@@ -142,6 +142,74 @@ function assertPrivateSecurityHeaders(headers) {
   assert.equal(headers["permissions-policy"], "camera=(), microphone=(), geolocation=()");
 }
 
+test("Node server preserves binary response bodies", async () => {
+  const expected = Buffer.from([0, 1, 2, 250, 255]);
+  const server = createNodeServer(async () => ({
+    status: 200,
+    headers: { "content-type": "image/avif" },
+    body: expected,
+  }));
+  const address = await listen(server);
+  try {
+    const response = await fetch(`http://${address.address}:${address.port}/hero-test`);
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-type"), "image/avif");
+    assert.equal(response.headers.get("content-length"), String(expected.length));
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()), expected);
+  } finally {
+    await close(server);
+  }
+});
+
+test("Node server measures UTF-8 response content length in bytes", async () => {
+  const body = JSON.stringify({ location: "Сандански", country: "България" });
+  const server = createNodeServer(async () => ({
+    status: 200,
+    headers: { "content-type": "application/json; charset=utf-8" },
+    body,
+  }));
+  const address = await listen(server);
+  try {
+    const response = await fetch(`http://${address.address}:${address.port}/utf8-test`, {
+      headers: { "accept-encoding": "identity" },
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-length"), String(Buffer.byteLength(body, "utf8")));
+    assert.equal(await response.text(), body);
+  } finally {
+    await close(server);
+  }
+});
+
+test("Node server serves HEAD through the matching GET route without a response body", async () => {
+  let receivedMethod = "";
+  const server = createNodeServer(async (request) => {
+    receivedMethod = request.method;
+    return {
+      status: 200,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+      body: "hello",
+    };
+  });
+  const address = await listen(server);
+  try {
+    const response = await fetch(`http://${address.address}:${address.port}/head-test`, {
+      method: "HEAD",
+      headers: { "accept-encoding": "identity" },
+    });
+
+    assert.equal(receivedMethod, "GET");
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-type"), "text/plain; charset=utf-8");
+    assert.equal(response.headers.get("content-length"), "5");
+    assert.equal(await response.text(), "");
+  } finally {
+    await close(server);
+  }
+});
+
 test("Node server serves live listing, search, lead, and viewing endpoints", async () => {
   await withServer(
     async (
@@ -206,6 +274,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
             accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
             reviewer: "media_editor",
+            reviewConfirmed: true,
           }),
         }),
         listingAfterTourApproval: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
@@ -587,7 +656,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
       assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
       assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
-      assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
+      assert.deepEqual(readListingEdits(listingEditLedgerPath), []);
       assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
       assert.equal(assertViewingFollowUpLedger(readViewingFollowUps(viewingFollowUpLedgerPath)), true);
       assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
@@ -622,10 +691,9 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         translation_drafted: 1,
         translation_approved: 1,
         translation_published: 1,
-        listing_edited: 1,
       });
       assert.equal(auditRows.some((row) => Object.hasOwn(row.metadata || {}, "note")), false);
-      assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
+      assert.equal(smoke.staleListing.body.metadata.robots, "index,follow");
       assert.deepEqual(
         [
           smoke.adminLocales.bg.body.workspace.locale,

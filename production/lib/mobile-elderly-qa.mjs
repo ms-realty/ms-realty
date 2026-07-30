@@ -161,7 +161,7 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "mobile_search_actions",
-      includes(pages.search, "data-map-optional=\"false\"") &&
+      includes(pages.search, "data-map-optional=\"true\"") &&
         includes(pages.search, "data-save-search-endpoint=\"/api/saved-searches\"") &&
         includes(pages.search, "data-search-card=\"true\"") &&
         includes(pages.search, "data-card-thumbnail=\"true\"") &&
@@ -170,12 +170,12 @@ export function buildMobileElderlyQaReport({
         includes(publicAdapterCss, ".sr-pagination .mk-btn { min-width: 44px; min-height: 44px; }"),
     ),
     check(
-      "mobile_search_live_preview",
-      includes(pages.search, "data-mobile-filter-submit=\"true\"") &&
-        includes(pages.search, "data-mobile-filter-preview-status=\"true\"") &&
-        includes(PUBLIC_APP_JS, "function initMobileFilterPreview()") &&
-        includes(PUBLIC_APP_JS, "window.setTimeout(preview, 320)") &&
-        includes(PUBLIC_APP_JS, "controller.abort()"),
+      "mobile_search_inline_filters",
+      includes(pages.search, "data-mobile-search-filters=\"true\"") &&
+        includes(pages.search, "class=\"sr-mobile-filters__panel\"") &&
+        includes(pages.search, "id=\"sr-mobile-filter-form\"") &&
+        !includes(pages.search, "data-mobile-filter-sheet=") &&
+        !includes(PUBLIC_APP_JS, "function initMobileSearchFilters()"),
     ),
     check(
       "mobile_search_empty_recovery",
@@ -185,10 +185,10 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "mobile_app_navigation",
-      includes(pages.home, "data-mobile-task=\"buy\" data-active=\"true\"") &&
+        includes(pages.home, "data-mobile-task=\"buy\" data-active=\"true\"") &&
         includes(rentSearch, "data-mobile-task=\"rent\" data-active=\"true\"") &&
         !includes(rentSearch, "data-mobile-task=\"buy\" data-active=\"true\"") &&
-        includes(pages.search, "data-mobile-filter-sheet=\"true\"") &&
+        includes(pages.search, "data-mobile-search-filters=\"true\"") &&
         includes(publicAdapterCss, ".site-hd { position: sticky; top: 0; z-index: 30;") &&
         includes(publicAdapterCss, ".sr-mobile-filters {\n    position: sticky;"),
     ),
@@ -224,8 +224,9 @@ export function buildMobileElderlyQaReport({
     check(
       "narrow_mobile_search_action",
       includes(englishHome, "class=\"mk-search__go\" type=\"submit\" aria-label=\"Search\" title=\"Search\"") &&
-        includes(publicAdapterCss, "@media (max-width: 360px)") &&
-        includes(publicAdapterCss, ".hp-hero__search .mk-search__go { width: 52px; padding-inline: 0; }") &&
+        includes(publicAdapterCss, "@media (max-width: 679px)") &&
+        includes(publicAdapterCss, ".hp-hero__search-form { --hero-search-action-width: 52px; }") &&
+        includes(publicAdapterCss, ".hp-hero__search .mk-search__go { padding-inline: 0; }") &&
         includes(publicAdapterCss, ".hp-hero__search .mk-search__go span { display: none; }"),
     ),
     check(
@@ -295,7 +296,8 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "source_backed_search_filters",
-      includes(pages.search, "name=\"property_type\"") &&
+      includes(pages.search, "name=\"property_family\"") &&
+        includes(pages.search, "name=\"property_subtype\"") &&
         includes(pages.search, "name=\"offer_type\"") &&
         includes(pages.search, "name=\"price_min\"") &&
         includes(pages.search, "name=\"price_max\"") &&
@@ -330,7 +332,7 @@ export function assertMobileElderlyQaReport(report) {
   for (const id of [
     "mobile_search_form",
     "mobile_search_actions",
-    "mobile_search_live_preview",
+    "mobile_search_inline_filters",
     "mobile_search_empty_recovery",
     "mobile_app_navigation",
     "approved_buyer_guide_discovery",

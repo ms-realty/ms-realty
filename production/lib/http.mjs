@@ -5,6 +5,7 @@ import { DEFAULT_SLUG_HISTORY_PATH } from "./slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { readThroughCached } from "./file-cache.mjs";
+import { renderMcpProtectedResourceMetadata, renderMcpResponse } from "./mcp-server.mjs";
 import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
@@ -128,6 +129,7 @@ import {
   normalizeSavedSearchInput,
   privacySafeSavedSearch,
   readSavedSearches,
+  savedSearchIntent,
 } from "./saved-searches.mjs";
 import { appendPublicContact, readPublicContacts } from "./public-contact-vault.mjs";
 import {
@@ -162,6 +164,7 @@ import {
 } from "./consent-ledger.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { renderFaviconSvg } from "./favicon.mjs";
+import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
 import {
   buildSeoEvidence,
   buildSeoEvidencePreflightReport,
@@ -208,7 +211,9 @@ import {
   writeListingQualityReviewCsv,
 } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
-import { searchFiltersFromObject, searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
+import { queryPublicSearch } from "./search-engine-sync.mjs";
+import { searchIntentToQueryFilters } from "./search-intent.mjs";
+import { normalizeSearchRequest } from "./search-request.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 
 const SECURITY_HEADERS = {
@@ -251,6 +256,18 @@ function adminJson(status, body) {
   return privateJson(status, body);
 }
 
+function payloadAdminListingPath(listingId) {
+  const id = typeof listingId === "string" ? listingId.trim() : "";
+  if (!id) throw new Error("listingId is required for the Payload editor handoff");
+  return `/payload-admin/collections/listings/${encodeURIComponent(id)}`;
+}
+
+function payloadAdminListingHandoff(listingId) {
+  return adminResponse(307, "", "text/plain; charset=utf-8", {
+    location: payloadAdminListingPath(listingId),
+  });
+}
+
 function wantsHtml(request, url) {
   const accept = request.headers?.accept || request.headers?.Accept || "";
   return url.searchParams.get("format") === "html" || accept.includes("text/html");
@@ -268,6 +285,52 @@ function publicResponse(request, url, rendered) {
     return response(rendered.status || 200, renderHtmlPage(rendered, { bodyHtml: renderReactPublicBody(rendered) }), "text/html; charset=utf-8");
   }
   return json(rendered.status || 200, rendered);
+}
+
+function activeListingRecord(record) {
+  const status = String(record.facts?.listing_status || "available").trim().toLowerCase();
+  return record.collection === "listings" && ["available", "reserved"].includes(status);
+}
+
+function engineLocaleCodes(seed, registry, result) {
+  if (seed.records.some((record) => activeListingRecord(record) && record.source_locale === result.locale)) {
+    return [result.locale];
+  }
+  return [...new Set([result.search.fallback?.locale || registry.source_locale, registry.source_locale].filter(Boolean))];
+}
+
+function seedForSearchHits(seed, hits) {
+  const recordsById = new Map(
+    seed.records.filter((record) => record.collection === "listings").map((record) => [record.id, record]),
+  );
+  const seen = new Set();
+  const records = [];
+  for (const hit of hits) {
+    const id = String(hit.source_listing_id || "").trim();
+    const record = recordsById.get(id);
+    if (!record || seen.has(id)) continue;
+    seen.add(id);
+    records.push(record);
+  }
+  return { ...seed, records };
+}
+
+function withSearchBackend(result, engineResult) {
+  const backend = {
+    engine: engineResult.engine,
+    mode: engineResult.engine === "typesense" ? "primary" : engineResult.engine === "meilisearch" ? "fallback" : "local_fallback",
+    locale_codes: engineResult.locale_codes,
+    unavailable_engines: engineResult.unavailable_engines,
+  };
+  if (Number.isFinite(engineResult.total)) backend.indexed_matches = engineResult.total;
+  return {
+    ...result,
+    search: {
+      ...result.search,
+      engines: [engineResult.engine],
+      backend,
+    },
+  };
 }
 
 function adminHtml(page) {
@@ -608,6 +671,8 @@ export function createHttpApp({
   leadSlaGeneratedAt,
   hermesReplyProvider = null,
   rateLimit = null,
+  naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
+  search = {},
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
@@ -1010,8 +1075,60 @@ export function createHttpApp({
           filePath: auditLogPath,
         })
       : null;
+  const productionSearch = String(search.environment ?? process.env.NODE_ENV ?? "").trim().toLowerCase() === "production";
+  const currentSearchResult = async (searchRequest, options = {}) => {
+    const { intent, query, filters, sort, page } = searchRequest;
+    const seedForRequest = currentSeed();
+    const translationTasks = currentTranslationTasks();
+    const searchOptions = { localeCode: intent.locale, query, filters, sort, page, translationTasks, ...options };
+    const localResult = searchRuntimeListings(activeRegistry, seedForRequest, searchOptions);
+    const engineResult = await queryPublicSearch({
+      ...search,
+      q: query,
+      intent,
+      localeCodes: engineLocaleCodes(seedForRequest, activeRegistry, localResult),
+    });
+    if (productionSearch && engineResult.engine === "seed_fallback") {
+      throw new Error("Production search requires a selected configured engine");
+    }
+    const result =
+      engineResult.engine === "seed_fallback"
+        ? localResult
+        : searchRuntimeListings(activeRegistry, seedForSearchHits(seedForRequest, engineResult.hits), searchOptions);
+    return withSearchBackend(result, engineResult);
+  };
+  const searchResultOrUnavailable = async (searchRequest, options) => {
+    try {
+      return { result: await currentSearchResult(searchRequest, options) };
+    } catch (error) {
+      if (!productionSearch) throw error;
+      return { response: json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" }) };
+    }
+  };
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
+    const mcpMetadataRoute =
+      url.pathname === "/.well-known/oauth-protected-resource" ||
+      url.pathname === "/.well-known/oauth-protected-resource/mcp";
+    if (url.pathname === "/mcp" || mcpMetadataRoute) {
+      const headers = new Headers();
+      for (const [name, value] of Object.entries(request.headers || {})) {
+        if (value !== undefined) headers.set(name, Array.isArray(value) ? value.join(", ") : String(value));
+      }
+      const method = String(request.method || "GET").toUpperCase();
+      const mcpResponse = await (mcpMetadataRoute ? renderMcpProtectedResourceMetadata : renderMcpResponse)(
+        new Request(`http://ms-realty.local${url.pathname}${url.search}`, {
+          method,
+          headers,
+          ...(!["GET", "HEAD"].includes(method) && request.body ? { body: request.body } : {}),
+        }),
+      );
+      return {
+        status: mcpResponse.status,
+        headers: Object.fromEntries(mcpResponse.headers.entries()),
+        body: await mcpResponse.text(),
+      };
+    }
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
     const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
     const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
@@ -1094,15 +1211,34 @@ export function createHttpApp({
       });
     }
 
+    if (request.method === "GET" && url.pathname.startsWith("/hero/")) {
+      const heroMatch = url.pathname.match(/^\/hero\/([a-z0-9][a-z0-9._-]*\.(avif|webp))$/i);
+      if (heroMatch) {
+        const heroPath = fromRoot("public", "hero", heroMatch[1]);
+        if (fs.existsSync(heroPath)) {
+          return response(200, fs.readFileSync(heroPath), `image/${heroMatch[2].toLowerCase()}`, {
+            "cache-control": "public, max-age=31536000, immutable",
+          });
+        }
+      }
+      return json(404, { kind: "not_found", message: "Unknown hero asset" });
+    }
+
     if (request.method === "GET" && url.pathname.startsWith("/vendor/")) {
       // Versioned browser bundles generated into public/vendor by
       // scripts/build-design-assets.mjs (?v= content hash → immutable cache).
-      const vendorMatch = url.pathname.match(/^\/vendor\/([a-z0-9][a-z0-9._-]*\.(js|css|txt))$/i);
+      const vendorMatch = url.pathname.match(/^\/vendor\/([a-z0-9][a-z0-9._-]*\.(js|css|txt|png))$/i);
       if (vendorMatch) {
         const vendorPath = fromRoot("public", "vendor", vendorMatch[1]);
         if (fs.existsSync(vendorPath)) {
-          const vendorTypes = { js: "text/javascript; charset=utf-8", css: "text/css; charset=utf-8", txt: "text/plain; charset=utf-8" };
-          return response(200, fs.readFileSync(vendorPath, "utf8"), vendorTypes[vendorMatch[2].toLowerCase()], {
+          const extension = vendorMatch[2].toLowerCase();
+          const vendorTypes = {
+            js: "text/javascript; charset=utf-8",
+            css: "text/css; charset=utf-8",
+            txt: "text/plain; charset=utf-8",
+            png: "image/png",
+          };
+          return response(200, fs.readFileSync(vendorPath, extension === "png" ? undefined : "utf8"), vendorTypes[extension], {
             "cache-control": "public, max-age=31536000, immutable",
           });
         }
@@ -1131,22 +1267,43 @@ export function createHttpApp({
       );
     }
 
+    if (request.method === "GET" && url.pathname === "/api/geography") {
+      return response(
+        200,
+        geographySuggestionsPayload(loadGeographyRegistry(), {
+          query: url.searchParams.get("q") || "",
+          countryCode: (url.searchParams.get("country") || "").toUpperCase() || undefined,
+          levels: url.searchParams
+            .getAll("level")
+            .flatMap((value) => value.split(","))
+            .filter(Boolean),
+          parentId: url.searchParams.get("parent_id") || undefined,
+          ancestorId: url.searchParams.get("ancestor_id") || undefined,
+          limit: url.searchParams.get("limit") || 20,
+        }),
+        "application/json; charset=utf-8",
+        { "cache-control": "public, max-age=3600, stale-while-revalidate=86400" },
+      );
+    }
+
     if (request.method === "GET" && url.pathname === "/api/search") {
-      const localeCode = url.searchParams.get("locale") || "bg";
-      const query = url.searchParams.get("q") || "";
-      const filters = searchFiltersFromParams(url.searchParams);
-      const sort = url.searchParams.get("sort") || "recommended";
-      const page = searchPageFromParams(url.searchParams);
-      const result = searchRuntimeListings(activeRegistry, currentSeed(), {
-        localeCode,
-        query,
-        filters,
-        sort,
-        page,
-        translationTasks: currentTranslationTasks(),
-      });
-      recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters, sort, page });
-      return json(200, result);
+      let searchRequest;
+      try {
+        searchRequest = normalizeSearchRequest(url.searchParams, {
+          defaultLocale: url.searchParams.get("locale") || activeRegistry.source_locale,
+          naturalLanguageEnabled: naturalLanguageSearchEnabled,
+        });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+      const outcome = await searchResultOrUnavailable(searchRequest);
+      if (outcome.response) return outcome.response;
+      const { intent, query, filters, sort, page } = searchRequest;
+      const result = outcome.result;
+      if ((request.headers?.["x-ms-realty-preview"] || request.headers?.["X-MS-REALTY-PREVIEW"]) !== "search-count") {
+        recordEvent({ type: "search", path: url.pathname, locale: intent.locale, query, filters, sort, page });
+      }
+      return json(200, { ...result, search: { ...result.search, intent, natural_language: searchRequest.natural_language } });
     }
 
     if (request.method === "GET") {
@@ -1155,26 +1312,22 @@ export function createHttpApp({
         (locale) => locale.route_segments?.search && `/${locale.code}/${locale.route_segments.search}` === normalized,
       );
       if (searchLocale) {
-        const query = url.searchParams.get("q") || "";
-        const filters = searchFiltersFromParams(url.searchParams);
-        const sort = url.searchParams.get("sort") || "recommended";
-        const page = searchPageFromParams(url.searchParams);
+        let searchRequest;
+        try {
+          searchRequest = normalizeSearchRequest(url.searchParams, {
+            defaultLocale: searchLocale.code,
+            naturalLanguageEnabled: naturalLanguageSearchEnabled,
+          });
+        } catch (error) {
+          return json(400, { kind: "bad_request", message: error.message });
+        }
+        const { intent, query, filters, sort, page } = searchRequest;
         const savedView = url.searchParams.get("saved") === "1";
-        recordEvent({ type: "search", path: url.pathname, locale: searchLocale.code, query, filters, sort, page });
-        return publicResponse(
-          request,
-          url,
-          searchRuntimeListings(activeRegistry, currentSeed(), {
-            localeCode: searchLocale.code,
-            query,
-            filters,
-            sort,
-            page,
-            pageSize: savedView ? null : 12,
-            savedView,
-            translationTasks: currentTranslationTasks(),
-          }),
-        );
+        const view = url.searchParams.get("view") || "list";
+        const outcome = await searchResultOrUnavailable(searchRequest, { pageSize: savedView ? null : 12, savedView, view });
+        if (outcome.response) return outcome.response;
+        recordEvent({ type: "search", path: url.pathname, locale: intent.locale, query, filters, sort, page });
+        return publicResponse(request, url, outcome.result);
       }
     }
 
@@ -1360,22 +1513,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return adminResponse(
-          200,
-          adminHtml(
-            renderAdminListingEditorPayload(
-              activeRegistry,
-              url.searchParams.get("locale") || "en",
-              currentSeed(),
-              url.searchParams.get("listingId"),
-              readListingEdits(listingEditLedgerPath || undefined),
-              latestTranslationTasks(currentTranslationTasks()),
-              currentTourApprovals(),
-              principal,
-            ),
-          ),
-          "text/html; charset=utf-8",
-        );
+        return payloadAdminListingHandoff(url.searchParams.get("listingId"));
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -1989,29 +2127,12 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        let input = bindAuthenticatedOperator(listingEditInput(request), principal, ["editor"]);
-        if (input.mediaReviewer) input = bindAuthenticatedOperator(input, principal, ["mediaReviewer"]);
-        const result = createListingEdit(currentSeed(), input, latestTranslationTasks(currentTranslationTasks()), editedAt);
-        const edit = appendListingEdit(result.edit, { filePath: listingEditLedgerPath || undefined });
-        const persistedStaleTranslations = edit.idempotent
-          ? []
-          : result.staleTranslations
-              .filter((translation) => translation.id)
-              .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
-        if (!edit.idempotent) {
-          recordAudit({
-            action: "listing_edited",
-            actor: edit.editor,
-            objectType: "listing",
-            objectId: edit.listing_id,
-            metadata: {
-              changed_fields: Object.keys(edit.patch || {}),
-              media_reviewer: edit.media_reviewer || null,
-              stale_translation_count: result.staleTranslations.length,
-            },
-          });
-        }
-        return adminJson(edit.idempotent ? 200 : 201, { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations });
+        const input = listingEditInput(request);
+        return adminJson(409, {
+          kind: "payload_canonical",
+          message: "Listing edits are managed in Payload.",
+          canonical_url: payloadAdminListingPath(input.listingId),
+        });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -2824,7 +2945,8 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const contact = createBrokerContact(parseJsonBody(request), { reviewedAt });
+        const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["reviewer"]);
+        const contact = createBrokerContact(input, { reviewedAt });
         const persisted = appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined });
         recordAudit({
           action: "broker_contact_approved",
@@ -2842,7 +2964,8 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/tours/approve") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const tour = appendTourApproval(createTourApproval(seed, parseBody(request), reviewedAt), {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["reviewer"]);
+        const tour = appendTourApproval(createTourApproval(seed, input, reviewedAt), {
           filePath: tourApprovalLedgerPath || undefined,
         });
         recordAudit({
@@ -2950,18 +3073,27 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/saved-searches") {
       try {
         const input = normalizeSavedSearchInput(parseBody(request));
-        const filters = searchFiltersFromObject(input.filters);
+        const intent = savedSearchIntent(activeRegistry, input);
+        const filters = Object.fromEntries(
+          Object.entries(searchIntentToQueryFilters(intent)).filter(([, value]) => value !== "" && value !== null && value !== undefined),
+        );
         const search = searchRuntimeListings(activeRegistry, currentSeed(), {
-          localeCode: input.locale || activeRegistry.source_locale,
-          query: input.query || "",
+          localeCode: intent.locale,
+          query: intent.text_query,
           filters,
+          sort: intent.sort,
+          page: intent.page,
           pageSize: null,
           translationTasks: currentTranslationTasks(),
         });
         const priceSnapshot = Object.fromEntries(
           search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
         );
-        const savedSearch = createSavedSearch(activeRegistry, { ...input, filters, priceSnapshot }, { matchCount: search.search.total_matches, savedAt });
+        const savedSearch = createSavedSearch(
+          activeRegistry,
+          { ...input, search_intent: intent, priceSnapshot },
+          { matchCount: search.search.total_matches, savedAt },
+        );
         if (!publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
         const contactVault = publicContactVaultPath
           ? appendPublicContact(
@@ -3192,8 +3324,8 @@ export function assertHttpSmoke(smoke) {
   if (smoke.savedSearch.body.match_count <= 12) {
     throw new Error("HTTP smoke must store full saved-search match count");
   }
-  if (smoke.savedSearch.body.filters?.unsupported_filter) {
-    throw new Error("HTTP smoke must ignore unsupported saved-search filters");
+  if (smoke.savedSearch.body.search_intent?.schema_version !== 1) {
+    throw new Error("HTTP smoke must persist a versioned saved-search intent");
   }
   if (
     smoke.localeCreate.status !== 201 ||
@@ -3216,19 +3348,19 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must publish only human-approved translation");
   }
   if (
-    smoke.listingEditorHtml?.status !== 200 ||
-    smoke.listingEditorHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
-    !smoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\"") ||
-    !smoke.listingEditorHtml.body.includes("data-listing-id=\"MS-CRAWL-0001\"") ||
-    !smoke.listingEditorHtml.body.includes("data-editor-form=\"listing\"")
+    smoke.listingEditorHtml?.status !== 307 ||
+    smoke.listingEditorHtml.headers.location !== "/payload-admin/collections/listings/MS-CRAWL-0001"
   ) {
-    throw new Error("HTTP smoke must serve admin listing editor HTML");
+    throw new Error("HTTP smoke must hand legacy listing editor links to Payload");
   }
-  if (smoke.listingEdit.status !== 201 || smoke.listingEdit.body.edit.stale_translation_count < 1) {
-    throw new Error("HTTP smoke must stale dependent translations after listing edit");
+  if (
+    smoke.listingEdit.status !== 409 ||
+    smoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+  ) {
+    throw new Error("HTTP smoke must reject legacy listing mutations with a Payload handoff");
   }
-  if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== false) {
-    throw new Error("HTTP smoke must noindex stale public translation");
+  if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== true) {
+    throw new Error("HTTP smoke must preserve the reviewed public translation after a rejected legacy mutation");
   }
   if (
     smoke.adminLocales?.bg?.status !== 200 ||
@@ -3248,10 +3380,10 @@ export function assertHttpSmoke(smoke) {
   const staleSearchCard = smoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
   if (
     smoke.staleSearch.status !== 200 ||
-    staleSearchCard?.translation_display !== "stale_translation_fallback" ||
-    staleSearchCard?.translation_indexable !== false
+    staleSearchCard?.translation_display !== "reviewed_translation" ||
+    staleSearchCard?.translation_indexable !== true
   ) {
-    throw new Error("HTTP smoke must mark stale search cards as fallback");
+    throw new Error("HTTP smoke must preserve reviewed search cards after a rejected legacy mutation");
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");

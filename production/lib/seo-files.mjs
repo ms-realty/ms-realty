@@ -32,10 +32,17 @@ function countBy(rows, keyFn) {
 
 export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = []) {
   const listings = seed.records.filter((record) => record.collection === "listings");
+  const locationLabels = new Map((seed.locations || []).map((location) => [location.id, location.label]));
   const listingEntries = listings.flatMap((record) =>
     sitemapEntriesForListing(registry, record.id, mergeRuntimeTranslations(record, translationTasks)),
   );
-  const locationEntries = sitemapEntriesForLocations(registry, listings, (record) =>
+  const locationEntries = sitemapEntriesForLocations(registry, listings.map((record) => ({
+    ...record,
+    location:
+      (typeof record.location === "object" ? record.location?.label : locationLabels.get(record.location)) ||
+      record.facts?.location ||
+      record.location,
+  })), (record) =>
     mergeRuntimeTranslations(record, translationTasks),
   );
   const sellerEntries = sitemapEntriesForSeller(registry);

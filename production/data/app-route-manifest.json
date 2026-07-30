@@ -1,23 +1,23 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
-  "source_sitemap_entries": 197,
+  "source_sitemap_entries": 198,
   "summary": {
-    "routes": 204,
-    "sitemap_indexable_routes": 197,
+    "routes": 205,
+    "sitemap_indexable_routes": 198,
     "utility_routes": 7,
     "by_type": {
       "home": 7,
-      "listing": 167,
+      "guide": 5,
+      "listing": 166,
       "contact": 7,
-      "location": 7,
+      "location": 6,
       "seller": 7,
-      "search": 7,
-      "guide": 2
+      "search": 7
     },
     "by_locale": {
-      "bg": 120,
+      "bg": 123,
       "de": 4,
-      "el": 6,
+      "el": 4,
       "en": 6,
       "he": 6,
       "nl": 4,
@@ -48,6 +48,81 @@
         "locale": "bg"
       },
       "hreflang_count": 8
+    },
+    {
+      "type": "guide",
+      "path": "/bg/guides/hotovo-obstinski-kontekst",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderGuidePage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "bg",
+        "guidePath": "guides/hotovo-obstinski-kontekst"
+      },
+      "hreflang_count": 2
+    },
+    {
+      "type": "guide",
+      "path": "/bg/guides/petrich-obstinski-kontekst",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderGuidePage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "bg",
+        "guidePath": "guides/petrich-obstinski-kontekst"
+      },
+      "hreflang_count": 2
+    },
+    {
+      "type": "guide",
+      "path": "/bg/guides/proverka-na-imot-sandanski",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderGuidePage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "bg",
+        "guidePath": "guides/proverka-na-imot-sandanski"
+      },
+      "hreflang_count": 2
     },
     {
       "type": "listing",
@@ -97,7 +172,7 @@
         "locale": "bg",
         "listingId": "MS-CRAWL-0001"
       },
-      "hreflang_count": 4
+      "hreflang_count": 3
     },
     {
       "type": "listing",
@@ -2971,7 +3046,7 @@
         "locale": "bg",
         "location": "sandanski"
       },
-      "hreflang_count": 5
+      "hreflang_count": 4
     },
     {
       "type": "seller",
@@ -3142,31 +3217,6 @@
       "hreflang_count": 8
     },
     {
-      "type": "listing",
-      "path": "/el/akinita/MS-CRAWL-0001",
-      "locale": "el",
-      "lang": "el",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "akinita",
-        "search": "anazitisi",
-        "location": "topothesies",
-        "seller": "polisi",
-        "contact": "epikoinonia"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "el",
-        "listingId": "MS-CRAWL-0001"
-      },
-      "hreflang_count": 4
-    },
-    {
       "type": "search",
       "path": "/el/anazitisi",
       "locale": "el",
@@ -3237,31 +3287,6 @@
         "locale": "el"
       },
       "hreflang_count": 8
-    },
-    {
-      "type": "location",
-      "path": "/el/topothesies/sandanski",
-      "locale": "el",
-      "lang": "el",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "akinita",
-        "search": "anazitisi",
-        "location": "topothesies",
-        "seller": "polisi",
-        "contact": "epikoinonia"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderLocationPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "el",
-        "location": "sandanski"
-      },
-      "hreflang_count": 5
     },
     {
       "type": "home",
@@ -3480,7 +3505,7 @@
         "locale": "he",
         "location": "sandanski"
       },
-      "hreflang_count": 5
+      "hreflang_count": 4
     },
     {
       "type": "listing",
@@ -3505,7 +3530,7 @@
         "locale": "he",
         "listingId": "MS-CRAWL-0001"
       },
-      "hreflang_count": 4
+      "hreflang_count": 3
     },
     {
       "type": "search",
@@ -3747,7 +3772,7 @@
         "locale": "ru",
         "location": "sandanski"
       },
-      "hreflang_count": 5
+      "hreflang_count": 4
     },
     {
       "type": "listing",

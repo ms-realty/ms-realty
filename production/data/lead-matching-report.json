@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-25T08:37:49.793Z",
+  "generated_at": "2026-07-30T16:20:33.388Z",
   "summary": {
     "matchable_leads_with_listing_reference": 2,
     "active_matchable_leads": 2,
     "qualified_leads": 1,
-    "leads_with_matches": 2,
-    "open_broker_tasks": 2
+    "leads_with_matches": 1,
+    "open_broker_tasks": 1
   },
   "rows": [
     {
@@ -28,35 +28,9 @@
         "price_max": 160000,
         "bedrooms_min": 2
       },
-      "match_count": 2,
-      "matches": [
-        {
-          "listing_id": "MS-CRAWL-0003",
-          "path": "/he/properties/MS-CRAWL-0003",
-          "title": "Тристаен апартамент под наем в Сандански + паркомясто",
-          "location": "סנדנסקי",
-          "property_type": "apartment",
-          "offer_type": "rent",
-          "price_eur": 600,
-          "price_on_request": false
-        },
-        {
-          "listing_id": "MS-CRAWL-0080",
-          "path": "/he/properties/MS-CRAWL-0080",
-          "title": "Тристаен апартамент под наем в с.Поленица",
-          "location": "סנדנסקי",
-          "property_type": "apartment",
-          "offer_type": "rent",
-          "price_eur": 450,
-          "price_on_request": false
-        }
-      ],
-      "broker_task": {
-        "id": "inventory-match-http-lead-he-0001",
-        "status": "open",
-        "owner": "broker_international",
-        "action": "review_matching_inventory"
-      }
+      "match_count": 0,
+      "matches": [],
+      "broker_task": null
     },
     {
       "lead_id": "http-viewing-lead-he-0001",
@@ -115,14 +89,14 @@
           "price_on_request": false
         },
         {
-          "listing_id": "MS-CRAWL-0094",
-          "path": "/he/properties/MS-CRAWL-0094",
-          "title": "Индустриална сграда под наем в Петрич",
+          "listing_id": "MS-CRAWL-0096",
+          "path": "/he/properties/MS-CRAWL-0096",
+          "title": "Индустриална сграда под наем",
           "location": "סנדנסקי",
           "property_type": "commercial",
           "offer_type": "rent",
-          "price_eur": 1,
-          "price_on_request": false
+          "price_eur": null,
+          "price_on_request": true
         }
       ],
       "broker_task": {

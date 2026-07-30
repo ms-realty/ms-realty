@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { loadLocaleRegistry, assertLocaleRegistry, publicIndexableLocales } from "../lib/locales.mjs";
 import { hreflangForListing } from "../lib/seo.mjs";
 import { assertHermesActionAllowed } from "../lib/hermes.mjs";
-import { assertHermesAuditLedger } from "../lib/translation-ledger.mjs";
+import { assertHermesAuditLedger, assertTranslationLedger, latestTranslationTasks } from "../lib/translation-ledger.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
 import { assertConsentLedger } from "../lib/consent-ledger.mjs";
 import { assertAuditLog } from "../lib/audit-log.mjs";
@@ -33,7 +33,6 @@ const expectedHttpAuditActions = {
   broker_contact_approved: 1,
   deal_closed: 1,
   lead_pipeline_outcome_recorded: 1,
-  listing_edited: 1,
   listing_slug_changed: 1,
   locale_created: 1,
   reply_approved: 2,
@@ -48,7 +47,6 @@ const expectedNodeServerAuditActions = {
   broker_contact_approved: 1,
   deal_closed: 1,
   lead_pipeline_outcome_recorded: 1,
-  listing_edited: 1,
   listing_slug_changed: 1,
   reply_approved: 1,
   tour_approved: 1,
@@ -199,11 +197,11 @@ if (redirectApprovals.length !== routeMap.summary.mappedListings) {
 const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
 if (
   sitemap.summary.home_pages !== 7 ||
-  sitemap.summary.listing_entries !== 167 ||
+  sitemap.summary.listing_entries !== 166 ||
   sitemap.summary.location_pages < 6 ||
   sitemap.summary.seller_pages !== 7 ||
   sitemap.summary.contact_pages !== 7 ||
-  sitemap.summary.guide_pages !== 2
+  sitemap.summary.guide_pages !== 5
 ) {
   throw new Error("Localized sitemap must include approved home, listing, location, seller, contact, and guide pages");
 }
@@ -220,7 +218,7 @@ if (sitemap.summary.entries !== expectedSitemapEntries) {
 if (sitemap.summary.byLocale.bg < 118 || sitemap.summary.byLocale.ru !== 57) {
   throw new Error("Localized sitemap must include published source BG/RU listings");
 }
-if (sitemap.summary.byLocale.el !== 5 || sitemap.summary.byLocale.he !== 5) {
+if (sitemap.summary.byLocale.el !== 3 || sitemap.summary.byLocale.he !== 5) {
   throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
@@ -228,10 +226,10 @@ const appRouteManifest = JSON.parse(fs.readFileSync(fromRoot("production", "data
 assertAppRouteManifest(appRouteManifest);
 assertAppRouteFiles(appRouteManifest);
 if (
-  appRouteManifest.summary.routes !== 204 ||
+  appRouteManifest.summary.routes !== 205 ||
   appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.entries ||
   appRouteManifest.summary.by_type.search !== 7 ||
-  appRouteManifest.summary.by_type.guide !== 2 ||
+  appRouteManifest.summary.by_type.guide !== 5 ||
   appRouteManifest.routes.find((route) => route.path === "/he")?.dir !== "rtl"
 ) {
   throw new Error("App Router manifest must map sitemap routes plus no-store search routes");
@@ -550,25 +548,24 @@ if (httpSmoke.translationPublish.status !== 201 || httpSmoke.translationPublish.
   throw new Error("HTTP smoke must publish human-approved translation");
 }
 if (
-  httpSmoke.listingEditorHtml.status !== 200 ||
-  !httpSmoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\"") ||
-  !httpSmoke.listingEditorHtml.body.includes("data-editor-form=\"listing\"")
+  httpSmoke.listingEditorHtml.status !== 307 ||
+  httpSmoke.listingEditorHtml.headers.location !== "/payload-admin/collections/listings/MS-CRAWL-0001"
 ) {
-  throw new Error("HTTP smoke must serve admin listing editor HTML");
+  throw new Error("HTTP smoke must hand legacy listing editor links to Payload");
 }
-if (httpSmoke.listingEdit.status !== 201 || httpSmoke.listingEdit.body.edit.stale_translation_count < 1) {
-  throw new Error("HTTP smoke must stale dependent translations after listing edit");
+if (httpSmoke.listingEdit.status !== 409 || httpSmoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001") {
+  throw new Error("HTTP smoke must reject legacy listing mutations with a Payload handoff");
 }
-if (httpSmoke.staleListing.status !== 200 || httpSmoke.staleListing.body.indexable !== false) {
-  throw new Error("HTTP smoke must noindex stale public translation");
+if (httpSmoke.staleListing.status !== 200 || httpSmoke.staleListing.body.indexable !== true) {
+  throw new Error("HTTP smoke must preserve reviewed public translation after a rejected legacy mutation");
 }
 const httpStaleSearchCard = httpSmoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
 if (
   httpSmoke.staleSearch.status !== 200 ||
-  httpStaleSearchCard?.translation_display !== "stale_translation_fallback" ||
-  httpStaleSearchCard?.translation_indexable !== false
+  httpStaleSearchCard?.translation_display !== "reviewed_translation" ||
+  httpStaleSearchCard?.translation_indexable !== true
 ) {
-  throw new Error("HTTP smoke must mark stale search cards as fallback");
+  throw new Error("HTTP smoke must preserve reviewed search cards after a rejected legacy mutation");
 }
 if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
@@ -673,8 +670,8 @@ if (httpSmoke.dealLedger.rows !== 1) throw new Error("HTTP smoke must persist on
 if (httpSmoke.tourApprovalLedger.rows !== 1) throw new Error("HTTP smoke must persist one tour approval row");
 if (!httpSmoke.eventLedger.byType.cta_click) throw new Error("HTTP smoke must persist one CTA analytics event row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
-if (httpSmoke.translationLedger.rows !== 4) throw new Error("HTTP smoke must persist draft, approved, published, and stale translation rows");
-if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must persist one listing edit row");
+if (httpSmoke.translationLedger.rows !== 3) throw new Error("HTTP smoke must persist draft, approved, and published translation rows");
+if (httpSmoke.listingEditLedger.rows !== 0) throw new Error("HTTP smoke must not write a legacy listing edit row");
 if (httpSmoke.slugHistoryLedger.rows !== 1) throw new Error("HTTP smoke must persist one slug-history row");
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
@@ -789,25 +786,25 @@ if (nodeServerSmoke.translationApprove.status !== 201 || nodeServerSmoke.transla
 if (nodeServerSmoke.translationPublish.status !== 201 || nodeServerSmoke.translationPublish.body.public_indexable !== true) {
   throw new Error("Node server smoke must publish human-approved translation");
 }
-if (nodeServerSmoke.listingEdit.status !== 201 || nodeServerSmoke.listingEdit.body.edit.stale_translation_count < 1) {
-  throw new Error("Node server smoke must stale dependent translations after listing edit");
+if (nodeServerSmoke.listingEdit.status !== 409 || nodeServerSmoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001") {
+  throw new Error("Node server smoke must reject legacy listing mutations with a Payload handoff");
 }
-if (nodeServerSmoke.staleListing.status !== 200 || nodeServerSmoke.staleListing.body.indexable !== false) {
-  throw new Error("Node server smoke must noindex stale public translation");
+if (nodeServerSmoke.staleListing.status !== 200 || nodeServerSmoke.staleListing.body.indexable !== true) {
+  throw new Error("Node server smoke must preserve reviewed public translation after a rejected legacy mutation");
 }
 const nodeStaleSearchCard = nodeServerSmoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
 if (
   nodeServerSmoke.staleSearch.status !== 200 ||
-  nodeStaleSearchCard?.translation_display !== "stale_translation_fallback" ||
-  nodeStaleSearchCard?.translation_indexable !== false
+  nodeStaleSearchCard?.translation_display !== "reviewed_translation" ||
+  nodeStaleSearchCard?.translation_indexable !== true
 ) {
-  throw new Error("Node server smoke must mark stale search cards as fallback");
+  throw new Error("Node server smoke must preserve reviewed search cards after a rejected legacy mutation");
 }
-if (nodeServerSmoke.translationLedger.rows !== 4) {
-  throw new Error("Node server smoke must persist draft, approved, published, and stale translation rows");
+if (nodeServerSmoke.translationLedger.rows !== 3) {
+  throw new Error("Node server smoke must persist draft, approved, and published translation rows");
 }
-if (nodeServerSmoke.listingEditLedger.rows !== 1) {
-  throw new Error("Node server smoke must persist one listing edit row");
+if (nodeServerSmoke.listingEditLedger.rows !== 0) {
+  throw new Error("Node server smoke must not write a legacy listing edit row");
 }
 if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includes("Sitemap:")) {
   throw new Error("Node server smoke must serve robots");
@@ -893,7 +890,7 @@ if (
   leadMatching.summary.matchable_leads_with_listing_reference !== 2 ||
   leadMatching.summary.active_matchable_leads !== 2 ||
   leadMatching.summary.qualified_leads !== 1 ||
-  leadMatching.summary.open_broker_tasks !== 2
+  leadMatching.summary.open_broker_tasks !== 1
 ) {
   throw new Error("Lead matching report must distinguish active, qualified, and referenced buyer or renter leads");
 }
@@ -948,8 +945,19 @@ if (
 ) {
   throw new Error("Hermes provider provisioning report must preserve self-hosted Hermes/vLLM safety settings");
 }
-const translationTasks = fs.readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8").trim().split("\n").filter(Boolean);
-if (translationTasks.length !== 3) throw new Error("Translation task artifact must contain draft, published, and stale smoke rows");
+const translationTaskEvents = fs
+  .readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+assertTranslationLedger(translationTaskEvents);
+const currentGreekTask = latestTranslationTasks(translationTaskEvents).find(
+  (task) => task.id === "translation-listing-MS-CRAWL-0001-el",
+);
+if (currentGreekTask?.status !== "stale" || currentGreekTask.public_indexable !== false) {
+  throw new Error("Translation task artifact must retain the latest Greek listing task as stale and non-indexable");
+}
 const translationCoverage = JSON.parse(fs.readFileSync(fromRoot("production", "data", "translation-coverage-report.json"), "utf8"));
 assertTranslationCoverageReport(translationCoverage);
 if (
@@ -967,8 +975,11 @@ const hermesAudit = fs
   .split("\n")
   .filter(Boolean)
   .map((line) => JSON.parse(line));
-if (hermesAudit.length !== 3) throw new Error("Hermes audit artifact must contain draft, published, and stale smoke rows");
 assertHermesAuditLedger(hermesAudit);
+const greekAuditHistory = hermesAudit.filter((row) => row.task_id === "translation-listing-MS-CRAWL-0001-el");
+if (!["hermes_drafted", "published", "stale"].every((status) => greekAuditHistory.some((row) => row.status === status))) {
+  throw new Error("Hermes audit artifact must retain draft, published, and stale Greek listing history");
+}
 const hermesDraftDispatch = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-dispatch.json"), "utf8"));
 assertHermesDraftDispatch(hermesDraftDispatch);
 if (
@@ -1035,8 +1046,9 @@ assertSavedSearchAlertReport(savedSearchAlerts);
 if (
   savedSearchAlerts.summary.saved_searches !== 1 ||
   savedSearchAlerts.rows[0].saved_search_id !== "saved-search-he-0001" ||
-  savedSearchAlerts.rows[0].current_match_count !== 41 ||
-  savedSearchAlerts.rows[0].status !== "no_new_matches"
+  savedSearchAlerts.rows[0].current_match_count !== 47 ||
+  savedSearchAlerts.rows[0].status !== "no_new_matches" ||
+  savedSearchAlerts.rows[0].alert_task !== null
 ) {
   throw new Error("Saved-search alert report must evaluate the persisted Hebrew search without duplicate alerts");
 }
@@ -1087,8 +1099,8 @@ for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
 
 const structuredData = JSON.parse(fs.readFileSync(fromRoot("production", "data", "structured-data-report.json"), "utf8"));
 if (
-  structuredData.summary.listing_entries !== 167 ||
-  structuredData.summary.guide_entries !== 2 ||
+  structuredData.summary.listing_entries !== 166 ||
+  structuredData.summary.guide_entries !== 5 ||
   structuredData.summary.failing_entries !== 0
 ) {
   throw new Error("Structured data report must cover all indexable listing and guide entries without schema failures");

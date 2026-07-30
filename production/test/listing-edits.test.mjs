@@ -54,7 +54,7 @@ test("listing edits persist and stale dependent translations", () => {
   assert.equal(rows.length, 1);
   assert.equal(rows[0].listing_id, "MS-CRAWL-0001");
   assert.equal(rows[0].patch.description, "Updated approved source description.");
-  assert.equal(rows[0].patch.price_eur, 123000);
+  assert.equal(rows[0].patch.price_eur, null);
   assert.equal(rows[0].patch.bedrooms, 2);
   assert.equal(rows[0].patch.area_sqm, 86.5);
   assert.equal(rows[0].patch.bedrooms_not_applicable, true);
@@ -76,6 +76,8 @@ test("listing edits persist and stale dependent translations", () => {
 
 test("listing edit ledger overlays reviewed facts onto CMS seed records", () => {
   const seed = loadCmsSeed();
+  const original = seed.records.find((record) => record.id === "MS-CRAWL-0001");
+  const originalDescription = original.facts.description;
   const updated = applyListingEdits(seed, [
     {
       listing_id: "MS-CRAWL-0001",
@@ -105,12 +107,12 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
       media_reviewer: "media_editor",
     },
   ]);
-  const original = seed.records.find((record) => record.id === "MS-CRAWL-0001");
   const record = updated.records.find((candidate) => candidate.id === "MS-CRAWL-0001");
 
-  assert.equal(original.facts.description, "Updated approved source description.");
+  assert.equal(original.facts.description, originalDescription);
+  assert.notEqual(record.facts.description, originalDescription);
   assert.equal(record.facts.description, "Reviewed source description.");
-  assert.equal(record.facts.price_eur, 123000);
+  assert.equal(record.facts.price_eur, null);
   assert.equal(record.facts.bedrooms, 2);
   assert.equal(record.facts.bedrooms_not_applicable, true);
   assert.equal(record.facts.price_on_request, true);
@@ -136,6 +138,81 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
   assert.equal(record.workflow.last_editor, "listing_editor");
   assert.equal(record.media_workflow.review_gated_assets, 0);
   assert.equal(record.media_workflow.media_reviewer, "media_editor");
+});
+
+test("scoped edits keep physical facts on the linked property with pending-review provenance", () => {
+  const seed = {
+    records: [
+      {
+        id: "MS-CRAWL-SCOPED",
+        collection: "listings",
+        property: "property-MS-CRAWL-SCOPED",
+        source_locale: "bg",
+        facts: { title: "Legacy apartment", bedrooms: 1, price_eur: 100000 },
+        seo: {},
+        translations: [],
+        media: [],
+        media_workflow: {},
+      },
+    ],
+    locations: [{ id: "location:sandanski", collection: "locations", label: "Sandanski" }],
+    properties: [
+      {
+        id: "property-MS-CRAWL-SCOPED",
+        collection: "properties",
+        location: "location:sandanski",
+        property_family: "apartment",
+        property_subtype: "apartment",
+        facts: { bedrooms_count: 1, built_area_sqm: 70 },
+        fact_verification: [{ field: "bedrooms_count", state: "broker_verified" }],
+        zero_value_audit: [],
+      },
+    ],
+  };
+  const result = createListingEdit(
+    seed,
+    {
+      listingId: "MS-CRAWL-SCOPED",
+      editor: "property_editor",
+      propertyPatch: { bedrooms_count: 2, public_longitude: 23.28 },
+      listingPatch: { price_eur: "120000", listing_status: "reserved" },
+    },
+    [],
+    "2026-07-30T10:00:00Z",
+  );
+
+  assert.equal(result.edit.edit_scope, "property_listing");
+  assert.deepEqual(result.edit.patch, {});
+  assert.equal(result.edit.property_patch.bedrooms_count, 2);
+  assert.equal(result.edit.listing_patch.price_eur, 120000);
+  assert.equal(result.edit.property_fact_verification.find((entry) => entry.field === "bedrooms_count").state, "entered_pending_review");
+  const updated = applyListingEdits(seed, [result.edit]);
+  const listing = updated.records[0];
+  const property = updated.properties[0];
+  assert.equal(listing.facts.price_eur, 120000);
+  assert.equal(listing.facts.bedrooms, 1);
+  assert.equal(property.facts.bedrooms_count, 2);
+  assert.equal(property.facts.public_longitude, 23.28);
+  assert.equal(property.facts.primary_area_sqm, 70);
+  assert.equal(property.fact_verification.find((entry) => entry.field === "bedrooms_count").state, "entered_pending_review");
+  assert.throws(
+    () =>
+      createListingEdit(seed, {
+        listingId: "MS-CRAWL-SCOPED",
+        editor: "property_editor",
+        listingPatch: { bedrooms: 2 },
+      }),
+    /belong in propertyPatch/,
+  );
+  assert.throws(
+    () =>
+      createListingEdit(seed, {
+        listingId: "MS-CRAWL-SCOPED",
+        editor: "property_editor",
+        propertyPatch: { price_amount: 120000 },
+      }),
+    /unsupported fields/,
+  );
 });
 
 test("listing edits reject invalid numeric facts before persistence", () => {

@@ -80,21 +80,12 @@
   <url>
     <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0001</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/imoti/MS-CRAWL-0001" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/akinita/MS-CRAWL-0001" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/properties/MS-CRAWL-0001" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/imoti/MS-CRAWL-0001" />
-  </url>
-  <url>
-    <loc>https://makler-realty.com/el/akinita/MS-CRAWL-0001</loc>
-    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/imoti/MS-CRAWL-0001" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/akinita/MS-CRAWL-0001" />
     <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/properties/MS-CRAWL-0001" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/imoti/MS-CRAWL-0001" />
   </url>
   <url>
     <loc>https://makler-realty.com/he/properties/MS-CRAWL-0001</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/imoti/MS-CRAWL-0001" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/akinita/MS-CRAWL-0001" />
     <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/properties/MS-CRAWL-0001" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/imoti/MS-CRAWL-0001" />
   </url>
@@ -869,15 +860,6 @@
   <url>
     <loc>https://makler-realty.com/bg/lokacii/sandanski</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/sandanski" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/topothesies/sandanski" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/locations/sandanski" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/sandanski" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/sandanski" />
-  </url>
-  <url>
-    <loc>https://makler-realty.com/el/topothesies/sandanski</loc>
-    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/sandanski" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/topothesies/sandanski" />
     <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/sandanski" />
@@ -885,7 +867,6 @@
   <url>
     <loc>https://makler-realty.com/he/locations/sandanski</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/sandanski" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/topothesies/sandanski" />
     <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/sandanski" />
@@ -893,15 +874,9 @@
   <url>
     <loc>https://makler-realty.com/ru/locations/sandanski</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/sandanski" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/topothesies/sandanski" />
     <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/sandanski" />
-  </url>
-  <url>
-    <loc>https://makler-realty.com/bg/lokacii/hotovo</loc>
-    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/hotovo" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/hotovo" />
   </url>
   <url>
     <loc>https://makler-realty.com/bg/lokacii/petrich</loc>
@@ -914,6 +889,11 @@
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/petrich" />
     <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/petrich" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/petrich" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/bg/lokacii/hotovo</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/hotovo" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/hotovo" />
   </url>
   <url>
     <loc>https://makler-realty.com/bg/prodai</loc>
@@ -1078,5 +1058,20 @@
     <loc>https://makler-realty.com/en/guides/buying-process</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/guides/buying-process" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/en/guides/buying-process" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/bg/guides/proverka-na-imot-sandanski</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/guides/proverka-na-imot-sandanski" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/guides/proverka-na-imot-sandanski" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/bg/guides/petrich-obstinski-kontekst</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/guides/petrich-obstinski-kontekst" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/guides/petrich-obstinski-kontekst" />
   </url>
 </urlset>

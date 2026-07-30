@@ -18,19 +18,19 @@
         "property_type": "apartment"
       },
       "alert_frequency": "weekly",
-      "previous_match_count": 41,
-      "current_match_count": 41,
+      "previous_match_count": 47,
+      "current_match_count": 47,
       "new_match_count": 0,
       "price_change_count": 0,
       "price_changes": [],
       "status": "no_new_matches",
       "alert_task": null,
       "sample_listing_ids": [
+        "MS-CRAWL-0002",
         "MS-CRAWL-0003",
         "MS-CRAWL-0004",
         "MS-CRAWL-0005",
-        "MS-CRAWL-0007",
-        "MS-CRAWL-0008"
+        "MS-CRAWL-0007"
       ]
     }
   ]

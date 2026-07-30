@@ -100,34 +100,6 @@
           "dir": "ltr"
         },
         {
-          "code": "en",
-          "label": "English",
-          "href": "/en",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "de",
-          "label": "Deutsch",
-          "href": "/de",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "nl",
-          "label": "Nederlands",
-          "href": "/nl",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "ru",
-          "label": "Русский",
-          "href": "/ru",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
           "code": "el",
           "label": "Ελληνικά",
           "href": "/el/akinita/MS-CRAWL-0001",
@@ -216,7 +188,7 @@
         "total_floors": null,
         "land_area_sqm": null,
         "condition": "",
-        "location_precision": "approximate",
+        "location_precision": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -236,8 +208,8 @@
         "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false,
-        "location_precision": "approximate"
+        "bedrooms_not_applicable": true,
+        "location_precision": null
       },
       "media": {
         "gallery": [
@@ -511,7 +483,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 1,
           "price_on_request": false,
@@ -568,7 +540,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 6,
           "price_on_request": false,
@@ -625,7 +597,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 83,
           "price_on_request": false,
@@ -690,9 +662,9 @@
     },
     "metadata": {
       "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "description": "Updated approved source description.",
+      "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
       "og_title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "og_description": "Updated approved source description.",
+      "og_description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
       "robots": "noindex,follow"
     },
     "hreflang": [],
@@ -748,57 +720,7 @@
           "active": false
         }
       ],
-      "languages": [
-        {
-          "code": "bg",
-          "label": "Български",
-          "href": "/bg",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "en",
-          "label": "English",
-          "href": "/en",
-          "active": true,
-          "dir": "ltr"
-        },
-        {
-          "code": "de",
-          "label": "Deutsch",
-          "href": "/de",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "nl",
-          "label": "Nederlands",
-          "href": "/nl",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "ru",
-          "label": "Русский",
-          "href": "/ru",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "el",
-          "label": "Ελληνικά",
-          "href": "/el",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "he",
-          "label": "עברית",
-          "href": "/he",
-          "active": false,
-          "dir": "rtl"
-        }
-      ],
+      "languages": [],
       "contact": {
         "phone_label": "+359 879 69 68 70",
         "phone_href": "tel:+359879696870",
@@ -839,7 +761,7 @@
       "url": "/en/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
       "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "description": "Updated approved source description.",
+      "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
@@ -881,7 +803,7 @@
     "body": {
       "content_locale": "bg",
       "h1": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "description": "Updated approved source description.",
+      "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
@@ -893,7 +815,7 @@
         "total_floors": null,
         "land_area_sqm": null,
         "condition": "",
-        "location_precision": "approximate",
+        "location_precision": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -913,8 +835,8 @@
         "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false,
-        "location_precision": "approximate"
+        "bedrooms_not_applicable": true,
+        "location_precision": null
       },
       "media": {
         "gallery": [
@@ -1188,7 +1110,7 @@
           "offer_type": "rent",
           "offer_type_label": "For rent",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 1,
           "price_on_request": false,
@@ -1245,7 +1167,7 @@
           "offer_type": "rent",
           "offer_type_label": "For rent",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 6,
           "price_on_request": false,
@@ -1302,7 +1224,7 @@
           "offer_type": "rent",
           "offer_type_label": "For rent",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 83,
           "price_on_request": false,
@@ -1431,53 +1353,11 @@
       ],
       "languages": [
         {
-          "code": "bg",
-          "label": "Български",
-          "href": "/bg",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "en",
-          "label": "English",
-          "href": "/en",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "de",
-          "label": "Deutsch",
-          "href": "/de",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "nl",
-          "label": "Nederlands",
-          "href": "/nl",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
           "code": "ru",
           "label": "Русский",
           "href": "/ru/properties/MS-CRAWL-0114",
           "active": true,
           "dir": "ltr"
-        },
-        {
-          "code": "el",
-          "label": "Ελληνικά",
-          "href": "/el",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "he",
-          "label": "עברית",
-          "href": "/he",
-          "active": false,
-          "dir": "rtl"
         }
       ],
       "contact": {
@@ -1501,7 +1381,7 @@
       "identifier": "MS-CRAWL-0114",
       "name": "Апартаменты в Парк отеле Пирин — г.Сандански",
       "description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
-      "category": "multi_unit",
+      "category": "apartment",
       "image": [
         "https://makler-realty.ru/wp-content/uploads/2013/11/191-1.jpg",
         "https://makler-realty.ru/wp-content/uploads/2013/11/191-2.jpg",
@@ -1539,7 +1419,7 @@
       "facts": {
         "id": "MS-CRAWL-0114",
         "location": "Сандански",
-        "property_type": "multi_unit",
+        "property_type": "apartment",
         "offer_type": "sale",
         "bedrooms": null,
         "area_sqm": null,
@@ -1547,7 +1427,7 @@
         "total_floors": null,
         "land_area_sqm": null,
         "condition": "",
-        "location_precision": "approximate",
+        "location_precision": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -1567,8 +1447,8 @@
         "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false,
-        "location_precision": "approximate"
+        "bedrooms_not_applicable": true,
+        "location_precision": null
       },
       "media": {
         "gallery": [
@@ -1783,6 +1663,120 @@
       },
       "related_listings": [
         {
+          "id": "MS-CRAWL-0119",
+          "title": "Трехкомнатная квартира в Парк Отеле Пирин — Сандански",
+          "path": "/ru/properties/MS-CRAWL-0119",
+          "review_badge": null,
+          "translation_display": "reviewed_translation",
+          "translation_locale": "ru",
+          "translation_status": "published",
+          "translation_indexable": true,
+          "translation_human_approved": true,
+          "source_locale": "ru",
+          "content_locale": "ru",
+          "location": "Сандански",
+          "property_type": "apartment",
+          "property_type_label": "Квартира",
+          "offer_type": "sale",
+          "offer_type_label": "Продажа",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "area_sqm": null,
+          "price_eur": null,
+          "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 19,
+          "legacy_image_count": 42,
+          "thumbnail": {
+            "url": "https://makler-realty.ru/wp-content/uploads/2018/03/778-dron.jpg",
+            "alt": "Трехкомнатная квартира в Парк Отеле Пирин — Сандански",
+            "width": null,
+            "height": null
+          },
+          "actions": {
+            "detail": {
+              "label": "Подробнее",
+              "href": "/ru/properties/MS-CRAWL-0119"
+            },
+            "inquiry": {
+              "label": "Запрос",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "ru",
+                "listingReference": "MS-CRAWL-0119",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Сохранить",
+              "saved_label": "Сохранено",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0119"
+            }
+          }
+        },
+        {
+          "id": "MS-CRAWL-0131",
+          "title": "Продажа дома в центре г. Сандански",
+          "path": "/ru/properties/MS-CRAWL-0131",
+          "review_badge": null,
+          "translation_display": "reviewed_translation",
+          "translation_locale": "ru",
+          "translation_status": "published",
+          "translation_indexable": true,
+          "translation_human_approved": true,
+          "source_locale": "ru",
+          "content_locale": "ru",
+          "location": "Сандански",
+          "property_type": "apartment",
+          "property_type_label": "Квартира",
+          "offer_type": "sale",
+          "offer_type_label": "Продажа",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "area_sqm": null,
+          "price_eur": 93000,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 9,
+          "legacy_image_count": 32,
+          "thumbnail": {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/280-1.jpg",
+            "alt": "Продажа дома в центре г. Сандански",
+            "width": null,
+            "height": null
+          },
+          "actions": {
+            "detail": {
+              "label": "Подробнее",
+              "href": "/ru/properties/MS-CRAWL-0131"
+            },
+            "inquiry": {
+              "label": "Запрос",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "ru",
+                "listingReference": "MS-CRAWL-0131",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Сохранить",
+              "saved_label": "Сохранено",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0131"
+            }
+          }
+        },
+        {
           "id": "MS-CRAWL-0133",
           "title": "Продажа дома с участком в городе Сандански",
           "path": "/ru/properties/MS-CRAWL-0133",
@@ -1795,12 +1789,12 @@
           "source_locale": "ru",
           "content_locale": "ru",
           "location": "Сандански",
-          "property_type": "multi_unit",
-          "property_type_label": "Апартаменты",
+          "property_type": "apartment",
+          "property_type_label": "Квартира",
           "offer_type": "sale",
           "offer_type_label": "Продажа",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 594000,
           "price_on_request": false,
@@ -1831,120 +1825,6 @@
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
               "listing_id": "MS-CRAWL-0133"
-            }
-          }
-        },
-        {
-          "id": "MS-CRAWL-0138",
-          "title": "Продажа новостройки в Сандански",
-          "path": "/ru/properties/MS-CRAWL-0138",
-          "review_badge": null,
-          "translation_display": "reviewed_translation",
-          "translation_locale": "ru",
-          "translation_status": "published",
-          "translation_indexable": true,
-          "translation_human_approved": true,
-          "source_locale": "ru",
-          "content_locale": "ru",
-          "location": "Сандански",
-          "property_type": "multi_unit",
-          "property_type_label": "Апартаменты",
-          "offer_type": "sale",
-          "offer_type_label": "Продажа",
-          "bedrooms": null,
-          "bedrooms_not_applicable": false,
-          "area_sqm": null,
-          "price_eur": 46200,
-          "price_on_request": false,
-          "listing_status": "available",
-          "listing_active": true,
-          "image_count": 5,
-          "legacy_image_count": 27,
-          "thumbnail": {
-            "url": "https://makler-realty.ru/wp-content/uploads/2025/06/2-1000x563.jpg",
-            "alt": "Продажа новостройки в Сандански",
-            "width": null,
-            "height": null
-          },
-          "actions": {
-            "detail": {
-              "label": "Подробнее",
-              "href": "/ru/properties/MS-CRAWL-0138"
-            },
-            "inquiry": {
-              "label": "Запрос",
-              "endpoint": "/api/leads",
-              "method": "POST",
-              "payload": {
-                "leadType": "buyer",
-                "language": "ru",
-                "listingReference": "MS-CRAWL-0138",
-                "source": "website_search_result"
-              }
-            },
-            "save": {
-              "label": "Сохранить",
-              "saved_label": "Сохранено",
-              "endpoint": "/api/saved-searches",
-              "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0138"
-            }
-          }
-        },
-        {
-          "id": "MS-CRAWL-0116",
-          "title": "Земля и здания на продажу недалеко от Сандански",
-          "path": "/ru/properties/MS-CRAWL-0116",
-          "review_badge": null,
-          "translation_display": "reviewed_translation",
-          "translation_locale": "ru",
-          "translation_status": "published",
-          "translation_indexable": true,
-          "translation_human_approved": true,
-          "source_locale": "ru",
-          "content_locale": "ru",
-          "location": "Сандански",
-          "property_type": "land",
-          "property_type_label": "Участок",
-          "offer_type": "sale",
-          "offer_type_label": "Продажа",
-          "bedrooms": null,
-          "bedrooms_not_applicable": false,
-          "area_sqm": null,
-          "price_eur": 75000,
-          "price_on_request": false,
-          "listing_status": "available",
-          "listing_active": true,
-          "image_count": 7,
-          "legacy_image_count": 30,
-          "thumbnail": {
-            "url": "https://makler-realty.ru/wp-content/uploads/2021/03/791-1-680x383.jpg",
-            "alt": "Земля и здания на продажу недалеко от Сандански",
-            "width": null,
-            "height": null
-          },
-          "actions": {
-            "detail": {
-              "label": "Подробнее",
-              "href": "/ru/properties/MS-CRAWL-0116"
-            },
-            "inquiry": {
-              "label": "Запрос",
-              "endpoint": "/api/leads",
-              "method": "POST",
-              "payload": {
-                "leadType": "buyer",
-                "language": "ru",
-                "listingReference": "MS-CRAWL-0116",
-                "source": "website_search_result"
-              }
-            },
-            "save": {
-              "label": "Сохранить",
-              "saved_label": "Сохранено",
-              "endpoint": "/api/saved-searches",
-              "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0116"
             }
           }
         }
@@ -2120,6 +2000,14 @@
           {
             "href": "/he/locations/sandanski",
             "label": "סנדנסקי"
+          },
+          {
+            "href": "/he/locations/petrich",
+            "label": "פטריץ׳"
+          },
+          {
+            "href": "/he/locations/hotovo",
+            "label": "חוטובו"
           }
         ],
         "locationsLabel": "אזורים",
@@ -2141,7 +2029,648 @@
         "path": "/he/search",
         "endpoint": "/api/search",
         "method": "GET",
-        "query_param": "q"
+        "query_param": "q",
+        "controls": {
+          "view_modes": [
+            {
+              "id": "list",
+              "label": "רשימה",
+              "default": true
+            },
+            {
+              "id": "map",
+              "label": "מפה",
+              "default": false
+            }
+          ],
+          "sort_options": [
+            {
+              "id": "recommended",
+              "label": "מומלצים",
+              "default": true
+            },
+            {
+              "id": "price_asc",
+              "label": "מחיר: מהנמוך לגבוה"
+            },
+            {
+              "id": "price_desc",
+              "label": "מחיר: מהגבוה לנמוך"
+            }
+          ],
+          "save_search": {
+            "endpoint": "/api/saved-searches",
+            "method": "POST",
+            "payload": {
+              "language": "he",
+              "query": "",
+              "filters": {},
+              "search_intent": {
+                "schema_version": 1,
+                "locale": "he",
+                "text_query": "",
+                "exact_reference": null,
+                "property_families": [],
+                "property_subtypes": [],
+                "offer_type": null,
+                "listing_status": null,
+                "price_currency": "EUR",
+                "price_period": null,
+                "parking_kinds": [],
+                "construction_statuses": [],
+                "has_approved_tour": null,
+                "location_ids": [],
+                "country_code": null,
+                "geography_id": null,
+                "region_id": null,
+                "municipality": null,
+                "district": null,
+                "map_bounds": null,
+                "radius": null,
+                "sort": "recommended",
+                "page": 1,
+                "page_size": 12,
+                "mandatory_filters": {
+                  "publication_state": "published",
+                  "listing_statuses": [
+                    "available",
+                    "reserved"
+                  ],
+                  "translation_human_approved": true,
+                  "locale_indexable": true
+                },
+                "price_min": null,
+                "price_max": null,
+                "bedrooms_min": null,
+                "bedrooms_max": null,
+                "premises_min": null,
+                "hotel_rooms_min": null,
+                "primary_area_min": null,
+                "primary_area_max": null,
+                "land_area_min": null,
+                "land_area_max": null,
+                "floor_min": null,
+                "floor_max": null,
+                "storeys_min": null,
+                "storeys_max": null
+              },
+              "source": "website_search"
+            }
+          },
+          "active_filter_chips": [],
+          "filter_options": {
+            "countries": [
+              {
+                "code": "BG",
+                "names": {
+                  "native": "България",
+                  "en": "Bulgaria"
+                }
+              },
+              {
+                "code": "GR",
+                "names": {
+                  "native": "Ελλάδα",
+                  "en": "Greece"
+                }
+              }
+            ],
+            "regions": [
+              {
+                "id": "GR:region:EL30",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL30",
+                "names": {
+                  "native": "Aττική",
+                  "en": "Attiki"
+                }
+              },
+              {
+                "id": "BG:district:BLG",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "BLG",
+                "names": {
+                  "native": "Благоевград",
+                  "en": "Blagoevgrad"
+                }
+              },
+              {
+                "id": "BG:district:BGS",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "BGS",
+                "names": {
+                  "native": "Бургас",
+                  "en": "Burgas"
+                }
+              },
+              {
+                "id": "GR:region:EL52",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL52",
+                "names": {
+                  "native": "Κεντρική Μακεδονία",
+                  "en": "Central Macedonia"
+                }
+              },
+              {
+                "id": "BG:district:DOB",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "DOB",
+                "names": {
+                  "native": "Добрич",
+                  "en": "Dobrich"
+                }
+              },
+              {
+                "id": "GR:region:EL63",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL63",
+                "names": {
+                  "native": "Δυτική Ελλάδα",
+                  "en": "Dytiki Elláda"
+                }
+              },
+              {
+                "id": "GR:region:EL51",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL51",
+                "names": {
+                  "native": "Ανατολική Μακεδονία και Θράκη",
+                  "en": "Eastern Macedonia and Thrace"
+                }
+              },
+              {
+                "id": "GR:region:EL54",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL54",
+                "names": {
+                  "native": "Ήπειρος",
+                  "en": "Epirus"
+                }
+              },
+              {
+                "id": "BG:district:GAB",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "GAB",
+                "names": {
+                  "native": "Габрово",
+                  "en": "Gabrovo"
+                }
+              },
+              {
+                "id": "BG:district:HKV",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "HKV",
+                "names": {
+                  "native": "Хасково",
+                  "en": "Haskovo"
+                }
+              },
+              {
+                "id": "GR:region:EL62",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL62",
+                "names": {
+                  "native": "Ιόνια Νησιά",
+                  "en": "Ionia Nisia"
+                }
+              },
+              {
+                "id": "BG:district:KRZ",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "KRZ",
+                "names": {
+                  "native": "Кърджали",
+                  "en": "Kardzhali"
+                }
+              },
+              {
+                "id": "GR:region:EL43",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL43",
+                "names": {
+                  "native": "Κρήτη",
+                  "en": "Kriti"
+                }
+              },
+              {
+                "id": "BG:district:KNL",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "KNL",
+                "names": {
+                  "native": "Кюстендил",
+                  "en": "Kyustendil"
+                }
+              },
+              {
+                "id": "BG:district:LOV",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "LOV",
+                "names": {
+                  "native": "Ловеч",
+                  "en": "Lovech"
+                }
+              },
+              {
+                "id": "BG:district:MON",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "MON",
+                "names": {
+                  "native": "Монтана",
+                  "en": "Montana"
+                }
+              },
+              {
+                "id": "GR:region:EL42",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL42",
+                "names": {
+                  "native": "Νότιο Αιγαίο",
+                  "en": "Notio Aigaio"
+                }
+              },
+              {
+                "id": "BG:district:PAZ",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "PAZ",
+                "names": {
+                  "native": "Пазарджик",
+                  "en": "Pazardzhik"
+                }
+              },
+              {
+                "id": "GR:region:EL65",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL65",
+                "names": {
+                  "native": "Πελοπόννησος",
+                  "en": "Peloponnisos"
+                }
+              },
+              {
+                "id": "BG:district:PER",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "PER",
+                "names": {
+                  "native": "Перник",
+                  "en": "Pernik"
+                }
+              },
+              {
+                "id": "BG:district:PVN",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "PVN",
+                "names": {
+                  "native": "Плевен",
+                  "en": "Pleven"
+                }
+              },
+              {
+                "id": "BG:district:PDV",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "PDV",
+                "names": {
+                  "native": "Пловдив",
+                  "en": "Plovdiv"
+                }
+              },
+              {
+                "id": "BG:district:RAZ",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "RAZ",
+                "names": {
+                  "native": "Разград",
+                  "en": "Razgrad"
+                }
+              },
+              {
+                "id": "BG:district:RSE",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "RSE",
+                "names": {
+                  "native": "Русе",
+                  "en": "Ruse"
+                }
+              },
+              {
+                "id": "BG:district:SHU",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SHU",
+                "names": {
+                  "native": "Шумен",
+                  "en": "Shumen"
+                }
+              },
+              {
+                "id": "BG:district:SLS",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SLS",
+                "names": {
+                  "native": "Силистра",
+                  "en": "Silistra"
+                }
+              },
+              {
+                "id": "BG:district:SLV",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SLV",
+                "names": {
+                  "native": "Сливен",
+                  "en": "Sliven"
+                }
+              },
+              {
+                "id": "BG:district:SML",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SML",
+                "names": {
+                  "native": "Смолян",
+                  "en": "Smolyan"
+                }
+              },
+              {
+                "id": "BG:district:SFO",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SFO",
+                "names": {
+                  "native": "София",
+                  "en": "Sofia"
+                }
+              },
+              {
+                "id": "BG:district:SOF",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SOF",
+                "names": {
+                  "native": "София (столица)",
+                  "en": "Sofia (stolitsa)"
+                }
+              },
+              {
+                "id": "BG:district:SZR",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SZR",
+                "names": {
+                  "native": "Стара Загора",
+                  "en": "Stara Zagora"
+                }
+              },
+              {
+                "id": "GR:region:EL64",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL64",
+                "names": {
+                  "native": "Στερεά Ελλάδα",
+                  "en": "Sterea Elláda"
+                }
+              },
+              {
+                "id": "BG:district:TGV",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "TGV",
+                "names": {
+                  "native": "Търговище",
+                  "en": "Targovishte"
+                }
+              },
+              {
+                "id": "GR:region:EL61",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL61",
+                "names": {
+                  "native": "Θεσσαλία",
+                  "en": "Thessalia"
+                }
+              },
+              {
+                "id": "BG:district:VAR",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "VAR",
+                "names": {
+                  "native": "Варна",
+                  "en": "Varna"
+                }
+              },
+              {
+                "id": "BG:district:VTR",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "VTR",
+                "names": {
+                  "native": "Велико Търново",
+                  "en": "Veliko Tarnovo"
+                }
+              },
+              {
+                "id": "BG:district:VID",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "VID",
+                "names": {
+                  "native": "Видин",
+                  "en": "Vidin"
+                }
+              },
+              {
+                "id": "GR:region:EL41",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL41",
+                "names": {
+                  "native": "Βόρειο Αιγαίο",
+                  "en": "Voreio Aigaio"
+                }
+              },
+              {
+                "id": "BG:district:VRC",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "VRC",
+                "names": {
+                  "native": "Враца",
+                  "en": "Vratsa"
+                }
+              },
+              {
+                "id": "GR:region:EL53",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL53",
+                "names": {
+                  "native": "Δυτική Μακεδονία",
+                  "en": "Western Macedonia"
+                }
+              },
+              {
+                "id": "BG:district:JAM",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "JAM",
+                "names": {
+                  "native": "Ямбол",
+                  "en": "Yambol"
+                }
+              }
+            ],
+            "locations": [
+              "Bansko",
+              "Blagoevgrad",
+              "Dzhigurovo",
+              "Elani-Sani, Halkidiki",
+              "Eretria-Kotroni",
+              "Hotovo",
+              "Igralishte",
+              "Kapatovo",
+              "Kulata",
+              "Laskarevo",
+              "Leshnitsa",
+              "Levunovo",
+              "Logari",
+              "Mikrevo",
+              "Nafplio",
+              "Paralia Ofrinio",
+              "Pasalimani, Piraeus",
+              "Petrich",
+              "Petrich Municipality",
+              "Pirin",
+              "Polenitsa",
+              "Sandanski",
+              "Spatovo",
+              "Strumyani",
+              "Sveti Vlas",
+              "Thessaloniki",
+              "Tsaparevo",
+              "Vinogradi"
+            ],
+            "municipalities": [
+              "Nesebar",
+              "Strumyani",
+              "Blagoevgrad",
+              "Bansko",
+              "Sandanski",
+              "Petrich"
+            ],
+            "districts": [
+              "Dobrich",
+              "Gabrovo",
+              "Haskovo",
+              "Kardzhali",
+              "Kyustendil",
+              "Lovech",
+              "Montana",
+              "Pazardzhik",
+              "Pernik",
+              "Pleven",
+              "Plovdiv",
+              "Razgrad",
+              "Ruse",
+              "Shumen",
+              "Silistra",
+              "Sliven",
+              "Smolyan",
+              "Sofia",
+              "Sofia (stolitsa)",
+              "Stara Zagora",
+              "Targovishte",
+              "Varna",
+              "Veliko Tarnovo",
+              "Vidin",
+              "Vratsa",
+              "Yambol",
+              "Burgas",
+              "Blagoevgrad"
+            ],
+            "property_families": [
+              "apartment",
+              "commercial",
+              "hotel",
+              "house",
+              "plot",
+              "property"
+            ],
+            "property_types": [
+              "apartment",
+              "commercial",
+              "hotel",
+              "house",
+              "plot",
+              "property"
+            ],
+            "property_subtypes": [
+              "apartment",
+              "development",
+              "hotel",
+              "house",
+              "other_commercial"
+            ],
+            "offer_types": [
+              "rent",
+              "sale"
+            ],
+            "bedrooms": [],
+            "premises": [],
+            "hotel_rooms": []
+          },
+          "area_maps": [],
+          "area_map_source": {
+            "authority": "Eurostat GISCO",
+            "dataset": "NUTS 2024",
+            "scale": "20M",
+            "crs": "EPSG:4326",
+            "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2024_4326.geojson",
+            "sha256": "8510ae0b3aebddd5cc171197db15a9b16f03f3808cec8d056cc4d65e92de1157",
+            "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
+          },
+          "applicable_filter_fields": [
+            "property_subtype",
+            "bedrooms_min",
+            "premises_min",
+            "hotel_rooms_min",
+            "area_min",
+            "area_max",
+            "land_area_min",
+            "land_area_max",
+            "floor_min",
+            "floor_max",
+            "storeys_min",
+            "storeys_max"
+          ]
+        }
       },
       "seller": {
         "path": "/he/sell",
@@ -2165,6 +2694,28 @@
             "listing_id": "MS-CRAWL-0001",
             "path": "/he/properties/MS-CRAWL-0001"
           }
+        },
+        {
+          "location": "פטריץ׳",
+          "path": "/he/locations/petrich",
+          "listing_count": 5,
+          "image": {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/02/345-3-680x510.jpg",
+            "alt": "Продава къща в с. Кулата",
+            "listing_id": "MS-CRAWL-0044",
+            "path": "/he/properties/MS-CRAWL-0044"
+          }
+        },
+        {
+          "location": "חוטובו",
+          "path": "/he/locations/hotovo",
+          "listing_count": 4,
+          "image": {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg",
+            "alt": "Къща за продажба в с. Хотово – имот с парцел и отличен потенциал",
+            "listing_id": "MS-CRAWL-0013",
+            "path": "/he/properties/MS-CRAWL-0013"
+          }
         }
       ]
     },
@@ -2187,7 +2738,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -2239,12 +2790,12 @@
         "source_locale": "bg",
         "content_locale": "bg",
         "location": "סנדנסקי",
-        "property_type": "multi_unit",
-        "property_type_label": "דירות",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -2300,7 +2851,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 600,
@@ -2357,7 +2908,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 355,
@@ -2414,7 +2965,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": null,
@@ -2472,7 +3023,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
@@ -3089,7 +3640,9 @@
             "For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD.",
             "EU and EEA buyers are handled differently and should confirm the current purchase structure with a lawyer before signing."
           ],
-          "reviewer": "editor_bg"
+          "reviewer": "editor_bg",
+          "sources_label": "",
+          "sources": []
         },
         {
           "id": "foreign-buyers-financing-gap",
@@ -3098,7 +3651,9 @@
             "Foreign-national mortgage availability can be limited in Bulgaria.",
             "MS Realty treats financing as an early qualification item, not a late-stage surprise."
           ],
-          "reviewer": "editor_bg"
+          "reviewer": "editor_bg",
+          "sources_label": "",
+          "sources": []
         }
       ],
       "ctas": {
@@ -3290,7 +3845,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -3431,34 +3986,6 @@
           "dir": "ltr"
         },
         {
-          "code": "en",
-          "label": "English",
-          "href": "/en",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "de",
-          "label": "Deutsch",
-          "href": "/de",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "nl",
-          "label": "Nederlands",
-          "href": "/nl",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
-          "code": "ru",
-          "label": "Русский",
-          "href": "/ru",
-          "active": false,
-          "dir": "ltr"
-        },
-        {
           "code": "el",
           "label": "Ελληνικά",
           "href": "/el/akinita/MS-CRAWL-0001",
@@ -3547,7 +4074,7 @@
         "total_floors": null,
         "land_area_sqm": null,
         "condition": "",
-        "location_precision": "approximate",
+        "location_precision": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "sold",
@@ -3567,8 +4094,8 @@
         "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false,
-        "location_precision": "approximate"
+        "bedrooms_not_applicable": true,
+        "location_precision": null
       },
       "media": {
         "gallery": [
@@ -3842,7 +4369,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 1,
           "price_on_request": false,
@@ -3899,7 +4426,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 6,
           "price_on_request": false,
@@ -3956,7 +4483,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 83,
           "price_on_request": false,
@@ -4021,7 +4548,7 @@
     },
     "mobile_policy": {
       "list_first_mobile": true,
-      "map_optional": false,
+      "map_optional": true,
       "sticky_contact_actions": true,
       "minimum_tap_target_px": 44
     },
@@ -4146,19 +4673,69 @@
         "typesense",
         "meilisearch"
       ],
+      "intent": {
+        "schema_version": 1,
+        "locale": "he",
+        "text_query": "Sandanski",
+        "exact_reference": null,
+        "property_families": [],
+        "property_subtypes": [],
+        "offer_type": null,
+        "listing_status": null,
+        "price_currency": "EUR",
+        "price_period": null,
+        "parking_kinds": [],
+        "construction_statuses": [],
+        "has_approved_tour": null,
+        "location_ids": [],
+        "country_code": null,
+        "geography_id": null,
+        "region_id": null,
+        "municipality": null,
+        "district": null,
+        "map_bounds": null,
+        "radius": null,
+        "sort": "recommended",
+        "page": 1,
+        "page_size": 12,
+        "mandatory_filters": {
+          "publication_state": "published",
+          "listing_statuses": [
+            "available",
+            "reserved"
+          ],
+          "translation_human_approved": true,
+          "locale_indexable": true
+        },
+        "price_min": null,
+        "price_max": null,
+        "bedrooms_min": null,
+        "bedrooms_max": null,
+        "premises_min": null,
+        "hotel_rooms_min": null,
+        "primary_area_min": null,
+        "primary_area_max": null,
+        "land_area_min": null,
+        "land_area_max": null,
+        "floor_min": null,
+        "floor_max": null,
+        "storeys_min": null,
+        "storeys_max": null
+      },
       "query": "Sandanski",
       "sort": "recommended",
+      "view": "list",
       "filters": {
         "locale": "he",
         "public_enabled": true,
         "indexable": true
       },
-      "total_matches": 108,
+      "total_matches": 111,
       "returned": 12,
       "pagination": {
         "page": 1,
         "per_page": 12,
-        "total_pages": 9,
+        "total_pages": 10,
         "has_previous": false,
         "has_next": true
       },
@@ -4168,6 +4745,11 @@
             "id": "list",
             "label": "רשימה",
             "default": true
+          },
+          {
+            "id": "map",
+            "label": "מפה",
+            "default": false
           }
         ],
         "sort_options": [
@@ -4192,39 +4774,611 @@
             "language": "he",
             "query": "Sandanski",
             "filters": {},
+            "search_intent": {
+              "schema_version": 1,
+              "locale": "he",
+              "text_query": "Sandanski",
+              "exact_reference": null,
+              "property_families": [],
+              "property_subtypes": [],
+              "offer_type": null,
+              "listing_status": null,
+              "price_currency": "EUR",
+              "price_period": null,
+              "parking_kinds": [],
+              "construction_statuses": [],
+              "has_approved_tour": null,
+              "location_ids": [],
+              "country_code": null,
+              "geography_id": null,
+              "region_id": null,
+              "municipality": null,
+              "district": null,
+              "map_bounds": null,
+              "radius": null,
+              "sort": "recommended",
+              "page": 1,
+              "page_size": 12,
+              "mandatory_filters": {
+                "publication_state": "published",
+                "listing_statuses": [
+                  "available",
+                  "reserved"
+                ],
+                "translation_human_approved": true,
+                "locale_indexable": true
+              },
+              "price_min": null,
+              "price_max": null,
+              "bedrooms_min": null,
+              "bedrooms_max": null,
+              "premises_min": null,
+              "hotel_rooms_min": null,
+              "primary_area_min": null,
+              "primary_area_max": null,
+              "land_area_min": null,
+              "land_area_max": null,
+              "floor_min": null,
+              "floor_max": null,
+              "storeys_min": null,
+              "storeys_max": null
+            },
             "source": "website_search"
           }
         },
         "active_filter_chips": [],
         "filter_options": {
+          "countries": [
+            {
+              "code": "BG",
+              "names": {
+                "native": "България",
+                "en": "Bulgaria"
+              }
+            },
+            {
+              "code": "GR",
+              "names": {
+                "native": "Ελλάδα",
+                "en": "Greece"
+              }
+            }
+          ],
+          "regions": [
+            {
+              "id": "GR:region:EL30",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL30",
+              "names": {
+                "native": "Aττική",
+                "en": "Attiki"
+              }
+            },
+            {
+              "id": "BG:district:BLG",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "BLG",
+              "names": {
+                "native": "Благоевград",
+                "en": "Blagoevgrad"
+              }
+            },
+            {
+              "id": "BG:district:BGS",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "BGS",
+              "names": {
+                "native": "Бургас",
+                "en": "Burgas"
+              }
+            },
+            {
+              "id": "GR:region:EL52",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL52",
+              "names": {
+                "native": "Κεντρική Μακεδονία",
+                "en": "Central Macedonia"
+              }
+            },
+            {
+              "id": "BG:district:DOB",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "DOB",
+              "names": {
+                "native": "Добрич",
+                "en": "Dobrich"
+              }
+            },
+            {
+              "id": "GR:region:EL63",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL63",
+              "names": {
+                "native": "Δυτική Ελλάδα",
+                "en": "Dytiki Elláda"
+              }
+            },
+            {
+              "id": "GR:region:EL51",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL51",
+              "names": {
+                "native": "Ανατολική Μακεδονία και Θράκη",
+                "en": "Eastern Macedonia and Thrace"
+              }
+            },
+            {
+              "id": "GR:region:EL54",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL54",
+              "names": {
+                "native": "Ήπειρος",
+                "en": "Epirus"
+              }
+            },
+            {
+              "id": "BG:district:GAB",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "GAB",
+              "names": {
+                "native": "Габрово",
+                "en": "Gabrovo"
+              }
+            },
+            {
+              "id": "BG:district:HKV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "HKV",
+              "names": {
+                "native": "Хасково",
+                "en": "Haskovo"
+              }
+            },
+            {
+              "id": "GR:region:EL62",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL62",
+              "names": {
+                "native": "Ιόνια Νησιά",
+                "en": "Ionia Nisia"
+              }
+            },
+            {
+              "id": "BG:district:KRZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "KRZ",
+              "names": {
+                "native": "Кърджали",
+                "en": "Kardzhali"
+              }
+            },
+            {
+              "id": "GR:region:EL43",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL43",
+              "names": {
+                "native": "Κρήτη",
+                "en": "Kriti"
+              }
+            },
+            {
+              "id": "BG:district:KNL",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "KNL",
+              "names": {
+                "native": "Кюстендил",
+                "en": "Kyustendil"
+              }
+            },
+            {
+              "id": "BG:district:LOV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "LOV",
+              "names": {
+                "native": "Ловеч",
+                "en": "Lovech"
+              }
+            },
+            {
+              "id": "BG:district:MON",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "MON",
+              "names": {
+                "native": "Монтана",
+                "en": "Montana"
+              }
+            },
+            {
+              "id": "GR:region:EL42",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL42",
+              "names": {
+                "native": "Νότιο Αιγαίο",
+                "en": "Notio Aigaio"
+              }
+            },
+            {
+              "id": "BG:district:PAZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PAZ",
+              "names": {
+                "native": "Пазарджик",
+                "en": "Pazardzhik"
+              }
+            },
+            {
+              "id": "GR:region:EL65",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL65",
+              "names": {
+                "native": "Πελοπόννησος",
+                "en": "Peloponnisos"
+              }
+            },
+            {
+              "id": "BG:district:PER",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PER",
+              "names": {
+                "native": "Перник",
+                "en": "Pernik"
+              }
+            },
+            {
+              "id": "BG:district:PVN",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PVN",
+              "names": {
+                "native": "Плевен",
+                "en": "Pleven"
+              }
+            },
+            {
+              "id": "BG:district:PDV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PDV",
+              "names": {
+                "native": "Пловдив",
+                "en": "Plovdiv"
+              }
+            },
+            {
+              "id": "BG:district:RAZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "RAZ",
+              "names": {
+                "native": "Разград",
+                "en": "Razgrad"
+              }
+            },
+            {
+              "id": "BG:district:RSE",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "RSE",
+              "names": {
+                "native": "Русе",
+                "en": "Ruse"
+              }
+            },
+            {
+              "id": "BG:district:SHU",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SHU",
+              "names": {
+                "native": "Шумен",
+                "en": "Shumen"
+              }
+            },
+            {
+              "id": "BG:district:SLS",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SLS",
+              "names": {
+                "native": "Силистра",
+                "en": "Silistra"
+              }
+            },
+            {
+              "id": "BG:district:SLV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SLV",
+              "names": {
+                "native": "Сливен",
+                "en": "Sliven"
+              }
+            },
+            {
+              "id": "BG:district:SML",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SML",
+              "names": {
+                "native": "Смолян",
+                "en": "Smolyan"
+              }
+            },
+            {
+              "id": "BG:district:SFO",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SFO",
+              "names": {
+                "native": "София",
+                "en": "Sofia"
+              }
+            },
+            {
+              "id": "BG:district:SOF",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SOF",
+              "names": {
+                "native": "София (столица)",
+                "en": "Sofia (stolitsa)"
+              }
+            },
+            {
+              "id": "BG:district:SZR",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SZR",
+              "names": {
+                "native": "Стара Загора",
+                "en": "Stara Zagora"
+              }
+            },
+            {
+              "id": "GR:region:EL64",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL64",
+              "names": {
+                "native": "Στερεά Ελλάδα",
+                "en": "Sterea Elláda"
+              }
+            },
+            {
+              "id": "BG:district:TGV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "TGV",
+              "names": {
+                "native": "Търговище",
+                "en": "Targovishte"
+              }
+            },
+            {
+              "id": "GR:region:EL61",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL61",
+              "names": {
+                "native": "Θεσσαλία",
+                "en": "Thessalia"
+              }
+            },
+            {
+              "id": "BG:district:VAR",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VAR",
+              "names": {
+                "native": "Варна",
+                "en": "Varna"
+              }
+            },
+            {
+              "id": "BG:district:VTR",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VTR",
+              "names": {
+                "native": "Велико Търново",
+                "en": "Veliko Tarnovo"
+              }
+            },
+            {
+              "id": "BG:district:VID",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VID",
+              "names": {
+                "native": "Видин",
+                "en": "Vidin"
+              }
+            },
+            {
+              "id": "GR:region:EL41",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL41",
+              "names": {
+                "native": "Βόρειο Αιγαίο",
+                "en": "Voreio Aigaio"
+              }
+            },
+            {
+              "id": "BG:district:VRC",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VRC",
+              "names": {
+                "native": "Враца",
+                "en": "Vratsa"
+              }
+            },
+            {
+              "id": "GR:region:EL53",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL53",
+              "names": {
+                "native": "Δυτική Μακεδονία",
+                "en": "Western Macedonia"
+              }
+            },
+            {
+              "id": "BG:district:JAM",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "JAM",
+              "names": {
+                "native": "Ямбол",
+                "en": "Yambol"
+              }
+            }
+          ],
           "locations": [
+            "Bansko",
+            "Blagoevgrad",
+            "Dzhigurovo",
+            "Elani-Sani, Halkidiki",
+            "Eretria-Kotroni",
             "Hotovo",
+            "Igralishte",
+            "Kapatovo",
+            "Kulata",
+            "Laskarevo",
+            "Leshnitsa",
+            "Levunovo",
+            "Logari",
+            "Mikrevo",
+            "Nafplio",
+            "Paralia Ofrinio",
+            "Pasalimani, Piraeus",
             "Petrich",
-            "Sandanski"
+            "Petrich Municipality",
+            "Pirin",
+            "Polenitsa",
+            "Sandanski",
+            "Spatovo",
+            "Strumyani",
+            "Sveti Vlas",
+            "Thessaloniki",
+            "Tsaparevo",
+            "Vinogradi"
+          ],
+          "municipalities": [
+            "Nesebar",
+            "Strumyani",
+            "Blagoevgrad",
+            "Bansko",
+            "Sandanski",
+            "Petrich"
+          ],
+          "districts": [
+            "Dobrich",
+            "Gabrovo",
+            "Haskovo",
+            "Kardzhali",
+            "Kyustendil",
+            "Lovech",
+            "Montana",
+            "Pazardzhik",
+            "Pernik",
+            "Pleven",
+            "Plovdiv",
+            "Razgrad",
+            "Ruse",
+            "Shumen",
+            "Silistra",
+            "Sliven",
+            "Smolyan",
+            "Sofia",
+            "Sofia (stolitsa)",
+            "Stara Zagora",
+            "Targovishte",
+            "Varna",
+            "Veliko Tarnovo",
+            "Vidin",
+            "Vratsa",
+            "Yambol",
+            "Burgas",
+            "Blagoevgrad"
+          ],
+          "property_families": [
+            "apartment",
+            "commercial",
+            "hotel",
+            "house",
+            "plot",
+            "property"
           ],
           "property_types": [
             "apartment",
             "commercial",
             "hotel",
             "house",
-            "land",
-            "multi_unit",
+            "plot",
             "property"
+          ],
+          "property_subtypes": [
+            "apartment",
+            "development",
+            "hotel",
+            "house",
+            "other_commercial"
           ],
           "offer_types": [
             "rent",
             "sale"
           ],
-          "bedrooms": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            6,
-            7
-          ]
-        }
+          "bedrooms": [],
+          "premises": [],
+          "hotel_rooms": []
+        },
+        "area_maps": [],
+        "area_map_source": {
+          "authority": "Eurostat GISCO",
+          "dataset": "NUTS 2024",
+          "scale": "20M",
+          "crs": "EPSG:4326",
+          "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2024_4326.geojson",
+          "sha256": "8510ae0b3aebddd5cc171197db15a9b16f03f3808cec8d056cc4d65e92de1157",
+          "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
+        },
+        "applicable_filter_fields": [
+          "property_subtype",
+          "bedrooms_min",
+          "premises_min",
+          "hotel_rooms_min",
+          "area_min",
+          "area_max",
+          "land_area_min",
+          "land_area_max",
+          "floor_min",
+          "floor_max",
+          "storeys_min",
+          "storeys_max"
+        ]
       },
       "fallback": {
         "enabled": true,
@@ -4246,12 +5400,12 @@
         "source_locale": "bg",
         "content_locale": "bg",
         "location": "סנדנסקי",
-        "property_type": "multi_unit",
-        "property_type_label": "דירות",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -4307,7 +5461,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 600,
@@ -4364,7 +5518,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 355,
@@ -4421,7 +5575,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": null,
@@ -4479,7 +5633,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
@@ -4535,7 +5689,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 53289,
@@ -4592,7 +5746,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 350,
@@ -4649,7 +5803,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 400,
@@ -4706,7 +5860,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 130000,
@@ -4764,7 +5918,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -4821,7 +5975,7 @@
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,
@@ -4861,9 +6015,9 @@
         }
       },
       {
-        "id": "MS-CRAWL-0014",
-        "title": "Наем – Двустаен апартамент в гр.Сандански",
-        "path": "/he/properties/MS-CRAWL-0014",
+        "id": "MS-CRAWL-0013",
+        "title": "Къща за продажба в с. Хотово – имот с парцел и отличен потенциал",
+        "path": "/he/properties/MS-CRAWL-0013",
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
@@ -4872,30 +6026,30 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "סנדנסקי",
+        "location": "חוטובו",
         "property_type": "apartment",
         "property_type_label": "דירה",
-        "offer_type": "rent",
-        "offer_type_label": "להשכרה",
-        "bedrooms": 1,
-        "bedrooms_not_applicable": false,
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
-        "price_eur": 230,
+        "price_eur": 35000,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 5,
-        "legacy_image_count": 23,
+        "image_count": 6,
+        "legacy_image_count": 24,
         "thumbnail": {
-          "url": "https://makler-realty.com/wp-content/uploads/2024/10/876-1-680x510.jpg",
-          "alt": "Наем – Двустаен апартамент в гр.Сандански",
+          "url": "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg",
+          "alt": "Къща за продажба в с. Хотово – имот с парцел и отличен потенциал",
           "width": null,
           "height": null
         },
         "actions": {
           "detail": {
             "label": "פרטים",
-            "href": "/he/properties/MS-CRAWL-0014"
+            "href": "/he/properties/MS-CRAWL-0013"
           },
           "inquiry": {
             "label": "פנייה",
@@ -4904,7 +6058,7 @@
             "payload": {
               "leadType": "buyer",
               "language": "he",
-              "listingReference": "MS-CRAWL-0014",
+              "listingReference": "MS-CRAWL-0013",
               "source": "website_search_result"
             }
           },
@@ -4913,7 +6067,7 @@
             "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
-            "listing_id": "MS-CRAWL-0014"
+            "listing_id": "MS-CRAWL-0013"
           }
         }
       }
@@ -4921,7 +6075,7 @@
   },
   "sold_location_he": {
     "kind": "location",
-    "status": 404,
+    "status": 200,
     "requested_locale": "he",
     "locale": "he",
     "lang": "he",
@@ -5053,9 +6207,694 @@
     "body": {
       "h1": "נכסים ב-סנדנסקי",
       "location": "Sandanski",
-      "listing_count": 0
+      "listing_count": 80
     },
-    "cards": []
+    "cards": [
+      {
+        "id": "MS-CRAWL-0002",
+        "title": "Апартаменти в парка на Сандански. Затворен комплекс",
+        "path": "/he/properties/MS-CRAWL-0002",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
+        "area_sqm": null,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 2,
+        "legacy_image_count": 20,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
+          "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0002"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0002",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0002"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0003",
+        "title": "Тристаен апартамент под наем в Сандански + паркомясто",
+        "path": "/he/properties/MS-CRAWL-0003",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "price_eur": 600,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 14,
+        "legacy_image_count": 32,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
+          "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0003"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0003",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0003"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0004",
+        "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+        "path": "/he/properties/MS-CRAWL-0004",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "price_eur": 355,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 8,
+        "legacy_image_count": 26,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
+          "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0004"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0004",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0004"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0005",
+        "title": "Апартамент под наем в гр.Сандански",
+        "path": "/he/properties/MS-CRAWL-0005",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 8,
+        "legacy_image_count": 26,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/07/899-2-680x510.jpg",
+          "alt": "Апартамент под наем в гр.Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0005"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0005",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0005"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0006",
+        "title": "Дава под наем промишлена сграда в Сандански",
+        "path": "/he/properties/MS-CRAWL-0006",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "commercial",
+        "property_type_label": "נכס מסחרי",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
+        "area_sqm": null,
+        "price_eur": 1,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 1,
+        "legacy_image_count": 18,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+          "alt": "Дава под наем промишлена сграда в Сандански",
+          "width": 45,
+          "height": 45
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0006"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0006",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0006"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0007",
+        "title": "Продава двустаен апартамент в гр.Сандански",
+        "path": "/he/properties/MS-CRAWL-0007",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "price_eur": 53289,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 6,
+        "legacy_image_count": 24,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/09/911-2-680x514.jpg",
+          "alt": "Продава двустаен апартамент в гр.Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0007"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0007",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0007"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0008",
+        "title": "Двустаен апартамент в центъра на Сандански – наем",
+        "path": "/he/properties/MS-CRAWL-0008",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "price_eur": 350,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 17,
+        "legacy_image_count": 35,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg",
+          "alt": "Двустаен апартамент в центъра на Сандански – наем",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0008"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0008",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0008"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0009",
+        "title": "Двустаен апартамент под наем в парка на Сандански",
+        "path": "/he/properties/MS-CRAWL-0009",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "price_eur": 400,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 8,
+        "legacy_image_count": 26,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2026/06/957-1-680x510.jpg",
+          "alt": "Двустаен апартамент под наем в парка на Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0009"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0009",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0009"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0010",
+        "title": "Двустаен апартамент в идеалния център на гр. Сандански",
+        "path": "/he/properties/MS-CRAWL-0010",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "price_eur": 130000,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 16,
+        "legacy_image_count": 34,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2026/06/987-main-1-510x680.jpg",
+          "alt": "Двустаен апартамент в идеалния център на гр. Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0010"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0010",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0010"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0011",
+        "title": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
+        "path": "/he/properties/MS-CRAWL-0011",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "hotel",
+        "property_type_label": "מלון",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
+        "area_sqm": null,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 20,
+        "legacy_image_count": 38,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2018/03/778-dron-680x383.jpg",
+          "alt": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0011"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0011",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0011"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0012",
+        "title": "Инвестиционен проект в Сандански – хотел ресторант",
+        "path": "/he/properties/MS-CRAWL-0012",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "hotel",
+        "property_type_label": "מלון",
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
+        "area_sqm": null,
+        "price_eur": 950000,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 1,
+        "legacy_image_count": 19,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/06/IMG_20250604_101804-680x510.jpg",
+          "alt": "Инвестиционен проект в Сандански – хотел ресторант",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0012"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0012",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0012"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0013",
+        "title": "Къща за продажба в с. Хотово – имот с парцел и отличен потенциал",
+        "path": "/he/properties/MS-CRAWL-0013",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "חוטובו",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
+        "area_sqm": null,
+        "price_eur": 35000,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 6,
+        "legacy_image_count": 24,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg",
+          "alt": "Къща за продажба в с. Хотово – имот с парцел и отличен потенциал",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0013"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0013",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0013"
+          }
+        }
+      }
+    ]
   },
   "fallback_fr": {
     "kind": "language_fallback",
@@ -5229,7 +7068,7 @@
     },
     "mobile_policy": {
       "list_first_mobile": true,
-      "map_optional": false,
+      "map_optional": true,
       "sticky_contact_actions": true,
       "minimum_tap_target_px": 44
     },
@@ -5354,14 +7193,64 @@
         "typesense",
         "meilisearch"
       ],
+      "intent": {
+        "schema_version": 1,
+        "locale": "he",
+        "text_query": "Sandanski",
+        "exact_reference": null,
+        "property_families": [],
+        "property_subtypes": [],
+        "offer_type": null,
+        "listing_status": null,
+        "price_currency": "EUR",
+        "price_period": null,
+        "parking_kinds": [],
+        "construction_statuses": [],
+        "has_approved_tour": null,
+        "location_ids": [],
+        "country_code": null,
+        "geography_id": null,
+        "region_id": null,
+        "municipality": null,
+        "district": null,
+        "map_bounds": null,
+        "radius": null,
+        "sort": "recommended",
+        "page": 1,
+        "page_size": 12,
+        "mandatory_filters": {
+          "publication_state": "published",
+          "listing_statuses": [
+            "available",
+            "reserved"
+          ],
+          "translation_human_approved": true,
+          "locale_indexable": true
+        },
+        "price_min": null,
+        "price_max": null,
+        "bedrooms_min": null,
+        "bedrooms_max": null,
+        "premises_min": null,
+        "hotel_rooms_min": null,
+        "primary_area_min": null,
+        "primary_area_max": null,
+        "land_area_min": null,
+        "land_area_max": null,
+        "floor_min": null,
+        "floor_max": null,
+        "storeys_min": null,
+        "storeys_max": null
+      },
       "query": "Sandanski",
       "sort": "recommended",
+      "view": "list",
       "filters": {
         "locale": "he",
         "public_enabled": true,
         "indexable": true
       },
-      "total_matches": 109,
+      "total_matches": 112,
       "returned": 12,
       "pagination": {
         "page": 1,
@@ -5376,6 +7265,11 @@
             "id": "list",
             "label": "רשימה",
             "default": true
+          },
+          {
+            "id": "map",
+            "label": "מפה",
+            "default": false
           }
         ],
         "sort_options": [
@@ -5400,39 +7294,611 @@
             "language": "he",
             "query": "Sandanski",
             "filters": {},
+            "search_intent": {
+              "schema_version": 1,
+              "locale": "he",
+              "text_query": "Sandanski",
+              "exact_reference": null,
+              "property_families": [],
+              "property_subtypes": [],
+              "offer_type": null,
+              "listing_status": null,
+              "price_currency": "EUR",
+              "price_period": null,
+              "parking_kinds": [],
+              "construction_statuses": [],
+              "has_approved_tour": null,
+              "location_ids": [],
+              "country_code": null,
+              "geography_id": null,
+              "region_id": null,
+              "municipality": null,
+              "district": null,
+              "map_bounds": null,
+              "radius": null,
+              "sort": "recommended",
+              "page": 1,
+              "page_size": 12,
+              "mandatory_filters": {
+                "publication_state": "published",
+                "listing_statuses": [
+                  "available",
+                  "reserved"
+                ],
+                "translation_human_approved": true,
+                "locale_indexable": true
+              },
+              "price_min": null,
+              "price_max": null,
+              "bedrooms_min": null,
+              "bedrooms_max": null,
+              "premises_min": null,
+              "hotel_rooms_min": null,
+              "primary_area_min": null,
+              "primary_area_max": null,
+              "land_area_min": null,
+              "land_area_max": null,
+              "floor_min": null,
+              "floor_max": null,
+              "storeys_min": null,
+              "storeys_max": null
+            },
             "source": "website_search"
           }
         },
         "active_filter_chips": [],
         "filter_options": {
+          "countries": [
+            {
+              "code": "BG",
+              "names": {
+                "native": "България",
+                "en": "Bulgaria"
+              }
+            },
+            {
+              "code": "GR",
+              "names": {
+                "native": "Ελλάδα",
+                "en": "Greece"
+              }
+            }
+          ],
+          "regions": [
+            {
+              "id": "GR:region:EL30",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL30",
+              "names": {
+                "native": "Aττική",
+                "en": "Attiki"
+              }
+            },
+            {
+              "id": "BG:district:BLG",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "BLG",
+              "names": {
+                "native": "Благоевград",
+                "en": "Blagoevgrad"
+              }
+            },
+            {
+              "id": "BG:district:BGS",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "BGS",
+              "names": {
+                "native": "Бургас",
+                "en": "Burgas"
+              }
+            },
+            {
+              "id": "GR:region:EL52",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL52",
+              "names": {
+                "native": "Κεντρική Μακεδονία",
+                "en": "Central Macedonia"
+              }
+            },
+            {
+              "id": "BG:district:DOB",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "DOB",
+              "names": {
+                "native": "Добрич",
+                "en": "Dobrich"
+              }
+            },
+            {
+              "id": "GR:region:EL63",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL63",
+              "names": {
+                "native": "Δυτική Ελλάδα",
+                "en": "Dytiki Elláda"
+              }
+            },
+            {
+              "id": "GR:region:EL51",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL51",
+              "names": {
+                "native": "Ανατολική Μακεδονία και Θράκη",
+                "en": "Eastern Macedonia and Thrace"
+              }
+            },
+            {
+              "id": "GR:region:EL54",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL54",
+              "names": {
+                "native": "Ήπειρος",
+                "en": "Epirus"
+              }
+            },
+            {
+              "id": "BG:district:GAB",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "GAB",
+              "names": {
+                "native": "Габрово",
+                "en": "Gabrovo"
+              }
+            },
+            {
+              "id": "BG:district:HKV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "HKV",
+              "names": {
+                "native": "Хасково",
+                "en": "Haskovo"
+              }
+            },
+            {
+              "id": "GR:region:EL62",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL62",
+              "names": {
+                "native": "Ιόνια Νησιά",
+                "en": "Ionia Nisia"
+              }
+            },
+            {
+              "id": "BG:district:KRZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "KRZ",
+              "names": {
+                "native": "Кърджали",
+                "en": "Kardzhali"
+              }
+            },
+            {
+              "id": "GR:region:EL43",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL43",
+              "names": {
+                "native": "Κρήτη",
+                "en": "Kriti"
+              }
+            },
+            {
+              "id": "BG:district:KNL",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "KNL",
+              "names": {
+                "native": "Кюстендил",
+                "en": "Kyustendil"
+              }
+            },
+            {
+              "id": "BG:district:LOV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "LOV",
+              "names": {
+                "native": "Ловеч",
+                "en": "Lovech"
+              }
+            },
+            {
+              "id": "BG:district:MON",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "MON",
+              "names": {
+                "native": "Монтана",
+                "en": "Montana"
+              }
+            },
+            {
+              "id": "GR:region:EL42",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL42",
+              "names": {
+                "native": "Νότιο Αιγαίο",
+                "en": "Notio Aigaio"
+              }
+            },
+            {
+              "id": "BG:district:PAZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PAZ",
+              "names": {
+                "native": "Пазарджик",
+                "en": "Pazardzhik"
+              }
+            },
+            {
+              "id": "GR:region:EL65",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL65",
+              "names": {
+                "native": "Πελοπόννησος",
+                "en": "Peloponnisos"
+              }
+            },
+            {
+              "id": "BG:district:PER",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PER",
+              "names": {
+                "native": "Перник",
+                "en": "Pernik"
+              }
+            },
+            {
+              "id": "BG:district:PVN",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PVN",
+              "names": {
+                "native": "Плевен",
+                "en": "Pleven"
+              }
+            },
+            {
+              "id": "BG:district:PDV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PDV",
+              "names": {
+                "native": "Пловдив",
+                "en": "Plovdiv"
+              }
+            },
+            {
+              "id": "BG:district:RAZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "RAZ",
+              "names": {
+                "native": "Разград",
+                "en": "Razgrad"
+              }
+            },
+            {
+              "id": "BG:district:RSE",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "RSE",
+              "names": {
+                "native": "Русе",
+                "en": "Ruse"
+              }
+            },
+            {
+              "id": "BG:district:SHU",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SHU",
+              "names": {
+                "native": "Шумен",
+                "en": "Shumen"
+              }
+            },
+            {
+              "id": "BG:district:SLS",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SLS",
+              "names": {
+                "native": "Силистра",
+                "en": "Silistra"
+              }
+            },
+            {
+              "id": "BG:district:SLV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SLV",
+              "names": {
+                "native": "Сливен",
+                "en": "Sliven"
+              }
+            },
+            {
+              "id": "BG:district:SML",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SML",
+              "names": {
+                "native": "Смолян",
+                "en": "Smolyan"
+              }
+            },
+            {
+              "id": "BG:district:SFO",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SFO",
+              "names": {
+                "native": "София",
+                "en": "Sofia"
+              }
+            },
+            {
+              "id": "BG:district:SOF",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SOF",
+              "names": {
+                "native": "София (столица)",
+                "en": "Sofia (stolitsa)"
+              }
+            },
+            {
+              "id": "BG:district:SZR",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SZR",
+              "names": {
+                "native": "Стара Загора",
+                "en": "Stara Zagora"
+              }
+            },
+            {
+              "id": "GR:region:EL64",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL64",
+              "names": {
+                "native": "Στερεά Ελλάδα",
+                "en": "Sterea Elláda"
+              }
+            },
+            {
+              "id": "BG:district:TGV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "TGV",
+              "names": {
+                "native": "Търговище",
+                "en": "Targovishte"
+              }
+            },
+            {
+              "id": "GR:region:EL61",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL61",
+              "names": {
+                "native": "Θεσσαλία",
+                "en": "Thessalia"
+              }
+            },
+            {
+              "id": "BG:district:VAR",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VAR",
+              "names": {
+                "native": "Варна",
+                "en": "Varna"
+              }
+            },
+            {
+              "id": "BG:district:VTR",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VTR",
+              "names": {
+                "native": "Велико Търново",
+                "en": "Veliko Tarnovo"
+              }
+            },
+            {
+              "id": "BG:district:VID",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VID",
+              "names": {
+                "native": "Видин",
+                "en": "Vidin"
+              }
+            },
+            {
+              "id": "GR:region:EL41",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL41",
+              "names": {
+                "native": "Βόρειο Αιγαίο",
+                "en": "Voreio Aigaio"
+              }
+            },
+            {
+              "id": "BG:district:VRC",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VRC",
+              "names": {
+                "native": "Враца",
+                "en": "Vratsa"
+              }
+            },
+            {
+              "id": "GR:region:EL53",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL53",
+              "names": {
+                "native": "Δυτική Μακεδονία",
+                "en": "Western Macedonia"
+              }
+            },
+            {
+              "id": "BG:district:JAM",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "JAM",
+              "names": {
+                "native": "Ямбол",
+                "en": "Yambol"
+              }
+            }
+          ],
           "locations": [
+            "Bansko",
+            "Blagoevgrad",
+            "Dzhigurovo",
+            "Elani-Sani, Halkidiki",
+            "Eretria-Kotroni",
             "Hotovo",
+            "Igralishte",
+            "Kapatovo",
+            "Kulata",
+            "Laskarevo",
+            "Leshnitsa",
+            "Levunovo",
+            "Logari",
+            "Mikrevo",
+            "Nafplio",
+            "Paralia Ofrinio",
+            "Pasalimani, Piraeus",
             "Petrich",
-            "Sandanski"
+            "Petrich Municipality",
+            "Pirin",
+            "Polenitsa",
+            "Sandanski",
+            "Spatovo",
+            "Strumyani",
+            "Sveti Vlas",
+            "Thessaloniki",
+            "Tsaparevo",
+            "Vinogradi"
+          ],
+          "municipalities": [
+            "Nesebar",
+            "Strumyani",
+            "Blagoevgrad",
+            "Bansko",
+            "Sandanski",
+            "Petrich"
+          ],
+          "districts": [
+            "Dobrich",
+            "Gabrovo",
+            "Haskovo",
+            "Kardzhali",
+            "Kyustendil",
+            "Lovech",
+            "Montana",
+            "Pazardzhik",
+            "Pernik",
+            "Pleven",
+            "Plovdiv",
+            "Razgrad",
+            "Ruse",
+            "Shumen",
+            "Silistra",
+            "Sliven",
+            "Smolyan",
+            "Sofia",
+            "Sofia (stolitsa)",
+            "Stara Zagora",
+            "Targovishte",
+            "Varna",
+            "Veliko Tarnovo",
+            "Vidin",
+            "Vratsa",
+            "Yambol",
+            "Burgas",
+            "Blagoevgrad"
+          ],
+          "property_families": [
+            "apartment",
+            "commercial",
+            "hotel",
+            "house",
+            "plot",
+            "property"
           ],
           "property_types": [
             "apartment",
             "commercial",
             "hotel",
             "house",
-            "land",
-            "multi_unit",
+            "plot",
             "property"
+          ],
+          "property_subtypes": [
+            "apartment",
+            "development",
+            "hotel",
+            "house",
+            "other_commercial"
           ],
           "offer_types": [
             "rent",
             "sale"
           ],
-          "bedrooms": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            6,
-            7
-          ]
-        }
+          "bedrooms": [],
+          "premises": [],
+          "hotel_rooms": []
+        },
+        "area_maps": [],
+        "area_map_source": {
+          "authority": "Eurostat GISCO",
+          "dataset": "NUTS 2024",
+          "scale": "20M",
+          "crs": "EPSG:4326",
+          "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2024_4326.geojson",
+          "sha256": "8510ae0b3aebddd5cc171197db15a9b16f03f3808cec8d056cc4d65e92de1157",
+          "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
+        },
+        "applicable_filter_fields": [
+          "property_subtype",
+          "bedrooms_min",
+          "premises_min",
+          "hotel_rooms_min",
+          "area_min",
+          "area_max",
+          "land_area_min",
+          "land_area_max",
+          "floor_min",
+          "floor_max",
+          "storeys_min",
+          "storeys_max"
+        ]
       },
       "fallback": {
         "enabled": true,
@@ -5459,7 +7925,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -5511,12 +7977,12 @@
         "source_locale": "bg",
         "content_locale": "bg",
         "location": "סנדנסקי",
-        "property_type": "multi_unit",
-        "property_type_label": "דירות",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -5572,7 +8038,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 600,
@@ -5629,7 +8095,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 355,
@@ -5686,7 +8152,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": null,
@@ -5744,7 +8210,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
@@ -5800,7 +8266,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 53289,
@@ -5857,7 +8323,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 350,
@@ -5914,7 +8380,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 400,
@@ -5971,7 +8437,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 130000,
@@ -6029,7 +8495,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -6086,7 +8552,7 @@
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,

@@ -75,7 +75,7 @@ test("missing approved media is a review warning instead of a schema failure", (
   assert.ok(report.rows.filter((row) => row.listing_id === "MS-CRAWL-0114").some((row) => row.warnings.includes("missing_public_images")));
 });
 
-test("structured data warnings use reviewed listing edits", () => {
+test("structured data warnings use broker-verified property edits", () => {
   const seed = loadCmsSeed();
   const seedWithPriceGap = {
     ...seed,
@@ -91,14 +91,23 @@ test("structured data warnings use reviewed listing edits", () => {
   const reviewed = buildStructuredDataReport({
     seed: seedWithPriceGap,
     listingEdits: [
-      { listing_id: "MS-CRAWL-0001", patch: { price_eur: 123000, area_sqm: 86.5 } },
-      { listing_id: "MS-CRAWL-0044", patch: { bedrooms: 1 } },
+      {
+        listing_id: "MS-CRAWL-0001",
+        listing_patch: { price_eur: 123000 },
+        property_patch: { usable_area_sqm: 86.5 },
+        property_fact_verification: [{ field: "usable_area_sqm", state: "broker_verified" }],
+      },
+      {
+        listing_id: "MS-CRAWL-0044",
+        property_patch: { bedrooms_count: 1 },
+        property_fact_verification: [{ field: "bedrooms_count", state: "broker_verified" }],
+      },
     ],
     generatedAt: "2026-07-05T00:00:00Z",
   });
 
-  assert.equal(reviewed.summary.warnings.missing_price, base.summary.warnings.missing_price - 3);
-  assert.equal(reviewed.summary.warnings.missing_area, base.summary.warnings.missing_area - 3);
+  assert.equal(reviewed.summary.warnings.missing_price, base.summary.warnings.missing_price - 2);
+  assert.equal(reviewed.summary.warnings.missing_area, base.summary.warnings.missing_area - 2);
   assert.equal(reviewed.summary.warnings.missing_bedrooms, base.summary.warnings.missing_bedrooms - 1);
 });
 
@@ -114,15 +123,23 @@ test("structured data warnings treat price-on-request as reviewed pricing withou
   assert.equal(rows.every((row) => row.has_offer === false), true);
 });
 
-test("structured data warnings treat bedroom-not-applicable as reviewed", () => {
+test("structured data warnings do not let a legacy bedroom flag bypass property verification", () => {
+  const seed = loadCmsSeed();
+  const seedWithBedroomGap = {
+    ...seed,
+    records: seed.records.map((record) =>
+      record.id === "MS-CRAWL-0044" ? { ...record, facts: { ...record.facts, bedrooms_not_applicable: false } } : record,
+    ),
+  };
   const report = buildStructuredDataReport({
+    seed: seedWithBedroomGap,
     listingEdits: [{ listing_id: "MS-CRAWL-0044", patch: { bedrooms_not_applicable: true } }],
     generatedAt: "2026-07-05T00:00:00Z",
   });
   const rows = report.rows.filter((row) => row.listing_id === "MS-CRAWL-0044");
 
   assert.ok(rows.length > 0);
-  assert.equal(rows.every((row) => !row.warnings.includes("missing_bedrooms")), true);
+  assert.equal(rows.every((row) => row.warnings.includes("missing_bedrooms")), true);
 });
 
 test("structured data warnings do not require bedrooms for land listings", () => {
@@ -138,10 +155,12 @@ test("generated structured data report covers indexable listing sitemap entries"
   if (!fs.existsSync(file)) return;
   const report = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertStructuredDataReport(report), true);
-  assert.equal(report.summary.listing_entries, 167);
-  assert.equal(report.summary.guide_entries, 2);
+  assert.equal(report.summary.listing_entries, 166);
+  assert.equal(report.summary.guide_entries, 5);
   assert.equal(report.summary.failing_entries, 0);
   assert.equal(report.rows.some((row) => row.loc === "/en/guides/foreign-buyers" && row.schema_type === "Article"), true);
+  assert.equal(report.rows.some((row) => row.loc === "/bg/guides/hotovo-obstinski-kontekst" && row.schema_type === "Article"), true);
+  assert.equal(report.rows.some((row) => row.loc === "/bg/guides/petrich-obstinski-kontekst" && row.schema_type === "Article"), true);
   assert.equal(Object.hasOwn(report.summary.warnings, "missing_price"), true);
   assert.equal(Object.hasOwn(report.summary.warnings, "missing_area"), true);
 });

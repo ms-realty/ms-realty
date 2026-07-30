@@ -21,13 +21,11 @@ import {
   renderAdminWorkspace,
 } from "./admin-workflows.mjs";
 import {
-  LISTING_EDIT_FIELDS,
   renderAdminActivityPayload,
   renderAdminContactsPayload,
   renderAdminConsentPayload,
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
-  renderAdminListingEditorPayload,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
@@ -356,6 +354,19 @@ function jsonResponse(status, body) {
   return new Response(JSON.stringify(body), { status, headers: PRIVATE_JSON_HEADERS });
 }
 
+function payloadAdminListingPath(listingId) {
+  const id = typeof listingId === "string" ? listingId.trim() : "";
+  if (!id) throw new Error("listingId is required for the Payload editor handoff");
+  return `/payload-admin/collections/listings/${encodeURIComponent(id)}`;
+}
+
+function payloadAdminListingHandoff(listingId) {
+  return new Response(null, {
+    status: 307,
+    headers: { ...PRIVATE_HTML_HEADERS, location: payloadAdminListingPath(listingId) },
+  });
+}
+
 function markdownResponse(body) {
   return new Response(body, { status: 200, headers: PRIVATE_MARKDOWN_HEADERS });
 }
@@ -508,15 +519,6 @@ function translationDraftInput(input) {
       citations: [{ source: "cms", field: "source_snapshot" }],
     },
   };
-}
-
-function listingEditInput(input) {
-  if (input.patch) return input;
-  const patch = {};
-  for (const field of LISTING_EDIT_FIELDS) {
-    if (input[field] !== undefined && input[field] !== "") patch[field] = input[field];
-  }
-  return { ...input, patch };
 }
 
 function realtyCaseInput(input) {
@@ -925,20 +927,6 @@ function reportsPayload(registry, url, config) {
   );
 }
 
-function listingEditorPayload(registry, url, config) {
-  const edits = readListingEdits(config.listingEditLedgerPath);
-  return renderAdminListingEditorPayload(
-    registry,
-    url.searchParams.get("locale") || "en",
-    currentSeed(config),
-    url.searchParams.get("listingId"),
-    edits,
-    latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
-    readTourApprovals(config.tourApprovalLedgerPath),
-    config.adminPrincipal || null,
-  );
-}
-
 function listingManagerPayload(registry, url, config) {
   const seed = currentSeed(config);
   const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
@@ -1281,14 +1269,6 @@ async function draftReply(input, config) {
   });
 }
 
-function attributedListingEditInput(input, config) {
-  let attributed = bindAuthenticatedOperator(listingEditInput(input), config.adminPrincipal, ["editor"]);
-  if (attributed.mediaReviewer) {
-    attributed = bindAuthenticatedOperator(attributed, config.adminPrincipal, ["mediaReviewer"]);
-  }
-  return attributed;
-}
-
 function persistEditorChange(result, config) {
   const edit = appendListingEdit(result.edit, { filePath: config.listingEditLedgerPath });
   const persistedStaleTranslations = edit.idempotent
@@ -1313,12 +1293,6 @@ function persistEditorChange(result, config) {
     );
   }
   return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
-}
-
-function appendEditorChange(input, config) {
-  const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
-  const result = createListingEdit(currentSeed(config), attributedListingEditInput(input, config), translationTasks, config.editedAt);
-  return persistEditorChange(result, config);
 }
 
 function appendMediaReviewEntry(input, config) {
@@ -1983,7 +1957,8 @@ function appendDealClose(input, config) {
 }
 
 function appendBrokerContactApproval(input, config) {
-  const contact = appendBrokerContact(createBrokerContact(input, { reviewedAt: config.reviewedAt }), {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
+  const contact = appendBrokerContact(createBrokerContact(attributed, { reviewedAt: config.reviewedAt }), {
     filePath: config.brokerContactLedgerPath,
   });
   recordAudit(
@@ -2000,7 +1975,8 @@ function appendBrokerContactApproval(input, config) {
 }
 
 function appendTourApprovalRow(input, config) {
-  const tour = appendTourApproval(createTourApproval(currentSeed(config), input, config.reviewedAt), {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
+  const tour = appendTourApproval(createTourApproval(currentSeed(config), attributed, config.reviewedAt), {
     filePath: config.tourApprovalLedgerPath,
   });
   recordAudit(
@@ -2395,7 +2371,7 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
 }
 
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
-  const principal = resolveAdminPrincipal(request.headers.get("authorization") || "");
+  const principal = config.adminPrincipal || resolveAdminPrincipal(request.headers.get("authorization") || "", config.authEnv || process.env);
   if (!principal) return adminUnauthorized();
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
   config = { ...config, adminPrincipal: principal };
@@ -2438,7 +2414,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/admin/listings") return htmlResponse(listingManagerPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/listings") return jsonResponse(200, listingManagerPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
-      return htmlResponse(listingEditorPayload(registry, url, config));
+      return payloadAdminListingHandoff(url.searchParams.get("listingId"));
     }
     if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, translationQueuePayload(registry, url, config));
@@ -2655,8 +2631,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
-      const result = appendEditorChange(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
-      return jsonResponse(result.edit.idempotent ? 200 : 201, result);
+      const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+      return jsonResponse(409, {
+        kind: "payload_canonical",
+        message: "Listing edits are managed in Payload.",
+        canonical_url: payloadAdminListingPath(input.listingId),
+      });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
       const result = appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);

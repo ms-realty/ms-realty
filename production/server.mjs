@@ -60,6 +60,21 @@ export function productionServerConfig(env = process.env) {
     port: portFrom(env.MS_REALTY_PORT || env.PORT),
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     rateLimit: rateLimitConfigFromEnv(env),
+    search: {
+      engine: env.MS_REALTY_SEARCH_ENGINE,
+      environment: env.NODE_ENV,
+      typesense: {
+        baseUrl: env.TYPESENSE_URL,
+        apiKey: env.TYPESENSE_API_KEY,
+        collectionName: env.TYPESENSE_COLLECTION || "ms_realty_listings",
+      },
+      meilisearch: {
+        baseUrl: env.MEILI_URL,
+        apiKey: env.MEILI_API_KEY,
+        indexName: env.MEILI_INDEX || "ms_realty_listings",
+      },
+      fetchImpl: globalThis.fetch,
+    },
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
@@ -126,6 +141,7 @@ export function productionServerConfig(env = process.env) {
 export function createProductionHttpApp(config = productionServerConfig()) {
   return createHttpApp({
     rateLimit: config.rateLimit,
+    search: config.search,
     eventLedgerPath: config.eventLedgerPath,
     consentLedgerPath: config.consentLedgerPath,
     auditLogPath: config.auditLogPath,

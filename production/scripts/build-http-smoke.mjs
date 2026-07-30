@@ -229,6 +229,7 @@ const smoke = {
       panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
       accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
       reviewer: "media_editor",
+      reviewConfirmed: true,
     },
   }),
   listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
@@ -278,7 +279,7 @@ const smoke = {
       id: "saved-search-he-0001",
       locale: "he",
       query: "Sandanski",
-      filters: { property_type: "apartment", unsupported_filter: "ignored" },
+      filters: { property_type: "apartment" },
       contact: { name: "Noa Levi", whatsapp: "+359880000001" },
       contact_preference: "whatsapp",
       alertConsent: true,
@@ -620,7 +621,7 @@ const translations = readTranslationLedger(translationLedgerPath);
 assertTranslationLedger(translations);
 smoke.translationLedger = { rows: translations.length };
 const listingEdits = readListingEdits(listingEditLedgerPath);
-assertListingEdits(listingEdits);
+if (listingEdits.length) throw new Error("Legacy listing edit handoff must not write a local edit row");
 smoke.listingEditLedger = { rows: listingEdits.length };
 const viewings = readViewings(viewingLedgerPath);
 assertViewingLedger(viewings);

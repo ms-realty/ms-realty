@@ -262,6 +262,7 @@ Useful operator endpoints:
 - `GET /api/admin/live-service-report-template` and `POST /api/admin/live-service-reports/import` handle validated live report files.
 - `GET /api/admin/production-recovery-template`, `GET /api/admin/production-recovery`, and `POST /api/admin/production-recovery/import` provide a validated, audited recovery-evidence intake without committing the private report.
 - `GET /api/admin/cms-collections` returns the implemented CMS collection contract manifest.
+- `POST /mcp` is the bounded remote MCP endpoint for approved ChatGPT/Codex operator tools; see `MCP_OPERATOR_SETUP_RU.md` before exposing it to staff.
 - `GET /api/admin/payload-collections` returns Payload-compatible collection configs generated from that manifest.
 - `GET /admin/cases?locale=bg|ru|en` and `GET /api/admin/cases` return the RealtyCase queue for both human and autonomous execution.
 - `POST /api/admin/cases` opens a versioned BG/GR case; `POST /api/admin/cases/actions` advances, blocks, reopens, freezes, resumes, changes mode, closes, or cancels it through the same authority/evidence contract.

@@ -1,8 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
+import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable, PROPERTY_FIELD_REGISTRY } from "./listing-facts.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_PAYLOAD_COLLECTIONS_OUTPUT = fromRoot("production", "data", "payload-collections.json");
+
+function propertyFamiliesForFact(name) {
+  if (!PROPERTY_FIELD_REGISTRY[name]) return null;
+  return CANONICAL_PROPERTY_FAMILIES.filter((family) => isFactApplicable(family, name));
+}
 
 const GROUP_FIELDS = {
   facts: [
@@ -10,16 +16,38 @@ const GROUP_FIELDS = {
     ["h1", "text"],
     ["description", "textarea"],
     ["location", "text"],
+    ["location_native", "text"],
+    ["location_legacy", "text"],
+    ["municipality", "text"],
+    ["municipality_code", "text"],
+    ["district", "text"],
+    ["district_code", "text"],
+    ["region", "text"],
+    ["region_id", "text"],
+    ["country_code", "text"],
+    ["geography_id", "text"],
+    ["geography_path", "json"],
+    ["settlement_ekatte", "text"],
+    ["location_review_status", "text"],
+    ["location_precision", "text"],
     ["property_type", "text"],
     ["offer_type", "text"],
     ["bedrooms", "number"],
+    ["bedrooms_not_applicable", "checkbox"],
     ["price_eur", "number"],
     ["price_on_request", "checkbox"],
     ["image_count", "number"],
+    ["area_sqm", "number"],
+    ["floor", "number"],
+    ["total_floors", "number"],
+    ["land_area_sqm", "number"],
+    ["condition", "text"],
   ],
   seo: [
     ["title", "text"],
     ["description", "textarea"],
+    ["og_title", "text"],
+    ["og_description", "textarea"],
     ["canonical", "text"],
     ["schema_present", "checkbox"],
   ],
@@ -35,9 +63,69 @@ const GROUP_FIELDS = {
     ["review_state", "text"],
     ["metadata_gaps", "json"],
   ],
+  "properties.facts": [
+    ["legacy_property_type", "text"],
+    ["location_id", "text"],
+    ["location_label", "text"],
+    ["municipality", "text"],
+    ["district", "text"],
+    ["region_id", "text"],
+    ["country_code", "text"],
+    ["geography_id", "text"],
+    ["geography_path", "json"],
+    ["condition", "text"],
+    ["construction_status", "text"],
+    ["parking_kind", "text"],
+    ["living_area_sqm", "number"],
+    ["built_area_sqm", "number"],
+    ["usable_area_sqm", "number"],
+    ["gross_floor_area_sqm", "number"],
+    ["land_area_sqm", "number"],
+    ["bedrooms_count", "number"],
+    ["premises_count", "number"],
+    ["hotel_room_count", "number"],
+    ["floor_number", "number"],
+    ["total_floors", "number"],
+    ["storeys_count", "number"],
+    ["zoning_status", "text"],
+    ["utilities_status", "text"],
+    ["road_access_status", "text"],
+    ["land_category", "text"],
+    ["permanent_use", "text"],
+    ["permitted_use", "text"],
+    ["public_location_precision", "text"],
+    ["primary_area_sqm", "number"],
+  ].map(([name, type]) => ({
+    name,
+    type,
+    custom: { property_families: propertyFamiliesForFact(name) },
+  })),
 };
 
-function cleanField(field) {
+function arrayFieldsFor(field) {
+  if (field.name === "fallback_gallery") {
+    return [
+      { name: "url", type: "text" },
+      { name: "alt", type: "text", localized: true },
+    ];
+  }
+  if (field.name === "fact_verification") {
+    return [
+      { name: "field", type: "text", required: true },
+      {
+        name: "state",
+        type: "select",
+        required: true,
+        options: ["unknown", "not_applicable", "entered_pending_review", "broker_verified"],
+      },
+      { name: "source_type", type: "text" },
+      { name: "source_reference", type: "text" },
+    ];
+  }
+  return [{ name: "value", type: "json" }];
+}
+
+function cleanField(field, collectionSlug) {
   const { required_when: requiredWhen, records, source, ...rest } = field;
   const payloadField = {
     ...rest,
@@ -53,40 +141,41 @@ function cleanField(field) {
     };
   }
   if (payloadField.type === "group") {
-    payloadField.fields = (GROUP_FIELDS[field.name] || (field.fields || []).map((name) => [name, "text"])).map(([name, type]) => ({
-      name,
-      type,
-    }));
+    payloadField.fields = (GROUP_FIELDS[`${collectionSlug}.${field.name}`] || GROUP_FIELDS[field.name] || (field.fields || []).map((name) => [name, "text"])).map(
+      (definition) => (Array.isArray(definition) ? { name: definition[0], type: definition[1] } : definition),
+    );
   }
   if (payloadField.type === "array") {
-    payloadField.fields =
-      field.name === "fallback_gallery"
-        ? [
-            { name: "url", type: "text" },
-            { name: "alt", type: "text", localized: true },
-          ]
-        : [{ name: "value", type: "json" }];
+    payloadField.fields = arrayFieldsFor(field);
   }
   return payloadField;
 }
 
 export function buildPayloadCollections(manifest) {
   return {
-    artifact_id: "payload-collections-20260704",
+    artifact_id: "payload-collections-20260730",
     source_artifact: manifest.artifact_id,
     generated_from: "production/data/cms-collections.json",
+    taxonomy_contract: manifest.taxonomy_contract,
     collections: manifest.collections.map((collection) => ({
       slug: collection.slug,
       admin: {
-        useAsTitle: collection.slug === "listings" ? "id" : collection.fields[0]?.name || "id",
+        useAsTitle:
+          collection.slug === "locations"
+            ? "label"
+            : collection.slug === "listing_enrichment_tasks" || collection.slug === "search_outbox"
+              ? "idempotency_key"
+              : collection.slug === "listings"
+                ? "id"
+                : collection.fields[0]?.name || "id",
         defaultColumns: collection.fields.slice(0, 4).map((field) => field.name),
       },
-      versions: { drafts: true },
+      versions: collection.versions === false ? false : { drafts: true },
       labels: {
         singular: collection.slug.replaceAll("_", " "),
         plural: collection.slug.replaceAll("_", " "),
       },
-      fields: collection.fields.map(cleanField),
+      fields: collection.fields.map((field) => cleanField(field, collection.slug)),
       custom: {
         source: collection.source,
         workflow: collection.workflow,
@@ -97,12 +186,24 @@ export function buildPayloadCollections(manifest) {
 }
 
 export function assertPayloadCollections(config) {
+  if (!config.taxonomy_contract?.version || !Array.isArray(config.taxonomy_contract.mappings)) {
+    throw new Error("Payload collection config must retain the versioned property taxonomy contract");
+  }
   const slugs = config.collections.map((collection) => collection.slug);
-  for (const slug of ["listings", "listing_translations", "media_assets", "listing_tours"]) {
+  for (const slug of [
+    "listings",
+    "properties",
+    "locations",
+    "listing_translations",
+    "media_assets",
+    "listing_tours",
+    "listing_enrichment_tasks",
+    "search_outbox",
+  ]) {
     if (!slugs.includes(slug)) throw new Error(`Missing Payload collection config: ${slug}`);
   }
   for (const collection of config.collections) {
-    if (!collection.admin?.useAsTitle || !collection.versions?.drafts) {
+    if (!collection.admin?.useAsTitle || (collection.versions !== false && !collection.versions?.drafts)) {
       throw new Error(`Payload collection is missing admin/draft config: ${collection.slug}`);
     }
     if (collection.custom?.publish_requires_human_review !== true) {

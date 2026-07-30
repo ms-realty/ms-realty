@@ -87,13 +87,13 @@ function timingSafeMatch(actual, expected) {
   return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 }
 
-function operatorId(value, label) {
+export function operatorId(value, label) {
   const id = String(value || "").trim();
   if (!OPERATOR_ID.test(id)) throw new Error(`${label} must be a stable operator ID`);
   return id;
 }
 
-function normalizedRoles(value, label, { fallbackAdmin = false } = {}) {
+export function normalizedRoles(value, label, { fallbackAdmin = false } = {}) {
   const values = Array.isArray(value)
     ? value
     : typeof value === "string"

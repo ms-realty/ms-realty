@@ -14,6 +14,7 @@ import {
 } from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { loadLegacyArchive } from "../lib/legacy-archive.mjs";
 
 const registry = loadLocaleRegistry();
 
@@ -57,12 +58,28 @@ test("generated App Router manifest is valid when present", () => {
   if (!fs.existsSync(file)) return;
   const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertAppRouteManifest(manifest), true);
-  assert.equal(manifest.summary.routes, 204);
-  assert.equal(manifest.summary.sitemap_indexable_routes, 197);
+  assert.equal(manifest.summary.routes, 205);
+  assert.equal(manifest.summary.sitemap_indexable_routes, 198);
   assert.equal(manifest.summary.by_type.search, 7);
-  assert.equal(manifest.summary.by_type.guide, 2);
+  assert.equal(manifest.summary.by_type.guide, 5);
   assert.equal(manifest.routes.some((route) => route.path.startsWith("/fr/")), false);
   assert.equal(assertAppRouteFiles(manifest), true);
+});
+
+test("every manifest page renders a complete public content contract", () => {
+  const manifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
+
+  for (const route of manifest.routes) {
+    const page = renderAppRoute({ pathname: route.path, url: `https://audit.test${route.path}` });
+    const label = `${route.type} ${route.path}`;
+    assert.equal(page.status, 200, `${label} must render`);
+    assert.equal(page.rendered.kind, route.type, `${label} must use its declared renderer`);
+    assert.equal(page.rendered.indexable, route.public_indexable, `${label} must match its sitemap indexability`);
+    assert.match(page.html, /<title>\s*[^<\s]/, `${label} must have a title`);
+    assert.match(page.html, /<meta name="description" content="[^"\s]/, `${label} must have a description`);
+    assert.match(page.html, /<h1(?:\s[^>]*)?>\s*[^<\s]/, `${label} must have an H1`);
+    assert.match(page.html, new RegExp(`data-react-public-ui="${route.type}"`), `${label} must render its public shell`);
+  }
 });
 
 test("App Router adapter renders home, search, listing, and RTL HTML", () => {
@@ -96,12 +113,17 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(search.html, /data-mobile-search-filters="true"/);
   assert.match(search.html, /data-mobile-filter-count="1"/);
   assert.match(search.html, /data-filter-form-id="sr-mobile"/);
-  assert.match(search.html, /data-filter-chip="property_type"/);
+  assert.match(search.html, /data-filter-chip="property_family"/);
   assert.match(search.html, /data-card-thumbnail="true"/);
   assert.match(search.html, /<img src="https:\/\/makler-realty\./);
   assert.match(search.html, /defer src="\/vendor\/ms-realty-public\.js\?v=[a-f0-9]{12}"/);
   assert.match(search.html, /data-ms-realty-public-client/);
   assert.doesNotMatch(search.html, /function submitHermesChat/);
+
+  const bgListing = renderAppRoute({ pathname: "/bg/imoti/MS-CRAWL-0001", url: "https://example.test/bg/imoti/MS-CRAWL-0001" });
+  assert.equal(bgListing.status, 200);
+  assert.match(bgListing.html, /Комплекс за дългосрочен наем/);
+  assert.doesNotMatch(bgListing.html, /Updated approved source description\./);
 
   const listing = renderAppRoute({ pathname: "/he/properties/MS-CRAWL-0001", url: "https://example.test/he/properties/MS-CRAWL-0001" });
   assert.equal(listing.status, 200);
@@ -143,6 +165,15 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(location.html, /data-react-public-ui="location"/);
   assert.match(location.html, /data-location-listings="true"/);
   assert.match(location.html, /data-card-thumbnail="true"/);
+
+  const fallbackLocation = renderAppRoute({
+    pathname: "/en/locations/sandanski",
+    url: "https://example.test/en/locations/sandanski",
+  });
+  assert.equal(fallbackLocation.status, 200);
+  assert.equal(fallbackLocation.rendered.indexable, false);
+  assert.equal(fallbackLocation.rendered.cards.length > 0, true);
+  assert.match(fallbackLocation.html, /<meta name="robots" content="noindex,follow">/);
 
   const seller = renderAppRoute({ pathname: "/he/sell", url: "https://example.test/he/sell" });
   assert.equal(seller.status, 200);
@@ -212,7 +243,7 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   const sitemap = renderAppSitemap();
   assert.equal(sitemap.status, 200);
   assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
-  assert.equal(sitemap.sitemap.summary.entries, 195);
+  assert.equal(sitemap.sitemap.summary.entries, 198);
   assert.match(sitemap.body, /<loc>https:\/\/makler-realty.com\/he<\/loc>/);
   assert.match(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
   assert.match(sitemap.body, /\/en\/guides\/foreign-buyers/);
@@ -279,4 +310,49 @@ test("App Router serves reviewed legacy URLs as direct domain-aware redirects", 
   assert.equal(wrongDomain.status, 404);
   assert.equal(canonicalHome.status, 308);
   assert.equal(canonicalHome.headers.get("location"), "/he?from=legacy-link");
+});
+
+test("App Router exposes only opaque noindex legacy archive captures", async () => {
+  const entry = loadLegacyArchive().entries[0];
+  const pathname = `/archive/${entry.archive_id}`;
+  const archive = renderAppRoute({ pathname, url: `https://example.test${pathname}` });
+  const sitemap = renderAppSitemap();
+  const manifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
+  const routeModule = await import("../../app/archive/[archiveId]/route.js");
+
+  assert.equal(archive.status, 200);
+  assert.equal(archive.rendered.kind, "legacy_archive");
+  assert.equal(archive.rendered.indexable, false);
+  assert.match(archive.html, /<meta name="robots" content="noindex,nofollow">/);
+  assert.match(archive.html, new RegExp(`<link rel="canonical" href="${entry.archive_id}">`.replace(entry.archive_id, pathname)));
+  assert.match(archive.html, /data-react-public-ui="legacy-archive"/);
+  assert.match(archive.html, /data-legacy-archive-source="true"/);
+  assert.doesNotMatch(archive.html, /data-approved-source="cms"/);
+  assert.doesNotMatch(sitemap.body, new RegExp(entry.archive_id));
+  assert.equal(manifest.routes.some((route) => route.path === pathname), false);
+
+  const forwarded = await routeModule.GET(new Request(`https://example.test${pathname}`));
+  assert.equal(forwarded.status, 200);
+  assert.match(await forwarded.text(), /data-react-public-ui="legacy-archive"/);
+});
+
+test("reviewed legacy redirects take priority over an archive capture", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-archive-redirect-"));
+  const deployableRedirectOutputPath = path.join(directory, "deployable-redirects.json");
+  const entry = loadLegacyArchive().entries[0];
+  const pathname = `/archive/${entry.archive_id}`;
+  fs.writeFileSync(
+    deployableRedirectOutputPath,
+    `${JSON.stringify({ decisions: [{ old_url: `https://makler-realty.com${pathname}`, status: 301, target_path: "/bg/imoti/MS-CRAWL-0001" }] })}\n`,
+  );
+
+  const response = renderAppRouteResponse({
+    pathname,
+    url: `http://app:3000${pathname}`,
+    host: "makler-realty.com",
+    config: { ...appRouterConfigFromEnv(), deployableRedirectOutputPath },
+  });
+
+  assert.equal(response.status, 301);
+  assert.equal(response.headers.get("location"), "/bg/imoti/MS-CRAWL-0001");
 });

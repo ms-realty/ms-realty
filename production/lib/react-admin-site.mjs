@@ -1,6 +1,6 @@
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
-import { LOGO_ASPECT, LOGO_SRC_REVERSED } from "./ui/design-assets.mjs";
+import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
 
 function adminCopy(page) {
   return page.workspace?.copy || {};
@@ -871,6 +871,10 @@ function adminHref(path, page) {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
+function payloadAdminListingHref(listingId) {
+  return `/payload-admin/collections/listings/${encodeURIComponent(listingId)}`;
+}
+
 function currentOperatorId(page, fallback) {
   return page.workspace?.operator_id || fallback;
 }
@@ -1017,7 +1021,6 @@ const NAV_ROUTES = [
   { id: "reports", module: "crm", path: "/admin/reports", icon: "bar-chart-3", kind: "admin_operations_reports", capability: "operations:read" },
   { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity", capability: "activity:read" },
   { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
-  { id: "listing_editor", module: "cms", path: "/admin/listings/edit", icon: "building-2", kind: "admin_listing_editor", capability: "content:read" },
   { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
   { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
 ];
@@ -1094,7 +1097,7 @@ function Sidebar({ page }) {
       h(
         "a",
         { href: adminHref(adminHomeForPage(page), page), "aria-label": "MS Realty" },
-        h("img", { src: LOGO_SRC_REVERSED, alt: "MS Realty", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
+        h("img", { src: LOGO_URL_REVERSED, alt: "MS Realty", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
       ),
     ),
     h(
@@ -2245,7 +2248,7 @@ function PipelineCard({ page, state, lead }) {
                       "div",
                       { className: "adm-task-list__actions" },
                       h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: match.path, target: "_blank", rel: "noopener" }, h(Icon, { name: "external-link", size: 15 }), label(copy, "openListing", "Open listing")),
-                      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(match.listing_id)}`, page) }, label(copy, "propertyEditor", "Edit")),
+                      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(match.listing_id) }, label(copy, "propertyEditor", "Edit")),
                     ),
                   ),
                 ),
@@ -4400,7 +4403,7 @@ function ListingManagerBody({ page }) {
                         h(
                           "div",
                           { className: "adm-task-list__actions" },
-                          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
+                          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: payloadAdminListingHref(row.id) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
                           h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
                         ),
                       ),
@@ -4541,7 +4544,7 @@ function TranslationQueueBody({ page }) {
                               ),
                             )
                           : h("span", { className: "crm-tbl__muted" }, task ? label(copy, "awaitingHermesDraft", "Awaiting Hermes draft") : statusText(ui, row.task_type)),
-                    h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(row.editor_path, page) }, label(copy, "openEditor", "Open editor")),
+                    h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(row.listing_id) }, label(copy, "openEditor", "Open editor")),
                   ),
                 );
               }),
@@ -5370,7 +5373,7 @@ function ListingQualityReviewDecision({ page, row, ui }) {
         ),
         h(
           "a",
-          { className: "mk-btn mk-btn--subtle mk-btn--sm adm-route-evidence__open", href: adminHref(row.editor_path, page) },
+          { className: "mk-btn mk-btn--subtle mk-btn--sm adm-route-evidence__open", href: payloadAdminListingHref(row.listing_id) },
           h(Icon, { name: "pencil", size: 16 }),
           h("span", null, label(copy, "editListing", "Edit listing")),
         ),

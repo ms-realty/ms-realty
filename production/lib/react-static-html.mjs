@@ -19,6 +19,7 @@ function attributeName(name) {
   if (name === "defaultChecked") return "checked";
   if (name === "autoComplete") return "autocomplete";
   if (name === "inputMode") return "inputmode";
+  if (name === "tabIndex") return "tabindex";
   return name;
 }
 

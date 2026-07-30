@@ -8,6 +8,8 @@ import { parseCsv } from "../lib/csv.mjs";
 import { buildLiveServiceProvisioningReport } from "../lib/live-service-provisioning.mjs";
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { readReplyDeliveryOutcomes } from "../lib/reply-delivery-outcomes.mjs";
+import { mediaAssetId } from "../lib/media-reviews.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
 
 function tempJsonl(prefix) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
@@ -560,7 +562,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(listingManagerHtml, /data-kind="admin-listing-manager"/);
       assert.match(listingManagerHtml, /data-listing-manager-row="MS-CRAWL-0001"/);
       assert.match(listingManagerHtml, /Поиск по номеру/);
-      assert.match(listingManagerHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=ru"/);
+      assert.match(listingManagerHtml, /href="\/payload-admin\/collections\/listings\/MS-CRAWL-0001"/);
       assert.match(listingManagerHtml, /href="\/admin\/translations\?locale=ru"/);
       const listingManagerJson = await listingManagerJsonRoute.GET(
         new Request("https://example.test/api/admin/listings?locale=ru&q=MS-CRAWL-0001", { headers: auth }),
@@ -608,26 +610,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const russianEditor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=ru", { headers: auth }),
       );
-      const russianEditorHtml = await russianEditor.text();
-      assert.equal(russianEditor.status, 200);
-      assert.match(russianEditorHtml, /data-editor-field="price_eur"/);
-      assert.match(russianEditorHtml, /data-editor-field="condition"/);
-      assert.match(russianEditorHtml, /data-editor-field="location_precision"/);
-      assert.match(russianEditorHtml, /data-editor-field="availability_verified_at"/);
-      assert.match(russianEditorHtml, /data-editor-field="seo_title"/);
-      assert.match(russianEditorHtml, /data-seo-panel="true"/);
-      assert.match(russianEditorHtml, /inputmode="decimal"/);
-      assert.match(russianEditorHtml, /data-editor-name="true"/);
-      assert.match(russianEditorHtml, /data-editor-tab="translations" aria-label="Переводы" title="Переводы"/);
-      assert.match(russianEditorHtml, /class="adm-editor-tab__label">Переводы/);
-      assert.match(russianEditorHtml, /placeholder="Имя редактора"/);
-      assert.match(russianEditorHtml, /Содержание из источника/);
-      assert.match(russianEditorHtml, /Данные объекта/);
-      assert.match(russianEditorHtml, /Коммерческие условия/);
-      assert.match(russianEditorHtml, /data-listing-quality-issues="[1-9][0-9]*"/);
-      assert.match(russianEditorHtml, /data-quality-issue="missing_area"/);
-      assert.match(russianEditorHtml, /data-listing-quality-required-fields="area_sqm"/);
-      assert.match(russianEditorHtml, /Площадь в m²/);
+      assert.equal(russianEditor.status, 307);
+      assert.equal(russianEditor.headers.get("location"), "/payload-admin/collections/listings/MS-CRAWL-0001");
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();
@@ -825,8 +809,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(payloadCollections.status, 200);
       assert.equal(payloadCollections.headers.get("cache-control"), "no-store");
       assert.equal(payloadCollectionsBody.kind, "admin_payload_collections");
-      assert.equal(payloadCollectionsBody.collections.length, 4);
-      assert.equal(payloadCollectionsBody.collections.every((collection) => collection.versions.drafts), true);
+      assert.equal(payloadCollectionsBody.collections.length, 8);
+      assert.ok(payloadCollectionsBody.collections.some((collection) => collection.slug === "listings"));
+      assert.equal(
+        payloadCollectionsBody.collections.every((collection) => collection.versions === false || collection.versions.drafts),
+        true,
+      );
 
       const liveTemplate = await liveServiceReportTemplateRoute.GET(
         new Request("https://example.test/api/admin/live-service-report-template?source=hermes_draft_worker", { headers: auth }),
@@ -1540,38 +1528,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const editor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
       );
-      const editorHtml = await editor.text();
-      assert.equal(editor.status, 200);
-      assert.match(editorHtml, /<html lang="bg" dir="ltr">/);
-      assert.match(editorHtml, /data-kind="admin-listing-editor"/);
-      assert.match(editorHtml, /data-react-admin-ui="listing-editor"/);
-      assert.match(editorHtml, /data-admin-workbench="cms"/);
-      assert.match(editorHtml, /data-editor-layout="facts-translations-quality"/);
-      assert.match(editorHtml, /data-editor-tabs="true"/);
-      assert.match(editorHtml, /data-editor-panel="facts"/);
-      assert.match(editorHtml, /<select name="property_type"/);
-      assert.match(editorHtml, /<select name="offer_type"/);
-      assert.match(editorHtml, /data-editor-tab="seo"/);
-      assert.match(editorHtml, /data-seo-panel="true"/);
-      assert.match(editorHtml, /data-translation-panel="true"/);
-      assert.match(editorHtml, /data-media-review-panel="true"/);
-      assert.match(editorHtml, /data-media-manager="true"/);
-      assert.match(editorHtml, /<details class="adm-media-review" data-media-review-disclosure=/);
-      assert.match(editorHtml, /Прегледай файла/);
-      assert.match(editorHtml, /action="\/api\/admin\/media\/reviews"/);
-      assert.match(editorHtml, /data-tour-review-status=/);
-      assert.match(editorHtml, /data-tour-editor-form="true"/);
-      assert.match(editorHtml, /action="\/api\/admin\/tours\/approve"/);
-      assert.match(editorHtml, /defer src="\/vendor\/ms-realty-admin\.js\?v=[a-f0-9]{12}"/);
-      assert.doesNotMatch(editorHtml, /function initTourEditor/);
-      assert.match(editorHtml, /name="panoramaUrl"/);
-      assert.match(editorHtml, /name="thumbnailUrl"/);
-      assert.match(editorHtml, /name="accessibilityCaption"/);
-      assert.match(editorHtml, /name="reviewer"/);
-      assert.match(editorHtml, /data-tour-review-confirmation="true"/);
-      assert.match(editorHtml, /data-listing-id="MS-CRAWL-0001"/);
-      const mediaAssetMatch = editorHtml.match(/data-media-asset="(media-[a-f0-9]{20})"/);
-      assert.ok(mediaAssetMatch, "listing editor must expose a stable reviewable media asset id");
+      assert.equal(editor.status, 307);
+      assert.equal(editor.headers.get("location"), "/payload-admin/collections/listings/MS-CRAWL-0001");
+      const reviewableAsset = loadCmsSeed().records
+        .find((record) => record.collection === "listings" && record.id === "MS-CRAWL-0001")
+        .media.find((asset) => asset.kind === "photo");
+      assert.ok(reviewableAsset, "listing must retain a reviewable source asset");
 
       const mediaReview = await mediaReviewRoute.POST(
         new Request("https://example.test/api/admin/media/reviews", {
@@ -1579,7 +1541,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             listingId: "MS-CRAWL-0001",
-            assetId: mediaAssetMatch[1],
+            assetId: mediaAssetId(reviewableAsset),
             decision: "publish",
             kind: "floor_plan",
             alt: "Human-reviewed floor plan for MS-CRAWL-0001.",
@@ -1593,13 +1555,6 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(mediaReview.status, 201);
       assert.equal(mediaReviewBody.review_status, "approved_by_human");
       assert.equal(mediaReviewBody.kind, "floor_plan");
-
-      const editorAfterMediaReview = await listingEditorRoute.GET(
-        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
-      );
-      const editorAfterMediaReviewHtml = await editorAfterMediaReview.text();
-      assert.match(editorAfterMediaReviewHtml, /data-media-public="true"/);
-      assert.match(editorAfterMediaReviewHtml, /MS-CRAWL-0001-floor-plan\.webp/);
 
       const edit = await listingEditRoute.POST(
         new Request("https://example.test/api/admin/listings/edit", {
@@ -1627,20 +1582,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         }),
       );
       const editBody = await edit.json();
-      assert.equal(edit.status, 201);
-      assert.equal(editBody.edit.patch.title, "Updated title for Next admin");
-      assert.equal(editBody.edit.patch.floor, 2);
-      assert.equal(editBody.edit.patch.publish_approved, true);
-      assert.equal(editBody.edit.patch.seo_title, "Reviewed SEO title");
-
-      const updatedEditor = await listingEditorRoute.GET(
-        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
-      );
-      const updatedEditorHtml = await updatedEditor.text();
-      assert.match(updatedEditorHtml, /value="Updated title for Next admin"/);
-      assert.match(updatedEditorHtml, /value="Reviewed SEO title"/);
-      assert.match(updatedEditorHtml, /data-publish-approved="true"/);
-      assert.match(updatedEditorHtml, /data-availability-verified="true"/);
+      assert.equal(edit.status, 409);
+      assert.equal(editBody.kind, "payload_canonical");
+      assert.equal(editBody.canonical_url, "/payload-admin/collections/listings/MS-CRAWL-0001");
 
       const slugChange = await listingSlugRoute.POST(
         new Request("https://example.test/api/admin/listings/slug", {
@@ -1679,14 +1623,6 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(tourApprovalBody.provider, "photo-sphere-viewer");
       assert.equal(tourApprovalBody.is_public, true);
       assert.ok(tourApprovalBody.fallback_gallery.length > 0);
-
-      const editorAfterTourApproval = await listingEditorRoute.GET(
-        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
-      );
-      const editorAfterTourApprovalHtml = await editorAfterTourApproval.text();
-      assert.match(editorAfterTourApprovalHtml, /data-tour-review-status="available"/);
-      assert.match(editorAfterTourApprovalHtml, /value="https:\/\/cdn\.example\.test\/tours\/MS-CRAWL-0001\.jpg"/);
-      assert.match(editorAfterTourApprovalHtml, /Reviewed 360 tour of the property\./);
 
       const operationsLead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
@@ -1894,7 +1830,6 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         reply_approved: 1,
         broker_contact_approved: 1,
         contact_linked: 1,
-        listing_edited: 1,
         listing_slug_changed: 1,
         tour_approved: 1,
         media_reviewed: 1,
@@ -2327,6 +2262,121 @@ test("Next admin replies bind the named production operator before queueing", as
     assert.equal(inbox.summary.repliesSent, 1);
     assert.equal(inbox.leadSla.rows[0].status, "customer_reply_sent");
     assert.equal(readAuditLog(auditLogPath).filter((row) => row.action === "reply_delivery_recorded").length, 1);
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
+test("Next admin public approvals bind reviewers and require confirmation", async () => {
+  const auditLogPath = tempJsonl("app-admin-public-approval-audit");
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN,
+    MS_REALTY_ADMIN_ACTOR: process.env.MS_REALTY_ADMIN_ACTOR,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  try {
+    process.env.NODE_ENV = "production";
+    delete process.env.MS_REALTY_ADMIN_TOKEN;
+    delete process.env.MS_REALTY_ADMIN_ACTOR;
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+      { id: "media_editor", token: "next-media-editor-token-0123456789", roles: ["admin"] },
+    ]);
+    const config = appAdminConfigFromEnv({
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+      MS_REALTY_BROKER_CONTACT_LEDGER_PATH: tempJsonl("app-admin-public-approval-brokers"),
+      MS_REALTY_TOUR_APPROVAL_LEDGER_PATH: tempJsonl("app-admin-public-approval-tours"),
+      MS_REALTY_REVIEWED_AT: "2026-07-29T10:05:00Z",
+    });
+    const headers = {
+      authorization: "Bearer next-media-editor-token-0123456789",
+      "content-type": "application/json",
+    };
+    const contact = {
+      id: "next-credentialed-broker-contact",
+      listingId: "MS-CRAWL-0001",
+      broker: "broker_bg",
+      phone: "+359880000000",
+      approved: true,
+    };
+    const spoofedContact = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/broker-contacts", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...contact, reviewer: "someone_else" }),
+      }),
+      { config },
+    );
+    const unconfirmedContact = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/broker-contacts", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...contact, approved: false }),
+      }),
+      { config },
+    );
+    const savedContact = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/broker-contacts", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(contact),
+      }),
+      { config },
+    );
+    const tour = {
+      id: "next-credentialed-tour-approval",
+      listingId: "MS-CRAWL-0001",
+      panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+      accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+      reviewConfirmed: true,
+    };
+    const spoofedTour = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/tours/approve", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...tour, reviewer: "someone_else" }),
+      }),
+      { config },
+    );
+    const unconfirmedTour = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/tours/approve", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...tour, reviewConfirmed: false }),
+      }),
+      { config },
+    );
+    const savedTour = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/tours/approve", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(tour),
+      }),
+      { config },
+    );
+
+    assert.equal(spoofedContact.status, 400);
+    assert.match((await spoofedContact.json()).message, /Submitted reviewer must match the authenticated operator/);
+    assert.equal(unconfirmedContact.status, 400);
+    assert.match((await unconfirmedContact.json()).message, /explicitly approved/);
+    assert.equal(savedContact.status, 201);
+    assert.equal((await savedContact.json()).reviewer, "media_editor");
+    assert.equal(spoofedTour.status, 400);
+    assert.match((await spoofedTour.json()).message, /Submitted reviewer must match the authenticated operator/);
+    assert.equal(unconfirmedTour.status, 400);
+    assert.match((await unconfirmedTour.json()).message, /explicit human confirmation/);
+    assert.equal(savedTour.status, 201);
+    assert.equal((await savedTour.json()).reviewer, "media_editor");
+    assert.deepEqual(
+      readAuditLog(auditLogPath).map((row) => [row.action, row.actor]),
+      [
+        ["broker_contact_approved", "media_editor"],
+        ["tour_approved", "media_editor"],
+      ],
+    );
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];

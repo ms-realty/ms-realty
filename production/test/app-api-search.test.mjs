@@ -41,7 +41,7 @@ async function withSearchServer(fn, { typesenseStatus = 200, meilisearchStatus =
   }
 }
 
-function searchConfig({ typesenseUrl = "", meiliUrl = "" } = {}) {
+function searchConfig({ typesenseUrl = "", meiliUrl = "", naturalLanguageEnabled = false, engine = "", environment = "" } = {}) {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-api-search-`);
   const eventLedgerPath = `${dir}/events.jsonl`;
   const listingEditLedgerPath = `${dir}/listing-edits.jsonl`;
@@ -58,6 +58,9 @@ function searchConfig({ typesenseUrl = "", meiliUrl = "" } = {}) {
     MEILI_URL: meiliUrl,
     MEILI_API_KEY: meiliUrl ? "meili-test" : "",
     MEILI_INDEX: "ms_realty_listings",
+    MS_REALTY_SEARCH_ENGINE: engine,
+    NODE_ENV: environment,
+    MS_REALTY_SEARCH_NL_INTENT_ENABLED: naturalLanguageEnabled ? "true" : "false",
   });
 }
 
@@ -117,6 +120,14 @@ test("public API search labels local data as a seed fallback only when both engi
   assert.ok(body.search.total_matches > 0);
 });
 
+test("production API search fails closed instead of serving the seed fixture", async () => {
+  const { response, body } = await searchResponse(searchConfig({ environment: "production" }), "locale=he&q=Sandanski");
+
+  assert.equal(response.status, 503);
+  assert.equal(body.kind, "search_unavailable");
+  assert.equal(body.search, undefined);
+});
+
 test("public API search preserves requested sorting and pagination in seed fallback mode", async () => {
   const first = await searchResponse(searchConfig(), "locale=bg&q=Sandanski&sort=price_desc&page=1");
   const second = await searchResponse(searchConfig(), "locale=bg&q=Sandanski&sort=price_desc&page=2");
@@ -129,4 +140,21 @@ test("public API search preserves requested sorting and pagination in seed fallb
   assert.equal(first.body.cards.some((card) => second.body.cards.some((candidate) => candidate.id === card.id)), false);
   const priced = first.body.cards.map((card) => Number(card.price_eur)).filter(Number.isFinite);
   assert.deepEqual(priced, [...priced].sort((left, right) => right - left));
+});
+
+test("public API search exposes the canonical intent and returns bad requests for invalid filters", async () => {
+  const enabled = await searchResponse(
+    searchConfig({ naturalLanguageEnabled: true }),
+    "locale=bg&nl=Find%20MS-CRAWL-0114%20in%20Sandanski",
+  );
+
+  assert.equal(enabled.response.status, 200);
+  assert.equal(enabled.body.search.intent.schema_version, 1);
+  assert.equal(enabled.body.search.intent.exact_reference, "MS-CRAWL-0114");
+  assert.deepEqual(enabled.body.search.natural_language, { enabled: true, mode: "exact_reference" });
+
+  const invalid = await searchResponse(searchConfig(), "locale=bg&unverified_filter=1");
+  assert.equal(invalid.response.status, 400);
+  assert.equal(invalid.body.kind, "bad_request");
+  assert.match(invalid.body.message, /unsupported field: unverified_filter/);
 });

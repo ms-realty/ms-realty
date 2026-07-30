@@ -44,6 +44,8 @@ test("migration records expose metadata gaps for launch review", () => {
   const summary = summarizeMigrationRecords(records);
   assert.ok(summary.byReviewState.metadata_review > 0);
   assert.ok(records.some((record) => record.metadata_gaps.missingDescription));
+  assert.ok(records.every((record) => typeof record.source_seo?.meta_description === "string"));
+  assert.ok(records.every((record) => typeof record.source_seo?.open_graph === "string"));
   assert.ok(records.every((record) => record.migration_action === "preserve_same_url"));
 });
 
@@ -138,6 +140,8 @@ test("migration review routes expose crawl evidence without making a terminal de
   assert.equal(route.source_evidence.canonical, records[0].canonical);
   assert.equal(route.source_evidence.robots_meta, records[0].robots_meta);
   assert.equal(route.source_evidence.hreflang, records[0].hreflang);
+  assert.equal(route.source_evidence.meta_description, records[0].source_seo.meta_description);
+  assert.equal(route.source_evidence.open_graph, records[0].source_seo.open_graph);
   assert.equal(route.source_evidence.word_count, records[0].word_count);
   assert.equal(route.source_evidence.review_owner, "content_editor");
   assert.equal(route.source_evidence.action_required, "map_or_rebuild_content_page");
@@ -157,11 +161,11 @@ test("generated localized sitemap file is approved-translation gated when presen
   const data = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(data.summary.listings, 165);
   assert.equal(data.summary.home_pages, 7);
-  assert.equal(data.summary.listing_entries, 167);
+  assert.equal(data.summary.listing_entries, 166);
   assert.equal(data.summary.location_pages >= 6, true);
   assert.equal(data.summary.seller_pages, 7);
   assert.equal(data.summary.contact_pages, 7);
-  assert.equal(data.summary.guide_pages, 2);
+  assert.equal(data.summary.guide_pages, 5);
   assert.equal(
     data.summary.entries,
     data.summary.home_pages +
@@ -173,7 +177,7 @@ test("generated localized sitemap file is approved-translation gated when presen
   );
   assert.equal(data.summary.byLocale.bg >= 118, true);
   assert.equal(data.summary.byLocale.ru, 57);
-  assert.equal(data.summary.byLocale.el, 5);
+  assert.equal(data.summary.byLocale.el, 3);
   assert.equal(data.summary.byLocale.he, 5);
   assert.equal(data.summary.byLocale.fr, undefined);
   assert.equal(data.entries.some((entry) => entry.loc === "/he" && entry.type === "home"), true);
@@ -182,4 +186,9 @@ test("generated localized sitemap file is approved-translation gated when presen
   assert.equal(data.entries.some((entry) => entry.loc === "/he/contact" && entry.type === "contact"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/en/guides/foreign-buyers" && entry.type === "guide"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/en/guides/buying-process" && entry.type === "guide"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/proverka-na-imot-sandanski" && entry.type === "guide"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/hotovo-obstinski-kontekst" && entry.type === "guide"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/petrich-obstinski-kontekst" && entry.type === "guide"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/el/akinita/MS-CRAWL-0001"), false);
+  assert.equal(data.entries.some((entry) => entry.loc === "/el/topothesies/sandanski"), false);
 });

@@ -9,6 +9,7 @@ import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { readPublicContacts } from "../lib/public-contact-vault.mjs";
 import { readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
+import { appApiConfigFromEnv, renderAppApiResponse } from "../lib/app-api-adapter.mjs";
 
 function tempLedger(prefix, reset) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
@@ -31,6 +32,45 @@ async function withEnv(env, fn) {
     }
   }
 }
+
+test("API search preserves complete municipality results when engine hits are truncated", async () => {
+  const calls = [];
+  const config = appApiConfigFromEnv({
+    ...process.env,
+    TYPESENSE_URL: "https://typesense.test",
+    TYPESENSE_API_KEY: "typesense-key",
+    MS_REALTY_EVENT_LEDGER_PATH: tempLedger("app-api-search-events", resetEventLedger),
+  });
+  config.search.fetchImpl = async (url) => {
+    calls.push(String(url));
+    return new Response(
+      JSON.stringify({
+        found: 999,
+        hits: [{ document: { source_listing_id: "MS-CRAWL-0033", locale: "bg", title: "Reviewed listing" } }],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
+  };
+
+  const response = await renderAppApiResponse(
+    new Request("https://example.test/api/search?locale=bg&municipality=Sandanski&district=Blagoevgrad", {
+      headers: { "x-ms-realty-preview": "search-count" },
+    }),
+    { config },
+  );
+  const payload = await response.json();
+  const request = new URL(calls[0]);
+
+  assert.equal(response.status, 200);
+  assert.equal(payload.search.filters.municipality, "Sandanski");
+  assert.equal(payload.search.filters.district, "Blagoevgrad");
+  assert.ok(payload.search.total_matches > 1);
+  assert.equal(payload.search.backend.indexed_matches, 999);
+  assert.match(request.searchParams.get("filter_by"), /municipality:=`Sandanski`/);
+  assert.match(request.searchParams.get("filter_by"), /district:=`Blagoevgrad`/);
+  assert.doesNotMatch(request.searchParams.get("filter_by"), /location_review_status/);
+  assert.equal(readEventLedger(config.eventLedgerPath).length, 0);
+});
 
 test("Next API routes reuse health, readiness, search, and lead HTTP contracts", async () => {
   const eventLedgerPath = tempLedger("app-api-events", resetEventLedger);
@@ -87,6 +127,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
     },
     async () => {
       const eventRoute = await import("../../app/api/events/route.js");
+      const geographyRoute = await import("../../app/api/geography/route.js");
       const healthRoute = await import("../../app/api/health/route.js");
       const languageRequestRoute = await import("../../app/api/language-requests/route.js");
       const readyRoute = await import("../../app/api/ready/route.js");
@@ -131,6 +172,15 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(searchBody.kind, "search");
       assert.equal(searchBody.search.query, "Sandanski");
       assert.ok(searchBody.search.total_matches > 0);
+
+      const geography = await geographyRoute.GET(
+        new Request("https://example.test/api/geography?q=Thessaloniki&country=GR&level=settlement&limit=3"),
+      );
+      const geographyBody = await geography.json();
+      assert.equal(geography.status, 200);
+      assert.equal(geography.headers.get("cache-control"), "public, max-age=3600, stale-while-revalidate=86400");
+      assert.equal(geographyBody.results[0].id, "GR:settlement:EL52:0701010001");
+      assert.equal(geographyBody.returned <= 3, true);
 
       const lead = await leadRoute.POST(
         new Request("https://example.test/api/leads", {
