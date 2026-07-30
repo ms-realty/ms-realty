@@ -69,6 +69,10 @@ preflight checks the profile's filter and query fields against the Typesense
 schema, Meilisearch settings, and corpus before either command contacts an
 engine.
 
+Bootstrap refuses an existing collection or index and never deletes it. For a
+repeatable run, choose fresh disposable names and pass the same
+`--typesense-collection` and `--meili-index` values to bootstrap and benchmark.
+
 ```bash
 npm run search:benchmark -- \
   --typesense-url "$TYPESENSE_URL" --typesense-key "$TYPESENSE_API_KEY" \

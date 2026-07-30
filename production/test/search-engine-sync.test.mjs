@@ -40,6 +40,10 @@ function fakeFetch(calls, statuses = []) {
   };
 }
 
+function typesenseImportResults(documentCount, resultAt = {}) {
+  return Array.from({ length: documentCount }, (_, index) => resultAt[index] ?? '{"success":true}').join("\n");
+}
+
 function runScript(script, env) {
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [fromRoot("production", "scripts", script)], {
@@ -482,14 +486,17 @@ test("benchmark legacy corpus filters only fields declared by the checked-in 167
 });
 
 test("benchmark bootstrap imports the declared corpus and waits for Meilisearch tasks", async () => {
+  const corpus = loadBenchmarkCorpus({ dataDir: fromRoot("search", "data"), corpusSchema: "legacy_fixture_v1" });
   const calls = [];
   const fetchImpl = async (url, options) => {
     calls.push({ url, options });
+    if (url.endsWith("/collections/ms_realty_listings") || url.endsWith("/indexes/ms_realty_listings")) return { status: 404 };
     if (url.includes("/tasks/11") || url.includes("/tasks/12")) {
       return { status: 200, async json() { return { status: "succeeded" }; } };
     }
     if (url.includes("/settings")) return { status: 202, async json() { return { taskUid: 11 }; } };
     if (url.includes("/documents?primaryKey=meili_id")) return { status: 202, async json() { return { taskUid: 12 }; } };
+    if (url.includes("/documents/import")) return { status: 200, async text() { return typesenseImportResults(corpus.document_count); } };
     return { status: 201, async json() { return {}; } };
   };
   const result = await bootstrapBenchmarkCorpus({
@@ -506,6 +513,8 @@ test("benchmark bootstrap imports the declared corpus and waits for Meilisearch 
   assert.deepEqual(
     calls.map(({ url }) => new URL(url).pathname),
     [
+      "/collections/ms_realty_listings",
+      "/indexes/ms_realty_listings",
       "/collections",
       "/collections/ms_realty_listings/documents/import",
       "/indexes/ms_realty_listings/settings",
@@ -514,8 +523,78 @@ test("benchmark bootstrap imports the declared corpus and waits for Meilisearch 
       "/tasks/12",
     ],
   );
-  assert.match(calls[1].options.body, /MS-CRAWL-0001:bg/);
-  assert.match(calls[4].options.body, /"meili_id":"MS-CRAWL-0001_bg"/);
+  assert.match(calls[3].options.body, /MS-CRAWL-0001:bg/);
+  assert.match(calls[6].options.body, /"meili_id":"MS-CRAWL-0001_bg"/);
+});
+
+test("benchmark bootstrap rejects failed or invalid Typesense JSONL results", async () => {
+  const corpus = loadBenchmarkCorpus({ dataDir: fromRoot("search", "data"), corpusSchema: "legacy_fixture_v1" });
+  for (const [line, expected] of [
+    [JSON.stringify({ success: false, error: "invalid field" }), /Typesense benchmark import result 4 failed: invalid field/],
+    ["not-json", /Typesense benchmark import result 4 is invalid JSON/],
+  ]) {
+    const calls = [];
+    await assert.rejects(
+      () =>
+        bootstrapBenchmarkCorpus({
+          dataDir: fromRoot("search", "data"),
+          typesense: { baseUrl: "http://typesense.local", apiKey: "typesense-key" },
+          meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+          fetchImpl: async (url, options) => {
+            calls.push({ url, options });
+            if (url.endsWith("/collections/ms_realty_listings") || url.endsWith("/indexes/ms_realty_listings")) return { status: 404 };
+            if (url.includes("/documents/import")) return { status: 200, async text() { return typesenseImportResults(corpus.document_count, { 3: line }); } };
+            if (url.endsWith("/collections")) return { status: 201 };
+            throw new Error(`unexpected request: ${url}`);
+          },
+        }),
+      expected,
+    );
+    assert.deepEqual(
+      calls.map(({ url }) => new URL(url).pathname),
+      [
+        "/collections/ms_realty_listings",
+        "/indexes/ms_realty_listings",
+        "/collections",
+        "/collections/ms_realty_listings/documents/import",
+      ],
+    );
+  }
+});
+
+test("benchmark bootstrap refuses pre-existing benchmark targets before importing", async () => {
+  const options = {
+    dataDir: fromRoot("search", "data"),
+    typesense: { baseUrl: "http://typesense.local", apiKey: "typesense-key" },
+    meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+  };
+  const typesenseCalls = [];
+  await assert.rejects(
+    () =>
+      bootstrapBenchmarkCorpus({
+        ...options,
+        fetchImpl: async (url, request) => {
+          typesenseCalls.push({ url, request });
+          return { status: 200 };
+        },
+      }),
+    /Benchmark bootstrap refuses an existing Typesense collection/,
+  );
+  assert.deepEqual(typesenseCalls.map(({ url }) => new URL(url).pathname), ["/collections/ms_realty_listings"]);
+
+  const meilisearchCalls = [];
+  await assert.rejects(
+    () =>
+      bootstrapBenchmarkCorpus({
+        ...options,
+        fetchImpl: async (url, request) => {
+          meilisearchCalls.push({ url, request });
+          return { status: url.includes("typesense.local") ? 404 : 200 };
+        },
+      }),
+    /Benchmark bootstrap refuses an existing Meilisearch index/,
+  );
+  assert.deepEqual(meilisearchCalls.map(({ url }) => new URL(url).pathname), ["/collections/ms_realty_listings", "/indexes/ms_realty_listings"]);
 });
 
 test("search engine sync posts existing fixtures to Typesense and Meilisearch", async () => {

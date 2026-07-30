@@ -44,7 +44,7 @@ function joinUrl(baseUrl, route) {
   return `${baseUrl}${route}`;
 }
 
-async function request(fetchImpl, url, options, acceptedStatuses, { json = false } = {}) {
+async function request(fetchImpl, url, options, acceptedStatuses, { json = false, text = false } = {}) {
   let response;
   try {
     response = await fetchImpl(url, options);
@@ -54,12 +54,40 @@ async function request(fetchImpl, url, options, acceptedStatuses, { json = false
   if (!acceptedStatuses.includes(response.status)) {
     throw new Error(`Benchmark bootstrap request failed: ${options.method} ${url} returned ${response.status}`);
   }
-  if (!json) return { status: response.status, payload: null };
+  if (!json && !text) return { status: response.status, payload: null };
   try {
-    return { status: response.status, payload: await response.json() };
+    return { status: response.status, payload: json ? await response.json() : await response.text() };
   } catch (cause) {
-    throw new Error(`Benchmark bootstrap request returned invalid JSON: ${options.method} ${url}`, { cause });
+    throw new Error(`Benchmark bootstrap request returned unreadable ${json ? "JSON" : "text"}: ${options.method} ${url}`, { cause });
   }
+}
+
+function assertTypesenseImportResults(payload, documentCount) {
+  const results = String(payload).trim().split(/\r?\n/);
+  if (results.length !== documentCount) {
+    throw new Error(`Typesense benchmark import returned ${results.length} results for ${documentCount} documents`);
+  }
+  results.forEach((line, index) => {
+    let result;
+    try {
+      result = JSON.parse(line);
+    } catch {
+      throw new Error(`Typesense benchmark import result ${index + 1} is invalid JSON`);
+    }
+    if (result?.success !== true) {
+      throw new Error(`Typesense benchmark import result ${index + 1} failed${result?.error ? `: ${result.error}` : ""}`);
+    }
+  });
+}
+
+async function assertTargetMissing({ fetchImpl, baseUrl, route, headers, label }) {
+  const { status } = await request(
+    fetchImpl,
+    joinUrl(baseUrl, route),
+    { method: "GET", headers },
+    [200, 404],
+  );
+  if (status === 200) throw new Error(`Benchmark bootstrap refuses an existing ${label}`);
 }
 
 function meilisearchTaskUid(payload) {
@@ -125,13 +153,28 @@ export async function bootstrapBenchmarkCorpus({
   const typesenseBody = fs.readFileSync(path.join(corpus.data_dir, "typesense-listings.jsonl"), "utf8");
   const meilisearchBody = fs.readFileSync(path.join(corpus.data_dir, "meilisearch-listings.ndjson"), "utf8");
   const typesenseHeaders = { "content-type": "application/json", "x-typesense-api-key": typesenseConfig.apiKey };
+  const meilisearchHeaders = { authorization: `Bearer ${meilisearchConfig.apiKey}`, "content-type": "application/json" };
+  await assertTargetMissing({
+    fetchImpl,
+    baseUrl: typesenseConfig.baseUrl,
+    route: `/collections/${encodeURIComponent(typesenseConfig.collectionName)}`,
+    headers: typesenseHeaders,
+    label: "Typesense collection",
+  });
+  await assertTargetMissing({
+    fetchImpl,
+    baseUrl: meilisearchConfig.baseUrl,
+    route: `/indexes/${encodeURIComponent(meilisearchConfig.indexName)}`,
+    headers: meilisearchHeaders,
+    label: "Meilisearch index",
+  });
   await request(
     fetchImpl,
     joinUrl(typesenseConfig.baseUrl, "/collections"),
     { method: "POST", headers: typesenseHeaders, body: JSON.stringify({ ...corpus.typesenseSchema, name: typesenseConfig.collectionName }) },
-    [200, 201, 409],
+    [200, 201],
   );
-  await request(
+  const typesenseImport = await request(
     fetchImpl,
     joinUrl(typesenseConfig.baseUrl, `/collections/${encodeURIComponent(typesenseConfig.collectionName)}/documents/import?action=upsert`),
     {
@@ -140,9 +183,10 @@ export async function bootstrapBenchmarkCorpus({
       body: typesenseBody,
     },
     [200, 201],
+    { text: true },
   );
+  assertTypesenseImportResults(typesenseImport.payload, corpus.document_count);
 
-  const meilisearchHeaders = { authorization: `Bearer ${meilisearchConfig.apiKey}`, "content-type": "application/json" };
   const settings = await request(
     fetchImpl,
     joinUrl(meilisearchConfig.baseUrl, `/indexes/${encodeURIComponent(meilisearchConfig.indexName)}/settings`),
