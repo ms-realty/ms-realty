@@ -448,6 +448,33 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /<img[^>]*loading="lazy"[^>]*decoding="async"/);
 });
 
+test("search exposes reviewed crawlable suggestions and localized recent-search containers", () => {
+  const english = renderReactPublicBody(
+    renderSearchPage({ registry, listings, localeCode: "en", filters: { location: "Sandanski" } }),
+  );
+  const hebrewPage = renderSearchPage({ registry, listings, localeCode: "he", filters: { property_family: "apartment" } });
+  const hebrew = renderReactPublicBody(hebrewPage);
+
+  assert.match(english, /data-guided-search-path="\/en\/search" data-guided-search-success="true"/);
+  assert.match(
+    english,
+    /<a class="sr-guided__link" href="\/en\/search\?location=Sandanski" data-guided-search-suggestion="location" data-guided-search-value="Sandanski">Sandanski<\/a>/,
+  );
+  assert.match(
+    english,
+    /<a class="sr-guided__link" href="\/en\/search\?property_family=apartment" data-guided-search-suggestion="property_family" data-guided-search-value="apartment">Apartment<\/a>/,
+  );
+  assert.match(english, /data-recent-searches="true" aria-labelledby="sr-mobile-recent-searches-title" hidden/);
+  assert.match(english, /data-recent-search-list="true"/);
+  assert.match(english, /data-clear-recent-searches="true" aria-label="Clear">Clear<\/button>/);
+  assert.doesNotMatch(english, /data-guided-search-suggestion="(?:location|property_family)"[^>]*href="[^"]*\?q=/);
+
+  assert.equal(hebrewPage.dir, "rtl");
+  assert.match(hebrew, /data-guided-search-path="\/he\/search" data-guided-search-success="true"/);
+  assert.match(hebrew, /חיפושים אחרונים/);
+  assert.match(hebrew, /href="\/he\/search\?property_family=apartment"/);
+});
+
 test("zero-result searches render a useful mobile recovery state", () => {
   const page = renderSearchPage({ registry, listings, localeCode: "ru", query: "no-such-listing-987654" });
   const html = renderReactPublicBody(page);

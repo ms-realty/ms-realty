@@ -11,10 +11,11 @@
   };
   var KEY = "ms-realty:saved-listings";
   var SEARCH_SCROLL_KEY = "ms-realty:search-scroll";
- var SEARCH_RETURN_KEY = "ms-realty:search-return";
- var lastLeadTrigger = null;
- var lastContactOptionsTrigger = null;
- var toastTimer = 0;
+  var SEARCH_RETURN_KEY = "ms-realty:search-return";
+  var RECENT_SEARCH_KEY = "ms-realty:recent-searches:v1";
+  var lastLeadTrigger = null;
+  var lastContactOptionsTrigger = null;
+  var toastTimer = 0;
   var PHOTO_SPHERE_VIEWER_SCRIPT_URL = "/vendor/photo-sphere-viewer.js";
   var PHOTO_SPHERE_VIEWER_CSS_URL = "/vendor/photo-sphere-viewer.css";
   var photoSphereViewerPromise = null;
@@ -975,7 +976,146 @@
     });
     showStep(0, false);
   }
- function initSearchScrollRestoration() {
+  function initGuidedSearch() {
+    var root = document.querySelector("main[data-guided-search-path]");
+    if (!root) return;
+    var path = root.getAttribute("data-guided-search-path") || "";
+    if (!path || path.charAt(0) !== "/") return;
+    var storageKey = RECENT_SEARCH_KEY + ":" + path;
+    function normalizeSuggestionValue(value) {
+      var normalized = String(value || "");
+      if (typeof normalized.normalize === "function") normalized = normalized.normalize("NFKD");
+      return normalized.replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+    }
+    function suggestionOptions(kind) {
+      var nodes = root.querySelectorAll('[data-guided-search-suggestion="' + kind + '"]');
+      var options = [];
+      for (var i = 0; i < nodes.length; i += 1) {
+        var value = nodes[i].getAttribute("data-guided-search-value") || "";
+        var label = (nodes[i].textContent || "").trim();
+        if (!value || !label || optionFor(options, value)) continue;
+        options.push({ value: value, label: label });
+      }
+      return options;
+    }
+    function optionFor(options, value) {
+      var normalized = normalizeSuggestionValue(value);
+      if (!normalized) return null;
+      for (var i = 0; i < options.length; i += 1) {
+        if (normalizeSuggestionValue(options[i].value) === normalized) return options[i];
+      }
+      return null;
+    }
+    var locations = suggestionOptions("location");
+    var propertyFamilies = suggestionOptions("property_family");
+    function keyFor(record) {
+      return (record.location || "") + " " + (record.propertyFamily || "");
+    }
+    function readRecentSearches() {
+      try {
+        var stored = JSON.parse(sessionStorage.getItem(storageKey));
+        if (!Array.isArray(stored)) return [];
+        var records = [];
+        for (var i = 0; i < stored.length; i += 1) {
+          var candidate = stored[i];
+          if (!candidate || typeof candidate !== "object") continue;
+          var location = optionFor(locations, candidate.location);
+          var propertyFamily = optionFor(propertyFamilies, candidate.propertyFamily);
+          if (!location && !propertyFamily) continue;
+          var record = {
+            location: location ? location.value : "",
+            propertyFamily: propertyFamily ? propertyFamily.value : "",
+          };
+          var duplicate = false;
+          for (var j = 0; j < records.length; j += 1) {
+            if (keyFor(records[j]) === keyFor(record)) {
+              duplicate = true;
+              break;
+            }
+          }
+          if (!duplicate) records.push(record);
+          if (records.length === 5) break;
+        }
+        return records;
+      } catch (error) { return []; }
+    }
+    function writeRecentSearches(records) {
+      try { sessionStorage.setItem(storageKey, JSON.stringify(records.slice(0, 5))); } catch (error) {}
+    }
+    function currentSuccessfulSearch() {
+      if (root.getAttribute("data-guided-search-success") !== "true") return null;
+      var params = new URLSearchParams(window.location.search || "");
+      // Session-only records are made exclusively from reviewed suggestion
+      // values. Free-text queries are never persisted.
+      var location = optionFor(locations, params.get("location")) || optionFor(locations, params.get("q"));
+      var propertyFamily = optionFor(propertyFamilies, params.get("property_family")) || optionFor(propertyFamilies, params.get("q"));
+      if (!location && !propertyFamily) return null;
+      return {
+        location: location ? location.value : "",
+        propertyFamily: propertyFamily ? propertyFamily.value : "",
+      };
+    }
+    function recentSearchHref(record) {
+      var params = new URLSearchParams();
+      if (record.location) params.set("location", record.location);
+      if (record.propertyFamily) params.set("property_family", record.propertyFamily);
+      var query = params.toString();
+      return query ? path + "?" + query : path;
+    }
+    function recentSearchLabel(record) {
+      var parts = [];
+      var location = optionFor(locations, record.location);
+      var propertyFamily = optionFor(propertyFamilies, record.propertyFamily);
+      if (location) parts.push(location.label);
+      if (propertyFamily) parts.push(propertyFamily.label);
+      return parts.join(" · ");
+    }
+    function renderRecentSearches(records) {
+      var visible = [];
+      for (var i = 0; i < records.length; i += 1) {
+        if (recentSearchLabel(records[i])) visible.push(records[i]);
+      }
+      var sections = root.querySelectorAll("[data-recent-searches]");
+      for (var j = 0; j < sections.length; j += 1) {
+        var section = sections[j];
+        var list = section.querySelector("[data-recent-search-list]");
+        if (!list) continue;
+        while (list.firstChild) list.removeChild(list.firstChild);
+        for (var k = 0; k < visible.length; k += 1) {
+          var item = document.createElement("li");
+          var link = document.createElement("a");
+          link.className = "sr-guided__link";
+          link.href = recentSearchHref(visible[k]);
+          link.setAttribute("data-recent-search", "true");
+          link.textContent = recentSearchLabel(visible[k]);
+          item.appendChild(link);
+          list.appendChild(item);
+        }
+        section.hidden = visible.length === 0;
+      }
+    }
+    var records = readRecentSearches();
+    var current = currentSuccessfulSearch();
+    if (current) {
+      var currentKey = keyFor(current);
+      var next = [current];
+      for (var i = 0; i < records.length; i += 1) {
+        if (keyFor(records[i]) !== currentKey) next.push(records[i]);
+      }
+      records = next.slice(0, 5);
+      writeRecentSearches(records);
+    }
+    renderRecentSearches(records);
+    document.addEventListener("click", function (event) {
+      var clear = event.target.closest("[data-clear-recent-searches]");
+      if (!clear || !root.contains(clear)) return;
+      event.preventDefault();
+      records = [];
+      writeRecentSearches(records);
+      renderRecentSearches(records);
+    });
+  }
+  function initSearchScrollRestoration() {
     var searchRoot = document.querySelector("[data-search-results], [data-saved-listings-view='true']");
     if (!searchRoot) return;
     var lastListingId = null;
@@ -1291,6 +1431,7 @@
     if (event.key === KEY) markSaved();
   });
   markSaved();
+  initGuidedSearch();
   initSearchScrollRestoration();
   initDialogFocusReturn();
   initPublicMobileNavigation();

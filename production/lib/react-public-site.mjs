@@ -1210,6 +1210,20 @@ const SEARCH_FILTER_QUERY_KEYS = [
   "status",
 ];
 
+const GUIDED_SEARCH_COPY = {
+  bg: { recentSearches: "Последни търсения", clearRecentSearches: "Изчисти" },
+  en: { recentSearches: "Recent searches", clearRecentSearches: "Clear" },
+  de: { recentSearches: "Letzte Suchen", clearRecentSearches: "Löschen" },
+  nl: { recentSearches: "Recente zoekopdrachten", clearRecentSearches: "Wissen" },
+  ru: { recentSearches: "Недавние поиски", clearRecentSearches: "Очистить" },
+  el: { recentSearches: "Πρόσφατες αναζητήσεις", clearRecentSearches: "Εκκαθάριση" },
+  he: { recentSearches: "חיפושים אחרונים", clearRecentSearches: "נקה" },
+};
+
+function guidedSearchCopyFor(locale) {
+  return GUIDED_SEARCH_COPY[locale] || GUIDED_SEARCH_COPY.en;
+}
+
 function searchHref(page, omitFilter, targetPage = 1, overrides = {}) {
   const params = new URLSearchParams();
   if (page.search.query) params.set("q", page.search.query);
@@ -1328,13 +1342,27 @@ function OfficialAreaMaps({ page, labels }) {
   );
 }
 
+function guidedSearchHref(page, filters) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters || {})) {
+    if (value !== "" && value !== null && value !== undefined) params.set(key, String(value));
+  }
+  const query = params.toString();
+  return query ? `${page.path}?${query}` : page.path;
+}
+
 function SearchBody({ page }) {
   const labels = uiLabels(page);
+  const guidedCopy = guidedSearchCopyFor(page.locale);
   const chrome = page.chrome || { copy: {} };
   const savedView = page.search.saved_view === true;
   const controls = page.search.controls || {};
   const viewModes = controls.view_modes || [];
   const filterOptions = controls.filter_options || {};
+  const allReviewedLocations = [...new Set(filterOptions.locations || [])].filter(Boolean);
+  const activeReviewedLocation = allReviewedLocations.includes(page.search.filters?.location) ? page.search.filters.location : "";
+  const reviewedLocations = [...new Set([activeReviewedLocation, ...allReviewedLocations])].filter(Boolean).slice(0, 6);
+  const reviewedPropertyFamilies = [...new Set(filterOptions.property_families || filterOptions.property_types || [])].filter(Boolean).slice(0, 6);
   const activeFilterCount = (controls.active_filter_chips || []).length;
   const applicableFilterFields = new Set(controls.applicable_filter_fields || []);
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
@@ -1437,6 +1465,87 @@ function SearchBody({ page }) {
       ),
     );
   };
+  const guidedSearch = (idPrefix) =>
+    !reviewedLocations.length && !reviewedPropertyFamilies.length
+      ? null
+      : h(
+          "section",
+          { className: "sr-guided", "data-guided-search": "true", "aria-label": labels.reviewedListings },
+          h("p", { className: "sr-guided__title" }, labels.reviewedListings),
+          reviewedLocations.length
+            ? h(
+                "section",
+                { className: "sr-guided__group", "aria-label": labels.location },
+                h("p", { className: "sr-guided__label" }, labels.location),
+                h(
+                  "div",
+                  { className: "sr-guided__links" },
+                  ...reviewedLocations.map((location) =>
+                    h(
+                      "a",
+                      {
+                        key: location,
+                        className: "sr-guided__link",
+                        href: guidedSearchHref(page, { location }),
+                        "data-guided-search-suggestion": "location",
+                        "data-guided-search-value": location,
+                      },
+                      localizedSearchFilterValue(page.locale, "location", location),
+                    ),
+                  ),
+                ),
+              )
+            : null,
+          reviewedPropertyFamilies.length
+            ? h(
+                "section",
+                { className: "sr-guided__group", "aria-label": labels.propertyType },
+                h("p", { className: "sr-guided__label" }, labels.propertyType),
+                h(
+                  "div",
+                  { className: "sr-guided__links" },
+                  ...reviewedPropertyFamilies.map((propertyFamily) =>
+                    h(
+                      "a",
+                      {
+                        key: propertyFamily,
+                        className: "sr-guided__link",
+                        href: guidedSearchHref(page, { property_family: propertyFamily }),
+                        "data-guided-search-suggestion": "property_family",
+                        "data-guided-search-value": propertyFamily,
+                      },
+                      localizedListingValue(page.locale, "property_type", propertyFamily),
+                    ),
+                  ),
+                ),
+              )
+            : null,
+          h(
+            "section",
+            {
+              className: "sr-guided__recent",
+              "data-recent-searches": "true",
+              "aria-labelledby": `${idPrefix}-recent-searches-title`,
+              hidden: true,
+            },
+            h(
+              "div",
+              { className: "sr-guided__recent-head" },
+              h("p", { id: `${idPrefix}-recent-searches-title`, className: "sr-guided__label" }, guidedCopy.recentSearches),
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "sr-guided__clear",
+                  "data-clear-recent-searches": "true",
+                  "aria-label": guidedCopy.clearRecentSearches,
+                },
+                guidedCopy.clearRecentSearches,
+              ),
+            ),
+            h("ul", { className: "sr-guided__links sr-guided__recent-list", "data-recent-search-list": "true" }),
+          ),
+        );
   const filterForm = (idPrefix) =>
     h(
       "form",
@@ -1447,6 +1556,7 @@ function SearchBody({ page }) {
         h("label", { className: "hdr", htmlFor: `${idPrefix}-q` }, labels.keywordSearch || labels.search),
         h("input", { id: `${idPrefix}-q`, name: "q", type: "search", defaultValue: page.search.query || "", autoComplete: "off" }),
       ),
+      guidedSearch(idPrefix),
       filterSelect(
         idPrefix,
         "country_code",
@@ -1719,6 +1829,8 @@ function SearchBody({ page }) {
       "data-list-first-mobile": page.mobile_policy?.list_first_mobile ? "true" : "false",
       "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false",
       "data-min-touch-target": page.mobile_policy?.minimum_tap_target_px || 44,
+      "data-guided-search-path": savedView ? undefined : page.path,
+      "data-guided-search-success": !savedView && page.search.total_matches > 0 ? "true" : "false",
       "data-saved-listings-view": savedView ? "true" : undefined,
     },
     h(

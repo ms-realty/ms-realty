@@ -52,6 +52,18 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /restorePosition\(false\)/);
   assert.match(PUBLIC_APP_JS, /entries\[0\]\.type === "back_forward"/);
   assert.match(PUBLIC_APP_JS, /focus\(\{ preventScroll: true \}\)/);
+  assert.match(PUBLIC_APP_JS, /RECENT_SEARCH_KEY = "ms-realty:recent-searches:v1"/);
+  assert.match(PUBLIC_APP_JS, /function initGuidedSearch/);
+  assert.match(PUBLIC_APP_JS, /main\[data-guided-search-path\]/);
+  assert.match(PUBLIC_APP_JS, /data-guided-search-success/);
+  assert.match(PUBLIC_APP_JS, /Free-text queries are never persisted/);
+  assert.match(PUBLIC_APP_JS, /sessionStorage\.setItem\(storageKey/);
+  assert.match(PUBLIC_APP_JS, /data-recent-search-list/);
+  assert.match(PUBLIC_APP_JS, /data-clear-recent-searches/);
+  assert.match(PUBLIC_APP_JS, /initGuidedSearch\(\);/);
+  const guidedSearchClient = PUBLIC_APP_JS.match(/function initGuidedSearch\(\) \{[\s\S]*?\n  \}\n  function initSearchScrollRestoration/);
+  assert.ok(guidedSearchClient);
+  assert.doesNotMatch(guidedSearchClient[0], /localStorage/);
   assert.match(PUBLIC_APP_JS, /function initDialogFocusReturn/);
   assert.match(PUBLIC_APP_JS, /function showToast/);
   assert.match(PUBLIC_APP_JS, /function copyShareUrl/);
