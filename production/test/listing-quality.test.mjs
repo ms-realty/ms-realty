@@ -104,6 +104,8 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(report.rows.every((row) => row.required_editor_fields.length > 0));
   assert.ok(report.rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
   assert.ok(report.rows.every((row) => Array.isArray(row.public_gallery_sample)));
+  assert.ok(report.rows.every((row) => Array.isArray(row.publication_readiness.blocking_fields)));
+  assert.ok(report.rows.every((row) => Array.isArray(row.canonical_fact_completion.incomplete_fields)));
   assert.ok(
     report.rows
       .filter((row) => row.required_editor_fields.includes("public_gallery"))

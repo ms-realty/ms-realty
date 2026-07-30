@@ -52,6 +52,8 @@ test("listing verification report creates broker tasks from latest listing edits
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").latest_edit_id, "latest-edit");
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").verification_task.owner, "broker_bg");
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0116").verification_task.owner, "broker_ru");
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").publication_readiness.ready, false);
+  assert.ok(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").publication_readiness.blocking_fields.includes("location_id"));
 });
 
 test("later legacy description restorations retain the immediately preceding factual verification priority", () => {
