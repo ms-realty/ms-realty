@@ -131,7 +131,8 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   ],
   media_migration: [
     "Run node production/scripts/run-media-mirror.mjs to copy every legacy /wp-content/uploads asset onto owned storage.",
-    "Legacy image URLs stop resolving the moment DNS moves; the mirror serves them at their original paths.",
+    "Run npm run media:upload with the Worker origin and MEDIA_INGEST_SECRET; the Cloudflare runtime serves these bytes from R2.",
+    "Legacy image URLs stop resolving the moment DNS moves; local mirror files alone are not deployment evidence.",
   ],
   live_services: [
     "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
@@ -1257,8 +1258,8 @@ export function buildLaunchReadinessReport({
       mediaMirror.ready ? "pass" : "blocked",
       mediaMirror,
       mediaMirror.ready
-        ? "Every legacy upload is mirrored onto owned storage."
-        : "Listing media is still hotlinked from the legacy WordPress origins and will 404 the moment DNS moves.",
+        ? "Every legacy upload is mirrored locally and acknowledged by the R2-backed Worker."
+        : "Listing media lacks a complete R2 upload record and will 404 when DNS moves to the Cloudflare runtime.",
     ),
     gate(
       "structured_data",

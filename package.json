@@ -87,6 +87,7 @@
     "lint": "eslint .",
     "audit": "node production/scripts/audit-dependencies.mjs",
     "media:mirror": "node production/scripts/run-media-mirror.mjs",
+    "media:upload": "node production/scripts/upload-media-mirror.mjs",
     "media:state": "node -e \"import('./production/lib/media-migration.mjs').then(async m=>{const {loadCmsSeed}=await import('./production/lib/runtime.mjs');console.log(JSON.stringify(m.mediaMirrorState(loadCmsSeed()),null,2))})\""
   },
   "engines": {

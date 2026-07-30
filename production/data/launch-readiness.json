@@ -147,18 +147,39 @@
     {
       "id": "media_migration",
       "status": "blocked",
-      "message": "Listing media is still hotlinked from the legacy WordPress origins and will 404 the moment DNS moves.",
+      "message": "Listing media lacks a complete R2 upload record and will 404 when DNS moves to the Cloudflare runtime.",
       "evidence": {
         "status": "missing_manifest",
         "ready": false,
         "required_assets": 1714,
         "mirrored_assets": 0,
         "missing_assets": 1714,
-        "external_assets": 13
+        "external_assets": 13,
+        "upload": {
+          "status": "missing_manifest",
+          "ready": false,
+          "required_assets": 1714,
+          "uploaded_assets": 0,
+          "missing_assets": 1714,
+          "generated_at": null,
+          "sample_missing": [
+            "makler-realty.com/wp-content/uploads/wv.png",
+            "makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+            "makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+            "makler-realty.com/wp-content/uploads/2024/12/815-1.jpg",
+            "makler-realty.com/wp-content/uploads/2024/12/815-2.jpg",
+            "makler-realty.com/wp-content/uploads/2024/12/815-13.jpg",
+            "makler-realty.com/wp-content/uploads/2024/12/815-12.jpg",
+            "makler-realty.com/wp-content/uploads/2024/12/815-9.jpg",
+            "makler-realty.com/wp-content/uploads/2024/12/815-10.jpg",
+            "makler-realty.com/wp-content/uploads/2024/12/815-11.jpg"
+          ]
+        }
       },
       "next_actions": [
         "Run node production/scripts/run-media-mirror.mjs to copy every legacy /wp-content/uploads asset onto owned storage.",
-        "Legacy image URLs stop resolving the moment DNS moves; the mirror serves them at their original paths."
+        "Run npm run media:upload with the Worker origin and MEDIA_INGEST_SECRET; the Cloudflare runtime serves these bytes from R2.",
+        "Legacy image URLs stop resolving the moment DNS moves; local mirror files alone are not deployment evidence."
       ]
     },
     {
@@ -635,7 +656,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-30T15:16:29.939Z",
+              "generated_at": "2026-07-30T15:46:02.030Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,

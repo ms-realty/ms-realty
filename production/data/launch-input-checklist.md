@@ -12,7 +12,8 @@ Blockers: redirect_reviews, locale_content_parity, media_migration, external_seo
 - locale_content_parity: Every indexable public locale needs at least one approved listing translation, or the locale must be set indexable: false in locales/registry.json until it has content.
 - locale_content_parity: Port the legacy /en/, /de/, and /nl/ translations, or run the Hermes draft queue and approve them in /admin/translations.
 - media_migration: Run node production/scripts/run-media-mirror.mjs to copy every legacy /wp-content/uploads asset onto owned storage.
-- media_migration: Legacy image URLs stop resolving the moment DNS moves; the mirror serves them at their original paths.
+- media_migration: Run npm run media:upload with the Worker origin and MEDIA_INGEST_SECRET; the Cloudflare runtime serves these bytes from R2.
+- media_migration: Legacy image URLs stop resolving the moment DNS moves; local mirror files alone are not deployment evidence.
 - external_seo_exports: Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.
 - external_seo_exports: Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.
 - listing_quality_review: Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.

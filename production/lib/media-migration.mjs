@@ -18,6 +18,7 @@ import { fromRoot } from "./paths.mjs";
 export const LEGACY_MEDIA_HOSTS = new Set(["makler-realty.com", "makler-realty.ru"]);
 export const DEFAULT_MEDIA_MIRROR_DIR = fromRoot("production", "data", "media-mirror");
 export const DEFAULT_MEDIA_MIRROR_MANIFEST = fromRoot("production", "data", "media-mirror-manifest.json");
+export const DEFAULT_MEDIA_UPLOAD_MANIFEST = fromRoot("production", "data", "media-upload-manifest.json");
 export const UPLOADS_PREFIX = "/wp-content/uploads/";
 
 function normalizedHost(value) {
@@ -92,13 +93,28 @@ export function writeMediaMirrorManifest(manifest, filePath = DEFAULT_MEDIA_MIRR
   return filePath;
 }
 
+export function readMediaUploadManifest(filePath = DEFAULT_MEDIA_UPLOAD_MANIFEST) {
+  return readMediaMirrorManifest(filePath);
+}
+
+export function writeMediaUploadManifest(manifest, filePath = DEFAULT_MEDIA_UPLOAD_MANIFEST) {
+  return writeMediaMirrorManifest(manifest, filePath);
+}
+
 export function sha256(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
 // Launch gate input: how much of the required media is actually mirrored and
 // verifiable on disk right now.
-export function mediaMirrorState(seed, { manifestPath = DEFAULT_MEDIA_MIRROR_MANIFEST, mirrorDir = DEFAULT_MEDIA_MIRROR_DIR } = {}) {
+export function mediaMirrorState(
+  seed,
+  {
+    manifestPath = DEFAULT_MEDIA_MIRROR_MANIFEST,
+    mirrorDir = DEFAULT_MEDIA_MIRROR_DIR,
+    uploadManifestPath = process.env.MS_REALTY_MEDIA_UPLOAD_MANIFEST || DEFAULT_MEDIA_UPLOAD_MANIFEST,
+  } = {},
+) {
   const plan = planMediaMirror(seed);
   const manifest = readMediaMirrorManifest(manifestPath);
   if (!manifest) {
@@ -109,6 +125,7 @@ export function mediaMirrorState(seed, { manifestPath = DEFAULT_MEDIA_MIRROR_MAN
       mirrored_assets: 0,
       missing_assets: plan.mirrorable.length,
       external_assets: plan.external.length,
+      upload: mediaUploadState(seed, { manifestPath, mirrorDir, uploadManifestPath }),
     };
   }
   const mirrored = new Map((manifest.assets || []).map((asset) => [asset.key, asset]));
@@ -120,14 +137,65 @@ export function mediaMirrorState(seed, { manifestPath = DEFAULT_MEDIA_MIRROR_MAN
     if (asset && filePath && fs.existsSync(filePath)) present += 1;
     else missing.push(key);
   }
+  const localReady = missing.length === 0 && plan.mirrorable.length > 0;
+  const upload = mediaUploadState(seed, { manifestPath, mirrorDir, uploadManifestPath });
   return {
-    status: missing.length ? "incomplete" : "ready",
-    ready: missing.length === 0 && plan.mirrorable.length > 0,
+    status: !localReady ? "incomplete" : upload.ready ? "ready" : "upload_incomplete",
+    ready: localReady && upload.ready,
     required_assets: plan.mirrorable.length,
     mirrored_assets: present,
     missing_assets: missing.length,
     external_assets: plan.external.length,
     generated_at: manifest.generated_at || null,
+    sample_missing: missing.slice(0, 10),
+    upload,
+  };
+}
+
+// The Cloudflare runtime reads these bytes from R2, not the local mirror. The
+// upload report is written only after the Worker confirms the exact key + size.
+export function mediaUploadState(
+  seed,
+  {
+    manifestPath = DEFAULT_MEDIA_MIRROR_MANIFEST,
+    mirrorDir = DEFAULT_MEDIA_MIRROR_DIR,
+    uploadManifestPath = process.env.MS_REALTY_MEDIA_UPLOAD_MANIFEST || DEFAULT_MEDIA_UPLOAD_MANIFEST,
+  } = {},
+) {
+  const plan = planMediaMirror(seed);
+  const mirror = readMediaMirrorManifest(manifestPath);
+  const upload = readMediaUploadManifest(uploadManifestPath);
+  const validUploadManifest = upload?.kind === "media_upload_manifest";
+  const uploaded = new Map((upload?.assets || []).map((asset) => [asset.key, asset]));
+  const mirrored = new Map((mirror?.assets || []).map((asset) => [asset.key, asset]));
+  const missing = [];
+  let present = 0;
+
+  for (const { key } of plan.mirrorable) {
+    const source = mirrored.get(key);
+    const recorded = uploaded.get(key);
+    const filePath = source ? mirrorPathFor(key, { mirrorDir }) : null;
+    if (
+      source &&
+      filePath &&
+      fs.existsSync(filePath) &&
+      recorded?.status === "uploaded" &&
+      recorded.bytes === source.bytes &&
+      recorded.sha256 === source.sha256
+    ) {
+      present += 1;
+    } else {
+      missing.push(key);
+    }
+  }
+
+  return {
+    status: !validUploadManifest ? "missing_manifest" : missing.length ? "incomplete" : "ready",
+    ready: validUploadManifest && missing.length === 0 && plan.mirrorable.length > 0,
+    required_assets: plan.mirrorable.length,
+    uploaded_assets: present,
+    missing_assets: missing.length,
+    generated_at: upload?.generated_at || null,
     sample_missing: missing.slice(0, 10),
   };
 }

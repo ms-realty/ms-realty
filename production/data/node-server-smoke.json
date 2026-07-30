@@ -57,7 +57,7 @@
         {
           "id": "media_migration",
           "status": "blocked",
-          "message": "Listing media is still hotlinked from the legacy WordPress origins and will 404 the moment DNS moves."
+          "message": "Listing media lacks a complete R2 upload record and will 404 when DNS moves to the Cloudflare runtime."
         },
         {
           "id": "external_seo_exports",
@@ -95,7 +95,7 @@
       "cache-control": "no-store",
       "connection": "keep-alive",
       "content-encoding": "gzip",
-      "content-length": "696",
+      "content-length": "699",
       "content-type": "application/json; charset=utf-8",
       "keep-alive": "timeout=5",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
