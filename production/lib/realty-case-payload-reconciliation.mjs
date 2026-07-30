@@ -321,7 +321,9 @@ function projectMandates(caseRecord, events, workspaceId) {
         workspace_id: workspaceId,
         mandate_ref: mandate.ref,
         version_number: version,
-        status: version === mandateEvents.length ? "active" : "superseded",
+        // Mandate versions are append-only. The case projection identifies the
+        // current version, so an older row must not be retroactively mutated.
+        status: "active",
         granted_by_ref: mandate.granted_by_ref,
         signed_at: mandate.signed_at,
         expires_at: mandate.expires_at,

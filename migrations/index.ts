@@ -1,5 +1,6 @@
 import * as migration_20260710_132716_initial_schema from './20260710_132716_initial_schema';
 import * as migration_20260730_142043_realty_case_persistence from './20260730_142043_realty_case_persistence';
+import * as migration_20260730_160000_realign_realty_case_mandate_projection from './20260730_160000_realign_realty_case_mandate_projection';
 
 export const migrations = [
   {
@@ -11,5 +12,10 @@ export const migrations = [
     up: migration_20260730_142043_realty_case_persistence.up,
     down: migration_20260730_142043_realty_case_persistence.down,
     name: '20260730_142043_realty_case_persistence'
+  },
+  {
+    up: migration_20260730_160000_realign_realty_case_mandate_projection.up,
+    down: migration_20260730_160000_realign_realty_case_mandate_projection.down,
+    name: '20260730_160000_realign_realty_case_mandate_projection'
   },
 ];

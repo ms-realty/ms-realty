@@ -97,8 +97,9 @@ test("payload manifest is deterministic and projects the current mandate version
   assert.equal(first.collections.realty_cases[0].data.mandate_version_number, 2);
   assert.deepEqual(
     first.collections.realty_case_mandate_versions.map((row) => row.data.status),
-    ["superseded", "active"],
+    ["active", "active"],
   );
+  assert.equal(first.collections.realty_case_mandate_versions.every((row) => row.data.idempotency_key.startsWith("mrc:")), true);
   assert.equal(first.collections.realty_case_events[0].references.case.match.case_id, "case-payload-1");
   assert.equal(first.collections.realty_case_events[0].data.case, undefined);
 });

@@ -10,6 +10,7 @@ import {
 import { REQUIRED_PAYLOAD_COLLECTIONS } from "../lib/payload-runtime.mjs";
 
 const migrationPath = "migrations/20260730_142043_realty_case_persistence.ts";
+const mandateMigrationPath = "migrations/20260730_160000_realign_realty_case_mandate_projection.ts";
 
 function collection(slug) {
   const result = REALTY_CASE_COLLECTIONS.find((item) => item.slug === slug);
@@ -62,6 +63,7 @@ test("RealtyCase snapshots, events, mandates, evidence, and outbox retain refere
 
   assert.equal(field("realty_case_mandate_versions", "capabilities").type, "json");
   assert.equal(field("realty_case_mandate_versions", "signed_evidence_ref").required, true);
+  assert.equal(field("realty_case_mandate_versions", "idempotency_key").required, true);
   assert.equal(field("realty_case_evidence", "storage_ref").type, "text");
   assert.equal(field("realty_case_evidence", "metadata_refs").type, "json");
   assert.equal(field("realty_case_outbox", "payload_refs").type, "json");
@@ -124,4 +126,15 @@ test("RealtyCase migration enforces workspace-local idempotency, immutable snaps
     down.indexOf('DROP CONSTRAINT "payload_locked_documents_rels_realty_cases_fk"') < down.indexOf('DROP TABLE "realty_case_outbox"'),
     "rollback removes Payload lock-table references before dropping their target collections",
   );
+});
+
+test("RealtyCase mandate migration preserves append-only idempotency across case reuse", () => {
+  const migration = fs.readFileSync(mandateMigrationPath, "utf8");
+
+  assert.match(migration, /ADD COLUMN "idempotency_key" varchar/);
+  assert.match(migration, /realty_case_mandates_workspace_case_version_unique/);
+  assert.match(migration, /UNIQUE \("workspace_id", "case_id", "version_number"\)/);
+  assert.match(migration, /realty_case_mandates_workspace_idempotency_unique/);
+  assert.match(migration, /UNIQUE \("workspace_id", "idempotency_key"\)/);
+  assert.match(migration, /Cannot restore the legacy mandate uniqueness constraint/);
 });

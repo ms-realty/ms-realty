@@ -175,7 +175,14 @@ export const REALTY_CASE_COLLECTIONS = [
       { name: "case", type: "relationship", relationTo: "realty_cases", required: true },
       { name: "mandate_ref", type: "text", required: true, index: true, maxLength: 240, admin: { description: "Reference only." } },
       { name: "version_number", type: "number", required: true, min: 1 },
-      { name: "status", type: "select", required: true, defaultValue: "active", options: ["active", "superseded", "revoked", "expired"] },
+      {
+        name: "status",
+        type: "select",
+        required: true,
+        defaultValue: "active",
+        options: ["active", "superseded", "revoked", "expired"],
+        admin: { description: "Immutable status at append time; the parent case identifies the current mandate version." },
+      },
       { name: "granted_by_ref", type: "text", required: true, maxLength: 240, admin: { description: "Reference only." } },
       { name: "signed_at", type: "date", required: true },
       { name: "expires_at", type: "date" },
@@ -183,6 +190,7 @@ export const REALTY_CASE_COLLECTIONS = [
       referencePayloadField("capabilities", { required: true }),
       referencePayloadField("limits"),
       { name: "mandate_digest", type: "text", required: true, maxLength: 160 },
+      { name: "idempotency_key", type: "text", required: true, index: true, maxLength: 240 },
     ],
   },
   {
