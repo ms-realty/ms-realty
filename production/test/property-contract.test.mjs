@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { publicPropertyProjection } from "../lib/content.mjs";
 import {
   CANONICAL_PROPERTY_FAMILIES,
   derivePrimaryAreaSqm,
@@ -8,10 +9,12 @@ import {
   normalizeImportedFact,
   normalizeLegacyListingFacts,
   publicFactValue,
+  publicPrimaryAreaSqm,
   taxonomyForLegacyPropertyType,
 } from "../lib/listing-facts.mjs";
 import { normalizeSearchIntent, searchIntentToQueryFilters } from "../lib/search-intent.mjs";
 import { searchFiltersFromObject } from "../lib/search-filters.mjs";
+import { listingFromCmsRecord } from "../lib/runtime.mjs";
 
 test("property applicability registry covers all canonical families with explicit primary-area rules", () => {
   assert.deepEqual(CANONICAL_PROPERTY_FAMILIES, ["apartment", "house", "plot", "agricultural_land", "commercial", "hotel"]);
@@ -25,6 +28,20 @@ test("property applicability registry covers all canonical families with explici
   assert.equal(derivePrimaryAreaSqm({ property_family: "agricultural_land", land_area_sqm: 9000 }), 9000);
   assert.equal(derivePrimaryAreaSqm({ property_family: "commercial", usable_area_sqm: 240 }), 240);
   assert.equal(derivePrimaryAreaSqm({ property_family: "hotel", gross_floor_area_sqm: 1800 }), 1800);
+  assert.equal(
+    publicPrimaryAreaSqm(
+      { property_family: "house", built_area_sqm: 115 },
+      [{ field: "built_area_sqm", state: "broker_verified" }],
+    ),
+    115,
+  );
+  assert.equal(
+    publicPrimaryAreaSqm(
+      { property_family: "house", built_area_sqm: 115 },
+      [{ field: "built_area_sqm", state: "entered_pending_review" }],
+    ),
+    null,
+  );
 });
 
 test("legacy taxonomy and zero handling preserve evidence without treating zero as verified", () => {
@@ -114,4 +131,57 @@ test("legacy filter extraction preserves an explicit numeric zero", () => {
     bedrooms_min: 0,
     status: "available",
   });
+});
+
+test("canonical property projection publishes only broker-verified facts and complete public coordinates", () => {
+  const property = {
+    id: "property-MS-CRAWL-VERIFIED",
+    property_family: "apartment",
+    property_subtype: "studio",
+    facts: {
+      bedrooms_count: 0,
+      built_area_sqm: 45,
+      public_latitude: 41.57,
+      public_longitude: 23.28,
+      public_location_precision: "approximate",
+    },
+    fact_verification: [
+      { field: "bedrooms_count", state: "broker_verified" },
+      { field: "built_area_sqm", state: "broker_verified" },
+      { field: "public_latitude", state: "broker_verified" },
+      { field: "public_longitude", state: "entered_pending_review" },
+      { field: "public_location_precision", state: "broker_verified" },
+    ],
+  };
+  const projection = publicPropertyProjection(property);
+  assert.equal(projection.bedrooms, 0);
+  assert.equal(projection.area_sqm, 45);
+  assert.equal(projection.public_coordinates, null);
+
+  const record = {
+    id: "MS-CRAWL-VERIFIED",
+    source_url: "https://makler-realty.com/example",
+    source_domain: "makler-realty.com",
+    source_locale: "bg",
+    property: property.id,
+    facts: {
+      title: "Legacy title",
+      h1: "Legacy heading",
+      description: "Legacy description",
+      location: "Sandanski",
+      property_type: "apartment",
+      offer_type: "sale",
+      bedrooms: 9,
+      area_sqm: 999,
+      price_eur: 120000,
+      price_on_request: false,
+    },
+    seo: { canonical: "/bg/imoti/MS-CRAWL-VERIFIED" },
+    translations: [],
+  };
+  const listing = listingFromCmsRecord(record, null, property);
+  assert.equal(listing.bedrooms, 0);
+  assert.equal(listing.area_sqm, 45);
+  assert.equal(listing.public_coordinates, null);
+  assert.equal(listing.location_precision, "approximate");
 });

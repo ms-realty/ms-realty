@@ -196,11 +196,16 @@ export function bedroomsRequired(facts = {}) {
 }
 
 export function derivePrimaryAreaSqm(facts = {}) {
+  const field = primaryAreaFieldFor(facts);
+  return field ? numericValue(facts[field]) : null;
+}
+
+export function primaryAreaFieldFor(facts = {}) {
   const family = propertyFamilyFor(facts);
   if (!family) return null;
   for (const field of PRIMARY_AREA_FIELDS[family] || []) {
     const value = numericValue(facts[field]);
-    if (value !== null && value > 0) return value;
+    if (value !== null && value > 0) return field;
   }
   return null;
 }
@@ -297,6 +302,11 @@ export function factVerificationFor(field, verifications = []) {
 export function publicFactValue(facts, verifications, field) {
   const verification = factVerificationFor(field, verifications);
   return verification.state === "broker_verified" ? facts[field] ?? null : null;
+}
+
+export function publicPrimaryAreaSqm(facts, verifications) {
+  const field = primaryAreaFieldFor(facts);
+  return field ? publicFactValue(facts, verifications, field) : null;
 }
 
 export function enrichmentChecklistFor({ facts = {}, fact_verification = [] } = {}) {

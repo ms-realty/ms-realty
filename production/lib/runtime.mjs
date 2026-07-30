@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { approvedContentDocumentsForPath, readApprovedCmsContent } from "./approved-content.mjs";
 import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
-import { approvedTranslationRecordsForListing } from "./content.mjs";
+import { approvedTranslationRecordsForListing, publicPropertyProjection } from "./content.mjs";
 import { createCrmInboxItem } from "./admin-workflows.mjs";
 import { normalizePublicLeadInput } from "./leads.mjs";
 import { applyListingEdits } from "./listing-edits.mjs";
@@ -18,6 +18,7 @@ import {
   isActiveListing,
 } from "./public-site.mjs";
 import { contactPath, locationPath, listingPath, sellerPath } from "./seo.mjs";
+import { publicFactValue } from "./listing-facts.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
 import { latestTourForListing } from "./tours.mjs";
 
@@ -27,7 +28,11 @@ export function loadCmsSeed(path = DEFAULT_CMS_SEED_PATH) {
   return JSON.parse(fs.readFileSync(path, "utf8"));
 }
 
-export function listingFromCmsRecord(record, approvedTour = null) {
+export function listingFromCmsRecord(record, approvedTour = null, property = null) {
+  const canonicalProperty = Boolean(property);
+  const publicProperty = publicPropertyProjection(property);
+  const propertyFacts = property?.facts || {};
+  const propertyVerification = property?.fact_verification || [];
   return {
     id: record.id,
     url: record.source_url,
@@ -44,18 +49,34 @@ export function listingFromCmsRecord(record, approvedTour = null) {
     description: record.facts.description || record.seo.description,
     h1: record.facts.h1,
     location: record.facts.location,
-    property_type: record.facts.property_type,
+    property_type: property?.property_family || record.facts.property_type,
+    property_family: property?.property_family || null,
+    property_subtype: property?.property_subtype || null,
     offer_type: record.facts.offer_type,
     listing_status: record.facts.listing_status || "available",
-    bedrooms: record.facts.bedrooms,
-    bedrooms_not_applicable: record.facts.bedrooms_not_applicable === true,
-    area_sqm: record.facts.area_sqm ?? record.facts.area ?? null,
-    floor: record.facts.floor ?? null,
-    total_floors: record.facts.total_floors ?? null,
-    land_area_sqm: record.facts.land_area_sqm ?? null,
-    condition: record.facts.condition || "",
-    location_precision: record.facts.location_precision || "approximate",
-    price_eur: record.facts.price_eur,
+    bedrooms: canonicalProperty ? publicProperty?.bedrooms ?? null : record.facts.bedrooms,
+    bedrooms_count: canonicalProperty ? publicProperty?.bedrooms ?? null : null,
+    bedrooms_not_applicable: canonicalProperty ? publicProperty?.bedrooms_not_applicable === true : record.facts.bedrooms_not_applicable === true,
+    area_sqm: canonicalProperty ? publicProperty?.area_sqm ?? null : record.facts.area_sqm ?? record.facts.area ?? null,
+    primary_area_sqm: canonicalProperty ? publicProperty?.area_sqm ?? null : null,
+    living_area_sqm: canonicalProperty ? publicFactValue(propertyFacts, propertyVerification, "living_area_sqm") : null,
+    built_area_sqm: canonicalProperty ? publicFactValue(propertyFacts, propertyVerification, "built_area_sqm") : null,
+    usable_area_sqm: canonicalProperty ? publicFactValue(propertyFacts, propertyVerification, "usable_area_sqm") : null,
+    gross_floor_area_sqm: canonicalProperty ? publicFactValue(propertyFacts, propertyVerification, "gross_floor_area_sqm") : null,
+    floor: canonicalProperty ? publicProperty?.floor ?? null : record.facts.floor ?? null,
+    floor_number: canonicalProperty ? publicProperty?.floor ?? null : null,
+    total_floors: canonicalProperty ? publicProperty?.total_floors ?? null : record.facts.total_floors ?? null,
+    storeys_count: canonicalProperty ? publicFactValue(propertyFacts, propertyVerification, "storeys_count") : null,
+    land_area_sqm: canonicalProperty ? publicProperty?.land_area_sqm ?? null : record.facts.land_area_sqm ?? null,
+    premises_count: canonicalProperty ? publicFactValue(propertyFacts, propertyVerification, "premises_count") : null,
+    hotel_room_count: canonicalProperty ? publicFactValue(propertyFacts, propertyVerification, "hotel_room_count") : null,
+    parking_kind: canonicalProperty ? publicFactValue(propertyFacts, propertyVerification, "parking_kind") : null,
+    construction_status: canonicalProperty ? publicFactValue(propertyFacts, propertyVerification, "construction_status") : null,
+    condition: canonicalProperty ? publicProperty?.condition || "" : record.facts.condition || "",
+    public_location_precision: canonicalProperty ? publicProperty?.location_precision ?? null : null,
+    location_precision: canonicalProperty ? publicProperty?.location_precision ?? null : record.facts.location_precision || "approximate",
+    public_coordinates: canonicalProperty ? publicProperty?.public_coordinates || null : null,
+    price_eur: record.facts.price_on_request === true ? null : record.facts.price_eur,
     price_on_request: record.facts.price_on_request === true,
     image_count: record.facts.image_count,
     thumbnail_url: record.facts.thumbnail_url || "",
@@ -82,6 +103,13 @@ export function listingFromCmsRecord(record, approvedTour = null) {
 
 function listingRecords(seed) {
   return seed.records.filter((record) => record.collection === "listings");
+}
+
+function propertyForRecord(seed, record) {
+  if (record?.property && typeof record.property === "object") return record.property;
+  const propertyId = String(record?.property || "").trim();
+  if (!propertyId) return null;
+  return (seed.properties || []).find((property) => property.id === propertyId) || null;
 }
 
 function translationLocale(translation) {
@@ -111,7 +139,7 @@ function locationNames(seed) {
 
 function runtimeListings(seed, translationTasks = []) {
   return listingRecords(seed).map((record) => ({
-    ...listingFromCmsRecord(record),
+    ...listingFromCmsRecord(record, null, propertyForRecord(seed, record)),
     translations: mergeRuntimeTranslations(record, translationTasks),
   }));
 }
@@ -136,7 +164,7 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
     return {
       type: "listing",
       record,
-      listing: listingFromCmsRecord(record, latestTourForListing(tourApprovals, record.id)),
+      listing: listingFromCmsRecord(record, latestTourForListing(tourApprovals, record.id), propertyForRecord(seed, record)),
       localeCode: matchedLocale,
     };
   }
@@ -188,7 +216,7 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
   const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks, tourApprovals);
   const listings = () => runtimeListings(seed, translationTasks);
   if (resolved.type === "listing") {
-    const view = listingFromCmsRecord(resolved.record);
+    const view = resolved.listing;
     return renderListingPage({
       registry,
       listing: resolved.listing,
@@ -281,7 +309,7 @@ export function submitRuntimeLead(registry, seed, input) {
 export function buildRuntimeSmoke(registry, seed) {
   const listing = listingRecords(seed).find((record) => record.id === "MS-CRAWL-0001");
   const ruListing = listingRecords(seed).find((record) => record.source_locale === "ru");
-  const runtimeListing = listingFromCmsRecord(listing);
+  const runtimeListing = listingFromCmsRecord(listing, null, propertyForRecord(seed, listing));
   const soldSeed = applyListingEdits(seed, [{ listing_id: listing.id, patch: { listing_status: "sold" } }]);
 
   return {

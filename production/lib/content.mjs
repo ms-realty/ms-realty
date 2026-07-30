@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { factVerificationFor, publicFactValue, publicPrimaryAreaSqm } from "./listing-facts.mjs";
 import { getLocale } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { contentHash } from "./translations.mjs";
@@ -26,6 +27,46 @@ export function findMigrationRecord(records, oldUrl) {
   return records.find((record) => record.old_url === oldUrl) || null;
 }
 
+export function publicPropertyProjection(property) {
+  if (!property?.facts || !Array.isArray(property.fact_verification)) return null;
+  const facts = {
+    ...property.facts,
+    property_family: property.property_family || property.facts.property_family,
+    property_subtype: property.property_subtype || property.facts.property_subtype,
+  };
+  const verification = property.fact_verification;
+  const latitude = publicFactValue(facts, verification, "public_latitude");
+  const longitude = publicFactValue(facts, verification, "public_longitude");
+  const publicCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude) ? { latitude, longitude } : null;
+  const bedroomsVerification = factVerificationFor("bedrooms_count", verification);
+  const primaryArea = publicPrimaryAreaSqm(facts, verification);
+  return {
+    property_family: property.property_family || null,
+    property_subtype: property.property_subtype || null,
+    bedrooms: publicFactValue(facts, verification, "bedrooms_count"),
+    bedrooms_count: publicFactValue(facts, verification, "bedrooms_count"),
+    bedrooms_not_applicable: bedroomsVerification.state === "not_applicable",
+    area_sqm: primaryArea,
+    primary_area_sqm: primaryArea,
+    living_area_sqm: publicFactValue(facts, verification, "living_area_sqm"),
+    built_area_sqm: publicFactValue(facts, verification, "built_area_sqm"),
+    usable_area_sqm: publicFactValue(facts, verification, "usable_area_sqm"),
+    gross_floor_area_sqm: publicFactValue(facts, verification, "gross_floor_area_sqm"),
+    premises_count: publicFactValue(facts, verification, "premises_count"),
+    hotel_room_count: publicFactValue(facts, verification, "hotel_room_count"),
+    floor: publicFactValue(facts, verification, "floor_number"),
+    floor_number: publicFactValue(facts, verification, "floor_number"),
+    total_floors: publicFactValue(facts, verification, "total_floors"),
+    storeys_count: publicFactValue(facts, verification, "storeys_count"),
+    land_area_sqm: publicFactValue(facts, verification, "land_area_sqm"),
+    condition: publicFactValue(facts, verification, "condition") || "",
+    parking_kind: publicFactValue(facts, verification, "parking_kind"),
+    construction_status: publicFactValue(facts, verification, "construction_status"),
+    location_precision: publicFactValue(facts, verification, "public_location_precision"),
+    public_coordinates: publicCoordinates,
+  };
+}
+
 export function listingSourceSnapshot(listing) {
   return {
     id: listing.id,
@@ -42,7 +83,7 @@ export function listingSourceSnapshot(listing) {
     total_floors: listing.total_floors ?? null,
     land_area_sqm: listing.land_area_sqm ?? null,
     condition: listing.condition || "",
-    location_precision: listing.location_precision || "approximate",
+    location_precision: listing.location_precision === undefined ? "approximate" : listing.location_precision,
     price_eur: listing.price_eur ?? null,
     price_on_request: listing.price_on_request === true,
     image_count: Number(listing.image_count || 0),
@@ -88,6 +129,8 @@ export function listingToPublicViewModel(listing) {
     description: snapshot.description,
     location: snapshot.location,
     property_type: snapshot.property_type,
+    property_family: listing.property_family || null,
+    property_subtype: listing.property_subtype || null,
     offer_type: snapshot.offer_type,
     listing_status: listing.listing_status || "available",
     bedrooms: snapshot.bedrooms,
@@ -98,6 +141,7 @@ export function listingToPublicViewModel(listing) {
     land_area_sqm: snapshot.land_area_sqm,
     condition: snapshot.condition,
     location_precision: snapshot.location_precision,
+    public_coordinates: listing.public_coordinates || null,
     price_eur: snapshot.price_eur,
     price_on_request: snapshot.price_on_request,
     image_count: snapshot.image_count,
