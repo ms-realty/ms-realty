@@ -156,6 +156,7 @@ import { buildAutonomousRealtyCaseIntents } from "./realty-case-executor.mjs";
 import {
   assertRealtyCaseRequestProjectionConfig,
   assertRealtyCaseRequestProjectionInput,
+  projectRealtyCaseConditionRequest,
   projectRealtyCaseRequest,
   realtyCaseRequestProjectionFailure,
 } from "./realty-case-request-projection.mjs";
@@ -867,6 +868,16 @@ export function createHttpApp({
       caseId: result.case.id,
       eventId: result.event.id,
       filePath: realtyCaseLedgerPath || undefined,
+      workspaceId: realtyCaseWorkspaceId,
+      projector: realtyCasePayloadProjector,
+    });
+  };
+  const projectCurrentRealtyCaseCondition = async (result) => {
+    if (!realtyCaseRequestProjectionEnabled) return null;
+    return projectRealtyCaseConditionRequest({
+      caseId: result.condition.case_id,
+      eventId: result.event.id,
+      filePath: realtyCaseConditionLedgerPath || undefined,
       workspaceId: realtyCaseWorkspaceId,
       projector: realtyCasePayloadProjector,
     });
@@ -2714,10 +2725,22 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/admin/cases/conditions") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      let result;
       try {
+        const input = parseBody(request);
+        if (
+          assertRealtyCaseRequestProjectionConfig({
+            realtyCaseRequestProjectionEnabled,
+            realtyCaseWorkspaceId,
+            realtyCasePayloadProjector,
+            realtyCasePayloadRuntimeConfigured,
+          })
+        ) {
+          assertRealtyCaseRequestProjectionInput(input);
+        }
         const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
-        const result = openRealtyCaseCondition(
-          bindRealtyCaseConditionExecutor(parseBody(request), principal, "condition_opened"),
+        result = openRealtyCaseCondition(
+          bindRealtyCaseConditionExecutor(input, principal, "condition_opened"),
           {
             filePath: realtyCaseConditionLedgerPath || undefined,
             caseLedgerPath: realtyCaseLedgerPath || undefined,
@@ -2743,19 +2766,36 @@ export function createHttpApp({
             },
           }, recordedAt);
         }
-        return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) return adminJson(503, realtyCaseRequestProjectionFailure());
         return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+      try {
+        const projection = await projectCurrentRealtyCaseCondition(result);
+        return adminJson(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+      } catch {
+        return adminJson(503, realtyCaseRequestProjectionFailure(result));
       }
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/cases/conditions/actions") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      let result;
       try {
         const input = parseBody(request);
+        if (
+          assertRealtyCaseRequestProjectionConfig({
+            realtyCaseRequestProjectionEnabled,
+            realtyCaseWorkspaceId,
+            realtyCasePayloadProjector,
+            realtyCasePayloadRuntimeConfigured,
+          })
+        ) {
+          assertRealtyCaseRequestProjectionInput(input, { conditionAction: true });
+        }
         const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
-        const result = appendRealtyCaseConditionAction(
+        result = appendRealtyCaseConditionAction(
           bindRealtyCaseConditionExecutor(input, principal, input?.action),
           {
             filePath: realtyCaseConditionLedgerPath || undefined,
@@ -2783,10 +2823,16 @@ export function createHttpApp({
             },
           }, recordedAt);
         }
-        return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) return adminJson(503, realtyCaseRequestProjectionFailure());
         return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+      try {
+        const projection = await projectCurrentRealtyCaseCondition(result);
+        return adminJson(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+      } catch {
+        return adminJson(503, realtyCaseRequestProjectionFailure(result));
       }
     }
 

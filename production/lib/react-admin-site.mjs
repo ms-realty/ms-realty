@@ -2410,6 +2410,11 @@ function conditionMutationAttrs(action, success) {
   };
 }
 
+function conditionActionEventId(condition, action) {
+  const source = [condition.case_id, condition.id, condition.last_recorded_at, condition.last_action, action].join("\u0000");
+  return `realty-case-condition-action-${createHash("sha256").update(source).digest("hex").slice(0, 48)}`;
+}
+
 function canManageCaseConditions(page) {
   return pageCan(page, "cases:write") && !page.workspace?.operator_roles?.includes("agent");
 }
@@ -2431,6 +2436,7 @@ function RealtyCaseConditionAction({ page, condition, action, submit, children =
       h("input", { type: "hidden", name: "caseId", value: condition.case_id }),
       h("input", { type: "hidden", name: "conditionId", value: condition.id }),
       h("input", { type: "hidden", name: "action", value: action }),
+      h("input", { type: "hidden", name: "eventId", value: conditionActionEventId(condition, action) }),
       h("input", { type: "hidden", name: "actor", value: actor }),
       ...fields,
       h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, submit),

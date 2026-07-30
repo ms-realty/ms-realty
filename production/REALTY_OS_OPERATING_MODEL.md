@@ -693,12 +693,14 @@ Configuration:
 - `MS_REALTY_CASE_PROJECTOR_APPLY=1`: explicit opt-in to write either case manifest through Payload;
   omission remains a dry run.
 - `MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED=true`: opt-in request-time bridge for
-  `POST /api/admin/cases` and `POST /api/admin/cases/actions`. It also requires
-  `MS_REALTY_WORKSPACE_ID`, `PAYLOAD_SECRET`, and `DATABASE_URL`; it projects only that case after
-  its ledger append. Case actions require a caller-supplied stable `id`, and client workspace fields
-  are rejected. A failed immediate projection returns `503` with only the recorded case/event
-  references; missing projection configuration also returns a reference-free `503` before a ledger
-  write. There is no durable projection queue, so retry the scoped projector CLI from the ledger.
+  `POST /api/admin/cases`, `POST /api/admin/cases/actions`, `POST /api/admin/cases/conditions`, and
+  `POST /api/admin/cases/conditions/actions`. It also requires `MS_REALTY_WORKSPACE_ID`,
+  `PAYLOAD_SECRET`, and `DATABASE_URL`; it projects only the affected case after its ledger append
+  and audit. Case actions require a caller-supplied stable `id`; condition actions require a stable
+  `eventId` or `id`; client workspace fields are rejected. A failed immediate projection returns
+  `503` with only the recorded case/event references (and condition ID where relevant); missing
+  projection configuration also returns a reference-free `503` before a ledger write. There is no
+  durable projection queue, so retry the scoped projector CLI from the ledger.
 - `MS_REALTY_CASE_READBACK_DATABASE_URL`: required PostgreSQL connection URL for `case:reconcile`;
   use a dedicated SELECT-only role, never a migration or write-capable operator connection.
 - `PAYLOAD_SECRET` and `NODE_ENV=production`: required for `case:reconcile`; both belong in the
@@ -719,10 +721,10 @@ Not yet production-complete:
   read-back reconciliation of the preview ledger; the disposable integration test proves the code
   path but is not an approved-runtime or launch-evidence substitute, and the manifest remains
   reference-only rather than a database source of truth;
-- production multi-writer/reconciliation coverage and a durable request-path writer; the case open
-  and action routes now have an opt-in, ledger-first request projection bridge, but it is not an
-  atomic dual-store commit or a database source of truth, and condition routes remain explicit
-  projection. The internal reconciliation intent does not replace either missing runtime boundary;
+- production multi-writer/reconciliation coverage and a durable request-path writer; case and
+  condition mutations now have an opt-in, ledger-first request projection bridge, but it is not an
+  atomic dual-store commit or a database source of truth. The internal reconciliation intent does
+  not replace either missing runtime boundary;
 - signed structured mandate limits beyond the current capability set;
 - child booking/stay/management-period runs;
 - official-source retrieval, receipt custody, source-refresh monitoring, geographic rules, and
