@@ -388,6 +388,9 @@ function routeSavedSearch(request, body, registry, seed, config) {
 export async function renderAppApiResponse(request, { config = appApiConfigFromEnv() } = {}) {
   try {
     const url = new URL(request.url, "http://localhost");
+    if (url.pathname === "/api/hermes/chat") {
+      return webResponse(privateJson(404, { kind: "not_found" }));
+    }
     const limiter = publicWriteLimiterFor(config);
     if (limiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
       const verdict = limiter.allow(`${clientIpFromHeaders(request.headers)}:${url.pathname}`);

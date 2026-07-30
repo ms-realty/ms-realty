@@ -6121,15 +6121,16 @@
     }
   },
   "hermesChatDisabled": {
-    "status": 405,
+    "status": 404,
     "body": {
-      "kind": "method_not_allowed"
+      "kind": "not_found"
     },
     "headers": {
       "connection": "keep-alive",
       "content-length": "29",
       "content-type": "application/json; charset=utf-8",
       "keep-alive": "timeout=5",
+      "cache-control": "no-store",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-content-type-options": "nosniff",

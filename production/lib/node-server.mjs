@@ -232,7 +232,11 @@ export function assertServerSmoke(smoke) {
   if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
     throw new Error("Server must store saved search alert tasks");
   }
-  if (smoke.hermesChatDisabled?.status !== 405 || smoke.hermesChatDisabled.body.kind !== "method_not_allowed") {
+  if (
+    smoke.hermesChatDisabled?.status !== 404 ||
+    smoke.hermesChatDisabled.body.kind !== "not_found" ||
+    smoke.hermesChatDisabled.headers?.["cache-control"] !== "no-store"
+  ) {
     throw new Error("Server must not expose public Hermes chat");
   }
   for (const response of [

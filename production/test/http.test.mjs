@@ -1016,8 +1016,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.savedSearch.body.contact, undefined);
   assert.equal(smoke.savedSearch.body.contactVault.encrypted, true);
   assert.equal(smoke.savedSearch.headers["cache-control"], "no-store");
-  assert.equal(smoke.hermesChatDisabled.status, 405);
-  assert.equal(smoke.hermesChatDisabled.body.kind, "method_not_allowed");
+  assert.equal(smoke.hermesChatDisabled.status, 404);
+  assert.equal(smoke.hermesChatDisabled.body.kind, "not_found");
+  assert.equal(smoke.hermesChatDisabled.headers["cache-control"], "no-store");
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
   assert.equal(smoke.lead.body.contactVault.encrypted, true);
   assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");

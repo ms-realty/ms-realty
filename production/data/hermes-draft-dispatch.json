@@ -89,7 +89,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0001-el"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-3000-de",
@@ -170,7 +171,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-3000-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0001-de",
@@ -250,7 +252,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0001-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0002-de",
@@ -330,7 +333,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0002-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0003-de",
@@ -411,7 +415,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0003-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0004-de",
@@ -492,7 +497,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0004-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0005-de",
@@ -572,7 +578,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0005-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0006-de",
@@ -653,7 +660,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0006-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0007-de",
@@ -734,7 +742,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0007-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0008-de",
@@ -815,7 +824,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0008-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0009-de",
@@ -896,7 +906,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0009-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0010-de",
@@ -977,7 +988,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0010-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0011-de",
@@ -1057,7 +1069,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0011-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0012-de",
@@ -1138,7 +1151,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0012-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0013-de",
@@ -1219,7 +1233,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0013-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0014-de",
@@ -1300,7 +1315,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0014-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0015-de",
@@ -1380,7 +1396,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0015-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0016-de",
@@ -1461,7 +1478,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0016-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0017-de",
@@ -1542,7 +1560,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0017-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0018-de",
@@ -1623,7 +1642,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0018-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0019-de",
@@ -1704,7 +1724,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0019-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0020-de",
@@ -1785,7 +1806,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0020-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0021-de",
@@ -1866,7 +1888,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0021-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0022-de",
@@ -1947,7 +1970,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0022-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     },
     {
       "id": "translation-listing-MS-CRAWL-0023-de",
@@ -2028,7 +2052,8 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0023-de"
         }
-      ]
+      ],
+      "data_classification": "non_sensitive_listing_translation"
     }
   ]
 }

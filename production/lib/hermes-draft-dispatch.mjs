@@ -8,6 +8,7 @@ import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_HERMES_DRAFT_DISPATCH_PATH = fromRoot("production", "data", "hermes-draft-dispatch.json");
 export const DEFAULT_HERMES_DRAFT_BATCH_LIMIT = 25;
+export const HERMES_NON_SENSITIVE_LISTING_TRANSLATION = "non_sensitive_listing_translation";
 
 const DRAFTABLE_TASKS = new Set(["hermes_draft_required", "stale_review_required"]);
 
@@ -61,6 +62,7 @@ function dispatchRow(registry, record, coverageRow) {
     target_direction: task.target_direction,
     reviewer_role: task.reviewer_role,
     provider_mode: task.provider_mode,
+    data_classification: HERMES_NON_SENSITIVE_LISTING_TRANSLATION,
     public_indexable: false,
     requires_human_approval: true,
     can_publish: false,
@@ -117,6 +119,9 @@ export function assertHermesDraftDispatch(dispatch) {
   for (const row of dispatch.rows) {
     if (row.status !== "ready_for_hermes" || row.provider_mode !== "hermes_draft") {
       throw new Error("Hermes dispatch rows must be model-ready Hermes draft tasks");
+    }
+    if (row.data_classification !== undefined && row.data_classification !== HERMES_NON_SENSITIVE_LISTING_TRANSLATION) {
+      throw new Error("Hermes dispatch rows must use the non-sensitive listing translation classification");
     }
     if (row.public_indexable !== false || row.requires_human_approval !== true || row.can_publish || row.can_mark_indexable) {
       throw new Error("Hermes dispatch rows must remain non-publishing and reviewer-gated");

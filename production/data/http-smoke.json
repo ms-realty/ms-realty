@@ -8048,16 +8048,17 @@
     }
   },
   "hermesChatDisabled": {
-    "status": 405,
+    "status": 404,
     "headers": {
       "x-content-type-options": "nosniff",
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
     },
     "body": {
-      "kind": "method_not_allowed"
+      "kind": "not_found"
     }
   },
   "lead": {
