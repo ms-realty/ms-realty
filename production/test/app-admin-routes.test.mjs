@@ -1632,6 +1632,33 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(tourApprovalBody.is_public, true);
       assert.ok(tourApprovalBody.fallback_gallery.length > 0);
 
+      const splatTourApproval = await tourApprovalRoute.POST(
+        new Request("https://example.test/api/admin/tours/approve", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            listingId: "MS-CRAWL-0001",
+            provider: "supersplat-viewer",
+            viewerUrl: "https://makler-realty.com/tours/MS-CRAWL-0001/index.html",
+            accessibilityCaption: "Reviewed interactive 3D tour of the property.",
+            reviewer: "media_reviewer",
+            reviewConfirmed: "on",
+          }),
+        }),
+      );
+      const splatTourApprovalBody = await splatTourApproval.json();
+      assert.equal(splatTourApproval.status, 201);
+      assert.equal(splatTourApprovalBody.provider, "supersplat-viewer");
+      assert.equal(splatTourApprovalBody.viewer_url, "https://makler-realty.com/tours/MS-CRAWL-0001/index.html");
+      assert.equal(splatTourApprovalBody.panorama_url, null);
+
+      const editorAfterTourApproval = await listingEditorRoute.GET(
+        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
+      );
+      const editorAfterTourApprovalHtml = await editorAfterTourApproval.text();
+      assert.match(editorAfterTourApprovalHtml, /data-tour-review-status="available"/);
+      assert.match(editorAfterTourApprovalHtml, /value="https:\/\/makler-realty\.com\/tours\/MS-CRAWL-0001\/index\.html"/);
+      assert.match(editorAfterTourApprovalHtml, /Reviewed interactive 3D tour of the property\./);
       const operationsLead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
@@ -1839,7 +1866,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         broker_contact_approved: 1,
         contact_linked: 1,
         listing_slug_changed: 1,
-        tour_approved: 1,
+        tour_approved: 2,
         media_reviewed: 1,
         lead_assigned: 1,
         viewing_booked: 1,

@@ -13,7 +13,7 @@ import { getLocale } from "./locales.mjs";
 import { mediaWorkflow, normalizeMediaAsset } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
 import { isTranslationIndexable } from "./seo.mjs";
-import { createTourField } from "./tours.mjs";
+import { TOUR_PROVIDERS, TOUR_REVIEW_STATUSES, createTourField } from "./tours.mjs";
 
 export const DEFAULT_MEDIA_INVENTORY_PATH = fromRoot("migration", "artifacts", "20260704-211155", "media-inventory.csv");
 export const DEFAULT_CMS_SEED_OUTPUT = fromRoot("production", "data", "cms-seed.json");
@@ -720,15 +720,20 @@ export function buildCmsCollections(seed) {
         slug: "listing_tours",
         records: tourRecords.length,
         source: "listings.tour",
-        workflow: ["needs_panorama_upload", "review_required", "approved", "published"],
+        workflow: [...TOUR_REVIEW_STATUSES],
         publish_requires_human_review: true,
         fields: [
           collectionField("provider", "select", {
             required: true,
-            options: ["photo-sphere-viewer"],
+            options: [...TOUR_PROVIDERS],
           }),
           collectionField("listing_id", "relationship", { required: true, relationTo: "listings" }),
-          collectionField("panorama_url", "url", { required_when: ["approved", "published"] }),
+          collectionField("panorama_url", "url", {
+            admin: { description: "Required for approved Photo Sphere Viewer tours." },
+          }),
+          collectionField("viewer_url", "url", {
+            admin: { description: "Required for approved SuperSplat Viewer tours." },
+          }),
           collectionField("thumbnail_url", "url"),
           collectionField("hotspots", "array", { required: true }),
           collectionField("is_public", "checkbox", { required: true }),
@@ -738,7 +743,7 @@ export function buildCmsCollections(seed) {
           }),
           collectionField("review_status", "select", {
             required: true,
-            options: ["needs_panorama_upload", "review_required", "approved", "published"],
+            options: [...TOUR_REVIEW_STATUSES],
           }),
           collectionField("fallback_gallery", "array", { admin: { readOnly: true } }),
         ],

@@ -1488,6 +1488,25 @@ export const ADMIN_APP_JS = `(function () {
     });
     return payload;
   }
+  function syncTourProviderInputs(form) {
+    var provider = form.querySelector("[data-tour-provider]");
+    if (!provider) return;
+    var isSupersplat = provider.value === "supersplat-viewer";
+    var panorama = form.querySelector("[data-tour-panorama-url]");
+    var viewer = form.querySelector("[data-tour-viewer-url]");
+    var panoramaField = form.querySelector("[data-tour-panorama-field]");
+    var viewerField = form.querySelector("[data-tour-viewer-field]");
+    if (panorama) {
+      panorama.required = !isSupersplat;
+      panorama.disabled = isSupersplat;
+    }
+    if (viewer) {
+      viewer.required = isSupersplat;
+      viewer.disabled = !isSupersplat;
+    }
+    if (panoramaField) panoramaField.hidden = isSupersplat;
+    if (viewerField) viewerField.hidden = !isSupersplat;
+  }
   function setTourSaveStatus(form, value, state) {
     var status = form.querySelector("[data-tour-save-status]");
     if (!status) return;
@@ -1495,10 +1514,22 @@ export const ADMIN_APP_JS = `(function () {
     status.setAttribute("data-state", state);
   }
   function initTourEditor() {
+    var forms = document.querySelectorAll("[data-tour-editor-form]");
+    for (var i = 0; i < forms.length; i += 1) syncTourProviderInputs(forms[i]);
+    document.addEventListener("change", function (event) {
+      var provider = event.target;
+      if (!(provider instanceof HTMLSelectElement) || !provider.matches("[data-tour-provider]") || !provider.form) return;
+      syncTourProviderInputs(provider.form);
+    });
     document.addEventListener("submit", function (event) {
       var form = event.target;
       if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-tour-editor-form")) return;
       event.preventDefault();
+      syncTourProviderInputs(form);
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
       var submit = form.querySelector('[type="submit"]');
       var saving = form.getAttribute("data-tour-save-pending") || "Saving...";
       var success = form.getAttribute("data-tour-save-success") || "360 tour approved.";

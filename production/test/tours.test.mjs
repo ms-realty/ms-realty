@@ -14,7 +14,7 @@ const media = [
   { url: "https://makler-realty.com/wp-content/uploads/2025/04/front.jpg", alt: "Front view duplicate" },
 ];
 
-test("360 tour field requires reviewed panorama, caption, and fallback before public display", () => {
+test("tour fields require provider-specific reviewed source, caption, and fallback before public display", () => {
   const draft = createTourField({ listingId: "MS-CRAWL-0001", media });
 
   assert.equal(draft.provider, "photo-sphere-viewer");
@@ -48,6 +48,41 @@ test("360 tour field requires reviewed panorama, caption, and fallback before pu
 
   assert.equal(publicTour(approved).available, true);
   assert.equal(publicTour(approved).mount_target, "psv-listing-tour");
+
+  const splat = createTourField({
+    listingId: "MS-CRAWL-0001",
+    provider: "supersplat-viewer",
+    viewerUrl: "https://makler-realty.com/splats/MS-CRAWL-0001/",
+    accessibilityCaption: "Reviewed interactive 3D reconstruction of the property interior.",
+    isPublic: true,
+    media,
+  });
+
+  assert.deepEqual(
+    publicTour(splat),
+    {
+      available: true,
+      provider: "supersplat-viewer",
+      viewer_url: "https://makler-realty.com/splats/MS-CRAWL-0001/",
+      thumbnail_url: null,
+      accessibility_caption: "Reviewed interactive 3D reconstruction of the property interior.",
+      fallback_gallery: splat.fallback_gallery,
+    },
+  );
+  assert.throws(
+    () =>
+      createTourField({
+        listingId: "MS-CRAWL-0001",
+        provider: "supersplat-viewer",
+        viewerUrl: "http://example.test/splats/MS-CRAWL-0001/",
+        media,
+      }),
+    /HTTPS/,
+  );
+  assert.throws(
+    () => createTourField({ listingId: "MS-CRAWL-0001", provider: "unknown-viewer", media }),
+    /Unsupported tour provider/,
+  );
 });
 
 test("360 tour approval rows are tied to known listings and latest public review wins", () => {
@@ -107,4 +142,20 @@ test("360 tour approval rows are tied to known listings and latest public review
       }),
     /Known listingId/,
   );
+
+  const splat = createTourApproval(
+    seed,
+    {
+      id: "tour-approval-splat",
+      listingId: "MS-CRAWL-0001",
+      provider: "supersplat-viewer",
+      viewerUrl: "https://makler-realty.com/splats/MS-CRAWL-0001/",
+      accessibilityCaption: "Reviewed interactive 3D reconstruction of the property interior.",
+      reviewer: "media_editor",
+      reviewConfirmed: true,
+    },
+    "2026-07-05T00:02:00Z",
+  );
+  assert.equal(splat.provider, "supersplat-viewer");
+  assert.equal(splat.viewer_url, "https://makler-realty.com/splats/MS-CRAWL-0001/");
 });
