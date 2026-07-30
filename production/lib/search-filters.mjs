@@ -1,13 +1,30 @@
+import { normalizeSearchIntent, searchIntentToQueryFilters } from "./search-intent.mjs";
+
 export const SEARCH_FILTER_FIELDS = [
   "location",
+  "location_id",
+  "location_ids",
+  "property_family",
+  "property_families",
   "property_type",
+  "property_subtype",
   "offer_type",
   "status",
   "price_min",
   "price_max",
   "bedrooms_min",
+  "bedrooms_max",
+  "premises_min",
+  "hotel_rooms_min",
   "area_min",
   "area_max",
+  "land_area_min",
+  "land_area_max",
+  "floor_min",
+  "floor_max",
+  "storeys_min",
+  "storeys_max",
+  "exact_reference",
 ];
 
 export function searchFiltersFromObject(input = {}) {
@@ -21,6 +38,18 @@ export function searchFiltersFromObject(input = {}) {
 
 export function searchFiltersFromParams(params) {
   return searchFiltersFromObject(Object.fromEntries(params));
+}
+
+export function searchIntentFromObject(input = {}, options = {}) {
+  return normalizeSearchIntent(input, options);
+}
+
+export function searchIntentFromParams(params, options = {}) {
+  return searchIntentFromObject(Object.fromEntries(params), options);
+}
+
+export function searchFiltersForIntent(intent) {
+  return searchIntentToQueryFilters(intent);
 }
 
 export function searchPageFromParams(params) {
