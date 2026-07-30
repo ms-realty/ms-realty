@@ -1,13 +1,83 @@
 {
-  "artifact_id": "cms-collections-20260704",
-  "source_artifact": "cms-seed-20260704",
+  "artifact_id": "cms-collections-20260730",
+  "source_artifact": "cms-seed-20260730",
+  "taxonomy_contract": {
+    "version": "2026-07-30",
+    "source": "production/lib/listing-facts.mjs#LEGACY_PROPERTY_TAXONOMY",
+    "mappings": [
+      {
+        "legacy_property_type": "apartment",
+        "property_family": "apartment",
+        "property_subtype": "apartment",
+        "review_status": "mapped"
+      },
+      {
+        "legacy_property_type": "multi_unit",
+        "property_family": "apartment",
+        "property_subtype": "development",
+        "review_status": "mapped"
+      },
+      {
+        "legacy_property_type": "house",
+        "property_family": "house",
+        "property_subtype": "house",
+        "review_status": "mapped"
+      },
+      {
+        "legacy_property_type": "villa",
+        "property_family": "house",
+        "property_subtype": "villa",
+        "review_status": "mapped"
+      },
+      {
+        "legacy_property_type": "land",
+        "property_family": "plot",
+        "property_subtype": null,
+        "review_status": "mapping_review_required"
+      },
+      {
+        "legacy_property_type": "plot",
+        "property_family": "plot",
+        "property_subtype": "building_plot",
+        "review_status": "mapped"
+      },
+      {
+        "legacy_property_type": "agricultural_land",
+        "property_family": "agricultural_land",
+        "property_subtype": null,
+        "review_status": "mapped"
+      },
+      {
+        "legacy_property_type": "commercial",
+        "property_family": "commercial",
+        "property_subtype": "other_commercial",
+        "review_status": "mapped"
+      },
+      {
+        "legacy_property_type": "hotel",
+        "property_family": "hotel",
+        "property_subtype": "hotel",
+        "review_status": "mapped"
+      },
+      {
+        "legacy_property_type": "property",
+        "property_family": null,
+        "property_subtype": null,
+        "review_status": "mapping_review_required"
+      }
+    ]
+  },
   "summary": {
-    "collections": 4,
+    "collections": 8,
     "records": {
       "listings": 165,
+      "properties": 165,
+      "locations": 3,
       "listing_translations": 167,
       "media_assets": 4978,
-      "listing_tours": 165
+      "listing_tours": 165,
+      "listing_enrichment_tasks": 165,
+      "search_outbox": 0
     },
     "public_tours": 0
   },
@@ -93,6 +163,20 @@
           ]
         },
         {
+          "name": "property",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "properties"
+        },
+        {
+          "name": "location",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "locations"
+        },
+        {
           "name": "translations",
           "type": "relationship",
           "required": false,
@@ -164,6 +248,13 @@
       "publish_requires_human_review": true,
       "fields": [
         {
+          "name": "listing",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "listings"
+        },
+        {
           "name": "locale",
           "type": "relationship",
           "required": true,
@@ -179,6 +270,20 @@
         },
         {
           "name": "status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "missing",
+            "hermes_drafted",
+            "human_edited",
+            "approved",
+            "published",
+            "stale"
+          ]
+        },
+        {
+          "name": "translation_state",
           "type": "select",
           "required": true,
           "localized": false,
@@ -237,6 +342,314 @@
           "admin": {
             "readOnly": true
           }
+        }
+      ]
+    },
+    {
+      "slug": "properties",
+      "records": 165,
+      "source": "CMS seed property backfill",
+      "workflow": [
+        "source_imported_review_required",
+        "enriched",
+        "broker_verified"
+      ],
+      "publish_requires_human_review": true,
+      "versions": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "location",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "locations"
+        },
+        {
+          "name": "property_family",
+          "type": "select",
+          "required": false,
+          "localized": false,
+          "options": [
+            "apartment",
+            "house",
+            "plot",
+            "agricultural_land",
+            "commercial",
+            "hotel"
+          ]
+        },
+        {
+          "name": "property_subtype",
+          "type": "text",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "taxonomy_mapping_version",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "taxonomy_review_status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "mapped",
+            "mapping_review_required"
+          ]
+        },
+        {
+          "name": "facts",
+          "type": "group",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "fact_verification",
+          "type": "array",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "zero_value_audit",
+          "type": "json",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "legacy_listing_id",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        }
+      ]
+    },
+    {
+      "slug": "locations",
+      "records": 3,
+      "source": "CMS seed location backfill",
+      "workflow": [
+        "source_imported_review_required",
+        "broker_verified"
+      ],
+      "publish_requires_human_review": true,
+      "versions": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "label",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "public_location_precision",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "exact",
+            "approximate",
+            "locality"
+          ]
+        },
+        {
+          "name": "internal_latitude",
+          "type": "number",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "internal_longitude",
+          "type": "number",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "public_latitude",
+          "type": "number",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "public_longitude",
+          "type": "number",
+          "required": false,
+          "localized": false
+        }
+      ]
+    },
+    {
+      "slug": "listing_enrichment_tasks",
+      "records": 165,
+      "source": "CMS seed legacy backfill",
+      "workflow": [
+        "pending",
+        "in_progress",
+        "completed",
+        "skipped"
+      ],
+      "publish_requires_human_review": true,
+      "versions": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "listing",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "listings"
+        },
+        {
+          "name": "property",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "properties"
+        },
+        {
+          "name": "task_type",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "verify_imported_facts"
+          ]
+        },
+        {
+          "name": "task_state",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "pending",
+            "in_progress",
+            "completed",
+            "skipped"
+          ]
+        },
+        {
+          "name": "idempotency_key",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "fact_fields",
+          "type": "json",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "source",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "legacy_backfill",
+            "listing_change"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "search_outbox",
+      "records": 0,
+      "source": "Payload listing hooks",
+      "workflow": [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ],
+      "publish_requires_human_review": true,
+      "versions": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "listing",
+          "type": "relationship",
+          "required": false,
+          "localized": false,
+          "relationTo": "listings"
+        },
+        {
+          "name": "event_type",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "upsert",
+            "delete"
+          ]
+        },
+        {
+          "name": "outbox_state",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "pending",
+            "processing",
+            "completed",
+            "failed"
+          ]
+        },
+        {
+          "name": "idempotency_key",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "payload",
+          "type": "json",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "attempts",
+          "type": "number",
+          "required": true,
+          "localized": false,
+          "defaultValue": 0
+        },
+        {
+          "name": "last_error",
+          "type": "text",
+          "required": false,
+          "localized": false
         }
       ]
     },

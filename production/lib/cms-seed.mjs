@@ -2,6 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseCsv } from "./csv.mjs";
 import { approvedTranslationRecordsForListing, listingSourceSnapshot } from "./content.mjs";
+import {
+  derivePrimaryAreaSqm,
+  enrichmentChecklistFor,
+  LEGACY_PROPERTY_TAXONOMY,
+  normalizeImportedFact,
+  normalizeLegacyListingFacts,
+} from "./listing-facts.mjs";
 import { getLocale } from "./locales.mjs";
 import { mediaWorkflow, normalizeMediaAsset } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -11,6 +18,72 @@ import { createTourField } from "./tours.mjs";
 export const DEFAULT_MEDIA_INVENTORY_PATH = fromRoot("migration", "artifacts", "20260704-211155", "media-inventory.csv");
 export const DEFAULT_CMS_SEED_OUTPUT = fromRoot("production", "data", "cms-seed.json");
 export const DEFAULT_CMS_COLLECTIONS_OUTPUT = fromRoot("production", "data", "cms-collections.json");
+
+export const ENRICHMENT_TASK_TYPE = "verify_imported_facts";
+export const SEARCH_OUTBOX_SCHEMA_VERSION = 1;
+
+export function propertyTaxonomyContract() {
+  const version = normalizeLegacyListingFacts({ property_type: "property" }).facts.taxonomy_mapping_version;
+  return {
+    version,
+    source: "production/lib/listing-facts.mjs#LEGACY_PROPERTY_TAXONOMY",
+    mappings: Object.entries(LEGACY_PROPERTY_TAXONOMY).map(([legacy_property_type, mapping]) => ({
+      legacy_property_type,
+      property_family: mapping.family,
+      property_subtype: mapping.subtype,
+      review_status: mapping.review_status,
+    })),
+  };
+}
+
+function relationId(value) {
+  if (value && typeof value === "object") return String(value.id || "").trim();
+  return String(value || "").trim();
+}
+
+export function propertyIdForListing(listingId) {
+  const id = relationId(listingId);
+  if (!id) throw new Error("Property backfill requires a listing id");
+  return `property-${id}`;
+}
+
+export function locationIdForLabel(label) {
+  const normalized = String(label || "").trim().toLowerCase();
+  if (!normalized) throw new Error("Location backfill requires a location label");
+  return `location:${normalized}`;
+}
+
+export function enrichmentTaskForListing({ listingId, propertyId, factFields = [], source = "legacy_backfill" }) {
+  const listing = relationId(listingId);
+  const property = relationId(propertyId);
+  if (!listing || !property) throw new Error("Enrichment task requires listing and property ids");
+  return {
+    id: `enrichment-${listing}`,
+    collection: "listing_enrichment_tasks",
+    listing,
+    property,
+    task_type: ENRICHMENT_TASK_TYPE,
+    task_state: "pending",
+    idempotency_key: `listing:${listing}:${ENRICHMENT_TASK_TYPE}`,
+    fact_fields: [...new Set(factFields)].sort(),
+    source,
+  };
+}
+
+export function searchOutboxEventForListing(listing, { eventType = "upsert", changeToken } = {}) {
+  const listingId = relationId(listing);
+  if (!listingId) throw new Error("Search outbox event requires a listing id");
+  const token = String(changeToken || listing?.updatedAt || listing?.createdAt || "current");
+  const idempotencyKey = `search:${listingId}:${eventType}:${token}`;
+  return {
+    listing: listingId,
+    event_type: eventType,
+    outbox_state: "pending",
+    idempotency_key: idempotencyKey,
+    // The worker resolves reviewed public facts itself; source copy and private coordinates never enter this payload.
+    payload: { schema_version: SEARCH_OUTBOX_SCHEMA_VERSION, listing_id: listingId, change_token: token },
+  };
+}
 
 export function loadMediaInventory(filePath = DEFAULT_MEDIA_INVENTORY_PATH) {
   return parseCsv(fs.readFileSync(filePath, "utf8"));
@@ -48,11 +121,89 @@ function mediaEntry(row, fallbackAlt = "") {
   });
 }
 
+function verificationForImportedValue(field, value, listingId) {
+  return {
+    field,
+    state: value === null || value === undefined || value === "" ? "unknown" : "entered_pending_review",
+    source_type: "legacy_import",
+    source_reference: listingId,
+  };
+}
+
+function propertyFactsForListing(listing, snapshot, locationId) {
+  const normalized = normalizeLegacyListingFacts({
+    ...listing,
+    ...snapshot,
+    listing_status: listing.listing_status,
+  });
+  const facts = { ...normalized.facts };
+  const family = facts.property_family;
+  const subtype = facts.property_subtype;
+  const sourceArea = numberOrNull(snapshot.area_sqm);
+  const areaField =
+    family === "commercial" ? "usable_area_sqm" : family === "plot" || family === "agricultural_land" ? "land_area_sqm" : "built_area_sqm";
+
+  if (sourceArea !== null && facts[areaField] == null) {
+    const result = normalizeImportedFact(sourceArea, {
+      field: areaField,
+      family,
+      subtype,
+      source: { source_type: "legacy_import", source_reference: listing.id },
+    });
+    facts[areaField] = result.value;
+    normalized.fact_verification.push({ field: areaField, ...result.verification });
+    if (result.zero_value_audit) normalized.zero_value_audit.push(areaField);
+  }
+
+  const propertyFacts = {
+    legacy_property_type: facts.legacy_property_type,
+    condition: snapshot.condition || null,
+    living_area_sqm: facts.living_area_sqm ?? null,
+    built_area_sqm: facts.built_area_sqm ?? null,
+    usable_area_sqm: facts.usable_area_sqm ?? null,
+    gross_floor_area_sqm: facts.gross_floor_area_sqm ?? null,
+    land_area_sqm: facts.land_area_sqm ?? null,
+    bedrooms_count: facts.bedrooms_count ?? null,
+    premises_count: facts.premises_count ?? null,
+    hotel_room_count: facts.hotel_room_count ?? null,
+    floor_number: facts.floor_number ?? null,
+    total_floors: facts.total_floors ?? null,
+    storeys_count: facts.storeys_count ?? null,
+    public_location_precision: snapshot.location_precision || "approximate",
+    primary_area_sqm: derivePrimaryAreaSqm(facts),
+  };
+  const verificationByField = new Map(
+    normalized.fact_verification
+      .filter((entry) => entry.field !== "price_amount")
+      .map((entry) => [entry.field, entry]),
+  );
+  for (const [field, value] of Object.entries(propertyFacts)) {
+    if (!verificationByField.has(field)) verificationByField.set(field, verificationForImportedValue(field, value, listing.id));
+  }
+
+  return {
+    id: propertyIdForListing(listing.id),
+    collection: "properties",
+    location: locationId,
+    property_family: family,
+    property_subtype: subtype,
+    taxonomy_mapping_version: facts.taxonomy_mapping_version,
+    taxonomy_review_status: facts.taxonomy_review_status,
+    facts: propertyFacts,
+    fact_verification: [...verificationByField.values()],
+    zero_value_audit: [...new Set(normalized.zero_value_audit)],
+    legacy_listing_id: listing.id,
+  };
+}
+
 export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows }) {
   const migrationByUrl = new Map(migrationRecords.map((record) => [record.old_url, record]));
   const routeByUrl = new Map(routeMap.map((route) => [route.old_url, route]));
   const mediaByUrl = groupBy(mediaRows, (row) => row.page_url);
 
+  const locationsById = new Map();
+  const properties = [];
+  const enrichmentTasks = [];
   const records = listings.map((listing) => {
     const migration = migrationByUrl.get(listing.url);
     const route = routeByUrl.get(listing.url);
@@ -67,6 +218,30 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
 
     const fallbackAlt = listing.h1 || listing.title || listing.id;
     const media = (mediaByUrl.get(listing.url) || []).map((row) => mediaEntry(row, fallbackAlt));
+    const snapshot = listingSourceSnapshot(listing);
+    if (snapshot.price_on_request) snapshot.price_eur = null;
+    const locationId = locationIdForLabel(snapshot.location);
+    const existingLocation = locationsById.get(locationId);
+    if (existingLocation && existingLocation.label !== snapshot.location) {
+      throw new Error(`Location id collision for ${snapshot.location}`);
+    }
+    if (!existingLocation) {
+      locationsById.set(locationId, {
+        id: locationId,
+        collection: "locations",
+        label: snapshot.location,
+        public_location_precision: snapshot.location_precision || "approximate",
+      });
+    }
+    const property = propertyFactsForListing(listing, snapshot, locationId);
+    properties.push(property);
+    enrichmentTasks.push(
+      enrichmentTaskForListing({
+        listingId: listing.id,
+        propertyId: property.id,
+        factFields: enrichmentChecklistFor(property).filter((item) => item.needs_enrichment).map((item) => item.field),
+      }),
+    );
 
     return {
       id: listing.id,
@@ -75,14 +250,16 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       source_locale: listing.locale,
       source_domain: listing.domain,
       source_url: listing.url,
-      facts: listingSourceSnapshot(listing),
+      facts: snapshot,
+      property: property.id,
+      location: locationId,
       seo: {
         title: listing.title || "",
         description: listing.description || "",
         canonical: listing.canonical || listing.url,
         schema_present: Boolean(listing.schema_present),
       },
-      translations,
+      translations: translations.map((translation) => ({ ...translation, listing: listing.id, translation_state: translation.status })),
       media,
       media_workflow: mediaWorkflow(media),
       tour: createTourField({ listingId: listing.id, media }),
@@ -105,6 +282,8 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
     };
   });
 
+  const locations = [...locationsById.values()].sort((left, right) => left.id.localeCompare(right.id));
+
   const translationRows = records.flatMap((record) => record.translations);
   const mediaAssets = records.reduce((total, record) => total + record.media.length, 0);
   const mediaWithAlt = records.reduce((total, record) => total + record.media.filter((media) => media.alt).length, 0);
@@ -116,9 +295,13 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
   const publicTours = records.filter((record) => record.tour?.is_public).length;
 
   return {
-    artifact_id: "cms-seed-20260704",
+    artifact_id: "cms-seed-20260730",
+    taxonomy_contract: propertyTaxonomyContract(),
     summary: {
       listings: records.length,
+      properties: properties.length,
+      locations: locations.length,
+      enrichmentTasks: enrichmentTasks.length,
       bySourceLocale: countBy(records, (record) => record.source_locale),
       translationLocales: countBy(translationRows, (translation) => translation.locale),
       mediaAssets,
@@ -135,11 +318,17 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       deployableRoutes: records.filter((record) => record.routing?.deployable).length,
     },
     records,
+    properties,
+    locations,
+    enrichment_tasks: enrichmentTasks,
   };
 }
 
 export function assertCmsSeed(seed) {
   if (seed.summary.listings !== 165) throw new Error(`Expected 165 CMS listing records, got ${seed.summary.listings}`);
+  if (seed.summary.properties !== seed.summary.listings) throw new Error("Every legacy listing must map to one Property");
+  if (!seed.summary.locations) throw new Error("CMS seed must contain Locations");
+  if (seed.summary.enrichmentTasks !== seed.summary.listings) throw new Error("Every legacy listing must receive one enrichment task");
   if (seed.summary.bySourceLocale.bg !== 113) throw new Error("Expected 113 BG CMS source listings");
   if (seed.summary.bySourceLocale.ru !== 52) throw new Error("Expected 52 RU CMS source listings");
   if (seed.summary.translationLocales.el !== 1 || seed.summary.translationLocales.he !== 1) {
@@ -155,6 +344,18 @@ export function assertCmsSeed(seed) {
   if (seed.summary.missingMigrationRecords !== 0) throw new Error("Every CMS listing needs a migration record");
   if (seed.summary.missingRouteRows !== 0) throw new Error("Every CMS listing needs a route row");
   if (seed.summary.deployableRoutes !== 0) throw new Error("CMS seed routes must stay review-gated");
+  if (seed.records.some((record) => record.facts.price_on_request && record.facts.price_eur !== null)) {
+    throw new Error("Price-on-request listings must not project a price_eur value");
+  }
+  if (!seed.taxonomy_contract?.version || !Array.isArray(seed.taxonomy_contract.mappings)) {
+    throw new Error("CMS seed must expose the versioned legacy property taxonomy contract");
+  }
+  if (seed.properties?.some((property) => !property.location || !Array.isArray(property.fact_verification))) {
+    throw new Error("Property backfill must retain a Location and fact verification metadata");
+  }
+  if (seed.enrichment_tasks?.some((task) => !task.idempotency_key || task.task_type !== ENRICHMENT_TASK_TYPE)) {
+    throw new Error("Enrichment tasks must be idempotent per listing");
+  }
   return seed.summary;
 }
 
@@ -184,11 +385,15 @@ const REQUIRED_COLLECTION_FIELDS = {
     source_url: "url",
     facts: "group",
     seo: "group",
+    property: "relationship",
+    location: "relationship",
   },
   listing_translations: {
+    listing: "relationship",
     locale: "relationship",
     source_locale: "relationship",
     status: "select",
+    translation_state: "select",
     source_hash: "text",
     translated_hash: "text",
   },
@@ -205,6 +410,31 @@ const REQUIRED_COLLECTION_FIELDS = {
     is_public: "checkbox",
     review_status: "select",
   },
+  properties: {
+    id: "text",
+    location: "relationship",
+    facts: "group",
+    fact_verification: "array",
+  },
+  locations: {
+    id: "text",
+    label: "text",
+  },
+  listing_enrichment_tasks: {
+    id: "text",
+    listing: "relationship",
+    property: "relationship",
+    task_type: "select",
+    task_state: "select",
+    idempotency_key: "text",
+  },
+  search_outbox: {
+    id: "text",
+    event_type: "select",
+    outbox_state: "select",
+    idempotency_key: "text",
+    payload: "json",
+  },
 };
 
 export function buildCmsCollections(seed) {
@@ -212,17 +442,25 @@ export function buildCmsCollections(seed) {
   const translationRecords = listings.flatMap((record) => record.translations || []);
   const mediaRecords = listings.flatMap((record) => record.media || []);
   const tourRecords = listings.map((record) => record.tour).filter(Boolean);
+  const properties = seed.properties || [];
+  const locations = seed.locations || [];
+  const enrichmentTasks = seed.enrichment_tasks || [];
 
   return {
-    artifact_id: "cms-collections-20260704",
+    artifact_id: "cms-collections-20260730",
     source_artifact: seed.artifact_id,
+    taxonomy_contract: seed.taxonomy_contract,
     summary: {
-      collections: 4,
+      collections: 8,
       records: {
         listings: listings.length,
+        properties: properties.length,
+        locations: locations.length,
         listing_translations: translationRecords.length,
         media_assets: mediaRecords.length,
         listing_tours: tourRecords.length,
+        listing_enrichment_tasks: enrichmentTasks.length,
+        search_outbox: 0,
       },
       public_tours: tourRecords.filter((tour) => tour.is_public).length,
     },
@@ -250,6 +488,8 @@ export function buildCmsCollections(seed) {
             required: true,
             fields: ["title", "description", "canonical", "schema_present"],
           }),
+          collectionField("property", "relationship", { required: true, relationTo: "properties" }),
+          collectionField("location", "relationship", { required: true, relationTo: "locations" }),
           collectionField("translations", "relationship", {
             hasMany: true,
             relationTo: "listing_translations",
@@ -275,9 +515,14 @@ export function buildCmsCollections(seed) {
         workflow: ["missing", "hermes_drafted", "human_edited", "approved", "published", "stale"],
         publish_requires_human_review: true,
         fields: [
+          collectionField("listing", "relationship", { required: true, relationTo: "listings" }),
           collectionField("locale", "relationship", { required: true, relationTo: "locales" }),
           collectionField("source_locale", "relationship", { required: true, relationTo: "locales" }),
           collectionField("status", "select", {
+            required: true,
+            options: ["missing", "hermes_drafted", "human_edited", "approved", "published", "stale"],
+          }),
+          collectionField("translation_state", "select", {
             required: true,
             options: ["missing", "hermes_drafted", "human_edited", "approved", "published", "stale"],
           }),
@@ -287,6 +532,87 @@ export function buildCmsCollections(seed) {
           collectionField("approved_at", "date", { required_when: ["approved", "published"] }),
           collectionField("direction", "select", { options: ["ltr", "rtl"] }),
           collectionField("public_indexable", "checkbox", { admin: { readOnly: true } }),
+        ],
+      },
+      {
+        slug: "properties",
+        records: properties.length,
+        source: "CMS seed property backfill",
+        workflow: ["source_imported_review_required", "enriched", "broker_verified"],
+        publish_requires_human_review: true,
+        versions: false,
+        fields: [
+          collectionField("id", "text", { required: true, unique: true }),
+          collectionField("location", "relationship", { required: true, relationTo: "locations" }),
+          collectionField("property_family", "select", {
+            options: ["apartment", "house", "plot", "agricultural_land", "commercial", "hotel"],
+          }),
+          collectionField("property_subtype", "text"),
+          collectionField("taxonomy_mapping_version", "text", { required: true }),
+          collectionField("taxonomy_review_status", "select", {
+            required: true,
+            options: ["mapped", "mapping_review_required"],
+          }),
+          collectionField("facts", "group", { required: true }),
+          collectionField("fact_verification", "array", { required: true }),
+          collectionField("zero_value_audit", "json"),
+          collectionField("legacy_listing_id", "text", { required: true, unique: true }),
+        ],
+      },
+      {
+        slug: "locations",
+        records: locations.length,
+        source: "CMS seed location backfill",
+        workflow: ["source_imported_review_required", "broker_verified"],
+        publish_requires_human_review: true,
+        versions: false,
+        fields: [
+          collectionField("id", "text", { required: true, unique: true }),
+          collectionField("label", "text", { required: true, unique: true }),
+          collectionField("public_location_precision", "select", {
+            required: true,
+            options: ["exact", "approximate", "locality"],
+          }),
+          collectionField("internal_latitude", "number"),
+          collectionField("internal_longitude", "number"),
+          collectionField("public_latitude", "number"),
+          collectionField("public_longitude", "number"),
+        ],
+      },
+      {
+        slug: "listing_enrichment_tasks",
+        records: enrichmentTasks.length,
+        source: "CMS seed legacy backfill",
+        workflow: ["pending", "in_progress", "completed", "skipped"],
+        publish_requires_human_review: true,
+        versions: false,
+        fields: [
+          collectionField("id", "text", { required: true, unique: true }),
+          collectionField("listing", "relationship", { required: true, relationTo: "listings" }),
+          collectionField("property", "relationship", { required: true, relationTo: "properties" }),
+          collectionField("task_type", "select", { required: true, options: [ENRICHMENT_TASK_TYPE] }),
+          collectionField("task_state", "select", { required: true, options: ["pending", "in_progress", "completed", "skipped"] }),
+          collectionField("idempotency_key", "text", { required: true, unique: true }),
+          collectionField("fact_fields", "json"),
+          collectionField("source", "select", { required: true, options: ["legacy_backfill", "listing_change"] }),
+        ],
+      },
+      {
+        slug: "search_outbox",
+        records: 0,
+        source: "Payload listing hooks",
+        workflow: ["pending", "processing", "completed", "failed"],
+        publish_requires_human_review: true,
+        versions: false,
+        fields: [
+          collectionField("id", "text", { required: true, unique: true }),
+          collectionField("listing", "relationship", { relationTo: "listings" }),
+          collectionField("event_type", "select", { required: true, options: ["upsert", "delete"] }),
+          collectionField("outbox_state", "select", { required: true, options: ["pending", "processing", "completed", "failed"] }),
+          collectionField("idempotency_key", "text", { required: true, unique: true }),
+          collectionField("payload", "json", { required: true }),
+          collectionField("attempts", "number", { required: true, defaultValue: 0 }),
+          collectionField("last_error", "text"),
         ],
       },
       {
@@ -345,14 +671,30 @@ export function buildCmsCollections(seed) {
 
 export function assertCmsCollections(manifest) {
   const slugs = manifest.collections.map((collection) => collection.slug);
-  if (manifest.summary.collections !== 4) throw new Error("Expected 4 implemented CMS collection contracts");
-  for (const slug of ["listings", "listing_translations", "media_assets", "listing_tours"]) {
+  if (manifest.summary.collections !== 8) throw new Error("Expected 8 implemented CMS collection contracts");
+  for (const slug of [
+    "listings",
+    "properties",
+    "locations",
+    "listing_translations",
+    "media_assets",
+    "listing_tours",
+    "listing_enrichment_tasks",
+    "search_outbox",
+  ]) {
     if (!slugs.includes(slug)) throw new Error(`Missing CMS collection contract: ${slug}`);
-    if (!manifest.summary.records[slug]) throw new Error(`CMS collection contract has no records: ${slug}`);
+    if (!Number.isInteger(manifest.summary.records[slug])) throw new Error(`CMS collection contract has no record count: ${slug}`);
   }
   if (manifest.summary.records.listings !== 165) throw new Error("Listings collection must cover all migrated listings");
   if (manifest.summary.records.media_assets !== 4978) throw new Error("Media collection must cover all listing media assets");
   if (manifest.summary.records.listing_tours !== 165) throw new Error("Tour collection must expose one review-gated tour per listing");
+  if (manifest.summary.records.properties !== 165) throw new Error("Property collection must backfill every legacy listing");
+  if (!manifest.summary.records.locations) throw new Error("Location collection must backfill imported locations");
+  if (manifest.summary.records.listing_enrichment_tasks !== 165) throw new Error("Every legacy listing must have an enrichment task");
+  if (manifest.summary.records.search_outbox !== 0) throw new Error("Search outbox must start empty");
+  if (!manifest.taxonomy_contract?.version || !Array.isArray(manifest.taxonomy_contract.mappings)) {
+    throw new Error("CMS collection manifest must retain the versioned property taxonomy contract");
+  }
   if (manifest.summary.public_tours !== 0) throw new Error("CMS collection manifest must not publish unreviewed tours");
   if (manifest.collections.some((collection) => collection.publish_requires_human_review !== true)) {
     throw new Error("CMS collection publishing must stay human-review gated");
