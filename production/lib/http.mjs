@@ -1277,7 +1277,6 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/cases", "/admin/cases"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = currentRealtyCasePayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/cases" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -2519,7 +2518,6 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/cases") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
         const result = openRealtyCase(bindRealtyCaseExecutor(parseBody(request), principal), {
@@ -2553,7 +2551,6 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/cases/actions") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
         const result = appendRealtyCaseAction(bindRealtyCaseExecutor(parseBody(request), principal), {

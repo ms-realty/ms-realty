@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-25T11:35:52.646Z",
+  "generated_at": "2026-07-30T14:32:49.003Z",
   "summary": {
     "matchable_leads_with_listing_reference": 2,
     "active_matchable_leads": 2,
@@ -28,7 +28,7 @@
         "price_max": 160000,
         "bedrooms_min": 2
       },
-      "match_count": 2,
+      "match_count": 1,
       "matches": [
         {
           "listing_id": "MS-CRAWL-0003",
@@ -38,16 +38,6 @@
           "property_type": "apartment",
           "offer_type": "rent",
           "price_eur": 600,
-          "price_on_request": false
-        },
-        {
-          "listing_id": "MS-CRAWL-0080",
-          "path": "/he/properties/MS-CRAWL-0080",
-          "title": "Тристаен апартамент под наем в с.Поленица",
-          "location": "סנדנסקי",
-          "property_type": "apartment",
-          "offer_type": "rent",
-          "price_eur": 450,
           "price_on_request": false
         }
       ],
@@ -115,14 +105,14 @@
           "price_on_request": false
         },
         {
-          "listing_id": "MS-CRAWL-0094",
-          "path": "/he/properties/MS-CRAWL-0094",
-          "title": "Индустриална сграда под наем в Петрич",
+          "listing_id": "MS-CRAWL-0096",
+          "path": "/he/properties/MS-CRAWL-0096",
+          "title": "Индустриална сграда под наем",
           "location": "סנדנסקי",
           "property_type": "commercial",
           "offer_type": "rent",
-          "price_eur": 1,
-          "price_on_request": false
+          "price_eur": null,
+          "price_on_request": true
         }
       ],
       "broker_task": {

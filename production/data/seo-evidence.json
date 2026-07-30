@@ -11,7 +11,7 @@
     "sources": {
       "search_console": {
         "source": "search_console",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/search-console.csv",
+        "input_path": "/Users/ivan/Code/MS-Realty-3d-tour/migration/external/seo/search-console.csv",
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
@@ -24,7 +24,7 @@
       },
       "yandex_webmaster": {
         "source": "yandex_webmaster",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/yandex-webmaster.csv",
+        "input_path": "/Users/ivan/Code/MS-Realty-3d-tour/migration/external/seo/yandex-webmaster.csv",
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
@@ -37,7 +37,7 @@
       },
       "backlinks": {
         "source": "backlinks",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/backlinks.csv",
+        "input_path": "/Users/ivan/Code/MS-Realty-3d-tour/migration/external/seo/backlinks.csv",
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
@@ -50,7 +50,7 @@
       },
       "analytics_export": {
         "source": "analytics_export",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/analytics.csv",
+        "input_path": "/Users/ivan/Code/MS-Realty-3d-tour/migration/external/seo/analytics.csv",
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
@@ -63,11 +63,11 @@
       },
       "privacy_events": {
         "source": "privacy_events",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/events.jsonl",
+        "input_path": "/Users/ivan/Code/MS-Realty-3d-tour/production/data/events.jsonl",
         "status": "imported",
-        "row_count": 158,
-        "matched_rows": 39,
-        "unmatched_rows": 119
+        "row_count": 73,
+        "matched_rows": 31,
+        "unmatched_rows": 42
       }
     },
     "missing_required_sources": [
@@ -75,7 +75,7 @@
       "yandex_webmaster",
       "backlinks"
     ],
-    "urls_with_any_evidence": 5
+    "urls_with_any_evidence": 3
   },
   "url_evidence": [
     {
@@ -1215,7 +1215,7 @@
         "referring_domains": 0
       },
       "analytics": {
-        "page_views": 1,
+        "page_views": 0,
         "searches": 0,
         "leads": 0,
         "cta_clicks": 0,
@@ -2957,9 +2957,9 @@
         "referring_domains": 0
       },
       "analytics": {
-        "page_views": 12,
+        "page_views": 8,
         "searches": 0,
-        "leads": 4,
+        "leads": 2,
         "cta_clicks": 1,
         "exported_page_views": 0
       }
@@ -5973,7 +5973,7 @@
         "referring_domains": 0
       },
       "analytics": {
-        "page_views": 1,
+        "page_views": 0,
         "searches": 0,
         "leads": 0,
         "cta_clicks": 0,

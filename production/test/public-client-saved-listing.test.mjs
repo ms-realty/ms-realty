@@ -258,7 +258,7 @@ test("mobile filter preview requests the localized JSON search contract", async 
   );
 
   formHandlers.input();
-  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setTimeout(resolve, 0));
 
   assert.equal(new URL(requests[0].url).pathname, "/api/search");
   assert.equal(new URL(requests[0].url).searchParams.get("locale"), "he");

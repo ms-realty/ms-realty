@@ -144,12 +144,6 @@ export const PROPERTY_FIELD_REGISTRY = Object.freeze(
   ]),
 );
 
-const LEGACY_FACT_ALIASES = Object.freeze({
-  bedrooms: "bedrooms_count",
-  floor: "floor_number",
-  price_eur: "price_amount",
-});
-
 function normalizedFamily(value) {
   const family = String(value || "").trim().toLowerCase();
   return CANONICAL_PROPERTY_FAMILIES.includes(family) ? family : null;

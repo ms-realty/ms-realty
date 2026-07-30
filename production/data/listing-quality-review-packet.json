@@ -4,9 +4,9 @@
   "ready": false,
   "status": "draft_not_launch_evidence",
   "paths": {
-    "workbook_csv": "/Users/ivan/Code/MS-Realty-content-audit/production/data/listing-quality-workbook.csv",
-    "draft_review_csv": "/Users/ivan/Code/MS-Realty-content-audit/production/data/listing-quality-review-draft.csv",
-    "launch_review_csv": "/Users/ivan/Code/MS-Realty-content-audit/migration/reviews/listing-quality.csv"
+    "workbook_csv": "/Users/ivan/Code/MS-Realty-3d-tour/production/data/listing-quality-workbook.csv",
+    "draft_review_csv": "/Users/ivan/Code/MS-Realty-3d-tour/production/data/listing-quality-review-draft.csv",
+    "launch_review_csv": "/Users/ivan/Code/MS-Realty-3d-tour/migration/reviews/listing-quality.csv"
   },
   "admin": {
     "editor_path_pattern": "/admin/listings/edit?listingId=:listing_id",

@@ -56,9 +56,9 @@
       "modal"
     ]
   },
-  "ledger_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-worker-smoke-translations.jsonl",
-  "audit_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-worker-smoke-audit.jsonl",
-  "audit_log_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-worker-smoke-audit-log.jsonl",
+  "ledger_path": "/Users/ivan/Code/MS-Realty-3d-tour/production/data/hermes-worker-smoke-translations.jsonl",
+  "audit_path": "/Users/ivan/Code/MS-Realty-3d-tour/production/data/hermes-worker-smoke-audit.jsonl",
+  "audit_log_path": "/Users/ivan/Code/MS-Realty-3d-tour/production/data/hermes-worker-smoke-audit-log.jsonl",
   "audit_log_rows": 2,
   "provider": {
     "mode": "self_hosted",
@@ -74,13 +74,13 @@
   },
   "persisted": [
     {
-      "id": "translation-listing-MS-CRAWL-0001-el",
-      "target_locale": "el",
+      "id": "translation-listing-MS-CRAWL-0002-de",
+      "target_locale": "de",
       "status": "hermes_drafted",
       "public_indexable": false
     },
     {
-      "id": "translation-listing-MS-3000-de",
+      "id": "translation-listing-MS-CRAWL-0003-de",
       "target_locale": "de",
       "status": "hermes_drafted",
       "public_indexable": false

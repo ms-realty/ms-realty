@@ -958,19 +958,24 @@ assertTranslationLedger(translationTaskEvents);
 const currentGreekTask = latestTranslationTasks(translationTaskEvents).find(
   (task) => task.id === "translation-listing-MS-CRAWL-0001-el",
 );
-if (currentGreekTask?.status !== "stale" || currentGreekTask.public_indexable !== false) {
-  throw new Error("Translation task artifact must retain the latest Greek listing task as stale and non-indexable");
+const greekTaskHistory = translationTaskEvents.filter((task) => task.id === "translation-listing-MS-CRAWL-0001-el");
+if (
+  currentGreekTask?.status !== "hermes_drafted" ||
+  currentGreekTask.public_indexable !== false ||
+  !greekTaskHistory.some((task) => task.status === "stale" && task.public_indexable === false)
+) {
+  throw new Error("Translation task artifact must retain stale Greek history and a non-indexable replacement draft");
 }
 const translationCoverage = JSON.parse(fs.readFileSync(fromRoot("production", "data", "translation-coverage-report.json"), "utf8"));
 assertTranslationCoverageReport(translationCoverage);
 if (
   translationCoverage.summary.open_translation_tasks !== 989 ||
-  translationCoverage.summary.stale_translation_tasks !== 1 ||
-  translationCoverage.summary.by_task_type.hermes_draft_required !== 658 ||
+  translationCoverage.summary.stale_translation_tasks !== 0 ||
+  translationCoverage.summary.by_task_type.hermes_draft_required !== 656 ||
   translationCoverage.rows.find((row) => row.listing_id === "MS-CRAWL-0001" && row.target_locale === "el")?.task_type !==
-    "stale_review_required"
+    "draft_review_required"
 ) {
-  throw new Error("Translation coverage report must open missing and stale translation review tasks");
+  throw new Error("Translation coverage report must keep replacement drafts reviewer-gated");
 }
 const hermesAudit = fs
   .readFileSync(fromRoot("production", "data", "hermes-audit.jsonl"), "utf8")
@@ -986,10 +991,10 @@ if (!["hermes_drafted", "published", "stale"].every((status) => greekAuditHistor
 const hermesDraftDispatch = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-dispatch.json"), "utf8"));
 assertHermesDraftDispatch(hermesDraftDispatch);
 if (
-  hermesDraftDispatch.summary.eligible_tasks !== 659 ||
+  hermesDraftDispatch.summary.eligible_tasks !== 656 ||
   hermesDraftDispatch.summary.batch_size !== 25 ||
-  hermesDraftDispatch.summary.remaining_after_batch !== 634 ||
-  hermesDraftDispatch.rows[0].task_type !== "stale_review_required" ||
+  hermesDraftDispatch.summary.remaining_after_batch !== 631 ||
+  hermesDraftDispatch.rows[0].task_type !== "hermes_draft_required" ||
   hermesDraftDispatch.rows.some((row) => row.can_publish || row.public_indexable)
 ) {
   throw new Error("Hermes draft dispatch must batch safe non-publishing translation tasks");
