@@ -16,6 +16,14 @@ function tableSql(source, name) {
 }
 
 test("Payload migration boot configuration and generated constraints stay runnable", () => {
+  const tsconfig = JSON.parse(fs.readFileSync(fromRoot("tsconfig.json"), "utf8"));
+  assert.equal(tsconfig.compilerOptions.allowJs, true);
+  assert.deepEqual(tsconfig.include, [
+    "payload.config.js",
+    "migrations/**/*.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+  ]);
   for (const migration of ["20260710_132716_initial_schema.ts", "20260730_120000_property_search_schema.ts"]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
