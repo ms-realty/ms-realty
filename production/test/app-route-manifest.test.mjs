@@ -10,6 +10,7 @@ import {
   renderAppRobots,
   renderAppRoute,
   renderAppRouteResponse,
+  renderAppSearchRoute,
   renderAppSitemap,
 } from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
@@ -202,6 +203,31 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(guide.html, /data-approved-source="cms"/);
   assert.match(guide.html, /aria-label="Guide actions"/);
   assert.match(guide.html, /Non-EU buyers cannot own Bulgarian land directly/);
+});
+
+test("dedicated localized search renderer preserves configured engine hits", async () => {
+  const config = {
+    ...appRouterConfigFromEnv({ NODE_ENV: "test" }),
+    search: {
+      environment: "test",
+      typesense: { baseUrl: "https://typesense.test", apiKey: "typesense-test", collectionName: "ms_realty_listings" },
+      meilisearch: {},
+      fetchImpl: async () => new Response(JSON.stringify({
+        found: 1,
+        hits: [{ document: { id: "MS-CRAWL-0001:bg", source_listing_id: "MS-CRAWL-0001", locale: "bg" } }],
+      }), { status: 200, headers: { "content-type": "application/json" } }),
+    },
+  };
+  const search = await renderAppSearchRoute({
+    pathname: "/bg/tarsene",
+    url: "https://example.test/bg/tarsene?q=Sndanski",
+    config,
+  });
+
+  assert.equal(search.status, 200);
+  assert.equal(search.rendered.search.backend.engine, "typesense");
+  assert.deepEqual(search.rendered.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
+  assert.match(search.html, /MS-CRAWL-0001/);
 });
 
 test("App Router adapter honors mounted public listing edit ledger", () => {

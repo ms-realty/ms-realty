@@ -26,9 +26,13 @@ import {
   privacySafeSavedSearch,
   savedSearchIntent,
 } from "./saved-searches.mjs";
-import { queryPublicSearch } from "./search-engine-sync.mjs";
+import {
+  executePublicSearch,
+  PublicSearchInputError,
+  PublicSearchUnavailableError,
+  publicSearchConfigFromEnv,
+} from "./public-search.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
-import { normalizeSearchRequest } from "./search-request.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
@@ -77,22 +81,7 @@ export function appApiConfigFromEnv(env = process.env) {
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
-    search: {
-      engine: env.MS_REALTY_SEARCH_ENGINE,
-      environment: env.NODE_ENV,
-      typesense: {
-        baseUrl: env.TYPESENSE_URL,
-        apiKey: env.TYPESENSE_API_KEY,
-        collectionName: env.TYPESENSE_COLLECTION || "ms_realty_listings",
-      },
-      meilisearch: {
-        baseUrl: env.MEILI_URL,
-        apiKey: env.MEILI_API_KEY,
-        indexName: env.MEILI_INDEX || "ms_realty_listings",
-      },
-      fetchImpl: globalThis.fetch,
-      naturalLanguageEnabled: env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
-    },
+    search: publicSearchConfigFromEnv(env),
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     receivedAt: env.MS_REALTY_RECEIVED_AT,
     requestedAt: env.MS_REALTY_REQUESTED_AT,
@@ -213,115 +202,28 @@ function recordConsent(input, config) {
   });
 }
 
-function activeListingRecord(record) {
-  const status = String(record.facts?.listing_status || "available").trim().toLowerCase();
-  return record.collection === "listings" && ["available", "reserved"].includes(status);
-}
-
-function engineLocaleCodes(seed, registry, result) {
-  if (seed.records.some((record) => activeListingRecord(record) && record.source_locale === result.locale)) {
-    return [result.locale];
-  }
-  return [...new Set([result.search.fallback?.locale || registry.source_locale, registry.source_locale].filter(Boolean))];
-}
-
-function seedForSearchHits(seed, hits) {
-  const recordsById = new Map(
-    seed.records.filter((record) => record.collection === "listings").map((record) => [record.id, record]),
-  );
-  const seen = new Set();
-  const records = [];
-  for (const hit of hits) {
-    const id = String(hit.source_listing_id || "").trim();
-    const record = recordsById.get(id);
-    if (!record || seen.has(id)) continue;
-    seen.add(id);
-    records.push(record);
-  }
-  return { ...seed, records };
-}
-
-function withSearchBackend(result, engineResult) {
-  const backend = {
-    engine: engineResult.engine,
-    mode: engineResult.engine === "typesense" ? "primary" : engineResult.engine === "meilisearch" ? "fallback" : "local_fallback",
-    locale_codes: engineResult.locale_codes,
-    unavailable_engines: engineResult.unavailable_engines,
-  };
-  if (Number.isFinite(engineResult.total)) backend.indexed_matches = engineResult.total;
-  return {
-    ...result,
-    search: {
-      ...result.search,
-      engines: [engineResult.engine],
-      backend,
-    },
-  };
-}
-
-function engineResultIsComplete(engineResult) {
-  return !Number.isFinite(engineResult.total) || engineResult.total <= engineResult.hits.length;
-}
-
-function withSearchIntent(result, searchRequest) {
-  return {
-    ...result,
-    search: {
-      ...result.search,
-      intent: searchRequest.intent,
-      natural_language: searchRequest.natural_language,
-    },
-  };
-}
-
-async function routeSearch(requestUrl, registry, seed, config, preview = false) {
-  let searchRequest;
+async function routeSearch(requestUrl, registry, seed, config) {
   try {
-    searchRequest = normalizeSearchRequest(requestUrl.searchParams, {
+    const { result, request } = await executePublicSearch({
+      registry,
+      seed,
+      params: requestUrl.searchParams,
       defaultLocale: requestUrl.searchParams.get("locale") || registry.source_locale,
-      naturalLanguageEnabled: config.search?.naturalLanguageEnabled === true,
+      search: config.search,
+      translationTasks: currentTranslationTasks(config),
     });
+    const { intent, query, filters, sort, page } = request;
+    recordEvent({ type: "search", path: requestUrl.pathname, locale: intent.locale, query, filters, sort, page }, config);
+    return json(200, result);
   } catch (error) {
-    return json(400, { kind: "bad_request", message: error.message });
-  }
-  const { intent, query, filters, sort, page } = searchRequest;
-  const localeCode = intent.locale;
-  const translationTasks = currentTranslationTasks(config);
-  const localResult = searchRuntimeListings(registry, seed, {
-    localeCode,
-    query,
-    filters,
-    sort,
-    page,
-    translationTasks,
-  });
-  let engineResult;
-  try {
-    engineResult = await queryPublicSearch({
-      ...(config.search || {}),
-      q: query,
-      intent,
-      localeCodes: engineLocaleCodes(seed, registry, localResult),
-    });
-  } catch (error) {
-    if (String(config.search?.environment || "").toLowerCase() === "production") {
+    if (error instanceof PublicSearchInputError) {
+      return json(400, { kind: "bad_request", message: error.message });
+    }
+    if (error instanceof PublicSearchUnavailableError) {
       return json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" });
     }
     throw error;
   }
-  const result =
-    engineResult.engine === "seed_fallback" || !engineResultIsComplete(engineResult)
-      ? localResult
-      : searchRuntimeListings(registry, seedForSearchHits(seed, engineResult.hits), {
-          localeCode,
-          query,
-          filters,
-          sort,
-          page,
-          translationTasks,
-        });
-  if (!preview) recordEvent({ type: "search", path: requestUrl.pathname, locale: localeCode, query, filters, sort, page }, config);
-  return json(200, withSearchIntent(withSearchBackend(result, engineResult), searchRequest));
 }
 
 function routeLead(request, body, registry, seed, config) {

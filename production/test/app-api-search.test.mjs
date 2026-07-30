@@ -93,6 +93,17 @@ test("public API search uses Typesense results and keeps local locale and filter
   });
 });
 
+test("public API keeps engine-ranked typo hits without a second local text filter", async () => {
+  await withSearchServer(async (baseUrl) => {
+    const { response, body } = await searchResponse(searchConfig({ typesenseUrl: baseUrl }), "locale=bg&q=Sndanski");
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(body.search.engines, ["typesense"]);
+    assert.equal(body.search.query, "Sndanski");
+    assert.deepEqual(body.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
+  });
+});
+
 test("public API search falls back to Meilisearch only after Typesense is unavailable", async () => {
   await withSearchServer(
     async (baseUrl, calls) => {
