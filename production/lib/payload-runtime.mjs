@@ -3,6 +3,7 @@ import net from "node:net";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { fromRoot } from "./paths.mjs";
+import { REALTY_CASE_PAYLOAD_COLLECTION_SLUGS } from "./realty-case-collections.mjs";
 
 export const DEFAULT_PAYLOAD_RUNTIME_REPORT = fromRoot("production", "data", "payload-runtime-report.json");
 
@@ -11,6 +12,15 @@ const REQUIRED_ROUTE_FILES = [
   "app/(payload)/api/[...slug]/route.js",
   "app/(payload)/graphql/route.js",
   "app/(payload)/graphql-playground/route.js",
+];
+export const REQUIRED_PAYLOAD_COLLECTIONS = [
+  "admins",
+  "locales",
+  "listings",
+  "listing_translations",
+  "media_assets",
+  "listing_tours",
+  ...REALTY_CASE_PAYLOAD_COLLECTION_SLUGS,
 ];
 const REQUIRED_CHECK_IDS = [
   "payload_secret",
@@ -185,13 +195,12 @@ async function payloadConfigCheck() {
     const mod = await import(pathToFileURL(configPath).href);
     const config = await mod.default;
     const slugs = (config.collections || []).map((collection) => collection.slug);
-    const required = ["admins", "locales", "listings", "listing_translations", "media_assets", "listing_tours"];
-    const missing = required.filter((slug) => !slugs.includes(slug));
+    const missing = REQUIRED_PAYLOAD_COLLECTIONS.filter((slug) => !slugs.includes(slug));
     if (config.routes?.admin !== "/payload-admin") {
       return check("payload_config_import", "fail", { error: "Payload admin route must be /payload-admin" });
     }
     if (missing.length) return check("payload_config_import", "fail", { missing_collections: missing });
-    return check("payload_config_import", "pass", { admin_route: config.routes.admin, collections: required.length });
+    return check("payload_config_import", "pass", { admin_route: config.routes.admin, collections: REQUIRED_PAYLOAD_COLLECTIONS.length });
   } catch (error) {
     return check("payload_config_import", "fail", { error: error.message });
   }
@@ -385,7 +394,11 @@ export function assertPayloadRuntimeReport(report) {
   const config = report.checks.find((item) => item.id === "payload_config_import");
   if (
     config?.status === "pass" &&
-    (config.admin_route !== "/payload-admin" || !Number.isInteger(config.collections) || config.collections < 6)
+    (
+      config.admin_route !== "/payload-admin" ||
+      !Number.isInteger(config.collections) ||
+      config.collections < REQUIRED_PAYLOAD_COLLECTIONS.length
+    )
   ) {
     throw new Error("Payload runtime report must include Payload config evidence");
   }
