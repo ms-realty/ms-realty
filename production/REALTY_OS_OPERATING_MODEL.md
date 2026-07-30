@@ -684,9 +684,17 @@ Configuration:
 - `MS_REALTY_CASE_CONDITION_LEDGER_PATH`: local preview condition-ledger location.
 - `MS_REALTY_CASE_RECORDED_AT`: deterministic test/smoke timestamp only.
 - `MS_REALTY_WORKSPACE_ID`: required scope for `case:manifest`, `case:project`, and
-  `case:conditions:project`.
+  `case:conditions:project`, and `case:reconcile`.
 - `MS_REALTY_CASE_PROJECTOR_APPLY=1`: explicit opt-in to write either case manifest through Payload;
   omission remains a dry run.
+- `MS_REALTY_CASE_READBACK_DATABASE_URL`: required PostgreSQL connection URL for `case:reconcile`;
+  use a dedicated SELECT-only role, never a migration or write-capable operator connection.
+- `PAYLOAD_SECRET` and `NODE_ENV=production`: required for `case:reconcile`; both belong in the
+  runtime secret/environment store, never a ledger, manifest, prompt, or committed file.
+- `case:reconcile` refuses `PAYLOAD_DROP_DATABASE=true`, `PAYLOAD_MIGRATING=true`, and
+  `MS_REALTY_CASE_PROJECTOR_APPLY=1`. It exits 0 for a clean snapshot, 1 for detected drift, and 2
+  for setup/read failures; the latter deliberately returns only
+  `{"kind":"realty_case_payload_readback","status":"failed"}`.
 - `MS_REALTY_RUN_PAYLOAD_INTEGRATION=1`: developer-only opt-in for the disposable Docker/Postgres
   migration-and-projector integration test; it is not production launch evidence.
 - `MS_REALTY_ADMIN_CREDENTIALS_JSON`: per-human/per-agent credentials and roles.
