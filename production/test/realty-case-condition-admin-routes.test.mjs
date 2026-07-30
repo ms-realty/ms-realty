@@ -141,6 +141,104 @@ test("Next admin condition routes bind actors and preserve manual and human-cont
   });
 });
 
+test("condition workbench renders unresolved states and validates JSON form evidence", async () => {
+  await withCredentials(async (auth) => {
+    const realtyCaseLedgerPath = tempLedger("app-condition-workbench-cases");
+    const realtyCaseConditionLedgerPath = tempLedger("app-condition-workbench-conditions");
+    const auditLogPath = tempLedger("app-condition-workbench-audit");
+    const config = appAdminConfigFromEnv({
+      MS_REALTY_CASE_LEDGER_PATH: realtyCaseLedgerPath,
+      MS_REALTY_CASE_CONDITION_LEDGER_PATH: realtyCaseConditionLedgerPath,
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+      MS_REALTY_CASE_RECORDED_AT: "2026-07-30T09:00:00.000Z",
+    });
+    const request = (pathname, method, headers, body, requestConfig = config) =>
+      renderAppAdminResponse(
+        new Request(`https://example.test${pathname}`, {
+          method,
+          headers: { ...headers, ...(body ? { "content-type": "application/json" } : {}) },
+          ...(body ? { body: JSON.stringify(body) } : {}),
+        }),
+        { config: requestConfig },
+      );
+
+    assert.equal((await request("/api/admin/cases", "POST", auth.human, caseInput("manual-workbench", "manual"))).status, 201);
+    const openWithFormValue = await request("/api/admin/cases/conditions", "POST", auth.human, {
+      caseId: "manual-workbench",
+      conditionId: "open-condition",
+      conditionType: "title_clearance",
+      dueAt: "2026-07-31T09:00:00.000Z",
+      requiredEvidenceProducerRefsJson: JSON.stringify(["lawyer://title-review", "registry://property-register"]),
+    });
+    assert.equal(openWithFormValue.status, 201);
+
+    for (const conditionId of ["blocked-condition", "expired-condition", "satisfied-condition"]) {
+      assert.equal(
+        (await request("/api/admin/cases/conditions", "POST", auth.human, conditionInput("manual-workbench", conditionId))).status,
+        201,
+      );
+    }
+    const blocked = await request("/api/admin/cases/conditions/actions", "POST", auth.human, {
+      caseId: "manual-workbench",
+      conditionId: "blocked-condition",
+      action: "condition_blocked",
+      reasonCode: "awaiting_registry_reply",
+    });
+    assert.equal(blocked.status, 201);
+
+    const invalidEvidence = await request("/api/admin/cases/conditions/actions", "POST", auth.human, {
+      caseId: "manual-workbench",
+      conditionId: "open-condition",
+      action: "condition_satisfied",
+      evidenceRefsJson: "not-json",
+    });
+    assert.equal(invalidEvidence.status, 400);
+    assert.match((await invalidEvidence.json()).message, /evidence refs must be valid JSON/i);
+
+    const satisfied = await request("/api/admin/cases/conditions/actions", "POST", auth.human, {
+      caseId: "manual-workbench",
+      conditionId: "satisfied-condition",
+      action: "condition_satisfied",
+      evidenceRefsJson: JSON.stringify([
+        { ref: "evidence://lawyer/title", producerRef: "lawyer://title-review" },
+        { ref: "evidence://registry/title", producerRef: "registry://property-register" },
+      ]),
+    });
+    assert.equal(satisfied.status, 201);
+    assert.equal((await satisfied.json()).condition.status, "satisfied");
+
+    const lateConfig = { ...config, realtyCaseRecordedAt: "2026-08-01T09:00:00.000Z" };
+    const expired = await request(
+      "/api/admin/cases/conditions/actions",
+      "POST",
+      auth.human,
+      { caseId: "manual-workbench", conditionId: "expired-condition", action: "condition_expired" },
+      lateConfig,
+    );
+    assert.equal(expired.status, 201);
+
+    const humanPage = await request("/admin/cases?locale=en", "GET", auth.human, null, lateConfig);
+    const humanHtml = await humanPage.text();
+    assert.equal(humanPage.status, 200, humanHtml);
+    assert.match(humanHtml, /data-realty-case-condition-workbench="true"/);
+    assert.match(humanHtml, /data-realty-case-condition-create="true"/);
+    assert.match(humanHtml, /data-realty-case-condition="open-condition"/);
+    assert.match(humanHtml, /data-condition-status="open"/);
+    assert.match(humanHtml, /data-condition-status="blocked"/);
+    assert.match(humanHtml, /data-condition-status="expired"/);
+    assert.match(humanHtml, /name="requiredEvidenceProducerRefsJson"/);
+    assert.match(humanHtml, /name="evidenceRefsJson"/);
+    assert.match(humanHtml, /data-admin-mutation-form="realty-case-condition-condition_satisfied"/);
+
+    const agentPage = await request("/admin/cases?locale=en", "GET", auth.agent, null, lateConfig);
+    const agentHtml = await agentPage.text();
+    assert.equal(agentPage.status, 200, agentHtml);
+    assert.match(agentHtml, /data-realty-case-condition="open-condition"/);
+    assert.doesNotMatch(agentHtml, /data-realty-case-condition-create="true"/);
+    assert.doesNotMatch(agentHtml, /data-admin-mutation-form="realty-case-condition-/);
+  });
+});
+
 test("standalone HTTP condition routes match the trusted-agent contract", async () => {
   await withCredentials(async (auth) => {
     const realtyCaseLedgerPath = tempLedger("http-condition-cases");

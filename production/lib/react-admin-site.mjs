@@ -2292,6 +2292,18 @@ const REALTY_CASE_COPY = Object.freeze({
     freeze: "Замрази",
     resume: "Продължи",
     empty: "Няма отворени сделки.",
+    conditions: "Условия",
+    addCondition: "Ново условие",
+    conditionId: "Идентификатор на условието",
+    conditionType: "Тип условие",
+    dueAt: "Срок",
+    requiredEvidence: "Изисквани източници на доказателства (JSON масив)",
+    evidenceJson: "Доказателства (JSON масив)",
+    satisfy: "Отбележи като изпълнено",
+    expire: "Отбележи като изтекло",
+    waive: "Отмени условието",
+    reopen: "Отвори отново",
+    conditionsEmpty: "Няма активни условия.",
   },
   ru: {
     title: "Сделки",
@@ -2313,6 +2325,18 @@ const REALTY_CASE_COPY = Object.freeze({
     freeze: "Заморозить",
     resume: "Продолжить",
     empty: "Нет открытых сделок.",
+    conditions: "Условия",
+    addCondition: "Новое условие",
+    conditionId: "Идентификатор условия",
+    conditionType: "Тип условия",
+    dueAt: "Срок",
+    requiredEvidence: "Требуемые источники доказательств (массив JSON)",
+    evidenceJson: "Доказательства (массив JSON)",
+    satisfy: "Отметить выполненным",
+    expire: "Отметить истекшим",
+    waive: "Отменить условие",
+    reopen: "Открыть снова",
+    conditionsEmpty: "Нет активных условий.",
   },
   en: {
     title: "Transaction cases",
@@ -2334,6 +2358,18 @@ const REALTY_CASE_COPY = Object.freeze({
     freeze: "Freeze",
     resume: "Resume",
     empty: "No open transaction cases.",
+    conditions: "Conditions",
+    addCondition: "Open condition",
+    conditionId: "Condition ID",
+    conditionType: "Condition type",
+    dueAt: "Due at",
+    requiredEvidence: "Required evidence producer references (JSON array)",
+    evidenceJson: "Evidence references (JSON array)",
+    satisfy: "Mark satisfied",
+    expire: "Mark expired",
+    waive: "Waive condition",
+    reopen: "Reopen",
+    conditionsEmpty: "No open, blocked, or expired conditions.",
   },
 });
 
@@ -2351,6 +2387,205 @@ function caseMutationAttrs(kind, success) {
     "data-admin-mutation-success": success,
     "data-admin-mutation-failure": "The transaction case action failed.",
   };
+}
+
+function conditionMutationAttrs(action, success) {
+  return {
+    method: "post",
+    action: action === "condition_opened" ? "/api/admin/cases/conditions" : "/api/admin/cases/conditions/actions",
+    className: "adm-form",
+    "data-admin-mutation-form": `realty-case-condition-${action}`,
+    "data-admin-mutation-saving": "Saving condition…",
+    "data-admin-mutation-success": success,
+    "data-admin-mutation-failure": "The condition action failed.",
+  };
+}
+
+function canManageCaseConditions(page) {
+  return pageCan(page, "cases:write") && !page.workspace?.operator_roles?.includes("agent");
+}
+
+function conditionTone(condition) {
+  return condition.status === "blocked" || condition.overdue ? "brick" : "sea";
+}
+
+function RealtyCaseConditionAction({ page, condition, action, submit, children = [] }) {
+  const actor = page.workspace?.operator_id || "admin";
+  const fields = Array.isArray(children) ? children : [children];
+  return h(
+    "details",
+    { className: "adm-pipeline-secondary" },
+    h("summary", null, submit),
+    h(
+      "form",
+      conditionMutationAttrs(action, "Condition updated. Refreshing case state."),
+      h("input", { type: "hidden", name: "caseId", value: condition.case_id }),
+      h("input", { type: "hidden", name: "conditionId", value: condition.id }),
+      h("input", { type: "hidden", name: "action", value: action }),
+      h("input", { type: "hidden", name: "actor", value: actor }),
+      ...fields,
+      h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, submit),
+    ),
+  );
+}
+
+function RealtyCaseConditionCard({ page, condition, caseIsActive }) {
+  const copy = caseCopy(page);
+  const canManage = canManageCaseConditions(page) && caseIsActive;
+  const canSatisfy = ["open", "blocked"].includes(condition.status);
+  const canExpire = condition.status !== "expired" && condition.overdue;
+  const canWaive = !["satisfied", "waived"].includes(condition.status);
+  const canReopen = condition.status !== "open";
+  const dueMin = datetimeLocalValue(page.realtyCaseConditionQueue?.generated_at);
+  return h(
+    "article",
+    {
+      className: "adm-pipeline-card",
+      "data-realty-case-condition": condition.id,
+      "data-condition-status": condition.status,
+      "data-condition-case": condition.case_id,
+    },
+    h(
+      "header",
+      { className: "adm-pipeline-card__header" },
+      h("div", null, h("h2", null, condition.id), h("small", null, `${condition.case_id} · ${condition.type}`)),
+      h(StatusPill, { tone: conditionTone(condition) }, condition.status),
+    ),
+    h(
+      "div",
+      { className: "adm-pipeline-requirements" },
+      h("span", null, `${copy.dueAt}: ${formatAdminDateTime(condition.due_at, page.workspace?.locale)}`),
+      h("span", null, `${copy.requiredEvidence}: ${condition.required_evidence_producer_refs.join(", ")}`),
+    ),
+    canManage
+      ? h(
+          "div",
+          { className: "adm-task-list__actions" },
+          canSatisfy
+            ? h(RealtyCaseConditionAction, {
+                page,
+                condition,
+                action: "condition_satisfied",
+                submit: copy.satisfy,
+                children: [
+                  h(
+                    "label",
+                    null,
+                    copy.evidenceJson,
+                    h("textarea", {
+                      name: "evidenceRefsJson",
+                      required: true,
+                      rows: 3,
+                      maxLength: 6000,
+                      placeholder: '[{"ref":"evidence://…","producerRef":"lawyer://…"}]',
+                    }),
+                  ),
+                ],
+              })
+            : null,
+          condition.status === "open"
+            ? h(RealtyCaseConditionAction, {
+                page,
+                condition,
+                action: "condition_blocked",
+                submit: copy.blocked,
+                children: [
+                  h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120, pattern: "[a-z][a-z0-9_:-]*" })),
+                ],
+              })
+            : null,
+          canExpire
+            ? h(RealtyCaseConditionAction, { page, condition, action: "condition_expired", submit: copy.expire })
+            : null,
+          canWaive
+            ? h(RealtyCaseConditionAction, {
+                page,
+                condition,
+                action: "condition_waived",
+                submit: copy.waive,
+                children: [
+                  h("label", null, copy.authority, h("input", { name: "authorityRef", required: true, maxLength: 240, pattern: "[A-Za-z0-9][A-Za-z0-9._:/-]*" })),
+                  h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120, pattern: "[a-z][a-z0-9_:-]*" })),
+                ],
+              })
+            : null,
+          canReopen
+            ? h(RealtyCaseConditionAction, {
+                page,
+                condition,
+                action: "condition_reopened",
+                submit: copy.reopen,
+                children: [
+                  h("label", null, copy.authority, h("input", { name: "authorityRef", required: true, maxLength: 240, pattern: "[A-Za-z0-9][A-Za-z0-9._:/-]*" })),
+                  h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120, pattern: "[a-z][a-z0-9_:-]*" })),
+                  h("label", null, copy.dueAt, h("input", { name: "dueAt", type: "datetime-local", required: true, min: dueMin })),
+                ],
+              })
+            : null,
+        )
+      : null,
+  );
+}
+
+function RealtyCaseConditionCreateForm({ page, cases }) {
+  const copy = caseCopy(page);
+  if (!canManageCaseConditions(page) || !cases.length) return null;
+  const actor = page.workspace?.operator_id || "admin";
+  return h(
+    WorkbenchDisclosure,
+    { summary: copy.addCondition, "data-realty-case-condition-create": "true" },
+    h(
+      "form",
+      conditionMutationAttrs("condition_opened", "Condition opened. Refreshing case state."),
+      h("input", { type: "hidden", name: "actor", value: actor }),
+      h(
+        "label",
+        null,
+        "Case ID",
+        h(
+          "select",
+          { name: "caseId", required: true },
+          ...cases.map((caseRecord) => h("option", { key: caseRecord.id, value: caseRecord.id }, caseRecord.id)),
+        ),
+      ),
+      h("label", null, copy.conditionId, h("input", { name: "conditionId", required: true, maxLength: 160, pattern: "[A-Za-z0-9][A-Za-z0-9._:/-]*" })),
+      h("label", null, copy.conditionType, h("input", { name: "conditionType", required: true, maxLength: 120, pattern: "[a-z][a-z0-9_:-]*" })),
+      h("label", null, copy.dueAt, h("input", { name: "dueAt", type: "datetime-local", required: true, min: datetimeLocalValue(page.realtyCaseConditionQueue?.generated_at) })),
+      h(
+        "label",
+        null,
+        copy.requiredEvidence,
+        h("textarea", { name: "requiredEvidenceProducerRefsJson", required: true, rows: 2, maxLength: 6000, placeholder: '["lawyer://title-review"]' }),
+      ),
+      h("button", { type: "submit", className: "mk-btn mk-btn--primary" }, copy.addCondition),
+    ),
+  );
+}
+
+function RealtyCaseConditions({ page, caseQueue }) {
+  const copy = caseCopy(page);
+  const queue = page.realtyCaseConditionQueue || { rows: [] };
+  const activeCases = (caseQueue.rows || []).filter((caseRecord) => caseRecord.status === "active");
+  const activeCaseIds = new Set(activeCases.map((caseRecord) => caseRecord.id));
+  return h(
+    Panel,
+    { title: copy.conditions, "data-realty-case-condition-workbench": "true" },
+    h(RealtyCaseConditionCreateForm, { page, cases: activeCases }),
+    queue.rows.length
+      ? h(
+          "section",
+          { className: "adm-pipeline-grid", "data-realty-case-condition-queue": "true" },
+          ...queue.rows.map((condition) =>
+            h(RealtyCaseConditionCard, {
+              key: `${condition.case_id}-${condition.id}`,
+              page,
+              condition,
+              caseIsActive: activeCaseIds.has(condition.case_id),
+            }),
+          ),
+        )
+      : h("p", { className: "adm-empty" }, copy.conditionsEmpty),
+  );
 }
 
 function RealtyCaseStep({ page, caseRecord, step }) {
@@ -2538,6 +2773,7 @@ function RealtyCasesBody({ page }) {
       h(PageHeader, { title: copy.title, subtitle: copy.subtitle }),
       h(StatGrid, { metrics }),
       h(RealtyCaseCreateForm, { page }),
+      h(RealtyCaseConditions, { page, caseQueue: queue }),
       queue.rows.length
         ? h("section", { className: "adm-pipeline-grid", "data-realty-case-grid": "true" }, ...queue.rows.map((caseRecord) => h(RealtyCaseCard, { key: caseRecord.id, page, caseRecord })))
         : h(Panel, { title: copy.open }, h("p", { className: "adm-empty" }, copy.empty)),

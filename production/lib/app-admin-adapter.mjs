@@ -548,6 +548,47 @@ function realtyCaseInput(input) {
   return output;
 }
 
+function jsonArrayInput(value, label) {
+  if (typeof value !== "string") throw new Error(`${label} must be a JSON array`);
+  let parsed;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new Error(`${label} must be valid JSON`);
+  }
+  if (!Array.isArray(parsed)) throw new Error(`${label} must be a JSON array`);
+  return parsed;
+}
+
+function realtyCaseConditionInput(input) {
+  const output = { ...(input || {}) };
+  const jsonFields = [
+    {
+      camel: "requiredEvidenceProducerRefsJson",
+      snake: "required_evidence_producer_refs_json",
+      target: "requiredEvidenceProducerRefs",
+      alternate: "required_evidence_producer_refs",
+      label: "Condition required evidence producer refs",
+    },
+    {
+      camel: "evidenceRefsJson",
+      snake: "evidence_refs_json",
+      target: "evidenceRefs",
+      alternate: "evidence_refs",
+      label: "Condition evidence refs",
+    },
+  ];
+  for (const field of jsonFields) {
+    const value = output[field.camel] ?? output[field.snake];
+    delete output[field.camel];
+    delete output[field.snake];
+    if (output[field.target] === undefined && output[field.alternate] === undefined && value !== undefined) {
+      output[field.target] = jsonArrayInput(value, field.label);
+    }
+  }
+  return output;
+}
+
 function bindRealtyCaseExecutor(input, principal) {
   const expectedKind = principal?.roles?.includes("agent") ? "agent" : "human";
   const submittedKind = String(input?.executorKind || input?.executor_kind || "").trim();
@@ -565,7 +606,7 @@ function bindRealtyCaseConditionExecutor(input, principal, action) {
   if (submittedKind && submittedKind !== expectedKind) {
     throw new Error("Condition executor kind must match the authenticated principal");
   }
-  const prepared = { ...(input || {}), executorKind: expectedKind };
+  const prepared = { ...realtyCaseConditionInput(input), executorKind: expectedKind };
   assertAgentRealtyCaseConditionMutation(principal, { ...prepared, action });
   return bindAuthenticatedOperator(prepared, principal);
 }
@@ -770,14 +811,20 @@ function pipelinePayload(registry, url, config) {
 }
 
 function realtyCasesPayload(registry, url, config) {
-  return renderAdminRealtyCasesPayload(
-    registry,
-    url.searchParams.get("locale") || "en",
-    buildRealtyCaseQueue(readRealtyCaseEvents(config.realtyCaseLedgerPath), {
-      now: config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString(),
+  const now = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
+  return {
+    ...renderAdminRealtyCasesPayload(
+      registry,
+      url.searchParams.get("locale") || "en",
+      buildRealtyCaseQueue(readRealtyCaseEvents(config.realtyCaseLedgerPath), {
+        now,
+      }),
+      config.adminPrincipal || null,
+    ),
+    realtyCaseConditionQueue: buildRealtyCaseConditionQueue(readRealtyCaseConditionEvents(config.realtyCaseConditionLedgerPath), {
+      now,
     }),
-    config.adminPrincipal || null,
-  );
+  };
 }
 
 function realtyCaseIntentsPayload(config) {
