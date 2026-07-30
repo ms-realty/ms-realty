@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  assertPublicationReady,
   CANONICAL_PROPERTY_FAMILIES,
   derivePrimaryAreaSqm,
   normalizeImportedFact,
@@ -34,6 +35,9 @@ export const LISTING_FACT_EDIT_FIELDS = Object.freeze([
 ]);
 export const LISTING_WORKFLOW_EDIT_FIELDS = Object.freeze([
   "availability_verified_at",
+  "location_verified_at",
+  "price_verified_at",
+  "price_on_request_verified_at",
   "publish_approved",
 ]);
 export const LISTING_SEO_EDIT_FIELDS = Object.freeze([
@@ -93,6 +97,12 @@ const SEO_FIELD_MAP = Object.freeze({
 });
 const FACT_FIELDS = new Set(LISTING_FACT_EDIT_FIELDS);
 const WORKFLOW_FIELDS = new Set(LISTING_WORKFLOW_EDIT_FIELDS);
+const VERIFICATION_TIMESTAMP_FIELDS = Object.freeze({
+  availability_verified_at: "availability_verified_by",
+  location_verified_at: "location_verified_by",
+  price_verified_at: "price_verified_by",
+  price_on_request_verified_at: "price_on_request_verified_by",
+});
 const LOCATION_PRECISIONS = new Set(["area_only", "approximate", "exact"]);
 const ROBOTS_VALUES = new Set(["index,follow", "noindex,follow"]);
 export const LISTING_STATUSES = Object.freeze(["available", "reserved", "sold", "rented", "archived"]);
@@ -177,9 +187,19 @@ export function applyListingEdits(seed, edits = []) {
     const facts = { ...record.facts };
     const seo = { ...record.seo };
     const workflow = { ...(record.workflow || {}) };
+    let location = record.location;
     let mediaReviewer = null;
     for (const edit of listingEdits) {
       const patch = { ...(edit.patch || {}), ...(edit.listing_patch || {}) };
+      const propertyPatch = edit.property_patch || {};
+      const priceChanged = Object.hasOwn(patch, "price_eur") || Object.hasOwn(patch, "price_on_request");
+      const locationChanged = Object.hasOwn(patch, "location") || Object.hasOwn(propertyPatch, "location_id");
+      if (priceChanged) {
+        if (!Object.hasOwn(patch, "price_verified_at")) workflow.price_verified_at = null;
+        if (!Object.hasOwn(patch, "price_on_request_verified_at")) workflow.price_on_request_verified_at = null;
+      }
+      if (locationChanged && !Object.hasOwn(patch, "location_verified_at")) workflow.location_verified_at = null;
+      if (propertyPatch.location_id) location = propertyPatch.location_id;
       if (patch.price_on_request === true) patch.price_eur = null;
       let seoChanged = false;
       for (const [field, value] of Object.entries(patch)) {
@@ -199,8 +219,8 @@ export function applyListingEdits(seed, edits = []) {
         if (edit.edited_at) workflow.last_edited_at = edit.edited_at;
         if (edit.editor) workflow.last_editor = edit.editor;
       }
-      if (Object.hasOwn(patch, "availability_verified_at")) {
-        workflow.availability_verified_by = patch.availability_verified_at ? edit.editor || null : null;
+      for (const [field, ownerField] of Object.entries(VERIFICATION_TIMESTAMP_FIELDS)) {
+        if (Object.hasOwn(patch, field)) workflow[ownerField] = patch[field] ? edit.editor || null : null;
       }
       if (Object.hasOwn(patch, "publish_approved")) {
         workflow.publish_approved_by = patch.publish_approved ? edit.editor || null : null;
@@ -218,6 +238,7 @@ export function applyListingEdits(seed, edits = []) {
       facts,
       seo,
       workflow,
+      location,
       media,
       media_workflow: mediaReviewer
         ? { ...record.media_workflow, review_gated_assets: 0, media_reviewer: mediaReviewer }
@@ -403,10 +424,10 @@ function normalizePatchValue(field, value) {
     if (!LOCATION_PRECISIONS.has(precision)) throw new Error("location_precision must be area_only, approximate, or exact");
     return precision;
   }
-  if (field === "availability_verified_at") {
+  if (Object.hasOwn(VERIFICATION_TIMESTAMP_FIELDS, field)) {
     if (value === "" || value === null) return "";
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) throw new Error("availability_verified_at must be a valid date and time");
+    if (Number.isNaN(date.getTime())) throw new Error(`${field} must be a valid date and time`);
     return date.toISOString();
   }
   if (field === "seo_canonical") {
@@ -472,6 +493,7 @@ export function createListingEdit(seed, input, translationTasks = [], editedAt =
   if (!record) throw new Error("Known listingId is required");
   if (!input.editor) throw new Error("Listing edit requires an editor");
   const patches = normalizeEditPatches(seed, record, input);
+  assertWorkflowTimestampsAtOrBefore(patches, editedAt);
   const patch = patches.patch;
   const translationSourcePatch = Object.fromEntries(
     Object.entries({ ...patch, ...patches.listing_patch }).filter(
@@ -505,31 +527,50 @@ export function createListingEdit(seed, input, translationTasks = [], editedAt =
     throw new Error("Listing edit id must be a stable identifier");
   }
 
-  return {
-    edit: {
-      edited_at: editedAt,
-      ...(requestedId ? { id: requestedId } : {}),
-      listing_id: record.id,
-      editor: input.editor,
-      media_reviewer: input.mediaReviewer ? String(input.mediaReviewer).trim() : null,
-      source_locale: record.source_locale,
-      edit_scope: patches.edit_scope,
-      patch,
-      ...(patches.edit_scope === "property_listing"
-        ? {
-            property_patch: patches.property_patch,
-            listing_patch: patches.listing_patch,
-            property_fact_verification: patches.property_fact_verification,
-            property_zero_value_audit: patches.property_zero_value_audit,
-          }
-        : {}),
-      source_hash_before: sourceHashBefore,
-      source_hash_after: sourceHashAfter,
-      stale_translation_count: staleTranslations.length,
-      stale_locales: [...new Set(staleTranslations.map((translation) => translation.locale || translation.target_locale))],
-    },
-    staleTranslations,
+  const edit = {
+    edited_at: editedAt,
+    ...(requestedId ? { id: requestedId } : {}),
+    listing_id: record.id,
+    editor: input.editor,
+    media_reviewer: input.mediaReviewer ? String(input.mediaReviewer).trim() : null,
+    source_locale: record.source_locale,
+    edit_scope: patches.edit_scope,
+    patch,
+    ...(patches.edit_scope === "property_listing"
+      ? {
+          property_patch: patches.property_patch,
+          listing_patch: patches.listing_patch,
+          property_fact_verification: patches.property_fact_verification,
+          property_zero_value_audit: patches.property_zero_value_audit,
+        }
+      : {}),
+    source_hash_before: sourceHashBefore,
+    source_hash_after: sourceHashAfter,
+    stale_translation_count: staleTranslations.length,
+    stale_locales: [...new Set(staleTranslations.map((translation) => translation.locale || translation.target_locale))],
   };
+  if (patch.publish_approved === true || patches.listing_patch.publish_approved === true) {
+    const projectedSeed = applyListingEdits(seed, [edit]);
+    const projectedRecord = findListing(projectedSeed, record.id);
+    assertPublicationReady({
+      listing: projectedRecord,
+      property: findProperty(projectedSeed, projectedRecord),
+      now: editedAt,
+    });
+  }
+  return { edit, staleTranslations };
+}
+
+function assertWorkflowTimestampsAtOrBefore(patches, editedAt) {
+  const editTimestamp = new Date(editedAt);
+  if (Number.isNaN(editTimestamp.getTime())) throw new Error("editedAt must be a valid date and time");
+  const values = { ...(patches.patch || {}), ...(patches.listing_patch || {}) };
+  for (const field of Object.keys(VERIFICATION_TIMESTAMP_FIELDS)) {
+    if (!values[field]) continue;
+    if (new Date(values[field]).getTime() > editTimestamp.getTime()) {
+      throw new Error(`${field} cannot be later than editedAt`);
+    }
+  }
 }
 
 function listingIdsFrom(input) {

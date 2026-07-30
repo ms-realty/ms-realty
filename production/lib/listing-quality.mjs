@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseCsv } from "./csv.mjs";
-import { bedroomsRequired } from "./listing-facts.mjs";
+import { bedroomsRequired, publicationReadinessFor } from "./listing-facts.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { latestTourForListing, readTourApprovals } from "./tours.mjs";
@@ -145,6 +145,12 @@ function assertListingQualityRow(row, seen) {
   if (!Array.isArray(row.public_gallery_sample)) {
     throw new Error(`Listing quality row ${row.listing_id} must include public_gallery_sample`);
   }
+  if (!row.publication_readiness || typeof row.publication_readiness.ready !== "boolean") {
+    throw new Error(`Listing quality row ${row.listing_id} must expose publication readiness`);
+  }
+  if (!Array.isArray(row.publication_readiness.blocking_fields) || !Array.isArray(row.canonical_fact_completion?.incomplete_fields)) {
+    throw new Error(`Listing quality row ${row.listing_id} must expose canonical fact completion`);
+  }
 }
 
 function publicGallerySample(publicPhotos) {
@@ -160,9 +166,10 @@ function publicGallerySample(publicPhotos) {
     .map((media) => (media.alt ? `${media.url} [alt: ${media.alt}]` : media.url));
 }
 
-function qualityRow(record, approvedTour = null) {
+function qualityRow(record, approvedTour = null, property = null, generatedAt = new Date().toISOString()) {
   const facts = record.facts || {};
   const tour = approvedTour || record.tour;
+  const publicationReadiness = publicationReadinessFor({ listing: record, property, now: generatedAt });
   const publicMedia = publicMediaLibrary(record.media || []);
   const publicPhotos = publicMedia.gallery;
   const publicGalleryAssets = publicMedia.gallery_count;
@@ -202,6 +209,17 @@ function qualityRow(record, approvedTour = null) {
     public_gallery_sample: publicGallerySample(publicPhotos),
     missing_alt_text_assets: missingAltTextAssets,
     review_gated_assets: record.media_workflow?.review_gated_assets || 0,
+    publication_readiness: {
+      ready: publicationReadiness.ready,
+      blocking_fields: publicationReadiness.blocking_fields,
+    },
+    canonical_fact_completion: {
+      property_family: publicationReadiness.fact_completion.property_family,
+      property_subtype: publicationReadiness.fact_completion.property_subtype,
+      taxonomy_review_status: publicationReadiness.fact_completion.taxonomy_review_status,
+      incomplete_fields: publicationReadiness.fact_completion.incomplete_fields,
+      complete: publicationReadiness.fact_completion.complete,
+    },
   };
 }
 
@@ -211,9 +229,10 @@ export function buildListingQualityReport({
   generatedAt = new Date().toISOString(),
   limit = null,
 } = {}) {
+  const propertiesById = new Map((seed.properties || []).map((property) => [property.id, property]));
   const allRows = seed.records
     .filter((record) => record.collection === "listings")
-    .map((record) => qualityRow(record, latestTourForListing(tourApprovals, record.id)))
+    .map((record) => qualityRow(record, latestTourForListing(tourApprovals, record.id), propertiesById.get(record.property), generatedAt))
     .filter(Boolean);
   const rows = limit ? allRows.slice(0, limit) : allRows;
   return {

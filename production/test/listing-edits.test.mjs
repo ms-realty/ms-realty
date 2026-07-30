@@ -13,6 +13,59 @@ import {
 } from "../lib/listing-edits.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 
+function publishReadySeed({ bedrooms = 2, bedroomsState = "broker_verified", priceEur = 120000, priceOnRequest = false } = {}) {
+  const listingId = "MS-READY-0001";
+  const propertyId = `property-${listingId}`;
+  const locationId = "location:sandanski";
+  return {
+    records: [
+      {
+        id: listingId,
+        collection: "listings",
+        property: propertyId,
+        location: locationId,
+        source_locale: "bg",
+        facts: {
+          title: "Verified apartment",
+          description: "Verified source description.",
+          location: "Sandanski",
+          property_type: "apartment",
+          price_eur: priceOnRequest ? null : priceEur,
+          price_on_request: priceOnRequest,
+        },
+        seo: { human_approved: true },
+        workflow: {
+          availability_verified_at: "2026-07-04T09:00:00.000Z",
+          location_verified_at: "2026-07-04T09:00:00.000Z",
+          ...(priceOnRequest
+            ? { price_on_request_verified_at: "2026-07-04T09:00:00.000Z" }
+            : { price_verified_at: "2026-07-04T09:00:00.000Z" }),
+        },
+        translations: [],
+        media: [],
+        media_workflow: { review_gated_assets: 0 },
+      },
+    ],
+    properties: [
+      {
+        id: propertyId,
+        collection: "properties",
+        location: locationId,
+        property_family: "apartment",
+        property_subtype: "apartment",
+        taxonomy_review_status: "mapped",
+        facts: { built_area_sqm: 80, bedrooms_count: bedrooms },
+        fact_verification: [
+          { field: "built_area_sqm", state: "broker_verified" },
+          { field: "bedrooms_count", state: bedroomsState },
+        ],
+        zero_value_audit: [],
+      },
+    ],
+    locations: [{ id: locationId, collection: "locations", label: "Sandanski" }],
+  };
+}
+
 test("listing edits persist and stale dependent translations", () => {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-edits-`)}/edits.jsonl`;
   resetListingEdits(file);
@@ -35,7 +88,6 @@ test("listing edits persist and stale dependent translations", () => {
         condition: "  Renovated  ",
         location_precision: "approximate",
         availability_verified_at: "2026-07-04T10:30:00Z",
-        publish_approved: "true",
         seo_title: "Reviewed workshop to rent",
         seo_description: "Reviewed source-language search description.",
         seo_canonical: "/bg/imoti/MS-CRAWL-0001",
@@ -46,7 +98,7 @@ test("listing edits persist and stale dependent translations", () => {
       },
     },
     [],
-    "2026-07-04T00:03:00Z",
+    "2026-07-04T11:00:00Z",
   );
   appendListingEdit(result.edit, { filePath: file });
 
@@ -66,7 +118,6 @@ test("listing edits persist and stale dependent translations", () => {
   assert.equal(rows[0].patch.condition, "Renovated");
   assert.equal(rows[0].patch.location_precision, "approximate");
   assert.equal(rows[0].patch.availability_verified_at, "2026-07-04T10:30:00.000Z");
-  assert.equal(rows[0].patch.publish_approved, true);
   assert.equal(rows[0].patch.seo_canonical, "/bg/imoti/MS-CRAWL-0001");
   assert.equal(rows[0].patch.seo_review_confirmed, true);
   assert.equal(result.staleTranslations.some((translation) => translation.locale === "el" && translation.status === "stale"), true);
@@ -271,15 +322,25 @@ test("listing edits reject invalid numeric facts before persistence", () => {
       }),
     /location_precision must be/,
   );
+  assert.throws(
+    () =>
+      createListingEdit(
+        publishReadySeed(),
+        { listingId: "MS-READY-0001", editor: "broker_bg", patch: { location_verified_at: "2026-07-04T10:01:00Z" } },
+        [],
+        "2026-07-04T10:00:00Z",
+      ),
+    /location_verified_at cannot be later than editedAt/,
+  );
 });
 
-test("verification and publication workflow edits do not stale translated copy", () => {
+test("verified publish approval does not stale translated copy", () => {
   const result = createListingEdit(
-    loadCmsSeed(),
+    publishReadySeed(),
     {
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-READY-0001",
       editor: "availability_reviewer",
-      patch: { availability_verified_at: "2026-07-04T10:30:00Z", publish_approved: true },
+      patch: { publish_approved: true },
     },
     [],
     "2026-07-04T10:31:00Z",
@@ -287,6 +348,36 @@ test("verification and publication workflow edits do not stale translated copy",
 
   assert.equal(result.edit.source_hash_before, result.edit.source_hash_after);
   assert.equal(result.staleTranslations.length, 0);
+});
+
+test("publish approval rejects sparse or zero-valued canonical facts and accepts verified price-on-request", () => {
+  assert.throws(
+    () =>
+      createListingEdit(
+        publishReadySeed({ priceEur: 0 }),
+        { listingId: "MS-READY-0001", editor: "broker_bg", patch: { publish_approved: true } },
+        [],
+        "2026-07-04T10:00:00Z",
+      ),
+    /price_amount/,
+  );
+  assert.throws(
+    () =>
+      createListingEdit(
+        publishReadySeed({ bedrooms: null, bedroomsState: "unknown" }),
+        { listingId: "MS-READY-0001", editor: "broker_bg", patch: { publish_approved: true } },
+        [],
+        "2026-07-04T10:00:00Z",
+      ),
+    /bedrooms_count/,
+  );
+  const approved = createListingEdit(
+    publishReadySeed({ priceOnRequest: true }),
+    { listingId: "MS-READY-0001", editor: "broker_bg", patch: { publish_approved: true } },
+    [],
+    "2026-07-04T10:00:00Z",
+  );
+  assert.equal(approved.edit.patch.publish_approved, true);
 });
 
 test("source-language SEO remains review-gated until a human confirms it", () => {

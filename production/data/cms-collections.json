@@ -186,6 +186,27 @@
           ]
         },
         {
+          "name": "workflow",
+          "type": "group",
+          "required": false,
+          "localized": false,
+          "fields": [
+            "availability_verified_at",
+            "availability_verified_by",
+            "location_verified_at",
+            "location_verified_by",
+            "price_verified_at",
+            "price_verified_by",
+            "price_on_request_verified_at",
+            "price_on_request_verified_by",
+            "publish_approved",
+            "publish_approved_at",
+            "publish_approved_by",
+            "last_edited_at",
+            "last_editor"
+          ]
+        },
+        {
           "name": "property",
           "type": "relationship",
           "required": true,
