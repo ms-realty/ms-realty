@@ -4,6 +4,7 @@
     "typesense": "typesense/typesense:30.2",
     "meilisearch": "getmeili/meilisearch:v1.11.3"
   },
+  "corpus_schema": "legacy_fixture_v1",
   "workload": {
     "iterations": 20,
     "query": "Sandanski",

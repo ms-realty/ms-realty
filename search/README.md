@@ -45,8 +45,29 @@ npm run search:projection -- --input /secure/joined-listings.json --out /tmp/ms-
 ```
 
 The no-Docker benchmark harness has a separate tested-image baseline of
-Typesense `30.2` and Meilisearch `v1.11.3`. It starts no services and does not
-change `production/docker-compose.local-production.yml`.
+Typesense `30.2` and Meilisearch `v1.11.3`. Its declared default corpus is
+`legacy_fixture_v1`, the checked-in 167-document fixture: it filters on
+`locale_is_indexable` and `translation_status`, not the production-only
+`publication_state` / `locale_indexable` fields. Use
+`--corpus-schema approved_projection_v1 --data-dir /path/to/projection` only
+when benchmarking a projection produced by the command above.
+
+It starts no services and does not change
+`production/docker-compose.local-production.yml`. With both local engines
+already running, use this reproducible sequence:
+
+```bash
+npm run search:benchmark:preflight
+npm run search:benchmark:bootstrap -- \
+  --typesense-url "$TYPESENSE_URL" --typesense-key "$TYPESENSE_API_KEY" \
+  --meili-url "$MEILI_URL" --meili-key "$MEILI_API_KEY"
+```
+
+The bootstrap imports the actual corpus into both engines and waits for the
+Meilisearch settings and document tasks to succeed before it exits. The
+preflight checks the profile's filter and query fields against the Typesense
+schema, Meilisearch settings, and corpus before either command contacts an
+engine.
 
 ```bash
 npm run search:benchmark -- \

@@ -29,6 +29,8 @@ import {
   writeApprovedSearchProjection,
 } from "../lib/search-engine-sync.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { assertBenchmarkCorpusCompatibility, benchmarkPublicFilters, loadBenchmarkCorpus } from "../../search/benchmark-corpus.mjs";
+import { bootstrapBenchmarkCorpus } from "../../search/bootstrap_benchmark_corpus.mjs";
 
 function fakeFetch(calls, statuses = []) {
   return async (url, options) => {
@@ -446,6 +448,74 @@ test("search outbox is idempotent, retryable, and reconciles delete tombstones",
   const reconciliation = reconcileSearchOutbox(readSearchOutbox(filePath));
   assert.deepEqual(reconciliation.pending, []);
   assert.equal(reconciliation.deleted[0].message_id, queued.message_id);
+});
+
+test("benchmark legacy corpus filters only fields declared by the checked-in 167-document schema", () => {
+  const corpus = loadBenchmarkCorpus({ dataDir: fromRoot("search", "data"), corpusSchema: "legacy_fixture_v1" });
+  assert.equal(corpus.document_count, 167);
+  assert.deepEqual(corpus.filter_fields, [
+    "translation_indexable",
+    "translation_human_approved",
+    "locale_is_indexable",
+    "translation_status",
+    "locale",
+  ]);
+  const filters = benchmarkPublicFilters({ corpusSchema: corpus.corpus_schema, locale: "bg" });
+  assert.match(filters.typesense, /locale_is_indexable:=true/);
+  assert.match(filters.typesense, /translation_status:=\[published,approved\]/);
+  assert.doesNotMatch(filters.typesense, /publication_state|locale_indexable/);
+  assert.match(filters.meilisearch, /translation_status = "published"/);
+  assert.equal(filters.typesense_query_by, "title,description,search_text,location");
+  assert.throws(
+    () =>
+      assertBenchmarkCorpusCompatibility({
+        corpusSchema: corpus.corpus_schema,
+        typesenseSchema: {
+          ...corpus.typesenseSchema,
+          fields: corpus.typesenseSchema.fields.filter((field) => field.name !== "locale_is_indexable"),
+        },
+        meilisearchSettings: corpus.meilisearchSettings,
+        documents: corpus.documents,
+      }),
+    /locale_is_indexable/,
+  );
+});
+
+test("benchmark bootstrap imports the declared corpus and waits for Meilisearch tasks", async () => {
+  const calls = [];
+  const fetchImpl = async (url, options) => {
+    calls.push({ url, options });
+    if (url.includes("/tasks/11") || url.includes("/tasks/12")) {
+      return { status: 200, async json() { return { status: "succeeded" }; } };
+    }
+    if (url.includes("/settings")) return { status: 202, async json() { return { taskUid: 11 }; } };
+    if (url.includes("/documents?primaryKey=meili_id")) return { status: 202, async json() { return { taskUid: 12 }; } };
+    return { status: 201, async json() { return {}; } };
+  };
+  const result = await bootstrapBenchmarkCorpus({
+    dataDir: fromRoot("search", "data"),
+    typesense: { baseUrl: "http://typesense.local", apiKey: "typesense-key" },
+    meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+    fetchImpl,
+  });
+  assert.equal(result.corpus.documents, 167);
+  assert.deepEqual(result.meilisearch.tasks, [
+    { task_uid: "11", status: "succeeded" },
+    { task_uid: "12", status: "succeeded" },
+  ]);
+  assert.deepEqual(
+    calls.map(({ url }) => new URL(url).pathname),
+    [
+      "/collections",
+      "/collections/ms_realty_listings/documents/import",
+      "/indexes/ms_realty_listings/settings",
+      "/tasks/11",
+      "/indexes/ms_realty_listings/documents",
+      "/tasks/12",
+    ],
+  );
+  assert.match(calls[1].options.body, /MS-CRAWL-0001:bg/);
+  assert.match(calls[4].options.body, /"meili_id":"MS-CRAWL-0001_bg"/);
 });
 
 test("search engine sync posts existing fixtures to Typesense and Meilisearch", async () => {

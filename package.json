@@ -20,6 +20,8 @@
     "search:validate": "python3 search/validate_search_imports.py",
     "search:projection": "node search/build_approved_search_projection.mjs",
     "search:benchmark": "node search/benchmark_search_engines.mjs",
+    "search:benchmark:preflight": "node search/bootstrap_benchmark_corpus.mjs --preflight",
+    "search:benchmark:bootstrap": "node search/bootstrap_benchmark_corpus.mjs",
     "search:sync": "node production/scripts/run-search-engine-sync.mjs",
     "search:sync:smoke": "node production/scripts/build-search-engine-sync-smoke.mjs",
     "search:query": "node production/scripts/run-search-engine-query.mjs",

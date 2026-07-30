@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { queryMeilisearch, queryTypesense } from "../production/lib/search-engine-sync.mjs";
+import { benchmarkPublicFilters, loadBenchmarkCorpus } from "./benchmark-corpus.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, "search", "data", "search-engine-benchmark.json"), "utf8"));
@@ -49,31 +50,60 @@ async function measure(run, iterations) {
 const query = argument("--query") || baseline.workload.query;
 const locale = argument("--locale") || baseline.workload.locale;
 const iterations = positiveInteger(argument("--iterations") || baseline.workload.iterations, "--iterations");
-const typesense = {
-  baseUrl: requiredArgument("--typesense-url"),
-  apiKey: requiredArgument("--typesense-key"),
-  collectionName: argument("--typesense-collection") || "ms_realty_listings",
-};
-const meilisearch = {
-  baseUrl: requiredArgument("--meili-url"),
-  apiKey: requiredArgument("--meili-key"),
-  indexName: argument("--meili-index") || "ms_realty_listings",
-};
-const typesenseFilter = `publication_state:=published && translation_human_approved:=true && locale_indexable:=true && locale:=\`${locale}\``;
-const meilisearchFilter = `publication_state = "published" AND translation_human_approved = true AND locale_indexable = true AND locale = ${JSON.stringify(locale)}`;
-const report = {
-  schema_version: 1,
-  generated_at: new Date().toISOString(),
-  baseline,
-  workload: { query, locale, iterations },
-  engines: {
-    typesense: await measure(() => queryTypesense({ ...typesense, q: query, filterBy: typesenseFilter, perPage: 20 }), iterations),
-    meilisearch: await measure(() => queryMeilisearch({ ...meilisearch, q: query, filter: meilisearchFilter, limit: 20 }), iterations),
-  },
-};
-const output = argument("--out");
-if (output) {
-  fs.mkdirSync(path.dirname(path.resolve(output)), { recursive: true });
-  fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`);
+const corpusSchema = argument("--corpus-schema") || baseline.corpus_schema;
+const dataDir = path.resolve(argument("--data-dir") || path.join(ROOT, "search", "data"));
+const corpus = loadBenchmarkCorpus({ dataDir, corpusSchema });
+const filters = benchmarkPublicFilters({ corpusSchema: corpus.corpus_schema, locale });
+
+if (process.argv.includes("--preflight")) {
+  console.log(
+    JSON.stringify(
+      {
+        corpus_schema: corpus.corpus_schema,
+        data_dir: corpus.data_dir,
+        documents: corpus.document_count,
+        filter_fields: corpus.filter_fields,
+        typesense_query_fields: corpus.typesense_query_fields,
+      },
+      null,
+      2,
+    ),
+  );
+  process.exitCode = 0;
+} else {
+  const typesense = {
+    baseUrl: requiredArgument("--typesense-url"),
+    apiKey: requiredArgument("--typesense-key"),
+    collectionName: argument("--typesense-collection") || "ms_realty_listings",
+  };
+  const meilisearch = {
+    baseUrl: requiredArgument("--meili-url"),
+    apiKey: requiredArgument("--meili-key"),
+    indexName: argument("--meili-index") || "ms_realty_listings",
+  };
+  const report = {
+    schema_version: 1,
+    generated_at: new Date().toISOString(),
+    baseline,
+    corpus: {
+      corpus_schema: corpus.corpus_schema,
+      documents: corpus.document_count,
+      filter_fields: corpus.filter_fields,
+      typesense_query_fields: corpus.typesense_query_fields,
+    },
+    workload: { query, locale, iterations },
+    engines: {
+      typesense: await measure(
+        () => queryTypesense({ ...typesense, q: query, filterBy: filters.typesense, queryBy: filters.typesense_query_by, perPage: 20 }),
+        iterations,
+      ),
+      meilisearch: await measure(() => queryMeilisearch({ ...meilisearch, q: query, filter: filters.meilisearch, limit: 20 }), iterations),
+    },
+  };
+  const output = argument("--out");
+  if (output) {
+    fs.mkdirSync(path.dirname(path.resolve(output)), { recursive: true });
+    fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`);
+  }
+  console.log(JSON.stringify(report, null, 2));
 }
-console.log(JSON.stringify(report, null, 2));

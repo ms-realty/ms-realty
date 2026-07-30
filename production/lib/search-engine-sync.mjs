@@ -1094,6 +1094,7 @@ export async function queryTypesense({
   perPage = 5,
   exactReference = null,
   sortBy = null,
+  queryBy = null,
   fetchImpl = globalThis.fetch,
 } = {}) {
   required(baseUrl, "TYPESENSE_URL");
@@ -1101,9 +1102,10 @@ export async function queryTypesense({
   if (typeof fetchImpl !== "function") throw new Error("fetch is required for Typesense query");
 
   const reference = optionalText(exactReference);
+  const queryFields = optionalText(queryBy) || (reference ? "listing_reference,source_listing_id" : "title,description,search_text,location_label,listing_reference");
   const params = new URLSearchParams({
     q: reference || String(q || "").trim() || "*",
-    query_by: reference ? "listing_reference,source_listing_id" : "title,description,search_text,location_label,listing_reference",
+    query_by: queryFields,
     filter_by: filterBy,
     per_page: String(perPage),
   });
