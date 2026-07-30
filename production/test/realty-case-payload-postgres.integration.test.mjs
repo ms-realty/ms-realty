@@ -19,6 +19,7 @@ const conditionProjector = path.join(root, "production", "scripts", "run-realty-
 const caseReadback = path.join(root, "production", "scripts", "run-realty-case-payload-readback.mjs");
 const payloadConfig = path.join(root, "payload.config.js");
 const payloadRuntime = path.join(root, "node_modules", "payload", "dist", "index.js");
+const COMMAND_TIMEOUT_MS = 120_000;
 
 function redact(value, env) {
   let text = String(value || "");
@@ -34,6 +35,7 @@ function command(commandName, args, { env, label }) {
     encoding: "utf8",
     env,
     maxBuffer: 10 * 1024 * 1024,
+    timeout: COMMAND_TIMEOUT_MS,
   });
   if (result.error) throw new Error(`${label} could not start: ${result.error.message}`);
   assert.equal(result.status, 0, `${label} failed\n${redact(`${result.stdout || ""}${result.stderr || ""}`, env)}`);
@@ -49,10 +51,9 @@ function runCompose(project, args, env, label) {
 }
 
 function downCompose(project, env) {
-  spawnSync("docker", composeArgs(project, ["down", "--volumes", "--remove-orphans"]), {
-    cwd: root,
-    encoding: "utf8",
+  return command("docker", composeArgs(project, ["down", "--volumes", "--remove-orphans"]), {
     env,
+    label: "cleaning up isolated Payload Postgres",
   });
 }
 
@@ -296,7 +297,7 @@ function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outbo
 
 test(
   "Payload/Postgres migration and RealtyCase projectors work against an isolated database",
-  { skip: enabled ? false : "set MS_REALTY_RUN_PAYLOAD_INTEGRATION=1 to run the disposable Docker integration test" },
+  { skip: enabled ? false : "set MS_REALTY_RUN_PAYLOAD_INTEGRATION=1 to run the disposable Docker integration test", timeout: 180_000 },
   async () => {
     const project = `ms-realty-payload-it-${process.pid}-${randomUUID().slice(0, 8)}`;
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-payload-postgres-it-"));
