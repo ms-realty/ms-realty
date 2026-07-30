@@ -33,7 +33,6 @@ const expectedHttpAuditActions = {
   broker_contact_approved: 1,
   deal_closed: 1,
   lead_pipeline_outcome_recorded: 1,
-  listing_edited: 1,
   listing_slug_changed: 1,
   locale_created: 1,
   reply_approved: 2,
@@ -48,7 +47,6 @@ const expectedNodeServerAuditActions = {
   broker_contact_approved: 1,
   deal_closed: 1,
   lead_pipeline_outcome_recorded: 1,
-  listing_edited: 1,
   listing_slug_changed: 1,
   reply_approved: 1,
   tour_approved: 1,
@@ -550,25 +548,24 @@ if (httpSmoke.translationPublish.status !== 201 || httpSmoke.translationPublish.
   throw new Error("HTTP smoke must publish human-approved translation");
 }
 if (
-  httpSmoke.listingEditorHtml.status !== 200 ||
-  !httpSmoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\"") ||
-  !httpSmoke.listingEditorHtml.body.includes("data-editor-form=\"listing\"")
+  httpSmoke.listingEditorHtml.status !== 307 ||
+  httpSmoke.listingEditorHtml.headers.location !== "/payload-admin/collections/listings/MS-CRAWL-0001"
 ) {
-  throw new Error("HTTP smoke must serve admin listing editor HTML");
+  throw new Error("HTTP smoke must hand legacy listing editor links to Payload");
 }
-if (httpSmoke.listingEdit.status !== 201 || httpSmoke.listingEdit.body.edit.stale_translation_count < 1) {
-  throw new Error("HTTP smoke must stale dependent translations after listing edit");
+if (httpSmoke.listingEdit.status !== 409 || httpSmoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001") {
+  throw new Error("HTTP smoke must reject legacy listing mutations with a Payload handoff");
 }
-if (httpSmoke.staleListing.status !== 200 || httpSmoke.staleListing.body.indexable !== false) {
-  throw new Error("HTTP smoke must noindex stale public translation");
+if (httpSmoke.staleListing.status !== 200 || httpSmoke.staleListing.body.indexable !== true) {
+  throw new Error("HTTP smoke must preserve reviewed public translation after a rejected legacy mutation");
 }
 const httpStaleSearchCard = httpSmoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
 if (
   httpSmoke.staleSearch.status !== 200 ||
-  httpStaleSearchCard?.translation_display !== "stale_translation_fallback" ||
-  httpStaleSearchCard?.translation_indexable !== false
+  httpStaleSearchCard?.translation_display !== "reviewed_translation" ||
+  httpStaleSearchCard?.translation_indexable !== true
 ) {
-  throw new Error("HTTP smoke must mark stale search cards as fallback");
+  throw new Error("HTTP smoke must preserve reviewed search cards after a rejected legacy mutation");
 }
 if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
@@ -673,8 +670,8 @@ if (httpSmoke.dealLedger.rows !== 1) throw new Error("HTTP smoke must persist on
 if (httpSmoke.tourApprovalLedger.rows !== 1) throw new Error("HTTP smoke must persist one tour approval row");
 if (!httpSmoke.eventLedger.byType.cta_click) throw new Error("HTTP smoke must persist one CTA analytics event row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
-if (httpSmoke.translationLedger.rows !== 4) throw new Error("HTTP smoke must persist draft, approved, published, and stale translation rows");
-if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must persist one listing edit row");
+if (httpSmoke.translationLedger.rows !== 3) throw new Error("HTTP smoke must persist draft, approved, and published translation rows");
+if (httpSmoke.listingEditLedger.rows !== 0) throw new Error("HTTP smoke must not write a legacy listing edit row");
 if (httpSmoke.slugHistoryLedger.rows !== 1) throw new Error("HTTP smoke must persist one slug-history row");
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
@@ -789,25 +786,25 @@ if (nodeServerSmoke.translationApprove.status !== 201 || nodeServerSmoke.transla
 if (nodeServerSmoke.translationPublish.status !== 201 || nodeServerSmoke.translationPublish.body.public_indexable !== true) {
   throw new Error("Node server smoke must publish human-approved translation");
 }
-if (nodeServerSmoke.listingEdit.status !== 201 || nodeServerSmoke.listingEdit.body.edit.stale_translation_count < 1) {
-  throw new Error("Node server smoke must stale dependent translations after listing edit");
+if (nodeServerSmoke.listingEdit.status !== 409 || nodeServerSmoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001") {
+  throw new Error("Node server smoke must reject legacy listing mutations with a Payload handoff");
 }
-if (nodeServerSmoke.staleListing.status !== 200 || nodeServerSmoke.staleListing.body.indexable !== false) {
-  throw new Error("Node server smoke must noindex stale public translation");
+if (nodeServerSmoke.staleListing.status !== 200 || nodeServerSmoke.staleListing.body.indexable !== true) {
+  throw new Error("Node server smoke must preserve reviewed public translation after a rejected legacy mutation");
 }
 const nodeStaleSearchCard = nodeServerSmoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
 if (
   nodeServerSmoke.staleSearch.status !== 200 ||
-  nodeStaleSearchCard?.translation_display !== "stale_translation_fallback" ||
-  nodeStaleSearchCard?.translation_indexable !== false
+  nodeStaleSearchCard?.translation_display !== "reviewed_translation" ||
+  nodeStaleSearchCard?.translation_indexable !== true
 ) {
-  throw new Error("Node server smoke must mark stale search cards as fallback");
+  throw new Error("Node server smoke must preserve reviewed search cards after a rejected legacy mutation");
 }
-if (nodeServerSmoke.translationLedger.rows !== 4) {
-  throw new Error("Node server smoke must persist draft, approved, published, and stale translation rows");
+if (nodeServerSmoke.translationLedger.rows !== 3) {
+  throw new Error("Node server smoke must persist draft, approved, and published translation rows");
 }
-if (nodeServerSmoke.listingEditLedger.rows !== 1) {
-  throw new Error("Node server smoke must persist one listing edit row");
+if (nodeServerSmoke.listingEditLedger.rows !== 0) {
+  throw new Error("Node server smoke must not write a legacy listing edit row");
 }
 if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includes("Sitemap:")) {
   throw new Error("Node server smoke must serve robots");
@@ -893,7 +890,7 @@ if (
   leadMatching.summary.matchable_leads_with_listing_reference !== 2 ||
   leadMatching.summary.active_matchable_leads !== 2 ||
   leadMatching.summary.qualified_leads !== 1 ||
-  leadMatching.summary.open_broker_tasks !== 2
+  leadMatching.summary.open_broker_tasks !== 1
 ) {
   throw new Error("Lead matching report must distinguish active, qualified, and referenced buyer or renter leads");
 }
@@ -1035,8 +1032,9 @@ assertSavedSearchAlertReport(savedSearchAlerts);
 if (
   savedSearchAlerts.summary.saved_searches !== 1 ||
   savedSearchAlerts.rows[0].saved_search_id !== "saved-search-he-0001" ||
-  savedSearchAlerts.rows[0].current_match_count !== 41 ||
-  savedSearchAlerts.rows[0].status !== "no_new_matches"
+  savedSearchAlerts.rows[0].current_match_count !== 46 ||
+  savedSearchAlerts.rows[0].status !== "no_new_matches" ||
+  savedSearchAlerts.rows[0].alert_task !== null
 ) {
   throw new Error("Saved-search alert report must evaluate the persisted Hebrew search without duplicate alerts");
 }

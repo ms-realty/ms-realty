@@ -587,7 +587,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
       assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
       assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
-      assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
+      assert.deepEqual(readListingEdits(listingEditLedgerPath), []);
       assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
       assert.equal(assertViewingFollowUpLedger(readViewingFollowUps(viewingFollowUpLedgerPath)), true);
       assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
@@ -622,10 +622,9 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         translation_drafted: 1,
         translation_approved: 1,
         translation_published: 1,
-        listing_edited: 1,
       });
       assert.equal(auditRows.some((row) => Object.hasOwn(row.metadata || {}, "note")), false);
-      assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
+      assert.equal(smoke.staleListing.body.metadata.robots, "index,follow");
       assert.deepEqual(
         [
           smoke.adminLocales.bg.body.workspace.locale,

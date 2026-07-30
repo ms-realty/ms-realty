@@ -487,7 +487,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         id: "http-saved-search-test",
         locale: "he",
         query: "Sandanski",
-        filters: { property_type: "apartment", unsupported_filter: "ignored" },
+        filters: { property_type: "apartment" },
         contact: { name: "Noa Levi", whatsapp: "+359880000001" },
         contact_preference: "whatsapp",
         alertConsent: true,
@@ -1018,7 +1018,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
   assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
-  assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
+  assert.deepEqual(readListingEdits(listingEditLedgerPath), []);
   assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
   assert.equal(assertViewingFollowUpLedger(readViewingFollowUps(viewingFollowUpLedgerPath)), true);
   assert.equal(assertLeadPipelineOutcomes(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath)), true);
@@ -1059,13 +1059,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     translation_drafted: 1,
     translation_approved: 1,
     translation_published: 1,
-    listing_edited: 1,
     locale_created: 1,
   });
   assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "cta_click" && row.action === "sticky_inquiry"), true);
   assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "hermes_chat"), false);
-  assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
-  assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");
+  assert.equal(smoke.staleListing.body.metadata.robots, "index,follow");
+  assert.notEqual(smoke.staleListing.body.body.description, "Updated approved source description.");
   assert.equal(smoke.admin.body.leads.length, 4);
   assert.equal(smoke.contacts.status, 200);
   assert.equal(smoke.contacts.body.kind, "admin_contacts");
@@ -1110,14 +1109,13 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminHtml.body.includes('name="hermesDraft" value="true"'), false);
   assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
-  assert.equal(smoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\""), true);
-  assert.equal(smoke.listingEditorHtml.body.includes("data-react-admin-ui=\"listing-editor\""), true);
-  assert.equal(smoke.listingEditorHtml.body.includes("data-listing-id=\"MS-CRAWL-0001\""), true);
+  assert.equal(smoke.listingEditorHtml.status, 307);
+  assert.equal(smoke.listingEditorHtml.headers.location, "/payload-admin/collections/listings/MS-CRAWL-0001");
   assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.sellerPipeline.length, 1);
   assert.equal(smoke.admin.body.deals.length, 1);
-  assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);
-  assert.equal(smoke.admin.body.listingEdits.length, 1);
+  assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), false);
+  assert.equal(smoke.admin.body.listingEdits.length, 0);
   assert.equal(smoke.admin.body.viewings.length, 1);
   assert.equal(smoke.admin.body.summary.viewingFollowUpsOpen, 1);
   assert.equal(smoke.admin.body.viewingFollowUpQueue.rows[0].task, "feedback");
@@ -1180,6 +1178,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const translationLedgerPath = tempTranslations();
   const auditLogPath = tempAuditLog();
   const liveServiceProvisioningReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-provisioning-`)}/mounted-live-service-provisioning-report.json`;
+  const payloadRuntimeReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-`)}/missing-payload-runtime-report.json`;
   fs.copyFileSync(fromRoot("production", "data", "live-service-provisioning-report.json"), liveServiceProvisioningReportPath);
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
@@ -1200,6 +1199,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     translationLedgerPath,
     auditLogPath,
     liveServiceProvisioningReportPath,
+    payloadRuntimeReportPath,
     reviewedAt: "2026-07-05T00:00:00Z",
     editedAt: "2026-07-05T00:03:00Z",
     listingQualityGeneratedAt: "2026-07-05T00:09:00Z",
@@ -1489,9 +1489,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(preflightReports.body.reports.live_service_provisioning.status, "blocked_report");
   assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
   assert.ok(preflightReports.body.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
-  assert.equal(preflightReports.body.reports.payload_runtime.status, "blocked_report");
-  assert.ok(preflightReports.body.reports.payload_runtime.summary.missing_env.includes("PAYLOAD_SECRET"));
-  assert.ok(preflightReports.body.reports.payload_runtime.next_actions.some((action) => action.includes("payload:bootstrap")));
+  assert.equal(preflightReports.body.reports.payload_runtime.status, "missing_report");
+  assert.ok(preflightReports.body.reports.payload_runtime.next_actions.some((action) => action.includes("payload:runtime")));
   assert.equal(seoPreflightUnauthorized.status, 401);
   assert.equal(seoPreflight.status, 200);
   assert.equal(seoPreflight.body.kind, "admin_seo_preflight");
@@ -1514,9 +1513,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(payloadRuntimeUnauthorized.status, 401);
   assert.equal(payloadRuntime.status, 200);
   assert.equal(payloadRuntime.body.kind, "admin_payload_runtime");
-  assert.equal(payloadRuntime.body.runtime.status, "blocked_report");
-  assert.ok(payloadRuntime.body.runtime.summary.missing_env.includes("PAYLOAD_SECRET"));
-  assert.ok(payloadRuntime.body.runtime.next_actions.some((action) => action.includes("payload:bootstrap")));
+  assert.equal(payloadRuntime.body.runtime.status, "missing_report");
+  assert.ok(payloadRuntime.body.runtime.next_actions.some((action) => action.includes("payload:runtime")));
   assert.equal(payloadRuntimeBootstrapUnauthorized.status, 401);
   assert.equal(payloadRuntimeBootstrap.status, 200);
   assert.equal(payloadRuntimeBootstrap.body.kind, "admin_payload_runtime_bootstrap");
@@ -1546,8 +1544,12 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(payloadCollections.status, 200);
   assert.equal(payloadCollections.headers["cache-control"], "no-store");
   assert.equal(payloadCollections.body.kind, "admin_payload_collections");
-  assert.equal(payloadCollections.body.collections.length, 4);
-  assert.equal(payloadCollections.body.collections.every((collection) => collection.versions.drafts), true);
+  assert.equal(payloadCollections.body.collections.length, 8);
+  assert.ok(payloadCollections.body.collections.some((collection) => collection.slug === "listings"));
+  assert.equal(
+    payloadCollections.body.collections.every((collection) => collection.versions === false || collection.versions.drafts),
+    true,
+  );
   assert.equal(imported.status, 201);
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
@@ -2230,7 +2232,7 @@ test("HTTP launch readiness stays tied to the deployed redirect artifact until e
   assert.equal(redirectGate.evidence.unresolved_legacy_urls, 292);
 });
 
-test("HTTP sitemap honors mounted listing edit ledger", async () => {
+test("HTTP sitemap ignores legacy listing edit ledger mutations", async () => {
   const listingEditLedgerPath = tempListingEdits();
   fs.appendFileSync(
     listingEditLedgerPath,
@@ -2245,7 +2247,7 @@ test("HTTP sitemap honors mounted listing edit ledger", async () => {
   const sitemap = await dispatchHttp(createHttpApp({ listingEditLedgerPath }), { url: "/sitemap.xml" });
 
   assert.equal(sitemap.status, 200);
-  assert.match(sitemap.body, /\/he\/locations\/runtime-only-city/);
+  assert.doesNotMatch(sitemap.body, /\/he\/locations\/runtime-only-city/);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {

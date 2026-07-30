@@ -2315,6 +2315,50 @@
         "typesense",
         "meilisearch"
       ],
+      "intent": {
+        "schema_version": 1,
+        "locale": "he",
+        "text_query": "Sandanski",
+        "exact_reference": null,
+        "property_families": [],
+        "property_subtypes": [],
+        "offer_type": null,
+        "listing_status": null,
+        "price_currency": "EUR",
+        "price_period": null,
+        "parking_kinds": [],
+        "construction_statuses": [],
+        "has_approved_tour": null,
+        "location_ids": [],
+        "map_bounds": null,
+        "radius": null,
+        "sort": "recommended",
+        "page": 1,
+        "page_size": 12,
+        "mandatory_filters": {
+          "publication_state": "published",
+          "listing_statuses": [
+            "available",
+            "reserved"
+          ],
+          "translation_human_approved": true,
+          "locale_indexable": true
+        },
+        "price_min": null,
+        "price_max": null,
+        "bedrooms_min": null,
+        "bedrooms_max": null,
+        "premises_min": null,
+        "hotel_rooms_min": null,
+        "primary_area_min": null,
+        "primary_area_max": null,
+        "land_area_min": null,
+        "land_area_max": null,
+        "floor_min": null,
+        "floor_max": null,
+        "storeys_min": null,
+        "storeys_max": null
+      },
       "query": "Sandanski",
       "sort": "recommended",
       "filters": {
@@ -2361,6 +2405,50 @@
             "language": "he",
             "query": "Sandanski",
             "filters": {},
+            "search_intent": {
+              "schema_version": 1,
+              "locale": "he",
+              "text_query": "Sandanski",
+              "exact_reference": null,
+              "property_families": [],
+              "property_subtypes": [],
+              "offer_type": null,
+              "listing_status": null,
+              "price_currency": "EUR",
+              "price_period": null,
+              "parking_kinds": [],
+              "construction_statuses": [],
+              "has_approved_tour": null,
+              "location_ids": [],
+              "map_bounds": null,
+              "radius": null,
+              "sort": "recommended",
+              "page": 1,
+              "page_size": 12,
+              "mandatory_filters": {
+                "publication_state": "published",
+                "listing_statuses": [
+                  "available",
+                  "reserved"
+                ],
+                "translation_human_approved": true,
+                "locale_indexable": true
+              },
+              "price_min": null,
+              "price_max": null,
+              "bedrooms_min": null,
+              "bedrooms_max": null,
+              "premises_min": null,
+              "hotel_rooms_min": null,
+              "primary_area_min": null,
+              "primary_area_max": null,
+              "land_area_min": null,
+              "land_area_max": null,
+              "floor_min": null,
+              "floor_max": null,
+              "storeys_min": null,
+              "storeys_max": null
+            },
             "source": "website_search"
           }
         },
@@ -2371,6 +2459,15 @@
             "Petrich",
             "Sandanski"
           ],
+          "property_families": [
+            "apartment",
+            "commercial",
+            "hotel",
+            "house",
+            "land",
+            "multi_unit",
+            "property"
+          ],
           "property_types": [
             "apartment",
             "commercial",
@@ -2380,6 +2477,7 @@
             "multi_unit",
             "property"
           ],
+          "property_subtypes": [],
           "offer_types": [
             "rent",
             "sale"
@@ -2392,8 +2490,24 @@
             4,
             6,
             7
-          ]
-        }
+          ],
+          "premises": [],
+          "hotel_rooms": []
+        },
+        "applicable_filter_fields": [
+          "property_subtype",
+          "bedrooms_min",
+          "premises_min",
+          "hotel_rooms_min",
+          "area_min",
+          "area_max",
+          "land_area_min",
+          "land_area_max",
+          "floor_min",
+          "floor_max",
+          "storeys_min",
+          "storeys_max"
+        ]
       },
       "fallback": {
         "enabled": true,

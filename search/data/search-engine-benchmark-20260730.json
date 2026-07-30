@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-30T14:48:37.149Z",
+  "baseline": {
+    "schema_version": 1,
+    "images": {
+      "typesense": "typesense/typesense:30.2",
+      "meilisearch": "getmeili/meilisearch:v1.11.3"
+    },
+    "corpus_schema": "legacy_fixture_v1",
+    "workload": {
+      "iterations": 20,
+      "query": "Sandanski",
+      "locale": "bg"
+    }
+  },
+  "corpus": {
+    "corpus_schema": "legacy_fixture_v1",
+    "documents": 167,
+    "filter_fields": [
+      "translation_indexable",
+      "translation_human_approved",
+      "locale_is_indexable",
+      "translation_status",
+      "locale"
+    ],
+    "typesense_query_fields": [
+      "title",
+      "description",
+      "search_text",
+      "location"
+    ]
+  },
+  "workload": {
+    "query": "Sandanski",
+    "locale": "bg",
+    "iterations": 20
+  },
+  "engines": {
+    "typesense": {
+      "samples_ms": [
+        30.793,
+        9.597,
+        8.5,
+        8.779,
+        8.964,
+        8.72,
+        8.506,
+        8.898,
+        9.957,
+        8.569,
+        8.827,
+        8.58,
+        7.91,
+        8.237,
+        9.527,
+        9.936,
+        8.927,
+        8.766,
+        8.643,
+        9.614
+      ],
+      "p50_ms": 8.779,
+      "p95_ms": 9.957,
+      "total_hits": 109
+    },
+    "meilisearch": {
+      "samples_ms": [
+        9.789,
+        3.627,
+        3.755,
+        3.542,
+        3.644,
+        3.536,
+        3.555,
+        3.681,
+        3.923,
+        3.456,
+        3.146,
+        3.285,
+        3.688,
+        4.066,
+        4.218,
+        5.495,
+        3.824,
+        3.893,
+        4.218,
+        5.438
+      ],
+      "p50_ms": 3.688,
+      "p95_ms": 5.495,
+      "total_hits": 109
+    }
+  }
+}

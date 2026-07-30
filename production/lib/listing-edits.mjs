@@ -1,5 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
+import {
+  CANONICAL_PROPERTY_FAMILIES,
+  derivePrimaryAreaSqm,
+  normalizeImportedFact,
+  propertyFamilyFor,
+  propertySubtypeFor,
+  PROPERTY_FIELD_REGISTRY,
+} from "./listing-facts.mjs";
 import { fromRoot } from "./paths.mjs";
 import { contentHash, markStaleWhenSourceChanges } from "./translations.mjs";
 
@@ -42,7 +50,25 @@ export const LISTING_EDIT_FIELDS = Object.freeze([
   ...LISTING_WORKFLOW_EDIT_FIELDS,
   ...LISTING_SEO_EDIT_FIELDS,
 ]);
+export const PROPERTY_FACT_EDIT_FIELDS = Object.freeze(
+  Object.entries(PROPERTY_FIELD_REGISTRY)
+    .filter(([, definition]) => definition.scope === "property")
+    .map(([field]) => field),
+);
 const EDITABLE_FIELDS = new Set(LISTING_EDIT_FIELDS);
+const PROPERTY_FACT_EDIT_FIELD_SET = new Set(PROPERTY_FACT_EDIT_FIELDS);
+const LEGACY_PROPERTY_FACT_EDIT_FIELDS = new Set([
+  "location",
+  "property_type",
+  "bedrooms",
+  "bedrooms_not_applicable",
+  "area_sqm",
+  "floor",
+  "total_floors",
+  "land_area_sqm",
+  "condition",
+  "location_precision",
+]);
 const TEXT_FIELDS = new Set([
   "title",
   "h1",
@@ -95,7 +121,9 @@ export function appendListingEdit(edit, { filePath = DEFAULT_LISTING_EDIT_LEDGER
     candidate.listing_id === edit.listing_id &&
     candidate.editor === edit.editor &&
     candidate.media_reviewer === edit.media_reviewer &&
-    JSON.stringify(candidate.patch || {}) === JSON.stringify(edit.patch || {});
+    JSON.stringify(candidate.patch || {}) === JSON.stringify(edit.patch || {}) &&
+    JSON.stringify(candidate.property_patch || {}) === JSON.stringify(edit.property_patch || {}) &&
+    JSON.stringify(candidate.listing_patch || {}) === JSON.stringify(edit.listing_patch || {});
   if (explicitId) {
     const existing = rows.find((row) => row.id === explicitId);
     if (existing) {
@@ -132,71 +160,228 @@ export function applyListingEdits(seed, edits = []) {
     editsByListing.set(edit.listing_id, [...(editsByListing.get(edit.listing_id) || []), edit]);
   }
   if (!editsByListing.size) return seed;
-  return {
-    ...seed,
-    records: seed.records.map((record) => {
-      const listingEdits = editsByListing.get(record.id);
-      if (record.collection !== "listings" || !listingEdits?.length) return record;
-      const facts = { ...record.facts };
-      const seo = { ...record.seo };
-      const workflow = { ...(record.workflow || {}) };
-      let mediaReviewer = null;
-      for (const edit of listingEdits) {
-        let seoChanged = false;
-        for (const [field, value] of Object.entries(edit.patch || {})) {
-          if (SEO_FIELD_MAP[field]) {
-            seo[SEO_FIELD_MAP[field]] = value;
-            seoChanged = true;
-          } else if (WORKFLOW_FIELDS.has(field)) workflow[field] = value;
-          else if (FACT_FIELDS.has(field)) facts[field] = value;
-        }
-        if (seoChanged || Object.hasOwn(edit.patch || {}, "seo_review_confirmed")) {
-          seo.human_approved = edit.patch.seo_review_confirmed === true;
-          seo.reviewer = seo.human_approved ? edit.editor || null : null;
-          seo.reviewed_at = seo.human_approved ? edit.edited_at || null : null;
-          seo.review_status = seo.human_approved ? "approved" : "review_required";
-        }
-        if (Object.keys(edit.patch || {}).length || edit.media_reviewer) {
-          if (edit.edited_at) workflow.last_edited_at = edit.edited_at;
-          if (edit.editor) workflow.last_editor = edit.editor;
-        }
-        if (Object.hasOwn(edit.patch || {}, "availability_verified_at")) {
-          workflow.availability_verified_by = edit.patch.availability_verified_at ? edit.editor || null : null;
-        }
-        if (Object.hasOwn(edit.patch || {}, "publish_approved")) {
-          workflow.publish_approved_by = edit.patch.publish_approved ? edit.editor || null : null;
-          workflow.publish_approved_at = edit.patch.publish_approved ? edit.edited_at || null : null;
-        }
-        if (edit.media_reviewer) mediaReviewer = edit.media_reviewer;
+  const propertyEditsById = new Map();
+  for (const [listingId, listingEdits] of editsByListing) {
+    const listing = findListing(seed, listingId);
+    const propertyId = String(listing?.property || "").trim();
+    if (!propertyId) continue;
+    for (const edit of listingEdits) {
+      if (!Object.keys(edit.property_patch || {}).length) continue;
+      propertyEditsById.set(propertyId, [...(propertyEditsById.get(propertyId) || []), edit]);
+    }
+  }
+
+  const records = seed.records.map((record) => {
+    const listingEdits = editsByListing.get(record.id);
+    if (record.collection !== "listings" || !listingEdits?.length) return record;
+    const facts = { ...record.facts };
+    const seo = { ...record.seo };
+    const workflow = { ...(record.workflow || {}) };
+    let mediaReviewer = null;
+    for (const edit of listingEdits) {
+      const patch = { ...(edit.patch || {}), ...(edit.listing_patch || {}) };
+      if (patch.price_on_request === true) patch.price_eur = null;
+      let seoChanged = false;
+      for (const [field, value] of Object.entries(patch)) {
+        if (SEO_FIELD_MAP[field]) {
+          seo[SEO_FIELD_MAP[field]] = value;
+          seoChanged = true;
+        } else if (WORKFLOW_FIELDS.has(field)) workflow[field] = value;
+        else if (FACT_FIELDS.has(field)) facts[field] = value;
       }
-      const media = mediaReviewer
-        ? (record.media || []).map((item) =>
-            item.is_public ? item : { ...item, review_status: "reviewed_private", media_reviewer: mediaReviewer },
-          )
-        : record.media;
-      return {
-        ...record,
-        facts,
-        seo,
-        workflow,
-        media,
-        media_workflow: mediaReviewer
-          ? { ...record.media_workflow, review_gated_assets: 0, media_reviewer: mediaReviewer }
-          : record.media_workflow,
-      };
-    }),
-  };
+      if (seoChanged || Object.hasOwn(patch, "seo_review_confirmed")) {
+        seo.human_approved = patch.seo_review_confirmed === true;
+        seo.reviewer = seo.human_approved ? edit.editor || null : null;
+        seo.reviewed_at = seo.human_approved ? edit.edited_at || null : null;
+        seo.review_status = seo.human_approved ? "approved" : "review_required";
+      }
+      if (Object.keys(patch).length || Object.keys(edit.property_patch || {}).length || edit.media_reviewer) {
+        if (edit.edited_at) workflow.last_edited_at = edit.edited_at;
+        if (edit.editor) workflow.last_editor = edit.editor;
+      }
+      if (Object.hasOwn(patch, "availability_verified_at")) {
+        workflow.availability_verified_by = patch.availability_verified_at ? edit.editor || null : null;
+      }
+      if (Object.hasOwn(patch, "publish_approved")) {
+        workflow.publish_approved_by = patch.publish_approved ? edit.editor || null : null;
+        workflow.publish_approved_at = patch.publish_approved ? edit.edited_at || null : null;
+      }
+      if (edit.media_reviewer) mediaReviewer = edit.media_reviewer;
+    }
+    const media = mediaReviewer
+      ? (record.media || []).map((item) =>
+          item.is_public ? item : { ...item, review_status: "reviewed_private", media_reviewer: mediaReviewer },
+        )
+      : record.media;
+    return {
+      ...record,
+      facts,
+      seo,
+      workflow,
+      media,
+      media_workflow: mediaReviewer
+        ? { ...record.media_workflow, review_gated_assets: 0, media_reviewer: mediaReviewer }
+        : record.media_workflow,
+    };
+  });
+
+  const properties = Array.isArray(seed.properties)
+    ? seed.properties.map((property) => {
+        const propertyEdits = propertyEditsById.get(property.id);
+        if (!propertyEdits?.length) return property;
+        const facts = { ...(property.facts || {}) };
+        const factVerification = [...(property.fact_verification || [])];
+        const zeroValueAudit = new Set(property.zero_value_audit || []);
+        let propertyFamily = property.property_family;
+        let propertySubtype = property.property_subtype;
+        let location = property.location;
+        for (const edit of propertyEdits) {
+          for (const [field, value] of Object.entries(edit.property_patch || {})) {
+            if (field === "property_family") propertyFamily = value;
+            else if (field === "property_subtype") propertySubtype = value;
+            else if (field === "location_id") location = value;
+            else facts[field] = value;
+          }
+          for (const verification of edit.property_fact_verification || []) {
+            const index = factVerification.findIndex((entry) => entry.field === verification.field);
+            if (index >= 0) factVerification[index] = verification;
+            else factVerification.push(verification);
+          }
+          for (const field of Object.keys(edit.property_patch || {})) zeroValueAudit.delete(field);
+          for (const field of edit.property_zero_value_audit || []) zeroValueAudit.add(field);
+        }
+        facts.primary_area_sqm = derivePrimaryAreaSqm({ ...facts, property_family: propertyFamily, property_subtype: propertySubtype });
+        return {
+          ...property,
+          property_family: propertyFamily,
+          property_subtype: propertySubtype,
+          location,
+          facts,
+          fact_verification: factVerification,
+          zero_value_audit: [...zeroValueAudit].sort(),
+        };
+      })
+    : seed.properties;
+
+  return { ...seed, records, ...(properties ? { properties } : {}) };
 }
 
 function findListing(seed, listingId) {
   return seed.records.find((record) => record.collection === "listings" && record.id === listingId);
 }
 
+function findProperty(seed, listing) {
+  const propertyId = String(listing?.property || "").trim();
+  if (!propertyId) return null;
+  return (seed.properties || []).find((property) => property.id === propertyId) || null;
+}
+
 function normalizePatch(patch = {}, { allowEmpty = false } = {}) {
   const entries = Object.entries(patch).filter(([field]) => EDITABLE_FIELDS.has(field));
   if (!entries.length && allowEmpty) return {};
   if (!entries.length) throw new Error("Listing edit patch must include editable listing fields");
-  return Object.fromEntries(entries.map(([field, value]) => [field, normalizePatchValue(field, value)]));
+  const normalized = Object.fromEntries(entries.map(([field, value]) => [field, normalizePatchValue(field, value)]));
+  if (normalized.price_on_request === true) normalized.price_eur = null;
+  return normalized;
+}
+
+function normalizeScopedListingPatch(patch = {}, { allowEmpty = false } = {}) {
+  const unsupported = Object.keys(patch).filter((field) => !EDITABLE_FIELDS.has(field));
+  if (unsupported.length) throw new Error(`Listing patch has unsupported fields: ${unsupported.join(", ")}`);
+  const physical = Object.keys(patch).filter((field) => LEGACY_PROPERTY_FACT_EDIT_FIELDS.has(field));
+  if (physical.length) {
+    throw new Error(`Physical facts belong in propertyPatch: ${physical.join(", ")}`);
+  }
+  return normalizePatch(patch, { allowEmpty });
+}
+
+function normalizePropertyPatch(property, patch = {}, { allowEmpty = false } = {}) {
+  const entries = Object.entries(patch);
+  if (!entries.length && allowEmpty) return { property_patch: {}, fact_verification: [], zero_value_audit: [] };
+  if (!entries.length) throw new Error("Property patch must include editable property fields");
+  const unsupported = entries.map(([field]) => field).filter((field) => !PROPERTY_FACT_EDIT_FIELD_SET.has(field));
+  if (unsupported.length) throw new Error(`Property patch has unsupported fields: ${unsupported.join(", ")}`);
+
+  const candidate = {
+    ...(property?.facts || {}),
+    property_family: patch.property_family ?? property?.property_family,
+    property_subtype: patch.property_subtype ?? property?.property_subtype,
+  };
+  const family = propertyFamilyFor(candidate);
+  if (!CANONICAL_PROPERTY_FAMILIES.includes(family)) {
+    throw new Error("Property patch requires a canonical property_family");
+  }
+  const subtype = propertySubtypeFor(candidate);
+  const propertyPatch = {};
+  const factVerification = [];
+  const zeroValueAudit = [];
+
+  for (const [field, value] of entries) {
+    if (field === "property_family") {
+      if (!CANONICAL_PROPERTY_FAMILIES.includes(String(value || "").trim().toLowerCase())) {
+        throw new Error("property_family must be canonical");
+      }
+      propertyPatch[field] = String(value).trim().toLowerCase();
+      continue;
+    }
+    if (field === "property_subtype") {
+      const normalized = String(value || "").trim();
+      if (!normalized || normalized.length > 80) throw new Error("property_subtype must be 1 to 80 characters");
+      propertyPatch[field] = normalized;
+      continue;
+    }
+    const normalized = normalizeImportedFact(value, {
+      field,
+      family,
+      subtype,
+      source: { source_type: "listing_edit_ledger", source_reference: property.id },
+    });
+    if (normalized.verification.state === "not_applicable") {
+      throw new Error(`${field} is not applicable to ${family}`);
+    }
+    propertyPatch[field] = normalized.value;
+    factVerification.push({ field, ...normalized.verification });
+    if (normalized.zero_value_audit) zeroValueAudit.push(field);
+  }
+  return { property_patch: propertyPatch, fact_verification: factVerification, zero_value_audit: zeroValueAudit };
+}
+
+function normalizeEditPatches(seed, record, input) {
+  const usesScopedPatches = input.propertyPatch !== undefined || input.listingPatch !== undefined;
+  if (!usesScopedPatches) {
+    return {
+      edit_scope: "legacy_flat",
+      patch: normalizePatch(input.patch, { allowEmpty: Boolean(input.mediaReviewer) }),
+      property_patch: {},
+      listing_patch: {},
+      property_fact_verification: [],
+      property_zero_value_audit: [],
+    };
+  }
+  if (input.patch && Object.keys(input.patch).length) {
+    throw new Error("Use either legacy patch or scoped propertyPatch/listingPatch, not both");
+  }
+  const property = findProperty(seed, record);
+  if (input.propertyPatch && Object.keys(input.propertyPatch).length && !property) {
+    throw new Error("Scoped property patch requires a linked property record");
+  }
+  const propertyResult = normalizePropertyPatch(property, input.propertyPatch || {}, { allowEmpty: true });
+  const listingPatch = normalizeScopedListingPatch(input.listingPatch || {}, { allowEmpty: true });
+  if (!Object.keys(propertyResult.property_patch).length && !Object.keys(listingPatch).length && !input.mediaReviewer) {
+    throw new Error("Scoped listing edit must include a propertyPatch, listingPatch, or media reviewer");
+  }
+  if (propertyResult.property_patch.location_id && Array.isArray(seed.locations)) {
+    const knownLocation = seed.locations.some((location) => location.id === propertyResult.property_patch.location_id);
+    if (!knownLocation) throw new Error("propertyPatch.location_id must reference a known location");
+  }
+  return {
+    edit_scope: "property_listing",
+    patch: {},
+    property_patch: propertyResult.property_patch,
+    listing_patch: listingPatch,
+    property_fact_verification: propertyResult.fact_verification,
+    property_zero_value_audit: propertyResult.zero_value_audit,
+  };
 }
 
 function normalizePatchValue(field, value) {
@@ -286,13 +471,34 @@ export function createListingEdit(seed, input, translationTasks = [], editedAt =
   const record = findListing(seed, input.listingId);
   if (!record) throw new Error("Known listingId is required");
   if (!input.editor) throw new Error("Listing edit requires an editor");
-  const patch = normalizePatch(input.patch, { allowEmpty: Boolean(input.mediaReviewer) });
+  const patches = normalizeEditPatches(seed, record, input);
+  const patch = patches.patch;
   const translationSourcePatch = Object.fromEntries(
-    Object.entries(patch).filter(([field]) => LISTING_FACT_EDIT_FIELDS.includes(field) || Object.hasOwn(SEO_FIELD_MAP, field)),
+    Object.entries({ ...patch, ...patches.listing_patch }).filter(
+      ([field]) => LISTING_FACT_EDIT_FIELDS.includes(field) || Object.hasOwn(SEO_FIELD_MAP, field),
+    ),
   );
-  const factsAfter = { ...record.facts, ...translationSourcePatch };
-  const sourceHashBefore = contentHash(record.facts);
-  const sourceHashAfter = contentHash(factsAfter);
+  const property = findProperty(seed, record);
+  const scopedSource = patches.edit_scope === "property_listing";
+  const sourceBefore = scopedSource
+    ? {
+        listing: record.facts,
+        property: { ...(property?.facts || {}), property_family: property?.property_family, property_subtype: property?.property_subtype },
+      }
+    : record.facts;
+  const sourceAfter = scopedSource
+    ? {
+        listing: { ...record.facts, ...translationSourcePatch },
+        property: {
+          ...(property?.facts || {}),
+          ...patches.property_patch,
+          property_family: patches.property_patch.property_family || property?.property_family,
+          property_subtype: patches.property_patch.property_subtype || property?.property_subtype,
+        },
+      }
+    : { ...record.facts, ...translationSourcePatch };
+  const sourceHashBefore = contentHash(sourceBefore);
+  const sourceHashAfter = contentHash(sourceAfter);
   const staleTranslations = staleTranslationsForListing(record, sourceHashAfter, translationTasks);
   const requestedId = String(input.id || "").trim();
   if (requestedId && !/^[a-z0-9][a-z0-9._:-]{2,159}$/i.test(requestedId)) {
@@ -307,7 +513,16 @@ export function createListingEdit(seed, input, translationTasks = [], editedAt =
       editor: input.editor,
       media_reviewer: input.mediaReviewer ? String(input.mediaReviewer).trim() : null,
       source_locale: record.source_locale,
+      edit_scope: patches.edit_scope,
       patch,
+      ...(patches.edit_scope === "property_listing"
+        ? {
+            property_patch: patches.property_patch,
+            listing_patch: patches.listing_patch,
+            property_fact_verification: patches.property_fact_verification,
+            property_zero_value_audit: patches.property_zero_value_audit,
+          }
+        : {}),
       source_hash_before: sourceHashBefore,
       source_hash_after: sourceHashAfter,
       stale_translation_count: staleTranslations.length,
@@ -379,7 +594,13 @@ export function assertListingEdits(rows) {
     if (!Number.isInteger(row.stale_translation_count) || row.stale_translation_count < 0) {
       throw new Error("Listing edit stale translation count must be a non-negative integer");
     }
-    normalizePatch(row.patch, { allowEmpty: Boolean(row.media_reviewer) });
+    const scoped = row.edit_scope === "property_listing";
+    normalizePatch(row.patch, { allowEmpty: Boolean(row.media_reviewer) || scoped });
+    if (scoped) {
+      if (!row.property_patch || !row.listing_patch || !Array.isArray(row.property_fact_verification)) {
+        throw new Error("Scoped listing edit must include property and listing patch metadata");
+      }
+    }
     if ("contact" in row || "email" in row || "phone" in row || "message" in row) {
       throw new Error("Listing edit rows must not contain private contact data");
     }

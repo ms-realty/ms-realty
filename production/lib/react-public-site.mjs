@@ -3,6 +3,14 @@ import { labelsFor, localizedListingValue, localizedSearchFilterValue, uiCopyFor
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_SRC, LOGO_SRC_REVERSED } from "./ui/design-assets.mjs";
 
+function humanizeIdentifier(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  return text
+    .replaceAll("_", " ")
+    .replace(/\b\p{L}/gu, (letter) => letter.toLocaleUpperCase());
+}
+
 function uiLabels(page) {
   return labelsFor(page.locale || page.lang || "en");
 }
@@ -898,14 +906,25 @@ function HomeBody({ page }) {
    ============================================================ */
 
 const SEARCH_FILTER_QUERY_KEYS = [
+  "exact_reference",
   "location",
-  "property_type",
+  "property_family",
+  "property_subtype",
   "offer_type",
   "price_min",
   "price_max",
   "bedrooms_min",
+  "bedrooms_max",
+  "premises_min",
+  "hotel_rooms_min",
   "area_min",
   "area_max",
+  "land_area_min",
+  "land_area_max",
+  "floor_min",
+  "floor_max",
+  "storeys_min",
+  "storeys_max",
   "status",
 ];
 
@@ -916,7 +935,7 @@ function searchHref(page, omitFilter, targetPage = 1) {
   for (const key of SEARCH_FILTER_QUERY_KEYS) {
     if (omitFilter === "*" || omitFilter === key) continue;
     const value = page.search.filters?.[key];
-    if (value) params.set(key, value);
+    if (value !== "" && value !== null && value !== undefined) params.set(key, String(value));
   }
   if (targetPage > 1) params.set("page", String(targetPage));
   const query = params.toString();
@@ -931,6 +950,7 @@ function SearchBody({ page }) {
   const viewModes = controls.view_modes || [];
   const filterOptions = controls.filter_options || {};
   const activeFilterCount = (controls.active_filter_chips || []).length;
+  const applicableFilterFields = new Set(controls.applicable_filter_fields || []);
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
   const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
   const mobileSearchContext = String(
@@ -952,7 +972,7 @@ function SearchBody({ page }) {
         { id: `${idPrefix}-${name}`, name },
         h("option", { value: "" }, labels.any),
         ...values.map((value) =>
-          h("option", { key: value, value, selected: page.search.filters?.[name] === String(value) ? true : undefined }, optionLabel(value)),
+          h("option", { key: value, value, selected: String(page.search.filters?.[name] ?? "") === String(value) ? true : undefined }, optionLabel(value)),
         ),
       ),
     );
@@ -985,11 +1005,14 @@ function SearchBody({ page }) {
       ),
       filterSelect(
         idPrefix,
-        "property_type",
+        "property_family",
         labels.propertyType,
-        filterOptions.property_types || [],
+        filterOptions.property_families || filterOptions.property_types || [],
         (value) => localizedListingValue(page.locale, "property_type", value),
       ),
+      applicableFilterFields.has("property_subtype")
+        ? filterSelect(idPrefix, "property_subtype", labels.propertyType, filterOptions.property_subtypes || [])
+        : null,
       filterSelect(
         idPrefix,
         "offer_type",
@@ -1018,13 +1041,21 @@ function SearchBody({ page }) {
           ),
         ),
       ),
-      filterSelect(
-        idPrefix,
-        "bedrooms_min",
-        labels.factLabels?.bedrooms || "Bedrooms",
-        filterOptions.bedrooms || [],
-        (value) => `${value}+`,
-      ),
+      applicableFilterFields.has("bedrooms_min")
+        ? filterSelect(
+            idPrefix,
+            "bedrooms_min",
+            labels.factLabels?.bedrooms || "Bedrooms",
+            filterOptions.bedrooms || [],
+            (value) => `${value}+`,
+          )
+        : null,
+      applicableFilterFields.has("premises_min")
+        ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || "Premises", filterOptions.premises || [], (value) => `${value}+`)
+        : null,
+      applicableFilterFields.has("hotel_rooms_min")
+        ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || "Hotel rooms", filterOptions.hotel_rooms || [], (value) => `${value}+`)
+        : null,
       h(
         "fieldset",
         { className: "sr-fg sr-fg--area" },
@@ -1046,6 +1077,40 @@ function SearchBody({ page }) {
           ),
         ),
       ),
+      applicableFilterFields.has("land_area_min")
+        ? h(
+            "fieldset",
+            { className: "sr-fg sr-fg--area" },
+            h("legend", { className: "hdr" }, labels.factLabels?.land_area_sqm || "Land area (m²)"),
+            h(
+              "div",
+              { className: "sr-fg__pair" },
+              h("label", { htmlFor: `${idPrefix}-land_area_min` }, labels.areaMin, h("input", { id: `${idPrefix}-land_area_min`, name: "land_area_min", type: "number", min: "0", step: "any", inputMode: "decimal", defaultValue: page.search.filters?.land_area_min || "" })),
+              h("label", { htmlFor: `${idPrefix}-land_area_max` }, labels.areaMax, h("input", { id: `${idPrefix}-land_area_max`, name: "land_area_max", type: "number", min: "0", step: "any", inputMode: "decimal", defaultValue: page.search.filters?.land_area_max || "" })),
+            ),
+          )
+        : null,
+      applicableFilterFields.has("floor_min")
+        ? h(
+            "fieldset",
+            { className: "sr-fg sr-fg--area" },
+            h("legend", { className: "hdr" }, labels.factLabels?.floor || "Floor"),
+            h(
+              "div",
+              { className: "sr-fg__pair" },
+              h("label", { htmlFor: `${idPrefix}-floor_min` }, labels.areaMin, h("input", { id: `${idPrefix}-floor_min`, name: "floor_min", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.floor_min || "" })),
+              h("label", { htmlFor: `${idPrefix}-floor_max` }, labels.areaMax, h("input", { id: `${idPrefix}-floor_max`, name: "floor_max", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.floor_max || "" })),
+            ),
+          )
+        : null,
+      applicableFilterFields.has("storeys_min")
+        ? h(
+            "div",
+            { className: "sr-fg" },
+            h("label", { className: "hdr", htmlFor: `${idPrefix}-storeys_min` }, labels.factLabels?.storeys || "Storeys"),
+            h("input", { id: `${idPrefix}-storeys_min`, name: "storeys_min", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.storeys_min || "" }),
+          )
+        : null,
       h(
         "div",
         { className: "sr-fg" },
@@ -1101,6 +1166,7 @@ function SearchBody({ page }) {
       h("input", { type: "hidden", name: "locale", defaultValue: page.locale }),
       h("input", { type: "hidden", name: "query", defaultValue: page.search.query || "" }),
       h("input", { type: "hidden", name: "filters", defaultValue: JSON.stringify(savedSearchFilters) }),
+      h("input", { type: "hidden", name: "search_intent", defaultValue: JSON.stringify(controls.save_search?.payload?.search_intent || page.search.intent || {}) }),
       h(
         "div",
         { className: "sr-fg" },

@@ -254,11 +254,14 @@ export function assertServerSmoke(smoke) {
   if (smoke.translationPublish.status !== 201 || smoke.translationPublish.body.public_indexable !== true) {
     throw new Error("Server must publish only human-approved translation");
   }
-  if (smoke.listingEdit.status !== 201 || smoke.listingEdit.body.edit.stale_translation_count < 1) {
-    throw new Error("Server must stale dependent translations after listing edit");
+  if (
+    smoke.listingEdit.status !== 409 ||
+    smoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+  ) {
+    throw new Error("Server must reject legacy listing mutations with a Payload handoff");
   }
-  if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== false) {
-    throw new Error("Server must noindex stale public translation");
+  if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== true) {
+    throw new Error("Server must preserve the reviewed public translation after a rejected legacy mutation");
   }
   if (
     smoke.adminLocales?.bg?.status !== 200 ||
@@ -278,10 +281,10 @@ export function assertServerSmoke(smoke) {
   const staleSearchCard = smoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
   if (
     smoke.staleSearch.status !== 200 ||
-    staleSearchCard?.translation_display !== "stale_translation_fallback" ||
-    staleSearchCard?.translation_indexable !== false
+    staleSearchCard?.translation_display !== "reviewed_translation" ||
+    staleSearchCard?.translation_indexable !== true
   ) {
-    throw new Error("Server must mark stale search cards as fallback");
+    throw new Error("Server must preserve reviewed search cards after a rejected legacy mutation");
   }
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");
   if (smoke.lead.body.contact_preference !== "whatsapp") throw new Error("Server must preserve lead contact preference");
