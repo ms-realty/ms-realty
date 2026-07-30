@@ -1033,10 +1033,10 @@ if (
   savedSearchAlerts.summary.saved_searches !== 1 ||
   savedSearchAlerts.rows[0].saved_search_id !== "saved-search-he-0001" ||
   savedSearchAlerts.rows[0].current_match_count !== 46 ||
-  savedSearchAlerts.rows[0].status !== "new_matches" ||
-  savedSearchAlerts.rows[0].alert_task?.new_match_count !== 5
+  savedSearchAlerts.rows[0].status !== "no_new_matches" ||
+  savedSearchAlerts.rows[0].alert_task !== null
 ) {
-  throw new Error("Saved-search alert report must create one broker alert for newly matching canonical properties");
+  throw new Error("Saved-search alert report must evaluate the persisted Hebrew search without duplicate alerts");
 }
 const sellerPipeline = fs.readFileSync(fromRoot("production", "data", "seller-pipeline.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (sellerPipeline.length !== 1) throw new Error("Seller pipeline artifact must contain one deterministic smoke row");

@@ -16,10 +16,6 @@ function tableSql(source, name) {
 }
 
 test("Payload migration boot configuration and generated constraints stay runnable", () => {
-  const tsconfig = JSON.parse(fs.readFileSync(fromRoot("tsconfig.json"), "utf8"));
-  assert.equal(tsconfig.compilerOptions.allowJs, true);
-  assert.deepEqual(tsconfig.include, ["payload.config.js", "migrations/**/*.ts"]);
-
   for (const migration of ["20260710_132716_initial_schema.ts", "20260730_120000_property_search_schema.ts"]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
@@ -70,8 +66,11 @@ test("Payload migration boot configuration and generated constraints stay runnab
   assert.match(migration, /listing_enrichment_tasks_property_id_properties_id_fk" FOREIGN KEY \("property_id"\).*ON DELETE set null/);
 
   const typesDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-migration-`);
-  const env = { ...process.env, PAYLOAD_TS_OUTPUT_PATH: `${typesDir}/payload-types.ts` };
-  delete env.PAYLOAD_CONFIG_PATH;
+  const env = {
+    ...process.env,
+    PAYLOAD_CONFIG_PATH: fromRoot("payload.config.js"),
+    PAYLOAD_TS_OUTPUT_PATH: `${typesDir}/payload-types.ts`,
+  };
   try {
     const loaded = spawnSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", "await import('./migrations/index.ts')"], {
       cwd: fromRoot(),

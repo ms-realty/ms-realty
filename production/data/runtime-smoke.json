@@ -216,7 +216,7 @@
         "total_floors": null,
         "land_area_sqm": null,
         "condition": "",
-        "location_precision": "approximate",
+        "location_precision": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -236,8 +236,8 @@
         "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false,
-        "location_precision": "approximate"
+        "bedrooms_not_applicable": true,
+        "location_precision": null
       },
       "media": {
         "gallery": [
@@ -511,7 +511,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 1,
           "price_on_request": false,
@@ -568,7 +568,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 6,
           "price_on_request": false,
@@ -625,7 +625,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 83,
           "price_on_request": false,
@@ -893,7 +893,7 @@
         "total_floors": null,
         "land_area_sqm": null,
         "condition": "",
-        "location_precision": "approximate",
+        "location_precision": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -913,8 +913,8 @@
         "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false,
-        "location_precision": "approximate"
+        "bedrooms_not_applicable": true,
+        "location_precision": null
       },
       "media": {
         "gallery": [
@@ -1188,7 +1188,7 @@
           "offer_type": "rent",
           "offer_type_label": "For rent",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 1,
           "price_on_request": false,
@@ -1245,7 +1245,7 @@
           "offer_type": "rent",
           "offer_type_label": "For rent",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 6,
           "price_on_request": false,
@@ -1302,7 +1302,7 @@
           "offer_type": "rent",
           "offer_type_label": "For rent",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 83,
           "price_on_request": false,
@@ -1501,7 +1501,7 @@
       "identifier": "MS-CRAWL-0114",
       "name": "Апартаменты в Парк отеле Пирин — г.Сандански",
       "description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
-      "category": "multi_unit",
+      "category": "apartment",
       "image": [
         "https://makler-realty.ru/wp-content/uploads/2013/11/191-1.jpg",
         "https://makler-realty.ru/wp-content/uploads/2013/11/191-2.jpg",
@@ -1539,7 +1539,7 @@
       "facts": {
         "id": "MS-CRAWL-0114",
         "location": "Сандански",
-        "property_type": "multi_unit",
+        "property_type": "apartment",
         "offer_type": "sale",
         "bedrooms": null,
         "area_sqm": null,
@@ -1547,7 +1547,7 @@
         "total_floors": null,
         "land_area_sqm": null,
         "condition": "",
-        "location_precision": "approximate",
+        "location_precision": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -1567,8 +1567,8 @@
         "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false,
-        "location_precision": "approximate"
+        "bedrooms_not_applicable": true,
+        "location_precision": null
       },
       "media": {
         "gallery": [
@@ -1783,6 +1783,120 @@
       },
       "related_listings": [
         {
+          "id": "MS-CRAWL-0119",
+          "title": "Трехкомнатная квартира в Парк Отеле Пирин — Сандански",
+          "path": "/ru/properties/MS-CRAWL-0119",
+          "review_badge": null,
+          "translation_display": "reviewed_translation",
+          "translation_locale": "ru",
+          "translation_status": "published",
+          "translation_indexable": true,
+          "translation_human_approved": true,
+          "source_locale": "ru",
+          "content_locale": "ru",
+          "location": "Сандански",
+          "property_type": "apartment",
+          "property_type_label": "Квартира",
+          "offer_type": "sale",
+          "offer_type_label": "Продажа",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "area_sqm": null,
+          "price_eur": null,
+          "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 19,
+          "legacy_image_count": 42,
+          "thumbnail": {
+            "url": "https://makler-realty.ru/wp-content/uploads/2018/03/778-dron.jpg",
+            "alt": "Трехкомнатная квартира в Парк Отеле Пирин — Сандански",
+            "width": null,
+            "height": null
+          },
+          "actions": {
+            "detail": {
+              "label": "Подробнее",
+              "href": "/ru/properties/MS-CRAWL-0119"
+            },
+            "inquiry": {
+              "label": "Запрос",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "ru",
+                "listingReference": "MS-CRAWL-0119",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Сохранить",
+              "saved_label": "Сохранено",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0119"
+            }
+          }
+        },
+        {
+          "id": "MS-CRAWL-0131",
+          "title": "Продажа дома в центре г. Сандански",
+          "path": "/ru/properties/MS-CRAWL-0131",
+          "review_badge": null,
+          "translation_display": "reviewed_translation",
+          "translation_locale": "ru",
+          "translation_status": "published",
+          "translation_indexable": true,
+          "translation_human_approved": true,
+          "source_locale": "ru",
+          "content_locale": "ru",
+          "location": "Сандански",
+          "property_type": "apartment",
+          "property_type_label": "Квартира",
+          "offer_type": "sale",
+          "offer_type_label": "Продажа",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "area_sqm": null,
+          "price_eur": 93000,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 9,
+          "legacy_image_count": 32,
+          "thumbnail": {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/280-1.jpg",
+            "alt": "Продажа дома в центре г. Сандански",
+            "width": null,
+            "height": null
+          },
+          "actions": {
+            "detail": {
+              "label": "Подробнее",
+              "href": "/ru/properties/MS-CRAWL-0131"
+            },
+            "inquiry": {
+              "label": "Запрос",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "ru",
+                "listingReference": "MS-CRAWL-0131",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Сохранить",
+              "saved_label": "Сохранено",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0131"
+            }
+          }
+        },
+        {
           "id": "MS-CRAWL-0133",
           "title": "Продажа дома с участком в городе Сандански",
           "path": "/ru/properties/MS-CRAWL-0133",
@@ -1795,12 +1909,12 @@
           "source_locale": "ru",
           "content_locale": "ru",
           "location": "Сандански",
-          "property_type": "multi_unit",
-          "property_type_label": "Апартаменты",
+          "property_type": "apartment",
+          "property_type_label": "Квартира",
           "offer_type": "sale",
           "offer_type_label": "Продажа",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 594000,
           "price_on_request": false,
@@ -1831,120 +1945,6 @@
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
               "listing_id": "MS-CRAWL-0133"
-            }
-          }
-        },
-        {
-          "id": "MS-CRAWL-0138",
-          "title": "Продажа новостройки в Сандански",
-          "path": "/ru/properties/MS-CRAWL-0138",
-          "review_badge": null,
-          "translation_display": "reviewed_translation",
-          "translation_locale": "ru",
-          "translation_status": "published",
-          "translation_indexable": true,
-          "translation_human_approved": true,
-          "source_locale": "ru",
-          "content_locale": "ru",
-          "location": "Сандански",
-          "property_type": "multi_unit",
-          "property_type_label": "Апартаменты",
-          "offer_type": "sale",
-          "offer_type_label": "Продажа",
-          "bedrooms": null,
-          "bedrooms_not_applicable": false,
-          "area_sqm": null,
-          "price_eur": 46200,
-          "price_on_request": false,
-          "listing_status": "available",
-          "listing_active": true,
-          "image_count": 5,
-          "legacy_image_count": 27,
-          "thumbnail": {
-            "url": "https://makler-realty.ru/wp-content/uploads/2025/06/2-1000x563.jpg",
-            "alt": "Продажа новостройки в Сандански",
-            "width": null,
-            "height": null
-          },
-          "actions": {
-            "detail": {
-              "label": "Подробнее",
-              "href": "/ru/properties/MS-CRAWL-0138"
-            },
-            "inquiry": {
-              "label": "Запрос",
-              "endpoint": "/api/leads",
-              "method": "POST",
-              "payload": {
-                "leadType": "buyer",
-                "language": "ru",
-                "listingReference": "MS-CRAWL-0138",
-                "source": "website_search_result"
-              }
-            },
-            "save": {
-              "label": "Сохранить",
-              "saved_label": "Сохранено",
-              "endpoint": "/api/saved-searches",
-              "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0138"
-            }
-          }
-        },
-        {
-          "id": "MS-CRAWL-0116",
-          "title": "Земля и здания на продажу недалеко от Сандански",
-          "path": "/ru/properties/MS-CRAWL-0116",
-          "review_badge": null,
-          "translation_display": "reviewed_translation",
-          "translation_locale": "ru",
-          "translation_status": "published",
-          "translation_indexable": true,
-          "translation_human_approved": true,
-          "source_locale": "ru",
-          "content_locale": "ru",
-          "location": "Сандански",
-          "property_type": "land",
-          "property_type_label": "Участок",
-          "offer_type": "sale",
-          "offer_type_label": "Продажа",
-          "bedrooms": null,
-          "bedrooms_not_applicable": false,
-          "area_sqm": null,
-          "price_eur": 75000,
-          "price_on_request": false,
-          "listing_status": "available",
-          "listing_active": true,
-          "image_count": 7,
-          "legacy_image_count": 30,
-          "thumbnail": {
-            "url": "https://makler-realty.ru/wp-content/uploads/2021/03/791-1-680x383.jpg",
-            "alt": "Земля и здания на продажу недалеко от Сандански",
-            "width": null,
-            "height": null
-          },
-          "actions": {
-            "detail": {
-              "label": "Подробнее",
-              "href": "/ru/properties/MS-CRAWL-0116"
-            },
-            "inquiry": {
-              "label": "Запрос",
-              "endpoint": "/api/leads",
-              "method": "POST",
-              "payload": {
-                "leadType": "buyer",
-                "language": "ru",
-                "listingReference": "MS-CRAWL-0116",
-                "source": "website_search_result"
-              }
-            },
-            "save": {
-              "label": "Сохранить",
-              "saved_label": "Сохранено",
-              "endpoint": "/api/saved-searches",
-              "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0116"
             }
           }
         }
@@ -2187,7 +2187,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -2239,12 +2239,12 @@
         "source_locale": "bg",
         "content_locale": "bg",
         "location": "סנדנסקי",
-        "property_type": "multi_unit",
-        "property_type_label": "דירות",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -2300,7 +2300,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 600,
@@ -2357,7 +2357,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 355,
@@ -2414,7 +2414,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": null,
@@ -2472,7 +2472,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
@@ -3290,7 +3290,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -3547,7 +3547,7 @@
         "total_floors": null,
         "land_area_sqm": null,
         "condition": "",
-        "location_precision": "approximate",
+        "location_precision": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "sold",
@@ -3567,8 +3567,8 @@
         "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false,
-        "location_precision": "approximate"
+        "bedrooms_not_applicable": true,
+        "location_precision": null
       },
       "media": {
         "gallery": [
@@ -3842,7 +3842,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 1,
           "price_on_request": false,
@@ -3899,7 +3899,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 6,
           "price_on_request": false,
@@ -3956,7 +3956,7 @@
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
           "bedrooms": null,
-          "bedrooms_not_applicable": false,
+          "bedrooms_not_applicable": true,
           "area_sqm": null,
           "price_eur": 83,
           "price_on_request": false,
@@ -4146,6 +4146,50 @@
         "typesense",
         "meilisearch"
       ],
+      "intent": {
+        "schema_version": 1,
+        "locale": "he",
+        "text_query": "Sandanski",
+        "exact_reference": null,
+        "property_families": [],
+        "property_subtypes": [],
+        "offer_type": null,
+        "listing_status": null,
+        "price_currency": "EUR",
+        "price_period": null,
+        "parking_kinds": [],
+        "construction_statuses": [],
+        "has_approved_tour": null,
+        "location_ids": [],
+        "map_bounds": null,
+        "radius": null,
+        "sort": "recommended",
+        "page": 1,
+        "page_size": 12,
+        "mandatory_filters": {
+          "publication_state": "published",
+          "listing_statuses": [
+            "available",
+            "reserved"
+          ],
+          "translation_human_approved": true,
+          "locale_indexable": true
+        },
+        "price_min": null,
+        "price_max": null,
+        "bedrooms_min": null,
+        "bedrooms_max": null,
+        "premises_min": null,
+        "hotel_rooms_min": null,
+        "primary_area_min": null,
+        "primary_area_max": null,
+        "land_area_min": null,
+        "land_area_max": null,
+        "floor_min": null,
+        "floor_max": null,
+        "storeys_min": null,
+        "storeys_max": null
+      },
       "query": "Sandanski",
       "sort": "recommended",
       "filters": {
@@ -4192,6 +4236,50 @@
             "language": "he",
             "query": "Sandanski",
             "filters": {},
+            "search_intent": {
+              "schema_version": 1,
+              "locale": "he",
+              "text_query": "Sandanski",
+              "exact_reference": null,
+              "property_families": [],
+              "property_subtypes": [],
+              "offer_type": null,
+              "listing_status": null,
+              "price_currency": "EUR",
+              "price_period": null,
+              "parking_kinds": [],
+              "construction_statuses": [],
+              "has_approved_tour": null,
+              "location_ids": [],
+              "map_bounds": null,
+              "radius": null,
+              "sort": "recommended",
+              "page": 1,
+              "page_size": 12,
+              "mandatory_filters": {
+                "publication_state": "published",
+                "listing_statuses": [
+                  "available",
+                  "reserved"
+                ],
+                "translation_human_approved": true,
+                "locale_indexable": true
+              },
+              "price_min": null,
+              "price_max": null,
+              "bedrooms_min": null,
+              "bedrooms_max": null,
+              "premises_min": null,
+              "hotel_rooms_min": null,
+              "primary_area_min": null,
+              "primary_area_max": null,
+              "land_area_min": null,
+              "land_area_max": null,
+              "floor_min": null,
+              "floor_max": null,
+              "storeys_min": null,
+              "storeys_max": null
+            },
             "source": "website_search"
           }
         },
@@ -4202,29 +4290,51 @@
             "Petrich",
             "Sandanski"
           ],
+          "property_families": [
+            "apartment",
+            "commercial",
+            "hotel",
+            "house",
+            "plot",
+            "property"
+          ],
           "property_types": [
             "apartment",
             "commercial",
             "hotel",
             "house",
-            "land",
-            "multi_unit",
+            "plot",
             "property"
+          ],
+          "property_subtypes": [
+            "apartment",
+            "development",
+            "hotel",
+            "house",
+            "other_commercial"
           ],
           "offer_types": [
             "rent",
             "sale"
           ],
-          "bedrooms": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            6,
-            7
-          ]
-        }
+          "bedrooms": [],
+          "premises": [],
+          "hotel_rooms": []
+        },
+        "applicable_filter_fields": [
+          "property_subtype",
+          "bedrooms_min",
+          "premises_min",
+          "hotel_rooms_min",
+          "area_min",
+          "area_max",
+          "land_area_min",
+          "land_area_max",
+          "floor_min",
+          "floor_max",
+          "storeys_min",
+          "storeys_max"
+        ]
       },
       "fallback": {
         "enabled": true,
@@ -4246,12 +4356,12 @@
         "source_locale": "bg",
         "content_locale": "bg",
         "location": "סנדנסקי",
-        "property_type": "multi_unit",
-        "property_type_label": "דירות",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -4307,7 +4417,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 600,
@@ -4364,7 +4474,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 355,
@@ -4421,7 +4531,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": null,
@@ -4479,7 +4589,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
@@ -4535,7 +4645,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 53289,
@@ -4592,7 +4702,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 350,
@@ -4649,7 +4759,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 400,
@@ -4706,7 +4816,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 130000,
@@ -4764,7 +4874,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -4821,7 +4931,7 @@
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,
@@ -4877,7 +4987,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 230,
@@ -5354,6 +5464,50 @@
         "typesense",
         "meilisearch"
       ],
+      "intent": {
+        "schema_version": 1,
+        "locale": "he",
+        "text_query": "Sandanski",
+        "exact_reference": null,
+        "property_families": [],
+        "property_subtypes": [],
+        "offer_type": null,
+        "listing_status": null,
+        "price_currency": "EUR",
+        "price_period": null,
+        "parking_kinds": [],
+        "construction_statuses": [],
+        "has_approved_tour": null,
+        "location_ids": [],
+        "map_bounds": null,
+        "radius": null,
+        "sort": "recommended",
+        "page": 1,
+        "page_size": 12,
+        "mandatory_filters": {
+          "publication_state": "published",
+          "listing_statuses": [
+            "available",
+            "reserved"
+          ],
+          "translation_human_approved": true,
+          "locale_indexable": true
+        },
+        "price_min": null,
+        "price_max": null,
+        "bedrooms_min": null,
+        "bedrooms_max": null,
+        "premises_min": null,
+        "hotel_rooms_min": null,
+        "primary_area_min": null,
+        "primary_area_max": null,
+        "land_area_min": null,
+        "land_area_max": null,
+        "floor_min": null,
+        "floor_max": null,
+        "storeys_min": null,
+        "storeys_max": null
+      },
       "query": "Sandanski",
       "sort": "recommended",
       "filters": {
@@ -5400,6 +5554,50 @@
             "language": "he",
             "query": "Sandanski",
             "filters": {},
+            "search_intent": {
+              "schema_version": 1,
+              "locale": "he",
+              "text_query": "Sandanski",
+              "exact_reference": null,
+              "property_families": [],
+              "property_subtypes": [],
+              "offer_type": null,
+              "listing_status": null,
+              "price_currency": "EUR",
+              "price_period": null,
+              "parking_kinds": [],
+              "construction_statuses": [],
+              "has_approved_tour": null,
+              "location_ids": [],
+              "map_bounds": null,
+              "radius": null,
+              "sort": "recommended",
+              "page": 1,
+              "page_size": 12,
+              "mandatory_filters": {
+                "publication_state": "published",
+                "listing_statuses": [
+                  "available",
+                  "reserved"
+                ],
+                "translation_human_approved": true,
+                "locale_indexable": true
+              },
+              "price_min": null,
+              "price_max": null,
+              "bedrooms_min": null,
+              "bedrooms_max": null,
+              "premises_min": null,
+              "hotel_rooms_min": null,
+              "primary_area_min": null,
+              "primary_area_max": null,
+              "land_area_min": null,
+              "land_area_max": null,
+              "floor_min": null,
+              "floor_max": null,
+              "storeys_min": null,
+              "storeys_max": null
+            },
             "source": "website_search"
           }
         },
@@ -5410,29 +5608,51 @@
             "Petrich",
             "Sandanski"
           ],
+          "property_families": [
+            "apartment",
+            "commercial",
+            "hotel",
+            "house",
+            "plot",
+            "property"
+          ],
           "property_types": [
             "apartment",
             "commercial",
             "hotel",
             "house",
-            "land",
-            "multi_unit",
+            "plot",
             "property"
+          ],
+          "property_subtypes": [
+            "apartment",
+            "development",
+            "hotel",
+            "house",
+            "other_commercial"
           ],
           "offer_types": [
             "rent",
             "sale"
           ],
-          "bedrooms": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            6,
-            7
-          ]
-        }
+          "bedrooms": [],
+          "premises": [],
+          "hotel_rooms": []
+        },
+        "applicable_filter_fields": [
+          "property_subtype",
+          "bedrooms_min",
+          "premises_min",
+          "hotel_rooms_min",
+          "area_min",
+          "area_max",
+          "land_area_min",
+          "land_area_max",
+          "floor_min",
+          "floor_max",
+          "storeys_min",
+          "storeys_max"
+        ]
       },
       "fallback": {
         "enabled": true,
@@ -5459,7 +5679,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -5511,12 +5731,12 @@
         "source_locale": "bg",
         "content_locale": "bg",
         "location": "סנדנסקי",
-        "property_type": "multi_unit",
-        "property_type_label": "דירות",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -5572,7 +5792,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 600,
@@ -5629,7 +5849,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 355,
@@ -5686,7 +5906,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 2,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": null,
@@ -5744,7 +5964,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
@@ -5800,7 +6020,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 53289,
@@ -5857,7 +6077,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 350,
@@ -5914,7 +6134,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 400,
@@ -5971,7 +6191,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": 1,
+        "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "price_eur": 130000,
@@ -6029,7 +6249,7 @@
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
@@ -6086,7 +6306,7 @@
         "offer_type": "sale",
         "offer_type_label": "למכירה",
         "bedrooms": null,
-        "bedrooms_not_applicable": false,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,
