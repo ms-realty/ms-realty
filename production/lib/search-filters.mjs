@@ -31,7 +31,7 @@ export function searchFiltersFromObject(input = {}) {
   const filters = {};
   for (const field of SEARCH_FILTER_FIELDS) {
     const value = input[field];
-    if (value) filters[field] = value;
+    if (value !== undefined && value !== null && value !== "") filters[field] = value;
   }
   return filters;
 }

@@ -11,6 +11,7 @@ import {
   taxonomyForLegacyPropertyType,
 } from "../lib/listing-facts.mjs";
 import { normalizeSearchIntent, searchIntentToQueryFilters } from "../lib/search-intent.mjs";
+import { searchFiltersFromObject } from "../lib/search-filters.mjs";
 
 test("property applicability registry covers all canonical families with explicit primary-area rules", () => {
   assert.deepEqual(CANONICAL_PROPERTY_FAMILIES, ["apartment", "house", "plot", "agricultural_land", "commercial", "hotel"]);
@@ -90,5 +91,12 @@ test("SearchIntent rejects incompatible filters and retains mandatory server-sid
     storeys_min: "",
     storeys_max: "",
     exact_reference: "MS-CRAWL-0001",
+  });
+});
+
+test("legacy filter extraction preserves an explicit numeric zero", () => {
+  assert.deepEqual(searchFiltersFromObject({ bedrooms_min: 0, area_min: "", status: "available" }), {
+    bedrooms_min: 0,
+    status: "available",
   });
 });
