@@ -5,7 +5,31 @@
     "moduleResolution": "Bundler",
     "noEmit": true,
     "skipLibCheck": true,
-    "target": "ES2022"
+    "target": "ES2022",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "strict": false,
+    "incremental": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["payload.config.js", "migrations/**/*.ts"]
+  "include": [
+    "payload.config.js",
+    "migrations/**/*.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
