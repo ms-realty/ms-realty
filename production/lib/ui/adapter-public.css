@@ -1070,6 +1070,7 @@ main[data-saved-listings-view="true"]:not([data-saved-listings-ready="true"]) [d
 .ld-mobile-contact-more { display: none; }
 .ld-media-nav { margin-bottom: var(--space-4); }
 .ld-media-nav .mk-tab { display: inline-flex; min-height: 44px; align-items: center; gap: 7px; text-decoration: none; }
+.ld-media-nav button.mk-tab { border: 0; cursor: pointer; font: inherit; }
 .ld-media-nav .mk-tab[aria-disabled="true"] { opacity: 0.55; }
 dl[data-listing-facts="true"] {
   display: grid;
@@ -1282,12 +1283,22 @@ main.ct-page.pg-narrow { max-width: var(--container-md); }
   font-size: var(--text-sm);
   font-weight: var(--fw-bold);
 }
+.sell-steps li[data-active="true"] { border-color: var(--brand); background: var(--sea-50); }
+.sell-steps li[data-complete="true"] .sell-steps__num { background: var(--success-500); }
 .ct-form { display: grid; gap: var(--space-4); }
 .ct-form__title { font-size: var(--text-xl); }
 .sell-form__section { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border); }
 .sell-form__section:first-of-type { padding-top: 0; border-top: 0; }
+.sell-form__section[hidden] { display: none; }
 .sell-form__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
 .sell-form__grid label { min-width: 0; }
+.sell-form__actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-2); }
+.sell-form__actions--end { justify-content: flex-end; }
+.sell-form__review { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin: 0; }
+.sell-form__review > div { min-width: 0; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-sunken); }
+.sell-form__review > div[hidden] { display: none; }
+.sell-form__review dt { color: var(--text-muted); font-size: var(--text-xs); }
+.sell-form__review dd { margin: var(--space-1) 0 0; overflow-wrap: anywhere; color: var(--text-strong); font-weight: var(--fw-semibold); }
 .ct-form__row { display: flex; gap: var(--space-3); }
 .ct-form__row > * { flex: 1; }
 .ct-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-4); }
@@ -1295,6 +1306,9 @@ main.ct-page.pg-narrow { max-width: var(--container-md); }
 @media (max-width: 700px) {
   .ct-form__row { flex-direction: column; }
   .sell-form__grid { grid-template-columns: 1fr; }
+  .sell-form__review { grid-template-columns: 1fr; }
+  .sell-form__actions .mk-btn { min-width: 0; flex: 1; }
+  .sell-form__actions--end .mk-btn { flex: 0 1 auto; }
 }
 .pg-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .guide-head { display: grid; justify-items: start; gap: var(--space-3); }
@@ -1440,6 +1454,12 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
   .ld-gallery .ld-g--desktop-extra { display: block; }
   .ld-gallery .ld-g--main { grid-column: auto; grid-row: auto; }
   .ld-gallery .ld-g__more { display: none; }
+  .ld-gallery .ld-g__open {
+    inset-block-start: auto;
+    inset-inline-end: auto;
+    inset-block-end: var(--space-3);
+    inset-inline-start: var(--space-3);
+  }
   .ld-g__count {
     position: absolute;
     z-index: 3;
@@ -1566,6 +1586,26 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom));
     padding-left: max(var(--space-5), env(safe-area-inset-left));
   }
+  dialog.ld-gallery-dialog {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+  .ld-gallery-dialog__head {
+    padding-right: max(var(--space-4), env(safe-area-inset-right));
+    padding-left: max(var(--space-4), env(safe-area-inset-left));
+  }
+  .ld-gallery-dialog__stage { grid-template-columns: 44px minmax(0, 1fr) 44px; gap: var(--space-2); padding: var(--space-3); }
+  .ld-gallery-dialog__image { gap: var(--space-2); }
+  .ld-gallery-dialog__thumbs {
+    padding-right: max(var(--space-3), env(safe-area-inset-right));
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    padding-left: max(var(--space-3), env(safe-area-inset-left));
+  }
+  .ld-gallery-dialog__thumb { width: 66px; height: 50px; }
   .ld-contact-options {
     inset: auto 0 0;
     width: 100%;

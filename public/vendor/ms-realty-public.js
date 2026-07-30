@@ -11,10 +11,10 @@
   };
   var KEY = "ms-realty:saved-listings";
   var SEARCH_SCROLL_KEY = "ms-realty:search-scroll";
-  var SEARCH_RETURN_KEY = "ms-realty:search-return";
-  var lastLeadTrigger = null;
-  var lastContactOptionsTrigger = null;
-  var toastTimer = 0;
+ var SEARCH_RETURN_KEY = "ms-realty:search-return";
+ var lastLeadTrigger = null;
+ var lastContactOptionsTrigger = null;
+ var toastTimer = 0;
   var PHOTO_SPHERE_VIEWER_SCRIPT_URL = "/vendor/photo-sphere-viewer.js";
   var PHOTO_SPHERE_VIEWER_CSS_URL = "/vendor/photo-sphere-viewer.css";
   var photoSphereViewerPromise = null;
@@ -903,7 +903,79 @@
     window.addEventListener("resize", scheduleGalleryPosition);
     updateGalleryPosition();
   }
-  function initSearchScrollRestoration() {
+  function initSellerIntake() {
+    var form = document.querySelector("form[data-seller-intake]");
+    if (!form) return;
+    var panels = form.querySelectorAll("[data-seller-step]");
+    var indicators = document.querySelectorAll("[data-seller-step-indicator]");
+    if (!panels.length) return;
+    var currentIndex = 0;
+    function fieldValue(control) {
+      if (!control) return "";
+      if (control.tagName === "SELECT" && control.options && control.selectedIndex >= 0) return control.options[control.selectedIndex].textContent || "";
+      return typeof control.value === "string" ? control.value.trim() : "";
+    }
+    function updateReview() {
+      var rows = form.querySelectorAll("[data-seller-summary-row]");
+      for (var i = 0; i < rows.length; i += 1) {
+        var valueNode = rows[i].querySelector("[data-seller-summary]");
+        var name = valueNode ? valueNode.getAttribute("data-seller-summary") : "";
+        var control = name ? form.elements.namedItem(name) : null;
+        var value = fieldValue(control);
+        rows[i].hidden = !value;
+        if (valueNode) valueNode.textContent = value;
+      }
+    }
+    function showStep(index, moveFocus) {
+      currentIndex = Math.max(0, Math.min(index, panels.length - 1));
+      form.setAttribute("data-seller-step", String(currentIndex + 1));
+      for (var i = 0; i < panels.length; i += 1) panels[i].hidden = i !== currentIndex;
+      for (var j = 0; j < indicators.length; j += 1) {
+        var active = j === currentIndex;
+        if (active) indicators[j].setAttribute("aria-current", "step");
+        else indicators[j].removeAttribute("aria-current");
+        if (j < currentIndex) indicators[j].setAttribute("data-complete", "true");
+        else indicators[j].removeAttribute("data-complete");
+        if (active) indicators[j].setAttribute("data-active", "true");
+        else indicators[j].removeAttribute("data-active");
+      }
+      if (currentIndex === panels.length - 1) updateReview();
+      if (moveFocus) {
+        var title = panels[currentIndex].querySelector("[data-seller-step-title]");
+        if (title) window.requestAnimationFrame(function () { title.focus(); });
+      }
+    }
+    function currentStepIsValid() {
+      var fields = panels[currentIndex].querySelectorAll("input[required], select[required], textarea[required]");
+      for (var i = 0; i < fields.length; i += 1) {
+        if (fields[i].checkValidity()) continue;
+        fields[i].reportValidity();
+        return false;
+      }
+      return true;
+    }
+    form.addEventListener("click", function (event) {
+      var next = event.target.closest("[data-seller-next]");
+      if (next && form.contains(next)) {
+        event.preventDefault();
+        if (currentStepIsValid()) showStep(currentIndex + 1, true);
+        return;
+      }
+      var back = event.target.closest("[data-seller-back]");
+      if (back && form.contains(back)) {
+        event.preventDefault();
+        showStep(currentIndex - 1, true);
+      }
+    });
+    form.addEventListener("submit", function (event) {
+      if (currentIndex === panels.length - 1) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (currentStepIsValid()) showStep(currentIndex + 1, true);
+    });
+    showStep(0, false);
+  }
+ function initSearchScrollRestoration() {
     var searchRoot = document.querySelector("[data-search-results], [data-saved-listings-view='true']");
     if (!searchRoot) return;
     var lastListingId = null;
@@ -997,13 +1069,13 @@
     });
     syncPublicDialogState();
   }
-  function syncPublicDialogState() {
-    var enquiry = document.getElementById("mk-enquiry");
-    var contactOptions = document.querySelector("[data-mobile-contact-options]");
-    var listingGallery = document.querySelector("[data-listing-gallery-dialog]");
-    var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
-    document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
-  }
+   function syncPublicDialogState() {
+     var enquiry = document.getElementById("mk-enquiry");
+     var contactOptions = document.querySelector("[data-mobile-contact-options]");
+     var listingGallery = document.querySelector("[data-listing-gallery-dialog]");
+     var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
+     document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
+   }
   function initPublicMobileNavigation() {
     var mobileMenu = document.querySelector("[data-mobile-menu]");
     if (!mobileMenu) return;
@@ -1227,7 +1299,8 @@
   initHeroAdvancedSearch();
   initHeroGallery();
   initImageFallbacks();
-  initListingGallery();
-  initMobileListingGallery();
-  initPhotoSphereViewers();
+ initListingGallery();
+ initMobileListingGallery();
+ initSellerIntake();
+ initPhotoSphereViewers();
 })();
