@@ -52,6 +52,14 @@ test("legacy taxonomy and zero handling preserve evidence without treating zero 
   const unmapped = normalizeLegacyListingFacts({ id: "MS-CRAWL-UNMAPPED", property_type: "property", price_eur: 100000 });
   assert.equal(unmapped.facts.price_amount, 100000);
   assert.equal(unmapped.fact_verification.find((fact) => fact.field === "price_amount").state, "entered_pending_review");
+  const onRequest = normalizeLegacyListingFacts({
+    id: "MS-CRAWL-REQUEST",
+    property_type: "apartment",
+    price_eur: 1,
+    price_on_request: true,
+  });
+  assert.equal(onRequest.facts.price_on_request, true);
+  assert.equal(onRequest.facts.price_amount, null);
 });
 
 test("SearchIntent rejects incompatible filters and retains mandatory server-side constraints", () => {

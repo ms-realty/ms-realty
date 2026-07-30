@@ -240,6 +240,7 @@ export function normalizeLegacyListingFacts(listing = {}) {
   const taxonomy = taxonomyForLegacyPropertyType(listing.property_type);
   const family = taxonomy.family;
   const subtype = taxonomy.subtype;
+  const priceOnRequest = listing.price_on_request === true;
   const normalized = {
     legacy_property_type: listing.property_type || "",
     property_family: family,
@@ -251,7 +252,7 @@ export function normalizeLegacyListingFacts(listing = {}) {
     listing_status: listing.listing_status || "available",
     price_currency: listing.price_currency || "EUR",
     price_period: listing.price_period || null,
-    price_on_request: listing.price_on_request === true,
+    price_on_request: priceOnRequest,
     public_location_precision: listing.location_precision || "approximate",
   };
   const values = {
@@ -259,7 +260,7 @@ export function normalizeLegacyListingFacts(listing = {}) {
     floor_number: listing.floor,
     total_floors: listing.total_floors,
     land_area_sqm: listing.land_area_sqm,
-    price_amount: listing.price_eur,
+    price_amount: priceOnRequest ? null : listing.price_eur,
   };
   const fact_verification = [];
   const zero_value_audit = [];
