@@ -6,6 +6,7 @@ import {
   validateRealtyCaseConditionPayloadManifest,
 } from "../lib/realty-case-condition-payload-projector.mjs";
 
+let exitCode = 0;
 try {
   const workspaceId = String(process.env.MS_REALTY_WORKSPACE_ID || "").trim();
   const filePath = process.env.MS_REALTY_CASE_CONDITION_LEDGER_PATH || undefined;
@@ -25,5 +26,7 @@ try {
   }
 } catch (error) {
   console.error(`REALTY CASE CONDITION PAYLOAD PROJECTOR FAILED: ${error.message}`);
-  process.exitCode = 1;
+  exitCode = 1;
 }
+
+process.exit(exitCode);

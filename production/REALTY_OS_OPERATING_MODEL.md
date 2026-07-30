@@ -642,16 +642,20 @@ Implemented in this change:
 - local AES-256-GCM JSONL evidence vault, scoped to workspace/case with payload-digest checks and
   idempotent reference writes; the case ledger and projections retain references rather than document
   content;
-- Payload-compatible PostgreSQL collection definitions and registered migrations for case, event,
-  mandate, evidence, and outbox records, including a forward mandate-idempotency correction that
-  preserves append-only historical versions and permits safe mandate-reference reuse across cases;
-- deterministic, reference-only Payload import manifest plus a transaction-backed projector for
-  cases, immutable events, and mandate versions. It uses Payload's serializable Local API
-  transaction, resolves workspace-scoped relationship IDs, retries bounded database races, rejects
-  immutable conflicts, and updates only the mutable case projection after ledger rows append;
-- `npm run case:project` is a scoped dry run by default. It requires `MS_REALTY_WORKSPACE_ID` and
-  respects `MS_REALTY_CASE_LEDGER_PATH`; applying requires an approved Payload runtime plus
-  `MS_REALTY_CASE_PROJECTOR_APPLY=1`;
+- Payload-compatible PostgreSQL collection definitions and registered migrations for case,
+  condition, immutable event, immutable condition-event, mandate, evidence, and outbox records,
+  including a forward mandate-idempotency correction that preserves append-only historical versions
+  and permits safe mandate-reference reuse across cases;
+- deterministic, reference-only Payload import manifests plus transaction-backed projectors for
+  cases/immutable events/mandate versions and their dependent conditions/condition events. They use
+  Payload's serializable Local API transaction, resolve workspace-scoped relationship IDs, retry
+  bounded database races, reject immutable conflicts, and update only mutable projections after
+  their immutable ledger rows append; a condition projector requires its parent case to exist first;
+- `npm run case:project` and `npm run case:conditions:project` are scoped dry runs by default. They
+  require `MS_REALTY_WORKSPACE_ID`, respect their corresponding ledger-path variables, and require
+  `MS_REALTY_CASE_PROJECTOR_APPLY=1` to write; the case projector runs before the condition projector;
+- an opt-in disposable Postgres integration test proves a fresh migration, both projectors,
+  relationship storage, and idempotent replay without using the operator's local Payload volume;
 - regulatory-source snapshot primitives that bind official-source receipt references and SHA-256
   content digests, compare changes/staleness, and require professional and approval-evidence
   references before an all-successful snapshot can be approved;
@@ -679,20 +683,25 @@ Configuration:
 - `MS_REALTY_CASE_LEDGER_PATH`: local preview case-ledger location.
 - `MS_REALTY_CASE_CONDITION_LEDGER_PATH`: local preview condition-ledger location.
 - `MS_REALTY_CASE_RECORDED_AT`: deterministic test/smoke timestamp only.
-- `MS_REALTY_WORKSPACE_ID`: required scope for `case:manifest` and `case:project`.
-- `MS_REALTY_CASE_PROJECTOR_APPLY=1`: explicit opt-in to write a manifest through Payload; omission
-  remains a dry run.
+- `MS_REALTY_WORKSPACE_ID`: required scope for `case:manifest`, `case:project`, and
+  `case:conditions:project`.
+- `MS_REALTY_CASE_PROJECTOR_APPLY=1`: explicit opt-in to write either case manifest through Payload;
+  omission remains a dry run.
+- `MS_REALTY_RUN_PAYLOAD_INTEGRATION=1`: developer-only opt-in for the disposable Docker/Postgres
+  migration-and-projector integration test; it is not production launch evidence.
 - `MS_REALTY_ADMIN_CREDENTIALS_JSON`: per-human/per-agent credentials and roles.
 - `MS_REALTY_EVIDENCE_VAULT_KEY`: local evidence-vault encryption key; it belongs in secret storage,
   never in a ledger, manifest, prompt, or committed file.
 
 Not yet production-complete:
 
-- applying the committed Payload/PostgreSQL schema in an approved runtime and proving the
-  transaction-backed projector against migrated Postgres with read-back reconciliation of the
-  preview ledger; the manifest remains reference-only and is not a database source of truth;
-- condition workbench UI, durable Payload/PostgreSQL condition collection and projector, and
-  production multi-writer/reconciliation coverage; the committed condition ledger/API is local only;
+- applying the committed Payload/PostgreSQL schema in an approved runtime and capturing operational
+  read-back reconciliation of the preview ledger; the disposable integration test proves the code
+  path but is not an approved-runtime or launch-evidence substitute, and the manifest remains
+  reference-only rather than a database source of truth;
+- production multi-writer/reconciliation coverage and a durable request-path writer; the committed
+  case and condition workbenches currently write to the local SQLite/JSONL preview ledger before
+  explicit projection, rather than directly to an agency production database;
 - signed structured mandate limits beyond the current capability set;
 - child booking/stay/management-period runs;
 - official-source retrieval, receipt custody, source-refresh monitoring, geographic rules, and

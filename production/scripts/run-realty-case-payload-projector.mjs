@@ -3,6 +3,7 @@ import config from "../../payload.config.js";
 import { readRealtyCasePayloadManifest } from "../lib/realty-case-payload-reconciliation.mjs";
 import { applyRealtyCasePayloadManifest, validateRealtyCasePayloadManifest } from "../lib/realty-case-payload-projector.mjs";
 
+let exitCode = 0;
 try {
   const workspaceId = String(process.env.MS_REALTY_WORKSPACE_ID || "").trim();
   const filePath = process.env.MS_REALTY_CASE_LEDGER_PATH || undefined;
@@ -22,5 +23,7 @@ try {
   }
 } catch (error) {
   console.error(`REALTY CASE PAYLOAD PROJECTOR FAILED: ${error.message}`);
-  process.exitCode = 1;
+  exitCode = 1;
 }
+
+process.exit(exitCode);
