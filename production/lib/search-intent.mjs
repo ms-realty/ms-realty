@@ -66,6 +66,9 @@ function assertRange(intent, min, max) {
 }
 
 export function assertSearchIntentCompatibility(intent) {
+  if (intent.listing_status && !intent.mandatory_filters.listing_statuses.includes(intent.listing_status)) {
+    throw new Error("listing_status conflicts with mandatory public availability filters");
+  }
   const families = intent.property_families;
   if (!families.length) return intent;
   const requires = (field, present) => {

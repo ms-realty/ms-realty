@@ -59,6 +59,8 @@ test("SearchIntent rejects incompatible filters and retains mandatory server-sid
     () => normalizeSearchIntent({ property_families: ["plot"], bedrooms_min: 2 }),
     /bedrooms_count is not applicable/,
   );
+  assert.throws(() => normalizeSearchIntent({ listing_status: "sold" }), /mandatory public availability/);
+  assert.throws(() => normalizeSearchIntent({ bedrooms_min: 3, bedrooms_max: 1 }), /bedrooms_min cannot exceed bedrooms_max/);
   assert.deepEqual(normalizeSearchIntent({ property_type: "multi_unit" }).property_families, ["apartment"]);
   const intent = normalizeSearchIntent({
     locale: "bg",
