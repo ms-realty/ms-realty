@@ -16,6 +16,12 @@ const ROLE_CAPABILITIES = {
 };
 
 const AGENT_REALTY_CASE_ACTIONS = new Set(["step_completed", "step_blocked", "case_closed"]);
+const AGENT_REALTY_CASE_CONDITION_ACTIONS = new Set([
+  "condition_opened",
+  "condition_satisfied",
+  "condition_blocked",
+  "condition_expired",
+]);
 
 const OPERATIONS_READ_PATHS = new Set([
   "/admin/today",
@@ -120,10 +126,20 @@ export function requiredAdminCapability(method, pathname) {
   const verb = String(method || "GET").toUpperCase();
   if (pathname === "/admin") return "workspace:read";
   if (verb === "GET" && ["/admin/activity", "/api/admin/activity"].includes(pathname)) return "activity:read";
-  if (verb === "GET" && ["/admin/cases", "/api/admin/cases", "/api/admin/cases/intents"].includes(pathname)) {
+  if (
+    verb === "GET" &&
+    ["/admin/cases", "/api/admin/cases", "/api/admin/cases/intents", "/api/admin/cases/conditions"].includes(pathname)
+  ) {
     return "cases:read";
   }
-  if (verb !== "GET" && ["/api/admin/cases", "/api/admin/cases/actions"].includes(pathname)) return "cases:write";
+  if (
+    verb !== "GET" &&
+    ["/api/admin/cases", "/api/admin/cases/actions", "/api/admin/cases/conditions", "/api/admin/cases/conditions/actions"].includes(
+      pathname,
+    )
+  ) {
+    return "cases:write";
+  }
   if (verb === "GET" && OPERATIONS_READ_PATHS.has(pathname)) return "operations:read";
   if (verb === "GET" && CONTENT_READ_PATHS.has(pathname)) return "content:read";
   if (verb === "GET" && TRANSLATION_READ_PATHS.has(pathname)) return "translations:read";
@@ -249,6 +265,15 @@ export function assertAgentRealtyCaseMutation(principal, input) {
   if (!principal?.roles?.includes("agent")) return;
   if (AGENT_REALTY_CASE_ACTIONS.has(String(input?.action || "").trim())) return;
   const error = new Error("Agents may only complete or block case steps, or close a complete autonomous case");
+  error.status = 403;
+  error.capability = "human_case_control";
+  throw error;
+}
+
+export function assertAgentRealtyCaseConditionMutation(principal, input) {
+  if (!principal?.roles?.includes("agent")) return;
+  if (AGENT_REALTY_CASE_CONDITION_ACTIONS.has(String(input?.action || "").trim())) return;
+  const error = new Error("Agents may only open, satisfy, block, or expire case conditions");
   error.status = 403;
   error.capability = "human_case_control";
   throw error;

@@ -66,6 +66,8 @@ test("trusted agent credentials are restricted to mandate-enforced case routes",
 
   assert.deepEqual(adminCapabilities(principal), ["activity:read", "cases:read", "cases:write", "workspace:read"]);
   assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/cases/actions")), true);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/cases/conditions/actions")), true);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("GET", "/api/admin/cases/conditions")), true);
   assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/replies")), false);
   assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/deals/close")), false);
   assert.equal(adminHomePath(principal), "/admin/cases");

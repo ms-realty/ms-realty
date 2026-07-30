@@ -9,6 +9,7 @@ import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
   adminHomePath,
+  assertAgentRealtyCaseConditionMutation,
   assertAgentRealtyCaseMutation,
   bindAuthenticatedOperator,
   canAdminAccess,
@@ -143,6 +144,12 @@ import {
   openRealtyCase,
   readRealtyCaseEvents,
 } from "./realty-cases.mjs";
+import {
+  appendRealtyCaseConditionAction,
+  buildRealtyCaseConditionQueue,
+  openRealtyCaseCondition,
+  readRealtyCaseConditionEvents,
+} from "./realty-case-conditions.mjs";
 import { buildAutonomousRealtyCaseIntents } from "./realty-case-executor.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
@@ -351,6 +358,17 @@ function bindRealtyCaseExecutor(input, principal) {
   return bindAuthenticatedOperator(prepared, principal);
 }
 
+function bindRealtyCaseConditionExecutor(input, principal, action) {
+  const expectedKind = principal?.roles?.includes("agent") ? "agent" : "human";
+  const submittedKind = String(input?.executorKind || input?.executor_kind || "").trim();
+  if (submittedKind && submittedKind !== expectedKind) {
+    throw new Error("Condition executor kind must match the authenticated principal");
+  }
+  const prepared = { ...(input || {}), executorKind: expectedKind };
+  assertAgentRealtyCaseConditionMutation(principal, { ...prepared, action });
+  return bindAuthenticatedOperator(prepared, principal);
+}
+
 function redirectApprovalInput(request) {
   const input = parseBody(request);
   return {
@@ -550,6 +568,7 @@ export function createHttpApp({
   dealLedgerPath = null,
   documentChecklistLedgerPath = null,
   realtyCaseLedgerPath = null,
+  realtyCaseConditionLedgerPath = null,
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
@@ -765,6 +784,10 @@ export function createHttpApp({
     );
   const currentAutonomousRealtyCaseIntents = () =>
     buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(realtyCaseLedgerPath || undefined), {
+      now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
+    });
+  const currentRealtyCaseConditionQueue = () =>
+    buildRealtyCaseConditionQueue(readRealtyCaseConditionEvents(realtyCaseConditionLedgerPath || undefined), {
       now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
     });
   const currentConsentPayload = (requestedLocale, operatorId = null) =>
@@ -1202,6 +1225,11 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/cases/intents") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminJson(200, currentAutonomousRealtyCaseIntents());
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/cases/conditions") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, currentRealtyCaseConditionQueue());
     }
 
     if (request.method === "GET" && ["/api/admin/consents", "/admin/consents"].includes(url.pathname)) {
@@ -2499,6 +2527,84 @@ export function createHttpApp({
               executor_kind: result.event.executor_kind,
               case_status: result.case.status,
               progress_percent: result.case.progress_percent,
+            },
+          }, recordedAt);
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/cases/conditions") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
+        const result = openRealtyCaseCondition(
+          bindRealtyCaseConditionExecutor(parseBody(request), principal, "condition_opened"),
+          {
+            filePath: realtyCaseConditionLedgerPath || undefined,
+            caseLedgerPath: realtyCaseLedgerPath || undefined,
+            recordedAt,
+          },
+        );
+        const audited = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "realty_case_condition_opened" && row.object_id === result.event.id,
+            )
+          : false;
+        if (!audited) {
+          recordAudit({
+            action: "realty_case_condition_opened",
+            actor: result.event.actor,
+            objectType: "realty_case_condition_event",
+            objectId: result.event.id,
+            metadata: {
+              case_id: result.condition.case_id,
+              condition_id: result.condition.id,
+              condition_type: result.condition.type,
+              executor_kind: result.event.executor_kind,
+            },
+          }, recordedAt);
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/cases/conditions/actions") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = parseBody(request);
+        const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
+        const result = appendRealtyCaseConditionAction(
+          bindRealtyCaseConditionExecutor(input, principal, input?.action),
+          {
+            filePath: realtyCaseConditionLedgerPath || undefined,
+            caseLedgerPath: realtyCaseLedgerPath || undefined,
+            recordedAt,
+          },
+        );
+        const audited = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "realty_case_condition_action_recorded" && row.object_id === result.event.id,
+            )
+          : false;
+        if (!audited) {
+          recordAudit({
+            action: "realty_case_condition_action_recorded",
+            actor: result.event.actor,
+            objectType: "realty_case_condition_event",
+            objectId: result.event.id,
+            metadata: {
+              case_id: result.condition.case_id,
+              condition_id: result.condition.id,
+              condition_action: result.event.action,
+              condition_status: result.condition.status,
+              executor_kind: result.event.executor_kind,
             },
           }, recordedAt);
         }

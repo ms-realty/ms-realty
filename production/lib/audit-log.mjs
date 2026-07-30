@@ -40,6 +40,8 @@ const ADMIN_ACTIONS = new Set([
   "reply_approved",
   "reply_delivery_recorded",
   "realty_case_action_recorded",
+  "realty_case_condition_action_recorded",
+  "realty_case_condition_opened",
   "realty_case_opened",
   "seller_pipeline_outcome_recorded",
   "seo_evidence_imported",

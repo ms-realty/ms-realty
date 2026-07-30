@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import {
+  assertAgentRealtyCaseConditionMutation,
   assertAgentRealtyCaseMutation,
   bindAuthenticatedOperator,
   canAdminAccess,
@@ -156,6 +157,13 @@ import {
   openRealtyCase,
   readRealtyCaseEvents,
 } from "./realty-cases.mjs";
+import {
+  DEFAULT_REALTY_CASE_CONDITION_LEDGER_PATH,
+  appendRealtyCaseConditionAction,
+  buildRealtyCaseConditionQueue,
+  openRealtyCaseCondition,
+  readRealtyCaseConditionEvents,
+} from "./realty-case-conditions.mjs";
 import { buildAutonomousRealtyCaseIntents } from "./realty-case-executor.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, readPublicContacts } from "./public-contact-vault.mjs";
 import {
@@ -246,6 +254,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
     realtyCaseLedgerPath: env.MS_REALTY_CASE_LEDGER_PATH || DEFAULT_REALTY_CASE_LEDGER_PATH,
+    realtyCaseConditionLedgerPath:
+      env.MS_REALTY_CASE_CONDITION_LEDGER_PATH || DEFAULT_REALTY_CASE_CONDITION_LEDGER_PATH,
     documentChecklistLedgerPath:
       env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
@@ -549,6 +559,17 @@ function bindRealtyCaseExecutor(input, principal) {
   return bindAuthenticatedOperator(prepared, principal);
 }
 
+function bindRealtyCaseConditionExecutor(input, principal, action) {
+  const expectedKind = principal?.roles?.includes("agent") ? "agent" : "human";
+  const submittedKind = String(input?.executorKind || input?.executor_kind || "").trim();
+  if (submittedKind && submittedKind !== expectedKind) {
+    throw new Error("Condition executor kind must match the authenticated principal");
+  }
+  const prepared = { ...(input || {}), executorKind: expectedKind };
+  assertAgentRealtyCaseConditionMutation(principal, { ...prepared, action });
+  return bindAuthenticatedOperator(prepared, principal);
+}
+
 function currentSeed(config) {
   return applyMediaReviews(
     applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
@@ -761,6 +782,12 @@ function realtyCasesPayload(registry, url, config) {
 
 function realtyCaseIntentsPayload(config) {
   return buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(config.realtyCaseLedgerPath), {
+    now: config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString(),
+  });
+}
+
+function realtyCaseConditionQueue(config) {
+  return buildRealtyCaseConditionQueue(readRealtyCaseConditionEvents(config.realtyCaseConditionLedgerPath), {
     now: config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString(),
   });
 }
@@ -1632,6 +1659,77 @@ function appendRealtyCaseActionEntry(input, config) {
   return result;
 }
 
+function openRealtyCaseConditionEntry(input, config) {
+  const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
+  const result = openRealtyCaseCondition(
+    bindRealtyCaseConditionExecutor(input, config.adminPrincipal, "condition_opened"),
+    {
+      filePath: config.realtyCaseConditionLedgerPath,
+      caseLedgerPath: config.realtyCaseLedgerPath,
+      recordedAt,
+    },
+  );
+  if (
+    !readAuditLog(config.auditLogPath).some(
+      (row) => row.action === "realty_case_condition_opened" && row.object_id === result.event.id,
+    )
+  ) {
+    recordAudit(
+      {
+        action: "realty_case_condition_opened",
+        actor: result.event.actor,
+        objectType: "realty_case_condition_event",
+        objectId: result.event.id,
+        metadata: {
+          case_id: result.condition.case_id,
+          condition_id: result.condition.id,
+          condition_type: result.condition.type,
+          executor_kind: result.event.executor_kind,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return result;
+}
+
+function appendRealtyCaseConditionActionEntry(input, config) {
+  const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
+  const result = appendRealtyCaseConditionAction(
+    bindRealtyCaseConditionExecutor(input, config.adminPrincipal, input?.action),
+    {
+      filePath: config.realtyCaseConditionLedgerPath,
+      caseLedgerPath: config.realtyCaseLedgerPath,
+      recordedAt,
+    },
+  );
+  if (
+    !readAuditLog(config.auditLogPath).some(
+      (row) => row.action === "realty_case_condition_action_recorded" && row.object_id === result.event.id,
+    )
+  ) {
+    recordAudit(
+      {
+        action: "realty_case_condition_action_recorded",
+        actor: result.event.actor,
+        objectType: "realty_case_condition_event",
+        objectId: result.event.id,
+        metadata: {
+          case_id: result.condition.case_id,
+          condition_id: result.condition.id,
+          condition_action: result.event.action,
+          condition_status: result.condition.status,
+          executor_kind: result.event.executor_kind,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return result;
+}
+
 function appendBrokerLeadEntry(input, registry, config) {
   if (!config.leadContactVaultPath || !config.leadContactKey) {
     throw new Error("Encrypted lead contact storage is not configured");
@@ -2276,6 +2374,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/cases/intents") {
       return jsonResponse(200, realtyCaseIntentsPayload(config));
     }
+    if (request.method === "GET" && url.pathname === "/api/admin/cases/conditions") {
+      return jsonResponse(200, realtyCaseConditionQueue(config));
+    }
     if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/requests") return jsonResponse(200, requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/viewings") return htmlResponse(viewingsPayload(registry, url, config));
@@ -2466,6 +2567,17 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/cases/actions") {
       const result = appendRealtyCaseActionEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/cases/conditions") {
+      const result = openRealtyCaseConditionEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/cases/conditions/actions") {
+      const result = appendRealtyCaseConditionActionEntry(
+        parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+        config,
+      );
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads") {

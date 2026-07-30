@@ -22,6 +22,7 @@ test("local Docker compose persists preview CRM and CMS state in a named local-o
     "MS_REALTY_EVENT_LEDGER_PATH: /runtime-data/events.jsonl",
     "MS_REALTY_CONSENT_LEDGER_PATH: /runtime-data/consent-ledger.jsonl",
     "MS_REALTY_CASE_LEDGER_PATH: /runtime-data/realty-case-events.jsonl",
+    "MS_REALTY_CASE_CONDITION_LEDGER_PATH: /runtime-data/realty-case-condition-events.jsonl",
     "MS_REALTY_LOCALE_REGISTRY_PATH: /runtime-data/locales.json",
     "MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: /runtime-evidence/local-launch-readiness.json",
     "MS_REALTY_LISTING_QUALITY_REVIEW_PATH: /runtime-evidence/listing-quality-review.csv",

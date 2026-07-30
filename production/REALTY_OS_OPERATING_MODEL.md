@@ -634,6 +634,22 @@ Implemented in this change:
 - append-only SQLite/JSONL event persistence with JSONL audit mirror;
 - reference-only evidence schema and accepted-producer gate;
 - phase ordering, blockers, optional-step authority, reopen, freeze/resume, close/cancel;
+- local SQLite/JSONL, case-scoped reference-only condition ledger with mandate-bound open, satisfy,
+  block, expire, human-waive, and human-reopen actions plus a deterministic due queue;
+- autonomous intent planning and a local, result-file-driven executor that rechecks eligibility,
+  requires a mandate-authorized result, and may append terminal `case_closed` only after the
+  workflow is complete;
+- local AES-256-GCM JSONL evidence vault, scoped to workspace/case with payload-digest checks and
+  idempotent reference writes; the case ledger and projections retain references rather than document
+  content;
+- Payload-compatible PostgreSQL collection definitions and registered migration for case, event,
+  mandate, evidence, and outbox records; these are explicitly schema-only and the preview ledger
+  remains the runtime writer;
+- deterministic, reference-only Payload import manifest and offline drift/reconciliation report;
+  neither imports records nor writes to a live Payload runtime;
+- regulatory-source snapshot primitives that bind official-source receipt references and SHA-256
+  content digests, compare changes/staleness, and require professional and approval-evidence
+  references before an all-successful snapshot can be approved;
 - BG and GR regulatory steps and official-source catalog;
 - derived queue, progress, current phase, next steps, and summary;
 - authenticated Next App Router and standalone Node JSON/form APIs;
@@ -646,29 +662,43 @@ Endpoints:
 
 - `GET /admin/cases?locale=bg|ru|en`
 - `GET /api/admin/cases`
+- `GET /api/admin/cases/intents`
+- `GET /api/admin/cases/conditions`
 - `POST /api/admin/cases`
 - `POST /api/admin/cases/actions`
+- `POST /api/admin/cases/conditions`
+- `POST /api/admin/cases/conditions/actions`
 
 Configuration:
 
-- `MS_REALTY_CASE_LEDGER_PATH`: durable case ledger location.
+- `MS_REALTY_CASE_LEDGER_PATH`: local preview case-ledger location.
+- `MS_REALTY_CASE_CONDITION_LEDGER_PATH`: local preview condition-ledger location.
 - `MS_REALTY_CASE_RECORDED_AT`: deterministic test/smoke timestamp only.
 - `MS_REALTY_ADMIN_CREDENTIALS_JSON`: per-human/per-agent credentials and roles.
+- `MS_REALTY_EVIDENCE_VAULT_KEY`: local evidence-vault encryption key; it belongs in secret storage,
+  never in a ledger, manifest, prompt, or committed file.
 
 Not yet production-complete:
 
-- authoritative PostgreSQL/Payload case/event/document/evidence projections and migration from the
-  preview ledger;
+- applying the committed Payload/PostgreSQL schema in an approved runtime, a transactional
+  projector/live writer, and read-back reconciliation of the preview ledger; the current manifest is
+  a reference-only import plan, not a migration runner or database source of truth;
+- condition workbench UI, durable Payload/PostgreSQL condition collection and projector, and
+  production multi-writer/reconciliation coverage; the committed condition ledger/API is local only;
 - signed structured mandate limits beyond the current capability set;
 - child booking/stay/management-period runs;
-- ConditionLedger API and UI;
-- regulatory-snapshot builder, source-refresh monitor, geographic rules, and lawyer/notary rule-pack
-  approval/versioning;
-- encrypted document/evidence vault, signatures, digest verification, retention, and access UI;
+- official-source retrieval, receipt custody, source-refresh monitoring, geographic rules, and
+  lawyer/notary rule-pack publication/versioning; snapshot metadata and a digest do not constitute
+  legal, tax, notarial, or other professional advice or approval;
+- production evidence storage and operations: managed key lifecycle, multi-writer safety,
+  upload/scanner/signature/virus/DLP controls, retention, access UI, backup/restore, and audit;
+  the committed evidence vault is a local single-writer storage primitive, not a production service;
 - identity, AML, registry, cadastre, tax, notary, bank, payment, e-signature, portal, messaging,
   accounting, ESTI, AADE, and property-management integrations;
 - provider outbox/inbox, webhook, reconciliation, dead-letter, compensation, and scheduler runtime;
-- autonomous next-step scheduler/executor and assurance-provider verification;
+- continuous autonomous scheduling, assurance-provider verification, and provider-action dispatch;
+  the committed executor is an explicitly invoked local runner over externally supplied result data,
+  not a continuously running provider worker;
 - monetary/channel/territory/delegation limits enforced from the signed mandate;
 - production observability, SLOs, alerts, incident playbooks, backup/restore, and disaster-recovery
   evidence for the new case data;
@@ -684,13 +714,20 @@ production-ready while `production/data/launch-readiness.json` or
 
 ### Slice A — case kernel and workbench
 
-Status: implemented locally.
+Status: implemented locally. Authenticated intent exposure and the local executor are part of this
+slice, but the executor is not a production scheduler or provider-action worker.
 
 Acceptance:
 
 - manual and autonomous cases share the same workflow;
 - agent cannot act on manual case or without assurance;
 - no case can skip phase/evidence/mandate controls;
+- an autonomous intent is rechecked before append, and terminal closure is offered only when the
+  workflow is complete and the mandate authorizes it;
+- local condition events are case-scoped and reference-only; satisfaction requires its declared
+  evidence producers, while waiver and reopen require a human authority/reason record;
+- both runtimes expose the same authenticated condition queue and mutation API, with agents limited
+  to open/satisfy/block/expire actions;
 - agent cannot call legacy broker mutations;
 - BG/GR overlays appear at opening and persist as the versioned snapshot;
 - Next and standalone runtimes return the same contract;
@@ -698,10 +735,17 @@ Acceptance:
 
 ### Slice B — durable domain persistence
 
-- add normalized PostgreSQL/Payload tables/collections for cases, immutable events, mandate versions,
-  evidence metadata, conditions, links, deadlines, and projections;
+Status: Payload/PostgreSQL collections and their migration are committed as schema-only. The
+condition ledger remains local and outside that migration. No live writer, applied-runtime migration,
+or database read-back reconciliation is claimed here.
+
+- apply the normalized PostgreSQL/Payload schema for cases, immutable events, mandate versions,
+  evidence metadata, links, deadlines, and projections;
 - transactionally append event and update query projection/outbox;
 - migrate/reconcile preview ledger by IDs/digests;
+- add a durable condition collection/projector and reconcile it with the local condition ledger;
+- keep the manifest/reconciliation artifact reference-only until an authorized transactional writer
+  and database read-back are implemented;
 - enforce tenant/workspace, uniqueness, immutability, chronological ordering, and least privilege in
   the database;
 - include case data in backup/restore and recovery drills.
@@ -711,8 +755,13 @@ mutation; restore reproduces event and projection digests.
 
 ### Slice C — evidence and regulatory control plane
 
-- encrypted document store, upload/scanner/signature/virus/DLP controls, metadata, digest, versions;
-- regulatory snapshot service with official-source retrieval and approved version publication;
+Status: local evidence-vault and source-snapshot primitives are implemented. They do not retrieve
+official material, operate a production evidence service, or replace professional approval.
+
+- production encrypted document store with managed keys, upload/scanner/signature/virus/DLP controls,
+  metadata, digest, versions, retention, access, and recovery;
+- regulatory snapshot service with official-source retrieval, receipt/digest custody, source-change
+  handling, and professionally approved version publication;
 - geographic/nationality/asset applicability rules and change alerts;
 - professional assignment/approval/evidence routes.
 
@@ -720,6 +769,9 @@ Acceptance: a BG and GR lawyer/notary can reproduce why every required step appl
 sources and cited case facts; obsolete rules freeze affected open cases for resnapshot.
 
 ### Slice D — communications, scheduler, and autonomous runner
+
+Status: intent planning and a local explicit executor are implemented. No continuously running
+scheduler/queue, assurance-provider verifier, or provider-action worker exists.
 
 - transactional outbox, templates, consent/channel/time-window checks, delivery callbacks;
 - deadline/scheduler/queue/dead-letter runtime;
