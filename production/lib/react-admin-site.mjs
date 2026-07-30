@@ -2508,6 +2508,7 @@ function RealtyCaseCreateForm({ page }) {
       h("label", null, "Mandate reference", h("input", { name: "mandateRef", required: true, maxLength: 160 })),
       h("label", null, "Mandate grantor reference", h("input", { name: "mandateGrantedByRef", required: true, maxLength: 160 })),
       h("label", null, "Mandate signed at (ISO)", h("input", { name: "mandateSignedAt", required: true, placeholder: "2026-07-30T08:00:00Z", maxLength: 80 })),
+      h("label", null, "Signed mandate evidence reference", h("input", { name: "mandateSignedEvidenceRef", required: true, maxLength: 240 })),
       h("input", { type: "hidden", name: "mandateCapabilities", value: "case:*" }),
       h("label", null, "Agent assurance reference (autonomous mode)", h("input", { name: "assuranceRef", maxLength: 240 })),
       h("button", { type: "submit", className: "mk-btn mk-btn--primary" }, copy.create),

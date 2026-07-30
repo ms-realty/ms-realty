@@ -670,6 +670,11 @@ function normalizedMandate(value) {
     ref: bounded(value.ref, "Mandate ref"),
     granted_by_ref: bounded(value.grantedByRef || value.granted_by_ref, "Mandate grantedByRef"),
     signed_at: signedAt,
+    signed_evidence_ref: bounded(
+      value.signedEvidenceRef || value.signed_evidence_ref,
+      "Mandate signedEvidenceRef",
+      240,
+    ),
     expires_at: expiresAt,
     capabilities: stringList(value.capabilities, "Mandate capability", 120).sort(),
   };

@@ -51,6 +51,7 @@ function caseInput(id, executionMode) {
       ref: `mandate-${id}`,
       grantedByRef: `contact-${id}`,
       signedAt: "2026-07-30T08:00:00.000Z",
+      signedEvidenceRef: `evidence://mandate-${id}/signed`,
       capabilities: ["case:*"],
     },
     ...(executionMode === "autonomous" ? { assuranceRef: "assurance://reliable-agents/profile-1" } : {}),
@@ -227,6 +228,7 @@ test("standalone HTTP runtime serves the same autonomous case contract and admin
       mandateRef: "mandate-http-1",
       mandateGrantedByRef: "contact-http-1",
       mandateSignedAt: "2026-07-30T08:00:00.000Z",
+      mandateSignedEvidenceRef: "evidence://mandate-http-1/signed",
       mandateCapabilities: "case:*",
       assuranceRef: "assurance://reliable-agents/profile-1",
     }).toString();

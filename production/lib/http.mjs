@@ -320,6 +320,7 @@ function realtyCaseInput(input) {
       ref: output.mandateRef || output.mandate_ref,
       grantedByRef: output.mandateGrantedByRef || output.mandate_granted_by_ref,
       signedAt: output.mandateSignedAt || output.mandate_signed_at,
+      signedEvidenceRef: output.mandateSignedEvidenceRef || output.mandate_signed_evidence_ref,
       expiresAt: output.mandateExpiresAt || output.mandate_expires_at || null,
       capabilities: String(output.mandateCapabilities || output.mandate_capabilities || "case:*")
         .split(",")

@@ -30,6 +30,7 @@ function mandate(ref, expiresAt = null) {
     ref,
     grantedByRef: "contact-ref",
     signedAt: "2026-07-30T07:00:00.000Z",
+    signedEvidenceRef: `evidence://${ref}/signed`,
     ...(expiresAt ? { expiresAt } : {}),
     capabilities: ["case:*"],
   };
@@ -66,12 +67,24 @@ test("planner emits ref-only stable intents only for active assured autonomous c
   openAutonomous(filePath, "case-eligible");
   openAutonomous(filePath, "case-expired", { expiresAt: "2026-07-30T08:30:00.000Z" });
   openAutonomous(filePath, "case-frozen");
+  const blocked = openAutonomous(filePath, "case-blocked");
   appendRealtyCaseAction(
     {
       caseId: "case-frozen",
       action: "case_frozen",
       authorityRef: "authority://client-pause",
       reasonCode: "client_requested_pause",
+      actor: "trusted-agent-1",
+      executorKind: "agent",
+    },
+    { filePath, recordedAt: "2026-07-30T08:10:00.000Z" },
+  );
+  appendRealtyCaseAction(
+    {
+      caseId: blocked.case.id,
+      action: "step_blocked",
+      stepKey: blocked.case.steps[0].key,
+      reasonCode: "awaiting_external_confirmation",
       actor: "trusted-agent-1",
       executorKind: "agent",
     },
@@ -167,7 +180,7 @@ test("executor rejects missing, invalid, and not-applicable results before recor
 
   await assert.rejects(run({ action: "step_completed" }), /requires evidenceRefs/);
   await assert.rejects(run(completedOutcome(target, "bank")), /accepted producer/);
-  await assert.rejects(run({ action: "step_not_applicable", reasonCode: "optional" }), /step_completed or step_blocked/);
+  await assert.rejects(run({ action: "step_not_applicable", reasonCode: "optional" }), /step_completed, step_blocked, or case_closed/);
   assert.equal(readRealtyCaseEvents(filePath).length, 1);
 });
 
@@ -200,6 +213,44 @@ test("executor drops a planned result when the case is frozen before the result 
   assert.equal(execution.recorded, 0);
   assert.equal(execution.results.some((row) => row.status === "skipped_eligibility_changed"), true);
   assert.equal(readRealtyCaseEvents(filePath).some((event) => event.action === "step_completed"), false);
+});
+
+test("executor emits and records a terminal close intent only after every case step is resolved", async () => {
+  const { filePath } = files();
+  const opened = openAutonomous(filePath, "case-close");
+  let recordedAt = Date.parse("2026-07-30T09:00:00.000Z");
+  for (const step of opened.case.steps) {
+    appendRealtyCaseAction(
+      {
+        caseId: opened.case.id,
+        action: "step_completed",
+        stepKey: step.key,
+        evidenceRefs: [
+          {
+            ref: `evidence://${opened.case.id}/${step.key}`,
+            type: "case_step_record",
+            producerKind: step.evidence_producers[0],
+          },
+        ],
+        actor: "trusted-agent-1",
+        executorKind: "agent",
+      },
+      { filePath, recordedAt: new Date(recordedAt++).toISOString() },
+    );
+  }
+  const closeIntents = buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(filePath), {
+    now: "2026-07-30T10:00:00.000Z",
+  }).intents;
+  assert.deepEqual(closeIntents.map((intent) => [intent.step_key, intent.allowed_actions]), [[null, ["case_closed"]]]);
+
+  const execution = await executeAutonomousRealtyCases({
+    filePath,
+    actor: "trusted-executor-1",
+    now: "2026-07-30T10:00:00.000Z",
+    executor: () => ({ action: "case_closed" }),
+  });
+  assert.equal(execution.recorded, 1);
+  assert.equal(execution.results[0].event.action, "case_closed");
 });
 
 test("executor CLI plans by default and applies only an explicit trusted result source", () => {

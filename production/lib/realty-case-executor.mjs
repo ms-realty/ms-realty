@@ -6,7 +6,7 @@ import {
   readRealtyCaseEvents,
 } from "./realty-cases.mjs";
 
-export const REALTY_CASE_EXECUTOR_RESULT_ACTIONS = Object.freeze(["step_completed", "step_blocked"]);
+export const REALTY_CASE_EXECUTOR_RESULT_ACTIONS = Object.freeze(["step_completed", "step_blocked", "case_closed"]);
 
 const EVENT_PREFIX = "realty-case-executor-";
 const RESULT_FIELDS = new Set([
@@ -35,11 +35,13 @@ function hasOwn(value, key) {
   return Object.prototype.hasOwnProperty.call(value, key);
 }
 
-function permittedActions(caseRecord, step) {
+function permittedActions(caseRecord, step = null) {
   const capabilities = new Set(caseRecord.mandate?.capabilities || []);
   return REALTY_CASE_EXECUTOR_RESULT_ACTIONS.filter(
     (action) =>
-      capabilities.has("case:*") || capabilities.has(`case:${action}`) || capabilities.has(`step:${step.key}`),
+      capabilities.has("case:*") ||
+      capabilities.has(`case:${action}`) ||
+      (step && action.startsWith("step_") && capabilities.has(`step:${step.key}`)),
   );
 }
 
@@ -89,7 +91,7 @@ function actionInput(intent, outcome, actor) {
   }
   const action = String(outcome.action || "").trim();
   if (!REALTY_CASE_EXECUTOR_RESULT_ACTIONS.includes(action)) {
-    throw new Error("Executor result must be step_completed or step_blocked");
+    throw new Error("Executor result must be step_completed, step_blocked, or case_closed");
   }
   if (!intent.allowed_actions.includes(action)) {
     throw new Error("Case mandate does not authorize this executor result");
@@ -107,11 +109,13 @@ function actionInput(intent, outcome, actor) {
       throw new Error("step_completed accepts evidenceRefs only");
     }
     input.evidenceRefs = assertEvidenceRefsOnly(outcome.evidenceRefs ?? outcome.evidence_refs);
-  } else {
+  } else if (action === "step_blocked") {
     if (hasOwn(outcome, "evidenceRefs") || hasOwn(outcome, "evidence_refs")) {
       throw new Error("step_blocked accepts a reason only");
     }
     input.reasonCode = requiredText(outcome.reasonCode ?? outcome.reason_code ?? outcome.reason, "reasonCode", 120);
+  } else if (Object.keys(outcome).some((key) => key !== "action")) {
+    throw new Error("case_closed accepts no result data");
   }
   return input;
 }
@@ -129,7 +133,30 @@ export function buildAutonomousRealtyCaseIntents(events = [], { now = new Date()
   const eligibleCases = new Set();
 
   for (const caseRecord of cases) {
-    if (!activeAutonomousCase(caseRecord, generatedAt)) continue;
+    if (!activeAutonomousCase(caseRecord, generatedAt) || caseRecord.blockers.length) continue;
+    if (caseRecord.current_phase === "complete") {
+      const allowedActions = permittedActions(caseRecord);
+      if (!allowedActions.includes("case_closed")) continue;
+      eligibleCases.add(caseRecord.id);
+      const closeStep = { key: "case_closed", last_recorded_at: caseRecord.last_recorded_at };
+      const eventId = stableIntentId(caseRecord, closeStep);
+      intents.push({
+        id: eventId,
+        event_id: eventId,
+        case_id: caseRecord.id,
+        step_key: null,
+        current_phase: caseRecord.current_phase,
+        jurisdiction: caseRecord.jurisdiction,
+        case_type: caseRecord.case_type,
+        asset_kind: caseRecord.asset_kind,
+        workflow_version: caseRecord.workflow_version,
+        assurance_ref: caseRecord.assurance_ref,
+        mandate_ref: caseRecord.mandate.ref,
+        allowed_actions: ["case_closed"],
+        accepted_evidence_producers: [],
+      });
+      continue;
+    }
     for (const step of caseRecord.steps) {
       if (step.phase !== caseRecord.current_phase || step.status !== "pending") continue;
       const allowedActions = permittedActions(caseRecord, step);
@@ -154,7 +181,9 @@ export function buildAutonomousRealtyCaseIntents(events = [], { now = new Date()
     }
   }
 
-  intents.sort((left, right) => left.case_id.localeCompare(right.case_id) || left.step_key.localeCompare(right.step_key));
+  intents.sort(
+    (left, right) => left.case_id.localeCompare(right.case_id) || String(left.step_key || "").localeCompare(String(right.step_key || "")),
+  );
   return {
     kind: "realty_case_execution_intents",
     generated_at: generatedAt,

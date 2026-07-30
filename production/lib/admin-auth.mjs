@@ -15,7 +15,7 @@ const ROLE_CAPABILITIES = {
   agent: ["workspace:read", "cases:read", "cases:write", "activity:read"],
 };
 
-const AGENT_REALTY_CASE_ACTIONS = new Set(["step_completed", "step_blocked"]);
+const AGENT_REALTY_CASE_ACTIONS = new Set(["step_completed", "step_blocked", "case_closed"]);
 
 const OPERATIONS_READ_PATHS = new Set([
   "/admin/today",
@@ -248,7 +248,7 @@ export function canAdminMutate(principal) {
 export function assertAgentRealtyCaseMutation(principal, input) {
   if (!principal?.roles?.includes("agent")) return;
   if (AGENT_REALTY_CASE_ACTIONS.has(String(input?.action || "").trim())) return;
-  const error = new Error("Agents may only complete or block existing autonomous case steps");
+  const error = new Error("Agents may only complete or block case steps, or close a complete autonomous case");
   error.status = 403;
   error.capability = "human_case_control";
   throw error;

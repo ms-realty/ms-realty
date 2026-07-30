@@ -25,9 +25,32 @@ function mandate(ref = "mandate-1") {
     ref,
     grantedByRef: "contact-1",
     signedAt: "2026-07-30T08:00:00.000Z",
+    signedEvidenceRef: `evidence://${ref}/signed`,
     capabilities: ["case:*"],
   };
 }
+
+test("a case mandate requires a signed-evidence reference", () => {
+  const filePath = ledger();
+  assert.throws(
+    () =>
+      openRealtyCase(
+        {
+          id: "case-mandate-evidence-required",
+          jurisdiction: "BG",
+          caseType: "tenant_rental",
+          assetKind: "residential",
+          clientRef: "contact-1",
+          executionMode: "manual",
+          mandate: { ...mandate(), signedEvidenceRef: undefined },
+          actor: "broker_bg",
+          executorKind: "human",
+        },
+        { filePath, recordedAt: "2026-07-30T08:05:00.000Z" },
+      ),
+    /signedEvidenceRef/i,
+  );
+});
 
 function evidence(step) {
   return [
