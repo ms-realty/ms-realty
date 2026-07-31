@@ -115,6 +115,7 @@ async function serveMedia(request, env, url) {
 // code path the site reads from, so a 200 here means the object is really
 // there. The endpoint does not exist unless MEDIA_INGEST_SECRET is set.
 const INGEST_PREFIX = "/__media/";
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 // R2 keys are arbitrary UTF-8, and 13 years of WordPress uploads include
 // Cyrillic filenames ("схема.jpg") that carry their own search equity. An
 // ASCII allowlist silently dropped them, so the guard now rejects only what is
@@ -179,6 +180,13 @@ async function ingestMedia(request, env, url) {
   });
 }
 
+function ephemeralRuntimeDataResponse() {
+  return new Response(JSON.stringify({ kind: "runtime_data_unavailable", message: "Writes are disabled until durable runtime data is configured" }), {
+    status: 503,
+    headers: { "cache-control": "no-store", "content-type": "application/json; charset=utf-8" },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -196,6 +204,11 @@ export default {
       if (media) return media;
       return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
     }
+
+    // Container disk resets on sleep, so routing a mutation to Next would
+    // acknowledge customer data that cannot be recovered. Keep the preview
+    // read-only until the application has a durable runtime-data store.
+    if (MUTATING_METHODS.has(request.method)) return ephemeralRuntimeDataResponse();
 
     // One shared instance: the app keeps in-process state (rate-limit buckets,
     // the stat-validated file cache) that must not be split across instances.
