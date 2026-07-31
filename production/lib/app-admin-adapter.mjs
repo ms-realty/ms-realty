@@ -228,6 +228,7 @@ import {
   createTourApproval,
   readTourApprovals,
 } from "./tours.mjs";
+import { crossOriginWriteRejection } from "./request-guard.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import {
   DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -2489,6 +2490,8 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
 }
 
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
+  const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
+  if (crossOrigin) return jsonResponse(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
   const principal = config.adminPrincipal || resolveAdminPrincipal(request.headers.get("authorization") || "", config.authEnv || process.env);
   if (!principal) return adminUnauthorized();
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();

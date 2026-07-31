@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
+import path from "node:path";
 import { fromRoot } from "../lib/paths.mjs";
 import { readBuildMarker } from "../lib/build-marker.mjs";
 import { allowsDurableCaseAuthorityMutation } from "../../workers/durable-case-authority.mjs";
@@ -12,8 +13,6 @@ const autoMergeWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "auto
 const dockerfile = fs.readFileSync(fromRoot("Dockerfile"), "utf8");
 const wranglerConfig = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 const CONTAINER_RUNTIME_BINDINGS = [
-  "MS_REALTY_SESSION_SECRET",
-  "MS_REALTY_ADMIN_OPERATORS_JSON",
   "MS_REALTY_ADMIN_CREDENTIALS_JSON",
   "MS_REALTY_ADMIN_TOKEN",
   "MS_REALTY_LEAD_CONTACT_KEY",
@@ -40,9 +39,30 @@ const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_TRUSTED_WRITE_ORIGINS",
   "MS_REALTY_MCP_ALLOWED_ORIGINS",
   "MS_REALTY_PUBLIC_ORIGIN",
-  "MS_REALTY_ADDITIONAL_PUBLIC_ORIGINS",
   "MS_REALTY_MAX_BODY_BYTES",
 ];
+
+// Directories a forwarded binding may legitimately be read from. workers/ and
+// production/test/ are excluded on purpose: forwarding a name and asserting
+// that it is forwarded is circular, and that circularity is what let
+// MS_REALTY_ADMIN_OPERATORS_JSON reach production as a Cloudflare secret that
+// no code ever read, while admin-auth.mjs looked for
+// MS_REALTY_ADMIN_CREDENTIALS_JSON and every admin request 401'd.
+const BINDING_CONSUMER_ROOTS = ["production/lib", "production/scripts", "app", "payload.config.js"];
+const SOURCE_EXTENSIONS = new Set([".mjs", ".js", ".jsx", ".ts", ".tsx"]);
+
+function sourceFilesUnder(target) {
+  if (!fs.statSync(target).isDirectory()) return SOURCE_EXTENSIONS.has(path.extname(target)) ? [target] : [];
+  return fs
+    .readdirSync(target, { withFileTypes: true })
+    .flatMap((entry) =>
+      entry.isDirectory()
+        ? sourceFilesUnder(path.join(target, entry.name))
+        : SOURCE_EXTENSIONS.has(path.extname(entry.name))
+          ? [path.join(target, entry.name)]
+          : [],
+    );
+}
 
 test("Cloudflare Container forwards every production runtime binding", () => {
   assert.match(workerSource, /pingEndpoint = "localhost\/api\/health";/);
@@ -50,6 +70,24 @@ test("Cloudflare Container forwards every production runtime binding", () => {
   for (const binding of CONTAINER_RUNTIME_BINDINGS) {
     assert.match(workerSource, new RegExp(`${binding}: this\\.env\\.${binding} \\?\\? ""`));
   }
+});
+
+test("every forwarded binding is actually read by the running app", () => {
+  const forwarded = [...workerSource.matchAll(/^\s+(MS_REALTY_[A-Z0-9_]+|PAYLOAD_SECRET|DATABASE_URL|TYPESENSE_[A-Z_]+|MEILI_[A-Z_]+|HERMES_[A-Z_]+): this\.env\./gm)].map(
+    ([, name]) => name,
+  );
+  assert.ok(forwarded.length > 0, "expected the Worker to forward runtime bindings");
+
+  const dead = forwarded.filter((binding) => {
+    const found = BINDING_CONSUMER_ROOTS.some((root) => {
+      const target = fromRoot(...root.split("/"));
+      if (!fs.existsSync(target)) return false;
+      return sourceFilesUnder(target).some((file) => fs.readFileSync(file, "utf8").includes(binding));
+    });
+    return !found;
+  });
+
+  assert.deepEqual(dead, [], `Worker forwards bindings that nothing reads: ${dead.join(", ")}`);
 });
 
 test("Cloudflare Container allows only configured durable case-authority writes", () => {
