@@ -46,4 +46,4 @@ Bulgarian agent-facing voice with moderately compact tables.
 - The CRM primitives (`DataTable`, `KanbanCard`, `StatTile`, `Timeline`, `TaskList`,
   `Sidebar`/`Topbar`) live in this kit. If the back office grows, promote them to
   formal DS components (`.d.ts` + `.jsx` + card) — they're written to that shape.
-- Best viewed ≥ 1080px (desktop tool). Below 760px the sidebar hides.
+- Best viewed ≥ 1440px (desktop tool). Below 1440px the sidebar hides.

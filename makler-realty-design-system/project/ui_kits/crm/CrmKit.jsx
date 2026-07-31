@@ -146,7 +146,7 @@ const crmCss = `
 .crm-grid { display:grid; gap:16px; }
 
 /* Messages-inbox styles are co-located in Messages.jsx (self-injected). */
-@media (max-width:760px){ .crm-app { grid-template-columns:1fr; } .crm-sb { display:none; } }
+@media (max-width:1439px){ .crm-app { grid-template-columns:1fr; } .crm-sb { display:none; } }
 `;
 
 /* ---------- primitives ---------- */

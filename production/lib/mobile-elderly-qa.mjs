@@ -217,6 +217,11 @@ export function buildMobileElderlyQaReport({
         adminAdapterCss,
         ".adm-editor-tabs .mk-tab { flex: 1 1 0; justify-content: center; min-width: 44px; min-height: 44px; }",
       ) &&
+        includes(adminAdapterCss, "@media (max-width: 1439px)") &&
+        includes(
+          DESIGN_CSS,
+          "@media (max-width:1439px){.crm-app{grid-template-columns:1fr}.crm-sb{display:none}}",
+        ) &&
         includes(adminAdapterCss, '.adm-editor-tabs .mk-tab[aria-current="location"]') &&
         includes(adminAdapterCss, "#listing-seo") &&
         includes(ADMIN_APP_JS, "function initListingEditorTabs()"),
