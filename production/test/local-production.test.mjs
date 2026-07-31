@@ -29,6 +29,7 @@ test("local Docker compose persists preview CRM and CMS state in a named local-o
     "MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: /runtime-evidence/seo-evidence-report.json",
   ];
   for (const line of requiredPaths) assert.ok(compose.includes(line), `missing ${line}`);
+  assert.match(compose, /MS_REALTY_SEARCH_ENGINE: \$\{MS_REALTY_SEARCH_ENGINE:-typesense\}/);
   assert.match(compose, /- local-dev-app-data:\/runtime-data/);
   assert.match(compose, /seed_runtime_file\(\)/);
   const committedBaselines = [
