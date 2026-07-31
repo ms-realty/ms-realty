@@ -3446,7 +3446,6 @@ function ManualLeadForm({ page }) {
         "data-admin-mutation-success": label(copy, "leadSaved", "Enquiry created and assigned."),
         "data-admin-mutation-failure": label(copy, "leadSaveFailed", "Could not create the enquiry."),
       },
-      h("input", { type: "hidden", name: "id", defaultValue: `broker-lead-${Date.now()}` }),
       h("p", { className: "crm-tbl__muted adm-manual-lead__intro" }, label(copy, "manualLeadDescription", "Record a broker-originated enquiry.")),
       h(
         "div",

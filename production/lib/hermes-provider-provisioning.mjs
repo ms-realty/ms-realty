@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fromRoot } from "./paths.mjs";
+import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_HERMES_PROVIDER_PROVISIONING_REPORT = fromRoot(
   "production",
@@ -161,7 +161,7 @@ function projectContextState() {
   const missingMarkers = REQUIRED_PROJECT_CONTEXT_MARKERS.filter((marker) => !text.includes(marker));
   return {
     file: PROJECT_CONTEXT_FILE,
-    path: filePath,
+    path: repoRelativePath(filePath),
     present,
     complete: present && missingMarkers.length === 0,
     required_markers: REQUIRED_PROJECT_CONTEXT_MARKERS,

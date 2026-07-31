@@ -8,7 +8,7 @@ import {
   buildHermesProviderProvisioningReport,
 } from "./hermes-provider-provisioning.mjs";
 import { assertHermesAgentRuntimeReport, probeHermesAgentRuntime } from "./hermes-agent-runtime.mjs";
-import { fromRoot } from "./paths.mjs";
+import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT = fromRoot(
   "production",
@@ -381,21 +381,21 @@ const LIVE_SERVICE_PROVISIONING_INVALID_REPORT_ACTIONS = [
 
 export function liveServiceProvisioningState(reportPath = DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT) {
   if (!fs.existsSync(reportPath)) {
-    return { status: "missing_report", path: reportPath, next_actions: LIVE_SERVICE_PROVISIONING_MISSING_REPORT_ACTIONS };
+    return { status: "missing_report", path: repoRelativePath(reportPath), next_actions: LIVE_SERVICE_PROVISIONING_MISSING_REPORT_ACTIONS };
   }
   try {
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
     assertLiveServiceProvisioningReport(report);
     return {
       status: report.ready ? "pass" : "blocked_report",
-      path: reportPath,
+      path: repoRelativePath(reportPath),
       summary: report.summary,
       checks: report.checks,
       hermes: report.hermes,
       next_actions: report.next_actions,
     };
   } catch (error) {
-    return { status: "invalid_report", path: reportPath, error: error.message, next_actions: LIVE_SERVICE_PROVISIONING_INVALID_REPORT_ACTIONS };
+    return { status: "invalid_report", path: repoRelativePath(reportPath), error: error.message, next_actions: LIVE_SERVICE_PROVISIONING_INVALID_REPORT_ACTIONS };
   }
 }
 

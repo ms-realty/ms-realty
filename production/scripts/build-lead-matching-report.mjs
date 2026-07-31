@@ -13,6 +13,10 @@ const leadPipelineStates = deriveLeadPipelineStates({
   viewingFollowUps: readViewingFollowUps(),
   deals: readDeals(),
 });
-const report = buildLeadMatchingReport({ leads, leadPipelineStates, generatedAt: new Date().toISOString() });
+const report = buildLeadMatchingReport({
+  leads,
+  leadPipelineStates,
+  generatedAt: process.env.MS_REALTY_GENERATED_AT || new Date().toISOString(),
+});
 writeLeadMatchingReport(report);
 console.log(`Wrote lead matching report to ${DEFAULT_LEAD_MATCHING_REPORT}`);

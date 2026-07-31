@@ -5,7 +5,7 @@ import { bedroomsRequired, publicationReadinessFor } from "./listing-facts.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { latestTourForListing, readTourApprovals } from "./tours.mjs";
-import { fromRoot } from "./paths.mjs";
+import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_LISTING_QUALITY_REPORT = fromRoot("production", "data", "listing-quality-report.json");
 export const DEFAULT_LISTING_QUALITY_WORKBOOK = fromRoot("production", "data", "listing-quality-workbook.csv");
@@ -394,9 +394,9 @@ export function buildListingQualityReviewPacket({
     ready: false,
     status: "draft_not_launch_evidence",
     paths: {
-      workbook_csv: DEFAULT_LISTING_QUALITY_WORKBOOK,
-      draft_review_csv: draftCsvPath,
-      launch_review_csv: reviewPath,
+      workbook_csv: repoRelativePath(DEFAULT_LISTING_QUALITY_WORKBOOK),
+      draft_review_csv: repoRelativePath(draftCsvPath),
+      launch_review_csv: repoRelativePath(reviewPath),
     },
     admin: {
       editor_path_pattern: "/admin/listings/edit?listingId=:listing_id",
@@ -686,7 +686,7 @@ function reviewState(report, reviewPath, csvText = null) {
   if (csvText === null && !fs.existsSync(reviewPath)) {
     return {
       status: "missing_review",
-      path: reviewPath,
+      path: repoRelativePath(reviewPath),
       summary: missingReviewSummary(report),
       pending_review_sample: pendingReviewSample(report.rows),
     };
@@ -708,17 +708,17 @@ function reviewState(report, reviewPath, csvText = null) {
         .join(", ");
       return {
         status: "invalid_review",
-        path: reviewPath,
+        path: repoRelativePath(reviewPath),
         summary: validation.summary,
         error: `Listing quality review is incomplete: ${validation.summary.missing_review_rows} listing rows missing review (${sample})`,
         pending_review_sample: pendingReviewSample(missingRows),
       };
     }
-    return { status: "pass", path: reviewPath, summary: validation.summary };
+    return { status: "pass", path: repoRelativePath(reviewPath), summary: validation.summary };
   } catch (error) {
     return {
       status: "invalid_review",
-      path: reviewPath,
+      path: repoRelativePath(reviewPath),
       summary: missingReviewSummary(report),
       error: error.message,
       pending_review_sample: pendingReviewSample(report.rows),
@@ -887,6 +887,7 @@ export function writeListingQualityReviewPacket(
     report = null,
   } = {},
 ) {
+  if (!path.isAbsolute(draftCsvPath)) draftCsvPath = fromRoot(draftCsvPath);
   fs.mkdirSync(path.dirname(packetPath), { recursive: true });
   fs.mkdirSync(path.dirname(draftCsvPath), { recursive: true });
   assertListingQualityReviewPacket(packet);

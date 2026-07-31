@@ -22,6 +22,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_el",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -89,8 +90,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0001-el"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-3000-de",
@@ -103,6 +103,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -171,8 +172,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-3000-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0001-de",
@@ -185,6 +185,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -252,8 +253,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0001-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0002-de",
@@ -266,6 +266,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -333,8 +334,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0002-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0003-de",
@@ -347,6 +347,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -415,8 +416,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0003-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0004-de",
@@ -429,6 +429,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -497,8 +498,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0004-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0005-de",
@@ -511,6 +511,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -578,8 +579,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0005-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0006-de",
@@ -592,6 +592,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -660,8 +661,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0006-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0007-de",
@@ -674,6 +674,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -742,8 +743,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0007-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0008-de",
@@ -756,6 +756,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -824,8 +825,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0008-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0009-de",
@@ -838,6 +838,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -906,8 +907,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0009-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0010-de",
@@ -920,6 +920,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -988,8 +989,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0010-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0011-de",
@@ -1002,6 +1002,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1069,8 +1070,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0011-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0012-de",
@@ -1083,6 +1083,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1151,8 +1152,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0012-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0013-de",
@@ -1165,6 +1165,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1233,8 +1234,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0013-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0014-de",
@@ -1247,6 +1247,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1315,8 +1316,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0014-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0015-de",
@@ -1329,6 +1329,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1396,8 +1397,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0015-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0016-de",
@@ -1410,6 +1410,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1478,8 +1479,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0016-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0017-de",
@@ -1492,6 +1492,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1560,8 +1561,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0017-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0018-de",
@@ -1574,6 +1574,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1642,8 +1643,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0018-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0019-de",
@@ -1656,6 +1656,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1724,8 +1725,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0019-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0020-de",
@@ -1738,6 +1738,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1806,8 +1807,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0020-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0021-de",
@@ -1820,6 +1820,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1888,8 +1889,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0021-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0022-de",
@@ -1902,6 +1902,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -1970,8 +1971,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0022-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     },
     {
       "id": "translation-listing-MS-CRAWL-0023-de",
@@ -1984,6 +1984,7 @@
       "target_direction": "ltr",
       "reviewer_role": "translator_de",
       "provider_mode": "hermes_draft",
+      "data_classification": "non_sensitive_listing_translation",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
@@ -2052,8 +2053,7 @@
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0023-de"
         }
-      ],
-      "data_classification": "non_sensitive_listing_translation"
+      ]
     }
   ]
 }

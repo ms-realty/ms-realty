@@ -13,7 +13,7 @@
     "sources": {
       "search_console": {
         "source": "search_console",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/search-console.csv",
+        "input_path": "migration/external/seo/search-console.csv",
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
@@ -26,7 +26,7 @@
       },
       "yandex_webmaster": {
         "source": "yandex_webmaster",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/yandex-webmaster.csv",
+        "input_path": "migration/external/seo/yandex-webmaster.csv",
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
@@ -39,7 +39,7 @@
       },
       "backlinks": {
         "source": "backlinks",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/backlinks.csv",
+        "input_path": "migration/external/seo/backlinks.csv",
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
@@ -52,7 +52,7 @@
       },
       "analytics_export": {
         "source": "analytics_export",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/analytics.csv",
+        "input_path": "migration/external/seo/analytics.csv",
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
@@ -65,7 +65,7 @@
       },
       "privacy_events": {
         "source": "privacy_events",
-        "input_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/events.jsonl",
+        "input_path": "production/data/events.jsonl",
         "status": "imported",
         "row_count": 87,
         "matched_rows": 42,

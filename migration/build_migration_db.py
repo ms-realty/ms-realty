@@ -23,6 +23,13 @@ TABLES = {
 }
 
 
+def repo_relative_path(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def raise_csv_limit() -> None:
     limit = sys.maxsize
     while True:
@@ -132,7 +139,7 @@ def build_summary(conn: sqlite3.Connection, artifact_dir: Path, table_counts: di
     homepage_redirect_targets = sum(1 for old_url, new_url in redirect_rows if not is_root(old_url) and is_root(new_url))
     summary = {
         "artifact_id": artifact_dir.name,
-        "db_path": str(db_path),
+        "db_path": repo_relative_path(db_path),
         "tables": table_counts,
         "url_domains": grouped_counts(conn, "url_inventory", "source_domain"),
         "url_types": grouped_counts(conn, "url_inventory", "url_type"),
