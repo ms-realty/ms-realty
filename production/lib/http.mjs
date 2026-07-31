@@ -76,6 +76,7 @@ import {
 } from "./reply-delivery-outcomes.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
+import { publicSeedFor } from "./public-inventory.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
@@ -733,6 +734,7 @@ export function createHttpApp({
       applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined)),
       readMediaReviews(mediaReviewLedgerPath || undefined),
     );
+  const currentPublicSeed = () => publicSeedFor(currentSeed());
   const currentTranslationTasks = () =>
     readThroughCached(translationLedgerPath || DEFAULT_TRANSLATION_LEDGER_PATH, () =>
       readTranslationLedger(translationLedgerPath || undefined),
@@ -1178,7 +1180,7 @@ export function createHttpApp({
   const productionSearch = String(search.environment ?? process.env.NODE_ENV ?? "").trim().toLowerCase() === "production";
   const currentSearchResult = async (searchRequest, options = {}) => {
     const { intent, query, filters, sort, page } = searchRequest;
-    const seedForRequest = currentSeed();
+    const seedForRequest = currentPublicSeed();
     const translationTasks = currentTranslationTasks();
     const searchOptions = { localeCode: intent.locale, query, filters, sort, page, translationTasks, ...options };
     const localResult = searchRuntimeListings(activeRegistry, seedForRequest, searchOptions);
@@ -1269,7 +1271,7 @@ export function createHttpApp({
     if (legacyDecision?.status === 200) {
       const retained = renderRuntimePath(
         activeRegistry,
-        currentSeed(),
+        currentPublicSeed(),
         legacyDecision.target_path,
         currentTranslationTasks(),
         currentBrokerContacts(),
@@ -1297,7 +1299,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
       return response(
         200,
-        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentSeed(), currentTranslationTasks())),
+        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentPublicSeed(), currentTranslationTasks())),
         "application/xml; charset=utf-8",
       );
     }
@@ -3241,7 +3243,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
         const input = parseBody(request);
-        const lead = submitRuntimeLead(activeRegistry, currentSeed(), input);
+        const lead = submitRuntimeLead(activeRegistry, currentPublicSeed(), input);
         const contactVault = leadContactVaultPath
           ? appendLeadContact(lead, { filePath: leadContactVaultPath, secret: leadContactKey, storedAt: receivedAt })
           : null;
@@ -3334,7 +3336,7 @@ export function createHttpApp({
         const filters = Object.fromEntries(
           Object.entries(searchIntentToQueryFilters(intent)).filter(([, value]) => value !== "" && value !== null && value !== undefined),
         );
-        const search = searchRuntimeListings(activeRegistry, currentSeed(), {
+        const search = searchRuntimeListings(activeRegistry, currentPublicSeed(), {
           localeCode: intent.locale,
           query: intent.text_query,
           filters,
@@ -3385,7 +3387,7 @@ export function createHttpApp({
 
     const rendered = renderRuntimePath(
       activeRegistry,
-      currentSeed(),
+      currentPublicSeed(),
       url.pathname,
       currentTranslationTasks(),
       currentBrokerContacts(),

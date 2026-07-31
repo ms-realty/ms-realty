@@ -16,8 +16,10 @@ import {
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLegacyArchive } from "../lib/legacy-archive.mjs";
+import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const registry = loadLocaleRegistry();
+const approvedConfig = appRouterConfigFromEnv({ ...process.env, ...approvedPublicSeedFixtureEnv() });
 
 test("App Router manifest maps sitemap entries plus no-store search routes", () => {
   const manifest = buildAppRouteManifest({
@@ -71,7 +73,7 @@ test("every manifest page renders a complete public content contract", () => {
   const manifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
 
   for (const route of manifest.routes) {
-    const page = renderAppRoute({ pathname: route.path, url: `https://audit.test${route.path}` });
+    const page = renderAppRoute({ pathname: route.path, url: `https://audit.test${route.path}`, config: approvedConfig });
     const label = `${route.type} ${route.path}`;
     assert.equal(page.status, 200, `${label} must render`);
     assert.equal(page.rendered.kind, route.type, `${label} must use its declared renderer`);
@@ -84,7 +86,7 @@ test("every manifest page renders a complete public content contract", () => {
 });
 
 test("App Router adapter renders home, search, listing, and RTL HTML", () => {
-  const home = renderAppRoute({ pathname: "/he/", url: "https://example.test/he/" });
+  const home = renderAppRoute({ pathname: "/he/", url: "https://example.test/he/", config: approvedConfig });
   assert.equal(home.status, 200);
   assert.equal(home.headers["cache-control"], "public, max-age=300, s-maxage=3600");
   assert.match(home.html, /<html lang="he" dir="rtl">/);
@@ -94,14 +96,14 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(home.html, /data-featured-listings="true"/);
   assert.match(home.html, /data-card-thumbnail="true"/);
 
-  const search = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?q=sandanski&property_type=apartment" });
+  const search = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?q=sandanski&property_type=apartment", config: approvedConfig });
   assert.equal(search.status, 200);
   assert.equal(search.headers["cache-control"], "no-store");
   assert.equal(search.rendered.kind, "search");
   assert.equal(search.rendered.search.query, "sandanski");
   assert.match(search.html, /data-react-public-ui="search"/);
 
-  const saved = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?saved=1" });
+  const saved = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?saved=1", config: approvedConfig });
   assert.equal(saved.status, 200);
   assert.equal(saved.rendered.search.saved_view, true);
   assert.equal(saved.rendered.indexable, false);
@@ -121,12 +123,12 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(search.html, /data-ms-realty-public-client/);
   assert.doesNotMatch(search.html, /function submitHermesChat/);
 
-  const bgListing = renderAppRoute({ pathname: "/bg/imoti/MS-CRAWL-0001", url: "https://example.test/bg/imoti/MS-CRAWL-0001" });
+  const bgListing = renderAppRoute({ pathname: "/bg/imoti/MS-CRAWL-0001", url: "https://example.test/bg/imoti/MS-CRAWL-0001", config: approvedConfig });
   assert.equal(bgListing.status, 200);
   assert.match(bgListing.html, /Комплекс за дългосрочен наем/);
   assert.doesNotMatch(bgListing.html, /Updated approved source description\./);
 
-  const listing = renderAppRoute({ pathname: "/he/properties/MS-CRAWL-0001", url: "https://example.test/he/properties/MS-CRAWL-0001" });
+  const listing = renderAppRoute({ pathname: "/he/properties/MS-CRAWL-0001", url: "https://example.test/he/properties/MS-CRAWL-0001", config: approvedConfig });
   assert.equal(listing.status, 200);
   assert.equal(listing.rendered.kind, "listing");
   assert.match(listing.html, /MS-CRAWL-0001/);
@@ -148,6 +150,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   const listingFallback = renderAppRoute({
     pathname: "/en/properties/MS-CRAWL-0001",
     url: "https://example.test/en/properties/MS-CRAWL-0001",
+    config: approvedConfig,
   });
   assert.equal(listingFallback.status, 200);
   assert.equal(listingFallback.rendered.kind, "listing");
@@ -158,12 +161,13 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   const listingPrint = renderAppRoute({
     pathname: "/he/properties/MS-CRAWL-0001",
     url: "https://example.test/he/properties/MS-CRAWL-0001?print=1",
+    config: approvedConfig,
   });
   assert.equal(listingPrint.status, 200);
   assert.doesNotMatch(listingPrint.html, /data-react-public-ui=/);
   assert.match(listingPrint.html, /data-kind="listing-print"/);
 
-  const location = renderAppRoute({ pathname: "/he/locations/sandanski", url: "https://example.test/he/locations/sandanski" });
+  const location = renderAppRoute({ pathname: "/he/locations/sandanski", url: "https://example.test/he/locations/sandanski", config: approvedConfig });
   assert.equal(location.status, 200);
   assert.equal(location.rendered.kind, "location");
   assert.match(location.html, /data-react-public-ui="location"/);
@@ -173,31 +177,32 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   const fallbackLocation = renderAppRoute({
     pathname: "/en/locations/sandanski",
     url: "https://example.test/en/locations/sandanski",
+    config: approvedConfig,
   });
   assert.equal(fallbackLocation.status, 200);
   assert.equal(fallbackLocation.rendered.indexable, false);
   assert.equal(fallbackLocation.rendered.cards.length > 0, true);
   assert.match(fallbackLocation.html, /<meta name="robots" content="noindex,follow">/);
 
-  const seller = renderAppRoute({ pathname: "/he/sell", url: "https://example.test/he/sell" });
+  const seller = renderAppRoute({ pathname: "/he/sell", url: "https://example.test/he/sell", config: approvedConfig });
   assert.equal(seller.status, 200);
   assert.equal(seller.rendered.kind, "seller");
   assert.match(seller.html, /data-react-public-ui="seller"/);
   assert.match(seller.html, /data-no-public-avm="true"/);
 
-  const contact = renderAppRoute({ pathname: "/he/contact", url: "https://example.test/he/contact" });
+  const contact = renderAppRoute({ pathname: "/he/contact", url: "https://example.test/he/contact", config: approvedConfig });
   assert.equal(contact.status, 200);
   assert.equal(contact.rendered.kind, "contact");
   assert.match(contact.html, /data-react-public-ui="contact"/);
   assert.match(contact.html, /website_contact_callback/);
 
-  const fallback = renderAppRoute({ pathname: "/fr/", url: "https://example.test/fr/" });
+  const fallback = renderAppRoute({ pathname: "/fr/", url: "https://example.test/fr/", config: approvedConfig });
   assert.equal(fallback.status, 200);
   assert.equal(fallback.rendered.kind, "language_fallback");
   assert.match(fallback.html, /data-react-public-ui="language-fallback"/);
   assert.match(fallback.html, /noindex,follow/);
 
-  const guide = renderAppRoute({ pathname: "/en/guides/foreign-buyers", url: "https://example.test/en/guides/foreign-buyers" });
+  const guide = renderAppRoute({ pathname: "/en/guides/foreign-buyers", url: "https://example.test/en/guides/foreign-buyers", config: approvedConfig });
   assert.equal(guide.status, 200);
   assert.equal(guide.rendered.kind, "guide");
   assert.match(guide.html, /data-react-public-ui="guide"/);
@@ -208,7 +213,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
 
 test("dedicated localized search renderer preserves configured engine hits", async () => {
   const config = {
-    ...appRouterConfigFromEnv({ NODE_ENV: "test" }),
+    ...approvedConfig,
     search: {
       environment: "test",
       typesense: { baseUrl: "https://typesense.test", apiKey: "typesense-test", collectionName: "ms_realty_listings" },
@@ -261,7 +266,7 @@ test("App Router adapter honors mounted public listing edit ledger", () => {
   const listing = renderAppRoute({
     pathname: "/bg/imoti/MS-CRAWL-0001",
     url: "https://example.test/bg/imoti/MS-CRAWL-0001",
-    config: appRouterConfigFromEnv({ MS_REALTY_LISTING_EDIT_LEDGER_PATH: editPath }),
+    config: { ...approvedConfig, listingEditLedgerPath: editPath },
   });
 
   assert.equal(listing.status, 200);
@@ -272,6 +277,7 @@ test("App Router restores a legacy WordPress gallery without serving tiny deriva
   const listing = renderAppRoute({
     pathname: "/ru/properties/MS-CRAWL-0114",
     url: "https://example.test/ru/properties/MS-CRAWL-0114",
+    config: approvedConfig,
   });
 
   assert.equal(listing.status, 200);
@@ -284,7 +290,7 @@ test("App Router restores a legacy WordPress gallery without serving tiny deriva
 });
 
 test("App Router adapter serves approved sitemap, robots text, and favicon", async () => {
-  const sitemap = renderAppSitemap();
+  const sitemap = renderAppSitemap({ config: approvedConfig });
   assert.equal(sitemap.status, 200);
   assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(sitemap.sitemap.summary.entries, 198);

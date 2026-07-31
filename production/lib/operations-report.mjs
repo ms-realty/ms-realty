@@ -162,12 +162,12 @@ function listingInventory(seed, translationTasks) {
   const tasks = latestTranslationTasks(translationTasks);
   return {
     total: listings.length,
-    active: listings.filter((record) => ACTIVE_LISTING_STATUSES.has(record.facts?.listing_status || "available")).length,
+    active: listings.filter((record) => ACTIVE_LISTING_STATUSES.has(record.facts?.listing_status || "unverified")).length,
     review_required: listings.filter(
       (record) => record.routing?.review_required === true || Object.values(record.migration?.metadata_gaps || {}).some(Boolean),
     ).length,
     translation_review: tasks.filter((task) => task.status !== "published").length,
-    by_status: countBy(listings, (record) => record.facts?.listing_status || "available"),
+    by_status: countBy(listings, (record) => record.facts?.listing_status || "unverified"),
     by_source_locale: countBy(listings, (record) => record.source_locale),
   };
 }

@@ -24,5 +24,7 @@
 	basic_auth {
 		{$MS_REALTY_REVIEW_USER} {$MS_REALTY_REVIEW_PASSWORD_HASH}
 	}
+	@review_root path /
+	redir @review_root /admin/migration/review?locale=bg 302
 	import app_proxy
 }

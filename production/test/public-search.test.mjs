@@ -7,6 +7,7 @@ import { appRouterConfigFromEnv, renderAppSearchRoute, renderAppSearchRouteRespo
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { executePublicSearch, PublicSearchUnavailableError } from "../lib/public-search.mjs";
 import { loadCmsSeed, searchRuntimeListings } from "../lib/runtime.mjs";
+import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
@@ -51,6 +52,7 @@ function apiConfig(search) {
   return {
     ...appApiConfigFromEnv({
       NODE_ENV: "test",
+      ...approvedPublicSeedFixtureEnv(),
       MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
       MS_REALTY_TRANSLATION_LEDGER_PATH: translationLedgerPath,
@@ -161,7 +163,7 @@ test("localized HTML and API search share engine-ranked cards and request intent
   const html = await renderAppSearchRoute({
     pathname: "/bg/tarsene",
     url: `https://example.test/bg/tarsene?${query}`,
-    config: { ...appRouterConfigFromEnv({ NODE_ENV: "test" }), search },
+    config: { ...appRouterConfigFromEnv({ NODE_ENV: "test", ...approvedPublicSeedFixtureEnv() }), search },
   });
 
   assert.equal(apiResponse.status, 200);

@@ -109,8 +109,8 @@ export function renderAdminRealtyCasesPayload(registry, requestedLocale, realtyC
     canonical: "/admin/cases",
     indexable: false,
     metadata: {
-      title: `Transaction cases | MS Realty`,
-      description:
+      title: `${workspace.copy.realtyCasesWorkspace || "Transaction cases"} | MS Realty`,
+      description: workspace.copy.realtyCasesDescription ||
         "Manual and autonomous purchase, sale, rental, short-stay, and property-management cases on one evidence-gated workflow.",
       robots: "noindex,nofollow",
     },
@@ -251,7 +251,7 @@ export function renderAdminListingManagerPayload(
         location: facts.location || "",
         source_locale: record.source_locale,
         source_domain: record.source_domain,
-        listing_status: facts.listing_status || "available",
+        listing_status: facts.listing_status || "unverified",
         cms_status: record.cms_status || "source_imported_review_required",
         price_eur: facts.price_eur ?? null,
         price_on_request: facts.price_on_request === true,

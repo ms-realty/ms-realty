@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { productionServerConfig } from "../server.mjs";
+import { approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture.mjs";
 
 test("production Node search fails closed for API and public search routes without a selected engine", async () => {
   const app = createHttpApp({ search: { environment: "production" } });
@@ -16,6 +17,7 @@ test("production Node search fails closed for API and public search routes witho
 test("production Node search renders only IDs returned by the selected engine", async () => {
   const calls = [];
   const app = createHttpApp({
+    ...approvedPublicSeedFixtureOptions(),
     search: {
       environment: "production",
       engine: "typesense",

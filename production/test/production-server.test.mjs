@@ -9,6 +9,7 @@ import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { createProductionServer, productionServerConfig } from "../server.mjs";
+import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 test("production server entrypoint serves runtime routes with env config", async () => {
   const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-events-`)}/events.jsonl`;
@@ -47,6 +48,7 @@ test("production server entrypoint serves runtime routes with env config", async
     })}\n`,
   );
   const config = productionServerConfig({
+    ...approvedPublicSeedFixtureEnv(),
     PORT: "0",
     HOST: "127.0.0.1",
     MS_REALTY_MAX_BODY_BYTES: "4096",
@@ -259,6 +261,7 @@ test("production server persists public leads and reviewed admin replies", async
   resetReplyOutbox(replyOutboxPath);
 
   const config = productionServerConfig({
+    ...approvedPublicSeedFixtureEnv(),
     PORT: "0",
     HOST: "127.0.0.1",
     MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
