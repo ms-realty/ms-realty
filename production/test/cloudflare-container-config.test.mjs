@@ -110,8 +110,11 @@ test("Cloudflare Container allows only configured durable case-authority writes"
 });
 
 test("main deploys automatically with image-marker rollback", () => {
-  assert.match(ciWorkflow, /workflow_dispatch:/);
-  assert.match(ciWorkflow, /github\.ref == 'refs\/heads\/main'.*github\.event_name == 'workflow_dispatch'/);
+  assert.match(ciWorkflow, /repository_dispatch:\n\s+types: \[auto_merge_deploy\]/);
+  assert.doesNotMatch(ciWorkflow, /workflow_dispatch:/);
+  assert.match(ciWorkflow, /github\.event_name == 'repository_dispatch'/);
+  assert.match(ciWorkflow, /github\.event\.action == 'auto_merge_deploy'/);
+  assert.match(ciWorkflow, /github\.event\.client_payload\.merge_sha == github\.sha/);
   assert.match(ciWorkflow, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
@@ -119,7 +122,11 @@ test("main deploys automatically with image-marker rollback", () => {
   assert.match(ciWorkflow, /https:\/\/ms-realty\.\$\{subdomain\}\.workers\.dev\/api\/health/);
   assert.match(ciWorkflow, /--build-arg "MS_REALTY_BUILD_MARKER=\$GITHUB_SHA"/);
   assert.match(ciWorkflow, /d\.build_marker !== expected/);
-  assert.equal((ciWorkflow.match(/for attempt in \$\(seq 1 100\); do/g) ?? []).length, 2);
+  const verificationBlock = ciWorkflow.slice(
+    ciWorkflow.indexOf("- name: Verify deployed Worker"),
+    ciWorkflow.indexOf("- name: Roll back failed deployment"),
+  );
+  assert.match(verificationBlock, /for attempt in \$\(seq 1 100\); do/);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
 });
 
@@ -149,8 +156,9 @@ test("successful exact-head CI runs merge without a review gate", () => {
   assert.match(autoMergeWorkflow, /pull\.base\.sha !== reference\.base\.sha/);
   assert.match(autoMergeWorkflow, /github\.rest\.pulls\.updateBranch/);
   assert.match(autoMergeWorkflow, /merge_method: "squash"/);
-  assert.match(autoMergeWorkflow, /actions: write/);
-  assert.match(autoMergeWorkflow, /github\.rest\.actions\.createWorkflowDispatch/);
-  assert.match(autoMergeWorkflow, /workflow_id: "ci\.yml"/);
+  assert.doesNotMatch(autoMergeWorkflow, /actions: write/);
+  assert.match(autoMergeWorkflow, /github\.rest\.repos\.createDispatchEvent/);
+  assert.match(autoMergeWorkflow, /event_type: "auto_merge_deploy"/);
+  assert.match(autoMergeWorkflow, /client_payload: \{ merge_sha: result\.sha \}/);
   assert.doesNotMatch(autoMergeWorkflow, /reviews|reviewers|approved/i);
 });
