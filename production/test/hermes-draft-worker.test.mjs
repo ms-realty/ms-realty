@@ -17,6 +17,7 @@ import {
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
 } from "../lib/hermes-provider-provisioning.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
+import { HERMES_NON_SENSITIVE_LISTING_TRANSLATION } from "../lib/hermes-draft-dispatch.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
 
@@ -24,6 +25,7 @@ function dispatchRow() {
   return {
     id: "translation-listing-MS-TEST-1-he",
     status: "ready_for_hermes",
+    task_type: "hermes_draft_required",
     object_type: "listing",
     object_id: "MS-TEST-1",
     source_locale: "bg",
@@ -31,6 +33,7 @@ function dispatchRow() {
     target_direction: "rtl",
     reviewer_role: "translator_he",
     provider_mode: "hermes_draft",
+    data_classification: HERMES_NON_SENSITIVE_LISTING_TRANSLATION,
     public_indexable: false,
     requires_human_approval: true,
     can_publish: false,
@@ -53,7 +56,7 @@ function dispatchRow() {
       source_hash: "source-hash",
       approved_legal_content: false,
     },
-    citations: [{ source: "cms_seed", object_id: "MS-TEST-1" }],
+    citations: [{ source: "cms_seed", object_id: "MS-TEST-1", fields: ["facts.title", "facts.description"] }],
   };
 }
 
@@ -370,7 +373,7 @@ test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => 
   assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
 });
 
-test("OpenAI-compatible Hermes provider accepts Hermes tool-call draft arguments", async () => {
+test("OpenAI-compatible Hermes provider rejects non-empty tool-call draft arguments", async () => {
   const provider = openAiCompatibleHermesProvider({
     endpoint: "https://hermes.local/v1/chat/completions",
     apiKey: "test-key",
@@ -399,8 +402,80 @@ test("OpenAI-compatible Hermes provider accepts Hermes tool-call draft arguments
     }),
   });
 
-  const output = await provider(dispatchRow());
-  assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
+  await assert.rejects(() => provider(dispatchRow()), /tool call despite tool_choice none/);
+});
+
+test("Hermes draft worker audits a rejected provider tool-call response before persistence", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-tool-call-`);
+  const file = `${dir}/translations.jsonl`;
+  const auditLog = `${dir}/audit-log.jsonl`;
+  const provider = openAiCompatibleHermesProvider({
+    endpoint: "https://hermes.local/v1/chat/completions",
+    apiKey: "test-key",
+    fetchImpl: async () => ({
+      ok: true,
+      async json() {
+        return {
+          choices: [
+            {
+              message: {
+                tool_calls: [{ type: "function", function: { name: "draft_translation", arguments: JSON.stringify(validDraft()) } }],
+              },
+            },
+          ],
+        };
+      },
+    }),
+  });
+
+  const report = await runHermesDraftWorker({
+    dispatch: { rows: [dispatchRow()] },
+    provider,
+    filePath: file,
+    auditLogPath: auditLog,
+    providerMetadata: { mode: "self_hosted", model: "NousResearch/Hermes-4-14B", sensitiveDataAllowed: true },
+  });
+
+  assert.deepEqual(report.summary, { attempted: 1, persisted: 0, rejected: 1 });
+  assert.equal(readTranslationLedger(file).length, 0);
+  const auditRows = readAuditLog(auditLog);
+  assert.equal(auditRows.length, 1);
+  assert.equal(auditRows[0].status, "rejected");
+  assert.match(auditRows[0].metadata.error, /tool call despite tool_choice none/);
+});
+
+test("hosted Hermes fallback refuses unclassified and PII-bearing dispatches before provider calls", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-hosted-`);
+  const file = `${dir}/translations.jsonl`;
+  const auditLog = `${dir}/audit-log.jsonl`;
+  const unclassified = { ...dispatchRow(), id: "translation-listing-MS-TEST-1-unclassified" };
+  delete unclassified.data_classification;
+  const piiBearing = {
+    ...dispatchRow(),
+    id: "translation-listing-MS-TEST-1-pii",
+    prompt: { ...dispatchRow().prompt, sourceText: "Sandanski apartment. Contact buyer@example.test." },
+  };
+  let calls = 0;
+
+  const report = await runHermesDraftWorker({
+    dispatch: { rows: [unclassified, piiBearing] },
+    provider: async () => {
+      calls += 1;
+      return validDraft();
+    },
+    filePath: file,
+    auditLogPath: auditLog,
+    providerMetadata: { mode: "openrouter", model: "hosted-test", sensitiveDataAllowed: false },
+  });
+
+  assert.equal(calls, 0);
+  assert.deepEqual(report.summary, { attempted: 2, persisted: 0, rejected: 2 });
+  assert.match(report.rejected.find((row) => row.id === unclassified.id).error, /explicitly classified/);
+  assert.match(report.rejected.find((row) => row.id === piiBearing.id).error, /PII-like contact data/);
+  assert.equal(readTranslationLedger(file).length, 0);
+  const auditRows = readAuditLog(auditLog);
+  assert.equal(auditRows.length, 2);
+  assert.equal(auditRows.every((row) => row.status === "rejected" && row.metadata.sensitive_data === false), true);
 });
 
 test("OpenAI-compatible Hermes provider rejects non chat-completions endpoints", () => {

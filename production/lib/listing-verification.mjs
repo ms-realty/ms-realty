@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readListingEdits } from "./listing-edits.mjs";
+import { publicationReadinessFor } from "./listing-facts.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -24,7 +25,7 @@ function ownerForLocale(locale) {
 }
 
 function priorityForEdit(edit) {
-  const fields = new Set(Object.keys(edit.patch || {}));
+  const fields = new Set([...Object.keys(edit.patch || {}), ...Object.keys(edit.listing_patch || {}), ...Object.keys(edit.property_patch || {})]);
   if (Number(edit.stale_translation_count || 0) > 0) return "high";
   if (fields.has("price_eur") || fields.has("price_on_request") || fields.has("listing_status")) return "high";
   if (fields.has("location") || fields.has("property_type")) return "normal";
@@ -59,6 +60,7 @@ export function buildListingVerificationReport({
   generatedAt = new Date().toISOString(),
 } = {}) {
   const records = listingRecords(seed);
+  const properties = new Map((seed.properties || []).map((property) => [property.id, property]));
   const rows = [...editsByListing(edits).entries()]
     .filter(([listingId]) => records.has(listingId))
     .map(([listingId, listingEdits]) => {
@@ -66,17 +68,34 @@ export function buildListingVerificationReport({
       const record = records.get(listingId);
       const rowPriority = verificationPriority(listingEdits);
       const owner = ownerForLocale(edit.source_locale || record.source_locale);
+      const publicationReadiness = publicationReadinessFor({
+        listing: record,
+        property: properties.get(record.property),
+        now: generatedAt,
+      });
       return {
         listing_id: edit.listing_id,
         latest_edit_id: edit.id,
         edited_at: edit.edited_at,
         source_locale: edit.source_locale || record.source_locale,
         changed_fields: Object.keys(edit.patch || {}).sort(),
+        changed_property_fields: Object.keys(edit.property_patch || {}).sort(),
         source_hash_after: edit.source_hash_after,
         stale_translation_count: Number(edit.stale_translation_count || 0),
         stale_locales: edit.stale_locales || [],
         priority: rowPriority,
         admin_path: `/admin/listings/edit?listingId=${encodeURIComponent(edit.listing_id)}`,
+        publication_readiness: {
+          ready: publicationReadiness.ready,
+          blocking_fields: publicationReadiness.blocking_fields,
+        },
+        canonical_fact_completion: {
+          property_family: publicationReadiness.fact_completion.property_family,
+          property_subtype: publicationReadiness.fact_completion.property_subtype,
+          taxonomy_review_status: publicationReadiness.fact_completion.taxonomy_review_status,
+          incomplete_fields: publicationReadiness.fact_completion.incomplete_fields,
+          complete: publicationReadiness.fact_completion.complete,
+        },
         verification_task: {
           id: `verify-${edit.listing_id}`,
           owner,
@@ -94,6 +113,7 @@ export function buildListingVerificationReport({
       broker_verification_tasks: rows.length,
       high_priority: rows.filter((row) => row.priority === "high").length,
       stale_translation_tasks: rows.filter((row) => row.stale_translation_count > 0).length,
+      publication_blocked: rows.filter((row) => !row.publication_readiness.ready).length,
       by_owner: rows.reduce((counts, row) => {
         counts[row.verification_task.owner] = (counts[row.verification_task.owner] || 0) + 1;
         return counts;
@@ -118,6 +138,12 @@ export function assertListingVerificationReport(report) {
     }
     if (row.stale_translation_count > 0 && row.priority !== "high") {
       throw new Error("Stale translation verification rows must be high priority");
+    }
+    if (!row.publication_readiness || typeof row.publication_readiness.ready !== "boolean" || !Array.isArray(row.publication_readiness.blocking_fields)) {
+      throw new Error("Listing verification rows must expose publication readiness");
+    }
+    if (!row.canonical_fact_completion || !Array.isArray(row.canonical_fact_completion.incomplete_fields)) {
+      throw new Error("Listing verification rows must expose canonical fact completion");
     }
   }
   return true;

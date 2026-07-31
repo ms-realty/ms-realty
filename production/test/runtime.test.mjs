@@ -158,14 +158,16 @@ test("runtime overlays approved broker contact links on listing routes", () => {
     createBrokerContact({
       listingId: "MS-CRAWL-0001",
       broker: "broker_ru",
-      phone: "+359880000000",
+      phone: "+447700900001",
       reviewer: "owner",
+      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      validationStatus: "broker_verified",
       approved: true,
     }),
   ]);
 
   assert.equal(page.body.actions.direct_contact.review_status, "approved_broker_contact");
-  assert.equal(page.body.actions.direct_contact.channels.find((channel) => channel.id === "viber").href, "viber://chat?number=%2B359880000000");
+  assert.equal(page.body.actions.direct_contact.channels.find((channel) => channel.id === "viber").href, "viber://chat?number=%2B447700900001");
 });
 
 test("runtime overlays approved 360 tour before public listing render", () => {

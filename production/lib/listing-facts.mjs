@@ -321,3 +321,165 @@ export function enrichmentChecklistFor({ facts = {}, fact_verification = [] } = 
     };
   });
 }
+
+function hasFactValue(value) {
+  return value !== null && value !== undefined && String(value).trim() !== "";
+}
+
+function verifiedAtOrBefore(value, now) {
+  if (!hasFactValue(value) || !hasFactValue(now)) return false;
+  const timestamp = new Date(value);
+  const limit = new Date(now);
+  return !Number.isNaN(timestamp.getTime()) && !Number.isNaN(limit.getTime()) && timestamp.getTime() <= limit.getTime();
+}
+
+function propertyFactsWithIdentity(property = {}) {
+  return {
+    ...(property.facts || {}),
+    property_family: property.property_family || property.facts?.property_family || null,
+    property_subtype: property.property_subtype || property.facts?.property_subtype || null,
+    location_id: property.location || property.facts?.location_id || null,
+  };
+}
+
+function verifiedPositiveFact(facts, factVerification, field) {
+  return factVerificationFor(field, factVerification).state === "broker_verified" && numericValue(facts[field]) > 0;
+}
+
+function verifiedBedrooms(facts, factVerification, subtype) {
+  if (factVerificationFor("bedrooms_count", factVerification).state !== "broker_verified") return false;
+  const bedrooms = numericValue(facts.bedrooms_count);
+  return bedrooms > 0 || (bedrooms === 0 && subtype === "studio");
+}
+
+export function normalizedListingPriceFor(facts = {}) {
+  const normalized = normalizeLegacyListingFacts(facts);
+  return {
+    amount: normalized.facts.price_amount,
+    currency: normalized.facts.price_currency,
+    period: normalized.facts.price_period,
+    price_on_request: normalized.facts.price_on_request === true,
+    zero_value_audited: normalized.zero_value_audit.includes("price_amount"),
+  };
+}
+
+export function propertyFactCompletionFor(property = {}) {
+  const facts = propertyFactsWithIdentity(property);
+  const propertyFamily = propertyFamilyFor(facts);
+  const propertySubtype = propertySubtypeFor(facts);
+  const factVerification = property.fact_verification || [];
+  const fields = applicableFactFields(propertyFamily, propertySubtype).map((field) => {
+    const taxonomyMapped = property.taxonomy_review_status === "mapped";
+    const verification =
+      field === "property_family"
+        ? { state: taxonomyMapped && propertyFamily ? "broker_verified" : "unknown" }
+        : field === "property_subtype"
+          ? { state: taxonomyMapped ? (propertySubtype ? "broker_verified" : "not_applicable") : "unknown" }
+          : factVerificationFor(field, factVerification);
+    return {
+      field,
+      state: verification.state,
+      value_present: hasFactValue(facts[field]),
+      broker_verified: verification.state === "broker_verified",
+    };
+  });
+  const incompleteFields = fields
+    .filter((field) => field.state !== "broker_verified" && field.state !== "not_applicable")
+    .map((field) => field.field);
+
+  return {
+    property_family: propertyFamily,
+    property_subtype: propertySubtype || null,
+    taxonomy_review_status: property.taxonomy_review_status || "mapping_review_required",
+    fields,
+    incomplete_fields: incompleteFields,
+    complete:
+      Boolean(propertyFamily) && property.taxonomy_review_status === "mapped" && incompleteFields.length === 0,
+  };
+}
+
+export function publicationReadinessFor({ listing = {}, property = null, now = new Date().toISOString(), requirePublishApproval = false } = {}) {
+  const listingFacts = listing.facts || {};
+  const workflow = listing.workflow || {};
+  const seo = listing.seo || {};
+  const propertyFacts = propertyFactsWithIdentity(property || {});
+  const propertyFamily = propertyFamilyFor(propertyFacts);
+  const propertySubtype = propertySubtypeFor(propertyFacts);
+  const factVerification = property?.fact_verification || [];
+  const factCompletion = propertyFactCompletionFor(property || {});
+  const primaryAreaField = primaryAreaFieldFor(propertyFacts);
+  const bedroomsApplicable = bedroomsRequired(propertyFacts);
+  const price = normalizedListingPriceFor(listingFacts);
+  const checks = [];
+  const add = (field, ready, state, { applicable = true, value = null } = {}) => {
+    checks.push({ field, applicable, ready, state, ...(value !== null ? { value } : {}) });
+  };
+
+  add(
+    "property_family",
+    Boolean(propertyFamily) && property?.taxonomy_review_status === "mapped",
+    property?.taxonomy_review_status || "mapping_review_required",
+    { value: propertyFamily },
+  );
+  add(
+    "location_id",
+    Boolean(property?.location || listing.location) && verifiedAtOrBefore(workflow.location_verified_at, now),
+    verifiedAtOrBefore(workflow.location_verified_at, now) ? "broker_verified" : "unverified",
+    { value: property?.location || listing.location || null },
+  );
+  add(
+    primaryAreaField || "primary_area_sqm",
+    Boolean(primaryAreaField) && verifiedPositiveFact(propertyFacts, factVerification, primaryAreaField),
+    primaryAreaField ? factVerificationFor(primaryAreaField, factVerification).state : "unknown",
+  );
+  add(
+    "bedrooms_count",
+    !bedroomsApplicable || verifiedBedrooms(propertyFacts, factVerification, propertySubtype),
+    bedroomsApplicable ? factVerificationFor("bedrooms_count", factVerification).state : "not_applicable",
+    { applicable: bedroomsApplicable },
+  );
+  if (price.price_on_request) {
+    add(
+      "price_on_request",
+      price.amount === null && verifiedAtOrBefore(workflow.price_on_request_verified_at, now),
+      verifiedAtOrBefore(workflow.price_on_request_verified_at, now) ? "broker_verified" : "unverified",
+    );
+  } else {
+    add(
+      "price_amount",
+      price.amount !== null && price.amount > 0 && verifiedAtOrBefore(workflow.price_verified_at, now),
+      price.zero_value_audited ? "zero_value_unverified" : verifiedAtOrBefore(workflow.price_verified_at, now) ? "broker_verified" : "unverified",
+      { value: price.amount },
+    );
+  }
+  add(
+    "availability_verified_at",
+    verifiedAtOrBefore(workflow.availability_verified_at, now),
+    verifiedAtOrBefore(workflow.availability_verified_at, now) ? "broker_verified" : "unverified",
+  );
+  add("seo_human_approved", seo.human_approved === true, seo.human_approved === true ? "approved" : "unapproved");
+  add(
+    "media_review",
+    Number(listing.media_workflow?.review_gated_assets || 0) === 0,
+    Number(listing.media_workflow?.review_gated_assets || 0) === 0 ? "approved" : "review_required",
+  );
+  if (requirePublishApproval) {
+    add("publish_approved", workflow.publish_approved === true, workflow.publish_approved === true ? "approved" : "unapproved");
+  }
+
+  const blockingFields = checks.filter((check) => check.applicable && !check.ready).map((check) => check.field);
+  return {
+    ready: blockingFields.length === 0,
+    blocking_fields: blockingFields,
+    checks,
+    fact_completion: factCompletion,
+  };
+}
+
+export function assertPublicationReady(options) {
+  const readiness = publicationReadinessFor(options);
+  if (!readiness.ready) {
+    throw new Error(`Listing publication requires verified completion: ${readiness.blocking_fields.join(", ")}`);
+  }
+  return readiness;
+}

@@ -28,6 +28,49 @@ function files() {
   return output;
 }
 
+function publishApprovedSeed() {
+  const listingId = "MS-SCHEDULE-0001";
+  const propertyId = `property-${listingId}`;
+  const locationId = "location:sandanski";
+  return {
+    records: [
+      {
+        id: listingId,
+        collection: "listings",
+        property: propertyId,
+        location: locationId,
+        source_locale: "bg",
+        facts: { title: "Verified apartment", location: "Sandanski", property_type: "apartment", price_eur: 120000, price_on_request: false },
+        seo: { human_approved: true },
+        workflow: {
+          availability_verified_at: "2026-07-19T09:00:00.000Z",
+          location_verified_at: "2026-07-19T09:00:00.000Z",
+          price_verified_at: "2026-07-19T09:00:00.000Z",
+          publish_approved: true,
+        },
+        translations: [],
+        media: [],
+        media_workflow: { review_gated_assets: 0 },
+      },
+    ],
+    properties: [
+      {
+        id: propertyId,
+        collection: "properties",
+        location: locationId,
+        property_family: "apartment",
+        property_subtype: "apartment",
+        taxonomy_review_status: "mapped",
+        facts: { built_area_sqm: 80, bedrooms_count: 2 },
+        fact_verification: [
+          { field: "built_area_sqm", state: "broker_verified" },
+          { field: "bedrooms_count", state: "broker_verified" },
+        ],
+      },
+    ],
+  };
+}
+
 test("publication schedules are human-owned, future-dated, single-open, cancellable, and retry-safe", () => {
   const paths = files();
   const seed = loadCmsSeed();
@@ -151,6 +194,59 @@ test("due publication execution appends an attributed listing edit and preserves
   });
   assert.equal(retry.executed, 0);
   assert.equal(readListingEdits(paths.edits).length, 1);
+});
+
+test("publish schedules require current verified completion at creation and execution", () => {
+  const paths = files();
+  assert.throws(
+    () =>
+      appendListingPublicationSchedule(
+        loadCmsSeed(),
+        {
+          id: "publication-incomplete-1",
+          listingId: "MS-CRAWL-0001",
+          action: "publish",
+          scheduledAt: "2026-07-20T10:00:00.000Z",
+          actor: "content_editor",
+        },
+        { filePath: paths.schedules, createdAt: "2026-07-19T10:00:00.000Z" },
+      ),
+    /verified completion/,
+  );
+
+  const seed = publishApprovedSeed();
+  appendListingPublicationSchedule(
+    seed,
+    {
+      id: "publication-verified-1",
+      listingId: "MS-SCHEDULE-0001",
+      action: "publish",
+      scheduledAt: "2026-07-20T10:00:00.000Z",
+      actor: "content_editor",
+    },
+    { filePath: paths.schedules, createdAt: "2026-07-19T10:00:00.000Z" },
+  );
+  const staleSeed = {
+    ...seed,
+    records: seed.records.map((record) => ({
+      ...record,
+      workflow: { ...record.workflow, price_verified_at: null },
+    })),
+  };
+  assert.throws(
+    () =>
+      executeDueListingPublicationSchedules({
+        seed: staleSeed,
+        schedules: readListingPublicationSchedules(paths.schedules),
+        executor: "content_editor",
+        now: "2026-07-20T10:00:00.000Z",
+        scheduleFilePath: paths.schedules,
+        listingEditFilePath: paths.edits,
+        translationLedgerPath: paths.translations,
+      }),
+    /price_amount/,
+  );
+  assert.equal(readListingPublicationSchedules(paths.schedules).length, 1);
 });
 
 test("publication scheduler CLI executes only due human-approved changes and is retry-safe", () => {

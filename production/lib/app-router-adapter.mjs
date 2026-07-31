@@ -15,6 +15,12 @@ import { fileSignature, readThroughCached } from "./file-cache.mjs";
 import { fromRoot } from "./paths.mjs";
 import { DEFAULT_CMS_SEED_PATH } from "./runtime.mjs";
 import { CSP_HEADER } from "./security-headers.mjs";
+import {
+  executePublicSearch,
+  PublicSearchInputError,
+  PublicSearchUnavailableError,
+  publicSearchConfigFromEnv,
+} from "./public-search.mjs";
 
 const DEFAULT_LOCALE_REGISTRY_PATH = fromRoot("locales", "registry.json");
 
@@ -31,6 +37,7 @@ export function appRouterConfigFromEnv(env = process.env) {
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
+    search: publicSearchConfigFromEnv(env),
     naturalLanguageSearchEnabled: env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
   };
 }
@@ -84,6 +91,23 @@ function currentTranslationTasks(config) {
   return readThroughCached(config.translationLedgerPath, () => readTranslationLedger(config.translationLedgerPath));
 }
 
+function renderedHtmlResponse(rendered, requestUrl) {
+  const print = requestUrl.searchParams.get("print") === "1";
+  const reactBody = print ? "" : renderReactPublicBody(rendered);
+  const html = renderHtmlPage(rendered, { bodyHtml: reactBody, print });
+
+  return {
+    status: rendered.status || 200,
+    headers: {
+      "content-type": HTML,
+      ...CSP_HEADER,
+      "cache-control": rendered.kind === "search" ? "no-store" : PUBLIC_CACHE,
+    },
+    rendered,
+    html,
+  };
+}
+
 export function renderAppRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
   if (!pathname) throw new Error("App route pathname is required");
 
@@ -118,20 +142,33 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
         readThroughCached(config.brokerContactLedgerPath, () => readBrokerContacts(config.brokerContactLedgerPath)),
         readThroughCached(config.tourApprovalLedgerPath, () => readTourApprovals(config.tourApprovalLedgerPath)),
       );
-  const print = requestUrl.searchParams.get("print") === "1";
-  const reactBody = print ? "" : renderReactPublicBody(rendered);
-  const html = renderHtmlPage(rendered, { bodyHtml: reactBody, print });
+  return renderedHtmlResponse(rendered, requestUrl);
+}
 
-  return {
-    status: rendered.status || 200,
-    headers: {
-      "content-type": HTML,
-      ...CSP_HEADER,
-      "cache-control": rendered.kind === "search" ? "no-store" : PUBLIC_CACHE,
-    },
-    rendered,
-    html,
+export async function renderAppSearchRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
+  if (!pathname) throw new Error("App route pathname is required");
+
+  const registry = currentRegistry(config);
+  const searchLocale = searchLocaleFor(registry, pathname);
+  if (!searchLocale) throw new PublicSearchInputError("Localized search route is required");
+
+  const requestUrl = new URL(url, "http://localhost");
+  const savedView = requestUrl.searchParams.get("saved") === "1";
+  const search = config.search || {
+    naturalLanguageEnabled: config.naturalLanguageSearchEnabled === true,
   };
+  const { result } = await executePublicSearch({
+    registry,
+    seed: currentSeed(config),
+    params: requestUrl.searchParams,
+    defaultLocale: searchLocale.code,
+    search,
+    translationTasks: currentTranslationTasks(config),
+    pageSize: savedView ? null : 12,
+    savedView,
+  });
+
+  return renderedHtmlResponse(result, requestUrl);
 }
 
 export function renderAppRouteResponse({ pathname, url = pathname, host = "", config = appRouterConfigFromEnv() } = {}) {
@@ -152,6 +189,45 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", co
   try {
     result = renderAppRoute({ pathname, url, config });
   } catch (error) {
+    return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
+      status: 400,
+      headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    });
+  }
+  if (result.status === 200 && pathname.length > 1 && pathname.endsWith("/")) {
+    return new Response(null, {
+      status: 308,
+      headers: { location: `${pathname.replace(/\/+$/, "")}${new URL(url, "http://localhost").search}`, "cache-control": PUBLIC_CACHE },
+    });
+  }
+  return new Response(result.html, { status: result.status, headers: result.headers });
+}
+
+export async function renderAppSearchRouteResponse({ pathname, url = pathname, host = "", config = appRouterConfigFromEnv() } = {}) {
+  const legacyDecision = legacyDecisionFor({ pathname, url, host, config });
+  if (legacyDecision?.status === 301) {
+    return new Response(null, {
+      status: 301,
+      headers: { location: legacyDecision.target_path, "cache-control": PUBLIC_CACHE },
+    });
+  }
+  if (legacyDecision?.status === 410) {
+    return new Response("Gone", { status: 410, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": PUBLIC_CACHE } });
+  }
+  if (legacyDecision?.status === 200) {
+    return renderAppRouteResponse({ pathname: legacyDecision.target_path, url, config });
+  }
+
+  let result;
+  try {
+    result = await renderAppSearchRoute({ pathname, url, config });
+  } catch (error) {
+    if (error instanceof PublicSearchUnavailableError) {
+      return new Response(JSON.stringify({ kind: "search_unavailable", message: "Search is temporarily unavailable" }), {
+        status: 503,
+        headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+      });
+    }
     return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
       status: 400,
       headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },

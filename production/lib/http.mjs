@@ -1136,11 +1136,11 @@ export function createHttpApp({
       return { response: json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" }) };
     }
   };
-  return async function handle(request) {
-    const url = new URL(request.url, "http://localhost");
-    const mcpMetadataRoute =
-      url.pathname === "/.well-known/oauth-protected-resource" ||
-      url.pathname === "/.well-known/oauth-protected-resource/mcp";
+ return async function handle(request) {
+   const url = new URL(request.url, "http://localhost");
+   const mcpMetadataRoute =
+     url.pathname === "/.well-known/oauth-protected-resource" ||
+     url.pathname === "/.well-known/oauth-protected-resource/mcp";
     if (url.pathname === "/mcp" || mcpMetadataRoute) {
       const headers = new Headers();
       for (const [name, value] of Object.entries(request.headers || {})) {
@@ -1157,10 +1157,11 @@ export function createHttpApp({
       return {
         status: mcpResponse.status,
         headers: Object.fromEntries(mcpResponse.headers.entries()),
-        body: await mcpResponse.text(),
-      };
-    }
-    const auth = request.headers?.authorization || request.headers?.Authorization || "";
+       body: await mcpResponse.text(),
+     };
+   }
+    if (url.pathname === "/api/hermes/chat") return privateJson(404, { kind: "not_found" });
+   const auth = request.headers?.authorization || request.headers?.Authorization || "";
     const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
     const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
     if (adminRequest && !principal) return adminUnauthorized();
@@ -2363,7 +2364,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = reviewedReplyInput(request);
+        const input = bindAuthenticatedOperator(reviewedReplyInput(request), principal, ["reviewer"]);
         const reply = appendReviewedReply(readLeadLedger(leadLedgerPath || undefined), input, {
           filePath: replyOutboxPath || undefined,
           reviewedAt,
@@ -3311,7 +3312,7 @@ export function assertHttpSmoke(smoke) {
   ) {
     throw new Error("HTTP smoke must expose listing conversion actions without inventing broker contact data");
   }
-  if (smoke.brokerContact?.status !== 201 || smoke.brokerContact.body.channels?.phone !== "tel:+359880000000") {
+  if (smoke.brokerContact?.status !== 201 || !smoke.brokerContact.body.channels?.phone?.startsWith("tel:+")) {
     throw new Error("HTTP smoke must approve broker contact data");
   }
   if (
@@ -3415,7 +3416,11 @@ export function assertHttpSmoke(smoke) {
   if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
     throw new Error("HTTP smoke must store saved search alert tasks");
   }
-  if (smoke.hermesChatDisabled?.status !== 405 || smoke.hermesChatDisabled.body.kind !== "method_not_allowed") {
+  if (
+    smoke.hermesChatDisabled?.status !== 404 ||
+    smoke.hermesChatDisabled.body.kind !== "not_found" ||
+    smoke.hermesChatDisabled.headers?.["cache-control"] !== "no-store"
+  ) {
     throw new Error("HTTP smoke must not expose public Hermes chat");
   }
   if (smoke.ctaClick && (smoke.ctaClick.status !== 201 || smoke.ctaClick.body.type !== "cta_click")) {
@@ -3506,7 +3511,7 @@ export function assertHttpSmoke(smoke) {
     smoke.listingHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.listingHtml.body.includes("<html lang=\"he\" dir=\"rtl\">") ||
     !smoke.listingHtml.body.includes("data-kind=\"listing\"") ||
-    smoke.listingHtml.body.includes("tel:+359880000000")
+    smoke.listingHtml.body.includes('href="tel:')
   ) {
     throw new Error("HTTP smoke must serve rendered listing HTML without unapproved direct contact");
   }
@@ -3515,7 +3520,7 @@ export function assertHttpSmoke(smoke) {
     smoke.listingPrint.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.listingPrint.body.includes("data-kind=\"listing-print\"") ||
     !smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\"") ||
-    smoke.listingPrint.body.includes("tel:+359880000000")
+    smoke.listingPrint.body.includes('href="tel:')
   ) {
     throw new Error("HTTP smoke must serve browser-print listing HTML without unapproved direct contact");
   }

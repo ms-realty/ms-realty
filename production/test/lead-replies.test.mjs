@@ -192,17 +192,11 @@ test("Hermes reply provider requires self-hosted Hermes Agent endpoint", async (
             choices: [
               {
                 message: {
-                  tool_calls: [
-                    {
-                      function: {
-                        arguments: JSON.stringify({
-                          text: "Draft for broker review.",
-                          language: "en",
-                          citations: [{ source: "lead", field: "message_original" }],
-                        }),
-                      },
-                    },
-                  ],
+                  content: JSON.stringify({
+                    text: "Draft for broker review.",
+                    language: "en",
+                    citations: [{ source: "lead", field: "message_original" }],
+                  }),
                 },
               },
             ],
@@ -221,4 +215,51 @@ test("Hermes reply provider requires self-hosted Hermes Agent endpoint", async (
   assert.match(body.messages[0].content, /Draft only/);
   assert.equal(body.tool_choice, "none");
   assert.equal(body.tools, undefined);
+});
+
+test("Hermes reply drafts reject function-call responses and audit the failure before an outbox entry", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-reply-tool-call-`);
+  const auditLogPath = `${dir}/audit-log.jsonl`;
+  resetAuditLog(auditLogPath);
+  const leads = [
+    {
+      lead_id: "lead-tool-call-test",
+      listing_reference: "MS-CRAWL-0001",
+      original_language: "en",
+      message_original: "Interested in this property.",
+    },
+  ];
+  const provider = openAiCompatibleHermesReplyProvider({
+    env: {
+      HERMES_PROVIDER_MODE: "self_hosted",
+      HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8080/v1/chat/completions",
+      HERMES_API_KEY: "secret",
+    },
+    fetchImpl: async () => ({
+      ok: true,
+      async json() {
+        return {
+          choices: [
+            {
+              message: {
+                function_call: {
+                  name: "draft_reply",
+                  arguments: JSON.stringify({ text: "Draft for broker review.", language: "en" }),
+                },
+              },
+            },
+          ],
+        };
+      },
+    }),
+  });
+
+  await assert.rejects(
+    () => createHermesReplyDraft(leads, { leadId: "lead-tool-call-test", language: "en" }, { auditLogPath, provider }),
+    /tool call despite tool_choice none/,
+  );
+  const auditRows = readAuditLog(auditLogPath);
+  assert.equal(auditRows.length, 1);
+  assert.equal(auditRows[0].status, "rejected");
+  assert.match(auditRows[0].metadata.error, /tool call despite tool_choice none/);
 });

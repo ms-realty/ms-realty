@@ -76,6 +76,33 @@ test("standalone admin routes enforce role capabilities and hide unavailable wor
       })).status,
       403,
     );
+    assert.equal(
+      (await dispatchHttp(app, {
+        method: "POST",
+        url: "/api/admin/replies/draft",
+        headers: headers.translator,
+        body: { leadId: "unknown", language: "en" },
+      })).status,
+      403,
+    );
+    assert.equal(
+      (await dispatchHttp(app, {
+        method: "POST",
+        url: "/api/admin/replies",
+        headers: headers.translator,
+        body: { leadId: "unknown", reviewedReply: "No role bypass.", reviewer: "translator_operator", approved: true },
+      })).status,
+      403,
+    );
+
+    const reviewerSpoof = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/replies",
+      headers: headers.broker,
+      body: { leadId: "unknown", reviewedReply: "No reviewer spoof.", reviewer: "admin_operator", approved: true },
+    });
+    assert.equal(reviewerSpoof.status, 400);
+    assert.match(reviewerSpoof.body.message, /Submitted reviewer must match the authenticated operator/);
 
     const commission = await dispatchHttp(app, {
       method: "POST",

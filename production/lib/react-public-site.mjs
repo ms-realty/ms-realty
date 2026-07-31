@@ -168,7 +168,7 @@ function SiteHeader({ chrome }) {
           ),
         ),
       ),
-      h(Btn, { tag: "a", variant: "accent", size: "md", full: true, iconStart: "phone", href: chrome.contact.phone_href }, copy.callBroker),
+      h(Btn, { tag: "a", variant: "accent", size: "md", full: true, iconStart: "message-circle", href: chrome.contact.path }, chrome.contact.label),
     ),
   );
   return h(
@@ -204,18 +204,18 @@ function SiteHeader({ chrome }) {
         h(LanguageMenu, { languages: chrome.languages, label: copy.languageLabel }),
         h(
           Btn,
-          { tag: "a", variant: "accent", size: "sm", iconStart: "phone", href: chrome.contact.phone_href, className: "site-hd__call mk-btn mk-btn--accent mk-btn--sm" },
-          copy.callBroker,
+          { tag: "a", variant: "accent", size: "sm", iconStart: "message-circle", href: chrome.contact.path, className: "site-hd__call mk-btn mk-btn--accent mk-btn--sm" },
+          chrome.contact.label,
         ),
       ),
-      h("a", { className: "site-hd__mobile-call", href: chrome.contact.phone_href, "aria-label": copy.callBroker, title: copy.callBroker }, h(Icon, { name: "phone", size: 20 })),
+      h("a", { className: "site-hd__mobile-call", href: chrome.contact.path, "aria-label": chrome.contact.label, title: chrome.contact.label }, h(Icon, { name: "message-circle", size: 20 })),
       mobileMenu,
     ),
   );
 }
 
 function MobileTaskNavigation({ page, chrome }) {
-  if (page.kind === "listing") return null;
+  if (page.kind === "listing" || page.kind === "seller") return null;
   const labels = uiLabels(page);
   const buy = chrome.nav.find((item) => item.id === "buy");
   const savedView = page.search?.saved_view === true;
@@ -277,7 +277,6 @@ function SiteFooter({ chrome, labels }) {
   const contactLinks = [
     { id: "contact", href: chrome.nav.find((item) => item.id === "contact")?.href || chrome.home.href, label: copy.navContact },
     { id: "seller", href: chrome.nav.find((item) => item.id === "sell")?.href || chrome.home.href, label: labels.sellerValuation },
-    { id: "phone", href: chrome.contact.phone_href, label: chrome.contact.phone_label },
     { id: "email", href: `mailto:${chrome.contact.email}`, label: chrome.contact.email },
   ];
   const mobileGroups = [
@@ -303,7 +302,6 @@ function SiteFooter({ chrome, labels }) {
         h(
           "div",
           { className: "site-ft__contact" },
-          h("span", null, h(Icon, { name: "phone", size: 16 }), h("a", { href: chrome.contact.phone_href }, chrome.contact.phone_label)),
           h("span", null, h(Icon, { name: "mail", size: 16 }), h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
           h("span", null, h(Icon, { name: "map-pin", size: 16 }), copy.offices),
         ),
@@ -1212,6 +1210,20 @@ const SEARCH_FILTER_QUERY_KEYS = [
   "status",
 ];
 
+const GUIDED_SEARCH_COPY = {
+  bg: { recentSearches: "Последни търсения", clearRecentSearches: "Изчисти" },
+  en: { recentSearches: "Recent searches", clearRecentSearches: "Clear" },
+  de: { recentSearches: "Letzte Suchen", clearRecentSearches: "Löschen" },
+  nl: { recentSearches: "Recente zoekopdrachten", clearRecentSearches: "Wissen" },
+  ru: { recentSearches: "Недавние поиски", clearRecentSearches: "Очистить" },
+  el: { recentSearches: "Πρόσφατες αναζητήσεις", clearRecentSearches: "Εκκαθάριση" },
+  he: { recentSearches: "חיפושים אחרונים", clearRecentSearches: "נקה" },
+};
+
+function guidedSearchCopyFor(locale) {
+  return GUIDED_SEARCH_COPY[locale] || GUIDED_SEARCH_COPY.en;
+}
+
 function searchHref(page, omitFilter, targetPage = 1, overrides = {}) {
   const params = new URLSearchParams();
   if (page.search.query) params.set("q", page.search.query);
@@ -1330,13 +1342,27 @@ function OfficialAreaMaps({ page, labels }) {
   );
 }
 
+function guidedSearchHref(page, filters) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters || {})) {
+    if (value !== "" && value !== null && value !== undefined) params.set(key, String(value));
+  }
+  const query = params.toString();
+  return query ? `${page.path}?${query}` : page.path;
+}
+
 function SearchBody({ page }) {
   const labels = uiLabels(page);
+  const guidedCopy = guidedSearchCopyFor(page.locale);
   const chrome = page.chrome || { copy: {} };
   const savedView = page.search.saved_view === true;
   const controls = page.search.controls || {};
   const viewModes = controls.view_modes || [];
   const filterOptions = controls.filter_options || {};
+  const allReviewedLocations = [...new Set(filterOptions.locations || [])].filter(Boolean);
+  const activeReviewedLocation = allReviewedLocations.includes(page.search.filters?.location) ? page.search.filters.location : "";
+  const reviewedLocations = [...new Set([activeReviewedLocation, ...allReviewedLocations])].filter(Boolean).slice(0, 6);
+  const reviewedPropertyFamilies = [...new Set(filterOptions.property_families || filterOptions.property_types || [])].filter(Boolean).slice(0, 6);
   const activeFilterCount = (controls.active_filter_chips || []).length;
   const applicableFilterFields = new Set(controls.applicable_filter_fields || []);
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
@@ -1439,6 +1465,87 @@ function SearchBody({ page }) {
       ),
     );
   };
+  const guidedSearch = (idPrefix) =>
+    !reviewedLocations.length && !reviewedPropertyFamilies.length
+      ? null
+      : h(
+          "section",
+          { className: "sr-guided", "data-guided-search": "true", "aria-label": labels.reviewedListings },
+          h("p", { className: "sr-guided__title" }, labels.reviewedListings),
+          reviewedLocations.length
+            ? h(
+                "section",
+                { className: "sr-guided__group", "aria-label": labels.location },
+                h("p", { className: "sr-guided__label" }, labels.location),
+                h(
+                  "div",
+                  { className: "sr-guided__links" },
+                  ...reviewedLocations.map((location) =>
+                    h(
+                      "a",
+                      {
+                        key: location,
+                        className: "sr-guided__link",
+                        href: guidedSearchHref(page, { location }),
+                        "data-guided-search-suggestion": "location",
+                        "data-guided-search-value": location,
+                      },
+                      localizedSearchFilterValue(page.locale, "location", location),
+                    ),
+                  ),
+                ),
+              )
+            : null,
+          reviewedPropertyFamilies.length
+            ? h(
+                "section",
+                { className: "sr-guided__group", "aria-label": labels.propertyType },
+                h("p", { className: "sr-guided__label" }, labels.propertyType),
+                h(
+                  "div",
+                  { className: "sr-guided__links" },
+                  ...reviewedPropertyFamilies.map((propertyFamily) =>
+                    h(
+                      "a",
+                      {
+                        key: propertyFamily,
+                        className: "sr-guided__link",
+                        href: guidedSearchHref(page, { property_family: propertyFamily }),
+                        "data-guided-search-suggestion": "property_family",
+                        "data-guided-search-value": propertyFamily,
+                      },
+                      localizedListingValue(page.locale, "property_type", propertyFamily),
+                    ),
+                  ),
+                ),
+              )
+            : null,
+          h(
+            "section",
+            {
+              className: "sr-guided__recent",
+              "data-recent-searches": "true",
+              "aria-labelledby": `${idPrefix}-recent-searches-title`,
+              hidden: true,
+            },
+            h(
+              "div",
+              { className: "sr-guided__recent-head" },
+              h("p", { id: `${idPrefix}-recent-searches-title`, className: "sr-guided__label" }, guidedCopy.recentSearches),
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "sr-guided__clear",
+                  "data-clear-recent-searches": "true",
+                  "aria-label": guidedCopy.clearRecentSearches,
+                },
+                guidedCopy.clearRecentSearches,
+              ),
+            ),
+            h("ul", { className: "sr-guided__links sr-guided__recent-list", "data-recent-search-list": "true" }),
+          ),
+        );
   const filterForm = (idPrefix) =>
     h(
       "form",
@@ -1449,6 +1556,7 @@ function SearchBody({ page }) {
         h("label", { className: "hdr", htmlFor: `${idPrefix}-q` }, labels.keywordSearch || labels.search),
         h("input", { id: `${idPrefix}-q`, name: "q", type: "search", defaultValue: page.search.query || "", autoComplete: "off" }),
       ),
+      guidedSearch(idPrefix),
       filterSelect(
         idPrefix,
         "country_code",
@@ -1721,6 +1829,8 @@ function SearchBody({ page }) {
       "data-list-first-mobile": page.mobile_policy?.list_first_mobile ? "true" : "false",
       "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false",
       "data-min-touch-target": page.mobile_policy?.minimum_tap_target_px || 44,
+      "data-guided-search-path": savedView ? undefined : page.path,
+      "data-guided-search-success": !savedView && page.search.total_matches > 0 ? "true" : "false",
       "data-saved-listings-view": savedView ? "true" : undefined,
     },
     h(
@@ -2359,31 +2469,38 @@ function ListingBody({ page }) {
                   "data-media-gallery-count": page.body.media.gallery_count || 0,
                   "data-tour-status": "available",
                 },
-                h("a", { className: "mk-tab", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 16 }), labels.gallery),
+                gallery.length
+                  ? h(
+                      "a",
+                      { className: "mk-tab", href: "#listing-gallery" },
+                      h(Icon, { name: "camera", size: 16 }),
+                      labels.gallery,
+                    )
+                  : null,
                 floorPlans.length ? h("a", { className: "mk-tab", href: "#listing-floor-plans" }, h(Icon, { name: "file-check", size: 16 }), labels.floorPlans) : null,
                 videos.length ? h("a", { className: "mk-tab", href: "#listing-videos" }, h(Icon, { name: "external-link", size: 16 }), labels.videos) : null,
                 tour.available ? h("a", { className: "mk-tab", href: "#listing-tour" }, h(Icon, { name: "globe", size: 16 }), labels.tour360) : null,
               )
             : null,
-          h(
-            "section",
-            { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
-            ...gallery.map((image, index) =>
-              h(
-                "button",
-                {
-                  key: image.url,
-                  type: "button",
-                  className: "ld-gallery-full__item",
-                  "data-listing-gallery-source": "true",
-                  "data-listing-gallery-open": String(index),
-                  "aria-label": `${index + 1} / ${gallery.length}${image.alt ? `: ${image.alt}` : ""}`,
-                },
-                h("img", publicImageProps(image, page.body.h1)),
-              ),
-            ),
-          ),
-          floorPlans.length
+         h(
+           "section",
+           { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
+           ...gallery.map((image, index) =>
+             h(
+               "button",
+               {
+                 key: image.url,
+                 type: "button",
+                 className: "ld-gallery-full__item",
+                 "data-listing-gallery-source": "true",
+                 "data-listing-gallery-open": String(index),
+                 "aria-label": `${index + 1} / ${gallery.length}${image.alt ? `: ${image.alt}` : ""}`,
+               },
+               h("img", publicImageProps(image, page.body.h1)),
+             ),
+           ),
+         ),
+         floorPlans.length
             ? h(
                 "section",
                 { id: "listing-floor-plans", className: "ld-gallery-full", "aria-label": labels.floorPlans, "data-floor-plan-gallery": "true" },
@@ -2469,8 +2586,18 @@ function ListingBody({ page }) {
 function SellerBody({ page }) {
   const labels = uiLabels(page);
   const valuation = page.body.valuation;
-  const steps = [labels.propertyDetails, labels.brokerReview, labels.callback];
+  const steps = [labels.propertyDetails, labels.callback, labels.brokerReview];
   const propertyTypes = Object.entries(uiCopyFor(page.locale).propertyTypes || {});
+  const reviewFields = [
+    ["property.location", labels.location],
+    ["property.type", labels.propertyType],
+    ["property.area", labels.area],
+    ["property.bedrooms", labels.factLabels?.bedrooms || "Bedrooms"],
+    ["contact.name", labels.name],
+    ["contact.phone", labels.phone],
+    ["contact_preference", labels.preferredContact],
+    ["message", labels.message],
+  ];
   const main = h(
     "main",
     {
@@ -2492,20 +2619,40 @@ function SellerBody({ page }) {
       h(
         "ol",
         { className: "sell-steps", "data-seller-steps": "true" },
-        ...steps.map((step, index) => h("li", { key: step }, h("span", { className: "sell-steps__num", "aria-hidden": "true" }, index + 1), step)),
+        ...steps.map((step, index) =>
+          h(
+            "li",
+            { key: step, "data-seller-step-indicator": String(index + 1), "aria-current": index === 0 ? "step" : undefined },
+            h("span", { className: "sell-steps__num", "aria-hidden": "true" }, index + 1),
+            step,
+          ),
+        ),
       ),
     ),
     h(
       "form",
-      { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", method: valuation.method || "POST", action: valuation.endpoint, "data-lead-type": "seller" },
+      {
+        className: "mk-card mk-card--elevated mk-card--pad-lg ct-form",
+        method: valuation.method || "POST",
+        action: valuation.endpoint,
+        "data-lead-type": "seller",
+        "data-seller-intake": "true",
+        "data-seller-step": "1",
+      },
       h("input", { type: "hidden", name: "source", defaultValue: valuation.payload.source }),
       h("input", { type: "hidden", name: "intent", defaultValue: valuation.payload.intent }),
       h("input", { type: "hidden", name: "leadType", defaultValue: valuation.payload.leadType }),
       h("input", { type: "hidden", name: "language", defaultValue: valuation.payload.language }),
       h(
-        "div",
-        { className: "sell-form__section", "data-seller-property-fields": "true" },
-        h("h2", { className: "ct-form__title" }, labels.propertyDetails),
+        "section",
+        {
+          className: "sell-form__section",
+          "data-seller-property-fields": "true",
+          "data-seller-step": "1",
+          role: "group",
+          "aria-labelledby": "seller-step-property",
+        },
+        h("h2", { id: "seller-step-property", className: "ct-form__title", tabIndex: "-1", "data-seller-step-title": "true" }, labels.propertyDetails),
         h("label", null, labels.location, h("input", { name: "property.location", required: true, autoComplete: "address-level2" })),
         h(
           "div",
@@ -2524,11 +2671,12 @@ function SellerBody({ page }) {
           h("label", null, labels.area, h("input", { name: "property.area", type: "number", min: "0", inputMode: "decimal" })),
           h("label", null, labels.factLabels?.bedrooms || "Bedrooms", h("input", { name: "property.bedrooms", type: "number", min: "0", inputMode: "numeric" })),
         ),
+        h("div", { className: "sell-form__actions sell-form__actions--end" }, h(Btn, { type: "button", variant: "accent", size: "lg", "data-seller-next": "true" }, labels.next)),
       ),
       h(
-        "div",
-        { className: "sell-form__section" },
-        h("h2", { className: "ct-form__title" }, labels.contact),
+        "section",
+        { className: "sell-form__section", "data-seller-step": "2", role: "group", "aria-labelledby": "seller-step-contact" },
+        h("h2", { id: "seller-step-contact", className: "ct-form__title", tabIndex: "-1", "data-seller-step-title": "true" }, labels.callback),
         h(
           "div",
           { className: "ct-form__row" },
@@ -2550,10 +2698,38 @@ function SellerBody({ page }) {
               h("option", { value: "viber" }, "Viber"),
             ),
           ),
-          h("label", null, labels.propertyDetails, h("textarea", { name: "message", required: true })),
+          h("label", null, labels.message, h("textarea", { name: "message", required: true })),
+        ),
+        h(
+          "div",
+          { className: "sell-form__actions" },
+          h(Btn, { type: "button", variant: "secondary", size: "lg", "data-seller-back": "true" }, labels.previous),
+          h(Btn, { type: "button", variant: "accent", size: "lg", "data-seller-next": "true" }, labels.next),
         ),
       ),
-      h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send" }, valuation.label),
+      h(
+        "section",
+        { className: "sell-form__section", "data-seller-step": "3", role: "group", "aria-labelledby": "seller-step-review" },
+        h("h2", { id: "seller-step-review", className: "ct-form__title", tabIndex: "-1", "data-seller-step-title": "true" }, labels.brokerReview),
+        h(
+          "dl",
+          { className: "sell-form__review", "data-seller-review": "true" },
+          ...reviewFields.map(([name, label]) =>
+            h(
+              "div",
+              { key: name, "data-seller-summary-row": "true", hidden: true },
+              h("dt", null, label),
+              h("dd", { "data-seller-summary": name }),
+            ),
+          ),
+        ),
+        h(
+          "div",
+          { className: "sell-form__actions" },
+          h(Btn, { type: "button", variant: "secondary", size: "lg", "data-seller-back": "true" }, labels.previous),
+          h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "send" }, valuation.label),
+        ),
+      ),
     ),
   );
   return shell(page, main);
@@ -2590,7 +2766,6 @@ function ContactBody({ page }) {
                   "div",
                   { className: "ct-office__meta" },
                   h("span", null, h(Icon, { name: "map-pin", size: 16 }), ` ${chrome.copy.offices}`),
-                  h("span", null, h(Icon, { name: "phone", size: 16 }), h("a", { href: chrome.contact.phone_href }, chrome.contact.phone_label)),
                   h("span", null, h(Icon, { name: "mail", size: 16 }), h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
                 ),
               ),

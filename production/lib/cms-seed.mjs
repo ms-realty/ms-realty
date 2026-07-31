@@ -463,6 +463,10 @@ const REQUIRED_COLLECTION_FIELDS = {
   },
 };
 
+const TYPED_OPTIONAL_COLLECTION_FIELDS = {
+  listings: { workflow: "group" },
+};
+
 export function buildCmsCollections(seed) {
   const listings = seed.records.filter((record) => record.collection === "listings");
   const translationRecords = listings.flatMap((record) => record.translations || []);
@@ -544,6 +548,23 @@ export function buildCmsCollections(seed) {
           collectionField("seo", "group", {
             required: true,
             fields: ["title", "description", "canonical", "schema_present"],
+          }),
+          collectionField("workflow", "group", {
+            fields: [
+              "availability_verified_at",
+              "availability_verified_by",
+              "location_verified_at",
+              "location_verified_by",
+              "price_verified_at",
+              "price_verified_by",
+              "price_on_request_verified_at",
+              "price_on_request_verified_by",
+              "publish_approved",
+              "publish_approved_at",
+              "publish_approved_by",
+              "last_edited_at",
+              "last_editor",
+            ],
           }),
           collectionField("property", "relationship", { required: true, relationTo: "properties" }),
           collectionField("location", "relationship", { required: true, relationTo: "locations" }),
@@ -768,6 +789,12 @@ export function assertCmsCollections(manifest) {
       if (!field) throw new Error(`Missing required CMS field ${collection.slug}.${name}`);
       if (field.type !== type) throw new Error(`CMS field ${collection.slug}.${name} expected type ${type}, got ${field.type}`);
       if (field.required !== true) throw new Error(`CMS field ${collection.slug}.${name} must be required`);
+    }
+    for (const [name, type] of Object.entries(TYPED_OPTIONAL_COLLECTION_FIELDS[collection.slug] || {})) {
+      const field = fieldMap.get(name);
+      if (!field || field.type !== type) {
+        throw new Error(`CMS collection must expose typed optional field ${collection.slug}.${name}`);
+      }
     }
     for (const field of collection.fields) {
       if (!field.name || !field.type || typeof field.required !== "boolean") {
