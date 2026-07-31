@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ms-realty",
+  "main": "workers/index.js",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // Serve on the account's *.workers.dev host until the real domains move to
+  // Cloudflare DNS; no custom domain is attached yet.
+  "workers_dev": true,
+
+  "containers": [
+    {
+      // basic = 1 GiB / 4 GB disk. Keep the Node runtime on this conservative
+      // size until a production cold-start and load test supports a reduction.
+      "class_name": "MsRealtyContainer",
+      "image": "./Dockerfile",
+      "instance_type": "basic",
+      "max_instances": 1
+    }
+  ],
+
+  // Legacy uploads live in R2, not in the image: they are 453MB that change
+  // monthly, and baking them in made every deploy re-push them.
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "ms-realty-media" }],
+
+  "durable_objects": {
+    "bindings": [{ "name": "MS_REALTY", "class_name": "MsRealtyContainer" }]
+  },
+
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["MsRealtyContainer"] }]
+}
