@@ -6,6 +6,12 @@ import {
   realtyCaseExecutionAuditRecords,
 } from "../lib/realty-case-executor.mjs";
 import { readRealtyCaseEvents } from "../lib/realty-cases.mjs";
+import {
+  assertRealtyCasePayloadAuthorityConfig,
+  readRealtyCaseEventsFromPayload,
+  realtyCasePayloadAuthorityConfigFromEnv,
+} from "../lib/realty-case-payload-authority.mjs";
+import { realtyCaseRequestProjectionConfigFromEnv } from "../lib/realty-case-request-projection.mjs";
 
 const filePath = process.env.MS_REALTY_CASE_LEDGER_PATH || undefined;
 const auditLogPath = process.env.MS_REALTY_AUDIT_LOG_PATH || undefined;
@@ -35,7 +41,16 @@ function trustedResultSource(sourcePath) {
 }
 
 try {
-  const plan = buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(filePath), { now });
+  const authorityConfig = {
+    ...realtyCaseRequestProjectionConfigFromEnv(process.env),
+    ...realtyCasePayloadAuthorityConfigFromEnv(process.env),
+  };
+  const payloadAuthority = assertRealtyCasePayloadAuthorityConfig(authorityConfig);
+  const currentEvents = () =>
+    payloadAuthority
+      ? readRealtyCaseEventsFromPayload({ workspaceId: authorityConfig.realtyCaseWorkspaceId })
+      : Promise.resolve(readRealtyCaseEvents(filePath));
+  const plan = buildAutonomousRealtyCaseIntents(await currentEvents(), { now });
   if (!apply) {
     console.log(JSON.stringify({ kind: plan.kind, dry_run: true, generated_at: plan.generated_at, summary: plan.summary, intents: plan.intents }));
   } else {
@@ -45,12 +60,14 @@ try {
       actor: requiredText(process.env.MS_REALTY_CASE_EXECUTOR_ACTOR, "MS_REALTY_CASE_EXECUTOR_ACTOR", 80),
       filePath,
       now,
+      payloadAuthority,
+      workspaceId: authorityConfig.realtyCaseWorkspaceId,
     });
     const audited = new Set(
       readAuditLog(auditLogPath).map((row) => `${row.action}:${row.object_id}`),
     );
     let repairedAudits = 0;
-    for (const record of realtyCaseExecutionAuditRecords(readRealtyCaseEvents(filePath))) {
+    for (const record of realtyCaseExecutionAuditRecords(await currentEvents())) {
       const key = `${record.input.action}:${record.input.objectId}`;
       if (audited.has(key)) continue;
       appendAuditLog(createAuditLogEntry(record.input, record.recordedAt), { filePath: auditLogPath });

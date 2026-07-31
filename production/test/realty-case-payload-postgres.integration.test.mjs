@@ -19,6 +19,7 @@ const conditionProjector = path.join(root, "production", "scripts", "run-realty-
 const caseReadback = path.join(root, "production", "scripts", "run-realty-case-payload-readback.mjs");
 const payloadConfig = path.join(root, "payload.config.js");
 const payloadRuntime = path.join(root, "node_modules", "payload", "dist", "index.js");
+const payloadAuthority = path.join(root, "production", "lib", "realty-case-payload-authority.mjs");
 const COMMAND_TIMEOUT_MS = 120_000;
 
 function redact(value, env) {
@@ -195,6 +196,128 @@ function assertCleanReadback(result, workspaceId) {
   });
 }
 
+function exercisePayloadAuthority(env, workspaceId) {
+  const caseId = "case-payload-postgres-authority-it";
+  const openedEventId = `realty-case-${caseId}-opened`;
+  const frozenEventId = "case-payload-postgres-authority-it-frozen";
+  const script = `
+    import assert from "node:assert/strict";
+    import { getPayload } from ${JSON.stringify(pathToFileURL(payloadRuntime).href)};
+    import {
+      appendRealtyCaseActionInPayload,
+      openRealtyCaseInPayload,
+      readRealtyCasePayloadAuthorityHistory,
+    } from ${JSON.stringify(pathToFileURL(payloadAuthority).href)};
+
+    const workspaceId = ${JSON.stringify(workspaceId)};
+    const caseId = ${JSON.stringify(caseId)};
+    const openedEventId = ${JSON.stringify(openedEventId)};
+    const frozenEventId = ${JSON.stringify(frozenEventId)};
+    let payload;
+    let exitCode = 0;
+
+    async function rows(collection) {
+      const result = await payload.find({
+        collection,
+        depth: 0,
+        limit: 10,
+        overrideAccess: true,
+        pagination: false,
+        where: { workspace_id: { equals: workspaceId } },
+      });
+      return result.docs;
+    }
+
+    try {
+      const configModule = await import(${JSON.stringify(pathToFileURL(payloadConfig).href)});
+      payload = await getPayload({ config: configModule.default });
+      const options = { payload, workspaceId };
+      const opened = await openRealtyCaseInPayload(
+        {
+          id: caseId,
+          jurisdiction: "BG",
+          caseType: "buyer_purchase",
+          assetKind: "residential",
+          clientRef: "client-payload-postgres-authority-it",
+          propertyRef: "property-payload-postgres-authority-it",
+          executionMode: "autonomous",
+          assuranceRef: "assurance://trusted-agent/payload-postgres-it",
+          mandate: {
+            ref: "mandate-payload-postgres-authority-it",
+            grantedByRef: "client-payload-postgres-authority-it",
+            signedAt: "2026-07-30T08:00:00.000Z",
+            signedEvidenceRef: "evidence://mandate/payload-postgres-authority-it",
+            capabilities: ["case:*"],
+          },
+          actor: "trusted-agent-payload-postgres-it",
+          executorKind: "agent",
+        },
+        { ...options, recordedAt: "2026-07-30T08:05:00.000Z" },
+      );
+      assert.equal(opened.idempotent, false);
+      assert.equal(opened.event.id, openedEventId);
+
+      const freezeInput = {
+        id: frozenEventId,
+        caseId,
+        action: "case_frozen",
+        authorityRef: "authority://broker/payload-postgres-it",
+        reasonCode: "integration_authority_retry",
+        actor: "trusted-agent-payload-postgres-it",
+        executorKind: "agent",
+      };
+      const frozen = await appendRealtyCaseActionInPayload(
+        freezeInput,
+        { ...options, recordedAt: "2026-07-30T08:10:00.000Z" },
+      );
+      assert.equal(frozen.idempotent, false);
+      assert.equal(frozen.case.status, "frozen");
+
+      const beforeRetry = await readRealtyCasePayloadAuthorityHistory(options);
+      assert.deepEqual(beforeRetry.caseEvents.map((event) => event.id), [openedEventId, frozenEventId]);
+      assert.deepEqual(beforeRetry.conditionEvents, []);
+      assert.equal(beforeRetry.caseEvents.at(-1).authority_ref, freezeInput.authorityRef);
+
+      const retried = await appendRealtyCaseActionInPayload(
+        freezeInput,
+        { ...options, recordedAt: "2026-07-30T08:10:00.000Z" },
+      );
+      assert.equal(retried.idempotent, true);
+
+      const history = await readRealtyCasePayloadAuthorityHistory(options);
+      assert.deepEqual(history.caseEvents.map((event) => event.id), [openedEventId, frozenEventId]);
+      const [events, outbox] = await Promise.all([rows("realty_case_events"), rows("realty_case_outbox")]);
+      assert.equal(events.length, 2);
+      assert.equal(new Set(events.map((event) => event.event_id)).size, 2);
+      assert.equal(new Set(events.map((event) => event.idempotency_key)).size, 2);
+      assert.equal(outbox.length, 2);
+      assert.equal(new Set(outbox.map((row) => row.idempotency_key)).size, 2);
+      assert.equal(new Set(outbox.map((row) => String(row.source_event?.id ?? row.source_event))).size, 2);
+      assert.deepEqual(
+        outbox.map((row) => row.payload_refs.last_event_id).sort(),
+        [openedEventId, frozenEventId].sort(),
+      );
+    } catch (error) {
+      console.error(error.stack || error);
+      exitCode = 1;
+    } finally {
+      if (payload) {
+        try {
+          await payload.destroy();
+        } catch (error) {
+          console.error(error.stack || error);
+          exitCode = 1;
+        }
+      }
+    }
+    process.exit(exitCode);
+  `;
+  command(process.execPath, ["--input-type=module", "--eval", script], {
+    env,
+    label: "exercising Payload RealtyCase authority writes",
+  });
+}
+
 function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outboxAttempts }) {
   const script = `
     import assert from "node:assert/strict";
@@ -296,13 +419,14 @@ function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outbo
 }
 
 test(
-  "Payload/Postgres migration and RealtyCase projectors work against an isolated database",
+  "Payload/Postgres authority writer and RealtyCase projectors work against an isolated database",
   { skip: enabled ? false : "set MS_REALTY_RUN_PAYLOAD_INTEGRATION=1 to run the disposable Docker integration test", timeout: 180_000 },
   async () => {
     const project = `ms-realty-payload-it-${process.pid}-${randomUUID().slice(0, 8)}`;
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-payload-postgres-it-"));
     const port = await freeLoopbackPort();
     const workspaceId = `workspace-payload-postgres-it-${process.pid}`;
+    const authorityWorkspaceId = `workspace-payload-postgres-authority-it-${process.pid}`;
     const databaseUser = "payload_it";
     const databaseName = "payload_it";
     const databasePassword = randomBytes(32).toString("hex");
@@ -324,6 +448,7 @@ test(
       runCompose(project, ["up", "--detach", "--wait", "payload-postgres"], env, "starting isolated Payload Postgres");
       command(process.execPath, [payloadCli, "migrate"], { env, label: "running Payload migrations" });
       command(process.execPath, [payloadCli, "migrate:status"], { env, label: "checking Payload migration status" });
+      exercisePayloadAuthority(env, authorityWorkspaceId);
 
       const fixture = writeFixture(directory);
       const projectorEnv = {

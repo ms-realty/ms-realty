@@ -173,6 +173,7 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
     MS_REALTY_PORT: "8080",
     MS_REALTY_MAX_BODY_BYTES: "1024",
     MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED: "true",
+    MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: "true",
     MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     PAYLOAD_SECRET: "test-payload-secret",
     DATABASE_URL: "postgres://payload:payload@127.0.0.1:5432/payload",
@@ -182,6 +183,7 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   assert.equal(config.host, "127.0.0.1");
   assert.equal(config.maxBodyBytes, 1024);
   assert.equal(config.realtyCaseRequestProjectionEnabled, true);
+  assert.equal(config.realtyCasePayloadAuthorityEnabled, true);
   assert.equal(config.realtyCaseWorkspaceId, "workspace-sandanski");
   assert.equal(config.realtyCasePayloadRuntimeConfigured, true);
   assert.equal(productionServerConfig({}).localeRegistryPath, undefined);

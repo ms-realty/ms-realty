@@ -273,8 +273,8 @@ function assertChronology(events, caseId, recordedAt) {
   }
 }
 
-function caseRecord(caseId, caseLedgerPath) {
-  const record = deriveRealtyCases(readRealtyCaseEvents(caseLedgerPath)).find((row) => row.id === caseId);
+function caseRecord(caseId, caseEvents) {
+  const record = deriveRealtyCases(caseEvents).find((row) => row.id === caseId);
   if (!record) throw new Error("Condition requires a known realty case");
   if (record.status !== "active") throw new Error("Condition changes require an active realty case");
   return record;
@@ -519,16 +519,16 @@ export function readRealtyCaseConditionEvents(filePath = DEFAULT_REALTY_CASE_CON
   return store.readRows(filePath);
 }
 
-export function openRealtyCaseCondition(
+export function planOpenRealtyCaseCondition(
   input,
   {
-    filePath = DEFAULT_REALTY_CASE_CONDITION_LEDGER_PATH,
-    caseLedgerPath = DEFAULT_REALTY_CASE_LEDGER_PATH,
+    caseEvents = [],
+    conditionEvents = [],
     recordedAt = new Date().toISOString(),
   } = {},
 ) {
   const normalized = openInput(input, recordedAt);
-  const events = readRealtyCaseConditionEvents(filePath);
+  const events = conditionEvents;
   const conditions = deriveRealtyCaseConditions(events);
   const existing = conditionForCase(normalized.case_id, normalized.condition_id, conditions);
   if (existing) {
@@ -541,7 +541,7 @@ export function openRealtyCaseCondition(
   if (normalized.requested_id && events.some((event) => event.id === normalized.requested_id)) {
     throw new Error("Condition event id already exists");
   }
-  const owningCase = caseRecord(normalized.case_id, caseLedgerPath);
+  const owningCase = caseRecord(normalized.case_id, caseEvents);
   assertAuthorized(owningCase, "condition_opened", normalized, normalized.recorded_at);
   assertChronology(events, normalized.case_id, normalized.recorded_at);
   const event = {
@@ -557,7 +557,6 @@ export function openRealtyCaseCondition(
     assurance_ref: normalized.executor_kind === "agent" ? owningCase.assurance_ref : null,
     recorded_at: normalized.recorded_at,
   };
-  store.appendRow(filePath, event);
   return {
     event,
     condition: conditionForCase(normalized.case_id, normalized.condition_id, deriveRealtyCaseConditions([...events, event])),
@@ -565,7 +564,7 @@ export function openRealtyCaseCondition(
   };
 }
 
-export function appendRealtyCaseConditionAction(
+export function openRealtyCaseCondition(
   input,
   {
     filePath = DEFAULT_REALTY_CASE_CONDITION_LEDGER_PATH,
@@ -573,9 +572,25 @@ export function appendRealtyCaseConditionAction(
     recordedAt = new Date().toISOString(),
   } = {},
 ) {
+  openInput(input, recordedAt);
+  const conditionEvents = readRealtyCaseConditionEvents(filePath);
+  const caseEvents = readRealtyCaseEvents(caseLedgerPath);
+  const planned = planOpenRealtyCaseCondition(input, { caseEvents, conditionEvents, recordedAt });
+  if (!planned.idempotent) store.appendRow(filePath, planned.event);
+  return planned;
+}
+
+export function planRealtyCaseConditionAction(
+  input,
+  {
+    caseEvents = [],
+    conditionEvents = [],
+    recordedAt = new Date().toISOString(),
+  } = {},
+) {
   const normalized = actionInput(input);
   const recorded = timestamp(recordedAt, "recordedAt");
-  const events = readRealtyCaseConditionEvents(filePath);
+  const events = conditionEvents;
   if (normalized.requested_id) {
     const prior = events.find((event) => event.id === normalized.requested_id);
     if (prior) {
@@ -590,7 +605,7 @@ export function appendRealtyCaseConditionAction(
   const conditions = deriveRealtyCaseConditions(events);
   const condition = conditionForCase(normalized.case_id, normalized.condition_id, conditions);
   if (!condition) throw new Error("Condition action requires a known condition for this case");
-  const owningCase = caseRecord(normalized.case_id, caseLedgerPath);
+  const owningCase = caseRecord(normalized.case_id, caseEvents);
   assertAuthorized(owningCase, normalized.action, normalized, recorded);
   assertChronology(events, normalized.case_id, recorded);
   if (normalized.action === "condition_reopened" && Date.parse(normalized.due_at) <= Date.parse(recorded)) {
@@ -611,12 +626,28 @@ export function appendRealtyCaseConditionAction(
     ...(normalized.due_at ? { due_at: normalized.due_at } : {}),
   };
   applyConditionEvent({ ...condition, evidence_refs: [...condition.evidence_refs] }, parseStoredEvent(event));
-  store.appendRow(filePath, event);
   return {
     event,
     condition: conditionForCase(normalized.case_id, normalized.condition_id, deriveRealtyCaseConditions([...events, event])),
     idempotent: false,
   };
+}
+
+export function appendRealtyCaseConditionAction(
+  input,
+  {
+    filePath = DEFAULT_REALTY_CASE_CONDITION_LEDGER_PATH,
+    caseLedgerPath = DEFAULT_REALTY_CASE_LEDGER_PATH,
+    recordedAt = new Date().toISOString(),
+  } = {},
+) {
+  actionInput(input);
+  timestamp(recordedAt, "recordedAt");
+  const conditionEvents = readRealtyCaseConditionEvents(filePath);
+  const caseEvents = readRealtyCaseEvents(caseLedgerPath);
+  const planned = planRealtyCaseConditionAction(input, { caseEvents, conditionEvents, recordedAt });
+  if (!planned.idempotent) store.appendRow(filePath, planned.event);
+  return planned;
 }
 
 export function buildRealtyCaseConditionQueue(events = [], { now = new Date().toISOString() } = {}) {

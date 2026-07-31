@@ -5,6 +5,7 @@ import {
   deriveRealtyCases,
   readRealtyCaseEvents,
 } from "./realty-cases.mjs";
+import { appendRealtyCaseActionInPayload, readRealtyCaseEventsFromPayload } from "./realty-case-payload-authority.mjs";
 
 export const REALTY_CASE_EXECUTOR_RESULT_ACTIONS = Object.freeze(["step_completed", "step_blocked", "case_closed"]);
 
@@ -63,8 +64,8 @@ function stableIntentId(caseRecord, step) {
   return `${EVENT_PREFIX}${digest}`;
 }
 
-function currentIntent(intent, filePath, now) {
-  return buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(filePath), { now }).intents.find(
+async function currentIntent(intent, readEvents, now) {
+  return buildAutonomousRealtyCaseIntents(await readEvents(), { now }).intents.find(
     (candidate) => candidate.event_id === intent.event_id,
   );
 }
@@ -201,16 +202,25 @@ export async function executeAutonomousRealtyCases({
   executor,
   actor,
   filePath = DEFAULT_REALTY_CASE_LEDGER_PATH,
+  payload = null,
+  payloadAuthority = false,
+  workspaceId = null,
   now = new Date().toISOString(),
 } = {}) {
   if (typeof executor !== "function") throw new Error("A trusted executor result callback is required");
   const recordedAt = isoTimestamp(now, "now");
   const executorId = executorActor(actor);
-  const plan = buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(filePath), { now: recordedAt });
+  const readEvents = payloadAuthority
+    ? () => readRealtyCaseEventsFromPayload({ payload, workspaceId })
+    : async () => readRealtyCaseEvents(filePath);
+  const appendAction = payloadAuthority
+    ? (input) => appendRealtyCaseActionInPayload(input, { payload, workspaceId, recordedAt })
+    : async (input) => appendRealtyCaseAction(input, { filePath, recordedAt });
+  const plan = buildAutonomousRealtyCaseIntents(await readEvents(), { now: recordedAt });
   const results = [];
 
   for (const plannedIntent of plan.intents) {
-    const beforeResult = currentIntent(plannedIntent, filePath, recordedAt);
+    const beforeResult = await currentIntent(plannedIntent, readEvents, recordedAt);
     if (!beforeResult) {
       results.push({ intent_id: plannedIntent.id, status: "skipped_stale_plan" });
       continue;
@@ -221,11 +231,11 @@ export async function executeAutonomousRealtyCases({
       continue;
     }
     const input = actionInput(beforeResult, outcome, executorId);
-    if (!currentIntent(beforeResult, filePath, recordedAt)) {
+    if (!(await currentIntent(beforeResult, readEvents, recordedAt))) {
       results.push({ intent_id: beforeResult.id, status: "skipped_eligibility_changed" });
       continue;
     }
-    const appended = appendRealtyCaseAction(input, { filePath, recordedAt });
+    const appended = await appendAction(input);
     results.push({
       intent_id: beforeResult.id,
       status: appended.idempotent ? "idempotent" : "recorded",
@@ -233,7 +243,7 @@ export async function executeAutonomousRealtyCases({
     });
   }
 
-  const remaining = buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(filePath), { now: recordedAt });
+  const remaining = buildAutonomousRealtyCaseIntents(await readEvents(), { now: recordedAt });
   return {
     kind: "realty_case_execution",
     executed_at: recordedAt,

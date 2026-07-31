@@ -10,6 +10,8 @@ import {
   assertRealtyCaseEvents,
   buildRealtyCaseQueue,
   openRealtyCase,
+  planOpenRealtyCase,
+  planRealtyCaseAction,
   readRealtyCaseEvents,
   resetRealtyCaseLedger,
 } from "../lib/realty-cases.mjs";
@@ -62,6 +64,53 @@ function evidence(step) {
     },
   ];
 }
+
+test("case mutation planners are pure and preserve retry plans", () => {
+  const input = {
+    id: "case-planned-1",
+    jurisdiction: "BG",
+    caseType: "buyer_purchase",
+    assetKind: "residential",
+    clientRef: "contact-planned-1",
+    propertyRef: "listing-planned-1",
+    executionMode: "manual",
+    mandate: mandate("mandate-planned-1"),
+    actor: "broker_bg",
+    executorKind: "human",
+  };
+  const events = [];
+  const opened = planOpenRealtyCase(input, { events, recordedAt: "2026-07-30T08:00:00.000Z" });
+  assert.equal(opened.idempotent, false);
+  assert.equal(events.length, 0);
+
+  const actionInput = {
+    id: "case-planned-step-1",
+    caseId: opened.case.id,
+    action: "step_completed",
+    stepKey: opened.case.steps[0].key,
+    evidenceRefs: evidence(opened.case.steps[0]),
+    actor: "broker_bg",
+    executorKind: "human",
+  };
+  const actionEvents = [opened.event];
+  const completed = planRealtyCaseAction(actionInput, {
+    events: actionEvents,
+    recordedAt: "2026-07-30T08:01:00.000Z",
+  });
+  assert.equal(completed.case.steps[0].status, "completed");
+  assert.equal(actionEvents.length, 1);
+  assert.equal(
+    planOpenRealtyCase(input, { events: actionEvents, recordedAt: "2026-07-30T08:02:00.000Z" }).idempotent,
+    true,
+  );
+  assert.equal(
+    planRealtyCaseAction(actionInput, {
+      events: [...actionEvents, completed.event],
+      recordedAt: "2026-07-30T08:02:00.000Z",
+    }).idempotent,
+    true,
+  );
+});
 
 test("manual and autonomous cases use the same workflow while enforcing their executor boundary", () => {
   const filePath = ledger();

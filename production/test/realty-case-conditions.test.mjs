@@ -8,10 +8,12 @@ import {
   assertRealtyCaseConditionEvents,
   buildRealtyCaseConditionQueue,
   openRealtyCaseCondition,
+  planOpenRealtyCaseCondition,
+  planRealtyCaseConditionAction,
   readRealtyCaseConditionEvents,
   resetRealtyCaseConditionLedger,
 } from "../lib/realty-case-conditions.mjs";
-import { openRealtyCase, resetRealtyCaseLedger } from "../lib/realty-cases.mjs";
+import { openRealtyCase, readRealtyCaseEvents, resetRealtyCaseLedger } from "../lib/realty-cases.mjs";
 
 function files() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-case-conditions-"));
@@ -131,6 +133,61 @@ test("conditions remain reference-only, idempotent, and isolated by case", () =>
   );
   assert.doesNotMatch(fs.readFileSync(filePath, "utf8"), /Private Client Name|document body/i);
   assert.equal(assertRealtyCaseConditionEvents(readRealtyCaseConditionEvents(filePath)), true);
+});
+
+test("condition planners are pure and retain idempotent mutation plans", () => {
+  const { filePath, caseLedgerPath } = files();
+  openCase(caseLedgerPath, "case-planner");
+  const caseEvents = readRealtyCaseEvents(caseLedgerPath);
+  const input = {
+    eventId: "condition-planner-open",
+    caseId: "case-planner",
+    conditionId: "title-check",
+    type: "title_clearance",
+    dueAt: "2026-07-31T09:00:00.000Z",
+    requiredEvidenceProducerRefs: ["registry://property-register"],
+    actor: "broker-bg-1",
+    executorKind: "human",
+  };
+  const opening = planOpenRealtyCaseCondition(input, {
+    caseEvents,
+    conditionEvents: [],
+    recordedAt: "2026-07-30T09:00:00.000Z",
+  });
+  assert.equal(opening.idempotent, false);
+  assert.equal(readRealtyCaseConditionEvents(filePath).length, 0);
+  assert.equal(
+    planOpenRealtyCaseCondition(input, {
+      caseEvents,
+      conditionEvents: [opening.event],
+      recordedAt: "2026-07-30T09:00:00.000Z",
+    }).idempotent,
+    true,
+  );
+
+  const action = {
+    eventId: "condition-planner-satisfied",
+    caseId: "case-planner",
+    conditionId: "title-check",
+    action: "condition_satisfied",
+    evidenceRefs: [{ ref: "evidence://registry/title", producerRef: "registry://property-register" }],
+    actor: "broker-bg-1",
+    executorKind: "human",
+  };
+  const satisfiedPlan = planRealtyCaseConditionAction(action, {
+    caseEvents,
+    conditionEvents: [opening.event],
+    recordedAt: "2026-07-30T10:00:00.000Z",
+  });
+  assert.equal(satisfiedPlan.condition.status, "satisfied");
+  assert.equal(
+    planRealtyCaseConditionAction(action, {
+      caseEvents,
+      conditionEvents: [opening.event, satisfiedPlan.event],
+      recordedAt: "2026-07-30T10:00:00.000Z",
+    }).idempotent,
+    true,
+  );
 });
 
 test("conditions enforce mandate authority, chronology, expiry, and human waive or reopen", () => {

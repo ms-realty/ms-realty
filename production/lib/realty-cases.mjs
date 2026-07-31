@@ -905,15 +905,14 @@ export function readRealtyCaseEvents(filePath = DEFAULT_REALTY_CASE_LEDGER_PATH)
   return store.readRows(filePath);
 }
 
-export function openRealtyCase(
+export function planOpenRealtyCase(
   input,
-  { filePath = DEFAULT_REALTY_CASE_LEDGER_PATH, recordedAt = new Date().toISOString() } = {},
+  { events = [], recordedAt = new Date().toISOString() } = {},
 ) {
   if (!input || typeof input !== "object" || containsPrivateKey(input)) {
     throw new Error("Realty cases store references, not raw personal data");
   }
   const caseId = bounded(input.id || input.caseId || input.case_id, "Case id");
-  const events = readRealtyCaseEvents(filePath);
   const existingCase = deriveRealtyCases(events).find((row) => row.id === caseId);
   if (existingCase) {
     const openingEvent = events.find((row) => row.case_id === caseId && row.action === "case_opened");
@@ -976,12 +975,23 @@ export function openRealtyCase(
     recorded_at: recorded,
   };
   if (events.some((row) => row.id === event.id)) throw new Error("Case event id already exists");
-  store.appendRow(filePath, event);
   return {
     event,
     case: deriveRealtyCases([...events, event]).find((row) => row.id === caseId),
     idempotent: false,
   };
+}
+
+export function openRealtyCase(
+  input,
+  { filePath = DEFAULT_REALTY_CASE_LEDGER_PATH, recordedAt = new Date().toISOString() } = {},
+) {
+  if (!input || typeof input !== "object" || containsPrivateKey(input)) {
+    throw new Error("Realty cases store references, not raw personal data");
+  }
+  const planned = planOpenRealtyCase(input, { events: readRealtyCaseEvents(filePath), recordedAt });
+  if (!planned.idempotent) store.appendRow(filePath, planned.event);
+  return planned;
 }
 
 function assertEarlierPhasesResolved(caseRecord, caseStep) {
@@ -997,14 +1007,13 @@ function normalizedReason(input) {
   return bounded(input.reasonCode || input.reason_code, "Reason code", 120);
 }
 
-export function appendRealtyCaseAction(
+export function planRealtyCaseAction(
   input,
-  { filePath = DEFAULT_REALTY_CASE_LEDGER_PATH, recordedAt = new Date().toISOString() } = {},
+  { events = [], recordedAt = new Date().toISOString() } = {},
 ) {
   if (!input || typeof input !== "object" || containsPrivateKey(input)) {
     throw new Error("Realty case actions store references, not raw personal data");
   }
-  const events = readRealtyCaseEvents(filePath);
   const requestedId = String(input.id || "").trim();
   if (requestedId) {
     const prior = events.find((row) => row.id === requestedId);
@@ -1107,12 +1116,23 @@ export function appendRealtyCaseAction(
     event.reason_code = normalizedReason(input);
   }
 
-  store.appendRow(filePath, event);
   return {
     event,
     case: deriveRealtyCases([...events, event]).find((row) => row.id === caseId),
     idempotent: false,
   };
+}
+
+export function appendRealtyCaseAction(
+  input,
+  { filePath = DEFAULT_REALTY_CASE_LEDGER_PATH, recordedAt = new Date().toISOString() } = {},
+) {
+  if (!input || typeof input !== "object" || containsPrivateKey(input)) {
+    throw new Error("Realty case actions store references, not raw personal data");
+  }
+  const planned = planRealtyCaseAction(input, { events: readRealtyCaseEvents(filePath), recordedAt });
+  if (!planned.idempotent) store.appendRow(filePath, planned.event);
+  return planned;
 }
 
 export function buildRealtyCaseQueue(events = [], { now = new Date().toISOString() } = {}) {

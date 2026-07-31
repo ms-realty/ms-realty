@@ -1,6 +1,6 @@
-// Payload collection definitions for the durable RealtyCase projection. These are
-// intentionally schema-only: the preview SQLite/JSONL ledger remains the runtime
-// writer until the transactional projector lands.
+// Payload collection definitions for the durable RealtyCase projection and opt-in
+// authority path. The preview SQLite/JSONL ledger remains the default writer until
+// a controlled authority cutover.
 
 export const REALTY_CASE_PAYLOAD_COLLECTION_SLUGS = [
   "realty_cases",

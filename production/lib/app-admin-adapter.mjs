@@ -171,6 +171,18 @@ import {
   realtyCaseRequestProjectionConfigFromEnv,
   realtyCaseRequestProjectionFailure,
 } from "./realty-case-request-projection.mjs";
+import {
+  appendRealtyCaseActionInPayload,
+  appendRealtyCaseConditionActionInPayload,
+  assertRealtyCasePayloadAuthorityConfig,
+  assertRealtyCasePayloadAuthorityInput,
+  openRealtyCaseConditionInPayload,
+  openRealtyCaseInPayload,
+  readRealtyCaseConditionEventsFromPayload,
+  readRealtyCaseEventsFromPayload,
+  realtyCasePayloadAuthorityConfigFromEnv,
+  realtyCasePayloadAuthorityFailure,
+} from "./realty-case-payload-authority.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, readPublicContacts } from "./public-contact-vault.mjs";
 import {
   DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
@@ -263,6 +275,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     realtyCaseConditionLedgerPath:
       env.MS_REALTY_CASE_CONDITION_LEDGER_PATH || DEFAULT_REALTY_CASE_CONDITION_LEDGER_PATH,
     ...realtyCaseRequestProjectionConfigFromEnv(env),
+    ...realtyCasePayloadAuthorityConfigFromEnv(env),
     documentChecklistLedgerPath:
       env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
@@ -821,31 +834,57 @@ function pipelinePayload(registry, url, config) {
   });
 }
 
-function realtyCasesPayload(registry, url, config) {
+function realtyCasePayloadAuthorityActive(config) {
+  return assertRealtyCasePayloadAuthorityConfig({
+    realtyCasePayloadAuthorityEnabled: config.realtyCasePayloadAuthorityEnabled,
+    realtyCaseRequestProjectionEnabled: config.realtyCaseRequestProjectionEnabled,
+    realtyCaseWorkspaceId: config.realtyCaseWorkspaceId,
+    realtyCasePayload: config.realtyCasePayload,
+    realtyCasePayloadRuntimeConfigured: config.realtyCasePayloadRuntimeConfigured,
+  });
+}
+
+async function currentRealtyCaseEvents(config) {
+  return realtyCasePayloadAuthorityActive(config)
+    ? readRealtyCaseEventsFromPayload({ payload: config.realtyCasePayload, workspaceId: config.realtyCaseWorkspaceId })
+    : readRealtyCaseEvents(config.realtyCaseLedgerPath);
+}
+
+async function currentRealtyCaseConditionEvents(config) {
+  return realtyCasePayloadAuthorityActive(config)
+    ? readRealtyCaseConditionEventsFromPayload({ payload: config.realtyCasePayload, workspaceId: config.realtyCaseWorkspaceId })
+    : readRealtyCaseConditionEvents(config.realtyCaseConditionLedgerPath);
+}
+
+async function realtyCasesPayload(registry, url, config) {
   const now = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
+  const [caseEvents, conditionEvents] = await Promise.all([
+    currentRealtyCaseEvents(config),
+    currentRealtyCaseConditionEvents(config),
+  ]);
   return {
     ...renderAdminRealtyCasesPayload(
       registry,
       url.searchParams.get("locale") || "en",
-      buildRealtyCaseQueue(readRealtyCaseEvents(config.realtyCaseLedgerPath), {
+      buildRealtyCaseQueue(caseEvents, {
         now,
       }),
       config.adminPrincipal || null,
     ),
-    realtyCaseConditionQueue: buildRealtyCaseConditionQueue(readRealtyCaseConditionEvents(config.realtyCaseConditionLedgerPath), {
+    realtyCaseConditionQueue: buildRealtyCaseConditionQueue(conditionEvents, {
       now,
     }),
   };
 }
 
-function realtyCaseIntentsPayload(config) {
-  return buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(config.realtyCaseLedgerPath), {
+async function realtyCaseIntentsPayload(config) {
+  return buildAutonomousRealtyCaseIntents(await currentRealtyCaseEvents(config), {
     now: config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString(),
   });
 }
 
-function realtyCaseConditionQueue(config) {
-  return buildRealtyCaseConditionQueue(readRealtyCaseConditionEvents(config.realtyCaseConditionLedgerPath), {
+async function realtyCaseConditionQueue(config) {
+  return buildRealtyCaseConditionQueue(await currentRealtyCaseConditionEvents(config), {
     now: config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString(),
   });
 }
@@ -1623,12 +1662,19 @@ function appendLeadPipelineOutcomeEntry(input, config) {
   return result;
 }
 
-function openRealtyCaseEntry(input, config) {
+async function openRealtyCaseEntry(input, config) {
   const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
-  const result = openRealtyCase(bindRealtyCaseExecutor(input, config.adminPrincipal), {
-    filePath: config.realtyCaseLedgerPath,
-    recordedAt,
-  });
+  const boundInput = bindRealtyCaseExecutor(input, config.adminPrincipal);
+  const result = realtyCasePayloadAuthorityActive(config)
+    ? await openRealtyCaseInPayload(boundInput, {
+        payload: config.realtyCasePayload,
+        workspaceId: config.realtyCaseWorkspaceId,
+        recordedAt,
+      })
+    : openRealtyCase(boundInput, {
+        filePath: config.realtyCaseLedgerPath,
+        recordedAt,
+      });
   if (
     !readAuditLog(config.auditLogPath).some(
       (row) => row.action === "realty_case_opened" && row.object_id === result.case.id,
@@ -1655,12 +1701,19 @@ function openRealtyCaseEntry(input, config) {
   return result;
 }
 
-function appendRealtyCaseActionEntry(input, config) {
+async function appendRealtyCaseActionEntry(input, config) {
   const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
-  const result = appendRealtyCaseAction(bindRealtyCaseExecutor(input, config.adminPrincipal), {
-    filePath: config.realtyCaseLedgerPath,
-    recordedAt,
-  });
+  const boundInput = bindRealtyCaseExecutor(input, config.adminPrincipal);
+  const result = realtyCasePayloadAuthorityActive(config)
+    ? await appendRealtyCaseActionInPayload(boundInput, {
+        payload: config.realtyCasePayload,
+        workspaceId: config.realtyCaseWorkspaceId,
+        recordedAt,
+      })
+    : appendRealtyCaseAction(boundInput, {
+        filePath: config.realtyCaseLedgerPath,
+        recordedAt,
+      });
   if (
     !readAuditLog(config.auditLogPath).some(
       (row) => row.action === "realty_case_action_recorded" && row.object_id === result.event.id,
@@ -1711,16 +1764,20 @@ async function projectRealtyCaseConditionEntry(result, config) {
   });
 }
 
-function openRealtyCaseConditionEntry(input, config) {
+async function openRealtyCaseConditionEntry(input, config) {
   const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
-  const result = openRealtyCaseCondition(
-    bindRealtyCaseConditionExecutor(input, config.adminPrincipal, "condition_opened"),
-    {
+  const boundInput = bindRealtyCaseConditionExecutor(input, config.adminPrincipal, "condition_opened");
+  const result = realtyCasePayloadAuthorityActive(config)
+    ? await openRealtyCaseConditionInPayload(boundInput, {
+        payload: config.realtyCasePayload,
+        workspaceId: config.realtyCaseWorkspaceId,
+        recordedAt,
+      })
+    : openRealtyCaseCondition(boundInput, {
       filePath: config.realtyCaseConditionLedgerPath,
       caseLedgerPath: config.realtyCaseLedgerPath,
       recordedAt,
-    },
-  );
+    });
   if (
     !readAuditLog(config.auditLogPath).some(
       (row) => row.action === "realty_case_condition_opened" && row.object_id === result.event.id,
@@ -1746,16 +1803,20 @@ function openRealtyCaseConditionEntry(input, config) {
   return result;
 }
 
-function appendRealtyCaseConditionActionEntry(input, config) {
+async function appendRealtyCaseConditionActionEntry(input, config) {
   const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
-  const result = appendRealtyCaseConditionAction(
-    bindRealtyCaseConditionExecutor(input, config.adminPrincipal, input?.action),
-    {
+  const boundInput = bindRealtyCaseConditionExecutor(input, config.adminPrincipal, input?.action);
+  const result = realtyCasePayloadAuthorityActive(config)
+    ? await appendRealtyCaseConditionActionInPayload(boundInput, {
+        payload: config.realtyCasePayload,
+        workspaceId: config.realtyCaseWorkspaceId,
+        recordedAt,
+      })
+    : appendRealtyCaseConditionAction(boundInput, {
       filePath: config.realtyCaseConditionLedgerPath,
       caseLedgerPath: config.realtyCaseLedgerPath,
       recordedAt,
-    },
-  );
+    });
   if (
     !readAuditLog(config.auditLogPath).some(
       (row) => row.action === "realty_case_condition_action_recorded" && row.object_id === result.event.id,
@@ -2423,13 +2484,37 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/consents") return jsonResponse(200, consentPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/pipeline") return htmlResponse(pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/pipeline") return jsonResponse(200, pipelinePayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/cases") return htmlResponse(realtyCasesPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/cases") return jsonResponse(200, realtyCasesPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/cases") {
+      try {
+        return htmlResponse(await realtyCasesPayload(registry, url, config));
+      } catch (error) {
+        if (config.realtyCasePayloadAuthorityEnabled) return jsonResponse(503, realtyCasePayloadAuthorityFailure());
+        throw error;
+      }
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/cases") {
+      try {
+        return jsonResponse(200, await realtyCasesPayload(registry, url, config));
+      } catch (error) {
+        if (config.realtyCasePayloadAuthorityEnabled) return jsonResponse(503, realtyCasePayloadAuthorityFailure());
+        throw error;
+      }
+    }
     if (request.method === "GET" && url.pathname === "/api/admin/cases/intents") {
-      return jsonResponse(200, realtyCaseIntentsPayload(config));
+      try {
+        return jsonResponse(200, await realtyCaseIntentsPayload(config));
+      } catch (error) {
+        if (config.realtyCasePayloadAuthorityEnabled) return jsonResponse(503, realtyCasePayloadAuthorityFailure());
+        throw error;
+      }
     }
     if (request.method === "GET" && url.pathname === "/api/admin/cases/conditions") {
-      return jsonResponse(200, realtyCaseConditionQueue(config));
+      try {
+        return jsonResponse(200, await realtyCaseConditionQueue(config));
+      } catch (error) {
+        if (config.realtyCasePayloadAuthorityEnabled) return jsonResponse(503, realtyCasePayloadAuthorityFailure());
+        throw error;
+      }
     }
     if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/requests") return jsonResponse(200, requestsPayload(registry, url, config));
@@ -2619,11 +2704,19 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       let result;
       try {
         const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
-        if (assertRealtyCaseRequestProjectionConfig(config)) assertRealtyCaseRequestProjectionInput(input);
-        result = openRealtyCaseEntry(input, config);
+        const payloadAuthority = realtyCasePayloadAuthorityActive(config);
+        if (payloadAuthority) assertRealtyCasePayloadAuthorityInput(input);
+        else if (assertRealtyCaseRequestProjectionConfig(config)) assertRealtyCaseRequestProjectionInput(input);
+        result = await openRealtyCaseEntry(input, config);
+        if (payloadAuthority) return jsonResponse(result.idempotent ? 200 : 201, result);
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
-        if (error.status === 503) return jsonResponse(503, realtyCaseRequestProjectionFailure());
+        if (error.status === 503) {
+          return jsonResponse(
+            503,
+            config.realtyCasePayloadAuthorityEnabled ? realtyCasePayloadAuthorityFailure() : realtyCaseRequestProjectionFailure(),
+          );
+        }
         return jsonResponse(400, { kind: "bad_request", message: error.message });
       }
       try {
@@ -2637,11 +2730,19 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       let result;
       try {
         const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
-        if (assertRealtyCaseRequestProjectionConfig(config)) assertRealtyCaseRequestProjectionInput(input, { action: true });
-        result = appendRealtyCaseActionEntry(input, config);
+        const payloadAuthority = realtyCasePayloadAuthorityActive(config);
+        if (payloadAuthority) assertRealtyCasePayloadAuthorityInput(input, { action: true });
+        else if (assertRealtyCaseRequestProjectionConfig(config)) assertRealtyCaseRequestProjectionInput(input, { action: true });
+        result = await appendRealtyCaseActionEntry(input, config);
+        if (payloadAuthority) return jsonResponse(result.idempotent ? 200 : 201, result);
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
-        if (error.status === 503) return jsonResponse(503, realtyCaseRequestProjectionFailure());
+        if (error.status === 503) {
+          return jsonResponse(
+            503,
+            config.realtyCasePayloadAuthorityEnabled ? realtyCasePayloadAuthorityFailure() : realtyCaseRequestProjectionFailure(),
+          );
+        }
         return jsonResponse(400, { kind: "bad_request", message: error.message });
       }
       try {
@@ -2655,11 +2756,19 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       let result;
       try {
         const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
-        if (assertRealtyCaseRequestProjectionConfig(config)) assertRealtyCaseRequestProjectionInput(input);
-        result = openRealtyCaseConditionEntry(input, config);
+        const payloadAuthority = realtyCasePayloadAuthorityActive(config);
+        if (payloadAuthority) assertRealtyCasePayloadAuthorityInput(input);
+        else if (assertRealtyCaseRequestProjectionConfig(config)) assertRealtyCaseRequestProjectionInput(input);
+        result = await openRealtyCaseConditionEntry(input, config);
+        if (payloadAuthority) return jsonResponse(result.idempotent ? 200 : 201, result);
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
-        if (error.status === 503) return jsonResponse(503, realtyCaseRequestProjectionFailure());
+        if (error.status === 503) {
+          return jsonResponse(
+            503,
+            config.realtyCasePayloadAuthorityEnabled ? realtyCasePayloadAuthorityFailure() : realtyCaseRequestProjectionFailure(),
+          );
+        }
         return jsonResponse(400, { kind: "bad_request", message: error.message });
       }
       try {
@@ -2673,13 +2782,21 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       let result;
       try {
         const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
-        if (assertRealtyCaseRequestProjectionConfig(config)) {
+        const payloadAuthority = realtyCasePayloadAuthorityActive(config);
+        if (payloadAuthority) assertRealtyCasePayloadAuthorityInput(input, { conditionAction: true });
+        else if (assertRealtyCaseRequestProjectionConfig(config)) {
           assertRealtyCaseRequestProjectionInput(input, { conditionAction: true });
         }
-        result = appendRealtyCaseConditionActionEntry(input, config);
+        result = await appendRealtyCaseConditionActionEntry(input, config);
+        if (payloadAuthority) return jsonResponse(result.idempotent ? 200 : 201, result);
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
-        if (error.status === 503) return jsonResponse(503, realtyCaseRequestProjectionFailure());
+        if (error.status === 503) {
+          return jsonResponse(
+            503,
+            config.realtyCasePayloadAuthorityEnabled ? realtyCasePayloadAuthorityFailure() : realtyCaseRequestProjectionFailure(),
+          );
+        }
         return jsonResponse(400, { kind: "bad_request", message: error.message });
       }
       try {

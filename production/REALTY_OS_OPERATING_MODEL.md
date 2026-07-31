@@ -651,6 +651,12 @@ Implemented in this change:
   Payload's serializable Local API transaction, resolve workspace-scoped relationship IDs, retry
   bounded database races, reject immutable conflicts, and update only mutable projections after
   their immutable ledger rows append; a condition projector requires its parent case to exist first;
+- an opt-in direct Payload authority path that reuses those shared mutation planners and
+  transaction-backed projectors. It reads scoped immutable case/condition history, derives the next
+  validated event, and applies its manifest transactionally. Both admin runtimes select Payload for
+  their case/condition reads and writes together in this mode; the explicit executor selects it for
+  its case reads and writes. It is mutually exclusive with the ledger-first request-projection
+  bridge and has no local-ledger fallback;
 - each successful case projection atomically creates or reuses a reference-only `reconciliation`
   intent in `realty_case_outbox`, bound to its case projection digest and latest case event. This is
   internal audit/read-back work only; it is not a provider dispatch, scheduler, or customer action;
@@ -660,7 +666,8 @@ Implemented in this change:
   require `MS_REALTY_WORKSPACE_ID`, respect their corresponding ledger-path variables, and require
   `MS_REALTY_CASE_PROJECTOR_APPLY=1` to write; the case projector runs before the condition projector;
 - an opt-in disposable Postgres integration test proves a fresh migration, both projectors,
-  relationship storage, and idempotent replay without using the operator's local Payload volume;
+  direct authority open/action/read-back/retry, relationship storage, and idempotent replay without
+  using the operator's local Payload volume;
 - regulatory-source snapshot primitives that bind official-source receipt references and SHA-256
   content digests, compare changes/staleness, and require professional and approval-evidence
   references before an all-successful snapshot can be approved;
@@ -688,8 +695,8 @@ Configuration:
 - `MS_REALTY_CASE_LEDGER_PATH`: local preview case-ledger location.
 - `MS_REALTY_CASE_CONDITION_LEDGER_PATH`: local preview condition-ledger location.
 - `MS_REALTY_CASE_RECORDED_AT`: deterministic test/smoke timestamp only.
-- `MS_REALTY_WORKSPACE_ID`: required scope for `case:manifest`, `case:project`, and
-  `case:conditions:project`, and `case:reconcile`.
+- `MS_REALTY_WORKSPACE_ID`: required scope for `case:manifest`, `case:project`,
+  `case:conditions:project`, `case:reconcile`, and the direct authority path.
 - `MS_REALTY_CASE_PROJECTOR_APPLY=1`: explicit opt-in to write either case manifest through Payload;
   omission remains a dry run.
 - `MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED=true`: opt-in request-time bridge for
@@ -701,6 +708,17 @@ Configuration:
   `503` with only the recorded case/event references (and condition ID where relevant); missing
   projection configuration also returns a reference-free `503` before a ledger write. There is no
   durable projection queue, so retry the scoped projector CLI from the ledger.
+- `MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED=true`: opt-in direct Payload authority for all
+  RealtyCase and condition reads/writes in the Next and standalone admin runtimes, and for case
+  reads/writes in the explicit executor. It requires `MS_REALTY_WORKSPACE_ID`, `PAYLOAD_SECRET`,
+  and `DATABASE_URL`, and cannot be enabled with
+  `MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED=true`. Case actions require a stable caller-supplied
+  `id`; condition actions require `eventId` or `id`; client workspace fields are rejected. A failed
+  authority operation returns the reference-free
+  `{"kind":"realty_case_authority_unavailable","source_recorded":false}` response rather than
+  appending to the local ledger or falling back to request-time projection. Re-read and retry with
+  the stable ID. Enable only after historical ledger projection/reconciliation, approved runtime
+  roles, and recovery evidence are complete.
 - `MS_REALTY_CASE_READBACK_DATABASE_URL`: required PostgreSQL connection URL for `case:reconcile`;
   use a dedicated SELECT-only role, never a migration or write-capable operator connection.
 - `PAYLOAD_SECRET` and `NODE_ENV=production`: required for `case:reconcile`; both belong in the
@@ -721,10 +739,11 @@ Not yet production-complete:
   read-back reconciliation of the preview ledger; the disposable integration test proves the code
   path but is not an approved-runtime or launch-evidence substitute, and the manifest remains
   reference-only rather than a database source of truth;
-- production multi-writer/reconciliation coverage and a durable request-path writer; case and
-  condition mutations now have an opt-in, ledger-first request projection bridge, but it is not an
-  atomic dual-store commit or a database source of truth. The internal reconciliation intent does
-  not replace either missing runtime boundary;
+- production multi-writer/reconciliation coverage and approved-runtime acceptance for the direct
+  authority path. Its per-mutation writer is transactional, but it currently has fake-transaction
+  and disposable-database proof only; real concurrent writers, least-privilege runtime roles,
+  monitoring/rollback, backup/restore, and a controlled cutover remain required. The separate
+  ledger-first request-projection bridge remains non-atomic and is not a database source of truth;
 - signed structured mandate limits beyond the current capability set;
 - child booking/stay/management-period runs;
 - official-source retrieval, receipt custody, source-refresh monitoring, geographic rules, and
@@ -778,19 +797,21 @@ Acceptance:
 
 Status: serializable, retry-bounded Payload Local API projectors are implemented for the current
 case/event/mandate and condition manifests, with fake-transaction crash/retry coverage and explicit
-dry-run/apply CLIs. A case projector atomically derives one reference-only internal reconciliation
-intent per case projection digest. The committed migrations, idempotent projectors, and
-`case:reconcile` read-back have passed against a disposable migrated PostgreSQL runtime.
-`case:reconcile` uses an explicit read-back URL, a workspace-scoped repeatable-read transaction,
-and reports sanitized drift counts for case, condition, and internal reconciliation-intent records
-only. Neither it nor the internal intent is production-runtime evidence or a source of operational
-truth.
+dry-run/apply CLIs. An opt-in direct authority path uses the same planners and projectors for
+Payload-only case/condition runtime reads and writes; it is off by default and mutually exclusive
+with the ledger-first request bridge. A case projector atomically derives one reference-only
+internal reconciliation intent per case projection digest. The committed migrations, idempotent
+projectors, direct authority retries, and `case:reconcile` read-back have passed against a
+disposable migrated PostgreSQL runtime. `case:reconcile` uses an explicit read-back URL, a
+workspace-scoped repeatable-read transaction, and reports sanitized drift counts for case,
+condition, and internal reconciliation-intent records only. Neither it nor the internal intent is
+production-runtime evidence or a source of operational truth.
 
 - run the committed migration chain against approved PostgreSQL and prove projector read-back
   reconciliation with a dedicated SELECT-only read-back role;
-- replace the preview local-ledger request path and its opt-in, non-atomic request projection bridge
-  with a workspace-scoped durable writer and transactional outbox before any runtime depends on
-  these projections;
+- rehearse a controlled cutover from projected/reconciled preview history to the opt-in
+  workspace-scoped direct authority writer. Prove approved runtime configuration, writer/read-back
+  roles, concurrent mutations, monitoring/rollback, and recovery before any runtime depends on it;
 - extend the transaction path to evidence and provider-facing outbox work only after their source
   contracts exist; the committed outbox entry is solely an internal reconciliation intent;
 - keep the manifest reference-only and keep database read-back mandatory before making it a runtime
