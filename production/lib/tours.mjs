@@ -5,6 +5,7 @@ import { fromRoot } from "./paths.mjs";
 
 export const TOUR_PROVIDER = "photo-sphere-viewer";
 export const TOUR_PROVIDERS = Object.freeze([TOUR_PROVIDER, "supersplat-viewer"]);
+const APPROVED_TOUR_HOSTS = Object.freeze(["makler-realty.com", "makler-realty.ru"]);
 export const TOUR_REVIEW_STATUSES = Object.freeze([
   "needs_panorama_upload",
   "needs_viewer_upload",
@@ -22,6 +23,12 @@ function httpsUrl(value) {
   } catch {
     return false;
   }
+}
+
+function approvedTourUrl(value) {
+  if (!httpsUrl(value)) return false;
+  const hostname = new URL(value).hostname.toLowerCase();
+  return APPROVED_TOUR_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`));
 }
 
 function assertTourProvider(provider) {
@@ -44,6 +51,10 @@ function publicRequirementsError(provider) {
     sourceField(provider) +
     ", accessibility_caption, and fallback gallery"
   );
+}
+
+function approvedOriginError(provider) {
+  return `Public ${provider === TOUR_PROVIDER ? "360" : "3D"} tours must use an approved MS Realty HTTPS origin`;
 }
 
 export function galleryFallback(media = []) {
@@ -80,9 +91,11 @@ export function createTourField({
   if (thumbnailUrl && !httpsUrl(thumbnailUrl)) throw new Error("thumbnail_url must be an HTTPS URL");
 
   const fallbackGallery = galleryFallback(media);
-  if (isPublic && (!sourceUrl(provider, { panoramaUrl, viewerUrl }) || !accessibilityCaption || !fallbackGallery.length)) {
+  const source = sourceUrl(provider, { panoramaUrl, viewerUrl });
+  if (isPublic && (!source || !accessibilityCaption || !fallbackGallery.length)) {
     throw new Error(publicRequirementsError(provider));
   }
+  if (isPublic && !approvedTourUrl(source)) throw new Error(approvedOriginError(provider));
 
   return {
     provider,
@@ -114,6 +127,7 @@ export function publicTour(tour) {
   if (!httpsUrl(value) || !tour.accessibility_caption || !tour.fallback_gallery?.length) {
     throw new Error(publicRequirementsError(provider));
   }
+  if (!approvedTourUrl(value)) throw new Error(approvedOriginError(provider));
 
   const shared = {
     available: true,
@@ -186,7 +200,18 @@ export function appendTourApproval(approval, { filePath = DEFAULT_TOUR_APPROVAL_
 }
 
 export function latestTourForListing(approvals = [], listingId) {
-  return [...approvals].reverse().find((approval) => approval.listing_id === listingId && approval.is_public === true) || null;
+  return (
+    [...approvals]
+      .reverse()
+      .find((approval) => {
+        if (approval.listing_id !== listingId || approval.is_public !== true) return false;
+        try {
+          return publicTour(approval).available === true;
+        } catch {
+          return false;
+        }
+      }) || null
+  );
 }
 
 export function assertTourApprovals(rows) {

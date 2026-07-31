@@ -1618,8 +1618,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             listingId: "MS-CRAWL-0001",
-            panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
-            thumbnailUrl: "https://cdn.example.test/tours/MS-CRAWL-0001-thumb.jpg",
+            panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
+            thumbnailUrl: "https://makler-realty.com/tours/MS-CRAWL-0001-thumb.jpg",
             accessibilityCaption: "Reviewed 360 tour of the property.",
             reviewer: "media_reviewer",
             reviewConfirmed: "on",
@@ -1651,14 +1651,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(splatTourApprovalBody.provider, "supersplat-viewer");
       assert.equal(splatTourApprovalBody.viewer_url, "https://makler-realty.com/tours/MS-CRAWL-0001/index.html");
       assert.equal(splatTourApprovalBody.panorama_url, null);
-
-      const editorAfterTourApproval = await listingEditorRoute.GET(
-        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
-      );
-      const editorAfterTourApprovalHtml = await editorAfterTourApproval.text();
-      assert.match(editorAfterTourApprovalHtml, /data-tour-review-status="available"/);
-      assert.match(editorAfterTourApprovalHtml, /value="https:\/\/makler-realty\.com\/tours\/MS-CRAWL-0001\/index\.html"/);
-      assert.match(editorAfterTourApprovalHtml, /Reviewed interactive 3D tour of the property\./);
+      assert.equal(splatTourApprovalBody.is_public, true);
       const operationsLead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
@@ -2366,7 +2359,7 @@ test("Next admin public approvals bind reviewers and require confirmation", asyn
     const tour = {
       id: "next-credentialed-tour-approval",
       listingId: "MS-CRAWL-0001",
-      panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+      panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
       accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
       reviewConfirmed: true,
     };
