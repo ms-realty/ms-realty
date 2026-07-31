@@ -1210,7 +1210,7 @@ function migrationReviewPayload(registry, url, config) {
     canonical: "/admin/migration/review",
     indexable: false,
     metadata: {
-      title: "MS Realty migration review",
+      title: `${workspace.copy.migrationReview || "Migration review"} | MS Realty`,
       description: "Admin-only crawl metadata, media, and reviewed redirect approval workbench.",
       robots: "noindex,nofollow",
     },

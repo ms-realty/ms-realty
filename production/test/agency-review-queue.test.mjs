@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildAgencyReviewQueue } from "../lib/agency-review-queue.mjs";
+import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 
 test("agency review queue defers decisions without weakening public guardrails", () => {
   const queue = buildAgencyReviewQueue({
@@ -33,4 +34,32 @@ test("agency review queue defers decisions without weakening public guardrails",
   assert.equal(queue.guardrails.unapproved_customer_messages, "blocked");
   assert.equal(queue.guardrails.legacy_domain_cutover, "blocked");
   assert.equal(queue.lanes.find((laneItem) => laneItem.id === "broker_contacts").count, 1);
+});
+
+test("production-review admin renders localized mobile queue labels and unverified imported listings", async () => {
+  const token = "agency-review-ui-test";
+  const config = {
+    ...appAdminConfigFromEnv({}),
+    authEnv: { MS_REALTY_ADMIN_TOKEN: token },
+  };
+  const headers = { authorization: `Bearer ${token}` };
+  const review = await renderAppAdminResponse(
+    new Request("http://local/admin/migration/review?locale=bg", { headers }),
+    { config },
+  );
+  const html = await review.text();
+
+  assert.equal(review.status, 200);
+  assert.match(html, /Опашка за решения на агенцията/);
+  assert.match(html, /data-agency-review-lane="legacy_routes"/);
+  assert.match(html, /data-label="Защитна граница"/);
+  assert.doesNotMatch(html, /Agency decision queue|Legacy URL decisions/);
+
+  const listings = await renderAppAdminResponse(
+    new Request("http://local/api/admin/listings?locale=bg&q=MS-CRAWL-0001", { headers }),
+    { config },
+  );
+  const payload = await listings.json();
+  assert.equal(listings.status, 200);
+  assert.equal(payload.listings[0].listing_status, "unverified");
 });

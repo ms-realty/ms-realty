@@ -576,6 +576,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingManagerJsonBody.summary.visible, 1);
       assert.ok(listingManagerJsonBody.summary.translationReviewRequired > 0);
       assert.equal(listingManagerJsonBody.listings[0].id, "MS-CRAWL-0001");
+      assert.equal(listingManagerJsonBody.listings[0].listing_status, "unverified");
       assert.ok(listingManagerJsonBody.listings[0].translation_review_required > 0);
 
       const singularListingManager = await listingManagerRoute.GET(
@@ -1108,6 +1109,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtmlBody.includes('data-listing-quality-endpoint="/api/admin/listing-quality"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-agency-review-queue="true"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-agency-review-status="open"'), true);
+      assert.match(migrationReviewHtmlBody, /Опашка за решения на агенцията/);
+      assert.match(migrationReviewHtmlBody, /data-agency-review-lane="legacy_routes"/);
+      assert.match(migrationReviewHtmlBody, /data-label="Защитна граница"/);
+      assert.doesNotMatch(migrationReviewHtmlBody, /Agency decision queue|Legacy URL decisions/);
       assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
       assert.match(migrationReviewHtmlBody, /data-react-admin-ui="migration-review"/);
       assert.match(migrationReviewHtmlBody, /Работно място за преглед на старите URL адреси/);

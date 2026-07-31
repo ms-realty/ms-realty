@@ -85,6 +85,7 @@ test("operations report derives privacy-safe source, response, pipeline, invento
       records: [
         { id: "listing-1", collection: "listings", source_locale: "bg", facts: { listing_status: "available" }, migration: { metadata_gaps: {} } },
         { id: "listing-2", collection: "listings", source_locale: "ru", facts: { listing_status: "sold" }, routing: { review_required: true }, migration: { metadata_gaps: {} } },
+        { id: "listing-3", collection: "listings", source_locale: "bg", facts: {}, migration: { metadata_gaps: {} } },
       ],
     },
     searchAnalytics: {
@@ -110,8 +111,9 @@ test("operations report derives privacy-safe source, response, pipeline, invento
   assert.equal(report.source_quality.find((row) => row.source === "website_listing_detail").closed_deals, 1);
   assert.equal(report.pipelines.buyer.closed, 1);
   assert.equal(report.pipelines.renter.open, 1);
-  assert.equal(report.listing_inventory.total, 2);
+  assert.equal(report.listing_inventory.total, 3);
   assert.equal(report.listing_inventory.active, 1);
+  assert.equal(report.listing_inventory.by_status.find((row) => row.key === "unverified").count, 1);
   assert.equal(report.listing_inventory.translation_review, 1);
   assert.equal(report.task_health.rows.find((row) => row.queue === "translation_review").overdue, 1);
   assert.equal(report.search.zero_result_events, 1);
