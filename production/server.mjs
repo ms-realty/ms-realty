@@ -4,6 +4,7 @@ import { DEFAULT_AUDIT_LOG_PATH } from "./lib/audit-log.mjs";
 import { DEFAULT_ACCOUNT_LEDGER_PATH } from "./lib/account-ledger.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./lib/broker-contacts.mjs";
 import { createHttpApp } from "./lib/http.mjs";
+import { DEFAULT_CMS_SEED_PATH, loadCmsSeed } from "./lib/runtime.mjs";
 import { rateLimitConfigFromEnv } from "./lib/rate-limit.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH } from "./lib/lead-ledger.mjs";
@@ -62,6 +63,7 @@ export function productionServerConfig(env = process.env) {
     port: portFrom(env.MS_REALTY_PORT || env.PORT),
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     rateLimit: rateLimitConfigFromEnv(env),
+    cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
     search: {
       engine: env.MS_REALTY_SEARCH_ENGINE,
       environment: env.NODE_ENV,
@@ -145,6 +147,7 @@ export function productionServerConfig(env = process.env) {
 
 export function createProductionHttpApp(config = productionServerConfig()) {
   return createHttpApp({
+    seed: loadCmsSeed(config.cmsSeedPath),
     rateLimit: config.rateLimit,
     search: config.search,
     eventLedgerPath: config.eventLedgerPath,

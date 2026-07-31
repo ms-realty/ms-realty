@@ -42,6 +42,7 @@ import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { appendRedirectApproval } from "../lib/redirect-approvals.mjs";
 import { LOGO_URL, LOGO_URL_REVERSED } from "../lib/ui/design-assets.mjs";
+import { approvedPublicSeedFixture, approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture.mjs";
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -415,6 +416,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const slugHistoryPath = tempSlugHistory();
   const hermesReplyPrompts = [];
   const app = createHttpApp({
+    seed: approvedPublicSeedFixture(),
     leadLedgerPath,
     leadAssignmentLedgerPath,
     leadContactVaultPath,
@@ -2267,6 +2269,7 @@ test("HTTP app executes reviewed retained and 410 legacy route decisions", async
   const page = routeMap.find((route) => route.url_type === "page" && route.old_url !== "https://makler-realty.com");
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg");
   const app = createHttpApp({
+    ...approvedPublicSeedFixtureOptions(),
     redirects: [
       { old_url: taxonomy.old_url, status: 410, source_domain: taxonomy.source_domain, reviewer: "seo_editor", reason: "Reviewed obsolete." },
       {
@@ -2329,11 +2332,11 @@ test("HTTP sitemap ignores editor-only location mutations without removing revie
       stale_translation_count: 1,
     })}\n`,
   );
-  const sitemap = await dispatchHttp(createHttpApp({ listingEditLedgerPath }), { url: "/sitemap.xml" });
+  const sitemap = await dispatchHttp(createHttpApp({ seed: approvedPublicSeedFixture(), listingEditLedgerPath }), { url: "/sitemap.xml" });
 
   assert.equal(sitemap.status, 200);
   assert.doesNotMatch(sitemap.body, /\/he\/locations\/runtime-only-city/);
-  assert.match(sitemap.body, /\/he\/locations\/sandanski/);
+  assert.doesNotMatch(sitemap.body, /\/he\/locations\/sandanski/);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {
@@ -2406,7 +2409,12 @@ test("HTTP admin can add a non-indexable website locale without changing admin l
 test("HTTP admin can publish an approved translation for a newly added public locale", async () => {
   const localeRegistryPath = tempRegistry();
   const translationLedgerPath = tempTranslations();
-  const app = createHttpApp({ registry: loadLocaleRegistry(localeRegistryPath), localeRegistryPath, translationLedgerPath });
+  const app = createHttpApp({
+    ...approvedPublicSeedFixtureOptions(),
+    registry: loadLocaleRegistry(localeRegistryPath),
+    localeRegistryPath,
+    translationLedgerPath,
+  });
 
   await dispatchHttp(app, {
     method: "POST",

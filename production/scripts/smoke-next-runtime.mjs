@@ -95,10 +95,10 @@ try {
   const home = await fetch(`${baseUrl}/bg`);
   assert(home.status === 200, "Next localized home did not render");
   assert(home.headers.get("content-type")?.startsWith("text/html"), "Next localized home must render HTML");
+  assert(!(await home.text()).includes("MS-CRAWL-0001"), "Next localized home exposed an unapproved listing");
 
   const listing = await fetch(`${baseUrl}/bg/imoti/MS-CRAWL-0001`);
-  assert(listing.status === 200, "Next localized listing did not render");
-  assert(listing.headers.get("content-type")?.startsWith("text/html"), "Next localized listing must render HTML");
+  assert(listing.status === 404, "Next localized listing must stay hidden until publication approval");
 
   const search = await fetch(`${baseUrl}/bg/tarsene?q=Sandanski`);
   assert(search.status === 503, "Next production search must fail closed without a configured engine");
@@ -121,7 +121,7 @@ try {
       kind: "next_runtime_smoke",
       status: "passed",
       launch_ready: expectedReady,
-      checked: ["health", "readiness", "home", "listing", "search_fail_closed", "vendor", "legacy_redirect"],
+      checked: ["health", "readiness", "home_inventory_gate", "listing_inventory_gate", "search_fail_closed", "vendor", "legacy_redirect"],
     }),
   );
 } finally {

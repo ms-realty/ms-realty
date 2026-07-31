@@ -98,6 +98,7 @@ import {
 } from "../lib/slug-history.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { approvedPublicSeedFixture } from "../test/approved-public-seed.fixture.mjs";
 
 function compactAdminLocaleResponse(response, { includeLocales = false } = {}) {
   return {
@@ -160,6 +161,7 @@ resetAuditLog(auditLogPath);
 resetSlugHistory(slugHistoryPath);
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
+  seed: approvedPublicSeedFixture(),
   leadLedgerPath,
   replyOutboxPath,
   languageRequestPath,

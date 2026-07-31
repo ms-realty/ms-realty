@@ -37,6 +37,7 @@ import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
+import { publicSeedFor } from "./public-inventory.mjs";
 
 const ERROR_JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -162,13 +163,13 @@ function readLaunchReadiness(filePath = LAUNCH_READINESS_PATH) {
 function currentSeed(config) {
   const seedPath = config.cmsSeedPath || DEFAULT_CMS_SEED_PATH;
   const seed = readThroughCached(seedPath, () => loadCmsSeed(seedPath));
-  return applyMediaReviews(
+  return publicSeedFor(applyMediaReviews(
     applyListingEdits(
       seed,
       readThroughCached(config.listingEditLedgerPath, () => readListingEdits(config.listingEditLedgerPath)),
     ),
     readThroughCached(config.mediaReviewLedgerPath, () => readMediaReviews(config.mediaReviewLedgerPath)),
-  );
+  ));
 }
 
 function currentRegistry(config) {

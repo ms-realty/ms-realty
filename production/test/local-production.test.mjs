@@ -70,6 +70,7 @@ test("production review reuses the tested stack with durable volumes and an auth
   assert.match(compose, /- "443:443"/);
   assert.match(caddy, /basic_auth \{/);
   assert.match(caddy, /X-Robots-Tag "noindex, nofollow, noarchive"/);
+  assert.match(caddy, /redir @review_root \/admin\/migration\/review\?locale=bg 302/);
   assert.match(caddy, /header_up Authorization "Bearer \{\$MS_REALTY_ADMIN_TOKEN\}"/);
   assert.match(script, /MS_REALTY_COMPOSE_OVERRIDE/);
   assert.match(script, /MS_REALTY_ENV_FILE/);

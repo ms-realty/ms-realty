@@ -23,6 +23,7 @@ import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mj
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { approvedPublicSeedFixture } from "./approved-public-seed.fixture.mjs";
 
 async function withServer(fn) {
   const leadLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-`)}/leads.jsonl`;
@@ -63,6 +64,7 @@ async function withServer(fn) {
   resetSlugHistory(slugHistoryPath);
   const server = createNodeServer(
     createHttpApp({
+      seed: approvedPublicSeedFixture(),
       leadLedgerPath,
       replyOutboxPath,
       languageRequestPath,

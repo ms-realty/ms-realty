@@ -21,6 +21,7 @@ import {
   PublicSearchUnavailableError,
   publicSearchConfigFromEnv,
 } from "./public-search.mjs";
+import { publicSeedFor } from "./public-inventory.mjs";
 
 const DEFAULT_LOCALE_REGISTRY_PATH = fromRoot("locales", "registry.json");
 
@@ -80,15 +81,15 @@ export function isAppSearchPath({ pathname, config = appRouterConfigFromEnv() } 
   return Boolean(pathname && searchLocaleFor(currentRegistry(config), pathname));
 }
 
-function currentSeed(config) {
+function currentPublicSeed(config) {
   const seed = readThroughCached(config.cmsSeedPath, () => loadCmsSeed(config.cmsSeedPath));
-  return applyMediaReviews(
+  return publicSeedFor(applyMediaReviews(
     applyListingEdits(
       seed,
       readThroughCached(config.listingEditLedgerPath, () => readListingEdits(config.listingEditLedgerPath)),
     ),
     readThroughCached(config.mediaReviewLedgerPath, () => readMediaReviews(config.mediaReviewLedgerPath)),
-  );
+  ));
 }
 
 function currentTranslationTasks(config) {
@@ -116,7 +117,7 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
   if (!pathname) throw new Error("App route pathname is required");
 
   const registry = currentRegistry(config);
-  const seed = currentSeed(config);
+  const seed = currentPublicSeed(config);
   const requestUrl = new URL(url, "http://localhost");
   const translationTasks = currentTranslationTasks(config);
   const searchLocale = searchLocaleFor(registry, pathname);
@@ -163,7 +164,7 @@ export async function renderAppSearchRoute({ pathname, url = pathname, config = 
   };
   const { result } = await executePublicSearch({
     registry,
-    seed: currentSeed(config),
+    seed: currentPublicSeed(config),
     params: requestUrl.searchParams,
     defaultLocale: searchLocale.code,
     search,
@@ -247,7 +248,7 @@ export async function renderAppSearchRouteResponse({ pathname, url = pathname, h
 }
 
 export function renderAppSitemap({ config = appRouterConfigFromEnv() } = {}) {
-  const sitemap = buildRuntimeLocalizedSitemap(currentRegistry(config), currentSeed(config), currentTranslationTasks(config));
+  const sitemap = buildRuntimeLocalizedSitemap(currentRegistry(config), currentPublicSeed(config), currentTranslationTasks(config));
   return {
     status: 200,
     headers: { "content-type": "application/xml; charset=utf-8", "cache-control": PUBLIC_CACHE },

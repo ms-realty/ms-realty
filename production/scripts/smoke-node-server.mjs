@@ -26,6 +26,7 @@ import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mj
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { approvedPublicSeedFixture } from "../test/approved-public-seed.fixture.mjs";
 
 function compactAdminLocaleResponse(response, { includeLocales = false } = {}) {
   return {
@@ -84,6 +85,7 @@ resetAuditLog(auditLogPath);
 resetSlugHistory(slugHistoryPath);
 const server = createNodeServer(
   createHttpApp({
+    seed: approvedPublicSeedFixture(),
     leadLedgerPath,
     replyOutboxPath,
     languageRequestPath,

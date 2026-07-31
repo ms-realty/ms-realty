@@ -10,6 +10,7 @@ import { readPublicContacts } from "../lib/public-contact-vault.mjs";
 import { readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { appApiConfigFromEnv, renderAppApiResponse } from "../lib/app-api-adapter.mjs";
+import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 function tempLedger(prefix, reset) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
@@ -37,6 +38,7 @@ test("API search preserves complete municipality results when engine hits are tr
   const calls = [];
   const config = appApiConfigFromEnv({
     ...process.env,
+    ...approvedPublicSeedFixtureEnv(),
     TYPESENSE_URL: "https://typesense.test",
     TYPESENSE_API_KEY: "typesense-key",
     MS_REALTY_EVENT_LEDGER_PATH: tempLedger("app-api-search-events", resetEventLedger),
@@ -115,6 +117,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   await withEnv(
     {
       MS_REALTY_CONSENT_LEDGER_PATH: consentLedgerPath,
+      ...approvedPublicSeedFixtureEnv(),
       MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: languageRequestPath,
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessPath,

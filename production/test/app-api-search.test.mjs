@@ -4,6 +4,7 @@ import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
 import { appApiConfigFromEnv, renderAppApiResponse } from "../lib/app-api-adapter.mjs";
+import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const hit = {
   id: "MS-CRAWL-0001:bg",
@@ -52,6 +53,7 @@ function searchConfig({ typesenseUrl = "", meiliUrl = "", naturalLanguageEnabled
     MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
     MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
     MS_REALTY_TRANSLATION_LEDGER_PATH: translationLedgerPath,
+    ...approvedPublicSeedFixtureEnv(),
     TYPESENSE_URL: typesenseUrl,
     TYPESENSE_API_KEY: typesenseUrl ? "typesense-test" : "",
     TYPESENSE_COLLECTION: "ms_realty_listings",

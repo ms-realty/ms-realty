@@ -325,9 +325,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             id: "next-admin-lead-test",
-            leadType: "buyer",
+            source: "website_consultation_request",
+            leadType: "renter",
             language: "he",
-            listingReference: "MS-CRAWL-0001",
             contact: { name: "Noa Levi", whatsapp: "+359880000001" },
             contact_preference: "whatsapp",
             message: "Interested in this property.",
@@ -429,7 +429,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-template-locale="he"/);
       assert.match(inboxHtml, /<details class="adm-lead-brief"/);
       assert.match(inboxHtml, /<details class="adm-lead-more">/);
-      assert.match(inboxHtml, /Максимальный бюджет \(€\), Срок решения/);
+      assert.match(inboxHtml, /Максимальный бюджет \(€\)/);
+      assert.match(inboxHtml, /Срок решения/);
       assert.match(inboxHtml, /История коммуникации/);
       assert.match(inboxHtml, /Внутренний номер заявки/);
       assert.match(inboxHtml, /Подтверждение · HE · WhatsApp/);
