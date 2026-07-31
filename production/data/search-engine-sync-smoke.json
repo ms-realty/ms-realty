@@ -22,13 +22,13 @@
           "method": "POST",
           "url": "http://typesense.local/collections",
           "status": 201,
-          "bytes": 2530
+          "bytes": 4929
         },
         {
           "method": "POST",
           "url": "http://typesense.local/collections/ms_realty_listings/documents/import?action=upsert",
           "status": 201,
-          "bytes": 776859
+          "bytes": 803256
         }
       ]
     },
@@ -41,13 +41,13 @@
           "method": "PATCH",
           "url": "http://meili.local/indexes/ms_realty_listings/settings",
           "status": 202,
-          "bytes": 873
+          "bytes": 1416
         },
         {
           "method": "POST",
           "url": "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id",
           "status": 201,
-          "bytes": 781863
+          "bytes": 808260
         }
       ]
     }
@@ -57,25 +57,25 @@
       "method": "POST",
       "url": "http://typesense.local/collections",
       "content_type": "application/json",
-      "bytes": 2530
+      "bytes": 4929
     },
     {
       "method": "POST",
       "url": "http://typesense.local/collections/ms_realty_listings/documents/import?action=upsert",
       "content_type": "application/x-ndjson",
-      "bytes": 776859
+      "bytes": 803256
     },
     {
       "method": "PATCH",
       "url": "http://meili.local/indexes/ms_realty_listings/settings",
       "content_type": "application/json",
-      "bytes": 873
+      "bytes": 1416
     },
     {
       "method": "POST",
       "url": "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id",
       "content_type": "application/x-ndjson",
-      "bytes": 781863
+      "bytes": 808260
     }
   ]
 }

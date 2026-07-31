@@ -13,7 +13,7 @@ x-app-environment: &app-environment
   MS_REALTY_LEAD_CONTACT_KEY: ${MS_REALTY_LEAD_CONTACT_KEY:?MS_REALTY_LEAD_CONTACT_KEY is required}
   TYPESENSE_URL: http://typesense:8108
   TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY is required}
-  TYPESENSE_COLLECTION: ms_realty_listings
+  TYPESENSE_COLLECTION: ${TYPESENSE_COLLECTION:-ms_realty_listings}
   MEILI_URL: http://meilisearch:7700
   MEILI_API_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
   MEILI_INDEX: ms_realty_listings
