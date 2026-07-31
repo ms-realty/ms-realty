@@ -5505,6 +5505,7 @@ function MigrationReviewBody({ page }) {
   const seoSources = ["search_console", "yandex_webmaster", "backlinks"];
   const launchBlockers = page.launchBlockers?.blockers || [];
   const launchStatus = page.launchBlockers?.status || "unknown";
+  const agencyQueue = page.agencyReviewQueue || { status: "complete", summary: { open_tasks: 0 }, lanes: [] };
   const launchActionCount = (page.launchBlockers?.blocked_gates || []).reduce(
     (count, gate) => count + (gate.next_actions || []).length,
     0,
@@ -5542,6 +5543,8 @@ function MigrationReviewBody({ page }) {
       "data-launch-blockers": launchBlockers.join(","),
       "data-launch-action-count": launchActionCount,
       "data-launch-readiness-endpoint": page.launchReadinessEndpoint,
+      "data-agency-review-status": agencyQueue.status,
+      "data-agency-review-open-tasks": agencyQueue.summary.open_tasks,
       "data-launch-readiness-export-endpoint": page.launchReadinessExportEndpoint,
       "data-launch-input-checklist-endpoint": page.launchInputChecklistEndpoint,
       "data-preflight-reports-endpoint": page.preflightReportsEndpoint,
@@ -5581,6 +5584,43 @@ function MigrationReviewBody({ page }) {
         ),
       ),
       h(StatGrid, { metrics }),
+      h(
+        Panel,
+        {
+          title: "Agency decision queue",
+          action: h(StatusPill, { tone: agencyQueue.status === "complete" ? "success" : "sun" }, agencyQueue.summary.open_tasks),
+          "data-agency-review-queue": "true",
+        },
+        h(
+          "p",
+          { className: "adm-note" },
+          "The platform may run in production review mode while these decisions remain open. Every public effect stays fail-closed until its lane is approved.",
+        ),
+        h(
+          "div",
+          { className: "adm-scroll-x" },
+          h(
+            "table",
+            { className: "crm-tbl" },
+            h("thead", null, h("tr", null, h("th", null, "Queue"), h("th", null, "Open"), h("th", null, "Owner"), h("th", null, "Safety boundary"), h("th", null, "Action"))),
+            h(
+              "tbody",
+              null,
+              ...agencyQueue.lanes.map((laneItem) =>
+                h(
+                  "tr",
+                  { key: laneItem.id, "data-agency-review-lane": laneItem.id },
+                  h("td", null, laneItem.title),
+                  h("td", null, h(StatusPill, { tone: laneItem.priority === "high" ? "brick" : "sun" }, laneItem.count)),
+                  h("td", null, laneItem.owner),
+                  h("td", null, laneItem.guardrail),
+                  h("td", null, h("a", { className: "mk-btn mk-btn--subtle mk-btn--sm", href: laneItem.admin_path }, "Review")),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
       h(
         Panel,
         { title: label(copy, "launchEvidence", "Launch evidence") },
