@@ -18,7 +18,7 @@ import {
 } from "../lib/hermes-provider-provisioning.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
 import { HERMES_NON_SENSITIVE_LISTING_TRANSLATION } from "../lib/hermes-draft-dispatch.mjs";
-import { fromRoot } from "../lib/paths.mjs";
+import { fromRoot, repoRelativePath } from "../lib/paths.mjs";
 import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
 
 function dispatchRow() {
@@ -217,7 +217,7 @@ test("Hermes draft worker uses the production audit log by default", async () =>
     generatedAt: "2026-07-06T00:00:00Z",
   });
 
-  assert.equal(report.audit_log_path, DEFAULT_AUDIT_LOG_PATH);
+  assert.equal(report.audit_log_path, repoRelativePath(DEFAULT_AUDIT_LOG_PATH));
 });
 
 test("Hermes draft worker report rejects generic runtime evidence", () => {

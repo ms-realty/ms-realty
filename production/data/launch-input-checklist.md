@@ -67,11 +67,11 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 ## Live Service Provisioning
 
 - Current report evidence:
-- typesense_meilisearch_sync: missing_report (path /Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-sync-report.json)
-- typesense_meilisearch_query: missing_report (path /Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-query-report.json)
-- hermes_draft_worker: missing_report (path /Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-draft-worker-report.json)
+- typesense_meilisearch_sync: missing_report (path production/data/search-engine-sync-report.json)
+- typesense_meilisearch_query: missing_report (path production/data/search-engine-query-report.json)
+- hermes_draft_worker: missing_report (path production/data/hermes-draft-worker-report.json)
 - Current provisioning evidence:
-- blocked_report (path /Users/ivan/Code/MS-Realty-content-audit/production/data/live-service-provisioning-report.json; missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
+- blocked_report (path production/data/live-service-provisioning-report.json; missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
 - Search engines: set `TYPESENSE_URL`, `TYPESENSE_API_KEY`, `MEILI_URL`, and `MEILI_API_KEY`.
 - Hermes Agent: set `HERMES_CHAT_COMPLETIONS_URL` to its internal `/v1/chat/completions` API and set `HERMES_API_KEY`; production Hermes evidence must be authenticated.
 - Hermes runtime: `npm run hermes:runtime` verifies its `/health` endpoint and authenticated `/v1/capabilities` response before any draft-worker evidence is accepted.
@@ -123,7 +123,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 ## Production Recovery
 
 - Current gate: blocked
-- Current evidence: missing_report (/Users/ivan/Code/MS-Realty-content-audit/production/data/production-recovery-report.json)
+- Current evidence: missing_report (production/data/production-recovery-report.json)
 - Private report: `production/data/production-recovery-report.json` (ignored)
 - Report example: `production/data/production-recovery-report.json.example`
 - Admin template endpoint: `GET /api/admin/production-recovery-template`
@@ -137,7 +137,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 ## Content Quality Warnings
 
 - Current review evidence:
-- missing_review (path /Users/ivan/Code/MS-Realty-content-audit/migration/reviews/listing-quality.csv; expected 165; reviewed 0; missing 165)
+- missing_review (path migration/reviews/listing-quality.csv; expected 165; reviewed 0; missing 165)
 - Pending review sample:
 - MS-CRAWL-0001: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0001
 - MS-CRAWL-0002: area_sqm|public_gallery (missing_area|thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0002
@@ -190,7 +190,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Monitoring sources: privacy_events: imported, search_console: missing_export, yandex_webmaster: missing_export, backlinks: missing_export
 - Rollback steps: 4
 - Current machine evidence:
-- missing (path /Users/ivan/Code/MS-Realty-content-audit/production/data/monitoring-rollback-report.json)
+- missing (path /Users/ivan/Code/MS-Realty-production-mainline/production/data/monitoring-rollback-report.json)
 - Private report: `production/data/monitoring-rollback-report.json` (ignored); template: `production/data/monitoring-rollback-report.json.example`.
 - Path override: `MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH`; validate it with `npm run monitoring:preflight`.
 - Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.

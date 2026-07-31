@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fromRoot } from "./paths.mjs";
+import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_PRODUCTION_RECOVERY_REPORT = fromRoot("production", "data", "production-recovery-report.json");
 export const DEFAULT_PRODUCTION_RECOVERY_REPORT_EXAMPLE = fromRoot(
@@ -100,16 +100,16 @@ export function assertProductionRecoveryReport(report) {
 }
 
 export function productionRecoveryState(reportPath = DEFAULT_PRODUCTION_RECOVERY_REPORT) {
-  if (!fs.existsSync(reportPath)) return { status: "missing_report", path: reportPath };
+  if (!fs.existsSync(reportPath)) return { status: "missing_report", path: repoRelativePath(reportPath) };
   try {
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
     if (report.example === true || reportPath.endsWith(".example")) {
-      return { status: "example_report", path: reportPath };
+      return { status: "example_report", path: repoRelativePath(reportPath) };
     }
     assertProductionRecoveryReport(report);
-    return { status: "pass", path: reportPath, report };
+    return { status: "pass", path: repoRelativePath(reportPath), report };
   } catch (error) {
-    return { status: "invalid_report", path: reportPath, error: error.message };
+    return { status: "invalid_report", path: repoRelativePath(reportPath), error: error.message };
   }
 }
 

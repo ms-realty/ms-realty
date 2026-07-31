@@ -41,3 +41,10 @@ test("Cloudflare Container forwards every production runtime binding", () => {
     assert.match(workerSource, new RegExp(`${binding}: this\\.env\\.${binding} \\?\\? ""`));
   }
 });
+
+test("Cloudflare Container refuses mutable app requests until durable runtime data exists", () => {
+  assert.match(workerSource, /const MUTATING_METHODS = new Set\(\["POST", "PUT", "PATCH", "DELETE"\]\);/);
+  assert.match(workerSource, /if \(MUTATING_METHODS\.has\(request\.method\)\) return ephemeralRuntimeDataResponse\(\);/);
+  assert.match(workerSource, /status: 503,/);
+  assert.match(workerSource, /"cache-control": "no-store"/);
+});

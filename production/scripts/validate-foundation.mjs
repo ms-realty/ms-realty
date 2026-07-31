@@ -24,6 +24,7 @@ import { assertHermesDraftWorkerReport } from "../lib/hermes-draft-worker.mjs";
 import { assertSearchEngineQueryReport, assertSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
 import { assertAppRouteFiles, assertAppRouteManifest } from "../lib/app-route-manifest.mjs";
 import { assertCmsCollections } from "../lib/cms-seed.mjs";
+import { assertTourApprovals } from "../lib/tours.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -1060,8 +1061,13 @@ const deal = JSON.parse(deals[0]);
 if (deal.testimonial_request?.status !== "open" || deal.referral_request?.status !== "open") {
   throw new Error("Deal artifact must contain testimonial and referral requests");
 }
-const tourApprovals = fs.readFileSync(fromRoot("production", "data", "tour-approvals.jsonl"), "utf8").trim().split("\n").filter(Boolean);
-if (tourApprovals.length !== 1) throw new Error("Tour approval artifact must contain one deterministic smoke row");
+const tourApprovals = fs
+  .readFileSync(fromRoot("production", "data", "tour-approvals.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+if (tourApprovals.length) assertTourApprovals(tourApprovals);
 const events = fs.readFileSync(fromRoot("production", "data", "events.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (events.length < 1) throw new Error("Event artifact must contain deterministic smoke rows");
 const searchAnalytics = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-analytics-report.json"), "utf8"));

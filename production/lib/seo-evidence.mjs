@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fromRoot } from "./paths.mjs";
+import { fromRoot, repoRelativePath } from "./paths.mjs";
 import { parseCsv } from "./csv.mjs";
 import {
   REQUIRED_EXPORTS,
@@ -33,12 +33,12 @@ const DEFAULT_EVENT_LEDGER_PATH = fromRoot("production", "data", "events.jsonl")
 function readExternalSource(source, inputDir) {
   const inputPath = path.join(/*turbopackIgnore: true*/ inputDir, SEO_EXPORTS[source]);
   if (!fs.existsSync(inputPath)) {
-    return { source, input_path: inputPath, status: "missing_export", rows: [], row_count: 0 };
+    return { source, input_path: repoRelativePath(inputPath), status: "missing_export", rows: [], row_count: 0 };
   }
   const rows = parseCsv(fs.readFileSync(inputPath, "utf8")).map((row) => normalizeExternalRow(source, row));
   return {
     source,
-    input_path: inputPath,
+    input_path: repoRelativePath(inputPath),
     status: rows.length ? "imported" : "empty_export",
     rows,
     row_count: rows.length,
@@ -152,7 +152,7 @@ export function buildSeoEvidence({
 
   sourceSummaries.privacy_events = {
     source: "privacy_events",
-    input_path: DEFAULT_EVENT_LEDGER_PATH,
+    input_path: repoRelativePath(DEFAULT_EVENT_LEDGER_PATH),
     status: events.length ? "imported" : "missing_export",
     ...joinPrivacyEvents(events, byKey, byListingReference),
   };

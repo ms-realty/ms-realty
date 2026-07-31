@@ -4,7 +4,7 @@
   "status": "blocked",
   "review": {
     "status": "missing_review",
-    "path": "/Users/ivan/Code/MS-Realty-content-audit/migration/reviews/listing-quality.csv",
+    "path": "migration/reviews/listing-quality.csv",
     "summary": {
       "expected_review_rows": 165,
       "review_rows": 0,

@@ -36,7 +36,7 @@ import {
   summarizeLegacyRouteDecisions,
   validateLegacyRouteDecisionArtifact,
 } from "./redirect-approvals.mjs";
-import { fromRoot } from "./paths.mjs";
+import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
 export const DEFAULT_LIVE_SERVICE_PREFLIGHT_REPORT = fromRoot("production", "data", "live-service-preflight-report.json");
@@ -894,7 +894,7 @@ function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_
   const { status, path: reportPath, summary, error, pending_review_sample: pendingReviewSample } = report.review;
   return {
     status,
-    path: reportPath,
+    path: repoRelativePath(reportPath),
     ...(summary ? { summary } : {}),
     ...(error ? { error } : {}),
     ...(pendingReviewSample ? { pending_review_sample: pendingReviewSample } : {}),
@@ -903,25 +903,25 @@ function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_
 }
 
 function reportStatus(source, filePath, assertReport) {
-  if (!fs.existsSync(filePath)) return { source, status: "missing_report", path: filePath };
+  if (!fs.existsSync(filePath)) return { source, status: "missing_report", path: repoRelativePath(filePath) };
   try {
     const report = readJson(filePath);
     assertReport(report);
     assertLiveServiceReportHasNoSecrets(report);
     if (report.example === true || filePath.endsWith(".example")) {
-      return { source, status: "example_report", path: filePath, summary: report.summary };
+      return { source, status: "example_report", path: repoRelativePath(filePath), summary: report.summary };
     }
     assertLiveServiceReportTimestamp(report);
     assertLaunchLiveServiceEvidence(source, report);
     return {
       source,
       status: "pass",
-      path: filePath,
+      path: repoRelativePath(filePath),
       summary: report.summary,
       evidence: liveServiceEvidenceSnapshot(source, report),
     };
   } catch (error) {
-    return { source, status: "invalid_report", path: filePath, error: error.message };
+    return { source, status: "invalid_report", path: repoRelativePath(filePath), error: error.message };
   }
 }
 
@@ -948,14 +948,14 @@ const PAYLOAD_RUNTIME_INVALID_REPORT_ACTIONS = [
 
 export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT) {
   if (!fs.existsSync(reportPath)) {
-    return { status: "missing_report", path: reportPath, next_actions: PAYLOAD_RUNTIME_MISSING_REPORT_ACTIONS };
+    return { status: "missing_report", path: repoRelativePath(reportPath), next_actions: PAYLOAD_RUNTIME_MISSING_REPORT_ACTIONS };
   }
   try {
     const report = readJson(reportPath);
     assertPayloadRuntimeReport(report);
     return {
       status: report.ready ? "pass" : "blocked_report",
-      path: reportPath,
+      path: repoRelativePath(reportPath),
       summary: report.summary,
       checks: report.checks,
       next_actions: report.next_actions,
@@ -963,7 +963,7 @@ export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT)
   } catch (error) {
     return {
       status: "invalid_report",
-      path: reportPath,
+      path: repoRelativePath(reportPath),
       error: error.message,
       next_actions: PAYLOAD_RUNTIME_INVALID_REPORT_ACTIONS,
     };

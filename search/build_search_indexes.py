@@ -28,6 +28,13 @@ LOCATION_REVIEWS = ROOT / "production" / "data" / "location-reviews.json"
 GEOGRAPHY_REGISTRY = ROOT / "production" / "data" / "geography-registry.json"
 
 
+def repo_relative_path(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
 LOCATION_PATTERNS = [
     ("Sandanski", re.compile(r"\b(sandanski|сандански)\b", re.I)),
     ("Bansko", re.compile(r"\b(bansko|банско)\b", re.I)),
@@ -623,11 +630,11 @@ def main() -> int:
     write_meili_settings(args.out_dir / "meilisearch-settings.json")
 
     summary = {
-        "artifact_dir": str(args.artifact_dir),
-        "locale_registry_path": str(locale_registry_path),
-        "listing_edits_path": str(listing_edits_path),
-        "location_reviews_path": str(location_reviews_path),
-        "geography_registry_path": str(geography_registry_path),
+        "artifact_dir": repo_relative_path(args.artifact_dir),
+        "locale_registry_path": repo_relative_path(locale_registry_path),
+        "listing_edits_path": repo_relative_path(listing_edits_path),
+        "location_reviews_path": repo_relative_path(location_reviews_path),
+        "geography_registry_path": repo_relative_path(geography_registry_path),
         "source_listing_count": len(source_docs),
         "index_document_count": len(index_docs),
         "domains": sorted({str(doc["domain"]) for doc in source_docs}),

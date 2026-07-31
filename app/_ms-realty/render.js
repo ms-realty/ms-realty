@@ -1,5 +1,6 @@
 export {
   renderAppFaviconResponse,
+  isAppSearchPath,
   renderAppRobotsResponse,
   renderAppSearchRouteResponse,
   renderAppRouteResponse,

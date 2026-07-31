@@ -13,7 +13,7 @@ import {
   hermesProviderConfigFromEnv,
 } from "./hermes-provider-provisioning.mjs";
 import { appendTranslationTask, auditPathFor, DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
-import { fromRoot } from "./paths.mjs";
+import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH = fromRoot("production", "data", "hermes-draft-worker-report.json");
 export const DEFAULT_HERMES_WORKER_SMOKE_REPORT_PATH = fromRoot("production", "data", "hermes-draft-worker-smoke.json");
@@ -393,9 +393,9 @@ export async function runHermesDraftWorker({
   return {
     generated_at: generatedAt,
     agent_runtime: agentRuntimeMetadata(),
-    ledger_path: filePath,
-    audit_path: resolvedAuditPath,
-    audit_log_path: auditLogPath || null,
+    ledger_path: repoRelativePath(filePath),
+    audit_path: repoRelativePath(resolvedAuditPath),
+    audit_log_path: repoRelativePath(auditLogPath) || null,
     audit_log_rows: auditLogRows.length,
     provider: {
       mode: providerMetadata.mode,

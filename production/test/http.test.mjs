@@ -494,7 +494,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       body: {
         id: "tour-approval-test",
         listingId: "MS-CRAWL-0001",
-        panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+        panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
         accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
         reviewer: "media_editor",
         reviewConfirmed: true,
@@ -1063,7 +1063,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
   assert.match(smoke.listingHtmlAfterTourApproval.body, /data-photo-sphere-viewer="psv-listing-tour"/);
-  assert.match(smoke.listingHtmlAfterTourApproval.body, /data-panorama-url="https:\/\/cdn\.example\.test\/tours\/MS-CRAWL-0001\.jpg"/);
+  assert.match(smoke.listingHtmlAfterTourApproval.body, /data-panorama-url="https:\/\/makler-realty\.com\/tours\/MS-CRAWL-0001\.jpg"/);
   assert.equal(smoke.mediaReview.status, 201);
   assert.equal(smoke.mediaReview.body.review_status, "approved_by_human");
   assert.equal(smoke.listingAfterMediaReview.body.body.media.floor_plans.length, 1);
@@ -2692,7 +2692,7 @@ test("HTTP public approval handlers bind reviewers and require confirmation", as
     const tour = {
       id: "credentialed-tour-approval",
       listingId: "MS-CRAWL-0001",
-      panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+      panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
       accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
       reviewConfirmed: true,
     };

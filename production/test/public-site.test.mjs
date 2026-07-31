@@ -158,6 +158,25 @@ test("approved 360 tours retain a public gallery fallback when the viewer cannot
  assert.match(html, /ld-tour__fallback/);
 });
 
+test("approved Supersplat tours link to the self-hosted viewer without loading the panorama viewer", () => {
+  const page = renderListingPage({ registry, listing, localeCode: "en" });
+  page.body.media.tour = {
+    available: true,
+    provider: "supersplat-viewer",
+    viewer_url: "https://makler-realty.com/tours/MS-CRAWL-0001/index.html",
+    accessibility_caption: "Reviewed 3D tour of the property.",
+    fallback_gallery: [page.body.media.gallery[0]],
+  };
+  const html = renderReactPublicBody(page);
+
+  assert.match(html, /data-tour-provider="supersplat-viewer"/);
+  assert.match(html, /href="https:\/\/makler-realty\.com\/tours\/MS-CRAWL-0001\/index\.html" target="_blank" rel="noopener" data-supersplat-viewer-link="true"/);
+  assert.match(html, /data-tour-gallery-fallback="true"/);
+  assert.match(html, /href="#listing-gallery"/);
+  assert.doesNotMatch(html, /data-photo-sphere-viewer=/);
+  assert.doesNotMatch(html, /data-panorama-url=/);
+});
+
 test("approved broker contact data enables direct listing contact links", () => {
   const page = renderListingPage({
     registry,

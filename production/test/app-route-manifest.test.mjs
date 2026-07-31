@@ -137,6 +137,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(listing.html, /<dl data-listing-facts="true">/);
   assert.match(listing.html, /aria-label="מדיית נכס"/);
   assert.match(listing.html, /data-media-gallery-count=/);
+  assert.match(listing.html, /data-tour-status="needs_panorama_upload"/);
   assert.match(listing.html, /data-listing-action="back_to_results"/);
   assert.equal((listing.html.match(/<[^>]+data-compact-mobile-action="true"/g) || []).length, 3);
   assert.match(listing.html, /href="\/he\/search"/);
@@ -228,6 +229,21 @@ test("dedicated localized search renderer preserves configured engine hits", asy
   assert.equal(search.rendered.search.backend.engine, "typesense");
   assert.deepEqual(search.rendered.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
   assert.match(search.html, /MS-CRAWL-0001/);
+});
+
+test("localized Next catch-all delegates configured search paths to the fail-closed search adapter", async () => {
+  const previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = "production";
+  try {
+    const { GET } = await import("../../app/[locale]/[...slug]/route.js");
+    const response = await GET(new Request("https://example.test/bg/tarsene?q=Sandanski"));
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { kind: "search_unavailable", message: "Search is temporarily unavailable" });
+    assert.equal(response.headers.get("cache-control"), "no-store");
+  } finally {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previousNodeEnv;
+  }
 });
 
 test("App Router adapter honors mounted public listing edit ledger", () => {
