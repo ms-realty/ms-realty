@@ -184,6 +184,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
     "app-admin-live-service-provisioning",
     fs.readFileSync("production/data/live-service-provisioning-report.json", "utf8"),
   );
+  const monitoringRollbackReportPath = `${seoEvidenceInputDir}/monitoring-rollback-report.json`;
   const payloadRuntimeReportPath = `${seoEvidenceInputDir}/payload-runtime-report.json`;
   const productionRecoveryReportPath = `${seoEvidenceInputDir}/production-recovery-report.json`;
   const listingQualityReviewPath = `${seoEvidenceInputDir}/listing-quality.csv`;
@@ -214,6 +215,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveServiceProvisioningReportPath,
+      MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: monitoringRollbackReportPath,
       MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: payloadRuntimeReportPath,
       MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryReportPath,
       MS_REALTY_RECEIVED_AT: "2026-07-04T00:00:00Z",
@@ -667,6 +669,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(
         launchReadinessBody.gates.find((gate) => gate.id === "live_services").evidence.provisioning.path,
         liveServiceProvisioningReportPath,
+      );
+      assert.equal(
+        launchReadinessBody.gates.find((gate) => gate.id === "monitoring_rollback").evidence.machine_evidence.path,
+        monitoringRollbackReportPath,
       );
 
       const launchChecklist = await launchInputChecklistRoute.GET(

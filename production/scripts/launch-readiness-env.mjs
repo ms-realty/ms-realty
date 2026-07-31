@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { liveServiceReports, payloadRuntimeState } from "../lib/launch-readiness.mjs";
 import { liveServiceProvisioningState } from "../lib/live-service-provisioning.mjs";
+import { monitoringRollbackState } from "../lib/monitoring-rollback.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { productionRecoveryState } from "../lib/production-recovery.mjs";
 import { DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT, summarizeDeployableRedirects } from "../lib/redirect-approvals.mjs";
@@ -51,6 +52,9 @@ export function launchReadinessInputsFromEnv(env = process.env) {
   }
   if (env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH) {
     inputs.productionRecovery = productionRecoveryState(env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH);
+  }
+  if (env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH) {
+    inputs.monitoringRollback = monitoringRollbackState(env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH);
   }
   return inputs;
 }

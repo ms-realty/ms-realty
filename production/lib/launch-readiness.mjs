@@ -22,6 +22,7 @@ import {
   DEFAULT_PAYLOAD_RUNTIME_REPORT,
 } from "./payload-runtime.mjs";
 import { assertProductionRecoveryReport, productionRecoveryState } from "./production-recovery.mjs";
+import { assertMonitoringRollbackReport, monitoringRollbackState } from "./monitoring-rollback.mjs";
 import {
   REQUIRED_EXPORTS,
   assertSeoEvidence,
@@ -130,7 +131,8 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   ],
   monitoring_rollback: [
     "Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.",
-    "Confirm rollback steps cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.",
+    "Mount a current redacted monitoring and rollback report, then run npm run monitoring:preflight.",
+    "Confirm the automated rollback policy, canary, and isolated drill cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.",
   ],
   production_app_layer: [
     "Keep the production Node adapter wired and rebuild the app layer readiness report.",
@@ -811,6 +813,11 @@ function assertPassMonitoringRollbackEvidence(report) {
   ) {
     throw new Error("Launch readiness monitoring rollback requires privacy monitoring and rollback evidence");
   }
+  const machineEvidence = monitoring.evidence?.machine_evidence;
+  if (machineEvidence?.status !== "pass" || !machineEvidence.path || !machineEvidence.report) {
+    throw new Error("Launch readiness monitoring rollback requires a current machine evidence report");
+  }
+  assertMonitoringRollbackReport(machineEvidence.report);
 }
 
 function assertPassProductionRecoveryEvidence(report) {
@@ -1126,6 +1133,7 @@ export function buildLaunchReadinessReport({
   appState = packageState(),
   payloadRuntime = payloadRuntimeState(),
   productionRecovery = productionRecoveryState(),
+  monitoringRollback = monitoringRollbackState(),
 } = {}) {
   assertSeoEvidence(seoEvidence);
   const seoPreflight = buildSeoEvidencePreflightReportFromEvidence(seoEvidence);
@@ -1175,6 +1183,7 @@ export function buildLaunchReadinessReport({
     "Use migration review queue owners to triage failed old URLs before broad redirects.",
   ];
   const monitoringReady = monitoringPlan.every((item) => item.status === "imported");
+  const monitoringRollbackReady = monitoringRollback.status === "pass";
   const rollbackReady = rollbackPlan.length >= 3;
   const expectedSitemapEntries =
     sitemap.summary.home_pages +
@@ -1267,14 +1276,17 @@ export function buildLaunchReadinessReport({
     ),
     gate(
       "monitoring_rollback",
-      monitoringReady && rollbackReady ? "pass" : "blocked",
+      monitoringReady && rollbackReady && monitoringRollbackReady ? "pass" : "blocked",
       {
         monitoring_sources: monitoringPlan.map((item) => item.source),
         monitoring_source_statuses: Object.fromEntries(monitoringPlan.map((item) => [item.source, item.status])),
         privacy_events_status: monitoringPlan.find((item) => item.source === "privacy_events")?.status,
         rollback_steps: rollbackPlan.length,
+        machine_evidence: monitoringRollback,
       },
-      monitoringReady && rollbackReady ? "" : "Monitoring evidence and rollback steps are required before launch.",
+      monitoringReady && rollbackReady && monitoringRollbackReady
+        ? ""
+        : "Monitoring evidence, an automated rollback report, and rollback steps are required before launch.",
     ),
     gate(
       "production_app_layer",

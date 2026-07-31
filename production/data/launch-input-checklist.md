@@ -17,7 +17,8 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - live_services: Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.
 - live_services: Import or mount the three live service reports, then run npm run live:preflight before launch.
 - monitoring_rollback: Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.
-- monitoring_rollback: Confirm rollback steps cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.
+- monitoring_rollback: Mount a current redacted monitoring and rollback report, then run npm run monitoring:preflight.
+- monitoring_rollback: Confirm the automated rollback policy, canary, and isolated drill cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.
 - payload_runtime: Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.
 - payload_runtime: Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.
 - production_recovery: Complete an encrypted off-site backup and isolated restore drill using production data stores.
@@ -188,7 +189,13 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Admin endpoint: `GET /api/admin/launch-readiness`
 - Monitoring sources: privacy_events: imported, search_console: missing_export, yandex_webmaster: missing_export, backlinks: missing_export
 - Rollback steps: 4
-- Launch rule: verify monitoring exports before cutover and keep rollback steps available through the first post-launch crawl window.
+- Current machine evidence:
+- missing (path /Users/ivan/Code/MS-Realty-content-audit/production/data/monitoring-rollback-report.json)
+- Private report: `production/data/monitoring-rollback-report.json` (ignored); template: `production/data/monitoring-rollback-report.json.example`.
+- Path override: `MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH`; validate it with `npm run monitoring:preflight`.
+- Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.
+- Release attestation: after every existing gate passes, set `MS_REALTY_RELEASE_SHA`, the mounted evidence paths, and the private signing key; run `npm run launch:evidence:capture`, then `npm run launch:evidence:verify` on the exact release SHA.
+- Launch rule: an evidence bundle records validated inputs; it does not create human listing reviews, SEO exports, broker approval, or production readiness.
 
 ## Validate After Inputs
 
@@ -205,6 +212,7 @@ npm run live:provisioning:preflight
 npm run live:capture
 npm run live:report
 npm run live:preflight
+npm run monitoring:preflight
 npm run payload:bootstrap
 npm run payload:runtime
 npm run payload:preflight
@@ -213,4 +221,6 @@ npm run listing:preflight
 npm run launch:readiness
 npm run launch:inputs
 npm run launch:preflight
+npm run launch:evidence:capture
+npm run launch:evidence:verify
 ```

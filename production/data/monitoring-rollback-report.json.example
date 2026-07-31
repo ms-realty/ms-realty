@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "example": true,
+  "generated_at": "2026-07-31T10:30:00.000Z",
+  "environment": "production",
+  "ready": false,
+  "release_id": "replace-with-production-release-id",
+  "monitoring": {
+    "provider": "replace-with-monitoring-provider",
+    "provider_run_id": "replace-with-monitor-run-id",
+    "endpoints": [
+      {
+        "url": "https://replace-with-public-health-endpoint.example/health",
+        "status": "pass",
+        "checked_at": "2026-07-31T10:25:00.000Z"
+      }
+    ]
+  },
+  "alert_delivery": {
+    "status": "pass",
+    "delivered_at": "2026-07-31T10:26:00.000Z"
+  },
+  "rollback": {
+    "automatic_policy_id": "replace-with-automatic-rollback-policy-id",
+    "canary": {
+      "run_id": "replace-with-canary-run-id",
+      "release_id": "replace-with-production-release-id",
+      "status": "pass",
+      "checked_at": "2026-07-31T10:27:00.000Z"
+    },
+    "drill": {
+      "drill_id": "replace-with-isolated-rollback-drill-id",
+      "release_id": "replace-with-production-release-id",
+      "status": "pass",
+      "target": "isolated",
+      "rollback_procedure_verified": true,
+      "verified_at": "2026-07-31T10:28:00.000Z"
+    }
+  }
+}

@@ -458,10 +458,57 @@ const readyProductionRecovery = {
     approval: { status: "approved", reviewer: "agency_owner", approved_at: "2026-07-04T23:30:00.000Z" },
   },
 };
+const readyMonitoringRollback = {
+  status: "pass",
+  path: "production/data/monitoring-rollback-report.json",
+  report: {
+    schema_version: 1,
+    generated_at: "2026-07-05T00:00:00.000Z",
+    environment: "production",
+    ready: true,
+    release_id: "release-20260705-001",
+    monitoring: {
+      provider: "production-monitor",
+      provider_run_id: "monitor-run-20260705-001",
+      endpoints: [{ url: "https://status.ms-realty.bg/health", status: "pass", checked_at: "2026-07-04T23:55:00.000Z" }],
+    },
+    alert_delivery: { status: "pass", delivered_at: "2026-07-04T23:56:00.000Z" },
+    rollback: {
+      automatic_policy_id: "rollback-policy-prod-001",
+      canary: {
+        run_id: "canary-20260705-001",
+        release_id: "release-20260705-001",
+        status: "pass",
+        checked_at: "2026-07-04T23:57:00.000Z",
+      },
+      drill: {
+        drill_id: "rollback-drill-20260705-001",
+        release_id: "release-20260705-001",
+        status: "pass",
+        target: "isolated",
+        rollback_procedure_verified: true,
+        verified_at: "2026-07-04T23:58:00.000Z",
+      },
+    },
+  },
+};
 
 function writeProductionRecoveryFixture(dir) {
   const reportPath = `${dir}/production-recovery-report.json`;
   writeJson(reportPath, readyProductionRecovery.report);
+  return reportPath;
+}
+
+function writeMonitoringRollbackFixture(dir) {
+  const reportPath = `${dir}/monitoring-rollback-report.json`;
+  const generatedAt = new Date().toISOString();
+  const report = structuredClone(readyMonitoringRollback.report);
+  report.generated_at = generatedAt;
+  report.monitoring.endpoints[0].checked_at = generatedAt;
+  report.alert_delivery.delivered_at = generatedAt;
+  report.rollback.canary.checked_at = generatedAt;
+  report.rollback.drill.verified_at = generatedAt;
+  writeJson(reportPath, report);
   return reportPath;
 }
 
@@ -777,6 +824,7 @@ test("launch readiness validator accepts ready state after required gates are cl
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    monitoringRollback: readyMonitoringRollback,
   });
 
   assert.equal(assertLaunchReadinessReport(report), true);
@@ -883,6 +931,7 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    monitoringRollback: readyMonitoringRollback,
   });
   const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
   seoGate.evidence.sources.search_console.signal_rows = 0;
@@ -1283,6 +1332,7 @@ test("launch readiness blocks live services until provisioning passes", () => {
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    monitoringRollback: readyMonitoringRollback,
   });
 
   const liveGate = report.gates.find((gate) => gate.id === "live_services");
@@ -1300,14 +1350,30 @@ test("launch readiness validator rejects weak production app layer pass evidence
 });
 
 test("launch readiness validator rejects weak monitoring rollback pass evidence", () => {
+  const routeMap = completeRouteMap();
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
     seoEvidence: readySeoEvidenceFixture(),
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
+    monitoringRollback: readyMonitoringRollback,
   });
   const monitoringGate = report.gates.find((gate) => gate.id === "monitoring_rollback");
-  monitoringGate.evidence.monitoring_source_statuses.search_console = "missing_export";
+  monitoringGate.evidence.machine_evidence = {
+    ...readyMonitoringRollback,
+    report: { ...readyMonitoringRollback.report, rollback: { ...readyMonitoringRollback.report.rollback, canary: { status: "fail" } } },
+  };
 
-  assert.throws(() => assertLaunchReadinessReport(report), /imported source evidence/);
+  assert.throws(() => assertLaunchReadinessReport(report), /passing canary run/);
 });
 
 test("launch readiness validator rejects weak listing quality pass evidence", () => {
@@ -1330,6 +1396,7 @@ test("launch readiness validator rejects weak listing quality pass evidence", ()
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    monitoringRollback: readyMonitoringRollback,
   });
 
   const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
@@ -1376,6 +1443,7 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    monitoringRollback: readyMonitoringRollback,
   });
 
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
@@ -1405,6 +1473,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    monitoringRollback: readyMonitoringRollback,
   });
   assert.equal(homepageReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(homepageReport.blockers, ["redirect_reviews"]);
@@ -1422,6 +1491,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    monitoringRollback: readyMonitoringRollback,
   });
   assert.equal(duplicateReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(duplicateReport.blockers, ["redirect_reviews"]);
@@ -1599,6 +1669,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   const livePaths = writeLiveReportFixtures(liveDir);
   const liveProvisioningPath = await writeLiveProvisioningFixture(liveDir);
   const productionRecoveryPath = writeProductionRecoveryFixture(liveDir);
+  const monitoringRollbackPath = writeMonitoringRollbackFixture(liveDir);
   const ready = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
@@ -1611,6 +1682,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
       MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryPath,
+      MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: monitoringRollbackPath,
     },
   });
 
@@ -1641,6 +1713,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
       MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryPath,
+      MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: monitoringRollbackPath,
     },
   });
   assert.notEqual(readyFromSeoOutput.status, 0);
@@ -1670,6 +1743,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
   const livePaths = writeLiveReportFixtures(liveDir);
   const liveProvisioningPath = await writeLiveProvisioningFixture(liveDir);
   const productionRecoveryPath = writeProductionRecoveryFixture(liveDir);
+  const monitoringRollbackPath = writeMonitoringRollbackFixture(liveDir);
   const checklistPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-checklist-`)}/launch-inputs.md`;
   const ready = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-launch-input-checklist.mjs")], {
     cwd: fromRoot(),
@@ -1683,6 +1757,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
       MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryPath,
+      MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: monitoringRollbackPath,
       MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH: checklistPath,
     },
   });

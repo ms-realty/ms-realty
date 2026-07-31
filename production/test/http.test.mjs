@@ -2163,12 +2163,14 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     "redirect_reviews",
     "listing_quality_review",
     "live_services",
+    "monitoring_rollback",
     "payload_runtime",
     "production_recovery",
   ]);
   assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
   assert.equal(launch.body.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "live_services").status, "blocked");
+  assert.equal(launch.body.gates.find((gate) => gate.id === "monitoring_rollback").evidence.machine_evidence.status, "missing");
   assert.equal(launch.body.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.equal(launchExportUnauthorized.status, 401);
   assert.equal(launchExport.status, 201);
@@ -2177,6 +2179,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     "redirect_reviews",
     "listing_quality_review",
     "live_services",
+    "monitoring_rollback",
     "payload_runtime",
     "production_recovery",
   ]);
@@ -2231,7 +2234,12 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(hermesWorkerReportPath), true);
   assert.equal(fs.existsSync(liveServiceProvisioningReportPath), true);
   assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
-  assert.deepEqual(launchAfterLive.body.blockers, ["redirect_reviews", "listing_quality_review", "production_recovery"]);
+  assert.deepEqual(launchAfterLive.body.blockers, [
+    "redirect_reviews",
+    "listing_quality_review",
+    "monitoring_rollback",
+    "production_recovery",
+  ]);
   assert.equal(launchAfterLive.body.status, "blocked");
 });
 

@@ -1,5 +1,26 @@
 import { assertLaunchReadinessReport, buildLaunchReadinessReport, launchBlockerSummary } from "../lib/launch-readiness.mjs";
+import {
+  assertLaunchEvidenceBundle,
+  readLaunchEvidenceBundle,
+  REQUIRED_LAUNCH_EVIDENCE_ARTIFACT_IDS,
+} from "../lib/launch-evidence.mjs";
 import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
+
+function verifyAttestedEvidence(env) {
+  const bundlePath = String(env.MS_REALTY_LAUNCH_EVIDENCE_BUNDLE_PATH || "").trim();
+  if (!bundlePath) return;
+  const signingKey = String(env.MS_REALTY_EVIDENCE_SIGNING_KEY || "");
+  if (signingKey.length < 32) throw new Error("MS_REALTY_EVIDENCE_SIGNING_KEY must be at least 32 characters");
+  const expectedCommitSha = String(env.MS_REALTY_RELEASE_SHA || env.GITHUB_SHA || "").trim();
+  if (!expectedCommitSha) throw new Error("MS_REALTY_RELEASE_SHA or GITHUB_SHA is required with a launch evidence bundle");
+  const bundle = readLaunchEvidenceBundle(bundlePath);
+  assertLaunchEvidenceBundle(bundle, {
+    signingKey,
+    expectedCommitSha,
+    requiredArtifactIds: REQUIRED_LAUNCH_EVIDENCE_ARTIFACT_IDS,
+  });
+  console.log(`Launch evidence verified for ${bundle.commit_sha} (${bundle.artifacts.length} artifacts)`);
+}
 
 function blockerDetails(report) {
   return report.gates
@@ -31,6 +52,13 @@ function blockerActions(report) {
   return launchBlockerSummary(report).blocked_gates.flatMap((gate) =>
     gate.next_actions.map((action) => `${gate.id} next: ${action}`),
   );
+}
+
+try {
+  verifyAttestedEvidence(process.env);
+} catch (error) {
+  console.error(`LAUNCH EVIDENCE VERIFY FAILED: ${error.message}`);
+  process.exit(1);
 }
 
 const report = buildLaunchReadinessReport(launchReadinessInputsFromEnv());
