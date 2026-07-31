@@ -76,6 +76,10 @@ function currentRegistry(config) {
   return readThroughCached(filePath, () => loadLocaleRegistry(filePath));
 }
 
+export function isAppSearchPath({ pathname, config = appRouterConfigFromEnv() } = {}) {
+  return Boolean(pathname && searchLocaleFor(currentRegistry(config), pathname));
+}
+
 function currentSeed(config) {
   const seed = readThroughCached(config.cmsSeedPath, () => loadCmsSeed(config.cmsSeedPath));
   return applyMediaReviews(

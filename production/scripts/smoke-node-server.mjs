@@ -164,7 +164,7 @@ try {
       body: JSON.stringify({
         id: "tour-approval-server-MS-CRAWL-0001",
         listingId: "MS-CRAWL-0001",
-        panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+        panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
         accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
         reviewer: "media_editor",
         reviewConfirmed: true,

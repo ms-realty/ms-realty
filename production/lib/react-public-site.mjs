@@ -2461,14 +2461,14 @@ function ListingBody({ page }) {
             h("p", { className: "ld-desc", "data-listing-description": "true", lang: contentLocale }, page.body.description || ""),
           ),
           hasDetailFacts ? h("div", { className: "ld-sec" }, h("h2", null, labels.listingMediaFacts), factsList(facts, labels, page.locale)) : null,
-          tour.available || floorPlans.length || videos.length
+          gallery.length || tour.available || floorPlans.length || videos.length
             ? h(
                 "nav",
                 {
                   className: "mk-tabs mk-tabs--segmented ld-media-nav",
                   "aria-label": labels.listingMedia,
                   "data-media-gallery-count": page.body.media.gallery_count || 0,
-                  "data-tour-status": "available",
+                  "data-tour-status": tour.available ? "available" : tour.review_status || "review_required",
                 },
                 gallery.length
                   ? h(

@@ -59,7 +59,7 @@ export function buildMobileElderlyQaReport({
     ...listing,
     tour: createTourField({
       listingId: listing.id,
-      panoramaUrl: "https://media.example.test/ms-realty/mobile-qa-tour.jpg",
+      panoramaUrl: "https://makler-realty.com/tours/mobile-qa-tour.jpg",
       accessibilityCaption: "Reviewed 360 panorama with a gallery fallback.",
       isPublic: true,
       media: [
