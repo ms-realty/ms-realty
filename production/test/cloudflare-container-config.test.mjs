@@ -110,7 +110,8 @@ test("Cloudflare Container allows only configured durable case-authority writes"
 });
 
 test("main deploys automatically with image-marker rollback", () => {
-  assert.match(ciWorkflow, /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/);
+  assert.match(ciWorkflow, /workflow_dispatch:/);
+  assert.match(ciWorkflow, /github\.ref == 'refs\/heads\/main'.*github\.event_name == 'workflow_dispatch'/);
   assert.match(ciWorkflow, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
@@ -148,5 +149,8 @@ test("successful exact-head CI runs merge without a review gate", () => {
   assert.match(autoMergeWorkflow, /pull\.base\.sha !== reference\.base\.sha/);
   assert.match(autoMergeWorkflow, /github\.rest\.pulls\.updateBranch/);
   assert.match(autoMergeWorkflow, /merge_method: "squash"/);
+  assert.match(autoMergeWorkflow, /actions: write/);
+  assert.match(autoMergeWorkflow, /github\.rest\.actions\.createWorkflowDispatch/);
+  assert.match(autoMergeWorkflow, /workflow_id: "ci\.yml"/);
   assert.doesNotMatch(autoMergeWorkflow, /reviews|reviewers|approved/i);
 });
