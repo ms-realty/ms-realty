@@ -57,6 +57,23 @@ test("local Docker startup recreates the edge after an app update", () => {
   assert.match(script, /\["up", "--detach", "--wait", "--no-deps", "--force-recreate", "edge"\]/);
 });
 
+test("production review reuses the tested stack with durable volumes and an authenticated noindex edge", () => {
+  const compose = fs.readFileSync(fromRoot("production", "docker-compose.production-review.yml"), "utf8");
+  const caddy = fs.readFileSync(fromRoot("production", "Caddyfile.production-review"), "utf8");
+  const script = fs.readFileSync(fromRoot("production", "scripts", "local-production.mjs"), "utf8");
+
+  assert.match(compose, /name: ms-realty-production-review/);
+  assert.match(compose, /MS_REALTY_ADMIN_ACTOR: \$\{MS_REALTY_ADMIN_ACTOR:-agency_admin\}/);
+  assert.match(compose, /name: ms-realty-production-review-runtime-data/);
+  assert.match(compose, /name: ms-realty-production-review-postgres/);
+  assert.match(compose, /- "443:443"/);
+  assert.match(caddy, /basic_auth \{/);
+  assert.match(caddy, /X-Robots-Tag "noindex, nofollow, noarchive"/);
+  assert.match(caddy, /header_up Authorization "Bearer \{\$MS_REALTY_ADMIN_TOKEN\}"/);
+  assert.match(script, /MS_REALTY_COMPOSE_OVERRIDE/);
+  assert.match(script, /MS_REALTY_ENV_FILE/);
+});
+
 test("local recovery is explicit, checksummed, and takes a rollback snapshot", () => {
   const script = fs.readFileSync(fromRoot("production", "scripts", "local-production.mjs"), "utf8");
   const packageJson = JSON.parse(fs.readFileSync(fromRoot("package.json"), "utf8"));

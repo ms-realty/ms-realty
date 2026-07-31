@@ -14,7 +14,10 @@ import {
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const composeFile = path.join(root, "production", "docker-compose.local-production.yml");
-const envFile = path.join(root, ".env.local-production");
+const composeOverride = String(process.env.MS_REALTY_COMPOSE_OVERRIDE || "").trim();
+const composeFiles = [composeFile, ...(composeOverride ? [path.resolve(root, composeOverride)] : [])];
+const composeFileArgs = composeFiles.flatMap((file) => ["-f", file]);
+const envFile = path.resolve(root, process.env.MS_REALTY_ENV_FILE || ".env.local-production");
 const command = process.argv[2] || "status";
 const commandArgs = process.argv.slice(3);
 const HERMES_AGENT_ENV_KEYS = ["HERMES_AGENT_API_SERVER_KEY", "HERMES_AGENT_MODEL", "HERMES_AGENT_LLM_BASE_URL", "HERMES_AGENT_LLM_API_KEY"];
@@ -79,7 +82,7 @@ function parseEnv(contents) {
 function compose(args, { allowFailure = false, envOverrides = {} } = {}) {
   const result = spawnSync(
     "docker",
-    ["compose", "--env-file", envFile, "-f", composeFile, ...args],
+    ["compose", "--env-file", envFile, ...composeFileArgs, ...args],
     { cwd: root, stdio: "inherit", env: { ...process.env, ...envOverrides } },
   );
   if (result.error) throw result.error;
@@ -90,7 +93,7 @@ function compose(args, { allowFailure = false, envOverrides = {} } = {}) {
 function composeCapture(args, { input, encoding = "utf8", envOverrides = {} } = {}) {
   const result = spawnSync(
     "docker",
-    ["compose", "--env-file", envFile, "-f", composeFile, ...args],
+    ["compose", "--env-file", envFile, ...composeFileArgs, ...args],
     {
       cwd: root,
       env: { ...process.env, ...envOverrides },
