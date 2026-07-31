@@ -1,0 +1,39 @@
+name: ms-realty-production-review
+
+services:
+  app:
+    environment:
+      MS_REALTY_ADMIN_ACTOR: ${MS_REALTY_ADMIN_ACTOR:-agency_admin}
+      MS_REALTY_PUBLIC_CONTACT_KEY: ${MS_REALTY_PUBLIC_CONTACT_KEY:?MS_REALTY_PUBLIC_CONTACT_KEY is required}
+      MS_REALTY_PUBLIC_ORIGIN: https://${MS_REALTY_REVIEW_HOST:?MS_REALTY_REVIEW_HOST is required}
+      MS_REALTY_MCP_ALLOWED_ORIGINS: https://${MS_REALTY_REVIEW_HOST}
+
+  edge:
+    environment:
+      MS_REALTY_REVIEW_HOST: ${MS_REALTY_REVIEW_HOST}
+      MS_REALTY_REVIEW_USER: ${MS_REALTY_REVIEW_USER:?MS_REALTY_REVIEW_USER is required}
+      MS_REALTY_REVIEW_PASSWORD_HASH: ${MS_REALTY_REVIEW_PASSWORD_HASH:?MS_REALTY_REVIEW_PASSWORD_HASH is required}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile.production-review:/etc/caddy/Caddyfile:ro
+
+volumes:
+  payload-postgres-data:
+    name: ms-realty-production-review-postgres
+  typesense-data:
+    name: ms-realty-production-review-typesense
+  meilisearch-data:
+    name: ms-realty-production-review-meilisearch
+  local-dev-app-data:
+    name: ms-realty-production-review-runtime-data
+  runtime-evidence:
+    name: ms-realty-production-review-runtime-evidence
+  hermes-agent-data:
+    name: ms-realty-production-review-hermes
+  caddy-data:
+    name: ms-realty-production-review-caddy-data
+  caddy-config:
+    name: ms-realty-production-review-caddy-config

@@ -1666,6 +1666,11 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.cmsCollectionsEndpoint, "/api/admin/cms-collections");
   assert.equal(review.body.payloadCollectionsEndpoint, "/api/admin/payload-collections");
   assert.equal(review.body.listingQualityEndpoint, "/api/admin/listing-quality");
+  assert.equal(review.body.agencyReviewQueue.deployment_mode, "production_review");
+  assert.equal(review.body.agencyReviewQueue.review_after_deploy, true);
+  assert.equal(review.body.agencyReviewQueue.public_launch_ready, false);
+  assert.ok(review.body.agencyReviewQueue.summary.open_tasks > 0);
+  assert.equal(review.body.agencyReviewQueue.guardrails.unreviewed_translation_indexing, "blocked");
   assert.ok(review.body.launchBlockers.blockers.includes("redirect_reviews"));
   assert.ok(review.body.launchBlockers.blockers.includes("external_seo_exports"));
   assert.ok(review.body.launchBlockers.blockers.includes("listing_quality_review"));
@@ -1717,6 +1722,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
   assert.equal(reviewHtml.body.includes('data-payload-collections-endpoint="/api/admin/payload-collections"'), true);
   assert.equal(reviewHtml.body.includes('data-listing-quality-endpoint="/api/admin/listing-quality"'), true);
+  assert.equal(reviewHtml.body.includes('data-agency-review-queue="true"'), true);
+  assert.equal(reviewHtml.body.includes('data-agency-review-status="open"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-workbook-endpoint="/api/admin/listing-quality-workbook"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-review-draft-endpoint="/api/admin/listing-quality-review-draft"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-import-endpoint="/api/admin/listing-quality/import"'), true);

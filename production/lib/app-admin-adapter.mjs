@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
+import { buildAgencyReviewQueue } from "./agency-review-queue.mjs";
 import {
   assertAgentRealtyCaseConditionMutation,
   assertAgentRealtyCaseMutation,
@@ -143,6 +144,7 @@ import {
   validateListingQualityReviewCsv,
   writeListingQualityReviewCsv,
 } from "./listing-quality.mjs";
+import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
@@ -226,6 +228,7 @@ import {
   createTourApproval,
   readTourApprovals,
 } from "./tours.mjs";
+import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import {
   DEFAULT_TRANSLATION_LEDGER_PATH,
   appendTranslationTask,
@@ -1174,6 +1177,19 @@ function migrationReviewPayload(registry, url, config) {
   const pendingRoutesWithEvidence = reviewSelection.rows.slice((routePage - 1) * routePageSize, routePage * routePageSize);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
   const readiness = launchReadiness(config);
+  const seoEvidence = seoEvidencePayload(currentSeoEvidence(config));
+  const listingQuality = currentListingQualityReviewQueue(config, { generatedAt: config.reviewedAt });
+  const listingVerification = buildListingVerificationReport({
+    seed: currentSeed(config),
+    edits: readListingEdits(config.listingEditLedgerPath),
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+  });
+  const translationCoverage = buildTranslationCoverageReport({
+    registry,
+    seed: currentSeed(config),
+    translationTasks: readTranslationLedger(config.translationLedgerPath),
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+  });
   return {
     kind: "admin_migration_review",
     status: 200,
@@ -1220,8 +1236,17 @@ function migrationReviewPayload(registry, url, config) {
       contentType: "text/csv",
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
-    seoEvidence: seoEvidencePayload(currentSeoEvidence(config)),
-    listingQuality: currentListingQualityReviewQueue(config, { generatedAt: config.reviewedAt }),
+    seoEvidence,
+    listingQuality,
+    agencyReviewQueue: buildAgencyReviewQueue({
+      pendingRoutes: reviewRequired,
+      listingQuality,
+      listingVerification,
+      translationCoverage,
+      brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
+      seoEvidence,
+      launchReadiness: readiness,
+    }),
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     listingQualityReviewDraftEndpoint: "/api/admin/listing-quality-review-draft",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",

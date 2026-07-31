@@ -1,0 +1,28 @@
+{
+	admin off
+}
+
+(app_proxy) {
+	encode zstd gzip
+
+	route {
+		@operator path /admin/* /api/admin/*
+		reverse_proxy @operator app:3000 {
+			header_up Authorization "Bearer {$MS_REALTY_ADMIN_TOKEN}"
+		}
+
+		reverse_proxy app:3000
+	}
+}
+
+:8080 {
+	import app_proxy
+}
+
+{$MS_REALTY_REVIEW_HOST} {
+	header X-Robots-Tag "noindex, nofollow, noarchive"
+	basic_auth {
+		{$MS_REALTY_REVIEW_USER} {$MS_REALTY_REVIEW_PASSWORD_HASH}
+	}
+	import app_proxy
+}

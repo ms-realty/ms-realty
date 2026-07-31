@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
+import { buildAgencyReviewQueue } from "./agency-review-queue.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./broker-contacts.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
@@ -229,6 +230,8 @@ import {
   validateListingQualityReviewCsv,
   writeListingQualityReviewCsv,
 } from "./listing-quality.mjs";
+import { buildListingVerificationReport } from "./listing-verification.mjs";
+import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { fromRoot } from "./paths.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
@@ -521,7 +524,17 @@ function listingEditInput(request) {
   return { ...input, patch };
 }
 
-function renderMigrationReviewPayload(registry, url, dashboard, routes, approvals, seoEvidence, listingQuality, launchReadiness) {
+function renderMigrationReviewPayload(
+  registry,
+  url,
+  dashboard,
+  routes,
+  approvals,
+  seoEvidence,
+  listingQuality,
+  launchReadiness,
+  { listingVerification, translationCoverage, brokerContacts } = {},
+) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
   const decisions = buildLegacyRouteDecisions(routes, approvals);
   const decidedOldUrls = new Set(decisions.map((decision) => decision.old_url));
@@ -544,6 +557,7 @@ function renderMigrationReviewPayload(registry, url, dashboard, routes, approval
   const routePage = Math.min(Math.max(Number.isFinite(requestedRoutePage) ? requestedRoutePage : 1, 1), routePages);
   const pendingRoutesWithEvidence = reviewSelection.rows.slice((routePage - 1) * routePageSize, routePage * routePageSize);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
+  const seoPayload = seoEvidencePayload(seoEvidence);
   return {
     kind: "admin_migration_review",
     status: 200,
@@ -590,8 +604,17 @@ function renderMigrationReviewPayload(registry, url, dashboard, routes, approval
       contentType: "text/csv",
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
-    seoEvidence: seoEvidencePayload(seoEvidence),
+    seoEvidence: seoPayload,
     listingQuality,
+    agencyReviewQueue: buildAgencyReviewQueue({
+      pendingRoutes: reviewRequired,
+      listingQuality,
+      listingVerification,
+      translationCoverage,
+      brokerContacts,
+      seoEvidence: seoPayload,
+      launchReadiness,
+    }),
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     listingQualityReviewDraftEndpoint: "/api/admin/listing-quality-review-draft",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",
@@ -744,6 +767,19 @@ export function createHttpApp({
     const reviewQueue = buildListingQualityReviewQueue(report, { reviewCsv, limit: 20 });
     return { ...report, rows: reviewQueue.rows, review_queue: reviewQueue };
   };
+  const currentListingVerification = () =>
+    buildListingVerificationReport({
+      seed: currentSeed(),
+      edits: readListingEdits(listingEditLedgerPath || undefined),
+      generatedAt: listingQualityGeneratedAt || new Date().toISOString(),
+    });
+  const currentTranslationCoverage = () =>
+    buildTranslationCoverageReport({
+      registry: activeRegistry,
+      seed: currentSeed(),
+      translationTasks: currentTranslationTasks(),
+      generatedAt: listingQualityGeneratedAt || new Date().toISOString(),
+    });
   const currentViewingData = () => {
     const viewings = readViewings(viewingLedgerPath || undefined);
     return {
@@ -1610,6 +1646,11 @@ export function createHttpApp({
         currentSeoEvidence(),
         currentListingQualityReviewQueue({ generatedAt: listingQualityGeneratedAt }),
         currentLaunchReadiness(),
+        {
+          listingVerification: currentListingVerification(),
+          translationCoverage: currentTranslationCoverage(),
+          brokerContacts: currentBrokerContacts(),
+        },
       );
       return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
     }
@@ -1626,6 +1667,11 @@ export function createHttpApp({
         currentSeoEvidence(),
         currentListingQualityReviewQueue({ generatedAt: listingQualityGeneratedAt }),
         currentLaunchReadiness(),
+        {
+          listingVerification: currentListingVerification(),
+          translationCoverage: currentTranslationCoverage(),
+          brokerContacts: currentBrokerContacts(),
+        },
       );
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);

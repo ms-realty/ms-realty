@@ -1025,6 +1025,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.routeMap.pendingSample.length, 10);
       assert.ok(migrationReviewBody.routeMap.targetOptions.some((option) => option.path === "/bg/kontakt"));
       assert.ok(migrationReviewBody.routeMap.targetOptions.every((option) => !["home", "search", "listing"].includes(option.type)));
+      assert.equal(migrationReviewBody.agencyReviewQueue.deployment_mode, "production_review");
+      assert.equal(migrationReviewBody.agencyReviewQueue.review_after_deploy, true);
+      assert.equal(migrationReviewBody.agencyReviewQueue.public_launch_ready, false);
+      assert.ok(migrationReviewBody.agencyReviewQueue.summary.open_tasks > 0);
+      assert.equal(migrationReviewBody.agencyReviewQueue.guardrails.unreviewed_listing_publication, "blocked");
       assert.equal(migrationReviewBody.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
       assert.equal(migrationReviewBody.preflightReportsEndpoint, "/api/admin/preflight-reports");
       assert.equal(migrationReviewBody.seoPreflightEndpoint, "/api/admin/seo-preflight");
@@ -1101,6 +1106,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtmlBody.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-payload-collections-endpoint="/api/admin/payload-collections"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-listing-quality-endpoint="/api/admin/listing-quality"'), true);
+      assert.equal(migrationReviewHtmlBody.includes('data-agency-review-queue="true"'), true);
+      assert.equal(migrationReviewHtmlBody.includes('data-agency-review-status="open"'), true);
       assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
       assert.match(migrationReviewHtmlBody, /data-react-admin-ui="migration-review"/);
       assert.match(migrationReviewHtmlBody, /Работно място за преглед на старите URL адреси/);
