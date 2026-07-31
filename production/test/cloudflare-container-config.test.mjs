@@ -118,6 +118,7 @@ test("main deploys automatically with image-marker rollback", () => {
   assert.match(ciWorkflow, /https:\/\/ms-realty\.\$\{subdomain\}\.workers\.dev\/api\/health/);
   assert.match(ciWorkflow, /--build-arg "MS_REALTY_BUILD_MARKER=\$GITHUB_SHA"/);
   assert.match(ciWorkflow, /d\.build_marker !== expected/);
+  assert.equal((ciWorkflow.match(/for attempt in \$\(seq 1 100\); do/g) ?? []).length, 2);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
 });
 
