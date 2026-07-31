@@ -1,6 +1,6 @@
 import { renderHtmlPage } from "./html.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
-import { loadLocaleRegistry } from "./locales.mjs";
+import { loadLocaleRegistry, siteRootRedirectTarget } from "./locales.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
@@ -257,6 +257,15 @@ export function renderAppSitemap({ config = appRouterConfigFromEnv() } = {}) {
   };
 }
 
+export function renderAppSiteRoot({ config = appRouterConfigFromEnv() } = {}) {
+  const location = siteRootRedirectTarget(currentRegistry(config));
+  return {
+    status: 308,
+    headers: { location, "content-type": "text/plain; charset=utf-8", "cache-control": PUBLIC_CACHE },
+    body: `Redirecting to ${location}\n`,
+  };
+}
+
 export function renderAppRobots() {
   return {
     status: 200,
@@ -280,6 +289,11 @@ export function renderAppSitemapResponse({ config = appRouterConfigFromEnv() } =
 
 export function renderAppRobotsResponse() {
   const result = renderAppRobots();
+  return new Response(result.body, { status: result.status, headers: result.headers });
+}
+
+export function renderAppSiteRootResponse({ config = appRouterConfigFromEnv() } = {}) {
+  const result = renderAppSiteRoot({ config });
   return new Response(result.body, { status: result.status, headers: result.headers });
 }
 
