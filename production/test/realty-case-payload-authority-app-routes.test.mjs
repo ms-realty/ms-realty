@@ -246,3 +246,67 @@ test("app admin case routes use Payload authority without local case ledgers or 
     assert.deepEqual(await badRead.json(), { kind: "realty_case_authority_unavailable", source_recorded: false });
   });
 });
+
+test("Payload authority preserves a committed case when its JSONL audit replica is unavailable", async () => {
+  await withCredentials(async (authorization) => {
+    const target = fakePayload();
+    const unavailableAuditPath = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-authority-audit-directory-"));
+    const repairedAuditPath = tempLedger("app-authority-audit-repaired");
+    const config = {
+      ...appAdminConfigFromEnv({
+        MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: "true",
+        MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
+        MS_REALTY_AUDIT_LOG_PATH: unavailableAuditPath,
+        MS_REALTY_CASE_RECORDED_AT: "2026-07-30T09:00:00.000Z",
+      }),
+      realtyCasePayload: target.payload,
+    };
+
+    const opened = await request("/api/admin/cases", {
+      method: "POST",
+      authorization,
+      body: caseInput("app-authority-audit-retry"),
+      config,
+    });
+    assert.equal(opened.status, 201);
+    assert.equal((await opened.json()).audit_replica_pending, true);
+    assert.equal(target.rows.realty_case_events.length, 1);
+
+    config.auditLogPath = repairedAuditPath;
+    const replay = await request("/api/admin/cases", {
+      method: "POST",
+      authorization,
+      body: caseInput("app-authority-audit-retry"),
+      config,
+    });
+    assert.equal(replay.status, 200);
+    const replayBody = await replay.json();
+    assert.equal(replayBody.idempotent, true);
+    assert.equal("audit_replica_pending" in replayBody, false);
+    assert.equal(target.rows.realty_case_events.length, 1);
+    assert.equal(readAuditLog(repairedAuditPath).filter((row) => row.action === "realty_case_opened").length, 1);
+  });
+});
+
+test("local case writes preserve an unavailable audit ledger error", async () => {
+  await withCredentials(async (authorization) => {
+    const unavailableAuditPath = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-local-audit-directory-"));
+    const config = appAdminConfigFromEnv({
+      MS_REALTY_CASE_LEDGER_PATH: tempLedger("app-local-case-ledger"),
+      MS_REALTY_AUDIT_LOG_PATH: unavailableAuditPath,
+      MS_REALTY_CASE_RECORDED_AT: "2026-07-30T09:00:00.000Z",
+    });
+
+    const response = await request("/api/admin/cases", {
+      method: "POST",
+      authorization,
+      body: caseInput("app-local-audit-error"),
+      config,
+    });
+    const body = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.notEqual(body.message, "error is not defined");
+    assert.match(body.message, /(EISDIR|directory)/i);
+  });
+});
