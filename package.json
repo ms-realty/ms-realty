@@ -44,6 +44,11 @@
     "listing:description:review": "node production/scripts/build-listing-description-review.mjs",
     "listing:publication": "node production/scripts/build-listing-publication-report.mjs",
     "listing:publication:run": "node production/scripts/run-listing-publication-schedules.mjs",
+    "case:executor": "node production/scripts/run-realty-case-executor.mjs",
+    "case:manifest": "node production/scripts/build-realty-case-payload-manifest.mjs",
+    "case:project": "node production/scripts/run-realty-case-payload-projector.mjs",
+    "case:conditions:project": "node production/scripts/run-realty-case-condition-payload-projector.mjs",
+    "case:reconcile": "node production/scripts/run-realty-case-payload-readback.mjs",
     "listing:verification": "node production/scripts/build-listing-verification-report.mjs",
     "listing:preflight:report": "node production/scripts/build-listing-quality-preflight-report.mjs",
     "listing:review-pack": "node production/scripts/build-listing-quality-review-packet.mjs",
@@ -99,7 +104,7 @@
     "@payloadcms/translations": "3.85.2",
     "@photo-sphere-viewer/core": "5.14.3",
     "jose": "5.10.0",
-    "next": "16.2.10",
+    "next": "16.2.12",
     "payload": "3.85.2",
     "react": "19.2.7",
     "react-dom": "19.2.7",
@@ -109,8 +114,10 @@
     "@esbuild-kit/core-utils": {
       "esbuild": "0.25.12"
     },
-    "dompurify": "3.4.11",
-    "postcss": "8.5.10"
+    "dompurify": "3.4.12",
+    "fast-uri": "3.1.4",
+    "postcss": "8.5.25",
+    "sharp": "0.35.3"
   },
   "devDependencies": {
     "@cloudflare/containers": "0.3.7",

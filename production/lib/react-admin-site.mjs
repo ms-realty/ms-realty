@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
@@ -1014,6 +1015,7 @@ const NAV_ROUTES = [
   { id: "contacts", module: "crm", path: "/admin/contacts", icon: "users", kind: "admin_contacts", capability: "operations:read" },
   { id: "consents", module: "crm", path: "/admin/consents", icon: "shield-check", kind: "admin_consents", capability: "operations:read" },
   { id: "documents", module: "crm", path: "/admin/documents", icon: "file-check", kind: "admin_document_checklists", capability: "operations:read" },
+  { id: "realty_cases", module: "crm", path: "/admin/cases", icon: "kanban-square", kind: "admin_realty_cases", capability: "cases:read" },
   { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline", capability: "operations:read" },
   { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests", capability: "operations:read" },
   { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings", capability: "operations:read" },
@@ -1048,6 +1050,11 @@ function adminNavigationGroups(page) {
         { ...route("contacts"), label: screenLabel("crm", "contacts", "Contacts and accounts") },
         { ...route("consents"), label: screenLabel("crm", "consents", "Consent and preferences") },
         { ...route("documents"), label: screenLabel("crm", "documents", "Documents and process") },
+        {
+          ...route("realty_cases"),
+          label: caseCopy(page).title,
+          badge: page.realtyCaseQueue?.summary?.open,
+        },
         {
           ...route("lead_pipeline"),
           label: screenLabel("crm", "lead_pipeline", "Buyers and renters"),
@@ -2266,6 +2273,531 @@ function PipelineCard({ page, state, lead }) {
         : null,
     ),
   );
+}
+
+const REALTY_CASE_COPY = Object.freeze({
+  bg: {
+    title: "Сделки",
+    subtitle: "Единен процес за ръчно и автономно изпълнение",
+    create: "Нова сделка",
+    open: "Отворени",
+    manual: "Ръчни",
+    autonomous: "Автономни",
+    frozen: "Замразени",
+    blocked: "Блокирани",
+    progress: "Напредък",
+    next: "Следващи стъпки",
+    evidence: "Референция към доказателство",
+    complete: "Завърши стъпката",
+    notApplicable: "Не е приложимо",
+    authority: "Референция към пълномощие/инструкция",
+    reason: "Код на причината",
+    close: "Затвори сделката",
+    freeze: "Замрази",
+    resume: "Продължи",
+    empty: "Няма отворени сделки.",
+    conditions: "Условия",
+    addCondition: "Ново условие",
+    conditionId: "Идентификатор на условието",
+    conditionType: "Тип условие",
+    dueAt: "Срок",
+    requiredEvidence: "Изисквани източници на доказателства (JSON масив)",
+    evidenceJson: "Доказателства (JSON масив)",
+    satisfy: "Отбележи като изпълнено",
+    expire: "Отбележи като изтекло",
+    waive: "Отмени условието",
+    reopen: "Отвори отново",
+    conditionsEmpty: "Няма активни условия.",
+  },
+  ru: {
+    title: "Сделки",
+    subtitle: "Единый процесс для ручного и автономного исполнения",
+    create: "Новая сделка",
+    open: "Открытые",
+    manual: "Ручные",
+    autonomous: "Автономные",
+    frozen: "Замороженные",
+    blocked: "Заблокированные",
+    progress: "Прогресс",
+    next: "Следующие шаги",
+    evidence: "Ссылка на доказательство",
+    complete: "Завершить шаг",
+    notApplicable: "Не применимо",
+    authority: "Ссылка на полномочие/инструкцию",
+    reason: "Код причины",
+    close: "Закрыть сделку",
+    freeze: "Заморозить",
+    resume: "Продолжить",
+    empty: "Нет открытых сделок.",
+    conditions: "Условия",
+    addCondition: "Новое условие",
+    conditionId: "Идентификатор условия",
+    conditionType: "Тип условия",
+    dueAt: "Срок",
+    requiredEvidence: "Требуемые источники доказательств (массив JSON)",
+    evidenceJson: "Доказательства (массив JSON)",
+    satisfy: "Отметить выполненным",
+    expire: "Отметить истекшим",
+    waive: "Отменить условие",
+    reopen: "Открыть снова",
+    conditionsEmpty: "Нет активных условий.",
+  },
+  en: {
+    title: "Transaction cases",
+    subtitle: "One evidence-gated process for manual and autonomous execution",
+    create: "Open case",
+    open: "Open",
+    manual: "Manual",
+    autonomous: "Autonomous",
+    frozen: "Frozen",
+    blocked: "Blocked",
+    progress: "Progress",
+    next: "Next steps",
+    evidence: "Evidence reference",
+    complete: "Complete step",
+    notApplicable: "Not applicable",
+    authority: "Authority or instruction reference",
+    reason: "Reason code",
+    close: "Close case",
+    freeze: "Freeze",
+    resume: "Resume",
+    empty: "No open transaction cases.",
+    conditions: "Conditions",
+    addCondition: "Open condition",
+    conditionId: "Condition ID",
+    conditionType: "Condition type",
+    dueAt: "Due at",
+    requiredEvidence: "Required evidence producer references (JSON array)",
+    evidenceJson: "Evidence references (JSON array)",
+    satisfy: "Mark satisfied",
+    expire: "Mark expired",
+    waive: "Waive condition",
+    reopen: "Reopen",
+    conditionsEmpty: "No open, blocked, or expired conditions.",
+  },
+});
+
+function caseCopy(page) {
+  return REALTY_CASE_COPY[page?.workspace?.locale] || REALTY_CASE_COPY.en;
+}
+
+function caseMutationAttrs(kind, success) {
+  return {
+    method: "post",
+    action: kind === "open" ? "/api/admin/cases" : "/api/admin/cases/actions",
+    className: "adm-form",
+    "data-admin-mutation-form": `realty-case-${kind}`,
+    "data-admin-mutation-saving": "Saving transaction case…",
+    "data-admin-mutation-success": success,
+    "data-admin-mutation-failure": "The transaction case action failed.",
+  };
+}
+
+function caseActionEventId(caseRecord, action, stepKey = "") {
+  const source = [caseRecord.id, caseRecord.last_event_id || caseRecord.last_recorded_at, action, stepKey].join("\u0000");
+  return `realty-case-action-${createHash("sha256").update(source).digest("hex").slice(0, 48)}`;
+}
+
+function conditionMutationAttrs(action, success) {
+  return {
+    method: "post",
+    action: action === "condition_opened" ? "/api/admin/cases/conditions" : "/api/admin/cases/conditions/actions",
+    className: "adm-form",
+    "data-admin-mutation-form": `realty-case-condition-${action}`,
+    "data-admin-mutation-saving": "Saving condition…",
+    "data-admin-mutation-success": success,
+    "data-admin-mutation-failure": "The condition action failed.",
+  };
+}
+
+function conditionActionEventId(condition, action) {
+  const source = [condition.case_id, condition.id, condition.last_recorded_at, condition.last_action, action].join("\u0000");
+  return `realty-case-condition-action-${createHash("sha256").update(source).digest("hex").slice(0, 48)}`;
+}
+
+function canManageCaseConditions(page) {
+  return pageCan(page, "cases:write") && !page.workspace?.operator_roles?.includes("agent");
+}
+
+function conditionTone(condition) {
+  return condition.status === "blocked" || condition.overdue ? "brick" : "sea";
+}
+
+function RealtyCaseConditionAction({ page, condition, action, submit, children = [] }) {
+  const actor = page.workspace?.operator_id || "admin";
+  const fields = Array.isArray(children) ? children : [children];
+  return h(
+    "details",
+    { className: "adm-pipeline-secondary" },
+    h("summary", null, submit),
+    h(
+      "form",
+      conditionMutationAttrs(action, "Condition updated. Refreshing case state."),
+      h("input", { type: "hidden", name: "caseId", value: condition.case_id }),
+      h("input", { type: "hidden", name: "conditionId", value: condition.id }),
+      h("input", { type: "hidden", name: "action", value: action }),
+      h("input", { type: "hidden", name: "eventId", value: conditionActionEventId(condition, action) }),
+      h("input", { type: "hidden", name: "actor", value: actor }),
+      ...fields,
+      h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, submit),
+    ),
+  );
+}
+
+function RealtyCaseConditionCard({ page, condition, caseIsActive }) {
+  const copy = caseCopy(page);
+  const canManage = canManageCaseConditions(page) && caseIsActive;
+  const canSatisfy = ["open", "blocked"].includes(condition.status);
+  const canExpire = condition.status !== "expired" && condition.overdue;
+  const canWaive = !["satisfied", "waived"].includes(condition.status);
+  const canReopen = condition.status !== "open";
+  const dueMin = datetimeLocalValue(page.realtyCaseConditionQueue?.generated_at);
+  return h(
+    "article",
+    {
+      className: "adm-pipeline-card",
+      "data-realty-case-condition": condition.id,
+      "data-condition-status": condition.status,
+      "data-condition-case": condition.case_id,
+    },
+    h(
+      "header",
+      { className: "adm-pipeline-card__header" },
+      h("div", null, h("h2", null, condition.id), h("small", null, `${condition.case_id} · ${condition.type}`)),
+      h(StatusPill, { tone: conditionTone(condition) }, condition.status),
+    ),
+    h(
+      "div",
+      { className: "adm-pipeline-requirements" },
+      h("span", null, `${copy.dueAt}: ${formatAdminDateTime(condition.due_at, page.workspace?.locale)}`),
+      h("span", null, `${copy.requiredEvidence}: ${condition.required_evidence_producer_refs.join(", ")}`),
+    ),
+    canManage
+      ? h(
+          "div",
+          { className: "adm-task-list__actions" },
+          canSatisfy
+            ? h(RealtyCaseConditionAction, {
+                page,
+                condition,
+                action: "condition_satisfied",
+                submit: copy.satisfy,
+                children: [
+                  h(
+                    "label",
+                    null,
+                    copy.evidenceJson,
+                    h("textarea", {
+                      name: "evidenceRefsJson",
+                      required: true,
+                      rows: 3,
+                      maxLength: 6000,
+                      placeholder: '[{"ref":"evidence://…","producerRef":"lawyer://…"}]',
+                    }),
+                  ),
+                ],
+              })
+            : null,
+          condition.status === "open"
+            ? h(RealtyCaseConditionAction, {
+                page,
+                condition,
+                action: "condition_blocked",
+                submit: copy.blocked,
+                children: [
+                  h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120, pattern: "[a-z][a-z0-9_:-]*" })),
+                ],
+              })
+            : null,
+          canExpire
+            ? h(RealtyCaseConditionAction, { page, condition, action: "condition_expired", submit: copy.expire })
+            : null,
+          canWaive
+            ? h(RealtyCaseConditionAction, {
+                page,
+                condition,
+                action: "condition_waived",
+                submit: copy.waive,
+                children: [
+                  h("label", null, copy.authority, h("input", { name: "authorityRef", required: true, maxLength: 240, pattern: "[A-Za-z0-9][A-Za-z0-9._:/-]*" })),
+                  h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120, pattern: "[a-z][a-z0-9_:-]*" })),
+                ],
+              })
+            : null,
+          canReopen
+            ? h(RealtyCaseConditionAction, {
+                page,
+                condition,
+                action: "condition_reopened",
+                submit: copy.reopen,
+                children: [
+                  h("label", null, copy.authority, h("input", { name: "authorityRef", required: true, maxLength: 240, pattern: "[A-Za-z0-9][A-Za-z0-9._:/-]*" })),
+                  h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120, pattern: "[a-z][a-z0-9_:-]*" })),
+                  h("label", null, copy.dueAt, h("input", { name: "dueAt", type: "datetime-local", required: true, min: dueMin })),
+                ],
+              })
+            : null,
+        )
+      : null,
+  );
+}
+
+function RealtyCaseConditionCreateForm({ page, cases }) {
+  const copy = caseCopy(page);
+  if (!canManageCaseConditions(page) || !cases.length) return null;
+  const actor = page.workspace?.operator_id || "admin";
+  return h(
+    WorkbenchDisclosure,
+    { summary: copy.addCondition, "data-realty-case-condition-create": "true" },
+    h(
+      "form",
+      conditionMutationAttrs("condition_opened", "Condition opened. Refreshing case state."),
+      h("input", { type: "hidden", name: "actor", value: actor }),
+      h(
+        "label",
+        null,
+        "Case ID",
+        h(
+          "select",
+          { name: "caseId", required: true },
+          ...cases.map((caseRecord) => h("option", { key: caseRecord.id, value: caseRecord.id }, caseRecord.id)),
+        ),
+      ),
+      h("label", null, copy.conditionId, h("input", { name: "conditionId", required: true, maxLength: 160, pattern: "[A-Za-z0-9][A-Za-z0-9._:/-]*" })),
+      h("label", null, copy.conditionType, h("input", { name: "conditionType", required: true, maxLength: 120, pattern: "[a-z][a-z0-9_:-]*" })),
+      h("label", null, copy.dueAt, h("input", { name: "dueAt", type: "datetime-local", required: true, min: datetimeLocalValue(page.realtyCaseConditionQueue?.generated_at) })),
+      h(
+        "label",
+        null,
+        copy.requiredEvidence,
+        h("textarea", { name: "requiredEvidenceProducerRefsJson", required: true, rows: 2, maxLength: 6000, placeholder: '["lawyer://title-review"]' }),
+      ),
+      h("button", { type: "submit", className: "mk-btn mk-btn--primary" }, copy.addCondition),
+    ),
+  );
+}
+
+function RealtyCaseConditions({ page, caseQueue }) {
+  const copy = caseCopy(page);
+  const queue = page.realtyCaseConditionQueue || { rows: [] };
+  const activeCases = (caseQueue.rows || []).filter((caseRecord) => caseRecord.status === "active");
+  const activeCaseIds = new Set(activeCases.map((caseRecord) => caseRecord.id));
+  return h(
+    Panel,
+    { title: copy.conditions, "data-realty-case-condition-workbench": "true" },
+    h(RealtyCaseConditionCreateForm, { page, cases: activeCases }),
+    queue.rows.length
+      ? h(
+          "section",
+          { className: "adm-pipeline-grid", "data-realty-case-condition-queue": "true" },
+          ...queue.rows.map((condition) =>
+            h(RealtyCaseConditionCard, {
+              key: `${condition.case_id}-${condition.id}`,
+              page,
+              condition,
+              caseIsActive: activeCaseIds.has(condition.case_id),
+            }),
+          ),
+        )
+      : h("p", { className: "adm-empty" }, copy.conditionsEmpty),
+  );
+}
+
+function RealtyCaseStep({ page, caseRecord, step }) {
+  const copy = caseCopy(page);
+  const actor = page.workspace?.operator_id || "admin";
+  const producer = step.evidence_producers[0];
+  const agent = page.workspace?.operator_roles?.includes("agent");
+  return h(
+    "li",
+    { key: step.key, "data-case-step": step.key, "data-step-status": step.status },
+    h(
+      "div",
+      null,
+      h("strong", null, step.label),
+      h("small", null, `${step.phase} · ${step.optional ? copy.notApplicable : step.status}`),
+    ),
+    pageCan(page, "cases:write") && caseRecord.status === "active"
+      ? h(
+          "div",
+          { className: "adm-task-list__actions" },
+          h(
+            "form",
+            caseMutationAttrs("step", "Step completed. Refreshing case state."),
+            h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
+            h("input", { type: "hidden", name: "action", value: "step_completed" }),
+            h("input", { type: "hidden", name: "stepKey", value: step.key }),
+            h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, "step_completed", step.key) }),
+            h("input", { type: "hidden", name: "actor", value: actor }),
+            h("input", { type: "hidden", name: "evidenceType", value: `${step.key}_record` }),
+            h("input", { type: "hidden", name: "evidenceProducerKind", value: producer }),
+            h("label", null, copy.evidence, h("input", { name: "evidenceRef", required: true, maxLength: 240 })),
+            h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.complete),
+          ),
+          step.optional && !agent
+            ? h(
+                "form",
+                caseMutationAttrs("not-applicable", "Step marked not applicable. Refreshing case state."),
+                h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
+                h("input", { type: "hidden", name: "action", value: "step_not_applicable" }),
+                h("input", { type: "hidden", name: "stepKey", value: step.key }),
+                h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, "step_not_applicable", step.key) }),
+                h("input", { type: "hidden", name: "actor", value: actor }),
+                h("label", null, copy.authority, h("input", { name: "authorityRef", required: true, maxLength: 240 })),
+                h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120 })),
+                h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, copy.notApplicable),
+              )
+            : null,
+        )
+      : null,
+  );
+}
+
+function RealtyCaseCard({ page, caseRecord }) {
+  const copy = caseCopy(page);
+  const actor = page.workspace?.operator_id || "admin";
+  const modeTone = caseRecord.execution_mode === "autonomous" ? "success" : "neutral";
+  const statusAction = caseRecord.status === "frozen" ? "case_resumed" : "case_frozen";
+  const agent = page.workspace?.operator_roles?.includes("agent");
+  return h(
+    "article",
+    {
+      className: "adm-pipeline-card",
+      "data-realty-case": caseRecord.id,
+      "data-execution-mode": caseRecord.execution_mode,
+      "data-case-status": caseRecord.status,
+    },
+    h(
+      "header",
+      { className: "adm-pipeline-card__header" },
+      h("div", null, h("h2", null, caseRecord.id), h("small", null, `${caseRecord.jurisdiction} · ${caseRecord.case_type} · ${caseRecord.asset_kind}`)),
+      h(StatusPill, { tone: modeTone }, caseRecord.execution_mode),
+    ),
+    h(
+      "div",
+      { className: "adm-pipeline-requirements" },
+      h("strong", null, `${copy.progress}: ${caseRecord.progress_percent}%`),
+      h("span", null, caseRecord.current_phase),
+      h("span", null, `${copy.blocked}: ${caseRecord.blockers.length}`),
+    ),
+    h(
+      Panel,
+      { title: copy.next },
+      caseRecord.next_steps.length
+        ? h("ul", { className: "adm-task-list" }, ...caseRecord.next_steps.map((step) => h(RealtyCaseStep, { page, caseRecord, step })))
+        : h("p", { className: "adm-empty" }, "All workflow steps are resolved."),
+    ),
+    pageCan(page, "cases:write") && !agent
+      ? h(
+          "details",
+          { className: "adm-pipeline-secondary" },
+          h("summary", null, caseRecord.status === "frozen" ? copy.resume : copy.freeze),
+          h(
+            "form",
+            caseMutationAttrs("status", "Case status updated. Refreshing case state."),
+            h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
+            h("input", { type: "hidden", name: "action", value: statusAction }),
+            h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, statusAction) }),
+            h("input", { type: "hidden", name: "actor", value: actor }),
+            h("label", null, copy.authority, h("input", { name: "authorityRef", required: true, maxLength: 240 })),
+            statusAction === "case_frozen"
+              ? h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120 }))
+              : null,
+            h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, caseRecord.status === "frozen" ? copy.resume : copy.freeze),
+          ),
+        )
+      : null,
+    pageCan(page, "cases:write") && !agent && caseRecord.progress_percent === 100 && caseRecord.status === "active"
+      ? h(
+          "form",
+          caseMutationAttrs("close", "Case closed."),
+          h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
+          h("input", { type: "hidden", name: "action", value: "case_closed" }),
+          h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, "case_closed") }),
+          h("input", { type: "hidden", name: "actor", value: actor }),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.close),
+        )
+      : null,
+  );
+}
+
+function RealtyCaseCreateForm({ page }) {
+  const copy = caseCopy(page);
+  if (!pageCan(page, "cases:write") || page.workspace?.operator_roles?.includes("agent")) return null;
+  const actor = page.workspace?.operator_id || "admin";
+  return h(
+    WorkbenchDisclosure,
+    { summary: copy.create, "data-realty-case-create": "true" },
+    h(
+      "form",
+      caseMutationAttrs("open", "Transaction case opened. Refreshing case queue."),
+      h("input", { type: "hidden", name: "actor", value: actor }),
+      h("label", null, "Case ID", h("input", { name: "id", required: true, maxLength: 160 })),
+      h("label", null, "Client reference", h("input", { name: "clientRef", required: true, maxLength: 160 })),
+      h("label", null, "Property reference", h("input", { name: "propertyRef", maxLength: 160 })),
+      h("label", null, "Jurisdiction", h("select", { name: "jurisdiction", required: true }, h("option", { value: "BG" }, "Bulgaria"), h("option", { value: "GR" }, "Greece"))),
+      h(
+        "label",
+        null,
+        "Case type",
+        h(
+          "select",
+          { name: "caseType", required: true },
+          ...["buyer_purchase", "seller_sale", "tenant_rental", "landlord_rental", "short_term_rental", "property_management"].map((value) =>
+            h("option", { key: value, value }, value.replaceAll("_", " ")),
+          ),
+        ),
+      ),
+      h(
+        "label",
+        null,
+        "Asset kind",
+        h(
+          "select",
+          { name: "assetKind", required: true },
+          ...["residential", "commercial", "land", "new_build", "mixed_use"].map((value) => h("option", { key: value, value }, value.replaceAll("_", " "))),
+        ),
+      ),
+      h("label", null, "Execution mode", h("select", { name: "executionMode", required: true }, h("option", { value: "manual" }, copy.manual), h("option", { value: "autonomous" }, copy.autonomous))),
+      h("label", null, "Mandate reference", h("input", { name: "mandateRef", required: true, maxLength: 160 })),
+      h("label", null, "Mandate grantor reference", h("input", { name: "mandateGrantedByRef", required: true, maxLength: 160 })),
+      h("label", null, "Mandate signed at (ISO)", h("input", { name: "mandateSignedAt", required: true, placeholder: "2026-07-30T08:00:00Z", maxLength: 80 })),
+      h("label", null, "Signed mandate evidence reference", h("input", { name: "mandateSignedEvidenceRef", required: true, maxLength: 240 })),
+      h("input", { type: "hidden", name: "mandateCapabilities", value: "case:*" }),
+      h("label", null, "Agent assurance reference (autonomous mode)", h("input", { name: "assuranceRef", maxLength: 240 })),
+      h("button", { type: "submit", className: "mk-btn mk-btn--primary" }, copy.create),
+    ),
+  );
+}
+
+function RealtyCasesBody({ page }) {
+  const copy = caseCopy(page);
+  const queue = page.realtyCaseQueue || { rows: [], summary: {} };
+  const metrics = [
+    [copy.open, queue.summary.open || 0, "kanban-square", "sea"],
+    [copy.manual, queue.summary.manual || 0, "user", "ink"],
+    [copy.autonomous, queue.summary.autonomous || 0, "sparkles", "success"],
+    [copy.frozen, queue.summary.frozen || 0, "circle-alert", "brick"],
+  ];
+  return adminShell(page, {
+    title: copy.title,
+    mainAttrs: {
+      "data-kind": "admin-realty-cases",
+      "data-react-admin-ui": "realty-cases",
+      "data-admin-workbench": "crm",
+      "data-task-led": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(PageHeader, { title: copy.title, subtitle: copy.subtitle }),
+      h(StatGrid, { metrics }),
+      h(RealtyCaseCreateForm, { page }),
+      h(RealtyCaseConditions, { page, caseQueue: queue }),
+      queue.rows.length
+        ? h("section", { className: "adm-pipeline-grid", "data-realty-case-grid": "true" }, ...queue.rows.map((caseRecord) => h(RealtyCaseCard, { key: caseRecord.id, page, caseRecord })))
+        : h(Panel, { title: copy.open }, h("p", { className: "adm-empty" }, copy.empty)),
+    ],
+  });
 }
 
 function LeadPipelineBody({ page }) {
@@ -5357,6 +5889,7 @@ export function renderReactAdminBody(page) {
   if (page.kind === "admin_consents") return renderStaticElement(h(ConsentsBody, { page }));
   if (page.kind === "admin_document_checklists") return renderStaticElement(h(DocumentChecklistsBody, { page }));
   if (page.kind === "admin_lead_inbox") return renderStaticElement(h(LeadInboxBody, { page }));
+  if (page.kind === "admin_realty_cases") return renderStaticElement(h(RealtyCasesBody, { page }));
   if (page.kind === "admin_lead_pipeline") return renderStaticElement(h(LeadPipelineBody, { page }));
   if (page.kind === "admin_requests") return renderStaticElement(h(PublicRequestsBody, { page }));
   if (page.kind === "admin_viewings") return renderStaticElement(h(ViewingsBody, { page }));

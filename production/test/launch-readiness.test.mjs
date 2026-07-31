@@ -11,6 +11,7 @@ import {
   buildLaunchReadinessReport,
   liveServiceImportSummary,
   materializeLocalLaunchReadiness,
+  payloadRuntimeState,
   publicLaunchReadinessHeaders,
   publicLaunchReadinessPayload,
   readLiveServiceReportTemplate,
@@ -2186,19 +2187,14 @@ test("live service report import writes only validated source reports", () => {
 });
 
 test("launch input checklist names remaining operator-owned blockers", async () => {
+  const payloadRuntimeReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-checklist-payload-runtime-`)}/payload-runtime-report.json`;
+  writeJson(payloadRuntimeReportPath, await buildPayloadRuntimeReport({ env: {}, generatedAt: "2026-07-05T00:00:00Z" }));
   const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
-  const payloadRuntimeReport = await buildPayloadRuntimeReport({ env: {}, generatedAt: "2026-07-05T00:00:00Z" });
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
     launchReadiness: buildLaunchReadinessReport({
       generatedAt: "2026-07-05T00:00:00Z",
-      payloadRuntime: {
-        status: "blocked_report",
-        path: "production/data/payload-runtime-report.json",
-        summary: payloadRuntimeReport.summary,
-        checks: payloadRuntimeReport.checks,
-        next_actions: payloadRuntimeReport.next_actions,
-      },
+      payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath),
     }),
     seoEvidence,
     redirectWorkbookCsv: fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8"),

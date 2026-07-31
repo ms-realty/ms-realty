@@ -6,6 +6,7 @@ import { bg } from "@payloadcms/translations/languages/bg";
 import { en } from "@payloadcms/translations/languages/en";
 import { ru } from "@payloadcms/translations/languages/ru";
 import { buildConfig } from "payload";
+import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -183,5 +184,5 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || "postgres://payload:payload@127.0.0.1:5432/ms_realty",
     },
   }),
-  collections: [admins, locales, ...collections],
+  collections: [admins, locales, ...collections, ...REALTY_CASE_COLLECTIONS],
 });

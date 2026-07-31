@@ -8,6 +8,7 @@ import {
   canAdminAccess,
   canAdminMutate,
   isAdminAuthorized,
+  requiredAdminCapability,
   resolveAdminPrincipal,
   withAuthenticatedAuditActor,
 } from "../lib/admin-auth.mjs";
@@ -31,7 +32,15 @@ test("individual admin credentials are authoritative and bind a stable operator"
   assert.equal(canAdminMutate(principal), true);
   assert.equal(canAdminAccess(principal, "operations:write"), true);
   assert.equal(canAdminAccess(principal, "translations:write"), false);
-  assert.deepEqual(adminCapabilities(principal), ["activity:read", "content:read", "operations:read", "operations:write", "workspace:read"]);
+  assert.deepEqual(adminCapabilities(principal), [
+    "activity:read",
+    "cases:read",
+    "cases:write",
+    "content:read",
+    "operations:read",
+    "operations:write",
+    "workspace:read",
+  ]);
   assert.equal(adminHomePath(principal), "/admin/today");
   assert.equal(isAdminAuthorized("Bearer legacy-shared-token", env), false);
   assert.equal(resolveAdminPrincipal("Bearer broker-bg-token-0123456789abcdef-extra", env), null);
@@ -44,6 +53,24 @@ test("individual admin credentials are authoritative and bind a stable operator"
     /must match the authenticated operator/,
   );
   assert.equal(withAuthenticatedAuditActor({ actor: "browser_claim", action: "example" }, principal).actor, "broker_bg");
+});
+
+test("trusted agent credentials are restricted to mandate-enforced case routes", () => {
+  const env = {
+    NODE_ENV: "production",
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: JSON.stringify([
+      { id: "trusted_agent_1", token: "trusted-agent-token-0123456789abcdef", roles: ["agent"] },
+    ]),
+  };
+  const principal = resolveAdminPrincipal("Bearer trusted-agent-token-0123456789abcdef", env);
+
+  assert.deepEqual(adminCapabilities(principal), ["activity:read", "cases:read", "cases:write", "workspace:read"]);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/cases/actions")), true);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/cases/conditions/actions")), true);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("GET", "/api/admin/cases/conditions")), true);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/replies")), false);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/deals/close")), false);
+  assert.equal(adminHomePath(principal), "/admin/cases");
 });
 
 test("a production shared bearer can read but cannot create an attributed mutation", () => {

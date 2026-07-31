@@ -52,7 +52,7 @@
       "id": "payload_config_import",
       "status": "pass",
       "admin_route": "/payload-admin",
-      "collections": 6
+      "collections": 11
     },
     {
       "id": "database_network_scope",

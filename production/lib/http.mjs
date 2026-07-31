@@ -10,6 +10,8 @@ import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
   adminHomePath,
+  assertAgentRealtyCaseConditionMutation,
+  assertAgentRealtyCaseMutation,
   bindAuthenticatedOperator,
   canAdminAccess,
   canAdminMutate,
@@ -30,6 +32,7 @@ import {
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
+  renderAdminRealtyCasesPayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import { appendDocumentChecklistOutcome, buildDocumentChecklistQueue, readDocumentChecklistOutcomes } from "./document-checklists.mjs";
@@ -137,6 +140,37 @@ import {
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { appendSellerPipelineOutcome, buildSellerPipelineQueue, readSellerPipelineOutcomes } from "./seller-pipeline-outcomes.mjs";
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
+import {
+  appendRealtyCaseAction,
+  buildRealtyCaseQueue,
+  openRealtyCase,
+  readRealtyCaseEvents,
+} from "./realty-cases.mjs";
+import {
+  appendRealtyCaseConditionAction,
+  buildRealtyCaseConditionQueue,
+  openRealtyCaseCondition,
+  readRealtyCaseConditionEvents,
+} from "./realty-case-conditions.mjs";
+import { buildAutonomousRealtyCaseIntents } from "./realty-case-executor.mjs";
+import {
+  assertRealtyCaseRequestProjectionConfig,
+  assertRealtyCaseRequestProjectionInput,
+  projectRealtyCaseConditionRequest,
+  projectRealtyCaseRequest,
+  realtyCaseRequestProjectionFailure,
+} from "./realty-case-request-projection.mjs";
+import {
+  appendRealtyCaseActionInPayload,
+  appendRealtyCaseConditionActionInPayload,
+  assertRealtyCasePayloadAuthorityConfig,
+  assertRealtyCasePayloadAuthorityInput,
+  openRealtyCaseConditionInPayload,
+  openRealtyCaseInPayload,
+  readRealtyCaseConditionEventsFromPayload,
+  readRealtyCaseEventsFromPayload,
+  realtyCasePayloadAuthorityFailure,
+} from "./realty-case-payload-authority.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import {
@@ -368,6 +402,55 @@ function parseBody(request) {
   return parseJsonBody(request);
 }
 
+function realtyCaseInput(input) {
+  const output = { ...(input || {}) };
+  if (!output.mandate && (output.mandateRef || output.mandate_ref)) {
+    output.mandate = {
+      ref: output.mandateRef || output.mandate_ref,
+      grantedByRef: output.mandateGrantedByRef || output.mandate_granted_by_ref,
+      signedAt: output.mandateSignedAt || output.mandate_signed_at,
+      signedEvidenceRef: output.mandateSignedEvidenceRef || output.mandate_signed_evidence_ref,
+      expiresAt: output.mandateExpiresAt || output.mandate_expires_at || null,
+      capabilities: String(output.mandateCapabilities || output.mandate_capabilities || "case:*")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean),
+    };
+  }
+  if (!output.evidenceRefs && !output.evidence_refs && (output.evidenceRef || output.evidence_ref)) {
+    output.evidenceRefs = [{
+      ref: output.evidenceRef || output.evidence_ref,
+      type: output.evidenceType || output.evidence_type,
+      producerKind: output.evidenceProducerKind || output.evidence_producer_kind,
+      issuedAt: output.evidenceIssuedAt || output.evidence_issued_at || null,
+      digest: output.evidenceDigest || output.evidence_digest || null,
+    }];
+  }
+  return output;
+}
+
+function bindRealtyCaseExecutor(input, principal) {
+  const expectedKind = principal?.roles?.includes("agent") ? "agent" : "human";
+  const submittedKind = String(input?.executorKind || input?.executor_kind || "").trim();
+  if (submittedKind && submittedKind !== expectedKind) {
+    throw new Error("Case executor kind must match the authenticated principal");
+  }
+  const prepared = { ...realtyCaseInput(input), executorKind: expectedKind };
+  assertAgentRealtyCaseMutation(principal, prepared);
+  return bindAuthenticatedOperator(prepared, principal);
+}
+
+function bindRealtyCaseConditionExecutor(input, principal, action) {
+  const expectedKind = principal?.roles?.includes("agent") ? "agent" : "human";
+  const submittedKind = String(input?.executorKind || input?.executor_kind || "").trim();
+  if (submittedKind && submittedKind !== expectedKind) {
+    throw new Error("Condition executor kind must match the authenticated principal");
+  }
+  const prepared = { ...(input || {}), executorKind: expectedKind };
+  assertAgentRealtyCaseConditionMutation(principal, { ...prepared, action });
+  return bindAuthenticatedOperator(prepared, principal);
+}
+
 function redirectApprovalInput(request) {
   const input = parseBody(request);
   return {
@@ -566,6 +649,14 @@ export function createHttpApp({
   sellerPipelineOutcomeLedgerPath = null,
   dealLedgerPath = null,
   documentChecklistLedgerPath = null,
+  realtyCaseLedgerPath = null,
+  realtyCaseConditionLedgerPath = null,
+  realtyCaseRequestProjectionEnabled = false,
+  realtyCaseWorkspaceId = "",
+  realtyCasePayloadProjector = null,
+  realtyCasePayloadRuntimeConfigured = false,
+  realtyCasePayloadAuthorityEnabled = false,
+  realtyCasePayload = null,
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
@@ -600,6 +691,7 @@ export function createHttpApp({
   sellerPipelineCreatedAt,
   sellerPipelineOutcomeAt,
   dealClosedAt,
+  realtyCaseRecordedAt,
   slugChangedAt,
   listingQualityGeneratedAt,
   leadSlaGeneratedAt,
@@ -772,6 +864,59 @@ export function createHttpApp({
       }),
       operatorId,
     );
+  const realtyCasePayloadAuthorityActive = () =>
+    assertRealtyCasePayloadAuthorityConfig({
+      realtyCasePayloadAuthorityEnabled,
+      realtyCaseRequestProjectionEnabled,
+      realtyCaseWorkspaceId,
+      realtyCasePayload,
+      realtyCasePayloadRuntimeConfigured,
+    });
+  const currentRealtyCaseEvents = async () =>
+    realtyCasePayloadAuthorityActive()
+      ? readRealtyCaseEventsFromPayload({ payload: realtyCasePayload, workspaceId: realtyCaseWorkspaceId })
+      : readRealtyCaseEvents(realtyCaseLedgerPath || undefined);
+  const currentRealtyCaseConditionEvents = async () =>
+    realtyCasePayloadAuthorityActive()
+      ? readRealtyCaseConditionEventsFromPayload({ payload: realtyCasePayload, workspaceId: realtyCaseWorkspaceId })
+      : readRealtyCaseConditionEvents(realtyCaseConditionLedgerPath || undefined);
+  const currentRealtyCasePayload = async (requestedLocale, operatorId = null) =>
+    renderAdminRealtyCasesPayload(
+      activeRegistry,
+      requestedLocale,
+      buildRealtyCaseQueue(await currentRealtyCaseEvents(), {
+        now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
+      }),
+      operatorId,
+    );
+  const currentAutonomousRealtyCaseIntents = async () =>
+    buildAutonomousRealtyCaseIntents(await currentRealtyCaseEvents(), {
+      now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
+    });
+  const projectCurrentRealtyCase = async (result) => {
+    if (!realtyCaseRequestProjectionEnabled) return null;
+    return projectRealtyCaseRequest({
+      caseId: result.case.id,
+      eventId: result.event.id,
+      filePath: realtyCaseLedgerPath || undefined,
+      workspaceId: realtyCaseWorkspaceId,
+      projector: realtyCasePayloadProjector,
+    });
+  };
+  const projectCurrentRealtyCaseCondition = async (result) => {
+    if (!realtyCaseRequestProjectionEnabled) return null;
+    return projectRealtyCaseConditionRequest({
+      caseId: result.condition.case_id,
+      eventId: result.event.id,
+      filePath: realtyCaseConditionLedgerPath || undefined,
+      workspaceId: realtyCaseWorkspaceId,
+      projector: realtyCasePayloadProjector,
+    });
+  };
+  const currentRealtyCaseConditionQueue = async () =>
+    buildRealtyCaseConditionQueue(await currentRealtyCaseConditionEvents(), {
+      now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
+    });
   const currentConsentPayload = (requestedLocale, operatorId = null) =>
     renderAdminConsentPayload(
       activeRegistry,
@@ -1283,6 +1428,41 @@ export function createHttpApp({
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
       return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/cases", "/admin/cases"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      let payload;
+      try {
+        payload = await currentRealtyCasePayload(url.searchParams.get("locale") || "en", principal);
+      } catch (error) {
+        if (realtyCasePayloadAuthorityEnabled) return adminJson(503, realtyCasePayloadAuthorityFailure());
+        throw error;
+      }
+      if (url.pathname === "/admin/cases" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/cases/intents") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        return adminJson(200, await currentAutonomousRealtyCaseIntents());
+      } catch (error) {
+        if (realtyCasePayloadAuthorityEnabled) return adminJson(503, realtyCasePayloadAuthorityFailure());
+        throw error;
+      }
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/cases/conditions") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        return adminJson(200, await currentRealtyCaseConditionQueue());
+      } catch (error) {
+        if (realtyCasePayloadAuthorityEnabled) return adminJson(503, realtyCasePayloadAuthorityFailure());
+        throw error;
+      }
     }
 
     if (request.method === "GET" && ["/api/admin/consents", "/admin/consents"].includes(url.pathname)) {
@@ -2483,6 +2663,285 @@ export function createHttpApp({
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/cases") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = parseBody(request);
+        const payloadAuthority = realtyCasePayloadAuthorityActive();
+        if (payloadAuthority) {
+          assertRealtyCasePayloadAuthorityInput(input);
+        } else if (
+          assertRealtyCaseRequestProjectionConfig({
+            realtyCaseRequestProjectionEnabled,
+            realtyCaseWorkspaceId,
+            realtyCasePayloadProjector,
+            realtyCasePayloadRuntimeConfigured,
+          })
+        ) {
+          assertRealtyCaseRequestProjectionInput(input);
+        }
+        const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
+        const boundInput = bindRealtyCaseExecutor(input, principal);
+        const result = payloadAuthority
+          ? await openRealtyCaseInPayload(boundInput, {
+              payload: realtyCasePayload,
+              workspaceId: realtyCaseWorkspaceId,
+              recordedAt,
+            })
+          : openRealtyCase(boundInput, {
+              filePath: realtyCaseLedgerPath || undefined,
+              recordedAt,
+            });
+        const audited = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "realty_case_opened" && row.object_id === result.case.id,
+            )
+          : false;
+        if (!audited) {
+          recordAudit({
+            action: "realty_case_opened",
+            actor: result.event.actor,
+            objectType: "realty_case",
+            objectId: result.case.id,
+            metadata: {
+              jurisdiction: result.case.jurisdiction,
+              case_type: result.case.case_type,
+              asset_kind: result.case.asset_kind,
+              execution_mode: result.case.execution_mode,
+              workflow_version: result.case.workflow_version,
+            },
+          }, recordedAt);
+        }
+        if (payloadAuthority) return adminJson(result.idempotent ? 200 : 201, result);
+        try {
+          const projection = await projectCurrentRealtyCase(result);
+          return adminJson(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+        } catch {
+          return adminJson(503, realtyCaseRequestProjectionFailure(result));
+        }
+      } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) {
+          return adminJson(
+            503,
+            realtyCasePayloadAuthorityEnabled ? realtyCasePayloadAuthorityFailure() : realtyCaseRequestProjectionFailure(),
+          );
+        }
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/cases/actions") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = parseBody(request);
+        const payloadAuthority = realtyCasePayloadAuthorityActive();
+        if (payloadAuthority) {
+          assertRealtyCasePayloadAuthorityInput(input, { action: true });
+        } else if (
+          assertRealtyCaseRequestProjectionConfig({
+            realtyCaseRequestProjectionEnabled,
+            realtyCaseWorkspaceId,
+            realtyCasePayloadProjector,
+            realtyCasePayloadRuntimeConfigured,
+          })
+        ) {
+          assertRealtyCaseRequestProjectionInput(input, { action: true });
+        }
+        const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
+        const boundInput = bindRealtyCaseExecutor(input, principal);
+        const result = payloadAuthority
+          ? await appendRealtyCaseActionInPayload(boundInput, {
+              payload: realtyCasePayload,
+              workspaceId: realtyCaseWorkspaceId,
+              recordedAt,
+            })
+          : appendRealtyCaseAction(boundInput, {
+              filePath: realtyCaseLedgerPath || undefined,
+              recordedAt,
+            });
+        const audited = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "realty_case_action_recorded" && row.object_id === result.event.id,
+            )
+          : false;
+        if (!audited) {
+          recordAudit({
+            action: "realty_case_action_recorded",
+            actor: result.event.actor,
+            objectType: "realty_case_event",
+            objectId: result.event.id,
+            metadata: {
+              case_id: result.case.id,
+              case_action: result.event.action,
+              step_key: result.event.step_key,
+              execution_mode: result.case.execution_mode,
+              executor_kind: result.event.executor_kind,
+              case_status: result.case.status,
+              progress_percent: result.case.progress_percent,
+            },
+          }, recordedAt);
+        }
+        if (payloadAuthority) return adminJson(result.idempotent ? 200 : 201, result);
+        try {
+          const projection = await projectCurrentRealtyCase(result);
+          return adminJson(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+        } catch {
+          return adminJson(503, realtyCaseRequestProjectionFailure(result));
+        }
+      } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) {
+          return adminJson(
+            503,
+            realtyCasePayloadAuthorityEnabled ? realtyCasePayloadAuthorityFailure() : realtyCaseRequestProjectionFailure(),
+          );
+        }
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/cases/conditions") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      let result;
+      let payloadAuthority = false;
+      try {
+        const input = parseBody(request);
+        payloadAuthority = realtyCasePayloadAuthorityActive();
+        if (payloadAuthority) {
+          assertRealtyCasePayloadAuthorityInput(input);
+        } else if (
+          assertRealtyCaseRequestProjectionConfig({
+            realtyCaseRequestProjectionEnabled,
+            realtyCaseWorkspaceId,
+            realtyCasePayloadProjector,
+            realtyCasePayloadRuntimeConfigured,
+          })
+        ) {
+          assertRealtyCaseRequestProjectionInput(input);
+        }
+        const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
+        const boundInput = bindRealtyCaseConditionExecutor(input, principal, "condition_opened");
+        result = payloadAuthority
+          ? await openRealtyCaseConditionInPayload(boundInput, {
+              payload: realtyCasePayload,
+              workspaceId: realtyCaseWorkspaceId,
+              recordedAt,
+            })
+          : openRealtyCaseCondition(boundInput, {
+              filePath: realtyCaseConditionLedgerPath || undefined,
+              caseLedgerPath: realtyCaseLedgerPath || undefined,
+              recordedAt,
+            });
+        const audited = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "realty_case_condition_opened" && row.object_id === result.event.id,
+            )
+          : false;
+        if (!audited) {
+          recordAudit({
+            action: "realty_case_condition_opened",
+            actor: result.event.actor,
+            objectType: "realty_case_condition_event",
+            objectId: result.event.id,
+            metadata: {
+              case_id: result.condition.case_id,
+              condition_id: result.condition.id,
+              condition_type: result.condition.type,
+              executor_kind: result.event.executor_kind,
+            },
+          }, recordedAt);
+        }
+      } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) {
+          return adminJson(
+            503,
+            realtyCasePayloadAuthorityEnabled ? realtyCasePayloadAuthorityFailure() : realtyCaseRequestProjectionFailure(),
+          );
+        }
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+      if (payloadAuthority) return adminJson(result.idempotent ? 200 : 201, result);
+      try {
+        const projection = await projectCurrentRealtyCaseCondition(result);
+        return adminJson(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+      } catch {
+        return adminJson(503, realtyCaseRequestProjectionFailure(result));
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/cases/conditions/actions") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      let result;
+      let payloadAuthority = false;
+      try {
+        const input = parseBody(request);
+        payloadAuthority = realtyCasePayloadAuthorityActive();
+        if (payloadAuthority) {
+          assertRealtyCasePayloadAuthorityInput(input, { conditionAction: true });
+        } else if (
+          assertRealtyCaseRequestProjectionConfig({
+            realtyCaseRequestProjectionEnabled,
+            realtyCaseWorkspaceId,
+            realtyCasePayloadProjector,
+            realtyCasePayloadRuntimeConfigured,
+          })
+        ) {
+          assertRealtyCaseRequestProjectionInput(input, { conditionAction: true });
+        }
+        const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
+        const boundInput = bindRealtyCaseConditionExecutor(input, principal, input?.action);
+        result = payloadAuthority
+          ? await appendRealtyCaseConditionActionInPayload(boundInput, {
+              payload: realtyCasePayload,
+              workspaceId: realtyCaseWorkspaceId,
+              recordedAt,
+            })
+          : appendRealtyCaseConditionAction(boundInput, {
+              filePath: realtyCaseConditionLedgerPath || undefined,
+              caseLedgerPath: realtyCaseLedgerPath || undefined,
+              recordedAt,
+            });
+        const audited = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "realty_case_condition_action_recorded" && row.object_id === result.event.id,
+            )
+          : false;
+        if (!audited) {
+          recordAudit({
+            action: "realty_case_condition_action_recorded",
+            actor: result.event.actor,
+            objectType: "realty_case_condition_event",
+            objectId: result.event.id,
+            metadata: {
+              case_id: result.condition.case_id,
+              condition_id: result.condition.id,
+              condition_action: result.event.action,
+              condition_status: result.condition.status,
+              executor_kind: result.event.executor_kind,
+            },
+          }, recordedAt);
+        }
+      } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) {
+          return adminJson(
+            503,
+            realtyCasePayloadAuthorityEnabled ? realtyCasePayloadAuthorityFailure() : realtyCaseRequestProjectionFailure(),
+          );
+        }
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+      if (payloadAuthority) return adminJson(result.idempotent ? 200 : 201, result);
+      try {
+        const projection = await projectCurrentRealtyCaseCondition(result);
+        return adminJson(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+      } catch {
+        return adminJson(503, realtyCaseRequestProjectionFailure(result));
       }
     }
 
