@@ -737,6 +737,15 @@
     apply(0, false);
     schedule();
   }
+  function initHorizontalFocusRails() {
+    var rails = document.querySelectorAll(".hp-guides__rail, .hp-resorts");
+    for (var i = 0; i < rails.length; i += 1) {
+      rails[i].addEventListener("focusin", function (event) {
+        var item = event.target.closest("a[href]");
+        if (item && this.contains(item)) item.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "auto" });
+      });
+    }
+  }
   function initImageFallbacks() {
     var images = document.querySelectorAll("main[data-react-public-ui] img, img[data-fallback-src]");
     function recoverImage(image) {
@@ -1439,6 +1448,7 @@
   initGeographyComboboxes();
   initHeroAdvancedSearch();
   initHeroGallery();
+  initHorizontalFocusRails();
   initImageFallbacks();
  initListingGallery();
  initMobileListingGallery();

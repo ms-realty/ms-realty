@@ -46,6 +46,10 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.doesNotMatch(PUBLIC_APP_JS, /initMobileSearchFilters/);
   assert.match(PUBLIC_APP_JS, /function initPublicMobileNavigation/);
   assert.match(PUBLIC_APP_JS, /initPublicMobileNavigation\(\);/);
+  assert.match(PUBLIC_APP_JS, /function initHorizontalFocusRails/);
+  assert.match(PUBLIC_APP_JS, /\.hp-guides__rail, \.hp-resorts/);
+  assert.match(PUBLIC_APP_JS, /item\.scrollIntoView\(\{ block: "nearest", inline: "nearest", behavior: "auto" \}\)/);
+  assert.match(PUBLIC_APP_JS, /initHorizontalFocusRails\(\);/);
   assert.match(PUBLIC_APP_JS, /function initSearchScrollRestoration/);
   assert.match(PUBLIC_APP_JS, /sessionStorage\.setItem\(SEARCH_SCROLL_KEY/);
   assert.match(PUBLIC_APP_JS, /sessionStorage\.setItem\(SEARCH_RETURN_KEY/);
