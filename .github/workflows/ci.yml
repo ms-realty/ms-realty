@@ -7,7 +7,11 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a production deployment halfway through its health check or rollback.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 jobs:
   check:
@@ -82,3 +86,68 @@ jobs:
       - name: Stop deployable container
         if: always() && steps.container_smoke.outputs.container_id != ''
         run: docker rm --force "${{ steps.container_smoke.outputs.container_id }}"
+
+  deploy:
+    name: Deploy production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      PRODUCTION_URL: ${{ vars.MS_REALTY_PRODUCTION_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require deployment credentials
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$PRODUCTION_URL"
+
+      - name: Capture active Worker version
+        id: previous
+        run: |
+          status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
+          version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy exact main commit
+        id: deploy
+        run: >-
+          npx --yes wrangler@4.117.0 deploy
+          --strict
+          --keep-vars
+          --containers-rollout immediate
+          --tag "$GITHUB_SHA"
+          --message "Automated production deploy $GITHUB_SHA"
+
+      - name: Verify deployed Worker
+        run: |
+          health_url="${PRODUCTION_URL%/}/api/health"
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 20 "$health_url" --output "$RUNNER_TEMP/health.json" &&
+              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok") process.exit(1)' "$RUNNER_TEMP/health.json"; then
+              exit 0
+            fi
+            echo "Health check attempt $attempt/30 failed; retrying."
+            sleep 10
+          done
+          exit 1
+
+      - name: Roll back failed deployment
+        if: failure() && steps.deploy.outcome == 'success' && steps.previous.outputs.version != ''
+        run: |
+          npx --yes wrangler@4.117.0 rollback "${{ steps.previous.outputs.version }}" --name ms-realty --message "Automatic rollback after failed health check for $GITHUB_SHA" --yes
+          status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
+          version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
+          test "$version" = "${{ steps.previous.outputs.version }}"
