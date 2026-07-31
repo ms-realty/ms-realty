@@ -11,7 +11,8 @@ import { applyRealtyCasePayloadManifest } from "./realty-case-payload-projector.
 import { buildRealtyCaseConditionPayloadManifest } from "./realty-case-condition-payload-reconciliation.mjs";
 import { applyRealtyCaseConditionPayloadManifest } from "./realty-case-condition-payload-projector.mjs";
 
-const MAX_AUTHORITY_ATTEMPTS = 3;
+const MAX_AUTHORITY_ATTEMPTS = 6;
+const AUTHORITY_RETRY_DELAY_MS = 50;
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -56,9 +57,10 @@ function sourceMandate(value) {
   };
 }
 
-function unavailableError(message) {
+function unavailableError(message, cause = null) {
   const error = new Error(message);
   error.status = 503;
+  if (cause) error.cause = cause;
   return error;
 }
 
@@ -262,7 +264,28 @@ export async function readRealtyCasePayloadAuthorityHistory({ payload, workspace
 }
 
 function retryableAuthorityError(error) {
-  return /could not serialize|serialization failure|deadlock detected|duplicate key|ahead of the source manifest/i.test(String(error?.message || error));
+  return /could not serialize|serialization failure|deadlock detected|duplicate key|ahead of the source manifest|(?:case_id|condition_id),\s*sequence/i.test(
+    String(error?.message || error),
+  );
+}
+
+function retryDelay(attempt) {
+  return new Promise((resolve) => setTimeout(resolve, AUTHORITY_RETRY_DELAY_MS * 2 ** (attempt - 1)));
+}
+
+function authorityRecordedAt(recordedAt, events, caseId) {
+  const requested = timestamp(recordedAt, "recordedAt");
+  const latest = events
+    .filter((event) => event.case_id === caseId)
+    .map((event) => timestamp(event.recorded_at, "Payload event recorded_at"))
+    .sort()
+    .at(-1);
+  if (!latest || requested > latest) return requested;
+  return new Date(Date.parse(latest) + 1).toISOString();
+}
+
+function inputCaseId(input) {
+  return String(input?.caseId || input?.case_id || input?.id || "").trim();
 }
 
 async function persistCaseMutation(input, { payload, workspaceId, recordedAt, planner } = {}) {
@@ -270,15 +293,21 @@ async function persistCaseMutation(input, { payload, workspaceId, recordedAt, pl
   const runtime = await runtimePayload(payload);
   for (let attempt = 1; attempt <= MAX_AUTHORITY_ATTEMPTS; attempt += 1) {
     const history = await readPayloadHistory({ payload: runtime, workspaceId: workspaceIdValue });
-    const result = planner(input, { events: history.caseEvents, recordedAt });
+    const result = planner(input, {
+      events: history.caseEvents,
+      recordedAt: authorityRecordedAt(recordedAt, history.caseEvents, inputCaseId(input)),
+    });
     if (result.idempotent) return result;
     try {
       const manifest = buildRealtyCasePayloadManifest([...history.caseEvents, result.event], { workspaceId: workspaceIdValue });
       await applyRealtyCasePayloadManifest(manifest, { payload: runtime, maxAttempts: 1 });
       return result;
     } catch (error) {
-      if (attempt < MAX_AUTHORITY_ATTEMPTS && retryableAuthorityError(error)) continue;
-      throw unavailableError("Payload case authority could not record the mutation");
+      if (attempt < MAX_AUTHORITY_ATTEMPTS && retryableAuthorityError(error)) {
+        await retryDelay(attempt);
+        continue;
+      }
+      throw unavailableError("Payload case authority could not record the mutation", error);
     }
   }
   throw unavailableError("Payload case authority exhausted mutation retries");
@@ -292,7 +321,7 @@ async function persistConditionMutation(input, { payload, workspaceId, recordedA
     const result = planner(input, {
       caseEvents: history.caseEvents,
       conditionEvents: history.conditionEvents,
-      recordedAt,
+      recordedAt: authorityRecordedAt(recordedAt, history.conditionEvents, inputCaseId(input)),
     });
     if (result.idempotent) return result;
     try {
@@ -302,8 +331,11 @@ async function persistConditionMutation(input, { payload, workspaceId, recordedA
       await applyRealtyCaseConditionPayloadManifest(manifest, { payload: runtime, maxAttempts: 1 });
       return result;
     } catch (error) {
-      if (attempt < MAX_AUTHORITY_ATTEMPTS && retryableAuthorityError(error)) continue;
-      throw unavailableError("Payload case authority could not record the condition mutation");
+      if (attempt < MAX_AUTHORITY_ATTEMPTS && retryableAuthorityError(error)) {
+        await retryDelay(attempt);
+        continue;
+      }
+      throw unavailableError("Payload case authority could not record the condition mutation", error);
     }
   }
   throw unavailableError("Payload case authority exhausted mutation retries");

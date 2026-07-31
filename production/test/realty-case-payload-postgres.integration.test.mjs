@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomBytes, randomUUID } from "node:crypto";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import net from "node:net";
 import os from "node:os";
@@ -41,6 +41,38 @@ function command(commandName, args, { env, label }) {
   if (result.error) throw new Error(`${label} could not start: ${result.error.message}`);
   assert.equal(result.status, 0, `${label} failed\n${redact(`${result.stdout || ""}${result.stderr || ""}`, env)}`);
   return result;
+}
+
+function commandAsync(commandName, args, { env, label }) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(commandName, args, { cwd: root, env });
+    let stdout = "";
+    let stderr = "";
+    let timedOut = false;
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      child.kill("SIGTERM");
+    }, COMMAND_TIMEOUT_MS);
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    child.once("error", (error) => {
+      clearTimeout(timeout);
+      reject(new Error(`${label} could not start: ${error.message}`));
+    });
+    child.once("close", (status, signal) => {
+      clearTimeout(timeout);
+      if (status === 0) {
+        resolve({ stdout, stderr });
+        return;
+      }
+      const reason = timedOut ? `timed out after ${COMMAND_TIMEOUT_MS}ms` : `failed with ${signal || `status ${status}`}`;
+      reject(new Error(`${label} ${reason}\n${redact(`${stdout}${stderr}`, env)}`));
+    });
+  });
 }
 
 function composeArgs(project, args) {
@@ -196,17 +228,19 @@ function assertCleanReadback(result, workspaceId) {
   });
 }
 
-function exercisePayloadAuthority(env, workspaceId) {
+async function exercisePayloadAuthority(env, workspaceId) {
   const caseId = "case-payload-postgres-authority-it";
   const openedEventId = `realty-case-${caseId}-opened`;
+  const blockedEventIds = [
+    "case-payload-postgres-authority-it-lead-blocked",
+    "case-payload-postgres-authority-it-requirements-blocked",
+  ];
   const frozenEventId = "case-payload-postgres-authority-it-frozen";
-  const script = `
+  const openScript = `
     import assert from "node:assert/strict";
     import { getPayload } from ${JSON.stringify(pathToFileURL(payloadRuntime).href)};
     import {
-      appendRealtyCaseActionInPayload,
       openRealtyCaseInPayload,
-      readRealtyCasePayloadAuthorityHistory,
     } from ${JSON.stringify(pathToFileURL(payloadAuthority).href)};
 
     const workspaceId = ${JSON.stringify(workspaceId)};
@@ -256,6 +290,151 @@ function exercisePayloadAuthority(env, workspaceId) {
       );
       assert.equal(opened.idempotent, false);
       assert.equal(opened.event.id, openedEventId);
+    } catch (error) {
+      console.error(error.stack || error);
+      exitCode = 1;
+    } finally {
+      if (payload) {
+        try {
+          await payload.destroy();
+        } catch (error) {
+          console.error(error.stack || error);
+          exitCode = 1;
+        }
+      }
+    }
+    process.exit(exitCode);
+  `;
+  command(process.execPath, ["--input-type=module", "--eval", openScript], {
+    env,
+    label: "opening Payload RealtyCase authority fixture",
+  });
+
+  const concurrentInputs = [
+    {
+      id: blockedEventIds[0],
+      caseId,
+      action: "step_blocked",
+      stepKey: "lead_intake",
+      reasonCode: "integration_concurrent_lead_block",
+      actor: "trusted-agent-payload-postgres-it",
+      executorKind: "agent",
+    },
+    {
+      id: blockedEventIds[1],
+      caseId,
+      action: "step_blocked",
+      stepKey: "requirements_brief",
+      reasonCode: "integration_concurrent_requirements_block",
+      actor: "trusted-agent-payload-postgres-it",
+      executorKind: "agent",
+    },
+  ];
+  const writerScript = (input) => `
+    import assert from "node:assert/strict";
+    import { getPayload } from ${JSON.stringify(pathToFileURL(payloadRuntime).href)};
+    import { appendRealtyCaseActionInPayload } from ${JSON.stringify(pathToFileURL(payloadAuthority).href)};
+
+    const input = ${JSON.stringify(input)};
+    const workspaceId = ${JSON.stringify(workspaceId)};
+    let payload;
+    let exitCode = 0;
+
+    try {
+      const configModule = await import(${JSON.stringify(pathToFileURL(payloadConfig).href)});
+      payload = await getPayload({ config: configModule.default });
+      const result = await appendRealtyCaseActionInPayload(input, {
+        payload,
+        workspaceId,
+        recordedAt: "2026-07-30T08:10:00.000Z",
+      });
+      assert.equal(result.idempotent, false);
+      assert.equal(result.event.id, input.id);
+    } catch (error) {
+      console.error(error.cause?.stack || error.stack || error);
+      exitCode = 1;
+    } finally {
+      if (payload) {
+        try {
+          await payload.destroy();
+        } catch (error) {
+          console.error(error.stack || error);
+          exitCode = 1;
+        }
+      }
+    }
+    process.exit(exitCode);
+  `;
+  await Promise.all(
+    concurrentInputs.map((input) =>
+      commandAsync(process.execPath, ["--input-type=module", "--eval", writerScript(input)], {
+        env,
+        label: `concurrent Payload RealtyCase authority writer ${input.id}`,
+      }),
+    ),
+  );
+
+  const verifyScript = `
+    import assert from "node:assert/strict";
+    import { getPayload } from ${JSON.stringify(pathToFileURL(payloadRuntime).href)};
+    import {
+      appendRealtyCaseActionInPayload,
+      readRealtyCasePayloadAuthorityHistory,
+    } from ${JSON.stringify(pathToFileURL(payloadAuthority).href)};
+
+    const workspaceId = ${JSON.stringify(workspaceId)};
+    const caseId = ${JSON.stringify(caseId)};
+    const openedEventId = ${JSON.stringify(openedEventId)};
+    const blockedEventIds = ${JSON.stringify(blockedEventIds)};
+    const frozenEventId = ${JSON.stringify(frozenEventId)};
+    const concurrentInputs = ${JSON.stringify(concurrentInputs)};
+    let payload;
+    let exitCode = 0;
+
+    async function rows(collection) {
+      const result = await payload.find({
+        collection,
+        depth: 0,
+        limit: 10,
+        overrideAccess: true,
+        pagination: false,
+        where: { workspace_id: { equals: workspaceId } },
+      });
+      return result.docs;
+    }
+
+    try {
+      const configModule = await import(${JSON.stringify(pathToFileURL(payloadConfig).href)});
+      payload = await getPayload({ config: configModule.default });
+      const options = { payload, workspaceId };
+      const beforeFreeze = await readRealtyCasePayloadAuthorityHistory(options);
+      const expectedBeforeFreeze = [openedEventId, ...blockedEventIds].sort();
+      assert.deepEqual(beforeFreeze.caseEvents.map((event) => event.id).sort(), expectedBeforeFreeze);
+      assert.deepEqual(beforeFreeze.conditionEvents, []);
+      assert.equal(beforeFreeze.caseEvents.length, expectedBeforeFreeze.length);
+      const [eventsBeforeFreeze, outboxBeforeFreeze] = await Promise.all([rows("realty_case_events"), rows("realty_case_outbox")]);
+      const orderedEvents = [...eventsBeforeFreeze].sort((left, right) => Number(left.sequence) - Number(right.sequence));
+      assert.deepEqual(orderedEvents.map((event) => Number(event.sequence)), [1, 2, 3]);
+      assert.deepEqual(beforeFreeze.caseEvents.map((event) => event.id), orderedEvents.map((event) => event.event_id));
+      assert.equal(new Set(eventsBeforeFreeze.map((event) => event.event_id)).size, 3);
+      assert.equal(new Set(eventsBeforeFreeze.map((event) => event.idempotency_key)).size, 3);
+      assert.equal(outboxBeforeFreeze.length, 3);
+      assert.equal(new Set(outboxBeforeFreeze.map((row) => row.idempotency_key)).size, 3);
+      assert.deepEqual(
+        outboxBeforeFreeze.map((row) => String(row.source_event?.id ?? row.source_event)).sort(),
+        orderedEvents.map((event) => String(event.id)).sort(),
+      );
+      assert.deepEqual(
+        outboxBeforeFreeze.map((row) => row.payload_refs.last_event_id).sort(),
+        expectedBeforeFreeze,
+      );
+
+      const retries = await Promise.all(
+        concurrentInputs.map((input) =>
+          appendRealtyCaseActionInPayload(input, { ...options, recordedAt: "2026-07-30T08:10:00.000Z" }),
+        ),
+      );
+      assert.deepEqual(retries.map((result) => result.idempotent), [true, true]);
 
       const freezeInput = {
         id: frozenEventId,
@@ -268,34 +447,30 @@ function exercisePayloadAuthority(env, workspaceId) {
       };
       const frozen = await appendRealtyCaseActionInPayload(
         freezeInput,
-        { ...options, recordedAt: "2026-07-30T08:10:00.000Z" },
+        { ...options, recordedAt: "2026-07-30T08:15:00.000Z" },
       );
       assert.equal(frozen.idempotent, false);
       assert.equal(frozen.case.status, "frozen");
 
-      const beforeRetry = await readRealtyCasePayloadAuthorityHistory(options);
-      assert.deepEqual(beforeRetry.caseEvents.map((event) => event.id), [openedEventId, frozenEventId]);
-      assert.deepEqual(beforeRetry.conditionEvents, []);
-      assert.equal(beforeRetry.caseEvents.at(-1).authority_ref, freezeInput.authorityRef);
-
       const retried = await appendRealtyCaseActionInPayload(
         freezeInput,
-        { ...options, recordedAt: "2026-07-30T08:10:00.000Z" },
+        { ...options, recordedAt: "2026-07-30T08:15:00.000Z" },
       );
       assert.equal(retried.idempotent, true);
 
       const history = await readRealtyCasePayloadAuthorityHistory(options);
-      assert.deepEqual(history.caseEvents.map((event) => event.id), [openedEventId, frozenEventId]);
+      const expected = [openedEventId, ...blockedEventIds, frozenEventId].sort();
+      assert.deepEqual(history.caseEvents.map((event) => event.id).sort(), expected);
+      assert.equal(history.caseEvents.at(-1).authority_ref, freezeInput.authorityRef);
       const [events, outbox] = await Promise.all([rows("realty_case_events"), rows("realty_case_outbox")]);
-      assert.equal(events.length, 2);
-      assert.equal(new Set(events.map((event) => event.event_id)).size, 2);
-      assert.equal(new Set(events.map((event) => event.idempotency_key)).size, 2);
-      assert.equal(outbox.length, 2);
-      assert.equal(new Set(outbox.map((row) => row.idempotency_key)).size, 2);
-      assert.equal(new Set(outbox.map((row) => String(row.source_event?.id ?? row.source_event))).size, 2);
+      assert.equal(events.length, 4);
+      assert.equal(new Set(events.map((event) => event.event_id)).size, 4);
+      assert.equal(new Set(events.map((event) => event.idempotency_key)).size, 4);
+      assert.equal(outbox.length, 4);
+      assert.equal(new Set(outbox.map((row) => row.idempotency_key)).size, 4);
       assert.deepEqual(
         outbox.map((row) => row.payload_refs.last_event_id).sort(),
-        [openedEventId, frozenEventId].sort(),
+        expected,
       );
     } catch (error) {
       console.error(error.stack || error);
@@ -312,9 +487,9 @@ function exercisePayloadAuthority(env, workspaceId) {
     }
     process.exit(exitCode);
   `;
-  command(process.execPath, ["--input-type=module", "--eval", script], {
+  command(process.execPath, ["--input-type=module", "--eval", verifyScript], {
     env,
-    label: "exercising Payload RealtyCase authority writes",
+    label: "verifying concurrent Payload RealtyCase authority writers",
   });
 }
 
@@ -448,7 +623,7 @@ test(
       runCompose(project, ["up", "--detach", "--wait", "payload-postgres"], env, "starting isolated Payload Postgres");
       command(process.execPath, [payloadCli, "migrate"], { env, label: "running Payload migrations" });
       command(process.execPath, [payloadCli, "migrate:status"], { env, label: "checking Payload migration status" });
-      exercisePayloadAuthority(env, authorityWorkspaceId);
+      await exercisePayloadAuthority(env, authorityWorkspaceId);
 
       const fixture = writeFixture(directory);
       const projectorEnv = {

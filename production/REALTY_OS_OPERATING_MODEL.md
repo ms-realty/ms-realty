@@ -665,9 +665,9 @@ Implemented in this change:
 - `npm run case:project` and `npm run case:conditions:project` are scoped dry runs by default. They
   require `MS_REALTY_WORKSPACE_ID`, respect their corresponding ledger-path variables, and require
   `MS_REALTY_CASE_PROJECTOR_APPLY=1` to write; the case projector runs before the condition projector;
-- an opt-in disposable Postgres integration test proves a fresh migration, both projectors,
-  direct authority open/action/read-back/retry, relationship storage, and idempotent replay without
-  using the operator's local Payload volume;
+- an opt-in disposable Postgres integration test proves a fresh migration, both projectors, direct
+  authority open/action/read-back/retry under two competing Payload writers, relationship storage,
+  and idempotent replay without using the operator's local Payload volume;
 - regulatory-source snapshot primitives that bind official-source receipt references and SHA-256
   content digests, compare changes/staleness, and require professional and approval-evidence
   references before an all-successful snapshot can be approved;
@@ -741,8 +741,9 @@ Not yet production-complete:
   reference-only rather than a database source of truth;
 - production multi-writer/reconciliation coverage and approved-runtime acceptance for the direct
   authority path. Its per-mutation writer is transactional, but it currently has fake-transaction
-  and disposable-database proof only; real concurrent writers, least-privilege runtime roles,
-  monitoring/rollback, backup/restore, and a controlled cutover remain required. The separate
+  and disposable-database proof only; approved-runtime concurrent writers under expected load,
+  least-privilege runtime roles, monitoring/rollback, backup/restore, and a controlled cutover
+  remain required. The separate
   ledger-first request-projection bridge remains non-atomic and is not a database source of truth;
 - signed structured mandate limits beyond the current capability set;
 - child booking/stay/management-period runs;
@@ -801,9 +802,9 @@ dry-run/apply CLIs. An opt-in direct authority path uses the same planners and p
 Payload-only case/condition runtime reads and writes; it is off by default and mutually exclusive
 with the ledger-first request bridge. A case projector atomically derives one reference-only
 internal reconciliation intent per case projection digest. The committed migrations, idempotent
-projectors, direct authority retries, and `case:reconcile` read-back have passed against a
-disposable migrated PostgreSQL runtime. `case:reconcile` uses an explicit read-back URL, a
-workspace-scoped repeatable-read transaction, and reports sanitized drift counts for case,
+projectors, direct authority concurrent-writer retries, and `case:reconcile` read-back have passed
+against a disposable migrated PostgreSQL runtime. `case:reconcile` uses an explicit read-back URL,
+a workspace-scoped repeatable-read transaction, and reports sanitized drift counts for case,
 condition, and internal reconciliation-intent records only. Neither it nor the internal intent is
 production-runtime evidence or a source of operational truth.
 

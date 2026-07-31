@@ -14,7 +14,7 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-function fakePayload({ failOnCreate = null } = {}) {
+function fakePayload({ failOnCreate = null, failCreateAttempts = Infinity, failMessage = null } = {}) {
   const rows = Object.fromEntries(
     [
       "realty_cases",
@@ -27,6 +27,7 @@ function fakePayload({ failOnCreate = null } = {}) {
   );
   let nextId = 1;
   let snapshot = null;
+  let failedCreates = 0;
   const calls = { begin: 0, commit: 0, rollback: 0 };
   const matches = (document, where) => Object.entries(where || {}).every(([key, rule]) => document[key] === rule.equals);
   return {
@@ -54,7 +55,10 @@ function fakePayload({ failOnCreate = null } = {}) {
       },
       async create({ collection, data, req }) {
         assert.match(req.transactionID, /^transaction-/);
-        if (collection === failOnCreate) throw new Error(`forced ${collection} failure`);
+        if (collection === failOnCreate && failedCreates < failCreateAttempts) {
+          failedCreates += 1;
+          throw new Error(failMessage || `forced ${collection} failure`);
+        }
         const document = { id: nextId++, ...clone(data) };
         rows[collection].push(document);
         return clone(document);
@@ -183,6 +187,23 @@ test("Payload authority rolls back a failed first write and never reports a reco
   assert.equal(target.rows.realty_cases.length, 0);
   assert.equal(target.rows.realty_case_events.length, 0);
   assert.equal(target.rows.realty_case_outbox.length, 0);
+});
+
+test("Payload authority retries a known per-case sequence collision", async () => {
+  const target = fakePayload({
+    failOnCreate: "realty_case_events",
+    failCreateAttempts: 1,
+    failMessage: "ValidationError: The following field is invalid: case_id, sequence",
+  });
+  const opened = await openRealtyCaseInPayload(caseInput("case-authority-sequence-retry"), {
+    payload: target.payload,
+    workspaceId: "workspace-sandanski",
+    recordedAt: "2026-07-30T08:05:00.000Z",
+  });
+  assert.equal(opened.idempotent, false);
+  assert.equal(target.calls.rollback, 1);
+  assert.equal(target.calls.commit, 1);
+  assert.equal(target.rows.realty_case_events.length, 1);
 });
 
 test("autonomous execution reads and records through Payload authority", async () => {
