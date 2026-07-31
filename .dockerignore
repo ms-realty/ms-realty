@@ -16,4 +16,18 @@ migration/content-evidence/
 production/data/search-engine-sync-report.json
 production/data/search-engine-query-report.json
 production/data/hermes-draft-worker-report.json
+production/data/hermes-agent-runtime-report.json
 production/data/payload-runtime-report.json
+production/data/production-recovery-report.json
+
+# Large or machine-local runtime state must never enter the container image.
+production/data/media-mirror
+production/data/media-mirror-manifest.json
+production/data/media-upload-manifest.json
+production/data/hermes-backend.json
+.playwright-mcp
+.wrangler
+
+# These run at the edge and are bundled by Wrangler, not copied into Next.
+workers/
+wrangler.jsonc
