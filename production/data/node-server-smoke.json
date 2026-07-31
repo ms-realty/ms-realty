@@ -63,7 +63,7 @@
         {
           "id": "monitoring_rollback",
           "status": "blocked",
-          "message": "Monitoring evidence and rollback steps are required before launch."
+          "message": "Monitoring evidence, an automated rollback report, and rollback steps are required before launch."
         },
         {
           "id": "payload_runtime",
@@ -81,7 +81,7 @@
       "cache-control": "no-store",
       "connection": "keep-alive",
       "content-encoding": "gzip",
-      "content-length": "531",
+      "content-length": "543",
       "content-type": "application/json; charset=utf-8",
       "keep-alive": "timeout=5",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",

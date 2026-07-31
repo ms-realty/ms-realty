@@ -664,7 +664,7 @@
         "rollback_steps": 4,
         "machine_evidence": {
           "status": "missing",
-          "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/monitoring-rollback-report.json"
+          "path": "/Users/ivan/Code/MS-Realty-production-mainline/production/data/monitoring-rollback-report.json"
         }
       },
       "next_actions": [
@@ -743,7 +743,7 @@
             "id": "payload_config_import",
             "status": "pass",
             "admin_route": "/payload-admin",
-            "collections": 6
+            "collections": 13
           },
           {
             "id": "database_network_scope",
