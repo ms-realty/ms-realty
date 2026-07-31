@@ -6,7 +6,6 @@ on:
     types: [completed]
 
 permissions:
-  actions: write
   contents: write
   pull-requests: write
 
@@ -73,11 +72,11 @@ jobs:
               return;
             }
 
-            await github.rest.actions.createWorkflowDispatch({
+            await github.rest.repos.createDispatchEvent({
               owner,
               repo,
-              workflow_id: "ci.yml",
-              ref: "main",
+              event_type: "auto_merge_deploy",
+              client_payload: { merge_sha: result.sha },
             });
 
             try {

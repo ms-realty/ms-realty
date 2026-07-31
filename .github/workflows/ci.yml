@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
+  repository_dispatch:
+    types: [auto_merge_deploy]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -91,7 +92,12 @@ jobs:
 
   deploy:
     name: Deploy production
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' ||
+      (github.event_name == 'repository_dispatch' &&
+      github.event.action == 'auto_merge_deploy' &&
+      github.event.client_payload.merge_sha == github.sha))
     needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -170,7 +176,7 @@ jobs:
       - name: Verify deployed Worker
         run: |
           health_url="${{ steps.workers_dev.outputs.url }}"
-          for attempt in $(seq 1 30); do
+          for attempt in $(seq 1 100); do
             if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/health.json" &&
               node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const expected=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== expected) process.exit(1)' "$RUNNER_TEMP/health.json" "$GITHUB_SHA"; then
               exit 0
