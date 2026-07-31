@@ -139,6 +139,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       const healthBody = await health.json();
       assert.equal(health.status, 200);
       assert.equal(healthBody.status, "ok");
+      assert.equal(healthBody.build_marker, "unversioned");
       assert.equal(healthBody.launch_ready, false);
       assert.deepEqual(healthBody.blockers, ["external_seo_exports"]);
 
