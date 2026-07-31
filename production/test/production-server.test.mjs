@@ -22,6 +22,7 @@ test("production server entrypoint serves runtime routes with env config", async
   const redirectApprovalPath = `${operatorDir}/redirect-approvals.jsonl`;
   const deployableRedirectOutputPath = `${operatorDir}/deployable-redirects.json`;
   const localeRegistryPath = `${operatorDir}/registry.json`;
+  const monitoringRollbackReportPath = `${operatorDir}/monitoring-rollback-report.json`;
   const registry = JSON.parse(fs.readFileSync(fromRoot("locales", "registry.json"), "utf8"));
   const french = registry.locales.find((locale) => locale.code === "fr");
   french.public_enabled = true;
@@ -62,6 +63,7 @@ test("production server entrypoint serves runtime routes with env config", async
     MS_REALTY_SEARCH_SYNC_REPORT_PATH: fromRoot("production", "data", "search-engine-sync-report.json.example"),
     MS_REALTY_SEARCH_QUERY_REPORT_PATH: fromRoot("production", "data", "search-engine-query-report.json.example"),
     MS_REALTY_HERMES_WORKER_REPORT_PATH: fromRoot("production", "data", "hermes-draft-worker-report.json.example"),
+    MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: monitoringRollbackReportPath,
   });
   assert.equal(config.port, 0);
   assert.equal(config.host, "127.0.0.1");
@@ -78,6 +80,7 @@ test("production server entrypoint serves runtime routes with env config", async
   assert.match(config.searchSyncReportPath, /search-engine-sync-report\.json\.example$/);
   assert.match(config.searchQueryReportPath, /search-engine-query-report\.json\.example$/);
   assert.match(config.hermesWorkerReportPath, /hermes-draft-worker-report\.json\.example$/);
+  assert.equal(config.monitoringRollbackReportPath, monitoringRollbackReportPath);
 
   const server = createProductionServer(config);
   const address = await listen(server, 0, "127.0.0.1");
@@ -146,6 +149,13 @@ test("production server entrypoint serves runtime routes with env config", async
     assert.equal(readiness.status, 200);
     assert.equal(readiness.body.blockers.includes("listing_quality_review"), true);
     assert.equal(readiness.body.blockers.includes("live_services"), true);
+    assert.equal(
+      readiness.body.gates.find((gate) => gate.id === "monitoring_rollback").evidence.machine_evidence.path,
+      monitoringRollbackReportPath,
+    );
+    const ready = await jsonFetch(baseUrl, "/api/ready");
+    assert.equal(ready.status, 503);
+    assert.equal(ready.body.blocked_gates.some((gate) => gate.id === "monitoring_rollback"), true);
     const auditRows = readAuditLog(auditLogPath);
     assert.equal(assertAuditLog(auditRows), true);
     assert.deepEqual(

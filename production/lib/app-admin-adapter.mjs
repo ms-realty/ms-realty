@@ -63,6 +63,7 @@ import {
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
+import { monitoringRollbackState } from "./monitoring-rollback.mjs";
 import {
   productionRecoveryState,
   readProductionRecoveryTemplate,
@@ -256,6 +257,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
     hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
     liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
+    monitoringRollbackReportPath: env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     productionRecoveryReportPath: env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
@@ -898,6 +900,7 @@ function launchReadiness(config) {
       hermesReportPath: config.hermesWorkerReportPath || undefined,
     }),
     liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
+    monitoringRollback: monitoringRollbackState(config.monitoringRollbackReportPath || undefined),
     payloadRuntime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
     productionRecovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
   });

@@ -169,6 +169,7 @@ import {
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
+import { monitoringRollbackState } from "./monitoring-rollback.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
 import {
@@ -579,6 +580,7 @@ export function createHttpApp({
   searchQueryReportPath = null,
   hermesWorkerReportPath = null,
   liveServiceProvisioningReportPath = null,
+  monitoringRollbackReportPath = null,
   payloadRuntimeReportPath = null,
   productionRecoveryReportPath = null,
   seoEvidenceInputDir = null,
@@ -921,6 +923,7 @@ export function createHttpApp({
         hermesReportPath: hermesWorkerReportPath || undefined,
       }),
       liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
+      monitoringRollback: monitoringRollbackState(monitoringRollbackReportPath || undefined),
       payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
       productionRecovery: productionRecoveryState(productionRecoveryReportPath || undefined),
     });

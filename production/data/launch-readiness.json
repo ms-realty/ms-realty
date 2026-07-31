@@ -646,7 +646,7 @@
     {
       "id": "monitoring_rollback",
       "status": "blocked",
-      "message": "Monitoring evidence and rollback steps are required before launch.",
+      "message": "Monitoring evidence, an automated rollback report, and rollback steps are required before launch.",
       "evidence": {
         "monitoring_sources": [
           "privacy_events",
@@ -661,11 +661,16 @@
           "backlinks": "missing_export"
         },
         "privacy_events_status": "imported",
-        "rollback_steps": 4
+        "rollback_steps": 4,
+        "machine_evidence": {
+          "status": "missing",
+          "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/monitoring-rollback-report.json"
+        }
       },
       "next_actions": [
         "Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.",
-        "Confirm rollback steps cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback."
+        "Mount a current redacted monitoring and rollback report, then run npm run monitoring:preflight.",
+        "Confirm the automated rollback policy, canary, and isolated drill cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback."
       ]
     },
     {

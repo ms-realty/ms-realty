@@ -87,6 +87,17 @@ function liveServiceProvisioningLine(provisioning) {
   return `- ${provisioning.status || "unknown"}${details.length ? ` (${details.join("; ")})` : ""}`;
 }
 
+function monitoringRollbackEvidenceLine(evidence) {
+  const details = [
+    evidence.path ? `path ${evidence.path}` : "",
+    Number.isFinite(evidence.age_ms) ? `age ${evidence.age_ms}ms` : "",
+    Number.isFinite(evidence.evidence_age_ms) ? `oldest proof ${evidence.evidence_age_ms}ms` : "",
+    Number.isFinite(evidence.max_age_ms) ? `maximum age ${evidence.max_age_ms}ms` : "",
+    evidence.error ? `error ${evidence.error}` : "",
+  ].filter(Boolean);
+  return `- ${evidence.status || "unknown"}${details.length ? ` (${details.join("; ")})` : ""}`;
+}
+
 function payloadCheckLine(check) {
   const details = [
     check.env ? `env ${check.env}` : "",
@@ -177,6 +188,8 @@ export function renderLaunchInputChecklist({
   const seoGateEvidence = seoGate?.evidence || {};
   const recoveryGate = launchReadiness.gates.find((gate) => gate.id === "production_recovery");
   const recoveryEvidence = recoveryGate?.evidence || {};
+  const monitoringGate = launchReadiness.gates.find((gate) => gate.id === "monitoring_rollback");
+  const monitoringEvidence = monitoringGate?.evidence?.machine_evidence || {};
 
   return `# Launch Input Checklist
 
@@ -331,7 +344,13 @@ ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`)
 - Admin endpoint: \`GET /api/admin/launch-readiness\`
 - Monitoring sources: ${launchReadiness.monitoring_plan.map((item) => `${item.source}: ${item.status}`).join(", ")}
 - Rollback steps: ${launchReadiness.rollback_plan.length}
-- Launch rule: verify monitoring exports before cutover and keep rollback steps available through the first post-launch crawl window.
+- Current machine evidence:
+${monitoringRollbackEvidenceLine(monitoringEvidence)}
+- Private report: \`production/data/monitoring-rollback-report.json\` (ignored); template: \`production/data/monitoring-rollback-report.json.example\`.
+- Path override: \`MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH\`; validate it with \`npm run monitoring:preflight\`.
+- Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.
+- Release attestation: after every existing gate passes, set \`MS_REALTY_RELEASE_SHA\`, the mounted evidence paths, and the private signing key; run \`npm run launch:evidence:capture\`, then \`npm run launch:evidence:verify\` on the exact release SHA.
+- Launch rule: an evidence bundle records validated inputs; it does not create human listing reviews, SEO exports, broker approval, or production readiness.
 
 ## Validate After Inputs
 
@@ -348,6 +367,7 @@ npm run live:provisioning:preflight
 npm run live:capture
 npm run live:report
 npm run live:preflight
+npm run monitoring:preflight
 npm run payload:bootstrap
 npm run payload:runtime
 npm run payload:preflight
@@ -356,6 +376,8 @@ npm run listing:preflight
 npm run launch:readiness
 npm run launch:inputs
 npm run launch:preflight
+npm run launch:evidence:capture
+npm run launch:evidence:verify
 \`\`\`
 `;
 }
