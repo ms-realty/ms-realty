@@ -15,8 +15,12 @@ COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 FROM dependencies AS build
+ARG MS_REALTY_BUILD_MARKER=unversioned
 ENV NODE_ENV=production
 COPY . .
+# Keep the revision inside the image rather than forwarding it from the
+# Worker: an old Container must not be able to claim a new Worker revision.
+RUN printf '%s\n' "$MS_REALTY_BUILD_MARKER" > .ms-realty-build-marker
 # payload.config.js fails closed on these in production. The build only needs
 # them to import the config; nothing connects to a database here. They are
 # dummies, but scoping them to this one RUN keeps them out of image layers

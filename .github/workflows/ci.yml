@@ -60,7 +60,7 @@ jobs:
         id: container_smoke
         run: |
           image="ms-realty-ci:${GITHUB_SHA}"
-          DOCKER_BUILDKIT=1 docker build --tag "$image" .
+          DOCKER_BUILDKIT=1 docker build --build-arg "MS_REALTY_BUILD_MARKER=$GITHUB_SHA" --tag "$image" .
           container_id="$(docker run --detach --publish 127.0.0.1::8080 \
             --env PAYLOAD_SECRET=ci-build-secret-not-a-real-secret-0123456789 \
             --env DATABASE_URL=postgresql://localhost:5432/ms_realty_ci \
@@ -75,6 +75,7 @@ jobs:
             sleep 1
           done
           test -s /tmp/ms-realty-health.json
+          node -e 'const d=JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); if (d.build_marker !== process.env.GITHUB_SHA) process.exit(1)' /tmp/ms-realty-health.json
           expected_ready_status="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync("/tmp/ms-realty-health.json", "utf8")).launch_ready ? "200" : "503")')"
           ready_status="$(curl --silent --show-error --output /tmp/ms-realty-ready.json --write-out '%{http_code}' "http://127.0.0.1:${port}/api/ready")"
           test "$ready_status" = "$expected_ready_status"
@@ -96,7 +97,6 @@ jobs:
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      PRODUCTION_URL: ${{ vars.MS_REALTY_PRODUCTION_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -112,14 +112,49 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
-          test -n "$PRODUCTION_URL"
 
-      - name: Capture active Worker version
+      - name: Resolve workers.dev health endpoint
+        id: workers_dev
+        run: |
+          response="$(curl --fail --silent --show-error --max-time 20 \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain")"
+          subdomain="$(node -e 'const d=JSON.parse(process.argv[1]); const value=d.success && d.result?.subdomain; if (typeof value !== "string" || !/^[a-z0-9-]{1,63}$/i.test(value)) process.exit(1); process.stdout.write(value)' "$response")"
+          echo "url=https://ms-realty.${subdomain}.workers.dev/api/health" >> "$GITHUB_OUTPUT"
+
+      - name: Capture active Worker version and image marker
         id: previous
         run: |
           status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
           version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
+          health_url="${{ steps.workers_dev.outputs.url }}"
+          marker=""
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/previous-health.json" &&
+              marker="$(node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok") process.exit(1); if (d.build_marker === undefined || d.build_marker === "unversioned") process.stdout.write("legacy"); else if (typeof d.build_marker === "string" && /^[0-9a-f]{40}$/i.test(d.build_marker)) process.stdout.write(d.build_marker); else process.exit(1)' "$RUNNER_TEMP/previous-health.json")"; then
+              break
+            fi
+            echo "Prior image marker check attempt $attempt/30 failed; retrying."
+            sleep 10
+          done
+          test -n "$marker"
+          if [ "$marker" = "legacy" ]; then marker=""; fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "marker=$marker" >> "$GITHUB_OUTPUT"
+
+      - name: Set exact Container image marker
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+
+          const marker = process.env.GITHUB_SHA;
+          const placeholder = "__MS_REALTY_BUILD_MARKER__";
+          const configPath = "wrangler.jsonc";
+          if (!/^[0-9a-f]{40}$/i.test(marker)) throw new Error("GITHUB_SHA must be a full commit SHA");
+          const config = fs.readFileSync(configPath, "utf8");
+          if (config.split(placeholder).length !== 2) throw new Error("Expected exactly one Container image marker placeholder");
+          fs.writeFileSync(configPath, config.replace(placeholder, marker));
+          NODE
 
       - name: Deploy exact main commit
         id: deploy
@@ -133,13 +168,13 @@ jobs:
 
       - name: Verify deployed Worker
         run: |
-          health_url="${PRODUCTION_URL%/}/api/health"
+          health_url="${{ steps.workers_dev.outputs.url }}"
           for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error --max-time 20 "$health_url" --output "$RUNNER_TEMP/health.json" &&
-              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok") process.exit(1)' "$RUNNER_TEMP/health.json"; then
+            if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/health.json" &&
+              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const expected=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== expected) process.exit(1)' "$RUNNER_TEMP/health.json" "$GITHUB_SHA"; then
               exit 0
             fi
-            echo "Health check attempt $attempt/30 failed; retrying."
+            echo "Expected image marker $GITHUB_SHA; attempt $attempt/30 did not match."
             sleep 10
           done
           exit 1
@@ -151,3 +186,20 @@ jobs:
           status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
           version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
           test "$version" = "${{ steps.previous.outputs.version }}"
+          health_url="${{ steps.workers_dev.outputs.url }}"
+          expected_marker="${{ steps.previous.outputs.marker }}"
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/rollback-health.json"; then
+              if [ -n "$expected_marker" ]; then
+                if node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const expected=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== expected) process.exit(1)' "$RUNNER_TEMP/rollback-health.json" "$expected_marker"; then
+                  exit 0
+                fi
+              elif node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok" || (d.build_marker !== undefined && d.build_marker !== "unversioned")) process.exit(1)' "$RUNNER_TEMP/rollback-health.json"; then
+                echo "Rollback target predates exact image markers; confirmed its legacy unversioned health response."
+                exit 0
+              fi
+            fi
+            echo "Rollback health check attempt $attempt/30 did not match the prior image marker."
+            sleep 10
+          done
+          exit 1

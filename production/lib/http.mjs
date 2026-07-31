@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import { buildAgencyReviewQueue } from "./agency-review-queue.mjs";
+import { readBuildMarker } from "./build-marker.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./broker-contacts.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
@@ -1352,6 +1353,7 @@ export function createHttpApp({
         kind: "health",
         service: "ms-realty",
         status: "ok",
+        build_marker: readBuildMarker(),
         launch_ready: readiness.launch_ready,
         blockers: readiness.blockers,
       });
