@@ -8,6 +8,7 @@ import {
   assertSearchEngineQueryReport,
   assertSearchEngineSyncReport,
   approvedSearchSchema,
+  approvedSearchSettings,
   buildApprovedSearchProjection,
   createSearchRebuildPlan,
   createSearchRollbackPlan,
@@ -515,6 +516,18 @@ test("benchmark legacy corpus filters only fields declared by the checked-in 167
       }),
     /locale_is_indexable/,
   );
+});
+
+test("checked-in review corpus supports the complete approved runtime schema without becoming public", () => {
+  const corpus = loadBenchmarkCorpus({ dataDir: fromRoot("search", "data"), corpusSchema: "approved_projection_v1" });
+  const schemaFields = new Set(corpus.typesenseSchema.fields.map((field) => field.name));
+  const approvedSettings = approvedSearchSettings();
+
+  for (const field of approvedSearchSchema().fields) assert.equal(schemaFields.has(field.name), true, field.name);
+  for (const field of approvedSettings.searchableAttributes) assert.equal(corpus.meilisearchSettings.searchableAttributes.includes(field), true, field);
+  for (const field of approvedSettings.filterableAttributes) assert.equal(corpus.meilisearchSettings.filterableAttributes.includes(field), true, field);
+  for (const field of approvedSettings.sortableAttributes) assert.equal(corpus.meilisearchSettings.sortableAttributes.includes(field), true, field);
+  assert.equal(corpus.documents.every((document) => document.publication_state === "review_required" && document.locale_indexable === false), true);
 });
 
 test("benchmark bootstrap imports the declared corpus and waits for Meilisearch tasks", async () => {

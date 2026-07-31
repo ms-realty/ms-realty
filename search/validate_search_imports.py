@@ -58,6 +58,16 @@ def main() -> int:
     if len(ids) != len(set(ids)):
         raise SystemExit("Search index document ids must be unique")
 
+    if any(
+        doc.get("listing_reference") != doc.get("source_listing_id")
+        or doc.get("location_label") != doc.get("location")
+        or doc.get("publication_state") != "review_required"
+        or doc.get("listing_status") != "unverified"
+        or doc.get("locale_indexable") is not False
+        for doc in index_docs
+    ):
+        raise SystemExit("Legacy search fixtures must expose the production query contract fail-closed")
+
     meili_ids = [str(doc.get("meili_id") or "") for doc in meili_docs]
     expected_meili_ids = [re.sub(r"[^A-Za-z0-9_-]", "_", doc_id) for doc_id in ids]
     if meili_ids != expected_meili_ids or len(meili_ids) != len(set(meili_ids)):

@@ -11,9 +11,25 @@
       "facet": true
     },
     {
+      "name": "listing_reference",
+      "type": "string",
+      "facet": true
+    },
+    {
       "name": "search_document_type",
       "type": "string",
       "facet": true
+    },
+    {
+      "name": "publication_state",
+      "type": "string",
+      "facet": true
+    },
+    {
+      "name": "listing_status",
+      "type": "string",
+      "facet": true,
+      "optional": true
     },
     {
       "name": "url",
@@ -49,6 +65,11 @@
       "facet": true
     },
     {
+      "name": "locale_indexable",
+      "type": "bool",
+      "facet": true
+    },
+    {
       "name": "translation_status",
       "type": "string",
       "facet": true
@@ -79,6 +100,18 @@
     },
     {
       "name": "location",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "location_id",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "location_label",
       "type": "string",
       "facet": true,
       "optional": true
@@ -169,12 +202,59 @@
       "facet": true
     },
     {
+      "name": "property_family",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "property_subtype",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
       "name": "offer_type",
       "type": "string",
       "facet": true
     },
     {
       "name": "bedrooms",
+      "type": "int32",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "bedrooms_count",
+      "type": "int32",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "premises_count",
+      "type": "int32",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "hotel_room_count",
+      "type": "int32",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "floor_number",
+      "type": "int32",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "total_floors",
+      "type": "int32",
+      "optional": true
+    },
+    {
+      "name": "storeys_count",
       "type": "int32",
       "facet": true,
       "optional": true
@@ -191,8 +271,58 @@
       "optional": true
     },
     {
+      "name": "living_area_sqm",
+      "type": "float",
+      "optional": true
+    },
+    {
+      "name": "built_area_sqm",
+      "type": "float",
+      "optional": true
+    },
+    {
+      "name": "usable_area_sqm",
+      "type": "float",
+      "optional": true
+    },
+    {
+      "name": "gross_floor_area_sqm",
+      "type": "float",
+      "optional": true
+    },
+    {
+      "name": "land_area_sqm",
+      "type": "float",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "primary_area_sqm",
+      "type": "float",
+      "facet": true,
+      "optional": true
+    },
+    {
       "name": "price_eur",
       "type": "float",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "price_amount",
+      "type": "float",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "price_currency",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "price_period",
+      "type": "string",
       "facet": true,
       "optional": true
     },
@@ -200,6 +330,80 @@
       "name": "price_on_request",
       "type": "bool",
       "facet": true
+    },
+    {
+      "name": "has_approved_tour",
+      "type": "bool",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "parking_kind",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "condition",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "construction_status",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "zoning_status",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "utilities_status",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "road_access_status",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "land_category",
+      "type": "string",
+      "optional": true
+    },
+    {
+      "name": "permanent_use",
+      "type": "string",
+      "optional": true
+    },
+    {
+      "name": "permitted_use",
+      "type": "string",
+      "optional": true
+    },
+    {
+      "name": "public_latitude",
+      "type": "float",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "public_longitude",
+      "type": "float",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "public_location_precision",
+      "type": "string",
+      "optional": true
     },
     {
       "name": "image_count",

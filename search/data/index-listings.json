@@ -52,7 +52,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0001",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0001",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0002:bg",
@@ -107,7 +112,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0002",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0002",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0003:bg",
@@ -162,7 +172,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0003",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0003",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0004:bg",
@@ -217,7 +232,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0004",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0004",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0005:bg",
@@ -272,7 +292,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0005",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0005",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0006:bg",
@@ -327,7 +352,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0006",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0006",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0007:bg",
@@ -382,7 +412,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0007",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0007",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0008:bg",
@@ -437,7 +472,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0008",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0008",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0009:bg",
@@ -492,7 +532,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0009",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0009",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0010:bg",
@@ -547,7 +592,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0010",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0010",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0011:bg",
@@ -602,7 +652,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0011",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0011",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0012:bg",
@@ -657,7 +712,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0012",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0012",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0013:bg",
@@ -712,7 +772,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0013",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0013",
+    "location_label": "Hotovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0014:bg",
@@ -767,7 +832,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0014",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0014",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0015:bg",
@@ -822,7 +892,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0015",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0015",
+    "location_label": "Mikrevo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0016:bg",
@@ -877,7 +952,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0016",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0016",
+    "location_label": "Dzhigurovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0017:bg",
@@ -932,7 +1012,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0017",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0017",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0018:bg",
@@ -987,7 +1072,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0018",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0018",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0019:bg",
@@ -1042,7 +1132,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0019",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0019",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0020:bg",
@@ -1097,7 +1192,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0020",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0020",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0021:bg",
@@ -1152,7 +1252,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0021",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0021",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0022:bg",
@@ -1207,7 +1312,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0022",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0022",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0023:bg",
@@ -1262,7 +1372,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0023",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0023",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0024:bg",
@@ -1319,7 +1434,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0024",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0024",
+    "location_label": "Thessaloniki",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0025:bg",
@@ -1374,7 +1494,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0025",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0025",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0026:bg",
@@ -1429,7 +1554,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0026",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0026",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0027:bg",
@@ -1484,7 +1614,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0027",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0027",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0028:bg",
@@ -1539,7 +1674,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0028",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0028",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0029:bg",
@@ -1594,7 +1734,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0029",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0029",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0030:bg",
@@ -1649,7 +1794,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0030",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0030",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0031:bg",
@@ -1704,7 +1854,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0031",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0031",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0032:bg",
@@ -1759,7 +1914,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0032",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0032",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0033:bg",
@@ -1814,7 +1974,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0033",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0033",
+    "location_label": "Polenitsa",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0034:bg",
@@ -1869,7 +2034,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0034",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0034",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0035:bg",
@@ -1924,7 +2094,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0035",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0035",
+    "location_label": "Levunovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0036:bg",
@@ -1979,7 +2154,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0036",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0036",
+    "location_label": "Dzhigurovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0037:bg",
@@ -2034,7 +2214,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0037",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0037",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0038:bg",
@@ -2089,7 +2274,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0038",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0038",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0039:bg",
@@ -2144,7 +2334,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0039",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0039",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0040:bg",
@@ -2199,7 +2394,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0040",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0040",
+    "location_label": "Laskarevo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0041:bg",
@@ -2254,7 +2454,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0041",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0041",
+    "location_label": "Levunovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0042:bg",
@@ -2309,7 +2514,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0042",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0042",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0043:bg",
@@ -2366,7 +2576,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0043",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0043",
+    "location_label": "Eretria-Kotroni",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0044:bg",
@@ -2421,7 +2636,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0044",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0044",
+    "location_label": "Kulata",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0045:bg",
@@ -2476,7 +2696,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0045",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0045",
+    "location_label": "Pirin",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0046:bg",
@@ -2531,7 +2756,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0046",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0046",
+    "location_label": "Polenitsa",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0047:bg",
@@ -2586,7 +2816,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0047",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0047",
+    "location_label": "Spatovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0048:bg",
@@ -2641,7 +2876,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0048",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0048",
+    "location_label": "Tsaparevo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0049:bg",
@@ -2696,7 +2936,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0049",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0049",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0050:bg",
@@ -2750,7 +2995,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0050",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0050",
+    "location_label": "Elani-Sani, Halkidiki",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0051:bg",
@@ -2805,7 +3055,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0051",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0051",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0052:bg",
@@ -2860,7 +3115,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0052",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0052",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0053:bg",
@@ -2915,7 +3175,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0053",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0053",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0054:bg",
@@ -2970,7 +3235,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0054",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0054",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0055:bg",
@@ -3025,7 +3295,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0055",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0055",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0056:bg",
@@ -3080,7 +3355,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0056",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0056",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0057:bg",
@@ -3135,7 +3415,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0057",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0057",
+    "location_label": "Mikrevo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0058:bg",
@@ -3190,7 +3475,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0058",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0058",
+    "location_label": "Polenitsa",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0059:bg",
@@ -3245,7 +3535,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0059",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0059",
+    "location_label": "Hotovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0060:bg",
@@ -3300,7 +3595,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0060",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0060",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0061:bg",
@@ -3355,7 +3655,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0061",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0061",
+    "location_label": "Strumyani",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0062:bg",
@@ -3410,7 +3715,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0062",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0062",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0063:bg",
@@ -3465,7 +3775,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0063",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0063",
+    "location_label": "Igralishte",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0064:bg",
@@ -3520,7 +3835,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0064",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0064",
+    "location_label": "Hotovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0065:bg",
@@ -3575,7 +3895,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0065",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0065",
+    "location_label": "Bansko",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0066:bg",
@@ -3632,7 +3957,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0066",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0066",
+    "location_label": "Paralia Ofrinio",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0067:bg",
@@ -3687,7 +4017,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0067",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0067",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0068:bg",
@@ -3742,7 +4077,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0068",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0068",
+    "location_label": "Kapatovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0069:bg",
@@ -3797,7 +4137,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0069",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0069",
+    "location_label": "Leshnitsa",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0070:bg",
@@ -3852,7 +4197,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0070",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0070",
+    "location_label": "Petrich",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0071:bg",
@@ -3907,7 +4257,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0071",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0071",
+    "location_label": "Hotovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0072:bg",
@@ -3964,7 +4319,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0072",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0072",
+    "location_label": "Logari",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0073:bg",
@@ -4019,7 +4379,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0073",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0073",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0074:bg",
@@ -4074,7 +4439,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0074",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0074",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0075:bg",
@@ -4129,7 +4499,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0075",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0075",
+    "location_label": "Blagoevgrad",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-3000:bg",
@@ -4184,7 +4559,12 @@
     "locale_path": "/bg/imoti/MS-3000",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-3000",
+    "location_label": "Strumyani",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0077:bg",
@@ -4239,7 +4619,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0077",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0077",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0078:bg",
@@ -4294,7 +4679,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0078",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0078",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0079:bg",
@@ -4349,7 +4739,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0079",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0079",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0080:bg",
@@ -4404,7 +4799,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0080",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0080",
+    "location_label": "Polenitsa",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0081:bg",
@@ -4459,7 +4859,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0081",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0081",
+    "location_label": "Strumyani",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0082:bg",
@@ -4514,7 +4919,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0082",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0082",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0083:bg",
@@ -4569,7 +4979,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0083",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0083",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0084:bg",
@@ -4624,7 +5039,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0084",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0084",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0085:bg",
@@ -4679,7 +5099,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0085",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0085",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0086:bg",
@@ -4734,7 +5159,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0086",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0086",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0087:bg",
@@ -4789,7 +5219,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0087",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0087",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0088:bg",
@@ -4844,7 +5279,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0088",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0088",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0089:bg",
@@ -4899,7 +5339,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0089",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0089",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0090:bg",
@@ -4956,7 +5401,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0090",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0090",
+    "location_label": "Pasalimani, Piraeus",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0091:bg",
@@ -5011,7 +5461,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0091",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0091",
+    "location_label": "Vinogradi",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0092:bg",
@@ -5066,7 +5521,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0092",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0092",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0093:bg",
@@ -5121,7 +5581,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0093",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0093",
+    "location_label": "Leshnitsa",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0094:bg",
@@ -5176,7 +5641,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0094",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0094",
+    "location_label": "Petrich",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0095:bg",
@@ -5230,7 +5700,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0095",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0095",
+    "location_label": "Petrich Municipality",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0096:bg",
@@ -5285,7 +5760,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0096",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0096",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0097:bg",
@@ -5340,7 +5820,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0097",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0097",
+    "location_label": "Petrich",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0098:bg",
@@ -5395,7 +5880,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0098",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0098",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0099:bg",
@@ -5450,7 +5940,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0099",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0099",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0100:bg",
@@ -5505,7 +6000,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0100",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0100",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0101:bg",
@@ -5560,7 +6060,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0101",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0101",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0102:bg",
@@ -5615,7 +6120,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0102",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0102",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0103:bg",
@@ -5670,7 +6180,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0103",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0103",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0104:bg",
@@ -5727,7 +6242,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0104",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0104",
+    "location_label": "Nafplio",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0105:bg",
@@ -5782,7 +6302,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0105",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0105",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0106:bg",
@@ -5837,7 +6362,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0106",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0106",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0107:bg",
@@ -5892,7 +6422,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0107",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0107",
+    "location_label": "Sveti Vlas",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0108:bg",
@@ -5947,7 +6482,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0108",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0108",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0109:bg",
@@ -6002,7 +6542,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0109",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0109",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0110:bg",
@@ -6057,7 +6602,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0110",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0110",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0111:bg",
@@ -6112,7 +6662,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0111",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0111",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0112:bg",
@@ -6167,7 +6722,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0112",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0112",
+    "location_label": "Dzhigurovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0113:bg",
@@ -6222,7 +6782,12 @@
     "locale_path": "/bg/imoti/MS-CRAWL-0113",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0113",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0114:ru",
@@ -6277,7 +6842,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0114",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0114",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0115:ru",
@@ -6332,7 +6902,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0115",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0115",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0116:ru",
@@ -6387,7 +6962,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0116",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0116",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0117:ru",
@@ -6442,7 +7022,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0117",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0117",
+    "location_label": "Spatovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0118:ru",
@@ -6497,7 +7082,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0118",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0118",
+    "location_label": "Petrovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0119:ru",
@@ -6552,7 +7142,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0119",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0119",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0120:ru",
@@ -6607,7 +7202,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0120",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0120",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0121:ru",
@@ -6662,7 +7262,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0121",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0121",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0122:ru",
@@ -6717,7 +7322,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0122",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0122",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0123:ru",
@@ -6772,7 +7382,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0123",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0123",
+    "location_label": "Petrich",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0124:ru",
@@ -6827,7 +7442,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0124",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0124",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0125:ru",
@@ -6882,7 +7502,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0125",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0125",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0126:ru",
@@ -6937,7 +7562,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0126",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0126",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0127:ru",
@@ -6992,7 +7622,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0127",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0127",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0128:ru",
@@ -7047,7 +7682,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0128",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0128",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0129:ru",
@@ -7102,7 +7742,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0129",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0129",
+    "location_label": "Vinogradi",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0130:ru",
@@ -7157,7 +7802,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0130",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0130",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0131:ru",
@@ -7212,7 +7862,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0131",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0131",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0132:ru",
@@ -7267,7 +7922,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0132",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0132",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0133:ru",
@@ -7322,7 +7982,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0133",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0133",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0134:ru",
@@ -7377,7 +8042,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0134",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0134",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0135:ru",
@@ -7432,7 +8102,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0135",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0135",
+    "location_label": "Bansko",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0136:ru",
@@ -7487,7 +8162,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0136",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0136",
+    "location_label": "Levunovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0137:ru",
@@ -7542,7 +8222,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0137",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0137",
+    "location_label": "Laskarevo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0138:ru",
@@ -7597,7 +8282,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0138",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0138",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0139:ru",
@@ -7652,7 +8342,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0139",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0139",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0140:ru",
@@ -7707,7 +8402,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0140",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0140",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0141:ru",
@@ -7761,7 +8461,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0141",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0141",
+    "location_label": "Derbere, Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0142:ru",
@@ -7816,7 +8521,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0142",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0142",
+    "location_label": "Lilyanovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0143:ru",
@@ -7871,7 +8581,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0143",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0143",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0144:ru",
@@ -7926,7 +8641,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0144",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0144",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0145:ru",
@@ -7981,7 +8701,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0145",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0145",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0146:ru",
@@ -8036,7 +8761,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0146",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0146",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0147:ru",
@@ -8091,7 +8821,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0147",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0147",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0148:ru",
@@ -8146,7 +8881,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0148",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0148",
+    "location_label": "Vinogradi",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0149:ru",
@@ -8201,7 +8941,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0149",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0149",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0150:ru",
@@ -8256,7 +9001,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0150",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0150",
+    "location_label": "Leshnitsa",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0151:ru",
@@ -8311,7 +9061,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0151",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0151",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0152:ru",
@@ -8366,7 +9121,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0152",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0152",
+    "location_label": "Leshnitsa",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0153:ru",
@@ -8421,7 +9181,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0153",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0153",
+    "location_label": "Strumyani",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0154:ru",
@@ -8476,7 +9241,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0154",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0154",
+    "location_label": "Strumyani",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0155:ru",
@@ -8531,7 +9301,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0155",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0155",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0156:ru",
@@ -8586,7 +9361,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0156",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0156",
+    "location_label": "Laskarevo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0157:ru",
@@ -8641,7 +9421,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0157",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0157",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0158:ru",
@@ -8696,7 +9481,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0158",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0158",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0159:ru",
@@ -8751,7 +9541,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0159",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0159",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0160:ru",
@@ -8806,7 +9601,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0160",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0160",
+    "location_label": "Levunovo",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0161:ru",
@@ -8861,7 +9661,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0161",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0161",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0162:ru",
@@ -8916,7 +9721,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0162",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0162",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0163:ru",
@@ -8971,7 +9781,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0163",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0163",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0164:ru",
@@ -9028,7 +9843,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0164",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0164",
+    "location_label": "Paralia Ofrinio",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0165:ru",
@@ -9083,7 +9903,12 @@
     "locale_path": "/ru/properties/MS-CRAWL-0165",
     "translation_source_locale": "ru",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0165",
+    "location_label": "Strumyani",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0001:el",
@@ -9138,7 +9963,12 @@
     "locale_path": "/el/akinita/MS-CRAWL-0001",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0001",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   },
   {
     "id": "MS-CRAWL-0001:he",
@@ -9193,6 +10023,11 @@
     "locale_path": "/he/properties/MS-CRAWL-0001",
     "translation_source_locale": "bg",
     "translation_human_approved": true,
-    "translation_indexable": true
+    "translation_indexable": true,
+    "listing_reference": "MS-CRAWL-0001",
+    "location_label": "Sandanski",
+    "publication_state": "review_required",
+    "listing_status": "unverified",
+    "locale_indexable": false
   }
 ]
