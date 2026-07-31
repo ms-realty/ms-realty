@@ -6,6 +6,7 @@ on:
     types: [completed]
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -71,6 +72,13 @@ jobs:
               core.setFailed(result.message || "GitHub refused the merge.");
               return;
             }
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner,
+              repo,
+              workflow_id: "ci.yml",
+              ref: "main",
+            });
 
             try {
               await github.rest.git.deleteRef({ owner, repo, ref: `heads/${pull.head.ref}` });
