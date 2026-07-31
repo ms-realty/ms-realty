@@ -15,6 +15,7 @@
       // size until a production cold-start and load test supports a reduction.
       "class_name": "MsRealtyContainer",
       "image": "./Dockerfile",
+      "image_vars": { "MS_REALTY_BUILD_MARKER": "__MS_REALTY_BUILD_MARKER__" },
       "instance_type": "basic",
       "max_instances": 1
     }

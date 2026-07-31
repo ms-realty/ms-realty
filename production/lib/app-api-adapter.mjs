@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { readBuildMarker } from "./build-marker.mjs";
 import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, appendEvent, createEvent } from "./events.mjs";
 import {
@@ -412,6 +413,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
           kind: "health",
           service: "ms-realty",
           status: "ok",
+          build_marker: readBuildMarker(),
           launch_ready: readiness.launch_ready,
           blockers: readiness.blockers,
         }),

@@ -965,6 +965,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
 
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.health.body.status, "ok");
+  assert.equal(smoke.health.body.build_marker, "unversioned");
   assert.deepEqual(smoke.health.body.blockers, [
     "redirect_reviews",
     "external_seo_exports",

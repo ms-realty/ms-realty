@@ -1,12 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import { fromRoot } from "../lib/paths.mjs";
+import { readBuildMarker } from "../lib/build-marker.mjs";
 import { allowsDurableCaseAuthorityMutation } from "../../workers/durable-case-authority.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
 const autoMergeWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "auto-merge.yml"), "utf8");
+const dockerfile = fs.readFileSync(fromRoot("Dockerfile"), "utf8");
+const wranglerConfig = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_SESSION_SECRET",
   "MS_REALTY_ADMIN_OPERATORS_JSON",
@@ -105,13 +109,35 @@ test("Cloudflare Container allows only configured durable case-authority writes"
   );
 });
 
-test("main deploys automatically with health-check rollback", () => {
+test("main deploys automatically with image-marker rollback", () => {
   assert.match(ciWorkflow, /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/);
   assert.match(ciWorkflow, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
-  assert.match(ciWorkflow, /\$\{PRODUCTION_URL%\/\}\/api\/health/);
+  assert.match(ciWorkflow, /accounts\/\$\{CLOUDFLARE_ACCOUNT_ID\}\/workers\/subdomain/);
+  assert.match(ciWorkflow, /https:\/\/ms-realty\.\$\{subdomain\}\.workers\.dev\/api\/health/);
+  assert.match(ciWorkflow, /--build-arg "MS_REALTY_BUILD_MARKER=\$GITHUB_SHA"/);
+  assert.match(ciWorkflow, /d\.build_marker !== expected/);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
+});
+
+test("health marker is baked into the Container image, not forwarded by the Worker", () => {
+  const markerDirectory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-build-marker-`);
+  const markerPath = `${markerDirectory}/marker`;
+  const marker = "a".repeat(40);
+  try {
+    fs.writeFileSync(markerPath, `${marker}\n`);
+
+    assert.equal(readBuildMarker(markerPath), marker);
+    fs.writeFileSync(markerPath, "not-a-commit\n");
+    assert.equal(readBuildMarker(markerPath), "unversioned");
+    assert.match(dockerfile, /ARG MS_REALTY_BUILD_MARKER=unversioned/);
+    assert.match(dockerfile, /printf '%s\\n' "\$MS_REALTY_BUILD_MARKER" > \.ms-realty-build-marker/);
+    assert.match(wranglerConfig, /"image_vars": \{ "MS_REALTY_BUILD_MARKER": "__MS_REALTY_BUILD_MARKER__" \}/);
+    assert.doesNotMatch(workerSource, /MS_REALTY_BUILD_MARKER/);
+  } finally {
+    fs.rmSync(markerDirectory, { recursive: true, force: true });
+  }
 });
 
 test("successful exact-head CI runs merge without a review gate", () => {
