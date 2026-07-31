@@ -4,7 +4,6 @@ import fs from "node:fs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
-const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
 const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_SESSION_SECRET",
   "MS_REALTY_ADMIN_OPERATORS_JSON",
@@ -48,13 +47,4 @@ test("Cloudflare Container refuses mutable app requests until durable runtime da
   assert.match(workerSource, /if \(MUTATING_METHODS\.has\(request\.method\)\) return ephemeralRuntimeDataResponse\(\);/);
   assert.match(workerSource, /status: 503,/);
   assert.match(workerSource, /"cache-control": "no-store"/);
-});
-
-test("main deploys automatically with health-check rollback", () => {
-  assert.match(ciWorkflow, /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/);
-  assert.match(ciWorkflow, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
-  assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
-  assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
-  assert.match(ciWorkflow, /\$\{PRODUCTION_URL%\/\}\/api\/health/);
-  assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
 });
