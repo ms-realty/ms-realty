@@ -9,6 +9,7 @@ import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { renderMcpProtectedResourceMetadata, renderMcpResponse } from "./mcp-server.mjs";
 import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
+import { crossOriginWriteRejection } from "./request-guard.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
   adminHomePath,
@@ -1232,6 +1233,10 @@ export function createHttpApp({
      };
    }
     if (url.pathname === "/api/hermes/chat") return privateJson(404, { kind: "not_found" });
+    // Runs after /mcp, which keeps its own MS_REALTY_MCP_ALLOWED_ORIGINS allowlist
+    // because connector clients are legitimately cross-origin.
+    const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
+    if (crossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
    const auth = request.headers?.authorization || request.headers?.Authorization || "";
     const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
     const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
