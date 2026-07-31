@@ -47,6 +47,7 @@ import {
   loadLocaleRegistry,
   requiredAdminLocales,
   requiredPublicLocales,
+  siteRootRedirectTarget,
   websiteLanguageCoverage,
   writeLocaleRegistry,
 } from "./locales.mjs";
@@ -1307,6 +1308,11 @@ export function createHttpApp({
         renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentPublicSeed(), currentTranslationTasks())),
         "application/xml; charset=utf-8",
       );
+    }
+
+    if (request.method === "GET" && url.pathname === "/") {
+      const location = siteRootRedirectTarget(loadLocaleRegistry());
+      return response(308, `Redirecting to ${location}\n`, "text/plain; charset=utf-8", { location });
     }
 
     if (request.method === "GET" && url.pathname === "/robots.txt") {

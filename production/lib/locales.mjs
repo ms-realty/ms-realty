@@ -12,6 +12,15 @@ export function loadLocaleRegistry(path = fromRoot("locales", "registry.json")) 
   return JSON.parse(fs.readFileSync(path, "utf8"));
 }
 
+// The site root has no page of its own: every public URL is locale-prefixed
+// (§14). It must still resolve, because the legacy `.com` root is the
+// highest-equity URL on the domain. Derived from source_locale rather than
+// registry.x_default ("/bg/"), which would redirect again to "/bg" and break
+// the single-hop rule in §13.
+export function siteRootRedirectTarget(registry) {
+  return `/${registry.source_locale}`;
+}
+
 export function writeLocaleRegistry(registry, path = fromRoot("locales", "registry.json")) {
   fs.writeFileSync(path, `${JSON.stringify(registry, null, 2)}\n`);
   return registry;

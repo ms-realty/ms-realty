@@ -1,5 +1,6 @@
 import { Container, getContainer } from "@cloudflare/containers";
 import { allowsDurableCaseAuthorityMutation } from "./durable-case-authority.mjs";
+import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
 // process that reads the filesystem — the CMS seed and (for now) the JSONL
@@ -181,6 +182,19 @@ async function ingestMedia(request, env, url) {
   });
 }
 
+function previewRobotsResponse() {
+  return new Response("User-agent: *\nDisallow: /\n", {
+    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store", "x-robots-tag": PREVIEW_NOINDEX },
+  });
+}
+
+function withPreviewNoindex(response) {
+  // Response headers from the container are immutable, so clone to add ours.
+  const headers = new Headers(response.headers);
+  headers.set("x-robots-tag", PREVIEW_NOINDEX);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 function ephemeralRuntimeDataResponse() {
   return new Response(JSON.stringify({ kind: "runtime_data_unavailable", message: "Writes are disabled until durable runtime data is configured" }), {
     status: 503,
@@ -192,6 +206,8 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname.startsWith(INGEST_PREFIX)) return ingestMedia(request, env, url);
+    const preview = isPreviewHost(url.hostname);
+    if (preview && url.pathname === "/robots.txt") return previewRobotsResponse();
     if (url.pathname.startsWith(MEDIA_PREFIX)) {
       // Media paths are static bytes: only GET/HEAD mean anything here, and a
       // DELETE must not wake the container or pretend to have deleted a file.
@@ -218,6 +234,7 @@ export default {
     // One shared instance: the app keeps in-process state (rate-limit buckets,
     // the stat-validated file cache) that must not be split across instances.
     // Fanning out would silently multiply rate limits and desync the caches.
-    return getContainer(env.MS_REALTY, "ms-realty-singleton").fetch(request);
+    const response = await getContainer(env.MS_REALTY, "ms-realty-singleton").fetch(request);
+    return preview ? withPreviewNoindex(response) : response;
   },
 };
