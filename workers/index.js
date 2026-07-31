@@ -1,4 +1,5 @@
 import { Container, getContainer } from "@cloudflare/containers";
+import { allowsDurableCaseAuthorityMutation } from "./durable-case-authority.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
 // process that reads the filesystem — the CMS seed and (for now) the JSONL
@@ -29,6 +30,9 @@ export class MsRealtyContainer extends Container {
     MS_REALTY_LEAD_CONTACT_KEY: this.env.MS_REALTY_LEAD_CONTACT_KEY ?? "",
     MS_REALTY_PUBLIC_CONTACT_KEY: this.env.MS_REALTY_PUBLIC_CONTACT_KEY ?? "",
     MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: this.env.MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST ?? "",
+    MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: this.env.MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED ?? "",
+    MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED: this.env.MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED ?? "",
+    MS_REALTY_WORKSPACE_ID: this.env.MS_REALTY_WORKSPACE_ID ?? "",
     PAYLOAD_SECRET: this.env.PAYLOAD_SECRET ?? "",
     DATABASE_URL: this.env.DATABASE_URL ?? "",
     TYPESENSE_URL: this.env.TYPESENSE_URL ?? "",
@@ -205,10 +209,14 @@ export default {
       return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
     }
 
-    // Container disk resets on sleep, so routing a mutation to Next would
-    // acknowledge customer data that cannot be recovered. Keep the preview
-    // read-only until the application has a durable runtime-data store.
-    if (MUTATING_METHODS.has(request.method)) return ephemeralRuntimeDataResponse();
+    // Container disk resets on sleep, so only the existing Payload/Postgres
+    // authority routes can write. Every other mutation remains read-only.
+    if (
+      MUTATING_METHODS.has(request.method) &&
+      !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
+    ) {
+      return ephemeralRuntimeDataResponse();
+    }
 
     // One shared instance: the app keeps in-process state (rate-limit buckets,
     // the stat-validated file cache) that must not be split across instances.

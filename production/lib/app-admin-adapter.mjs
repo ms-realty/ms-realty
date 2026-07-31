@@ -682,6 +682,16 @@ function recordAudit(input, config, recordedAt = auditRecordedAt(config)) {
   });
 }
 
+function recordAuditReplica(input, config, recordedAt, alreadyRecorded, bestEffort) {
+  try {
+    if (!readAuditLog(config.auditLogPath).some(alreadyRecorded)) recordAudit(input, config, recordedAt);
+    return false;
+  } catch (error) {
+    if (bestEffort) return true;
+    throw error;
+  }
+}
+
 function publicRequestContactData(config) {
   if (!config.publicContactVaultPath) {
     return { contactMaps: {}, contactVaultStatus: "not_configured" };
@@ -1668,7 +1678,8 @@ function appendLeadPipelineOutcomeEntry(input, config) {
 async function openRealtyCaseEntry(input, config) {
   const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
   const boundInput = bindRealtyCaseExecutor(input, config.adminPrincipal);
-  const result = realtyCasePayloadAuthorityActive(config)
+  const payloadAuthority = realtyCasePayloadAuthorityActive(config);
+  const result = payloadAuthority
     ? await openRealtyCaseInPayload(boundInput, {
         payload: config.realtyCasePayload,
         workspaceId: config.realtyCaseWorkspaceId,
@@ -1678,36 +1689,33 @@ async function openRealtyCaseEntry(input, config) {
         filePath: config.realtyCaseLedgerPath,
         recordedAt,
       });
-  if (
-    !readAuditLog(config.auditLogPath).some(
-      (row) => row.action === "realty_case_opened" && row.object_id === result.case.id,
-    )
-  ) {
-    recordAudit(
-      {
-        action: "realty_case_opened",
-        actor: result.event.actor,
-        objectType: "realty_case",
-        objectId: result.case.id,
-        metadata: {
-          jurisdiction: result.case.jurisdiction,
-          case_type: result.case.case_type,
-          asset_kind: result.case.asset_kind,
-          execution_mode: result.case.execution_mode,
-          workflow_version: result.case.workflow_version,
-        },
+  const auditReplicaPending = recordAuditReplica(
+    {
+      action: "realty_case_opened",
+      actor: result.event.actor,
+      objectType: "realty_case",
+      objectId: result.case.id,
+      metadata: {
+        jurisdiction: result.case.jurisdiction,
+        case_type: result.case.case_type,
+        asset_kind: result.case.asset_kind,
+        execution_mode: result.case.execution_mode,
+        workflow_version: result.case.workflow_version,
       },
-      config,
-      recordedAt,
-    );
-  }
-  return result;
+    },
+    config,
+    recordedAt,
+    (row) => row.action === "realty_case_opened" && row.object_id === result.case.id,
+    payloadAuthority,
+  );
+  return auditReplicaPending ? { ...result, audit_replica_pending: true } : result;
 }
 
 async function appendRealtyCaseActionEntry(input, config) {
   const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
   const boundInput = bindRealtyCaseExecutor(input, config.adminPrincipal);
-  const result = realtyCasePayloadAuthorityActive(config)
+  const payloadAuthority = realtyCasePayloadAuthorityActive(config);
+  const result = payloadAuthority
     ? await appendRealtyCaseActionInPayload(boundInput, {
         payload: config.realtyCasePayload,
         workspaceId: config.realtyCaseWorkspaceId,
@@ -1717,32 +1725,28 @@ async function appendRealtyCaseActionEntry(input, config) {
         filePath: config.realtyCaseLedgerPath,
         recordedAt,
       });
-  if (
-    !readAuditLog(config.auditLogPath).some(
-      (row) => row.action === "realty_case_action_recorded" && row.object_id === result.event.id,
-    )
-  ) {
-    recordAudit(
-      {
-        action: "realty_case_action_recorded",
-        actor: result.event.actor,
-        objectType: "realty_case_event",
-        objectId: result.event.id,
-        metadata: {
-          case_id: result.case.id,
-          case_action: result.event.action,
-          step_key: result.event.step_key,
-          execution_mode: result.case.execution_mode,
-          executor_kind: result.event.executor_kind,
-          case_status: result.case.status,
-          progress_percent: result.case.progress_percent,
-        },
+  const auditReplicaPending = recordAuditReplica(
+    {
+      action: "realty_case_action_recorded",
+      actor: result.event.actor,
+      objectType: "realty_case_event",
+      objectId: result.event.id,
+      metadata: {
+        case_id: result.case.id,
+        case_action: result.event.action,
+        step_key: result.event.step_key,
+        execution_mode: result.case.execution_mode,
+        executor_kind: result.event.executor_kind,
+        case_status: result.case.status,
+        progress_percent: result.case.progress_percent,
       },
-      config,
-      recordedAt,
-    );
-  }
-  return result;
+    },
+    config,
+    recordedAt,
+    (row) => row.action === "realty_case_action_recorded" && row.object_id === result.event.id,
+    payloadAuthority,
+  );
+  return auditReplicaPending ? { ...result, audit_replica_pending: true } : result;
 }
 
 async function projectRealtyCaseEntry(result, config) {
@@ -1770,7 +1774,8 @@ async function projectRealtyCaseConditionEntry(result, config) {
 async function openRealtyCaseConditionEntry(input, config) {
   const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
   const boundInput = bindRealtyCaseConditionExecutor(input, config.adminPrincipal, "condition_opened");
-  const result = realtyCasePayloadAuthorityActive(config)
+  const payloadAuthority = realtyCasePayloadAuthorityActive(config);
+  const result = payloadAuthority
     ? await openRealtyCaseConditionInPayload(boundInput, {
         payload: config.realtyCasePayload,
         workspaceId: config.realtyCaseWorkspaceId,
@@ -1781,35 +1786,32 @@ async function openRealtyCaseConditionEntry(input, config) {
       caseLedgerPath: config.realtyCaseLedgerPath,
       recordedAt,
     });
-  if (
-    !readAuditLog(config.auditLogPath).some(
-      (row) => row.action === "realty_case_condition_opened" && row.object_id === result.event.id,
-    )
-  ) {
-    recordAudit(
-      {
-        action: "realty_case_condition_opened",
-        actor: result.event.actor,
-        objectType: "realty_case_condition_event",
-        objectId: result.event.id,
-        metadata: {
-          case_id: result.condition.case_id,
-          condition_id: result.condition.id,
-          condition_type: result.condition.type,
-          executor_kind: result.event.executor_kind,
-        },
+  const auditReplicaPending = recordAuditReplica(
+    {
+      action: "realty_case_condition_opened",
+      actor: result.event.actor,
+      objectType: "realty_case_condition_event",
+      objectId: result.event.id,
+      metadata: {
+        case_id: result.condition.case_id,
+        condition_id: result.condition.id,
+        condition_type: result.condition.type,
+        executor_kind: result.event.executor_kind,
       },
-      config,
-      recordedAt,
-    );
-  }
-  return result;
+    },
+    config,
+    recordedAt,
+    (row) => row.action === "realty_case_condition_opened" && row.object_id === result.event.id,
+    payloadAuthority,
+  );
+  return auditReplicaPending ? { ...result, audit_replica_pending: true } : result;
 }
 
 async function appendRealtyCaseConditionActionEntry(input, config) {
   const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
   const boundInput = bindRealtyCaseConditionExecutor(input, config.adminPrincipal, input?.action);
-  const result = realtyCasePayloadAuthorityActive(config)
+  const payloadAuthority = realtyCasePayloadAuthorityActive(config);
+  const result = payloadAuthority
     ? await appendRealtyCaseConditionActionInPayload(boundInput, {
         payload: config.realtyCasePayload,
         workspaceId: config.realtyCaseWorkspaceId,
@@ -1820,30 +1822,26 @@ async function appendRealtyCaseConditionActionEntry(input, config) {
       caseLedgerPath: config.realtyCaseLedgerPath,
       recordedAt,
     });
-  if (
-    !readAuditLog(config.auditLogPath).some(
-      (row) => row.action === "realty_case_condition_action_recorded" && row.object_id === result.event.id,
-    )
-  ) {
-    recordAudit(
-      {
-        action: "realty_case_condition_action_recorded",
-        actor: result.event.actor,
-        objectType: "realty_case_condition_event",
-        objectId: result.event.id,
-        metadata: {
-          case_id: result.condition.case_id,
-          condition_id: result.condition.id,
-          condition_action: result.event.action,
-          condition_status: result.condition.status,
-          executor_kind: result.event.executor_kind,
-        },
+  const auditReplicaPending = recordAuditReplica(
+    {
+      action: "realty_case_condition_action_recorded",
+      actor: result.event.actor,
+      objectType: "realty_case_condition_event",
+      objectId: result.event.id,
+      metadata: {
+        case_id: result.condition.case_id,
+        condition_id: result.condition.id,
+        condition_action: result.event.action,
+        condition_status: result.condition.status,
+        executor_kind: result.event.executor_kind,
       },
-      config,
-      recordedAt,
-    );
-  }
-  return result;
+    },
+    config,
+    recordedAt,
+    (row) => row.action === "realty_case_condition_action_recorded" && row.object_id === result.event.id,
+    payloadAuthority,
+  );
+  return auditReplicaPending ? { ...result, audit_replica_pending: true } : result;
 }
 
 function appendBrokerLeadEntry(input, registry, config) {
