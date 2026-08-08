@@ -114,6 +114,25 @@
           "ru": 57,
           "el": 3,
           "he": 5
+        },
+        "public": {
+          "listings": 0,
+          "home_pages": 7,
+          "listing_entries": 0,
+          "location_pages": 0,
+          "seller_pages": 7,
+          "contact_pages": 7,
+          "guide_pages": 5,
+          "entries": 26,
+          "byLocale": {
+            "bg": 6,
+            "en": 5,
+            "de": 3,
+            "nl": 3,
+            "ru": 3,
+            "el": 3,
+            "he": 3
+          }
         }
       }
     },
@@ -664,7 +683,7 @@
         "rollback_steps": 4,
         "machine_evidence": {
           "status": "missing",
-          "path": "/Users/ivan/Code/MS-Realty-production-mainline/production/data/monitoring-rollback-report.json"
+          "path": "/Users/ivan/Code/MS-Realty/.claude/worktrees/focused-mccarthy-294a89/production/data/monitoring-rollback-report.json"
         }
       },
       "next_actions": [

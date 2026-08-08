@@ -449,6 +449,22 @@ function assertPassLocalizedSitemapEvidence(report) {
   ) {
     throw new Error("Launch readiness localized sitemap requires complete approved route evidence");
   }
+  const publicEvidence = evidence.public || {};
+  const publicEntries =
+    publicEvidence.home_pages +
+    publicEvidence.listing_entries +
+    publicEvidence.location_pages +
+    publicEvidence.seller_pages +
+    publicEvidence.contact_pages +
+    publicEvidence.guide_pages;
+  if (
+    !evidence.public ||
+    publicEvidence.entries !== publicEntries ||
+    publicEvidence.listing_entries > evidence.listing_entries ||
+    publicEvidence.entries > evidence.entries
+  ) {
+    throw new Error("Launch readiness localized sitemap requires runtime-public route evidence");
+  }
 }
 
 function assertPassStructuredDataEvidence(report) {
@@ -1192,6 +1208,15 @@ export function buildLaunchReadinessReport({
     sitemap.summary.seller_pages +
     sitemap.summary.contact_pages +
     sitemap.summary.guide_pages;
+  const publicSitemap = sitemap.summary.public || null;
+  const expectedPublicSitemapEntries = publicSitemap
+    ? publicSitemap.home_pages +
+      publicSitemap.listing_entries +
+      publicSitemap.location_pages +
+      publicSitemap.seller_pages +
+      publicSitemap.contact_pages +
+      publicSitemap.guide_pages
+    : null;
   const localizedSitemapReady =
     sitemap.summary.home_pages === 7 &&
     sitemap.summary.listing_entries === 166 &&
@@ -1199,7 +1224,14 @@ export function buildLaunchReadinessReport({
     sitemap.summary.seller_pages === 7 &&
     sitemap.summary.contact_pages === 7 &&
     sitemap.summary.guide_pages === 5 &&
-    sitemap.summary.entries === expectedSitemapEntries;
+    sitemap.summary.entries === expectedSitemapEntries &&
+    // The public view is what the runtime publication gate actually serves;
+    // an artifact without it (or with inconsistent counts) can advertise
+    // URLs the runtime 404s.
+    Boolean(publicSitemap) &&
+    publicSitemap.entries === expectedPublicSitemapEntries &&
+    publicSitemap.listing_entries <= sitemap.summary.listing_entries &&
+    publicSitemap.entries <= sitemap.summary.entries;
 
   const gates = [
     gate("crawl_inventory", crawlPass ? "pass" : "blocked", migration.summary),

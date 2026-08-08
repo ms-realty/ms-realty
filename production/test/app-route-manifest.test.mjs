@@ -60,9 +60,11 @@ test("generated App Router manifest is valid when present", () => {
   const file = fromRoot("production", "data", "app-route-manifest.json");
   if (!fs.existsSync(file)) return;
   const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
+  const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
   assert.equal(assertAppRouteManifest(manifest), true);
   assert.equal(manifest.summary.routes, 205);
-  assert.equal(manifest.summary.sitemap_indexable_routes, 198);
+  assert.equal(manifest.summary.eligible_routes, sitemap.summary.entries);
+  assert.equal(manifest.summary.sitemap_indexable_routes, sitemap.summary.public.entries);
   assert.equal(manifest.summary.by_type.search, 7);
   assert.equal(manifest.summary.by_type.guide, 5);
   assert.equal(manifest.routes.some((route) => route.path.startsWith("/fr/")), false);

@@ -80,7 +80,10 @@ function absoluteUrl(origin, pathname) {
 }
 
 export function renderSitemapXml(sitemap, { origin = DEFAULT_PUBLIC_ORIGIN } = {}) {
+  // Entries flagged public:false are eligible-but-gated (runtime 404s them);
+  // runtime-built sitemaps carry no flag and pass through untouched.
   const urls = sitemap.entries
+    .filter((entry) => entry.public !== false)
     .map((entry) => {
       const links = entry.hreflang
         .map(
@@ -101,10 +104,18 @@ export function renderRobotsTxt({ origin = DEFAULT_PUBLIC_ORIGIN } = {}) {
   return `User-agent: *\nAllow: /\nSitemap: ${absoluteUrl(origin, "/sitemap.xml")}\n`;
 }
 
-export function assertSeoFiles({ sitemapXml, robotsTxt }) {
+export function assertSeoFiles({ sitemapXml, robotsTxt, sitemap = null }) {
   if (!sitemapXml.includes("/he</loc>")) throw new Error("Sitemap XML must include approved Hebrew homepage");
-  if (!sitemapXml.includes("/he/properties/MS-CRAWL-0001")) throw new Error("Sitemap XML must include approved Hebrew route");
-  if (!sitemapXml.includes("/he/locations/sandanski")) throw new Error("Sitemap XML must include approved Hebrew location route");
+  if (sitemap) {
+    const xmlPaths = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => new URL(loc).pathname).sort();
+    const publicPaths = sitemap.entries
+      .filter((entry) => entry.public !== false)
+      .map((entry) => entry.loc)
+      .sort();
+    if (JSON.stringify(xmlPaths) !== JSON.stringify(publicPaths)) {
+      throw new Error("Sitemap XML must advertise exactly the runtime-public localized sitemap entries");
+    }
+  }
   if (!sitemapXml.includes("/he/sell")) throw new Error("Sitemap XML must include Hebrew seller route");
   if (!sitemapXml.includes("/he/contact")) throw new Error("Sitemap XML must include Hebrew contact route");
   if (!sitemapXml.includes("/en/guides/foreign-buyers")) throw new Error("Sitemap XML must include approved CMS guide route");
@@ -125,7 +136,7 @@ export function writeSeoFiles(
 ) {
   const sitemapXml = renderSitemapXml(sitemap, { origin });
   const robotsTxt = renderRobotsTxt({ origin });
-  assertSeoFiles({ sitemapXml, robotsTxt });
+  assertSeoFiles({ sitemapXml, robotsTxt, sitemap });
   fs.mkdirSync(path.dirname(sitemapPath), { recursive: true });
   fs.writeFileSync(sitemapPath, sitemapXml);
   fs.writeFileSync(robotsPath, robotsTxt);

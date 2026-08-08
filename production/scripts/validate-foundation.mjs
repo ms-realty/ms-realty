@@ -2,7 +2,12 @@ import fs from "node:fs";
 import { loadLocaleRegistry, assertLocaleRegistry, publicIndexableLocales } from "../lib/locales.mjs";
 import { hreflangForListing } from "../lib/seo.mjs";
 import { assertHermesActionAllowed } from "../lib/hermes.mjs";
-import { assertHermesAuditLedger, assertTranslationLedger, latestTranslationTasks } from "../lib/translation-ledger.mjs";
+import { assertHermesAuditLedger, assertTranslationLedger, latestTranslationTasks, readTranslationLedger } from "../lib/translation-ledger.mjs";
+import { applyListingEdits, readListingEdits } from "../lib/listing-edits.mjs";
+import { applyMediaReviews, readMediaReviews } from "../lib/media-reviews.mjs";
+import { publicSeedFor } from "../lib/public-inventory.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
+import { buildRuntimeLocalizedSitemap } from "../lib/seo-files.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
 import { assertConsentLedger } from "../lib/consent-ledger.mjs";
 import { assertAuditLog } from "../lib/audit-log.mjs";
@@ -223,12 +228,36 @@ if (sitemap.summary.byLocale.el !== 3 || sitemap.summary.byLocale.he !== 5) {
   throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
+
+// Anti-split-brain: rebuild the runtime publication gate's sitemap from the
+// current seed and ledgers, and require the committed artifact's public view
+// to match it exactly. A stale artifact must never advertise a URL the
+// runtime 404s (or hide one it serves).
+const runtimeGatedSitemap = buildRuntimeLocalizedSitemap(
+  registry,
+  publicSeedFor(applyMediaReviews(applyListingEdits(loadCmsSeed(), readListingEdits()), readMediaReviews())),
+  readTranslationLedger(),
+);
+const sitemapEntryKey = (entry) => `${entry.locale} ${entry.loc}`;
+const artifactPublicKeys = sitemap.entries
+  .filter((entry) => entry.public !== false)
+  .map(sitemapEntryKey)
+  .sort();
+const runtimePublicKeys = runtimeGatedSitemap.entries.map(sitemapEntryKey).sort();
+if (JSON.stringify(artifactPublicKeys) !== JSON.stringify(runtimePublicKeys)) {
+  throw new Error("Localized sitemap public entries must match the runtime publication gate");
+}
+if (JSON.stringify(sitemap.summary.public) !== JSON.stringify(runtimeGatedSitemap.summary)) {
+  throw new Error("Localized sitemap public summary must match the runtime publication gate");
+}
+
 const appRouteManifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
 assertAppRouteManifest(appRouteManifest);
 assertAppRouteFiles(appRouteManifest);
 if (
   appRouteManifest.summary.routes !== 205 ||
-  appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.entries ||
+  appRouteManifest.summary.eligible_routes !== sitemap.summary.entries ||
+  appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.public.entries ||
   appRouteManifest.summary.by_type.search !== 7 ||
   appRouteManifest.summary.by_type.guide !== 5 ||
   appRouteManifest.routes.find((route) => route.path === "/he")?.dir !== "rtl"
@@ -240,14 +269,20 @@ const sitemapXml = fs.readFileSync(fromRoot("production", "data", "sitemap.xml")
 const robotsTxt = fs.readFileSync(fromRoot("production", "data", "robots.txt"), "utf8");
 if (
   !sitemapXml.includes("/he</loc>") ||
-  !sitemapXml.includes("/he/properties/MS-CRAWL-0001") ||
-  !sitemapXml.includes("/he/locations/sandanski") ||
   !sitemapXml.includes("/he/sell") ||
   !sitemapXml.includes("/he/contact") ||
   !sitemapXml.includes("/en/guides/foreign-buyers") ||
   sitemapXml.includes("/fr/")
 ) {
   throw new Error("Sitemap XML must include approved Hebrew/guide routes and exclude French");
+}
+const sitemapXmlPaths = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => new URL(loc).pathname).sort();
+const sitemapPublicPaths = sitemap.entries
+  .filter((entry) => entry.public !== false)
+  .map((entry) => entry.loc)
+  .sort();
+if (JSON.stringify(sitemapXmlPaths) !== JSON.stringify(sitemapPublicPaths)) {
+  throw new Error("Sitemap XML must advertise exactly the runtime-public localized sitemap entries");
 }
 if (!robotsTxt.includes("Sitemap:")) throw new Error("Robots must include sitemap URL");
 

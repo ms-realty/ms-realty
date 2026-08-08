@@ -44,7 +44,11 @@ function entryFromSitemap(registry, entry) {
     app_module: route.module,
     renderer: route.renderer,
     dynamic: route.dynamic,
-    sitemap_indexable: true,
+    // sitemap_indexable mirrors the runtime publication gate: false while the
+    // entry is eligible but not yet publicly served. public_indexable stays
+    // true for every eligible content route (it renders indexable once
+    // approved; utility routes stay false).
+    sitemap_indexable: entry.public !== false,
     public_indexable: true,
     cache: "public, max-age=300, s-maxage=3600",
     params: {
@@ -90,7 +94,8 @@ export function buildAppRouteManifest({
     source_sitemap_entries: sitemap.entries.length,
     summary: {
       routes: routes.length,
-      sitemap_indexable_routes: sitemapRoutes.length,
+      eligible_routes: sitemapRoutes.length,
+      sitemap_indexable_routes: sitemapRoutes.filter((route) => route.sitemap_indexable).length,
       utility_routes: searchRoutes.length,
       by_type: routes.reduce((counts, route) => {
         counts[route.type] = (counts[route.type] || 0) + 1;
@@ -106,8 +111,11 @@ export function buildAppRouteManifest({
 }
 
 export function assertAppRouteManifest(manifest) {
-  if (manifest.source_sitemap_entries !== manifest.summary.sitemap_indexable_routes) {
+  if (manifest.source_sitemap_entries !== manifest.summary.eligible_routes) {
     throw new Error("App route manifest must preserve every localized sitemap entry");
+  }
+  if (manifest.summary.sitemap_indexable_routes !== manifest.routes.filter((route) => route.sitemap_indexable).length) {
+    throw new Error("App route manifest sitemap-indexable summary must match rows");
   }
   if (manifest.summary.routes !== manifest.routes.length) throw new Error("App route manifest summary must match rows");
   if (manifest.summary.utility_routes !== 7) throw new Error("App route manifest must include one search route per public locale");
