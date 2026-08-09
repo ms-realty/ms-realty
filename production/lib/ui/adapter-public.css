@@ -422,7 +422,7 @@ a.mk-btn:hover { text-decoration: none; }
   min-height: 52px;
   box-shadow: none;
 }
-.hp-hero__search .mk-search__field input:focus-visible { box-shadow: none; }
+.hp-hero__search .mk-search__field input:focus-visible { box-shadow: none; outline: none; }
 .hp-hero__search .mk-search__seg:focus-within { background: var(--surface-hover); box-shadow: inset 0 0 0 2px var(--brand); }
 .hp-hero__location-options {
   position: absolute;

@@ -1,5 +1,5 @@
 import { Container, getContainer } from "@cloudflare/containers";
-import { allowsDurableCaseAuthorityMutation, allowsMcpRequest } from "./durable-case-authority.mjs";
+import { allowsAdminSessionMutation, allowsDurableCaseAuthorityMutation, allowsMcpRequest } from "./durable-case-authority.mjs";
 import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
@@ -231,6 +231,7 @@ export default {
     // its ledger-writing tools (MS_REALTY_MCP_WRITES_DISABLED below).
     if (
       MUTATING_METHODS.has(request.method) &&
+      !allowsAdminSessionMutation({ method: request.method, pathname: url.pathname }) &&
       !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
     ) {

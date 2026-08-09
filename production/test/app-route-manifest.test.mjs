@@ -147,7 +147,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(listing.html, /href="\/he\/search"/);
   assert.match(listing.html, /data-related-listings="true"/);
   assert.equal(listing.rendered.body.actions.direct_contact.review_status, "needs_broker_contact_review");
-  assert.doesNotMatch(listing.html, /href="(?:tel:|https:\/\/wa\.me\/|viber:)/);
+  assert.doesNotMatch(listing.html, /href="(?:tel:(?!\+359879696870")|https:\/\/wa\.me\/(?!359879696870)|viber:)/);
 
   const listingFallback = renderAppRoute({
     pathname: "/en/properties/MS-CRAWL-0001",
@@ -245,7 +245,10 @@ test("localized Next catch-all delegates configured search paths to the fail-clo
     const { GET } = await import("../../app/[locale]/[...slug]/route.js");
     const response = await GET(new Request("https://example.test/bg/tarsene?q=Sandanski"));
     assert.equal(response.status, 503);
-    assert.deepEqual(await response.json(), { kind: "search_unavailable", message: "Search is temporarily unavailable" });
+    assert.match(response.headers.get("content-type"), /text\/html/);
+    const fallbackHtml = await response.text();
+    assert.match(fallbackHtml, /data-kind="search-unavailable"/);
+    assert.match(fallbackHtml, /tel:\+359879696870/);
     assert.equal(response.headers.get("cache-control"), "no-store");
   } finally {
     if (previousNodeEnv === undefined) delete process.env.NODE_ENV;

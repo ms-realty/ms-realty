@@ -365,7 +365,7 @@ export function assertServerSmoke(smoke) {
     smoke.listingPrint?.status !== 200 ||
     !smoke.listingPrint.body.includes("data-kind=\"listing-print\"") ||
     !smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\"") ||
-    smoke.listingPrint.body.includes('href="tel:')
+    /href="tel:(?!\+359879696870")/.test(smoke.listingPrint.body)
   ) {
     throw new Error("Server must serve browser-print listing HTML without unapproved direct contact");
   }

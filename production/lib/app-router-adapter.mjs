@@ -1,7 +1,7 @@
 import { renderHtmlPage } from "./html.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { loadLocaleRegistry, siteRootRedirectTarget } from "./locales.mjs";
-import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
+import { loadCmsSeed, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings } from "./runtime.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
@@ -228,10 +228,14 @@ export async function renderAppSearchRouteResponse({ pathname, url = pathname, h
     result = await renderAppSearchRoute({ pathname, url, config });
   } catch (error) {
     if (error instanceof PublicSearchUnavailableError) {
-      return new Response(JSON.stringify({ kind: "search_unavailable", message: "Search is temporarily unavailable" }), {
-        status: 503,
-        headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
-      });
+      // A person on the search page gets a branded fallback with working
+      // contact channels; the /api/search JSON contract is handled elsewhere.
+      const registry = currentRegistry(config);
+      const localeCode = String(pathname || "").split("/").filter(Boolean)[0] || registry.source_locale;
+      const page = renderSearchUnavailablePage({ registry, localeCode });
+      const requestUrl = url instanceof URL ? url : new URL(String(url || pathname), "http://localhost");
+      const out = renderedHtmlResponse(page, requestUrl);
+      return new Response(out.html, { status: out.status, headers: { ...out.headers, "cache-control": "no-store" } });
     }
     return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
       status: 400,

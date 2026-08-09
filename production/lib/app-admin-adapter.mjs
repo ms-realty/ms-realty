@@ -12,6 +12,12 @@ import {
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
 import { renderOperatorConnectPage } from "./operator-connect.mjs";
+import {
+  adminSessionClearCookie,
+  adminSessionSetCookie,
+  adminTokenFromCookie,
+  renderAdminLoginPage,
+} from "./admin-login.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
@@ -2493,7 +2499,45 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
   const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
   if (crossOrigin) return jsonResponse(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
-  const principal = config.adminPrincipal || resolveAdminPrincipal(request.headers.get("authorization") || "", config.authEnv || process.env);
+  const authEnv = config.authEnv || process.env;
+  let authHeader = request.headers.get("authorization") || "";
+  if (!authHeader) {
+    const cookieToken = adminTokenFromCookie(request.headers.get("cookie") || "");
+    if (cookieToken) authHeader = `Bearer ${cookieToken}`;
+  }
+  const requestPath = new URL(request.url, "http://localhost").pathname;
+  if (requestPath === "/admin/login") {
+    if (request.method === "GET") {
+      if (resolveAdminPrincipal(authHeader, authEnv)) {
+        return new Response(null, { status: 303, headers: { location: "/admin", "cache-control": "no-store" } });
+      }
+      const error = new URL(request.url, "http://localhost").searchParams.get("error") === "1";
+      return new Response(renderAdminLoginPage({ error }), {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" },
+      });
+    }
+    if (request.method === "POST") {
+      const form = new URLSearchParams(await request.text());
+      const submitted = form.get("token")?.trim() || "";
+      const principal = submitted ? resolveAdminPrincipal(`Bearer ${submitted}`, authEnv) : null;
+      if (!principal) {
+        return new Response(null, { status: 303, headers: { location: "/admin/login?error=1", "cache-control": "no-store" } });
+      }
+      return new Response(null, {
+        status: 303,
+        headers: { location: "/admin", "set-cookie": adminSessionSetCookie(submitted), "cache-control": "no-store" },
+      });
+    }
+    return new Response("Method not allowed", { status: 405, headers: { allow: "GET, POST" } });
+  }
+  if (requestPath === "/admin/logout" && request.method === "POST") {
+    return new Response(null, {
+      status: 303,
+      headers: { location: "/admin/login", "set-cookie": adminSessionClearCookie(), "cache-control": "no-store" },
+    });
+  }
+  const principal = config.adminPrincipal || resolveAdminPrincipal(authHeader, authEnv);
   if (!principal) return adminUnauthorized();
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
   config = { ...config, adminPrincipal: principal };
@@ -2503,7 +2547,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
     const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/connect") {
-      const token = String(request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "").trim();
+      const token = String(authHeader).replace(/^Bearer\s+/i, "").trim();
       const base =
         String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
       return new Response(renderOperatorConnectPage({ baseUrl: base, token, operatorId: principal?.id || "operator" }), {

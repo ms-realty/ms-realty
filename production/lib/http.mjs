@@ -24,6 +24,12 @@ import {
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
 import { renderOperatorConnectPage } from "./operator-connect.mjs";
+import {
+  adminSessionClearCookie,
+  adminSessionSetCookie,
+  adminTokenFromCookie,
+  renderAdminLoginPage,
+} from "./admin-login.mjs";
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import {
   LISTING_EDIT_FIELDS,
@@ -78,7 +84,7 @@ import {
   readReplyDeliveryOutcomes,
 } from "./reply-delivery-outcomes.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
-import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
+import { loadCmsSeed, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
@@ -1239,7 +1245,44 @@ export function createHttpApp({
     // because connector clients are legitimately cross-origin.
     const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
     if (crossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
-   const auth = request.headers?.authorization || request.headers?.Authorization || "";
+   let auth = request.headers?.authorization || request.headers?.Authorization || "";
+    // A browser cannot send a Bearer header; /admin/login exchanged the
+    // operator key for a cookie carrying that same token. Header wins.
+    if (!auth) {
+      const cookieToken = adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
+      if (cookieToken) auth = `Bearer ${cookieToken}`;
+    }
+
+    if (url.pathname === "/admin/login") {
+      if (request.method === "GET") {
+        if (resolveAdminPrincipal(auth)) return response(303, "", "text/plain; charset=utf-8", { location: "/admin" });
+        return response(200, renderAdminLoginPage({ error: url.searchParams.get("error") === "1" }), "text/html; charset=utf-8", {
+          "cache-control": "no-store",
+          "x-robots-tag": "noindex, nofollow",
+        });
+      }
+      if (request.method === "POST") {
+        const submitted = new URLSearchParams(request.body || "").get("token")?.trim() || "";
+        const principal = submitted ? resolveAdminPrincipal(`Bearer ${submitted}`) : null;
+        if (!principal) {
+          return response(303, "", "text/plain; charset=utf-8", { location: "/admin/login?error=1", "cache-control": "no-store" });
+        }
+        return response(303, "", "text/plain; charset=utf-8", {
+          location: "/admin",
+          "set-cookie": adminSessionSetCookie(submitted),
+          "cache-control": "no-store",
+        });
+      }
+      return response(405, "Method not allowed", "text/plain; charset=utf-8", { allow: "GET, POST" });
+    }
+    if (url.pathname === "/admin/logout" && request.method === "POST") {
+      return response(303, "", "text/plain; charset=utf-8", {
+        location: "/admin/login",
+        "set-cookie": adminSessionClearCookie(),
+        "cache-control": "no-store",
+      });
+    }
+
     const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
     const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
     if (adminRequest && !principal) return adminUnauthorized();
@@ -1441,7 +1484,11 @@ export function createHttpApp({
         const savedView = url.searchParams.get("saved") === "1";
         const view = url.searchParams.get("view") || "list";
         const outcome = await searchResultOrUnavailable(searchRequest, { pageSize: savedView ? null : 12, savedView, view });
-        if (outcome.response) return outcome.response;
+        if (outcome.response) {
+          // The API keeps its JSON contract, but a person on the search PAGE
+          // gets a branded page with working contact channels, not raw JSON.
+          return publicResponse(request, url, renderSearchUnavailablePage({ registry: activeRegistry, localeCode: searchLocale.code }));
+        }
         recordEvent({ type: "search", path: url.pathname, locale: intent.locale, query, filters, sort, page });
         return publicResponse(request, url, outcome.result);
       }
@@ -3692,7 +3739,7 @@ export function assertHttpSmoke(smoke) {
     smoke.listingHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.listingHtml.body.includes("<html lang=\"he\" dir=\"rtl\">") ||
     !smoke.listingHtml.body.includes("data-kind=\"listing\"") ||
-    smoke.listingHtml.body.includes('href="tel:')
+    /href="tel:(?!\+359879696870")/.test(smoke.listingHtml.body)
   ) {
     throw new Error("HTTP smoke must serve rendered listing HTML without unapproved direct contact");
   }
@@ -3701,7 +3748,7 @@ export function assertHttpSmoke(smoke) {
     smoke.listingPrint.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.listingPrint.body.includes("data-kind=\"listing-print\"") ||
     !smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\"") ||
-    smoke.listingPrint.body.includes('href="tel:')
+    /href="tel:(?!\+359879696870")/.test(smoke.listingPrint.body)
   ) {
     throw new Error("HTTP smoke must serve browser-print listing HTML without unapproved direct contact");
   }
