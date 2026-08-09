@@ -464,6 +464,63 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     },
   });
   const redirect = deployableRedirect();
+  const leadResponse = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/leads",
+      body: {
+        leadType: "buyer",
+        language: "he",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Noa Levi", whatsapp: "+359880000001" },
+        contact_preference: "whatsapp",
+        message: "Interested in this property.",
+      },
+    });
+  const viewingLeadResponse = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/leads",
+      body: {
+        source: "website_viewing_request",
+        leadType: "buyer",
+        language: "he",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Noa Levi", phone: "+359880000001" },
+        contact_preference: "phone",
+        request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
+        message: "I would like to view this property.",
+      },
+    });
+  const contactLeadResponse = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/leads",
+      body: {
+        source: "website_contact_callback",
+        leadType: "general",
+        language: "he",
+        contact: { name: "Noa Levi", phone: "+359880000001" },
+        contact_preference: "phone",
+        request_details: { callback_time: "Weekdays after 14:00" },
+        message: "Please call me about buying in Sandanski.",
+      },
+    });
+  const sellerLeadResponse = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/leads",
+      body: {
+        source: "website_seller_valuation",
+        leadType: "seller",
+        language: "el",
+        contact: { name: "Nikos Papadopoulos", phone: "+359880000002" },
+        property: { location: "Sandanski", type: "apartment" },
+        message: "I want a valuation for my property.",
+      },
+    });
+  // Public intake mints its own ids; correlate downstream steps by what the
+  // server actually assigned rather than by a fixture string.
+  const leadId = leadResponse.body.lead.id;
+  const viewingLeadId = viewingLeadResponse.body.lead.id;
+  const contactLeadId = contactLeadResponse.body.lead.id;
+
   const smoke = {
     health: await dispatchHttp(app, { url: "/api/health" }),
     ready: await dispatchHttp(app, { url: "/api/ready" }),
@@ -576,25 +633,13 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     contactHtml: await dispatchHttp(app, { url: "/he/contact?format=html" }),
     guidePage: await dispatchHttp(app, { url: "/en/guides/foreign-buyers" }),
     guideHtml: await dispatchHttp(app, { url: "/en/guides/foreign-buyers?format=html" }),
-    lead: await dispatchHttp(app, {
-      method: "POST",
-      url: "/api/leads",
-      body: {
-        id: "http-lead-test",
-        leadType: "buyer",
-        language: "he",
-        listingReference: "MS-CRAWL-0001",
-        contact: { name: "Noa Levi", whatsapp: "+359880000001" },
-        contact_preference: "whatsapp",
-        message: "Interested in this property.",
-      },
-    }),
+    lead: leadResponse,
     replyDraft: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/replies/draft",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
-        leadId: "http-lead-test",
+        leadId,
         language: "he",
         listingFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
       },
@@ -602,50 +647,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     replyDraftUnauthorized: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/replies/draft",
-      body: { leadId: "http-lead-test", language: "he" },
+      body: { leadId, language: "he" },
     }),
-    viewingLead: await dispatchHttp(app, {
-      method: "POST",
-      url: "/api/leads",
-      body: {
-        id: "http-viewing-lead-test",
-        source: "website_viewing_request",
-        leadType: "buyer",
-        language: "he",
-        listingReference: "MS-CRAWL-0001",
-        contact: { name: "Noa Levi", phone: "+359880000001" },
-        contact_preference: "phone",
-        request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
-        message: "I would like to view this property.",
-      },
-    }),
-    contactLead: await dispatchHttp(app, {
-      method: "POST",
-      url: "/api/leads",
-      body: {
-        id: "http-contact-lead-test",
-        source: "website_contact_callback",
-        leadType: "general",
-        language: "he",
-        contact: { name: "Noa Levi", phone: "+359880000001" },
-        contact_preference: "phone",
-        request_details: { callback_time: "Weekdays after 14:00" },
-        message: "Please call me about buying in Sandanski.",
-      },
-    }),
-    sellerLead: await dispatchHttp(app, {
-      method: "POST",
-      url: "/api/leads",
-      body: {
-        id: "http-seller-lead-test",
-        source: "website_seller_valuation",
-        leadType: "seller",
-        language: "el",
-        contact: { name: "Nikos Papadopoulos", phone: "+359880000002" },
-        property: { location: "Sandanski", type: "apartment" },
-        message: "I want a valuation for my property.",
-      },
-    }),
+    viewingLead: viewingLeadResponse,
+    contactLead: contactLeadResponse,
+    sellerLead: sellerLeadResponse,
     admin: await dispatchHttp(app, {
       url: "/api/admin/leads?locale=ru",
       headers: { authorization: "Bearer local-admin-smoke" },
@@ -661,7 +667,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       url: "/api/admin/replies",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
-        leadId: "http-lead-test",
+        leadId,
         reviewedReply: "Reviewed reply approved by broker.",
         reviewer: "broker_ru",
         approved: true,
@@ -670,14 +676,14 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     replyUnauthorized: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/replies",
-      body: { leadId: "http-lead-test", reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
+      body: { leadId, reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
     }),
     leadQualification: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/lead-pipeline/outcome",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
-        leadId: "http-lead-test",
+        leadId,
         actor: "broker_ru",
         action: "qualify",
         budgetMinEur: 90000,
@@ -695,7 +701,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
         id: "viewing-http-contact-lead-test",
-        leadId: "http-contact-lead-test",
+        leadId: contactLeadId,
         startsAt: "2026-07-06T10:00:00Z",
         broker: "broker_ru",
       },
@@ -730,7 +736,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     viewingUnauthorized: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/viewings",
-      body: { leadId: "http-contact-lead-test", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
+      body: { leadId: contactLeadId, startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
     }),
     viewingCalendar: await dispatchHttp(app, {
       url: "/api/admin/viewings.ics",
@@ -741,12 +747,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       method: "POST",
       url: "/api/admin/deals/close",
       headers: { authorization: "Bearer local-admin-smoke" },
-      body: { leadId: "http-contact-lead-test", broker: "broker_ru" },
+      body: { leadId: contactLeadId, broker: "broker_ru" },
     }),
     dealCloseUnauthorized: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/deals/close",
-      body: { leadId: "http-contact-lead-test", broker: "broker_ru" },
+      body: { leadId: contactLeadId, broker: "broker_ru" },
     }),
   };
   smoke.formReply = await dispatchHttp(app, {
@@ -757,7 +763,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       "content-type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
-      leadId: "http-contact-lead-test",
+      leadId: contactLeadId,
       language: "he",
       reviewedReply: "Reviewed callback reply approved by broker.",
       reviewer: "broker_en",
@@ -898,7 +904,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/api/admin/leads/assign",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
-      leadId: "http-lead-test",
+      leadId,
       brokerId: "broker_ru",
       actor: "sales_manager",
       reason: "Owner approved reassignment for Russian follow-up.",
@@ -952,7 +958,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/api/admin/documents/outcome",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
-      leadId: "http-lead-test",
+      leadId,
       itemKey: "foreign_process_scope",
       status: "complete",
       actor: "sales_manager",
@@ -1050,7 +1056,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
   assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
   assert.equal(smoke.contactLead.body.lead.leadType, "general");
-  assert.equal(smoke.admin.body.leads.find((lead) => lead.lead_id === "http-lead-test").contact.whatsapp, "+359880000001");
+  assert.equal(smoke.admin.body.leads.find((lead) => lead.lead_id === leadId).contact.whatsapp, "+359880000001");
   assert.match(smoke.adminHtml.body, /data-private-contact="true"/);
   assert.match(smoke.adminHtml.body, /https:\/\/wa\.me\/359880000001/);
   assert.equal(smoke.guidePage.body.kind, "guide");
@@ -1075,7 +1081,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.match(smoke.listingHtmlAfterMediaReview.body, /MS-CRAWL-0001-floor-plan\.webp/);
   assert.equal(smoke.leadAssignment.status, 201);
   assert.equal(smoke.leadAssignment.body.previous_broker_id, "broker_international");
-  assert.equal(smoke.adminAfterLeadAssignment.body.leads.find((lead) => lead.lead_id === "http-lead-test").assigned_broker, "broker_ru");
+  assert.equal(smoke.adminAfterLeadAssignment.body.leads.find((lead) => lead.lead_id === leadId).assigned_broker, "broker_ru");
   assert.equal(smoke.slugChange.body.new_path, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugChangeUnauthorized.status, 401);
@@ -1148,7 +1154,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.documentsHtml.body.includes('data-kind="admin-document-checklists"'), true);
   assert.equal(smoke.documentsHtml.body.includes('data-process-guardrail="true"'), true);
   assert.equal(smoke.documentOutcome.status, 201);
-  assert.equal(smoke.documentsAfter.body.documentChecklistQueue.rows.find((row) => row.lead_id === "http-lead-test").completed_count, 1);
+  assert.equal(smoke.documentsAfter.body.documentChecklistQueue.rows.find((row) => row.lead_id === leadId).completed_count, 1);
   assert.equal(smoke.admin.body.leadSla.summary.total_leads, 4);
   assert.equal(smoke.admin.body.leadSla.summary.manager_escalation_required, 4);
   assert.equal(smoke.admin.body.leadSla.summary.customer_reply_sent, 0);

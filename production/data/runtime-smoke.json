@@ -8678,9 +8678,10 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-runtime-lead-he-0001",
+    "id": "inbox-lead-draft-be553ce0-7054-4703-85bc-895af83c1a33",
     "lead": {
-      "id": "runtime-lead-he-0001",
+      "id": "lead-draft-be553ce0-7054-4703-85bc-895af83c1a33",
+      "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
       "leadType": "renter",
@@ -8778,9 +8779,10 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-runtime-viewing-lead-he-0001",
+    "id": "inbox-lead-draft-eb3ccd76-058e-4698-bdfa-a01c300c4f88",
     "lead": {
-      "id": "runtime-viewing-lead-he-0001",
+      "id": "lead-draft-eb3ccd76-058e-4698-bdfa-a01c300c4f88",
+      "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
       "leadType": "renter",
@@ -8881,9 +8883,10 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-runtime-contact-lead-he-0001",
+    "id": "inbox-lead-draft-f3f73fdb-07ca-4615-8c59-dd1b8d868c03",
     "lead": {
-      "id": "runtime-contact-lead-he-0001",
+      "id": "lead-draft-f3f73fdb-07ca-4615-8c59-dd1b8d868c03",
+      "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",
       "leadType": "general",

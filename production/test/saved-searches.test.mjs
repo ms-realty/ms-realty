@@ -61,7 +61,7 @@ test("saved search stores criteria and creates alert task", () => {
       createSavedSearch(
         registry,
         {
-          id: "saved-search-test",
+          id: "caller-supplied-id-must-be-ignored",
           locale: "fr",
           query: "Sandanski",
           filters: { property_type: "apartment" },
@@ -82,7 +82,11 @@ test("saved search stores criteria and creates alert task", () => {
   assert.equal(rows[0].locale, "en");
   assert.equal(rows[0].fallback_used, true);
   assert.equal(rows[0].contact, undefined);
-  assert.equal(rows[0].contact_ref, "saved-search-test");
+  // Identity is minted server-side; a caller-supplied id is ignored outright.
+  assert.match(rows[0].id, /^saved-search-[0-9a-f-]{36}$/);
+  assert.notEqual(rows[0].id, "caller-supplied-id-must-be-ignored");
+  assert.equal(rows[0].contact_ref, rows[0].id);
+  assert.match(rows[0].alert_task.id, /^alert-[0-9a-f-]{36}$/);
   assert.equal(rows[0].contact_preference, "whatsapp");
   assert.deepEqual(rows[0].price_snapshot, { "MS-CRAWL-0001": 120000 });
   assert.equal(rows[0].alert_task.status, "open");

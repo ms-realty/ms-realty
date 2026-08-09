@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { adminLocales, localesByCode } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
+import { findByIdempotencyKey, newRecordId, normalizeIdempotencyKey } from "./record-ids.mjs";
 
 export const DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH = fromRoot("production", "data", "language-requests.jsonl");
 
@@ -24,7 +25,8 @@ export function createLanguageRequest(registry, input, requestedAt = new Date().
 
   return {
     requested_at: requestedAt,
-    id: input.id || `language-request-${requestedLocale}`,
+    id: newRecordId("language-request"),
+    idempotency_key: normalizeIdempotencyKey(input.idempotencyKey ?? input.idempotency_key),
     requested_locale: requestedLocale,
     requested_path: requestedPath,
     fallback_locale: fallbackLocale,
@@ -50,6 +52,10 @@ export function appendLanguageRequest(
   request,
   { filePath = DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } = {},
 ) {
+  // A retried submission carrying the same idempotency key returns the
+  // original record instead of appending a duplicate person.
+  const existing = findByIdempotencyKey(readLanguageRequests(filePath), request.idempotency_key);
+  if (existing) return existing;
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.appendFileSync(filePath, `${JSON.stringify(request)}\n`);
   return request;

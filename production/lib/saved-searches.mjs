@@ -3,6 +3,7 @@ import path from "node:path";
 import { normalizeLeadInput } from "./leads.mjs";
 import { resolvePublicLocale } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
+import { findByIdempotencyKey, newRecordId, normalizeIdempotencyKey } from "./record-ids.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
 
@@ -106,7 +107,8 @@ export function createSavedSearch(registry, input, { matchCount = 0, savedAt = n
 
   return {
     saved_at: savedAt,
-    id: savedSearchInput.id || `saved-search-${requestedLocale}-${Date.parse(savedAt)}`,
+    id: newRecordId("saved-search"),
+    idempotency_key: normalizeIdempotencyKey(savedSearchInput.idempotencyKey ?? savedSearchInput.idempotency_key),
     requested_locale: requestedLocale,
     locale: resolved.locale.code,
     fallback_used: !resolved.available,
@@ -121,7 +123,7 @@ export function createSavedSearch(registry, input, { matchCount = 0, savedAt = n
     alert_frequency: frequency,
     status: "active",
     alert_task: {
-      id: savedSearchInput.taskId || `alert-${requestedLocale}-${Date.parse(savedAt)}`,
+      id: newRecordId("alert"),
       status: "open",
       owner: savedSearchInput.owner || "broker_en",
     },
@@ -138,6 +140,10 @@ export function privacySafeSavedSearch(search) {
 }
 
 export function appendSavedSearch(search, { filePath = DEFAULT_SAVED_SEARCH_LEDGER_PATH } = {}) {
+  // A retried submission carrying the same idempotency key returns the
+  // original record instead of appending a duplicate saved search.
+  const existing = findByIdempotencyKey(readSavedSearches(filePath), search.idempotency_key);
+  if (existing) return existing;
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.appendFileSync(filePath, `${JSON.stringify(search)}\n`);
   return search;

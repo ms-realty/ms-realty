@@ -1396,11 +1396,10 @@ export function publishApprovedTranslation(registry, task) {
   };
 }
 
-export function createCrmInboxItem(registry, input) {
+export function createCrmInboxItem(registry, input, { assignedId = null } = {}) {
   assertHermesActionAllowed("draft_reply");
   const leadInput = normalizeLeadInput(input);
   const lead = createLeadDraft(registry, {
-    id: leadInput.id,
     source: leadInput.source,
     intent: leadInput.intent,
     leadType: leadInput.leadType,
@@ -1414,7 +1413,7 @@ export function createCrmInboxItem(registry, input) {
     contactPreference: leadInput.contactPreference,
     preferred_channel: leadInput.preferred_channel,
     message: leadInput.message,
-  });
+  }, { assignedId });
   const brokerAssignment = assignLeadBroker(lead, {
     manualBrokerId: leadInput.manualBrokerId,
     brokerProfiles: leadInput.brokerProfiles,
