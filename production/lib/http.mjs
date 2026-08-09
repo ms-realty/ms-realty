@@ -8,7 +8,7 @@ import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { renderMcpProtectedResourceMetadata, renderMcpResponse } from "./mcp-server.mjs";
-import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
+import { clientIdentity, createRateLimiter } from "./rate-limit.mjs";
 import { crossOriginWriteRejection } from "./request-guard.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
@@ -731,6 +731,7 @@ export function createHttpApp({
   leadSlaGeneratedAt,
   hermesReplyProvider = null,
   rateLimit = null,
+  trustProxy = process.env.MS_REALTY_TRUST_PROXY === "1",
   naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
   search = {},
 } = {}) {
@@ -1291,7 +1292,7 @@ export function createHttpApp({
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
     const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
     if (publicWriteLimiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
-      const verdict = publicWriteLimiter.allow(`${clientIpFromHeaders(request.headers)}:${url.pathname}`);
+      const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
       if (!verdict.allowed) {
         return response(429, { kind: "rate_limited", retry_after: verdict.retryAfterSec }, "application/json; charset=utf-8", {
           "retry-after": String(verdict.retryAfterSec),

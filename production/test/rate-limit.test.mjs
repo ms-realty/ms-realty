@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { clientIpFromHeaders, createRateLimiter, rateLimitConfigFromEnv } from "../lib/rate-limit.mjs";
+import { clientIdentity, clientIpFromHeaders, createRateLimiter, rateLimitConfigFromEnv } from "../lib/rate-limit.mjs";
 
 test("limiter allows up to max per key, then blocks with retry-after", () => {
   let now = 1_000;
@@ -21,12 +21,35 @@ test("limiter validates its configuration", () => {
   assert.throws(() => createRateLimiter({ max: 0 }));
 });
 
-test("clientIpFromHeaders parses plain objects and fetch Headers", () => {
-  assert.equal(clientIpFromHeaders({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }), "203.0.113.7");
-  assert.equal(clientIpFromHeaders({ "X-Forwarded-For": "198.51.100.3" }), "198.51.100.3");
-  assert.equal(clientIpFromHeaders({ "x-real-ip": "192.0.2.9" }), "192.0.2.9");
-  assert.equal(clientIpFromHeaders(new Headers({ "x-forwarded-for": "203.0.113.99" })), "203.0.113.99");
-  assert.equal(clientIpFromHeaders({}), "unknown");
+test("untrusted identity ignores spoofable forwarded headers, uses the socket peer", () => {
+  // Default (no trusted proxy): X-Forwarded-For is NOT trusted — a caller
+  // cannot rotate it to escape the limiter.
+  assert.equal(clientIpFromHeaders({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }), "unknown");
+  assert.equal(clientIdentity({ headers: { "x-forwarded-for": "203.0.113.7" } }, { trustProxy: false }), "unknown");
+  // The un-spoofable socket peer is used instead when present.
+  assert.equal(
+    clientIdentity({ headers: { "x-forwarded-for": "203.0.113.7" }, remoteAddress: "192.0.2.50" }, { trustProxy: false }),
+    "192.0.2.50",
+  );
+  // A rotated X-Forwarded-For does not change the identity for a fixed peer.
+  assert.equal(
+    clientIdentity({ headers: { "x-forwarded-for": "9.9.9.9" }, remoteAddress: "192.0.2.50" }, { trustProxy: false }),
+    "192.0.2.50",
+  );
+});
+
+test("trusted identity prefers Cloudflare's verified cf-connecting-ip", () => {
+  assert.equal(
+    clientIdentity({ headers: { "cf-connecting-ip": "198.51.100.5", "x-forwarded-for": "1.2.3.4" } }, { trustProxy: true }),
+    "198.51.100.5",
+  );
+  // Falls back through x-real-ip then the first X-Forwarded-For hop.
+  assert.equal(clientIdentity({ headers: { "x-real-ip": "192.0.2.9" } }, { trustProxy: true }), "192.0.2.9");
+  assert.equal(
+    clientIdentity({ headers: new Headers({ "x-forwarded-for": "203.0.113.99, 10.0.0.1" }) }, { trustProxy: true }),
+    "203.0.113.99",
+  );
+  assert.equal(clientIdentity({ headers: {} }, { trustProxy: true }), "unknown");
 });
 
 test("rateLimitConfigFromEnv parses, defaults, disables, and validates", () => {

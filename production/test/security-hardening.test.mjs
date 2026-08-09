@@ -20,7 +20,9 @@ test("public write endpoints are rate limited when configured", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-rate-limit-http-"));
   const eventLedgerPath = path.join(dir, "events.jsonl");
   fs.writeFileSync(eventLedgerPath, "");
-  const app = createHttpApp({ rateLimit: { max: 2, windowMs: 60_000 }, eventLedgerPath });
+  // Behind a declared trusted proxy the forwarded client IP is authoritative,
+  // so genuinely different visitors get their own buckets.
+  const app = createHttpApp({ rateLimit: { max: 2, windowMs: 60_000 }, eventLedgerPath, trustProxy: true });
   const post = (ip) =>
     app({
       method: "POST",
@@ -42,6 +44,31 @@ test("public write endpoints are rate limited when configured", async () => {
 
   const otherIp = await post("203.0.113.2");
   assert.notEqual(otherIp.status, 429, "a different client IP is not blocked");
+});
+
+test("rotating a forwarded header cannot mint fresh rate-limit buckets", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-rate-limit-spoof-"));
+  const eventLedgerPath = path.join(dir, "events.jsonl");
+  fs.writeFileSync(eventLedgerPath, "");
+  // No trusted proxy is declared, so X-Forwarded-For is attacker-controlled
+  // data and must not influence identity at all.
+  const app = createHttpApp({ rateLimit: { max: 2, windowMs: 60_000 }, eventLedgerPath });
+  const post = (ip) =>
+    app({
+      method: "POST",
+      url: "/api/events",
+      headers: { "content-type": "application/json", "x-forwarded-for": ip },
+      remoteAddress: "192.0.2.50",
+      body: JSON.stringify({ event: "rate_limit_probe", page: "/bg" }),
+    });
+
+  assert.notEqual((await post("203.0.113.1")).status, 429);
+  assert.notEqual((await post("203.0.113.2")).status, 429);
+  const blocked = await post("203.0.113.3");
+  assert.equal(blocked.status, 429, "a rotated forwarded header must not escape the limit");
+
+  // Even a fresh header value stays blocked while the real peer is the same.
+  assert.equal((await post("198.51.100.9")).status, 429);
 });
 
 test("public write endpoints are not limited without configuration", async () => {

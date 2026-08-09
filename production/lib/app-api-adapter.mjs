@@ -18,7 +18,7 @@ import { fromRoot } from "./paths.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, appendPublicContact } from "./public-contact-vault.mjs";
 import { searchRuntimeListings, loadCmsSeed, submitRuntimeLead, DEFAULT_CMS_SEED_PATH } from "./runtime.mjs";
 import { readThroughCached } from "./file-cache.mjs";
-import { clientIpFromHeaders, createRateLimiter, rateLimitConfigFromEnv } from "./rate-limit.mjs";
+import { clientIdentity, createRateLimiter, rateLimitConfigFromEnv } from "./rate-limit.mjs";
 import {
   DEFAULT_SAVED_SEARCH_LEDGER_PATH,
   appendSavedSearch,
@@ -67,6 +67,7 @@ export function appApiConfigFromEnv(env = process.env) {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
     rateLimit: rateLimitConfigFromEnv(env),
+    trustProxy: env.MS_REALTY_TRUST_PROXY === "1",
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
@@ -395,7 +396,12 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     }
     const limiter = publicWriteLimiterFor(config);
     if (limiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
-      const verdict = limiter.allow(`${clientIpFromHeaders(request.headers)}:${url.pathname}`);
+      // Behind Cloudflare (trustProxy) the verified cf-connecting-ip is used;
+      // otherwise there is no socket peer here, so all callers share one bucket
+      // rather than letting a spoofed X-Forwarded-For mint fresh identities.
+      const verdict = limiter.allow(
+        `${clientIdentity({ headers: request.headers }, { trustProxy: config.trustProxy })}:${url.pathname}`,
+      );
       if (!verdict.allowed) {
         return webResponse(
           json(429, { kind: "rate_limited", retry_after: verdict.retryAfterSec }, {
