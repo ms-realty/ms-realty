@@ -199,6 +199,10 @@ export function mcpConfigFromEnv(env = process.env) {
     allowedOrigins: configuredOrigins(env.MS_REALTY_MCP_ALLOWED_ORIGINS),
     oidc,
     publicOrigin,
+    // On runtimes with ephemeral disks (the Cloudflare Container) ledger
+    // writes would be silently lost, so the Worker sets this flag and the
+    // write tools are simply not registered — tools/list stays truthful.
+    writesDisabled: String(env.MS_REALTY_MCP_WRITES_DISABLED || "").trim() === "1",
   };
 }
 
@@ -969,7 +973,7 @@ function authenticatedToolDefinitions(server, config, principal) {
     );
   }
 
-  if (canAdminMutate(principal) && canAdminAccess(principal, "content:write")) {
+  if (!config.writesDisabled && canAdminMutate(principal) && canAdminAccess(principal, "content:write")) {
     server.registerTool(
       "edit_listing_content",
       {
@@ -1089,7 +1093,7 @@ function authenticatedToolDefinitions(server, config, principal) {
     );
   }
 
-  if (canAdminMutate(principal) && canAdminAccess(principal, "translations:write")) {
+  if (!config.writesDisabled && canAdminMutate(principal) && canAdminAccess(principal, "translations:write")) {
     server.registerTool(
       "save_translation_draft",
       {
@@ -1147,7 +1151,7 @@ function authenticatedToolDefinitions(server, config, principal) {
     );
   }
 
-  if (canAdminMutate(principal) && canAdminAccess(principal, "operations:write")) {
+  if (!config.writesDisabled && canAdminMutate(principal) && canAdminAccess(principal, "operations:write")) {
     server.registerTool(
       "queue_reviewed_reply",
       {

@@ -501,3 +501,29 @@ test("the standalone production server serves the same MCP endpoint", async () =
   assert.equal(metadata.status, 404);
   assert.match(metadata.body, /MCP OAuth protected resource is not configured/);
 });
+
+test("ephemeral runtimes mask every ledger-writing MCP tool", async () => {
+  const { config } = fixture();
+  assert.equal(config.writesDisabled, false);
+
+  const masked = { ...config, writesDisabled: true };
+  const editorTools = await listTools(masked, { authorization: `Bearer ${EDITOR_TOKEN}` });
+  assert.deepEqual(editorTools, [
+    "search_public_listings",
+    "get_public_listing",
+    "get_launch_status",
+    "get_listing_content_queue",
+    "get_translation_queue",
+  ]);
+  for (const name of ["edit_listing_content", "bulk_update_listing_status", "save_translation_draft"]) {
+    assert.equal(editorTools.includes(name), false, `${name} must not register on ephemeral runtimes`);
+  }
+
+  const brokerTools = await listTools(masked, { authorization: `Bearer ${BROKER_TOKEN}` });
+  for (const name of brokerTools) {
+    assert.equal(/queue_reviewed_reply|run_operator_workflow/.test(name), false, `${name} is a write tool`);
+  }
+
+  const flagged = mcpConfigFromEnv({ NODE_ENV: "test", MS_REALTY_MCP_WRITES_DISABLED: "1" });
+  assert.equal(flagged.writesDisabled, true);
+});

@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fromRoot } from "../lib/paths.mjs";
 import { readBuildMarker } from "../lib/build-marker.mjs";
-import { allowsDurableCaseAuthorityMutation } from "../../workers/durable-case-authority.mjs";
+import { allowsDurableCaseAuthorityMutation, allowsMcpRequest } from "../../workers/durable-case-authority.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
@@ -199,4 +199,18 @@ test("successful exact-head CI runs merge without a review gate", () => {
   assert.match(autoMergeWorkflow, /event_type: "auto_merge_deploy"/);
   assert.match(autoMergeWorkflow, /client_payload: \{ merge_sha: result\.sha \}/);
   assert.doesNotMatch(autoMergeWorkflow, /reviews|reviewers|approved/i);
+});
+
+test("Cloudflare Container admits authenticated MCP without opening ledger writes", () => {
+  assert.match(workerSource, /allowsMcpRequest\(\{ method: request\.method, pathname: url\.pathname, env \}\)/);
+  assert.match(workerSource, /MS_REALTY_MCP_WRITES_DISABLED: "1"/);
+
+  const env = { MS_REALTY_PUBLIC_ORIGIN: "https://ms-realty.example.workers.dev" };
+  assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env }), true);
+  assert.equal(allowsMcpRequest({ method: "DELETE", pathname: "/mcp", env }), true);
+  assert.equal(allowsMcpRequest({ method: "PATCH", pathname: "/mcp", env }), false);
+  assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp/extra", env }), false);
+  assert.equal(allowsMcpRequest({ method: "POST", pathname: "/api/leads", env }), false);
+  assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: { MS_REALTY_PUBLIC_ORIGIN: "  " } }), false);
+  assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: {} }), false);
 });

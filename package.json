@@ -60,6 +60,7 @@
     "http:build": "node production/scripts/build-http-smoke.mjs",
     "translation:coverage": "node production/scripts/build-translation-coverage-report.mjs",
     "locale:rollout": "node production/scripts/build-locale-rollout-report.mjs",
+    "hermes:mcp": "node production/scripts/hermes-mcp-server.mjs",
     "hermes:provisioning": "node production/scripts/build-hermes-provider-provisioning-report.mjs",
     "hermes:runtime": "node production/scripts/run-hermes-agent-runtime.mjs",
     "hermes:drafts": "node production/scripts/build-hermes-draft-dispatch.mjs",

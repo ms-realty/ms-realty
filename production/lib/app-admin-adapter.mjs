@@ -11,6 +11,7 @@ import {
   resolveAdminPrincipal,
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
+import { renderOperatorConnectPage } from "./operator-connect.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
@@ -2501,6 +2502,19 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     const requiredCapability = requiredAdminCapability(request.method, url.pathname);
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
     const registry = loadLocaleRegistry(config.localeRegistryPath);
+    if (request.method === "GET" && url.pathname === "/admin/connect") {
+      const token = String(request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "").trim();
+      const base =
+        String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
+      return new Response(renderOperatorConnectPage({ baseUrl: base, token, operatorId: principal?.id || "operator" }), {
+        status: 200,
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "no-store",
+          "x-robots-tag": "noindex, nofollow",
+        },
+      });
+    }
     if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
