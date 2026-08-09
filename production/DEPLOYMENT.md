@@ -300,6 +300,32 @@ Also required before cutover: R2 media coverage report (§8) and relaxing the
    (single container instance pinned by design). Admin GETs, `/api/search`,
    and page renders are unlimited — a cheap wake-the-container DoS surface.
 
+## 8a. Turning public lead capture back on
+
+Lead intake is blocked at the edge because the container disk forgets. The
+durable path now exists (`production/lib/lead-durable-store.mjs`, collections
+`public_leads` + `lead_contacts`); enabling it is a deliberate operator
+sequence, not a deploy:
+
+1. Generate and apply the migration for the two new collections against the
+   production DSN — same direct (non-pooled) DSN used for the first migration:
+
+   ```bash
+   DATABASE_URL="$(grep '^DATABASE_URL_DIRECT=' ~/.ms-realty-prod.env | cut -d= -f2-)" PAYLOAD_SECRET="$(node -p 'require(process.env.HOME+"/.ms-realty-operators.json").payloadSecret')" NODE_ENV=production node_modules/.bin/payload migrate:create durable_lead_store
+   ```
+
+   Review the generated file, then apply it with `payload migrate`.
+2. Set Worker var `MS_REALTY_LEAD_DURABLE_STORE_ENABLED=true` (the store stays
+   off unless `PAYLOAD_SECRET` and `DATABASE_URL` are also present, so a
+   half-provisioned deployment keeps failing closed rather than losing leads).
+3. Extend the edge allowlist to `POST /api/leads` only after a test submission
+   is confirmed in Postgres, then flip the contact page back to the form by
+   clearing `MS_REALTY_MCP_WRITES_DISABLED` for that path.
+
+Contact details stay encrypted with `MS_REALTY_LEAD_CONTACT_KEY`; Postgres
+only ever receives the AES-256-GCM envelope. Losing that key orphans every
+stored contact, so it belongs in the password manager, not only in Cloudflare.
+
 ## 9. Fast-follow code changes (next PRs, in priority order)
 
 1. **CSRF guard missing in `app-api-adapter.mjs`** — the Next runtime's public

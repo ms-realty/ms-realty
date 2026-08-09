@@ -1,0 +1,170 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { LEAD_COLLECTIONS, LEAD_COLLECTION_SLUGS } from "../lib/lead-collections.mjs";
+import {
+  LeadStoreUnavailableError,
+  findLeadByIdempotencyKey,
+  isLeadDurableStoreEnabled,
+  leadDurableStoreConfigFromEnv,
+  persistLeadDurably,
+} from "../lib/lead-durable-store.mjs";
+
+// A minimal stand-in for the Payload runtime: enough to prove the store's
+// ordering, idempotency, and failure behaviour without a database.
+function fakePayload({ failOn = null } = {}) {
+  const rows = { public_leads: [], lead_contacts: [] };
+  return {
+    rows,
+    async find({ collection, where, limit }) {
+      const [field, condition] = Object.entries(where || {})[0] || [];
+      const wanted = condition?.equals;
+      const docs = rows[collection].filter((row) => row[field] === wanted);
+      return { docs: limit ? docs.slice(0, limit) : docs };
+    },
+    async create({ collection, data }) {
+      if (failOn === collection) throw new Error(`${collection} write rejected`);
+      rows[collection].push(data);
+      return data;
+    },
+  };
+}
+
+const ledgerRow = (overrides = {}) => ({
+  lead_id: "lead-draft-11111111-1111-4111-8111-111111111111",
+  idempotency_key: null,
+  received_at: "2026-08-10T09:00:00.000Z",
+  source: "website_listing_detail",
+  intent: "inquiry",
+  lead_type: "buyer",
+  original_language: "he",
+  admin_locale: "en",
+  contact_preference: "whatsapp",
+  contact_fingerprint: "fp-abc",
+  duplicate_status: "new_contact",
+  sla_due_at: "2026-08-10T09:15:00.000Z",
+  ...overrides,
+});
+
+const envelope = (overrides = {}) => ({
+  subject_type: "lead",
+  subject_id: "lead-draft-11111111-1111-4111-8111-111111111111",
+  stored_at: "2026-08-10T09:00:00.000Z",
+  algorithm: "aes-256-gcm",
+  iv: "aXYtYmFzZTY0",
+  auth_tag: "dGFnLWJhc2U2NA==",
+  ciphertext: "Y2lwaGVydGV4dA==",
+  ...overrides,
+});
+
+test("the durable store stays off unless it is both requested and configured", () => {
+  const base = { MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true", PAYLOAD_SECRET: "s".repeat(40), DATABASE_URL: "postgres://x/y" };
+  assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv(base)), true);
+  // A half-provisioned deployment keeps using the file ledger rather than
+  // failing every submission.
+  assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, DATABASE_URL: "" })), false);
+  assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, PAYLOAD_SECRET: "" })), false);
+  assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "false" })), false);
+  assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({})), false);
+});
+
+test("a lead persists with its encrypted contact envelope and no plaintext", async () => {
+  const payload = fakePayload();
+  const result = await persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload });
+
+  assert.equal(result.created, true);
+  assert.equal(result.idempotent, false);
+  assert.equal(payload.rows.public_leads.length, 1);
+  assert.equal(payload.rows.lead_contacts.length, 1);
+
+  const stored = payload.rows.public_leads[0];
+  assert.equal(stored.lead_id, ledgerRow().lead_id);
+  assert.deepEqual(stored.ledger_row, ledgerRow());
+  const storedContact = payload.rows.lead_contacts[0];
+  assert.equal(storedContact.ciphertext, "Y2lwaGVydGV4dA==");
+  // Nothing readable about the person may reach the database.
+  const serialized = JSON.stringify(payload.rows);
+  for (const plaintext of ["whatsapp:+359", "Noa", "@example"]) {
+    assert.equal(serialized.includes(plaintext), false, `${plaintext} must not be stored`);
+  }
+});
+
+test("a retried submission collapses onto the original record", async () => {
+  const payload = fakePayload();
+  const row = ledgerRow({ idempotency_key: "browser-retry-1" });
+  const first = await persistLeadDurably({ ledgerRow: row, contactEnvelope: envelope(), payload });
+  const second = await persistLeadDurably({
+    ledgerRow: { ...row, lead_id: "lead-draft-22222222-2222-4222-8222-222222222222" },
+    contactEnvelope: envelope(),
+    payload,
+  });
+
+  assert.equal(first.created, true);
+  assert.equal(second.created, false);
+  assert.equal(second.idempotent, true);
+  assert.equal(payload.rows.public_leads.length, 1, "a retry must not create a second person");
+  assert.equal(second.lead.lead_id, row.lead_id, "the original record is returned");
+
+  const found = await findLeadByIdempotencyKey("browser-retry-1", { payload });
+  assert.equal(found.lead_id, row.lead_id);
+  assert.equal(await findLeadByIdempotencyKey(null, { payload }), null);
+});
+
+test("a repeated lead id never overwrites the original", async () => {
+  const payload = fakePayload();
+  await persistLeadDurably({ ledgerRow: ledgerRow(), payload });
+  const again = await persistLeadDurably({ ledgerRow: ledgerRow({ source: "website_contact_callback" }), payload });
+  assert.equal(again.created, false);
+  assert.equal(payload.rows.public_leads.length, 1);
+  assert.equal(payload.rows.public_leads[0].source, "website_listing_detail", "the first write wins");
+});
+
+test("a failed write raises rather than reporting a stored lead", async () => {
+  const payload = fakePayload({ failOn: "public_leads" });
+  await assert.rejects(
+    () => persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload }),
+    (error) => error instanceof LeadStoreUnavailableError && error.code === "lead_store_unavailable",
+  );
+
+  // A contact-store failure must also fail loudly: a lead nobody can answer is
+  // worse than a refused submission.
+  const contactFailure = fakePayload({ failOn: "lead_contacts" });
+  await assert.rejects(
+    () => persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload: contactFailure }),
+    LeadStoreUnavailableError,
+  );
+});
+
+test("the store refuses malformed input outright", async () => {
+  const payload = fakePayload();
+  await assert.rejects(() => persistLeadDurably({ payload }), /ledger row is required/i);
+  await assert.rejects(() => persistLeadDurably({ ledgerRow: { source: "x" }, payload }), /lead_id/);
+  await assert.rejects(
+    () => persistLeadDurably({ ledgerRow: ledgerRow({ contact: { name: "Noa" } }), payload }),
+    /must not contain raw contact data/,
+  );
+  await assert.rejects(
+    () => persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: { subject_id: "x" }, payload }),
+    /must be encrypted/,
+  );
+});
+
+test("the collections keep contact envelopes opaque and ledger rows immutable", () => {
+  assert.deepEqual(LEAD_COLLECTION_SLUGS, ["public_leads", "lead_contacts"]);
+  const bySlug = Object.fromEntries(LEAD_COLLECTIONS.map((c) => [c.slug, c]));
+
+  const leadFields = Object.fromEntries(bySlug.public_leads.fields.map((f) => [f.name, f]));
+  assert.equal(leadFields.lead_id.unique, true);
+  assert.equal(leadFields.lead_id.access.update(), false, "identity is immutable once written");
+  assert.equal(leadFields.received_at.access.update(), false);
+  assert.equal(leadFields.idempotency_key.index, true);
+  // No field may invite raw contact data into the ledger collection.
+  for (const name of ["contact", "email", "phone", "whatsapp", "message"]) {
+    assert.equal(name in leadFields, false, `public_leads must not carry ${name}`);
+  }
+
+  const contactFields = Object.fromEntries(bySlug.lead_contacts.fields.map((f) => [f.name, f]));
+  for (const name of ["iv", "auth_tag", "ciphertext", "algorithm"]) {
+    assert.equal(contactFields[name].required, true);
+    assert.equal(contactFields[name].access.update(), false, `${name} is write-once`);
+  }
+});
