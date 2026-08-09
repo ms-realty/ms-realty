@@ -8,6 +8,13 @@ import { ru } from "@payloadcms/translations/languages/ru";
 import { buildConfig } from "payload";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
+import {
+  accessForGeneratedCollection,
+  adminRoleFieldAccess,
+  adminsCollectionAccess,
+  caseCollectionAccess,
+  referenceCollectionAccess,
+} from "./production/lib/payload-access.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const generated = JSON.parse(fs.readFileSync(path.join(root, "production/data/payload-collections.json"), "utf8"));
@@ -16,6 +23,9 @@ const admins = {
   slug: "admins",
   auth: true,
   admin: { useAsTitle: "email" },
+  // Only an admin manages operator accounts; everyone else is limited to their
+  // own record and cannot touch the role field (no self-escalation).
+  access: adminsCollectionAccess,
   fields: [
     { name: "name", type: "text" },
     {
@@ -24,12 +34,21 @@ const admins = {
       required: true,
       defaultValue: "admin",
       options: ["admin", "broker", "editor", "translator"],
+      access: adminRoleFieldAccess,
+    },
+    {
+      name: "workspace_ids",
+      type: "text",
+      hasMany: true,
+      access: adminRoleFieldAccess,
+      admin: { description: "Workspaces this operator may access. Empty = admin-wide. Only admins may edit." },
     },
   ],
 };
 
 const locales = {
   slug: "locales",
+  access: referenceCollectionAccess,
   admin: { useAsTitle: "code", defaultColumns: ["code", "native_name", "direction", "public_enabled"] },
   fields: [
     { name: "code", type: "text", required: true, unique: true },
@@ -144,7 +163,14 @@ function applyPropertyFactVisibility(collection) {
 }
 
 const collections = generated.collections.map((input) => {
-  const collection = applyPropertyFactVisibility(input);
+  const withVisibility = applyPropertyFactVisibility(input);
+  // Generated content collections shipped with Payload's permissive default
+  // (any authenticated user writes). Gate them by role; translations also
+  // admit translators. An explicit per-collection access wins if one exists.
+  const collection = {
+    ...withVisibility,
+    access: withVisibility.access || accessForGeneratedCollection(withVisibility.slug),
+  };
   if (collection.slug === "listings") {
     return {
       ...collection,
@@ -170,6 +196,20 @@ const collections = generated.collections.map((input) => {
   return collection;
 });
 
+// Realty-case collections are workspace-scoped for brokers and full-access for
+// admins. Several are append-only (update/delete already forced false); we add
+// role-gated create and workspace-scoped read while preserving those guards.
+const caseCollectionsWithAccess = REALTY_CASE_COLLECTIONS.map((collection) => ({
+  ...collection,
+  access: {
+    create: caseCollectionAccess.create,
+    read: caseCollectionAccess.read,
+    update: collection.access?.update ?? caseCollectionAccess.update,
+    delete: collection.access?.delete ?? caseCollectionAccess.delete,
+    ...(collection.access?.admin ? { admin: collection.access.admin } : {}),
+  },
+}));
+
 export default buildConfig({
   admin: { user: "admins" },
   routes: { admin: "/payload-admin" },
@@ -184,5 +224,5 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || "postgres://payload:payload@127.0.0.1:5432/ms_realty",
     },
   }),
-  collections: [admins, locales, ...collections, ...REALTY_CASE_COLLECTIONS],
+  collections: [admins, locales, ...collections, ...caseCollectionsWithAccess],
 });
