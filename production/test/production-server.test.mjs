@@ -199,7 +199,7 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   assert.equal(config.realtyCaseWorkspaceId, "workspace-sandanski");
   assert.equal(config.realtyCasePayloadRuntimeConfigured, true);
   assert.equal(productionServerConfig({}).localeRegistryPath, undefined);
-  assert.equal(productionServerConfig({ HOST: "" }).host, "0.0.0.0");
+  assert.equal(productionServerConfig({ HOST: "" }).host, "127.0.0.1");
   assert.throws(() => productionServerConfig({ HOST: " 127.0.0.1" }), /HOST must be a non-empty/);
   assert.throws(() => productionServerConfig({ MS_REALTY_HOST: "127.0.0.1 " }), /HOST must be a non-empty/);
   assert.throws(() => productionServerConfig({ PORT: " 0" }), /PORT must be an integer/);
@@ -313,4 +313,38 @@ test("production server persists public leads and reviewed admin replies", async
   } finally {
     await close(server);
   }
+});
+
+test("default host is loopback and non-loopback binds fail closed without production credentials", async () => {
+  const { assertSafeBind, isLoopbackHost, productionServerConfig } = await import("../server.mjs");
+
+  // Default bind is loopback — a bare start never exposes admin on all interfaces.
+  assert.equal(productionServerConfig({}).host, "127.0.0.1");
+  assert.equal(isLoopbackHost("127.0.0.1"), true);
+  assert.equal(isLoopbackHost("::1"), true);
+  assert.equal(isLoopbackHost("0.0.0.0"), false);
+
+  // Loopback binds are always allowed.
+  assert.doesNotThrow(() => assertSafeBind({ host: "127.0.0.1" }, {}));
+  assert.doesNotThrow(() => assertSafeBind({ host: "localhost" }, { NODE_ENV: "development" }));
+
+  // Non-loopback without production mode is refused.
+  assert.throws(() => assertSafeBind({ host: "0.0.0.0" }, {}), /Refusing to bind/);
+  // Non-loopback in production but without a credential registry is refused.
+  assert.throws(
+    () => assertSafeBind({ host: "0.0.0.0" }, { NODE_ENV: "production" }),
+    /MS_REALTY_ADMIN_CREDENTIALS_JSON/,
+  );
+  // Non-loopback in production WITH a real credential registry is allowed.
+  assert.doesNotThrow(() =>
+    assertSafeBind(
+      { host: "0.0.0.0" },
+      {
+        NODE_ENV: "production",
+        MS_REALTY_ADMIN_CREDENTIALS_JSON: JSON.stringify([
+          { id: "op1", token: "safe-bind-operator-token-0123456789", roles: ["admin"] },
+        ]),
+      },
+    ),
+  );
 });

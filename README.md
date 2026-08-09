@@ -34,4 +34,10 @@ npm run check                                # tests + full validate pipeline
 MS_REALTY_ADMIN_TOKEN=replace-me MS_REALTY_ADMIN_ACTOR=operations_lead MS_REALTY_ADMIN_ROLES=admin npm start
 ```
 
+`npm start` binds `127.0.0.1` by default. Binding a public interface
+(`MS_REALTY_HOST=0.0.0.0`) requires `NODE_ENV=production` and a
+`MS_REALTY_ADMIN_CREDENTIALS_JSON` operator registry, or the server
+refuses to start — a bare start can never expose a mutation-capable
+admin on the network.
+
 Requires Node ≥ 22 and Python 3.
