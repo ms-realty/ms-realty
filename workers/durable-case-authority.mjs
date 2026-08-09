@@ -5,6 +5,13 @@ export const DURABLE_CASE_AUTHORITY_PATHS = new Set([
   "/api/admin/cases/conditions/actions",
 ]);
 
+// The browser login exchanges the operator key for a cookie; both routes
+// only set or clear that cookie — nothing touches the ephemeral disk.
+const ADMIN_SESSION_PATHS = new Set(["/admin/login", "/admin/logout"]);
+export function allowsAdminSessionMutation({ method, pathname }) {
+  return method === "POST" && ADMIN_SESSION_PATHS.has(pathname);
+}
+
 // The MCP endpoint speaks JSON-RPC over POST (and DELETE for session close).
 // It is safe to admit through the edge mutation gate because the app 401s
 // unauthenticated calls and the Worker disables ledger-writing MCP tools via

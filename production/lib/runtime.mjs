@@ -15,10 +15,13 @@ import {
   renderListingPage,
   renderLocationPage,
   renderSearchPage,
+  renderSearchUnavailablePage,
   renderContactPage,
   renderSellerPage,
   isActiveListing,
 } from "./public-site.mjs";
+
+export { renderSearchUnavailablePage };
 import { contactPath, locationPath, listingPath, publicLocationNames, sellerPath } from "./seo.mjs";
 import { publicFactValue } from "./listing-facts.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";

@@ -984,36 +984,57 @@ const CONTACT_COPY = {
     title: "Свържете се с MS Realty",
     h1: "Свържете се с брокер",
     description: "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty. За обратно обаждане посочете име, телефон и предпочитано време.",
+    form_unavailable: "Формата е временно недостъпна. Обадете се или ни пишете — отговаряме бързо.",
+    search_unavailable_title: "Търсенето е временно недостъпно",
+    search_unavailable_description: "Работим по него. Обадете се или разгледайте страниците ни — брокерът ще помогне веднага.",
   },
   en: {
     title: "Contact MS Realty",
     h1: "Contact a broker",
     description: "Send a question or callback request to the MS Realty team.",
+    form_unavailable: "The form is temporarily unavailable. Call or message us instead — we reply quickly.",
+    search_unavailable_title: "Search is temporarily unavailable",
+    search_unavailable_description: "We are working on it. Call us or browse our pages — a broker will help right away.",
   },
   de: {
     title: "MS Realty kontaktieren",
     h1: "Makler kontaktieren",
     description: "Senden Sie eine Frage oder Rückrufanfrage an das MS Realty Team.",
+    form_unavailable: "Das Formular ist vorübergehend nicht verfügbar. Rufen Sie uns an oder schreiben Sie uns.",
+    search_unavailable_title: "Die Suche ist vorübergehend nicht verfügbar",
+    search_unavailable_description: "Wir arbeiten daran. Rufen Sie uns an — ein Makler hilft sofort.",
   },
   nl: {
     title: "Neem contact op met MS Realty",
     h1: "Neem contact op met een makelaar",
     description: "Stuur een vraag of terugbelverzoek naar het MS Realty team.",
+    form_unavailable: "Het formulier is tijdelijk niet beschikbaar. Bel of stuur ons een bericht.",
+    search_unavailable_title: "Zoeken is tijdelijk niet beschikbaar",
+    search_unavailable_description: "We werken eraan. Bel ons — een makelaar helpt direct.",
   },
   ru: {
     title: "Связаться с MS Realty",
     h1: "Связаться с брокером",
     description: "Отправьте вопрос или запрос на обратный звонок команде MS Realty.",
+    form_unavailable: "Форма временно недоступна. Позвоните или напишите нам — мы быстро отвечаем.",
+    search_unavailable_title: "Поиск временно недоступен",
+    search_unavailable_description: "Мы работаем над этим. Позвоните нам — брокер поможет сразу.",
   },
   el: {
     title: "Επικοινωνία με τη MS Realty",
     h1: "Επικοινωνήστε με μεσίτη",
     description: "Στείλτε ερώτηση ή αίτημα επανάκλησης στην ομάδα της MS Realty.",
+    form_unavailable: "Η φόρμα δεν είναι προσωρινά διαθέσιμη. Καλέστε μας ή στείλτε μήνυμα.",
+    search_unavailable_title: "Η αναζήτηση δεν είναι προσωρινά διαθέσιμη",
+    search_unavailable_description: "Εργαζόμαστε πάνω σε αυτό. Καλέστε μας — ένας μεσίτης θα βοηθήσει άμεσα.",
   },
   he: {
     title: "יצירת קשר עם MS Realty",
     h1: "יצירת קשר עם מתווך",
     description: "שלחו שאלה או בקשה לשיחה חוזרת לצוות MS Realty.",
+    form_unavailable: "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
+    search_unavailable_title: "החיפוש אינו זמין זמנית",
+    search_unavailable_description: "אנחנו עובדים על זה. התקשרו אלינו — מתווך יעזור מיד.",
   },
 };
 
@@ -1173,13 +1194,29 @@ const CHROME_COPY = {
 
 const BRAND_CONTACT = {
   email: "office@makler-realty.com",
+  // Agency line verified against the live legacy site (makler-realty.com
+  // header/footer, 2026-08-09); reachable on WhatsApp and Viber.
+  phone: "+359879696870",
+  phone_display: "+359 879 69 68 70",
+  whatsapp: "https://wa.me/359879696870",
+  viber: "viber://chat?number=%2B359879696870",
 };
 
 export function chromeCopyFor(localeCode) {
   return CHROME_COPY[localeCode] || CHROME_COPY.en;
 }
 
-function publicChrome(registry, locale, { hreflang = [], active = null, locations = [], currentPath = null } = {}) {
+function publicChrome(
+  registry,
+  locale,
+  {
+    hreflang = [],
+    active = null,
+    locations = [],
+    currentPath = null,
+    leadWritesDisabled = process.env.MS_REALTY_MCP_WRITES_DISABLED === "1",
+  } = {},
+) {
   const copy = chromeCopyFor(locale.code);
   const labels = labelsFor(locale.code);
   const searchBase = `/${locale.code}/${locale.route_segments.search}`;
@@ -1189,6 +1226,7 @@ function publicChrome(registry, locale, { hreflang = [], active = null, location
   );
   return {
     copy,
+    lead_writes_disabled: leadWritesDisabled,
     home: { href: homePath(registry, locale.code), label: "MS Realty" },
     nav: [
       { id: "buy", href: searchBase, label: copy.navBuy, active: active === "search" || active === "listing" || active === "location" },
@@ -2141,7 +2179,14 @@ export function renderHomePage({ registry, localeCode, listings }) {
   };
 }
 
-export function renderContactPage({ registry, localeCode }) {
+export function renderContactPage({
+  registry,
+  localeCode,
+  // The Worker sets this flag on runtimes whose disk forgets (the edge also
+  // 503s /api/leads there); rendering a form whose backend is off would waste
+  // the visitor's effort, so the page falls back to direct contact channels.
+  leadWritesDisabled = process.env.MS_REALTY_MCP_WRITES_DISABLED === "1",
+} = {}) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const path = contactPath(registry, locale.code);
@@ -2164,29 +2209,79 @@ export function renderContactPage({ registry, localeCode }) {
       robots: resolved.available ? "index,follow" : "noindex,follow",
     },
     hreflang: resolved.available ? hreflangForContact(registry) : [],
-    chrome: publicChrome(registry, locale, { hreflang: resolved.available ? hreflangForContact(registry) : [], active: "contact" }),
+    chrome: publicChrome(registry, locale, {
+      hreflang: resolved.available ? hreflangForContact(registry) : [],
+      active: "contact",
+      leadWritesDisabled,
+    }),
     body: {
       h1: copy.h1,
       intro: copy.description,
-      callback: {
-        endpoint: "/api/leads",
-        method: "POST",
-        minimum_tap_target_px: 44,
-        required_fields: ["contact.name", "contact.phone"],
-        payload: {
-          source: "website_contact_callback",
-          intent: "callback",
-          leadType: "general",
-          language: locale.code,
-          contact_preference: "phone",
-        },
-        label: labels.callback,
+      contact_channels: {
+        phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
+        whatsapp: { href: BRAND_CONTACT.whatsapp, label: "WhatsApp" },
+        viber: { href: BRAND_CONTACT.viber, label: "Viber" },
+        email: { href: `mailto:${BRAND_CONTACT.email}`, label: BRAND_CONTACT.email },
       },
+      form_unavailable: leadWritesDisabled ? copy.form_unavailable : null,
+      callback: leadWritesDisabled
+        ? null
+        : {
+            endpoint: "/api/leads",
+            method: "POST",
+            minimum_tap_target_px: 44,
+            required_fields: ["contact.name", "contact.phone"],
+            payload: {
+              source: "website_contact_callback",
+              intent: "callback",
+              leadType: "general",
+              language: locale.code,
+              contact_preference: "phone",
+            },
+            label: labels.callback,
+          },
       search: {
         path: `/${locale.code}/${locale.route_segments.search}`,
       },
       seller: {
         path: sellerPath(registry, locale.code),
+      },
+    },
+  };
+}
+
+export function renderSearchUnavailablePage({ registry, localeCode }) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const copy = contactCopy(locale.code);
+  const path = `/${locale.code}/${locale.route_segments.search}`;
+  return {
+    kind: "search_unavailable",
+    status: 503,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: false,
+    metadata: {
+      title: copy.search_unavailable_title,
+      description: copy.search_unavailable_description,
+      robots: "noindex,follow",
+    },
+    hreflang: [],
+    chrome: publicChrome(registry, locale, { active: "search" }),
+    body: {
+      h1: copy.search_unavailable_title,
+      intro: copy.search_unavailable_description,
+      contact_channels: {
+        phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
+        whatsapp: { href: BRAND_CONTACT.whatsapp, label: "WhatsApp" },
+      },
+      ctas: {
+        contact: { path: contactPath(registry, locale.code) },
+        seller: { path: sellerPath(registry, locale.code) },
       },
     },
   };

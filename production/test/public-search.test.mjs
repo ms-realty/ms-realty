@@ -149,7 +149,10 @@ test("production public search fails closed when no configured engine can serve 
     config,
   });
   assert.equal(responseFromRoute.status, 503);
-  assert.deepEqual(await responseFromRoute.json(), { kind: "search_unavailable", message: "Search is temporarily unavailable" });
+  assert.match(responseFromRoute.headers.get("content-type"), /text\/html/);
+  const fallbackHtml = await responseFromRoute.text();
+  assert.match(fallbackHtml, /data-kind="search-unavailable"/);
+  assert.match(fallbackHtml, /tel:\+359879696870/);
 });
 
 test("localized HTML and API search share engine-ranked cards and request intent", async () => {

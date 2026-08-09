@@ -138,7 +138,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /data-client-save-listing="MS-CRAWL-0001"/);
   assert.match(runtimeListingHtml, /property="og:image" content="https:\/\/makler-realty\.com\/wp-content\/uploads\//);
   assert.match(listingHtml, /hreflang="el"/);
-  assert.doesNotMatch(listingHtml, /href="tel:/);
+  // The verified brand line (footer) is allowed everywhere; any OTHER tel:
+  // on a listing still requires the per-listing verified broker contact.
+  assert.doesNotMatch(listingHtml, /href="tel:(?!\+359879696870")/);
   assert.equal(assertHtmlPage(listingPrintHtml, { lang: "he", dir: "rtl", kind: "listing-print" }), true);
   assert.match(listingPrintHtml, /data-print-status="browser-pdf-ready"/);
   assert.match(listingPrintHtml, /data-print-document="property-brochure"/);
@@ -150,7 +152,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingPrintHtml, /ms-print-document__hero-media/);
   assert.match(runtimeListingPrintHtml, /data-print-gallery="true"/);
   assert.equal(listingPrintHtml.includes(listingPrintPage.body.source.old_url), false);
-  assert.doesNotMatch(listingPrintHtml, /href="tel:/);
+  assert.doesNotMatch(listingPrintHtml, /href="tel:(?!\+359879696870")/);
   assert.doesNotMatch(listingPrintHtml, /tel:\+359880000000/);
   assert.match(approvedListingHtml, /tel:\+447700900001/);
   assert.match(approvedListingPrintHtml, /טלפון: \+447700900001/);

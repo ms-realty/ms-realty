@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fromRoot } from "../lib/paths.mjs";
 import { readBuildMarker } from "../lib/build-marker.mjs";
-import { allowsDurableCaseAuthorityMutation, allowsMcpRequest } from "../../workers/durable-case-authority.mjs";
+import { allowsAdminSessionMutation, allowsDurableCaseAuthorityMutation, allowsMcpRequest } from "../../workers/durable-case-authority.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
@@ -213,4 +213,13 @@ test("Cloudflare Container admits authenticated MCP without opening ledger write
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/api/leads", env }), false);
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: { MS_REALTY_PUBLIC_ORIGIN: "  " } }), false);
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: {} }), false);
+});
+
+test("Cloudflare Container admits the cookie-login exchange without opening ledger writes", () => {
+  assert.match(workerSource, /allowsAdminSessionMutation\(\{ method: request\.method, pathname: url\.pathname \}\)/);
+  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/login" }), true);
+  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/logout" }), true);
+  assert.equal(allowsAdminSessionMutation({ method: "GET", pathname: "/admin/login" }), false);
+  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/login/extra" }), false);
+  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/api/admin/cases" }), false);
 });

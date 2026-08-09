@@ -277,6 +277,9 @@ function SiteFooter({ chrome, labels }) {
   const contactLinks = [
     { id: "contact", href: chrome.nav.find((item) => item.id === "contact")?.href || chrome.home.href, label: copy.navContact },
     { id: "seller", href: chrome.nav.find((item) => item.id === "sell")?.href || chrome.home.href, label: labels.sellerValuation },
+    ...(chrome.contact.phone
+      ? [{ id: "phone", href: `tel:${chrome.contact.phone}`, label: chrome.contact.phone_display || chrome.contact.phone }]
+      : []),
     { id: "email", href: `mailto:${chrome.contact.email}`, label: chrome.contact.email },
   ];
   const mobileGroups = [
@@ -438,6 +441,24 @@ const INTENT_DIALOG_COPY = {
 // One implementation with three explicit task states. Each state has its own
 // context, fields, validation, and confirmation while sharing the lead schema.
 function EnquiryDialog({ page, labels, copy }) {
+  // When the runtime cannot durably accept leads, the shell modal must not
+  // pretend otherwise: offer the working direct channels instead of a form.
+  if (page.chrome?.lead_writes_disabled) {
+    const contact = page.chrome?.contact || {};
+    return h(
+      "dialog",
+      { id: "mk-enquiry", className: "ct-modal mk-enquiry", "aria-label": labels.inquiry, "data-enquiry-intent": "inquiry", "data-form-unavailable": "true" },
+      h("div", { className: "mk-enquiry__heading" }, h("h2", null, labels.inquiry)),
+      contact.phone
+        ? h(
+            Btn,
+            { tag: "a", variant: "accent", size: "lg", full: true, iconStart: "phone", href: `tel:${contact.phone}` },
+            contact.phone_display || contact.phone,
+          )
+        : null,
+      contact.email ? h("p", null, h("a", { href: `mailto:${contact.email}` }, contact.email)) : null,
+    );
+  }
   const intentCopy = INTENT_DIALOG_COPY[page.locale] || INTENT_DIALOG_COPY.en;
   const facts = page.kind === "listing" ? page.body?.facts || {} : {};
   const propertyTitle = page.kind === "listing" ? page.body?.h1 || "" : "";
@@ -2787,7 +2808,6 @@ function ContactBody({ page }) {
           ? h(
               "div",
               { className: "ct-office" },
-              h("div", { className: "ct-office__ph mk-photo mk-photo--sand", "aria-hidden": "true" }),
               h(
                 "div",
                 null,
@@ -2798,6 +2818,29 @@ function ContactBody({ page }) {
                   h("span", null, h(Icon, { name: "map-pin", size: 16 }), ` ${chrome.copy.offices}`),
                   h("span", null, h(Icon, { name: "mail", size: 16 }), h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
                 ),
+                page.body.contact_channels
+                  ? h(
+                      "div",
+                      { className: "ct-actions", "data-contact-channels": "true" },
+                      h(
+                        Btn,
+                        { tag: "a", variant: "accent", size: "lg", full: true, iconStart: "phone", href: page.body.contact_channels.phone.href },
+                        page.body.contact_channels.phone.label,
+                      ),
+                      h(
+                        Btn,
+                        { tag: "a", variant: "secondary", iconStart: "message-circle", href: page.body.contact_channels.whatsapp.href },
+                        page.body.contact_channels.whatsapp.label,
+                      ),
+                      page.body.contact_channels.viber
+                        ? h(
+                            Btn,
+                            { tag: "a", variant: "secondary", iconStart: "message-circle", href: page.body.contact_channels.viber.href },
+                            page.body.contact_channels.viber.label,
+                          )
+                        : null,
+                    )
+                  : null,
               ),
             )
           : null,
@@ -2808,26 +2851,70 @@ function ContactBody({ page }) {
           h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.seller.path, "data-action": "seller" }, labels.sellerValuation),
         ),
       ),
+      callback
+        ? h(
+            "form",
+            {
+              className: "mk-card mk-card--elevated mk-card--pad-lg ct-form",
+              method: callback.method || "POST",
+              action: callback.endpoint,
+              "data-lead-type": "general",
+              "data-source": callback.payload.source,
+            },
+            h("h2", { className: "ct-form__title" }, labels.message),
+            h("input", { type: "hidden", name: "source", defaultValue: callback.payload.source }),
+            h("input", { type: "hidden", name: "intent", defaultValue: callback.payload.intent }),
+            h("input", { type: "hidden", name: "leadType", defaultValue: callback.payload.leadType }),
+            h("input", { type: "hidden", name: "language", defaultValue: callback.payload.language }),
+            h("input", { type: "hidden", name: "contact_preference", defaultValue: callback.payload.contact_preference }),
+            h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+            h("label", null, labels.phone, h("input", { name: "contact.phone", type: "tel", required: true, autoComplete: "tel", inputMode: "tel" })),
+            h("label", null, labels.preferredCallbackTime, h("input", { name: "request_details.callback_time", maxLength: 120 })),
+            h("label", null, labels.message, h("textarea", { name: "message" })),
+            h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send" }, callback.label),
+          )
+        : h(
+            "div",
+            { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
+            h("h2", { className: "ct-form__title" }, labels.message),
+            h("p", null, page.body.form_unavailable),
+            page.body.contact_channels
+              ? h(
+                  Btn,
+                  { tag: "a", variant: "accent", size: "lg", full: true, iconStart: "phone", href: page.body.contact_channels.phone.href },
+                  page.body.contact_channels.phone.label,
+                )
+              : null,
+          ),
+    ),
+  );
+  return shell(page, main);
+}
+
+function SearchUnavailableBody({ page }) {
+  const labels = uiLabels(page);
+  const channels = page.body.contact_channels;
+  const main = h(
+    "main",
+    { id: "main", tabIndex: -1, "data-kind": "search-unavailable", "data-react-public-ui": "search-unavailable", className: "pg-narrow" },
+    h(
+      "div",
+      { className: "mk-empty" },
+      h("span", { className: "mk-empty__icon" }, h(Icon, { name: "search", size: 24 })),
+      h("h1", { className: "mk-empty__title" }, page.body.h1),
+      h("p", { className: "mk-empty__text" }, page.body.intro),
       h(
-        "form",
-        {
-          className: "mk-card mk-card--elevated mk-card--pad-lg ct-form",
-          method: callback.method || "POST",
-          action: callback.endpoint,
-          "data-lead-type": "general",
-          "data-source": callback.payload.source,
-        },
-        h("h2", { className: "ct-form__title" }, labels.message),
-        h("input", { type: "hidden", name: "source", defaultValue: callback.payload.source }),
-        h("input", { type: "hidden", name: "intent", defaultValue: callback.payload.intent }),
-        h("input", { type: "hidden", name: "leadType", defaultValue: callback.payload.leadType }),
-        h("input", { type: "hidden", name: "language", defaultValue: callback.payload.language }),
-        h("input", { type: "hidden", name: "contact_preference", defaultValue: callback.payload.contact_preference }),
-        h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
-        h("label", null, labels.phone, h("input", { name: "contact.phone", type: "tel", required: true, autoComplete: "tel", inputMode: "tel" })),
-        h("label", null, labels.preferredCallbackTime, h("input", { name: "request_details.callback_time", maxLength: 120 })),
-        h("label", null, labels.message, h("textarea", { name: "message" })),
-        h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send" }, callback.label),
+        "div",
+        { className: "mk-empty__actions" },
+        channels
+          ? h(
+              Btn,
+              { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: channels.phone.href },
+              channels.phone.label,
+            )
+          : null,
+        h(Btn, { tag: "a", variant: "secondary", iconStart: "message-circle", href: page.body.ctas.contact.path }, labels.contactActions),
+        h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
       ),
     ),
   );
@@ -3007,6 +3094,7 @@ export function renderReactPublicBody(page) {
   if (page.kind === "location") return renderStaticElement(h(LocationBody, { page }));
   if (page.kind === "seller") return renderStaticElement(h(SellerBody, { page }));
   if (page.kind === "contact") return renderStaticElement(h(ContactBody, { page }));
+  if (page.kind === "search_unavailable") return renderStaticElement(h(SearchUnavailableBody, { page }));
   if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));
   if (page.kind === "guide") return renderStaticElement(h(GuideBody, { page }));
   if (page.kind === "legacy_archive") return renderStaticElement(h(LegacyArchiveBody, { page }));

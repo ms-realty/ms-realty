@@ -61,6 +61,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -116,6 +117,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
@@ -690,6 +695,7 @@
         "filters": "Filters",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -723,6 +729,10 @@
       "languages": [],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/en/contact",
         "label": "Contact",
         "offices": "Sandanski · Bansko · Sveti Vlas"
@@ -1321,6 +1331,7 @@
         "filters": "Фильтры",
         "offices": "Сандански · Банско · Свети-Влас"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/ru",
         "label": "MS Realty"
@@ -1362,6 +1373,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/ru/contact",
         "label": "Контакты",
         "offices": "Сандански · Банско · Свети-Влас"
@@ -1907,6 +1922,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -1990,6 +2006,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
@@ -3134,6 +3154,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -3217,6 +3238,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
@@ -3334,6 +3359,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -3417,6 +3443,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
@@ -3431,6 +3461,25 @@
     "body": {
       "h1": "יצירת קשר עם מתווך",
       "intro": "שלחו שאלה או בקשה לשיחה חוזרת לצוות MS Realty.",
+      "contact_channels": {
+        "phone": {
+          "href": "tel:+359879696870",
+          "label": "+359 879 69 68 70"
+        },
+        "whatsapp": {
+          "href": "https://wa.me/359879696870",
+          "label": "WhatsApp"
+        },
+        "viber": {
+          "href": "viber://chat?number=%2B359879696870",
+          "label": "Viber"
+        },
+        "email": {
+          "href": "mailto:office@makler-realty.com",
+          "label": "office@makler-realty.com"
+        }
+      },
+      "form_unavailable": null,
       "callback": {
         "endpoint": "/api/leads",
         "method": "POST",
@@ -3503,6 +3552,7 @@
         "filters": "Filters",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -3586,6 +3636,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/en/contact",
         "label": "Contact",
         "offices": "Sandanski · Bansko · Sveti Vlas"
@@ -3727,6 +3781,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -3810,6 +3865,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
@@ -3947,6 +4006,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4002,6 +4062,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
@@ -4573,6 +4637,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4656,6 +4721,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
@@ -6110,6 +6179,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -6193,6 +6263,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
@@ -6921,6 +6995,7 @@
         "filters": "Filters",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -7004,6 +7079,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/en/contact",
         "label": "Contact",
         "offices": "Sandanski · Bansko · Sveti Vlas"
@@ -7093,6 +7172,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "lead_writes_disabled": false,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -7176,6 +7256,10 @@
       ],
       "contact": {
         "email": "office@makler-realty.com",
+        "phone": "+359879696870",
+        "phone_display": "+359 879 69 68 70",
+        "whatsapp": "https://wa.me/359879696870",
+        "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"

@@ -7,11 +7,17 @@ import { approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture
 test("production Node search fails closed for API and public search routes without a selected engine", async () => {
   const app = createHttpApp({ search: { environment: "production" } });
 
-  for (const url of ["/api/search?locale=he&q=Sandanski", "/he/search?format=html&q=Sandanski"]) {
-    const response = await dispatchHttp(app, { url });
-    assert.equal(response.status, 503);
-    assert.deepEqual(response.body, { kind: "search_unavailable", message: "Search is temporarily unavailable" });
-  }
+  const api = await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" });
+  assert.equal(api.status, 503);
+  assert.deepEqual(api.body, { kind: "search_unavailable", message: "Search is temporarily unavailable" });
+
+  // The human-facing search page keeps the 503 but renders a branded fallback
+  // with working contact channels instead of raw JSON.
+  const page = await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski" });
+  assert.equal(page.status, 503);
+  assert.match(page.headers["content-type"], /text\/html/);
+  assert.match(page.body, /data-kind="search-unavailable"/);
+  assert.match(page.body, /tel:\+359879696870/);
 });
 
 test("production Node search renders only IDs returned by the selected engine", async () => {
