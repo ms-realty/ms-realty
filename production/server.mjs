@@ -4,6 +4,7 @@ import { DEFAULT_AUDIT_LOG_PATH } from "./lib/audit-log.mjs";
 import { DEFAULT_ACCOUNT_LEDGER_PATH } from "./lib/account-ledger.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./lib/broker-contacts.mjs";
 import { createHttpApp } from "./lib/http.mjs";
+import { adminCredentials } from "./lib/admin-auth.mjs";
 import { DEFAULT_CMS_SEED_PATH, loadCmsSeed } from "./lib/runtime.mjs";
 import { rateLimitConfigFromEnv } from "./lib/rate-limit.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mjs";
@@ -51,10 +52,41 @@ function bytesFrom(value) {
   return bytes;
 }
 
+const LOOPBACK_HOSTS = new Set(["127.0.0.1", "::1", "localhost", "loopback"]);
+
 function hostFrom(value) {
-  const host = value === undefined || value === "" ? "0.0.0.0" : String(value);
+  // Default to loopback. A bare `npm start` must not expose a mutation-capable
+  // admin on every interface; binding beyond loopback is a deliberate,
+  // guarded choice (see assertSafeBind).
+  const host = value === undefined || value === "" ? "127.0.0.1" : String(value);
   if (host.trim() !== host || host === "") throw new Error("HOST must be a non-empty hostname or IP address");
   return host;
+}
+
+export function isLoopbackHost(host) {
+  return LOOPBACK_HOSTS.has(String(host || "").trim().toLowerCase());
+}
+
+// A non-loopback bind reaches other machines, so it must not run with the
+// development admin fallback. Require production mode and a real operator
+// credential registry before listening on a public interface.
+export function assertSafeBind(config, env = process.env) {
+  if (isLoopbackHost(config.host)) return;
+  const problems = [];
+  if (env.NODE_ENV !== "production") problems.push("NODE_ENV must be 'production'");
+  let hasRegistry = false;
+  try {
+    hasRegistry = adminCredentials(env).length > 0;
+  } catch (error) {
+    problems.push(`MS_REALTY_ADMIN_CREDENTIALS_JSON is invalid: ${error.message}`);
+  }
+  if (!hasRegistry) problems.push("MS_REALTY_ADMIN_CREDENTIALS_JSON must define at least one operator");
+  if (problems.length) {
+    throw new Error(
+      `Refusing to bind ${config.host} without production credentials: ${problems.join("; ")}. ` +
+        "Bind 127.0.0.1 for local use, or supply production configuration.",
+    );
+  }
 }
 
 export function productionServerConfig(env = process.env) {
@@ -214,6 +246,7 @@ export function createProductionServer(config = productionServerConfig()) {
 }
 
 export async function startProductionServer(config = productionServerConfig()) {
+  assertSafeBind(config);
   const server = createProductionServer(config);
   const address = await listen(server, config.port, config.host);
   console.log(JSON.stringify({ kind: "ms_realty_server", status: "listening", address }));
