@@ -2645,7 +2645,7 @@ export function createHttpApp({
         const leadId = String(input.id || `broker-lead-${randomUUID()}`).trim();
         const existing = currentLeads().find((row) => row.lead_id === leadId);
         if (existing) return adminJson(200, { lead: existing, idempotent: true });
-        const lead = createCrmInboxItem(activeRegistry, { ...input, id: leadId });
+        const lead = createCrmInboxItem(activeRegistry, input, { assignedId: leadId });
         const contactVault = appendLeadContact(lead, {
           filePath: leadContactVaultPath,
           secret: leadContactKey,

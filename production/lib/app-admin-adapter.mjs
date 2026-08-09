@@ -1886,7 +1886,7 @@ function appendBrokerLeadEntry(input, registry, config) {
   const existing = readLeadLedger(config.leadLedgerPath).find((row) => row.lead_id === leadId);
   if (existing) return { lead: existing, idempotent: true };
   const recordedAt = config.reviewedAt || new Date().toISOString();
-  const lead = createCrmInboxItem(registry, { ...normalized, id: leadId });
+  const lead = createCrmInboxItem(registry, normalized, { assignedId: leadId });
   const contactVault = appendLeadContact(lead, {
     filePath: config.leadContactVaultPath,
     secret: config.leadContactKey,

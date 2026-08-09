@@ -1,4 +1,5 @@
 import { getLocale, adminLocales } from "./locales.mjs";
+import { newRecordId, normalizeIdempotencyKey } from "./record-ids.mjs";
 
 const CONTACT_PREFERENCES = new Set(["phone", "viber", "whatsapp", "email"]);
 export const LEAD_TYPES = Object.freeze([
@@ -311,7 +312,11 @@ export function normalizePublicLeadInput(input = {}) {
   return { ...leadInput, source, intent: contract.intent };
 }
 
-export function createLeadDraft(registry, input) {
+// `assignedId` is a SECOND-ARGUMENT option on purpose: only server-side code
+// can set the identity of a record, never a field inside a request body. The
+// authenticated broker-intake path mints its own id (and uses it for
+// idempotency against the ledger); public intake gets a fresh server id.
+export function createLeadDraft(registry, input, { assignedId = null } = {}) {
   const leadInput = normalizeLeadInput(input);
   if (!leadInput.source || !leadInput.leadType || !leadInput.contact?.name) {
     throw new Error("source, leadType, and contact.name are required");
@@ -319,7 +324,8 @@ export function createLeadDraft(registry, input) {
   if (!LEAD_TYPE_SET.has(leadInput.leadType)) throw new Error("leadType must be a supported lead segment");
   const language = normalizeLeadLanguage(registry, leadInput.language || registry.source_locale);
   const draft = {
-    id: leadInput.id || `lead-draft-${Date.now()}`,
+    id: assignedId || newRecordId("lead-draft"),
+    idempotency_key: normalizeIdempotencyKey(leadInput.idempotencyKey ?? leadInput.idempotency_key),
     source: leadInput.source,
     intent: leadInput.intent || null,
     leadType: leadInput.leadType,

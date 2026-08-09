@@ -9,7 +9,7 @@
   },
   "rows": [
     {
-      "lead_id": "http-lead-he-0001",
+      "lead_id": "lead-draft-d848d08e-3396-4d92-9036-2508d83e5068",
       "lead_type": "renter",
       "original_language": "he",
       "admin_locale": "en",
@@ -33,7 +33,7 @@
       "broker_task": null
     },
     {
-      "lead_id": "http-viewing-lead-he-0001",
+      "lead_id": "lead-draft-ba034884-d6bc-463d-b48f-a6b628d050db",
       "lead_type": "renter",
       "original_language": "he",
       "admin_locale": "en",
@@ -100,7 +100,7 @@
         }
       ],
       "broker_task": {
-        "id": "inventory-match-http-viewing-lead-he-0001",
+        "id": "inventory-match-lead-draft-ba034884-d6bc-463d-b48f-a6b628d050db",
         "status": "open",
         "owner": "broker_international",
         "action": "review_matching_inventory"

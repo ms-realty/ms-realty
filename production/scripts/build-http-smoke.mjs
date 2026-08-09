@@ -301,7 +301,6 @@ const smoke = {
     method: "POST",
     url: "/api/leads",
     body: {
-      id: "http-lead-he-0001",
       leadType: "buyer",
       language: "he",
       listingReference: "MS-CRAWL-0001",
@@ -314,7 +313,6 @@ const smoke = {
     method: "POST",
     url: "/api/leads",
     body: {
-      id: "http-viewing-lead-he-0001",
       source: "website_viewing_request",
       leadType: "buyer",
       language: "he",
@@ -329,7 +327,6 @@ const smoke = {
     method: "POST",
     url: "/api/leads",
     body: {
-      id: "http-lead-contact-he-0001",
       source: "website_contact_callback",
       leadType: "general",
       language: "he",
@@ -357,6 +354,11 @@ const smoke = {
   adminMigrationReview: null,
   adminUnauthorized: null,
 };
+
+// Public intake mints its own id; every downstream step follows that id.
+const smokeLeadId = smoke.lead.body.lead.id;
+const smokeViewingLeadId = smoke.viewingLead.body.lead.id;
+const smokeContactLeadId = smoke.contactLead.body.lead.id;
 smoke.admin = await dispatchHttp(app, {
   url: "/api/admin/leads?locale=ru",
   headers: { authorization: "Bearer local-admin-smoke" },
@@ -376,7 +378,7 @@ smoke.reply = await dispatchHttp(app, {
   headers: { authorization: "Bearer local-admin-smoke" },
   body: {
     id: "reply-http-lead-he-0001",
-    leadId: "http-lead-he-0001",
+    leadId: smokeLeadId,
     language: "he",
     hermesDraft: "Hermes draft for broker review.",
     reviewedReply: "Reviewed reply approved by broker.",
@@ -392,7 +394,7 @@ smoke.formReply = await dispatchHttp(app, {
     "content-type": "application/x-www-form-urlencoded",
   },
   body: new URLSearchParams({
-    leadId: "http-lead-contact-he-0001",
+    leadId: smokeContactLeadId,
     language: "he",
     reviewedReply: "Reviewed callback reply approved by broker.",
     reviewer: "broker_en",
@@ -402,7 +404,7 @@ smoke.formReply = await dispatchHttp(app, {
 smoke.replyUnauthorized = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/replies",
-  body: { leadId: "http-lead-he-0001", reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
+  body: { leadId: smokeLeadId, reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
 });
 smoke.leadQualification = await dispatchHttp(app, {
   method: "POST",
@@ -410,7 +412,7 @@ smoke.leadQualification = await dispatchHttp(app, {
   headers: { authorization: "Bearer local-admin-smoke" },
   body: {
     id: "qualification-http-lead-he-0001",
-    leadId: "http-lead-he-0001",
+    leadId: smokeLeadId,
     actor: "broker_ru",
     action: "qualify",
     budgetMinEur: 90000,
@@ -428,7 +430,7 @@ smoke.viewing = await dispatchHttp(app, {
   headers: { authorization: "Bearer local-admin-smoke" },
   body: {
     id: "viewing-http-lead-he-0001",
-    leadId: "http-lead-he-0001",
+    leadId: smokeLeadId,
     startsAt: "2026-07-06T10:00:00Z",
     broker: "broker_ru",
   },
@@ -465,7 +467,7 @@ smoke.viewingFollowUpUnauthorized = await dispatchHttp(app, {
 smoke.viewingUnauthorized = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/viewings",
-  body: { leadId: "http-lead-he-0001", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
+  body: { leadId: smokeLeadId, startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
 });
 smoke.viewingCalendar = await dispatchHttp(app, {
   url: "/api/admin/viewings.ics",
@@ -478,14 +480,14 @@ smoke.dealClose = await dispatchHttp(app, {
   headers: { authorization: "Bearer local-admin-smoke" },
   body: {
     id: "deal-http-lead-contact-he-0001",
-    leadId: "http-lead-contact-he-0001",
+    leadId: smokeContactLeadId,
     broker: "broker_ru",
   },
 });
 smoke.dealCloseUnauthorized = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/deals/close",
-  body: { leadId: "http-lead-he-0001", broker: "broker_ru" },
+  body: { leadId: smokeLeadId, broker: "broker_ru" },
 });
 smoke.translationDraft = await dispatchHttp(app, {
   method: "POST",

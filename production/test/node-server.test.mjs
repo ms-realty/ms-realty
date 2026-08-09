@@ -237,6 +237,61 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
     ) => {
       const redirect = deployableRedirect();
       const oldUrl = new URL(redirect.old_url);
+  const leadResponse = await jsonFetch(baseUrl, "/api/leads", {
+          method: "POST",
+          captureHeaders: true,
+          body: JSON.stringify({
+            leadType: "buyer",
+            language: "he",
+            listingReference: "MS-CRAWL-0001",
+            contact: { name: "Noa Levi", whatsapp: "+359880000001" },
+            contact_preference: "whatsapp",
+          }),
+        });
+  const viewingLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
+          method: "POST",
+          captureHeaders: true,
+          body: JSON.stringify({
+            source: "website_viewing_request",
+            leadType: "buyer",
+            language: "he",
+            listingReference: "MS-CRAWL-0001",
+            contact: { name: "Noa Levi", phone: "+359880000001" },
+            contact_preference: "phone",
+            request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
+            message: "I would like to view this property.",
+          }),
+        });
+  const contactLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
+          method: "POST",
+          captureHeaders: true,
+          body: JSON.stringify({
+            source: "website_contact_callback",
+            leadType: "general",
+            language: "he",
+            contact: { name: "Noa Levi", phone: "+359880000001" },
+            contact_preference: "phone",
+            request_details: { callback_time: "Weekdays after 14:00" },
+            message: "Please call me about buying in Sandanski.",
+          }),
+        });
+  const sellerLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
+          method: "POST",
+          captureHeaders: true,
+          body: JSON.stringify({
+            source: "website_seller_valuation",
+            leadType: "seller",
+            language: "el",
+            contact: { name: "Nikos Papadopoulos", phone: "+359880000002" },
+            property: { location: "Sandanski", type: "apartment" },
+            message: "I want a valuation for my property.",
+          }),
+        });
+  // Public intake mints its own ids; correlate downstream steps by what the
+  // server actually assigned rather than by a fixture string.
+  const leadId = leadResponse.body.lead.id;
+  const viewingLeadId = viewingLeadResponse.body.lead.id;
+  const contactLeadId = contactLeadResponse.body.lead.id;
       const smoke = {
         health: await jsonFetch(baseUrl, "/api/health"),
         ready: await jsonFetch(baseUrl, "/api/ready", { captureHeaders: true }),
@@ -349,60 +404,10 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         guideHtml: await textFetch(baseUrl, "/en/guides/foreign-buyers", {
           headers: { accept: "text/html" },
         }),
-        lead: await jsonFetch(baseUrl, "/api/leads", {
-          method: "POST",
-          captureHeaders: true,
-          body: JSON.stringify({
-            id: "node-server-lead-test",
-            leadType: "buyer",
-            language: "he",
-            listingReference: "MS-CRAWL-0001",
-            contact: { name: "Noa Levi", whatsapp: "+359880000001" },
-            contact_preference: "whatsapp",
-          }),
-        }),
-        viewingLead: await jsonFetch(baseUrl, "/api/leads", {
-          method: "POST",
-          captureHeaders: true,
-          body: JSON.stringify({
-            id: "node-server-viewing-lead-test",
-            source: "website_viewing_request",
-            leadType: "buyer",
-            language: "he",
-            listingReference: "MS-CRAWL-0001",
-            contact: { name: "Noa Levi", phone: "+359880000001" },
-            contact_preference: "phone",
-            request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
-            message: "I would like to view this property.",
-          }),
-        }),
-        contactLead: await jsonFetch(baseUrl, "/api/leads", {
-          method: "POST",
-          captureHeaders: true,
-          body: JSON.stringify({
-            id: "node-server-contact-lead-test",
-            source: "website_contact_callback",
-            leadType: "general",
-            language: "he",
-            contact: { name: "Noa Levi", phone: "+359880000001" },
-            contact_preference: "phone",
-            request_details: { callback_time: "Weekdays after 14:00" },
-            message: "Please call me about buying in Sandanski.",
-          }),
-        }),
-        sellerLead: await jsonFetch(baseUrl, "/api/leads", {
-          method: "POST",
-          captureHeaders: true,
-          body: JSON.stringify({
-            id: "node-server-seller-lead-test",
-            source: "website_seller_valuation",
-            leadType: "seller",
-            language: "el",
-            contact: { name: "Nikos Papadopoulos", phone: "+359880000002" },
-            property: { location: "Sandanski", type: "apartment" },
-            message: "I want a valuation for my property.",
-          }),
-        }),
+        lead: leadResponse,
+        viewingLead: viewingLeadResponse,
+        contactLead: contactLeadResponse,
+        sellerLead: sellerLeadResponse,
         badLead: await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
@@ -422,7 +427,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
           body: JSON.stringify({
-            leadId: "node-server-lead-test",
+            leadId,
             reviewedReply: "Reviewed reply approved by broker.",
             reviewer: "broker_ru",
             approved: true,
@@ -432,7 +437,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           method: "POST",
           captureHeaders: true,
           body: JSON.stringify({
-            leadId: "node-server-lead-test",
+            leadId,
             reviewedReply: "No auth",
             reviewer: "broker_ru",
             approved: true,
@@ -442,7 +447,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
           body: JSON.stringify({
-            leadId: "node-server-lead-test",
+            leadId,
             actor: "broker_ru",
             action: "qualify",
             budgetMinEur: 90000,
@@ -459,7 +464,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           headers: { authorization: "Bearer local-admin-smoke" },
           body: JSON.stringify({
             id: "viewing-node-server-contact-lead-test",
-            leadId: "node-server-contact-lead-test",
+            leadId: contactLeadId,
             startsAt: "2026-07-06T10:00:00Z",
             broker: "broker_ru",
           }),
@@ -468,7 +473,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           method: "POST",
           captureHeaders: true,
           body: JSON.stringify({
-            leadId: "node-server-contact-lead-test",
+            leadId: contactLeadId,
             startsAt: "2026-07-06T10:00:00Z",
             broker: "broker_ru",
           }),
@@ -480,12 +485,12 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         dealClose: await jsonFetch(baseUrl, "/api/admin/deals/close", {
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
-          body: JSON.stringify({ leadId: "node-server-contact-lead-test", broker: "broker_ru" }),
+          body: JSON.stringify({ leadId: contactLeadId, broker: "broker_ru" }),
         }),
         dealCloseUnauthorized: await jsonFetch(baseUrl, "/api/admin/deals/close", {
           method: "POST",
           captureHeaders: true,
-          body: JSON.stringify({ leadId: "node-server-contact-lead-test", broker: "broker_ru" }),
+          body: JSON.stringify({ leadId: contactLeadId, broker: "broker_ru" }),
         }),
       };
       smoke.viewingFollowUpUnauthorized = await jsonFetch(baseUrl, "/api/admin/viewings/follow-up", {

@@ -191,7 +191,6 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            id: "next-api-lead-test",
             source: "website_listing_detail",
             intent: "inquiry",
             leadType: "buyer",
@@ -215,7 +214,6 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
           method: "POST",
           headers: { "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            id: "next-api-seller-form-test",
             source: "website_seller_valuation",
             leadType: "seller",
             language: "bg",
@@ -348,8 +346,8 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   );
 
   assert.equal(readLeadLedger(leadLedgerPath).length, 2);
-  assert.equal(readLeadLedger(leadLedgerPath).find((row) => row.lead_id === "next-api-lead-test").intent, "inquiry");
-  assert.deepEqual(readLeadLedger(leadLedgerPath).find((row) => row.lead_id === "next-api-seller-form-test").property, {
+  assert.equal(readLeadLedger(leadLedgerPath).find((row) => row.source === "website_listing_detail").intent, "inquiry");
+  assert.deepEqual(readLeadLedger(leadLedgerPath).find((row) => row.source === "website_seller_valuation").property, {
     location: "Sandanski",
     type: "apartment",
   });

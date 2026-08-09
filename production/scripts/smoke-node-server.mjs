@@ -125,6 +125,62 @@ const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data",
 const legacyUrl = new URL(legacyRedirect.old_url);
 
 try {
+  const leadResponse = await jsonFetch(baseUrl, "/api/leads", {
+      method: "POST",
+      captureHeaders: true,
+      body: JSON.stringify({
+        leadType: "buyer",
+        language: "he",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Noa Levi", whatsapp: "+359880000001" },
+        contact_preference: "whatsapp",
+      }),
+    });
+  const viewingLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
+      method: "POST",
+      captureHeaders: true,
+      body: JSON.stringify({
+        source: "website_viewing_request",
+        leadType: "buyer",
+        language: "he",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Noa Levi", phone: "+359880000002" },
+        contact_preference: "phone",
+        request_details: { viewing_date: "2026-07-06", viewing_time: "10:00" },
+        message: "I would like to view this property.",
+      }),
+    });
+  const contactLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
+      method: "POST",
+      captureHeaders: true,
+      body: JSON.stringify({
+        source: "website_contact_callback",
+        leadType: "general",
+        language: "he",
+        contact: { name: "Noa Levi", phone: "+359880000003" },
+        contact_preference: "phone",
+        request_details: { callback_time: "Weekdays after 14:00" },
+        message: "Please call me about buying in Sandanski.",
+      }),
+    });
+  const sellerLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
+      method: "POST",
+      captureHeaders: true,
+      body: JSON.stringify({
+        source: "website_seller_valuation",
+        leadType: "seller",
+        language: "el",
+        contact: { name: "Nikos Papadopoulos", phone: "+359880000004" },
+        contact_preference: "phone",
+        property: { location: "Sandanski", type: "house" },
+        message: "I want a valuation for my property.",
+      }),
+    });
+  // Public intake mints its own ids; correlate downstream steps by what the
+  // server actually assigned rather than by a fixture string.
+  const leadId = leadResponse.body.lead.id;
+  const viewingLeadId = viewingLeadResponse.body.lead.id;
+  const contactLeadId = contactLeadResponse.body.lead.id;
   const smoke = {
     fixture_id: "node-server-smoke-20260704",
     baseUrl: "http://127.0.0.1:0",
@@ -240,61 +296,10 @@ try {
       captureHeaders: true,
       body: JSON.stringify({ locale: "he", query: "Sandanski" }),
     }),
-    lead: await jsonFetch(baseUrl, "/api/leads", {
-      method: "POST",
-      captureHeaders: true,
-      body: JSON.stringify({
-        id: "server-lead-he-0001",
-        leadType: "buyer",
-        language: "he",
-        listingReference: "MS-CRAWL-0001",
-        contact: { name: "Noa Levi", whatsapp: "+359880000001" },
-        contact_preference: "whatsapp",
-      }),
-    }),
-    viewingLead: await jsonFetch(baseUrl, "/api/leads", {
-      method: "POST",
-      captureHeaders: true,
-      body: JSON.stringify({
-        id: "server-viewing-lead-he-0001",
-        source: "website_viewing_request",
-        leadType: "buyer",
-        language: "he",
-        listingReference: "MS-CRAWL-0001",
-        contact: { name: "Noa Levi", phone: "+359880000002" },
-        contact_preference: "phone",
-        request_details: { viewing_date: "2026-07-06", viewing_time: "10:00" },
-        message: "I would like to view this property.",
-      }),
-    }),
-    contactLead: await jsonFetch(baseUrl, "/api/leads", {
-      method: "POST",
-      captureHeaders: true,
-      body: JSON.stringify({
-        id: "server-lead-contact-he-0001",
-        source: "website_contact_callback",
-        leadType: "general",
-        language: "he",
-        contact: { name: "Noa Levi", phone: "+359880000003" },
-        contact_preference: "phone",
-        request_details: { callback_time: "Weekdays after 14:00" },
-        message: "Please call me about buying in Sandanski.",
-      }),
-    }),
-    sellerLead: await jsonFetch(baseUrl, "/api/leads", {
-      method: "POST",
-      captureHeaders: true,
-      body: JSON.stringify({
-        id: "server-lead-seller-el-0001",
-        source: "website_seller_valuation",
-        leadType: "seller",
-        language: "el",
-        contact: { name: "Nikos Papadopoulos", phone: "+359880000004" },
-        contact_preference: "phone",
-        property: { location: "Sandanski", type: "house" },
-        message: "I want a valuation for my property.",
-      }),
-    }),
+    lead: leadResponse,
+    viewingLead: viewingLeadResponse,
+    contactLead: contactLeadResponse,
+    sellerLead: sellerLeadResponse,
     badLead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       captureHeaders: true,
@@ -316,7 +321,7 @@ try {
       headers: { authorization: "Bearer local-admin-smoke" },
       body: JSON.stringify({
         id: "reply-server-lead-he-0001",
-        leadId: "server-lead-he-0001",
+        leadId,
         language: "he",
         hermesDraft: "Hermes draft for broker review.",
         reviewedReply: "Reviewed reply approved by broker.",
@@ -328,7 +333,7 @@ try {
       method: "POST",
       captureHeaders: true,
       body: JSON.stringify({
-        leadId: "server-lead-he-0001",
+        leadId,
         reviewedReply: "No auth",
         reviewer: "broker_ru",
         approved: true,
@@ -339,7 +344,7 @@ try {
       headers: { authorization: "Bearer local-admin-smoke" },
       body: JSON.stringify({
         id: "qualification-server-lead-he-0001",
-        leadId: "server-lead-he-0001",
+        leadId,
         actor: "broker_ru",
         action: "qualify",
         budgetMinEur: 90000,
@@ -356,7 +361,7 @@ try {
       headers: { authorization: "Bearer local-admin-smoke" },
       body: JSON.stringify({
         id: "viewing-server-lead-he-0001",
-        leadId: "server-lead-he-0001",
+        leadId,
         startsAt: "2026-07-06T10:00:00Z",
         broker: "broker_ru",
       }),
@@ -392,7 +397,7 @@ try {
       method: "POST",
       captureHeaders: true,
       body: JSON.stringify({
-        leadId: "server-lead-he-0001",
+        leadId,
         startsAt: "2026-07-06T10:00:00Z",
         broker: "broker_ru",
       }),
@@ -406,7 +411,7 @@ try {
       headers: { authorization: "Bearer local-admin-smoke" },
       body: JSON.stringify({
         id: "deal-server-lead-contact-he-0001",
-        leadId: "server-lead-contact-he-0001",
+        leadId: contactLeadId,
         broker: "broker_ru",
       }),
     }),
@@ -414,7 +419,7 @@ try {
       method: "POST",
       captureHeaders: true,
       body: JSON.stringify({
-        leadId: "server-lead-he-0001",
+        leadId,
         broker: "broker_ru",
       }),
     }),

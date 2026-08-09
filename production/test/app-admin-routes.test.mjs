@@ -324,7 +324,6 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            id: "next-admin-lead-test",
             source: "website_consultation_request",
             leadType: "renter",
             language: "he",
@@ -335,6 +334,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         }),
       );
       assert.equal(lead.status, 201);
+      // Identity is minted server-side; correlate by what came back.
+      const leadId = (await lead.clone().json()).lead.id;
 
       const unauthorized = await leadInboxRoute.GET(new Request("https://example.test/admin/leads?locale=ru"));
       assert.equal(unauthorized.status, 401);
@@ -354,10 +355,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(todayHtml, /data-kind="admin-today"/);
       assert.match(todayHtml, /data-react-admin-ui="today"/);
       assert.match(todayHtml, /data-priority-leads="true"/);
-      assert.match(todayHtml, /data-priority-lead="next-admin-lead-test"/);
+      assert.match(todayHtml, new RegExp(`data-priority-lead="${leadId}"`));
       assert.match(todayHtml, /adm-task-list__reference/);
       assert.match(todayHtml, /Открыть и ответить/);
-      assert.match(todayHtml, /href="\/admin\/leads\?locale=ru#lead-next-admin-lead-test"/);
+      assert.match(todayHtml, new RegExp(`href="/admin/leads\\?locale=ru#lead-${leadId}"`));
       assert.match(todayHtml, /href="\/admin\/viewings\?locale=ru"/);
       assert.match(todayHtml, /href="\/admin\/activity\?locale=ru"/);
       const todayJson = await todayJsonRoute.GET(new Request("https://example.test/api/admin/today?locale=ru", { headers: auth }));
@@ -387,8 +388,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(inboxJsonBody.leads[0].original_language, "he");
       assert.equal(inboxJsonBody.leads[0].contact.whatsapp, "+359880000001");
       assert.equal(inboxJsonBody.communicationThreads[0].events[0].type, "inbound_request");
-      assert.equal(inboxJsonBody.communicationTemplates["next-admin-lead-test"][0].locale, "he");
-      assert.equal(inboxJsonBody.communicationTemplates["next-admin-lead-test"][0].human_review_required, true);
+      assert.equal(inboxJsonBody.communicationTemplates[leadId][0].locale, "he");
+      assert.equal(inboxJsonBody.communicationTemplates[leadId][0].human_review_required, true);
 
       const inbox = await leadInboxRoute.GET(new Request("https://example.test/admin/leads?locale=ru", { headers: auth }));
       const inboxHtml = await inbox.text();
@@ -422,8 +423,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-reply-status="true"/);
       assert.equal(inboxHtml.includes('name="hermesDraft" value="true"'), false);
       assert.match(inboxHtml, /data-show-original-toggle="true"/);
-      assert.match(inboxHtml, /data-lead-assignment-control="next-admin-lead-test"/);
-      assert.match(inboxHtml, /data-communication-thread="next-admin-lead-test"/);
+      assert.match(inboxHtml, new RegExp(`data-lead-assignment-control="${leadId}"`));
+      assert.match(inboxHtml, new RegExp(`data-communication-thread="${leadId}"`));
       assert.match(inboxHtml, /data-communication-event="inbound_request"/);
       assert.match(inboxHtml, /data-communication-template-select="true"/);
       assert.match(inboxHtml, /data-template-locale="he"/);
@@ -505,7 +506,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify({
-            leadId: "next-admin-lead-test",
+            leadId,
             itemKey: "foreign_process_scope",
             status: "complete",
             actor: "account_manager",
@@ -523,7 +524,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            leadId: "next-admin-lead-test",
+            leadId,
             brokerId: "broker_ru",
             actor: "sales_manager",
             reason: "Owner approved Russian broker follow-up.",
@@ -1513,7 +1514,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            leadId: "next-admin-lead-test",
+            leadId,
             language: "he",
             approved: "true",
             reviewer: "broker_ru",
@@ -1670,7 +1671,6 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            id: "next-admin-operations-lead-test",
             source: "website_contact_callback",
             leadType: "general",
             language: "he",
@@ -1680,6 +1680,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           }),
         }),
       );
+      const operationsLeadId = (await operationsLead.clone().json()).lead.id;
       assert.equal(operationsLead.status, 201);
 
       const viewing = await viewingRoute.POST(
@@ -1687,7 +1688,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify({
-            leadId: "next-admin-operations-lead-test",
+            leadId: operationsLeadId,
             listingReference: "MS-CRAWL-0001",
             startsAt: "2026-07-06T10:00:00Z",
             broker: "broker_ru",
@@ -1838,7 +1839,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify({
-            leadId: "next-admin-operations-lead-test",
+            leadId: operationsLeadId,
             listingReference: "MS-CRAWL-0001",
             broker: "broker_ru",
           }),

@@ -277,7 +277,6 @@ test("production server persists public leads and reviewed admin replies", async
     const lead = await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       body: JSON.stringify({
-        id: "prod-lead-he-0001",
         leadType: "buyer",
         language: "he",
         listingReference: "MS-CRAWL-0001",
@@ -298,7 +297,7 @@ test("production server persists public leads and reviewed admin replies", async
       method: "POST",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: JSON.stringify({
-        leadId: "prod-lead-he-0001",
+        leadId: lead.body.lead.id,
         language: "he",
         reviewedReply: "Reviewed reply approved by broker.",
         reviewer: "broker_en",
