@@ -19,9 +19,14 @@ test("SEO files expose only approved localized sitemap routes", () => {
   const sitemapXml = renderSitemapXml(sitemap, { origin: "https://makler-realty.com" });
   const robotsTxt = renderRobotsTxt({ origin: "https://makler-realty.com" });
 
-  assert.equal(assertSeoFiles({ sitemapXml, robotsTxt }), true);
+  assert.equal(assertSeoFiles({ sitemapXml, robotsTxt, sitemap }), true);
   assert.match(sitemapXml, /https:\/\/makler-realty\.com\/he<\/loc>/);
-  assert.match(sitemapXml, /https:\/\/makler-realty\.com\/ru\/properties\/MS-CRAWL-/);
+  const listingUrlPattern = /https:\/\/makler-realty\.com\/[a-z]{2}\/[^</]+\/MS-CRAWL-/;
+  if (sitemap.summary.public.listing_entries > 0) {
+    assert.match(sitemapXml, listingUrlPattern);
+  } else {
+    assert.doesNotMatch(sitemapXml, listingUrlPattern);
+  }
   assert.match(sitemapXml, /https:\/\/makler-realty\.com\/he\/contact/);
   assert.match(sitemapXml, /https:\/\/makler-realty\.com\/en\/guides\/foreign-buyers/);
   assert.doesNotMatch(sitemapXml, /\/fr\//);
@@ -97,6 +102,7 @@ test("generated SEO files are valid when present", () => {
     assertSeoFiles({
       sitemapXml: fs.readFileSync(sitemapPath, "utf8"),
       robotsTxt: fs.readFileSync(robotsPath, "utf8"),
+      sitemap: loadLocalizedSitemap(),
     }),
     true,
   );

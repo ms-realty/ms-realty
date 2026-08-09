@@ -979,6 +979,20 @@ test("launch readiness validator rejects weak sitemap pass evidence", () => {
   assert.throws(() => assertLaunchReadinessReport(report), /complete approved route evidence/);
 });
 
+test("launch readiness validator rejects sitemap evidence without a truthful public view", () => {
+  for (const patch of [
+    { public: undefined },
+    { public: { home_pages: 7, listing_entries: 0, location_pages: 0, seller_pages: 7, contact_pages: 7, guide_pages: 5, entries: 27 } },
+    { public: { home_pages: 7, listing_entries: 200, location_pages: 0, seller_pages: 7, contact_pages: 7, guide_pages: 5, entries: 226 } },
+  ]) {
+    const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+    const sitemapGate = report.gates.find((gate) => gate.id === "localized_sitemap");
+    Object.assign(sitemapGate.evidence, patch);
+
+    assert.throws(() => assertLaunchReadinessReport(report), /runtime-public route evidence/);
+  }
+});
+
 test("launch readiness validator rejects weak structured data pass evidence", () => {
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
   const structuredDataGate = report.gates.find((gate) => gate.id === "structured_data");
