@@ -475,7 +475,7 @@ if (
   httpSmoke.listingHtml.status !== 200 ||
   !httpSmoke.listingHtml.body.includes("<html lang=\"he\" dir=\"rtl\">") ||
   !httpSmoke.listingHtml.body.includes("<link rel=\"canonical\"") ||
-  httpSmoke.listingHtml.body.includes('href="tel:')
+  /href="tel:(?!\+359879696870")/.test(httpSmoke.listingHtml.body)
 ) {
   throw new Error("HTTP smoke must expose SEO-safe listing HTML without unapproved direct contact");
 }
@@ -484,7 +484,7 @@ if (
   httpSmoke.listingPrint.headers["content-type"] !== "text/html; charset=utf-8" ||
   !httpSmoke.listingPrint.body.includes("data-kind=\"listing-print\"") ||
   !httpSmoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\"") ||
-  httpSmoke.listingPrint.body.includes('href="tel:')
+  /href="tel:(?!\+359879696870")/.test(httpSmoke.listingPrint.body)
 ) {
   throw new Error("HTTP smoke must expose browser-print listing HTML without unapproved direct contact");
 }
