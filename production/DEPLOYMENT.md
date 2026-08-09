@@ -50,6 +50,17 @@ Live URL: `https://ms-realty.ms-realty-bg.workers.dev`
 
 ## 2. Audited state (2026-08-09)
 
+> **Update, 2026-08-09 evening — Phases 1, 2 and 4 executed.** Operator
+> credentials live (`MS_REALTY_ADMIN_CREDENTIALS_JSON` set, both dead secrets
+> deleted), Postgres provisioned on **Neon** (project in `aws-eu-central-1`,
+> pooled DSN on the Worker, direct DSN for migrations), all 6 migrations
+> applied, first Payload admin seeded, case-authority vars enabled,
+> `payload:preflight` all-green, admin API verified 200 and case POST reaches
+> Payload (400 validation, not edge-503). Uptime monitoring runs as the
+> `health-check.yml` scheduled workflow. Phase 3 (Typesense) deferred — the
+> account is PayPal-only, so `/search` stays fail-closed 503 for now. The
+> tables below preserve the pre-fix morning audit for history.
+
 Verified live:
 
 | Check | Result |
@@ -317,11 +328,15 @@ Also required before cutover: R2 media coverage report (§8) and relaxing the
 
 - [x] Deploy pipeline green; live `build_marker` == `main` HEAD (verified 2026-08-09)
 - [x] This plan merged through the sanctioned PR → auto-merge → auto-deploy path
-- [ ] Phase 1: admin credentials fixed, dead secrets removed, admin API 200
-- [ ] Phase 2: Neon provisioned, migrations applied, first admin created,
+      (which also required unbreaking the repo-wide red `npm audit` via the
+      Payload 3.87.1 bump in the same PR)
+- [x] Phase 1: admin credentials fixed, dead secrets removed, admin API 200
+- [x] Phase 2: Neon provisioned, migrations applied, first admin created,
       case-authority writes verified, `payload:preflight` green
-- [ ] Phase 4: uptime monitor armed
-- [ ] Phase 3 decision recorded (Typesense now vs 503)
+- [x] Phase 4: uptime monitor armed (`health-check.yml`, hourly, fails loud on
+      unhealthy response; GitHub emails the workflow author)
+- [x] Phase 3 decision recorded: deferred — Typesense Cloud needs a card, the
+      account is PayPal-only; `/search` stays honestly fail-closed until then
 
 Everything unchecked is an operator (dashboard/provider) action with exact
 steps above; no further code is required to complete them.
