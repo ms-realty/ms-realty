@@ -6,6 +6,7 @@ import { bg } from "@payloadcms/translations/languages/bg";
 import { en } from "@payloadcms/translations/languages/en";
 import { ru } from "@payloadcms/translations/languages/ru";
 import { buildConfig } from "payload";
+import { LEAD_COLLECTIONS } from "./production/lib/lead-collections.mjs";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 import {
@@ -13,6 +14,8 @@ import {
   adminRoleFieldAccess,
   adminsCollectionAccess,
   caseCollectionAccess,
+  hasRole,
+  isAdmin,
   referenceCollectionAccess,
 } from "./production/lib/payload-access.mjs";
 
@@ -210,6 +213,17 @@ const caseCollectionsWithAccess = REALTY_CASE_COLLECTIONS.map((collection) => ({
   },
 }));
 
+// Lead intake is written by server code through overrideAccess, so no operator
+// role gets write access here: brokers read their inbox, admins clean up.
+// Contact envelopes stay admin-only even though they hold ciphertext.
+const leadCollectionsWithAccess = LEAD_COLLECTIONS.map((collection) => ({
+  ...collection,
+  access:
+    collection.slug === "lead_contacts"
+      ? { create: () => false, read: isAdmin, update: () => false, delete: isAdmin }
+      : { create: () => false, read: hasRole("admin", "broker"), update: hasRole("admin", "broker"), delete: isAdmin },
+}));
+
 export default buildConfig({
   admin: { user: "admins" },
   routes: { admin: "/payload-admin" },
@@ -224,5 +238,5 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || "postgres://payload:payload@127.0.0.1:5432/ms_realty",
     },
   }),
-  collections: [admins, locales, ...collections, ...caseCollectionsWithAccess],
+  collections: [admins, locales, ...collections, ...caseCollectionsWithAccess, ...leadCollectionsWithAccess],
 });
