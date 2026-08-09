@@ -5,6 +5,10 @@ App Router bridge in `../app/`. The contracts stay mostly Node-stdlib code so
 URL, locale, AI, migration, and lead policy remains testable outside the app
 framework.
 
+Deploying and operating the live Cloudflare deployment is documented in
+[`DEPLOYMENT.md`](DEPLOYMENT.md) — topology, secret matrix, phased runbook,
+rollback, and the current audited state.
+
 What it proves now:
 
 - Dynamic approved locale registry.

@@ -101,13 +101,13 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.0.0",
-    "@payloadcms/db-postgres": "3.85.2",
-    "@payloadcms/next": "3.85.2",
-    "@payloadcms/translations": "3.85.2",
+    "@payloadcms/db-postgres": "3.87.1",
+    "@payloadcms/next": "3.87.1",
+    "@payloadcms/translations": "3.87.1",
     "@photo-sphere-viewer/core": "5.14.3",
     "jose": "5.10.0",
     "next": "16.2.12",
-    "payload": "3.85.2",
+    "payload": "3.87.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "zod": "4.2.0"
@@ -116,8 +116,10 @@
     "@esbuild-kit/core-utils": {
       "esbuild": "0.25.12"
     },
-    "dompurify": "3.4.12",
-    "fast-uri": "3.1.4",
+    "dompurify": "3.4.13",
+    "fast-uri": "3.1.5",
+    "js-yaml": "4.3.1",
+    "nanoid": "3.3.18",
     "postcss": "8.5.25",
     "sharp": "0.35.3"
   },
