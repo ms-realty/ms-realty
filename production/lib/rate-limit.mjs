@@ -54,15 +54,33 @@ function readHeader(headers, name) {
   return headers[pascal] ? String(headers[pascal]) : "";
 }
 
-export function clientIpFromHeaders(headers = {}) {
-  const forwarded = readHeader(headers, "x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0].trim();
-    if (first) return first;
+// Client identity for rate limiting. Forwarded headers are trusted ONLY when
+// the deployment declares it sits behind a proxy (MS_REALTY_TRUST_PROXY=1);
+// otherwise a caller could rotate X-Forwarded-For to mint fresh limiter
+// buckets. Untrusted, we use the socket peer — the only un-spoofable identity.
+export function clientIdentity(request = {}, { trustProxy = false } = {}) {
+  const headers = request.headers || {};
+  if (trustProxy) {
+    // Cloudflare sets cf-connecting-ip to the verified client IP and strips
+    // any client-supplied copy, so it is the trustworthy first choice.
+    const cf = readHeader(headers, "cf-connecting-ip");
+    if (cf) return cf.trim();
+    const realIp = readHeader(headers, "x-real-ip");
+    if (realIp) return realIp.trim();
+    const forwarded = readHeader(headers, "x-forwarded-for");
+    if (forwarded) {
+      const first = forwarded.split(",")[0].trim();
+      if (first) return first;
+    }
   }
-  const realIp = readHeader(headers, "x-real-ip");
-  if (realIp) return realIp;
-  return "unknown";
+  const peer = String(request.remoteAddress || "").trim();
+  return peer || "unknown";
+}
+
+// Back-compat shim: some call sites still pass a bare headers object. Treats
+// input as untrusted (no proxy), matching the safe default.
+export function clientIpFromHeaders(headers = {}) {
+  return clientIdentity({ headers }, { trustProxy: false });
 }
 
 function intFrom(value, fallback, name) {

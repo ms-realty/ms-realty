@@ -67,6 +67,9 @@ export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT
         method: headRequest ? "GET" : req.method,
         url: req.url,
         headers: req.headers,
+        // The socket peer is the only un-spoofable client identity for a
+        // direct bind; the rate limiter uses it when no trusted proxy is set.
+        remoteAddress: req.socket?.remoteAddress || "",
         body: await readBody(req, maxBodyBytes),
       });
       status = response.status;
