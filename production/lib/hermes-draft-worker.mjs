@@ -29,7 +29,7 @@ function parseJsonObject(value) {
   return JSON.parse(trimmed);
 }
 
-function providerRequestBody(row, model) {
+export function providerRequestBody(row, model) {
   return {
     model,
     temperature: 0.2,
@@ -230,7 +230,7 @@ function assertHostedFallbackDispatch(row) {
   assertNoPii(row);
 }
 
-function assertProviderMayReceiveDispatch(row, providerMetadata) {
+export function assertProviderMayReceiveDispatch(row, providerMetadata) {
   if (providerMetadata?.mode === "self_hosted" && providerMetadata.sensitiveDataAllowed === true) return;
   assertHostedFallbackDispatch(row);
 }

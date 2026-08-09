@@ -23,6 +23,7 @@ import {
   requiredAdminCapability,
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
+import { renderOperatorConnectPage } from "./operator-connect.mjs";
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import {
   LISTING_EDIT_FIELDS,
@@ -1452,6 +1453,17 @@ export function createHttpApp({
       const payload = currentAdminLeadPayload(requestedLocale, principal);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && url.pathname === "/admin/connect") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const token = String(auth).replace(/^Bearer\s+/i, "").trim();
+      const base = String(process.env.MS_REALTY_PUBLIC_ORIGIN || "").trim() || `https://${host}`;
+      return adminResponse(
+        200,
+        renderOperatorConnectPage({ baseUrl: base, token, operatorId: principal?.id || "operator" }),
+        "text/html; charset=utf-8",
+      );
     }
 
     if (request.method === "GET" && url.pathname === "/admin/leads") {

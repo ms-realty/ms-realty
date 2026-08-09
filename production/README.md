@@ -7,7 +7,10 @@ framework.
 
 Deploying and operating the live Cloudflare deployment is documented in
 [`DEPLOYMENT.md`](DEPLOYMENT.md) — topology, secret matrix, phased runbook,
-rollback, and the current audited state.
+rollback, and the current audited state. Running the agency through the
+operator's own desktop AI (the `/admin/connect` one-step onboarding, the
+Hermes drafting bridge, guardrails) is documented in
+[`OPERATOR_AI.md`](OPERATOR_AI.md).
 
 What it proves now:
 

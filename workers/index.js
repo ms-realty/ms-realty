@@ -1,5 +1,5 @@
 import { Container, getContainer } from "@cloudflare/containers";
-import { allowsDurableCaseAuthorityMutation } from "./durable-case-authority.mjs";
+import { allowsDurableCaseAuthorityMutation, allowsMcpRequest } from "./durable-case-authority.mjs";
 import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
@@ -24,6 +24,9 @@ export class MsRealtyContainer extends Container {
   envVars = {
     NODE_ENV: "production",
     MS_REALTY_TRUST_PROXY: "1",
+    // This runtime's disk is ephemeral; MCP ledger-writing tools must not
+    // register here or drafts would vanish on container sleep.
+    MS_REALTY_MCP_WRITES_DISABLED: "1",
     MS_REALTY_ADMIN_CREDENTIALS_JSON: this.env.MS_REALTY_ADMIN_CREDENTIALS_JSON ?? "",
     MS_REALTY_ADMIN_TOKEN: this.env.MS_REALTY_ADMIN_TOKEN ?? "",
     MS_REALTY_LEAD_CONTACT_KEY: this.env.MS_REALTY_LEAD_CONTACT_KEY ?? "",
@@ -224,8 +227,11 @@ export default {
 
     // Container disk resets on sleep, so only the existing Payload/Postgres
     // authority routes can write. Every other mutation remains read-only.
+    // MCP is admitted as well: the app authenticates it and the Worker strips
+    // its ledger-writing tools (MS_REALTY_MCP_WRITES_DISABLED below).
     if (
       MUTATING_METHODS.has(request.method) &&
+      !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
     ) {
       return ephemeralRuntimeDataResponse();

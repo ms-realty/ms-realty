@@ -190,7 +190,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Monitoring sources: privacy_events: imported, search_console: missing_export, yandex_webmaster: missing_export, backlinks: missing_export
 - Rollback steps: 4
 - Current machine evidence:
-- missing (path /Users/ivan/Code/MS-Realty/.claude/worktrees/focused-mccarthy-294a89/production/data/monitoring-rollback-report.json)
+- missing (path /Users/ivan/Code/MS-Realty/.claude/worktrees/production-deployment-plan-4f948b/production/data/monitoring-rollback-report.json)
 - Private report: `production/data/monitoring-rollback-report.json` (ignored); template: `production/data/monitoring-rollback-report.json.example`.
 - Path override: `MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH`; validate it with `npm run monitoring:preflight`.
 - Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.
