@@ -7,6 +7,11 @@
 // Access functions return a boolean, or (for read/update/delete) a Payload
 // `where` query that scopes the rows. Field-level `access` returns a boolean.
 
+import { APIError } from "payload";
+import { REALTY_CASE_PAYLOAD_COLLECTION_SLUGS } from "./realty-case-collections.mjs";
+
+const REALTY_CASE_SLUGS = new Set(REALTY_CASE_PAYLOAD_COLLECTION_SLUGS);
+
 const roleOf = (user) => (user && typeof user.role === "string" ? user.role : null);
 
 // An operator may carry an explicit workspace allowlist. Empty/absent means
@@ -17,6 +22,55 @@ function workspaceIdsOf(user) {
   if (Array.isArray(raw)) return raw.map((v) => String(v || "").trim()).filter(Boolean);
   if (typeof raw === "string" && raw.trim()) return [raw.trim()];
   return [];
+}
+
+function relationshipId(value) {
+  return String(value && typeof value === "object" ? value.id || "" : value || "").trim();
+}
+
+function denyWorkspaceBoundary(message) {
+  throw new APIError(message, 403);
+}
+
+export function caseWorkspaceBoundaryHook({ fields = [] } = {}) {
+  const relationships = fields.filter(
+    (field) => field.type === "relationship" && typeof field.relationTo === "string" && REALTY_CASE_SLUGS.has(field.relationTo),
+  );
+
+  return async ({ data = {}, operation, originalDoc, req }) => {
+    if (roleOf(req?.user) !== "broker") return data;
+
+    const allowedWorkspaces = workspaceIdsOf(req.user);
+    const submittedWorkspace = String(data.workspace_id || "").trim();
+    const originalWorkspace = String(originalDoc?.workspace_id || "").trim();
+    const workspace = operation === "update" ? originalWorkspace : submittedWorkspace;
+    if (!workspace || !allowedWorkspaces.includes(workspace)) {
+      denyWorkspaceBoundary("The selected workspace is not available to this operator");
+    }
+    if (operation === "update" && Object.hasOwn(data, "workspace_id") && submittedWorkspace !== originalWorkspace) {
+      denyWorkspaceBoundary("A case cannot be moved to another workspace");
+    }
+
+    for (const field of relationships) {
+      const value = Object.hasOwn(data, field.name) ? data[field.name] : originalDoc?.[field.name];
+      const id = relationshipId(value);
+      if (!id) continue;
+      if (!req.payload?.find) denyWorkspaceBoundary("Related Realty Case records cannot be verified");
+      const related = await req.payload.find({
+        collection: field.relationTo,
+        depth: 0,
+        limit: 1,
+        overrideAccess: true,
+        req,
+        where: { and: [{ id: { equals: id } }, { workspace_id: { equals: workspace } }] },
+      });
+      if (!related.docs?.length) {
+        denyWorkspaceBoundary("Related Realty Case records must belong to the same workspace");
+      }
+    }
+
+    return data;
+  };
 }
 
 export const isAdmin = ({ req }) => roleOf(req?.user) === "admin";
