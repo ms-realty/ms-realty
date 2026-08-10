@@ -609,6 +609,30 @@ test("Payload CMS overwrite ignores schema-added nested keys but detects desired
   assert.equal(target.rows.listings.find((row) => row.id === "MS-TEST-0001").seo.description, "Updated seed description");
 });
 
+test("Payload CMS overwrite removes meaningful nested fields deleted from the seed", async () => {
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  const target = fakePayload();
+
+  await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  const withoutDescription = clone(seed);
+  delete withoutDescription.records[0].seo.description;
+
+  const report = await runPayloadCmsImport({
+    overwriteExisting: true,
+    payload: target.payload,
+    registry,
+    seed: withoutDescription,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+  assert.equal(report.plan.byCollection.listings.updated, 1);
+  assert.equal(
+    Object.hasOwn(target.rows.listings.find((row) => row.id === "MS-TEST-0001").seo, "description"),
+    false,
+  );
+});
+
 test("Payload CMS importer reads the latest draft and overwrite never changes the published base", async () => {
   const registry = minimalRegistry();
   const seed = minimalSeed();

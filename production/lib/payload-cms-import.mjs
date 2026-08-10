@@ -421,12 +421,17 @@ function listingRelationPatch(current, desired) {
   return { conflicts, patch };
 }
 
-function comparableValue(current, desired) {
+function comparableValue(current, desired, arrayRow = false) {
   if (Array.isArray(current) && Array.isArray(desired)) {
-    return current.map((item, index) => comparableValue(item, desired[index]));
+    return current.map((item, index) => comparableValue(item, desired[index], true));
   }
   if (!isRecord(current) || !isRecord(desired)) return clone(current);
-  return Object.fromEntries(Object.entries(desired).map(([key, value]) => [key, comparableValue(current[key], value)]));
+  return Object.fromEntries([
+    ...Object.entries(desired).map(([key, value]) => [key, comparableValue(current[key], value)]),
+    ...Object.entries(current)
+      .filter(([key, value]) => !Object.hasOwn(desired, key) && !(arrayRow && key === "id") && !missingValue(value))
+      .map(([key, value]) => [key, clone(value)]),
+  ]);
 }
 
 function currentComparable(document, desiredData) {
