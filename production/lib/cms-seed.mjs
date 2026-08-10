@@ -252,7 +252,7 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
         id: locationId,
         collection: "locations",
         label: snapshot.location,
-        public_location_precision: snapshot.location_precision || "approximate",
+        public_location_precision: snapshot.location_precision === "area_only" ? "locality" : snapshot.location_precision || "approximate",
       });
     }
     const property = propertyFactsForListing(listing, snapshot, locationId);
@@ -354,6 +354,9 @@ export function assertCmsSeed(seed) {
   if (seed.summary.listings !== 165) throw new Error(`Expected 165 CMS listing records, got ${seed.summary.listings}`);
   if (seed.summary.properties !== seed.summary.listings) throw new Error("Every legacy listing must map to one Property");
   if (!seed.summary.locations) throw new Error("CMS seed must contain Locations");
+  if (!Array.isArray(seed.locations) || seed.locations.some((location) => !["exact", "approximate", "locality"].includes(location.public_location_precision))) {
+    throw new Error("Location collection precision must be exact, approximate, or locality");
+  }
   if (seed.summary.enrichmentTasks !== seed.summary.listings) throw new Error("Every legacy listing must receive one enrichment task");
   if (seed.summary.bySourceLocale.bg !== 113) throw new Error("Expected 113 BG CMS source listings");
   if (seed.summary.bySourceLocale.ru !== 52) throw new Error("Expected 52 RU CMS source listings");
