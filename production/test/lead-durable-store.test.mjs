@@ -220,6 +220,38 @@ test("durable lead messages stay encrypted and authorized readback reconstructs 
   assert.equal(joined[0].contact_available, true);
 });
 
+test("durable persistence strips mixed-case nested plaintext message fields", async () => {
+  for (const privateField of ["Message", "MESSAGE_ORIGINAL", "mEsSaGe"]) {
+    const payload = fakePayload();
+    await persistLeadIntakeDurably({
+      lead: {
+        id: `inbox-mixed-case-message-${privateField}`,
+        lead: {
+          id: ledgerRow().lead_id,
+          source: "website_contact_callback",
+          intent: "callback",
+          leadType: "general",
+          contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+          request_details: {
+            nested: [{ safe: "retained" }, { [privateField]: "plaintext private message" }],
+          },
+        },
+        original_language: "en",
+        admin_locale: "en",
+        contact_preference: "email",
+      },
+      contactSecret: "test-only-durable-contact-key-32-characters-minimum",
+      receivedAt: "2026-08-10T09:00:00.000Z",
+      payload,
+    });
+
+    assert.equal(JSON.stringify(payload.rows.public_leads).includes("plaintext private message"), false);
+    assert.deepEqual(payload.rows.public_leads[0].ledger_row.request_details, {
+      nested: [{ safe: "retained" }, {}],
+    });
+  }
+});
+
 test("durable admin readback joins only matching encrypted contacts", async () => {
   const payload = fakePayload();
   const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
@@ -344,6 +376,11 @@ test("durable admin readback rejects plaintext private fields in stored ledger r
       /plaintext contact data/,
     ]),
     ["request_details", { nested: { message_original: "plaintext private note" } }, /plaintext message/],
+    ...["Message", "MESSAGE_ORIGINAL", "mEsSaGe"].map((privateField) => [
+      "request_details",
+      { arbitrary: [{ nested: { [privateField]: "plaintext private message" } }] },
+      /plaintext message/,
+    ]),
   ]) {
     const hadField = Object.hasOwn(stored, field);
     const previous = stored[field];
