@@ -52,8 +52,8 @@ export function caseWorkspaceBoundaryHook({ fields = [] } = {}) {
     }
 
     for (const field of relationships) {
-      if (!Object.hasOwn(data, field.name)) continue;
-      const id = relationshipId(data[field.name]);
+      const value = Object.hasOwn(data, field.name) ? data[field.name] : originalDoc?.[field.name];
+      const id = relationshipId(value);
       if (!id) continue;
       if (!req.payload?.find) denyWorkspaceBoundary("Related Realty Case records cannot be verified");
       const related = await req.payload.find({

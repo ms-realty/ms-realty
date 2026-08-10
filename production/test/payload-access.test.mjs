@@ -181,6 +181,14 @@ test("case relationships must resolve inside the document workspace", async () =
       req: foreign.request,
     }),
   );
+  await assertForbidden(() =>
+    caseBoundary({
+      data: { status: "active" },
+      operation: "update",
+      originalDoc: { workspace_id: "ws-sandanski", case: "case-2" },
+      req: foreign.request,
+    }),
+  );
 });
 
 test("admin and internal projector writes preserve their existing authority path", async () => {
