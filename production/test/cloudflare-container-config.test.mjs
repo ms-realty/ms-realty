@@ -18,6 +18,7 @@ import {
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
 const autoMergeWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "auto-merge.yml"), "utf8");
+const dockerignore = fs.readFileSync(fromRoot(".dockerignore"), "utf8");
 const dockerfile = fs.readFileSync(fromRoot("Dockerfile"), "utf8");
 const wranglerConfig = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 const CONTAINER_RUNTIME_BINDINGS = [
@@ -207,6 +208,7 @@ test("Cloudflare Container refreshes Payload evidence before serving readiness",
   assert.ok(payloadEvidence > 0, "container startup must capture current Payload evidence");
   assert.ok(aggregateReadiness > payloadEvidence, "aggregate readiness must consume the fresh Payload report");
   assert.ok(nextRuntime > aggregateReadiness, "Next must not serve stale readiness while startup evidence is rebuilding");
+  assert.match(dockerignore, /^!workers\/index\.js$/m, "runtime evidence must be able to inspect the Worker boundary");
 });
 
 test("successful exact-head CI runs merge without a review gate", () => {
