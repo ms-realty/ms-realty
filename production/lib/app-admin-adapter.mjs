@@ -805,10 +805,15 @@ function rowsForLeadIds(rows, leadIds) {
   return rows.filter((row) => leadIds.has(row.lead_id));
 }
 
+function leadScopedRows(source) {
+  if (!source.durable) return (rows) => rows;
+  const leadIds = new Set(source.leads.map((lead) => lead.lead_id));
+  return (rows) => rowsForLeadIds(rows, leadIds);
+}
+
 async function leadInboxPayload(registry, url, config) {
   const source = await adminLeadSource(config);
-  const leadIds = new Set(source.leads.map((lead) => lead.lead_id));
-  const filterRows = (rows) => (source.durable ? rowsForLeadIds(rows, leadIds) : rows);
+  const filterRows = leadScopedRows(source);
   const leads = applyLeadAssignments(source.leads, filterRows(readLeadAssignments(config.leadAssignmentLedgerPath)));
   const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
   const replyDeliveryOutcomes = filterRows(readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath));
@@ -863,18 +868,34 @@ async function leadInboxPayload(registry, url, config) {
   });
 }
 
-function contactWorkspaceData(config) {
+async function contactWorkspaceData(config) {
+  const source = await adminLeadSource(config);
+  const filterRows = leadScopedRows(source);
   const leads = applyLeadAssignments(
-    withLeadContacts(readLeadLedger(config.leadLedgerPath), {
-      filePath: config.leadContactVaultPath,
-      secret: config.leadContactKey,
-    }),
-    readLeadAssignments(config.leadAssignmentLedgerPath),
+    source.leads,
+    filterRows(readLeadAssignments(config.leadAssignmentLedgerPath)),
   );
-  const replies = readReplyOutbox(config.replyOutboxPath);
-  const outcomes = readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath);
+  const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
+  const outcomes = filterRows(readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath));
   const communicationThreads = buildCommunicationThreads({ leads, replies, outcomes });
-  const accounts = deriveAccounts(readAccountLedger(config.accountLedgerPath));
+  const allAccounts = deriveAccounts(readAccountLedger(config.accountLedgerPath));
+  const contactIds = new Set(buildContactRecords({ leads, communicationThreads }).map((contact) => contact.id));
+  const accounts = source.durable
+    ? allAccounts.flatMap((account) => {
+        const contactIdsForAccount = account.contact_ids.filter((contactId) => contactIds.has(contactId));
+        if (!contactIdsForAccount.length) return [];
+        return [
+          {
+            ...account,
+            contact_ids: contactIdsForAccount,
+            contact_count: contactIdsForAccount.length,
+            events: account.events.filter(
+              (event) => event.action === "account_created" || contactIdsForAccount.includes(event.contact_id),
+            ),
+          },
+        ];
+      })
+    : allAccounts;
   return {
     leads,
     communicationThreads,
@@ -883,8 +904,8 @@ function contactWorkspaceData(config) {
   };
 }
 
-function contactsPayload(registry, url, config) {
-  const data = contactWorkspaceData(config);
+async function contactsPayload(registry, url, config) {
+  const data = await contactWorkspaceData(config);
   return renderAdminContactsPayload(registry, url.searchParams.get("locale") || "en", {
     contacts: data.contacts,
     accounts: data.accounts,
@@ -892,13 +913,15 @@ function contactsPayload(registry, url, config) {
   });
 }
 
-function documentChecklistPayload(registry, url, config) {
+async function documentChecklistPayload(registry, url, config) {
   const locale = url.searchParams.get("locale") || "en";
-  const leads = applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath));
+  const source = await adminLeadSource(config);
+  const filterRows = leadScopedRows(source);
+  const leads = applyLeadAssignments(source.leads, filterRows(readLeadAssignments(config.leadAssignmentLedgerPath)));
   return renderAdminDocumentChecklistPayload(
     registry,
     locale,
-    buildDocumentChecklistQueue(leads, readDocumentChecklistOutcomes(config.documentChecklistLedgerPath), { locale }),
+    buildDocumentChecklistQueue(leads, filterRows(readDocumentChecklistOutcomes(config.documentChecklistLedgerPath)), { locale }),
     config.adminPrincipal || null,
   );
 }
@@ -1028,25 +1051,27 @@ function activityPayload(registry, url, config) {
   );
 }
 
-function operationsReport(registry, config) {
+async function operationsReport(registry, config) {
   const generatedAt = config.reviewedAt || config.editedAt || new Date().toISOString();
   const seed = currentSeed(config);
-  const leads = readLeadLedger(config.leadLedgerPath);
-  const replies = readReplyOutbox(config.replyOutboxPath);
-  const viewings = readViewings(config.viewingLedgerPath);
-  const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
-  const deals = readDeals(config.dealLedgerPath);
+  const source = await adminLeadSource(config);
+  const filterRows = leadScopedRows(source);
+  const leads = source.leads;
+  const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
+  const viewings = filterRows(readViewings(config.viewingLedgerPath));
+  const viewingFollowUps = filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath));
+  const deals = filterRows(readDeals(config.dealLedgerPath));
   const translationTasks = readTranslationLedger(config.translationLedgerPath);
   return buildOperationsReport({
     leads,
     replies,
-    replyDeliveryOutcomes: readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath),
-    leadPipelineOutcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
+    replyDeliveryOutcomes: filterRows(readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath)),
+    leadPipelineOutcomes: filterRows(readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath)),
     viewings,
     viewingFollowUps,
     deals,
-    sellerPipelines: readSellerPipeline(config.sellerPipelinePath),
-    sellerPipelineOutcomes: readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath),
+    sellerPipelines: filterRows(readSellerPipeline(config.sellerPipelinePath)),
+    sellerPipelineOutcomes: filterRows(readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath)),
     savedSearches: readSavedSearches(config.savedSearchLedgerPath),
     languageRequests: readLanguageRequests(config.languageRequestPath),
     publicRequestOutcomes: readPublicRequestOutcomes(config.publicRequestOutcomeLedgerPath),
@@ -1062,11 +1087,11 @@ function operationsReport(registry, config) {
   });
 }
 
-function reportsPayload(registry, url, config) {
+async function reportsPayload(registry, url, config) {
   return renderAdminOperationsReportPayload(
     registry,
     url.searchParams.get("locale") || "en",
-    operationsReport(registry, config),
+    await operationsReport(registry, config),
     config.adminPrincipal || null,
   );
 }
@@ -2108,9 +2133,9 @@ function appendAccountCreationEntry(input, config) {
   return result;
 }
 
-function appendAccountContactLinkEntry(input, config) {
+async function appendAccountContactLinkEntry(input, config) {
   const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const contacts = contactWorkspaceData(config).contacts;
+  const contacts = (await contactWorkspaceData(config)).contacts;
   const result = appendAccountContactLink(contacts, attributed, {
     filePath: config.accountLedgerPath,
     recordedAt: config.reviewedAt || new Date().toISOString(),
@@ -2817,10 +2842,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, await todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, await leadInboxPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(contactsPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, contactsPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/documents") return htmlResponse(documentChecklistPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/documents") return jsonResponse(200, documentChecklistPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(await contactsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, await contactsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/documents") return htmlResponse(await documentChecklistPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/documents") return jsonResponse(200, await documentChecklistPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/consents") return htmlResponse(consentPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/consents") return jsonResponse(200, consentPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/pipeline") return htmlResponse(await pipelinePayload(registry, url, config));
@@ -2861,10 +2886,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/requests") return jsonResponse(200, await requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/viewings") return htmlResponse(await viewingsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/viewings") return jsonResponse(200, await viewingsPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/reports") return htmlResponse(reportsPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/reports") return jsonResponse(200, reportsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/reports") return htmlResponse(await reportsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/reports") return jsonResponse(200, await reportsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/reports/export") {
-      return csvResponse(renderOperationsReportCsv(operationsReport(registry, config)), "ms-realty-source-quality.csv");
+      return csvResponse(renderOperationsReportCsv(await operationsReport(registry, config)), "ms-realty-source-quality.csv");
     }
     if (request.method === "GET" && url.pathname === "/admin/activity") return htmlResponse(activityPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/activity") return jsonResponse(200, activityPayload(registry, url, config));
@@ -3164,7 +3189,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/accounts/link") {
-      const result = appendAccountContactLinkEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendAccountContactLinkEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/documents/outcome") {

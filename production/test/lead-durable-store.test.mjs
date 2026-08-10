@@ -242,6 +242,56 @@ test("durable admin readback joins only matching encrypted contacts", async () =
   assert.equal(leads[0].contact_available, true);
 });
 
+test("durable admin readback takes the lead snapshot before querying contacts", async () => {
+  const payload = fakePayload();
+  const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
+  await persistLeadIntakeDurably({
+    lead: {
+      id: "inbox-durable-snapshot-order",
+      lead: {
+        id: ledgerRow().lead_id,
+        source: "website_contact_callback",
+        intent: "callback",
+        leadType: "general",
+        contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+      },
+      original_language: "en",
+      admin_locale: "en",
+      contact_preference: "email",
+    },
+    contactSecret,
+    receivedAt: "2026-08-10T09:00:00.000Z",
+    payload,
+  });
+
+  const find = payload.find.bind(payload);
+  let releaseLeadQuery;
+  let markLeadQueryStarted;
+  let contactQueryStarted = false;
+  const leadQueryStarted = new Promise((resolve) => {
+    markLeadQueryStarted = resolve;
+  });
+  payload.find = async (query) => {
+    if (query.collection === "public_leads") {
+      return new Promise((resolve) => {
+        releaseLeadQuery = () => resolve(find(query));
+        markLeadQueryStarted();
+      });
+    }
+    if (query.collection === "lead_contacts") contactQueryStarted = true;
+    return find(query);
+  };
+
+  const pendingRead = readLeadIntakesDurably({ contactSecret, payload });
+  await leadQueryStarted;
+  assert.equal(contactQueryStarted, false, "the contact query must wait for a stable lead snapshot");
+  releaseLeadQuery();
+
+  const leads = await pendingRead;
+  assert.equal(contactQueryStarted, true);
+  assert.equal(leads.length, 1);
+});
+
 test("durable admin readback rejects plaintext private fields in stored ledger rows", async () => {
   const payload = fakePayload();
   const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
@@ -265,19 +315,27 @@ test("durable admin readback rejects plaintext private fields in stored ledger r
   });
 
   const stored = payload.rows.public_leads[0].ledger_row;
-  for (const [field, value] of [
-    ["contact", { email: "plaintext@example.invalid" }],
-    ["request_details", { nested: { message_original: "plaintext private note" } }],
+  for (const [field, value, expectedCause] of [
+    ["contact", { email: "plaintext@example.invalid" }, /plaintext contact data/],
+    ...["email", "phone", "contact", "whatsapp", "viber"].map((privateField) => [
+      "request_details",
+      { arbitrary: { nested: { [privateField]: "plaintext private contact" } } },
+      /plaintext contact data/,
+    ]),
+    ["request_details", { nested: { message_original: "plaintext private note" } }, /plaintext message/],
   ]) {
+    const hadField = Object.hasOwn(stored, field);
+    const previous = stored[field];
     stored[field] = value;
     await assert.rejects(
       () => readLeadIntakesDurably({ contactSecret, payload }),
       (error) =>
         error instanceof LeadStoreUnavailableError &&
         error.code === "lead_store_unavailable" &&
-        /plaintext/.test(error.cause?.message || ""),
+        expectedCause.test(error.cause?.message || ""),
     );
-    delete stored[field];
+    if (hadField) stored[field] = previous;
+    else delete stored[field];
   }
 });
 
