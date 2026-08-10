@@ -277,7 +277,7 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       location: locationId,
       seo: {
         title: listing.title || "",
-        description: listing.description || "",
+        description: migration?.source_seo?.meta_description || "",
         canonical: listing.canonical || listing.url,
         schema_present: Boolean(listing.schema_present),
       },
@@ -375,6 +375,9 @@ export function assertCmsSeed(seed) {
   if (seed.summary.deployableRoutes !== 0) throw new Error("CMS seed routes must stay review-gated");
   if (seed.records.some((record) => record.facts.price_on_request && record.facts.price_eur !== null)) {
     throw new Error("Price-on-request listings must not project a price_eur value");
+  }
+  if (seed.records.some((record) => String(record.seo?.description || "").length > 320)) {
+    throw new Error("Listing seo.description must be 320 characters or fewer");
   }
   if (!seed.taxonomy_contract?.version || !Array.isArray(seed.taxonomy_contract.mappings)) {
     throw new Error("CMS seed must expose the versioned legacy property taxonomy contract");

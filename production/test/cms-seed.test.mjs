@@ -25,6 +25,7 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   const seed = buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows });
   const summary = assertCmsSeed(seed);
   const fixtureListing = seed.records.find((record) => record.id === "MS-CRAWL-0001");
+  const fixtureSourceListing = listings.find((listing) => listing.id === fixtureListing.id);
   const polenitsaListing = seed.records.find((record) => record.id === "MS-CRAWL-0033");
   const greekListing = seed.records.find((record) => record.id === "MS-CRAWL-0072");
   const ruListing = seed.records.find((record) => record.source_locale === "ru");
@@ -57,6 +58,8 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(fixtureListing.tour.provider, "photo-sphere-viewer");
   assert.equal(fixtureListing.tour.is_public, false);
   assert.ok(fixtureListing.tour.fallback_gallery.length > 0);
+  assert.equal(fixtureListing.facts.description, fixtureSourceListing.description);
+  assert.equal(fixtureListing.seo.description, fixtureListing.migration.source_seo.meta_description);
   assert.equal(fixtureListing.migration.source_seo.meta_description, migrationRecords.find((record) => record.old_url === fixtureListing.source_url).source_seo.meta_description);
   assert.equal(fixtureListing.migration.source_seo.open_graph, migrationRecords.find((record) => record.old_url === fixtureListing.source_url).source_seo.open_graph);
   assert.deepEqual(
@@ -120,6 +123,13 @@ test("CMS seed rejects Location precision outside the canonical enum", () => {
   seed.locations[0].public_location_precision = "area_only";
 
   assert.throws(() => assertCmsSeed(seed), /Location collection precision/);
+});
+
+test("CMS seed rejects SEO descriptions longer than the editor contract", () => {
+  const seed = buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows });
+  seed.records[0].seo.description = "x".repeat(321);
+
+  assert.throws(() => assertCmsSeed(seed), /seo\.description must be 320 characters or fewer/);
 });
 
 test("price-on-request seed records never retain a numeric price projection", () => {
