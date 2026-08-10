@@ -80,7 +80,14 @@ export function hasAdminSessionCookie(cookieHeader) {
 
 export function isPayloadPrivatePath(pathname) {
   const [first, second] = securityPathSegments(pathname);
-  return first === "payload-admin" || (first === "api" && second === "admins");
+  return (
+    first === "payload-admin" ||
+    first === "graphql" ||
+    first === "graphql-playground" ||
+    (first === "api" && second === "admins") ||
+    (first === "api" && second === "graphql") ||
+    (first === "api" && second === "graphql-playground")
+  );
 }
 
 function isExactSecurityPath(pathname, expected) {

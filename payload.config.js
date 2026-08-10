@@ -271,6 +271,7 @@ const leadCollectionsWithAccess = LEAD_COLLECTIONS.map((collection) => ({
 
 export default buildConfig({
   admin: { user: "admins" },
+  graphQL: { disable: true, disablePlaygroundInProduction: true },
   routes: { admin: "/payload-admin" },
   // Payload adds serverURL to its CSRF allowlist, yielding one exact origin.
   ...(publicOrigin ? { serverURL: publicOrigin } : {}),

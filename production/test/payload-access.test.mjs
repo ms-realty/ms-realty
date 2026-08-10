@@ -241,6 +241,8 @@ test("config wires shared access onto admins, content, and case collections", as
     assert.equal(bySlug.admins.auth.maxLoginAttempts, 5);
     assert.equal(bySlug.admins.auth.tokenExpiration, 2 * 60 * 60);
     assert.equal(bySlug.admins.auth.useSessions, true);
+    assert.equal(config.graphQL.disable, true);
+    assert.equal(config.graphQL.disablePlaygroundInProduction, true);
     assert.equal(config.serverURL, "https://ms-realty.ms-realty-bg.workers.dev");
     assert.deepEqual(config.csrf, ["https://ms-realty.ms-realty-bg.workers.dev"]);
   } finally {

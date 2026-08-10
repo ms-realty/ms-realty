@@ -261,7 +261,7 @@ test("Cloudflare Container admits only the exact anonymous login and cookie-pres
   assert.equal(hasAdminSessionCookie("xms_admin=session"), false);
 });
 
-test("Cloudflare Container hides Payload UI and identity REST paths across encoded path variants", () => {
+test("Cloudflare Container hides every external Payload UI, identity REST, and GraphQL path variant", () => {
   for (const pathname of [
     "/payload-admin",
     "/payload-admin/",
@@ -273,10 +273,33 @@ test("Cloudflare Container hides Payload UI and identity REST paths across encod
     "/api/admins/first-register",
     "/api%2fadmins%2ffirst-register",
     "/api%252fadmins%252ffirst-register",
+    "/graphql",
+    "/graphql/",
+    "/graphql/query",
+    "/graph%71l",
+    "/graph%2571l",
+    "/graphql%2fquery",
+    "/graphql%252fquery",
+    "/graphql-playground",
+    "/graphql-playground/",
+    "/graphql%2dplayground",
+    "/graphql%252dplayground%252f",
+    "/api/graphql",
+    "/api/graphql/",
+    "/api%2fgraphql",
+    "/api%252fgraphql%252f",
   ]) {
     assert.equal(isPayloadPrivatePath(pathname), true, pathname);
   }
-  for (const pathname of ["/admin", "/admin/login", "/api/admin/team", "/api/admins-public"]) {
+  for (const pathname of [
+    "/admin",
+    "/admin/login",
+    "/api/admin/team",
+    "/api/admins-public",
+    "/graphql-public",
+    "/graphql-playground-public",
+    "/api/graphql-public",
+  ]) {
     assert.equal(isPayloadPrivatePath(pathname), false, pathname);
   }
   assert.match(workerSource, /isPayloadPrivatePath\(url\.pathname\)/);
