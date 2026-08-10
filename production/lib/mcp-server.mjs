@@ -348,36 +348,6 @@ function errorResult(message) {
   return { content: [{ type: "text", text: message }], isError: true };
 }
 
-async function updatePayloadListingContent(config, principal, listingId, patch) {
-  if (config.payloadListingWriter) return config.payloadListingWriter({ listingId, patch, principal });
-  if (!config.env.PAYLOAD_SECRET || !config.env.DATABASE_URL) {
-    throw new Error("Payload runtime is not configured");
-  }
-  const [{ getPayload }, payloadConfig] = await Promise.all([import("payload"), import("../../payload.config.js")]);
-  const payload = await getPayload({ config: payloadConfig.default });
-  const current = await payload.findByID({ collection: "listings", id: listingId, depth: 0, overrideAccess: true });
-  const facts = { ...(current.facts || {}) };
-  const seo = { ...(current.seo || {}) };
-  for (const [field, value] of Object.entries(patch)) {
-    if (PAYLOAD_FACT_CONTENT_FIELDS.has(field)) facts[field] = value;
-    else seo[PAYLOAD_SEO_CONTENT_FIELDS[field]] = value;
-  }
-  return payload.update({
-    collection: "listings",
-    id: listingId,
-    data: { facts, seo },
-    draft: true,
-    overrideAccess: true,
-    context: {
-      ms_realty_operator: {
-        id: principal.id,
-        roles: principal.roles,
-        source: principal.source || "mcp",
-      },
-    },
-  });
-}
-
 function recordPayloadListingEdit(config, principal, listingId, changedFields) {
   appendAuditLog(
     createAuditLogEntry(

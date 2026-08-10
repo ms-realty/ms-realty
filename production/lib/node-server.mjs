@@ -270,10 +270,10 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must publish only human-approved translation");
   }
   if (
-    smoke.listingEdit.status !== 409 ||
-    smoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+    smoke.listingEdit.status !== 503 ||
+    smoke.listingEdit.body.kind !== "payload_draft_unavailable"
   ) {
-    throw new Error("Server must reject legacy listing mutations with a Payload handoff");
+    throw new Error("Server must fail closed when the durable listing draft runtime is unavailable");
   }
   if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== true) {
     throw new Error("Server must preserve the reviewed public translation after a rejected legacy mutation");
