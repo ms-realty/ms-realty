@@ -61,7 +61,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -695,7 +695,7 @@
         "filters": "Filters",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -1331,7 +1331,7 @@
         "filters": "Фильтры",
         "offices": "Сандански · Банско · Свети-Влас"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/ru",
         "label": "MS Realty"
@@ -1922,7 +1922,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -3154,7 +3154,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -3359,7 +3359,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -3479,24 +3479,8 @@
           "label": "office@makler-realty.com"
         }
       },
-      "form_unavailable": null,
-      "callback": {
-        "endpoint": "/api/leads",
-        "method": "POST",
-        "minimum_tap_target_px": 44,
-        "required_fields": [
-          "contact.name",
-          "contact.phone"
-        ],
-        "payload": {
-          "source": "website_contact_callback",
-          "intent": "callback",
-          "leadType": "general",
-          "language": "he",
-          "contact_preference": "phone"
-        },
-        "label": "שיחה חוזרת"
-      },
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
+      "callback": null,
       "search": {
         "path": "/he/search"
       },
@@ -3552,7 +3536,7 @@
         "filters": "Filters",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -3781,7 +3765,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4006,7 +3990,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4637,7 +4621,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -6179,7 +6163,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -6995,7 +6979,7 @@
         "filters": "Filters",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -7172,7 +7156,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -8678,9 +8662,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-19e14af4-2723-46f2-af88-f30c280781b3",
+    "id": "inbox-lead-draft-bed4593d-8b90-433d-9883-a27a4644cd9d",
     "lead": {
-      "id": "lead-draft-19e14af4-2723-46f2-af88-f30c280781b3",
+      "id": "lead-draft-bed4593d-8b90-433d-9883-a27a4644cd9d",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -8779,9 +8763,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-2c9630a5-7f3a-4268-aaa7-aea6da5ff0bb",
+    "id": "inbox-lead-draft-51f6c588-9d45-422a-9c89-de438c636ff0",
     "lead": {
-      "id": "lead-draft-2c9630a5-7f3a-4268-aaa7-aea6da5ff0bb",
+      "id": "lead-draft-51f6c588-9d45-422a-9c89-de438c636ff0",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -8883,9 +8867,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-453a9df5-ffcc-4d5e-98fa-6c0e262a30da",
+    "id": "inbox-lead-draft-29617fd2-6b4d-411f-ac72-119cf564de42",
     "lead": {
-      "id": "lead-draft-453a9df5-ffcc-4d5e-98fa-6c0e262a30da",
+      "id": "lead-draft-29617fd2-6b4d-411f-ac72-119cf564de42",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",

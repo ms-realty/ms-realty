@@ -92,7 +92,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -1308,7 +1308,7 @@
         "filters": "Филтри",
         "offices": "Сандански · Банско · Свети Влас"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/bg",
         "label": "MS Realty"
@@ -1675,7 +1675,7 @@
         "filters": "Φίλτρα",
         "offices": "Σαντάνσκι · Μπάνσκο · Σβετί Βλας"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/el",
         "label": "MS Realty"
@@ -2014,7 +2014,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -2337,7 +2337,7 @@
         "filters": "Filters",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -2638,7 +2638,7 @@
         "filters": "Filters",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -2815,7 +2815,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4358,7 +4358,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4590,7 +4590,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4795,7 +4795,7 @@
         "filters": "סינון",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4915,24 +4915,8 @@
           "label": "office@makler-realty.com"
         }
       },
-      "form_unavailable": null,
-      "callback": {
-        "endpoint": "/api/leads",
-        "method": "POST",
-        "minimum_tap_target_px": 44,
-        "required_fields": [
-          "contact.name",
-          "contact.phone"
-        ],
-        "payload": {
-          "source": "website_contact_callback",
-          "intent": "callback",
-          "leadType": "general",
-          "language": "he",
-          "contact_preference": "phone"
-        },
-        "label": "שיחה חוזרת"
-      },
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
+      "callback": null,
       "search": {
         "path": "/he/search"
       },
@@ -4988,7 +4972,7 @@
         "filters": "Filters",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
-      "lead_writes_disabled": false,
+      "lead_writes_disabled": true,
       "home": {
         "href": "/en",
         "label": "MS Realty"
