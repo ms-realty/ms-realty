@@ -76,3 +76,26 @@ test("custom listing editor writes durable draft changes through the shared serv
   assert.equal(body.publication_approval_changed, false);
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.title, "Payload-backed title");
 });
+
+test("custom listing editor preserves explicit empty-string form clears for durable drafts", async () => {
+  const runtime = createPayloadDraftRuntime(loadCmsSeed());
+  const listing = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001");
+  listing.seo.canonical_override = "/bg/custom-canonical";
+  const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+  process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
+  const app = createHttpApp({ payloadListingRuntime: runtime.payload });
+  const response = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/listings/edit",
+    headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      listingId: "MS-CRAWL-0001",
+      seo_canonical: "",
+    }).toString(),
+  });
+  if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+  else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
+  assert.equal(response.status, 201);
+  assert.equal(response.body.kind, "listing_draft_saved");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").seo.canonical_override, "");
+});

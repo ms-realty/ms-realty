@@ -595,18 +595,19 @@ function localeCode(value, snapshot) {
 }
 
 function projectedTranslation(document, snapshot) {
+  const translationState = document.translation_state || (document.status === "published" ? "published" : document.status) || "draft";
   return {
     locale: localeCode(document.locale, snapshot),
     source_locale: localeCode(document.source_locale, snapshot),
-    status: document.status,
+    status: translationState,
     source_hash: document.source_hash,
     translated_hash: document.translated_hash,
     reviewer: document.reviewer || null,
     approved_at: document.approved_at || null,
     direction: document.direction || null,
     public_indexable: document.public_indexable === true,
-    human_approved: ["approved", "published"].includes(String(document.status || "").trim().toLowerCase()),
-    translation_state: document.translation_state || document.status || "draft",
+    human_approved: ["approved", "published"].includes(String(translationState || "").trim().toLowerCase()),
+    translation_state: translationState,
     listing: relationId(document.listing),
   };
 }

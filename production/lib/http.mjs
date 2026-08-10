@@ -538,7 +538,7 @@ function listingEditInput(request) {
   if (input.patch) return input;
   const patch = {};
   for (const field of LISTING_EDIT_FIELDS) {
-    if (input[field] !== undefined && input[field] !== "") patch[field] = input[field];
+    if (input[field] !== undefined) patch[field] = input[field];
   }
   return { ...input, patch };
 }
@@ -2473,6 +2473,7 @@ export function createHttpApp({
           kind: "listing_draft_saved",
           listing_id: result.listingId,
           changed_fields: result.changedFields,
+          staleTranslations: result.staleTranslations,
           editor_url: listingEditorPath(result.listingId),
           draft_only: true,
           publication_approval_changed: false,
@@ -2541,7 +2542,7 @@ export function createHttpApp({
           unchanged: result.batch.unchangedListingIds.length,
           unchangedListingIds: result.batch.unchangedListingIds,
           edits: result.edits,
-          staleTranslations: result.batch.changes.flatMap((change) => change.staleTranslations),
+          staleTranslations: result.staleTranslations,
         };
         return adminJson(body.updated ? 201 : 200, body);
       } catch (error) {

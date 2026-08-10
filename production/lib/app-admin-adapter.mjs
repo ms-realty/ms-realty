@@ -1484,7 +1484,7 @@ async function appendBulkListingStatusChanges(input, config) {
     unchanged: result.batch.unchangedListingIds.length,
     unchangedListingIds: result.batch.unchangedListingIds,
     edits: result.edits,
-    staleTranslations: result.batch.changes.flatMap((change) => change.staleTranslations),
+    staleTranslations: result.staleTranslations,
     projectedSeed: result.projectedSeed,
   };
 }
@@ -3134,6 +3134,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           kind: "listing_draft_saved",
           listing_id: result.listingId,
           changed_fields: result.changedFields,
+          staleTranslations: result.staleTranslations,
           editor_url: listingEditorPath(result.listingId),
           draft_only: true,
           publication_approval_changed: false,

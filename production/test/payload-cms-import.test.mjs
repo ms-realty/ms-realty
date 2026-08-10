@@ -820,6 +820,36 @@ test("Payload CMS projection overlays durable draft rows onto the seed shape", a
   assert.equal(overlay.payload_overlay.source, "payload_draft_overlay");
 });
 
+test("Payload CMS projection exposes legacy translation status from translation_state", async () => {
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  const target = fakePayload();
+
+  await runPayloadCmsImport({
+    payload: target.payload,
+    registry,
+    seed,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+
+  const english = target.rows.listing_translations.find(
+    (row) => relationId(row.listing) === "MS-TEST-0001" && relationId(row.locale) !== relationId(row.source_locale),
+  );
+  english.status = "draft";
+  english.translation_state = "stale";
+  english.public_indexable = false;
+
+  const snapshot = await readPayloadCmsSnapshot({ payload: target.payload });
+  const overlay = projectPayloadCmsSeed(seed, snapshot);
+  const translation = overlay.records[0].translations.find((row) => row.locale === "en");
+
+  assert.equal(translation.status, "stale");
+  assert.equal(translation.translation_state, "stale");
+  assert.equal(translation.human_approved, false);
+  assert.equal(translation.public_indexable, false);
+});
+
 test("Importer context helper marks backfill writes as side-effect-suppressed", () => {
   assert.equal(payloadCmsImportContextEnabled({ context: { [CMS_SEED_IMPORT_CONTEXT_FLAG]: true } }), true);
   assert.equal(payloadCmsImportContextEnabled({ context: {} }), false);
