@@ -1584,13 +1584,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(mediaReviewBody.review_status, "approved_by_human");
       assert.equal(mediaReviewBody.kind, "floor_plan");
 
+      const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+      process.env.MS_REALTY_ADMIN_ACTOR = "content_editor";
       const edit = await listingEditRoute.POST(
         new Request("https://example.test/api/admin/listings/edit", {
           method: "POST",
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             listingId: "MS-CRAWL-0001",
-            editor: "content_editor",
             title: "Updated title for Next admin",
             floor: "2",
             total_floors: "5",
@@ -1607,6 +1608,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           }),
         }),
       );
+      if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+      else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
       const editBody = await edit.json();
       assert.equal(edit.status, 503);
       assert.equal(editBody.kind, "payload_draft_unavailable");

@@ -8,6 +8,8 @@ import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 const auth = { authorization: "Bearer local-admin-smoke" };
 
 test("custom listing editor renders locally and draft writes fail closed without a Payload runtime", async () => {
+  const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+  process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
   const appRoute = await renderAppAdminResponse(
     new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
   );
@@ -44,6 +46,8 @@ test("custom listing editor renders locally and draft writes fail closed without
   });
   assert.equal(httpApi.status, 503);
   assert.equal(httpApi.body.kind, "payload_draft_unavailable");
+  if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+  else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
 });
 
 test("bare admin validates authentication before its operations-shell redirect", async () => {

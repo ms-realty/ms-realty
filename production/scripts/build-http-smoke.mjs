@@ -534,6 +534,8 @@ smoke.listingEditorHtml = await dispatchHttp(app, {
   url: "/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001",
   headers: { authorization: "Bearer local-admin-smoke" },
 });
+const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
 smoke.listingEdit = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/listings/edit",
@@ -543,10 +545,11 @@ smoke.listingEdit = await dispatchHttp(app, {
   },
   body: new URLSearchParams({
     listingId: "MS-CRAWL-0001",
-    editor: "editor_bg",
     description: "Updated approved source description.",
   }).toString(),
 });
+if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
 smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
 smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
 smoke.adminLocales = {

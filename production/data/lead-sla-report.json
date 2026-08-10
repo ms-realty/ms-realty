@@ -9,7 +9,7 @@
   },
   "rows": [
     {
-      "lead_id": "lead-draft-97da3bd4-dae2-4826-8936-3133d9a2cdf7",
+      "lead_id": "lead-draft-a010eacd-acea-4535-a4ad-3a78f34ffae1",
       "source": "website_listing_detail",
       "assigned_broker": "broker_international",
       "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -17,13 +17,13 @@
       "status": "manager_escalation_required",
       "reminder_task": null,
       "manager_escalation": {
-        "id": "manager-escalation-lead-draft-97da3bd4-dae2-4826-8936-3133d9a2cdf7",
+        "id": "manager-escalation-lead-draft-a010eacd-acea-4535-a4ad-3a78f34ffae1",
         "owner": "manager",
         "status": "open"
       }
     },
     {
-      "lead_id": "lead-draft-ac97a309-a018-4153-9af2-f5fd2026eec6",
+      "lead_id": "lead-draft-bd0e041c-a0a9-49e7-9369-693ca8e66977",
       "source": "website_viewing_request",
       "assigned_broker": "broker_international",
       "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -31,13 +31,13 @@
       "status": "manager_escalation_required",
       "reminder_task": null,
       "manager_escalation": {
-        "id": "manager-escalation-lead-draft-ac97a309-a018-4153-9af2-f5fd2026eec6",
+        "id": "manager-escalation-lead-draft-bd0e041c-a0a9-49e7-9369-693ca8e66977",
         "owner": "manager",
         "status": "open"
       }
     },
     {
-      "lead_id": "lead-draft-7acf9524-e25d-428c-b655-01c7facffeb1",
+      "lead_id": "lead-draft-5bcf33ae-f24c-4d26-a6f3-87f5e33a19af",
       "source": "website_contact_callback",
       "assigned_broker": "broker_international",
       "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -45,13 +45,13 @@
       "status": "manager_escalation_required",
       "reminder_task": null,
       "manager_escalation": {
-        "id": "manager-escalation-lead-draft-7acf9524-e25d-428c-b655-01c7facffeb1",
+        "id": "manager-escalation-lead-draft-5bcf33ae-f24c-4d26-a6f3-87f5e33a19af",
         "owner": "manager",
         "status": "open"
       }
     },
     {
-      "lead_id": "lead-draft-b0d65c34-431b-4f60-8d2b-a195e666b812",
+      "lead_id": "lead-draft-e27f6700-7f50-449a-840c-60abb6aef34a",
       "source": "website_seller_valuation",
       "assigned_broker": "broker_international",
       "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -59,7 +59,7 @@
       "status": "manager_escalation_required",
       "reminder_task": null,
       "manager_escalation": {
-        "id": "manager-escalation-lead-draft-b0d65c34-431b-4f60-8d2b-a195e666b812",
+        "id": "manager-escalation-lead-draft-e27f6700-7f50-449a-840c-60abb6aef34a",
         "owner": "manager",
         "status": "open"
       }

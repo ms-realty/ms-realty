@@ -595,13 +595,13 @@ if (httpSmoke.translationPublish.status !== 201 || httpSmoke.translationPublish.
   throw new Error("HTTP smoke must publish human-approved translation");
 }
 if (
-  httpSmoke.listingEditorHtml.status !== 307 ||
-  httpSmoke.listingEditorHtml.headers.location !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+  httpSmoke.listingEditorHtml.status !== 200 ||
+  !String(httpSmoke.listingEditorHtml.body || "").includes('data-admin-mutation-form="listing"')
 ) {
-  throw new Error("HTTP smoke must hand legacy listing editor links to Payload");
+  throw new Error("HTTP smoke must render the custom listing editor");
 }
-if (httpSmoke.listingEdit.status !== 409 || httpSmoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001") {
-  throw new Error("HTTP smoke must reject legacy listing mutations with a Payload handoff");
+if (httpSmoke.listingEdit.status !== 503 || httpSmoke.listingEdit.body.kind !== "payload_draft_unavailable") {
+  throw new Error("HTTP smoke must fail closed when the durable listing draft runtime is unavailable");
 }
 if (httpSmoke.staleListing.status !== 200 || httpSmoke.staleListing.body.indexable !== true) {
   throw new Error("HTTP smoke must preserve reviewed public translation after a rejected legacy mutation");
@@ -832,8 +832,8 @@ if (nodeServerSmoke.translationApprove.status !== 201 || nodeServerSmoke.transla
 if (nodeServerSmoke.translationPublish.status !== 201 || nodeServerSmoke.translationPublish.body.public_indexable !== true) {
   throw new Error("Node server smoke must publish human-approved translation");
 }
-if (nodeServerSmoke.listingEdit.status !== 409 || nodeServerSmoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001") {
-  throw new Error("Node server smoke must reject legacy listing mutations with a Payload handoff");
+if (nodeServerSmoke.listingEdit.status !== 503 || nodeServerSmoke.listingEdit.body.kind !== "payload_draft_unavailable") {
+  throw new Error("Node server smoke must fail closed when the durable listing draft runtime is unavailable");
 }
 if (nodeServerSmoke.staleListing.status !== 200 || nodeServerSmoke.staleListing.body.indexable !== true) {
   throw new Error("Node server smoke must preserve reviewed public translation after a rejected legacy mutation");
