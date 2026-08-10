@@ -436,7 +436,7 @@ function planRecord({ collection, current, desired, overwriteExisting = false, a
   let patch = null;
   if (allowListingRelationMerge) {
     const relationPatch = listingRelationPatch(current, desired.data);
-    if (relationPatch.conflicts.length && !overwriteExisting) {
+    if (relationPatch.conflicts.length) {
       return { action: "conflict", conflict: conflictEntry(collection, desired.key, relationPatch.conflicts, "relationship_conflict") };
     }
     patch = relationPatch.patch;
@@ -453,6 +453,7 @@ function planRecord({ collection, current, desired, overwriteExisting = false, a
     if (allowListingRelationMerge) {
       data.translations = [...new Set([...relationId(current.translations || []), ...relationId(desired.data.translations || [])])];
       data.media = [...new Set([...relationId(current.media || []), ...relationId(desired.data.media || [])])];
+      if (relationId(current.tour) && !relationId(desired.data.tour)) data.tour = clone(current.tour);
     }
     return { action: "updated", data };
   }
@@ -801,7 +802,7 @@ function listingRelationsResolved(seed, targets, localeIds) {
       relationId(listing.location) === relationId(record.location) &&
       includesIds(relationId(listing.translations || []), expectedTranslations) &&
       includesIds(relationId(listing.media || []), expectedMedia) &&
-      relationId(listing.tour) === relationId(expectedTour)
+      (!expectedTour || relationId(listing.tour) === relationId(expectedTour))
     );
   });
 }
@@ -899,7 +900,7 @@ function aggregateReadback(snapshot, beforeSnapshot, target, seed, registry) {
         readback.target.listings.linked_locations === target.listings &&
         readback.target.listings.linked_translations === listingsWithTranslations &&
         readback.target.listings.linked_media === listingsWithMedia &&
-        readback.target.listings.linked_tours === target.listing_tours &&
+        readback.target.listings.linked_tours >= target.listing_tours &&
         listingRelationsResolved(seed, targets, localeIds),
       observed: readback.target.listings,
     },
@@ -1006,7 +1007,7 @@ export function buildPayloadCmsImportPlan({ registry, seed, snapshot, overwriteE
 async function executePlanPart({ payload, req, planParts, collection, desiredRows, currentRows, overwriteExisting = false, allowListingRelationMerge = false } = {}) {
   const part = planCollection(collection, desiredRows, currentRows, { overwriteExisting, allowListingRelationMerge });
   planParts.push(part);
-  if (part.conflicts.length && !overwriteExisting) return { blocked: true, part };
+  if (part.conflicts.length) return { blocked: true, part };
   await applyOperations(payload, part.operations, req);
   return { blocked: false, part };
 }

@@ -572,6 +572,55 @@ test("Payload CMS importer reads the latest draft and overwrite never changes th
   assert.equal(target.publishedRows.listings[0]._status, "published");
 });
 
+test("Payload CMS overwrite preserves a current tour when the seed has none", async () => {
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  const target = fakePayload();
+
+  await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  const currentTour = target.rows.listings.find((row) => row.id === "MS-TEST-0001").tour;
+  const seedWithoutTour = clone(seed);
+  seedWithoutTour.records[0].tour = null;
+  seedWithoutTour.summary.tourFields = 0;
+
+  const report = await runPayloadCmsImport({
+    overwriteExisting: true,
+    payload: target.payload,
+    registry,
+    seed: seedWithoutTour,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+
+  assert.equal(report.status, "committed");
+  assert.equal(report.integrity.ok, true);
+  assert.equal(target.rows.listings.find((row) => row.id === "MS-TEST-0001").tour, currentTour);
+});
+
+test("Payload CMS overwrite blocks conflicting non-null tours without partial writes", async () => {
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  const target = fakePayload();
+
+  await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  target.rows.listing_tours.push({ id: 1003, listing_id: "MS-OTHER-9999", review_status: "review_required", is_public: false, _status: "draft" });
+  target.rows.listings.find((row) => row.id === "MS-TEST-0001").tour = 1003;
+
+  const report = await runPayloadCmsImport({
+    overwriteExisting: true,
+    payload: target.payload,
+    registry,
+    seed,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+
+  assert.equal(report.status, "blocked_conflicts");
+  assert.equal(report.plan.conflicts, 1);
+  assert.equal(target.calls.commit, 1);
+  assert.equal(target.rows.listings.find((row) => row.id === "MS-TEST-0001").tour, 1003);
+});
+
 test("Payload CMS rerun preserves operator-added translation and media relationships", async () => {
   const registry = minimalRegistry();
   const seed = minimalSeed();
