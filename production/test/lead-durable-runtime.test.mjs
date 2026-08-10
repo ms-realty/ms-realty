@@ -139,6 +139,24 @@ test("Next lead intake requires an exact same-origin browser Origin", async () =
     assert.deepEqual(await response.json(), { kind: "cross_origin_write_blocked", reason });
   }
   assert.equal(calls.length, 0);
+
+  const allowed = await renderAppApiResponse(
+    new Request("http://container.internal/api/leads", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        host: "example.test",
+        origin: "https://example.test",
+        "sec-fetch-site": "same-origin",
+        "x-forwarded-proto": "https",
+      },
+      body: JSON.stringify(leadInput()),
+    }),
+    { config },
+  );
+
+  assert.equal(allowed.status, 201, await allowed.text());
+  assert.equal(calls.length, 1);
 });
 
 test("the standalone HTTP runtime uses the same durable lead path", async () => {

@@ -44,7 +44,7 @@ import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelin
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
-import { sameOriginWriteRejection } from "./request-guard.mjs";
+import { readHeader, requestHost, sameOriginWriteRejection } from "./request-guard.mjs";
 
 const ERROR_JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -426,7 +426,11 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       return webResponse(privateJson(404, { kind: "not_found" }));
     }
     if (request.method === "POST" && url.pathname === "/api/leads") {
-      const crossOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl: request.url });
+      const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
+      const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : url.protocol.slice(0, -1);
+      const host = requestHost(request.headers);
+      const requestUrl = host ? `${protocol}://${host}${url.pathname}${url.search}` : request.url;
+      const crossOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl });
       if (crossOrigin) {
         return webResponse(privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin }));
       }
