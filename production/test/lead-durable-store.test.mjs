@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { LEAD_COLLECTIONS, LEAD_COLLECTION_SLUGS } from "../lib/lead-collections.mjs";
+import { withLeadContactEnvelopes } from "../lib/lead-contact-vault.mjs";
 import {
   LeadStoreUnavailableError,
   findLeadByIdempotencyKey,
@@ -167,6 +168,49 @@ test("an intake retry reports the contact row belonging to the original lead", a
   assert.equal(retry.contactVault.stored_at, "2026-08-10T09:00:00.000Z");
 });
 
+test("durable lead messages stay encrypted and authorized readback reconstructs them", async () => {
+  const payload = fakePayload();
+  const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
+  const message = "Test Buyer asks for +359000000000 or test-buyer@example.invalid.";
+  const lead = {
+    id: "inbox-private-message",
+    message_original: message,
+    lead: {
+      id: ledgerRow().lead_id,
+      source: "website_contact_callback",
+      intent: "callback",
+      leadType: "general",
+      contact: { name: "Test Buyer", phone: "+359000000000", email: "test-buyer@example.invalid" },
+      request_details: { message, nested: { message_original: message }, callback_time: "Tomorrow" },
+    },
+    original_language: "en",
+    admin_locale: "en",
+    contact_preference: "phone",
+  };
+
+  await persistLeadIntakeDurably({ lead, contactSecret, receivedAt: "2026-08-10T09:00:00.000Z", payload });
+
+  const publicSerialized = JSON.stringify(payload.rows.public_leads);
+  for (const plaintext of [message, "Test Buyer", "+359000000000", "test-buyer@example.invalid"]) {
+    assert.equal(publicSerialized.includes(plaintext), false, `${plaintext} must not enter public_leads`);
+  }
+  assert.equal(payload.rows.public_leads[0].ledger_row.show_original_available, true);
+  assert.equal("message_original" in payload.rows.public_leads[0].ledger_row, false);
+  assert.deepEqual(payload.rows.public_leads[0].ledger_row.request_details, {
+    nested: {},
+    callback_time: "Tomorrow",
+  });
+
+  const joined = withLeadContactEnvelopes(
+    [payload.rows.public_leads[0].ledger_row],
+    payload.rows.lead_contacts,
+    { secret: contactSecret },
+  );
+  assert.equal(joined[0].message_original, message);
+  assert.deepEqual(joined[0].contact, lead.lead.contact);
+  assert.equal(joined[0].contact_available, true);
+});
+
 test("a repeated lead id never overwrites the original", async () => {
   const payload = fakePayload();
   await persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload });
@@ -205,6 +249,19 @@ test("the store refuses malformed input outright", async () => {
   await assert.rejects(
     () => persistLeadDurably({ ledgerRow: ledgerRow({ contact: { name: "Noa" } }), payload }),
     /must not contain raw contact data/,
+  );
+  await assert.rejects(
+    () => persistLeadDurably({ ledgerRow: ledgerRow({ message_original: "private" }), contactEnvelope: envelope(), payload }),
+    /must not contain a plaintext message/,
+  );
+  await assert.rejects(
+    () =>
+      persistLeadDurably({
+        ledgerRow: ledgerRow({ request_details: { nested: { message: "private" } } }),
+        contactEnvelope: envelope(),
+        payload,
+      }),
+    /must not contain a plaintext message/,
   );
   await assert.rejects(
     () => persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: { subject_id: "x" }, payload }),

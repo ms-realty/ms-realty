@@ -1,5 +1,5 @@
 import { createLeadContactEnvelope } from "./lead-contact-vault.mjs";
-import { createLeadLedgerRow } from "./lead-ledger.mjs";
+import { containsPlaintextMessageField, createLeadLedgerRow } from "./lead-ledger.mjs";
 
 // Durable persistence for public lead intake, following the same shape as the
 // realty-case Payload authority: a lazily-imported Payload runtime, explicit
@@ -78,7 +78,7 @@ export async function findLeadByIdempotencyKey(idempotencyKey, { payload = null 
 }
 
 export async function persistLeadIntakeDurably({ lead, contactSecret, receivedAt, payload = null } = {}) {
-  const ledgerRow = createLeadLedgerRow(lead, { receivedAt });
+  const ledgerRow = createLeadLedgerRow(lead, { receivedAt, contactSecret });
   const contactEnvelope = createLeadContactEnvelope(lead, { secret: contactSecret, storedAt: receivedAt });
   const result = await persistLeadDurably({ ledgerRow, contactEnvelope, payload });
   return {
@@ -103,6 +103,9 @@ export async function persistLeadDurably({ ledgerRow, contactEnvelope, payload =
   if (!leadId) throw new Error("The ledger row must carry a lead_id");
   if (ledgerRow.contact || ledgerRow.email || ledgerRow.phone) {
     throw new Error("The durable ledger row must not contain raw contact data");
+  }
+  if (containsPlaintextMessageField(ledgerRow)) {
+    throw new Error("The durable ledger row must not contain a plaintext message");
   }
   // Validated before any write: a malformed envelope is a caller defect, not a
   // store outage, and must not be reported as one.
