@@ -110,6 +110,7 @@ test("requested durable storage fails closed when its runtime is incomplete", as
 });
 
 test("Next lead intake requires an exact same-origin browser Origin", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-durable-next-origin-"));
   const calls = [];
   const config = appApiConfigFromEnv({
     ...approvedPublicSeedFixtureEnv(),
@@ -117,6 +118,8 @@ test("Next lead intake requires an exact same-origin browser Origin", async () =
     PAYLOAD_SECRET: STORE_CONFIG.payloadSecret,
     DATABASE_URL: STORE_CONFIG.databaseUrl,
     MS_REALTY_LEAD_CONTACT_KEY: CONTACT_SECRET,
+    MS_REALTY_CONSENT_LEDGER_PATH: path.join(dir, "consents.jsonl"),
+    MS_REALTY_EVENT_LEDGER_PATH: path.join(dir, "events.jsonl"),
   });
   config.persistLeadIntakeDurably = successfulStore(calls);
 
@@ -182,12 +185,15 @@ test("the standalone HTTP runtime uses the same durable lead path", async () => 
 });
 
 test("standalone lead intake requires an exact same-origin browser Origin", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-durable-http-origin-"));
   const calls = [];
   const app = createHttpApp({
     seed: approvedPublicSeedFixture(),
     leadDurableStore: STORE_CONFIG,
     persistLeadIntake: successfulStore(calls),
     leadContactKey: CONTACT_SECRET,
+    consentLedgerPath: path.join(dir, "consents.jsonl"),
+    eventLedgerPath: path.join(dir, "events.jsonl"),
   });
 
   for (const [headers, reason] of [
