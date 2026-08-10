@@ -4,6 +4,7 @@ import {
   allowsPayloadAdminMutation,
   allowsPayloadAdminServerAction,
   allowsDurableCaseAuthorityMutation,
+  allowsLegacyAdminLogout,
   allowsLeadProbeMutation,
   allowsMcpRequest,
   isPayloadFirstRegisterPath,
@@ -245,6 +246,7 @@ export default {
       mutating &&
       !allowsPayloadAdminMutation({ request, pathname: url.pathname }) &&
       !allowsPayloadAdminServerAction({ request, pathname: url.pathname }) &&
+      !allowsLegacyAdminLogout({ method: request.method, pathname: url.pathname }) &&
       !leadProbe &&
       !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })

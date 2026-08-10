@@ -141,6 +141,13 @@ export function allowsPayloadAdminServerAction({ request, pathname }) {
   return NEXT_SERVER_ACTION_ID.test(request.headers.get("next-action") || "");
 }
 
+// Existing custom-workbench sessions still need a safe way to clear their
+// legacy operator cookie during the migration. Token login is intentionally
+// absent: the deployed /admin/login route redirects to canonical Payload auth.
+export function allowsLegacyAdminLogout({ method, pathname }) {
+  return method === "POST" && pathname === "/admin/logout";
+}
+
 async function sha256(value) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return new Uint8Array(digest);

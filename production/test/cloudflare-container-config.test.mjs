@@ -10,6 +10,7 @@ import {
   allowsPayloadAdminMutation,
   allowsPayloadAdminServerAction,
   allowsDurableCaseAuthorityMutation,
+  allowsLegacyAdminLogout,
   allowsLeadProbeMutation,
   allowsMcpRequest,
   isPayloadFirstRegisterPath,
@@ -317,6 +318,14 @@ test("Cloudflare Container admits only authenticated Payload Admin server action
   assert.equal(allows({ method: "PATCH" }), false);
   assert.equal(allows({ pathname: "/admin" }), false, "the legacy workbench is not a Payload server-action prefix");
   assert.equal(allows({ pathname: "/payload-admin/create-first-user" }), false);
+});
+
+test("Cloudflare Container preserves only legacy workbench logout during auth migration", () => {
+  assert.match(workerSource, /allowsLegacyAdminLogout\(\{ method: request\.method, pathname: url\.pathname \}\)/);
+  assert.equal(allowsLegacyAdminLogout({ method: "POST", pathname: "/admin/logout" }), true);
+  assert.equal(allowsLegacyAdminLogout({ method: "POST", pathname: "/admin/login" }), false);
+  assert.equal(allowsLegacyAdminLogout({ method: "GET", pathname: "/admin/logout" }), false);
+  assert.equal(allowsLegacyAdminLogout({ method: "POST", pathname: "/admin/logout/extra" }), false);
 });
 
 test("Cloudflare Container admits only the secret-backed durable lead probe", async () => {
