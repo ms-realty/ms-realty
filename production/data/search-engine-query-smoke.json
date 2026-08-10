@@ -15,13 +15,13 @@
   "engines": [
     {
       "engine": "typesense",
-      "service_url": "http://typesense.local/",
+      "service_url": "https://typesense.ms-realty.bg/",
       "collection": "ms_realty_listings",
       "query": "Sandanski",
       "filter": "translation_indexable:=true && locale:=bg && source_listing_id:=MS-CRAWL-0001",
       "operation": {
         "method": "GET",
-        "url": "http://typesense.local/collections/ms_realty_listings/documents/search?q=Sandanski&query_by=title%2Cdescription%2Csearch_text%2Clocation_label%2Clisting_reference&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg+%26%26+source_listing_id%3A%3DMS-CRAWL-0001&per_page=5",
+        "url": "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&query_by=title%2Cdescription%2Csearch_text%2Clocation_label%2Clisting_reference&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg+%26%26+source_listing_id%3A%3DMS-CRAWL-0001&per_page=5",
         "status": 200
       },
       "total": 1,
@@ -37,13 +37,13 @@
     },
     {
       "engine": "meilisearch",
-      "service_url": "http://meili.local/",
+      "service_url": "https://meili.ms-realty.bg/",
       "index": "ms_realty_listings",
       "query": "Sandanski",
       "filter": "translation_indexable = true AND locale = bg AND source_listing_id = \"MS-CRAWL-0001\"",
       "operation": {
         "method": "POST",
-        "url": "http://meili.local/indexes/ms_realty_listings/search",
+        "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/search",
         "status": 200
       },
       "total": 1,

@@ -752,6 +752,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           HERMES_API_KEY: "hermes-key",
         },
         fetchImpl: healthyHermesAgentFetch,
+        lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
         generatedAt: runtimeGeneratedAt,
       });
       const liveServiceProvisioningImport = await liveServiceProvisioningImportRoute.POST(

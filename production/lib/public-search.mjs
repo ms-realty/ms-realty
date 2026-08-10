@@ -1,6 +1,7 @@
 import { searchRuntimeListings } from "./runtime.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
+import { privateSearchServiceNetworkAllowed } from "./search-service-http.mjs";
 
 export class PublicSearchInputError extends Error {
   constructor(message, options) {
@@ -25,11 +26,15 @@ export function publicSearchConfigFromEnv(env = process.env) {
     typesense: {
       baseUrl: env.TYPESENSE_URL,
       apiKey: env.TYPESENSE_API_KEY,
+      queryApiKey: env.TYPESENSE_QUERY_API_KEY || env.TYPESENSE_API_KEY,
+      allowPrivateNetwork: privateSearchServiceNetworkAllowed(env),
       collectionName: env.TYPESENSE_COLLECTION || "ms_realty_listings"
     },
     meilisearch: {
       baseUrl: env.MEILI_URL,
       apiKey: env.MEILI_API_KEY,
+      queryApiKey: env.MEILI_QUERY_API_KEY || env.MEILI_API_KEY,
+      allowPrivateNetwork: privateSearchServiceNetworkAllowed(env),
       indexName: env.MEILI_INDEX || "ms_realty_listings"
     },
     fetchImpl: globalThis.fetch,

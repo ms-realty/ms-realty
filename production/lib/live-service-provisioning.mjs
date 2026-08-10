@@ -9,6 +9,11 @@ import {
 } from "./hermes-provider-provisioning.mjs";
 import { assertHermesAgentRuntimeReport, probeHermesAgentRuntime } from "./hermes-agent-runtime.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
+import {
+  assertSearchServiceUrl,
+  fetchSearchService,
+  privateSearchServiceNetworkAllowed,
+} from "./search-service-http.mjs";
 
 export const DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT = fromRoot(
   "production",
@@ -35,26 +40,17 @@ const REQUIRED_ENV_BY_CHECK = {
   meili_api_key: "MEILI_API_KEY",
 };
 const HERMES_REQUIRED_ENV_NAMES = new Set(["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
-
-function redactUrl(value) {
-  if (!value) return null;
-  const parsed = new URL(value);
-  parsed.username = "";
-  parsed.password = "";
-  parsed.search = "";
-  parsed.hash = "";
-  return parsed.href.replace(/\/$/, "");
-}
+const SEARCH_HEALTH_TIMEOUT_MS = 3_000;
 
 function assertProvisioningServiceUrl(value, label) {
-  const parsed = new URL(value);
-  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error(`${label} must use http or https`);
+  const parsed = assertSearchServiceUrl(value, { label, exactOrigin: false });
   const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
   const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];
   if (reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
     throw new Error(`${label} must not use localhost or placeholder service URLs`);
   }
+  if (parsed.protocol !== "https:") throw new Error(`${label} must use HTTPS`);
 }
 
 function envCheck(id, env, key) {
@@ -64,14 +60,40 @@ function envCheck(id, env, key) {
   return { id, env: key, status: "pass" };
 }
 
-async function healthCheck({ fetchImpl, headers = {}, id, path: route, url }) {
+async function healthCheck({
+  fetchImpl,
+  headers = {},
+  id,
+  path: route,
+  url,
+  lookupImpl,
+  allowPrivateNetwork = false,
+}) {
   if (!url) return { id, status: "missing_env" };
   let redacted_url = null;
   try {
-    redacted_url = redactUrl(url);
-    assertProvisioningServiceUrl(redacted_url, id);
-    const response = await fetchImpl(`${String(url).replace(/\/+$/, "")}${route}`, { headers, method: "GET" });
-    return { id, redacted_url, status: response.ok ? "pass" : "fail", status_code: response.status };
+    redacted_url = assertSearchServiceUrl(url, { label: id }).origin;
+    const { response, clearDeadline } = await fetchSearchService({
+      baseUrl: url,
+      route,
+      fetchImpl,
+      lookupImpl,
+      allowPrivateNetwork,
+      timeoutMs: SEARCH_HEALTH_TIMEOUT_MS,
+      options: { headers, method: "GET" },
+      label: id,
+    });
+    try {
+      return {
+        id,
+        redacted_url,
+        status: response.ok ? "pass" : "fail",
+        status_code: response.status,
+        ...(allowPrivateNetwork ? { private_network_allowed: true } : {}),
+      };
+    } finally {
+      clearDeadline();
+    }
   } catch (error) {
     return { error: error.message, id, redacted_url, status: "fail" };
   }
@@ -153,8 +175,10 @@ async function hermesProviderCheck(hermes, { env, fetchImpl, generatedAt }) {
 export async function buildLiveServiceProvisioningReport({
   env = process.env,
   fetchImpl = globalThis.fetch,
+  lookupImpl,
   generatedAt = new Date().toISOString(),
 } = {}) {
+  const allowPrivateNetwork = privateSearchServiceNetworkAllowed(env);
   const checks = [
     envCheck("typesense_url", env, "TYPESENSE_URL"),
     envCheck("typesense_api_key", env, "TYPESENSE_API_KEY"),
@@ -170,6 +194,8 @@ export async function buildLiveServiceProvisioningReport({
         id: "typesense_health",
         path: "/health",
         url: env.TYPESENSE_URL,
+        lookupImpl,
+        allowPrivateNetwork,
       }),
     );
   } else {
@@ -184,6 +210,8 @@ export async function buildLiveServiceProvisioningReport({
         id: "meilisearch_health",
         path: "/health",
         url: env.MEILI_URL,
+        lookupImpl,
+        allowPrivateNetwork,
       }),
     );
   } else {
@@ -293,7 +321,12 @@ export function assertLiveServiceProvisioningReport(report) {
     if (ready && (!check.redacted_url || !Number.isInteger(check.status_code) || check.status_code < 200 || check.status_code > 299)) {
       throw new Error(`${id} must include successful endpoint evidence`);
     }
-    if (ready && check.redacted_url) assertProvisioningServiceUrl(check.redacted_url, id);
+    if (ready && check.redacted_url) {
+      const parsed = assertSearchServiceUrl(check.redacted_url, { label: id });
+      if (parsed.protocol !== "https:" && check.private_network_allowed !== true) {
+        throw new Error(`${id} must use HTTPS unless private network evidence is explicit`);
+      }
+    }
   }
   for (const id of ["hermes_agent_health", "hermes_agent_capabilities"]) {
     const check = report.checks.find((item) => item.id === id);

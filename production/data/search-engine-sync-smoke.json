@@ -20,13 +20,13 @@
       "operations": [
         {
           "method": "POST",
-          "url": "http://typesense.local/collections",
+          "url": "https://typesense.ms-realty.bg/collections",
           "status": 201,
           "bytes": 4929
         },
         {
           "method": "POST",
-          "url": "http://typesense.local/collections/ms_realty_listings/documents/import?action=upsert",
+          "url": "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert",
           "status": 201,
           "bytes": 803256
         }
@@ -39,13 +39,13 @@
       "operations": [
         {
           "method": "PATCH",
-          "url": "http://meili.local/indexes/ms_realty_listings/settings",
+          "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings",
           "status": 202,
           "bytes": 1416
         },
         {
           "method": "POST",
-          "url": "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id",
+          "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id",
           "status": 201,
           "bytes": 808260
         }
@@ -55,25 +55,25 @@
   "calls": [
     {
       "method": "POST",
-      "url": "http://typesense.local/collections",
+      "url": "https://typesense.ms-realty.bg/collections",
       "content_type": "application/json",
       "bytes": 4929
     },
     {
       "method": "POST",
-      "url": "http://typesense.local/collections/ms_realty_listings/documents/import?action=upsert",
+      "url": "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert",
       "content_type": "application/x-ndjson",
       "bytes": 803256
     },
     {
       "method": "PATCH",
-      "url": "http://meili.local/indexes/ms_realty_listings/settings",
+      "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings",
       "content_type": "application/json",
       "bytes": 1416
     },
     {
       "method": "POST",
-      "url": "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id",
+      "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id",
       "content_type": "application/x-ndjson",
       "bytes": 808260
     }

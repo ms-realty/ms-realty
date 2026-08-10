@@ -5,7 +5,7 @@ import os from "node:os";
 import { spawnSync } from "node:child_process";
 import {
   assertLiveServiceProvisioningReport,
-  buildLiveServiceProvisioningReport,
+  buildLiveServiceProvisioningReport as buildLiveServiceProvisioningReportRaw,
   liveServiceProvisioningState,
   writeLiveServiceProvisioningReport,
 } from "../lib/live-service-provisioning.mjs";
@@ -25,6 +25,12 @@ function healthyFetch(url, options = {}) {
     };
   }
   return { ok: true, status: 200 };
+}
+
+const PUBLIC_LOOKUP = async () => [{ address: "1.1.1.1", family: 4 }];
+
+function buildLiveServiceProvisioningReport(options = {}) {
+  return buildLiveServiceProvisioningReportRaw({ lookupImpl: PUBLIC_LOOKUP, ...options });
 }
 
 test("live service provisioning report fails closed until service env is configured", async () => {
@@ -64,17 +70,18 @@ test("live service provisioning report verifies live endpoints without persistin
   const calls = [];
   const report = await buildLiveServiceProvisioningReport({
     env: {
-      TYPESENSE_URL: "https://user:pass@typesense.internal?token=secret",
+      TYPESENSE_URL: "https://typesense.ms-realty.bg",
       TYPESENSE_API_KEY: "typesense-test-secret",
-      MEILI_URL: "https://user:pass@meili.internal?token=secret",
+      MEILI_URL: "https://meili.ms-realty.bg",
       MEILI_API_KEY: "meili-test-secret",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-test-secret",
     },
     fetchImpl: async (url, options) => {
-      calls.push({ url, headers: options.headers });
+      calls.push({ url, options });
       return healthyFetch(url, options);
     },
+    lookupImpl: PUBLIC_LOOKUP,
     generatedAt: "2026-07-06T00:00:00Z",
   });
 
@@ -83,15 +90,65 @@ test("live service provisioning report verifies live endpoints without persistin
   assert.equal(report.status, "ready");
   assert.equal(report.summary.missing_env.length, 0);
   assert.equal(report.summary.placeholder_env.length, 0);
-  assert.equal(report.checks.find((check) => check.id === "typesense_health").redacted_url, "https://typesense.internal");
-  assert.equal(report.checks.find((check) => check.id === "meilisearch_health").redacted_url, "https://meili.internal");
+  assert.equal(report.checks.find((check) => check.id === "typesense_health").redacted_url, "https://typesense.ms-realty.bg");
+  assert.equal(report.checks.find((check) => check.id === "meilisearch_health").redacted_url, "https://meili.ms-realty.bg");
   assert.equal(calls.length, 4);
-  assert.equal(calls[3].headers.authorization, "Bearer hermes-test-secret");
+  assert.equal(calls[0].options.redirect, "error");
+  assert.equal(calls[0].options.signal instanceof AbortSignal, true);
+  assert.equal(calls[3].options.headers.authorization, "Bearer hermes-test-secret");
   const serialized = JSON.stringify(report);
   assert.equal(serialized.includes("typesense-test-secret"), false);
   assert.equal(serialized.includes("meili-test-secret"), false);
   assert.equal(serialized.includes("user:pass"), false);
   assert.equal(serialized.includes("token=secret"), false);
+});
+
+test("live service provisioning rejects URL credentials, fragments, and private DNS before search health fetches", async () => {
+  const calls = [];
+  const report = await buildLiveServiceProvisioningReport({
+    env: {
+      TYPESENSE_URL: "https://user:pass@typesense.ms-realty.bg",
+      TYPESENSE_API_KEY: "typesense-key",
+      MEILI_URL: "https://meili.ms-realty.bg#fragment",
+      MEILI_API_KEY: "meili-key",
+      HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+      HERMES_API_KEY: "hermes-key",
+    },
+    fetchImpl: async (url, options) => {
+      calls.push(String(url));
+      return healthyFetch(url, options);
+    },
+    lookupImpl: async (hostname) => [
+      { address: hostname.startsWith("meili") ? "127.0.0.1" : "1.1.1.1", family: 4 },
+    ],
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(report.checks.find((check) => check.id === "typesense_health").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "typesense_health").error, /URL credentials/);
+  assert.equal(report.checks.find((check) => check.id === "meilisearch_health").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "meilisearch_health").error, /fragment/);
+  assert.equal(calls.some((url) => url.includes("typesense") || url.includes("meili")), false);
+});
+
+test("private self-hosted search services require the narrowly named opt-in", async () => {
+  const baseEnv = {
+    TYPESENSE_URL: "http://127.0.0.1:8108",
+    TYPESENSE_API_KEY: "typesense-key",
+    MEILI_URL: "http://10.0.0.9:7700",
+    MEILI_API_KEY: "meili-key",
+    HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+    HERMES_API_KEY: "hermes-key",
+  };
+  const blocked = await buildLiveServiceProvisioningReport({ env: baseEnv, fetchImpl: healthyFetch });
+  const allowed = await buildLiveServiceProvisioningReport({
+    env: { ...baseEnv, MS_REALTY_SEARCH_ALLOW_PRIVATE_SERVICE_NETWORK: "true" },
+    fetchImpl: healthyFetch,
+  });
+
+  assert.equal(blocked.checks.find((check) => check.id === "typesense_health").status, "fail");
+  assert.equal(allowed.checks.find((check) => check.id === "typesense_health").status, "pass");
+  assert.equal(allowed.checks.find((check) => check.id === "meilisearch_health").status, "pass");
 });
 
 test("live service provisioning rejects copied placeholder env values before health checks", async () => {
@@ -372,7 +429,7 @@ test("live service provisioning ready report requires endpoint evidence", async 
           check.id === "typesense_health" ? { ...check, redacted_url: "http://127.0.0.1:8108" } : check,
         ),
       }),
-    /localhost or placeholder/,
+    /HTTPS unless private network evidence/,
   );
   assert.throws(
     () =>
