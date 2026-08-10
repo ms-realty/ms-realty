@@ -25,15 +25,19 @@ async function main() {
     return;
   }
   const payload = await loadPayloadCmsImportRuntime();
-  const report = await runPayloadCmsImport({
-    dryRun: options.dryRun,
-    overwriteExisting: options.overwriteExisting,
-    payload,
-    registry: loadLocaleRegistry(),
-    seed: loadCmsSeed(),
-  });
-  console.log(JSON.stringify(report, null, 2));
-  if (!["committed", "dry_run_ready"].includes(report.status)) process.exitCode = 1;
+  try {
+    const report = await runPayloadCmsImport({
+      dryRun: options.dryRun,
+      overwriteExisting: options.overwriteExisting,
+      payload,
+      registry: loadLocaleRegistry(),
+      seed: loadCmsSeed(),
+    });
+    console.log(JSON.stringify(report, null, 2));
+    if (!["committed", "dry_run_ready"].includes(report.status)) process.exitCode = 1;
+  } finally {
+    await payload.destroy?.();
+  }
 }
 
 main().catch((error) => {
