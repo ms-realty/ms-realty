@@ -113,6 +113,11 @@ function minimalSeed() {
           total_floors: 5,
           land_area_sqm: null,
           condition: "good",
+          id: "MS-TEST-0001",
+          thumbnail_url: "https://makler-realty.com/wp-content/uploads/2025/04/thumbnail.jpg",
+          thumbnail_alt: "Legacy thumbnail",
+          word_count: 42,
+          canonical: "https://makler-realty.com/listing/test-1",
         },
         workflow: {},
         property: "property-MS-TEST-0001",
@@ -188,7 +193,7 @@ function minimalSeed() {
           review_status: "needs_panorama_upload",
           fallback_gallery: [{ url: "https://makler-realty.com/wp-content/uploads/2025/04/listing-1.jpg", alt: "Front view" }],
         },
-        migration: { record_id: "migration-1", review_state: "review_required", metadata_gaps: [] },
+        migration: { record_id: "migration-1", review_state: "review_required", metadata_gaps: [], source_seo: { title: "Legacy SEO" } },
         routing: { target_path: "/bg/properties/MS-TEST-0001", target_locale: "bg", planned_status: 301, deployable: false, review_required: true },
       },
     ],
@@ -370,6 +375,14 @@ function mediaDedupSeed() {
   return seed;
 }
 
+function payloadDocument(collection, data) {
+  const document = clone(data);
+  if (collection !== "listings") return document;
+  for (const field of ["id", "thumbnail_url", "thumbnail_alt", "word_count", "canonical"]) delete document.facts?.[field];
+  if (document.migration) delete document.migration.source_seo;
+  return document;
+}
+
 function fakePayload(initial = {}, { published = {} } = {}) {
   const rows = Object.fromEntries(
     ["locales", "locations", "properties", "listings", "listing_translations", "media_assets", "listing_tours", "listing_enrichment_tasks", "search_outbox"].map(
@@ -417,7 +430,7 @@ function fakePayload(initial = {}, { published = {} } = {}) {
     },
     async create({ collection, data, draft, req }) {
       assert.match(req.transactionID, /^tx-/);
-      const cloned = clone(data);
+      const cloned = payloadDocument(collection, data);
       const document = AUTO_INTEGER_ID_COLLECTIONS.has(collection)
         ? { ...cloned, id: Number.isInteger(cloned.id) ? cloned.id : nextIntegerId[collection]++ }
         : { id: cloned.id || `${collection}-${nextId++}`, ...cloned };
@@ -439,7 +452,7 @@ function fakePayload(initial = {}, { published = {} } = {}) {
         }
       }
       if (!document) throw new Error(`Missing ${collection} ${id}`);
-      Object.assign(document, clone(data));
+      Object.assign(document, payloadDocument(collection, data));
       if (draft) document._status = "draft";
       return clone(document);
     },
