@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { assertCmsSeed } from "./cms-seed.mjs";
 import { assertLocaleRegistry, loadLocaleRegistry } from "./locales.mjs";
 import { mediaWorkflow } from "./media.mjs";
@@ -62,19 +61,6 @@ function missingValue(value) {
   return Object.keys(value).length === 0;
 }
 
-function stableMediaId(url) {
-  const digest = createHash("sha256").update(requiredText(url, "CMS media url", 2000)).digest("hex");
-  return `media-${digest.slice(0, 24)}`;
-}
-
-function stableTranslationId(listingId, locale) {
-  return `translation-${requiredText(listingId, "CMS translation listing id", 160)}-${requiredText(locale, "CMS translation locale", 20)}`;
-}
-
-function stableTourId(listingId) {
-  return `tour-${requiredText(listingId, "CMS tour listing id", 160)}`;
-}
-
 function countBy(rows, keyFn) {
   return rows.reduce((result, row) => {
     const key = keyFn(row);
@@ -117,7 +103,7 @@ function summarizePlan(operations, conflicts) {
 
 function buildTargetSummary(seed, registry) {
   const translationCount = seed.records.reduce((total, record) => total + (record.translations || []).length, 0);
-  const mediaCount = seed.records.reduce((total, record) => total + (record.media || []).length, 0);
+  const mediaCount = new Set(seed.records.flatMap((record) => (record.media || []).map((item) => item.url))).size;
   const tourCount = seed.records.filter((record) => record.tour).length;
   return {
     locales: registry.locales.length,
@@ -132,69 +118,48 @@ function buildTargetSummary(seed, registry) {
   };
 }
 
-function buildLocaleResolution(snapshot, registry) {
-  const byCode = new Map(snapshot.locales.docs.map((doc) => [String(doc.code || "").trim(), doc]));
-  return new Map(
-    registry.locales.map((locale) => {
-      const current = byCode.get(locale.code);
-      return [locale.code, current?.id || locale.code];
-    }),
-  );
+function requiredMapValue(map, key, label) {
+  const value = map.get(key);
+  if (missingValue(value)) throw new Error(`${label} missing for ${key}`);
+  return value;
 }
 
-function buildIdentityMaps(snapshot, seed, registry, localeIds) {
-  const locations = new Map((seed.locations || []).map((row) => [row.id, snapshot.locations.byId.get(row.id)?.id || row.id]));
-  const properties = new Map((seed.properties || []).map((row) => [row.id, snapshot.properties.byId.get(row.id)?.id || row.id]));
-  const listings = new Map(seed.records.map((row) => [row.id, snapshot.listings.byId.get(row.id)?.id || row.id]));
-  const translations = new Map();
-  const media = new Map();
-  const tours = new Map();
-  const tasks = new Map((seed.enrichment_tasks || []).map((row) => [row.id, snapshot.listing_enrichment_tasks.byId.get(row.id)?.id || row.id]));
-
-  for (const record of seed.records) {
-    for (const translation of record.translations || []) {
-      const key = relationKey(record.id, translation.locale);
-      const current = snapshot.listing_translations.byListingLocale.get(key);
-      translations.set(key, current?.id || stableTranslationId(record.id, translation.locale));
-    }
-    for (const item of record.media || []) {
-      const key = requiredText(item.url, "CMS media url", 2000);
-      const current = snapshot.media_assets.byUrl.get(key);
-      media.set(key, current?.id || stableMediaId(key));
-    }
-    if (record.tour) {
-      const current = snapshot.listing_tours.byListingId.get(record.id);
-      tours.set(record.id, current?.id || stableTourId(record.id));
-    }
-  }
-
-  return { listings, localeIds, locations, media, properties, tasks, tours, translations };
+function localeIdMap(snapshot) {
+  return new Map(snapshot.locales.docs.map((doc) => [String(doc.code || "").trim(), doc.id]));
 }
 
-function desiredLocales(registry, localeIds) {
+function desiredLocalesBase(registry) {
   return registry.locales.map((locale) => ({
-    id: localeIds.get(locale.code),
     data: {
-      id: localeIds.get(locale.code),
       code: locale.code,
       native_name: locale.native_name,
       admin_name: locale.admin_name,
       direction: locale.direction,
       public_enabled: locale.public_enabled === true,
       indexable: locale.indexable === true,
-      fallback_locale: locale.fallback_locale ? localeIds.get(locale.fallback_locale) || locale.fallback_locale : null,
       reviewer_owner: locale.reviewer_owner || locale.reviewer_role || null,
     },
     key: locale.code,
-    match: { code: locale.code, id: localeIds.get(locale.code) },
+    match: { code: locale.code },
   }));
 }
 
-function desiredLocations(seed, ids) {
-  return (seed.locations || []).map((location) => ({
-    id: ids.locations.get(location.id),
+function desiredLocaleRelations(registry, localeIds) {
+  return registry.locales.map((locale) => ({
+    id: requiredMapValue(localeIds, locale.code, "Locale id"),
     data: {
-      id: ids.locations.get(location.id),
+      fallback_locale: locale.fallback_locale ? requiredMapValue(localeIds, locale.fallback_locale, "Locale fallback id") : null,
+    },
+    key: locale.code,
+    match: { code: locale.code },
+  }));
+}
+
+function desiredLocations(seed) {
+  return (seed.locations || []).map((location) => ({
+    id: location.id,
+    data: {
+      id: location.id,
       label: location.label,
       public_location_precision: location.public_location_precision,
       internal_latitude: location.internal_latitude ?? null,
@@ -207,12 +172,12 @@ function desiredLocations(seed, ids) {
   }));
 }
 
-function desiredProperties(seed, ids) {
+function desiredProperties(seed) {
   return (seed.properties || []).map((property) => ({
-    id: ids.properties.get(property.id),
+    id: property.id,
     data: {
-      id: ids.properties.get(property.id),
-      location: ids.locations.get(property.location) || property.location,
+      id: property.id,
+      location: property.location,
       property_family: property.property_family ?? null,
       property_subtype: property.property_subtype ?? null,
       taxonomy_mapping_version: property.taxonomy_mapping_version,
@@ -227,49 +192,39 @@ function desiredProperties(seed, ids) {
   }));
 }
 
-function desiredListings(seed, ids) {
-  return seed.records.map((record) => {
-    const translationIds = (record.translations || []).map((row) => ids.translations.get(relationKey(record.id, row.locale)));
-    const mediaIds = (record.media || []).map((row) => ids.media.get(row.url));
-    const tourId = record.tour ? ids.tours.get(record.id) : null;
-    return {
-      id: ids.listings.get(record.id),
-      data: {
-        id: ids.listings.get(record.id),
-        cms_status: "source_imported_review_required",
-        source_locale: ids.localeIds.get(record.source_locale) || record.source_locale,
-        source_domain: record.source_domain,
-        source_url: record.source_url,
-        facts: clone(record.facts || {}),
-        seo: clone(record.seo || {}),
-        workflow: clone(record.workflow || {}),
-        property: ids.properties.get(record.property) || record.property,
-        location: ids.locations.get(record.location) || record.location,
-        translations: translationIds,
-        media: mediaIds,
-        tour: tourId || null,
-        routing: {
-          ...(record.routing || {}),
-          review_required: true,
-          deployable: false,
-        },
-        migration: clone(record.migration || {}),
+function desiredListingsBase(seed, localeIds) {
+  return seed.records.map((record) => ({
+    id: record.id,
+    data: {
+      id: record.id,
+      cms_status: "source_imported_review_required",
+      source_locale: requiredMapValue(localeIds, record.source_locale, "Listing source locale"),
+      source_domain: record.source_domain,
+      source_url: record.source_url,
+      facts: clone(record.facts || {}),
+      seo: clone(record.seo || {}),
+      workflow: clone(record.workflow || {}),
+      property: record.property,
+      location: record.location,
+      routing: {
+        ...(record.routing || {}),
+        review_required: true,
+        deployable: false,
       },
-      key: record.id,
-      match: { id: record.id },
-    };
-  });
+      migration: clone(record.migration || {}),
+    },
+    key: record.id,
+    match: { id: record.id },
+  }));
 }
 
-function desiredTranslations(seed, ids) {
+function desiredTranslations(seed, localeIds) {
   return seed.records.flatMap((record) =>
     (record.translations || []).map((translation) => ({
-      id: ids.translations.get(relationKey(record.id, translation.locale)),
       data: {
-        id: ids.translations.get(relationKey(record.id, translation.locale)),
-        listing: ids.listings.get(record.id) || record.id,
-        locale: ids.localeIds.get(translation.locale) || translation.locale,
-        source_locale: ids.localeIds.get(translation.source_locale) || translation.source_locale,
+        listing: record.id,
+        locale: requiredMapValue(localeIds, translation.locale, "Translation locale"),
+        source_locale: requiredMapValue(localeIds, translation.source_locale, "Translation source locale"),
         status: "draft",
         translation_state: "draft",
         source_hash: translation.source_hash,
@@ -280,17 +235,15 @@ function desiredTranslations(seed, ids) {
         public_indexable: false,
       },
       key: relationKey(record.id, translation.locale),
-      match: { listing: ids.listings.get(record.id) || record.id, locale: ids.localeIds.get(translation.locale) || translation.locale },
+      match: { listing: record.id, locale: requiredMapValue(localeIds, translation.locale, "Translation locale") },
     })),
   );
 }
 
-function desiredMedia(seed, ids) {
+function desiredMedia(seed) {
   return seed.records.flatMap((record) =>
     (record.media || []).map((media) => ({
-      id: ids.media.get(media.url),
       data: {
-        id: ids.media.get(media.url),
         url: media.url,
         asset_url: media.asset_url ?? null,
         alt: media.alt || "",
@@ -306,15 +259,13 @@ function desiredMedia(seed, ids) {
   );
 }
 
-function desiredTours(seed, ids) {
+function desiredTours(seed) {
   return seed.records
     .filter((record) => record.tour)
     .map((record) => ({
-      id: ids.tours.get(record.id),
       data: {
-        id: ids.tours.get(record.id),
         provider: record.tour.provider,
-        listing_id: ids.listings.get(record.id) || record.id,
+        listing_id: record.id,
         panorama_url: record.tour.panorama_url ?? null,
         viewer_url: record.tour.viewer_url ?? null,
         thumbnail_url: record.tour.thumbnail_url ?? null,
@@ -325,17 +276,17 @@ function desiredTours(seed, ids) {
         fallback_gallery: clone(record.tour.fallback_gallery || []),
       },
       key: record.id,
-      match: { listing_id: ids.listings.get(record.id) || record.id },
+      match: { listing_id: record.id },
     }));
 }
 
-function desiredTasks(seed, ids) {
+function desiredTasks(seed) {
   return (seed.enrichment_tasks || []).map((task) => ({
-    id: ids.tasks.get(task.id),
+    id: task.id,
     data: {
-      id: ids.tasks.get(task.id),
-      listing: ids.listings.get(task.listing) || task.listing,
-      property: ids.properties.get(task.property) || task.property,
+      id: task.id,
+      listing: task.listing,
+      property: task.property,
       task_type: task.task_type,
       task_state: task.task_state,
       idempotency_key: task.idempotency_key,
@@ -347,20 +298,45 @@ function desiredTasks(seed, ids) {
   }));
 }
 
-function desiredImportState(seed, registry, snapshot) {
-  const localeIds = buildLocaleResolution(snapshot, registry);
-  const ids = buildIdentityMaps(snapshot, seed, registry, localeIds);
-  return {
-    ids,
-    locales: desiredLocales(registry, localeIds),
-    locations: desiredLocations(seed, ids),
-    properties: desiredProperties(seed, ids),
-    listings: desiredListings(seed, ids),
-    listing_translations: desiredTranslations(seed, ids),
-    media_assets: desiredMedia(seed, ids),
-    listing_tours: desiredTours(seed, ids),
-    listing_enrichment_tasks: desiredTasks(seed, ids),
-  };
+function buildImportedRelationIds(seed, snapshot, localeIds) {
+  const translations = new Map();
+  const media = new Map();
+  const tours = new Map();
+
+  for (const record of seed.records) {
+    for (const translation of record.translations || []) {
+      const localeId = requiredMapValue(localeIds, translation.locale, "Imported translation locale");
+      const document = snapshot.listing_translations.byListingLocale.get(relationKey(record.id, localeId));
+      if (!document) throw new Error(`Imported translation missing for ${record.id}:${translation.locale}`);
+      translations.set(relationKey(record.id, translation.locale), document.id);
+    }
+    for (const item of record.media || []) {
+      const url = requiredText(item.url, "CMS media url", 2000);
+      const document = snapshot.media_assets.byUrl.get(url);
+      if (!document) throw new Error(`Imported media missing for ${url}`);
+      media.set(url, document.id);
+    }
+    if (record.tour) {
+      const document = snapshot.listing_tours.byListingId.get(record.id);
+      if (!document) throw new Error(`Imported tour missing for ${record.id}`);
+      tours.set(record.id, document.id);
+    }
+  }
+
+  return { media, tours, translations };
+}
+
+function desiredListingRelations(seed, relationIds) {
+  return seed.records.map((record) => ({
+    id: record.id,
+    data: {
+      translations: (record.translations || []).map((row) => requiredMapValue(relationIds.translations, relationKey(record.id, row.locale), "Listing translation id")),
+      media: (record.media || []).map((row) => requiredMapValue(relationIds.media, row.url, "Listing media id")),
+      tour: record.tour ? requiredMapValue(relationIds.tours, record.id, "Listing tour id") : null,
+    },
+    key: record.id,
+    match: { id: record.id },
+  }));
 }
 
 function safePatchValue(current, desired) {
@@ -485,91 +461,13 @@ function planCollection(collection, desiredRows, currentRows, { overwriteExistin
   return { conflicts, operations };
 }
 
-function buildPlan(snapshot, desired, { overwriteExisting = false } = {}) {
-  const localePlan = planCollection("locales", desired.locales, (row) => snapshot.locales.byCode.get(row.key) || snapshot.locales.byId.get(row.id), {
-    overwriteExisting,
-  });
-  const locationPlan = planCollection("locations", desired.locations, (row) => snapshot.locations.byId.get(row.key), { overwriteExisting });
-  const propertyPlan = planCollection("properties", desired.properties, (row) => snapshot.properties.byId.get(row.key), { overwriteExisting });
-  const listingBaseRows = desired.listings.map((row) => ({
-    ...row,
-    data: Object.fromEntries(
-      Object.entries(row.data).filter(([key]) => !["translations", "media", "tour"].includes(key)),
-    ),
-  }));
-  const listingBasePlan = planCollection(
-    "listings",
-    listingBaseRows,
-    (row) => snapshot.listings.byId.get(row.key),
-    { overwriteExisting },
-  );
-  const translationPlan = planCollection(
-    "listing_translations",
-    desired.listing_translations,
-    (row) => snapshot.listing_translations.byListingLocale.get(row.key) || snapshot.listing_translations.byId.get(row.id),
-    { overwriteExisting },
-  );
-  const mediaPlan = planCollection("media_assets", desired.media_assets, (row) => snapshot.media_assets.byUrl.get(row.key) || snapshot.media_assets.byId.get(row.id), {
-    overwriteExisting,
-  });
-  const tourPlan = planCollection("listing_tours", desired.listing_tours, (row) => snapshot.listing_tours.byListingId.get(row.key) || snapshot.listing_tours.byId.get(row.id), {
-    overwriteExisting,
-  });
-  const baseListingByKey = new Map(listingBaseRows.map((row) => [row.key, row]));
-  const listingRelationsPlan = planCollection("listings", desired.listings, (row) => snapshot.listings.byId.get(row.key), {
-    overwriteExisting,
-    allowListingRelationMerge: true,
-  });
-  const relationOperations = desired.listings.map((row) => {
-    const current = snapshot.listings.byId.get(row.key) || baseListingByKey.get(row.key)?.data || null;
-    const planned = planRecord({
-      collection: "listings",
-      current,
-      desired: row,
-      overwriteExisting,
-      allowListingRelationMerge: true,
-    });
-    return { current, planned, row };
-  });
-  const taskPlan = planCollection("listing_enrichment_tasks", desired.listing_enrichment_tasks, (row) => snapshot.listing_enrichment_tasks.byId.get(row.key), {
-    overwriteExisting,
-  });
-
-  const operations = [
-    ...localePlan.operations,
-    ...locationPlan.operations,
-    ...propertyPlan.operations,
-    ...listingBasePlan.operations,
-    ...translationPlan.operations,
-    ...mediaPlan.operations,
-    ...tourPlan.operations,
-    ...relationOperations
-      .filter(({ planned }) => planned.action === "updated")
-      .map(({ planned, row, current }) => ({
-        action: "updated",
-        collection: "listings",
-        data: planned.data,
-        desired: row,
-        id: row.id,
-        currentId: current?.id || row.id,
-      })),
-    ...taskPlan.operations,
-  ];
-  const conflicts = [
-    ...localePlan.conflicts,
-    ...locationPlan.conflicts,
-    ...propertyPlan.conflicts,
-    ...listingBasePlan.conflicts,
-    ...translationPlan.conflicts,
-    ...mediaPlan.conflicts,
-    ...tourPlan.conflicts,
-    ...listingRelationsPlan.conflicts,
-    ...relationOperations
-      .filter(({ planned }) => planned.action === "conflict")
-      .map(({ planned }) => planned.conflict)
-      .slice(0, SAMPLE_CONFLICT_LIMIT),
-    ...taskPlan.conflicts,
-  ];
+function mergePlanParts(parts) {
+  const operations = [];
+  const conflicts = [];
+  for (const part of parts) {
+    operations.push(...(part?.operations || []));
+    conflicts.push(...(part?.conflicts || []));
+  }
   return { conflicts, operations, summary: summarizePlan(operations, conflicts) };
 }
 
@@ -631,8 +529,15 @@ async function readSnapshot(payload, req) {
 
 export async function readPayloadCmsSnapshot({ payload, req } = {}) {
   assertPayload(payload);
-  if (!req?.transactionID) throw new Error("Payload CMS snapshot requires a transaction-aware req");
-  return readSnapshot(payload, req);
+  if (req?.transactionID) return readSnapshot(payload, req);
+
+  const transactionID = await payload.db.beginTransaction({ accessMode: "read only", isolationLevel: "repeatable read" });
+  if (!transactionID) throw new Error("Payload CMS snapshot could not open a read transaction");
+  try {
+    return await readSnapshot(payload, { payload, transactionID });
+  } finally {
+    await payload.db.rollbackTransaction(transactionID).catch(() => undefined);
+  }
 }
 
 function localeCode(value, snapshot) {
@@ -819,80 +724,177 @@ async function applyOperations(payload, operations, req) {
   }
 }
 
-function aggregateReadback(snapshot, beforeSnapshot, target) {
-  const listings = snapshot.listings.docs;
-  const translations = snapshot.listing_translations.docs;
-  const media = snapshot.media_assets.docs;
-  const tours = snapshot.listing_tours.docs;
+function sameIdSet(left, right) {
+  return JSON.stringify([...new Set((left || []).map((value) => String(value)))].sort()) === JSON.stringify([...new Set((right || []).map((value) => String(value)))].sort());
+}
+
+function importedTargets(snapshot, seed, registry) {
+  const localeIds = localeIdMap(snapshot);
+  const locales = registry.locales.map((locale) => snapshot.locales.byCode.get(locale.code)).filter(Boolean);
+  const locations = (seed.locations || []).map((location) => snapshot.locations.byId.get(location.id)).filter(Boolean);
+  const properties = (seed.properties || []).map((property) => snapshot.properties.byId.get(property.id)).filter(Boolean);
+  const listings = seed.records.map((record) => snapshot.listings.byId.get(record.id)).filter(Boolean);
+  const listingById = new Map(listings.map((listing) => [listing.id, listing]));
+  const translationKeys = seed.records.flatMap((record) =>
+    (record.translations || []).map((translation) => ({
+      key: relationKey(record.id, translation.locale),
+      document: localeIds.has(translation.locale)
+        ? snapshot.listing_translations.byListingLocale.get(relationKey(record.id, localeIds.get(translation.locale)))
+        : null,
+    })),
+  );
+  const translations = translationKeys.map((entry) => entry.document).filter(Boolean);
+  const translationsByKey = new Map(translationKeys.filter((entry) => entry.document).map((entry) => [entry.key, entry.document]));
+  const media = [...new Set(seed.records.flatMap((record) => (record.media || []).map((item) => item.url)))]
+    .map((url) => snapshot.media_assets.byUrl.get(url))
+    .filter(Boolean);
+  const mediaByUrl = new Map(media.map((document) => [document.url, document]));
+  const tours = seed.records.filter((record) => record.tour).map((record) => snapshot.listing_tours.byListingId.get(record.id)).filter(Boolean);
+  const toursByListingId = new Map(tours.map((document) => [relationId(document.listing_id), document]));
+  const tasks = (seed.enrichment_tasks || []).map((task) => snapshot.listing_enrichment_tasks.byId.get(task.id)).filter(Boolean);
+  return { listingById, localeIds, locales, locations, media, mediaByUrl, properties, tasks, tours, toursByListingId, translations, translationsByKey, listings };
+}
+
+function listingRelationsResolved(seed, targets, localeIds) {
+  return seed.records.every((record) => {
+    const listing = targets.listingById.get(record.id);
+    if (!listing) return false;
+    const expectedTranslations = (record.translations || [])
+      .map((translation) => targets.translationsByKey.get(relationKey(record.id, translation.locale))?.id)
+      .filter((value) => !missingValue(value));
+    const expectedMedia = (record.media || []).map((media) => targets.mediaByUrl.get(media.url)?.id).filter((value) => !missingValue(value));
+    const expectedTour = record.tour ? targets.toursByListingId.get(record.id)?.id || null : null;
+    const expectedLocale = localeIds.get(record.source_locale);
+    return (
+      relationId(listing.source_locale) === relationId(expectedLocale) &&
+      relationId(listing.property) === relationId(record.property) &&
+      relationId(listing.location) === relationId(record.location) &&
+      sameIdSet(relationId(listing.translations || []), expectedTranslations) &&
+      sameIdSet(relationId(listing.media || []), expectedMedia) &&
+      relationId(listing.tour) === relationId(expectedTour)
+    );
+  });
+}
+
+function aggregateReadback(snapshot, beforeSnapshot, target, seed, registry) {
+  const targets = importedTargets(snapshot, seed, registry);
+  const localeIds = targets.localeIds;
   const outboxRows = snapshot.search_outbox.docs.length;
+  const listingsWithMedia = seed.records.filter((record) => (record.media || []).length > 0).length;
+  const listingsWithTranslations = seed.records.filter((record) => (record.translations || []).length > 0).length;
 
   const readback = {
     collections: Object.fromEntries(IMPORT_COLLECTIONS.map((collection) => [collection, snapshot[collection].docs.length])),
-    listings: {
-      by_cms_status: countBy(listings, (row) => row.cms_status || "missing"),
-      linked_media: listings.filter((row) => Array.isArray(row.media) && row.media.length > 0).length,
-      linked_properties: listings.filter((row) => relationId(row.property)).length,
-      linked_tours: listings.filter((row) => relationId(row.tour)).length,
-      linked_translations: listings.filter((row) => Array.isArray(row.translations) && row.translations.length > 0).length,
-      linked_locations: listings.filter((row) => relationId(row.location)).length,
-      published_docs: listings.filter((row) => String(row._status || "").trim().toLowerCase() === "published").length,
-    },
-    listing_translations: {
-      by_status: countBy(translations, (row) => row.status || "missing"),
-      public_indexable_true: translations.filter((row) => row.public_indexable === true).length,
-      published_docs: translations.filter((row) => String(row._status || "").trim().toLowerCase() === "published").length,
-    },
-    media_assets: {
-      by_review_status: countBy(media, (row) => row.review_status || "missing"),
-      public_true: media.filter((row) => row.is_public === true).length,
-      published_docs: media.filter((row) => String(row._status || "").trim().toLowerCase() === "published").length,
-    },
-    listing_tours: {
-      by_review_status: countBy(tours, (row) => row.review_status || "missing"),
-      public_true: tours.filter((row) => row.is_public === true).length,
-      published_docs: tours.filter((row) => String(row._status || "").trim().toLowerCase() === "published").length,
-    },
-    search_outbox: {
-      rows: outboxRows,
-      delta: outboxRows - beforeSnapshot.search_outbox.docs.length,
+    target: {
+      locales: {
+        count: targets.locales.length,
+        codes: targets.locales.map((row) => row.code).sort(),
+      },
+      locations: {
+        count: targets.locations.length,
+        ids: targets.locations.map((row) => row.id).sort(),
+      },
+      properties: {
+        count: targets.properties.length,
+        ids: targets.properties.map((row) => row.id).sort(),
+      },
+      listings: {
+        count: targets.listings.length,
+        ids: targets.listings.map((row) => row.id).sort(),
+        by_cms_status: countBy(targets.listings, (row) => row.cms_status || "missing"),
+        linked_media: targets.listings.filter((row) => Array.isArray(row.media) && row.media.length > 0).length,
+        linked_properties: targets.listings.filter((row) => relationId(row.property)).length,
+        linked_tours: targets.listings.filter((row) => relationId(row.tour)).length,
+        linked_translations: targets.listings.filter((row) => Array.isArray(row.translations) && row.translations.length > 0).length,
+        linked_locations: targets.listings.filter((row) => relationId(row.location)).length,
+        published_docs: targets.listings.filter((row) => String(row._status || "").trim().toLowerCase() === "published").length,
+      },
+      listing_translations: {
+        count: targets.translations.length,
+        keys: [...targets.translationsByKey.keys()].sort(),
+        by_status: countBy(targets.translations, (row) => row.status || "missing"),
+        public_indexable_true: targets.translations.filter((row) => row.public_indexable === true).length,
+        published_docs: targets.translations.filter((row) => String(row._status || "").trim().toLowerCase() === "published").length,
+      },
+      media_assets: {
+        count: targets.media.length,
+        urls: targets.media.map((row) => row.url).sort(),
+        by_review_status: countBy(targets.media, (row) => row.review_status || "missing"),
+        public_true: targets.media.filter((row) => row.is_public === true).length,
+        published_docs: targets.media.filter((row) => String(row._status || "").trim().toLowerCase() === "published").length,
+      },
+      listing_tours: {
+        count: targets.tours.length,
+        listing_ids: targets.tours.map((row) => relationId(row.listing_id)).sort(),
+        by_review_status: countBy(targets.tours, (row) => row.review_status || "missing"),
+        public_true: targets.tours.filter((row) => row.is_public === true).length,
+        published_docs: targets.tours.filter((row) => String(row._status || "").trim().toLowerCase() === "published").length,
+      },
+      listing_enrichment_tasks: {
+        count: targets.tasks.length,
+        ids: targets.tasks.map((row) => row.id).sort(),
+      },
+      search_outbox: {
+        rows: outboxRows,
+        delta: outboxRows - beforeSnapshot.search_outbox.docs.length,
+      },
     },
   };
 
-  const expectedCollections = { ...target, search_outbox: beforeSnapshot.search_outbox.docs.length };
   const checks = [
     {
-      id: "collections_match_target",
-      ok: Object.entries(expectedCollections).every(([collection, count]) => readback.collections[collection] === count),
-      expected: expectedCollections,
-      observed: readback.collections,
+      id: "imported_target_identities_present",
+      ok:
+        readback.target.locales.count === target.locales &&
+        readback.target.locations.count === target.locations &&
+        readback.target.properties.count === target.properties &&
+        readback.target.listings.count === target.listings &&
+        readback.target.listing_translations.count === target.listing_translations &&
+        readback.target.media_assets.count === target.media_assets &&
+        readback.target.listing_tours.count === target.listing_tours &&
+        readback.target.listing_enrichment_tasks.count === target.listing_enrichment_tasks,
+      observed: readback.target,
     },
     {
       id: "listing_status_review_required",
-      ok: (readback.listings.by_cms_status.source_imported_review_required || 0) === target.listings && readback.listings.published_docs === 0,
-      observed: readback.listings,
+      ok:
+        (readback.target.listings.by_cms_status.source_imported_review_required || 0) === target.listings &&
+        readback.target.listings.published_docs === 0,
+      observed: readback.target.listings,
+    },
+    {
+      id: "listing_relationships_resolved",
+      ok:
+        readback.target.listings.linked_properties === target.listings &&
+        readback.target.listings.linked_locations === target.listings &&
+        readback.target.listings.linked_translations === listingsWithTranslations &&
+        readback.target.listings.linked_media === listingsWithMedia &&
+        readback.target.listings.linked_tours === target.listing_tours &&
+        listingRelationsResolved(seed, targets, localeIds),
+      observed: readback.target.listings,
     },
     {
       id: "translations_non_public_drafts",
       ok:
-        (readback.listing_translations.by_status.draft || 0) === target.listing_translations &&
-        readback.listing_translations.public_indexable_true === 0 &&
-        readback.listing_translations.published_docs === 0,
-      observed: readback.listing_translations,
+        (readback.target.listing_translations.by_status.draft || 0) === target.listing_translations &&
+        readback.target.listing_translations.public_indexable_true === 0 &&
+        readback.target.listing_translations.published_docs === 0,
+      observed: readback.target.listing_translations,
     },
     {
       id: "media_non_public",
-      ok: readback.media_assets.public_true === 0 && readback.media_assets.published_docs === 0,
-      observed: readback.media_assets,
+      ok: readback.target.media_assets.public_true === 0 && readback.target.media_assets.published_docs === 0,
+      observed: readback.target.media_assets,
     },
     {
       id: "tours_non_public",
-      ok: readback.listing_tours.public_true === 0 && readback.listing_tours.published_docs === 0,
-      observed: readback.listing_tours,
+      ok: readback.target.listing_tours.public_true === 0 && readback.target.listing_tours.published_docs === 0,
+      observed: readback.target.listing_tours,
     },
     {
       id: "no_hook_outbox_growth",
-      ok: readback.search_outbox.delta === 0,
-      observed: readback.search_outbox,
+      ok: readback.target.search_outbox.delta === 0,
+      observed: readback.target.search_outbox,
     },
   ];
 
@@ -931,12 +933,52 @@ export function payloadCmsImportContextEnabled(req) {
 }
 
 export function buildPayloadCmsImportPlan({ registry, seed, snapshot, overwriteExisting = false } = {}) {
-  const desired = desiredImportState(seed, registry, snapshot);
+  const localeIds = localeIdMap(snapshot);
+  const planParts = [
+    planCollection("locales", desiredLocalesBase(registry), (row) => snapshot.locales.byCode.get(row.key), { overwriteExisting }),
+    planCollection("locations", desiredLocations(seed), (row) => snapshot.locations.byId.get(row.key), { overwriteExisting }),
+    planCollection("properties", desiredProperties(seed), (row) => snapshot.properties.byId.get(row.key), { overwriteExisting }),
+  ];
+
+  if (registry.locales.every((locale) => localeIds.has(locale.code))) {
+    planParts.push(planCollection("locales", desiredLocaleRelations(registry, localeIds), (row) => snapshot.locales.byCode.get(row.key), { overwriteExisting }));
+    planParts.push(planCollection("listings", desiredListingsBase(seed, localeIds), (row) => snapshot.listings.byId.get(row.key), { overwriteExisting }));
+    planParts.push(
+      planCollection(
+        "listing_translations",
+        desiredTranslations(seed, localeIds),
+        (row) => snapshot.listing_translations.byListingLocale.get(relationKey(row.match.listing, row.match.locale)),
+        { overwriteExisting },
+      ),
+    );
+    planParts.push(planCollection("media_assets", desiredMedia(seed), (row) => snapshot.media_assets.byUrl.get(row.key), { overwriteExisting }));
+    planParts.push(planCollection("listing_tours", desiredTours(seed), (row) => snapshot.listing_tours.byListingId.get(row.key), { overwriteExisting }));
+    planParts.push(planCollection("listing_enrichment_tasks", desiredTasks(seed), (row) => snapshot.listing_enrichment_tasks.byId.get(row.key), { overwriteExisting }));
+    try {
+      const relationIds = buildImportedRelationIds(seed, snapshot, localeIds);
+      planParts.push(
+        planCollection("listings", desiredListingRelations(seed, relationIds), (row) => snapshot.listings.byId.get(row.key), {
+          overwriteExisting,
+          allowListingRelationMerge: true,
+        }),
+      );
+    } catch {
+      // The preview plan is best-effort before create-time integer ids exist.
+    }
+  }
+
   return {
-    desired,
-    plan: buildPlan(snapshot, desired, { overwriteExisting }),
+    plan: mergePlanParts(planParts),
     target: buildTargetSummary(seed, registry),
   };
+}
+
+async function executePlanPart({ payload, req, planParts, collection, desiredRows, currentRows, overwriteExisting = false, allowListingRelationMerge = false } = {}) {
+  const part = planCollection(collection, desiredRows, currentRows, { overwriteExisting, allowListingRelationMerge });
+  planParts.push(part);
+  if (part.conflicts.length && !overwriteExisting) return { blocked: true, part };
+  await applyOperations(payload, part.operations, req);
+  return { blocked: false, part };
 }
 
 export async function runPayloadCmsImport({
@@ -962,17 +1004,114 @@ export async function runPayloadCmsImport({
       let committed = false;
       try {
         const current = await readSnapshot(payload, req);
-        const { desired, plan, target } = buildPayloadCmsImportPlan({ registry, seed, snapshot: current, overwriteExisting });
-        const report = reportSkeleton({ attempt, current, dryRun, overwriteExisting, plan, registry, seed, target });
+        const target = buildTargetSummary(seed, registry);
+        const planParts = [];
 
-        if (plan.conflicts.length && !overwriteExisting) {
+        let snapshot = current;
+        let stage = await executePlanPart({
+          collection: "locales",
+          currentRows: (row) => snapshot.locales.byCode.get(row.key),
+          desiredRows: desiredLocalesBase(registry),
+          overwriteExisting,
+          payload,
+          planParts,
+          req,
+        });
+        let plan = mergePlanParts(planParts);
+        let report = reportSkeleton({ attempt, current, dryRun, overwriteExisting, plan, registry, seed, target });
+        if (stage.blocked) {
           await payload.db.rollbackTransaction(transactionId);
           return { ...report, committed: false, status: "blocked_conflicts" };
         }
 
-        await applyOperations(payload, plan.operations, req);
+        snapshot = await readSnapshot(payload, req);
+        const localeIds = localeIdMap(snapshot);
+
+        for (const nextStage of [
+          {
+            collection: "locales",
+            currentRows: (row) => snapshot.locales.byCode.get(row.key),
+            desiredRows: desiredLocaleRelations(registry, localeIds),
+          },
+          {
+            collection: "locations",
+            currentRows: (row) => snapshot.locations.byId.get(row.key),
+            desiredRows: desiredLocations(seed),
+          },
+          {
+            collection: "properties",
+            currentRows: (row) => snapshot.properties.byId.get(row.key),
+            desiredRows: desiredProperties(seed),
+          },
+          {
+            collection: "listings",
+            currentRows: (row) => snapshot.listings.byId.get(row.key),
+            desiredRows: desiredListingsBase(seed, localeIds),
+          },
+        ]) {
+          stage = await executePlanPart({ ...nextStage, overwriteExisting, payload, planParts, req });
+          plan = mergePlanParts(planParts);
+          report = reportSkeleton({ attempt, current, dryRun, overwriteExisting, plan, registry, seed, target });
+          if (stage.blocked) {
+            await payload.db.rollbackTransaction(transactionId);
+            return { ...report, committed: false, status: "blocked_conflicts" };
+          }
+        }
+
+        snapshot = await readSnapshot(payload, req);
+
+        for (const nextStage of [
+          {
+            collection: "listing_translations",
+            currentRows: (row) => snapshot.listing_translations.byListingLocale.get(relationKey(row.match.listing, row.match.locale)),
+            desiredRows: desiredTranslations(seed, localeIds),
+          },
+          {
+            collection: "media_assets",
+            currentRows: (row) => snapshot.media_assets.byUrl.get(row.key),
+            desiredRows: desiredMedia(seed),
+          },
+          {
+            collection: "listing_tours",
+            currentRows: (row) => snapshot.listing_tours.byListingId.get(row.key),
+            desiredRows: desiredTours(seed),
+          },
+          {
+            collection: "listing_enrichment_tasks",
+            currentRows: (row) => snapshot.listing_enrichment_tasks.byId.get(row.key),
+            desiredRows: desiredTasks(seed),
+          },
+        ]) {
+          stage = await executePlanPart({ ...nextStage, overwriteExisting, payload, planParts, req });
+          plan = mergePlanParts(planParts);
+          report = reportSkeleton({ attempt, current, dryRun, overwriteExisting, plan, registry, seed, target });
+          if (stage.blocked) {
+            await payload.db.rollbackTransaction(transactionId);
+            return { ...report, committed: false, status: "blocked_conflicts" };
+          }
+        }
+
+        snapshot = await readSnapshot(payload, req);
+        const relationIds = buildImportedRelationIds(seed, snapshot, localeIds);
+        stage = await executePlanPart({
+          allowListingRelationMerge: true,
+          collection: "listings",
+          currentRows: (row) => snapshot.listings.byId.get(row.key),
+          desiredRows: desiredListingRelations(seed, relationIds),
+          overwriteExisting,
+          payload,
+          planParts,
+          req,
+        });
+        plan = mergePlanParts(planParts);
+        report = reportSkeleton({ attempt, current, dryRun, overwriteExisting, plan, registry, seed, target });
+        if (stage.blocked) {
+          await payload.db.rollbackTransaction(transactionId);
+          return { ...report, committed: false, status: "blocked_conflicts" };
+        }
+
         const after = await readSnapshot(payload, req);
-        const integrity = aggregateReadback(after, current, target);
+        const integrity = aggregateReadback(after, current, target, seed, registry);
         if (!integrity.ok) {
           await payload.db.rollbackTransaction(transactionId);
           return { ...report, committed: false, integrity, status: "integrity_failed" };

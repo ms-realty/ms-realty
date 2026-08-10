@@ -252,6 +252,8 @@ function minimalSeed() {
   };
 }
 
+const AUTO_INTEGER_ID_COLLECTIONS = new Set(["locales", "listing_translations", "media_assets", "listing_tours"]);
+
 function fakePayload(initial = {}) {
   const rows = Object.fromEntries(
     ["locales", "locations", "properties", "listings", "listing_translations", "media_assets", "listing_tours", "listing_enrichment_tasks", "search_outbox"].map(
@@ -261,6 +263,9 @@ function fakePayload(initial = {}) {
   const calls = { begin: 0, commit: 0, rollback: 0 };
   let nextId = 1;
   let snapshot = null;
+  const nextIntegerId = Object.fromEntries(
+    [...AUTO_INTEGER_ID_COLLECTIONS].map((collection) => [collection, Math.max(0, ...rows[collection].map((row) => (Number.isInteger(row.id) ? row.id : 0))) + 1]),
+  );
 
   const payload = {
     db: {
@@ -284,7 +289,10 @@ function fakePayload(initial = {}) {
     },
     async create({ collection, data, draft, req }) {
       assert.match(req.transactionID, /^tx-/);
-      const document = { id: data.id || `${collection}-${nextId++}`, ...clone(data) };
+      const cloned = clone(data);
+      const document = AUTO_INTEGER_ID_COLLECTIONS.has(collection)
+        ? { ...cloned, id: Number.isInteger(cloned.id) ? cloned.id : nextIntegerId[collection]++ }
+        : { id: cloned.id || `${collection}-${nextId++}`, ...cloned };
       if (draft) document._status = "draft";
       rows[collection].push(document);
       return clone(document);
@@ -304,7 +312,45 @@ function fakePayload(initial = {}) {
 test("Payload CMS importer commits one durable draft graph and reuses it on rerun", async () => {
   const registry = minimalRegistry();
   const seed = minimalSeed();
-  const target = fakePayload();
+  const target = fakePayload({
+    locales: [{ id: 21, code: "fr", native_name: "French", admin_name: "French", direction: "ltr", public_enabled: false, indexable: false, fallback_locale: null }],
+    locations: [{ id: "location:sofia", label: "Sofia", public_location_precision: "approximate" }],
+    properties: [
+      {
+        id: "property-MS-OTHER-9999",
+        location: "location:sofia",
+        property_family: "apartment",
+        property_subtype: "apartment",
+        taxonomy_mapping_version: "test",
+        taxonomy_review_status: "mapped",
+        facts: { primary_area_sqm: 64 },
+        fact_verification: [],
+        zero_value_audit: [],
+        legacy_listing_id: "MS-OTHER-9999",
+      },
+    ],
+    media_assets: [{ id: 41, url: "https://makler-realty.com/wp-content/uploads/2025/04/existing.jpg", asset_url: null, alt: "Existing", width: 640, height: 480, kind: "photo", is_public: false, review_status: "reviewed_private", _status: "draft" }],
+    listings: [
+      {
+        id: "MS-OTHER-9999",
+        cms_status: "broker_verified",
+        source_locale: 21,
+        source_domain: "makler-realty.com",
+        source_url: "https://makler-realty.com/listing/existing",
+        facts: { title: "Existing listing" },
+        seo: { title: "Existing listing" },
+        workflow: {},
+        property: "property-MS-OTHER-9999",
+        location: "location:sofia",
+        translations: [],
+        media: [41],
+        tour: null,
+        routing: { review_required: false, deployable: true },
+        migration: { record_id: "migration-existing", review_state: "verified", metadata_gaps: [] },
+        _status: "draft",
+      },
+    ],
+  });
 
   const first = await runPayloadCmsImport({
     payload: target.payload,
@@ -315,17 +361,26 @@ test("Payload CMS importer commits one durable draft graph and reuses it on reru
   });
   assert.equal(first.status, "committed");
   assert.equal(first.integrity.ok, true);
-  assert.equal(first.integrity.readback.collections.listings, 1);
-  assert.equal(first.integrity.readback.listing_translations.by_status.draft, 2);
-  assert.equal(first.integrity.readback.listing_translations.public_indexable_true, 0);
-  assert.equal(first.integrity.readback.media_assets.public_true, 0);
-  assert.equal(first.integrity.readback.search_outbox.delta, 0);
-  assert.equal(target.rows.listings[0].translations.length, 2);
-  assert.equal(target.rows.listings[0].media.length, 2);
-  assert.equal(Boolean(target.rows.listings[0].tour), true);
-  assert.equal(target.rows.listings[0]._status, "draft");
+  assert.equal(first.integrity.readback.collections.listings, 2);
+  assert.equal(first.integrity.readback.target.listing_translations.by_status.draft, 2);
+  assert.equal(first.integrity.readback.target.listing_translations.public_indexable_true, 0);
+  assert.equal(first.integrity.readback.target.media_assets.public_true, 0);
+  assert.equal(first.integrity.readback.target.search_outbox.delta, 0);
+  const importedListing = target.rows.listings.find((row) => row.id === "MS-TEST-0001");
+  assert.equal(importedListing.translations.length, 2);
+  assert.equal(importedListing.media.length, 2);
+  assert.equal(Boolean(importedListing.tour), true);
+  assert.equal(importedListing._status, "draft");
+  assert.equal(typeof importedListing.source_locale, "number");
+  assert.equal(importedListing.translations.every((id) => typeof id === "number"), true);
+  assert.equal(importedListing.media.every((id) => typeof id === "number"), true);
+  assert.equal(typeof importedListing.tour, "number");
   assert.equal(target.rows.listing_translations.every((row) => row._status === "draft"), true);
   assert.equal(target.rows.media_assets.every((row) => row.is_public === false), true);
+  const unrelatedListing = target.rows.listings.find((row) => row.id === "MS-OTHER-9999");
+  assert.deepEqual(unrelatedListing.media, [41]);
+  assert.equal(unrelatedListing.source_locale, 21);
+  assert.equal(target.rows.locales.find((row) => row.code === "fr").id, 21);
 
   const second = await runPayloadCmsImport({
     payload: target.payload,
@@ -337,7 +392,7 @@ test("Payload CMS importer commits one durable draft graph and reuses it on reru
   assert.equal(second.status, "committed");
   assert.equal(second.plan.byCollection.listings.created, 0);
   assert.equal(second.plan.byCollection.listings.updated, 0);
-  assert.equal(second.plan.byCollection.listings.reused, 1);
+  assert.equal(second.plan.byCollection.listings.reused, 2);
   assert.equal(target.calls.commit, 2);
 });
 
@@ -345,11 +400,15 @@ test("Payload CMS importer blocks conflicting operator-edited drafts without wri
   const registry = minimalRegistry();
   const seed = minimalSeed();
   const existing = fakePayload({
+    locales: [
+      { id: 1, code: "bg", native_name: "Bulgarian", admin_name: "Bulgarian", direction: "ltr", public_enabled: true, indexable: true, fallback_locale: null },
+      { id: 2, code: "en", native_name: "English", admin_name: "English", direction: "ltr", public_enabled: true, indexable: true, fallback_locale: 1 },
+    ],
     listings: [
       {
         id: "MS-TEST-0001",
         cms_status: "source_imported_review_required",
-        source_locale: "bg",
+        source_locale: 1,
         source_domain: "makler-realty.com",
         source_url: "https://makler-realty.com/listing/test-1",
         facts: { ...seed.records[0].facts, title: "Broker custom title" },
@@ -397,11 +456,8 @@ test("Payload CMS projection overlays durable draft rows onto the seed shape", a
   target.rows.listings[0].facts.title = "Payload draft title";
   target.rows.listings[0].seo.title = "Payload SEO title";
 
-  const transactionID = await target.payload.db.beginTransaction();
-  const req = { payload: target.payload, transactionID };
-  const snapshot = await readPayloadCmsSnapshot({ payload: target.payload, req });
+  const snapshot = await readPayloadCmsSnapshot({ payload: target.payload });
   const overlay = projectPayloadCmsSeed(seed, snapshot);
-  await target.payload.db.rollbackTransaction();
 
   assert.equal(overlay.records[0].facts.title, "Payload draft title");
   assert.equal(overlay.records[0].seo.title, "Payload SEO title");
