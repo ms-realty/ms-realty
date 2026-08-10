@@ -7,7 +7,10 @@ on:
     - cron: "17 * * * *"
   workflow_dispatch:
 
-permissions: {}
+# The probe script lives in this repository, so the job needs to read it.
+# Nothing else: the probe only makes unauthenticated HTTP requests.
+permissions:
+  contents: read
 
 jobs:
   probe:
