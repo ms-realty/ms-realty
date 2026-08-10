@@ -694,6 +694,22 @@ test("Payload CMS importer creates one deterministic media asset per URL and ded
   assert.deepEqual(listingTwo.media, [sharedAsset.id]);
 });
 
+test("Payload CMS importer fail-closes legacy media review statuses", async () => {
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  const legacyMedia = seed.records[0].media.find((media) => media.kind === "site_chrome");
+  legacyMedia.review_status = "needs_media_review";
+  legacyMedia.is_public = false;
+  const target = fakePayload();
+
+  const report = await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  const projected = target.rows.media_assets.find((media) => media.url === legacyMedia.url);
+
+  assert.equal(report.status, "committed");
+  assert.equal(projected.review_status, "review_required");
+  assert.equal(projected.is_public, false);
+});
+
 test("Payload CMS importer blocks conflicting operator-edited drafts without writing partial state", async () => {
   const registry = minimalRegistry();
   const seed = minimalSeed();

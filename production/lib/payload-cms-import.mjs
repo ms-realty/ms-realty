@@ -262,7 +262,7 @@ function mergedMediaDocument(url, variants) {
     kind: firstNonNullish(variants.map((media) => media.kind)) || "unknown",
     review_status: altConflict
       ? "review_required"
-      : variants.some((media) => media.is_public === true || media.review_status === "review_required")
+      : variants.some((media) => media.is_public === true || !["approved_imported_photo", "reviewed_private"].includes(media.review_status))
         ? "review_required"
         : firstNonNullish(variants.map((media) => media.review_status).filter(Boolean)) || "review_required",
     url,
