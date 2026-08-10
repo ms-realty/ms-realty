@@ -534,6 +534,33 @@ test("Payload CMS importer commits one durable draft graph and reuses it on reru
   assert.equal(target.calls.commit, 2);
 });
 
+test("Payload CMS importer ignores generated array row ids without hiding operator changes", async () => {
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  const target = fakePayload();
+
+  await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  const property = target.rows.properties.find((row) => row.id === "property-MS-TEST-0001");
+  property.fact_verification = property.fact_verification.map((row, index) => ({ ...row, id: `verification-row-${index + 1}` }));
+  const tour = target.rows.listing_tours.find((row) => relationId(row.listing_id) === "MS-TEST-0001");
+  tour.fallback_gallery = tour.fallback_gallery.map((row, index) => ({ ...row, id: `gallery-row-${index + 1}` }));
+
+  const rerun = await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  assert.equal(rerun.status, "committed");
+  assert.equal(rerun.plan.byCollection.properties.reused, 1);
+  assert.equal(rerun.plan.byCollection.listing_tours.reused, 1);
+
+  property.fact_verification[0].source_reference = "operator-edited";
+  const conflict = await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  assert.equal(conflict.status, "blocked_conflicts");
+  assert.deepEqual(conflict.write_blockers[0], {
+    collection: "properties",
+    fields: ["fact_verification"],
+    key: "property-MS-TEST-0001",
+    reason: "conflicting_existing_data",
+  });
+});
+
 test("Payload CMS importer reads the latest draft and overwrite never changes the published base", async () => {
   const registry = minimalRegistry();
   const seed = minimalSeed();

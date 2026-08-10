@@ -414,9 +414,21 @@ function listingRelationPatch(current, desired) {
   return { conflicts, patch };
 }
 
+function comparableValue(current, desired, arrayRow = false) {
+  if (Array.isArray(current) && Array.isArray(desired)) {
+    return current.map((item, index) => comparableValue(item, desired[index], true));
+  }
+  if (!isRecord(current) || !isRecord(desired)) return clone(current);
+  return Object.fromEntries(
+    Object.entries(current)
+      .filter(([key]) => key !== "id" || !arrayRow || Object.hasOwn(desired, "id"))
+      .map(([key, value]) => [key, comparableValue(value, desired[key])]),
+  );
+}
+
 function currentComparable(document, desiredData) {
   if (!document) return null;
-  return Object.fromEntries(Object.keys(desiredData).map((key) => [key, clone(document[key])]));
+  return Object.fromEntries(Object.keys(desiredData).map((key) => [key, comparableValue(document[key], desiredData[key])]));
 }
 
 function publishedConflict(collection, document) {
