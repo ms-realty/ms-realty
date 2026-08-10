@@ -11,6 +11,7 @@ import {
   hasRole,
   isAdmin,
   referenceCollectionAccess,
+  serverOwnedCollectionAccess,
   translationCollectionAccess,
   workspaceScopedAccess,
 } from "../lib/payload-access.mjs";
@@ -94,6 +95,18 @@ test("translations additionally admit translators", () => {
   assert.equal(translationCollectionAccess.create(req(broker)), false);
   assert.equal(accessForGeneratedCollection("listing_translations"), translationCollectionAccess);
   assert.equal(accessForGeneratedCollection("listings"), contentCollectionAccess);
+});
+
+test("server-owned queues are read-only to human operators", () => {
+  assert.equal(serverOwnedCollectionAccess.read(req(editor)), true);
+  assert.equal(serverOwnedCollectionAccess.read(req(undefined)), false);
+  for (const user of [admin, editor, broker, translator]) {
+    assert.equal(serverOwnedCollectionAccess.create(req(user)), false);
+    assert.equal(serverOwnedCollectionAccess.update(req(user)), false);
+    assert.equal(serverOwnedCollectionAccess.delete(req(user)), false);
+  }
+  assert.equal(accessForGeneratedCollection("search_outbox"), serverOwnedCollectionAccess);
+  assert.equal(accessForGeneratedCollection("listing_enrichment_tasks"), serverOwnedCollectionAccess);
 });
 
 test("reference data (locales) is admin-write, all-read", () => {
@@ -233,6 +246,9 @@ test("config wires shared access onto admins, content, and case collections", as
     // listings: editor writes, broker does not
     assert.equal(bySlug.listings.access.create(req(editor)), true);
     assert.equal(bySlug.listings.access.create(req(broker)), false);
+    assert.equal(bySlug.search_outbox.access.create(req(admin)), false);
+    assert.equal(bySlug.search_outbox.access.update(req(editor)), false);
+    assert.equal(bySlug.listing_enrichment_tasks.access.delete(req(admin)), false);
     // realty_cases: broker read is workspace-scoped; append-only update preserved
     assert.deepEqual(bySlug.realty_cases.access.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });
     assert.equal(bySlug.realty_cases.hooks.beforeValidate.length, 1, "workspace boundary hook is wired");

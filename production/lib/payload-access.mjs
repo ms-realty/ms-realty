@@ -149,6 +149,15 @@ export const referenceCollectionAccess = {
   delete: isAdmin,
 };
 
+// Search and enrichment queues are written by trusted Local API hooks. Human
+// operators may inspect them, but cannot forge, edit, or delete work items.
+export const serverOwnedCollectionAccess = {
+  create: () => false,
+  read: isAuthenticated,
+  update: () => false,
+  delete: () => false,
+};
+
 // Realty-case plane: workspace-scoped for broker, full for admin.
 export const caseCollectionAccess = {
   create: hasRole("admin", "broker"),
@@ -160,8 +169,10 @@ export const caseCollectionAccess = {
 // Which generated content collections are translation-shaped (translators may
 // write) vs plain content (editors only).
 const TRANSLATION_SLUGS = new Set(["listing_translations"]);
+const SERVER_OWNED_SLUGS = new Set(["search_outbox", "listing_enrichment_tasks"]);
 
 export function accessForGeneratedCollection(slug) {
+  if (SERVER_OWNED_SLUGS.has(slug)) return serverOwnedCollectionAccess;
   if (TRANSLATION_SLUGS.has(slug)) return translationCollectionAccess;
   return contentCollectionAccess;
 }
