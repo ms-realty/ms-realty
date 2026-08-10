@@ -23,7 +23,7 @@ import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mj
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
-import { approvedPublicSeedFixture } from "./approved-public-seed.fixture.mjs";
+import { approvedPublicSeedFixture, installDurableLeadStoreFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 async function withServer(fn) {
   const leadLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-`)}/leads.jsonl`;
@@ -65,6 +65,9 @@ async function withServer(fn) {
   const server = createNodeServer(
     createHttpApp({
       seed: approvedPublicSeedFixture(),
+      // This integration fixture exercises the legacy file adapter. Enabled
+      // UI readiness is installed only by the one end-to-end test below.
+      leadDurableStore: { leadDurableStoreEnabled: false },
       leadLedgerPath,
       replyOutboxPath,
       languageRequestPath,
@@ -212,7 +215,8 @@ test("Node server serves HEAD through the matching GET route without a response 
   }
 });
 
-test("Node server serves live listing, search, lead, and viewing endpoints", async () => {
+test("Node server serves live listing, search, lead, and viewing endpoints", async (t) => {
+  installDurableLeadStoreFixtureEnv(t);
   await withServer(
     async (
       baseUrl,

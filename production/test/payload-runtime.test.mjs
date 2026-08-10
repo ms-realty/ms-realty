@@ -12,12 +12,17 @@ import {
 import { payloadRuntimeBootstrapChecklist } from "../lib/payload-runtime-bootstrap.mjs";
 import { payloadRuntimeState } from "../lib/launch-readiness.mjs";
 
-test("Payload config exposes generated CMS collections behind an admin runtime", async () => {
+test("Payload config keeps admins as the internal identity engine for the custom admin workbench", async () => {
   const resolved = await config;
   const slugs = resolved.collections.map((collection) => collection.slug);
+  const admins = resolved.collections.find((collection) => collection.slug === "admins");
 
   assert.equal(resolved.admin.user, "admins");
   assert.equal(resolved.routes.admin, "/payload-admin");
+  assert.equal(admins.auth.useSessions, true);
+  assert.equal(admins.auth.cookies.sameSite, "Lax");
+  assert.equal(admins.auth.tokenExpiration, 2 * 60 * 60);
+  assert.equal(admins.auth.maxLoginAttempts, 5);
   assert.ok(slugs.includes("admins"));
   assert.ok(slugs.includes("locales"));
   assert.ok(slugs.includes("listings"));
@@ -35,12 +40,6 @@ test("Payload config exposes generated CMS collections behind an admin runtime",
       .fields.some((field) => field.name === "viewer_url" && field.type === "text"),
     true,
   );
-
-  const payloadLayout = fs.readFileSync("app/(payload)/layout.js", "utf8");
-  const payloadAdminCss = fs.readFileSync("app/(payload)/payload-admin.css", "utf8");
-  assert.match(payloadLayout, /import "\.\/payload-admin\.css"/);
-  assert.match(payloadAdminCss, /min-height: 48px/);
-  assert.match(payloadAdminCss, /safe-area-inset-bottom/);
 });
 
 test("Payload runtime report blocks missing launch env without leaking defaults", async () => {
@@ -53,8 +52,20 @@ test("Payload runtime report blocks missing launch env without leaking defaults"
   assert.equal(report.ready, false);
   assert.deepEqual(report.summary.missing_env, ["PAYLOAD_SECRET", "DATABASE_URL"]);
   assert.deepEqual(report.summary.weak_env, []);
+  assert.equal(report.summary.admin_route, "/admin");
+  assert.equal(report.summary.identity_collection, "admins");
+  assert.equal(report.summary.payload_admin_ui, "edge_hidden");
+  assert.equal(report.summary.payload_identity_rest, "edge_hidden");
+  assert.equal(report.summary.route_files, 6);
   assert.equal(report.summary.database.status, "missing_env");
   assert.equal(report.checks.find((check) => check.id === "payload_config_import").status, "pass");
+  assert.deepEqual(report.checks.find((check) => check.id === "payload_edge_boundary"), {
+    id: "payload_edge_boundary",
+    status: "pass",
+    custom_admin_route: "/admin",
+    payload_admin_ui: "edge_hidden",
+    payload_identity_rest: "edge_hidden",
+  });
   assert.ok(report.next_actions.some((action) => action.includes("payload:bootstrap")));
 });
 
@@ -562,5 +573,15 @@ test("Payload runtime ready report requires route and config evidence", async ()
         checks: report.checks.map((check) => (check.id === "payload_config_import" ? { id: check.id, status: "pass" } : check)),
       }),
     /Payload config evidence/,
+  );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        checks: report.checks.map((check) =>
+          check.id === "payload_edge_boundary" ? { id: check.id, status: "pass" } : check,
+        ),
+      }),
+    /custom-admin edge boundary/,
   );
 });

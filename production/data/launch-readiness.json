@@ -712,20 +712,24 @@
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
         "status": "blocked_report",
+        "generated_at": "2026-07-05T00:00:00Z",
         "path": "production/data/payload-runtime-report.json",
         "summary": {
-          "admin_route": "/payload-admin",
-          "checks": 9,
+          "admin_route": "/admin",
+          "checks": 12,
           "database": {
             "status": "missing_env"
           },
+          "identity_collection": "admins",
           "missing_env": [
             "PAYLOAD_SECRET",
             "DATABASE_URL"
           ],
+          "payload_admin_ui": "edge_hidden",
+          "payload_identity_rest": "edge_hidden",
           "placeholder_env": [],
           "weak_env": [],
-          "route_files": 4
+          "route_files": 6
         },
         "checks": [
           {
@@ -739,9 +743,29 @@
             "env": "DATABASE_URL"
           },
           {
-            "id": "route:app/(payload)/payload-admin/[[...segments]]/page.js",
+            "id": "route:app/admin/route.js",
             "status": "pass",
-            "file": "app/(payload)/payload-admin/[[...segments]]/page.js"
+            "file": "app/admin/route.js"
+          },
+          {
+            "id": "route:app/admin/login/route.js",
+            "status": "pass",
+            "file": "app/admin/login/route.js"
+          },
+          {
+            "id": "route:app/admin/logout/route.js",
+            "status": "pass",
+            "file": "app/admin/logout/route.js"
+          },
+          {
+            "id": "route:app/admin/team/route.js",
+            "status": "pass",
+            "file": "app/admin/team/route.js"
+          },
+          {
+            "id": "route:app/api/admin/team/route.js",
+            "status": "pass",
+            "file": "app/api/admin/team/route.js"
           },
           {
             "id": "route:app/(payload)/api/[...slug]/route.js",
@@ -749,20 +773,20 @@
             "file": "app/(payload)/api/[...slug]/route.js"
           },
           {
-            "id": "route:app/(payload)/graphql/route.js",
+            "id": "payload_edge_boundary",
             "status": "pass",
-            "file": "app/(payload)/graphql/route.js"
-          },
-          {
-            "id": "route:app/(payload)/graphql-playground/route.js",
-            "status": "pass",
-            "file": "app/(payload)/graphql-playground/route.js"
+            "custom_admin_route": "/admin",
+            "payload_admin_ui": "edge_hidden",
+            "payload_identity_rest": "edge_hidden"
           },
           {
             "id": "payload_config_import",
             "status": "pass",
-            "admin_route": "/payload-admin",
-            "collections": 13
+            "collections": 13,
+            "identity_collection": "admins",
+            "internal_admin_route": "/payload-admin",
+            "session_max_age_seconds": 7200,
+            "sessions": "database_backed"
           },
           {
             "id": "database_network_scope",
@@ -775,6 +799,12 @@
             "env": "DATABASE_URL"
           }
         ],
+        "freshness": {
+          "id": "payload_runtime",
+          "status": "fresh",
+          "age_ms": 0,
+          "max_age_ms": 604800000
+        },
         "next_actions": [
           "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
           "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",

@@ -61,7 +61,7 @@ test("Next lead intake uses the durable store without touching lead files", asyn
   const response = await renderAppApiResponse(
     new Request("https://example.test/api/leads", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", origin: "https://example.test" },
       body: JSON.stringify(leadInput()),
     }),
     { config },
@@ -95,7 +95,7 @@ test("requested durable storage fails closed when its runtime is incomplete", as
     const response = await renderAppApiResponse(
       new Request("https://example.test/api/leads", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", origin: "https://example.test" },
         body: JSON.stringify(leadInput()),
       }),
       { config },
@@ -107,6 +107,38 @@ test("requested durable storage fails closed when its runtime is incomplete", as
       message: "Lead storage is temporarily unavailable",
     });
   }
+});
+
+test("Next lead intake requires an exact same-origin browser Origin", async () => {
+  const calls = [];
+  const config = appApiConfigFromEnv({
+    ...approvedPublicSeedFixtureEnv(),
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: STORE_CONFIG.payloadSecret,
+    DATABASE_URL: STORE_CONFIG.databaseUrl,
+    MS_REALTY_LEAD_CONTACT_KEY: CONTACT_SECRET,
+  });
+  config.persistLeadIntakeDurably = successfulStore(calls);
+
+  for (const [origin, reason] of [
+    [null, "missing_origin"],
+    ["https://attacker.example", "cross_origin_request"],
+  ]) {
+    const headers = { "content-type": "application/json" };
+    if (origin) headers.origin = origin;
+    const response = await renderAppApiResponse(
+      new Request("https://example.test/api/leads", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(leadInput()),
+      }),
+      { config },
+    );
+
+    assert.equal(response.status, 403);
+    assert.deepEqual(await response.json(), { kind: "cross_origin_write_blocked", reason });
+  }
+  assert.equal(calls.length, 0);
 });
 
 test("the standalone HTTP runtime uses the same durable lead path", async () => {

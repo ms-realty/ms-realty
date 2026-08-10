@@ -21,6 +21,13 @@ import {
   renderSellerPage,
 } from "../lib/public-site.mjs";
 
+Object.assign(process.env, {
+  MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+  PAYLOAD_SECRET: "test-only-public-site-payload-secret-32-characters",
+  DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+  MS_REALTY_LEAD_CONTACT_KEY: "test-only-public-site-contact-key-32-characters",
+});
+
 const registry = loadLocaleRegistry();
 const listings = loadListings();
 const listing = findListingById(listings, "MS-CRAWL-0001");

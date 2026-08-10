@@ -10,6 +10,9 @@ import {
   allowsDurableCaseAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
+  allowsPublicLeadMutation,
+  hasAdminSessionCookie,
+  isPayloadPrivatePath,
 } from "../../workers/durable-case-authority.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
@@ -231,13 +234,52 @@ test("Cloudflare Container admits authenticated MCP without opening ledger write
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: {} }), false);
 });
 
-test("Cloudflare Container admits the cookie-login exchange without opening ledger writes", () => {
-  assert.match(workerSource, /allowsAdminSessionMutation\(\{ method: request\.method, pathname: url\.pathname \}\)/);
-  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/login" }), true);
-  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/logout" }), true);
-  assert.equal(allowsAdminSessionMutation({ method: "GET", pathname: "/admin/login" }), false);
-  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/login/extra" }), false);
-  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/api/admin/cases" }), false);
+test("Cloudflare Container admits only the exact anonymous login and cookie-present custom admin mutations", () => {
+  assert.match(workerSource, /allowsAdminSessionMutation\(\{ request, method: request\.method, pathname: url\.pathname \}\)/);
+  const request = (cookie = "") => new Request("https://ms-realty.example/admin", { headers: cookie ? { cookie } : {} });
+  assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin/login" }), true);
+  assert.equal(allowsAdminSessionMutation({ request: request(), method: "GET", pathname: "/admin/login" }), false);
+  assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin/login/" }), false);
+  assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin/login%2fextra" }), false);
+  assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin%252flogin%252fextra" }), false);
+
+  assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin/logout" }), false);
+  assert.equal(
+    allowsAdminSessionMutation({ request: request("ms_admin=session"), method: "POST", pathname: "/admin/logout" }),
+    true,
+  );
+  assert.equal(
+    allowsAdminSessionMutation({ request: request("ms_admin=session"), method: "POST", pathname: "/api/admin/team" }),
+    true,
+  );
+  assert.equal(
+    allowsAdminSessionMutation({ request: request("other=session"), method: "POST", pathname: "/api/admin/team" }),
+    false,
+  );
+  assert.equal(hasAdminSessionCookie("other=1; ms_admin=payload.jwt.session"), true);
+  assert.equal(hasAdminSessionCookie("ms_admin=; other=1"), false);
+  assert.equal(hasAdminSessionCookie("xms_admin=session"), false);
+});
+
+test("Cloudflare Container hides Payload UI and identity REST paths across encoded path variants", () => {
+  for (const pathname of [
+    "/payload-admin",
+    "/payload-admin/",
+    "/payload-admin/collections/admins",
+    "/payload%2dadmin/collections/admins",
+    "/payload%252dadmin%252fcollections%252fadmins",
+    "/payload-admin%2f..%2fpayload-admin",
+    "/api/admins",
+    "/api/admins/first-register",
+    "/api%2fadmins%2ffirst-register",
+    "/api%252fadmins%252ffirst-register",
+  ]) {
+    assert.equal(isPayloadPrivatePath(pathname), true, pathname);
+  }
+  for (const pathname of ["/admin", "/admin/login", "/api/admin/team", "/api/admins-public"]) {
+    assert.equal(isPayloadPrivatePath(pathname), false, pathname);
+  }
+  assert.match(workerSource, /isPayloadPrivatePath\(url\.pathname\)/);
 });
 
 test("Cloudflare Container admits only the secret-backed durable lead probe", async () => {
@@ -255,4 +297,32 @@ test("Cloudflare Container admits only the secret-backed durable lead probe", as
   assert.equal(await allowsLeadProbeMutation({ request: request(), pathname: "/api/leads", env: {} }), false);
   assert.match(workerSource, /await allowsLeadProbeMutation\(\{ request, pathname: url\.pathname, env \}\)/);
   assert.match(workerSource, /headers\.delete\(LEAD_PROBE_HEADER\)/);
+});
+
+test("Cloudflare Container admits public leads only with a complete durable runtime", () => {
+  const complete = {
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: "p".repeat(32),
+    DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+    MS_REALTY_LEAD_CONTACT_KEY: "c".repeat(32),
+  };
+  const allowed = (env = complete, pathname = "/api/leads", method = "POST") =>
+    allowsPublicLeadMutation({ env, method, pathname });
+
+  assert.equal(allowed(), true);
+  assert.equal(allowed(complete, "/api/leads/"), false);
+  assert.equal(allowed(complete, "/api/leads/extra"), false);
+  assert.equal(allowed(complete, "/api%2fleads"), false);
+  assert.equal(allowed(complete, "/api/leads", "PUT"), false);
+  for (const key of [
+    "MS_REALTY_LEAD_DURABLE_STORE_ENABLED",
+    "PAYLOAD_SECRET",
+    "DATABASE_URL",
+    "MS_REALTY_LEAD_CONTACT_KEY",
+  ]) {
+    assert.equal(allowed({ ...complete, [key]: "" }), false, key);
+  }
+  assert.equal(allowed({ ...complete, MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "false" }), false);
+  assert.equal(allowed({ ...complete, MS_REALTY_LEAD_CONTACT_KEY: "short" }), false);
+  assert.match(workerSource, /allowsPublicLeadMutation\(\{ method: request\.method, pathname: url\.pathname, env \}\)/);
 });

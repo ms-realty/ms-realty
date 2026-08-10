@@ -16,6 +16,13 @@ import {
 } from "../lib/runtime.mjs";
 import { createTourApproval } from "../lib/tours.mjs";
 
+Object.assign(process.env, {
+  MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+  PAYLOAD_SECRET: "test-only-runtime-payload-secret-32-characters",
+  DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+  MS_REALTY_LEAD_CONTACT_KEY: "test-only-runtime-contact-key-32-characters",
+});
+
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
 

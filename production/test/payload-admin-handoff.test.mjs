@@ -46,9 +46,11 @@ test("legacy listing editor routes hand off to the canonical Payload collection"
   assert.equal(httpApi.body.canonical_url, "/payload-admin/collections/listings/MS-CRAWL-0001");
 });
 
-test("bare admin keeps its operations-shell redirect", async () => {
+test("bare admin validates authentication before its operations-shell redirect", async () => {
   const adminRoot = await import("../../app/admin/route.js");
-  const response = await adminRoot.GET(new Request("https://example.test/admin?locale=bg"));
+  const unauthorized = await adminRoot.GET(new Request("https://example.test/admin?locale=bg"));
+  assert.equal(unauthorized.status, 401);
+  const response = await adminRoot.GET(new Request("https://example.test/admin?locale=bg", { headers: auth }));
   assert.equal(response.status, 307);
   assert.equal(response.headers.get("location"), "/admin/today?locale=bg");
 });

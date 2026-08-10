@@ -44,6 +44,7 @@ import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelin
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
+import { sameOriginWriteRejection } from "./request-guard.mjs";
 
 const ERROR_JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -423,6 +424,12 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     const url = new URL(request.url, "http://localhost");
     if (url.pathname === "/api/hermes/chat") {
       return webResponse(privateJson(404, { kind: "not_found" }));
+    }
+    if (request.method === "POST" && url.pathname === "/api/leads") {
+      const crossOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl: request.url });
+      if (crossOrigin) {
+        return webResponse(privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin }));
+      }
     }
     const limiter = publicWriteLimiterFor(config);
     if (limiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {

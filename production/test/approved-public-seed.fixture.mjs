@@ -82,3 +82,25 @@ export function approvedPublicSeedFixtureOptions() {
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH,
   };
 }
+
+export function durableLeadStoreFixtureEnv() {
+  return {
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: "test-only-payload-secret-32-characters-minimum",
+    DATABASE_URL: "postgresql://fixture:fixture@127.0.0.1:5432/ms_realty_fixture",
+    MS_REALTY_LEAD_CONTACT_KEY: "test-only-lead-contact-key-32-characters-minimum",
+  };
+}
+
+export function installDurableLeadStoreFixtureEnv(testContext) {
+  const fixture = durableLeadStoreFixtureEnv();
+  const previous = Object.fromEntries(Object.keys(fixture).map((key) => [key, process.env[key]]));
+  Object.assign(process.env, fixture);
+  testContext?.after(() => {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+  return fixture;
+}

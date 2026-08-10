@@ -8,10 +8,12 @@ import { REALTY_CASE_PAYLOAD_COLLECTION_SLUGS } from "./realty-case-collections.
 export const DEFAULT_PAYLOAD_RUNTIME_REPORT = fromRoot("production", "data", "payload-runtime-report.json");
 
 const REQUIRED_ROUTE_FILES = [
-  "app/(payload)/payload-admin/[[...segments]]/page.js",
+  "app/admin/route.js",
+  "app/admin/login/route.js",
+  "app/admin/logout/route.js",
+  "app/admin/team/route.js",
+  "app/api/admin/team/route.js",
   "app/(payload)/api/[...slug]/route.js",
-  "app/(payload)/graphql/route.js",
-  "app/(payload)/graphql-playground/route.js",
 ];
 export const REQUIRED_PAYLOAD_COLLECTIONS = [
   "admins",
@@ -26,6 +28,7 @@ const REQUIRED_CHECK_IDS = [
   "payload_secret",
   "database_url",
   ...REQUIRED_ROUTE_FILES.map((file) => `route:${file}`),
+  "payload_edge_boundary",
   "payload_config_import",
   "database_network_scope",
   "database_tcp",
@@ -196,13 +199,50 @@ async function payloadConfigCheck() {
     const config = await mod.default;
     const slugs = (config.collections || []).map((collection) => collection.slug);
     const missing = REQUIRED_PAYLOAD_COLLECTIONS.filter((slug) => !slugs.includes(slug));
+    const admins = (config.collections || []).find((collection) => collection.slug === "admins");
     if (config.routes?.admin !== "/payload-admin") {
-      return check("payload_config_import", "fail", { error: "Payload admin route must be /payload-admin" });
+      return check("payload_config_import", "fail", { error: "Payload internal admin route must remain isolated at /payload-admin" });
     }
     if (missing.length) return check("payload_config_import", "fail", { missing_collections: missing });
-    return check("payload_config_import", "pass", { admin_route: config.routes.admin, collections: REQUIRED_PAYLOAD_COLLECTIONS.length });
+    if (
+      config.admin?.user !== "admins" ||
+      admins?.auth?.useSessions !== true ||
+      admins?.auth?.cookies?.sameSite !== "Lax" ||
+      admins?.auth?.tokenExpiration !== 2 * 60 * 60 ||
+      admins?.auth?.maxLoginAttempts !== 5
+    ) {
+      return check("payload_config_import", "fail", { error: "Payload admins must provide the hardened database-backed identity session" });
+    }
+    return check("payload_config_import", "pass", {
+      collections: REQUIRED_PAYLOAD_COLLECTIONS.length,
+      identity_collection: "admins",
+      internal_admin_route: config.routes.admin,
+      session_max_age_seconds: admins.auth.tokenExpiration,
+      sessions: "database_backed",
+    });
   } catch (error) {
     return check("payload_config_import", "fail", { error: error.message });
+  }
+}
+
+function payloadEdgeBoundaryCheck() {
+  try {
+    const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
+    const guard = fs.readFileSync(fromRoot("workers", "durable-case-authority.mjs"), "utf8");
+    if (
+      !worker.includes("isPayloadPrivatePath(url.pathname)") ||
+      !guard.includes('first === "payload-admin"') ||
+      !guard.includes('first === "api" && second === "admins"')
+    ) {
+      return check("payload_edge_boundary", "fail", { error: "Cloudflare must hide Payload admin UI and identity REST routes" });
+    }
+    return check("payload_edge_boundary", "pass", {
+      custom_admin_route: "/admin",
+      payload_admin_ui: "edge_hidden",
+      payload_identity_rest: "edge_hidden",
+    });
+  } catch (error) {
+    return check("payload_edge_boundary", "fail", { error: error.message });
   }
 }
 
@@ -216,6 +256,7 @@ export async function buildPayloadRuntimeReport({
     check("payload_secret", configuredSecret(env.PAYLOAD_SECRET), { env: "PAYLOAD_SECRET" }),
     check("database_url", databaseUrl.status, { env: "DATABASE_URL", ...(databaseUrl.error ? { error: databaseUrl.error } : {}) }),
     ...REQUIRED_ROUTE_FILES.map((file) => check(`route:${file}`, fs.existsSync(fromRoot(file)) ? "pass" : "fail", { file })),
+    payloadEdgeBoundaryCheck(),
     await payloadConfigCheck(),
   ];
 
@@ -275,10 +316,13 @@ export async function buildPayloadRuntimeReport({
     ready,
     status: ready ? "ready" : "blocked",
     summary: {
-      admin_route: "/payload-admin",
+      admin_route: "/admin",
       checks: checks.length,
       database,
+      identity_collection: "admins",
       missing_env: [...new Set(missingEnv)],
+      payload_admin_ui: "edge_hidden",
+      payload_identity_rest: "edge_hidden",
       placeholder_env: [...new Set(placeholders)],
       weak_env: [...new Set(weakEnv)],
       route_files: REQUIRED_ROUTE_FILES.length,
@@ -384,7 +428,13 @@ export function assertPayloadRuntimeReport(report) {
   ) {
     throw new Error("Payload runtime database TCP target must match summary evidence");
   }
-  if (report.summary.admin_route !== "/payload-admin" || report.summary.route_files !== REQUIRED_ROUTE_FILES.length) {
+  if (
+    report.summary.admin_route !== "/admin" ||
+    report.summary.identity_collection !== "admins" ||
+    report.summary.payload_admin_ui !== "edge_hidden" ||
+    report.summary.payload_identity_rest !== "edge_hidden" ||
+    report.summary.route_files !== REQUIRED_ROUTE_FILES.length
+  ) {
     throw new Error("Payload runtime report must include route summary evidence");
   }
   for (const file of REQUIRED_ROUTE_FILES) {
@@ -395,12 +445,24 @@ export function assertPayloadRuntimeReport(report) {
   if (
     config?.status === "pass" &&
     (
-      config.admin_route !== "/payload-admin" ||
+      config.identity_collection !== "admins" ||
+      config.internal_admin_route !== "/payload-admin" ||
+      config.sessions !== "database_backed" ||
+      config.session_max_age_seconds !== 2 * 60 * 60 ||
       !Number.isInteger(config.collections) ||
       config.collections < REQUIRED_PAYLOAD_COLLECTIONS.length
     )
   ) {
     throw new Error("Payload runtime report must include Payload config evidence");
+  }
+  const edgeBoundary = report.checks.find((item) => item.id === "payload_edge_boundary");
+  if (
+    edgeBoundary?.status === "pass" &&
+    (edgeBoundary.custom_admin_route !== "/admin" ||
+      edgeBoundary.payload_admin_ui !== "edge_hidden" ||
+      edgeBoundary.payload_identity_rest !== "edge_hidden")
+  ) {
+    throw new Error("Payload runtime report must include the custom-admin edge boundary");
   }
   if (
     ready &&

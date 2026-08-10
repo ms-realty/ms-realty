@@ -325,7 +325,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const lead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", origin: "https://example.test" },
           body: JSON.stringify({
             source: "website_consultation_request",
             leadType: "renter",
@@ -345,7 +345,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(unauthorized.headers.get("www-authenticate"), 'Bearer realm="ms-realty-admin"');
 
       const auth = { authorization: "Bearer next-admin-test" };
-      const adminRoot = await adminRootRoute.GET(new Request("https://example.test/admin?locale=ru"));
+      const adminRootUnauthorized = await adminRootRoute.GET(new Request("https://example.test/admin?locale=ru"));
+      assert.equal(adminRootUnauthorized.status, 401);
+      const adminRoot = await adminRootRoute.GET(new Request("https://example.test/admin?locale=ru", { headers: auth }));
       assert.equal(adminRoot.status, 307);
       assert.equal(adminRoot.headers.get("location"), "/admin/today?locale=ru");
 
@@ -1673,7 +1675,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const operationsLead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", origin: "https://example.test" },
           body: JSON.stringify({
             source: "website_contact_callback",
             leadType: "general",
@@ -1749,7 +1751,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const sellerLead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", origin: "https://example.test" },
           body: JSON.stringify({
             id: "next-admin-seller-pipeline-test",
             source: "website_seller_valuation",

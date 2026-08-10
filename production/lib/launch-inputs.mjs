@@ -275,7 +275,9 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 - Runtime env example: \`production/data/payload-runtime.env.example\`
 - Local Postgres compose file: \`production/docker-compose.payload.yml\`
 - Collection export: \`production/data/payload-collections.json\`
-- Admin route: \`/payload-admin\`; API routes: \`/api/[...slug]\`, \`/graphql\`, \`/graphql-playground\`.
+- Client admin routes: \`/admin/login\` for Payload-backed email/password sessions and \`/admin/team\` for admin-only operator management.
+- Identity authority: Payload collection \`admins\` with database-backed sessions; the internal \`/payload-admin\` UI and direct \`/api/admins/*\` identity REST routes are hidden at the Cloudflare edge.
+- Internal integration: the Payload REST catch-all remains available to the application runtime, while GraphQL is not a client-facing admin surface.
 - Required env: \`PAYLOAD_SECRET\`, \`DATABASE_URL\`${missingPayloadEnv.length ? `; currently missing: ${missingPayloadEnv.map((name) => `\`${name}\``).join(", ")}` : ""}.
 - Secret strength: \`PAYLOAD_SECRET\` must be at least 32 bytes${weakPayloadEnv.length ? `; currently weak: ${weakPayloadEnv.map((name) => `\`${name}\``).join(", ")}` : ""}.
 - Runtime evidence: \`payload\` dependency present, \`payload.config.js\` present, collection export generated, and required env configured.
@@ -286,7 +288,7 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 - Admin status endpoint: \`GET /api/admin/payload-runtime\`.
 - Production/CLI path overrides: \`MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH\`, \`MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH\`, \`MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH\`.
 - Real Payload runtime reports stay local and ignored; examples do not count as launch evidence.
-- Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
+- Launch rule: custom \`/admin\` session, edge-boundary, Payload identity/config, and database evidence must all pass; the hidden Payload Admin UI is not a launch requirement.
 
 ## Production Recovery
 

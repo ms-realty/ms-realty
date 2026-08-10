@@ -16,7 +16,9 @@ import {
   renderSearchPage,
   renderSellerPage,
 } from "../lib/public-site.mjs";
+import { durableLeadStoreFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
+Object.assign(process.env, durableLeadStoreFixtureEnv());
 const registry = loadLocaleRegistry();
 const listings = loadListings();
 const listing = findListingById(listings, "MS-CRAWL-0001");

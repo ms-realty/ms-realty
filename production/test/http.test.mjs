@@ -42,7 +42,11 @@ import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { appendRedirectApproval } from "../lib/redirect-approvals.mjs";
 import { LOGO_URL, LOGO_URL_REVERSED } from "../lib/ui/design-assets.mjs";
-import { approvedPublicSeedFixture, approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture.mjs";
+import {
+  approvedPublicSeedFixture,
+  approvedPublicSeedFixtureOptions,
+  installDurableLeadStoreFixtureEnv,
+} from "./approved-public-seed.fixture.mjs";
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -390,7 +394,8 @@ test("HTTP app serves bounded official bilingual geography suggestions", async (
   assert.equal(thessaloniki.body.results[0].active_market, true);
 });
 
-test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
+test("HTTP app serves listing, search, fallback, and lead JSON contracts", async (t) => {
+  installDurableLeadStoreFixtureEnv(t);
   const leadLedgerPath = tempLedger();
   const leadAssignmentLedgerPath = tempLeadAssignments();
   const leadContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-contacts-`)}/contacts.jsonl`;
@@ -419,6 +424,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const hermesReplyPrompts = [];
   const app = createHttpApp({
     seed: approvedPublicSeedFixture(),
+    // This integration fixture exercises the legacy file adapter. The
+    // process-level durable env above is only for the public UI contract.
+    leadDurableStore: { leadDurableStoreEnabled: false },
     leadLedgerPath,
     leadAssignmentLedgerPath,
     leadContactVaultPath,

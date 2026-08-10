@@ -7,14 +7,45 @@ import {
   adminTokenFromCookie,
   renderAdminLoginPage,
 } from "../lib/admin-login.mjs";
-import { renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
+import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
-import { renderContactPage, renderSearchUnavailablePage } from "../lib/public-site.mjs";
+import { leadWritesDisabledFromEnv, renderContactPage, renderSearchUnavailablePage } from "../lib/public-site.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 
 const OPERATOR_TOKEN = "login-operator-token-0123456789ab";
+const PAYLOAD_SESSION = "payload.browser.session";
+const NOW_SECONDS = 1_786_377_600;
 const registry = loadLocaleRegistry();
+
+function payloadSessionService() {
+  const calls = [];
+  const principal = {
+    id: "payload-1",
+    source: "payload_session",
+    can_mutate: true,
+    roles: ["admin"],
+    workspace_ids: ["sandanski"],
+    payload_user_id: 1,
+    email: "peycheff.com@gmail.com",
+  };
+  return {
+    calls,
+    async login({ email, password }) {
+      calls.push(["login", email]);
+      if (email !== "peycheff.com@gmail.com" || password !== "correct-password") throw new Error("invalid");
+      return { token: PAYLOAD_SESSION, exp: NOW_SECONDS + 3600, principal, user: { id: 1 } };
+    },
+    async resolve(token) {
+      calls.push(["resolve", token]);
+      return token === PAYLOAD_SESSION ? { principal, user: { id: 1 } } : null;
+    },
+    async logout(token) {
+      calls.push(["logout", token]);
+      return token === PAYLOAD_SESSION;
+    },
+  };
+}
 
 async function withNamedOperator(fn) {
   const previous = {
@@ -39,7 +70,7 @@ async function withNamedOperator(fn) {
   }
 }
 
-test("session cookie helpers round-trip the operator token", () => {
+test("session cookie helpers round-trip and cap the Payload session token", () => {
   const cookie = adminSessionSetCookie("abc=123");
   assert.match(cookie, /HttpOnly/);
   assert.match(cookie, /Secure/);
@@ -48,23 +79,28 @@ test("session cookie helpers round-trip the operator token", () => {
   assert.equal(adminTokenFromCookie(`${header}; other=1`), "abc=123");
   assert.equal(adminTokenFromCookie(adminSessionClearCookie().split(";")[0]), "");
   assert.equal(adminTokenFromCookie(""), "");
-  assert.match(renderAdminLoginPage({ error: true }), /role="alert"/);
+  assert.match(adminSessionSetCookie("token", { maxAgeSeconds: 30 * 24 * 60 * 60 }), /Max-Age=7200/);
+  const login = renderAdminLoginPage({ error: true });
+  assert.match(login, /role="alert"/);
+  assert.match(login, /name="email"/);
+  assert.match(login, /name="password"/);
+  assert.doesNotMatch(login, /name="token"|Операторски ключ/);
 });
 
-test("standalone HTTP runtime: login exchanges the key for a cookie session", async () => {
-  await withNamedOperator(async () => {
-    const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+test("standalone HTTP runtime: login exchanges email/password for a Payload cookie session", async () => {
+    const service = payloadSessionService();
+    const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z", payloadAdminAuth: service, nowSeconds: () => NOW_SECONDS });
 
     const form = await dispatchHttp(app, { method: "GET", url: "/admin/login", headers: {} });
     assert.equal(form.status, 200);
     assert.match(form.headers["content-type"], /text\/html/);
-    assert.match(form.body, /Операторски ключ/);
+    assert.match(form.body, /name="email"/);
 
     const bad = await dispatchHttp(app, {
       method: "POST",
       url: "/admin/login",
       headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: "token=wrong-token-000000000000000000",
+      body: "email=peycheff.com%40gmail.com&password=wrong",
     });
     assert.equal(bad.status, 303);
     assert.equal(bad.headers.location, "/admin/login?error=1");
@@ -74,7 +110,7 @@ test("standalone HTTP runtime: login exchanges the key for a cookie session", as
       method: "POST",
       url: "/admin/login",
       headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: `token=${OPERATOR_TOKEN}`,
+      body: "email=peycheff.com%40gmail.com&password=correct-password",
     });
     assert.equal(ok.status, 303);
     assert.equal(ok.headers.location, "/admin");
@@ -86,8 +122,9 @@ test("standalone HTTP runtime: login exchanges the key for a cookie session", as
       url: "/admin/connect",
       headers: { cookie, host: "ms-realty.ms-realty-bg.workers.dev" },
     });
-    assert.equal(connect.status, 200);
-    assert.ok(connect.body.includes(OPERATOR_TOKEN), "connect page embeds the cookie-authenticated token");
+    assert.equal(connect.status, 403);
+    assert.equal(connect.body.kind, "mcp_credential_required");
+    assert.equal(JSON.stringify(connect.body).includes(PAYLOAD_SESSION), false);
 
     const authed = await dispatchHttp(app, { method: "GET", url: "/admin/login", headers: { cookie } });
     assert.equal(authed.status, 303);
@@ -96,33 +133,42 @@ test("standalone HTTP runtime: login exchanges the key for a cookie session", as
     const logout = await dispatchHttp(app, { method: "POST", url: "/admin/logout", headers: { cookie } });
     assert.equal(logout.status, 303);
     assert.match(logout.headers["set-cookie"], /Max-Age=0/);
-  });
+    assert.ok(service.calls.some(([name, token]) => name === "logout" && token === PAYLOAD_SESSION));
 });
 
-test("Next admin adapter: login, cookie auth, and logout behave identically", async () => {
-  await withNamedOperator(async () => {
+test("Next admin adapter: Payload login, cookie auth, and logout behave identically", async () => {
+    const service = payloadSessionService();
+    const config = {
+      ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
+      payloadAdminAuth: service,
+      nowSeconds: () => NOW_SECONDS,
+    };
     const base = "https://ms-realty.ms-realty-bg.workers.dev";
-    const form = await renderAppAdminResponse(new Request(`${base}/admin/login`));
+    const form = await renderAppAdminResponse(new Request(`${base}/admin/login`), { config });
     assert.equal(form.status, 200);
 
     const ok = await renderAppAdminResponse(
       new Request(`${base}/admin/login`, {
         method: "POST",
         headers: { "content-type": "application/x-www-form-urlencoded" },
-        body: `token=${OPERATOR_TOKEN}`,
+        body: "email=peycheff.com%40gmail.com&password=correct-password",
       }),
+      { config },
     );
     assert.equal(ok.status, 303);
     const cookie = ok.headers.get("set-cookie").split(";")[0];
 
-    const connect = await renderAppAdminResponse(new Request(`${base}/admin/connect`, { headers: { cookie } }));
-    assert.equal(connect.status, 200);
-    assert.ok((await connect.text()).includes(OPERATOR_TOKEN));
+    const connect = await renderAppAdminResponse(new Request(`${base}/admin/connect`, { headers: { cookie } }), { config });
+    assert.equal(connect.status, 403);
+    assert.doesNotMatch(await connect.text(), new RegExp(PAYLOAD_SESSION));
 
-    const logout = await renderAppAdminResponse(new Request(`${base}/admin/logout`, { method: "POST", headers: { cookie } }));
+    const logout = await renderAppAdminResponse(
+      new Request(`${base}/admin/logout`, { method: "POST", headers: { cookie } }),
+      { config },
+    );
     assert.equal(logout.status, 303);
     assert.match(logout.headers.get("set-cookie"), /Max-Age=0/);
-  });
+    assert.ok(service.calls.some(([name, token]) => name === "logout" && token === PAYLOAD_SESSION));
 });
 
 test("contact page tells the truth about the lead form and always offers channels", () => {
@@ -145,6 +191,37 @@ test("contact page tells the truth about the lead form and always offers channel
   assert.match(disabledHtml, /data-form-unavailable="true"/);
   assert.match(disabledHtml, /tel:\+359879696870/);
   assert.match(disabledHtml, /wa\.me\/359879696870/);
+});
+
+test("contact form availability follows only complete durable lead-store readiness", () => {
+  const complete = {
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: "p".repeat(32),
+    DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+    MS_REALTY_LEAD_CONTACT_KEY: "c".repeat(32),
+    MS_REALTY_MCP_WRITES_DISABLED: "1",
+  };
+  const enabled = renderContactPage({
+    registry,
+    localeCode: "bg",
+    leadWritesDisabled: leadWritesDisabledFromEnv(complete),
+  });
+  assert.ok(enabled.body.callback, "MCP write policy must not disable durable public leads");
+
+  for (const key of [
+    "MS_REALTY_LEAD_DURABLE_STORE_ENABLED",
+    "PAYLOAD_SECRET",
+    "DATABASE_URL",
+    "MS_REALTY_LEAD_CONTACT_KEY",
+  ]) {
+    const disabled = renderContactPage({
+      registry,
+      localeCode: "bg",
+      leadWritesDisabled: leadWritesDisabledFromEnv({ ...complete, [key]: "" }),
+    });
+    assert.equal(disabled.body.callback, null, key);
+    assert.ok(disabled.body.form_unavailable, key);
+  }
 });
 
 test("search page failure renders a branded localized fallback, not raw JSON", () => {

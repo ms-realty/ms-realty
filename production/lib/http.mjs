@@ -17,6 +17,7 @@ import {
   assertAgentRealtyCaseMutation,
   bindAuthenticatedOperator,
   canAdminAccess,
+  canAdminAccessWorkspace,
   canAdminMutate,
   isAdminAuthorized,
   resolveAdminPrincipal,
@@ -30,6 +31,8 @@ import {
   adminTokenFromCookie,
   renderAdminLoginPage,
 } from "./admin-login.mjs";
+import { renderAdminTeamPage } from "./admin-team.mjs";
+import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import {
   LISTING_EDIT_FIELDS,
@@ -741,12 +744,26 @@ export function createHttpApp({
   rateLimit = null,
   trustProxy = process.env.MS_REALTY_TRUST_PROXY === "1",
   naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
+  payloadAdminAuth = getPayloadAdminAuthService,
+  nowSeconds = () => Math.floor(Date.now() / 1000),
   search = {},
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
   const activeLegacyDecisionByUrl = new Map(activeLegacyDecisions.map((row) => [row.old_url, row]));
   const publicWriteLimiter = rateLimit ? createRateLimiter(rateLimit) : null;
+  let payloadAdminAuthPromise;
+  const configuredPayloadAdminAuth = async () => {
+    if (!payloadAdminAuthPromise) {
+      payloadAdminAuthPromise = Promise.resolve(typeof payloadAdminAuth === "function" ? payloadAdminAuth() : payloadAdminAuth);
+    }
+    try {
+      return await payloadAdminAuthPromise;
+    } catch (error) {
+      payloadAdminAuthPromise = undefined;
+      throw error;
+    }
+  };
   const currentSeed = () =>
     applyMediaReviews(
       applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined)),
@@ -1255,36 +1272,54 @@ export function createHttpApp({
     const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
     if (crossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
    let auth = request.headers?.authorization || request.headers?.Authorization || "";
-    // A browser cannot send a Bearer header; /admin/login exchanged the
-    // operator key for a cookie carrying that same token. Header wins.
-    if (!auth) {
-      const cookieToken = adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
-      if (cookieToken) auth = `Bearer ${cookieToken}`;
-    }
+    const sessionToken = auth ? "" : adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
 
     if (url.pathname === "/admin/login") {
       if (request.method === "GET") {
-        if (resolveAdminPrincipal(auth)) return response(303, "", "text/plain; charset=utf-8", { location: "/admin" });
+        let session = null;
+        if (sessionToken) {
+          try {
+            session = await (await configuredPayloadAdminAuth())?.resolve(sessionToken);
+          } catch {
+            session = null;
+          }
+        }
+        if ((auth && resolveAdminPrincipal(auth)) || session?.principal) {
+          return response(303, "", "text/plain; charset=utf-8", { location: "/admin" });
+        }
         return response(200, renderAdminLoginPage({ error: url.searchParams.get("error") === "1" }), "text/html; charset=utf-8", {
           "cache-control": "no-store",
           "x-robots-tag": "noindex, nofollow",
+          ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
         });
       }
       if (request.method === "POST") {
-        const submitted = new URLSearchParams(request.body || "").get("token")?.trim() || "";
-        const principal = submitted ? resolveAdminPrincipal(`Bearer ${submitted}`) : null;
-        if (!principal) {
+        try {
+          const service = await configuredPayloadAdminAuth();
+          if (!service) throw new Error("Payload admin authentication is unavailable");
+          const form = new URLSearchParams(request.body || "");
+          const login = await service.login({ email: form.get("email"), password: form.get("password") });
+          const maxAgeSeconds = Math.floor(Number(login.exp) - nowSeconds());
+          if (!login.token || maxAgeSeconds <= 0) throw new Error("Payload returned an expired session");
+          return response(303, "", "text/plain; charset=utf-8", {
+            location: "/admin",
+            "set-cookie": adminSessionSetCookie(login.token, { maxAgeSeconds }),
+            "cache-control": "no-store",
+          });
+        } catch {
           return response(303, "", "text/plain; charset=utf-8", { location: "/admin/login?error=1", "cache-control": "no-store" });
         }
-        return response(303, "", "text/plain; charset=utf-8", {
-          location: "/admin",
-          "set-cookie": adminSessionSetCookie(submitted),
-          "cache-control": "no-store",
-        });
       }
       return response(405, "Method not allowed", "text/plain; charset=utf-8", { allow: "GET, POST" });
     }
     if (url.pathname === "/admin/logout" && request.method === "POST") {
+      if (sessionToken) {
+        try {
+          await (await configuredPayloadAdminAuth())?.logout(sessionToken);
+        } catch {
+          // The browser credential is still cleared and expires within two hours.
+        }
+      }
       return response(303, "", "text/plain; charset=utf-8", {
         location: "/admin/login",
         "set-cookie": adminSessionClearCookie(),
@@ -1293,11 +1328,73 @@ export function createHttpApp({
     }
 
     const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
-    const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
-    if (adminRequest && !principal) return adminUnauthorized();
+    let payloadSession = null;
+    let principal = adminRequest && auth ? resolveAdminPrincipal(auth) : null;
+    if (adminRequest && !principal && sessionToken) {
+      try {
+        payloadSession = await (await configuredPayloadAdminAuth())?.resolve(sessionToken);
+        principal = payloadSession?.principal || null;
+        if (principal) auth = principal;
+      } catch {
+        principal = null;
+      }
+    }
+    if (adminRequest && !principal) {
+      if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && wantsHtml(request, url)) {
+        return adminResponse(303, "", "text/plain; charset=utf-8", {
+          location: "/admin/login",
+          ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
+        });
+      }
+      const unauthorized = adminUnauthorized();
+      if (sessionToken) unauthorized.headers["set-cookie"] = adminSessionClearCookie();
+      return unauthorized;
+    }
     if (adminRequest && request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
     const requiredCapability = adminRequest ? requiredAdminCapability(request.method, url.pathname) : null;
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
+    if (
+      principal?.source === "payload_session" &&
+      ["cases:read", "cases:write"].includes(requiredCapability) &&
+      !canAdminAccessWorkspace(principal, realtyCaseWorkspaceId)
+    ) {
+      return adminForbidden("workspace:access");
+    }
+    if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
+      const service = await configuredPayloadAdminAuth();
+      if (!payloadSession || !service) return adminForbidden("payload_session");
+      if (request.method === "GET") {
+        const operators = await service.listOperators(payloadSession);
+        if (url.pathname === "/api/admin/team") return adminJson(200, { kind: "admin_team", operators });
+        return adminResponse(
+          200,
+          renderAdminTeamPage({
+            operators,
+            created: url.searchParams.get("created") === "1",
+            error: url.searchParams.get("error") === "1",
+          }),
+          "text/html; charset=utf-8",
+        );
+      }
+      if (request.method === "POST" && url.pathname === "/api/admin/team") {
+        const formRequest = String(request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes(
+          "application/x-www-form-urlencoded",
+        );
+        try {
+          const operator = await service.createOperator(payloadSession, parseBody(request));
+          if (formRequest) {
+            return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/team?created=1" });
+          }
+          return adminJson(201, { kind: "admin_team_operator", operator });
+        } catch (error) {
+          if (formRequest) {
+            return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/team?error=1" });
+          }
+          return adminJson(400, { kind: "bad_request", message: error.message });
+        }
+      }
+      return adminJson(405, { kind: "method_not_allowed" });
+    }
     const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
     if (publicWriteLimiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
       const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
@@ -1513,6 +1610,12 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/admin/connect") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (principal?.source === "payload_session") {
+        return adminJson(403, {
+          kind: "mcp_credential_required",
+          message: "Use a named MCP operator credential; browser sessions are never exported as bearer tokens.",
+        });
+      }
       const token = String(auth).replace(/^Bearer\s+/i, "").trim();
       const base = String(process.env.MS_REALTY_PUBLIC_ORIGIN || "").trim() || `https://${host}`;
       return adminResponse(
@@ -3503,6 +3606,10 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
+  const contactLeadUiDisabled = smoke.contact?.body?.chrome?.lead_writes_disabled === true;
+  const contactLeadUiValid = contactLeadUiDisabled
+    ? smoke.contact?.body?.body?.callback === null && Boolean(smoke.contact?.body?.body?.form_unavailable)
+    : smoke.contact?.body?.body?.callback?.payload?.source === "website_contact_callback";
   const expectedBlockers = [
     "redirect_reviews",
     "external_seo_exports",
@@ -3634,9 +3741,9 @@ export function assertHttpSmoke(smoke) {
   if (
     smoke.contact?.status !== 200 ||
     smoke.contact.body.kind !== "contact" ||
-    smoke.contact.body.body.callback.payload.source !== "website_contact_callback"
+    !contactLeadUiValid
   ) {
-    throw new Error("HTTP smoke must serve generic contact callback page");
+    throw new Error("HTTP smoke contact page must match durable lead-store readiness");
   }
   if (
     smoke.contactLead?.status !== 201 ||
@@ -3798,9 +3905,12 @@ export function assertHttpSmoke(smoke) {
   if (
     smoke.contactHtml?.status !== 200 ||
     !smoke.contactHtml.body.includes("data-kind=\"contact\"") ||
-    !smoke.contactHtml.body.includes("data-lead-type=\"general\"")
+    (contactLeadUiDisabled
+      ? !smoke.contactHtml.body.includes("data-form-unavailable=\"true\"") ||
+        smoke.contactHtml.body.includes("data-lead-type=\"general\"")
+      : !smoke.contactHtml.body.includes("data-lead-type=\"general\""))
   ) {
-    throw new Error("HTTP smoke must serve rendered contact callback HTML");
+    throw new Error("HTTP smoke rendered contact page must match durable lead-store readiness");
   }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
   if (smoke.admin.body.leads.length < 4) throw new Error("HTTP smoke must show buyer, viewing, contact, and seller leads");
