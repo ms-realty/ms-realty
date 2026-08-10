@@ -100,9 +100,32 @@ test("production recovery state accepts only a real private report", (t) => {
   fs.writeFileSync(reportPath, `${JSON.stringify(report())}\n`);
   fs.writeFileSync(examplePath, `${JSON.stringify({ ...report(), example: true, ready: false })}\n`);
 
-  assert.equal(productionRecoveryState(reportPath).status, "pass");
+  assert.equal(productionRecoveryState(reportPath, { now: "2026-07-23T01:00:00.000Z" }).status, "pass");
   assert.equal(productionRecoveryState(examplePath).status, "example_report");
   assert.equal(productionRecoveryState(path.join(directory, "missing.json")).status, "missing_report");
+});
+
+test("production recovery state expires the oldest proof and rejects future evidence", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-production-recovery-freshness-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const reportPath = path.join(directory, "production-recovery-report.json");
+  fs.writeFileSync(reportPath, `${JSON.stringify(report())}\n`);
+
+  const expired = productionRecoveryState(reportPath, { now: "2026-08-22T23:00:00.001Z" });
+  assert.equal(expired.status, "expired_report");
+  assert.equal(expired.evidence_at, "2026-07-22T23:00:00.000Z");
+  assert.equal(expired.freshness.max_age_ms, 30 * 24 * 60 * 60 * 1000);
+
+  const futureAt = "2026-07-23T01:01:00.001Z";
+  const future = report();
+  future.generated_at = futureAt;
+  future.backup.completed_at = futureAt;
+  future.restore_drill.completed_at = futureAt;
+  future.approval.approved_at = futureAt;
+  fs.writeFileSync(reportPath, `${JSON.stringify(future)}\n`);
+  const invalid = productionRecoveryState(reportPath, { now: "2026-07-23T01:00:00.000Z" });
+  assert.equal(invalid.status, "invalid_report");
+  assert.match(invalid.error, /future/);
 });
 
 test("production recovery import validates before persisting and exposes the safe template", (t) => {

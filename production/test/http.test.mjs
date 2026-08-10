@@ -60,10 +60,12 @@ function healthyHermesAgentFetch(url) {
   return { ok: true, status: 200 };
 }
 
-function validProductionRecoveryReport() {
+function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
+  const generatedAtMs = Date.parse(generatedAt);
+  const minutesBefore = (minutes) => new Date(generatedAtMs - minutes * 60_000).toISOString();
   return {
     schema_version: 1,
-    generated_at: "2026-07-22T23:40:00.000Z",
+    generated_at: generatedAt,
     environment: "production",
     ready: true,
     policy: {
@@ -77,14 +79,14 @@ function validProductionRecoveryReport() {
     },
     backup: {
       backup_id: "backup-20260722-001",
-      completed_at: "2026-07-22T23:00:00.000Z",
+      completed_at: minutesBefore(40),
       checksum_verified: true,
       components: ["payload_postgres", "runtime_data", "runtime_evidence"],
     },
     restore_drill: {
       drill_id: "restore-20260722-001",
       source_backup_id: "backup-20260722-001",
-      completed_at: "2026-07-22T23:15:00.000Z",
+      completed_at: minutesBefore(25),
       target: "isolated",
       status: "pass",
       checksum_verified: true,
@@ -95,7 +97,7 @@ function validProductionRecoveryReport() {
     approval: {
       status: "approved",
       reviewer: "agency_owner",
-      approved_at: "2026-07-22T23:30:00.000Z",
+      approved_at: minutesBefore(10),
     },
   };
 }
@@ -1907,6 +1909,7 @@ test("HTTP admin auth does not accept local smoke token in production without co
 });
 
 test("HTTP admin can import external SEO evidence without broad launch assumptions", async () => {
+  const runtimeGeneratedAt = new Date().toISOString();
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const com = routeMap.find((route) => route.url_type === "listing" && route.source_domain === "makler-realty.com");
   const ru = routeMap.find((route) => route.url_type === "listing" && route.source_domain === "makler-realty.ru");
@@ -1927,11 +1930,11 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
       DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
       PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
     },
-    generatedAt: "2026-07-06T00:00:00Z",
+    generatedAt: runtimeGeneratedAt,
   });
   const blockedPayloadReport = await buildPayloadRuntimeReport({
     env: {},
-    generatedAt: "2026-07-06T00:00:00Z",
+    generatedAt: runtimeGeneratedAt,
   });
   const liveServiceProvisioningReport = await buildLiveServiceProvisioningReport({
     env: {
@@ -1943,11 +1946,14 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
       HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: healthyHermesAgentFetch,
-    generatedAt: "2026-07-06T00:00:00Z",
+    generatedAt: runtimeGeneratedAt,
   });
   delete syncReport.example;
   delete queryReport.example;
   delete hermesReport.example;
+  syncReport.generated_at = runtimeGeneratedAt;
+  queryReport.generated_at = runtimeGeneratedAt;
+  hermesReport.generated_at = runtimeGeneratedAt;
   for (const engine of syncReport.engines) {
     const host = engine.engine === "typesense" ? "typesense.ms-realty.bg" : "meili.ms-realty.bg";
     for (const operation of engine.operations) {
@@ -1970,7 +1976,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     hermesWorkerReportPath,
     liveServiceProvisioningReportPath,
     payloadRuntimeReportPath,
-    reviewedAt: "2026-07-05T00:00:00Z",
+    reviewedAt: runtimeGeneratedAt,
   });
 
   const unauthorized = await dispatchHttp(app, {
@@ -2856,7 +2862,7 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
     method: "POST",
     url: "/api/admin/production-recovery/import",
     headers: auth,
-    body: { report: JSON.stringify(validProductionRecoveryReport()) },
+    body: { report: JSON.stringify(validProductionRecoveryReport("2026-07-22T23:40:00.000Z")) },
   });
   const reviewHtml = await dispatchHttp(app, {
     url: "/admin/migration/review?locale=en",

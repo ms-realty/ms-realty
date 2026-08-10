@@ -61,10 +61,12 @@ function actionCounts(rows) {
   }, {});
 }
 
-function validProductionRecoveryReport() {
+function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
+  const generatedAtMs = Date.parse(generatedAt);
+  const minutesBefore = (minutes) => new Date(generatedAtMs - minutes * 60_000).toISOString();
   return {
     schema_version: 1,
-    generated_at: "2026-07-22T23:40:00.000Z",
+    generated_at: generatedAt,
     environment: "production",
     ready: true,
     policy: {
@@ -78,14 +80,14 @@ function validProductionRecoveryReport() {
     },
     backup: {
       backup_id: "backup-20260722-001",
-      completed_at: "2026-07-22T23:00:00.000Z",
+      completed_at: minutesBefore(40),
       checksum_verified: true,
       components: ["payload_postgres", "runtime_data", "runtime_evidence"],
     },
     restore_drill: {
       drill_id: "restore-20260722-001",
       source_backup_id: "backup-20260722-001",
-      completed_at: "2026-07-22T23:15:00.000Z",
+      completed_at: minutesBefore(25),
       target: "isolated",
       status: "pass",
       checksum_verified: true,
@@ -96,7 +98,7 @@ function validProductionRecoveryReport() {
     approval: {
       status: "approved",
       reviewer: "agency_owner",
-      approved_at: "2026-07-22T23:30:00.000Z",
+      approved_at: minutesBefore(10),
     },
   };
 }
@@ -167,6 +169,7 @@ async function withEnv(env, fn) {
 }
 
 test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin auth", async () => {
+  const runtimeGeneratedAt = new Date().toISOString();
   const deployableRedirectOutputPath = tempJson(
     "app-admin-deployable-redirects",
     `${JSON.stringify({ summary: {}, redirects: [] })}\n`,
@@ -747,7 +750,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           HERMES_API_KEY: "hermes-key",
         },
         fetchImpl: healthyHermesAgentFetch,
-        generatedAt: "2026-07-06T00:00:00Z",
+        generatedAt: runtimeGeneratedAt,
       });
       const liveServiceProvisioningImport = await liveServiceProvisioningImportRoute.POST(
         new Request("https://example.test/api/admin/live-service-provisioning/import", {
@@ -849,6 +852,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
 
       const liveReport = { ...liveTemplateBody };
       delete liveReport.example;
+      liveReport.generated_at = runtimeGeneratedAt;
       liveReport.provider = {
         ...liveReport.provider,
         endpoint: "https://hermes.ms-realty.bg/v1/chat/completions",
@@ -881,11 +885,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
           PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
         },
-        generatedAt: "2026-07-06T00:00:00Z",
+        generatedAt: runtimeGeneratedAt,
       });
       const blockedPayloadRuntimeReport = await buildPayloadRuntimeReport({
         env: {},
-        generatedAt: "2026-07-06T00:00:00Z",
+        generatedAt: runtimeGeneratedAt,
       });
       const examplePayloadRuntimeReport = JSON.parse(fs.readFileSync("production/data/payload-runtime-report.json.example", "utf8"));
       const localPayloadRuntimeReport = {

@@ -2,13 +2,9 @@
 // but payload-runtime, live-service, and recovery reports only required a
 // structurally valid timestamp — so a report that passed months ago kept
 // clearing its gate forever. This module names a max age per evidence class
-// and reports (not enforces) staleness, so operators can see which proof is
-// aging before it silently misrepresents production.
-//
-// Enforcement stays out of the gate evaluation deliberately: flipping a
-// passing gate to blocked on a timer is a launch-day decision, not a
-// refactor. `stalenessReport` is what the launch workbench and preflight
-// surface today.
+// so gate readers and operator reports share one clock policy. Launch-critical
+// runtime evidence is enforced by its gate reader; `stalenessReport` also
+// exposes the same policy across every classified evidence source.
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 

@@ -21,8 +21,13 @@ import {
   assertProductionDatabaseHost,
   DEFAULT_PAYLOAD_RUNTIME_REPORT,
 } from "./payload-runtime.mjs";
-import { assertProductionRecoveryReport, productionRecoveryState } from "./production-recovery.mjs";
+import {
+  assertProductionRecoveryReport,
+  productionRecoveryFreshness,
+  productionRecoveryState,
+} from "./production-recovery.mjs";
 import { assertMonitoringRollbackReport, monitoringRollbackState } from "./monitoring-rollback.mjs";
+import { evidenceFreshness } from "./evidence-freshness.mjs";
 import {
   REQUIRED_EXPORTS,
   assertSeoEvidence,
@@ -314,6 +319,27 @@ function assertPassCrawlInventoryEvidence(report) {
 
 function sameJson(left, right) {
   return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function freshnessNow(value) {
+  const parsed = value instanceof Date ? value.getTime() : typeof value === "number" ? value : Date.parse(value);
+  if (!Number.isFinite(parsed)) throw new Error("Evidence freshness requires a valid current timestamp");
+  return parsed;
+}
+
+function evidenceFreshnessAt(id, generatedAt, now) {
+  return evidenceFreshness(id, generatedAt, { now: freshnessNow(now) });
+}
+
+function withEvidenceFreshness(id, evidence, generatedAt, now) {
+  return { ...evidence, freshness: evidenceFreshnessAt(id, generatedAt, now) };
+}
+
+function assertFreshEvidence(id, generatedAt, observedFreshness, now) {
+  const expectedFreshness = evidenceFreshnessAt(id, generatedAt, now);
+  if (expectedFreshness.status !== "fresh" || !sameJson(observedFreshness, expectedFreshness)) {
+    throw new Error(`Launch readiness requires fresh ${id} evidence`);
+  }
 }
 
 function redirectRowsFromDecisions(decisions) {
@@ -841,6 +867,26 @@ function assertPassProductionRecoveryEvidence(report) {
   if (recovery?.status === "pass") assertProductionRecoveryReport(recovery.evidence?.report);
 }
 
+function assertPassEvidenceFreshness(report, now) {
+  const liveServices = gateById(report, "live_services");
+  if (liveServices?.status === "pass") {
+    for (const item of liveServices.evidence?.reports || []) {
+      assertFreshEvidence("live_services", item.generated_at, item.freshness, now);
+    }
+  }
+  const payloadRuntime = gateById(report, "payload_runtime");
+  if (payloadRuntime?.status === "pass") {
+    assertFreshEvidence("payload_runtime", payloadRuntime.evidence?.generated_at, payloadRuntime.evidence?.freshness, now);
+  }
+  const productionRecovery = gateById(report, "production_recovery");
+  if (productionRecovery?.status === "pass") {
+    const expectedFreshness = productionRecoveryFreshness(productionRecovery.evidence?.report, { now });
+    if (expectedFreshness.status !== "fresh" || !sameJson(productionRecovery.evidence?.freshness, expectedFreshness)) {
+      throw new Error("Launch readiness requires fresh production_recovery evidence");
+    }
+  }
+}
+
 function warningsFrom(structuredData, listingQuality) {
   const warnings = {
     ...Object.fromEntries(
@@ -918,7 +964,7 @@ function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_
   };
 }
 
-function reportStatus(source, filePath, assertReport) {
+function reportStatus(source, filePath, assertReport, now) {
   if (!fs.existsSync(filePath)) return { source, status: "missing_report", path: repoRelativePath(filePath) };
   try {
     const report = readJson(filePath);
@@ -929,12 +975,26 @@ function reportStatus(source, filePath, assertReport) {
     }
     assertLiveServiceReportTimestamp(report);
     assertLaunchLiveServiceEvidence(source, report);
+    const freshness = evidenceFreshnessAt("live_services", report.generated_at, now);
+    if (freshness.status === "invalid") throw new Error(freshness.error);
+    if (freshness.status === "stale") {
+      return {
+        source,
+        status: "expired_report",
+        generated_at: report.generated_at,
+        path: repoRelativePath(filePath),
+        summary: report.summary,
+        freshness,
+      };
+    }
     return {
       source,
       status: "pass",
+      generated_at: report.generated_at,
       path: repoRelativePath(filePath),
       summary: report.summary,
       evidence: liveServiceEvidenceSnapshot(source, report),
+      freshness,
     };
   } catch (error) {
     return { source, status: "invalid_report", path: repoRelativePath(filePath), error: error.message };
@@ -945,11 +1005,12 @@ export function liveServiceReports({
   syncReportPath = DEFAULT_SEARCH_ENGINE_SYNC_REPORT,
   queryReportPath = DEFAULT_SEARCH_ENGINE_QUERY_REPORT,
   hermesReportPath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
+  now = Date.now(),
 } = {}) {
   return [
-    reportStatus("typesense_meilisearch_sync", syncReportPath, assertSearchEngineSyncReport),
-    reportStatus("typesense_meilisearch_query", queryReportPath, assertSearchEngineQueryReport),
-    reportStatus("hermes_draft_worker", hermesReportPath, assertHermesDraftWorkerReport),
+    reportStatus("typesense_meilisearch_sync", syncReportPath, assertSearchEngineSyncReport, now),
+    reportStatus("typesense_meilisearch_query", queryReportPath, assertSearchEngineQueryReport, now),
+    reportStatus("hermes_draft_worker", hermesReportPath, assertHermesDraftWorkerReport, now),
   ];
 }
 
@@ -962,18 +1023,22 @@ const PAYLOAD_RUNTIME_INVALID_REPORT_ACTIONS = [
   "Run npm run payload:preflight before launch:preflight.",
 ];
 
-export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT) {
+export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT, { now = Date.now() } = {}) {
   if (!fs.existsSync(reportPath)) {
     return { status: "missing_report", path: repoRelativePath(reportPath), next_actions: PAYLOAD_RUNTIME_MISSING_REPORT_ACTIONS };
   }
   try {
     const report = readJson(reportPath);
     assertPayloadRuntimeReport(report);
+    const freshness = evidenceFreshnessAt("payload_runtime", report.generated_at, now);
+    if (freshness.status === "invalid") throw new Error(freshness.error);
     return {
-      status: report.ready ? "pass" : "blocked_report",
+      status: report.ready ? (freshness.status === "fresh" ? "pass" : "expired_report") : "blocked_report",
+      generated_at: report.generated_at,
       path: repoRelativePath(reportPath),
       summary: report.summary,
       checks: report.checks,
+      freshness,
       next_actions: report.next_actions,
     };
   } catch (error) {
@@ -1001,10 +1066,10 @@ function liveServiceStatusCounts(reports) {
   }, {});
 }
 
-const LIVE_SERVICE_REPORT_STATUSES = new Set(["pass", "missing_report", "invalid_report", "example_report"]);
+const LIVE_SERVICE_REPORT_STATUSES = new Set(["pass", "missing_report", "invalid_report", "example_report", "expired_report"]);
 
 export function buildLiveServicePreflightReport({ generatedAt = new Date().toISOString(), ...options } = {}) {
-  const result = validateLiveServiceReports(options);
+  const result = validateLiveServiceReports({ now: generatedAt, ...options });
   const statusCounts = liveServiceStatusCounts(result.reports);
   return {
     generated_at: generatedAt,
@@ -1016,6 +1081,7 @@ export function buildLiveServicePreflightReport({ generatedAt = new Date().toISO
       missing_report: statusCounts.missing_report || 0,
       invalid_report: statusCounts.invalid_report || 0,
       example_report: statusCounts.example_report || 0,
+      expired_report: statusCounts.expired_report || 0,
       configured_paths: Object.fromEntries(result.reports.map((report) => [report.source, report.path])),
     },
     reports: result.reports,
@@ -1064,7 +1130,7 @@ export function assertLiveServicePreflightReport(report) {
     }
   }
   const statusCounts = liveServiceStatusCounts(report.reports);
-  for (const status of ["pass", "missing_report", "invalid_report", "example_report"]) {
+  for (const status of ["pass", "missing_report", "invalid_report", "example_report", "expired_report"]) {
     if (report.summary[status] !== (statusCounts[status] || 0)) {
       throw new Error("Live service preflight summary status counts must match reports");
     }
@@ -1144,15 +1210,33 @@ export function buildLaunchReadinessReport({
   seoEvidence = readJson(fromRoot("production", "data", "seo-evidence.json")),
   httpSmoke = readJson(fromRoot("production", "data", "http-smoke.json")),
   nodeServerSmoke = readJson(fromRoot("production", "data", "node-server-smoke.json")),
-  liveServices = liveServiceReports(),
+  liveServices = liveServiceReports({ now: generatedAt }),
   liveServiceProvisioning = liveServiceProvisioningState(),
   appState = packageState(),
-  payloadRuntime = payloadRuntimeState(),
-  productionRecovery = productionRecoveryState(),
-  monitoringRollback = monitoringRollbackState(),
+  payloadRuntime = payloadRuntimeState(undefined, { now: generatedAt }),
+  productionRecovery = productionRecoveryState(undefined, { now: generatedAt }),
+  monitoringRollback = monitoringRollbackState(undefined, { now: generatedAt }),
 } = {}) {
+  const generatedAtMs = Date.parse(generatedAt);
+  if (!Number.isFinite(generatedAtMs)) throw new Error("Launch readiness requires valid generatedAt");
   assertSeoEvidence(seoEvidence);
   const seoPreflight = buildSeoEvidencePreflightReportFromEvidence(seoEvidence);
+
+  const liveServiceEvidence = liveServices.map((item) =>
+    withEvidenceFreshness("live_services", item, item.generated_at, generatedAtMs),
+  );
+  const payloadRuntimeEvidence = withEvidenceFreshness(
+    "payload_runtime",
+    payloadRuntime,
+    payloadRuntime.generated_at,
+    generatedAtMs,
+  );
+  const productionRecoveryEvidence = {
+    ...productionRecovery,
+    freshness: productionRecovery.report
+      ? productionRecoveryFreshness(productionRecovery.report, { now: generatedAtMs })
+      : evidenceFreshnessAt("production_recovery", null, generatedAtMs),
+  };
 
   const crawlPass =
     migration.summary.total === 457 &&
@@ -1182,10 +1266,13 @@ export function buildLaunchReadinessReport({
     routeReview.decisionSummary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const listingQualityReady = hasCompleteListingQualityEvidence(listingQualityReview);
-  const liveServicesReady = liveServices.every((item) => item.status === "pass") && liveServiceProvisioning.status === "pass";
+  const liveServicesReady =
+    liveServiceEvidence.every((item) => item.status === "pass" && item.freshness.status === "fresh") &&
+    liveServiceProvisioning.status === "pass";
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
-  const payloadRuntimeReady = payloadRuntime.status === "pass";
-  const productionRecoveryReady = productionRecovery.status === "pass";
+  const payloadRuntimeReady = payloadRuntimeEvidence.status === "pass" && payloadRuntimeEvidence.freshness.status === "fresh";
+  const productionRecoveryReady =
+    productionRecoveryEvidence.status === "pass" && productionRecoveryEvidence.freshness.status === "fresh";
   const monitoringPlan = [
     { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status },
     { source: "search_console", status: seoEvidence.summary.sources.search_console.status },
@@ -1301,7 +1388,7 @@ export function buildLaunchReadinessReport({
     gate(
       "live_services",
       liveServicesReady ? "pass" : "blocked",
-      { reports: liveServices, provisioning: liveServiceProvisioning },
+      { reports: liveServiceEvidence, provisioning: liveServiceProvisioning },
       liveServicesReady
         ? ""
         : "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning.",
@@ -1329,7 +1416,7 @@ export function buildLaunchReadinessReport({
     gate(
       "payload_runtime",
       payloadRuntimeReady ? "pass" : "blocked",
-      payloadRuntime,
+      payloadRuntimeEvidence,
       payloadRuntimeReady
         ? "Payload runtime report proves config, routes, env, and database reachability."
         : "Payload runtime report must pass before final production readiness.",
@@ -1337,7 +1424,7 @@ export function buildLaunchReadinessReport({
     gate(
       "production_recovery",
       productionRecoveryReady ? "pass" : "blocked",
-      productionRecovery,
+      productionRecoveryEvidence,
       productionRecoveryReady
         ? "Encrypted off-site backup and isolated restore evidence passed."
         : "Encrypted off-site backup and isolated production restore evidence are required before launch.",
@@ -1352,13 +1439,15 @@ export function buildLaunchReadinessReport({
     blockers,
     warnings: warningsFrom(structuredData, listingQuality),
     gates,
-    live_services: liveServices,
+    live_services: liveServiceEvidence,
     monitoring_plan: monitoringPlan,
     rollback_plan: rollbackPlan,
   };
 }
 
 export function assertLaunchReadinessReport(report) {
+  const generatedAtMs = Date.parse(report.generated_at);
+  if (!Number.isFinite(generatedAtMs)) throw new Error("Launch readiness report must include valid generated_at");
   if (!Array.isArray(report.gates) || report.gates.length < 7) throw new Error("Launch readiness report must include core gates");
   const gateIds = new Set(report.gates.map((item) => item.id));
   for (const id of REQUIRED_LAUNCH_GATE_IDS) {
@@ -1386,6 +1475,7 @@ export function assertLaunchReadinessReport(report) {
   assertPassAppLayerEvidence(report);
   assertPassMonitoringRollbackEvidence(report);
   assertPassProductionRecoveryEvidence(report);
+  assertPassEvidenceFreshness(report, generatedAtMs);
   if (report.launch_ready && !report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");
   }
@@ -1464,8 +1554,8 @@ function writeJsonAtomically(report, outPath) {
   return outPath;
 }
 
-function localPayloadRuntimeGate(sourceGate, snapshot) {
-  const runtime = snapshot.status === "pass" ? payloadRuntimeState(snapshot.path) : null;
+function localPayloadRuntimeGate(sourceGate, snapshot, generatedAtMs) {
+  const runtime = snapshot.status === "pass" ? payloadRuntimeState(snapshot.path, { now: generatedAtMs }) : null;
   if (runtime?.status === "pass") {
     return {
       id: "payload_runtime",
@@ -1574,7 +1664,9 @@ export function materializeLocalLaunchReadiness({
     source_launch_readiness: { path: sourceReadinessPath, generated_at: source.generated_at },
     reports,
   };
-  const gates = source.gates.map((gate) => (gate.id === "payload_runtime" ? localPayloadRuntimeGate(gate, payloadSnapshot) : gate));
+  const gates = source.gates.map((gate) =>
+    gate.id === "payload_runtime" ? localPayloadRuntimeGate(gate, payloadSnapshot, generatedAtMs) : gate,
+  );
   gates.push(localPreviewGate(localPreview));
   const report = {
     ...source,

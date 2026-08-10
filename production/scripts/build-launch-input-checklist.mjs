@@ -33,7 +33,7 @@ function currentDeployableRedirects(inputs) {
   return readJson(outputPath);
 }
 
-const generatedAt = "2026-07-05T00:00:00Z";
+const generatedAt = process.env.MS_REALTY_GENERATED_AT || new Date().toISOString();
 const inputs = launchReadinessInputsFromEnv();
 const routeMap = inputs.routeMap || readJson(fromRoot("production", "data", "legacy-route-map.json"));
 const seoEvidence = currentSeoEvidence(inputs);
