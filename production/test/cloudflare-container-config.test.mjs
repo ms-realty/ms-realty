@@ -193,6 +193,16 @@ test("health marker is baked into the Container image, not forwarded by the Work
   }
 });
 
+test("Cloudflare Container refreshes Payload evidence before serving readiness", () => {
+  const payloadEvidence = dockerfile.indexOf("node production/scripts/build-payload-runtime-report.mjs");
+  const aggregateReadiness = dockerfile.indexOf("node production/scripts/build-launch-readiness.mjs");
+  const nextRuntime = dockerfile.indexOf("exec ./node_modules/.bin/next start");
+
+  assert.ok(payloadEvidence > 0, "container startup must capture current Payload evidence");
+  assert.ok(aggregateReadiness > payloadEvidence, "aggregate readiness must consume the fresh Payload report");
+  assert.ok(nextRuntime > aggregateReadiness, "Next must not serve stale readiness while startup evidence is rebuilding");
+});
+
 test("successful exact-head CI runs merge without a review gate", () => {
   assert.match(autoMergeWorkflow, /workflow_run:/);
   assert.match(autoMergeWorkflow, /pull\.head\.repo\?\.full_name !== `\$\{owner\}\/\$\{repo\}`/);
