@@ -1047,8 +1047,11 @@ async function listingEditorPayload(registry, url, config) {
   );
 }
 
-function translationQueuePayload(registry, url, config) {
-  const seed = currentSeed(config);
+async function translationQueuePayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    payload: config.payloadListingRuntime,
+    env: process.env,
+  });
   const tasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
   return renderAdminTranslationQueuePayload(registry, url.searchParams.get("locale") || "en", {
     seed,
@@ -2804,8 +2807,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
-    if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(translationQueuePayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, translationQueuePayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(await translationQueuePayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, await translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/migration/review") {
       return htmlResponse(migrationReviewPayload(registry, url, config));
     }

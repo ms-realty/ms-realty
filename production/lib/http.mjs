@@ -1097,9 +1097,9 @@ export function createHttpApp({
       currentTourApprovals(),
       operatorId,
     );
-  const currentTranslationQueuePayload = (url, operatorId = null) =>
+  const currentTranslationQueuePayload = async (url, operatorId = null) =>
     renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: currentSeed(),
+      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: process.env }),
       translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       targetLocale: url.searchParams.get("targetLocale") || "",
@@ -1771,7 +1771,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/translations", "/admin/translations"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentTranslationQueuePayload(url, principal);
+      const payload = await currentTranslationQueuePayload(url, principal);
       if (url.pathname === "/admin/translations" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }

@@ -99,3 +99,42 @@ test("custom listing editor preserves explicit empty-string form clears for dura
   assert.equal(response.body.kind, "listing_draft_saved");
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").seo.canonical_override, "");
 });
+
+test("durable listing edits surface stale translations in both dedicated queue runtimes", async () => {
+  const runtime = createPayloadDraftRuntime(loadCmsSeed());
+  const config = { payloadListingRuntime: runtime.payload, adminPrincipal: { id: "editor_bg", roles: ["editor"], can_mutate: true } };
+
+  const appEdit = await renderAppAdminResponse(
+    new Request("https://example.test/api/admin/listings/edit", {
+      method: "POST",
+      headers: { ...auth, "content-type": "application/json" },
+      body: JSON.stringify({ listingId: "MS-CRAWL-0001", patch: { title: "Queue-visible draft title" } }),
+    }),
+    { config },
+  );
+  assert.equal(appEdit.status, 201);
+
+  const appQueue = await renderAppAdminResponse(
+    new Request("https://example.test/api/admin/translations?locale=bg&targetLocale=el&q=MS-CRAWL-0001", { headers: auth }),
+    { config },
+  );
+  const appQueueBody = await appQueue.json();
+  assert.equal(appQueue.status, 200);
+  assert.equal(appQueueBody.translationTasks.length, 1);
+  assert.equal(appQueueBody.translationTasks[0].listing_id, "MS-CRAWL-0001");
+  assert.equal(appQueueBody.translationTasks[0].target_locale, "el");
+  assert.equal(appQueueBody.translationTasks[0].current_status, "stale");
+  assert.equal(appQueueBody.translationTasks[0].task_type, "stale_review_required");
+
+  const app = createHttpApp({ payloadListingRuntime: runtime.payload });
+  const httpQueue = await dispatchHttp(app, {
+    url: "/api/admin/translations?locale=bg&targetLocale=el&q=MS-CRAWL-0001",
+    headers: auth,
+  });
+  assert.equal(httpQueue.status, 200);
+  assert.equal(httpQueue.body.translationTasks.length, 1);
+  assert.equal(httpQueue.body.translationTasks[0].listing_id, "MS-CRAWL-0001");
+  assert.equal(httpQueue.body.translationTasks[0].target_locale, "el");
+  assert.equal(httpQueue.body.translationTasks[0].current_status, "stale");
+  assert.equal(httpQueue.body.translationTasks[0].task_type, "stale_review_required");
+});
