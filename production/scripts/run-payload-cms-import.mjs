@@ -40,7 +40,11 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+let exitCode = 0;
+try {
+  await main();
+} catch (error) {
   console.error(`PAYLOAD CMS IMPORT FAILED: ${error.message}`);
-  process.exitCode = 1;
-});
+  exitCode = 1;
+}
+process.exit(process.exitCode || exitCode);
