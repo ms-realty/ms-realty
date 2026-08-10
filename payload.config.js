@@ -9,6 +9,7 @@ import { buildConfig } from "payload";
 import { LEAD_COLLECTIONS } from "./production/lib/lead-collections.mjs";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
+import { payloadCmsImportContextEnabled } from "./production/lib/payload-cms-import.mjs";
 import {
   accessForGeneratedCollection,
   adminRoleFieldAccess,
@@ -120,7 +121,7 @@ function outboxRecordFor(listing, { eventType = "upsert", changeToken, includeLi
 
 export async function enqueueListingSearchOutbox({ listing, req, eventType = "upsert", changeToken, includeListingRelation = true } = {}) {
   const listingId = relationId(listing);
-  if (!listingId || !req?.payload) return;
+  if (!listingId || !req?.payload || payloadCmsImportContextEnabled(req)) return;
   try {
     await req.payload.create({
       collection: "search_outbox",
@@ -135,7 +136,7 @@ export async function enqueueListingSearchOutbox({ listing, req, eventType = "up
 export async function ensureListingEnrichmentTask({ doc, req } = {}) {
   const listingId = relationId(doc?.id);
   const propertyId = relationId(doc?.property);
-  if (!listingId || !propertyId || !req?.payload) return;
+  if (!listingId || !propertyId || !req?.payload || payloadCmsImportContextEnabled(req)) return;
   try {
     await req.payload.create({
       collection: "listing_enrichment_tasks",

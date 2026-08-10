@@ -114639,13 +114639,13 @@
       "id": "location:bansko",
       "collection": "locations",
       "label": "Bansko",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:blagoevgrad",
       "collection": "locations",
       "label": "Blagoevgrad",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:derbere, sandanski",
@@ -114657,7 +114657,7 @@
       "id": "location:dzhigurovo",
       "collection": "locations",
       "label": "Dzhigurovo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:elani-sani, halkidiki",
@@ -114675,73 +114675,73 @@
       "id": "location:hotovo",
       "collection": "locations",
       "label": "Hotovo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:igralishte",
       "collection": "locations",
       "label": "Igralishte",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:kapatovo",
       "collection": "locations",
       "label": "Kapatovo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:kulata",
       "collection": "locations",
       "label": "Kulata",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:laskarevo",
       "collection": "locations",
       "label": "Laskarevo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:leshnitsa",
       "collection": "locations",
       "label": "Leshnitsa",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:levunovo",
       "collection": "locations",
       "label": "Levunovo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:lilyanovo",
       "collection": "locations",
       "label": "Lilyanovo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:logari",
       "collection": "locations",
       "label": "Logari",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:mikrevo",
       "collection": "locations",
       "label": "Mikrevo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:nafplio",
       "collection": "locations",
       "label": "Nafplio",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:paralia ofrinio",
       "collection": "locations",
       "label": "Paralia Ofrinio",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:pasalimani, piraeus",
@@ -114753,73 +114753,73 @@
       "id": "location:petrich",
       "collection": "locations",
       "label": "Petrich",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:petrich municipality",
       "collection": "locations",
       "label": "Petrich Municipality",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:petrovo",
       "collection": "locations",
       "label": "Petrovo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:pirin",
       "collection": "locations",
       "label": "Pirin",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:polenitsa",
       "collection": "locations",
       "label": "Polenitsa",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:sandanski",
       "collection": "locations",
       "label": "Sandanski",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:spatovo",
       "collection": "locations",
       "label": "Spatovo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:strumyani",
       "collection": "locations",
       "label": "Strumyani",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:sveti vlas",
       "collection": "locations",
       "label": "Sveti Vlas",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:thessaloniki",
       "collection": "locations",
       "label": "Thessaloniki",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:tsaparevo",
       "collection": "locations",
       "label": "Tsaparevo",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     },
     {
       "id": "location:vinogradi",
       "collection": "locations",
       "label": "Vinogradi",
-      "public_location_precision": "area_only"
+      "public_location_precision": "locality"
     }
   ],
   "enrichment_tasks": [

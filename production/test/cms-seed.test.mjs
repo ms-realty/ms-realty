@@ -28,6 +28,9 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   const polenitsaListing = seed.records.find((record) => record.id === "MS-CRAWL-0033");
   const greekListing = seed.records.find((record) => record.id === "MS-CRAWL-0072");
   const ruListing = seed.records.find((record) => record.source_locale === "ru");
+  const areaOnlyListing = seed.records.find((record) => record.facts.location_precision === "area_only");
+  const areaOnlyProperty = seed.properties.find((record) => record.id === areaOnlyListing.property);
+  const areaOnlyLocation = seed.locations.find((record) => record.id === areaOnlyListing.location);
 
   assert.equal(summary.listings, 165);
   assert.equal(summary.properties, 165);
@@ -101,12 +104,22 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(property.fact_verification.some((fact) => fact.state === "broker_verified"), false);
   assert.equal(seed.enrichment_tasks.some((task) => task.listing === fixtureListing.id && task.property === property.id), true);
   assert.equal(seed.taxonomy_contract.version, property.taxonomy_mapping_version);
+  assert.equal(areaOnlyListing.facts.location_precision, "area_only");
+  assert.equal(areaOnlyProperty.facts.public_location_precision, "area_only");
+  assert.equal(areaOnlyLocation.public_location_precision, "locality");
   assert.deepEqual(seed.taxonomy_contract.mappings.find((mapping) => mapping.legacy_property_type === "land"), {
     legacy_property_type: "land",
     property_family: "plot",
     property_subtype: null,
     review_status: "mapping_review_required",
   });
+});
+
+test("CMS seed rejects Location precision outside the canonical enum", () => {
+  const seed = buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows });
+  seed.locations[0].public_location_precision = "area_only";
+
+  assert.throws(() => assertCmsSeed(seed), /Location collection precision/);
 });
 
 test("price-on-request seed records never retain a numeric price projection", () => {
