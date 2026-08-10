@@ -449,7 +449,12 @@ function planRecord({ collection, current, desired, overwriteExisting = false, a
   }
 
   if (overwriteExisting) {
-    return { action: "updated", data: desired.data };
+    const data = clone(desired.data);
+    if (allowListingRelationMerge) {
+      data.translations = [...new Set([...relationId(current.translations || []), ...relationId(desired.data.translations || [])])];
+      data.media = [...new Set([...relationId(current.media || []), ...relationId(desired.data.media || [])])];
+    }
+    return { action: "updated", data };
   }
 
   const mergedPatch = patch || {};
@@ -510,6 +515,7 @@ async function findAll(payload, collection, req) {
     overrideAccess: true,
     pagination: false,
     req,
+    ...(VERSIONED_COLLECTIONS.has(collection) ? { draft: true } : {}),
   });
   if (!Array.isArray(result?.docs)) throw new Error(`Payload ${collection} query did not return documents`);
   return result.docs;
@@ -747,8 +753,9 @@ async function applyOperations(payload, operations, req) {
   }
 }
 
-function sameIdSet(left, right) {
-  return JSON.stringify([...new Set((left || []).map((value) => String(value)))].sort()) === JSON.stringify([...new Set((right || []).map((value) => String(value)))].sort());
+function includesIds(actual, expected) {
+  const actualIds = new Set((actual || []).map((value) => String(value)));
+  return [...new Set((expected || []).map((value) => String(value)))].every((value) => actualIds.has(value));
 }
 
 function importedTargets(snapshot, seed, registry) {
@@ -792,8 +799,8 @@ function listingRelationsResolved(seed, targets, localeIds) {
       relationId(listing.source_locale) === relationId(expectedLocale) &&
       relationId(listing.property) === relationId(record.property) &&
       relationId(listing.location) === relationId(record.location) &&
-      sameIdSet(relationId(listing.translations || []), expectedTranslations) &&
-      sameIdSet(relationId(listing.media || []), expectedMedia) &&
+      includesIds(relationId(listing.translations || []), expectedTranslations) &&
+      includesIds(relationId(listing.media || []), expectedMedia) &&
       relationId(listing.tour) === relationId(expectedTour)
     );
   });

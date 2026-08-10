@@ -16,6 +16,7 @@ function parseArgs(argv = process.argv.slice(2)) {
 function printHelp() {
   console.log("Usage: node production/scripts/run-payload-cms-import.mjs [--dry-run] [--overwrite-existing]");
   console.log("Imports the canonical CMS seed into Payload through the Local API without exposing secrets.");
+  console.log("--overwrite-existing replaces conflicting latest drafts; it never publishes or changes the current published version.");
 }
 
 async function main() {

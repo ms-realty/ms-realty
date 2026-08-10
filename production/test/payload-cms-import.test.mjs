@@ -257,6 +257,7 @@ function minimalSeed() {
 }
 
 const AUTO_INTEGER_ID_COLLECTIONS = new Set(["locales", "listing_translations", "media_assets", "listing_tours"]);
+const VERSIONED_COLLECTIONS = new Set(["listings", "listing_translations", "media_assets", "listing_tours"]);
 
 function duplicateKeyError(message) {
   const error = new Error(message);
@@ -369,24 +370,28 @@ function mediaDedupSeed() {
   return seed;
 }
 
-function fakePayload(initial = {}) {
+function fakePayload(initial = {}, { published = {} } = {}) {
   const rows = Object.fromEntries(
     ["locales", "locations", "properties", "listings", "listing_translations", "media_assets", "listing_tours", "listing_enrichment_tasks", "search_outbox"].map(
       (collection) => [collection, clone(initial[collection] || [])],
     ),
   );
-  const calls = { begin: 0, commit: 0, rollback: 0 };
+  const publishedRows = Object.fromEntries(Object.keys(rows).map((collection) => [collection, clone(published[collection] || [])]));
+  const calls = { begin: 0, commit: 0, find: [], rollback: 0 };
   let nextId = 1;
   let snapshot = null;
   const nextIntegerId = Object.fromEntries(
-    [...AUTO_INTEGER_ID_COLLECTIONS].map((collection) => [collection, Math.max(0, ...rows[collection].map((row) => (Number.isInteger(row.id) ? row.id : 0))) + 1]),
+    [...AUTO_INTEGER_ID_COLLECTIONS].map((collection) => [
+      collection,
+      Math.max(0, ...rows[collection].map((row) => (Number.isInteger(row.id) ? row.id : 0)), ...publishedRows[collection].map((row) => (Number.isInteger(row.id) ? row.id : 0))) + 1,
+    ]),
   );
 
   const payload = {
     db: {
       async beginTransaction() {
         calls.begin += 1;
-        snapshot = clone(rows);
+        snapshot = { publishedRows: clone(publishedRows), rows: clone(rows) };
         return `tx-${calls.begin}`;
       },
       async commitTransaction() {
@@ -395,12 +400,20 @@ function fakePayload(initial = {}) {
       },
       async rollbackTransaction() {
         calls.rollback += 1;
-        for (const collection of Object.keys(rows)) rows[collection] = clone(snapshot[collection]);
+        for (const collection of Object.keys(rows)) {
+          rows[collection] = clone(snapshot.rows[collection]);
+          publishedRows[collection] = clone(snapshot.publishedRows[collection]);
+        }
         snapshot = null;
       },
     },
-    async find({ collection }) {
-      return { docs: clone(rows[collection] || []) };
+    async find({ collection, draft }) {
+      calls.find.push({ collection, draft: draft === true });
+      if (!VERSIONED_COLLECTIONS.has(collection)) return { docs: clone(rows[collection] || []) };
+      if (!draft) return { docs: clone(publishedRows[collection] || []) };
+      const documents = new Map((publishedRows[collection] || []).map((row) => [String(row.id), row]));
+      for (const row of rows[collection] || []) documents.set(String(row.id), row);
+      return { docs: clone([...documents.values()]) };
     },
     async create({ collection, data, draft, req }) {
       assert.match(req.transactionID, /^tx-/);
@@ -408,21 +421,30 @@ function fakePayload(initial = {}) {
       const document = AUTO_INTEGER_ID_COLLECTIONS.has(collection)
         ? { ...cloned, id: Number.isInteger(cloned.id) ? cloned.id : nextIntegerId[collection]++ }
         : { id: cloned.id || `${collection}-${nextId++}`, ...cloned };
-      assertUniqueCreate(rows, collection, document);
+      const targetRows = VERSIONED_COLLECTIONS.has(collection) && !draft ? publishedRows : rows;
+      assertUniqueCreate(targetRows, collection, document);
       if (draft) document._status = "draft";
-      rows[collection].push(document);
+      targetRows[collection].push(document);
       return clone(document);
     },
     async update({ collection, data, draft, id, req }) {
       assert.match(req.transactionID, /^tx-/);
-      const document = rows[collection].find((row) => row.id === id);
+      const targetRows = VERSIONED_COLLECTIONS.has(collection) && !draft ? publishedRows : rows;
+      let document = targetRows[collection].find((row) => row.id === id);
+      if (!document && draft && VERSIONED_COLLECTIONS.has(collection)) {
+        const publishedDocument = publishedRows[collection].find((row) => row.id === id);
+        if (publishedDocument) {
+          document = clone(publishedDocument);
+          targetRows[collection].push(document);
+        }
+      }
       if (!document) throw new Error(`Missing ${collection} ${id}`);
       Object.assign(document, clone(data));
       if (draft) document._status = "draft";
       return clone(document);
     },
   };
-  return { calls, payload, rows };
+  return { calls, payload, publishedRows, rows };
 }
 
 test("Payload CMS importer commits one durable draft graph and reuses it on rerun", async () => {
@@ -510,6 +532,87 @@ test("Payload CMS importer commits one durable draft graph and reuses it on reru
   assert.equal(second.plan.byCollection.listings.updated, 0);
   assert.equal(second.plan.byCollection.listings.reused, 2);
   assert.equal(target.calls.commit, 2);
+});
+
+test("Payload CMS importer reads the latest draft and overwrite never changes the published base", async () => {
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  const target = fakePayload(
+    {
+      listings: [{ id: "MS-TEST-0001", facts: { title: "Newer operator draft" }, _status: "draft" }],
+    },
+    {
+      published: {
+        listings: [{ id: "MS-TEST-0001", facts: { title: "Published title" }, _status: "published" }],
+      },
+    },
+  );
+
+  const snapshot = await readPayloadCmsSnapshot({ payload: target.payload });
+  assert.equal(snapshot.listings.byId.get("MS-TEST-0001").facts.title, "Newer operator draft");
+  assert.equal(
+    target.calls.find.filter((call) => VERSIONED_COLLECTIONS.has(call.collection)).every((call) => call.draft),
+    true,
+  );
+
+  const report = await runPayloadCmsImport({
+    overwriteExisting: true,
+    payload: target.payload,
+    registry,
+    seed,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+
+  assert.equal(report.status, "committed");
+  assert.equal(report.integrity.ok, true);
+  assert.equal(target.rows.listings[0].facts.title, "Seed title");
+  assert.equal(target.rows.listings[0]._status, "draft");
+  assert.equal(target.publishedRows.listings[0].facts.title, "Published title");
+  assert.equal(target.publishedRows.listings[0]._status, "published");
+});
+
+test("Payload CMS rerun preserves operator-added translation and media relationships", async () => {
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  const target = fakePayload();
+
+  await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  const listing = target.rows.listings.find((row) => row.id === "MS-TEST-0001");
+  target.rows.locales.push({ id: 99, code: "fr" });
+  target.rows.listing_translations.push({
+    id: 1001,
+    listing: listing.id,
+    locale: 99,
+    source_locale: 1,
+    status: "draft",
+    translation_state: "draft",
+    public_indexable: false,
+    _status: "draft",
+  });
+  target.rows.media_assets.push({
+    id: 1002,
+    url: "https://operator.example/manual-photo.jpg",
+    is_public: false,
+    review_status: "review_required",
+    _status: "draft",
+  });
+  listing.translations.push(1001);
+  listing.media.push(1002);
+
+  const report = await runPayloadCmsImport({
+    payload: target.payload,
+    registry,
+    seed,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+
+  assert.equal(report.status, "committed");
+  assert.equal(report.integrity.ok, true);
+  const persistedListing = target.rows.listings.find((row) => row.id === "MS-TEST-0001");
+  assert.equal(persistedListing.translations.map(String).includes("1001"), true);
+  assert.equal(persistedListing.media.map(String).includes("1002"), true);
 });
 
 test("Payload CMS importer creates one deterministic media asset per URL and dedupes listing relations", async () => {
