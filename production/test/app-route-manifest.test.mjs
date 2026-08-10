@@ -219,7 +219,12 @@ test("dedicated localized search renderer preserves configured engine hits", asy
     ...approvedConfig,
     search: {
       environment: "test",
-      typesense: { baseUrl: "https://typesense.test", apiKey: "typesense-test", collectionName: "ms_realty_listings" },
+      typesense: {
+        baseUrl: "https://search.makler-realty.com",
+        apiKey: "typesense-test",
+        collectionName: "ms_realty_listings",
+        lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
+      },
       meilisearch: {},
       fetchImpl: async () => new Response(JSON.stringify({
         found: 1,

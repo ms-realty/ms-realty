@@ -14,7 +14,9 @@ import {
   createSearchRollbackPlan,
   enqueueSearchOutbox,
   processSearchOutbox,
+  queryMeilisearch,
   queryPublicSearch,
+  queryTypesense,
   projectApprovedSearchDocument,
   readSearchOutbox,
   reconcileSearchOutbox,
@@ -40,6 +42,140 @@ function fakeFetch(calls, statuses = []) {
     return { ok: status >= 200 && status < 300, status };
   };
 }
+
+const PUBLIC_LOOKUP = async () => [{ address: "1.1.1.1", family: 4 }];
+
+test("search egress rejects credentialed, fragmented, and private destinations before fetch", async () => {
+  let calls = 0;
+  const fetchImpl = async () => {
+    calls += 1;
+    return new Response(JSON.stringify({ found: 0, hits: [] }), { status: 200 });
+  };
+
+  await assert.rejects(
+    () => queryTypesense({ baseUrl: "https://user:pass@typesense.ms-realty.bg", apiKey: "key", lookupImpl: PUBLIC_LOOKUP, fetchImpl }),
+    /URL credentials/,
+  );
+  await assert.rejects(
+    () => queryTypesense({ baseUrl: "https://typesense.ms-realty.bg#fragment", apiKey: "key", lookupImpl: PUBLIC_LOOKUP, fetchImpl }),
+    /fragment/,
+  );
+  await assert.rejects(
+    () =>
+      queryTypesense({
+        baseUrl: "https://typesense.ms-realty.bg",
+        apiKey: "key",
+        lookupImpl: async () => [{ address: "127.0.0.1", family: 4 }],
+        fetchImpl,
+      }),
+    /private or reserved address/,
+  );
+  for (const [baseUrl, lookupImpl, pattern] of [
+    ["https://typesense.ms-realty.bg/proxy", PUBLIC_LOOKUP, /exact service origin/],
+    ["http://typesense.ms-realty.bg", PUBLIC_LOOKUP, /must use HTTPS/],
+    ["https://typesense.ms-realty.bg", async () => [{ address: "169.254.169.254", family: 4 }], /private or reserved/],
+    ["https://typesense.ms-realty.bg", async () => [{ address: "203.0.113.1", family: 4 }], /private or reserved/],
+    [
+      "https://typesense.ms-realty.bg",
+      async () => [
+        { address: "1.1.1.1", family: 4 },
+        { address: "127.0.0.1", family: 4 },
+      ],
+      /private or reserved/,
+    ],
+    ["https://[2001:db8::1]", PUBLIC_LOOKUP, /private or reserved/],
+  ]) {
+    await assert.rejects(() => queryTypesense({ baseUrl, apiKey: "key", lookupImpl, fetchImpl }), pattern);
+  }
+  assert.equal(calls, 0);
+});
+
+test("search queries use query-only keys, disable redirects, and carry an abort signal", async () => {
+  const calls = [];
+  await queryTypesense({
+    baseUrl: "https://typesense.ms-realty.bg",
+    apiKey: "admin-key",
+    queryApiKey: "query-key",
+    lookupImpl: PUBLIC_LOOKUP,
+    fetchImpl: async (url, options) => {
+      calls.push({ url, options });
+      return new Response(JSON.stringify({ found: 0, hits: [] }), { status: 200 });
+    },
+  });
+
+  assert.equal(calls[0].options.headers["x-typesense-api-key"], "query-key");
+  assert.equal(calls[0].options.redirect, "error");
+  assert.equal(calls[0].options.signal instanceof AbortSignal, true);
+
+  await assert.rejects(
+    () =>
+      queryTypesense({
+        baseUrl: "https://typesense.ms-realty.bg",
+        apiKey: "admin-key",
+        lookupImpl: PUBLIC_LOOKUP,
+        timeoutMs: 5,
+        fetchImpl: async (_url, { signal }) =>
+          new Promise((resolve, reject) => {
+            signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+          }),
+      }),
+    (error) => error.name === "SearchEngineUnavailableError" && /exceeded 5ms/.test(error.cause?.message),
+  );
+
+  await assert.rejects(
+    () =>
+      queryTypesense({
+        baseUrl: "https://typesense.ms-realty.bg",
+        apiKey: "admin-key",
+        lookupImpl: PUBLIC_LOOKUP,
+        timeoutMs: 5,
+        fetchImpl: async (_url, { signal }) =>
+          new Response(
+            new ReadableStream({
+              start(controller) {
+                signal.addEventListener("abort", () => controller.error(signal.reason), { once: true });
+              },
+            }),
+            { status: 200 },
+          ),
+      }),
+    (error) => error.name === "SearchEngineUnavailableError" && /exceeded 5ms/.test(error.cause?.message),
+  );
+});
+
+test("public search rejects oversized or over-broad engine responses", async () => {
+  await assert.rejects(
+    () =>
+      queryTypesense({
+        baseUrl: "https://typesense.ms-realty.bg",
+        apiKey: "key",
+        lookupImpl: PUBLIC_LOOKUP,
+        fetchImpl: async () =>
+          new Response("{}", { status: 200, headers: { "content-length": String(1024 * 1024 + 1) } }),
+      }),
+    /response exceeds 1048576 bytes/,
+  );
+
+  const hit = {
+    id: "MS-CRAWL-0001:bg",
+    source_listing_id: "MS-CRAWL-0001",
+    locale: "bg",
+    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    title: "Reviewed listing",
+  };
+  await assert.rejects(
+    () =>
+      queryMeilisearch({
+        baseUrl: "https://meili.ms-realty.bg",
+        apiKey: "key",
+        limit: 250,
+        lookupImpl: PUBLIC_LOOKUP,
+        fetchImpl: async () =>
+          new Response(JSON.stringify({ estimatedTotalHits: 251, hits: Array.from({ length: 251 }, () => hit) }), { status: 200 }),
+      }),
+    /more than 250 hits/,
+  );
+});
 
 function typesenseImportResults(documentCount, resultAt = {}) {
   return Array.from({ length: documentCount }, (_, index) => resultAt[index] ?? '{"success":true}').join("\n");
@@ -105,8 +241,8 @@ async function withSearchServer(fn, { typesenseStatus = 200, meilisearchStatus =
 test("public search queries Typesense first with only reviewed locale documents", async () => {
   await withSearchServer(async (baseUrl, calls) => {
     const result = await queryPublicSearch({
-      typesense: { baseUrl, apiKey: "typesense-key" },
-      meilisearch: { baseUrl, apiKey: "meili-key" },
+      typesense: { baseUrl, apiKey: "typesense-key", allowPrivateNetwork: true },
+      meilisearch: { baseUrl, apiKey: "meili-key", allowPrivateNetwork: true },
       q: "Sandanski",
       localeCodes: ["bg"],
       filters: {
@@ -149,7 +285,7 @@ test("selected Typesense receives the validated exact and structured intent", as
     await queryPublicSearch({
       engine: "typesense",
       environment: "production",
-      typesense: { baseUrl, apiKey: "typesense-key" },
+      typesense: { baseUrl, apiKey: "typesense-key", allowPrivateNetwork: true },
       localeCodes: ["bg"],
       q: "ignored lexical query",
       intent: {
@@ -182,8 +318,8 @@ test("public search uses Meilisearch only when Typesense is unavailable", async 
   await withSearchServer(
     async (baseUrl, calls) => {
       const result = await queryPublicSearch({
-        typesense: { baseUrl, apiKey: "typesense-key" },
-        meilisearch: { baseUrl, apiKey: "meili-key" },
+        typesense: { baseUrl, apiKey: "typesense-key", allowPrivateNetwork: true },
+        meilisearch: { baseUrl, apiKey: "meili-key", allowPrivateNetwork: true },
         q: "Sandanski",
         localeCodes: ["bg", "ru"],
         filters: {
@@ -222,8 +358,8 @@ test("public search does not hide a configured Typesense failure behind a fallba
       await assert.rejects(
         () =>
           queryPublicSearch({
-            typesense: { baseUrl, apiKey: "typesense-key" },
-            meilisearch: { baseUrl, apiKey: "meili-key" },
+            typesense: { baseUrl, apiKey: "typesense-key", allowPrivateNetwork: true },
+            meilisearch: { baseUrl, apiKey: "meili-key", allowPrivateNetwork: true },
             localeCodes: ["bg"],
           }),
         /returned 401/,
@@ -336,8 +472,8 @@ test("production search requires one configured engine and never falls back", as
         engine: "typesense",
         environment: "production",
         localeCodes: ["bg"],
-        typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
-        meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+        typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
+        meilisearch: { baseUrl: "https://meili.ms-realty.bg", apiKey: "meili-key", lookupImpl: PUBLIC_LOOKUP },
         fetchImpl: async (url) => {
           calls.push(url);
           return { status: 503, async json() { return {}; } };
@@ -346,7 +482,7 @@ test("production search requires one configured engine and never falls back", as
     /Selected search engine typesense is unavailable/,
   );
   assert.equal(calls.length, 1);
-  assert.match(calls[0], /typesense\.local/);
+  assert.match(calls[0], /typesense\.ms-realty\.bg/);
 });
 
 test("search intent builds approved-only canonical filters with exact-reference precedence", async () => {
@@ -370,8 +506,8 @@ test("search intent builds approved-only canonical filters with exact-reference 
     await queryPublicSearch({
       engine: "typesense",
       environment: "test",
-      typesense: { baseUrl, apiKey: "typesense-key" },
-      meilisearch: { baseUrl, apiKey: "meili-key" },
+      typesense: { baseUrl, apiKey: "typesense-key", allowPrivateNetwork: true },
+      meilisearch: { baseUrl, apiKey: "meili-key", allowPrivateNetwork: true },
       localeCodes: ["bg"],
       intent,
     });
@@ -434,7 +570,7 @@ test("versioned Typesense rebuild imports a new target before alias activation a
       },
     ],
     schema: approvedSearchSchema(),
-    typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
+    typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
     fetchImpl,
     activate: true,
   });
@@ -444,7 +580,7 @@ test("versioned Typesense rebuild imports a new target before alias activation a
   assert.deepEqual(JSON.parse(calls[2].options.body), { collection_name: "ms_realty_listings__20260730a" });
 
   const rollback = await rollbackSearchEngineRebuild(rebuild, {
-    typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
+    typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
     fetchImpl,
   });
   assert.equal(rollback.target, "ms_realty_listings__20260729z");
@@ -646,8 +782,8 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
   const calls = [];
   const report = await runSearchEngineSync({
     fetchImpl: fakeFetch(calls, [201, 202, 202, 202]),
-    typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
-    meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+    typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
+    meilisearch: { baseUrl: "https://meili.ms-realty.bg", apiKey: "meili-key", lookupImpl: PUBLIC_LOOKUP },
   });
 
   assert.equal(assertSearchEngineSyncReport(report), true);
@@ -656,10 +792,10 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
   assert.deepEqual(report.summary.targets, { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" });
   assert.deepEqual(report.summary.documents_per_engine, [167, 167]);
   assert.equal(calls.length, 4);
-  assert.equal(calls[0].url, "http://typesense.local/collections");
-  assert.equal(calls[1].url, "http://typesense.local/collections/ms_realty_listings/documents/import?action=upsert");
-  assert.equal(calls[2].url, "http://meili.local/indexes/ms_realty_listings/settings");
-  assert.equal(calls[3].url, "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id");
+  assert.equal(calls[0].url, "https://typesense.ms-realty.bg/collections");
+  assert.equal(calls[1].url, "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert");
+  assert.equal(calls[2].url, "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings");
+  assert.equal(calls[3].url, "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id");
   assert.equal(calls[1].options.headers["x-typesense-api-key"], "type-key");
   assert.equal(calls[3].options.headers.authorization, "Bearer meili-key");
   assert.match(calls[1].body, /MS-CRAWL-0001:bg/);
@@ -788,8 +924,9 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
 test("Typesense sync accepts existing collection response before upsert import", async () => {
   const calls = [];
   const report = await syncTypesense({
-    baseUrl: "http://typesense.local/",
+    baseUrl: "https://typesense.ms-realty.bg/",
     apiKey: "type-key",
+    lookupImpl: PUBLIC_LOOKUP,
     fetchImpl: fakeFetch(calls, [409, 201]),
   });
 
@@ -827,8 +964,9 @@ test("Typesense sync rejects non-accepted collection creation statuses even when
   await assert.rejects(
     () =>
       syncTypesense({
-        baseUrl: "http://typesense.local/",
+        baseUrl: "https://typesense.ms-realty.bg/",
         apiKey: "type-key",
+        lookupImpl: PUBLIC_LOOKUP,
         fetchImpl: async () => ({ ok: true, status: 202 }),
       }),
     /returned 202/,
@@ -893,11 +1031,11 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
     title: "Reviewed listing",
   };
   const report = await runSearchEngineQuerySmoke({
-    typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
-    meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+    typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
+    meilisearch: { baseUrl: "https://meili.ms-realty.bg", apiKey: "meili-key", lookupImpl: PUBLIC_LOOKUP },
     fetchImpl: async (url, options) => {
       calls.push({ url, options });
-      if (url.includes("typesense.local")) {
+      if (url.includes("typesense.ms-realty.bg")) {
         return { ok: true, status: 200, async json() { return { found: 1, hits: [{ document: hit }] }; } };
       }
       return { ok: true, status: 200, async json() { return { estimatedTotalHits: 1, hits: [hit] }; } };
@@ -910,14 +1048,14 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
   assert.deepEqual(report.summary.targets, { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" });
   assert.equal(calls[0].url.includes("/documents/search?"), true);
   assert.equal(calls[0].options.method, "GET");
-  assert.equal(calls[1].url, "http://meili.local/indexes/ms_realty_listings/search");
+  assert.equal(calls[1].url, "https://meili.ms-realty.bg/indexes/ms_realty_listings/search");
   assert.equal(calls[1].options.method, "POST");
   assert.equal(
     JSON.parse(calls[1].options.body).filter,
     'translation_indexable = true AND locale = bg AND source_listing_id = "MS-CRAWL-0001"',
   );
   assert.equal(report.engines.find((engine) => engine.engine === "typesense").operation.method, "GET");
-  assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").operation.url, "http://meili.local/indexes/ms_realty_listings/search");
+  assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").operation.url, "https://meili.ms-realty.bg/indexes/ms_realty_listings/search");
   assert.throws(
     () => assertSearchEngineQueryReport({ ...report, engines: [report.engines[0], { ...report.engines[0] }] }),
     /exactly once/,
@@ -1005,8 +1143,8 @@ test("search engine query rejects non-accepted statuses even when fetch reports 
   await assert.rejects(
     () =>
       runSearchEngineQuerySmoke({
-        typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
-        meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+        typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
+        meilisearch: { baseUrl: "https://meili.ms-realty.bg", apiKey: "meili-key", lookupImpl: PUBLIC_LOOKUP },
         fetchImpl: async () => ({ ok: true, status: 202, async json() { return {}; } }),
       }),
     /returned 202/,
@@ -1049,6 +1187,7 @@ test("live search engine CLIs write reports to configured paths", async () => {
       TYPESENSE_API_KEY: "typesense-test",
       MEILI_URL: baseUrl,
       MEILI_API_KEY: "meili-test",
+      MS_REALTY_SEARCH_ALLOW_PRIVATE_SERVICE_NETWORK: "true",
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: syncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: queryReportPath,
     };

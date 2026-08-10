@@ -60,6 +60,7 @@ function searchConfig({ typesenseUrl = "", meiliUrl = "", naturalLanguageEnabled
     MEILI_URL: meiliUrl,
     MEILI_API_KEY: meiliUrl ? "meili-test" : "",
     MEILI_INDEX: "ms_realty_listings",
+    MS_REALTY_SEARCH_ALLOW_PRIVATE_SERVICE_NETWORK: typesenseUrl || meiliUrl ? "true" : "",
     MS_REALTY_SEARCH_ENGINE: engine,
     NODE_ENV: environment,
     MS_REALTY_SEARCH_NL_INTENT_ENABLED: naturalLanguageEnabled ? "true" : "false",

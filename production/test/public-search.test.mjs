@@ -5,7 +5,11 @@ import os from "node:os";
 import { appApiConfigFromEnv, renderAppApiResponse } from "../lib/app-api-adapter.mjs";
 import { appRouterConfigFromEnv, renderAppSearchRoute, renderAppSearchRouteResponse } from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
-import { executePublicSearch, PublicSearchUnavailableError } from "../lib/public-search.mjs";
+import {
+  executePublicSearch,
+  publicSearchConfigFromEnv,
+  PublicSearchUnavailableError,
+} from "../lib/public-search.mjs";
 import { loadCmsSeed, searchRuntimeListings } from "../lib/runtime.mjs";
 import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
@@ -33,14 +37,39 @@ function response(body, status = 200) {
 }
 
 function searchConfig(fetchImpl, { environment = "test", typesense = true, meilisearch = true } = {}) {
+  const lookupImpl = async () => [{ address: "1.1.1.1", family: 4 }];
   return {
     environment,
-    typesense: typesense ? { baseUrl: "https://typesense.test", apiKey: "typesense-test", collectionName: "ms_realty_listings" } : {},
-    meilisearch: meilisearch ? { baseUrl: "https://meili.test", apiKey: "meili-test", indexName: "ms_realty_listings" } : {},
+    typesense: typesense
+      ? { baseUrl: "https://typesense.ms-realty.bg", apiKey: "typesense-test", collectionName: "ms_realty_listings", lookupImpl }
+      : {},
+    meilisearch: meilisearch
+      ? { baseUrl: "https://meili.ms-realty.bg", apiKey: "meili-test", indexName: "ms_realty_listings", lookupImpl }
+      : {},
     fetchImpl,
     naturalLanguageEnabled: false,
   };
 }
+
+test("public search prefers optional query-only credentials and keeps admin-key fallback", () => {
+  const separated = publicSearchConfigFromEnv({
+    TYPESENSE_URL: "https://typesense.ms-realty.bg",
+    TYPESENSE_API_KEY: "typesense-admin",
+    TYPESENSE_QUERY_API_KEY: "typesense-query",
+    MEILI_URL: "https://meili.ms-realty.bg",
+    MEILI_API_KEY: "meili-admin",
+    MEILI_QUERY_API_KEY: "meili-query",
+  });
+  const compatible = publicSearchConfigFromEnv({
+    TYPESENSE_API_KEY: "typesense-admin",
+    MEILI_API_KEY: "meili-admin",
+  });
+
+  assert.equal(separated.typesense.queryApiKey, "typesense-query");
+  assert.equal(separated.meilisearch.queryApiKey, "meili-query");
+  assert.equal(compatible.typesense.queryApiKey, "typesense-admin");
+  assert.equal(compatible.meilisearch.queryApiKey, "meili-admin");
+});
 
 function apiConfig(search) {
   const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-public-search-`);

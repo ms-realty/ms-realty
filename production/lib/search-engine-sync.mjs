@@ -4,6 +4,13 @@ import path from "node:path";
 import { derivePrimaryAreaSqm } from "./listing-facts.mjs";
 import { fromRoot } from "./paths.mjs";
 import { normalizeSearchIntent } from "./search-intent.mjs";
+import {
+  fetchSearchService,
+  privateSearchServiceNetworkAllowed,
+  readBoundedJsonResponse,
+  SEARCH_QUERY_MAX_BYTES,
+  SearchServiceConfigurationError,
+} from "./search-service-http.mjs";
 import { createLedgerStore } from "./sqlite-ledger.mjs";
 
 export const DEFAULT_SEARCH_DATA_DIR = fromRoot("search", "data");
@@ -16,6 +23,9 @@ export const DEFAULT_SEARCH_OUTBOX_PATH = fromRoot("production", "data", "search
 const SEARCH_ENGINES = new Set(["typesense", "meilisearch"]);
 const APPROVED_PUBLICATION_STATE = "published";
 const BROKER_VERIFIED = "broker_verified";
+const MAX_PUBLIC_SEARCH_HITS = 250;
+const SEARCH_QUERY_TIMEOUT_MS = 4_000;
+const SEARCH_SYNC_TIMEOUT_MS = 20_000;
 const SEARCH_OUTBOX_EVENT_TYPES = new Set(["enqueue", "retry", "delete"]);
 const SEARCH_OUTBOX_STORE = createLedgerStore({
   name: "search_outbox",
@@ -51,10 +61,6 @@ function meilisearchImportBody(body) {
       return JSON.stringify({ ...document, meili_id: meiliId });
     });
   return `${documents.join("\n")}\n`;
-}
-
-function joinUrl(baseUrl, route) {
-  return `${String(baseUrl).replace(/\/+$/, "")}${route}`;
 }
 
 function redactedUrl(value) {
@@ -517,11 +523,18 @@ export async function applySearchAliasPlan(
     engine === "typesense"
       ? { "content-type": "application/json", "x-typesense-api-key": config.apiKey }
       : { "content-type": "application/json", authorization: `Bearer ${config.apiKey}` };
-  return checkedFetch(fetchImpl, joinUrl(config.baseUrl, plan.activation.path), {
-    method: plan.activation.method,
-    headers,
-    body: JSON.stringify(plan.activation.body),
-  });
+  return checkedFetch(
+    fetchImpl,
+    config.baseUrl,
+    plan.activation.path,
+    {
+      method: plan.activation.method,
+      headers,
+      body: JSON.stringify(plan.activation.body),
+    },
+    [200, 201, 202],
+    config,
+  );
 }
 
 export async function runSearchEngineRebuild({
@@ -779,59 +792,142 @@ function isUnavailableError(error) {
   return error?.unavailable === true;
 }
 
-function missingSearchEngineConfig({ baseUrl, apiKey }) {
-  return !String(baseUrl || "").trim() || !String(apiKey || "").trim();
+function missingSearchEngineConfig({ baseUrl, apiKey, queryApiKey }) {
+  return !String(baseUrl || "").trim() || !String(queryApiKey || apiKey || "").trim();
 }
 
-async function checkedFetch(fetchImpl, url, options, acceptedStatuses = [200, 201, 202]) {
-  const response = await fetchImpl(url, options);
-  if (!acceptedStatuses.includes(response.status)) {
-    throw new Error(`Search engine sync failed: ${options.method} ${url} returned ${response.status}`);
-  }
-  return {
-    method: options.method,
-    url: redactedUrl(url),
-    status: response.status,
-    bytes: Buffer.byteLength(options.body || ""),
-  };
-}
-
-async function checkedJson(fetchImpl, url, options, acceptedStatuses = [200]) {
-  let response;
+async function checkedFetch(
+  fetchImpl,
+  baseUrl,
+  route,
+  options,
+  acceptedStatuses = [200, 201, 202],
+  { allowPrivateNetwork = privateSearchServiceNetworkAllowed(), lookupImpl, timeoutMs = SEARCH_SYNC_TIMEOUT_MS } = {},
+) {
+  const { response, url, clearDeadline } = await fetchSearchService({
+    baseUrl,
+    route,
+    fetchImpl,
+    lookupImpl,
+    allowPrivateNetwork,
+    timeoutMs,
+    options,
+  });
   try {
-    response = await fetchImpl(url, options);
-  } catch (cause) {
-    throw new SearchEngineUnavailableError(`Search engine query failed: ${options.method} ${url} could not connect`, { cause });
-  }
-  if (!acceptedStatuses.includes(response.status)) {
-    const error = new Error(`Search engine query failed: ${options.method} ${url} returned ${response.status}`);
-    error.unavailable = isUnavailableStatus(response.status);
-    throw error;
-  }
-  let payload;
-  try {
-    payload = await response.json();
-  } catch (cause) {
-    throw new SearchEngineUnavailableError(`Search engine query failed: ${options.method} ${url} returned invalid JSON`, { cause });
-  }
-  return {
-    payload,
-    operation: {
+    if (!acceptedStatuses.includes(response.status)) {
+      throw new Error(`Search engine sync failed: ${options.method} ${url} returned ${response.status}`);
+    }
+    return {
       method: options.method,
       url: redactedUrl(url),
       status: response.status,
-    },
-  };
+      bytes: Buffer.byteLength(options.body || ""),
+    };
+  } finally {
+    clearDeadline();
+  }
+}
+
+async function checkedJson(
+  fetchImpl,
+  baseUrl,
+  route,
+  options,
+  acceptedStatuses = [200],
+  { allowPrivateNetwork = privateSearchServiceNetworkAllowed(), lookupImpl, timeoutMs = SEARCH_QUERY_TIMEOUT_MS } = {},
+) {
+  let response;
+  let url;
+  let clearDeadline = () => {};
+  try {
+    ({ response, url, clearDeadline } = await fetchSearchService({
+      baseUrl,
+      route,
+      fetchImpl,
+      lookupImpl,
+      allowPrivateNetwork,
+      timeoutMs,
+      options,
+    }));
+  } catch (cause) {
+    if (cause instanceof SearchServiceConfigurationError) throw cause;
+    throw new SearchEngineUnavailableError(`Search engine query failed: ${options.method} ${baseUrl} could not connect`, { cause });
+  }
+  try {
+    if (!acceptedStatuses.includes(response.status)) {
+      const error = new Error(`Search engine query failed: ${options.method} ${url} returned ${response.status}`);
+      error.unavailable = isUnavailableStatus(response.status);
+      throw error;
+    }
+    let payload;
+    try {
+      payload = await readBoundedJsonResponse(response, { maxBytes: SEARCH_QUERY_MAX_BYTES, label: "Search engine query" });
+    } catch (cause) {
+      throw new SearchEngineUnavailableError(
+        `Search engine query failed: ${options.method} ${url} returned invalid JSON: ${cause.message}`,
+        { cause },
+      );
+    }
+    return {
+      payload,
+      operation: {
+        method: options.method,
+        url: redactedUrl(url),
+        status: response.status,
+      },
+    };
+  } finally {
+    clearDeadline();
+  }
+}
+
+function boundedSearchLimit(value, label) {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 1 || number > MAX_PUBLIC_SEARCH_HITS) {
+    throw new Error(`${label} must be an integer from 1 to ${MAX_PUBLIC_SEARCH_HITS}`);
+  }
+  return number;
+}
+
+function responseHitText(value, label, maxLength, { required: isRequired = false } = {}) {
+  if (value === null || value === undefined || value === "") {
+    if (isRequired) throw new SearchEngineUnavailableError(`Search engine response is missing ${label}`);
+    return undefined;
+  }
+  if (typeof value !== "string" || value.length > maxLength) {
+    throw new SearchEngineUnavailableError(`Search engine response has invalid ${label}`);
+  }
+  return value;
 }
 
 function searchHit(doc) {
+  if (!plainObject(doc)) throw new SearchEngineUnavailableError("Search engine response contains an invalid hit");
+  const id = responseHitText(doc.id, "hit id", 256);
+  const sourceListingId = responseHitText(doc.source_listing_id, "source listing id", 256);
+  if (!id && !sourceListingId) {
+    throw new SearchEngineUnavailableError("Search engine response is missing a hit identifier");
+  }
   return {
-    id: doc.id,
-    source_listing_id: doc.source_listing_id,
-    locale: doc.locale,
-    locale_path: doc.locale_path,
-    title: doc.title,
+    id,
+    source_listing_id: sourceListingId,
+    locale: responseHitText(doc.locale, "locale", 32),
+    locale_path: responseHitText(doc.locale_path, "locale path", 2048),
+    title: responseHitText(doc.title, "title", 1000),
   };
+}
+
+function boundedSearchResponse(payload, { engine, limit }) {
+  if (!plainObject(payload) || !Array.isArray(payload.hits)) {
+    throw new SearchEngineUnavailableError(`${engine} response must include a hits array`);
+  }
+  if (payload.hits.length > limit || payload.hits.length > MAX_PUBLIC_SEARCH_HITS) {
+    throw new SearchEngineUnavailableError(`${engine} response returned more than ${limit} hits`);
+  }
+  const rawTotal = engine === "Typesense" ? payload.found ?? 0 : payload.estimatedTotalHits ?? payload.totalHits ?? 0;
+  if (!Number.isSafeInteger(rawTotal) || rawTotal < payload.hits.length) {
+    throw new SearchEngineUnavailableError(`${engine} response has an invalid total hit count`);
+  }
+  return { hits: payload.hits, total: rawTotal };
 }
 
 function assertSearchEngines(report, label) {
@@ -972,6 +1068,9 @@ export async function syncTypesense({
   documents = null,
   schema: suppliedSchema = null,
   fetchImpl = globalThis.fetch,
+  lookupImpl,
+  allowPrivateNetwork = privateSearchServiceNetworkAllowed(),
+  timeoutMs = SEARCH_SYNC_TIMEOUT_MS,
 } = {}) {
   required(baseUrl, "TYPESENSE_URL");
   required(apiKey, "TYPESENSE_API_KEY");
@@ -983,15 +1082,24 @@ export async function syncTypesense({
   const operations = [
     await checkedFetch(
       fetchImpl,
-      joinUrl(baseUrl, "/collections"),
+      baseUrl,
+      "/collections",
       { method: "POST", headers, body: JSON.stringify(schema) },
       [200, 201, 409],
+      { allowPrivateNetwork, lookupImpl, timeoutMs },
     ),
-    await checkedFetch(fetchImpl, joinUrl(baseUrl, `/collections/${encodeURIComponent(collectionName)}/documents/import?action=upsert`), {
-      method: "POST",
-      headers: { "x-typesense-api-key": apiKey, "content-type": "application/x-ndjson" },
-      body,
-    }),
+    await checkedFetch(
+      fetchImpl,
+      baseUrl,
+      `/collections/${encodeURIComponent(collectionName)}/documents/import?action=upsert`,
+      {
+        method: "POST",
+        headers: { "x-typesense-api-key": apiKey, "content-type": "application/x-ndjson" },
+        body,
+      },
+      [200, 201, 202],
+      { allowPrivateNetwork, lookupImpl, timeoutMs },
+    ),
   ];
 
   return {
@@ -1010,6 +1118,9 @@ export async function syncMeilisearch({
   documents = null,
   settings: suppliedSettings = null,
   fetchImpl = globalThis.fetch,
+  lookupImpl,
+  allowPrivateNetwork = privateSearchServiceNetworkAllowed(),
+  timeoutMs = SEARCH_SYNC_TIMEOUT_MS,
 } = {}) {
   required(baseUrl, "MEILI_URL");
   required(apiKey, "MEILI_API_KEY");
@@ -1021,16 +1132,30 @@ export async function syncMeilisearch({
   );
   const auth = { authorization: `Bearer ${apiKey}` };
   const operations = [
-    await checkedFetch(fetchImpl, joinUrl(baseUrl, `/indexes/${encodeURIComponent(indexName)}/settings`), {
-      method: "PATCH",
-      headers: { ...auth, "content-type": "application/json" },
-      body: JSON.stringify(settings),
-    }),
-    await checkedFetch(fetchImpl, joinUrl(baseUrl, `/indexes/${encodeURIComponent(indexName)}/documents?primaryKey=meili_id`), {
-      method: "POST",
-      headers: { ...auth, "content-type": "application/x-ndjson" },
-      body,
-    }),
+    await checkedFetch(
+      fetchImpl,
+      baseUrl,
+      `/indexes/${encodeURIComponent(indexName)}/settings`,
+      {
+        method: "PATCH",
+        headers: { ...auth, "content-type": "application/json" },
+        body: JSON.stringify(settings),
+      },
+      [200, 201, 202],
+      { allowPrivateNetwork, lookupImpl, timeoutMs },
+    ),
+    await checkedFetch(
+      fetchImpl,
+      baseUrl,
+      `/indexes/${encodeURIComponent(indexName)}/documents?primaryKey=meili_id`,
+      {
+        method: "POST",
+        headers: { ...auth, "content-type": "application/x-ndjson" },
+        body,
+      },
+      [200, 201, 202],
+      { allowPrivateNetwork, lookupImpl, timeoutMs },
+    ),
   ];
 
   return {
@@ -1106,6 +1231,7 @@ export function writeSearchEngineSyncReport(report, filePath = DEFAULT_SEARCH_EN
 export async function queryTypesense({
   baseUrl = process.env.TYPESENSE_URL,
   apiKey = process.env.TYPESENSE_API_KEY,
+  queryApiKey = process.env.TYPESENSE_QUERY_API_KEY,
   collectionName = process.env.TYPESENSE_COLLECTION || "ms_realty_listings",
   q = "Sandanski",
   filterBy = "translation_indexable:=true && locale:=bg && source_listing_id:=MS-CRAWL-0001",
@@ -1114,10 +1240,16 @@ export async function queryTypesense({
   sortBy = null,
   queryBy = null,
   fetchImpl = globalThis.fetch,
+  lookupImpl,
+  allowPrivateNetwork = privateSearchServiceNetworkAllowed(),
+  timeoutMs = SEARCH_QUERY_TIMEOUT_MS,
 } = {}) {
   required(baseUrl, "TYPESENSE_URL");
-  required(apiKey, "TYPESENSE_API_KEY");
+  const searchApiKey = queryApiKey
+    ? required(queryApiKey, "TYPESENSE_QUERY_API_KEY")
+    : required(apiKey, "TYPESENSE_API_KEY");
   if (typeof fetchImpl !== "function") throw new Error("fetch is required for Typesense query");
+  const limit = boundedSearchLimit(perPage, "Typesense per_page");
 
   const reference = optionalText(exactReference);
   const queryFields = optionalText(queryBy) || (reference ? "listing_reference,source_listing_id" : "title,description,search_text,location_label,listing_reference");
@@ -1125,7 +1257,7 @@ export async function queryTypesense({
     q: reference || String(q || "").trim() || "*",
     query_by: queryFields,
     filter_by: filterBy,
-    per_page: String(perPage),
+    per_page: String(limit),
   });
   if (reference) {
     params.set("num_typos", "0");
@@ -1134,9 +1266,13 @@ export async function queryTypesense({
   if (sortBy) params.set("sort_by", sortBy);
   const { payload, operation } = await checkedJson(
     fetchImpl,
-    joinUrl(baseUrl, `/collections/${encodeURIComponent(collectionName)}/documents/search?${params}`),
-    { method: "GET", headers: { "x-typesense-api-key": apiKey } },
+    baseUrl,
+    `/collections/${encodeURIComponent(collectionName)}/documents/search?${params}`,
+    { method: "GET", headers: { "x-typesense-api-key": searchApiKey } },
+    [200],
+    { allowPrivateNetwork, lookupImpl, timeoutMs },
   );
+  const bounded = boundedSearchResponse(payload, { engine: "Typesense", limit });
 
   return {
     engine: "typesense",
@@ -1145,29 +1281,42 @@ export async function queryTypesense({
     query: q,
     filter: filterBy,
     operation,
-    total: Number(payload.found || 0),
-    hits: (payload.hits || []).map((hit) => searchHit(hit.document || hit)),
+    total: bounded.total,
+    hits: bounded.hits.map((hit) => searchHit(hit.document || hit)),
   };
 }
 
 export async function queryMeilisearch({
   baseUrl = process.env.MEILI_URL,
   apiKey = process.env.MEILI_API_KEY,
+  queryApiKey = process.env.MEILI_QUERY_API_KEY,
   indexName = process.env.MEILI_INDEX || "ms_realty_listings",
   q = "Sandanski",
   filter = 'translation_indexable = true AND locale = bg AND source_listing_id = "MS-CRAWL-0001"',
   limit = 5,
   fetchImpl = globalThis.fetch,
+  lookupImpl,
+  allowPrivateNetwork = privateSearchServiceNetworkAllowed(),
+  timeoutMs = SEARCH_QUERY_TIMEOUT_MS,
 } = {}) {
   required(baseUrl, "MEILI_URL");
-  required(apiKey, "MEILI_API_KEY");
+  const searchApiKey = queryApiKey ? required(queryApiKey, "MEILI_QUERY_API_KEY") : required(apiKey, "MEILI_API_KEY");
   if (typeof fetchImpl !== "function") throw new Error("fetch is required for Meilisearch query");
+  const boundedLimit = boundedSearchLimit(limit, "Meilisearch limit");
 
-  const { payload, operation } = await checkedJson(fetchImpl, joinUrl(baseUrl, `/indexes/${encodeURIComponent(indexName)}/search`), {
-    method: "POST",
-    headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
-    body: JSON.stringify({ q, filter, limit }),
-  });
+  const { payload, operation } = await checkedJson(
+    fetchImpl,
+    baseUrl,
+    `/indexes/${encodeURIComponent(indexName)}/search`,
+    {
+      method: "POST",
+      headers: { authorization: `Bearer ${searchApiKey}`, "content-type": "application/json" },
+      body: JSON.stringify({ q, filter, limit: boundedLimit }),
+    },
+    [200],
+    { allowPrivateNetwork, lookupImpl, timeoutMs },
+  );
+  const bounded = boundedSearchResponse(payload, { engine: "Meilisearch", limit: boundedLimit });
 
   return {
     engine: "meilisearch",
@@ -1176,8 +1325,8 @@ export async function queryMeilisearch({
     query: q,
     filter,
     operation,
-    total: Number(payload.estimatedTotalHits ?? payload.totalHits ?? 0),
-    hits: (payload.hits || []).map(searchHit),
+    total: bounded.total,
+    hits: bounded.hits.map(searchHit),
   };
 }
 

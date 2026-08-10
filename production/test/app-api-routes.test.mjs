@@ -39,10 +39,11 @@ test("API search preserves complete municipality results when engine hits are tr
   const config = appApiConfigFromEnv({
     ...process.env,
     ...approvedPublicSeedFixtureEnv(),
-    TYPESENSE_URL: "https://typesense.test",
+    TYPESENSE_URL: "https://search.makler-realty.com",
     TYPESENSE_API_KEY: "typesense-key",
     MS_REALTY_EVENT_LEDGER_PATH: tempLedger("app-api-search-events", resetEventLedger),
   });
+  config.search.typesense.lookupImpl = async () => [{ address: "1.1.1.1", family: 4 }];
   config.search.fetchImpl = async (url) => {
     calls.push(String(url));
     return new Response(

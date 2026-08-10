@@ -1971,6 +1971,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
       HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: healthyHermesAgentFetch,
+    lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
     generatedAt: runtimeGeneratedAt,
   });
   delete syncReport.example;

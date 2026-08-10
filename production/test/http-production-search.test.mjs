@@ -27,7 +27,12 @@ test("production Node search renders only IDs returned by the selected engine", 
     search: {
       environment: "production",
       engine: "typesense",
-      typesense: { baseUrl: "https://typesense.test", apiKey: "typesense-test", collectionName: "ms_realty_listings" },
+      typesense: {
+        baseUrl: "https://search.makler-realty.com",
+        apiKey: "typesense-test",
+        collectionName: "ms_realty_listings",
+        lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
+      },
       fetchImpl: async (url, options) => {
         calls.push({ url: String(url), options });
         return {
@@ -58,7 +63,7 @@ test("production Node search renders only IDs returned by the selected engine", 
   assert.equal(response.body.search.backend.engine, "typesense");
   assert.deepEqual(response.body.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
   assert.equal(calls.length, 1);
-  assert.equal(calls[0].url.startsWith("https://typesense.test/collections/ms_realty_listings/documents/search?"), true);
+  assert.equal(calls[0].url.startsWith("https://search.makler-realty.com/collections/ms_realty_listings/documents/search?"), true);
 });
 
 test("production server passes the selected search engine configuration to the Node app", () => {

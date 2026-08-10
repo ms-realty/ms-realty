@@ -651,6 +651,7 @@ async function writeLiveProvisioningFixture(dir, generatedAt = new Date().toISOS
       HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: healthyHermesAgentFetch,
+    lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
     generatedAt,
   });
   return writeLiveServiceProvisioningReport(report, reportPath);
