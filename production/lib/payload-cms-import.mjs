@@ -240,23 +240,51 @@ function desiredTranslations(seed, localeIds) {
   );
 }
 
+function firstNonNullish(values) {
+  for (const value of values) {
+    if (value !== undefined && value !== null) return value;
+  }
+  return null;
+}
+
+function normalizeMediaAlt(value) {
+  return String(value || "").trim();
+}
+
+function mergedMediaDocument(url, variants) {
+  const alts = [...new Set(variants.map((media) => normalizeMediaAlt(media.alt)).filter(Boolean))];
+  const altConflict = alts.length > 1;
+  return {
+    asset_url: firstNonNullish(variants.map((media) => media.asset_url ?? null)),
+    alt: altConflict ? "" : alts[0] || "",
+    height: firstNonNullish(variants.map((media) => media.height ?? null)),
+    is_public: false,
+    kind: firstNonNullish(variants.map((media) => media.kind)) || "unknown",
+    review_status: altConflict
+      ? "review_required"
+      : variants.some((media) => media.is_public === true || media.review_status === "review_required")
+        ? "review_required"
+        : firstNonNullish(variants.map((media) => media.review_status).filter(Boolean)) || "review_required",
+    url,
+    width: firstNonNullish(variants.map((media) => media.width ?? null)),
+  };
+}
+
 function desiredMedia(seed) {
-  return seed.records.flatMap((record) =>
-    (record.media || []).map((media) => ({
-      data: {
-        url: media.url,
-        asset_url: media.asset_url ?? null,
-        alt: media.alt || "",
-        width: media.width ?? null,
-        height: media.height ?? null,
-        kind: media.kind,
-        is_public: false,
-        review_status: media.is_public === true ? "review_required" : media.review_status || "review_required",
-      },
-      key: media.url,
-      match: { url: media.url },
-    })),
-  );
+  const byUrl = new Map();
+  for (const record of seed.records) {
+    for (const media of record.media || []) {
+      const url = requiredText(media.url, "CMS media url", 2000);
+      const variants = byUrl.get(url) || [];
+      variants.push(media);
+      byUrl.set(url, variants);
+    }
+  }
+  return [...byUrl.entries()].map(([url, variants]) => ({
+    data: mergedMediaDocument(url, variants),
+    key: url,
+    match: { url },
+  }));
 }
 
 function desiredTours(seed) {
@@ -331,7 +359,7 @@ function desiredListingRelations(seed, relationIds) {
     id: record.id,
     data: {
       translations: (record.translations || []).map((row) => requiredMapValue(relationIds.translations, relationKey(record.id, row.locale), "Listing translation id")),
-      media: (record.media || []).map((row) => requiredMapValue(relationIds.media, row.url, "Listing media id")),
+      media: [...new Set((record.media || []).map((row) => requiredMapValue(relationIds.media, row.url, "Listing media id")))],
       tour: record.tour ? requiredMapValue(relationIds.tours, record.id, "Listing tour id") : null,
     },
     key: record.id,
@@ -425,11 +453,6 @@ function planRecord({ collection, current, desired, overwriteExisting = false, a
   }
 
   const mergedPatch = patch || {};
-  if (allowListingRelationMerge) {
-    for (const [key, value] of Object.entries(mergedPatch)) {
-      if (!safePatch.ok || !fields.includes(key)) continue;
-    }
-  }
   if (safePatch.ok && safePatch.changed) {
     for (const [key, value] of Object.entries(safePatch.value)) {
       if (!equalNormalized(comparable[key], value)) mergedPatch[key] = value;

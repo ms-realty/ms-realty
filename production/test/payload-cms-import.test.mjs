@@ -6,6 +6,10 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function relationId(value) {
+  return String(value && typeof value === "object" ? value.id || "" : value || "").trim();
+}
+
 function minimalRegistry() {
   return {
     policy: "dynamic_approved",
@@ -254,6 +258,117 @@ function minimalSeed() {
 
 const AUTO_INTEGER_ID_COLLECTIONS = new Set(["locales", "listing_translations", "media_assets", "listing_tours"]);
 
+function duplicateKeyError(message) {
+  const error = new Error(message);
+  error.code = "23505";
+  return error;
+}
+
+function uniqueKeyFor(collection, row) {
+  switch (collection) {
+    case "locales":
+      return `code:${row.code}`;
+    case "listing_translations":
+      return `listing-locale:${relationId(row.listing)}\u0000${relationId(row.locale)}`;
+    case "media_assets":
+      return `url:${row.url}`;
+    case "listing_tours":
+      return `listing:${relationId(row.listing_id)}`;
+    case "search_outbox":
+    case "listing_enrichment_tasks":
+      return row.idempotency_key ? `idempotency:${row.idempotency_key}` : null;
+    default:
+      return null;
+  }
+}
+
+function assertUniqueCreate(rows, collection, document) {
+  const uniqueKey = uniqueKeyFor(collection, document);
+  if (uniqueKey && rows[collection].some((row) => uniqueKeyFor(collection, row) === uniqueKey)) {
+    throw duplicateKeyError(`Duplicate ${collection} unique key ${uniqueKey}`);
+  }
+  if (rows[collection].some((row) => String(row.id) === String(document.id))) {
+    throw duplicateKeyError(`Duplicate ${collection} id ${document.id}`);
+  }
+}
+
+function mediaDedupSeed() {
+  const seed = minimalSeed();
+  const sharedUrl = "https://makler-realty.com/wp-content/uploads/2025/04/shared.jpg";
+  seed.records[0].media = [
+    {
+      url: sharedUrl,
+      asset_url: sharedUrl,
+      alt: "Balcony view",
+      width: 1200,
+      height: 800,
+      kind: "photo",
+      is_public: true,
+      review_status: "approved_imported_photo",
+    },
+    {
+      url: sharedUrl,
+      asset_url: sharedUrl,
+      alt: "Balcony view",
+      width: 1200,
+      height: 800,
+      kind: "photo",
+      is_public: true,
+      review_status: "approved_imported_photo",
+    },
+    {
+      url: "https://makler-realty.com/wp-content/themes/Avenue/images/logo.png",
+      asset_url: null,
+      alt: "Logo",
+      width: null,
+      height: null,
+      kind: "site_chrome",
+      is_public: false,
+      review_status: "reviewed_private",
+    },
+  ];
+  seed.records[0].facts.title = "Seed listing one";
+  seed.records[0].seo.title = "Seed listing one";
+  seed.records[0].source_url = "https://makler-realty.com/listing/test-1";
+
+  seed.records.push({
+    ...clone(seed.records[0]),
+    id: "MS-TEST-0002",
+    source_url: "https://makler-realty.com/listing/test-2",
+    facts: { ...clone(seed.records[0].facts), title: "Seed listing two", h1: "Seed listing two" },
+    seo: { ...clone(seed.records[0].seo), title: "Seed listing two", canonical: "https://makler-realty.com/listing/test-2" },
+    property: "property-MS-TEST-0002",
+    media: [
+      {
+        url: sharedUrl,
+        asset_url: sharedUrl,
+        alt: "Facade view",
+        width: 1200,
+        height: 800,
+        kind: "photo",
+        is_public: true,
+        review_status: "approved_imported_photo",
+      },
+    ],
+    tour: null,
+    translations: [],
+    migration: { record_id: "migration-2", review_state: "review_required", metadata_gaps: [] },
+    routing: { target_path: "/bg/properties/MS-TEST-0002", target_locale: "bg", planned_status: 301, deployable: false, review_required: true },
+  });
+  seed.properties.push({
+    ...clone(seed.properties[0]),
+    id: "property-MS-TEST-0002",
+    legacy_listing_id: "MS-TEST-0002",
+  });
+  seed.summary.listings = 2;
+  seed.summary.properties = 2;
+  seed.summary.mediaAssets = 4;
+  seed.summary.publicGalleryAssets = 3;
+  seed.summary.mediaReviewGatedAssets = 1;
+  seed.summary.tourFields = 1;
+  return seed;
+}
+
 function fakePayload(initial = {}) {
   const rows = Object.fromEntries(
     ["locales", "locations", "properties", "listings", "listing_translations", "media_assets", "listing_tours", "listing_enrichment_tasks", "search_outbox"].map(
@@ -293,6 +408,7 @@ function fakePayload(initial = {}) {
       const document = AUTO_INTEGER_ID_COLLECTIONS.has(collection)
         ? { ...cloned, id: Number.isInteger(cloned.id) ? cloned.id : nextIntegerId[collection]++ }
         : { id: cloned.id || `${collection}-${nextId++}`, ...cloned };
+      assertUniqueCreate(rows, collection, document);
       if (draft) document._status = "draft";
       rows[collection].push(document);
       return clone(document);
@@ -394,6 +510,36 @@ test("Payload CMS importer commits one durable draft graph and reuses it on reru
   assert.equal(second.plan.byCollection.listings.updated, 0);
   assert.equal(second.plan.byCollection.listings.reused, 2);
   assert.equal(target.calls.commit, 2);
+});
+
+test("Payload CMS importer creates one deterministic media asset per URL and dedupes listing relations", async () => {
+  const registry = minimalRegistry();
+  const seed = mediaDedupSeed();
+  const target = fakePayload();
+
+  const report = await runPayloadCmsImport({
+    payload: target.payload,
+    registry,
+    seed,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+
+  assert.equal(report.status, "committed");
+  assert.equal(report.integrity.ok, true);
+  assert.equal(report.plan.byCollection.media_assets.created, 2);
+  assert.equal(target.rows.media_assets.length, 2);
+
+  const sharedAsset = target.rows.media_assets.find((row) => row.url === "https://makler-realty.com/wp-content/uploads/2025/04/shared.jpg");
+  assert.equal(sharedAsset.alt, "");
+  assert.equal(sharedAsset.review_status, "review_required");
+
+  const listingOne = target.rows.listings.find((row) => row.id === "MS-TEST-0001");
+  const listingTwo = target.rows.listings.find((row) => row.id === "MS-TEST-0002");
+  assert.deepEqual(listingOne.media, [...new Set(listingOne.media)]);
+  assert.deepEqual(listingTwo.media, [...new Set(listingTwo.media)]);
+  assert.equal(listingOne.media.includes(sharedAsset.id), true);
+  assert.deepEqual(listingTwo.media, [sharedAsset.id]);
 });
 
 test("Payload CMS importer blocks conflicting operator-edited drafts without writing partial state", async () => {
