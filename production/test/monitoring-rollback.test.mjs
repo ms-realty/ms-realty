@@ -8,6 +8,7 @@ import {
   monitoringRollbackState,
   writeMonitoringRollbackReport,
 } from "../lib/monitoring-rollback.mjs";
+import { fromRoot } from "../lib/paths.mjs";
 
 function report() {
   const releaseId = "release-20260731-001";
@@ -67,6 +68,11 @@ test("monitoring rollback state reports stale, invalid, and example evidence", (
   assert.equal(monitoringRollbackState(reportPath, { now: "2026-07-31T11:00:00.000Z" }).status, "invalid");
   fs.writeFileSync(reportPath, `${JSON.stringify({ ...report(), example: true })}\n`);
   assert.equal(monitoringRollbackState(reportPath, { now: "2026-07-31T11:00:00.000Z" }).status, "example");
+});
+
+test("monitoring rollback state keeps repository evidence paths worktree-independent", () => {
+  const state = monitoringRollbackState(fromRoot("production", "data", "missing-monitoring-rollback-report.json"));
+  assert.equal(state.path, "production/data/missing-monitoring-rollback-report.json");
 });
 
 test("monitoring rollback evidence rejects placeholders and secret-bearing data", () => {
