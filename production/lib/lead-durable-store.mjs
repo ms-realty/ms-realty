@@ -1,5 +1,16 @@
 import { createLeadContactEnvelope } from "./lead-contact-vault.mjs";
 import { containsPlaintextMessageField, createLeadLedgerRow } from "./lead-ledger.mjs";
+import { openPrivateContactEnvelope } from "./private-contact-vault.mjs";
+
+const PLAINTEXT_CONTACT_FIELDS = new Set(["contact", "email", "phone", "whatsapp", "viber"]);
+
+function containsPlaintextContactField(value) {
+  if (Array.isArray(value)) return value.some(containsPlaintextContactField);
+  if (!value || typeof value !== "object") return false;
+  return Object.entries(value).some(
+    ([key, nested]) => PLAINTEXT_CONTACT_FIELDS.has(key.toLowerCase()) || containsPlaintextContactField(nested),
+  );
+}
 
 // Durable persistence for public lead intake, following the same shape as the
 // realty-case Payload authority: a lazily-imported Payload runtime, explicit
@@ -77,6 +88,49 @@ export async function findLeadByIdempotencyKey(idempotencyKey, { payload = null 
   return findOne(runtime, "public_leads", { idempotency_key: { equals: idempotencyKey } });
 }
 
+export async function readLeadIntakesDurably({ contactSecret, payload = null } = {}) {
+  try {
+    const runtime = await runtimePayload(payload);
+    const leadResult = await runtime.find({ collection: "public_leads", depth: 0, overrideAccess: true, pagination: false });
+    if (!Array.isArray(leadResult?.docs)) throw new Error("Payload public_leads query did not return documents");
+
+    const leads = leadResult.docs.map((document) => {
+      const lead = document?.ledger_row;
+      if (!lead?.lead_id || lead.lead_id !== document.lead_id) throw new Error("Payload public_leads ledger_row is invalid");
+      if (containsPlaintextContactField(lead)) {
+        throw new Error("Payload public_leads ledger_row contains plaintext contact data");
+      }
+      if (containsPlaintextMessageField(lead)) {
+        throw new Error("Payload public_leads ledger_row contains a plaintext message");
+      }
+      return lead;
+    });
+    // Leads are append-only. Taking their snapshot first ensures the later
+    // contact snapshot cannot omit an envelope for a lead we already saw.
+    const contactResult = await runtime.find({ collection: "lead_contacts", depth: 0, overrideAccess: true, pagination: false });
+    if (!Array.isArray(contactResult?.docs)) throw new Error("Payload lead_contacts query did not return documents");
+    const leadIds = new Set(leads.map((lead) => lead.lead_id));
+    const contacts = new Map();
+    for (const envelope of contactResult.docs) {
+      if (envelope?.subject_type !== "lead" || !leadIds.has(envelope.subject_id)) continue;
+      const opened = openPrivateContactEnvelope(envelope, {
+        secret: contactSecret,
+        secretName: "MS_REALTY_LEAD_CONTACT_KEY",
+      });
+      if (!contacts.has(opened.subject_id)) contacts.set(opened.subject_id, opened.payload);
+    }
+
+    return leads.map((lead) => {
+      const contact = contacts.get(lead.lead_id);
+      if (!contact) throw new Error(`Payload lead ${lead.lead_id} has no encrypted contact envelope`);
+      return { ...lead, ...contact, contact_available: true };
+    });
+  } catch (error) {
+    if (error instanceof LeadStoreUnavailableError) throw error;
+    throw new LeadStoreUnavailableError("Durable lead store read failed", error);
+  }
+}
+
 export async function persistLeadIntakeDurably({ lead, contactSecret, receivedAt, payload = null } = {}) {
   const ledgerRow = createLeadLedgerRow(lead, { receivedAt, contactSecret });
   const contactEnvelope = createLeadContactEnvelope(lead, { secret: contactSecret, storedAt: receivedAt });
@@ -101,7 +155,7 @@ export async function persistLeadDurably({ ledgerRow, contactEnvelope, payload =
   if (!ledgerRow || typeof ledgerRow !== "object") throw new Error("A privacy-safe ledger row is required");
   const leadId = String(ledgerRow.lead_id || "").trim();
   if (!leadId) throw new Error("The ledger row must carry a lead_id");
-  if (ledgerRow.contact || ledgerRow.email || ledgerRow.phone) {
+  if (containsPlaintextContactField(ledgerRow)) {
     throw new Error("The durable ledger row must not contain raw contact data");
   }
   if (containsPlaintextMessageField(ledgerRow)) {

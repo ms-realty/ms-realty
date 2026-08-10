@@ -19,6 +19,7 @@ import {
   hasRole,
   isAdmin,
   referenceCollectionAccess,
+  serverOwnedCollectionAccess,
 } from "./production/lib/payload-access.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -260,15 +261,14 @@ const caseCollectionsWithAccess = REALTY_CASE_COLLECTIONS.map((collection) => ({
   },
 }));
 
-// Lead intake is written by server code through overrideAccess, so no operator
-// role gets write access here: brokers read their inbox, admins clean up.
-// Contact envelopes stay admin-only even though they hold ciphertext.
+// Lead intake is append-only server-owned state written through overrideAccess.
+// Brokers may read the privacy-safe ledger; contact envelopes stay admin-only.
 const leadCollectionsWithAccess = LEAD_COLLECTIONS.map((collection) => ({
   ...collection,
-  access:
-    collection.slug === "lead_contacts"
-      ? { create: () => false, read: isAdmin, update: () => false, delete: isAdmin }
-      : { create: () => false, read: hasRole("admin", "broker"), update: hasRole("admin", "broker"), delete: isAdmin },
+  access: {
+    ...serverOwnedCollectionAccess,
+    read: collection.slug === "lead_contacts" ? isAdmin : hasRole("admin", "broker"),
+  },
 }));
 
 export default buildConfig({

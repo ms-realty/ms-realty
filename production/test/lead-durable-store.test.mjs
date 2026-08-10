@@ -9,14 +9,17 @@ import {
   leadDurableStoreConfigFromEnv,
   persistLeadIntakeDurably,
   persistLeadDurably,
+  readLeadIntakesDurably,
 } from "../lib/lead-durable-store.mjs";
 
 // A minimal stand-in for the Payload runtime: enough to prove the store's
 // ordering, idempotency, and failure behaviour without a database.
 function fakePayload({ failOn = null } = {}) {
   const rows = { public_leads: [], lead_contacts: [] };
+  const calls = { create: [], find: [] };
   let snapshot = null;
   return {
+    calls,
     rows,
     db: {
       async beginTransaction() {
@@ -32,13 +35,17 @@ function fakePayload({ failOn = null } = {}) {
         snapshot = null;
       },
     },
-    async find({ collection, where, limit }) {
+    async find(input) {
+      calls.find.push(input);
+      const { collection, where, limit } = input;
       const [field, condition] = Object.entries(where || {})[0] || [];
       const wanted = condition?.equals;
       const docs = rows[collection].filter((row) => row[field] === wanted);
       return { docs: limit ? docs.slice(0, limit) : docs };
     },
-    async create({ collection, data }) {
+    async create(input) {
+      calls.create.push(input);
+      const { collection, data } = input;
       if (failOn === collection) throw new Error(`${collection} write rejected`);
       rows[collection].push(data);
       return data;
@@ -98,6 +105,8 @@ test("a lead persists with its encrypted contact envelope and no plaintext", asy
   assert.equal(result.idempotent, false);
   assert.equal(payload.rows.public_leads.length, 1);
   assert.equal(payload.rows.lead_contacts.length, 1);
+  assert.equal(payload.calls.find.every((call) => call.overrideAccess === true), true);
+  assert.equal(payload.calls.create.every((call) => call.overrideAccess === true), true);
 
   const stored = payload.rows.public_leads[0];
   assert.equal(stored.lead_id, ledgerRow().lead_id);
@@ -211,6 +220,199 @@ test("durable lead messages stay encrypted and authorized readback reconstructs 
   assert.equal(joined[0].contact_available, true);
 });
 
+test("durable persistence strips mixed-case nested plaintext message fields", async () => {
+  for (const privateField of ["Message", "MESSAGE_ORIGINAL", "mEsSaGe"]) {
+    const payload = fakePayload();
+    await persistLeadIntakeDurably({
+      lead: {
+        id: `inbox-mixed-case-message-${privateField}`,
+        lead: {
+          id: ledgerRow().lead_id,
+          source: "website_contact_callback",
+          intent: "callback",
+          leadType: "general",
+          contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+          request_details: {
+            nested: [{ safe: "retained" }, { [privateField]: "plaintext private message" }],
+          },
+        },
+        original_language: "en",
+        admin_locale: "en",
+        contact_preference: "email",
+      },
+      contactSecret: "test-only-durable-contact-key-32-characters-minimum",
+      receivedAt: "2026-08-10T09:00:00.000Z",
+      payload,
+    });
+
+    assert.equal(JSON.stringify(payload.rows.public_leads).includes("plaintext private message"), false);
+    assert.deepEqual(payload.rows.public_leads[0].ledger_row.request_details, {
+      nested: [{ safe: "retained" }, {}],
+    });
+  }
+});
+
+test("durable admin readback joins only matching encrypted contacts", async () => {
+  const payload = fakePayload();
+  const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
+  const message = "Please call the durable lead only.";
+  const lead = {
+    id: "inbox-durable-readback",
+    message_original: message,
+    lead: {
+      id: ledgerRow().lead_id,
+      source: "website_contact_callback",
+      intent: "callback",
+      leadType: "general",
+      contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+    },
+    original_language: "en",
+    admin_locale: "en",
+    contact_preference: "email",
+  };
+
+  await persistLeadIntakeDurably({ lead, contactSecret, receivedAt: "2026-08-10T09:00:00.000Z", payload });
+  payload.rows.lead_contacts.push(envelope({ subject_id: "orphan-fixture-lead", ciphertext: "not-valid-base64" }));
+
+  const readFindStart = payload.calls.find.length;
+  const leads = await readLeadIntakesDurably({ contactSecret, payload });
+  assert.deepEqual(
+    payload.calls.find.slice(readFindStart).map(({ collection, depth, overrideAccess, pagination }) => ({
+      collection,
+      depth,
+      overrideAccess,
+      pagination,
+    })),
+    [
+      { collection: "public_leads", depth: 0, overrideAccess: true, pagination: false },
+      { collection: "lead_contacts", depth: 0, overrideAccess: true, pagination: false },
+    ],
+  );
+  assert.equal(leads.length, 1);
+  assert.equal(leads[0].lead_id, lead.lead.id);
+  assert.deepEqual(leads[0].contact, lead.lead.contact);
+  assert.equal(leads[0].message_original, message);
+  assert.equal(leads[0].contact_available, true);
+});
+
+test("durable admin readback takes the lead snapshot before querying contacts", async () => {
+  const payload = fakePayload();
+  const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
+  await persistLeadIntakeDurably({
+    lead: {
+      id: "inbox-durable-snapshot-order",
+      lead: {
+        id: ledgerRow().lead_id,
+        source: "website_contact_callback",
+        intent: "callback",
+        leadType: "general",
+        contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+      },
+      original_language: "en",
+      admin_locale: "en",
+      contact_preference: "email",
+    },
+    contactSecret,
+    receivedAt: "2026-08-10T09:00:00.000Z",
+    payload,
+  });
+
+  const find = payload.find.bind(payload);
+  let releaseLeadQuery;
+  let markLeadQueryStarted;
+  let contactQueryStarted = false;
+  const leadQueryStarted = new Promise((resolve) => {
+    markLeadQueryStarted = resolve;
+  });
+  payload.find = async (query) => {
+    if (query.collection === "public_leads") {
+      return new Promise((resolve) => {
+        releaseLeadQuery = () => resolve(find(query));
+        markLeadQueryStarted();
+      });
+    }
+    if (query.collection === "lead_contacts") contactQueryStarted = true;
+    return find(query);
+  };
+
+  const pendingRead = readLeadIntakesDurably({ contactSecret, payload });
+  await leadQueryStarted;
+  assert.equal(contactQueryStarted, false, "the contact query must wait for a stable lead snapshot");
+  releaseLeadQuery();
+
+  const leads = await pendingRead;
+  assert.equal(contactQueryStarted, true);
+  assert.equal(leads.length, 1);
+});
+
+test("durable admin readback rejects plaintext private fields in stored ledger rows", async () => {
+  const payload = fakePayload();
+  const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
+  await persistLeadIntakeDurably({
+    lead: {
+      id: "inbox-durable-privacy-readback",
+      lead: {
+        id: ledgerRow().lead_id,
+        source: "website_contact_callback",
+        intent: "callback",
+        leadType: "general",
+        contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+      },
+      original_language: "en",
+      admin_locale: "en",
+      contact_preference: "email",
+    },
+    contactSecret,
+    receivedAt: "2026-08-10T09:00:00.000Z",
+    payload,
+  });
+
+  const stored = payload.rows.public_leads[0].ledger_row;
+  for (const [field, value, expectedCause] of [
+    ["contact", { email: "plaintext@example.invalid" }, /plaintext contact data/],
+    ...["email", "phone", "contact", "whatsapp", "viber", "Email", "eMail", "PHONE", "ConTaCt", "WhatsApp", "VIBER"].map((privateField) => [
+      "request_details",
+      { arbitrary: { nested: { [privateField]: "plaintext private contact" } } },
+      /plaintext contact data/,
+    ]),
+    ["request_details", { nested: { message_original: "plaintext private note" } }, /plaintext message/],
+    ...["Message", "MESSAGE_ORIGINAL", "mEsSaGe"].map((privateField) => [
+      "request_details",
+      { arbitrary: [{ nested: { [privateField]: "plaintext private message" } }] },
+      /plaintext message/,
+    ]),
+  ]) {
+    const hadField = Object.hasOwn(stored, field);
+    const previous = stored[field];
+    stored[field] = value;
+    await assert.rejects(
+      () => readLeadIntakesDurably({ contactSecret, payload }),
+      (error) =>
+        error instanceof LeadStoreUnavailableError &&
+        error.code === "lead_store_unavailable" &&
+        expectedCause.test(error.cause?.message || ""),
+    );
+    if (hadField) stored[field] = previous;
+    else delete stored[field];
+  }
+});
+
+test("durable admin readback fails closed when Payload cannot be read", async () => {
+  const payload = fakePayload();
+  payload.find = async () => {
+    throw new Error("database unavailable");
+  };
+
+  await assert.rejects(
+    () =>
+      readLeadIntakesDurably({
+        contactSecret: "test-only-durable-contact-key-32-characters-minimum",
+        payload,
+      }),
+    (error) => error instanceof LeadStoreUnavailableError && error.code === "lead_store_unavailable",
+  );
+});
+
 test("a repeated lead id never overwrites the original", async () => {
   const payload = fakePayload();
   await persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload });
@@ -267,6 +469,37 @@ test("the store refuses malformed input outright", async () => {
     () => persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: { subject_id: "x" }, payload }),
     /must be encrypted/,
   );
+});
+
+test("durable persistence rejects mixed-case nested plaintext contact fields before writing", async () => {
+  for (const privateField of ["Email", "eMail", "PHONE", "ConTaCt", "WhatsApp", "VIBER"]) {
+    const payload = fakePayload();
+    await assert.rejects(
+      () =>
+        persistLeadIntakeDurably({
+          lead: {
+            id: `inbox-mixed-case-${privateField}`,
+            lead: {
+              id: ledgerRow().lead_id,
+              source: "website_contact_callback",
+              intent: "callback",
+              leadType: "general",
+              contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+              request_details: { nested: { [privateField]: "plaintext private contact" } },
+            },
+            original_language: "en",
+            admin_locale: "en",
+            contact_preference: "email",
+          },
+          contactSecret: "test-only-durable-contact-key-32-characters-minimum",
+          receivedAt: "2026-08-10T09:00:00.000Z",
+          payload,
+        }),
+      /must not contain raw contact data/,
+    );
+    assert.equal(payload.rows.public_leads.length, 0);
+    assert.equal(payload.rows.lead_contacts.length, 0);
+  }
 });
 
 test("the collections keep contact envelopes opaque and ledger rows immutable", () => {

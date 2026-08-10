@@ -3,7 +3,6 @@ import path from "node:path";
 import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import {
-  DEFAULT_LEAD_LEDGER_PATH,
   assertLeadLedger,
   readLeadLedger,
   resetLeadLedger,
@@ -24,25 +23,21 @@ import {
   resetListingEdits,
 } from "../lib/listing-edits.mjs";
 import {
-  DEFAULT_REPLY_OUTBOX_PATH,
   assertReplyOutbox,
   readReplyOutbox,
   resetReplyOutbox,
 } from "../lib/lead-replies.mjs";
 import {
-  DEFAULT_VIEWING_LEDGER_PATH,
   assertViewingLedger,
   readViewings,
   resetViewingLedger,
 } from "../lib/viewing-ledger.mjs";
 import {
-  DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
   assertViewingFollowUpLedger,
   readViewingFollowUps,
   resetViewingFollowUpLedger,
 } from "../lib/viewing-follow-ups.mjs";
 import {
-  DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
   assertLeadPipelineOutcomes,
   readLeadPipelineOutcomes,
   resetLeadPipelineOutcomes,
@@ -59,7 +54,6 @@ import {
   resetSellerPipeline,
 } from "../lib/seller-pipeline.mjs";
 import {
-  DEFAULT_DEAL_LEDGER_PATH,
   assertDealLedger,
   readDeals,
   resetDealLedger,
@@ -80,13 +74,11 @@ import {
   resetEventLedger,
 } from "../lib/events.mjs";
 import {
-  DEFAULT_CONSENT_LEDGER_PATH,
   assertConsentLedger,
   readConsentLedger,
   resetConsentLedger,
 } from "../lib/consent-ledger.mjs";
 import {
-  DEFAULT_AUDIT_LOG_PATH,
   assertAuditLog,
   readAuditLog,
   resetAuditLog,
@@ -140,7 +132,6 @@ const slugHistoryPath = path.join(smokeDir, "slug-history.jsonl");
 const publicContactVaultPath = path.join(smokeDir, "public-contacts.jsonl");
 const publicContactKey = "http-smoke-public-contact-key-2026";
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
-const auditLogExamplePath = fromRoot("production", "data", "audit-log.jsonl.example");
 
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
@@ -618,11 +609,9 @@ smoke.adminHtml = await dispatchHttp(app, {
 assertHttpSmoke(smoke);
 const ledger = readLeadLedger(leadLedgerPath);
 assertLeadLedger(ledger);
-fs.copyFileSync(leadLedgerPath, DEFAULT_LEAD_LEDGER_PATH);
 smoke.leadLedger = { rows: ledger.length };
 const outbox = readReplyOutbox(replyOutboxPath);
 assertReplyOutbox(outbox);
-fs.copyFileSync(replyOutboxPath, DEFAULT_REPLY_OUTBOX_PATH);
 smoke.replyOutbox = { rows: outbox.length };
 const languageRequests = readLanguageRequests(languageRequestPath);
 assertLanguageRequests(languageRequests);
@@ -638,15 +627,12 @@ if (listingEdits.length) throw new Error("Legacy listing edit handoff must not w
 smoke.listingEditLedger = { rows: listingEdits.length };
 const viewings = readViewings(viewingLedgerPath);
 assertViewingLedger(viewings);
-fs.copyFileSync(viewingLedgerPath, DEFAULT_VIEWING_LEDGER_PATH);
 smoke.viewingLedger = { rows: viewings.length };
 const viewingFollowUps = readViewingFollowUps(viewingFollowUpLedgerPath);
 assertViewingFollowUpLedger(viewingFollowUps);
-fs.copyFileSync(viewingFollowUpLedgerPath, DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH);
 smoke.viewingFollowUpLedger = { rows: viewingFollowUps.length };
 const leadPipelineOutcomes = readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath);
 assertLeadPipelineOutcomes(leadPipelineOutcomes);
-fs.copyFileSync(leadPipelineOutcomeLedgerPath, DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH);
 smoke.leadPipelineOutcomeLedger = { rows: leadPipelineOutcomes.length };
 const savedSearches = readSavedSearches(savedSearchLedgerPath);
 assertSavedSearches(savedSearches);
@@ -662,7 +648,6 @@ assertSellerPipeline(sellerPipeline);
 smoke.sellerPipelineLedger = { rows: sellerPipeline.length };
 const deals = readDeals(dealLedgerPath);
 assertDealLedger(deals);
-fs.copyFileSync(dealLedgerPath, DEFAULT_DEAL_LEDGER_PATH);
 smoke.dealLedger = { rows: deals.length };
 const brokerContacts = readBrokerContacts(brokerContactLedgerPath);
 assertBrokerContacts(brokerContacts);
@@ -678,15 +663,12 @@ smoke.eventLedger = {
 };
 const consents = readConsentLedger(consentLedgerPath);
 assertConsentLedger(consents);
-fs.copyFileSync(consentLedgerPath, DEFAULT_CONSENT_LEDGER_PATH);
 smoke.consentLedger = {
   rows: consents.length,
   byType: consents.reduce((counts, row) => ({ ...counts, [row.consent_type]: (counts[row.consent_type] || 0) + 1 }), {}),
 };
 const auditRows = readAuditLog(auditLogPath);
 assertAuditLog(auditRows);
-fs.copyFileSync(auditLogPath, DEFAULT_AUDIT_LOG_PATH);
-fs.copyFileSync(auditLogPath, auditLogExamplePath);
 smoke.auditLog = {
   rows: auditRows.length,
   byAction: auditRows.reduce((counts, row) => ({ ...counts, [row.action]: (counts[row.action] || 0) + 1 }), {}),

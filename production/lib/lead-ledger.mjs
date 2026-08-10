@@ -63,7 +63,7 @@ export function containsPlaintextMessageField(value) {
   if (Array.isArray(value)) return value.some(containsPlaintextMessageField);
   if (!value || typeof value !== "object") return false;
   return Object.entries(value).some(
-    ([key, nested]) => PLAINTEXT_MESSAGE_FIELDS.has(key) || containsPlaintextMessageField(nested),
+    ([key, nested]) => PLAINTEXT_MESSAGE_FIELDS.has(key.toLowerCase()) || containsPlaintextMessageField(nested),
   );
 }
 
@@ -72,7 +72,7 @@ function withoutPlaintextMessageFields(value) {
   if (!value || typeof value !== "object") return value;
   return Object.fromEntries(
     Object.entries(value)
-      .filter(([key]) => !PLAINTEXT_MESSAGE_FIELDS.has(key))
+      .filter(([key]) => !PLAINTEXT_MESSAGE_FIELDS.has(key.toLowerCase()))
       .map(([key, nested]) => [key, withoutPlaintextMessageFields(nested)]),
   );
 }
