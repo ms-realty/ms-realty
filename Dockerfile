@@ -44,4 +44,8 @@ COPY --from=build --chown=nextjs:nodejs /app /app
 USER nextjs
 EXPOSE 8080
 
-CMD ["./node_modules/.bin/next", "start", "-H", "0.0.0.0", "-p", "8080"]
+# The image carries the human-reviewed launch inputs, while Payload connectivity
+# depends on the secrets attached to this exact Worker version. Refresh only
+# that redacted runtime evidence on every wake, then rebuild the aggregate
+# readiness snapshot before serving health/readiness requests.
+CMD ["sh", "-c", "node production/scripts/build-payload-runtime-report.mjs && node production/scripts/build-launch-readiness.mjs && exec ./node_modules/.bin/next start -H 0.0.0.0 -p 8080"]
