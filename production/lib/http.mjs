@@ -722,6 +722,7 @@ export function createHttpApp({
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
   payloadListingRuntime = null,
+  payloadListingEnv = process.env,
   receivedAt,
   requestedAt,
   editedAt,
@@ -1073,7 +1074,7 @@ export function createHttpApp({
     );
   const currentListingManagerPayload = async (url, operatorId = null) =>
     renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: process.env }),
+      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
       translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       status: url.searchParams.get("status") || "",
@@ -1090,7 +1091,7 @@ export function createHttpApp({
     renderAdminListingEditorPayload(
       activeRegistry,
       url.searchParams.get("locale") || "en",
-      await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: process.env }),
+      await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
       url.searchParams.get("listingId"),
       readListingEdits(listingEditLedgerPath || undefined),
       latestTranslationTasks(currentTranslationTasks()),
@@ -1099,7 +1100,7 @@ export function createHttpApp({
     );
   const currentTranslationQueuePayload = async (url, operatorId = null) =>
     renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: process.env }),
+      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
       translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       targetLocale: url.searchParams.get("targetLocale") || "",
@@ -2451,7 +2452,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const result = await saveListingDraft(currentSeed(), {
-          env: process.env,
+          env: payloadListingEnv,
           payload: payloadListingRuntime,
           principal,
           input: listingEditInput(request),
@@ -2515,7 +2516,7 @@ export function createHttpApp({
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["editor"]);
         const result = await saveBulkListingStatusDrafts(currentSeed(), {
-          env: process.env,
+          env: payloadListingEnv,
           payload: payloadListingRuntime,
           principal,
           input,

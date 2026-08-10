@@ -427,6 +427,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     // This integration fixture exercises the legacy file adapter. The
     // process-level durable env above is only for the public UI contract.
     leadDurableStore: { leadDurableStoreEnabled: false },
+    payloadListingEnv: {},
     leadLedgerPath,
     leadAssignmentLedgerPath,
     leadContactVaultPath,

@@ -68,6 +68,7 @@ async function withServer(fn) {
       // This integration fixture exercises the legacy file adapter. Enabled
       // UI readiness is installed only by the one end-to-end test below.
       leadDurableStore: { leadDurableStoreEnabled: false },
+      payloadListingEnv: {},
       leadLedgerPath,
       replyOutboxPath,
       languageRequestPath,
