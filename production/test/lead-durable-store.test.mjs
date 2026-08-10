@@ -16,8 +16,10 @@ import {
 // ordering, idempotency, and failure behaviour without a database.
 function fakePayload({ failOn = null } = {}) {
   const rows = { public_leads: [], lead_contacts: [] };
+  const calls = { create: [], find: [] };
   let snapshot = null;
   return {
+    calls,
     rows,
     db: {
       async beginTransaction() {
@@ -33,13 +35,17 @@ function fakePayload({ failOn = null } = {}) {
         snapshot = null;
       },
     },
-    async find({ collection, where, limit }) {
+    async find(input) {
+      calls.find.push(input);
+      const { collection, where, limit } = input;
       const [field, condition] = Object.entries(where || {})[0] || [];
       const wanted = condition?.equals;
       const docs = rows[collection].filter((row) => row[field] === wanted);
       return { docs: limit ? docs.slice(0, limit) : docs };
     },
-    async create({ collection, data }) {
+    async create(input) {
+      calls.create.push(input);
+      const { collection, data } = input;
       if (failOn === collection) throw new Error(`${collection} write rejected`);
       rows[collection].push(data);
       return data;
@@ -99,6 +105,8 @@ test("a lead persists with its encrypted contact envelope and no plaintext", asy
   assert.equal(result.idempotent, false);
   assert.equal(payload.rows.public_leads.length, 1);
   assert.equal(payload.rows.lead_contacts.length, 1);
+  assert.equal(payload.calls.find.every((call) => call.overrideAccess === true), true);
+  assert.equal(payload.calls.create.every((call) => call.overrideAccess === true), true);
 
   const stored = payload.rows.public_leads[0];
   assert.equal(stored.lead_id, ledgerRow().lead_id);
@@ -234,7 +242,20 @@ test("durable admin readback joins only matching encrypted contacts", async () =
   await persistLeadIntakeDurably({ lead, contactSecret, receivedAt: "2026-08-10T09:00:00.000Z", payload });
   payload.rows.lead_contacts.push(envelope({ subject_id: "orphan-fixture-lead", ciphertext: "not-valid-base64" }));
 
+  const readFindStart = payload.calls.find.length;
   const leads = await readLeadIntakesDurably({ contactSecret, payload });
+  assert.deepEqual(
+    payload.calls.find.slice(readFindStart).map(({ collection, depth, overrideAccess, pagination }) => ({
+      collection,
+      depth,
+      overrideAccess,
+      pagination,
+    })),
+    [
+      { collection: "public_leads", depth: 0, overrideAccess: true, pagination: false },
+      { collection: "lead_contacts", depth: 0, overrideAccess: true, pagination: false },
+    ],
+  );
   assert.equal(leads.length, 1);
   assert.equal(leads[0].lead_id, lead.lead.id);
   assert.deepEqual(leads[0].contact, lead.lead.contact);
