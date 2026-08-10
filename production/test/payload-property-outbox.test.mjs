@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import config, {
   listingDeleteSearchOutboxHook,
+  listingSearchOutboxHook,
   propertyDeleteSearchOutboxHook,
   propertySearchOutboxHook,
 } from "../../payload.config.js";
@@ -36,9 +37,29 @@ test("property change enqueues an upsert for its legacy listing", async () => {
         payload: { schema_version: 1, listing_id: "MS-CRAWL-0001", change_token: "2026-07-30T10:00:00.000Z" },
         attempts: 0,
       },
+      overrideAccess: true,
       req: { payload: fake.payload },
     },
   ]);
+});
+
+test("listing changes use internal authority for server-owned work items", async () => {
+  const fake = fakePayload();
+  const req = { payload: fake.payload };
+  const doc = {
+    id: "MS-CRAWL-0001",
+    property: "property-MS-CRAWL-0001",
+    updatedAt: "2026-07-30T10:00:00.000Z",
+  };
+
+  assert.equal(await listingSearchOutboxHook({ doc, operation: "update", req }), doc);
+  assert.deepEqual(
+    fake.creates.map(({ collection, overrideAccess }) => ({ collection, overrideAccess })),
+    [
+      { collection: "listing_enrichment_tasks", overrideAccess: true },
+      { collection: "search_outbox", overrideAccess: true },
+    ],
+  );
 });
 
 test("listing deletion enqueues an unlinked delete event after the Listing is gone", async () => {
