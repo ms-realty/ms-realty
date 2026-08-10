@@ -317,7 +317,7 @@ test("durable admin readback rejects plaintext private fields in stored ledger r
   const stored = payload.rows.public_leads[0].ledger_row;
   for (const [field, value, expectedCause] of [
     ["contact", { email: "plaintext@example.invalid" }, /plaintext contact data/],
-    ...["email", "phone", "contact", "whatsapp", "viber"].map((privateField) => [
+    ...["email", "phone", "contact", "whatsapp", "viber", "Email", "PHONE", "ConTaCt", "WhatsApp", "VIBER"].map((privateField) => [
       "request_details",
       { arbitrary: { nested: { [privateField]: "plaintext private contact" } } },
       /plaintext contact data/,
@@ -411,6 +411,37 @@ test("the store refuses malformed input outright", async () => {
     () => persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: { subject_id: "x" }, payload }),
     /must be encrypted/,
   );
+});
+
+test("durable persistence rejects mixed-case nested plaintext contact fields before writing", async () => {
+  for (const privateField of ["Email", "PHONE", "ConTaCt", "WhatsApp", "VIBER"]) {
+    const payload = fakePayload();
+    await assert.rejects(
+      () =>
+        persistLeadIntakeDurably({
+          lead: {
+            id: `inbox-mixed-case-${privateField}`,
+            lead: {
+              id: ledgerRow().lead_id,
+              source: "website_contact_callback",
+              intent: "callback",
+              leadType: "general",
+              contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+              request_details: { nested: { [privateField]: "plaintext private contact" } },
+            },
+            original_language: "en",
+            admin_locale: "en",
+            contact_preference: "email",
+          },
+          contactSecret: "test-only-durable-contact-key-32-characters-minimum",
+          receivedAt: "2026-08-10T09:00:00.000Z",
+          payload,
+        }),
+      /must not contain raw contact data/,
+    );
+    assert.equal(payload.rows.public_leads.length, 0);
+    assert.equal(payload.rows.lead_contacts.length, 0);
+  }
 });
 
 test("the collections keep contact envelopes opaque and ledger rows immutable", () => {

@@ -8,7 +8,7 @@ function containsPlaintextContactField(value) {
   if (Array.isArray(value)) return value.some(containsPlaintextContactField);
   if (!value || typeof value !== "object") return false;
   return Object.entries(value).some(
-    ([key, nested]) => PLAINTEXT_CONTACT_FIELDS.has(key) || containsPlaintextContactField(nested),
+    ([key, nested]) => PLAINTEXT_CONTACT_FIELDS.has(key.toLowerCase()) || containsPlaintextContactField(nested),
   );
 }
 
