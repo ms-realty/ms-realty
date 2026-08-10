@@ -1,6 +1,11 @@
 import fs from "node:fs";
 import { fromRoot } from "./paths.mjs";
-import { appendPrivateContact, createPrivateContactEnvelope, readPrivateContacts } from "./private-contact-vault.mjs";
+import {
+  appendPrivateContact,
+  createPrivateContactEnvelope,
+  openPrivateContactEnvelope,
+  readPrivateContacts,
+} from "./private-contact-vault.mjs";
 
 export const DEFAULT_LEAD_CONTACT_VAULT_PATH = fromRoot("production", "data", "lead-contact-vault.jsonl");
 
@@ -9,7 +14,19 @@ function contactPayload(lead) {
   if (!lead.lead?.id || !contact || typeof contact !== "object" || !Object.keys(contact).length) {
     throw new Error("Lead contact vault requires a lead id and contact data");
   }
-  return { contact, contact_preference: lead.contact_preference || null };
+  const message = String(lead.message_original || lead.message || lead.lead?.message || "").trim();
+  return {
+    contact,
+    contact_preference: lead.contact_preference || null,
+    ...(message ? { message_original: message.slice(0, 2000) } : {}),
+  };
+}
+
+function joinLeadContacts(leads, contacts) {
+  return leads.map((lead) => {
+    const privateContact = contacts.get(lead.lead_id);
+    return privateContact ? { ...lead, ...privateContact, contact_available: true } : lead;
+  });
 }
 
 export function createLeadContactEnvelope(
@@ -45,9 +62,17 @@ export function readLeadContacts(filePath = DEFAULT_LEAD_CONTACT_VAULT_PATH, sec
 
 export function withLeadContacts(leads, { filePath = DEFAULT_LEAD_CONTACT_VAULT_PATH, secret } = {}) {
   if (!filePath || !fs.existsSync(filePath)) return leads;
-  const contacts = readLeadContacts(filePath, secret);
-  return leads.map((lead) => {
-    const privateContact = contacts.get(lead.lead_id);
-    return privateContact ? { ...lead, ...privateContact, contact_available: true } : lead;
-  });
+  return joinLeadContacts(leads, readLeadContacts(filePath, secret));
+}
+
+export function withLeadContactEnvelopes(leads, envelopes, { secret } = {}) {
+  const contacts = new Map();
+  for (const envelope of envelopes || []) {
+    const opened = openPrivateContactEnvelope(envelope, {
+      secret,
+      secretName: "MS_REALTY_LEAD_CONTACT_KEY",
+    });
+    if (opened.subject_type === "lead") contacts.set(opened.subject_id, opened.payload);
+  }
+  return joinLeadContacts(leads, contacts);
 }

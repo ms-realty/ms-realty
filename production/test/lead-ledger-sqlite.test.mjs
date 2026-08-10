@@ -14,6 +14,8 @@ import {
   sqlitePathFor,
 } from "../lib/lead-ledger.mjs";
 
+const CONTACT_SECRET = "test-only-lead-contact-key-32-characters-minimum";
+
 function leadFixture(id, email) {
   return {
     id: `inbox-${id}`,
@@ -45,8 +47,16 @@ function tempLedger(name) {
 test("sqlite store keeps the append/read contract and mirrors JSONL", () => {
   const file = tempLedger("roundtrip");
   resetLeadLedger(file);
-  const first = appendLead(leadFixture("lead-sqlite-1", "Buyer@example.com"), { filePath: file, receivedAt: "2026-07-20T10:00:00Z" });
-  const second = appendLead(leadFixture("lead-sqlite-2", "buyer@example.com"), { filePath: file, receivedAt: "2026-07-20T10:05:00Z" });
+  const first = appendLead(leadFixture("lead-sqlite-1", "Buyer@example.com"), {
+    filePath: file,
+    receivedAt: "2026-07-20T10:00:00Z",
+    contactSecret: CONTACT_SECRET,
+  });
+  const second = appendLead(leadFixture("lead-sqlite-2", "buyer@example.com"), {
+    filePath: file,
+    receivedAt: "2026-07-20T10:05:00Z",
+    contactSecret: CONTACT_SECRET,
+  });
 
   assert.equal(first.duplicate_status, "new_contact");
   assert.equal(second.duplicate_status, "possible_duplicate", "indexed fingerprint lookup finds the earlier lead");
@@ -72,10 +82,20 @@ test("sqlite store keeps the append/read contract and mirrors JSONL", () => {
 test("external JSONL replacement rebuilds the sqlite store (fixture/restore path)", () => {
   const file = tempLedger("reconcile");
   resetLeadLedger(file);
-  appendLead(leadFixture("lead-original", "a@example.com"), { filePath: file, receivedAt: "2026-07-20T10:00:00Z" });
+  appendLead(leadFixture("lead-original", "a@example.com"), {
+    filePath: file,
+    receivedAt: "2026-07-20T10:00:00Z",
+    contactSecret: CONTACT_SECRET,
+  });
 
   const fixtureRows = [
-    { ...appendLead(leadFixture("lead-fixture", "f@example.com"), { filePath: tempLedger("fixture-source"), receivedAt: "2026-07-20T11:00:00Z" }) },
+    {
+      ...appendLead(leadFixture("lead-fixture", "f@example.com"), {
+        filePath: tempLedger("fixture-source"),
+        receivedAt: "2026-07-20T11:00:00Z",
+        contactSecret: CONTACT_SECRET,
+      }),
+    },
   ];
   fs.writeFileSync(file, `${fixtureRows.map((row) => JSON.stringify(row)).join("\n")}\n`);
 
@@ -86,7 +106,11 @@ test("external JSONL replacement rebuilds the sqlite store (fixture/restore path
     "store follows the externally replaced JSONL mirror",
   );
 
-  appendLead(leadFixture("lead-after-restore", "b@example.com"), { filePath: file, receivedAt: "2026-07-20T12:00:00Z" });
+  appendLead(leadFixture("lead-after-restore", "b@example.com"), {
+    filePath: file,
+    receivedAt: "2026-07-20T12:00:00Z",
+    contactSecret: CONTACT_SECRET,
+  });
   assert.deepEqual(
     readLeadLedger(file).map((row) => row.lead_id),
     ["lead-fixture", "lead-after-restore"],
@@ -97,7 +121,11 @@ test("external JSONL replacement rebuilds the sqlite store (fixture/restore path
 test("sqlite store is append-only", () => {
   const file = tempLedger("append-only");
   resetLeadLedger(file);
-  appendLead(leadFixture("lead-immutable", "c@example.com"), { filePath: file, receivedAt: "2026-07-20T10:00:00Z" });
+  appendLead(leadFixture("lead-immutable", "c@example.com"), {
+    filePath: file,
+    receivedAt: "2026-07-20T10:00:00Z",
+    contactSecret: CONTACT_SECRET,
+  });
 
   const db = new DatabaseSync(sqlitePathFor(file));
   assert.throws(() => db.prepare("UPDATE leads SET source = ? WHERE lead_id = ?").run("tampered", "lead-immutable"), /append-only/);
@@ -108,8 +136,16 @@ test("sqlite store is append-only", () => {
 test("import migrates legacy JSONL and export reproduces identical JSONL", () => {
   const legacySource = tempLedger("legacy-source");
   resetLeadLedger(legacySource);
-  appendLead(leadFixture("lead-legacy-1", "d@example.com"), { filePath: legacySource, receivedAt: "2026-07-20T09:00:00Z" });
-  appendLead(leadFixture("lead-legacy-2", "e@example.com"), { filePath: legacySource, receivedAt: "2026-07-20T09:05:00Z" });
+  appendLead(leadFixture("lead-legacy-1", "d@example.com"), {
+    filePath: legacySource,
+    receivedAt: "2026-07-20T09:00:00Z",
+    contactSecret: CONTACT_SECRET,
+  });
+  appendLead(leadFixture("lead-legacy-2", "e@example.com"), {
+    filePath: legacySource,
+    receivedAt: "2026-07-20T09:05:00Z",
+    contactSecret: CONTACT_SECRET,
+  });
   const legacyJsonl = fs.readFileSync(legacySource, "utf8");
 
   const migrated = tempLedger("migrated");
@@ -127,7 +163,11 @@ test("import migrates legacy JSONL and export reproduces identical JSONL", () =>
 test("reset clears both the sqlite store and the JSONL mirror", () => {
   const file = tempLedger("reset");
   resetLeadLedger(file);
-  appendLead(leadFixture("lead-reset", "g@example.com"), { filePath: file, receivedAt: "2026-07-20T10:00:00Z" });
+  appendLead(leadFixture("lead-reset", "g@example.com"), {
+    filePath: file,
+    receivedAt: "2026-07-20T10:00:00Z",
+    contactSecret: CONTACT_SECRET,
+  });
   assert.equal(readLeadLedger(file).length, 1);
 
   resetLeadLedger(file);

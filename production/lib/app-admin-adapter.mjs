@@ -1356,11 +1356,18 @@ function appendReply(input, config) {
 }
 
 async function draftReply(input, config) {
-  return createHermesReplyDraft(readLeadLedger(config.leadLedgerPath), input, {
-    auditLogPath: config.auditLogPath,
-    provider: config.hermesReplyProvider || undefined,
-    recordedAt: config.reviewedAt || config.editedAt,
-  });
+  return createHermesReplyDraft(
+    withLeadContacts(readLeadLedger(config.leadLedgerPath), {
+      filePath: config.leadContactVaultPath,
+      secret: config.leadContactKey,
+    }),
+    input,
+    {
+      auditLogPath: config.auditLogPath,
+      provider: config.hermesReplyProvider || undefined,
+      recordedAt: config.reviewedAt || config.editedAt,
+    },
+  );
 }
 
 function persistEditorChange(result, config) {
@@ -1892,7 +1899,11 @@ function appendBrokerLeadEntry(input, registry, config) {
     secret: config.leadContactKey,
     storedAt: recordedAt,
   });
-  const ledger = appendLead(lead, { filePath: config.leadLedgerPath, receivedAt: recordedAt });
+  const ledger = appendLead(lead, {
+    filePath: config.leadLedgerPath,
+    receivedAt: recordedAt,
+    contactSecret: config.leadContactKey,
+  });
   const consent = appendConsentRecord(
     createConsentRecord(
       {

@@ -2660,7 +2660,7 @@ export function createHttpApp({
           secret: leadContactKey,
           storedAt: receivedAt,
         });
-        const ledger = appendLead(lead, { filePath: leadLedgerPath || undefined, receivedAt });
+        const ledger = appendLead(lead, { filePath: leadLedgerPath || undefined, receivedAt, contactSecret: leadContactKey });
         const consent = recordConsent({
           consentType: "inquiry_follow_up",
           source: lead.lead.source,
@@ -3107,7 +3107,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const draft = await createHermesReplyDraft(readLeadLedger(leadLedgerPath || undefined), parseJsonBody(request), {
+        const draft = await createHermesReplyDraft(currentLeads(), parseJsonBody(request), {
           auditLogPath: auditLogPath || undefined,
           provider: hermesReplyProvider || undefined,
           recordedAt: reviewedAt || editedAt || receivedAt,
@@ -3335,7 +3335,9 @@ export function createHttpApp({
           : leadContactVaultPath
             ? appendLeadContact(lead, { filePath: leadContactVaultPath, secret: leadContactKey, storedAt: receivedAt })
             : null;
-        const ledger = durable?.lead || (leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null);
+        const ledger =
+          durable?.lead ||
+          (leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt, contactSecret: leadContactKey }) : null);
         const consent = recordConsent({
           consentType: "inquiry_follow_up",
           source: lead.lead?.source,

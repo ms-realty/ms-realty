@@ -261,7 +261,13 @@ async function routeLead(request, body, registry, seed, config) {
             storedAt: config.receivedAt,
           })
         : null;
-    const ledger = durable?.lead || appendLead(lead, { filePath: config.leadLedgerPath, receivedAt: config.receivedAt });
+    const ledger =
+      durable?.lead ||
+      appendLead(lead, {
+        filePath: config.leadLedgerPath,
+        receivedAt: config.receivedAt,
+        contactSecret: config.leadContactKey,
+      });
     const consent = recordConsent(
       {
         consentType: "inquiry_follow_up",
