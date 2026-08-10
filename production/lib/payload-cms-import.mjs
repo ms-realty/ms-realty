@@ -426,11 +426,12 @@ function comparableValue(current, desired, arrayRow = false) {
     return current.map((item, index) => comparableValue(item, desired[index], true));
   }
   if (!isRecord(current) || !isRecord(desired)) return clone(current);
-  return Object.fromEntries(
-    Object.entries(current)
-      .filter(([key]) => key !== "id" || !arrayRow || Object.hasOwn(desired, "id"))
-      .map(([key, value]) => [key, comparableValue(value, desired[key])]),
-  );
+  return Object.fromEntries([
+    ...Object.entries(desired).map(([key, value]) => [key, comparableValue(current[key], value)]),
+    ...Object.entries(current)
+      .filter(([key, value]) => !Object.hasOwn(desired, key) && !(arrayRow && key === "id") && !missingValue(value))
+      .map(([key, value]) => [key, clone(value)]),
+  ]);
 }
 
 function currentComparable(document, desiredData) {
