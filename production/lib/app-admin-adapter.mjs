@@ -38,6 +38,7 @@ import {
   renderAdminConsentPayload,
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
+  renderAdminListingEditorPayload,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
@@ -87,6 +88,11 @@ import {
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
+import {
+  projectListingDraftSeed,
+  saveBulkListingStatusDrafts,
+  saveListingDraft,
+} from "./listing-draft-service.mjs";
 import {
   DEFAULT_CONSENT_LEDGER_PATH,
   appendConsentRecord,
@@ -400,17 +406,10 @@ async function configuredPayloadAdminAuth(config) {
   return typeof configured === "function" ? configured() : configured;
 }
 
-function payloadAdminListingPath(listingId) {
+function listingEditorPath(listingId) {
   const id = typeof listingId === "string" ? listingId.trim() : "";
-  if (!id) throw new Error("listingId is required for the Payload editor handoff");
-  return `/payload-admin/collections/listings/${encodeURIComponent(id)}`;
-}
-
-function payloadAdminListingHandoff(listingId) {
-  return new Response(null, {
-    status: 307,
-    headers: { ...PRIVATE_HTML_HEADERS, location: payloadAdminListingPath(listingId) },
-  });
+  if (!id) throw new Error("Known listingId is required");
+  return `/admin/listings/edit?listingId=${encodeURIComponent(id)}`;
 }
 
 function markdownResponse(body) {
@@ -1009,8 +1008,11 @@ function reportsPayload(registry, url, config) {
   );
 }
 
-function listingManagerPayload(registry, url, config) {
-  const seed = currentSeed(config);
+async function listingManagerPayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    env: config.authEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+  });
   const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
   return renderAdminListingManagerPayload(registry, url.searchParams.get("locale") || "en", {
     seed,
@@ -1026,6 +1028,23 @@ function listingManagerPayload(registry, url, config) {
     sourceLocale: url.searchParams.get("sourceLocale") || "",
     page: url.searchParams.get("page") || 1,
   });
+}
+
+async function listingEditorPayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    env: config.authEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+  });
+  return renderAdminListingEditorPayload(
+    registry,
+    url.searchParams.get("locale") || "en",
+    seed,
+    url.searchParams.get("listingId"),
+    readListingEdits(config.listingEditLedgerPath),
+    latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
+    readTourApprovals(config.tourApprovalLedgerPath),
+    config.adminPrincipal || null,
+  );
 }
 
 function translationQueuePayload(registry, url, config) {
@@ -1431,21 +1450,42 @@ function appendMediaReviewEntry(input, config) {
   return persisted;
 }
 
-function appendBulkListingStatusChanges(input, config) {
+async function appendBulkListingStatusChanges(input, config) {
   const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["editor"]);
-  const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
-  const batch = createBulkListingStatusEdits(currentSeed(config), attributed, translationTasks, config.editedAt);
-  const changes = batch.changes.map((result) => persistEditorChange(result, config));
+  const result = await saveBulkListingStatusDrafts(currentSeed(config), {
+    env: config.authEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+    principal: config.adminPrincipal,
+    input: attributed,
+    editedAt: config.editedAt,
+  });
+  const changes = result.edits.filter((edit) => !edit.idempotent);
+  for (const edit of changes) {
+    recordAudit(
+      {
+        action: "listing_edited",
+        actor: edit.editor,
+        objectType: "listing",
+        objectId: edit.listing_id,
+        metadata: {
+          changed_fields: ["listing_status"],
+          source: "admin_payload_draft",
+        },
+      },
+      config,
+    );
+  }
   return {
     kind: "bulk_listing_status_update",
-    targetStatus: batch.targetStatus,
-    requested: batch.requestedListingIds.length,
-    updated: changes.filter((result) => !result.edit.idempotent).length,
-    idempotent: changes.filter((result) => result.edit.idempotent).length,
-    unchanged: batch.unchangedListingIds.length,
-    unchangedListingIds: batch.unchangedListingIds,
-    edits: changes.map((result) => result.edit),
-    staleTranslations: changes.flatMap((result) => result.staleTranslations),
+    targetStatus: result.batch.targetStatus,
+    requested: result.batch.requestedListingIds.length,
+    updated: changes.length,
+    idempotent: result.edits.filter((edit) => edit.idempotent).length,
+    unchanged: result.batch.unchangedListingIds.length,
+    unchangedListingIds: result.batch.unchangedListingIds,
+    edits: result.edits,
+    staleTranslations: result.batch.changes.flatMap((change) => change.staleTranslations),
+    projectedSeed: result.projectedSeed,
   };
 }
 
@@ -2755,10 +2795,14 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/admin/activity") return htmlResponse(activityPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/activity") return jsonResponse(200, activityPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/listings") return htmlResponse(listingManagerPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/listings") return jsonResponse(200, listingManagerPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/listings") return htmlResponse(await listingManagerPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/listings") return jsonResponse(200, await listingManagerPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
-      return payloadAdminListingHandoff(url.searchParams.get("listingId"));
+      try {
+        return htmlResponse(await listingEditorPayload(registry, url, config));
+      } catch (error) {
+        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+      }
     }
     if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, translationQueuePayload(registry, url, config));
@@ -3062,20 +3106,54 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
-      const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
-      return jsonResponse(409, {
-        kind: "payload_canonical",
-        message: "Listing edits are managed in Payload.",
-        canonical_url: payloadAdminListingPath(input.listingId),
-      });
+      try {
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        const result = await saveListingDraft(currentSeed(config), {
+          env: config.authEnv || process.env,
+          payload: config.payloadListingRuntime || null,
+          principal: config.adminPrincipal,
+          input,
+          editedAt: config.editedAt,
+        });
+        if (!result.idempotent) {
+          recordAudit(
+            {
+              action: "listing_edited",
+              actor: config.adminPrincipal?.id,
+              objectType: "listing",
+              objectId: result.listingId,
+              metadata: {
+                changed_fields: result.changedFields,
+                source: "admin_payload_draft",
+              },
+            },
+            config,
+          );
+        }
+        return jsonResponse(result.idempotent ? 200 : 201, {
+          kind: "listing_draft_saved",
+          listing_id: result.listingId,
+          changed_fields: result.changedFields,
+          editor_url: listingEditorPath(result.listingId),
+          draft_only: true,
+          publication_approval_changed: false,
+          idempotent: result.idempotent,
+        });
+      } catch (error) {
+        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+      }
     }
     if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
       const result = appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/status") {
-      const result = appendBulkListingStatusChanges(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
-      return jsonResponse(result.updated ? 201 : 200, result);
+      try {
+        const result = await appendBulkListingStatusChanges(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+        return jsonResponse(result.updated ? 201 : 200, result);
+      } catch (error) {
+        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+      }
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/publication-schedules") {
       const result = scheduleListingPublication(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);

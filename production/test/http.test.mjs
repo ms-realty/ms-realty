@@ -1193,8 +1193,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminHtml.body.includes('name="hermesDraft" value="true"'), false);
   assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
-  assert.equal(smoke.listingEditorHtml.status, 307);
-  assert.equal(smoke.listingEditorHtml.headers.location, "/payload-admin/collections/listings/MS-CRAWL-0001");
+  assert.equal(smoke.listingEditorHtml.status, 200);
+  assert.match(smoke.listingEditorHtml.body, /data-admin-mutation-form="listing"/);
+  assert.equal(smoke.listingEdit.status, 503);
+  assert.equal(smoke.listingEdit.body.kind, "payload_draft_unavailable");
   assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.sellerPipeline.length, 1);
   assert.equal(smoke.admin.body.deals.length, 1);

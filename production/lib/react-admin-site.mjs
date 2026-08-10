@@ -922,8 +922,8 @@ function adminHref(path, page) {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
-function payloadAdminListingHref(listingId) {
-  return `/payload-admin/collections/listings/${encodeURIComponent(listingId)}`;
+function payloadAdminListingHref(listingId, page) {
+  return adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(listingId)}`, page);
 }
 
 function currentOperatorId(page, fallback) {
@@ -2299,7 +2299,7 @@ function PipelineCard({ page, state, lead }) {
                       "div",
                       { className: "adm-task-list__actions" },
                       h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: match.path, target: "_blank", rel: "noopener" }, h(Icon, { name: "external-link", size: 15 }), label(copy, "openListing", "Open listing")),
-                      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(match.listing_id) }, label(copy, "propertyEditor", "Edit")),
+                      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(match.listing_id, page) }, label(copy, "propertyEditor", "Edit")),
                     ),
                   ),
                 ),
@@ -4468,7 +4468,7 @@ function ListingManagerBody({ page }) {
                         h(
                           "div",
                           { className: "adm-task-list__actions" },
-                          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: payloadAdminListingHref(row.id) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
+                          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: payloadAdminListingHref(row.id, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
                           h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
                         ),
                       ),
@@ -4609,7 +4609,7 @@ function TranslationQueueBody({ page }) {
                               ),
                             )
                           : h("span", { className: "crm-tbl__muted" }, task ? label(copy, "awaitingHermesDraft", "Awaiting Hermes draft") : statusText(ui, row.task_type)),
-                    h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(row.listing_id) }, label(copy, "openEditor", "Open editor")),
+                    h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(row.listing_id, page) }, label(copy, "openEditor", "Open editor")),
                   ),
                 );
               }),
@@ -4696,14 +4696,12 @@ function ListingEditorBody({ page }) {
   const editorValues = {
     ...facts,
     availability_verified_at: workflow.availability_verified_at || "",
-    publish_approved: workflow.publish_approved === true,
     seo_title: seo.title || "",
     seo_description: seo.description || "",
     seo_canonical: seo.canonical_override || "",
     seo_og_title: seo.og_title || "",
     seo_og_description: seo.og_description || "",
     seo_robots: seo.robots || "index,follow",
-    seo_review_confirmed: seo.human_approved === true,
   };
   const tour = page.listing.tour || {};
   const tourProvider = tour.provider === "supersplat-viewer" ? "supersplat-viewer" : "photo-sphere-viewer";
@@ -4717,7 +4715,7 @@ function ListingEditorBody({ page }) {
   const title = label(copy, "propertyEditor", "Property editor");
   const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
   const termsFields = page.editableFields.filter((field) => ["price_eur", "price_on_request"].includes(field));
-  const workflowFields = page.editableFields.filter((field) => ["availability_verified_at", "publish_approved"].includes(field));
+  const workflowFields = page.editableFields.filter((field) => ["availability_verified_at"].includes(field));
   const seoFields = page.editableFields.filter((field) => field.startsWith("seo_"));
   const detailFields = page.editableFields.filter(
     (field) => !contentFields.includes(field) && !termsFields.includes(field) && !workflowFields.includes(field) && !seoFields.includes(field),
@@ -4761,8 +4759,16 @@ function ListingEditorBody({ page }) {
         Panel,
         { title: label(copy, "facts", "Facts") },
         h(
-          "form",
-          { id: "listing-facts", method: "post", action: "/api/admin/listings/edit", className: "adm-form", "data-editor-form": "listing", "data-editor-panel": "facts" },
+        "form",
+          {
+            id: "listing-facts",
+            method: "post",
+            action: "/api/admin/listings/edit",
+            className: "adm-form",
+            "data-admin-mutation-form": "listing",
+            "data-editor-form": "listing",
+            "data-editor-panel": "facts",
+          },
           h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
           h(
             "fieldset",
@@ -4775,9 +4781,9 @@ function ListingEditorBody({ page }) {
               h("input", {
                 name: "editor",
                 required: true,
-                disabled: !canEditContent,
-                autoComplete: "name",
-                placeholder: label(copy, "editorNamePlaceholder", "Editor name"),
+                readOnly: true,
+                defaultValue: currentOperatorId(page, ""),
+                autoComplete: "off",
                 "data-editor-name": "true",
               }),
             ),
@@ -4796,6 +4802,7 @@ function ListingEditorBody({ page }) {
                 "div",
                 { className: "adm-form__actions" },
                 h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
+                h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
               )
             : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
         ),
@@ -5468,7 +5475,7 @@ function ListingQualityReviewDecision({ page, row, ui }) {
         ),
         h(
           "a",
-          { className: "mk-btn mk-btn--subtle mk-btn--sm adm-route-evidence__open", href: payloadAdminListingHref(row.listing_id) },
+          { className: "mk-btn mk-btn--subtle mk-btn--sm adm-route-evidence__open", href: payloadAdminListingHref(row.listing_id, page) },
           h(Icon, { name: "pencil", size: 16 }),
           h("span", null, label(copy, "editListing", "Edit listing")),
         ),

@@ -571,7 +571,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(listingManagerHtml, /data-kind="admin-listing-manager"/);
       assert.match(listingManagerHtml, /data-listing-manager-row="MS-CRAWL-0001"/);
       assert.match(listingManagerHtml, /Поиск по номеру/);
-      assert.match(listingManagerHtml, /href="\/payload-admin\/collections\/listings\/MS-CRAWL-0001"/);
+      assert.match(listingManagerHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=ru"/);
       assert.match(listingManagerHtml, /href="\/admin\/translations\?locale=ru"/);
       const listingManagerJson = await listingManagerJsonRoute.GET(
         new Request("https://example.test/api/admin/listings?locale=ru&q=MS-CRAWL-0001", { headers: auth }),
@@ -620,8 +620,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const russianEditor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=ru", { headers: auth }),
       );
-      assert.equal(russianEditor.status, 307);
-      assert.equal(russianEditor.headers.get("location"), "/payload-admin/collections/listings/MS-CRAWL-0001");
+      assert.equal(russianEditor.status, 200);
+      assert.match(await russianEditor.text(), /data-admin-mutation-form="listing"/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();
@@ -1556,8 +1556,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const editor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
       );
-      assert.equal(editor.status, 307);
-      assert.equal(editor.headers.get("location"), "/payload-admin/collections/listings/MS-CRAWL-0001");
+      assert.equal(editor.status, 200);
+      assert.match(await editor.text(), /data-admin-mutation-form="listing"/);
       const reviewableAsset = loadCmsSeed().records
         .find((record) => record.collection === "listings" && record.id === "MS-CRAWL-0001")
         .media.find((asset) => asset.kind === "photo");
@@ -1598,21 +1598,18 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
             condition: "Renovated",
             location_precision: "approximate",
             availability_verified_at: "2026-07-19T11:30",
-            publish_approved: "true",
             seo_title: "Reviewed SEO title",
             seo_description: "Reviewed SEO description for the source-language listing.",
             seo_canonical: "/bg/imoti/MS-CRAWL-0001",
             seo_og_title: "Reviewed Open Graph title",
             seo_og_description: "Reviewed Open Graph description.",
             seo_robots: "index,follow",
-            seo_review_confirmed: "true",
           }),
         }),
       );
       const editBody = await edit.json();
-      assert.equal(edit.status, 409);
-      assert.equal(editBody.kind, "payload_canonical");
-      assert.equal(editBody.canonical_url, "/payload-admin/collections/listings/MS-CRAWL-0001");
+      assert.equal(edit.status, 503);
+      assert.equal(editBody.kind, "payload_draft_unavailable");
 
       const slugChange = await listingSlugRoute.POST(
         new Request("https://example.test/api/admin/listings/slug", {

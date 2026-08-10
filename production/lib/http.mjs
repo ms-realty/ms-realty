@@ -133,6 +133,11 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
+import {
+  projectListingDraftSeed,
+  saveBulkListingStatusDrafts,
+  saveListingDraft,
+} from "./listing-draft-service.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
   appendListingPublicationSchedule,
@@ -298,16 +303,10 @@ function adminJson(status, body) {
   return privateJson(status, body);
 }
 
-function payloadAdminListingPath(listingId) {
+function listingEditorPath(listingId) {
   const id = typeof listingId === "string" ? listingId.trim() : "";
-  if (!id) throw new Error("listingId is required for the Payload editor handoff");
-  return `/payload-admin/collections/listings/${encodeURIComponent(id)}`;
-}
-
-function payloadAdminListingHandoff(listingId) {
-  return adminResponse(307, "", "text/plain; charset=utf-8", {
-    location: payloadAdminListingPath(listingId),
-  });
+  if (!id) throw new Error("Known listingId is required");
+  return `/admin/listings/edit?listingId=${encodeURIComponent(id)}`;
 }
 
 function wantsHtml(request, url) {
@@ -722,6 +721,7 @@ export function createHttpApp({
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
+  payloadListingRuntime = null,
   receivedAt,
   requestedAt,
   editedAt,
@@ -1071,9 +1071,9 @@ export function createHttpApp({
         page: url.searchParams.get("page"),
       },
     );
-  const currentListingManagerPayload = (url, operatorId = null) =>
+  const currentListingManagerPayload = async (url, operatorId = null) =>
     renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: currentSeed(),
+      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: process.env }),
       translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       status: url.searchParams.get("status") || "",
@@ -1086,6 +1086,17 @@ export function createHttpApp({
         { now: listingPublicationAt || reviewedAt || editedAt || new Date().toISOString() },
       ),
     });
+  const currentListingEditorPayload = async (url, operatorId = null) =>
+    renderAdminListingEditorPayload(
+      activeRegistry,
+      url.searchParams.get("locale") || "en",
+      await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: process.env }),
+      url.searchParams.get("listingId"),
+      readListingEdits(listingEditLedgerPath || undefined),
+      latestTranslationTasks(currentTranslationTasks()),
+      currentTourApprovals(),
+      operatorId,
+    );
   const currentTranslationQueuePayload = (url, operatorId = null) =>
     renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
       seed: currentSeed(),
@@ -1751,7 +1762,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/listings", "/admin/listings"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentListingManagerPayload(url, principal);
+      const payload = await currentListingManagerPayload(url, principal);
       if (url.pathname === "/admin/listings" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -1815,9 +1826,9 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return payloadAdminListingHandoff(url.searchParams.get("listingId"));
+        return adminResponse(200, adminHtml(await currentListingEditorPayload(url, principal)), "text/html; charset=utf-8");
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
@@ -2439,14 +2450,36 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = listingEditInput(request);
-        return adminJson(409, {
-          kind: "payload_canonical",
-          message: "Listing edits are managed in Payload.",
-          canonical_url: payloadAdminListingPath(input.listingId),
+        const result = await saveListingDraft(currentSeed(), {
+          env: process.env,
+          payload: payloadListingRuntime,
+          principal,
+          input: listingEditInput(request),
+          editedAt,
+        });
+        if (!result.idempotent) {
+          recordAudit({
+            action: "listing_edited",
+            actor: principal?.id,
+            objectType: "listing",
+            objectId: result.listingId,
+            metadata: {
+              changed_fields: result.changedFields,
+              source: "admin_payload_draft",
+            },
+          });
+        }
+        return adminJson(result.idempotent ? 200 : 201, {
+          kind: "listing_draft_saved",
+          listing_id: result.listingId,
+          changed_fields: result.changedFields,
+          editor_url: listingEditorPath(result.listingId),
+          draft_only: true,
+          publication_approval_changed: false,
+          idempotent: result.idempotent,
         });
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
@@ -2480,48 +2513,39 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["editor"]);
-        const batch = createBulkListingStatusEdits(
-          currentSeed(),
+        const result = await saveBulkListingStatusDrafts(currentSeed(), {
+          env: process.env,
+          payload: payloadListingRuntime,
+          principal,
           input,
-          latestTranslationTasks(currentTranslationTasks()),
           editedAt,
-        );
-        const changes = batch.changes.map((result) => {
-          const edit = appendListingEdit(result.edit, { filePath: listingEditLedgerPath || undefined });
-          const persistedStaleTranslations = edit.idempotent
-            ? []
-            : result.staleTranslations
-                .filter((translation) => translation.id)
-                .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
-          if (!edit.idempotent) {
-            recordAudit({
-              action: "listing_edited",
-              actor: edit.editor,
-              objectType: "listing",
-              objectId: edit.listing_id,
-              metadata: {
-                changed_fields: ["listing_status"],
-                bulk_request_id: input.requestId || null,
-                stale_translation_count: result.staleTranslations.length,
-              },
-            });
-          }
-          return { edit, persistedStaleTranslations };
         });
+        for (const edit of result.edits.filter((row) => !row.idempotent)) {
+          recordAudit({
+            action: "listing_edited",
+            actor: edit.editor,
+            objectType: "listing",
+            objectId: edit.listing_id,
+            metadata: {
+              changed_fields: ["listing_status"],
+              source: "admin_payload_draft",
+            },
+          });
+        }
         const body = {
           kind: "bulk_listing_status_update",
-          targetStatus: batch.targetStatus,
-          requested: batch.requestedListingIds.length,
-          updated: changes.filter((result) => !result.edit.idempotent).length,
-          idempotent: changes.filter((result) => result.edit.idempotent).length,
-          unchanged: batch.unchangedListingIds.length,
-          unchangedListingIds: batch.unchangedListingIds,
-          edits: changes.map((result) => result.edit),
-          staleTranslations: batch.changes.flatMap((result) => result.staleTranslations),
+          targetStatus: result.batch.targetStatus,
+          requested: result.batch.requestedListingIds.length,
+          updated: result.edits.filter((row) => !row.idempotent).length,
+          idempotent: result.edits.filter((row) => row.idempotent).length,
+          unchanged: result.batch.unchangedListingIds.length,
+          unchangedListingIds: result.batch.unchangedListingIds,
+          edits: result.edits,
+          staleTranslations: result.batch.changes.flatMap((change) => change.staleTranslations),
         };
         return adminJson(body.updated ? 201 : 200, body);
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
