@@ -5,6 +5,29 @@ export const DURABLE_CASE_AUTHORITY_PATHS = new Set([
   "/api/admin/cases/conditions/actions",
 ]);
 
+export const LEAD_PROBE_HEADER = "x-ms-realty-lead-probe";
+
+async function sha256(value) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return new Uint8Array(digest);
+}
+
+// Comparing digests rather than raw strings keeps the comparison constant-time
+// and avoids leaking the configured secret length.
+export async function secretMatches(presented, expected) {
+  const [a, b] = await Promise.all([sha256(presented), sha256(expected)]);
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+
+export async function allowsLeadProbeMutation({ request, pathname, env }) {
+  if (request.method !== "POST" || pathname !== "/api/leads") return false;
+  const expected = env.MS_REALTY_LEAD_PROBE_TOKEN?.trim() || "";
+  const presented = request.headers.get(LEAD_PROBE_HEADER)?.trim() || "";
+  return Boolean(expected && presented) && secretMatches(presented, expected);
+}
+
 // The browser login exchanges the operator key for a cookie; both routes
 // only set or clear that cookie — nothing touches the ephemeral disk.
 const ADMIN_SESSION_PATHS = new Set(["/admin/login", "/admin/logout"]);
