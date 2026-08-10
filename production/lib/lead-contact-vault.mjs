@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { fromRoot } from "./paths.mjs";
-import { appendPrivateContact, readPrivateContacts } from "./private-contact-vault.mjs";
+import { appendPrivateContact, createPrivateContactEnvelope, readPrivateContacts } from "./private-contact-vault.mjs";
 
 export const DEFAULT_LEAD_CONTACT_VAULT_PATH = fromRoot("production", "data", "lead-contact-vault.jsonl");
 
@@ -10,6 +10,16 @@ function contactPayload(lead) {
     throw new Error("Lead contact vault requires a lead id and contact data");
   }
   return { contact, contact_preference: lead.contact_preference || null };
+}
+
+export function createLeadContactEnvelope(
+  lead,
+  { secret, storedAt = new Date().toISOString() } = {},
+) {
+  return createPrivateContactEnvelope(
+    { subjectType: "lead", subjectId: lead.lead?.id, payload: contactPayload(lead) },
+    { secret, secretName: "MS_REALTY_LEAD_CONTACT_KEY", storedAt },
+  );
 }
 
 export function appendLeadContact(

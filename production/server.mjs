@@ -11,6 +11,7 @@ import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mj
 import { DEFAULT_LEAD_LEDGER_PATH } from "./lib/lead-ledger.mjs";
 import { DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH } from "./lib/lead-assignments.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH } from "./lib/lead-contact-vault.mjs";
+import { leadDurableStoreConfigFromEnv } from "./lib/lead-durable-store.mjs";
 import { DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/lead-pipeline-outcomes.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH } from "./lib/public-contact-vault.mjs";
 import { DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH } from "./lib/public-request-outcomes.mjs";
@@ -122,6 +123,7 @@ export function productionServerConfig(env = process.env) {
     leadContactVaultPath:
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
+    leadDurableStore: leadDurableStoreConfigFromEnv(env),
     publicContactVaultPath:
       env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
     publicContactKey: env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY,
@@ -191,6 +193,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     leadPipelineOutcomeLedgerPath: config.leadPipelineOutcomeLedgerPath,
     leadContactVaultPath: config.leadContactVaultPath,
     leadContactKey: config.leadContactKey,
+    leadDurableStore: config.leadDurableStore,
     publicContactVaultPath: config.publicContactVaultPath,
     publicContactKey: config.publicContactKey,
     replyOutboxPath: config.replyOutboxPath,

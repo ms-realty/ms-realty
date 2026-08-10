@@ -12,19 +12,18 @@ function subjectAad(subjectType, subjectId) {
   return Buffer.from(`${subjectType}:${subjectId}`);
 }
 
-export function appendPrivateContact(
+export function createPrivateContactEnvelope(
   { subjectType, subjectId, payload },
-  { filePath, secret, secretName = "contact vault secret", storedAt = new Date().toISOString() } = {},
+  { secret, secretName = "contact vault secret", storedAt = new Date().toISOString() } = {},
 ) {
   if (!subjectType || !subjectId || !payload || typeof payload !== "object" || Array.isArray(payload)) {
     throw new Error("Private contact vault requires a subject type, subject id, and payload");
   }
-  if (!filePath) throw new Error("Private contact vault path is required");
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv("aes-256-gcm", encryptionKey(secret, secretName), iv);
   cipher.setAAD(subjectAad(subjectType, subjectId));
   const ciphertext = Buffer.concat([cipher.update(JSON.stringify(payload), "utf8"), cipher.final()]);
-  const row = {
+  return {
     subject_type: subjectType,
     subject_id: subjectId,
     stored_at: storedAt,
@@ -33,10 +32,18 @@ export function appendPrivateContact(
     auth_tag: cipher.getAuthTag().toString("base64"),
     ciphertext: ciphertext.toString("base64"),
   };
+}
+
+export function appendPrivateContact(
+  contact,
+  { filePath, secret, secretName = "contact vault secret", storedAt = new Date().toISOString() } = {},
+) {
+  if (!filePath) throw new Error("Private contact vault path is required");
+  const row = createPrivateContactEnvelope(contact, { secret, secretName, storedAt });
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`, { encoding: "utf8", mode: 0o600 });
   fs.chmodSync(filePath, 0o600);
-  return { subject_type: subjectType, subject_id: subjectId, stored_at: storedAt, encrypted: true };
+  return { subject_type: row.subject_type, subject_id: row.subject_id, stored_at: row.stored_at, encrypted: true };
 }
 
 export function readPrivateContacts(

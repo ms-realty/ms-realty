@@ -186,6 +186,8 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
     MS_REALTY_MAX_BODY_BYTES: "1024",
     MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED: "true",
     MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: "true",
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_CONTACT_KEY: "test-only-production-contact-key-32-characters",
     MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     PAYLOAD_SECRET: "test-payload-secret",
     DATABASE_URL: "postgres://payload:payload@127.0.0.1:5432/payload",
@@ -198,6 +200,10 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   assert.equal(config.realtyCasePayloadAuthorityEnabled, true);
   assert.equal(config.realtyCaseWorkspaceId, "workspace-sandanski");
   assert.equal(config.realtyCasePayloadRuntimeConfigured, true);
+  assert.equal(config.leadDurableStore.leadDurableStoreEnabled, true);
+  assert.equal(config.leadDurableStore.payloadSecret, "test-payload-secret");
+  assert.equal(config.leadDurableStore.databaseUrl, "postgres://payload:payload@127.0.0.1:5432/payload");
+  assert.equal(config.leadDurableStore.contactSecret, "test-only-production-contact-key-32-characters");
   assert.equal(productionServerConfig({}).localeRegistryPath, undefined);
   assert.equal(productionServerConfig({ HOST: "" }).host, "127.0.0.1");
   assert.throws(() => productionServerConfig({ HOST: " 127.0.0.1" }), /HOST must be a non-empty/);

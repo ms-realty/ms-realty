@@ -57,13 +57,13 @@ function optionalMessage(value) {
   return text ? text.slice(0, 2000) : null;
 }
 
-export function appendLead(
+export function createLeadLedgerRow(
   lead,
-  { filePath = DEFAULT_LEAD_LEDGER_PATH, receivedAt = new Date().toISOString(), slaMinutes = 15, escalationMinutes = 60 } = {},
+  { filePath = null, receivedAt = new Date().toISOString(), slaMinutes = 15, escalationMinutes = 60 } = {},
 ) {
   const slaDueAt = minutesAfter(receivedAt, slaMinutes);
   const contact_fingerprint = contactFingerprint(lead.lead?.contact);
-  const possibleDuplicate = contact_fingerprint ? store.firstRowWhere(filePath, "contact_fingerprint", contact_fingerprint) : null;
+  const possibleDuplicate = filePath && contact_fingerprint ? store.firstRowWhere(filePath, "contact_fingerprint", contact_fingerprint) : null;
   const messageOriginal = optionalMessage(lead.message_original || lead.message || lead.lead?.message);
   const row = {
     received_at: receivedAt,
@@ -107,6 +107,15 @@ export function appendLead(
       missing_fields: (lead.lead?.intake || lead.intake)?.missing_fields || [],
     },
   };
+  if (lead.lead?.idempotency_key) row.idempotency_key = lead.lead.idempotency_key;
+  return row;
+}
+
+export function appendLead(
+  lead,
+  { filePath = DEFAULT_LEAD_LEDGER_PATH, receivedAt = new Date().toISOString(), slaMinutes = 15, escalationMinutes = 60 } = {},
+) {
+  const row = createLeadLedgerRow(lead, { filePath, receivedAt, slaMinutes, escalationMinutes });
   store.appendRow(filePath, row);
   return row;
 }

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
-import { appendLeadContact, readLeadContacts, withLeadContacts } from "../lib/lead-contact-vault.mjs";
+import { appendLeadContact, createLeadContactEnvelope, readLeadContacts, withLeadContacts } from "../lib/lead-contact-vault.mjs";
 
 const SECRET = "test-only-lead-contact-key-32-characters-minimum";
 
@@ -48,6 +48,10 @@ test("lead contact vault encrypts private contact data and restores it only with
     },
   ]);
   assert.throws(() => readLeadContacts(filePath, `${SECRET}-wrong`), /authenticate data|Unsupported state/i);
+
+  const envelope = createLeadContactEnvelope(lead, { secret: SECRET, storedAt: "2026-07-19T10:00:00Z" });
+  assert.deepEqual(Object.keys(envelope).sort(), ["algorithm", "auth_tag", "ciphertext", "iv", "stored_at", "subject_id", "subject_type"]);
+  assert.doesNotMatch(JSON.stringify(envelope), /Noa Levi|\+359880000001|whatsapp/);
 });
 
 test("lead contact vault fails closed without a sufficiently strong key", () => {

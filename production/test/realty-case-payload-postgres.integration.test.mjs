@@ -20,6 +20,7 @@ const caseReadback = path.join(root, "production", "scripts", "run-realty-case-p
 const payloadConfig = path.join(root, "payload.config.js");
 const payloadRuntime = path.join(root, "node_modules", "payload", "dist", "index.js");
 const payloadAuthority = path.join(root, "production", "lib", "realty-case-payload-authority.mjs");
+const leadDurableStore = path.join(root, "production", "lib", "lead-durable-store.mjs");
 const COMMAND_TIMEOUT_MS = 120_000;
 
 function redact(value, env) {
@@ -493,6 +494,93 @@ async function exercisePayloadAuthority(env, workspaceId) {
   });
 }
 
+function exerciseDurableLeadStore(env) {
+  const script = `
+    import assert from "node:assert/strict";
+    import { getPayload } from ${JSON.stringify(pathToFileURL(payloadRuntime).href)};
+    import { persistLeadIntakeDurably } from ${JSON.stringify(pathToFileURL(leadDurableStore).href)};
+
+    const leadId = "lead-draft-33333333-3333-4333-8333-333333333333";
+    const idempotencyKey = "payload-postgres-durable-lead-it";
+    const receivedAt = "2026-08-10T09:00:00.000Z";
+    const plaintextName = "Durable Lead Integration";
+    const plaintextPhone = "+359000000000";
+    const lead = {
+      id: "crm-inbox-payload-postgres-durable-lead-it",
+      lead: {
+        id: leadId,
+        idempotency_key: idempotencyKey,
+        source: "website_contact_callback",
+        intent: "callback",
+        leadType: "general",
+        contact: { name: plaintextName, phone: plaintextPhone },
+        intake: { complete: true, missing_fields: [], captured_fields: ["contact"] },
+      },
+      original_language: "en",
+      admin_locale: "en",
+      contact_preference: "phone",
+      hermes_reply_draft: { broker_approval_required: true },
+      confirmation: { status: "ready", message_key: "lead_received" },
+      broker_assignment: { broker_id: "broker-payload-postgres-it", method: "integration_fixture" },
+    };
+    let payload;
+    let exitCode = 0;
+
+    async function rows(collection, where) {
+      const result = await payload.find({
+        collection,
+        depth: 0,
+        limit: 10,
+        overrideAccess: true,
+        pagination: false,
+        where,
+      });
+      return result.docs;
+    }
+
+    try {
+      const configModule = await import(${JSON.stringify(pathToFileURL(payloadConfig).href)});
+      payload = await getPayload({ config: configModule.default });
+      const options = { lead, contactSecret: process.env.MS_REALTY_LEAD_CONTACT_KEY, receivedAt, payload };
+      const first = await persistLeadIntakeDurably(options);
+      const retry = await persistLeadIntakeDurably(options);
+      assert.equal(first.created, true);
+      assert.equal(first.idempotent, false);
+      assert.equal(retry.created, false);
+      assert.equal(retry.idempotent, true);
+
+      const [leads, contacts] = await Promise.all([
+        rows("public_leads", { lead_id: { equals: leadId } }),
+        rows("lead_contacts", { subject_id: { equals: leadId } }),
+      ]);
+      assert.equal(leads.length, 1, "expected exactly one durable public lead");
+      assert.equal(contacts.length, 1, "expected exactly one encrypted lead contact");
+      assert.equal(leads[0].idempotency_key, idempotencyKey);
+      assert.equal(contacts[0].algorithm, "aes-256-gcm");
+      for (const field of ["iv", "auth_tag", "ciphertext"]) assert.ok(contacts[0][field], "missing encrypted envelope field " + field);
+      for (const field of ["contact", "name", "phone", "email", "message"]) assert.equal(field in contacts[0], false);
+
+      const serialized = JSON.stringify({ lead: leads[0], contact: contacts[0] });
+      assert.equal(serialized.includes(plaintextName), false, "plaintext name reached Postgres");
+      assert.equal(serialized.includes(plaintextPhone), false, "plaintext phone reached Postgres");
+    } catch (error) {
+      console.error(error.stack || error);
+      exitCode = 1;
+    } finally {
+      if (payload) {
+        try {
+          await payload.destroy();
+        } catch (error) {
+          console.error(error.stack || error);
+          exitCode = 1;
+        }
+      }
+    }
+    process.exit(exitCode);
+  `;
+  command(process.execPath, ["--input-type=module", "--eval", script], { env, label: "exercising durable lead storage" });
+}
+
 function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outboxAttempts }) {
   const script = `
     import assert from "node:assert/strict";
@@ -527,6 +615,8 @@ function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outbo
         "20260730_142043_realty_case_persistence",
         "20260730_160000_realign_realty_case_mandate_projection",
         "20260730_170000_add_realty_case_conditions",
+        "20260810_000558_durable_lead_store",
+        "20260810_143000_repair_durable_lead_relations",
       ]) {
         assert.ok(migrationNames.has(name), \`missing applied Payload migration \${name}\`);
       }
@@ -606,6 +696,7 @@ test(
     const databaseName = "payload_it";
     const databasePassword = randomBytes(32).toString("hex");
     const payloadSecret = randomBytes(32).toString("hex");
+    const leadContactKey = randomBytes(32).toString("hex");
     const databaseUrl = `postgres://${databaseUser}:${databasePassword}@127.0.0.1:${port}/${databaseName}`;
     const env = {
       ...process.env,
@@ -618,11 +709,13 @@ test(
       PAYLOAD_POSTGRES_PORT: String(port),
       PAYLOAD_POSTGRES_USER: databaseUser,
       PAYLOAD_SECRET: payloadSecret,
+      MS_REALTY_LEAD_CONTACT_KEY: leadContactKey,
     };
     try {
       runCompose(project, ["up", "--detach", "--wait", "payload-postgres"], env, "starting isolated Payload Postgres");
       command(process.execPath, [payloadCli, "migrate"], { env, label: "running Payload migrations" });
       command(process.execPath, [payloadCli, "migrate:status"], { env, label: "checking Payload migration status" });
+      exerciseDurableLeadStore(env);
       await exercisePayloadAuthority(env, authorityWorkspaceId);
 
       const fixture = writeFixture(directory);
