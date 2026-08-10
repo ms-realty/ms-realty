@@ -574,6 +574,41 @@ test("Payload CMS importer ignores generated array row ids without hiding operat
   });
 });
 
+test("Payload CMS overwrite ignores schema-added nested keys but detects desired nested changes", async () => {
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  const target = fakePayload();
+
+  await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  const listing = target.rows.listings.find((row) => row.id === "MS-TEST-0001");
+  listing.seo.og_title = null;
+  listing.seo.og_description = null;
+
+  const schemaOnly = await runPayloadCmsImport({
+    overwriteExisting: true,
+    payload: target.payload,
+    registry,
+    seed,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+  assert.equal(schemaOnly.plan.byCollection.listings.updated, 0);
+  assert.equal(schemaOnly.plan.byCollection.listings.reused, 2);
+
+  const changedSeed = clone(seed);
+  changedSeed.records[0].seo.description = "Updated seed description";
+  const changed = await runPayloadCmsImport({
+    overwriteExisting: true,
+    payload: target.payload,
+    registry,
+    seed: changedSeed,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+  assert.equal(changed.plan.byCollection.listings.updated, 1);
+  assert.equal(target.rows.listings.find((row) => row.id === "MS-TEST-0001").seo.description, "Updated seed description");
+});
+
 test("Payload CMS importer reads the latest draft and overwrite never changes the published base", async () => {
   const registry = minimalRegistry();
   const seed = minimalSeed();
