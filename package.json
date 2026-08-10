@@ -81,6 +81,7 @@
     "live:report": "node production/scripts/build-live-service-preflight-report.mjs",
     "live:preflight": "node production/scripts/validate-live-service-reports.mjs",
     "payload:bootstrap": "node production/scripts/build-payload-runtime-bootstrap.mjs",
+    "payload:cms:import": "node production/scripts/run-payload-cms-import.mjs",
     "payload:runtime": "node production/scripts/build-payload-runtime-report.mjs",
     "payload:preflight": "node production/scripts/validate-payload-runtime-report.mjs",
     "server:smoke": "node production/scripts/smoke-node-server.mjs",
