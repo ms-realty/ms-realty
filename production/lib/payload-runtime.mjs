@@ -2,6 +2,7 @@ import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { isPayloadPrivatePath } from "../../workers/durable-case-authority.mjs";
 import { fromRoot } from "./paths.mjs";
 import { REALTY_CASE_PAYLOAD_COLLECTION_SLUGS } from "./realty-case-collections.mjs";
 
@@ -34,6 +35,17 @@ const REQUIRED_CHECK_IDS = [
   "database_tcp",
 ];
 const REQUIRED_CHECK_ID_SET = new Set(REQUIRED_CHECK_IDS);
+const PAYLOAD_GRAPHQL_EDGE_PATHS = ["/graphql", "/graphql-playground", "/api/graphql"];
+const PAYLOAD_GRAPHQL_ENCODED_EDGE_PATHS = [
+  "/graph%71l",
+  "/graph%2571l",
+  "/graphql%2fquery",
+  "/graphql%252fquery",
+  "/graphql%2dplayground",
+  "/graphql%252dplayground%252f",
+  "/api%2fgraphql",
+  "/api%252fgraphql%252f",
+];
 const PAYLOAD_RUNTIME_CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "weak_secret", "fail"]);
 const PAYLOAD_RUNTIME_SECRET_FIELD_NAMES = new Set(["apikey", "authorization", "databaseurl", "password", "payloadsecret", "secret", "token"]);
 const PUBLIC_DATABASE_NETWORK_SCOPES = new Set(["public_dns", "public_ip"]);
@@ -204,6 +216,9 @@ async function payloadConfigCheck() {
       return check("payload_config_import", "fail", { error: "Payload internal admin route must remain isolated at /payload-admin" });
     }
     if (missing.length) return check("payload_config_import", "fail", { missing_collections: missing });
+    if (config.graphQL?.disable !== true || config.graphQL?.disablePlaygroundInProduction !== true) {
+      return check("payload_config_import", "fail", { error: "Payload GraphQL and its production playground must remain disabled" });
+    }
     if (
       config.admin?.user !== "admins" ||
       admins?.auth?.useSessions !== true ||
@@ -215,6 +230,8 @@ async function payloadConfigCheck() {
     }
     return check("payload_config_import", "pass", {
       collections: REQUIRED_PAYLOAD_COLLECTIONS.length,
+      graphql_disabled: true,
+      graphql_playground_disabled_in_production: true,
       identity_collection: "admins",
       internal_admin_route: config.routes.admin,
       session_max_age_seconds: admins.auth.tokenExpiration,
@@ -229,16 +246,25 @@ function payloadEdgeBoundaryCheck() {
   try {
     const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
     const guard = fs.readFileSync(fromRoot("workers", "durable-case-authority.mjs"), "utf8");
+    const missingGraphqlPaths = [...PAYLOAD_GRAPHQL_EDGE_PATHS, ...PAYLOAD_GRAPHQL_ENCODED_EDGE_PATHS].filter(
+      (pathname) => !isPayloadPrivatePath(pathname),
+    );
     if (
       !worker.includes("isPayloadPrivatePath(url.pathname)") ||
       !guard.includes('first === "payload-admin"') ||
-      !guard.includes('first === "api" && second === "admins"')
+      !guard.includes('first === "api" && second === "admins"') ||
+      missingGraphqlPaths.length
     ) {
-      return check("payload_edge_boundary", "fail", { error: "Cloudflare must hide Payload admin UI and identity REST routes" });
+      return check("payload_edge_boundary", "fail", {
+        error: "Cloudflare must hide Payload admin UI, identity REST, and GraphQL routes",
+        ...(missingGraphqlPaths.length ? { missing_graphql_paths: missingGraphqlPaths } : {}),
+      });
     }
     return check("payload_edge_boundary", "pass", {
       custom_admin_route: "/admin",
       payload_admin_ui: "edge_hidden",
+      payload_graphql_encoded_paths: PAYLOAD_GRAPHQL_ENCODED_EDGE_PATHS,
+      payload_graphql_paths: PAYLOAD_GRAPHQL_EDGE_PATHS,
       payload_identity_rest: "edge_hidden",
     });
   } catch (error) {
@@ -447,6 +473,8 @@ export function assertPayloadRuntimeReport(report) {
     (
       config.identity_collection !== "admins" ||
       config.internal_admin_route !== "/payload-admin" ||
+      config.graphql_disabled !== true ||
+      config.graphql_playground_disabled_in_production !== true ||
       config.sessions !== "database_backed" ||
       config.session_max_age_seconds !== 2 * 60 * 60 ||
       !Number.isInteger(config.collections) ||
@@ -460,6 +488,8 @@ export function assertPayloadRuntimeReport(report) {
     edgeBoundary?.status === "pass" &&
     (edgeBoundary.custom_admin_route !== "/admin" ||
       edgeBoundary.payload_admin_ui !== "edge_hidden" ||
+      JSON.stringify(edgeBoundary.payload_graphql_paths) !== JSON.stringify(PAYLOAD_GRAPHQL_EDGE_PATHS) ||
+      JSON.stringify(edgeBoundary.payload_graphql_encoded_paths) !== JSON.stringify(PAYLOAD_GRAPHQL_ENCODED_EDGE_PATHS) ||
       edgeBoundary.payload_identity_rest !== "edge_hidden")
   ) {
     throw new Error("Payload runtime report must include the custom-admin edge boundary");
