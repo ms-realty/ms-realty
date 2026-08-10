@@ -5,7 +5,12 @@ import os from "node:os";
 import path from "node:path";
 import { fromRoot } from "../lib/paths.mjs";
 import { readBuildMarker } from "../lib/build-marker.mjs";
-import { allowsAdminSessionMutation, allowsDurableCaseAuthorityMutation, allowsMcpRequest } from "../../workers/durable-case-authority.mjs";
+import {
+  allowsAdminSessionMutation,
+  allowsDurableCaseAuthorityMutation,
+  allowsLeadProbeMutation,
+  allowsMcpRequest,
+} from "../../workers/durable-case-authority.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
@@ -223,4 +228,21 @@ test("Cloudflare Container admits the cookie-login exchange without opening ledg
   assert.equal(allowsAdminSessionMutation({ method: "GET", pathname: "/admin/login" }), false);
   assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/login/extra" }), false);
   assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/api/admin/cases" }), false);
+});
+
+test("Cloudflare Container admits only the secret-backed durable lead probe", async () => {
+  const env = { MS_REALTY_LEAD_PROBE_TOKEN: "launch-probe-secret" };
+  const request = (method = "POST", token = "launch-probe-secret") =>
+    new Request("https://ms-realty.example/api/leads", {
+      method,
+      headers: { "x-ms-realty-lead-probe": token },
+    });
+
+  assert.equal(await allowsLeadProbeMutation({ request: request(), pathname: "/api/leads", env }), true);
+  assert.equal(await allowsLeadProbeMutation({ request: request("POST", "wrong"), pathname: "/api/leads", env }), false);
+  assert.equal(await allowsLeadProbeMutation({ request: request("GET"), pathname: "/api/leads", env }), false);
+  assert.equal(await allowsLeadProbeMutation({ request: request(), pathname: "/api/leads/extra", env }), false);
+  assert.equal(await allowsLeadProbeMutation({ request: request(), pathname: "/api/leads", env: {} }), false);
+  assert.match(workerSource, /await allowsLeadProbeMutation\(\{ request, pathname: url\.pathname, env \}\)/);
+  assert.match(workerSource, /headers\.delete\(LEAD_PROBE_HEADER\)/);
 });

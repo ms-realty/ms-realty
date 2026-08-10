@@ -1,5 +1,12 @@
 import { Container, getContainer } from "@cloudflare/containers";
-import { allowsAdminSessionMutation, allowsDurableCaseAuthorityMutation, allowsMcpRequest } from "./durable-case-authority.mjs";
+import {
+  LEAD_PROBE_HEADER,
+  allowsAdminSessionMutation,
+  allowsDurableCaseAuthorityMutation,
+  allowsLeadProbeMutation,
+  allowsMcpRequest,
+  secretMatches,
+} from "./durable-case-authority.mjs";
 import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
@@ -130,20 +137,6 @@ const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 const isSafeKey = (key) => key.length > 0 && key.length <= 1024 && !CONTROL_CHARS.test(key) && !key.includes("..");
 
-async function sha256(value) {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-  return new Uint8Array(digest);
-}
-
-// Comparing digests rather than the raw strings keeps the comparison
-// constant-time and stops the length of the secret from leaking.
-async function secretMatches(presented, expected) {
-  const [a, b] = await Promise.all([sha256(presented), sha256(expected)]);
-  let diff = 0;
-  for (let i = 0; i < a.length; i += 1) diff |= a[i] ^ b[i];
-  return diff === 0;
-}
-
 // Uploads may only land under the two legacy-host media trees. Even with the
 // secret, the endpoint cannot plant objects at arbitrary keys — a leaked
 // credential defaces images, it does not gain a free file host.
@@ -230,9 +223,12 @@ export default {
     // authority routes can write. Every other mutation remains read-only.
     // MCP is admitted as well: the app authenticates it and the Worker strips
     // its ledger-writing tools (MS_REALTY_MCP_WRITES_DISABLED below).
+    const mutating = MUTATING_METHODS.has(request.method);
+    const leadProbe = mutating && (await allowsLeadProbeMutation({ request, pathname: url.pathname, env }));
     if (
-      MUTATING_METHODS.has(request.method) &&
+      mutating &&
       !allowsAdminSessionMutation({ method: request.method, pathname: url.pathname }) &&
+      !leadProbe &&
       !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
     ) {
@@ -242,7 +238,13 @@ export default {
     // One shared instance: the app keeps in-process state (rate-limit buckets,
     // the stat-validated file cache) that must not be split across instances.
     // Fanning out would silently multiply rate limits and desync the caches.
-    const response = await getContainer(env.MS_REALTY, "ms-realty-singleton").fetch(request);
+    let forwardedRequest = request;
+    if (leadProbe) {
+      const headers = new Headers(request.headers);
+      headers.delete(LEAD_PROBE_HEADER);
+      forwardedRequest = new Request(request, { headers });
+    }
+    const response = await getContainer(env.MS_REALTY, "ms-realty-singleton").fetch(forwardedRequest);
     return preview ? withPreviewNoindex(response) : response;
   },
 };
