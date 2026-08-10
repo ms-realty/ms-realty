@@ -338,7 +338,7 @@ test("durable admin readback rejects plaintext private fields in stored ledger r
   const stored = payload.rows.public_leads[0].ledger_row;
   for (const [field, value, expectedCause] of [
     ["contact", { email: "plaintext@example.invalid" }, /plaintext contact data/],
-    ...["email", "phone", "contact", "whatsapp", "viber", "Email", "PHONE", "ConTaCt", "WhatsApp", "VIBER"].map((privateField) => [
+    ...["email", "phone", "contact", "whatsapp", "viber", "Email", "eMail", "PHONE", "ConTaCt", "WhatsApp", "VIBER"].map((privateField) => [
       "request_details",
       { arbitrary: { nested: { [privateField]: "plaintext private contact" } } },
       /plaintext contact data/,
@@ -435,7 +435,7 @@ test("the store refuses malformed input outright", async () => {
 });
 
 test("durable persistence rejects mixed-case nested plaintext contact fields before writing", async () => {
-  for (const privateField of ["Email", "PHONE", "ConTaCt", "WhatsApp", "VIBER"]) {
+  for (const privateField of ["Email", "eMail", "PHONE", "ConTaCt", "WhatsApp", "VIBER"]) {
     const payload = fakePayload();
     await assert.rejects(
       () =>
