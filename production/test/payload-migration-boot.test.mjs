@@ -6,6 +6,7 @@ import test from "node:test";
 import { fromRoot } from "../lib/paths.mjs";
 
 const propertySearchMigration = fromRoot("migrations", "20260730_120000_property_search_schema.ts");
+const payloadSchemaDriftMigration = fromRoot("migrations", "20260810_164700_payload_schema_drift.ts");
 
 function tableSql(source, name) {
   const start = source.indexOf(`CREATE TABLE "${name}" (`);
@@ -24,7 +25,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
   ]);
-  for (const migration of ["20260710_132716_initial_schema.ts", "20260730_120000_property_search_schema.ts"]) {
+  for (const migration of ["20260710_132716_initial_schema.ts", "20260730_120000_property_search_schema.ts", "20260810_164700_payload_schema_drift.ts"]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
       /import \{ sql, type MigrateDownArgs, type MigrateUpArgs \} from '@payloadcms\/db-postgres'/,
@@ -72,6 +73,53 @@ test("Payload migration boot configuration and generated constraints stay runnab
   assert.match(migration, /properties_location_id_locations_id_fk" FOREIGN KEY \("location_id"\).*ON DELETE set null/);
   assert.match(migration, /listing_enrichment_tasks_listing_id_listings_id_fk" FOREIGN KEY \("listing_id"\).*ON DELETE set null/);
   assert.match(migration, /listing_enrichment_tasks_property_id_properties_id_fk" FOREIGN KEY \("property_id"\).*ON DELETE set null/);
+
+  const driftPatch = fs.readFileSync(payloadSchemaDriftMigration, "utf8");
+  for (const column of [
+    '"facts_location_native" varchar',
+    '"facts_location_legacy" varchar',
+    '"facts_municipality" varchar',
+    '"facts_municipality_code" varchar',
+    '"facts_district" varchar',
+    '"facts_district_code" varchar',
+    '"facts_region" varchar',
+    '"facts_region_id" varchar',
+    '"facts_country_code" varchar',
+    '"facts_geography_id" varchar',
+    '"facts_geography_path" jsonb',
+    '"facts_settlement_ekatte" varchar',
+    '"facts_location_review_status" varchar',
+    '"seo_og_title" varchar',
+    '"seo_og_description" varchar',
+    '"workflow_publish_approved" boolean',
+    '"workflow_last_editor" varchar',
+    '"facts_location_id" varchar',
+    '"facts_location_label" varchar',
+    '"properties_id" varchar',
+    '"locations_id" varchar',
+    '"listing_enrichment_tasks_id" varchar',
+    '"search_outbox_id" varchar',
+  ]) {
+    assert.match(driftPatch, new RegExp(`ADD COLUMN IF NOT EXISTS ${column.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}`));
+  }
+  for (const fragment of [
+    'CREATE INDEX IF NOT EXISTS "listing_enrichment_tasks_updated_at_idx"',
+    'CREATE INDEX IF NOT EXISTS "listing_enrichment_tasks_created_at_idx"',
+    'CREATE INDEX IF NOT EXISTS "search_outbox_created_at_idx"',
+    'CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_properties_id_idx"',
+    'CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_locations_id_idx"',
+    'CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_listing_enrichment_tasks_i_idx"',
+    'CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_search_outbox_id_idx"',
+    'ADD CONSTRAINT "payload_locked_documents_rels_properties_fk"',
+    'ADD CONSTRAINT "payload_locked_documents_rels_locations_fk"',
+    'ADD CONSTRAINT "payload_locked_documents_rels_listing_enrichment_tasks_fk"',
+    'ADD CONSTRAINT "payload_locked_documents_rels_search_outbox_fk"',
+  ]) {
+    assert.match(driftPatch, new RegExp(fragment.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")));
+  }
+  const driftDown = driftPatch.match(/export async function down[\s\S]*$/)?.[0] || "";
+  assert.match(driftDown, /export async function down\(\{ db \}: MigrateDownArgs\): Promise<void> \{\s+void db\s+\}/);
+  assert.doesNotMatch(driftDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
 
   const typesDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-migration-`);
   const env = {
