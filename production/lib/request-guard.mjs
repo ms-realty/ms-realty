@@ -10,9 +10,10 @@
 // without JavaScript, so the fix cannot be "reject urlencoded" — it has to be
 // an origin check.
 //
-// The Cloudflare deployment is not exposed to this: workers/index.js refuses
-// every mutating method at the edge. The guard is still correct there and
-// costs nothing.
+// The Cloudflare edge now admits custom-admin mutations only when the request
+// carries the Payload session cookie name. This app-level guard remains
+// mandatory: the Worker does not parse or trust the signed session and cannot
+// replace same-origin, role, workspace, and Payload access validation.
 //
 // Rule: for state-changing methods, if the request carries browser-set origin
 // evidence (Sec-Fetch-Site or Origin), it must say same-origin. Requests with
@@ -85,4 +86,38 @@ export function crossOriginWriteRejection(method, headers, { env = process.env }
   if (!host) return "unknown_host";
   if (originHost === host) return null;
   return trustedWriteHosts(env).has(originHost) ? null : "cross_origin_request";
+}
+
+// Public lead intake is intentionally browser-only once the durable store is
+// enabled. Unlike authenticated automation, it must carry a browser Origin
+// that exactly matches the request URL; missing Origin is not treated as a
+// server-to-server exception on this endpoint.
+export function sameOriginWriteRejection(method, headers, { requestUrl } = {}) {
+  if (SAFE_METHODS.has(String(method || "GET").toUpperCase())) return null;
+
+  const fetchSite = readHeader(headers, "sec-fetch-site").trim().toLowerCase();
+  if (fetchSite && fetchSite !== "same-origin") return "cross_site_request";
+
+  const origin = readHeader(headers, "origin").trim();
+  if (!origin) return "missing_origin";
+  if (origin.toLowerCase() === "null") return "opaque_origin";
+
+  try {
+    const source = new URL(origin);
+    const target = new URL(String(requestUrl || ""));
+    if (
+      source.username ||
+      source.password ||
+      source.pathname !== "/" ||
+      source.search ||
+      source.hash ||
+      !["http:", "https:"].includes(source.protocol) ||
+      !["http:", "https:"].includes(target.protocol)
+    ) {
+      return "invalid_origin";
+    }
+    return source.origin === target.origin ? null : "cross_origin_request";
+  } catch {
+    return "invalid_origin";
+  }
 }

@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-07-05T00:00:00Z
+Generated: 2026-08-10T15:19:43.293Z
 
 Status: blocked
 Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
@@ -107,7 +107,9 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`
-- Admin route: `/payload-admin`; API routes: `/api/[...slug]`, `/graphql`, `/graphql-playground`.
+- Client admin routes: `/admin/login` for Payload-backed email/password sessions and `/admin/team` for admin-only operator management.
+- Identity authority: Payload collection `admins` with database-backed sessions; the internal `/payload-admin` UI and direct `/api/admins/*` identity REST routes are hidden at the Cloudflare edge.
+- Internal integration: the Payload REST catch-all remains available to the application runtime, while GraphQL is not a client-facing admin surface.
 - Required env: `PAYLOAD_SECRET`, `DATABASE_URL`; currently missing: `PAYLOAD_SECRET`, `DATABASE_URL`.
 - Secret strength: `PAYLOAD_SECRET` must be at least 32 bytes.
 - Runtime evidence: `payload` dependency present, `payload.config.js` present, collection export generated, and required env configured.
@@ -118,7 +120,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Admin status endpoint: `GET /api/admin/payload-runtime`.
 - Production/CLI path overrides: `MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH`.
 - Real Payload runtime reports stay local and ignored; examples do not count as launch evidence.
-- Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
+- Launch rule: custom `/admin` session, edge-boundary, Payload identity/config, and database evidence must all pass; the hidden Payload Admin UI is not a launch requirement.
 
 ## Production Recovery
 
@@ -190,7 +192,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Monitoring sources: privacy_events: imported, search_console: missing_export, yandex_webmaster: missing_export, backlinks: missing_export
 - Rollback steps: 4
 - Current machine evidence:
-- missing (path /Users/ivan/Code/MS-Realty/.claude/worktrees/production-deployment-plan-4f948b/production/data/monitoring-rollback-report.json)
+- missing (path production/data/monitoring-rollback-report.json)
 - Private report: `production/data/monitoring-rollback-report.json` (ignored); template: `production/data/monitoring-rollback-report.json.example`.
 - Path override: `MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH`; validate it with `npm run monitoring:preflight`.
 - Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.

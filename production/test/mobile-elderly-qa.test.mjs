@@ -6,6 +6,9 @@ import {
   buildMobileElderlyQaReport,
 } from "../lib/mobile-elderly-qa.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { durableLeadStoreFixtureEnv } from "./approved-public-seed.fixture.mjs";
+
+Object.assign(process.env, durableLeadStoreFixtureEnv());
 
 test("mobile elderly QA report covers rendered public pages and language policy", () => {
   const report = buildMobileElderlyQaReport({ generatedAt: "2026-07-05T00:00:00Z" });

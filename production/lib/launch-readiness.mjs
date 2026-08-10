@@ -74,15 +74,18 @@ const REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS = [
   "hermes_provider",
 ];
 const REQUIRED_PAYLOAD_RUNTIME_ROUTE_FILES = [
-  "app/(payload)/payload-admin/[[...segments]]/page.js",
+  "app/admin/route.js",
+  "app/admin/login/route.js",
+  "app/admin/logout/route.js",
+  "app/admin/team/route.js",
+  "app/api/admin/team/route.js",
   "app/(payload)/api/[...slug]/route.js",
-  "app/(payload)/graphql/route.js",
-  "app/(payload)/graphql-playground/route.js",
 ];
 const REQUIRED_PAYLOAD_RUNTIME_CHECK_IDS = [
   "payload_secret",
   "database_url",
   ...REQUIRED_PAYLOAD_RUNTIME_ROUTE_FILES.map((file) => `route:${file}`),
+  "payload_edge_boundary",
   "payload_config_import",
   "database_tcp",
 ];
@@ -801,6 +804,10 @@ function assertPassRuntimeEvidence(report) {
       payload.evidence?.summary?.missing_env?.length !== 0 ||
       payload.evidence?.summary?.placeholder_env?.length !== 0 ||
       payload.evidence?.summary?.weak_env?.length !== 0 ||
+      payload.evidence?.summary?.admin_route !== "/admin" ||
+      payload.evidence?.summary?.identity_collection !== "admins" ||
+      payload.evidence?.summary?.payload_admin_ui !== "edge_hidden" ||
+      payload.evidence?.summary?.payload_identity_rest !== "edge_hidden" ||
       payload.evidence?.summary?.route_files !== REQUIRED_PAYLOAD_RUNTIME_ROUTE_FILES.length
     ) {
       throw new Error("Launch readiness payload runtime requires complete runtime summary evidence");

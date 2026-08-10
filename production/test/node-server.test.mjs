@@ -23,7 +23,7 @@ import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mj
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
-import { approvedPublicSeedFixture } from "./approved-public-seed.fixture.mjs";
+import { approvedPublicSeedFixture, installDurableLeadStoreFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 async function withServer(fn) {
   const leadLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-`)}/leads.jsonl`;
@@ -65,6 +65,10 @@ async function withServer(fn) {
   const server = createNodeServer(
     createHttpApp({
       seed: approvedPublicSeedFixture(),
+      // This integration fixture exercises the legacy file adapter. Enabled
+      // UI readiness is installed only by the one end-to-end test below.
+      leadDurableStore: { leadDurableStoreEnabled: false },
+      payloadListingEnv: {},
       leadLedgerPath,
       replyOutboxPath,
       languageRequestPath,
@@ -212,7 +216,8 @@ test("Node server serves HEAD through the matching GET route without a response 
   }
 });
 
-test("Node server serves live listing, search, lead, and viewing endpoints", async () => {
+test("Node server serves live listing, search, lead, and viewing endpoints", async (t) => {
+  installDurableLeadStoreFixtureEnv(t);
   await withServer(
     async (
       baseUrl,
@@ -240,6 +245,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
   const leadResponse = await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             leadType: "buyer",
             language: "he",
@@ -251,6 +257,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
   const viewingLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             source: "website_viewing_request",
             leadType: "buyer",
@@ -265,6 +272,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
   const contactLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             source: "website_contact_callback",
             leadType: "general",
@@ -278,6 +286,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
   const sellerLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             source: "website_seller_valuation",
             leadType: "seller",
@@ -411,6 +420,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         badLead: await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             id: "node-server-bad-lead-test",
             leadType: "buyer",
@@ -558,15 +568,18 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           taskId: smoke.translationApprove.body.id,
         }),
       });
+      const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+      process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
       smoke.listingEdit = await jsonFetch(baseUrl, "/api/admin/listings/edit", {
         method: "POST",
         headers: { authorization: "Bearer local-admin-smoke" },
         body: JSON.stringify({
           listingId: "MS-CRAWL-0001",
-          editor: "editor_bg",
           patch: { description: "Updated approved source description." },
         }),
       });
+      if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+      else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
       smoke.staleListing = await jsonFetch(baseUrl, "/el/akinita/MS-CRAWL-0001");
       smoke.staleSearch = await jsonFetch(baseUrl, "/api/search?locale=el&q=Sandanski");
       smoke.ctaClick = await jsonFetch(baseUrl, "/api/events", {

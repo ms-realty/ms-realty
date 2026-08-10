@@ -42,7 +42,17 @@ import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { appendRedirectApproval } from "../lib/redirect-approvals.mjs";
 import { LOGO_URL, LOGO_URL_REVERSED } from "../lib/ui/design-assets.mjs";
-import { approvedPublicSeedFixture, approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture.mjs";
+import {
+  approvedPublicSeedFixture,
+  approvedPublicSeedFixtureOptions,
+  installDurableLeadStoreFixtureEnv,
+} from "./approved-public-seed.fixture.mjs";
+
+const SAME_ORIGIN_LEAD_HEADERS = Object.freeze({
+  host: "localhost",
+  origin: "http://localhost",
+  "sec-fetch-site": "same-origin",
+});
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -390,7 +400,8 @@ test("HTTP app serves bounded official bilingual geography suggestions", async (
   assert.equal(thessaloniki.body.results[0].active_market, true);
 });
 
-test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
+test("HTTP app serves listing, search, fallback, and lead JSON contracts", async (t) => {
+  installDurableLeadStoreFixtureEnv(t);
   const leadLedgerPath = tempLedger();
   const leadAssignmentLedgerPath = tempLeadAssignments();
   const leadContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-contacts-`)}/contacts.jsonl`;
@@ -419,6 +430,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const hermesReplyPrompts = [];
   const app = createHttpApp({
     seed: approvedPublicSeedFixture(),
+    // This integration fixture exercises the legacy file adapter. The
+    // process-level durable env above is only for the public UI contract.
+    leadDurableStore: { leadDurableStoreEnabled: false },
+    payloadListingEnv: {},
     leadLedgerPath,
     leadAssignmentLedgerPath,
     leadContactVaultPath,
@@ -469,6 +484,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const leadResponse = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         leadType: "buyer",
         language: "he",
@@ -481,6 +497,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const viewingLeadResponse = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         source: "website_viewing_request",
         leadType: "buyer",
@@ -495,6 +512,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const contactLeadResponse = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         source: "website_contact_callback",
         leadType: "general",
@@ -508,6 +526,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const sellerLeadResponse = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         source: "website_seller_valuation",
         leadType: "seller",
@@ -811,6 +830,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+  process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
   smoke.listingEdit = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/listings/edit",
@@ -820,10 +841,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     },
     body: new URLSearchParams({
       listingId: "MS-CRAWL-0001",
-      editor: "editor_bg",
       description: "Updated approved source description.",
     }).toString(),
   });
+  if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+  else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
   smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
   smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
   smoke.adminLocales = {
@@ -1185,8 +1207,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminHtml.body.includes('name="hermesDraft" value="true"'), false);
   assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
-  assert.equal(smoke.listingEditorHtml.status, 307);
-  assert.equal(smoke.listingEditorHtml.headers.location, "/payload-admin/collections/listings/MS-CRAWL-0001");
+  assert.equal(smoke.listingEditorHtml.status, 200);
+  assert.match(smoke.listingEditorHtml.body, /data-admin-mutation-form="listing"/);
+  assert.equal(smoke.listingEdit.status, 503);
+  assert.equal(smoke.listingEdit.body.kind, "payload_draft_unavailable");
   assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.sellerPipeline.length, 1);
   assert.equal(smoke.admin.body.deals.length, 1);
@@ -1825,6 +1849,7 @@ test("HTTP app rejects malformed JSON request bodies", async () => {
   const response = await dispatchHttp(createHttpApp(), {
     method: "POST",
     url: "/api/leads",
+    headers: SAME_ORIGIN_LEAD_HEADERS,
     body: "{bad",
   });
 
@@ -2355,6 +2380,7 @@ test("HTTP app rejects unknown buyer listing references", async () => {
   const response = await dispatchHttp(createHttpApp(), {
     method: "POST",
     url: "/api/leads",
+    headers: SAME_ORIGIN_LEAD_HEADERS,
     body: {
       id: "bad-lead-test",
       leadType: "buyer",
@@ -2508,7 +2534,7 @@ test("HTTP fallback accepts a URL-encoded seller valuation form", async () => {
   const response = await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
+    headers: { ...SAME_ORIGIN_LEAD_HEADERS, "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       source: "website_seller_valuation",
       leadType: "seller",
@@ -2545,6 +2571,7 @@ test("HTTP admin records private seller valuation outcomes with a derived queue"
   const sellerLead = await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: SAME_ORIGIN_LEAD_HEADERS,
     body: {
       id: "http-seller-outcome",
       source: "website_seller_valuation",
@@ -2620,6 +2647,7 @@ test("HTTP credentialed seller outcomes cannot spoof the workflow actor", async 
     const sellerLead = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         id: "credentialed-seller-outcome",
         source: "website_seller_valuation",

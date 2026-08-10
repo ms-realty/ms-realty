@@ -60,7 +60,12 @@ const publicOrigin = configuredPublicOrigin();
 
 const admins = {
   slug: "admins",
-  auth: { cookies: { sameSite: "Lax", secure: production } },
+  auth: {
+    cookies: { sameSite: "Lax", secure: production },
+    maxLoginAttempts: 5,
+    tokenExpiration: 2 * 60 * 60,
+    useSessions: true,
+  },
   admin: { useAsTitle: "email" },
   // Only an admin manages operator accounts; everyone else is limited to their
   // own record and cannot touch the role field (no self-escalation).
@@ -266,6 +271,7 @@ const leadCollectionsWithAccess = LEAD_COLLECTIONS.map((collection) => ({
 
 export default buildConfig({
   admin: { user: "admins" },
+  graphQL: { disable: true, disablePlaygroundInProduction: true },
   routes: { admin: "/payload-admin" },
   // Payload adds serverURL to its CSRF allowlist, yielding one exact origin.
   ...(publicOrigin ? { serverURL: publicOrigin } : {}),

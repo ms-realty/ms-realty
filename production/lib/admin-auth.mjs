@@ -122,9 +122,18 @@ export function canAdminAccess(principal, capability) {
   return capabilities.includes("*") || capabilities.includes(capability);
 }
 
+export function canAdminAccessWorkspace(principal, workspaceId) {
+  if (!principal) return false;
+  if (principal.roles?.includes("admin")) return true;
+  const required = String(workspaceId || "").trim();
+  if (!required) return false;
+  return (principal.workspace_ids || []).map((value) => String(value || "").trim()).includes(required);
+}
+
 export function requiredAdminCapability(method, pathname) {
   const verb = String(method || "GET").toUpperCase();
   if (pathname === "/admin") return "workspace:read";
+  if (["/admin/team", "/api/admin/team"].includes(pathname)) return "team:manage";
   if (verb === "GET" && ["/admin/activity", "/api/admin/activity"].includes(pathname)) return "activity:read";
   if (
     verb === "GET" &&
@@ -171,6 +180,7 @@ export function publicAdminPrincipal(principal) {
     source: principal.source,
     can_mutate: Boolean(principal.can_mutate),
     roles: [...(principal.roles || [])],
+    workspace_ids: [...(principal.workspace_ids || [])],
     capabilities: adminCapabilities(principal),
   };
 }
@@ -254,6 +264,7 @@ export function resolveAdminPrincipal(auth, env = process.env) {
 }
 
 export function isAdminAuthorized(auth, env = process.env) {
+  if (auth && typeof auth === "object" && auth.source === "payload_session") return true;
   return Boolean(resolveAdminPrincipal(auth, env));
 }
 

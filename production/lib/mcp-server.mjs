@@ -26,23 +26,64 @@ const LISTING_ID = z.string().trim().regex(/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/).
 const TEXT = (max) => z.string().trim().max(max);
 const CONTENT_TEXT = (max) => TEXT(max).min(1);
 const LISTING_STATUS = z.enum(LISTING_STATUSES);
-const LISTING_CONTENT_FIELDS = ["title", "h1", "description", "seo_title", "seo_description", "seo_og_title", "seo_og_description"];
-const PAYLOAD_FACT_CONTENT_FIELDS = new Set(["title", "h1", "description"]);
-const PAYLOAD_SEO_CONTENT_FIELDS = {
-  seo_title: "title",
-  seo_description: "description",
-  seo_og_title: "og_title",
-  seo_og_description: "og_description",
-};
+const LISTING_CONTENT_FIELDS = [
+  "title",
+  "h1",
+  "description",
+  "location",
+  "property_type",
+  "offer_type",
+  "listing_status",
+  "bedrooms",
+  "bedrooms_not_applicable",
+  "area_sqm",
+  "price_eur",
+  "price_on_request",
+  "floor",
+  "total_floors",
+  "land_area_sqm",
+  "condition",
+  "location_precision",
+  "availability_verified_at",
+  "location_verified_at",
+  "price_verified_at",
+  "price_on_request_verified_at",
+  "seo_title",
+  "seo_description",
+  "seo_canonical",
+  "seo_og_title",
+  "seo_og_description",
+  "seo_robots",
+];
 const LISTING_CONTENT_PATCH = z
   .object({
     title: CONTENT_TEXT(240).optional(),
     h1: CONTENT_TEXT(240).optional(),
     description: CONTENT_TEXT(20000).optional(),
+    location: CONTENT_TEXT(240).optional(),
+    property_type: CONTENT_TEXT(240).optional(),
+    offer_type: CONTENT_TEXT(240).optional(),
+    listing_status: LISTING_STATUS.optional(),
+    bedrooms: z.number().int().min(0).max(100).optional(),
+    bedrooms_not_applicable: z.boolean().optional(),
+    area_sqm: z.number().positive().optional(),
+    price_eur: z.number().positive().optional(),
+    price_on_request: z.boolean().optional(),
+    floor: z.number().int().min(0).max(1000).optional(),
+    total_floors: z.number().int().min(0).max(1000).optional(),
+    land_area_sqm: z.number().positive().optional(),
+    condition: CONTENT_TEXT(240).optional(),
+    location_precision: z.enum(["area_only", "approximate", "exact"]).optional(),
+    availability_verified_at: TEXT(80).min(1).optional(),
+    location_verified_at: TEXT(80).min(1).optional(),
+    price_verified_at: TEXT(80).min(1).optional(),
+    price_on_request_verified_at: TEXT(80).min(1).optional(),
     seo_title: CONTENT_TEXT(240).optional(),
     seo_description: CONTENT_TEXT(320).optional(),
+    seo_canonical: z.string().trim().min(1).max(500).optional(),
     seo_og_title: CONTENT_TEXT(240).optional(),
     seo_og_description: CONTENT_TEXT(320).optional(),
+    seo_robots: z.enum(["index,follow", "noindex,follow"]).optional(),
   })
   .strict()
   .refine((patch) => Object.keys(patch).length > 0, "Listing content patch must include at least one allowed field");
@@ -203,6 +244,7 @@ export function mcpConfigFromEnv(env = process.env) {
     // writes would be silently lost, so the Worker sets this flag and the
     // write tools are simply not registered — tools/list stays truthful.
     writesDisabled: String(env.MS_REALTY_MCP_WRITES_DISABLED || "").trim() === "1",
+    durableListingWritesEnabled: String(env.MS_REALTY_MCP_DURABLE_LISTING_WRITES || "").trim() === "1",
   };
 }
 
@@ -304,36 +346,6 @@ function textResult(value) {
 
 function errorResult(message) {
   return { content: [{ type: "text", text: message }], isError: true };
-}
-
-async function updatePayloadListingContent(config, principal, listingId, patch) {
-  if (config.payloadListingWriter) return config.payloadListingWriter({ listingId, patch, principal });
-  if (!config.env.PAYLOAD_SECRET || !config.env.DATABASE_URL) {
-    throw new Error("Payload runtime is not configured");
-  }
-  const [{ getPayload }, payloadConfig] = await Promise.all([import("payload"), import("../../payload.config.js")]);
-  const payload = await getPayload({ config: payloadConfig.default });
-  const current = await payload.findByID({ collection: "listings", id: listingId, depth: 0, overrideAccess: true });
-  const facts = { ...(current.facts || {}) };
-  const seo = { ...(current.seo || {}) };
-  for (const [field, value] of Object.entries(patch)) {
-    if (PAYLOAD_FACT_CONTENT_FIELDS.has(field)) facts[field] = value;
-    else seo[PAYLOAD_SEO_CONTENT_FIELDS[field]] = value;
-  }
-  return payload.update({
-    collection: "listings",
-    id: listingId,
-    data: { facts, seo },
-    draft: true,
-    overrideAccess: true,
-    context: {
-      ms_realty_operator: {
-        id: principal.id,
-        roles: principal.roles,
-        source: principal.source || "mcp",
-      },
-    },
-  });
 }
 
 function recordPayloadListingEdit(config, principal, listingId, changedFields) {
@@ -446,7 +458,13 @@ async function adminJson(config, principal, pathname, { method = "GET", body } =
       headers,
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     }),
-    { config: { ...config.adminConfig, adminPrincipal: principal } },
+    {
+      config: {
+        ...config.adminConfig,
+        adminPrincipal: principal,
+        payloadListingRuntime: config.payloadListingRuntime || config.adminConfig.payloadListingRuntime || null,
+      },
+    },
   );
   const payload = await response.json().catch(() => null);
   return { response, payload };
@@ -973,12 +991,12 @@ function authenticatedToolDefinitions(server, config, principal) {
     );
   }
 
-  if (!config.writesDisabled && canAdminMutate(principal) && canAdminAccess(principal, "content:write")) {
+  if (config.durableListingWritesEnabled && canAdminMutate(principal) && canAdminAccess(principal, "content:write")) {
     server.registerTool(
       "edit_listing_content",
       {
         description:
-          "Save an allowlisted listing text edit. It cannot change publication approval, indexability, listing status, translations, or customer data.",
+          "Save an allowlisted listing draft edit in Payload. It cannot change publication approval, SEO human approval, translations, or customer data.",
         inputSchema: z
           .object({
             listing_id: LISTING_ID,
@@ -990,15 +1008,22 @@ function authenticatedToolDefinitions(server, config, principal) {
       },
       async ({ listing_id: listingId, patch }) => {
         try {
-          await updatePayloadListingContent(config, principal, listingId, patch);
-          const changedFields = Object.keys(patch).filter((field) => LISTING_CONTENT_FIELDS.includes(field));
-          recordPayloadListingEdit(config, principal, listingId, changedFields);
+          const { response, payload } = await adminJson(config, principal, "/api/admin/listings/edit", {
+            method: "POST",
+            body: { listingId, patch },
+          });
+          if (!response.ok || payload?.kind !== "listing_draft_saved") return errorResult("The listing content was not saved.");
+          const changedFields = payload.idempotent
+            ? []
+            : Object.keys(patch).filter((field) => LISTING_CONTENT_FIELDS.includes(field));
+          if (!payload.idempotent) recordPayloadListingEdit(config, principal, listingId, changedFields);
           return textResult({
             listing_id: listingId,
             changed_fields: changedFields,
-            canonical_editor_url: `/payload-admin/collections/listings/${encodeURIComponent(listingId)}`,
+            editor_url: payload.editor_url || `/admin/listings/edit?listingId=${encodeURIComponent(listingId)}`,
             draft_only: true,
             publication_approval_changed: false,
+            idempotent: payload.idempotent === true,
             next_step: "A qualified human must separately review any publication or translation decision.",
           });
         } catch {
@@ -1036,10 +1061,11 @@ function authenticatedToolDefinitions(server, config, principal) {
             updated: payload.updated || 0,
             idempotent: payload.idempotent || 0,
             unchanged: payload.unchanged || 0,
-            changed_listing_ids: (payload.edits || []).map((edit) => edit.listing_id),
+            changed_listing_ids: (payload.edits || []).filter((edit) => !edit.idempotent).map((edit) => edit.listing_id),
             unchanged_listing_ids: Array.isArray(payload.unchangedListingIds) ? payload.unchangedListingIds : [],
             stale_translation_count: Array.isArray(payload.staleTranslations) ? payload.staleTranslations.length : 0,
             publication_approval_changed: false,
+            draft_only: true,
           });
         } catch {
           return errorResult("The listing status update was not saved.");

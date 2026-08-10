@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-05T00:00:00Z",
+  "generated_at": "2026-08-10T15:19:43.028Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
@@ -492,17 +492,32 @@
           {
             "source": "typesense_meilisearch_sync",
             "status": "missing_report",
-            "path": "production/data/search-engine-sync-report.json"
+            "path": "production/data/search-engine-sync-report.json",
+            "freshness": {
+              "id": "live_services",
+              "status": "invalid",
+              "error": "generated_at is not a timestamp"
+            }
           },
           {
             "source": "typesense_meilisearch_query",
             "status": "missing_report",
-            "path": "production/data/search-engine-query-report.json"
+            "path": "production/data/search-engine-query-report.json",
+            "freshness": {
+              "id": "live_services",
+              "status": "invalid",
+              "error": "generated_at is not a timestamp"
+            }
           },
           {
             "source": "hermes_draft_worker",
             "status": "missing_report",
-            "path": "production/data/hermes-draft-worker-report.json"
+            "path": "production/data/hermes-draft-worker-report.json",
+            "freshness": {
+              "id": "live_services",
+              "status": "invalid",
+              "error": "generated_at is not a timestamp"
+            }
           }
         ],
         "provisioning": {
@@ -683,7 +698,7 @@
         "rollback_steps": 4,
         "machine_evidence": {
           "status": "missing",
-          "path": "/Users/ivan/Code/MS-Realty/.claude/worktrees/production-deployment-plan-4f948b/production/data/monitoring-rollback-report.json"
+          "path": "production/data/monitoring-rollback-report.json"
         }
       },
       "next_actions": [
@@ -712,20 +727,24 @@
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
         "status": "blocked_report",
+        "generated_at": "2026-07-06T00:00:00Z",
         "path": "production/data/payload-runtime-report.json",
         "summary": {
-          "admin_route": "/payload-admin",
-          "checks": 9,
+          "admin_route": "/admin",
+          "checks": 12,
           "database": {
             "status": "missing_env"
           },
+          "identity_collection": "admins",
           "missing_env": [
             "PAYLOAD_SECRET",
             "DATABASE_URL"
           ],
+          "payload_admin_ui": "edge_hidden",
+          "payload_identity_rest": "edge_hidden",
           "placeholder_env": [],
           "weak_env": [],
-          "route_files": 4
+          "route_files": 6
         },
         "checks": [
           {
@@ -739,9 +758,29 @@
             "env": "DATABASE_URL"
           },
           {
-            "id": "route:app/(payload)/payload-admin/[[...segments]]/page.js",
+            "id": "route:app/admin/route.js",
             "status": "pass",
-            "file": "app/(payload)/payload-admin/[[...segments]]/page.js"
+            "file": "app/admin/route.js"
+          },
+          {
+            "id": "route:app/admin/login/route.js",
+            "status": "pass",
+            "file": "app/admin/login/route.js"
+          },
+          {
+            "id": "route:app/admin/logout/route.js",
+            "status": "pass",
+            "file": "app/admin/logout/route.js"
+          },
+          {
+            "id": "route:app/admin/team/route.js",
+            "status": "pass",
+            "file": "app/admin/team/route.js"
+          },
+          {
+            "id": "route:app/api/admin/team/route.js",
+            "status": "pass",
+            "file": "app/api/admin/team/route.js"
           },
           {
             "id": "route:app/(payload)/api/[...slug]/route.js",
@@ -749,20 +788,37 @@
             "file": "app/(payload)/api/[...slug]/route.js"
           },
           {
-            "id": "route:app/(payload)/graphql/route.js",
+            "id": "payload_edge_boundary",
             "status": "pass",
-            "file": "app/(payload)/graphql/route.js"
-          },
-          {
-            "id": "route:app/(payload)/graphql-playground/route.js",
-            "status": "pass",
-            "file": "app/(payload)/graphql-playground/route.js"
+            "custom_admin_route": "/admin",
+            "payload_admin_ui": "edge_hidden",
+            "payload_graphql_encoded_paths": [
+              "/graph%71l",
+              "/graph%2571l",
+              "/graphql%2fquery",
+              "/graphql%252fquery",
+              "/graphql%2dplayground",
+              "/graphql%252dplayground%252f",
+              "/api%2fgraphql",
+              "/api%252fgraphql%252f"
+            ],
+            "payload_graphql_paths": [
+              "/graphql",
+              "/graphql-playground",
+              "/api/graphql"
+            ],
+            "payload_identity_rest": "edge_hidden"
           },
           {
             "id": "payload_config_import",
             "status": "pass",
-            "admin_route": "/payload-admin",
-            "collections": 13
+            "collections": 13,
+            "graphql_disabled": true,
+            "graphql_playground_disabled_in_production": true,
+            "identity_collection": "admins",
+            "internal_admin_route": "/payload-admin",
+            "session_max_age_seconds": 7200,
+            "sessions": "database_backed"
           },
           {
             "id": "database_network_scope",
@@ -775,6 +831,12 @@
             "env": "DATABASE_URL"
           }
         ],
+        "freshness": {
+          "id": "payload_runtime",
+          "status": "stale",
+          "age_ms": 3079183028,
+          "max_age_ms": 604800000
+        },
         "next_actions": [
           "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
           "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
@@ -792,7 +854,12 @@
       "message": "Encrypted off-site backup and isolated production restore evidence are required before launch.",
       "evidence": {
         "status": "missing_report",
-        "path": "production/data/production-recovery-report.json"
+        "path": "production/data/production-recovery-report.json",
+        "freshness": {
+          "id": "production_recovery",
+          "status": "invalid",
+          "error": "generated_at is not a timestamp"
+        }
       },
       "next_actions": [
         "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
@@ -804,17 +871,32 @@
     {
       "source": "typesense_meilisearch_sync",
       "status": "missing_report",
-      "path": "production/data/search-engine-sync-report.json"
+      "path": "production/data/search-engine-sync-report.json",
+      "freshness": {
+        "id": "live_services",
+        "status": "invalid",
+        "error": "generated_at is not a timestamp"
+      }
     },
     {
       "source": "typesense_meilisearch_query",
       "status": "missing_report",
-      "path": "production/data/search-engine-query-report.json"
+      "path": "production/data/search-engine-query-report.json",
+      "freshness": {
+        "id": "live_services",
+        "status": "invalid",
+        "error": "generated_at is not a timestamp"
+      }
     },
     {
       "source": "hermes_draft_worker",
       "status": "missing_report",
-      "path": "production/data/hermes-draft-worker-report.json"
+      "path": "production/data/hermes-draft-worker-report.json",
+      "freshness": {
+        "id": "live_services",
+        "status": "invalid",
+        "error": "generated_at is not a timestamp"
+      }
     }
   ],
   "monitoring_plan": [

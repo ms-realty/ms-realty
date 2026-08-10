@@ -385,11 +385,15 @@ const readyPayloadRuntime = {
   generated_at: "2026-07-05T00:00:00.000Z",
   path: "production/data/payload-runtime-report.json",
   summary: {
-    checks: 9,
+    admin_route: "/admin",
+    checks: 12,
+    identity_collection: "admins",
     missing_env: [],
+    payload_admin_ui: "edge_hidden",
+    payload_identity_rest: "edge_hidden",
     placeholder_env: [],
     weak_env: [],
-    route_files: 4,
+    route_files: 6,
     database: {
       status: "pass",
       credentials_configured: true,
@@ -403,10 +407,13 @@ const readyPayloadRuntime = {
   checks: [
     { id: "payload_secret", status: "pass" },
     { id: "database_url", status: "pass" },
-    { id: "route:app/(payload)/payload-admin/[[...segments]]/page.js", status: "pass" },
+    { id: "route:app/admin/route.js", status: "pass" },
+    { id: "route:app/admin/login/route.js", status: "pass" },
+    { id: "route:app/admin/logout/route.js", status: "pass" },
+    { id: "route:app/admin/team/route.js", status: "pass" },
+    { id: "route:app/api/admin/team/route.js", status: "pass" },
     { id: "route:app/(payload)/api/[...slug]/route.js", status: "pass" },
-    { id: "route:app/(payload)/graphql/route.js", status: "pass" },
-    { id: "route:app/(payload)/graphql-playground/route.js", status: "pass" },
+    { id: "payload_edge_boundary", status: "pass" },
     { id: "payload_config_import", status: "pass" },
     {
       id: "database_network_scope",
@@ -2415,7 +2422,10 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /production\/data\/payload-runtime-report\.json/);
   assert.match(markdown, /production\/data\/payload-runtime-report\.json\.example/);
   assert.match(markdown, /production\/data\/payload-collections\.json/);
-  assert.match(markdown, /\/payload-admin/);
+  assert.match(markdown, /Client admin routes: `\/admin\/login`/);
+  assert.match(markdown, /`\/admin\/team`/);
+  assert.match(markdown, /Payload collection `admins` with database-backed sessions/);
+  assert.match(markdown, /internal `\/payload-admin` UI and direct `\/api\/admins\/\*` identity REST routes are hidden/);
   assert.match(markdown, /Required env: `PAYLOAD_SECRET`, `DATABASE_URL`; currently missing: `PAYLOAD_SECRET`, `DATABASE_URL`/);
   assert.match(markdown, /Secret strength: `PAYLOAD_SECRET` must be at least 32 bytes/);
   assert.match(markdown, /payload\.config\.js/);
@@ -2427,7 +2437,8 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH/);
   assert.match(markdown, /Real Payload runtime reports stay local and ignored/);
   assert.match(markdown, /examples do not count as launch evidence/);
-  assert.match(markdown, /interim admin workbenches do not count/);
+  assert.match(markdown, /custom `\/admin` session, edge-boundary, Payload identity\/config, and database evidence must all pass/);
+  assert.match(markdown, /hidden Payload Admin UI is not a launch requirement/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /Current review evidence/);
   assert.match(markdown, /missing_review .*migration\/reviews\/listing-quality\.csv.*expected 165.*reviewed 0.*missing 165/);

@@ -8,8 +8,8 @@ import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
 import { buildLeadBriefs } from "./lead-briefs.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingQualityReport } from "./listing-quality.mjs";
-export { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
-import { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
+export { DURABLE_LISTING_EDIT_FIELDS as LISTING_EDIT_FIELDS } from "./listing-draft-service.mjs";
+import { DURABLE_LISTING_EDIT_FIELDS as LISTING_EDIT_FIELDS } from "./listing-draft-service.mjs";
 
 function listingRecord(seed, listingId) {
   return seed.records.find((record) => record.collection === "listings" && record.id === listingId);

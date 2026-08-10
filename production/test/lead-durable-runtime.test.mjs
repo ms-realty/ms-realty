@@ -61,7 +61,7 @@ test("Next lead intake uses the durable store without touching lead files", asyn
   const response = await renderAppApiResponse(
     new Request("https://example.test/api/leads", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", origin: "https://example.test" },
       body: JSON.stringify(leadInput()),
     }),
     { config },
@@ -95,7 +95,7 @@ test("requested durable storage fails closed when its runtime is incomplete", as
     const response = await renderAppApiResponse(
       new Request("https://example.test/api/leads", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", origin: "https://example.test" },
         body: JSON.stringify(leadInput()),
       }),
       { config },
@@ -107,6 +107,38 @@ test("requested durable storage fails closed when its runtime is incomplete", as
       message: "Lead storage is temporarily unavailable",
     });
   }
+});
+
+test("Next lead intake requires an exact same-origin browser Origin", async () => {
+  const calls = [];
+  const config = appApiConfigFromEnv({
+    ...approvedPublicSeedFixtureEnv(),
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: STORE_CONFIG.payloadSecret,
+    DATABASE_URL: STORE_CONFIG.databaseUrl,
+    MS_REALTY_LEAD_CONTACT_KEY: CONTACT_SECRET,
+  });
+  config.persistLeadIntakeDurably = successfulStore(calls);
+
+  for (const [origin, reason] of [
+    [null, "missing_origin"],
+    ["https://attacker.example", "cross_origin_request"],
+  ]) {
+    const headers = { "content-type": "application/json" };
+    if (origin) headers.origin = origin;
+    const response = await renderAppApiResponse(
+      new Request("https://example.test/api/leads", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(leadInput()),
+      }),
+      { config },
+    );
+
+    assert.equal(response.status, 403);
+    assert.deepEqual(await response.json(), { kind: "cross_origin_write_blocked", reason });
+  }
+  assert.equal(calls.length, 0);
 });
 
 test("the standalone HTTP runtime uses the same durable lead path", async () => {
@@ -122,11 +154,43 @@ test("the standalone HTTP runtime uses the same durable lead path", async () => 
       eventLedgerPath: path.join(dir, "events.jsonl"),
       receivedAt: "2026-08-10T09:00:00.000Z",
     }),
-    { method: "POST", url: "/api/leads", body: leadInput() },
+    { method: "POST", url: "/api/leads", headers: { host: "localhost", origin: "http://localhost" }, body: leadInput() },
   );
 
   assert.equal(response.status, 201, JSON.stringify(response.body));
   assert.equal(calls.length, 1);
   assert.equal(calls[0].lead.lead.idempotency_key, "durable-runtime-probe-1");
   assert.equal(response.body.contactVault.durable, true);
+});
+
+test("standalone lead intake requires an exact same-origin browser Origin", async () => {
+  const calls = [];
+  const app = createHttpApp({
+    seed: approvedPublicSeedFixture(),
+    leadDurableStore: STORE_CONFIG,
+    persistLeadIntake: successfulStore(calls),
+    leadContactKey: CONTACT_SECRET,
+  });
+
+  for (const [headers, reason] of [
+    [{}, "missing_origin"],
+    [{ origin: "https://attacker.example" }, "cross_origin_request"],
+  ]) {
+    const response = await dispatchHttp(app, { method: "POST", url: "/api/leads", headers, body: leadInput() });
+    assert.equal(response.status, 403);
+    assert.deepEqual(response.body, { kind: "cross_origin_write_blocked", reason });
+  }
+  const allowed = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/leads",
+    headers: {
+      host: "example.test",
+      origin: "https://example.test",
+      "sec-fetch-site": "same-origin",
+      "x-forwarded-proto": "https",
+    },
+    body: leadInput(),
+  });
+  assert.equal(allowed.status, 201);
+  assert.equal(calls.length, 1);
 });

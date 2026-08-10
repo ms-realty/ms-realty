@@ -4,8 +4,10 @@ import { buildAgencyReviewQueue } from "./agency-review-queue.mjs";
 import {
   assertAgentRealtyCaseConditionMutation,
   assertAgentRealtyCaseMutation,
+  adminHomePath,
   bindAuthenticatedOperator,
   canAdminAccess,
+  canAdminAccessWorkspace,
   canAdminMutate,
   requiredAdminCapability,
   resolveAdminPrincipal,
@@ -18,6 +20,8 @@ import {
   adminTokenFromCookie,
   renderAdminLoginPage,
 } from "./admin-login.mjs";
+import { renderAdminTeamPage } from "./admin-team.mjs";
+import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
@@ -34,6 +38,7 @@ import {
   renderAdminConsentPayload,
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
+  renderAdminListingEditorPayload,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
@@ -83,6 +88,11 @@ import {
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
+import {
+  projectListingDraftSeed,
+  saveBulkListingStatusDrafts,
+  saveListingDraft,
+} from "./listing-draft-service.mjs";
 import {
   DEFAULT_CONSENT_LEDGER_PATH,
   appendConsentRecord,
@@ -347,6 +357,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     leadPipelineOutcomeAt: env.MS_REALTY_LEAD_PIPELINE_OUTCOME_AT,
     replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
     listingPublicationAt: env.MS_REALTY_LISTING_PUBLICATION_AT,
+    payloadAdminAuth: getPayloadAdminAuthService,
   };
 }
 
@@ -389,17 +400,16 @@ function jsonResponse(status, body) {
   return new Response(JSON.stringify(body), { status, headers: PRIVATE_JSON_HEADERS });
 }
 
-function payloadAdminListingPath(listingId) {
-  const id = typeof listingId === "string" ? listingId.trim() : "";
-  if (!id) throw new Error("listingId is required for the Payload editor handoff");
-  return `/payload-admin/collections/listings/${encodeURIComponent(id)}`;
+async function configuredPayloadAdminAuth(config) {
+  const configured = config.payloadAdminAuth;
+  if (!configured) return null;
+  return typeof configured === "function" ? configured() : configured;
 }
 
-function payloadAdminListingHandoff(listingId) {
-  return new Response(null, {
-    status: 307,
-    headers: { ...PRIVATE_HTML_HEADERS, location: payloadAdminListingPath(listingId) },
-  });
+function listingEditorPath(listingId) {
+  const id = typeof listingId === "string" ? listingId.trim() : "";
+  if (!id) throw new Error("Known listingId is required");
+  return `/admin/listings/edit?listingId=${encodeURIComponent(id)}`;
 }
 
 function markdownResponse(body) {
@@ -998,8 +1008,11 @@ function reportsPayload(registry, url, config) {
   );
 }
 
-function listingManagerPayload(registry, url, config) {
-  const seed = currentSeed(config);
+async function listingManagerPayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    env: config.authEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+  });
   const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
   return renderAdminListingManagerPayload(registry, url.searchParams.get("locale") || "en", {
     seed,
@@ -1017,8 +1030,28 @@ function listingManagerPayload(registry, url, config) {
   });
 }
 
-function translationQueuePayload(registry, url, config) {
-  const seed = currentSeed(config);
+async function listingEditorPayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    env: config.authEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+  });
+  return renderAdminListingEditorPayload(
+    registry,
+    url.searchParams.get("locale") || "en",
+    seed,
+    url.searchParams.get("listingId"),
+    readListingEdits(config.listingEditLedgerPath),
+    latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
+    readTourApprovals(config.tourApprovalLedgerPath),
+    config.adminPrincipal || null,
+  );
+}
+
+async function translationQueuePayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    payload: config.payloadListingRuntime,
+    env: process.env,
+  });
   const tasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
   return renderAdminTranslationQueuePayload(registry, url.searchParams.get("locale") || "en", {
     seed,
@@ -1420,21 +1453,42 @@ function appendMediaReviewEntry(input, config) {
   return persisted;
 }
 
-function appendBulkListingStatusChanges(input, config) {
+async function appendBulkListingStatusChanges(input, config) {
   const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["editor"]);
-  const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
-  const batch = createBulkListingStatusEdits(currentSeed(config), attributed, translationTasks, config.editedAt);
-  const changes = batch.changes.map((result) => persistEditorChange(result, config));
+  const result = await saveBulkListingStatusDrafts(currentSeed(config), {
+    env: config.authEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+    principal: config.adminPrincipal,
+    input: attributed,
+    editedAt: config.editedAt,
+  });
+  const changes = result.edits.filter((edit) => !edit.idempotent);
+  for (const edit of changes) {
+    recordAudit(
+      {
+        action: "listing_edited",
+        actor: edit.editor,
+        objectType: "listing",
+        objectId: edit.listing_id,
+        metadata: {
+          changed_fields: ["listing_status"],
+          source: "admin_payload_draft",
+        },
+      },
+      config,
+    );
+  }
   return {
     kind: "bulk_listing_status_update",
-    targetStatus: batch.targetStatus,
-    requested: batch.requestedListingIds.length,
-    updated: changes.filter((result) => !result.edit.idempotent).length,
-    idempotent: changes.filter((result) => result.edit.idempotent).length,
-    unchanged: batch.unchangedListingIds.length,
-    unchangedListingIds: batch.unchangedListingIds,
-    edits: changes.map((result) => result.edit),
-    staleTranslations: changes.flatMap((result) => result.staleTranslations),
+    targetStatus: result.batch.targetStatus,
+    requested: result.batch.requestedListingIds.length,
+    updated: changes.length,
+    idempotent: result.edits.filter((edit) => edit.idempotent).length,
+    unchanged: result.batch.unchangedListingIds.length,
+    unchangedListingIds: result.batch.unchangedListingIds,
+    edits: result.edits,
+    staleTranslations: result.staleTranslations,
+    projectedSeed: result.projectedSeed,
   };
 }
 
@@ -2511,53 +2565,172 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
   const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
   if (crossOrigin) return jsonResponse(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
   const authEnv = config.authEnv || process.env;
-  let authHeader = request.headers.get("authorization") || "";
-  if (!authHeader) {
-    const cookieToken = adminTokenFromCookie(request.headers.get("cookie") || "");
-    if (cookieToken) authHeader = `Bearer ${cookieToken}`;
-  }
+  const authHeader = request.headers.get("authorization") || "";
+  const sessionToken = authHeader ? "" : adminTokenFromCookie(request.headers.get("cookie") || "");
+  let payloadAdminAuthPromise;
+  const payloadAdminAuth = () => {
+    payloadAdminAuthPromise ||= configuredPayloadAdminAuth(config);
+    return payloadAdminAuthPromise;
+  };
   const requestPath = new URL(request.url, "http://localhost").pathname;
   if (requestPath === "/admin/login") {
     if (request.method === "GET") {
-      if (resolveAdminPrincipal(authHeader, authEnv)) {
+      let session = null;
+      if (sessionToken) {
+        try {
+          session = await (await payloadAdminAuth())?.resolve(sessionToken);
+        } catch {
+          session = null;
+        }
+      }
+      if ((authHeader && resolveAdminPrincipal(authHeader, authEnv)) || session?.principal) {
         return new Response(null, { status: 303, headers: { location: "/admin", "cache-control": "no-store" } });
       }
       const error = new URL(request.url, "http://localhost").searchParams.get("error") === "1";
       return new Response(renderAdminLoginPage({ error }), {
         status: 200,
-        headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" },
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "no-store",
+          "x-robots-tag": "noindex, nofollow",
+          ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
+        },
       });
     }
     if (request.method === "POST") {
-      const form = new URLSearchParams(await request.text());
-      const submitted = form.get("token")?.trim() || "";
-      const principal = submitted ? resolveAdminPrincipal(`Bearer ${submitted}`, authEnv) : null;
-      if (!principal) {
+      try {
+        const service = await payloadAdminAuth();
+        if (!service) throw new Error("Payload admin authentication is unavailable");
+        const form = new URLSearchParams(await readRequestBody(request, config.maxBodyBytes));
+        const login = await service.login({ email: form.get("email"), password: form.get("password") });
+        const nowSeconds = typeof config.nowSeconds === "function" ? config.nowSeconds() : Math.floor(Date.now() / 1000);
+        const maxAgeSeconds = Math.floor(Number(login.exp) - nowSeconds);
+        if (!login.token || maxAgeSeconds <= 0) throw new Error("Payload returned an expired session");
+        return new Response(null, {
+          status: 303,
+          headers: {
+            location: "/admin",
+            "set-cookie": adminSessionSetCookie(login.token, { maxAgeSeconds }),
+            "cache-control": "no-store",
+          },
+        });
+      } catch {
         return new Response(null, { status: 303, headers: { location: "/admin/login?error=1", "cache-control": "no-store" } });
       }
-      return new Response(null, {
-        status: 303,
-        headers: { location: "/admin", "set-cookie": adminSessionSetCookie(submitted), "cache-control": "no-store" },
-      });
     }
     return new Response("Method not allowed", { status: 405, headers: { allow: "GET, POST" } });
   }
   if (requestPath === "/admin/logout" && request.method === "POST") {
+    if (sessionToken) {
+      try {
+        await (await payloadAdminAuth())?.logout(sessionToken);
+      } catch {
+        // Clearing the browser cookie still terminates this browser session;
+        // the short-lived Payload token expires even if Postgres is unavailable.
+      }
+    }
     return new Response(null, {
       status: 303,
       headers: { location: "/admin/login", "set-cookie": adminSessionClearCookie(), "cache-control": "no-store" },
     });
   }
-  const principal = config.adminPrincipal || resolveAdminPrincipal(authHeader, authEnv);
-  if (!principal) return adminUnauthorized();
+  let payloadSession = null;
+  let principal = config.adminPrincipal || (authHeader ? resolveAdminPrincipal(authHeader, authEnv) : null);
+  if (!principal && sessionToken) {
+    try {
+      payloadSession = await (await payloadAdminAuth())?.resolve(sessionToken);
+      principal = payloadSession?.principal || null;
+    } catch {
+      principal = null;
+    }
+  }
+  if (!principal) {
+    if ((requestPath === "/admin" || requestPath.startsWith("/admin/")) && request.headers.get("accept")?.includes("text/html")) {
+      return new Response(null, {
+        status: 303,
+        headers: {
+          location: "/admin/login",
+          "cache-control": "no-store",
+          ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
+        },
+      });
+    }
+    const response = adminUnauthorized();
+    if (!sessionToken) return response;
+    const headers = new Headers(response.headers);
+    headers.set("set-cookie", adminSessionClearCookie());
+    return new Response(response.body, { status: response.status, headers });
+  }
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
-  config = { ...config, adminPrincipal: principal };
+  config = { ...config, adminPrincipal: principal, payloadAdminSession: payloadSession };
   try {
     const url = new URL(request.url, "http://localhost");
     const requiredCapability = requiredAdminCapability(request.method, url.pathname);
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
+    if (
+      principal.source === "payload_session" &&
+      ["cases:read", "cases:write"].includes(requiredCapability) &&
+      !canAdminAccessWorkspace(principal, config.realtyCaseWorkspaceId)
+    ) {
+      return adminForbidden("workspace:access");
+    }
+    if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
+      const service = await payloadAdminAuth();
+      if (!payloadSession || !service) return adminForbidden("payload_session");
+      if (request.method === "GET") {
+        const operators = await service.listOperators(payloadSession);
+        if (url.pathname === "/api/admin/team") return jsonResponse(200, { kind: "admin_team", operators });
+        return new Response(
+          renderAdminTeamPage({
+            operators,
+            created: url.searchParams.get("created") === "1",
+            error: url.searchParams.get("error") === "1",
+          }),
+          { status: 200, headers: PRIVATE_HTML_HEADERS },
+        );
+      }
+      if (request.method === "POST" && url.pathname === "/api/admin/team") {
+        const formRequest = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
+        try {
+          const operator = await service.createOperator(
+            payloadSession,
+            parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+          );
+          if (formRequest) {
+            return new Response(null, {
+              status: 303,
+              headers: { location: "/admin/team?created=1", "cache-control": "no-store" },
+            });
+          }
+          return jsonResponse(201, { kind: "admin_team_operator", operator });
+        } catch (error) {
+          if (formRequest) {
+            return new Response(null, {
+              status: 303,
+              headers: { location: "/admin/team?error=1", "cache-control": "no-store" },
+            });
+          }
+          throw error;
+        }
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
+    }
+    if (request.method === "GET" && url.pathname === "/admin") {
+      const locale = url.searchParams.get("locale");
+      const query = locale ? `?locale=${encodeURIComponent(locale)}` : "";
+      return new Response(null, {
+        status: 307,
+        headers: { ...PRIVATE_HTML_HEADERS, location: `${adminHomePath(principal)}${query}` },
+      });
+    }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/connect") {
+      if (!authHeader || principal.source === "payload_session") {
+        return jsonResponse(403, {
+          kind: "mcp_credential_required",
+          message: "Use a named MCP operator credential; browser sessions are never exported as bearer tokens.",
+        });
+      }
       const token = String(authHeader).replace(/^Bearer\s+/i, "").trim();
       const base =
         String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
@@ -2625,13 +2798,17 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/admin/activity") return htmlResponse(activityPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/activity") return jsonResponse(200, activityPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/listings") return htmlResponse(listingManagerPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/listings") return jsonResponse(200, listingManagerPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/listings") return htmlResponse(await listingManagerPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/listings") return jsonResponse(200, await listingManagerPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
-      return payloadAdminListingHandoff(url.searchParams.get("listingId"));
+      try {
+        return htmlResponse(await listingEditorPayload(registry, url, config));
+      } catch (error) {
+        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+      }
     }
-    if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(translationQueuePayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, translationQueuePayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(await translationQueuePayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, await translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/migration/review") {
       return htmlResponse(migrationReviewPayload(registry, url, config));
     }
@@ -2932,20 +3109,55 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
-      const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
-      return jsonResponse(409, {
-        kind: "payload_canonical",
-        message: "Listing edits are managed in Payload.",
-        canonical_url: payloadAdminListingPath(input.listingId),
-      });
+      try {
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        const result = await saveListingDraft(currentSeed(config), {
+          env: config.authEnv || process.env,
+          payload: config.payloadListingRuntime || null,
+          principal: config.adminPrincipal,
+          input,
+          editedAt: config.editedAt,
+        });
+        if (!result.idempotent) {
+          recordAudit(
+            {
+              action: "listing_edited",
+              actor: config.adminPrincipal?.id,
+              objectType: "listing",
+              objectId: result.listingId,
+              metadata: {
+                changed_fields: result.changedFields,
+                source: "admin_payload_draft",
+              },
+            },
+            config,
+          );
+        }
+        return jsonResponse(result.idempotent ? 200 : 201, {
+          kind: "listing_draft_saved",
+          listing_id: result.listingId,
+          changed_fields: result.changedFields,
+          staleTranslations: result.staleTranslations,
+          editor_url: listingEditorPath(result.listingId),
+          draft_only: true,
+          publication_approval_changed: false,
+          idempotent: result.idempotent,
+        });
+      } catch (error) {
+        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+      }
     }
     if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
       const result = appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/status") {
-      const result = appendBulkListingStatusChanges(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
-      return jsonResponse(result.updated ? 201 : 200, result);
+      try {
+        const result = await appendBulkListingStatusChanges(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+        return jsonResponse(result.updated ? 201 : 200, result);
+      } catch (error) {
+        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+      }
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/publication-schedules") {
       const result = scheduleListingPublication(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);

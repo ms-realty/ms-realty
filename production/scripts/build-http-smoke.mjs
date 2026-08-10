@@ -300,6 +300,7 @@ const smoke = {
   lead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: { host: "localhost", origin: "http://localhost", "sec-fetch-site": "same-origin" },
     body: {
       leadType: "buyer",
       language: "he",
@@ -312,6 +313,7 @@ const smoke = {
   viewingLead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: { host: "localhost", origin: "http://localhost", "sec-fetch-site": "same-origin" },
     body: {
       source: "website_viewing_request",
       leadType: "buyer",
@@ -326,6 +328,7 @@ const smoke = {
   contactLead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: { host: "localhost", origin: "http://localhost", "sec-fetch-site": "same-origin" },
     body: {
       source: "website_contact_callback",
       leadType: "general",
@@ -339,6 +342,7 @@ const smoke = {
   sellerLead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: { host: "localhost", origin: "http://localhost", "sec-fetch-site": "same-origin" },
     body: {
       id: "http-lead-seller-el-0001",
       source: "website_seller_valuation",
@@ -534,6 +538,8 @@ smoke.listingEditorHtml = await dispatchHttp(app, {
   url: "/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001",
   headers: { authorization: "Bearer local-admin-smoke" },
 });
+const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
 smoke.listingEdit = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/listings/edit",
@@ -543,10 +549,11 @@ smoke.listingEdit = await dispatchHttp(app, {
   },
   body: new URLSearchParams({
     listingId: "MS-CRAWL-0001",
-    editor: "editor_bg",
     description: "Updated approved source description.",
   }).toString(),
 });
+if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
 smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
 smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
 smoke.adminLocales = {

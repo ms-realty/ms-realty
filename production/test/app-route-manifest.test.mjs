@@ -16,9 +16,10 @@ import {
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLegacyArchive } from "../lib/legacy-archive.mjs";
-import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
+import { approvedPublicSeedFixtureEnv, durableLeadStoreFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const registry = loadLocaleRegistry();
+Object.assign(process.env, durableLeadStoreFixtureEnv());
 const approvedConfig = appRouterConfigFromEnv({ ...process.env, ...approvedPublicSeedFixtureEnv() });
 
 test("App Router manifest maps sitemap entries plus no-store search routes", () => {

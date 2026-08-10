@@ -1,12 +1,8 @@
-// Browser session for the admin workbench. The API surface stays pure
-// Bearer, but a human in a browser cannot send headers — so /admin/login
-// exchanges the operator key for a cookie carrying that same token.
-// Deliberately stateless: the container disk forgets on every sleep, so there
-// is nowhere to keep server-side sessions; the cookie IS the credential, and
-// rotating the operator key in MS_REALTY_ADMIN_CREDENTIALS_JSON kills every
-// session instantly.
+// Browser session transport for the custom admin workbench. The cookie carries
+// a short-lived Payload JWT whose session id is also recorded in Postgres. It
+// never carries a long-lived MCP/operator credential.
 export const ADMIN_SESSION_COOKIE = "ms_admin";
-const THIRTY_DAYS_SECONDS = 30 * 24 * 60 * 60;
+export const MAX_ADMIN_SESSION_SECONDS = 2 * 60 * 60;
 
 export function adminTokenFromCookie(cookieHeader) {
   for (const part of String(cookieHeader || "").split(";")) {
@@ -22,8 +18,12 @@ export function adminTokenFromCookie(cookieHeader) {
   return "";
 }
 
-export function adminSessionSetCookie(token, { maxAgeSeconds = THIRTY_DAYS_SECONDS } = {}) {
-  return `${ADMIN_SESSION_COOKIE}=${encodeURIComponent(token)}; Max-Age=${maxAgeSeconds}; Path=/; HttpOnly; Secure; SameSite=Lax`;
+export function adminSessionSetCookie(token, { maxAgeSeconds = MAX_ADMIN_SESSION_SECONDS } = {}) {
+  const requested = Number(maxAgeSeconds);
+  const maxAge = Number.isFinite(requested)
+    ? Math.max(0, Math.min(Math.floor(requested), MAX_ADMIN_SESSION_SECONDS))
+    : MAX_ADMIN_SESSION_SECONDS;
+  return `${ADMIN_SESSION_COOKIE}=${encodeURIComponent(token)}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Lax`;
 }
 
 export function adminSessionClearCookie() {
@@ -32,7 +32,7 @@ export function adminSessionClearCookie() {
 
 export function renderAdminLoginPage({ error = false } = {}) {
   const errorBanner = error
-    ? `<p class="error" role="alert">Ключът не беше разпознат. Провери и опитай пак. / Key not recognized — check it and try again.</p>`
+    ? `<p class="error" role="alert">Данните не бяха приети. Опитай отново. / Sign-in details were not accepted. Try again.</p>`
     : "";
   return `<!doctype html>
 <html lang="bg">
@@ -55,11 +55,13 @@ export function renderAdminLoginPage({ error = false } = {}) {
 <body>
 <main>
   <h1>Вход за екипа на MS Realty</h1>
-  <p class="hint">Постави личния си операторски ключ. Пази го като парола.</p>
+  <p class="hint">Използвай служебния си имейл и парола.</p>
   ${errorBanner}
   <form method="POST" action="/admin/login">
-    <label for="operator-token">Операторски ключ</label>
-    <input id="operator-token" name="token" type="password" autocomplete="current-password" required autofocus>
+    <label for="admin-email">Имейл</label>
+    <input id="admin-email" name="email" type="email" autocomplete="username" inputmode="email" required autofocus>
+    <label for="admin-password">Парола</label>
+    <input id="admin-password" name="password" type="password" autocomplete="current-password" required>
     <button type="submit">Влез</button>
   </form>
 </main>

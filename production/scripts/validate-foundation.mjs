@@ -70,6 +70,18 @@ function countBy(rows, field) {
   }, {});
 }
 
+function contactPageMatchesLeadReadiness(page, html = null) {
+  const disabled = page?.chrome?.lead_writes_disabled === true;
+  const jsonMatches = disabled
+    ? page?.body?.callback === null && Boolean(page?.body?.form_unavailable)
+    : page?.body?.callback?.payload?.source === "website_contact_callback" &&
+      page?.body?.callback?.payload?.leadType === "general";
+  if (!jsonMatches || html === null) return jsonMatches;
+  return disabled
+    ? html.includes("data-form-unavailable=\"true\"") && !html.includes("data-lead-type=\"general\"")
+    : html.includes("data-lead-type=\"general\"");
+}
+
 function assertRuntimeAuditSummary(summary, label, expectedActions) {
   const expectedRows = Object.values(expectedActions).reduce((total, count) => total + count, 0);
   if (summary?.rows !== expectedRows) throw new Error(`${label} audit log must contain ${expectedRows} admin mutation rows`);
@@ -320,9 +332,9 @@ if (publicFixtures.listing_fr_fallback.indexable !== false) throw new Error("Fre
 if (publicFixtures.fallback_fr.indexable !== false) throw new Error("French language fallback must not be indexable");
 if (
   publicFixtures.contact_he.path !== "/he/contact" ||
-  publicFixtures.contact_he.body.callback.payload.source !== "website_contact_callback"
+  !contactPageMatchesLeadReadiness(publicFixtures.contact_he)
 ) {
-  throw new Error("Public fixtures must include Hebrew contact callback page");
+  throw new Error("Public fixtures contact page must match durable lead-store readiness");
 }
 if (
   publicFixtures.guide_en?.path !== "/en/guides/foreign-buyers" ||
@@ -419,9 +431,9 @@ if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke
 if (
   runtimeSmoke.contact_he.status !== 200 ||
   runtimeSmoke.contact_he.kind !== "contact" ||
-  runtimeSmoke.contact_he.body.callback.payload.source !== "website_contact_callback"
+  !contactPageMatchesLeadReadiness(runtimeSmoke.contact_he)
 ) {
-  throw new Error("Runtime smoke must expose contact callback page");
+  throw new Error("Runtime smoke contact page must match durable lead-store readiness");
 }
 if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");
 if (runtimeSmoke.lead_he.contact_preference !== "whatsapp") throw new Error("Runtime smoke lead must preserve contact preference");
@@ -500,10 +512,9 @@ if (
 }
 if (
   httpSmoke.contact.status !== 200 ||
-  httpSmoke.contact.body.body.callback.payload.leadType !== "general" ||
-  !httpSmoke.contactHtml.body.includes("data-lead-type=\"general\"")
+  !contactPageMatchesLeadReadiness(httpSmoke.contact.body, httpSmoke.contactHtml.body)
 ) {
-  throw new Error("HTTP smoke must expose contact callback page contract");
+  throw new Error("HTTP smoke contact page must match durable lead-store readiness");
 }
 if (
   httpSmoke.brokerContact.status !== 201 ||
@@ -584,13 +595,13 @@ if (httpSmoke.translationPublish.status !== 201 || httpSmoke.translationPublish.
   throw new Error("HTTP smoke must publish human-approved translation");
 }
 if (
-  httpSmoke.listingEditorHtml.status !== 307 ||
-  httpSmoke.listingEditorHtml.headers.location !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+  httpSmoke.listingEditorHtml.status !== 200 ||
+  !String(httpSmoke.listingEditorHtml.body || "").includes('data-admin-mutation-form="listing"')
 ) {
-  throw new Error("HTTP smoke must hand legacy listing editor links to Payload");
+  throw new Error("HTTP smoke must render the custom listing editor");
 }
-if (httpSmoke.listingEdit.status !== 409 || httpSmoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001") {
-  throw new Error("HTTP smoke must reject legacy listing mutations with a Payload handoff");
+if (httpSmoke.listingEdit.status !== 503 || httpSmoke.listingEdit.body.kind !== "payload_draft_unavailable") {
+  throw new Error("HTTP smoke must fail closed when the durable listing draft runtime is unavailable");
 }
 if (httpSmoke.staleListing.status !== 200 || httpSmoke.staleListing.body.indexable !== true) {
   throw new Error("HTTP smoke must preserve reviewed public translation after a rejected legacy mutation");
@@ -771,10 +782,9 @@ if (
 }
 if (
   nodeServerSmoke.contact.status !== 200 ||
-  nodeServerSmoke.contact.body.body.callback.payload.leadType !== "general" ||
-  !nodeServerSmoke.contactHtml.body.includes("data-lead-type=\"general\"")
+  !contactPageMatchesLeadReadiness(nodeServerSmoke.contact.body, nodeServerSmoke.contactHtml.body)
 ) {
-  throw new Error("Node server smoke must expose contact callback page contract");
+  throw new Error("Node server smoke contact page must match durable lead-store readiness");
 }
 if (
   nodeServerSmoke.contactLead.status !== 201 ||
@@ -822,8 +832,8 @@ if (nodeServerSmoke.translationApprove.status !== 201 || nodeServerSmoke.transla
 if (nodeServerSmoke.translationPublish.status !== 201 || nodeServerSmoke.translationPublish.body.public_indexable !== true) {
   throw new Error("Node server smoke must publish human-approved translation");
 }
-if (nodeServerSmoke.listingEdit.status !== 409 || nodeServerSmoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001") {
-  throw new Error("Node server smoke must reject legacy listing mutations with a Payload handoff");
+if (nodeServerSmoke.listingEdit.status !== 503 || nodeServerSmoke.listingEdit.body.kind !== "payload_draft_unavailable") {
+  throw new Error("Node server smoke must fail closed when the durable listing draft runtime is unavailable");
 }
 if (nodeServerSmoke.staleListing.status !== 200 || nodeServerSmoke.staleListing.body.indexable !== true) {
   throw new Error("Node server smoke must preserve reviewed public translation after a rejected legacy mutation");

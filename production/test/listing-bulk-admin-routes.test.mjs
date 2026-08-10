@@ -5,8 +5,10 @@ import os from "node:os";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { readAuditLog } from "../lib/audit-log.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
 import { readListingEdits } from "../lib/listing-edits.mjs";
 import { buildListingPublicationScheduleQueue, readListingPublicationSchedules } from "../lib/listing-publication-schedules.mjs";
+import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
 function tempWorkspace(prefix) {
   const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`);
@@ -46,12 +48,16 @@ async function withNamedOperator(fn) {
 test("Next listing manager bulk status changes are selected, attributed, audited, and retry-safe", async () => {
   await withNamedOperator(async (auth) => {
     const paths = tempWorkspace("next-listing-bulk");
-    const config = appAdminConfigFromEnv({
-      MS_REALTY_LISTING_EDIT_LEDGER_PATH: paths.listingEdits,
-      MS_REALTY_TRANSLATION_LEDGER_PATH: paths.translations,
-      MS_REALTY_AUDIT_LOG_PATH: paths.audit,
-      MS_REALTY_EDITED_AT: "2026-07-19T08:00:00.000Z",
-    });
+    const runtime = createPayloadDraftRuntime(loadCmsSeed());
+    const config = {
+      ...appAdminConfigFromEnv({
+        MS_REALTY_LISTING_EDIT_LEDGER_PATH: paths.listingEdits,
+        MS_REALTY_TRANSLATION_LEDGER_PATH: paths.translations,
+        MS_REALTY_AUDIT_LOG_PATH: paths.audit,
+        MS_REALTY_EDITED_AT: "2026-07-19T08:00:00.000Z",
+      }),
+      payloadListingRuntime: runtime.payload,
+    };
 
     const page = await renderAppAdminResponse(
       new Request("https://example.test/admin/listings?q=MS-CRAWL-0001", { headers: auth }),
@@ -92,7 +98,9 @@ test("Next listing manager bulk status changes are selected, attributed, audited
     assert.equal(first.status, 201);
     assert.equal(firstBody.updated, 2);
     assert.equal(firstBody.edits.every((edit) => edit.editor === "listing_operations"), true);
-    assert.equal(readListingEdits(paths.listingEdits).length, 2);
+    assert.equal(readListingEdits(paths.listingEdits).length, 0);
+    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
+    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").facts.listing_status, "reserved");
     assert.equal(readAuditLog(paths.audit).length, 2);
     assert.equal(readAuditLog(paths.audit).every((row) => row.actor === "listing_operations"), true);
 
@@ -100,8 +108,8 @@ test("Next listing manager bulk status changes are selected, attributed, audited
     const retryBody = await retry.json();
     assert.equal(retry.status, 200);
     assert.equal(retryBody.updated, 0);
-    assert.equal(retryBody.unchanged, 2);
-    assert.equal(readListingEdits(paths.listingEdits).length, 2);
+    assert.equal(retryBody.idempotent, 2);
+    assert.equal(readListingEdits(paths.listingEdits).length, 0);
     assert.equal(readAuditLog(paths.audit).length, 2);
 
     const json = await renderAppAdminResponse(
@@ -263,11 +271,13 @@ test("HTTP listing publication schedule can be cancelled before it changes inven
 test("HTTP adapter preserves repeated form selections for bulk listing status changes", async () => {
   await withNamedOperator(async (auth) => {
     const paths = tempWorkspace("http-listing-bulk");
+    const runtime = createPayloadDraftRuntime(loadCmsSeed());
     const app = createHttpApp({
       listingEditLedgerPath: paths.listingEdits,
       translationLedgerPath: paths.translations,
       auditLogPath: paths.audit,
       editedAt: "2026-07-19T08:00:00.000Z",
+      payloadListingRuntime: runtime.payload,
     });
     const response = await dispatchHttp(app, {
       method: "POST",
@@ -277,13 +287,14 @@ test("HTTP adapter preserves repeated form selections for bulk listing status ch
         ["listingIds", "MS-CRAWL-0001"],
         ["listingIds", "MS-CRAWL-0002"],
         ["targetStatus", "sold"],
-        ["editor", "listing_operations"],
       ]).toString(),
     });
     assert.equal(response.status, 201);
     assert.equal(response.body.requested, 2);
     assert.equal(response.body.updated, 2);
-    assert.equal(readListingEdits(paths.listingEdits).length, 2);
+    assert.equal(readListingEdits(paths.listingEdits).length, 0);
+    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "sold");
+    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").facts.listing_status, "sold");
     assert.equal(readAuditLog(paths.audit).length, 2);
   });
 });

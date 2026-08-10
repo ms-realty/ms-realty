@@ -29,5 +29,6 @@ production/data/hermes-backend.json
 .wrangler
 
 # These run at the edge and are bundled by Wrangler, not copied into Next.
-workers/
+workers/*
+!workers/durable-case-authority.mjs
 wrangler.jsonc

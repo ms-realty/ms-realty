@@ -315,12 +315,15 @@ sequence, not a deploy:
    ```
 
    Review the generated file, then apply it with `payload migrate`.
-2. Set Worker var `MS_REALTY_LEAD_DURABLE_STORE_ENABLED=true` (the store stays
-   off unless `PAYLOAD_SECRET` and `DATABASE_URL` are also present, so a
-   half-provisioned deployment keeps failing closed rather than losing leads).
-3. Extend the edge allowlist to `POST /api/leads` only after a test submission
-   is confirmed in Postgres, then flip the contact page back to the form by
-   clearing `MS_REALTY_MCP_WRITES_DISABLED` for that path.
+2. Set Worker var `MS_REALTY_LEAD_DURABLE_STORE_ENABLED=true`. The edge admits
+   only the exact `POST /api/leads` when that flag, `PAYLOAD_SECRET`,
+   `DATABASE_URL`, and a valid `MS_REALTY_LEAD_CONTACT_KEY` are all present;
+   incomplete configuration remains a 503 rather than falling back to disk.
+3. Deploy the guarded edge admission only after a test submission is confirmed
+   in Postgres. The Next handler additionally requires an exact same-origin
+   browser `Origin`; missing, opaque, or spoofed origins are rejected before
+   persistence. The visible contact form uses the same durable-store readiness
+   predicate and stays hidden whenever any required binding is missing.
 
 Contact details stay encrypted with `MS_REALTY_LEAD_CONTACT_KEY`; Postgres
 only ever receives the AES-256-GCM envelope. Losing that key orphans every
@@ -328,18 +331,17 @@ stored contact, so it belongs in the password manager, not only in Cloudflare.
 
 ## 9. Fast-follow code changes (next PRs, in priority order)
 
-1. **CSRF guard missing in `app-api-adapter.mjs`** — the Next runtime's public
-   write routes skip `request-guard`; `http.mjs` and the admin adapter enforce
-   it. Masked today by the edge 503; becomes live the moment writes open.
-2. **`payload.config.js` fails open** — dev-default secret and localhost DSN
-   ship as fallbacks; add a production boot assert (NODE_ENV=production +
-   placeholder secret ⇒ refuse to start).
+1. **Public lead Origin guard implemented** — `POST /api/leads` requires an
+   exact same-origin browser `Origin`, and the Worker requires the complete
+   durable runtime before forwarding it.
+2. **Payload production boot is fail-closed** — missing or placeholder
+   `PAYLOAD_SECRET` and missing `DATABASE_URL` refuse production config import.
 3. **No migration runner in the deploy path** — add `payload:migrate` npm
    script + a deploy-time (or boot-time) `payload migrate` step, and assert
    applied migrations in `payload:runtime` evidence.
-4. **Extend the edge mutation allowlist** to `/(payload)/api` auth +
-   collection routes once `DATABASE_URL` is proven, so `/payload-admin` works
-   through the Worker.
+4. **Keep Payload internal** — `/payload-admin` and direct `/api/admins/*`
+   remain edge-hidden; the client-facing `/admin` workbench resolves Payload
+   sessions and enforces role/workspace access server-side.
 5. **Proxy trust**: `x-forwarded-for` is trusted unconditionally (rate-limit
    evasion); `MS_REALTY_TRUST_PROXY` is forwarded but read by nothing (escapes
    the dead-binding test because it is a literal). On Cloudflare, prefer

@@ -22,6 +22,7 @@ import {
   sellerPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
+import { isLeadDurableStoreEnabled, leadDurableStoreConfigFromEnv } from "./lead-durable-store.mjs";
 import {
   geographyRegistryAncestors,
   geographyRegistryArea,
@@ -1206,6 +1207,10 @@ export function chromeCopyFor(localeCode) {
   return CHROME_COPY[localeCode] || CHROME_COPY.en;
 }
 
+export function leadWritesDisabledFromEnv(env = process.env) {
+  return !isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv(env));
+}
+
 function publicChrome(
   registry,
   locale,
@@ -1214,7 +1219,7 @@ function publicChrome(
     active = null,
     locations = [],
     currentPath = null,
-    leadWritesDisabled = process.env.MS_REALTY_MCP_WRITES_DISABLED === "1",
+    leadWritesDisabled = leadWritesDisabledFromEnv(),
   } = {},
 ) {
   const copy = chromeCopyFor(locale.code);
@@ -2182,10 +2187,9 @@ export function renderHomePage({ registry, localeCode, listings }) {
 export function renderContactPage({
   registry,
   localeCode,
-  // The Worker sets this flag on runtimes whose disk forgets (the edge also
-  // 503s /api/leads there); rendering a form whose backend is off would waste
-  // the visitor's effort, so the page falls back to direct contact channels.
-  leadWritesDisabled = process.env.MS_REALTY_MCP_WRITES_DISABLED === "1",
+  // The UI uses the same durable-store readiness predicate as the API and
+  // Worker edge. MCP automation remains independently disabled.
+  leadWritesDisabled = leadWritesDisabledFromEnv(),
 } = {}) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;

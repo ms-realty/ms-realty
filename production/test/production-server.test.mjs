@@ -282,6 +282,7 @@ test("production server persists public leads and reviewed admin replies", async
   try {
     const lead = await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
+      headers: { origin: baseUrl },
       body: JSON.stringify({
         leadType: "buyer",
         language: "he",

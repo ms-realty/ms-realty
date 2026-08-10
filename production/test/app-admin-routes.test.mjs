@@ -325,7 +325,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const lead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", origin: "https://example.test" },
           body: JSON.stringify({
             source: "website_consultation_request",
             leadType: "renter",
@@ -345,7 +345,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(unauthorized.headers.get("www-authenticate"), 'Bearer realm="ms-realty-admin"');
 
       const auth = { authorization: "Bearer next-admin-test" };
-      const adminRoot = await adminRootRoute.GET(new Request("https://example.test/admin?locale=ru"));
+      const adminRootUnauthorized = await adminRootRoute.GET(new Request("https://example.test/admin?locale=ru"));
+      assert.equal(adminRootUnauthorized.status, 401);
+      const adminRoot = await adminRootRoute.GET(new Request("https://example.test/admin?locale=ru", { headers: auth }));
       assert.equal(adminRoot.status, 307);
       assert.equal(adminRoot.headers.get("location"), "/admin/today?locale=ru");
 
@@ -569,7 +571,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(listingManagerHtml, /data-kind="admin-listing-manager"/);
       assert.match(listingManagerHtml, /data-listing-manager-row="MS-CRAWL-0001"/);
       assert.match(listingManagerHtml, /Поиск по номеру/);
-      assert.match(listingManagerHtml, /href="\/payload-admin\/collections\/listings\/MS-CRAWL-0001"/);
+      assert.match(listingManagerHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=ru"/);
       assert.match(listingManagerHtml, /href="\/admin\/translations\?locale=ru"/);
       const listingManagerJson = await listingManagerJsonRoute.GET(
         new Request("https://example.test/api/admin/listings?locale=ru&q=MS-CRAWL-0001", { headers: auth }),
@@ -618,8 +620,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const russianEditor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=ru", { headers: auth }),
       );
-      assert.equal(russianEditor.status, 307);
-      assert.equal(russianEditor.headers.get("location"), "/payload-admin/collections/listings/MS-CRAWL-0001");
+      assert.equal(russianEditor.status, 200);
+      assert.match(await russianEditor.text(), /data-admin-mutation-form="listing"/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();
@@ -1554,8 +1556,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const editor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
       );
-      assert.equal(editor.status, 307);
-      assert.equal(editor.headers.get("location"), "/payload-admin/collections/listings/MS-CRAWL-0001");
+      assert.equal(editor.status, 200);
+      assert.match(await editor.text(), /data-admin-mutation-form="listing"/);
       const reviewableAsset = loadCmsSeed().records
         .find((record) => record.collection === "listings" && record.id === "MS-CRAWL-0001")
         .media.find((asset) => asset.kind === "photo");
@@ -1582,13 +1584,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(mediaReviewBody.review_status, "approved_by_human");
       assert.equal(mediaReviewBody.kind, "floor_plan");
 
+      const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+      process.env.MS_REALTY_ADMIN_ACTOR = "content_editor";
       const edit = await listingEditRoute.POST(
         new Request("https://example.test/api/admin/listings/edit", {
           method: "POST",
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             listingId: "MS-CRAWL-0001",
-            editor: "content_editor",
             title: "Updated title for Next admin",
             floor: "2",
             total_floors: "5",
@@ -1596,21 +1599,20 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
             condition: "Renovated",
             location_precision: "approximate",
             availability_verified_at: "2026-07-19T11:30",
-            publish_approved: "true",
             seo_title: "Reviewed SEO title",
             seo_description: "Reviewed SEO description for the source-language listing.",
             seo_canonical: "/bg/imoti/MS-CRAWL-0001",
             seo_og_title: "Reviewed Open Graph title",
             seo_og_description: "Reviewed Open Graph description.",
             seo_robots: "index,follow",
-            seo_review_confirmed: "true",
           }),
         }),
       );
+      if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+      else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
       const editBody = await edit.json();
-      assert.equal(edit.status, 409);
-      assert.equal(editBody.kind, "payload_canonical");
-      assert.equal(editBody.canonical_url, "/payload-admin/collections/listings/MS-CRAWL-0001");
+      assert.equal(edit.status, 503);
+      assert.equal(editBody.kind, "payload_draft_unavailable");
 
       const slugChange = await listingSlugRoute.POST(
         new Request("https://example.test/api/admin/listings/slug", {
@@ -1673,7 +1675,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const operationsLead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", origin: "https://example.test" },
           body: JSON.stringify({
             source: "website_contact_callback",
             leadType: "general",
@@ -1749,7 +1751,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const sellerLead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", origin: "https://example.test" },
           body: JSON.stringify({
             id: "next-admin-seller-pipeline-test",
             source: "website_seller_valuation",

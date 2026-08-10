@@ -128,6 +128,7 @@ try {
   const leadResponse = await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       captureHeaders: true,
+      headers: { origin: baseUrl },
       body: JSON.stringify({
         leadType: "buyer",
         language: "he",
@@ -139,6 +140,7 @@ try {
   const viewingLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       captureHeaders: true,
+      headers: { origin: baseUrl },
       body: JSON.stringify({
         source: "website_viewing_request",
         leadType: "buyer",
@@ -153,6 +155,7 @@ try {
   const contactLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       captureHeaders: true,
+      headers: { origin: baseUrl },
       body: JSON.stringify({
         source: "website_contact_callback",
         leadType: "general",
@@ -166,6 +169,7 @@ try {
   const sellerLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       captureHeaders: true,
+      headers: { origin: baseUrl },
       body: JSON.stringify({
         source: "website_seller_valuation",
         leadType: "seller",
@@ -303,6 +307,7 @@ try {
     badLead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       captureHeaders: true,
+      headers: { origin: baseUrl },
       body: JSON.stringify({
         id: "server-lead-bad-0001",
         leadType: "buyer",
@@ -462,15 +467,18 @@ try {
       taskId: smoke.translationApprove.body.id,
     }),
   });
+  const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+  process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
   smoke.listingEdit = await jsonFetch(baseUrl, "/api/admin/listings/edit", {
     method: "POST",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: JSON.stringify({
       listingId: "MS-CRAWL-0001",
-      editor: "editor_bg",
       patch: { description: "Updated approved source description." },
     }),
   });
+  if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+  else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
   smoke.staleListing = await jsonFetch(baseUrl, "/el/akinita/MS-CRAWL-0001");
   smoke.staleSearch = await jsonFetch(baseUrl, "/api/search?locale=el&q=Sandanski");
   smoke.ctaClick = await jsonFetch(baseUrl, "/api/events", {

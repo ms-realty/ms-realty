@@ -4,18 +4,21 @@
   "ready": false,
   "status": "blocked",
   "summary": {
-    "admin_route": "/payload-admin",
-    "checks": 9,
+    "admin_route": "/admin",
+    "checks": 12,
     "database": {
       "status": "missing_env"
     },
+    "identity_collection": "admins",
     "missing_env": [
       "PAYLOAD_SECRET",
       "DATABASE_URL"
     ],
+    "payload_admin_ui": "edge_hidden",
+    "payload_identity_rest": "edge_hidden",
     "placeholder_env": [],
     "weak_env": [],
-    "route_files": 4
+    "route_files": 6
   },
   "checks": [
     {
@@ -29,9 +32,29 @@
       "env": "DATABASE_URL"
     },
     {
-      "id": "route:app/(payload)/payload-admin/[[...segments]]/page.js",
+      "id": "route:app/admin/route.js",
       "status": "pass",
-      "file": "app/(payload)/payload-admin/[[...segments]]/page.js"
+      "file": "app/admin/route.js"
+    },
+    {
+      "id": "route:app/admin/login/route.js",
+      "status": "pass",
+      "file": "app/admin/login/route.js"
+    },
+    {
+      "id": "route:app/admin/logout/route.js",
+      "status": "pass",
+      "file": "app/admin/logout/route.js"
+    },
+    {
+      "id": "route:app/admin/team/route.js",
+      "status": "pass",
+      "file": "app/admin/team/route.js"
+    },
+    {
+      "id": "route:app/api/admin/team/route.js",
+      "status": "pass",
+      "file": "app/api/admin/team/route.js"
     },
     {
       "id": "route:app/(payload)/api/[...slug]/route.js",
@@ -39,20 +62,37 @@
       "file": "app/(payload)/api/[...slug]/route.js"
     },
     {
-      "id": "route:app/(payload)/graphql/route.js",
+      "id": "payload_edge_boundary",
       "status": "pass",
-      "file": "app/(payload)/graphql/route.js"
-    },
-    {
-      "id": "route:app/(payload)/graphql-playground/route.js",
-      "status": "pass",
-      "file": "app/(payload)/graphql-playground/route.js"
+      "custom_admin_route": "/admin",
+      "payload_admin_ui": "edge_hidden",
+      "payload_graphql_encoded_paths": [
+        "/graph%71l",
+        "/graph%2571l",
+        "/graphql%2fquery",
+        "/graphql%252fquery",
+        "/graphql%2dplayground",
+        "/graphql%252dplayground%252f",
+        "/api%2fgraphql",
+        "/api%252fgraphql%252f"
+      ],
+      "payload_graphql_paths": [
+        "/graphql",
+        "/graphql-playground",
+        "/api/graphql"
+      ],
+      "payload_identity_rest": "edge_hidden"
     },
     {
       "id": "payload_config_import",
       "status": "pass",
-      "admin_route": "/payload-admin",
-      "collections": 11
+      "collections": 13,
+      "graphql_disabled": true,
+      "graphql_playground_disabled_in_production": true,
+      "identity_collection": "admins",
+      "internal_admin_route": "/payload-admin",
+      "session_max_age_seconds": 7200,
+      "sessions": "database_backed"
     },
     {
       "id": "database_network_scope",

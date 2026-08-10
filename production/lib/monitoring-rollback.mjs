@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fromRoot } from "./paths.mjs";
+import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_MONITORING_ROLLBACK_REPORT = fromRoot("production", "data", "monitoring-rollback-report.json");
 export const DEFAULT_REPORT_PATH = DEFAULT_MONITORING_ROLLBACK_REPORT;
@@ -159,22 +159,23 @@ export function assertMonitoringRollbackReport(report) {
 }
 
 export function monitoringRollbackState(reportPath = DEFAULT_MONITORING_ROLLBACK_REPORT, options = {}) {
-  if (!fs.existsSync(reportPath)) return { status: "missing", path: reportPath };
+  const normalizedPath = repoRelativePath(reportPath);
+  if (!fs.existsSync(reportPath)) return { status: "missing", path: normalizedPath };
   try {
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
-    if (report?.example === true || reportPath.endsWith(".example")) return { status: "example", path: reportPath };
+    if (report?.example === true || reportPath.endsWith(".example")) return { status: "example", path: normalizedPath };
     assertMonitoringRollbackReport(report);
     const { maxAgeMs, now } = stateOptions(options);
     const [generatedAt, ...operationalEvidenceTimes] = evidenceTimes(report);
     const ageMs = now - generatedAt;
-    if (ageMs < 0) return { status: "invalid", path: reportPath, error: "generated_at is in the future" };
+    if (ageMs < 0) return { status: "invalid", path: normalizedPath, error: "generated_at is in the future" };
     const evidenceAgeMs = now - Math.min(...operationalEvidenceTimes);
     if (evidenceAgeMs > maxAgeMs) {
-      return { status: "expired", path: reportPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, max_age_ms: maxAgeMs };
+      return { status: "expired", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, max_age_ms: maxAgeMs };
     }
-    return { status: "pass", path: reportPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, report };
+    return { status: "pass", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, report };
   } catch (error) {
-    return { status: "invalid", path: reportPath, error: error.message };
+    return { status: "invalid", path: normalizedPath, error: error.message };
   }
 }
 

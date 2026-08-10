@@ -9,7 +9,12 @@ import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { renderMcpProtectedResourceMetadata, renderMcpResponse } from "./mcp-server.mjs";
 import { clientIdentity, createRateLimiter } from "./rate-limit.mjs";
-import { crossOriginWriteRejection } from "./request-guard.mjs";
+import {
+  crossOriginWriteRejection,
+  readHeader,
+  requestHost,
+  sameOriginWriteRejection,
+} from "./request-guard.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
   adminHomePath,
@@ -17,6 +22,7 @@ import {
   assertAgentRealtyCaseMutation,
   bindAuthenticatedOperator,
   canAdminAccess,
+  canAdminAccessWorkspace,
   canAdminMutate,
   isAdminAuthorized,
   resolveAdminPrincipal,
@@ -30,6 +36,8 @@ import {
   adminTokenFromCookie,
   renderAdminLoginPage,
 } from "./admin-login.mjs";
+import { renderAdminTeamPage } from "./admin-team.mjs";
+import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import {
   LISTING_EDIT_FIELDS,
@@ -130,6 +138,11 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
+import {
+  projectListingDraftSeed,
+  saveBulkListingStatusDrafts,
+  saveListingDraft,
+} from "./listing-draft-service.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
   appendListingPublicationSchedule,
@@ -295,16 +308,10 @@ function adminJson(status, body) {
   return privateJson(status, body);
 }
 
-function payloadAdminListingPath(listingId) {
+function listingEditorPath(listingId) {
   const id = typeof listingId === "string" ? listingId.trim() : "";
-  if (!id) throw new Error("listingId is required for the Payload editor handoff");
-  return `/payload-admin/collections/listings/${encodeURIComponent(id)}`;
-}
-
-function payloadAdminListingHandoff(listingId) {
-  return adminResponse(307, "", "text/plain; charset=utf-8", {
-    location: payloadAdminListingPath(listingId),
-  });
+  if (!id) throw new Error("Known listingId is required");
+  return `/admin/listings/edit?listingId=${encodeURIComponent(id)}`;
 }
 
 function wantsHtml(request, url) {
@@ -536,7 +543,7 @@ function listingEditInput(request) {
   if (input.patch) return input;
   const patch = {};
   for (const field of LISTING_EDIT_FIELDS) {
-    if (input[field] !== undefined && input[field] !== "") patch[field] = input[field];
+    if (input[field] !== undefined) patch[field] = input[field];
   }
   return { ...input, patch };
 }
@@ -719,6 +726,8 @@ export function createHttpApp({
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
+  payloadListingRuntime = null,
+  payloadListingEnv = process.env,
   receivedAt,
   requestedAt,
   editedAt,
@@ -741,12 +750,26 @@ export function createHttpApp({
   rateLimit = null,
   trustProxy = process.env.MS_REALTY_TRUST_PROXY === "1",
   naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
+  payloadAdminAuth = getPayloadAdminAuthService,
+  nowSeconds = () => Math.floor(Date.now() / 1000),
   search = {},
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
   const activeLegacyDecisionByUrl = new Map(activeLegacyDecisions.map((row) => [row.old_url, row]));
   const publicWriteLimiter = rateLimit ? createRateLimiter(rateLimit) : null;
+  let payloadAdminAuthPromise;
+  const configuredPayloadAdminAuth = async () => {
+    if (!payloadAdminAuthPromise) {
+      payloadAdminAuthPromise = Promise.resolve(typeof payloadAdminAuth === "function" ? payloadAdminAuth() : payloadAdminAuth);
+    }
+    try {
+      return await payloadAdminAuthPromise;
+    } catch (error) {
+      payloadAdminAuthPromise = undefined;
+      throw error;
+    }
+  };
   const currentSeed = () =>
     applyMediaReviews(
       applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined)),
@@ -1054,9 +1077,9 @@ export function createHttpApp({
         page: url.searchParams.get("page"),
       },
     );
-  const currentListingManagerPayload = (url, operatorId = null) =>
+  const currentListingManagerPayload = async (url, operatorId = null) =>
     renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: currentSeed(),
+      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
       translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       status: url.searchParams.get("status") || "",
@@ -1069,9 +1092,20 @@ export function createHttpApp({
         { now: listingPublicationAt || reviewedAt || editedAt || new Date().toISOString() },
       ),
     });
-  const currentTranslationQueuePayload = (url, operatorId = null) =>
+  const currentListingEditorPayload = async (url, operatorId = null) =>
+    renderAdminListingEditorPayload(
+      activeRegistry,
+      url.searchParams.get("locale") || "en",
+      await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
+      url.searchParams.get("listingId"),
+      readListingEdits(listingEditLedgerPath || undefined),
+      latestTranslationTasks(currentTranslationTasks()),
+      currentTourApprovals(),
+      operatorId,
+    );
+  const currentTranslationQueuePayload = async (url, operatorId = null) =>
     renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: currentSeed(),
+      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
       translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       targetLocale: url.searchParams.get("targetLocale") || "",
@@ -1250,41 +1284,66 @@ export function createHttpApp({
      };
    }
     if (url.pathname === "/api/hermes/chat") return privateJson(404, { kind: "not_found" });
+    if (request.method === "POST" && url.pathname === "/api/leads") {
+      const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
+      const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : "http";
+      const requestUrl = new URL(request.url, `${protocol}://${requestHost(request.headers) || "localhost"}`);
+      const sameOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl });
+      if (sameOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: sameOrigin });
+    }
     // Runs after /mcp, which keeps its own MS_REALTY_MCP_ALLOWED_ORIGINS allowlist
     // because connector clients are legitimately cross-origin.
     const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
     if (crossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
    let auth = request.headers?.authorization || request.headers?.Authorization || "";
-    // A browser cannot send a Bearer header; /admin/login exchanged the
-    // operator key for a cookie carrying that same token. Header wins.
-    if (!auth) {
-      const cookieToken = adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
-      if (cookieToken) auth = `Bearer ${cookieToken}`;
-    }
+    const sessionToken = auth ? "" : adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
 
     if (url.pathname === "/admin/login") {
       if (request.method === "GET") {
-        if (resolveAdminPrincipal(auth)) return response(303, "", "text/plain; charset=utf-8", { location: "/admin" });
+        let session = null;
+        if (sessionToken) {
+          try {
+            session = await (await configuredPayloadAdminAuth())?.resolve(sessionToken);
+          } catch {
+            session = null;
+          }
+        }
+        if ((auth && resolveAdminPrincipal(auth)) || session?.principal) {
+          return response(303, "", "text/plain; charset=utf-8", { location: "/admin" });
+        }
         return response(200, renderAdminLoginPage({ error: url.searchParams.get("error") === "1" }), "text/html; charset=utf-8", {
           "cache-control": "no-store",
           "x-robots-tag": "noindex, nofollow",
+          ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
         });
       }
       if (request.method === "POST") {
-        const submitted = new URLSearchParams(request.body || "").get("token")?.trim() || "";
-        const principal = submitted ? resolveAdminPrincipal(`Bearer ${submitted}`) : null;
-        if (!principal) {
+        try {
+          const service = await configuredPayloadAdminAuth();
+          if (!service) throw new Error("Payload admin authentication is unavailable");
+          const form = new URLSearchParams(request.body || "");
+          const login = await service.login({ email: form.get("email"), password: form.get("password") });
+          const maxAgeSeconds = Math.floor(Number(login.exp) - nowSeconds());
+          if (!login.token || maxAgeSeconds <= 0) throw new Error("Payload returned an expired session");
+          return response(303, "", "text/plain; charset=utf-8", {
+            location: "/admin",
+            "set-cookie": adminSessionSetCookie(login.token, { maxAgeSeconds }),
+            "cache-control": "no-store",
+          });
+        } catch {
           return response(303, "", "text/plain; charset=utf-8", { location: "/admin/login?error=1", "cache-control": "no-store" });
         }
-        return response(303, "", "text/plain; charset=utf-8", {
-          location: "/admin",
-          "set-cookie": adminSessionSetCookie(submitted),
-          "cache-control": "no-store",
-        });
       }
       return response(405, "Method not allowed", "text/plain; charset=utf-8", { allow: "GET, POST" });
     }
     if (url.pathname === "/admin/logout" && request.method === "POST") {
+      if (sessionToken) {
+        try {
+          await (await configuredPayloadAdminAuth())?.logout(sessionToken);
+        } catch {
+          // The browser credential is still cleared and expires within two hours.
+        }
+      }
       return response(303, "", "text/plain; charset=utf-8", {
         location: "/admin/login",
         "set-cookie": adminSessionClearCookie(),
@@ -1293,11 +1352,73 @@ export function createHttpApp({
     }
 
     const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
-    const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
-    if (adminRequest && !principal) return adminUnauthorized();
+    let payloadSession = null;
+    let principal = adminRequest && auth ? resolveAdminPrincipal(auth) : null;
+    if (adminRequest && !principal && sessionToken) {
+      try {
+        payloadSession = await (await configuredPayloadAdminAuth())?.resolve(sessionToken);
+        principal = payloadSession?.principal || null;
+        if (principal) auth = principal;
+      } catch {
+        principal = null;
+      }
+    }
+    if (adminRequest && !principal) {
+      if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && wantsHtml(request, url)) {
+        return adminResponse(303, "", "text/plain; charset=utf-8", {
+          location: "/admin/login",
+          ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
+        });
+      }
+      const unauthorized = adminUnauthorized();
+      if (sessionToken) unauthorized.headers["set-cookie"] = adminSessionClearCookie();
+      return unauthorized;
+    }
     if (adminRequest && request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
     const requiredCapability = adminRequest ? requiredAdminCapability(request.method, url.pathname) : null;
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
+    if (
+      principal?.source === "payload_session" &&
+      ["cases:read", "cases:write"].includes(requiredCapability) &&
+      !canAdminAccessWorkspace(principal, realtyCaseWorkspaceId)
+    ) {
+      return adminForbidden("workspace:access");
+    }
+    if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
+      const service = await configuredPayloadAdminAuth();
+      if (!payloadSession || !service) return adminForbidden("payload_session");
+      if (request.method === "GET") {
+        const operators = await service.listOperators(payloadSession);
+        if (url.pathname === "/api/admin/team") return adminJson(200, { kind: "admin_team", operators });
+        return adminResponse(
+          200,
+          renderAdminTeamPage({
+            operators,
+            created: url.searchParams.get("created") === "1",
+            error: url.searchParams.get("error") === "1",
+          }),
+          "text/html; charset=utf-8",
+        );
+      }
+      if (request.method === "POST" && url.pathname === "/api/admin/team") {
+        const formRequest = String(request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes(
+          "application/x-www-form-urlencoded",
+        );
+        try {
+          const operator = await service.createOperator(payloadSession, parseBody(request));
+          if (formRequest) {
+            return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/team?created=1" });
+          }
+          return adminJson(201, { kind: "admin_team_operator", operator });
+        } catch (error) {
+          if (formRequest) {
+            return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/team?error=1" });
+          }
+          return adminJson(400, { kind: "bad_request", message: error.message });
+        }
+      }
+      return adminJson(405, { kind: "method_not_allowed" });
+    }
     const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
     if (publicWriteLimiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
       const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
@@ -1513,6 +1634,12 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/admin/connect") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (principal?.source === "payload_session") {
+        return adminJson(403, {
+          kind: "mcp_credential_required",
+          message: "Use a named MCP operator credential; browser sessions are never exported as bearer tokens.",
+        });
+      }
       const token = String(auth).replace(/^Bearer\s+/i, "").trim();
       const base = String(process.env.MS_REALTY_PUBLIC_ORIGIN || "").trim() || `https://${host}`;
       return adminResponse(
@@ -1648,7 +1775,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/listings", "/admin/listings"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentListingManagerPayload(url, principal);
+      const payload = await currentListingManagerPayload(url, principal);
       if (url.pathname === "/admin/listings" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -1657,7 +1784,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/translations", "/admin/translations"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentTranslationQueuePayload(url, principal);
+      const payload = await currentTranslationQueuePayload(url, principal);
       if (url.pathname === "/admin/translations" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -1712,9 +1839,9 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return payloadAdminListingHandoff(url.searchParams.get("listingId"));
+        return adminResponse(200, adminHtml(await currentListingEditorPayload(url, principal)), "text/html; charset=utf-8");
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
@@ -2336,14 +2463,37 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = listingEditInput(request);
-        return adminJson(409, {
-          kind: "payload_canonical",
-          message: "Listing edits are managed in Payload.",
-          canonical_url: payloadAdminListingPath(input.listingId),
+        const result = await saveListingDraft(currentSeed(), {
+          env: payloadListingEnv,
+          payload: payloadListingRuntime,
+          principal,
+          input: listingEditInput(request),
+          editedAt,
+        });
+        if (!result.idempotent) {
+          recordAudit({
+            action: "listing_edited",
+            actor: principal?.id,
+            objectType: "listing",
+            objectId: result.listingId,
+            metadata: {
+              changed_fields: result.changedFields,
+              source: "admin_payload_draft",
+            },
+          });
+        }
+        return adminJson(result.idempotent ? 200 : 201, {
+          kind: "listing_draft_saved",
+          listing_id: result.listingId,
+          changed_fields: result.changedFields,
+          staleTranslations: result.staleTranslations,
+          editor_url: listingEditorPath(result.listingId),
+          draft_only: true,
+          publication_approval_changed: false,
+          idempotent: result.idempotent,
         });
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
@@ -2377,48 +2527,39 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["editor"]);
-        const batch = createBulkListingStatusEdits(
-          currentSeed(),
+        const result = await saveBulkListingStatusDrafts(currentSeed(), {
+          env: payloadListingEnv,
+          payload: payloadListingRuntime,
+          principal,
           input,
-          latestTranslationTasks(currentTranslationTasks()),
           editedAt,
-        );
-        const changes = batch.changes.map((result) => {
-          const edit = appendListingEdit(result.edit, { filePath: listingEditLedgerPath || undefined });
-          const persistedStaleTranslations = edit.idempotent
-            ? []
-            : result.staleTranslations
-                .filter((translation) => translation.id)
-                .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
-          if (!edit.idempotent) {
-            recordAudit({
-              action: "listing_edited",
-              actor: edit.editor,
-              objectType: "listing",
-              objectId: edit.listing_id,
-              metadata: {
-                changed_fields: ["listing_status"],
-                bulk_request_id: input.requestId || null,
-                stale_translation_count: result.staleTranslations.length,
-              },
-            });
-          }
-          return { edit, persistedStaleTranslations };
         });
+        for (const edit of result.edits.filter((row) => !row.idempotent)) {
+          recordAudit({
+            action: "listing_edited",
+            actor: edit.editor,
+            objectType: "listing",
+            objectId: edit.listing_id,
+            metadata: {
+              changed_fields: ["listing_status"],
+              source: "admin_payload_draft",
+            },
+          });
+        }
         const body = {
           kind: "bulk_listing_status_update",
-          targetStatus: batch.targetStatus,
-          requested: batch.requestedListingIds.length,
-          updated: changes.filter((result) => !result.edit.idempotent).length,
-          idempotent: changes.filter((result) => result.edit.idempotent).length,
-          unchanged: batch.unchangedListingIds.length,
-          unchangedListingIds: batch.unchangedListingIds,
-          edits: changes.map((result) => result.edit),
-          staleTranslations: batch.changes.flatMap((result) => result.staleTranslations),
+          targetStatus: result.batch.targetStatus,
+          requested: result.batch.requestedListingIds.length,
+          updated: result.edits.filter((row) => !row.idempotent).length,
+          idempotent: result.edits.filter((row) => row.idempotent).length,
+          unchanged: result.batch.unchangedListingIds.length,
+          unchangedListingIds: result.batch.unchangedListingIds,
+          edits: result.edits,
+          staleTranslations: result.staleTranslations,
         };
         return adminJson(body.updated ? 201 : 200, body);
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
@@ -3503,6 +3644,10 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
+  const contactLeadUiDisabled = smoke.contact?.body?.chrome?.lead_writes_disabled === true;
+  const contactLeadUiValid = contactLeadUiDisabled
+    ? smoke.contact?.body?.body?.callback === null && Boolean(smoke.contact?.body?.body?.form_unavailable)
+    : smoke.contact?.body?.body?.callback?.payload?.source === "website_contact_callback";
   const expectedBlockers = [
     "redirect_reviews",
     "external_seo_exports",
@@ -3634,9 +3779,9 @@ export function assertHttpSmoke(smoke) {
   if (
     smoke.contact?.status !== 200 ||
     smoke.contact.body.kind !== "contact" ||
-    smoke.contact.body.body.callback.payload.source !== "website_contact_callback"
+    !contactLeadUiValid
   ) {
-    throw new Error("HTTP smoke must serve generic contact callback page");
+    throw new Error("HTTP smoke contact page must match durable lead-store readiness");
   }
   if (
     smoke.contactLead?.status !== 201 ||
@@ -3704,16 +3849,16 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must publish only human-approved translation");
   }
   if (
-    smoke.listingEditorHtml?.status !== 307 ||
-    smoke.listingEditorHtml.headers.location !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+    smoke.listingEditorHtml?.status !== 200 ||
+    !smoke.listingEditorHtml.body.includes('data-admin-mutation-form="listing"')
   ) {
-    throw new Error("HTTP smoke must hand legacy listing editor links to Payload");
+    throw new Error("HTTP smoke must render the custom listing editor");
   }
   if (
-    smoke.listingEdit.status !== 409 ||
-    smoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+    smoke.listingEdit.status !== 503 ||
+    smoke.listingEdit.body.kind !== "payload_draft_unavailable"
   ) {
-    throw new Error("HTTP smoke must reject legacy listing mutations with a Payload handoff");
+    throw new Error("HTTP smoke must fail closed when the durable listing draft runtime is unavailable");
   }
   if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== true) {
     throw new Error("HTTP smoke must preserve the reviewed public translation after a rejected legacy mutation");
@@ -3798,9 +3943,12 @@ export function assertHttpSmoke(smoke) {
   if (
     smoke.contactHtml?.status !== 200 ||
     !smoke.contactHtml.body.includes("data-kind=\"contact\"") ||
-    !smoke.contactHtml.body.includes("data-lead-type=\"general\"")
+    (contactLeadUiDisabled
+      ? !smoke.contactHtml.body.includes("data-form-unavailable=\"true\"") ||
+        smoke.contactHtml.body.includes("data-lead-type=\"general\"")
+      : !smoke.contactHtml.body.includes("data-lead-type=\"general\""))
   ) {
-    throw new Error("HTTP smoke must serve rendered contact callback HTML");
+    throw new Error("HTTP smoke rendered contact page must match durable lead-store readiness");
   }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
   if (smoke.admin.body.leads.length < 4) throw new Error("HTTP smoke must show buyer, viewing, contact, and seller leads");

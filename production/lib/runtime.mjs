@@ -387,6 +387,11 @@ export function buildRuntimeSmoke(registry, seed) {
 }
 
 export function assertRuntimeSmoke(smoke) {
+  const contactLeadUiDisabled = smoke.contact_he?.chrome?.lead_writes_disabled === true;
+  const contactLeadUiValid = contactLeadUiDisabled
+    ? smoke.contact_he?.body?.callback === null && Boolean(smoke.contact_he?.body?.form_unavailable)
+    : smoke.contact_he?.body?.callback?.payload?.source === "website_contact_callback" &&
+      smoke.contact_he?.body?.callback?.payload?.leadType === "general";
   if (smoke.listing_he.status !== 200 || smoke.listing_he.dir !== "rtl") {
     throw new Error("Runtime Hebrew listing must render as RTL 200");
   }
@@ -426,10 +431,9 @@ export function assertRuntimeSmoke(smoke) {
   if (
     smoke.contact_he.status !== 200 ||
     smoke.contact_he.kind !== "contact" ||
-    smoke.contact_he.body.callback.payload.source !== "website_contact_callback" ||
-    smoke.contact_he.body.callback.payload.leadType !== "general"
+    !contactLeadUiValid
   ) {
-    throw new Error("Runtime contact page must expose generic callback lead action");
+    throw new Error("Runtime contact page must match durable lead-store readiness");
   }
   if (
     smoke.guide_en.status !== 200 ||

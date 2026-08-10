@@ -243,13 +243,16 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "intent_specific_lead_forms",
-      includes(pages.listing, "data-enquiry-callback-time=\"true\"") &&
+      (includes(pages.listing, "data-enquiry-callback-time=\"true\"") &&
         includes(pages.listing, "data-enquiry-viewing-date=\"true\"") &&
         includes(pages.listing, "data-enquiry-viewing-time=\"true\"") &&
         includes(pages.listing, "data-lead-source=\"website_listing_detail\"") &&
         includes(pages.listing, "data-lead-source=\"website_callback_request\"") &&
         includes(pages.listing, "data-lead-source=\"website_viewing_request\"") &&
-        includes(pages.listing, "data-history-back=\"same-origin\""),
+        includes(pages.listing, "data-history-back=\"same-origin\"")) ||
+        (includes(pages.listing, "data-form-unavailable=\"true\"") &&
+          includes(pages.contact, "data-form-unavailable=\"true\"") &&
+          includes(pages.listing, "tel:+359879696870")),
     ),
     check(
       "listing_detail_media_actions",

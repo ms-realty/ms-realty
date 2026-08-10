@@ -5,6 +5,8 @@ import {
   allowsDurableCaseAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
+  allowsPublicLeadMutation,
+  isPayloadPrivatePath,
   secretMatches,
 } from "./durable-case-authority.mjs";
 import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
@@ -199,9 +201,21 @@ function ephemeralRuntimeDataResponse() {
   });
 }
 
+function payloadPrivateResponse() {
+  return new Response("Not found", {
+    status: 404,
+    headers: {
+      "cache-control": "no-store",
+      "content-type": "text/plain; charset=utf-8",
+      "x-content-type-options": "nosniff",
+    },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (isPayloadPrivatePath(url.pathname)) return payloadPrivateResponse();
     if (url.pathname.startsWith(INGEST_PREFIX)) return ingestMedia(request, env, url);
     const preview = isPreviewHost(url.hostname);
     if (preview && url.pathname === "/robots.txt") return previewRobotsResponse();
@@ -225,10 +239,12 @@ export default {
     // its ledger-writing tools (MS_REALTY_MCP_WRITES_DISABLED below).
     const mutating = MUTATING_METHODS.has(request.method);
     const leadProbe = mutating && (await allowsLeadProbeMutation({ request, pathname: url.pathname, env }));
+    const publicLead = mutating && allowsPublicLeadMutation({ method: request.method, pathname: url.pathname, env });
     if (
       mutating &&
-      !allowsAdminSessionMutation({ method: request.method, pathname: url.pathname }) &&
+      !allowsAdminSessionMutation({ request, method: request.method, pathname: url.pathname }) &&
       !leadProbe &&
+      !publicLead &&
       !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
     ) {

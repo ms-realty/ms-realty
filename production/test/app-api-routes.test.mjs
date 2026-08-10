@@ -189,7 +189,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       const lead = await leadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", origin: "https://example.test" },
           body: JSON.stringify({
             source: "website_listing_detail",
             intent: "inquiry",
@@ -212,7 +212,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       const sellerFormLead = await leadRoute.POST(
         new Request("https://example.test/api/leads", {
           method: "POST",
-          headers: { "content-type": "application/x-www-form-urlencoded" },
+          headers: { "content-type": "application/x-www-form-urlencoded", origin: "https://example.test" },
           body: new URLSearchParams({
             source: "website_seller_valuation",
             leadType: "seller",

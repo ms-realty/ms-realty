@@ -15,6 +15,7 @@ import {
   renderMcpResponse,
 } from "../lib/mcp-server.mjs";
 import { readTranslationLedger } from "../lib/translation-ledger.mjs";
+import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
 const EDITOR_TOKEN = "mcp-editor-token-0123456789abcdef";
 const BROKER_TOKEN = "mcp-broker-token-0123456789abcdef";
@@ -26,7 +27,7 @@ function jsonl(directory, name, rows = []) {
   return filePath;
 }
 
-function fixture() {
+function fixture({ durableListingWrites = false } = {}) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-mcp-"));
   const lead = {
     lead_id: "mcp-lead-0001",
@@ -66,14 +67,13 @@ function fixture() {
     MS_REALTY_REPLY_OUTBOX_PATH: paths.replyOutboxPath,
     MS_REALTY_TRANSLATION_LEDGER_PATH: paths.translationLedgerPath,
     MS_REALTY_REVIEWED_AT: "2026-07-29T10:05:00.000Z",
+    ...(durableListingWrites ? { MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1" } : {}),
   };
   const config = mcpConfigFromEnv(env);
-  const payloadEdits = [];
-  config.payloadListingWriter = async (input) => {
-    payloadEdits.push(input);
-    return { id: input.listingId };
-  };
-  return { config, paths, payloadEdits };
+  const runtime = createPayloadDraftRuntime();
+  config.payloadListingRuntime = runtime.payload;
+  config.adminConfig.payloadListingRuntime = runtime.payload;
+  return { config, paths, runtime };
 }
 
 function ssePayload(text) {
@@ -120,8 +120,6 @@ test("MCP separates anonymous public discovery from role-bound operator tools", 
     "get_public_listing",
     "get_launch_status",
     "get_listing_content_queue",
-    "edit_listing_content",
-    "bulk_update_listing_status",
     "get_translation_queue",
     "save_translation_draft",
   ]);
@@ -207,7 +205,7 @@ test("MCP OIDC configuration requires a complete HTTPS resource-server identity"
 });
 
 test("MCP publishes OAuth metadata and binds a verified OIDC subject to existing role tools", async () => {
-  const { config, paths, payloadEdits } = fixture();
+  const { config, paths, runtime } = fixture({ durableListingWrites: true });
   config.publicOrigin = "https://realty.example";
   config.oidc = {
     issuer: "https://identity.example",
@@ -259,8 +257,8 @@ test("MCP publishes OAuth metadata and binds a verified OIDC subject to existing
   );
   assert.deepEqual(edit.changed_fields, ["description"]);
   assert.equal(edit.draft_only, true);
-  assert.equal(payloadEdits[0].principal.id, "staff_editor");
-  assert.equal(payloadEdits[0].patch.description, "OIDC-attributed staff edit for human publication review.");
+  assert.equal(edit.editor_url, "/admin/listings/edit?listingId=MS-CRAWL-0001");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.description, "OIDC-attributed staff edit for human publication review.");
   assert.equal(readAuditLog(paths.auditLogPath)[0].actor, "staff_editor");
 
   for (const token of ["wrong-scope-token", "unknown-subject-token", "invalid-token"]) {
@@ -346,7 +344,7 @@ test("MCP exposes a privacy-safe broker queue and routes confirmed work through 
 });
 
 test("MCP bounds listing-content operations to authenticated, confirmed, non-approval changes", async () => {
-  const { config, paths, payloadEdits } = fixture();
+  const { config, paths, runtime } = fixture({ durableListingWrites: true });
   const auth = { authorization: `Bearer ${EDITOR_TOKEN}` };
 
   const queue = await callTool(config, "get_listing_content_queue", { locale: "en", query: "MS-CRAWL-0001" }, auth);
@@ -433,10 +431,21 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
   assert.equal(edit.draft_only, true);
   assert.equal(edit.publication_approval_changed, false);
   assert.equal("editor" in edit, false);
-  assert.equal(payloadEdits[0].principal.id, "mcp_editor");
-  assert.equal(payloadEdits[0].patch.description, "Staff-reviewed source description for the listing.");
-  assert.equal("publish_approved" in payloadEdits[0].patch, false);
-  assert.equal("listing_status" in payloadEdits[0].patch, false);
+  assert.equal(edit.editor_url, "/admin/listings/edit?listingId=MS-CRAWL-0001");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.description, "Staff-reviewed source description for the listing.");
+
+  const idempotentEdit = await callTool(
+    config,
+    "edit_listing_content",
+    {
+      listing_id: "MS-CRAWL-0001",
+      patch: { description: "Staff-reviewed source description for the listing." },
+      confirmation: "EDIT_LISTING_CONTENT",
+    },
+    auth,
+  );
+  assert.equal(idempotentEdit.idempotent, true);
+  assert.deepEqual(idempotentEdit.changed_fields, []);
 
   const rejectedBulk = await mcpCall(
     config,
@@ -459,6 +468,18 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
   assert.equal(rejectedBulk.payload.result.isError, true);
   assert.equal(readListingEdits(paths.listingEditLedgerPath).length, 0);
 
+  const primedStatus = await callTool(
+    config,
+    "bulk_update_listing_status",
+    {
+      listing_ids: ["MS-CRAWL-0001"],
+      target_status: "reserved",
+      confirmation: "BULK_UPDATE_LISTING_STATUS",
+    },
+    auth,
+  );
+  assert.deepEqual(primedStatus.changed_listing_ids, ["MS-CRAWL-0001"]);
+
   const status = await callTool(
     config,
     "bulk_update_listing_status",
@@ -470,11 +491,12 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
     auth,
   );
   assert.equal(status.target_status, "reserved");
-  assert.equal(status.updated, 2);
-  assert.deepEqual(status.changed_listing_ids, ["MS-CRAWL-0001", "MS-CRAWL-0002"]);
+  assert.equal(status.updated, 1);
+  assert.equal(status.idempotent, 1);
+  assert.deepEqual(status.changed_listing_ids, ["MS-CRAWL-0002"]);
   assert.equal("edits" in status, false);
-  assert.equal(readListingEdits(paths.listingEditLedgerPath).every((row) => row.editor === "mcp_editor"), true);
-  assert.equal(readListingEdits(paths.listingEditLedgerPath).every((row) => row.patch.publish_approved === undefined), true);
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").facts.listing_status, "reserved");
   assert.equal(
     readAuditLog(paths.auditLogPath).every((row) => !["translation_approved", "translation_published"].includes(row.action)),
     true,
@@ -503,7 +525,7 @@ test("the standalone production server serves the same MCP endpoint", async () =
 });
 
 test("ephemeral runtimes mask every ledger-writing MCP tool", async () => {
-  const { config } = fixture();
+  const { config } = fixture({ durableListingWrites: true });
   assert.equal(config.writesDisabled, false);
 
   const masked = { ...config, writesDisabled: true };
@@ -513,9 +535,11 @@ test("ephemeral runtimes mask every ledger-writing MCP tool", async () => {
     "get_public_listing",
     "get_launch_status",
     "get_listing_content_queue",
+    "edit_listing_content",
+    "bulk_update_listing_status",
     "get_translation_queue",
   ]);
-  for (const name of ["edit_listing_content", "bulk_update_listing_status", "save_translation_draft"]) {
+  for (const name of ["save_translation_draft"]) {
     assert.equal(editorTools.includes(name), false, `${name} must not register on ephemeral runtimes`);
   }
 
@@ -524,6 +548,7 @@ test("ephemeral runtimes mask every ledger-writing MCP tool", async () => {
     assert.equal(/queue_reviewed_reply|run_operator_workflow/.test(name), false, `${name} is a write tool`);
   }
 
-  const flagged = mcpConfigFromEnv({ NODE_ENV: "test", MS_REALTY_MCP_WRITES_DISABLED: "1" });
+  const flagged = mcpConfigFromEnv({ NODE_ENV: "test", MS_REALTY_MCP_WRITES_DISABLED: "1", MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1" });
   assert.equal(flagged.writesDisabled, true);
+  assert.equal(flagged.durableListingWritesEnabled, true);
 });

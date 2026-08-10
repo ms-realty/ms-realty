@@ -28,11 +28,88 @@ export async function allowsLeadProbeMutation({ request, pathname, env }) {
   return Boolean(expected && presented) && secretMatches(presented, expected);
 }
 
-// The browser login exchanges the operator key for a cookie; both routes
-// only set or clear that cookie — nothing touches the ephemeral disk.
-const ADMIN_SESSION_PATHS = new Set(["/admin/login", "/admin/logout"]);
-export function allowsAdminSessionMutation({ method, pathname }) {
-  return method === "POST" && ADMIN_SESSION_PATHS.has(pathname);
+export function allowsPublicLeadMutation({ method, pathname, env }) {
+  return (
+    method === "POST" &&
+    pathname === "/api/leads" &&
+    String(env.MS_REALTY_LEAD_DURABLE_STORE_ENABLED || "").trim() === "true" &&
+    Boolean(env.PAYLOAD_SECRET?.trim()) &&
+    Boolean(env.DATABASE_URL?.trim()) &&
+    String(env.MS_REALTY_LEAD_CONTACT_KEY || "").length >= 32
+  );
+}
+
+const ADMIN_SESSION_COOKIE = "ms_admin";
+const ADMIN_MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+function decodedSecurityPath(pathname) {
+  let current = String(pathname || "");
+  // Every successful decode shortens the string, so the original length is a
+  // finite upper bound even for deliberately over-encoded bypass attempts.
+  const maxDepth = current.length + 1;
+  for (let depth = 0; depth < maxDepth; depth += 1) {
+    let decoded;
+    try {
+      decoded = decodeURIComponent(current);
+    } catch {
+      return null;
+    }
+    if (decoded === current) break;
+    current = decoded;
+  }
+  // Backslashes are path separators in several downstream routers. Treating
+  // them as slashes here prevents an edge/app interpretation mismatch.
+  current = current.replaceAll("\\", "/");
+  // eslint-disable-next-line no-control-regex -- path controls are never valid routes
+  if (!current.startsWith("/") || /[\u0000-\u001f\u007f]/.test(current)) return null;
+  return current;
+}
+
+function securityPathSegments(pathname) {
+  const decoded = decodedSecurityPath(pathname);
+  return decoded ? decoded.split("/").filter(Boolean) : [];
+}
+
+export function hasAdminSessionCookie(cookieHeader) {
+  for (const part of String(cookieHeader || "").split(";")) {
+    const [name, ...rest] = part.trim().split("=");
+    if (name === ADMIN_SESSION_COOKIE && rest.join("=").trim()) return true;
+  }
+  return false;
+}
+
+export function isPayloadPrivatePath(pathname) {
+  const [first, second] = securityPathSegments(pathname);
+  return (
+    first === "payload-admin" ||
+    first === "graphql" ||
+    first === "graphql-playground" ||
+    (first === "api" && second === "admins") ||
+    (first === "api" && second === "graphql") ||
+    (first === "api" && second === "graphql-playground")
+  );
+}
+
+function isExactSecurityPath(pathname, expected) {
+  return decodedSecurityPath(pathname) === expected;
+}
+
+function isCustomAdminApiPath(pathname) {
+  const [first, second, third] = securityPathSegments(pathname);
+  return first === "api" && second === "admin" && Boolean(third);
+}
+
+// Login is the only anonymous browser mutation. Every other custom workbench
+// mutation needs the exact Payload session cookie name at the edge; Payload
+// then validates its signed token, database session, role, workspace, and CSRF.
+export function allowsAdminSessionMutation({ request, method, pathname }) {
+  const verb = String(method || "").toUpperCase();
+  if (verb === "POST" && isExactSecurityPath(pathname, "/admin/login")) return true;
+  if (!ADMIN_MUTATING_METHODS.has(verb)) return false;
+  const hasSession = hasAdminSessionCookie(request?.headers?.get("cookie") || "");
+  if (!hasSession) return false;
+  if (verb === "POST" && isExactSecurityPath(pathname, "/admin/logout")) return true;
+  return isCustomAdminApiPath(pathname);
 }
 
 // The MCP endpoint speaks JSON-RPC over POST (and DELETE for session close).

@@ -147,6 +147,10 @@ export async function textFetch(baseUrl, path, options = {}) {
 }
 
 export function assertServerSmoke(smoke) {
+  const contactLeadUiDisabled = smoke.contact?.body?.chrome?.lead_writes_disabled === true;
+  const contactLeadUiValid = contactLeadUiDisabled
+    ? smoke.contact?.body?.body?.callback === null && Boolean(smoke.contact?.body?.body?.form_unavailable)
+    : smoke.contact?.body?.body?.callback?.payload?.source === "website_contact_callback";
   const expectedBlockers = [
     "redirect_reviews",
     "external_seo_exports",
@@ -266,10 +270,10 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must publish only human-approved translation");
   }
   if (
-    smoke.listingEdit.status !== 409 ||
-    smoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+    smoke.listingEdit.status !== 503 ||
+    smoke.listingEdit.body.kind !== "payload_draft_unavailable"
   ) {
-    throw new Error("Server must reject legacy listing mutations with a Payload handoff");
+    throw new Error("Server must fail closed when the durable listing draft runtime is unavailable");
   }
   if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== true) {
     throw new Error("Server must preserve the reviewed public translation after a rejected legacy mutation");
@@ -316,9 +320,9 @@ export function assertServerSmoke(smoke) {
   if (
     smoke.contact?.status !== 200 ||
     smoke.contact.body.kind !== "contact" ||
-    smoke.contact.body.body.callback.payload.source !== "website_contact_callback"
+    !contactLeadUiValid
   ) {
-    throw new Error("Server must serve generic contact callback page");
+    throw new Error("Server contact page must match durable lead-store readiness");
   }
   if (
     smoke.contactLead?.status !== 201 ||
@@ -388,9 +392,12 @@ export function assertServerSmoke(smoke) {
   if (
     smoke.contactHtml?.status !== 200 ||
     !smoke.contactHtml.body.includes("data-kind=\"contact\"") ||
-    !smoke.contactHtml.body.includes("data-lead-type=\"general\"")
+    (contactLeadUiDisabled
+      ? !smoke.contactHtml.body.includes("data-form-unavailable=\"true\"") ||
+        smoke.contactHtml.body.includes("data-lead-type=\"general\"")
+      : !smoke.contactHtml.body.includes("data-lead-type=\"general\""))
   ) {
-    throw new Error("Server must serve rendered contact callback HTML");
+    throw new Error("Server rendered contact page must match durable lead-store readiness");
   }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("Server must serve RU admin leads");
   if (smoke.admin.body.leads.length < 4) throw new Error("Server must show buyer, viewing, contact, and seller leads");
