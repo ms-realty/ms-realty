@@ -242,6 +242,45 @@ test("durable admin readback joins only matching encrypted contacts", async () =
   assert.equal(leads[0].contact_available, true);
 });
 
+test("durable admin readback rejects plaintext private fields in stored ledger rows", async () => {
+  const payload = fakePayload();
+  const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
+  await persistLeadIntakeDurably({
+    lead: {
+      id: "inbox-durable-privacy-readback",
+      lead: {
+        id: ledgerRow().lead_id,
+        source: "website_contact_callback",
+        intent: "callback",
+        leadType: "general",
+        contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+      },
+      original_language: "en",
+      admin_locale: "en",
+      contact_preference: "email",
+    },
+    contactSecret,
+    receivedAt: "2026-08-10T09:00:00.000Z",
+    payload,
+  });
+
+  const stored = payload.rows.public_leads[0].ledger_row;
+  for (const [field, value] of [
+    ["contact", { email: "plaintext@example.invalid" }],
+    ["request_details", { nested: { message_original: "plaintext private note" } }],
+  ]) {
+    stored[field] = value;
+    await assert.rejects(
+      () => readLeadIntakesDurably({ contactSecret, payload }),
+      (error) =>
+        error instanceof LeadStoreUnavailableError &&
+        error.code === "lead_store_unavailable" &&
+        /plaintext/.test(error.cause?.message || ""),
+    );
+    delete stored[field];
+  }
+});
+
 test("durable admin readback fails closed when Payload cannot be read", async () => {
   const payload = fakePayload();
   payload.find = async () => {

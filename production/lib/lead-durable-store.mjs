@@ -92,6 +92,12 @@ export async function readLeadIntakesDurably({ contactSecret, payload = null } =
     const leads = leadResult.docs.map((document) => {
       const lead = document?.ledger_row;
       if (!lead?.lead_id || lead.lead_id !== document.lead_id) throw new Error("Payload public_leads ledger_row is invalid");
+      if (["contact", "email", "phone", "whatsapp", "viber"].some((field) => Object.hasOwn(lead, field))) {
+        throw new Error("Payload public_leads ledger_row contains plaintext contact data");
+      }
+      if (containsPlaintextMessageField(lead)) {
+        throw new Error("Payload public_leads ledger_row contains a plaintext message");
+      }
       return lead;
     });
     const leadIds = new Set(leads.map((lead) => lead.lead_id));
