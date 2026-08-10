@@ -131,6 +131,7 @@ export async function enqueueListingSearchOutbox({ listing, req, eventType = "up
     await req.payload.create({
       collection: "search_outbox",
       data: outboxRecordFor({ id: listingId }, { eventType, changeToken, includeListingRelation }),
+      overrideAccess: true,
       req,
     });
   } catch (error) {
@@ -146,6 +147,7 @@ export async function ensureListingEnrichmentTask({ doc, req } = {}) {
     await req.payload.create({
       collection: "listing_enrichment_tasks",
       data: enrichmentTaskForListing({ listingId, propertyId, source: "listing_change" }),
+      overrideAccess: true,
       req,
     });
   } catch (error) {
