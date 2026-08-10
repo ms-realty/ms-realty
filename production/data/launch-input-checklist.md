@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-08-10T14:45:04.941Z
+Generated: 2026-08-10T14:49:00.791Z
 
 Status: blocked
 Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
