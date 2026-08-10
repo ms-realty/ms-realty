@@ -10,6 +10,12 @@ import {
 } from "./language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact } from "./lead-contact-vault.mjs";
+import {
+  LeadStoreUnavailableError,
+  isLeadDurableStoreEnabled,
+  leadDurableStoreConfigFromEnv,
+  persistLeadIntakeDurably,
+} from "./lead-durable-store.mjs";
 import { publicLaunchReadinessHeaders, publicLaunchReadinessPayload } from "./launch-readiness.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
@@ -75,6 +81,7 @@ export function appApiConfigFromEnv(env = process.env) {
     leadContactVaultPath:
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
+    leadDurableStore: leadDurableStoreConfigFromEnv(env),
     publicContactVaultPath:
       env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
     publicContactKey: env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY,
@@ -229,18 +236,32 @@ async function routeSearch(requestUrl, registry, seed, config, preview = false) 
   }
 }
 
-function routeLead(request, body, registry, seed, config) {
+async function routeLead(request, body, registry, seed, config) {
   try {
     const input = parseBody(request, body);
     const lead = submitRuntimeLead(registry, seed, input);
-    const contactVault = config.leadContactVaultPath
-      ? appendLeadContact(lead, {
-          filePath: config.leadContactVaultPath,
-          secret: config.leadContactKey,
-          storedAt: config.receivedAt,
+    const durableStore = config.leadDurableStore || {};
+    const durableRequested = durableStore.leadDurableStoreEnabled === true;
+    if (durableRequested && !isLeadDurableStoreEnabled(durableStore)) {
+      throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
+    }
+    const durable = durableRequested
+      ? await (config.persistLeadIntakeDurably || persistLeadIntakeDurably)({
+          lead,
+          contactSecret: durableStore.contactSecret,
+          receivedAt: config.receivedAt,
         })
       : null;
-    const ledger = appendLead(lead, { filePath: config.leadLedgerPath, receivedAt: config.receivedAt });
+    const contactVault = durable
+      ? durable.contactVault
+      : config.leadContactVaultPath
+        ? appendLeadContact(lead, {
+            filePath: config.leadContactVaultPath,
+            secret: config.leadContactKey,
+            storedAt: config.receivedAt,
+          })
+        : null;
+    const ledger = durable?.lead || appendLead(lead, { filePath: config.leadLedgerPath, receivedAt: config.receivedAt });
     const consent = recordConsent(
       {
         consentType: "inquiry_follow_up",
@@ -268,8 +289,11 @@ function routeLead(request, body, registry, seed, config) {
       },
       config,
     );
-    return privateJson(201, { ...lead, ledger, contactVault, consent, sellerPipeline });
+    return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline });
   } catch (error) {
+    if (error instanceof LeadStoreUnavailableError) {
+      return privateJson(503, { kind: error.code, message: "Lead storage is temporarily unavailable" });
+    }
     return privateJson(400, { kind: "bad_request", message: error.message });
   }
 }
@@ -467,7 +491,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     if (request.method === "POST" && url.pathname === "/api/leads") {
       const registry = currentRegistry(config);
       const seed = currentSeed(config);
-      return webResponse(routeLead(request, body, registry, seed, config));
+      return webResponse(await routeLead(request, body, registry, seed, config));
     }
 
     if (request.method === "POST" && url.pathname === "/api/events") {

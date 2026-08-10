@@ -1413,6 +1413,7 @@ export function createCrmInboxItem(registry, input, { assignedId = null } = {}) 
     contactPreference: leadInput.contactPreference,
     preferred_channel: leadInput.preferred_channel,
     message: leadInput.message,
+    idempotencyKey: leadInput.idempotencyKey ?? leadInput.idempotency_key,
   }, { assignedId });
   const brokerAssignment = assignLeadBroker(lead, {
     manualBrokerId: leadInput.manualBrokerId,

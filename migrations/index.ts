@@ -5,6 +5,7 @@ import * as migration_20260730_142043_realty_case_persistence from './20260730_1
 import * as migration_20260730_160000_realign_realty_case_mandate_projection from './20260730_160000_realign_realty_case_mandate_projection';
 import * as migration_20260730_170000_add_realty_case_conditions from './20260730_170000_add_realty_case_conditions';
 import * as migration_20260810_000558_durable_lead_store from './20260810_000558_durable_lead_store';
+import * as migration_20260810_143000_repair_durable_lead_relations from './20260810_143000_repair_durable_lead_relations';
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20260810_000558_durable_lead_store.up,
     down: migration_20260810_000558_durable_lead_store.down,
     name: '20260810_000558_durable_lead_store'
+  },
+  {
+    up: migration_20260810_143000_repair_durable_lead_relations.up,
+    down: migration_20260810_143000_repair_durable_lead_relations.down,
+    name: '20260810_143000_repair_durable_lead_relations',
   },
 ];

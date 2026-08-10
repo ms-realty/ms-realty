@@ -65,6 +65,12 @@ import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import {
+  LeadStoreUnavailableError,
+  isLeadDurableStoreEnabled,
+  leadDurableStoreConfigFromEnv,
+  persistLeadIntakeDurably,
+} from "./lead-durable-store.mjs";
+import {
   appendLeadAssignment,
   applyLeadAssignments,
   createLeadAssignment,
@@ -666,6 +672,8 @@ export function createHttpApp({
   leadPipelineOutcomeLedgerPath = null,
   leadContactVaultPath = null,
   leadContactKey = null,
+  leadDurableStore = leadDurableStoreConfigFromEnv(),
+  persistLeadIntake = persistLeadIntakeDurably,
   publicContactVaultPath = null,
   publicContactKey = null,
   replyOutboxPath = null,
@@ -3315,10 +3323,19 @@ export function createHttpApp({
       try {
         const input = parseBody(request);
         const lead = submitRuntimeLead(activeRegistry, currentPublicSeed(), input);
-        const contactVault = leadContactVaultPath
-          ? appendLeadContact(lead, { filePath: leadContactVaultPath, secret: leadContactKey, storedAt: receivedAt })
+        const durableRequested = leadDurableStore.leadDurableStoreEnabled === true;
+        if (durableRequested && !isLeadDurableStoreEnabled(leadDurableStore)) {
+          throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
+        }
+        const durable = durableRequested
+          ? await persistLeadIntake({ lead, contactSecret: leadDurableStore.contactSecret, receivedAt })
           : null;
-        const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
+        const contactVault = durable
+          ? durable.contactVault
+          : leadContactVaultPath
+            ? appendLeadContact(lead, { filePath: leadContactVaultPath, secret: leadContactKey, storedAt: receivedAt })
+            : null;
+        const ledger = durable?.lead || (leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null);
         const consent = recordConsent({
           consentType: "inquiry_follow_up",
           source: lead.lead?.source,
@@ -3340,8 +3357,11 @@ export function createHttpApp({
           listingReference: lead.lead?.listingReference,
           action: lead.lead?.source,
         });
-        return privateJson(201, { ...lead, ledger, contactVault, consent, sellerPipeline });
+        return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline });
       } catch (error) {
+        if (error instanceof LeadStoreUnavailableError) {
+          return privateJson(503, { kind: error.code, message: "Lead storage is temporarily unavailable" });
+        }
         return privateJson(400, { kind: "bad_request", message: error.message });
       }
     }

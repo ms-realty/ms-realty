@@ -6,6 +6,7 @@ import {
   findLeadByIdempotencyKey,
   isLeadDurableStoreEnabled,
   leadDurableStoreConfigFromEnv,
+  persistLeadIntakeDurably,
   persistLeadDurably,
 } from "../lib/lead-durable-store.mjs";
 
@@ -13,8 +14,23 @@ import {
 // ordering, idempotency, and failure behaviour without a database.
 function fakePayload({ failOn = null } = {}) {
   const rows = { public_leads: [], lead_contacts: [] };
+  let snapshot = null;
   return {
     rows,
+    db: {
+      async beginTransaction() {
+        snapshot = structuredClone(rows);
+        return "lead-test-transaction";
+      },
+      async commitTransaction() {
+        snapshot = null;
+      },
+      async rollbackTransaction() {
+        rows.public_leads.splice(0, rows.public_leads.length, ...snapshot.public_leads);
+        rows.lead_contacts.splice(0, rows.lead_contacts.length, ...snapshot.lead_contacts);
+        snapshot = null;
+      },
+    },
     async find({ collection, where, limit }) {
       const [field, condition] = Object.entries(where || {})[0] || [];
       const wanted = condition?.equals;
@@ -57,12 +73,18 @@ const envelope = (overrides = {}) => ({
 });
 
 test("the durable store stays off unless it is both requested and configured", () => {
-  const base = { MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true", PAYLOAD_SECRET: "s".repeat(40), DATABASE_URL: "postgres://x/y" };
+  const base = {
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: "s".repeat(40),
+    DATABASE_URL: "postgres://x/y",
+    MS_REALTY_LEAD_CONTACT_KEY: "c".repeat(32),
+  };
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv(base)), true);
-  // A half-provisioned deployment keeps using the file ledger rather than
-  // failing every submission.
+  // The runtime adapters use this false result plus the requested flag to fail
+  // closed; it must never silently fall back to the file ledger.
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, DATABASE_URL: "" })), false);
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, PAYLOAD_SECRET: "" })), false);
+  assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, MS_REALTY_LEAD_CONTACT_KEY: "short" })), false);
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "false" })), false);
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({})), false);
 });
@@ -94,7 +116,7 @@ test("a retried submission collapses onto the original record", async () => {
   const first = await persistLeadDurably({ ledgerRow: row, contactEnvelope: envelope(), payload });
   const second = await persistLeadDurably({
     ledgerRow: { ...row, lead_id: "lead-draft-22222222-2222-4222-8222-222222222222" },
-    contactEnvelope: envelope(),
+    contactEnvelope: envelope({ subject_id: "lead-draft-22222222-2222-4222-8222-222222222222" }),
     payload,
   });
 
@@ -109,10 +131,50 @@ test("a retried submission collapses onto the original record", async () => {
   assert.equal(await findLeadByIdempotencyKey(null, { payload }), null);
 });
 
+test("an intake retry reports the contact row belonging to the original lead", async () => {
+  const payload = fakePayload();
+  const input = (id) => ({
+    id: `inbox-${id}`,
+    lead: {
+      id,
+      idempotency_key: "browser-retry-intake-1",
+      source: "website_contact_callback",
+      intent: "callback",
+      leadType: "general",
+      contact: { name: "Storage Probe", phone: "+359000000000" },
+    },
+    original_language: "en",
+    admin_locale: "en",
+    contact_preference: "phone",
+  });
+  const firstId = ledgerRow().lead_id;
+  const secondId = "lead-draft-22222222-2222-4222-8222-222222222222";
+  await persistLeadIntakeDurably({
+    lead: input(firstId),
+    contactSecret: "test-only-durable-contact-key-32-characters-minimum",
+    receivedAt: "2026-08-10T09:00:00.000Z",
+    payload,
+  });
+  const retry = await persistLeadIntakeDurably({
+    lead: input(secondId),
+    contactSecret: "test-only-durable-contact-key-32-characters-minimum",
+    receivedAt: "2026-08-10T09:01:00.000Z",
+    payload,
+  });
+
+  assert.equal(retry.lead.lead_id, firstId);
+  assert.equal(retry.contactVault.lead_id, firstId);
+  assert.equal(retry.contactVault.stored_at, "2026-08-10T09:00:00.000Z");
+});
+
 test("a repeated lead id never overwrites the original", async () => {
   const payload = fakePayload();
-  await persistLeadDurably({ ledgerRow: ledgerRow(), payload });
-  const again = await persistLeadDurably({ ledgerRow: ledgerRow({ source: "website_contact_callback" }), payload });
+  await persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload });
+  const again = await persistLeadDurably({
+    ledgerRow: ledgerRow({ source: "website_contact_callback" }),
+    contactEnvelope: envelope(),
+    payload,
+  });
   assert.equal(again.created, false);
   assert.equal(payload.rows.public_leads.length, 1);
   assert.equal(payload.rows.public_leads[0].source, "website_listing_detail", "the first write wins");
@@ -132,6 +194,8 @@ test("a failed write raises rather than reporting a stored lead", async () => {
     () => persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload: contactFailure }),
     LeadStoreUnavailableError,
   );
+  assert.equal(contactFailure.rows.public_leads.length, 0, "lead and contact must roll back together");
+  assert.equal(contactFailure.rows.lead_contacts.length, 0);
 });
 
 test("the store refuses malformed input outright", async () => {
