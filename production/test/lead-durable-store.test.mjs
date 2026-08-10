@@ -9,6 +9,7 @@ import {
   leadDurableStoreConfigFromEnv,
   persistLeadIntakeDurably,
   persistLeadDurably,
+  readLeadIntakesDurably,
 } from "../lib/lead-durable-store.mjs";
 
 // A minimal stand-in for the Payload runtime: enough to prove the store's
@@ -209,6 +210,52 @@ test("durable lead messages stay encrypted and authorized readback reconstructs 
   assert.equal(joined[0].message_original, message);
   assert.deepEqual(joined[0].contact, lead.lead.contact);
   assert.equal(joined[0].contact_available, true);
+});
+
+test("durable admin readback joins only matching encrypted contacts", async () => {
+  const payload = fakePayload();
+  const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
+  const message = "Please call the durable lead only.";
+  const lead = {
+    id: "inbox-durable-readback",
+    message_original: message,
+    lead: {
+      id: ledgerRow().lead_id,
+      source: "website_contact_callback",
+      intent: "callback",
+      leadType: "general",
+      contact: { name: "Durable Buyer", email: "durable@example.invalid" },
+    },
+    original_language: "en",
+    admin_locale: "en",
+    contact_preference: "email",
+  };
+
+  await persistLeadIntakeDurably({ lead, contactSecret, receivedAt: "2026-08-10T09:00:00.000Z", payload });
+  payload.rows.lead_contacts.push(envelope({ subject_id: "orphan-fixture-lead", ciphertext: "not-valid-base64" }));
+
+  const leads = await readLeadIntakesDurably({ contactSecret, payload });
+  assert.equal(leads.length, 1);
+  assert.equal(leads[0].lead_id, lead.lead.id);
+  assert.deepEqual(leads[0].contact, lead.lead.contact);
+  assert.equal(leads[0].message_original, message);
+  assert.equal(leads[0].contact_available, true);
+});
+
+test("durable admin readback fails closed when Payload cannot be read", async () => {
+  const payload = fakePayload();
+  payload.find = async () => {
+    throw new Error("database unavailable");
+  };
+
+  await assert.rejects(
+    () =>
+      readLeadIntakesDurably({
+        contactSecret: "test-only-durable-contact-key-32-characters-minimum",
+        payload,
+      }),
+    (error) => error instanceof LeadStoreUnavailableError && error.code === "lead_store_unavailable",
+  );
 });
 
 test("a repeated lead id never overwrites the original", async () => {

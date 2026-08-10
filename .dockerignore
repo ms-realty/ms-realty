@@ -25,6 +25,23 @@ production/data/media-mirror
 production/data/media-mirror-manifest.json
 production/data/media-upload-manifest.json
 production/data/hermes-backend.json
+
+# Validation fixtures and mutable lead workflow state are never runtime truth.
+production/data/lead-ledger.jsonl
+production/data/lead-contact-vault.jsonl
+production/data/lead-assignments.jsonl
+production/data/reply-outbox.jsonl
+production/data/reply-delivery-outcomes.jsonl
+production/data/lead-pipeline-outcomes.jsonl
+production/data/viewings.jsonl
+production/data/viewing-follow-ups.jsonl
+production/data/seller-pipeline.jsonl
+production/data/seller-pipeline-outcomes.jsonl
+production/data/deals.jsonl
+production/data/account-ledger.jsonl
+production/data/document-checklist-outcomes.jsonl
+production/data/consent-ledger.jsonl
+production/data/audit-log.jsonl
 .playwright-mcp
 .wrangler
 

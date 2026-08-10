@@ -20,6 +20,8 @@ const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "
 const autoMergeWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "auto-merge.yml"), "utf8");
 const dockerignore = fs.readFileSync(fromRoot(".dockerignore"), "utf8");
 const dockerfile = fs.readFileSync(fromRoot("Dockerfile"), "utf8");
+const dockerignore = fs.readFileSync(fromRoot(".dockerignore"), "utf8");
+const httpSmokeSource = fs.readFileSync(fromRoot("production", "scripts", "build-http-smoke.mjs"), "utf8");
 const wranglerConfig = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_ADMIN_CREDENTIALS_JSON",
@@ -209,6 +211,29 @@ test("Cloudflare Container refreshes Payload evidence before serving readiness",
   assert.ok(aggregateReadiness > payloadEvidence, "aggregate readiness must consume the fresh Payload report");
   assert.ok(nextRuntime > aggregateReadiness, "Next must not serve stale readiness while startup evidence is rebuilding");
   assert.match(dockerignore, /^!workers\/index\.js$/m, "runtime evidence must be able to inspect the Worker boundary");
+});
+
+test("validation fixtures cannot become Container lead workflow state", () => {
+  assert.doesNotMatch(httpSmokeSource, /fs\.copyFileSync\(/);
+  for (const file of [
+    "lead-ledger.jsonl",
+    "lead-contact-vault.jsonl",
+    "lead-assignments.jsonl",
+    "reply-outbox.jsonl",
+    "reply-delivery-outcomes.jsonl",
+    "lead-pipeline-outcomes.jsonl",
+    "viewings.jsonl",
+    "viewing-follow-ups.jsonl",
+    "seller-pipeline.jsonl",
+    "seller-pipeline-outcomes.jsonl",
+    "deals.jsonl",
+    "account-ledger.jsonl",
+    "document-checklist-outcomes.jsonl",
+    "consent-ledger.jsonl",
+    "audit-log.jsonl",
+  ]) {
+    assert.match(dockerignore, new RegExp(`^production/data/${file.replaceAll(".", "\\.")}$`, "m"), file);
+  }
 });
 
 test("successful exact-head CI runs merge without a review gate", () => {

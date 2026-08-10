@@ -87,6 +87,12 @@ import {
 } from "./production-recovery.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
+import {
+  LeadStoreUnavailableError,
+  isLeadDurableStoreEnabled,
+  leadDurableStoreConfigFromEnv,
+  readLeadIntakesDurably,
+} from "./lead-durable-store.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
 import {
   projectListingDraftSeed,
@@ -276,6 +282,22 @@ const PRIVATE_JSON_HEADERS = {
 const PRIVATE_MARKDOWN_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/markdown; charset=utf-8", "cache-control": "no-store" };
 const PRIVATE_CSV_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/csv; charset=utf-8", "cache-control": "no-store" };
 const PRIVATE_DOWNLOAD_JSON_HEADERS = { ...SECURITY_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
+const FILE_BACKED_LEAD_MUTATION_PATHS = new Set([
+  "/api/admin/replies",
+  "/api/admin/replies/delivery",
+  "/api/admin/lead-pipeline/outcome",
+  "/api/admin/leads",
+  "/api/admin/leads/assign",
+  "/api/admin/accounts",
+  "/api/admin/accounts/link",
+  "/api/admin/documents/outcome",
+  "/api/admin/consents/withdraw",
+  "/api/admin/replies/draft",
+  "/api/admin/viewings",
+  "/api/admin/viewings/follow-up",
+  "/api/admin/seller-pipeline/outcome",
+  "/api/admin/deals/close",
+]);
 
 function bytesFrom(value) {
   const raw = value === undefined || value === "" ? String(10 * 1024 * 1024) : String(value);
@@ -311,6 +333,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     leadContactVaultPath:
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
+    leadDurableStore: leadDurableStoreConfigFromEnv(env),
     publicContactVaultPath:
       env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
     publicContactKey: env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY,
@@ -386,6 +409,16 @@ function adminBadRequest(error) {
   return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
     status: 400,
     headers: PRIVATE_JSON_HEADERS,
+  });
+}
+
+function leadStoreUnavailable(kind = "lead_store_unavailable") {
+  return jsonResponse(503, {
+    kind,
+    message:
+      kind === "lead_store_read_only"
+        ? "This lead operation is disabled until it has durable persistence."
+        : "The durable lead store is unavailable.",
   });
 }
 
@@ -739,25 +772,55 @@ function currentPublicRequestQueue(config) {
   });
 }
 
-function leadInboxPayload(registry, url, config) {
-  const leads = applyLeadAssignments(
-    withLeadContacts(readLeadLedger(config.leadLedgerPath), {
-      filePath: config.leadContactVaultPath,
-      secret: config.leadContactKey,
-    }),
-    readLeadAssignments(config.leadAssignmentLedgerPath),
-  );
-  const replies = readReplyOutbox(config.replyOutboxPath);
-  const replyDeliveryOutcomes = readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath);
-  const viewings = readViewings(config.viewingLedgerPath);
-  const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
-  const deals = readDeals(config.dealLedgerPath);
-  const sellerPipeline = readSellerPipeline(config.sellerPipelinePath);
-  const sellerPipelineOutcomes = readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath);
+async function adminLeadSource(config) {
+  const durableStore = config.leadDurableStore || {};
+  if (!durableStore.leadDurableStoreEnabled) {
+    return {
+      durable: false,
+      leads: withLeadContacts(readLeadLedger(config.leadLedgerPath), {
+        filePath: config.leadContactVaultPath,
+        secret: config.leadContactKey,
+      }),
+    };
+  }
+  if (!isLeadDurableStoreEnabled(durableStore)) {
+    throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
+  }
+  try {
+    const leads = await (config.readLeadIntakesDurably || readLeadIntakesDurably)({
+      contactSecret: durableStore.contactSecret,
+      payload: config.leadDurablePayload || null,
+    });
+    if (!Array.isArray(leads) || leads.some((lead) => !lead?.lead_id)) {
+      throw new Error("Durable lead readback returned invalid rows");
+    }
+    return { durable: true, leads };
+  } catch (error) {
+    if (error instanceof LeadStoreUnavailableError) throw error;
+    throw new LeadStoreUnavailableError("Durable lead store read failed", error);
+  }
+}
+
+function rowsForLeadIds(rows, leadIds) {
+  return rows.filter((row) => leadIds.has(row.lead_id));
+}
+
+async function leadInboxPayload(registry, url, config) {
+  const source = await adminLeadSource(config);
+  const leadIds = new Set(source.leads.map((lead) => lead.lead_id));
+  const filterRows = (rows) => (source.durable ? rowsForLeadIds(rows, leadIds) : rows);
+  const leads = applyLeadAssignments(source.leads, filterRows(readLeadAssignments(config.leadAssignmentLedgerPath)));
+  const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
+  const replyDeliveryOutcomes = filterRows(readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath));
+  const viewings = filterRows(readViewings(config.viewingLedgerPath));
+  const viewingFollowUps = filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath));
+  const deals = filterRows(readDeals(config.dealLedgerPath));
+  const sellerPipeline = filterRows(readSellerPipeline(config.sellerPipelinePath));
+  const sellerPipelineOutcomes = filterRows(readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath));
   const leadPipelineQueue = buildLeadPipelineQueue(
     {
       leads,
-      outcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
+      outcomes: filterRows(readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath)),
       viewings,
       viewingFollowUps,
       deals,
@@ -849,7 +912,7 @@ function consentPayload(registry, url, config) {
   );
 }
 
-function requestsPayload(registry, url, config) {
+async function requestsPayload(registry, url, config) {
   return operationalQueuePayload(registry, url, config, {
     kind: "admin_requests",
     path: "/admin/requests",
@@ -858,7 +921,7 @@ function requestsPayload(registry, url, config) {
   });
 }
 
-function pipelinePayload(registry, url, config) {
+async function pipelinePayload(registry, url, config) {
   return operationalQueuePayload(registry, url, config, {
     kind: "admin_lead_pipeline",
     path: "/admin/pipeline",
@@ -922,8 +985,8 @@ async function realtyCaseConditionQueue(config) {
   });
 }
 
-function operationalQueuePayload(registry, url, config, { kind, path, titleKey, descriptionKey }) {
-  return renderAdminOperationalQueuePayload(leadInboxPayload(registry, url, config), {
+async function operationalQueuePayload(registry, url, config, { kind, path, titleKey, descriptionKey }) {
+  return renderAdminOperationalQueuePayload(await leadInboxPayload(registry, url, config), {
     kind,
     path,
     titleKey,
@@ -931,7 +994,7 @@ function operationalQueuePayload(registry, url, config, { kind, path, titleKey, 
   });
 }
 
-function todayPayload(registry, url, config) {
+async function todayPayload(registry, url, config) {
   return operationalQueuePayload(registry, url, config, {
     kind: "admin_today",
     path: "/admin/today",
@@ -940,7 +1003,7 @@ function todayPayload(registry, url, config) {
   });
 }
 
-function viewingsPayload(registry, url, config) {
+async function viewingsPayload(registry, url, config) {
   return operationalQueuePayload(registry, url, config, {
     kind: "admin_viewings",
     path: "/admin/viewings",
@@ -2668,6 +2731,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     const requiredCapability = requiredAdminCapability(request.method, url.pathname);
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
     if (
+      request.method !== "GET" &&
+      config.leadDurableStore?.leadDurableStoreEnabled === true &&
+      FILE_BACKED_LEAD_MUTATION_PATHS.has(url.pathname)
+    ) {
+      return leadStoreUnavailable("lead_store_read_only");
+    }
+    if (
       principal.source === "payload_session" &&
       ["cases:read", "cases:write"].includes(requiredCapability) &&
       !canAdminAccessWorkspace(principal, config.realtyCaseWorkspaceId)
@@ -2743,18 +2813,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         },
       });
     }
-    if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(todayPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, todayPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, leadInboxPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(await todayPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, await todayPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(await leadInboxPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(contactsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, contactsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/documents") return htmlResponse(documentChecklistPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/documents") return jsonResponse(200, documentChecklistPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/consents") return htmlResponse(consentPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/consents") return jsonResponse(200, consentPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/pipeline") return htmlResponse(pipelinePayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/pipeline") return jsonResponse(200, pipelinePayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/pipeline") return htmlResponse(await pipelinePayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/pipeline") return jsonResponse(200, await pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/cases") {
       try {
         return htmlResponse(await realtyCasesPayload(registry, url, config));
@@ -2787,10 +2857,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         throw error;
       }
     }
-    if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(requestsPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/requests") return jsonResponse(200, requestsPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/viewings") return htmlResponse(viewingsPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/viewings") return jsonResponse(200, viewingsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(await requestsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/requests") return jsonResponse(200, await requestsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/viewings") return htmlResponse(await viewingsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/viewings") return jsonResponse(200, await viewingsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/reports") return htmlResponse(reportsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/reports") return jsonResponse(200, reportsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/reports/export") {
@@ -3205,6 +3275,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     return jsonResponse(405, { kind: "method_not_allowed" });
   } catch (error) {
+    if (error instanceof LeadStoreUnavailableError || error?.code === "lead_store_unavailable") {
+      return leadStoreUnavailable();
+    }
     if (error.status === 413) return jsonResponse(413, { kind: "request_too_large" });
     if (error.status === 403) return adminForbidden(error.capability || "administration:write");
     return adminBadRequest(error);
