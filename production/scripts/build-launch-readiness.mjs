@@ -6,11 +6,12 @@ import {
 import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
 
 const outputPath = process.env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || DEFAULT_LAUNCH_READINESS_OUTPUT;
+const generatedAt = process.env.MS_REALTY_GENERATED_AT || new Date().toISOString();
 
 writeLaunchReadinessReport(
   buildLaunchReadinessReport({
     ...launchReadinessInputsFromEnv(),
-    generatedAt: "2026-07-05T00:00:00Z",
+    generatedAt,
   }),
   outputPath,
 );

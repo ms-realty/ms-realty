@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { evidenceFreshness } from "./evidence-freshness.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_PRODUCTION_RECOVERY_REPORT = fromRoot("production", "data", "production-recovery-report.json");
@@ -99,7 +100,27 @@ export function assertProductionRecoveryReport(report) {
   return true;
 }
 
-export function productionRecoveryState(reportPath = DEFAULT_PRODUCTION_RECOVERY_REPORT) {
+export function productionRecoveryEvidenceAt(report) {
+  return new Date(
+    Math.min(
+      timestamp(report.generated_at, "generated_at"),
+      timestamp(report.backup?.completed_at, "backup.completed_at"),
+      timestamp(report.restore_drill?.completed_at, "restore_drill.completed_at"),
+      timestamp(report.approval?.approved_at, "approval.approved_at"),
+    ),
+  ).toISOString();
+}
+
+export function productionRecoveryFreshness(report, { now = Date.now() } = {}) {
+  assertProductionRecoveryReport(report);
+  const nowMs = now instanceof Date ? now.getTime() : typeof now === "number" ? now : Date.parse(now);
+  if (!Number.isFinite(nowMs)) throw new Error("Production recovery freshness requires a valid current timestamp");
+  const generatedFreshness = evidenceFreshness("production_recovery", report.generated_at, { now: nowMs });
+  if (generatedFreshness.status === "invalid") return generatedFreshness;
+  return evidenceFreshness("production_recovery", productionRecoveryEvidenceAt(report), { now: nowMs });
+}
+
+export function productionRecoveryState(reportPath = DEFAULT_PRODUCTION_RECOVERY_REPORT, { now = Date.now() } = {}) {
   if (!fs.existsSync(reportPath)) return { status: "missing_report", path: repoRelativePath(reportPath) };
   try {
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
@@ -107,7 +128,16 @@ export function productionRecoveryState(reportPath = DEFAULT_PRODUCTION_RECOVERY
       return { status: "example_report", path: repoRelativePath(reportPath) };
     }
     assertProductionRecoveryReport(report);
-    return { status: "pass", path: repoRelativePath(reportPath), report };
+    const freshness = productionRecoveryFreshness(report, { now });
+    if (freshness.status === "invalid") throw new Error(freshness.error);
+    return {
+      status: freshness.status === "fresh" ? "pass" : "expired_report",
+      path: repoRelativePath(reportPath),
+      generated_at: report.generated_at,
+      evidence_at: productionRecoveryEvidenceAt(report),
+      freshness,
+      report,
+    };
   } catch (error) {
     return { status: "invalid_report", path: repoRelativePath(reportPath), error: error.message };
   }

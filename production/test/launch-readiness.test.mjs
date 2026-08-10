@@ -259,6 +259,7 @@ const readyLiveServices = [
   {
     source: "typesense_meilisearch_sync",
     status: "pass",
+    generated_at: "2026-07-05T00:00:00.000Z",
     path: "production/data/search-engine-sync-report.json",
     summary: {
       engines: 2,
@@ -300,6 +301,7 @@ const readyLiveServices = [
   {
     source: "typesense_meilisearch_query",
     status: "pass",
+    generated_at: "2026-07-05T00:00:00.000Z",
     path: "production/data/search-engine-query-report.json",
     summary: {
       engines: 2,
@@ -333,6 +335,7 @@ const readyLiveServices = [
   {
     source: "hermes_draft_worker",
     status: "pass",
+    generated_at: "2026-07-05T00:00:00.000Z",
     path: "production/data/hermes-draft-worker-report.json",
     summary: { attempted: 1, persisted: 1, rejected: 0 },
     evidence: {
@@ -379,6 +382,7 @@ const readyAppState = {
 };
 const readyPayloadRuntime = {
   status: "pass",
+  generated_at: "2026-07-05T00:00:00.000Z",
   path: "production/data/payload-runtime-report.json",
   summary: {
     checks: 9,
@@ -494,15 +498,19 @@ const readyMonitoringRollback = {
   },
 };
 
-function writeProductionRecoveryFixture(dir) {
+function writeProductionRecoveryFixture(dir, generatedAt = new Date().toISOString()) {
   const reportPath = `${dir}/production-recovery-report.json`;
-  writeJson(reportPath, readyProductionRecovery.report);
+  const report = structuredClone(readyProductionRecovery.report);
+  report.generated_at = generatedAt;
+  report.backup.completed_at = generatedAt;
+  report.restore_drill.completed_at = generatedAt;
+  report.approval.approved_at = generatedAt;
+  writeJson(reportPath, report);
   return reportPath;
 }
 
-function writeMonitoringRollbackFixture(dir) {
+function writeMonitoringRollbackFixture(dir, generatedAt = new Date().toISOString()) {
   const reportPath = `${dir}/monitoring-rollback-report.json`;
-  const generatedAt = new Date().toISOString();
   const report = structuredClone(readyMonitoringRollback.report);
   report.generated_at = generatedAt;
   report.monitoring.endpoints[0].checked_at = generatedAt;
@@ -513,14 +521,14 @@ function writeMonitoringRollbackFixture(dir) {
   return reportPath;
 }
 
-function writeLiveReportFixtures(dir) {
+function writeLiveReportFixtures(dir, generatedAt = new Date().toISOString()) {
   const syncReportPath = `${dir}/search-engine-sync-report.json`;
   const queryReportPath = `${dir}/search-engine-query-report.json`;
   const hermesReportPath = `${dir}/hermes-draft-worker-report.json`;
   fs.writeFileSync(
     syncReportPath,
     `${JSON.stringify({
-      generated_at: "2026-07-06T00:00:00Z",
+      generated_at: generatedAt,
       summary: {
         engines: 2,
         targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
@@ -552,7 +560,7 @@ function writeLiveReportFixtures(dir) {
   fs.writeFileSync(
     queryReportPath,
     `${JSON.stringify({
-      generated_at: "2026-07-06T00:00:00Z",
+      generated_at: generatedAt,
       summary: {
         engines: 2,
         targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
@@ -594,7 +602,7 @@ function writeLiveReportFixtures(dir) {
   fs.writeFileSync(
     hermesReportPath,
     `${JSON.stringify({
-      generated_at: "2026-07-06T00:00:00Z",
+      generated_at: generatedAt,
       agent_runtime: {
         product: "Nous Hermes Agent",
         license: "MIT",
@@ -624,7 +632,7 @@ function writeLiveReportFixtures(dir) {
   return { syncReportPath, queryReportPath, hermesReportPath };
 }
 
-async function writeLiveProvisioningFixture(dir) {
+async function writeLiveProvisioningFixture(dir, generatedAt = new Date().toISOString()) {
   const reportPath = `${dir}/live-service-provisioning-report.json`;
   const report = await buildLiveServiceProvisioningReport({
     env: {
@@ -636,7 +644,7 @@ async function writeLiveProvisioningFixture(dir) {
       HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: healthyHermesAgentFetch,
-    generatedAt: "2026-07-06T00:00:00Z",
+    generatedAt,
   });
   return writeLiveServiceProvisioningReport(report, reportPath);
 }
@@ -834,6 +842,77 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.deepEqual(report.blockers, []);
   assert.deepEqual(publicLaunchReadinessPayload(report).blocked_gates, []);
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store" });
+});
+
+test("launch readiness fail-closes stale and future mounted runtime evidence", () => {
+  const generatedAt = "2026-08-10T12:00:00.000Z";
+  const staleAt = "2026-07-10T11:59:59.999Z";
+  const futureAt = "2026-08-10T12:01:00.001Z";
+  const recoveryAt = (timestamp) => ({
+    ...readyProductionRecovery,
+    report: {
+      ...readyProductionRecovery.report,
+      generated_at: timestamp,
+      backup: { ...readyProductionRecovery.report.backup, completed_at: timestamp },
+      restore_drill: { ...readyProductionRecovery.report.restore_drill, completed_at: timestamp },
+      approval: { ...readyProductionRecovery.report.approval, approved_at: timestamp },
+    },
+  });
+  const freshEvidence = () => ({
+    liveServices: readyLiveServices.map((item) => ({ ...item, generated_at: generatedAt })),
+    payloadRuntime: { ...readyPayloadRuntime, generated_at: generatedAt },
+    productionRecovery: recoveryAt(generatedAt),
+  });
+
+  for (const [timestamp, expectedFreshness] of [
+    [staleAt, "stale"],
+    [futureAt, "invalid"],
+  ]) {
+    for (const gateId of ["live_services", "payload_runtime", "production_recovery"]) {
+      const evidence = freshEvidence();
+      if (gateId === "live_services") {
+        evidence.liveServices = evidence.liveServices.map((item) => ({ ...item, generated_at: timestamp }));
+      } else if (gateId === "payload_runtime") {
+        evidence.payloadRuntime.generated_at = timestamp;
+      } else {
+        evidence.productionRecovery = recoveryAt(timestamp);
+      }
+
+      const report = buildLaunchReadinessReport({
+        generatedAt,
+        ...evidence,
+        liveServiceProvisioning: readyLiveServiceProvisioning,
+        appState: readyAppState,
+      });
+      const gate = report.gates.find((item) => item.id === gateId);
+      assert.equal(gate.status, "blocked", `${gateId} must block ${expectedFreshness} evidence`);
+      const freshness = gateId === "live_services" ? gate.evidence.reports[0].freshness : gate.evidence.freshness;
+      assert.equal(freshness.status, expectedFreshness);
+      assert.equal(assertLaunchReadinessReport(report), true);
+    }
+  }
+});
+
+test("launch readiness validator rejects a hand-cleared stale runtime gate", () => {
+  const generatedAt = "2026-08-10T12:00:00.000Z";
+  const evidence = {
+    liveServices: readyLiveServices.map((item) => ({ ...item, generated_at: generatedAt })),
+    payloadRuntime: { ...readyPayloadRuntime, generated_at: generatedAt },
+    productionRecovery: {
+      ...readyProductionRecovery,
+      report: { ...readyProductionRecovery.report, generated_at: generatedAt },
+    },
+  };
+  const report = buildLaunchReadinessReport({
+    generatedAt,
+    ...evidence,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+  });
+  const payloadGate = report.gates.find((item) => item.id === "payload_runtime");
+  payloadGate.evidence.generated_at = "2026-08-01T12:00:00.000Z";
+
+  assert.throws(() => assertLaunchReadinessReport(report), /fresh payload_runtime evidence/);
 });
 
 test("launch readiness blocks forged terminal-decision summaries when rows lack human review", () => {
@@ -1521,16 +1600,19 @@ test("generated launch readiness report is valid when present", () => {
 
 test("launch readiness build honors output path override", () => {
   const outputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-readiness-output-`)}/launch-readiness.json`;
+  const startedAt = Date.now();
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-launch-readiness.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: outputPath },
+    env: { ...process.env, MS_REALTY_GENERATED_AT: "", MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: outputPath },
   });
+  const completedAt = Date.now();
 
   assert.equal(result.status, 0, result.stderr);
   assert.ok(result.stdout.includes(`Wrote launch readiness report to ${outputPath}`));
   const report = JSON.parse(fs.readFileSync(outputPath, "utf8"));
   assert.equal(assertLaunchReadinessReport(report), true);
+  assert.ok(Date.parse(report.generated_at) >= startedAt && Date.parse(report.generated_at) <= completedAt);
   assert.deepEqual(report.blockers, [
     "redirect_reviews",
     "external_seo_exports",
@@ -1540,6 +1622,23 @@ test("launch readiness build honors output path override", () => {
     "payload_runtime",
     "production_recovery",
   ]);
+});
+
+test("launch readiness build honors an explicit generated timestamp", () => {
+  const outputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-readiness-time-`)}/launch-readiness.json`;
+  const generatedAt = "2026-08-10T12:00:00.000Z";
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-launch-readiness.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_GENERATED_AT: generatedAt,
+      MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: outputPath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(JSON.parse(fs.readFileSync(outputPath, "utf8")).generated_at, generatedAt);
 });
 
 test("local readiness materializer promotes only fresh local Payload proof and preserves external blockers", async () => {
@@ -1736,6 +1835,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
 });
 
 test("launch preflight and input checklist honor env-mounted redirect and evidence paths", async () => {
+  const generatedAt = "2026-08-10T12:00:00.000Z";
   const emptyRedirectsPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-empty-redirects-`)}/deployable-redirects.json`;
   fs.writeFileSync(
     emptyRedirectsPath,
@@ -1755,16 +1855,17 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
   const seoDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-seo-`);
   writeCompleteSeoInputFixture(seoDir);
   const liveDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-live-`);
-  const livePaths = writeLiveReportFixtures(liveDir);
-  const liveProvisioningPath = await writeLiveProvisioningFixture(liveDir);
-  const productionRecoveryPath = writeProductionRecoveryFixture(liveDir);
-  const monitoringRollbackPath = writeMonitoringRollbackFixture(liveDir);
+  const livePaths = writeLiveReportFixtures(liveDir, generatedAt);
+  const liveProvisioningPath = await writeLiveProvisioningFixture(liveDir, generatedAt);
+  const productionRecoveryPath = writeProductionRecoveryFixture(liveDir, generatedAt);
+  const monitoringRollbackPath = writeMonitoringRollbackFixture(liveDir, generatedAt);
   const checklistPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-checklist-`)}/launch-inputs.md`;
   const ready = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-launch-input-checklist.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
     env: {
       ...process.env,
+      MS_REALTY_GENERATED_AT: generatedAt,
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath,
       MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoDir,
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
@@ -1780,6 +1881,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
 
   assert.equal(ready.status, 0, ready.stderr);
   assert.match(markdown, /Status: blocked/);
+  assert.match(markdown, /Generated: 2026-08-10T12:00:00.000Z/);
   assert.match(markdown, /Blockers: redirect_reviews, payload_runtime/);
   assert.match(markdown, /MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH/);
 });
@@ -1804,12 +1906,24 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.match(missing.stderr, /Next: run `npm run live:provisioning:preflight`/);
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-valid-live-reports-`);
-  const paths = writeLiveReportFixtures(validDir);
+  const generatedAt = new Date().toISOString();
+  const paths = writeLiveReportFixtures(validDir, generatedAt);
   const result = validateLiveServiceReports(paths);
   assert.equal(result.ready, true);
   assert.equal(result.reports.every((report) => report.status === "pass"), true);
 
-  const readyReport = buildLiveServicePreflightReport({ generatedAt: "2026-07-06T00:00:00Z", ...paths });
+  const expiredAt = new Date(Date.parse(generatedAt) + 7 * 24 * 60 * 60 * 1000 + 1).toISOString();
+  const expired = validateLiveServiceReports({ ...paths, now: expiredAt });
+  assert.equal(expired.ready, false);
+  assert.equal(expired.reports.every((report) => report.status === "expired_report"), true);
+  assert.equal(expired.reports[0].freshness.max_age_ms, 7 * 24 * 60 * 60 * 1000);
+  const future = validateLiveServiceReports({
+    ...paths,
+    now: new Date(Date.parse(generatedAt) - 60_001).toISOString(),
+  });
+  assert.equal(future.reports.every((report) => report.status === "invalid_report"), true);
+
+  const readyReport = buildLiveServicePreflightReport({ generatedAt, ...paths });
   assert.equal(assertLiveServicePreflightReport(readyReport), true);
   assert.ok(
     readyReport.next_actions.some((action) => action.includes("live:preflight") && action.includes("launch:preflight")),
@@ -1839,6 +1953,9 @@ test("live service report preflight fails missing reports and passes valid repor
       }),
     /missing hermes_draft_worker evidence/,
   );
+  const expiredReport = buildLiveServicePreflightReport({ generatedAt: expiredAt, ...paths });
+  assert.equal(assertLiveServicePreflightReport(expiredReport), true);
+  assert.equal(expiredReport.summary.expired_report, 3);
   readyReport.reports.find((report) => report.source === "typesense_meilisearch_sync").summary.total_operations = 0;
   assert.throws(() => assertLiveServicePreflightReport(readyReport), /search sync summary evidence/);
 
@@ -2089,7 +2206,8 @@ test("live service preflight report records blockers without clearing the gate",
   assert.equal(JSON.parse(fs.readFileSync(missingOutputPath, "utf8")).generated_at, "2026-07-08T12:00:00Z");
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-preflight-report-valid-`);
-  const paths = writeLiveReportFixtures(validDir);
+  const generatedAt = "2026-07-08T12:00:00Z";
+  const paths = writeLiveReportFixtures(validDir, generatedAt);
   const outputPath = `${validDir}/live-service-preflight-report.json`;
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-live-service-preflight-report.mjs")], {
     cwd: fromRoot(),
@@ -2100,14 +2218,14 @@ test("live service preflight report records blockers without clearing the gate",
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: paths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH: outputPath,
-      MS_REALTY_GENERATED_AT: "2026-07-08T12:00:00Z",
+      MS_REALTY_GENERATED_AT: generatedAt,
     },
   });
 
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, new RegExp(outputPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   const readyReport = JSON.parse(fs.readFileSync(outputPath, "utf8"));
-  assert.equal(readyReport.generated_at, "2026-07-08T12:00:00Z");
+  assert.equal(readyReport.generated_at, generatedAt);
   assert.equal(assertLiveServicePreflightReport(readyReport), true);
   assert.equal(readyReport.ready, true);
   assert.equal(readyReport.summary.pass, 3);

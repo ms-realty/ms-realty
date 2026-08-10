@@ -203,6 +203,30 @@ test("Payload runtime report passes with env and database reachability proof", a
   assert.equal(JSON.stringify(report).includes("payload:secret"), false);
 });
 
+test("Payload runtime state expires stale reports and rejects future timestamps", async (t) => {
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-freshness-`);
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const reportPath = `${directory}/payload-runtime-report.json`;
+  const generatedAt = "2026-07-06T00:00:00.000Z";
+  const report = await buildPayloadRuntimeReport({
+    databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
+    env: {
+      DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+    },
+    generatedAt,
+  });
+  fs.writeFileSync(reportPath, `${JSON.stringify(report)}\n`);
+
+  assert.equal(payloadRuntimeState(reportPath, { now: generatedAt }).status, "pass");
+  const expired = payloadRuntimeState(reportPath, { now: "2026-07-14T00:00:00.000Z" });
+  assert.equal(expired.status, "expired_report");
+  assert.equal(expired.freshness.max_age_ms, 7 * 24 * 60 * 60 * 1000);
+  const invalid = payloadRuntimeState(reportPath, { now: "2026-07-05T23:58:59.999Z" });
+  assert.equal(invalid.status, "invalid_report");
+  assert.match(invalid.error, /future/);
+});
+
 test("Payload runtime report blocks private database hosts without explicit launch evidence", async () => {
   const probeCalls = [];
   const blocked = await buildPayloadRuntimeReport({
