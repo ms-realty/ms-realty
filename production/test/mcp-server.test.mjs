@@ -434,6 +434,19 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
   assert.equal(edit.editor_url, "/admin/listings/edit?listingId=MS-CRAWL-0001");
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.description, "Staff-reviewed source description for the listing.");
 
+  const idempotentEdit = await callTool(
+    config,
+    "edit_listing_content",
+    {
+      listing_id: "MS-CRAWL-0001",
+      patch: { description: "Staff-reviewed source description for the listing." },
+      confirmation: "EDIT_LISTING_CONTENT",
+    },
+    auth,
+  );
+  assert.equal(idempotentEdit.idempotent, true);
+  assert.deepEqual(idempotentEdit.changed_fields, []);
+
   const rejectedBulk = await mcpCall(
     config,
     {
@@ -455,6 +468,18 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
   assert.equal(rejectedBulk.payload.result.isError, true);
   assert.equal(readListingEdits(paths.listingEditLedgerPath).length, 0);
 
+  const primedStatus = await callTool(
+    config,
+    "bulk_update_listing_status",
+    {
+      listing_ids: ["MS-CRAWL-0001"],
+      target_status: "reserved",
+      confirmation: "BULK_UPDATE_LISTING_STATUS",
+    },
+    auth,
+  );
+  assert.deepEqual(primedStatus.changed_listing_ids, ["MS-CRAWL-0001"]);
+
   const status = await callTool(
     config,
     "bulk_update_listing_status",
@@ -466,8 +491,9 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
     auth,
   );
   assert.equal(status.target_status, "reserved");
-  assert.equal(status.updated, 2);
-  assert.deepEqual(status.changed_listing_ids, ["MS-CRAWL-0001", "MS-CRAWL-0002"]);
+  assert.equal(status.updated, 1);
+  assert.equal(status.idempotent, 1);
+  assert.deepEqual(status.changed_listing_ids, ["MS-CRAWL-0002"]);
   assert.equal("edits" in status, false);
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").facts.listing_status, "reserved");

@@ -48,6 +48,12 @@ import {
   installDurableLeadStoreFixtureEnv,
 } from "./approved-public-seed.fixture.mjs";
 
+const SAME_ORIGIN_LEAD_HEADERS = Object.freeze({
+  host: "localhost",
+  origin: "http://localhost",
+  "sec-fetch-site": "same-origin",
+});
+
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
     return {
@@ -478,6 +484,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const leadResponse = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         leadType: "buyer",
         language: "he",
@@ -490,6 +497,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const viewingLeadResponse = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         source: "website_viewing_request",
         leadType: "buyer",
@@ -504,6 +512,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const contactLeadResponse = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         source: "website_contact_callback",
         leadType: "general",
@@ -517,6 +526,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const sellerLeadResponse = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         source: "website_seller_valuation",
         leadType: "seller",
@@ -1839,6 +1849,7 @@ test("HTTP app rejects malformed JSON request bodies", async () => {
   const response = await dispatchHttp(createHttpApp(), {
     method: "POST",
     url: "/api/leads",
+    headers: SAME_ORIGIN_LEAD_HEADERS,
     body: "{bad",
   });
 
@@ -2369,6 +2380,7 @@ test("HTTP app rejects unknown buyer listing references", async () => {
   const response = await dispatchHttp(createHttpApp(), {
     method: "POST",
     url: "/api/leads",
+    headers: SAME_ORIGIN_LEAD_HEADERS,
     body: {
       id: "bad-lead-test",
       leadType: "buyer",
@@ -2522,7 +2534,7 @@ test("HTTP fallback accepts a URL-encoded seller valuation form", async () => {
   const response = await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
+    headers: { ...SAME_ORIGIN_LEAD_HEADERS, "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       source: "website_seller_valuation",
       leadType: "seller",
@@ -2559,6 +2571,7 @@ test("HTTP admin records private seller valuation outcomes with a derived queue"
   const sellerLead = await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: SAME_ORIGIN_LEAD_HEADERS,
     body: {
       id: "http-seller-outcome",
       source: "website_seller_valuation",
@@ -2634,6 +2647,7 @@ test("HTTP credentialed seller outcomes cannot spoof the workflow actor", async 
     const sellerLead = await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
+      headers: SAME_ORIGIN_LEAD_HEADERS,
       body: {
         id: "credentialed-seller-outcome",
         source: "website_seller_valuation",

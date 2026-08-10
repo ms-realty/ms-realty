@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
+import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import {
   createPayloadAdminAuthService,
   payloadAdminPrincipal,
@@ -97,6 +98,9 @@ test("Payload Local API backs login, validation, revocation, and access-controll
 
   const team = await service.listOperators(session);
   assert.equal(team[0].email, "peycheff.com@gmail.com");
+  const listOptions = payload.calls.find(([name]) => name === "find")[1];
+  assert.equal(listOptions.limit, 0);
+  assert.equal(listOptions.pagination, false);
   const created = await service.createOperator(session, {
     email: "broker@example.com",
     password: "a-long-unique-password",
@@ -229,6 +233,56 @@ test("team registration is admin-only and executes through Payload access", asyn
   assert.equal(admin.status, 201);
   assert.equal((await admin.json()).operator.email, input.email);
   assert.equal(created.length, 1);
+});
+
+test("both custom-admin routes reject operator passwords shorter than 12 characters", async () => {
+  const payload = fakePayload();
+  const service = createPayloadAdminAuthService(payload, {
+    revokePayloadSession: async () => true,
+  });
+  const body = {
+    email: "short-password@example.com",
+    password: "too-short",
+    name: "Short Password",
+    role: "broker",
+    workspace_ids: ["sandanski"],
+  };
+
+  const appResponse = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/team`, {
+      method: "POST",
+      headers: {
+        cookie: "ms_admin=payload.jwt.session",
+        "content-type": "application/json",
+        host: "ms-realty.ms-realty-bg.workers.dev",
+        origin: BASE_URL,
+        "sec-fetch-site": "same-origin",
+      },
+      body: JSON.stringify(body),
+    }),
+    { config: adapterConfig(service) },
+  );
+  assert.equal(appResponse.status, 400);
+  assert.match((await appResponse.json()).message, /at least 12 characters/);
+
+  const httpResponse = await dispatchHttp(
+    createHttpApp({ payloadAdminAuth: service, nowSeconds: () => NOW_SECONDS }),
+    {
+      method: "POST",
+      url: "/api/admin/team",
+      headers: {
+        cookie: "ms_admin=payload.jwt.session",
+        "content-type": "application/json",
+        host: "localhost",
+        origin: "http://localhost",
+        "sec-fetch-site": "same-origin",
+      },
+      body,
+    },
+  );
+  assert.equal(httpResponse.status, 400);
+  assert.match(httpResponse.body.message, /at least 12 characters/);
+  assert.equal(payload.calls.some(([name]) => name === "create"), false);
 });
 
 test("Payload-session brokers cannot cross the configured custom-admin workspace", async () => {

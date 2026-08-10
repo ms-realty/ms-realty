@@ -245,6 +245,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
   const leadResponse = await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             leadType: "buyer",
             language: "he",
@@ -256,6 +257,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
   const viewingLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             source: "website_viewing_request",
             leadType: "buyer",
@@ -270,6 +272,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
   const contactLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             source: "website_contact_callback",
             leadType: "general",
@@ -283,6 +286,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
   const sellerLeadResponse = await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             source: "website_seller_valuation",
             leadType: "seller",
@@ -416,6 +420,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         badLead: await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
+          headers: { origin: baseUrl },
           body: JSON.stringify({
             id: "node-server-bad-lead-test",
             leadType: "buyer",

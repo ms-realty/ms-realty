@@ -48,6 +48,7 @@ function normalizedOperatorInput(input) {
   const role = String(input?.role || "").trim().toLowerCase();
   const name = String(input?.name || "").trim();
   if (!email || !password) throw new Error("Email and password are required");
+  if (password.length < 12) throw new Error("Password must be at least 12 characters");
   if (!PAYLOAD_ADMIN_ROLES.includes(role)) throw new Error("A valid operator role is required");
   return { email, password, name, role, workspace_ids: workspaceIds(input?.workspace_ids) };
 }
@@ -108,8 +109,9 @@ export function createPayloadAdminAuthService(
       const result = await payload.find({
         collection: PAYLOAD_ADMIN_COLLECTION,
         depth: 0,
-        limit: 100,
+        limit: 0,
         overrideAccess: false,
+        pagination: false,
         sort: "email",
         user: session.user,
         select: { email: true, name: true, role: true, workspace_ids: true },

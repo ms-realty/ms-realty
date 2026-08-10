@@ -300,6 +300,7 @@ const smoke = {
   lead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: { host: "localhost", origin: "http://localhost", "sec-fetch-site": "same-origin" },
     body: {
       leadType: "buyer",
       language: "he",
@@ -312,6 +313,7 @@ const smoke = {
   viewingLead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: { host: "localhost", origin: "http://localhost", "sec-fetch-site": "same-origin" },
     body: {
       source: "website_viewing_request",
       leadType: "buyer",
@@ -326,6 +328,7 @@ const smoke = {
   contactLead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: { host: "localhost", origin: "http://localhost", "sec-fetch-site": "same-origin" },
     body: {
       source: "website_contact_callback",
       leadType: "general",
@@ -339,6 +342,7 @@ const smoke = {
   sellerLead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
+    headers: { host: "localhost", origin: "http://localhost", "sec-fetch-site": "same-origin" },
     body: {
       id: "http-lead-seller-el-0001",
       source: "website_seller_valuation",

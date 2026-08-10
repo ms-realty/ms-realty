@@ -1013,7 +1013,9 @@ function authenticatedToolDefinitions(server, config, principal) {
             body: { listingId, patch },
           });
           if (!response.ok || payload?.kind !== "listing_draft_saved") return errorResult("The listing content was not saved.");
-          const changedFields = Object.keys(patch).filter((field) => LISTING_CONTENT_FIELDS.includes(field));
+          const changedFields = payload.idempotent
+            ? []
+            : Object.keys(patch).filter((field) => LISTING_CONTENT_FIELDS.includes(field));
           if (!payload.idempotent) recordPayloadListingEdit(config, principal, listingId, changedFields);
           return textResult({
             listing_id: listingId,
@@ -1059,7 +1061,7 @@ function authenticatedToolDefinitions(server, config, principal) {
             updated: payload.updated || 0,
             idempotent: payload.idempotent || 0,
             unchanged: payload.unchanged || 0,
-            changed_listing_ids: (payload.edits || []).map((edit) => edit.listing_id),
+            changed_listing_ids: (payload.edits || []).filter((edit) => !edit.idempotent).map((edit) => edit.listing_id),
             unchanged_listing_ids: Array.isArray(payload.unchangedListingIds) ? payload.unchangedListingIds : [],
             stale_translation_count: Array.isArray(payload.staleTranslations) ? payload.staleTranslations.length : 0,
             publication_approval_changed: false,
