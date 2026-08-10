@@ -14,6 +14,7 @@ import {
   adminRoleFieldAccess,
   adminsCollectionAccess,
   caseCollectionAccess,
+  caseWorkspaceBoundaryHook,
   hasRole,
   isAdmin,
   referenceCollectionAccess,
@@ -21,10 +22,44 @@ import {
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const generated = JSON.parse(fs.readFileSync(path.join(root, "production/data/payload-collections.json"), "utf8"));
+const production = process.env.NODE_ENV === "production";
+
+function productionRuntimeConfig() {
+  const secret = String(process.env.PAYLOAD_SECRET || "").trim();
+  const databaseUrl = String(process.env.DATABASE_URL || "").trim();
+  if (production && (!secret || /replace-with|change-me|example|local-payload-secret/i.test(secret) || Buffer.byteLength(secret) < 32)) {
+    throw new Error("PAYLOAD_SECRET must be a non-placeholder secret of at least 32 bytes in production");
+  }
+  if (production && (!databaseUrl || /replace-with|change-me|example/i.test(databaseUrl))) {
+    throw new Error("DATABASE_URL must be configured without placeholder values in production");
+  }
+  return {
+    databaseUrl: databaseUrl || "postgres://payload:payload@127.0.0.1:5432/ms_realty",
+    secret: secret || "ms-realty-local-payload-secret",
+  };
+}
+
+function configuredPublicOrigin() {
+  const value = String(process.env.MS_REALTY_PUBLIC_ORIGIN || "").trim();
+  if (!value) return null;
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error("MS_REALTY_PUBLIC_ORIGIN must be a valid URL origin");
+  }
+  if (url.username || url.password || url.pathname !== "/" || url.search || url.hash || (production && url.protocol !== "https:")) {
+    throw new Error("MS_REALTY_PUBLIC_ORIGIN must be an exact HTTPS origin in production");
+  }
+  return url.origin;
+}
+
+const runtimeConfig = productionRuntimeConfig();
+const publicOrigin = configuredPublicOrigin();
 
 const admins = {
   slug: "admins",
-  auth: true,
+  auth: { cookies: { sameSite: "Lax", secure: production } },
   admin: { useAsTitle: "email" },
   // Only an admin manages operator accounts; everyone else is limited to their
   // own record and cannot touch the role field (no self-escalation).
@@ -211,6 +246,10 @@ const caseCollectionsWithAccess = REALTY_CASE_COLLECTIONS.map((collection) => ({
     delete: collection.access?.delete ?? caseCollectionAccess.delete,
     ...(collection.access?.admin ? { admin: collection.access.admin } : {}),
   },
+  hooks: {
+    ...collection.hooks,
+    beforeValidate: [...(collection.hooks?.beforeValidate || []), caseWorkspaceBoundaryHook(collection)],
+  },
 }));
 
 // Lead intake is written by server code through overrideAccess, so no operator
@@ -227,15 +266,17 @@ const leadCollectionsWithAccess = LEAD_COLLECTIONS.map((collection) => ({
 export default buildConfig({
   admin: { user: "admins" },
   routes: { admin: "/payload-admin" },
-  // ponytail: local defaults keep build/test importable; launch readiness still requires real env values.
-  secret: process.env.PAYLOAD_SECRET || "ms-realty-local-payload-secret",
+  // Payload adds serverURL to its CSRF allowlist, yielding one exact origin.
+  ...(publicOrigin ? { serverURL: publicOrigin } : {}),
+  // ponytail: explicit local fallbacks keep development importable; production fails closed above.
+  secret: runtimeConfig.secret,
   i18n: {
     fallbackLanguage: "en",
     supportedLanguages: { bg, ru, en },
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || "postgres://payload:payload@127.0.0.1:5432/ms_realty",
+      connectionString: runtimeConfig.databaseUrl,
     },
   }),
   collections: [admins, locales, ...collections, ...caseCollectionsWithAccess, ...leadCollectionsWithAccess],
