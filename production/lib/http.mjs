@@ -3835,16 +3835,16 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must publish only human-approved translation");
   }
   if (
-    smoke.listingEditorHtml?.status !== 307 ||
-    smoke.listingEditorHtml.headers.location !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+    smoke.listingEditorHtml?.status !== 200 ||
+    !smoke.listingEditorHtml.body.includes('data-admin-mutation-form="listing"')
   ) {
-    throw new Error("HTTP smoke must hand legacy listing editor links to Payload");
+    throw new Error("HTTP smoke must render the custom listing editor");
   }
   if (
-    smoke.listingEdit.status !== 409 ||
-    smoke.listingEdit.body.canonical_url !== "/payload-admin/collections/listings/MS-CRAWL-0001"
+    smoke.listingEdit.status !== 503 ||
+    smoke.listingEdit.body.kind !== "payload_draft_unavailable"
   ) {
-    throw new Error("HTTP smoke must reject legacy listing mutations with a Payload handoff");
+    throw new Error("HTTP smoke must fail closed when the durable listing draft runtime is unavailable");
   }
   if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== true) {
     throw new Error("HTTP smoke must preserve the reviewed public translation after a rejected legacy mutation");
