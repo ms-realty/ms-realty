@@ -238,6 +238,7 @@ test("config wires shared access onto admins, content, and case collections", as
     assert.equal(bySlug.realty_cases.hooks.beforeValidate.length, 1, "workspace boundary hook is wired");
     assert.equal(bySlug.realty_case_events.access.update(req(admin)), false, "append-only update preserved");
     assert.deepEqual(bySlug.admins.auth.cookies, { sameSite: "Lax", secure: true });
+    assert.equal(config.cookiePrefix, "payload", "the Worker and Payload must agree on the session cookie name");
     assert.equal(config.serverURL, "https://ms-realty.ms-realty-bg.workers.dev");
     assert.deepEqual(config.csrf, ["https://ms-realty.ms-realty-bg.workers.dev"]);
   } finally {

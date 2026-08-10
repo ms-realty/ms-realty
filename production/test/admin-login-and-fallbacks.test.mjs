@@ -12,6 +12,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { renderContactPage, renderSearchUnavailablePage } from "../lib/public-site.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { GET as adminLoginGet, POST as adminLoginPost } from "../../app/admin/login/route.js";
 
 const OPERATOR_TOKEN = "login-operator-token-0123456789ab";
 const registry = loadLocaleRegistry();
@@ -49,6 +50,24 @@ test("session cookie helpers round-trip the operator token", () => {
   assert.equal(adminTokenFromCookie(adminSessionClearCookie().split(";")[0]), "");
   assert.equal(adminTokenFromCookie(""), "");
   assert.match(renderAdminLoginPage({ error: true }), /role="alert"/);
+});
+
+test("the deployed admin login route redirects to Payload without accepting an operator token", async () => {
+  const base = "https://ms-realty.ms-realty-bg.workers.dev";
+  const getResponse = await adminLoginGet(new Request(`${base}/admin/login`));
+  assert.equal(getResponse.status, 303);
+  assert.equal(getResponse.headers.get("location"), `${base}/payload-admin/login`);
+
+  const postResponse = await adminLoginPost(
+    new Request(`${base}/admin/login`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: `token=${OPERATOR_TOKEN}`,
+    }),
+  );
+  assert.equal(postResponse.status, 303);
+  assert.equal(postResponse.headers.get("location"), `${base}/payload-admin/login`);
+  assert.equal(postResponse.headers.get("set-cookie"), null, "the long-lived operator token must not become a CMS cookie");
 });
 
 test("standalone HTTP runtime: login exchanges the key for a cookie session", async () => {

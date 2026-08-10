@@ -1,10 +1,12 @@
 import { Container, getContainer } from "@cloudflare/containers";
 import {
   LEAD_PROBE_HEADER,
-  allowsAdminSessionMutation,
+  allowsPayloadAdminMutation,
+  allowsPayloadAdminServerAction,
   allowsDurableCaseAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
+  isPayloadFirstRegisterPath,
   secretMatches,
 } from "./durable-case-authority.mjs";
 import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
@@ -199,6 +201,13 @@ function ephemeralRuntimeDataResponse() {
   });
 }
 
+function blockedPayloadFirstRegisterResponse() {
+  return new Response("Not found", {
+    status: 404,
+    headers: { "cache-control": "no-store", "content-type": "text/plain; charset=utf-8", "x-content-type-options": "nosniff" },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -219,15 +228,23 @@ export default {
       return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
     }
 
+    // First-user registration is never a production recovery mechanism. The
+    // canonical administrator already exists and only an authenticated admin
+    // may create another operator through normal collection access.
+    if (isPayloadFirstRegisterPath(url.pathname)) return blockedPayloadFirstRegisterResponse();
+
     // Container disk resets on sleep, so only the existing Payload/Postgres
-    // authority routes can write. Every other mutation remains read-only.
+    // authority routes can write. The browser CMS gets a narrow Payload route
+    // allowlist; Payload itself validates the session, CSRF origin, RBAC, and
+    // workspace access. Every other mutation remains read-only.
     // MCP is admitted as well: the app authenticates it and the Worker strips
     // its ledger-writing tools (MS_REALTY_MCP_WRITES_DISABLED below).
     const mutating = MUTATING_METHODS.has(request.method);
     const leadProbe = mutating && (await allowsLeadProbeMutation({ request, pathname: url.pathname, env }));
     if (
       mutating &&
-      !allowsAdminSessionMutation({ method: request.method, pathname: url.pathname }) &&
+      !allowsPayloadAdminMutation({ request, pathname: url.pathname }) &&
+      !allowsPayloadAdminServerAction({ request, pathname: url.pathname }) &&
       !leadProbe &&
       !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })

@@ -6,10 +6,13 @@ import path from "node:path";
 import { fromRoot } from "../lib/paths.mjs";
 import { readBuildMarker } from "../lib/build-marker.mjs";
 import {
-  allowsAdminSessionMutation,
+  PAYLOAD_ADMIN_CRUD_COLLECTIONS,
+  allowsPayloadAdminMutation,
+  allowsPayloadAdminServerAction,
   allowsDurableCaseAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
+  isPayloadFirstRegisterPath,
 } from "../../workers/durable-case-authority.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
@@ -231,13 +234,89 @@ test("Cloudflare Container admits authenticated MCP without opening ledger write
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: {} }), false);
 });
 
-test("Cloudflare Container admits the cookie-login exchange without opening ledger writes", () => {
-  assert.match(workerSource, /allowsAdminSessionMutation\(\{ method: request\.method, pathname: url\.pathname \}\)/);
-  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/login" }), true);
-  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/logout" }), true);
-  assert.equal(allowsAdminSessionMutation({ method: "GET", pathname: "/admin/login" }), false);
-  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/admin/login/extra" }), false);
-  assert.equal(allowsAdminSessionMutation({ method: "POST", pathname: "/api/admin/cases" }), false);
+test("Cloudflare Container admits only the required Payload admin auth and session-backed CRUD mutations", () => {
+  assert.match(workerSource, /allowsPayloadAdminMutation\(\{ request, pathname: url\.pathname \}\)/);
+  assert.match(workerSource, /allowsPayloadAdminServerAction\(\{ request, pathname: url\.pathname \}\)/);
+  assert.match(workerSource, /isPayloadFirstRegisterPath\(url\.pathname\)/);
+
+  const request = (pathname, { method = "POST", cookie = "", override = "" } = {}) =>
+    new Request(`https://ms-realty.example${pathname}`, {
+      method,
+      headers: {
+        ...(cookie ? { cookie } : {}),
+        ...(override ? { "x-payload-http-method-override": override } : {}),
+      },
+    });
+  const allows = (pathname, options) =>
+    allowsPayloadAdminMutation({ request: request(pathname, options), pathname });
+  const session = "payload-token=valid-looking-session";
+
+  assert.equal(allows("/api/admins/login"), true, "login is the sole anonymous Payload mutation");
+  assert.equal(allows("/api/admins/logout"), false);
+  assert.equal(allows("/api/admins/logout", { cookie: session }), true);
+  assert.equal(allows("/api/admins/refresh-token", { cookie: session }), true);
+  assert.equal(allows("/api/admins/me", { method: "GET", cookie: session }), false, "me is read-only and bypasses the mutation gate");
+
+  assert.equal(allows("/api/admins", { cookie: session }), true, "an authenticated admin may create an operator");
+  assert.equal(allows("/api/admins"), false, "anonymous operator creation never reaches Payload");
+  assert.equal(allows("/api/admins/operator-1", { method: "PATCH", cookie: session }), true);
+  assert.equal(allows("/api/admins/operator-1", { method: "DELETE", cookie: session }), true);
+
+  assert.equal(isPayloadFirstRegisterPath("/api/admins/first-register"), true);
+  assert.equal(isPayloadFirstRegisterPath("/api/admins/%66irst-register"), true);
+  assert.equal(isPayloadFirstRegisterPath("/api/admins/%2566irst-register"), true);
+  for (const pathname of ["/api/admins/first-register", "/api/admins/first-register/", "/api/admins/%66irst-register", "/api/admins/%2566irst-register"]) {
+    assert.equal(allows(pathname, { cookie: session }), false, `${pathname} must remain permanently closed`);
+  }
+  for (const pathname of ["/api/admins/forgot-password", "/api/admins/reset-password", "/api/admins/unlock", "/api/admins/verify/token"]) {
+    assert.equal(allows(pathname, { cookie: session }), false, `${pathname} is outside the production auth contract`);
+  }
+
+  for (const [pathname, options] of [
+    ["/api/listings", { cookie: session }],
+    ["/api/listings/MS-CRAWL-0001", { method: "PATCH", cookie: session }],
+    ["/api/listings/MS-CRAWL-0001/duplicate", { cookie: session }],
+    ["/api/listings/versions/version-1", { cookie: session }],
+    ["/api/listings/access/MS-CRAWL-0001", { cookie: session }],
+    ["/api/listings/MS-CRAWL-0001", { cookie: session, override: "GET" }],
+    ["/api/payload-preferences/collection-listings", { cookie: session }],
+    ["/api/payload-preferences/collection-listings", { method: "DELETE", cookie: session }],
+  ]) {
+    assert.equal(allows(pathname, options), true, `${options.method || "POST"} ${pathname} should be admitted`);
+  }
+
+  assert.equal(PAYLOAD_ADMIN_CRUD_COLLECTIONS.has("listings"), true);
+  assert.equal(PAYLOAD_ADMIN_CRUD_COLLECTIONS.has("admins"), true);
+  assert.equal(PAYLOAD_ADMIN_CRUD_COLLECTIONS.has("search_outbox"), false);
+  assert.equal(PAYLOAD_ADMIN_CRUD_COLLECTIONS.has("listing_enrichment_tasks"), false);
+  for (const pathname of ["/api/search_outbox", "/api/listing_enrichment_tasks", "/api/lead_contacts", "/api/admin/cases"]) {
+    assert.equal(allows(pathname, { cookie: session }), false, `${pathname} is not a browser-managed Payload collection`);
+  }
+});
+
+test("Cloudflare Container admits only authenticated Payload Admin server actions", () => {
+  const action = "60b8a7da0666a0842c71c00e7403343f1dab3ab0";
+  const request = ({ pathname = "/payload-admin", method = "POST", cookie = "payload-token=session", nextAction = action } = {}) =>
+    new Request(`https://ms-realty.example${pathname}`, {
+      method,
+      headers: {
+        ...(cookie ? { cookie } : {}),
+        ...(nextAction ? { "next-action": nextAction } : {}),
+      },
+    });
+  const allows = (options = {}) => {
+    const candidate = request(options);
+    return allowsPayloadAdminServerAction({ request: candidate, pathname: new URL(candidate.url).pathname });
+  };
+
+  assert.equal(allows(), true);
+  assert.equal(allows({ pathname: "/payload-admin/collections/listings" }), true);
+  assert.equal(allows({ cookie: "" }), false, "anonymous server actions remain closed");
+  assert.equal(allows({ nextAction: "" }), false);
+  assert.equal(allows({ nextAction: "not-a-next-action" }), false);
+  assert.equal(allows({ method: "PATCH" }), false);
+  assert.equal(allows({ pathname: "/admin" }), false, "the legacy workbench is not a Payload server-action prefix");
+  assert.equal(allows({ pathname: "/payload-admin/create-first-user" }), false);
 });
 
 test("Cloudflare Container admits only the secret-backed durable lead probe", async () => {
