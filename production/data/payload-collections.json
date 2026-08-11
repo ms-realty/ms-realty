@@ -81,7 +81,8 @@
         ]
       },
       "versions": {
-        "drafts": true
+        "drafts": true,
+        "maxPerDoc": 0
       },
       "labels": {
         "singular": "listings",
@@ -218,6 +219,17 @@
               "type": "text"
             },
             {
+              "name": "listing_status",
+              "type": "select",
+              "options": [
+                "available",
+                "reserved",
+                "sold",
+                "rented",
+                "archived"
+              ]
+            },
+            {
               "name": "bedrooms",
               "type": "number"
             },
@@ -286,6 +298,18 @@
               "type": "text"
             },
             {
+              "name": "canonical_override",
+              "type": "text"
+            },
+            {
+              "name": "robots",
+              "type": "select",
+              "options": [
+                "index,follow",
+                "noindex,follow"
+              ]
+            },
+            {
               "name": "schema_present",
               "type": "checkbox"
             }
@@ -348,6 +372,10 @@
             {
               "name": "last_editor",
               "type": "text"
+            },
+            {
+              "name": "last_edit_event",
+              "type": "json"
             }
           ]
         },

@@ -115,6 +115,19 @@ function outboxIdempotencyDuplicate(error) {
   return [error?.code, error?.cause?.code, error?.data?.code, error?.data?.cause?.code].includes("23505");
 }
 
+function enrichmentTaskIdDuplicate(error) {
+  const validationErrors = error?.data?.errors;
+  return (
+    outboxIdempotencyDuplicate(error) ||
+    (error?.name === "ValidationError" &&
+      error?.data?.collection === "listing_enrichment_tasks" &&
+      Array.isArray(validationErrors) &&
+      validationErrors.length === 1 &&
+      validationErrors[0]?.path === "id" &&
+      validationErrors[0]?.message === "Value must be unique")
+  );
+}
+
 function outboxRecordFor(listing, { eventType = "upsert", changeToken, includeListingRelation = true } = {}) {
   const { listing: listingId, ...event } = searchOutboxEventForListing(listing, { eventType, changeToken });
   return {
@@ -144,15 +157,20 @@ export async function ensureListingEnrichmentTask({ doc, req } = {}) {
   const listingId = relationId(doc?.id);
   const propertyId = relationId(doc?.property);
   if (!listingId || !propertyId || !req?.payload || payloadCmsImportContextEnabled(req)) return;
+  const data = enrichmentTaskForListing({ listingId, propertyId, source: "listing_change" });
+  const existing = await req.payload.find({
+    collection: "listing_enrichment_tasks",
+    depth: 0,
+    limit: 1,
+    overrideAccess: true,
+    req,
+    where: { id: { equals: data.id } },
+  });
+  if (existing.docs?.length) return;
   try {
-    await req.payload.create({
-      collection: "listing_enrichment_tasks",
-      data: enrichmentTaskForListing({ listingId, propertyId, source: "listing_change" }),
-      overrideAccess: true,
-      req,
-    });
+    await req.payload.create({ collection: "listing_enrichment_tasks", data, overrideAccess: true, req });
   } catch (error) {
-    if (!outboxIdempotencyDuplicate(error)) throw error;
+    if (!enrichmentTaskIdDuplicate(error) || req.transactionID) throw error;
   }
 }
 

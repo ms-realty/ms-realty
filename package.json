@@ -91,6 +91,7 @@
     "launch:preflight": "node production/scripts/launch-preflight.mjs",
     "launch:evidence:capture": "node production/scripts/capture-launch-evidence.mjs",
     "launch:evidence:verify": "node production/scripts/verify-launch-evidence.mjs",
+    "monitoring:report": "node production/scripts/build-monitoring-rollback-report.mjs",
     "monitoring:preflight": "node production/scripts/validate-monitoring-rollback-report.mjs",
     "next:build": "next build",
     "next:smoke": "node production/scripts/smoke-next-runtime.mjs",

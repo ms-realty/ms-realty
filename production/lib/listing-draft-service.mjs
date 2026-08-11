@@ -115,6 +115,31 @@ async function withPayloadTransaction(payload, { principal, accessMode, isolatio
   }
 }
 
+function listingWorkQueueDuplicate(error) {
+  const validationErrors = error?.data?.errors;
+  if ([error?.code, error?.cause?.code, error?.data?.code, error?.data?.cause?.code].includes("23505")) {
+    const constraint = String(error?.constraint || error?.cause?.constraint || error?.data?.constraint || "");
+    return !constraint || /^(listing_enrichment_tasks|search_outbox)_/.test(constraint);
+  }
+  return (
+    error?.name === "ValidationError" &&
+    error?.data?.collection === "listing_enrichment_tasks" &&
+    Array.isArray(validationErrors) &&
+    validationErrors.length === 1 &&
+    validationErrors[0]?.path === "id" &&
+    validationErrors[0]?.message === "Value must be unique"
+  );
+}
+
+async function withListingWorkQueueDuplicateRetry(payload, transactionOptions, work) {
+  try {
+    return await withPayloadTransaction(payload, transactionOptions, work);
+  } catch (error) {
+    if (!listingWorkQueueDuplicate(error)) throw error;
+    return withPayloadTransaction(payload, transactionOptions, work);
+  }
+}
+
 function patchSourceFromInput(input = {}) {
   if (input.patch !== undefined) {
     if (!input.patch || typeof input.patch !== "object" || Array.isArray(input.patch)) {
@@ -215,8 +240,13 @@ async function markListingTranslationsStale(
   return { staleTranslations: persisted, localeCodes: codes };
 }
 
-function mutationFromEdit(current, edit, actorId, editedAt) {
+function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "admin") {
+  const actorId = principal.id;
   const patch = { ...(edit.patch || {}), ...(edit.listing_patch || {}) };
+  for (const field of Object.keys(VERIFICATION_OWNER_FIELDS)) {
+    if (patch[field] === "") patch[field] = null;
+  }
+  const sameValue = (left, right) => JSON.stringify(left ?? "") === JSON.stringify(right ?? "");
   const facts = { ...(current.facts || {}) };
   const seo = { ...(current.seo || {}) };
   const workflow = { ...(current.workflow || {}) };
@@ -224,7 +254,8 @@ function mutationFromEdit(current, edit, actorId, editedAt) {
 
   for (const [field, value] of Object.entries(patch)) {
     if (FACT_FIELDS.has(field)) {
-      if (JSON.stringify(facts[field]) !== JSON.stringify(value)) {
+      const currentValue = field === "listing_status" ? facts[field] || "available" : facts[field];
+      if (!sameValue(currentValue, value)) {
         facts[field] = value;
         changedFields.push(field);
       }
@@ -232,25 +263,38 @@ function mutationFromEdit(current, edit, actorId, editedAt) {
     }
     if (Object.hasOwn(SEO_FIELDS, field)) {
       const target = SEO_FIELDS[field];
-      if (JSON.stringify(seo[target]) !== JSON.stringify(value)) {
+      const currentValue = target === "robots" ? seo[target] || "index,follow" : seo[target];
+      if (!sameValue(currentValue, value)) {
         seo[target] = value;
         changedFields.push(field);
       }
       continue;
     }
-    if (WORKFLOW_FIELDS.has(field) && JSON.stringify(workflow[field]) !== JSON.stringify(value)) {
+    if (WORKFLOW_FIELDS.has(field) && !sameValue(workflow[field], value)) {
       workflow[field] = value;
       changedFields.push(field);
     }
   }
 
-  if (!changedFields.length) return { changedFields: Object.keys(patch), data: null, idempotent: true };
+  if (!changedFields.length) return { changedFields: [], data: null, idempotent: true };
 
   const priceChanged = changedFields.some((field) => field === "price_eur" || field === "price_on_request");
   const locationChanged = changedFields.some((field) => field === "location" || field === "location_precision");
 
   workflow.last_editor = actorId;
   workflow.last_edited_at = editedAt;
+  workflow.last_edit_event = {
+    actor_id: actorId,
+    auth_source: String(principal.source || "admin"),
+    channel: requestChannel === "mcp" ? "mcp" : "admin",
+    changed_fields: [...changedFields].sort(),
+    edited_at: editedAt,
+    source_hash_before: edit.source_hash_before,
+    source_hash_after: edit.source_hash_after,
+    source_locale: edit.source_locale,
+    stale_locales: [...(edit.stale_locales || [])].sort(),
+    stale_translation_count: Number(edit.stale_translation_count || 0),
+  };
   if (priceChanged && !Object.hasOwn(patch, "price_verified_at")) {
     workflow.price_verified_at = null;
     workflow.price_verified_by = null;
@@ -285,7 +329,7 @@ export async function projectListingDraftSeed(seed, { env = process.env, payload
 
 export async function saveListingDraft(
   seed,
-  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString() } = {},
+  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString(), requestChannel = "admin" } = {},
 ) {
   const listingId = listingIdFor(input?.listingId || input?.listing_id);
   const patch = listingDraftPatchFromInput(input);
@@ -307,7 +351,7 @@ export async function saveListingDraft(
     throw unavailableError("Payload draft store is not configured", error);
   }
 
-  return withPayloadTransaction(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
+  return withListingWorkQueueDuplicateRetry(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
     const current = await runtime.findByID({
       collection: "listings",
       id: listingId,
@@ -316,7 +360,7 @@ export async function saveListingDraft(
       req,
     });
     if (!current) throw notFoundError("Known listingId is required");
-    const mutation = mutationFromEdit(current, validated.edit, principal.id, editedAt);
+    const mutation = mutationFromEdit(current, validated.edit, principal, editedAt, requestChannel);
     let staleTranslations = [];
     if (!mutation.idempotent) {
       await runtime.update({
@@ -356,7 +400,7 @@ export async function saveListingDraft(
 
 export async function saveBulkListingStatusDrafts(
   seed,
-  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString() } = {},
+  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString(), requestChannel = "admin" } = {},
 ) {
   const attributed = { ...(input || {}), editor: requiredText(principal?.id, "Authenticated operator id", 64) };
   const batch = createBulkListingStatusEdits(seed, attributed, [], editedAt);
@@ -368,7 +412,7 @@ export async function saveBulkListingStatusDrafts(
     throw unavailableError("Payload draft store is not configured", error);
   }
 
-  return withPayloadTransaction(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
+  return withListingWorkQueueDuplicateRetry(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
     const edits = [];
     let localeCodes = null;
     let translationDocs = null;
@@ -389,7 +433,7 @@ export async function saveBulkListingStatusDrafts(
         req,
       });
       if (!current) throw notFoundError(`Known listingId is required: ${result.listingId}`);
-      const mutation = mutationFromEdit(current, result.edit, principal.id, editedAt);
+      const mutation = mutationFromEdit(current, result.edit, principal, editedAt, requestChannel);
       if (!mutation.idempotent) {
         await runtime.update({
           collection: "listings",

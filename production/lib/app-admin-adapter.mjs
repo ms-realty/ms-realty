@@ -1549,6 +1549,7 @@ async function appendBulkListingStatusChanges(input, config) {
     principal: config.adminPrincipal,
     input: attributed,
     editedAt: config.editedAt,
+    requestChannel: config.requestChannel || "admin",
   });
   const changes = result.edits.filter((edit) => !edit.idempotent);
   for (const edit of changes) {
@@ -1560,7 +1561,7 @@ async function appendBulkListingStatusChanges(input, config) {
         objectId: edit.listing_id,
         metadata: {
           changed_fields: ["listing_status"],
-          source: "admin_payload_draft",
+          source: config.requestChannel === "mcp" ? "mcp_payload_draft" : "admin_payload_draft",
         },
       },
       config,
@@ -3212,6 +3213,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           principal: config.adminPrincipal,
           input,
           editedAt: config.editedAt,
+          requestChannel: config.requestChannel || "admin",
         });
         if (!result.idempotent) {
           recordAudit(
@@ -3222,7 +3224,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
               objectId: result.listingId,
               metadata: {
                 changed_fields: result.changedFields,
-                source: "admin_payload_draft",
+                source: config.requestChannel === "mcp" ? "mcp_payload_draft" : "admin_payload_draft",
               },
             },
             config,

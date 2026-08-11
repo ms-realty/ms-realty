@@ -12,6 +12,9 @@ function fakePayload({ duplicate = false } = {}) {
   return {
     creates,
     payload: {
+      async find() {
+        return { docs: [] };
+      },
       async create(input) {
         creates.push(input);
         if (duplicate) throw Object.assign(new Error("duplicate search outbox event"), { code: "23505" });
@@ -59,6 +62,76 @@ test("listing changes use internal authority for server-owned work items", async
       { collection: "listing_enrichment_tasks", overrideAccess: true },
       { collection: "search_outbox", overrideAccess: true },
     ],
+  );
+});
+
+test("listing changes reuse an existing deterministic enrichment task without attempting a duplicate write", async () => {
+  const creates = [];
+  const finds = [];
+  const req = {
+    payload: {
+      async find(input) {
+        finds.push(input);
+        return { docs: [{ id: "enrichment-MS-CRAWL-0001" }] };
+      },
+      async create(input) {
+        creates.push(input);
+      },
+    },
+  };
+  const doc = { id: "MS-CRAWL-0001", property: "property-MS-CRAWL-0001", updatedAt: "2026-08-10T18:45:00.000Z" };
+
+  await assert.doesNotReject(() => listingSearchOutboxHook({ doc, operation: "update", req }));
+  assert.equal(finds.length, 1);
+  assert.deepEqual(finds[0].where, { id: { equals: "enrichment-MS-CRAWL-0001" } });
+  assert.deepEqual(creates.map((input) => input.collection), ["search_outbox"]);
+});
+
+test("standalone enrichment task creation tolerates a concurrent duplicate", async () => {
+  const req = {
+    payload: {
+      async find() {
+        return { docs: [] };
+      },
+      async create(input) {
+        if (input.collection === "listing_enrichment_tasks") {
+          throw Object.assign(new Error("duplicate enrichment task"), { code: "23505" });
+        }
+      },
+    },
+  };
+
+  await assert.doesNotReject(() =>
+    listingSearchOutboxHook({
+      doc: { id: "MS-CRAWL-0001", property: "property-MS-CRAWL-0001", updatedAt: "2026-08-10T18:45:00.000Z" },
+      operation: "update",
+      req,
+    }),
+  );
+});
+
+test("transactional enrichment duplicates escape so the outer transaction can retry", async () => {
+  const duplicate = Object.assign(new Error("duplicate enrichment task"), { code: "23505" });
+  const req = {
+    transactionID: "tx-1",
+    payload: {
+      async find() {
+        return { docs: [] };
+      },
+      async create(input) {
+        if (input.collection === "listing_enrichment_tasks") throw duplicate;
+      },
+    },
+  };
+
+  await assert.rejects(
+    () =>
+      listingSearchOutboxHook({
+        doc: { id: "MS-CRAWL-0001", property: "property-MS-CRAWL-0001", updatedAt: "2026-08-10T18:45:00.000Z" },
+        operation: "update",
+        req,
+      }),
+    (error) => error === duplicate,
   );
 });
 

@@ -47,6 +47,7 @@ export class MsRealtyContainer extends Container {
     MS_REALTY_WORKSPACE_ID: this.env.MS_REALTY_WORKSPACE_ID ?? "",
     PAYLOAD_SECRET: this.env.PAYLOAD_SECRET ?? "",
     DATABASE_URL: this.env.DATABASE_URL ?? "",
+    MS_REALTY_SEARCH_ENGINE: this.env.MS_REALTY_SEARCH_ENGINE ?? "",
     TYPESENSE_URL: this.env.TYPESENSE_URL ?? "",
     TYPESENSE_API_KEY: this.env.TYPESENSE_API_KEY ?? "",
     TYPESENSE_QUERY_API_KEY: this.env.TYPESENSE_QUERY_API_KEY ?? "",
