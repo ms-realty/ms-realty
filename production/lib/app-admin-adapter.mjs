@@ -559,7 +559,7 @@ function seoExportInput(request, url, body) {
 
 function liveServiceReportInput(request, url, body) {
   const input = parseBody(request, body);
-  return { source: input.source || url.searchParams.get("source"), report: reportJsonInput(input) };
+  return { source: url.searchParams.get("source") || input.source, report: reportJsonInput(input) };
 }
 
 function reportJsonInput(input) {

@@ -515,7 +515,7 @@ function seoExportInput(request, url) {
 function liveServiceReportInput(request, url) {
   const input = parseBody(request);
   return {
-    source: input.source || url.searchParams.get("source"),
+    source: url.searchParams.get("source") || input.source,
     report: reportJsonInput(input),
   };
 }
