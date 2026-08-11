@@ -1,5 +1,11 @@
 {
+  "evidence_scope": "smoke",
   "generated_at": "2026-07-06T00:00:00Z",
+  "source": {
+    "kind": "search_fixture",
+    "authoritative": false,
+    "projected_documents": 167
+  },
   "summary": {
     "engines": 2,
     "targets": {

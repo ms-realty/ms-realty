@@ -1,51 +1,52 @@
 {
-  "generated_at": "2026-07-06T00:00:00Z",
+  "evidence_scope": "live",
+  "generated_at": "2026-08-11T00:00:00.000Z",
   "example": true,
+  "source": {
+    "kind": "payload_postgres",
+    "authoritative": true,
+    "listing_rows": 0,
+    "eligible_translation_rows": 0,
+    "projected_documents": 0,
+    "locale_codes": [],
+    "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
   "summary": {
     "engines": 2,
     "targets": {
       "typesense": "ms_realty_listings",
       "meilisearch": "ms_realty_listings"
     },
-    "documents_per_engine": [167, 167],
-    "total_operations": 4
+    "documents_per_engine": [
+      0,
+      0
+    ],
+    "total_operations": 2
   },
   "engines": [
     {
       "engine": "typesense",
       "collection": "ms_realty_listings",
-      "documents": 167,
+      "documents": 0,
       "operations": [
         {
           "method": "POST",
-          "url": "https://typesense.example.com/collections",
+          "url": "https://ms-realty-typesense.workers.dev/collections",
           "status": 201,
-          "bytes": 1024
-        },
-        {
-          "method": "POST",
-          "url": "https://typesense.example.com/collections/ms_realty_listings/documents/import?action=upsert",
-          "status": 200,
-          "bytes": 8192
+          "bytes": 4929
         }
       ]
     },
     {
       "engine": "meilisearch",
       "index": "ms_realty_listings",
-      "documents": 167,
+      "documents": 0,
       "operations": [
         {
           "method": "PATCH",
-          "url": "https://meili.example.com/indexes/ms_realty_listings/settings",
+          "url": "https://ms-realty-meilisearch.workers.dev/indexes/ms_realty_listings/settings",
           "status": 202,
-          "bytes": 2048
-        },
-        {
-          "method": "POST",
-          "url": "https://meili.example.com/indexes/ms_realty_listings/documents?primaryKey=meili_id",
-          "status": 202,
-          "bytes": 8192
+          "bytes": 1416
         }
       ]
     }

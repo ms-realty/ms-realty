@@ -1,59 +1,60 @@
 {
-  "generated_at": "2026-07-06T00:00:00Z",
+  "evidence_scope": "live",
+  "generated_at": "2026-08-11T00:00:00.000Z",
   "example": true,
+  "source": {
+    "kind": "payload_postgres",
+    "authoritative": true,
+    "listing_rows": 0,
+    "eligible_translation_rows": 0,
+    "projected_documents": 0,
+    "locale_codes": [],
+    "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "expectation": {
+    "projected_documents": 0,
+    "sample_document_id": null
+  },
   "summary": {
     "engines": 2,
     "targets": {
       "typesense": "ms_realty_listings",
       "meilisearch": "ms_realty_listings"
     },
-    "total_hits": 2,
-    "first_hit_ids": ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"]
+    "total_hits": 0,
+    "first_hit_ids": [
+      null,
+      null
+    ]
   },
   "engines": [
     {
       "engine": "typesense",
-      "service_url": "https://typesense.example.com",
+      "service_url": "https://ms-realty-typesense.workers.dev/",
       "collection": "ms_realty_listings",
-      "query": "Sandanski",
-      "filter": "translation_indexable:=true && locale:=bg && source_listing_id:=MS-CRAWL-0001",
+      "query": "*",
+      "filter": "publication_state:=published && (listing_status:=available || listing_status:=reserved) && translation_indexable:=true && translation_human_approved:=true && locale_indexable:=true && locale:=`bg`",
       "operation": {
         "method": "GET",
-        "url": "https://typesense.example.com/collections/ms_realty_listings/documents/search?q=Sandanski&query_by=title%2Cdescription%2Csearch_text%2Clocation&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg+%26%26+source_listing_id%3A%3DMS-CRAWL-0001&per_page=5",
+        "url": "https://ms-realty-typesense.workers.dev/collections/ms_realty_listings/documents/search?q=*&query_by=title%2Cdescription%2Csearch_text%2Clocation_label%2Clisting_reference&filter_by=publication_state%3A%3Dpublished+%26%26+%28listing_status%3A%3Davailable+%7C%7C+listing_status%3A%3Dreserved%29+%26%26+translation_indexable%3A%3Dtrue+%26%26+translation_human_approved%3A%3Dtrue+%26%26+locale_indexable%3A%3Dtrue+%26%26+locale%3A%3D%60bg%60&per_page=5",
         "status": 200
       },
-      "total": 1,
-      "hits": [
-        {
-          "id": "MS-CRAWL-0001:bg",
-          "source_listing_id": "MS-CRAWL-0001",
-          "locale": "bg",
-          "locale_path": "/bg/imoti/MS-CRAWL-0001",
-          "title": "Reviewed Sandanski listing"
-        }
-      ]
+      "total": 0,
+      "hits": []
     },
     {
       "engine": "meilisearch",
-      "service_url": "https://meili.example.com",
+      "service_url": "https://ms-realty-meilisearch.workers.dev/",
       "index": "ms_realty_listings",
-      "query": "Sandanski",
-      "filter": "translation_indexable = true AND locale = bg AND source_listing_id = \"MS-CRAWL-0001\"",
+      "query": "*",
+      "filter": "publication_state = \"published\" AND (listing_status = \"available\" OR listing_status = \"reserved\") AND translation_indexable = true AND translation_human_approved = true AND locale_indexable = true AND locale = \"bg\"",
       "operation": {
         "method": "POST",
-        "url": "https://meili.example.com/indexes/ms_realty_listings/search",
+        "url": "https://ms-realty-meilisearch.workers.dev/indexes/ms_realty_listings/search",
         "status": 200
       },
-      "total": 1,
-      "hits": [
-        {
-          "id": "MS-CRAWL-0001:bg",
-          "source_listing_id": "MS-CRAWL-0001",
-          "locale": "bg",
-          "locale_path": "/bg/imoti/MS-CRAWL-0001",
-          "title": "Reviewed Sandanski listing"
-        }
-      ]
+      "total": 0,
+      "hits": []
     }
   ]
 }

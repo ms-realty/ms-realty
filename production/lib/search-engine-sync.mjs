@@ -403,6 +403,47 @@ function documentsToJsonl(documents) {
   return documents.length ? `${documents.map((document) => JSON.stringify(document)).join("\n")}\n` : "";
 }
 
+function liveProjection(projection) {
+  if (projection === null || projection === undefined) return null;
+  if (!plainObject(projection) || projection.schema_version !== 1 || !Array.isArray(projection.documents)) {
+    throw new Error("Live search sync requires an approved search projection");
+  }
+  const source = projection.source;
+  if (
+    !plainObject(source) ||
+    source.kind !== "payload_postgres" ||
+    source.authoritative !== true ||
+    source.projected_documents !== projection.documents.length ||
+    !/^[a-f0-9]{64}$/.test(String(source.digest || ""))
+  ) {
+    throw new Error("Live search sync requires authoritative Payload projection evidence");
+  }
+  return projection;
+}
+
+function fixtureSource(projectedDocuments) {
+  return { kind: "search_fixture", authoritative: false, projected_documents: projectedDocuments };
+}
+
+function assertSearchReportSource(report, label) {
+  if (!["live", "smoke"].includes(report.evidence_scope)) throw new Error(`${label} must declare live or smoke evidence scope`);
+  if (!plainObject(report.source) || !Number.isInteger(report.source.projected_documents) || report.source.projected_documents < 0) {
+    throw new Error(`${label} must include projected document source evidence`);
+  }
+  if (report.evidence_scope === "live") {
+    if (
+      report.source.kind !== "payload_postgres" ||
+      report.source.authoritative !== true ||
+      !/^[a-f0-9]{64}$/.test(String(report.source.digest || ""))
+    ) {
+      throw new Error(`${label} live evidence must use an authoritative Payload projection`);
+    }
+  } else if (report.source.kind !== "search_fixture" || report.source.authoritative !== false) {
+    throw new Error(`${label} smoke evidence must identify its search fixture`);
+  }
+  return report.source;
+}
+
 export function writeApprovedSearchProjection(projection, dataDir) {
   if (!plainObject(projection) || projection.schema_version !== 1 || !Array.isArray(projection.documents)) {
     throw new Error("Approved search projection must use schema version 1");
@@ -999,6 +1040,7 @@ function assertSearchSyncOperations(engine, target) {
       throw new Error("typesense sync report must include collection create operation evidence");
     }
     if (
+      engine.documents > 0 &&
       !hasSyncOperation(engine, {
         method: "POST",
         path: `/collections/${encoded}/documents/import`,
@@ -1015,6 +1057,7 @@ function assertSearchSyncOperations(engine, target) {
       throw new Error("meilisearch sync report must include settings operation evidence");
     }
     if (
+      engine.documents > 0 &&
       !hasSyncOperation(engine, {
         method: "POST",
         path: `/indexes/${encoded}/documents`,
@@ -1088,7 +1131,9 @@ export async function syncTypesense({
       [200, 201, 409],
       { allowPrivateNetwork, lookupImpl, timeoutMs },
     ),
-    await checkedFetch(
+  ];
+  if (body) {
+    operations.push(await checkedFetch(
       fetchImpl,
       baseUrl,
       `/collections/${encodeURIComponent(collectionName)}/documents/import?action=upsert`,
@@ -1099,8 +1144,8 @@ export async function syncTypesense({
       },
       [200, 201, 202],
       { allowPrivateNetwork, lookupImpl, timeoutMs },
-    ),
-  ];
+    ));
+  }
 
   return {
     engine: "typesense",
@@ -1144,7 +1189,9 @@ export async function syncMeilisearch({
       [200, 201, 202],
       { allowPrivateNetwork, lookupImpl, timeoutMs },
     ),
-    await checkedFetch(
+  ];
+  if (body.trim()) {
+    operations.push(await checkedFetch(
       fetchImpl,
       baseUrl,
       `/indexes/${encodeURIComponent(indexName)}/documents?primaryKey=meili_id`,
@@ -1155,8 +1202,8 @@ export async function syncMeilisearch({
       },
       [200, 201, 202],
       { allowPrivateNetwork, lookupImpl, timeoutMs },
-    ),
-  ];
+    ));
+  }
 
   return {
     engine: "meilisearch",
@@ -1169,16 +1216,22 @@ export async function syncMeilisearch({
 export async function runSearchEngineSync({
   typesense = {},
   meilisearch = {},
+  projection = null,
   fetchImpl = globalThis.fetch,
   generatedAt = "2026-07-06T00:00:00Z",
 } = {}) {
+  const approved = liveProjection(projection);
+  const documents = approved?.documents ?? null;
   const engines = [
-    await syncTypesense({ ...typesense, fetchImpl }),
-    await syncMeilisearch({ ...meilisearch, fetchImpl }),
+    await syncTypesense({ ...typesense, documents, fetchImpl }),
+    await syncMeilisearch({ ...meilisearch, documents, fetchImpl }),
   ];
+  const projectedDocuments = engines[0].documents;
 
   return {
+    evidence_scope: approved ? "live" : "smoke",
     generated_at: generatedAt,
+    source: approved?.source || fixtureSource(projectedDocuments),
     summary: {
       engines: engines.length,
       targets: searchEngineTargets(engines),
@@ -1194,7 +1247,11 @@ export function assertSearchEngineSyncReport(report) {
     throw new Error("Search sync report must include valid generated_at");
   }
   if (report.summary.engines !== 2) throw new Error("Search sync must cover Typesense and Meilisearch");
-  if (report.summary.total_operations !== 4) throw new Error("Search sync must perform four engine operations");
+  const source = assertSearchReportSource(report, "Search sync");
+  const expectedOperations = source.projected_documents === 0 ? 2 : 4;
+  if (report.summary.total_operations !== expectedOperations) {
+    throw new Error(expectedOperations === 4 ? "Search sync must perform four engine operations" : "Zero-document search sync must perform two configuration operations");
+  }
   assertSearchEngines(report, "Search sync");
   if (JSON.stringify(report.summary.documents_per_engine) !== JSON.stringify(report.engines.map((engine) => engine.documents))) {
     throw new Error("Search sync summary documents must match engine rows");
@@ -1204,10 +1261,12 @@ export function assertSearchEngineSyncReport(report) {
   for (const engine of report.engines) {
     const { target } = assertSearchEngineTarget(engine, `${engine.engine} sync report`);
     if (report.summary.targets?.[engine.engine] !== target) throw new Error("Search sync summary targets must match engine rows");
-    if (!operationUrlsIncludeTarget(engine, target)) {
+    if (engine.documents > 0 && !operationUrlsIncludeTarget(engine, target)) {
       throw new Error(`${engine.engine} sync report must include operation URL evidence for its target`);
     }
-    if (engine.documents !== 167) throw new Error(`${engine.engine} must sync 167 locale-scoped documents`);
+    if (engine.documents !== source.projected_documents) {
+      throw new Error(`${engine.engine} document count must match its current search projection`);
+    }
     for (const operation of engine.operations || []) {
       assertReportUrl(operation.url, `${engine.engine} sync operation`);
       if (!["PATCH", "POST"].includes(operation.method)) throw new Error(`${engine.engine} sync operation method is invalid`);
@@ -1659,15 +1718,48 @@ export async function queryPublicSearch({
 export async function runSearchEngineQuerySmoke({
   typesense = {},
   meilisearch = {},
+  projection = null,
   fetchImpl = globalThis.fetch,
   generatedAt = "2026-07-06T00:00:00Z",
 } = {}) {
+  const approved = liveProjection(projection);
+  const documents = approved?.documents ?? null;
+  const sample = approved
+    ? documents[0] || null
+    : { id: "MS-CRAWL-0001:bg", source_listing_id: "MS-CRAWL-0001", listing_reference: "MS-CRAWL-0001", locale: "bg" };
+  const localeCodes = [sample?.locale || "bg"];
+  const typesenseFilter = [
+    typesensePublicFilter(localeCodes),
+    ...(sample ? [`source_listing_id:=${typesenseLiteral(sample.source_listing_id)}`] : []),
+  ].join(" && ");
+  const meilisearchFilter = [
+    meilisearchPublicFilter(localeCodes),
+    ...(sample ? [`source_listing_id = ${JSON.stringify(sample.source_listing_id)}`] : []),
+  ].join(" AND ");
   const engines = [
-    await queryTypesense({ ...typesense, fetchImpl }),
-    await queryMeilisearch({ ...meilisearch, fetchImpl }),
+    await queryTypesense({
+      ...typesense,
+      q: sample?.listing_reference || "*",
+      filterBy: typesenseFilter,
+      exactReference: sample?.listing_reference || null,
+      fetchImpl,
+    }),
+    await queryMeilisearch({
+      ...meilisearch,
+      q: sample?.listing_reference || "*",
+      filter: meilisearchFilter,
+      fetchImpl,
+    }),
   ];
+  const projectedDocuments = approved ? documents.length : 167;
   return {
+    evidence_scope: approved ? "live" : "smoke",
     generated_at: generatedAt,
+    source: approved?.source || fixtureSource(projectedDocuments),
+    expectation: {
+      projected_documents: projectedDocuments,
+      sample_document_id: sample?.id || null,
+    },
     summary: {
       engines: engines.length,
       targets: searchEngineTargets(engines),
@@ -1683,6 +1775,14 @@ export function assertSearchEngineQueryReport(report) {
     throw new Error("Search query smoke report must include valid generated_at");
   }
   if (report.summary.engines !== 2) throw new Error("Search query smoke must cover Typesense and Meilisearch");
+  const source = assertSearchReportSource(report, "Search query smoke");
+  if (
+    !plainObject(report.expectation) ||
+    report.expectation.projected_documents !== source.projected_documents ||
+    (report.expectation.sample_document_id !== null && !String(report.expectation.sample_document_id || "").trim())
+  ) {
+    throw new Error("Search query smoke must include current projection expectations");
+  }
   assertSearchEngines(report, "Search query smoke");
   const totalHits = report.engines.reduce((sum, engine) => sum + engine.total, 0);
   if (report.summary.total_hits !== totalHits) throw new Error("Search query summary hits must match engine rows");
@@ -1696,17 +1796,38 @@ export function assertSearchEngineQueryReport(report) {
     assertSearchQueryOperation(engine, target);
     if (!String(engine.query || "").trim()) throw new Error(`${engine.engine} query report must include query evidence`);
     if (
+      !String(engine.filter || "").includes("publication_state") ||
+      !String(engine.filter || "").includes("listing_status") ||
       !String(engine.filter || "").includes("translation_indexable") ||
-      !String(engine.filter || "").includes("locale") ||
-      !String(engine.filter || "").includes("source_listing_id")
+      !String(engine.filter || "").includes("translation_human_approved") ||
+      !String(engine.filter || "").includes("locale_indexable") ||
+      !String(engine.filter || "").includes("locale")
     ) {
       throw new Error(`${engine.engine} query report must prove reviewed locale filtering`);
     }
+    if (source.projected_documents === 0) {
+      if (engine.total !== 0 || engine.hits.length !== 0) throw new Error(`${engine.engine} query must prove zero approved documents`);
+      continue;
+    }
     if (engine.total < 1 || !engine.hits.length) throw new Error(`${engine.engine} query must return search hits`);
-    if (!engine.hits.some((hit) => hit.id === "MS-CRAWL-0001:bg")) {
-      throw new Error(`${engine.engine} query must find the reviewed BG listing document`);
+    if (!engine.hits.some((hit) => hit.id === report.expectation.sample_document_id)) {
+      throw new Error(`${engine.engine} query must find the current projection sample document`);
     }
     if (engine.hits.some((hit) => hit.locale === "fr")) throw new Error(`${engine.engine} query must not return draft French docs`);
+  }
+  return true;
+}
+
+export function assertSearchEngineEvidenceConsistency(syncReport, queryReport) {
+  assertSearchEngineSyncReport(syncReport);
+  assertSearchEngineQueryReport(queryReport);
+  if (
+    syncReport.evidence_scope !== queryReport.evidence_scope ||
+    syncReport.source.kind !== queryReport.source.kind ||
+    syncReport.source.projected_documents !== queryReport.source.projected_documents ||
+    (syncReport.evidence_scope === "live" && syncReport.source.digest !== queryReport.source.digest)
+  ) {
+    throw new Error("Search sync and query evidence must use the same Payload projection");
   }
   return true;
 }

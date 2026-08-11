@@ -1052,7 +1052,7 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
   assert.equal(calls[1].options.method, "POST");
   assert.equal(
     JSON.parse(calls[1].options.body).filter,
-    'translation_indexable = true AND locale = bg AND source_listing_id = "MS-CRAWL-0001"',
+    'publication_state = "published" AND (listing_status = "available" OR listing_status = "reserved") AND translation_indexable = true AND translation_human_approved = true AND locale_indexable = true AND locale = "bg" AND source_listing_id = "MS-CRAWL-0001"',
   );
   assert.equal(report.engines.find((engine) => engine.engine === "typesense").operation.method, "GET");
   assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").operation.url, "https://meili.ms-realty.bg/indexes/ms_realty_listings/search");
@@ -1157,11 +1157,19 @@ test("generated search query smoke report is valid when present", () => {
   assert.equal(assertSearchEngineQueryReport(JSON.parse(fs.readFileSync(file, "utf8"))), true);
 });
 
-test("live search engine CLIs fail closed when provisioning env is missing", () => {
-  const env = { ...process.env, TYPESENSE_URL: "", TYPESENSE_API_KEY: "", MEILI_URL: "", MEILI_API_KEY: "" };
+test("live search engine CLIs fail closed without the authoritative Payload runtime", () => {
+  const env = {
+    ...process.env,
+    PAYLOAD_SECRET: "",
+    DATABASE_URL: "",
+    TYPESENSE_URL: "",
+    TYPESENSE_API_KEY: "",
+    MEILI_URL: "",
+    MEILI_API_KEY: "",
+  };
   const cases = [
-    ["run-search-engine-sync.mjs", /SEARCH ENGINE SYNC FAILED: TYPESENSE_URL is required/],
-    ["run-search-engine-query.mjs", /SEARCH ENGINE QUERY FAILED: TYPESENSE_URL is required/],
+    ["run-search-engine-sync.mjs", /SEARCH ENGINE SYNC FAILED: Payload runtime is not configured/],
+    ["run-search-engine-query.mjs", /SEARCH ENGINE QUERY FAILED: Payload runtime is not configured/],
   ];
 
   for (const [script, message] of cases) {
@@ -1176,7 +1184,7 @@ test("live search engine CLIs fail closed when provisioning env is missing", () 
   }
 });
 
-test("live search engine CLIs write reports to configured paths", async () => {
+test("live search engine CLIs do not sync fixtures when only search services are configured", async () => {
   await withSearchServer(async (baseUrl) => {
     const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-search-cli-reports-`);
     const syncReportPath = `${dir}/search-engine-sync-report.json`;
@@ -1187,6 +1195,8 @@ test("live search engine CLIs write reports to configured paths", async () => {
       TYPESENSE_API_KEY: "typesense-test",
       MEILI_URL: baseUrl,
       MEILI_API_KEY: "meili-test",
+      PAYLOAD_SECRET: "",
+      DATABASE_URL: "",
       MS_REALTY_SEARCH_ALLOW_PRIVATE_SERVICE_NETWORK: "true",
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: syncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: queryReportPath,
@@ -1195,9 +1205,11 @@ test("live search engine CLIs write reports to configured paths", async () => {
     const sync = await runScript("run-search-engine-sync.mjs", env);
     const query = await runScript("run-search-engine-query.mjs", env);
 
-    assert.equal(sync.status, 0, sync.stderr);
-    assert.equal(query.status, 0, query.stderr);
-    assert.equal(assertSearchEngineSyncReport(JSON.parse(fs.readFileSync(syncReportPath, "utf8"))), true);
-    assert.equal(assertSearchEngineQueryReport(JSON.parse(fs.readFileSync(queryReportPath, "utf8"))), true);
+    assert.notEqual(sync.status, 0);
+    assert.notEqual(query.status, 0);
+    assert.match(sync.stderr, /Payload runtime is not configured/);
+    assert.match(query.stderr, /Payload runtime is not configured/);
+    assert.equal(fs.existsSync(syncReportPath), false);
+    assert.equal(fs.existsSync(queryReportPath), false);
   });
 });

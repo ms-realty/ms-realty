@@ -25,6 +25,7 @@ function deployableRedirectsFromEnv(env) {
 
 export function launchReadinessInputsFromEnv(env = process.env) {
   const inputs = {};
+  const now = env.MS_REALTY_GENERATED_AT || Date.now();
   if (env.MS_REALTY_REDIRECT_APPROVALS_PATH || env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH) {
     inputs.routeMap = routeMapInput();
     inputs.deployableRedirects = deployableRedirectsFromEnv(env);
@@ -42,19 +43,20 @@ export function launchReadinessInputsFromEnv(env = process.env) {
       syncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined,
       queryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH || undefined,
       hermesReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH || undefined,
+      now,
     });
   }
   if (env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH) {
     inputs.liveServiceProvisioning = liveServiceProvisioningState(env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH);
   }
   if (env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH) {
-    inputs.payloadRuntime = payloadRuntimeState(env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH);
+    inputs.payloadRuntime = payloadRuntimeState(env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH, { now });
   }
   if (env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH) {
-    inputs.productionRecovery = productionRecoveryState(env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH);
+    inputs.productionRecovery = productionRecoveryState(env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH, { now });
   }
   if (env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH) {
-    inputs.monitoringRollback = monitoringRollbackState(env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH);
+    inputs.monitoringRollback = monitoringRollbackState(env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH, { now });
   }
   return inputs;
 }

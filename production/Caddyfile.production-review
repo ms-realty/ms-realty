@@ -21,10 +21,91 @@
 
 {$MS_REALTY_REVIEW_HOST} {
 	header X-Robots-Tag "noindex, nofollow, noarchive"
-	basic_auth {
-		{$MS_REALTY_REVIEW_USER} {$MS_REALTY_REVIEW_PASSWORD_HASH}
+	route {
+		@typesense_health {
+			method GET
+			path /_search/typesense/health
+			header X-MS-Realty-Search-Origin-Token {$MS_REALTY_SEARCH_ORIGIN_TOKEN}
+		}
+		handle @typesense_health {
+			uri strip_prefix /_search/typesense
+			reverse_proxy typesense:8108 {
+				header_up X-TYPESENSE-API-KEY "{$TYPESENSE_API_KEY}"
+			}
+		}
+
+		@typesense_query {
+			method GET
+			path /_search/typesense/collections/ms_realty_listings/documents/search
+			header X-MS-Realty-Search-Origin-Token {$MS_REALTY_SEARCH_ORIGIN_TOKEN}
+		}
+		handle @typesense_query {
+			uri strip_prefix /_search/typesense
+			reverse_proxy typesense:8108 {
+				header_up X-TYPESENSE-API-KEY "{$TYPESENSE_API_KEY}"
+			}
+		}
+
+		@typesense_sync {
+			method POST
+			path /_search/typesense/collections /_search/typesense/collections/ms_realty_listings/documents/import
+			header X-MS-Realty-Search-Origin-Token {$MS_REALTY_SEARCH_ORIGIN_TOKEN}
+		}
+		handle @typesense_sync {
+			uri strip_prefix /_search/typesense
+			reverse_proxy typesense:8108 {
+				header_up X-TYPESENSE-API-KEY "{$TYPESENSE_API_KEY}"
+			}
+		}
+
+		@meilisearch_health {
+			method GET
+			path /_search/meilisearch/health
+			header X-MS-Realty-Search-Origin-Token {$MS_REALTY_SEARCH_ORIGIN_TOKEN}
+		}
+		handle @meilisearch_health {
+			uri strip_prefix /_search/meilisearch
+			reverse_proxy meilisearch:7700 {
+				header_up Authorization "Bearer {$MEILI_MASTER_KEY}"
+			}
+		}
+
+		@meilisearch_query {
+			method POST
+			path /_search/meilisearch/indexes/ms_realty_listings/search
+			header X-MS-Realty-Search-Origin-Token {$MS_REALTY_SEARCH_ORIGIN_TOKEN}
+		}
+		handle @meilisearch_query {
+			uri strip_prefix /_search/meilisearch
+			reverse_proxy meilisearch:7700 {
+				header_up Authorization "Bearer {$MEILI_MASTER_KEY}"
+			}
+		}
+
+		@meilisearch_sync {
+			method PATCH POST
+			path /_search/meilisearch/indexes/ms_realty_listings/settings /_search/meilisearch/indexes/ms_realty_listings/documents
+			header X-MS-Realty-Search-Origin-Token {$MS_REALTY_SEARCH_ORIGIN_TOKEN}
+		}
+		handle @meilisearch_sync {
+			uri strip_prefix /_search/meilisearch
+			reverse_proxy meilisearch:7700 {
+				header_up Authorization "Bearer {$MEILI_MASTER_KEY}"
+			}
+		}
+
+		@search path /_search/*
+		respond @search "Not found" 404
+
+		basic_auth {
+			{$MS_REALTY_REVIEW_USER} {$MS_REALTY_REVIEW_PASSWORD_HASH}
+		}
+		@review_root path /
+		redir @review_root /admin/migration/review?locale=bg 302
+		@operator path /admin/* /api/admin/*
+		reverse_proxy @operator app:3000 {
+			header_up Authorization "Bearer {$MS_REALTY_ADMIN_TOKEN}"
+		}
+		reverse_proxy app:3000
 	}
-	@review_root path /
-	redir @review_root /admin/migration/review?locale=bg 302
-	import app_proxy
 }
