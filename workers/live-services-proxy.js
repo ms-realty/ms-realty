@@ -3,24 +3,22 @@ import { secretMatches } from "./durable-case-authority.mjs";
 const MAX_QUERY_BODY_BYTES = 64 * 1024;
 const MAX_SYNC_BODY_BYTES = 16 * 1024 * 1024;
 const TARGET_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
-const TYPESENSE_PUBLIC_FILTERS = [
+const TYPESENSE_PUBLIC_FILTER_PREFIX = [
   "publication_state:=published",
-  "listing_status:=available",
-  "listing_status:=reserved",
+  "(listing_status:=available || listing_status:=reserved)",
   "translation_indexable:=true",
   "translation_human_approved:=true",
   "locale_indexable:=true",
-  "locale:=",
-];
-const MEILI_PUBLIC_FILTERS = [
+].join(" && ") + " && ";
+const MEILI_PUBLIC_FILTER_PREFIX = [
   'publication_state = "published"',
-  'listing_status = "available"',
-  'listing_status = "reserved"',
+  '(listing_status = "available" OR listing_status = "reserved")',
   "translation_indexable = true",
   "translation_human_approved = true",
   "locale_indexable = true",
-  "locale = ",
-];
+].join(" AND ") + " AND ";
+const TYPESENSE_LOCALE_FILTER = /^(?:locale:=`[A-Za-z0-9-]{1,32}`|\(locale:=`[A-Za-z0-9-]{1,32}`(?: \|\| locale:=`[A-Za-z0-9-]{1,32}`)+\))(?:$| && )/;
+const MEILI_LOCALE_FILTER = /^(?:locale = "[A-Za-z0-9-]{1,32}"|\(locale = "[A-Za-z0-9-]{1,32}"(?: OR locale = "[A-Za-z0-9-]{1,32}")+\))(?:$| AND )/;
 
 function response(status, message) {
   return new Response(message, {
@@ -71,9 +69,37 @@ async function boundedBody(request, maxBytes) {
   return body;
 }
 
-function mandatoryFilter(value, required) {
-  const filter = String(value || "");
-  return filter.length <= 8_192 && required.every((clause) => filter.includes(clause));
+function validFilterSyntax(filter) {
+  let depth = 0;
+  let quote = null;
+  let escaped = false;
+  for (let index = 0; index < filter.length; index += 1) {
+    const character = filter[index];
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (["\"", "'", "`"].includes(character)) quote = character;
+    else if (character === "(") depth += 1;
+    else if (character === ")") {
+      depth -= 1;
+      if (depth < 0) return false;
+    } else if (depth === 0 && filter.startsWith("||", index)) return false;
+    else if (
+      depth === 0 &&
+      filter.slice(index, index + 2).toUpperCase() === "OR" &&
+      !/[A-Za-z0-9_]/.test(filter[index - 1] || "") &&
+      !/[A-Za-z0-9_]/.test(filter[index + 2] || "")
+    ) return false;
+  }
+  return depth === 0 && quote === null;
+}
+
+function mandatoryFilter(value, prefix, localePattern) {
+  if (typeof value !== "string" || value.length > 8_192 || !value.startsWith(prefix)) return false;
+  return localePattern.test(value.slice(prefix.length)) && validFilterSyntax(value);
 }
 
 async function typesenseRoute(request, url, target) {
@@ -82,7 +108,8 @@ async function typesenseRoute(request, url, target) {
     if (
       !url.searchParams.get("q") ||
       !url.searchParams.get("query_by") ||
-      !mandatoryFilter(url.searchParams.get("filter_by"), TYPESENSE_PUBLIC_FILTERS) ||
+      url.searchParams.getAll("filter_by").length !== 1 ||
+      !mandatoryFilter(url.searchParams.get("filter_by"), TYPESENSE_PUBLIC_FILTER_PREFIX, TYPESENSE_LOCALE_FILTER) ||
       Number(url.searchParams.get("per_page") || 0) < 1 ||
       Number(url.searchParams.get("per_page")) > 250
     ) {
@@ -121,7 +148,7 @@ async function meilisearchRoute(request, url, target) {
     } catch {
       throw new Error("search query is invalid");
     }
-    if (!mandatoryFilter(query?.filter, MEILI_PUBLIC_FILTERS) || !Number.isInteger(query?.limit) || query.limit < 1 || query.limit > 250) {
+    if (!mandatoryFilter(query?.filter, MEILI_PUBLIC_FILTER_PREFIX, MEILI_LOCALE_FILTER) || !Number.isInteger(query?.limit) || query.limit < 1 || query.limit > 250) {
       throw new Error("public search filter is invalid");
     }
     return { access: "query", body };

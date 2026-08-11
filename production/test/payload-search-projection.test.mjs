@@ -31,11 +31,13 @@ function approvedListing(overrides = {}) {
       id: "property-1",
       property_family: "apartment",
       property_subtype: "two-bedroom",
-      facts: { municipality: "Sandanski", country_code: "BG", bedrooms_count: 2 },
+      facts: { municipality: "Sandanski", country_code: "BG", bedrooms_count: 2, floor_number: 3, total_floors: 6 },
       fact_verification: [
         { field: "municipality", state: "broker_verified" },
         { field: "country_code", state: "broker_verified" },
         { field: "bedrooms_count", state: "broker_verified" },
+        { field: "floor_number", state: "broker_verified" },
+        { field: "total_floors", state: "broker_verified" },
       ],
     },
     translations: [
@@ -103,6 +105,34 @@ test("Payload projection treats zero approved listings as a valid authoritative 
       { "workflow.publish_approved": { equals: true } },
     ],
   });
+});
+
+test("Payload projection preserves property bedroom and floor facts until listing values override them", async () => {
+  const baseFacts = approvedListing().facts;
+  const payload = {
+    async find() {
+      return {
+        docs: [
+          approvedListing({ facts: { ...baseFacts, bedrooms: null, floor: null, total_floors: null } }),
+          approvedListing({
+            id: "MS-CURRENT-0002",
+            facts: { ...baseFacts, bedrooms: 4, floor: 5, total_floors: 9 },
+            routing: { target_path: "/bg/imoti/MS-CURRENT-0002", target_locale: "bg" },
+          }),
+        ],
+        page: 1,
+        totalPages: 1,
+      };
+    },
+  };
+  const projection = await buildPayloadApprovedSearchProjection(payload);
+  assert.deepEqual(
+    projection.documents.map(({ bedrooms_count, floor_number, total_floors }) => ({ bedrooms_count, floor_number, total_floors })),
+    [
+      { bedrooms_count: 2, floor_number: 3, total_floors: 6 },
+      { bedrooms_count: 4, floor_number: 5, total_floors: 9 },
+    ],
+  );
 });
 
 test("Payload projection paginates current database rows without reading fixture files", async () => {

@@ -75,9 +75,9 @@ function rowFor(listing, translation) {
       price_amount: listingFacts.price_eur,
       price_currency: listingFacts.price_eur === null || listingFacts.price_eur === undefined ? undefined : "EUR",
       price_on_request: listingFacts.price_on_request,
-      bedrooms_count: listingFacts.bedrooms,
-      floor_number: listingFacts.floor,
-      total_floors: listingFacts.total_floors,
+      bedrooms_count: listingFacts.bedrooms ?? propertyFacts.bedrooms_count,
+      floor_number: listingFacts.floor ?? propertyFacts.floor_number,
+      total_floors: listingFacts.total_floors ?? propertyFacts.total_floors,
     },
     approval: {
       publication_state: "published",

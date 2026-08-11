@@ -34,7 +34,8 @@ test("live search proxy forwards only mandatory-filter Typesense queries to the 
     "translation_indexable:=true",
     "translation_human_approved:=true",
     "locale_indexable:=true",
-    "locale:=`bg`",
+    "(locale:=`bg` || locale:=`en`)",
+    "(property_family:=`apartment` || property_family:=`house`)",
   ].join(" && ");
   const params = new URLSearchParams({ q: "*", query_by: "title,search_text", filter_by: filter, per_page: "25" });
   const response = await worker.fetch(request(`/collections/ms_realty_listings/documents/search?${params}`), ENV, {
@@ -121,6 +122,54 @@ test("live search proxy rejects bypass filters, delete/key APIs, encoded paths, 
   assert.equal(redirected.status, 502);
 });
 
+test("live search proxy rejects top-level disjunctions that broaden public filters", async () => {
+  const calls = [];
+  const fetchImpl = async () => {
+    calls.push(true);
+    return upstreamResponse();
+  };
+  const typesenseFilter = [
+    "publication_state:=published",
+    "(listing_status:=available || listing_status:=reserved)",
+    "translation_indexable:=true",
+    "translation_human_approved:=true",
+    "locale_indexable:=true",
+    "locale:=`bg`",
+  ].join(" && ") + " || publication_state:=draft";
+  const typesenseParams = new URLSearchParams({
+    q: "*",
+    query_by: "title",
+    filter_by: typesenseFilter,
+    per_page: "25",
+  });
+  assert.equal(
+    (await worker.fetch(request(`/collections/ms_realty_listings/documents/search?${typesenseParams}`), ENV, { fetchImpl })).status,
+    400,
+  );
+
+  const meilisearchFilter = [
+    'publication_state = "published"',
+    '(listing_status = "available" OR listing_status = "reserved")',
+    "translation_indexable = true",
+    "translation_human_approved = true",
+    "locale_indexable = true",
+    'locale = "bg"',
+  ].join(" AND ") + ' OR publication_state = "draft"';
+  assert.equal(
+    (await worker.fetch(
+      new Request("https://ms-realty-meilisearch.workers.dev/indexes/ms_realty_listings/search", {
+        method: "POST",
+        headers: { authorization: `Bearer ${ENV.MS_REALTY_SEARCH_QUERY_PROXY_KEY}`, "content-type": "application/json" },
+        body: JSON.stringify({ q: "*", filter: meilisearchFilter, limit: 25 }),
+      }),
+      { ...ENV, MS_REALTY_SEARCH_ENGINE: "meilisearch" },
+      { fetchImpl },
+    )).status,
+    400,
+  );
+  assert.equal(calls.length, 0);
+});
+
 test("live search proxy validates Meilisearch public filters and strips bearer credentials", async () => {
   const calls = [];
   const env = { ...ENV, MS_REALTY_SEARCH_ENGINE: "meilisearch" };
@@ -132,7 +181,8 @@ test("live search proxy validates Meilisearch public filters and strips bearer c
       "translation_indexable = true",
       "translation_human_approved = true",
       "locale_indexable = true",
-      'locale = "bg"',
+      '(locale = "bg" OR locale = "en")',
+      '(property_family = "apartment" OR property_family = "house")',
     ].join(" AND "),
     limit: 25,
   });
