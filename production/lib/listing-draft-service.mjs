@@ -218,6 +218,10 @@ async function markListingTranslationsStale(
 function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "admin") {
   const actorId = principal.id;
   const patch = { ...(edit.patch || {}), ...(edit.listing_patch || {}) };
+  for (const field of Object.keys(VERIFICATION_OWNER_FIELDS)) {
+    if (patch[field] === "") patch[field] = null;
+  }
+  const sameValue = (left, right) => JSON.stringify(left ?? "") === JSON.stringify(right ?? "");
   const facts = { ...(current.facts || {}) };
   const seo = { ...(current.seo || {}) };
   const workflow = { ...(current.workflow || {}) };
@@ -225,7 +229,8 @@ function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "
 
   for (const [field, value] of Object.entries(patch)) {
     if (FACT_FIELDS.has(field)) {
-      if (JSON.stringify(facts[field]) !== JSON.stringify(value)) {
+      const currentValue = field === "listing_status" ? facts[field] || "available" : facts[field];
+      if (!sameValue(currentValue, value)) {
         facts[field] = value;
         changedFields.push(field);
       }
@@ -233,19 +238,20 @@ function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "
     }
     if (Object.hasOwn(SEO_FIELDS, field)) {
       const target = SEO_FIELDS[field];
-      if (JSON.stringify(seo[target]) !== JSON.stringify(value)) {
+      const currentValue = target === "robots" ? seo[target] || "index,follow" : seo[target];
+      if (!sameValue(currentValue, value)) {
         seo[target] = value;
         changedFields.push(field);
       }
       continue;
     }
-    if (WORKFLOW_FIELDS.has(field) && JSON.stringify(workflow[field]) !== JSON.stringify(value)) {
+    if (WORKFLOW_FIELDS.has(field) && !sameValue(workflow[field], value)) {
       workflow[field] = value;
       changedFields.push(field);
     }
   }
 
-  if (!changedFields.length) return { changedFields: Object.keys(patch), data: null, idempotent: true };
+  if (!changedFields.length) return { changedFields: [], data: null, idempotent: true };
 
   const priceChanged = changedFields.some((field) => field === "price_eur" || field === "price_on_request");
   const locationChanged = changedFields.some((field) => field === "location" || field === "location_precision");

@@ -144,16 +144,17 @@ export async function ensureListingEnrichmentTask({ doc, req } = {}) {
   const listingId = relationId(doc?.id);
   const propertyId = relationId(doc?.property);
   if (!listingId || !propertyId || !req?.payload || payloadCmsImportContextEnabled(req)) return;
-  try {
-    await req.payload.create({
-      collection: "listing_enrichment_tasks",
-      data: enrichmentTaskForListing({ listingId, propertyId, source: "listing_change" }),
-      overrideAccess: true,
-      req,
-    });
-  } catch (error) {
-    if (!outboxIdempotencyDuplicate(error)) throw error;
-  }
+  const data = enrichmentTaskForListing({ listingId, propertyId, source: "listing_change" });
+  const existing = await req.payload.find({
+    collection: "listing_enrichment_tasks",
+    depth: 0,
+    limit: 1,
+    overrideAccess: true,
+    req,
+    where: { id: { equals: data.id } },
+  });
+  if (existing.docs?.length) return;
+  await req.payload.create({ collection: "listing_enrichment_tasks", data, overrideAccess: true, req });
 }
 
 export async function listingSearchOutboxHook({ doc, operation, req }) {
