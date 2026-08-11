@@ -410,6 +410,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /aria-controls="admin-mobile-navigation-ru" aria-expanded="false"/);
       assert.match(inboxHtml, /role="dialog" aria-modal="true" aria-label="Навигация по рабочему пространству"/);
       assert.match(inboxHtml, /aria-label="Навигация по рабочему пространству"/);
+      assert.match(inboxHtml, /data-admin-mobile-nav-close="true"/);
       assert.match(inboxHtml, /class="adm-mobile-nav__link adm-mobile-nav__link--on" href="\/admin\/leads\?locale=ru" aria-current="page"/);
       assert.match(inboxHtml, /class="adm-mobile-nav__link" href="\/admin\/viewings\?locale=ru"/);
       assert.match(inboxHtml, /class="adm-mobile-nav__link" href="\/admin\/listings\?locale=ru"/);
@@ -570,6 +571,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingManager.headers.get("cache-control"), "no-store");
       assert.match(listingManagerHtml, /data-kind="admin-listing-manager"/);
       assert.match(listingManagerHtml, /data-listing-manager-row="MS-CRAWL-0001"/);
+      assert.match(listingManagerHtml, /data-listing-filter-summary="true"/);
+      assert.match(listingManagerHtml, /data-listing-bulk-bar="true"/);
       assert.match(listingManagerHtml, /Поиск по номеру/);
       assert.match(listingManagerHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=ru"/);
       assert.match(listingManagerHtml, /href="\/admin\/translations\?locale=ru"/);
@@ -621,7 +624,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         new Request("https://example.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=ru", { headers: auth }),
       );
       assert.equal(russianEditor.status, 200);
-      assert.match(await russianEditor.text(), /data-admin-mutation-form="listing"/);
+      const russianEditorHtml = await russianEditor.text();
+      assert.match(russianEditorHtml, /data-admin-mutation-form="listing"/);
+      assert.match(russianEditorHtml, /data-editor-layout="split-rail"/);
+      assert.match(russianEditorHtml, /data-editor-tabs="true"/);
+      assert.match(russianEditorHtml, /data-editor-savebar="true"/);
+      assert.match(russianEditorHtml, /data-editor-dirty-message="[^"]+"/);
+      assert.match(russianEditorHtml, /data-editor-clean-message="[^"]+"/);
+      assert.match(russianEditorHtml, /data-editor-readiness-rail="true"/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();

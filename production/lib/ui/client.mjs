@@ -1459,10 +1459,20 @@ export const PUBLIC_APP_JS = `(function () {
 
 export const ADMIN_APP_JS = `(function () {
   "use strict";
+  function syncAdminShellOffsets() {
+    var topbar = document.querySelector(".crm-top");
+    var editorTabs = document.querySelector("[data-editor-tabs]");
+    var topbarHeight = topbar ? Math.round(topbar.getBoundingClientRect().height) : 64;
+    var tabsHeight = editorTabs ? Math.round(editorTabs.getBoundingClientRect().height) : 0;
+    document.documentElement.style.setProperty("--adm-shell-top-offset", String(topbarHeight) + "px");
+    document.documentElement.style.setProperty("--adm-editor-anchor-offset", String(topbarHeight + tabsHeight + 24) + "px");
+  }
   function applyLeadQueueFilter(tabs, filter) {
     var buttons = tabs.querySelectorAll("button[data-lead-filter]");
     for (var i = 0; i < buttons.length; i += 1) {
-      buttons[i].setAttribute("data-on", buttons[i].getAttribute("data-lead-filter") === filter ? "1" : "0");
+      var on = buttons[i].getAttribute("data-lead-filter") === filter;
+      buttons[i].setAttribute("data-on", on ? "1" : "0");
+      buttons[i].setAttribute("aria-pressed", on ? "true" : "false");
     }
     var rows = document.querySelectorAll("[data-lead-row]");
     for (var j = 0; j < rows.length; j += 1) {
@@ -1615,7 +1625,6 @@ export const ADMIN_APP_JS = `(function () {
         })
         .then(function () {
           setViewingFollowUpStatus(form, success, "success");
-          window.setTimeout(function () { window.location.reload(); }, 150);
         })
         .catch(function () {
           setViewingFollowUpStatus(form, failed, "error");
@@ -1664,7 +1673,6 @@ export const ADMIN_APP_JS = `(function () {
         })
         .then(function () {
           setSellerPipelineStatus(form, success, "success");
-          window.setTimeout(function () { window.location.reload(); }, 150);
         })
         .catch(function () {
           setSellerPipelineStatus(form, failed, "error");
@@ -1713,7 +1721,6 @@ export const ADMIN_APP_JS = `(function () {
         })
         .then(function () {
           setPublicRequestStatus(form, success, "success");
-          window.setTimeout(function () { window.location.reload(); }, 150);
         })
         .catch(function (error) {
           setPublicRequestStatus(form, error.message || failed, "error");
@@ -1760,7 +1767,6 @@ export const ADMIN_APP_JS = `(function () {
         })
         .then(function () {
           setTranslationWorkflowStatus(form, success, "success");
-          window.setTimeout(function () { window.location.reload(); }, 150);
         })
         .catch(function () {
           setTranslationWorkflowStatus(form, failure, "error");
@@ -1821,7 +1827,6 @@ export const ADMIN_APP_JS = `(function () {
             throw new Error("invalid reply delivery response");
           }
           setReplyDeliveryStatus(form, success, "success");
-          window.setTimeout(function () { window.location.reload(); }, 150);
         })
         .catch(function (error) {
           setReplyDeliveryStatus(form, error.message || failure, "error");
@@ -1880,7 +1885,6 @@ export const ADMIN_APP_JS = `(function () {
           var details = form.closest("details");
           if (details) details.open = false;
           setReplyStatus(form, success, "success");
-          window.setTimeout(function () { window.location.reload(); }, 150);
         })
         .catch(function (error) {
           var message = isDraft && /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY/.test(String(error && error.message || ""))
@@ -2009,12 +2013,84 @@ export const ADMIN_APP_JS = `(function () {
       })(forms[i]);
     }
   }
+  function syncEditorSavebar(form) {
+    var savebar = form.querySelector("[data-editor-savebar]");
+    if (!savebar) return;
+    var initial = form.getAttribute("data-editor-initial-state") || "";
+    var dirty = initial !== editorFormState(form);
+    var save = savebar.querySelector('[type="submit"]');
+    var reset = savebar.querySelector("[data-editor-reset]");
+    var note = savebar.querySelector("[data-editor-dirty-note]");
+    savebar.setAttribute("data-dirty", dirty ? "true" : "false");
+    if (save) save.disabled = !dirty;
+    if (reset) reset.disabled = !dirty;
+    if (note) {
+      note.textContent = dirty
+        ? form.getAttribute("data-editor-dirty-message") || "Unsaved changes"
+        : form.getAttribute("data-editor-clean-message") || "All changes saved.";
+      note.setAttribute("data-state", dirty ? "dirty" : "clean");
+    }
+  }
+  function editorFormState(form) {
+    var fields = [];
+    var data = new FormData(form);
+    data.forEach(function (value, key) {
+      fields.push(key + "=" + String(value));
+    });
+    return fields.join("&");
+  }
+  function commitEditorFormState(form) {
+    var elements = form.elements;
+    for (var i = 0; i < elements.length; i += 1) {
+      var field = elements[i];
+      if (!field || !field.name) continue;
+      if (field instanceof HTMLInputElement && (field.type === "checkbox" || field.type === "radio")) {
+        field.defaultChecked = field.checked;
+      } else if ("defaultValue" in field) {
+        field.defaultValue = field.value;
+      }
+      if (field instanceof HTMLSelectElement) {
+        for (var j = 0; j < field.options.length; j += 1) {
+          field.options[j].defaultSelected = field.options[j].selected;
+        }
+      }
+    }
+    form.setAttribute("data-editor-initial-state", editorFormState(form));
+    syncEditorSavebar(form);
+  }
+  function initEditorForms() {
+    var forms = document.querySelectorAll("[data-editor-form]");
+    for (var i = 0; i < forms.length; i += 1) {
+      (function (form) {
+        var reset = form.querySelector("[data-editor-reset]");
+        commitEditorFormState(form);
+        form.addEventListener("input", function () { syncEditorSavebar(form); });
+        form.addEventListener("change", function () { syncEditorSavebar(form); });
+        form.addEventListener("reset", function () {
+          window.setTimeout(function () { syncEditorSavebar(form); });
+        });
+        if (reset) {
+          reset.addEventListener("click", function () {
+            form.reset();
+            syncEditorSavebar(form);
+            var status = form.querySelector("[data-admin-mutation-status]");
+            if (status) {
+              status.textContent = "";
+              status.removeAttribute("data-state");
+            }
+          });
+        }
+      })(forms[i]);
+    }
+  }
   function initAdminMobileNavigation() {
     var mobileNav = document.querySelector("[data-admin-mobile-nav]");
     if (!mobileNav) return;
     var summary = mobileNav.querySelector(".adm-mobile-nav__summary");
     var panel = mobileNav.querySelector(".adm-mobile-nav__panel");
+    var close = mobileNav.querySelector("[data-admin-mobile-nav-close]");
     if (!summary || !panel) return;
+    var returnFocusTarget = null;
     function focusableItems() {
       var items = panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
       var visible = [];
@@ -2027,15 +2103,27 @@ export const ADMIN_APP_JS = `(function () {
       summary.setAttribute("aria-expanded", mobileNav.open ? "true" : "false");
       document.documentElement.classList.toggle("admin-mobile-nav-open", mobileNav.open);
       if (!mobileNav.open) return;
+      syncAdminShellOffsets();
       window.requestAnimationFrame(function () {
-        var target = panel.querySelector('[aria-current="page"]') || focusableItems()[0];
+        var target = close || panel.querySelector('[aria-current="page"]') || focusableItems()[0];
         if (target) target.focus();
       });
     }
     function closeNavigation(returnFocus) {
       mobileNav.open = false;
       syncOpenState();
-      if (returnFocus) summary.focus();
+      if (returnFocus) {
+        var target = returnFocusTarget && returnFocusTarget.isConnected ? returnFocusTarget : summary;
+        target.focus();
+      }
+    }
+    summary.addEventListener("click", function () {
+      if (!mobileNav.open) returnFocusTarget = document.activeElement instanceof HTMLElement ? document.activeElement : summary;
+    });
+    if (close) {
+      close.addEventListener("click", function () {
+        closeNavigation(true);
+      });
     }
     mobileNav.addEventListener("toggle", syncOpenState);
     panel.addEventListener("click", function (event) {
@@ -2067,6 +2155,7 @@ export const ADMIN_APP_JS = `(function () {
         if (!event.matches && mobileNav.open) closeNavigation(false);
       });
     }
+    window.addEventListener("resize", syncAdminShellOffsets);
     syncOpenState();
   }
   function initListingEditorTabs() {
@@ -2090,8 +2179,20 @@ export const ADMIN_APP_JS = `(function () {
         else entries[j].tab.removeAttribute("aria-current");
       }
     }
+    function expandSection(section) {
+      var details = section.querySelector("details[data-editor-section]");
+      if (details) details.open = true;
+    }
+    function scrollToSection(section) {
+      syncAdminShellOffsets();
+      var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var offset = Number((document.documentElement.style.getPropertyValue("--adm-editor-anchor-offset") || "124").replace("px", "")) || 124;
+      var nextTop = window.scrollY + section.getBoundingClientRect().top - offset;
+      window.scrollTo({ top: Math.max(0, nextTop), behavior: reduceMotion ? "auto" : "smooth" });
+    }
     function syncFromScroll() {
       frame = 0;
+      syncAdminShellOffsets();
       var anchorLine = nav.getBoundingClientRect().bottom + 24;
       var activeSection = entries[0].section;
       var activeTop = -Infinity;
@@ -2109,13 +2210,33 @@ export const ADMIN_APP_JS = `(function () {
     }
     nav.addEventListener("click", function (event) {
       var tab = event.target.closest("[data-editor-tab][href^='#']");
-      if (tab) setActive((tab.getAttribute("href") || "").slice(1));
+      if (!tab) return;
+      var targetId = (tab.getAttribute("href") || "").slice(1);
+      var section = targetId ? document.getElementById(targetId) : null;
+      if (!section) return;
+      event.preventDefault();
+      expandSection(section);
+      setActive(targetId);
+      if (window.history && window.history.pushState) window.history.pushState(null, "", "#" + targetId);
+      else window.location.hash = targetId;
+      scrollToSection(section);
     });
     window.addEventListener("scroll", scheduleSync, { passive: true });
-    window.addEventListener("resize", scheduleSync);
-    window.addEventListener("hashchange", scheduleSync);
+    window.addEventListener("resize", function () {
+      syncAdminShellOffsets();
+      scheduleSync();
+    });
+    window.addEventListener("hashchange", function () {
+      var targetId = window.location.hash ? window.location.hash.slice(1) : "";
+      var section = targetId ? document.getElementById(targetId) : null;
+      if (section) expandSection(section);
+      scheduleSync();
+    });
     var initialId = window.location.hash ? window.location.hash.slice(1) : entries[0].section.id;
-    setActive(document.getElementById(initialId) ? initialId : entries[0].section.id);
+    var initialSection = document.getElementById(initialId) ? document.getElementById(initialId) : entries[0].section;
+    if (initialSection) expandSection(initialSection);
+    setActive(initialSection ? initialSection.id : entries[0].section.id);
+    syncAdminShellOffsets();
     scheduleSync();
   }
   function completeRouteDecision(form, payload) {
@@ -2144,7 +2265,11 @@ export const ADMIN_APP_JS = `(function () {
       item.remove();
       var next = nextItem && nextItem.isConnected ? nextItem : list.querySelector("[data-pending-route-decision]");
       if (!next) {
-        window.location.reload();
+        var empty = panel.querySelector("[data-empty-route-decisions]");
+        if (empty) {
+          empty.hidden = false;
+          empty.focus({ preventScroll: true });
+        }
         return;
       }
       var details = next.querySelector(".adm-route-decision__disclosure");
@@ -2184,9 +2309,8 @@ export const ADMIN_APP_JS = `(function () {
         })
         .then(function (payload) {
           if (status) { status.textContent = success; status.setAttribute("data-state", "success"); }
-          if (!form.hasAttribute("data-route-decision-form") || !completeRouteDecision(form, payload)) {
-            window.setTimeout(function () { window.location.reload(); }, 150);
-          }
+          if (form.hasAttribute("data-editor-form")) commitEditorFormState(form);
+          if (form.hasAttribute("data-route-decision-form")) completeRouteDecision(form, payload);
         })
         .catch(function (error) {
           if (status) { status.textContent = error.message || failure; status.setAttribute("data-state", "error"); }
@@ -2200,6 +2324,7 @@ export const ADMIN_APP_JS = `(function () {
   initLeadQueueFilters();
   initAdminMobileNavigation();
   initListingEditorTabs();
+  initEditorForms();
   initLeadPipelineFilters();
   initListingBulkForms();
   initRouteDecisionForms();
