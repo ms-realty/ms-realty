@@ -24,14 +24,17 @@ if (!bgListing || !ruListing) {
 }
 
 const workbook = writeRedirectApprovalWorkbook(attachMigrationReviewEvidence(routeMap, loadMigrationRecords()));
-let approvals = readRedirectApprovals(approvalLedgerPath);
-if (!approvals.length && fs.existsSync(importPath)) {
-  importRedirectApprovalsCsv(routeMap, fs.readFileSync(importPath, "utf8"), {
+let approvals;
+if (fs.existsSync(importPath)) {
+  approvals = importRedirectApprovalsCsv(routeMap, fs.readFileSync(importPath, "utf8"), {
     filePath: approvalLedgerPath,
     approvedAt: "2026-07-04T00:00:00Z",
+    replace: true,
   });
+} else {
   approvals = readRedirectApprovals(approvalLedgerPath);
-} else if (!approvals.length) {
+}
+if (!approvals.length && !fs.existsSync(importPath)) {
   for (const route of [bgListing, ruListing]) {
     appendRedirectApproval(routeMap, {
       oldUrl: route.old_url,

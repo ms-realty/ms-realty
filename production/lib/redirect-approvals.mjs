@@ -222,12 +222,13 @@ export function appendRedirectApproval(
 export function importRedirectApprovalsCsv(
   routeMap,
   csvText,
-  { filePath = DEFAULT_REDIRECT_APPROVALS_PATH, approvedAt = new Date().toISOString() } = {},
+  { filePath = DEFAULT_REDIRECT_APPROVALS_PATH, approvedAt = new Date().toISOString(), replace = false } = {},
 ) {
   const approvals = approvalsFromCsv(routeMap, csvText, approvedAt);
-  if (!approvals.length) return [];
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${approvals.map((approval) => JSON.stringify(approval)).join("\n")}\n`);
+  const contents = approvals.length ? `${approvals.map((approval) => JSON.stringify(approval)).join("\n")}\n` : "";
+  if (replace) fs.writeFileSync(filePath, contents);
+  else if (contents) fs.appendFileSync(filePath, contents);
   return approvals;
 }
 
