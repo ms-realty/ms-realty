@@ -36,8 +36,15 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /data-route-decision-state", "saved"/);
   assert.match(ADMIN_APP_JS, /summary\.focus\(\{ preventScroll: true \}\)/);
   assert.match(ADMIN_APP_JS, /prefers-reduced-motion: reduce/);
-  assert.match(ADMIN_APP_JS, /!form\.hasAttribute\("data-route-decision-form"\)/);
+  assert.match(ADMIN_APP_JS, /function commitEditorFormState\(form\)/);
+  assert.match(ADMIN_APP_JS, /form\.hasAttribute\("data-editor-form"\)\) commitEditorFormState\(form\)/);
+  assert.match(ADMIN_APP_JS, /form\.hasAttribute\("data-route-decision-form"\)\) completeRouteDecision\(form, payload\)/);
+  assert.doesNotMatch(ADMIN_APP_JS, /window\.location\.reload\(/);
   assert.match(ADMIN_APP_JS, /function initListingEditorTabs\(\)/);
+  assert.match(ADMIN_APP_JS, /function initEditorForms\(\)/);
+  assert.match(ADMIN_APP_JS, /data-editor-dirty-message/);
   assert.match(ADMIN_APP_JS, /setAttribute\("aria-current", "location"\)/);
   assert.match(ADMIN_APP_JS, /window\.addEventListener\("scroll", scheduleSync/);
+  assert.match(ADMIN_APP_JS, /data-admin-mobile-nav-close/);
+  assert.match(ADMIN_APP_JS, /var target = returnFocusTarget && returnFocusTarget\.isConnected \? returnFocusTarget : summary/);
 });

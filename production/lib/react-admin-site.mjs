@@ -1181,6 +1181,7 @@ function Sidebar({ page }) {
 }
 
 function MobileNavigation({ page }) {
+  const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const menuLabel = ui.workspaceNavigation;
   const visibleGroups = adminNavigationGroups(page);
@@ -1208,6 +1209,21 @@ function MobileNavigation({ page }) {
         "aria-modal": "true",
         "aria-label": menuLabel,
       },
+      h(
+        "div",
+        { className: "adm-mobile-nav__panel-head" },
+        h("strong", { className: "adm-mobile-nav__panel-title" }, menuLabel),
+        h(
+          "button",
+          {
+            type: "button",
+            className: "adm-mobile-nav__close",
+            "data-admin-mobile-nav-close": "true",
+            "aria-label": label(copy, "closeNavigation", "Close navigation"),
+          },
+          h(Icon, { name: "x", size: 18 }),
+        ),
+      ),
       h(
         "nav",
         { className: "adm-mobile-nav__links", "aria-label": menuLabel },
@@ -1256,7 +1272,7 @@ function Topbar({ page, title }) {
             key: code,
             href: code === "en" ? page.path : `${page.path}?locale=${code}`,
             "data-on": code === page.workspace?.locale ? "1" : "0",
-            "aria-current": code === page.workspace?.locale ? "true" : undefined,
+            "aria-current": code === page.workspace?.locale ? "page" : undefined,
           },
           code.toUpperCase(),
         ),
@@ -1315,6 +1331,85 @@ function queueTone(status) {
   return "sun";
 }
 
+function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, inboxHref }) {
+  const readinessItems = [
+    {
+      href: inboxHref,
+      label: label(copy, "needsReply", "Needs reply"),
+      note: label(copy, "priorityLeads", "Priority leads"),
+      value: queue.pending.length,
+      tone: queue.pending.length ? "sun" : "success",
+    },
+    {
+      href: adminHref("/admin/viewings", page),
+      label: label(copy, "openFollowUps", "Open follow-ups"),
+      note: label(copy, "viewingsWorkspace", "Viewings and follow-ups"),
+      value: page.summary?.viewingFollowUpsOpen || 0,
+      tone: overdueTasks ? "brick" : "sea",
+    },
+    {
+      href: adminHref("/admin/pipeline", page),
+      label: label(copy, "openTasks", "Open tasks"),
+      note: label(copy, "pipelineWorkspace", "Buyers and renters"),
+      value: openTasks,
+      tone: openTasks ? "ink" : "success",
+    },
+    {
+      href: adminHref("/admin/requests", page),
+      label: label(copy, "publicRequests", "Website requests"),
+      note: label(copy, "requestsWorkspace", "Requests and alerts"),
+      value: page.summary?.publicRequestsOpen || 0,
+      tone: page.summary?.publicRequestsOpen ? "sun" : "success",
+    },
+  ];
+  return h(
+    "aside",
+    { className: "adm-workbench-rail", "data-readiness-rail": "true" },
+    h(Panel, { title: label(copy, "today", "Today"), "data-today-snapshot": "true" }, h(StatGrid, {
+      metrics: [
+        [label(copy, "needsReply", "Needs reply"), queue.pending.length, "messages-square", "sea"],
+        [label(copy, "managerEscalations", "Manager escalations"), page.summary?.leadSlaManagerEscalations || 0, "triangle-alert", "brick"],
+        [label(copy, "overdueFollowUps", "Overdue follow-ups"), overdueTasks, "bell", "sun"],
+        [label(copy, "openTasks", "Open tasks"), openTasks, "check-circle-2", "success"],
+      ],
+    })),
+    h(
+      Panel,
+      { title: ui.launchReadiness, "data-readiness-work": "true" },
+      h(
+        "ul",
+        { className: "adm-readiness-list" },
+        ...readinessItems.map((item) =>
+          h(
+            "li",
+            { key: item.label },
+            h(
+              "a",
+              { className: "adm-readiness-link", href: item.href },
+              h("span", { className: "adm-readiness-copy" }, h("strong", null, item.label), h("small", null, item.note)),
+              h("span", { className: "adm-readiness-value" }, h(StatusPill, { tone: item.tone }, item.value)),
+            ),
+          ),
+        ),
+      ),
+    ),
+    h(
+      Panel,
+      {
+        title: label(copy, "activity", "Activity"),
+        action: h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/activity", page) }, label(copy, "viewHistory", "History")),
+        "data-today-activity-link": "true",
+      },
+      h(
+        "div",
+        { className: "adm-rail-actions" },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/leads", page) }, h(Icon, { name: "inbox", size: 16 }), label(copy, "viewLeadInbox", "Open lead inbox")),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/reports", page) }, h(Icon, { name: "bar-chart-3", size: 16 }), ui.operationsReports),
+      ),
+    ),
+  );
+}
+
 function TodayBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -1330,12 +1425,6 @@ function TodayBody({ page }) {
     (page.summary?.sellerPipelineOverdue || 0) +
     (page.summary?.publicRequestsOverdue || 0) +
     (page.summary?.leadPipelineOverdue || 0);
-  const metrics = [
-    [label(copy, "needsReply", "Needs reply"), queue.pending.length, "messages-square", "sea"],
-    [label(copy, "managerEscalations", "Manager escalations"), page.summary?.leadSlaManagerEscalations || 0, "triangle-alert", "brick"],
-    [label(copy, "overdueFollowUps", "Overdue follow-ups"), overdueTasks, "bell", "sun"],
-    [label(copy, "openTasks", "Open tasks"), openTasks, "check-circle-2", "success"],
-  ];
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
   return adminShell(page, {
@@ -1353,104 +1442,112 @@ function TodayBody({ page }) {
         { title, subtitle: page.metadata?.description },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
       ),
-      h(StatGrid, { metrics }),
       h(
-        Panel,
-        { title: label(copy, "priorityLeads", "Priority leads"), "data-priority-leads": "true" },
-        queue.pending.length
-          ? h(
-              "ul",
-              { className: "adm-task-list" },
-              ...queue.pending.map((lead) => {
-                const sla = queue.leadSlaById.get(lead.lead_id);
-                const status = sla?.status || "pending";
-                return h(
-                  "li",
-                  { key: lead.lead_id, "data-priority-lead": lead.lead_id },
-                  h(
-                    "div",
-                    { className: "adm-task-list__body" },
-                    leadContactActions(lead, ui),
-                    h("strong", null, [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source)),
-                    requestDetailsText(lead) ? h("small", { className: "adm-lead-context" }, requestDetailsText(lead)) : null,
-                    h("code", { className: "crm-mono adm-task-list__reference" }, lead.lead_id),
+        "div",
+        { className: "adm-workbench-shell adm-workbench-shell--today", "data-today-layout": "action-rail" },
+        h(
+          "div",
+          { className: "adm-workbench-main" },
+          h(
+            Panel,
+            { title: label(copy, "priorityLeads", "Priority leads"), "data-priority-leads": "true" },
+            queue.pending.length
+              ? h(
+                  "ul",
+                  { className: "adm-task-list" },
+                  ...queue.pending.map((lead) => {
+                    const sla = queue.leadSlaById.get(lead.lead_id);
+                    const status = sla?.status || "pending";
+                    return h(
+                      "li",
+                      { key: lead.lead_id, "data-priority-lead": lead.lead_id },
+                      h(
+                        "div",
+                        { className: "adm-task-list__body" },
+                        leadContactActions(lead, ui),
+                        h("strong", null, [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source)),
+                        requestDetailsText(lead) ? h("small", { className: "adm-lead-context" }, requestDetailsText(lead)) : null,
+                        h("code", { className: "crm-mono adm-task-list__reference" }, lead.lead_id),
+                      ),
+                      h(
+                        "div",
+                        { className: "adm-task-list__actions" },
+                        h(StatusPill, { tone: queueTone(status) }, statusText(ui, status)),
+                        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}` }, label(copy, "openAndReply", "Open and reply")),
+                      ),
+                    );
+                  }),
+                )
+              : h("p", { className: "adm-empty" }, label(copy, "noPriorityLeads", "No leads are waiting for a reply.")),
+          ),
+          h(
+            Panel,
+            {
+              title: label(copy, "pipelineWorkspace", "Buyers and renters"),
+              action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "openPipeline", "Open opportunities")),
+              "data-lead-pipeline-preview": "true",
+            },
+            page.leadPipelineQueue?.rows?.length
+              ? h(
+                  "ul",
+                  { className: "adm-task-list" },
+                  ...page.leadPipelineQueue.rows.slice(0, 3).map((state) =>
+                    h(
+                      "li",
+                      { key: state.lead_id, "data-pipeline-preview-row": state.lead_id },
+                      h(
+                        "div",
+                        { className: "adm-task-list__body" },
+                        h("code", { className: "crm-mono" }, state.lead_id),
+                        h("strong", null, `${statusText(ui, state.lead_type)} · ${statusText(ui, state.stage)}`),
+                        h("small", { className: "adm-lead-context" }, state.next_action ? statusText(ui, state.next_action) : ""),
+                      ),
+                      h(
+                        "div",
+                        { className: "adm-task-list__actions" },
+                        h(StatusPill, { tone: state.overdue ? "brick" : "sea" }, state.overdue ? statusText(ui, "overdue") : statusText(ui, state.status)),
+                        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, statusText(ui, "open")),
+                      ),
+                    ),
                   ),
-                  h(
-                    "div",
-                    { className: "adm-task-list__actions" },
-                    h(StatusPill, { tone: queueTone(status) }, statusText(ui, status)),
-                    h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}` }, label(copy, "openAndReply", "Open and reply")),
+                )
+              : h("p", { className: "adm-empty" }, label(copy, "noOpenPipeline", "No open buyer or renter opportunities.")),
+          ),
+          h(ViewingFollowUpQueue, { page, copy, ui }),
+          h(SellerPipelineQueue, { page, copy, ui }),
+          h(
+            Panel,
+            {
+              title: label(copy, "publicRequests", "Website requests"),
+              action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page) }, label(copy, "requestsWorkspace", "Requests and alerts")),
+              "data-public-request-preview": "true",
+            },
+            page.publicRequestQueue?.rows?.length
+              ? h(
+                  "ul",
+                  { className: "adm-task-list" },
+                  ...page.publicRequestQueue.rows.slice(0, 3).map((row) =>
+                    h(
+                      "li",
+                      { key: `${row.request_type}:${row.request_id}` },
+                      h(
+                        "div",
+                        { className: "adm-task-list__body" },
+                        h("code", { className: "crm-mono" }, row.request_id),
+                        h("strong", null, row.request_type === "saved_search" ? label(copy, "savedSearchRequest", "Saved search") : label(copy, "languageRequest", "Language request")),
+                      ),
+                      h(
+                        "div",
+                        { className: "adm-task-list__actions" },
+                        h(StatusPill, { tone: row.overdue ? "brick" : "sea" }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
+                      ),
+                    ),
                   ),
-                );
-              }),
-            )
-          : h("p", { className: "adm-empty" }, label(copy, "noPriorityLeads", "No leads are waiting for a reply.")),
-      ),
-      h(
-        Panel,
-        {
-          title: label(copy, "pipelineWorkspace", "Buyers and renters"),
-          action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "openPipeline", "Open opportunities")),
-          "data-lead-pipeline-preview": "true",
-        },
-        page.leadPipelineQueue?.rows?.length
-          ? h(
-              "ul",
-              { className: "adm-task-list" },
-              ...page.leadPipelineQueue.rows.slice(0, 3).map((state) =>
-                h(
-                  "li",
-                  { key: state.lead_id, "data-pipeline-preview-row": state.lead_id },
-                  h(
-                    "div",
-                    { className: "adm-task-list__body" },
-                    h("code", { className: "crm-mono" }, state.lead_id),
-                    h("strong", null, `${statusText(ui, state.lead_type)} · ${statusText(ui, state.stage)}`),
-                    h("small", { className: "adm-lead-context" }, state.next_action ? statusText(ui, state.next_action) : ""),
-                  ),
-                  h(
-                    "div",
-                    { className: "adm-task-list__actions" },
-                    h(StatusPill, { tone: state.overdue ? "brick" : "sea" }, state.overdue ? statusText(ui, "overdue") : statusText(ui, state.status)),
-                    h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, statusText(ui, "open")),
-                  ),
-                ),
-              ),
-            )
-          : h("p", { className: "adm-empty" }, label(copy, "noOpenPipeline", "No open buyer or renter opportunities.")),
-      ),
-      h(ViewingFollowUpQueue, { page, copy, ui }),
-      h(SellerPipelineQueue, { page, copy, ui }),
-      h(
-        Panel,
-        {
-          title: label(copy, "publicRequests", "Website requests"),
-          action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page) }, label(copy, "requestsWorkspace", "Requests and alerts")),
-          "data-public-request-preview": "true",
-        },
-        page.publicRequestQueue?.rows?.length
-          ? h(
-              "ul",
-              { className: "adm-task-list" },
-              ...page.publicRequestQueue.rows.slice(0, 3).map((row) =>
-                h(
-                  "li",
-                  { key: `${row.request_type}:${row.request_id}` },
-                  h(
-                    "div",
-                    { className: "adm-task-list__body" },
-                    h("code", { className: "crm-mono" }, row.request_id),
-                    h("strong", null, row.request_type === "saved_search" ? label(copy, "savedSearchRequest", "Saved search") : label(copy, "languageRequest", "Language request")),
-                  ),
-                  h(
-                    "div",
-                    { className: "adm-task-list__actions" },
-                    h(StatusPill, { tone: row.overdue ? "brick" : "sea" }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
-                  ),
-                ),
-              ),
-            )
-          : h("p", { className: "adm-empty" }, label(copy, "noOpenRequests", "No open website requests.")),
+                )
+              : h("p", { className: "adm-empty" }, label(copy, "noOpenRequests", "No open website requests.")),
+          ),
+        ),
+        h(TodayReadinessRail, { page, copy, ui, queue, openTasks, overdueTasks, inboxHref }),
       ),
     ],
   });
@@ -4340,6 +4437,11 @@ function ListingManagerBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const canEditContent = pageCan(page, "content:write");
+  const activeFilters = [
+    page.filters.q ? `${label(copy, "searchListings", "Search listings")}: ${page.filters.q}` : null,
+    page.filters.status ? `${label(copy, "qualityStatus", "Status")}: ${statusText(ui, page.filters.status)}` : null,
+    page.filters.sourceLocale ? `${label(copy, "language", "Language")}: ${String(page.filters.sourceLocale).toUpperCase()}` : null,
+  ].filter(Boolean);
   const title = label(copy, "listingManager", "Listings");
   const metrics = [
     [label(copy, "listingManager", "Listings"), page.summary.total, "building-2", "ink"],
@@ -4372,6 +4474,14 @@ function ListingManagerBody({ page }) {
         "form",
         { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },
         filterLocaleInput(page),
+        h(
+          "div",
+          { className: "adm-filterbar__summary", "data-listing-filter-summary": "true" },
+          h("strong", null, `${page.summary.visible} / ${page.summary.total}`),
+          activeFilters.length
+            ? h("div", { className: "adm-filterbar__chips" }, ...activeFilters.map((value) => h("span", { key: value, className: "adm-filter-chip" }, value)))
+            : h("small", null, `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`),
+        ),
         h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "q", defaultValue: page.filters.q, placeholder: "MS-CRAWL-0114" })),
         h(
           "label",
@@ -4410,7 +4520,7 @@ function ListingManagerBody({ page }) {
               h("input", { type: "hidden", name: "editor", value: currentOperatorId(page, "listing_manager_editor") }),
               h(
                 "div",
-                { className: "adm-listing-bulk__bar" },
+                { className: "adm-listing-bulk__bar", "data-listing-bulk-bar": "true" },
                 h(
                   "div",
                   { className: "adm-listing-bulk__summary" },
@@ -4439,7 +4549,7 @@ function ListingManagerBody({ page }) {
                 { className: "adm-scroll-x" },
               h(
                 "table",
-                { className: "crm-tbl" },
+                { className: "crm-tbl crm-tbl--dense adm-listing-table" },
                 h("thead", null, h("tr", null, ...Object.values(columns).map((column) => h("th", { key: column, scope: "col" }, column)))),
                 h(
                   "tbody",
@@ -4678,11 +4788,27 @@ function editorField(copy, ui, field, value, disabled = false) {
 }
 
 function editorFieldGroup(copy, ui, title, fields, facts, disabled = false) {
+  if (!fields.length) return null;
   return h(
     "fieldset",
     { className: "adm-form__group" },
     h("legend", null, title),
     ...fields.map((field) => editorField(copy, ui, field, facts[field] ?? "", disabled)),
+  );
+}
+
+function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts" } = {}) {
+  if (!fields.length) return null;
+  return h(
+    "details",
+    { className: "adm-editor-section", open, "data-editor-section": section },
+    h(
+      "summary",
+      { className: "adm-editor-section__summary" },
+      h("span", null, title),
+      h("small", null, `${fields.length}`),
+    ),
+    editorFieldGroup(copy, ui, title, fields, facts, disabled),
   );
 }
 
@@ -4727,7 +4853,7 @@ function ListingEditorBody({ page }) {
       "data-kind": "admin-listing-editor",
       "data-react-admin-ui": "listing-editor",
       "data-admin-workbench": "cms",
-      "data-editor-layout": "facts-translations-quality",
+      "data-editor-layout": "split-rail",
       "data-cms-status": page.listing.cms_status,
       "data-schema-ready": page.listing.seo?.schema_present ? "true" : "false",
       "data-publish-approved": workflow.publish_approved ? "true" : "false",
@@ -4756,60 +4882,123 @@ function ListingEditorBody({ page }) {
         h("a", { className: "mk-tab", href: "#listing-quality", "data-editor-tab": "quality", "aria-label": label(copy, "quality", "Quality"), title: label(copy, "quality", "Quality") }, h(Icon, { name: "shield-check", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "quality", "Quality"))),
       ),
       h(
-        Panel,
-        { title: label(copy, "facts", "Facts") },
+        "div",
+        { className: "adm-editor-shell", "data-editor-shell": "true" },
         h(
-        "form",
-          {
-            id: "listing-facts",
-            method: "post",
-            action: "/api/admin/listings/edit",
-            className: "adm-form",
-            "data-admin-mutation-form": "listing",
-            "data-editor-form": "listing",
-            "data-editor-panel": "facts",
-          },
-          h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
+          "div",
+          { className: "adm-editor-main" },
           h(
-            "fieldset",
-            { className: "adm-form__group adm-form__group--editor" },
-            h("legend", null, label(copy, "editor", "Editor")),
+            Panel,
+            { title: label(copy, "facts", "Facts"), "data-editor-primary-panel": "true" },
             h(
-              "label",
-              null,
-              label(copy, "editor", "Editor"),
-              h("input", {
-                name: "editor",
-                required: true,
-                readOnly: true,
-                defaultValue: currentOperatorId(page, ""),
-                autoComplete: "off",
-                "data-editor-name": "true",
-              }),
+              "form",
+              {
+                id: "listing-facts",
+                method: "post",
+                action: "/api/admin/listings/edit",
+                className: "adm-form",
+                "data-admin-mutation-form": "listing",
+                "data-editor-form": "listing",
+                "data-editor-panel": "facts",
+                "data-editor-clean-message": label(copy, "saved", "All changes saved."),
+                "data-editor-dirty-message": label(copy, "unsavedChanges", "Unsaved changes"),
+              },
+              h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
+              h(
+                "fieldset",
+                { className: "adm-form__group adm-form__group--editor" },
+                h("legend", null, label(copy, "editor", "Editor")),
+                h(
+                  "label",
+                  null,
+                  label(copy, "editor", "Editor"),
+                  h("input", {
+                    name: "editor",
+                    required: true,
+                    readOnly: true,
+                    defaultValue: currentOperatorId(page, ""),
+                    autoComplete: "off",
+                    "data-editor-name": "true",
+                  }),
+                ),
+              ),
+              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content" }),
+              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: detailFields.length <= 4, section: "details" }),
+              editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms" }),
+              editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
+              h(
+                "section",
+                { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
+                editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo" }),
+              ),
+              canEditContent
+                ? h(
+                    "div",
+                    {
+                      className: "adm-form__actions adm-editor-savebar",
+                      "data-editor-savebar": "true",
+                      "data-dirty": "false",
+                    },
+                    h(
+                      "div",
+                      { className: "adm-editor-savebar__meta" },
+                      h("strong", { "data-editor-dirty-note": "true" }, label(copy, "saved", "All changes saved.")),
+                      h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+                    ),
+                    h(
+                      "div",
+                      { className: "adm-editor-savebar__controls" },
+                      h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--md", "data-editor-reset": "true", disabled: true }, label(copy, "resetFilters", "Reset")),
+                      h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md", disabled: true }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
+                    ),
+                  )
+                : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
             ),
           ),
-          editorFieldGroup(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent),
-          editorFieldGroup(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent),
-          editorFieldGroup(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent),
-          editorFieldGroup(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent),
-          h(
-            "section",
-            { id: "listing-seo", className: "adm-form__section", "data-seo-panel": "true", "aria-label": ui.seoSettings },
-            editorFieldGroup(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent),
-          ),
-          canEditContent
-            ? h(
-                "div",
-                { className: "adm-form__actions" },
-                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
-                h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
-              )
-            : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
         ),
-      ),
-      h(
-        Panel,
-        { title: label(copy, "translationState", "Translation state"), id: "listing-translations", "aria-label": label(copy, "translationState", "Translation state"), "data-translation-panel": "true" },
+        h(
+          "aside",
+          { className: "adm-editor-rail", "data-editor-readiness-rail": "true" },
+          h(
+            Panel,
+            {
+              title: label(copy, "qualityStatus", "Quality"),
+              id: "listing-quality",
+              "aria-label": label(copy, "qualityStatus", "Quality"),
+              "data-quality-panel": "true",
+            },
+            qualityReview
+              ? h(
+                  "div",
+                  {
+                    className: "adm-evidence",
+                    "data-listing-quality-issues": qualityReview.issues.length,
+                    "data-listing-quality-required-fields": qualityReview.required_editor_fields.join(","),
+                  },
+                  ...qualityReview.issues.map((issue) =>
+                    h(StatusPill, { key: issue, tone: "brick", "data-quality-issue": issue }, listingQualityIssueText(ui, issue)),
+                  ),
+                )
+              : h("p", { className: "adm-note", "data-listing-quality-issues": "0" }, `${ui.issues}: 0 · ${ui.reviewRequired}`),
+            qualityReview?.required_editor_fields?.length
+              ? h(
+                  "p",
+                  { className: "adm-note" },
+                  `${ui.reviewRequired}: ${qualityReview.required_editor_fields.map((field) => fieldText(ui, field)).join(", ")}`,
+                )
+              : null,
+            h(StatGrid, {
+              metrics: [
+                [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), "file-check", PILL_TONES[page.listing.cms_status] || "ink"],
+                [ui.schema, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), "check-circle-2", page.listing.seo?.schema_present ? "success" : "brick"],
+                [ui.availabilityVerification, workflow.availability_verified_at ? formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale) : ui.notVerified, "calendar-check", workflow.availability_verified_at ? "success" : "sun"],
+                [ui.publishApproval, workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing, "shield-check", workflow.publish_approved ? "success" : "sun"],
+              ],
+            }),
+          ),
+          h(
+            Panel,
+            { title: label(copy, "translationState", "Translation state"), id: "listing-translations", "aria-label": label(copy, "translationState", "Translation state"), "data-translation-panel": "true" },
         h(
           "ul",
           { className: "adm-translations" },
@@ -4831,121 +5020,121 @@ function ListingEditorBody({ page }) {
             );
           }),
         ),
-      ),
-      h(
-        Panel,
-        {
-          title: label(copy, "mediaReview", "Media review"),
-          id: "listing-media",
-          "aria-label": label(copy, "mediaReview", "Media review"),
-          "data-media-review-panel": "true",
-          "data-tour-review-status": tourPublished ? "available" : tourStatus,
-        },
-        h(StatGrid, {
-          metrics: [
-            [label(copy, "media", "Media"), (page.listing.media || []).length, "camera", "ink"],
-            [
-              ui.tourStatus,
-              statusText(ui, tourStatus),
-              "globe",
-              tourPublished ? "success" : "sun",
-            ],
-            [ui.tourFallbackGallery, fallbackGalleryCount, "camera", fallbackGalleryCount ? "sea" : "brick"],
-          ],
-        }),
-        h("p", { className: "adm-note" }, ui.mediaManagerHint),
-        h(
-          "section",
-          { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
-          reviewableMedia.length
-            ? reviewableMedia.map((item) => {
-                const sourceUrl = item.asset_url || item.url || "";
-                const published = item.is_public === true;
-                return h(
-                  "article",
-                  {
-                    key: item.asset_id,
-                    className: "mk-card mk-card--sunken mk-card--pad-md adm-media-asset",
-                    "data-media-asset": item.asset_id,
-                    "data-media-kind": item.kind,
-                    "data-media-public": published ? "true" : "false",
-                  },
-                  h(
-                    "header",
-                    { className: "adm-media-asset__header" },
-                    h("div", null, h("strong", null, fieldText(ui, `media_kind_${item.kind}`)), h("small", { className: "crm-mono" }, item.asset_id)),
-                    h(StatusPill, { tone: published ? "success" : "sun" }, statusText(ui, item.review_status)),
-                  ),
-                  sourceUrl
-                    ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
-                    : null,
-                  canEditContent
-                    ? h(
-                        "details",
-                        { className: "adm-media-review", "data-media-review-disclosure": item.asset_id },
-                        h(
-                          "summary",
-                          null,
-                          h(Icon, { name: "shield-check", size: 16 }),
-                          h("span", null, ui.reviewMediaAsset),
-                        ),
-                        h(
-                          "form",
-                          {
-                            method: "post",
-                            action: "/api/admin/media/reviews",
-                            className: "adm-form adm-media-review-form",
-                            "data-admin-mutation-form": "media-review",
-                            "data-admin-mutation-saving": ui.mediaReviewSaving,
-                            "data-admin-mutation-success": ui.mediaReviewSaved,
-                            "data-admin-mutation-failure": ui.mediaReviewFailed,
-                          },
-                            h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
-                            h("input", { type: "hidden", name: "assetId", defaultValue: item.asset_id }),
+          ),
+          h(
+            Panel,
+            {
+              title: label(copy, "mediaReview", "Media review"),
+              id: "listing-media",
+              "aria-label": label(copy, "mediaReview", "Media review"),
+              "data-media-review-panel": "true",
+              "data-tour-review-status": tourPublished ? "available" : tourStatus,
+            },
+            h(StatGrid, {
+              metrics: [
+                [label(copy, "media", "Media"), (page.listing.media || []).length, "camera", "ink"],
+                [
+                  ui.tourStatus,
+                  statusText(ui, tourStatus),
+                  "globe",
+                  tourPublished ? "success" : "sun",
+                ],
+                [ui.tourFallbackGallery, fallbackGalleryCount, "camera", fallbackGalleryCount ? "sea" : "brick"],
+              ],
+            }),
+            h("p", { className: "adm-note" }, ui.mediaManagerHint),
+            h(
+              "section",
+              { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
+              reviewableMedia.length
+                ? reviewableMedia.map((item) => {
+                    const sourceUrl = item.asset_url || item.url || "";
+                    const published = item.is_public === true;
+                    return h(
+                      "article",
+                      {
+                        key: item.asset_id,
+                        className: "mk-card mk-card--sunken mk-card--pad-md adm-media-asset",
+                        "data-media-asset": item.asset_id,
+                        "data-media-kind": item.kind,
+                        "data-media-public": published ? "true" : "false",
+                      },
+                      h(
+                        "header",
+                        { className: "adm-media-asset__header" },
+                        h("div", null, h("strong", null, fieldText(ui, `media_kind_${item.kind}`)), h("small", { className: "crm-mono" }, item.asset_id)),
+                        h(StatusPill, { tone: published ? "success" : "sun" }, statusText(ui, item.review_status)),
+                      ),
+                      sourceUrl
+                        ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
+                        : null,
+                      canEditContent
+                        ? h(
+                            "details",
+                            { className: "adm-media-review", "data-media-review-disclosure": item.asset_id },
                             h(
-                              "label",
+                              "summary",
                               null,
-                              ui.mediaDecision,
-                              h(
-                                "select",
-                                { name: "decision", defaultValue: published ? "publish" : "keep_private" },
-                                h("option", { value: "keep_private", selected: published ? undefined : true }, ui.keepMediaPrivate),
-                                h("option", { value: "publish", selected: published ? true : undefined }, ui.publishMedia),
-                              ),
+                              h(Icon, { name: "shield-check", size: 16 }),
+                              h("span", null, ui.reviewMediaAsset),
                             ),
                             h(
-                              "label",
-                              null,
-                              ui.mediaKind,
-                              h(
-                                "select",
-                                { name: "kind", defaultValue: item.kind },
-                                ...["photo", "floor_plan", "video"].map((kind) =>
-                                  h("option", { key: kind, value: kind, selected: item.kind === kind ? true : undefined }, fieldText(ui, `media_kind_${kind}`)),
+                              "form",
+                              {
+                                method: "post",
+                                action: "/api/admin/media/reviews",
+                                className: "adm-form adm-media-review-form",
+                                "data-admin-mutation-form": "media-review",
+                                "data-admin-mutation-saving": ui.mediaReviewSaving,
+                                "data-admin-mutation-success": ui.mediaReviewSaved,
+                                "data-admin-mutation-failure": ui.mediaReviewFailed,
+                              },
+                                h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
+                                h("input", { type: "hidden", name: "assetId", defaultValue: item.asset_id }),
+                                h(
+                                  "label",
+                                  null,
+                                  ui.mediaDecision,
+                                  h(
+                                    "select",
+                                    { name: "decision", defaultValue: published ? "publish" : "keep_private" },
+                                    h("option", { value: "keep_private", selected: published ? undefined : true }, ui.keepMediaPrivate),
+                                    h("option", { value: "publish", selected: published ? true : undefined }, ui.publishMedia),
+                                  ),
                                 ),
-                              ),
+                                h(
+                                  "label",
+                                  null,
+                                  ui.mediaKind,
+                                  h(
+                                    "select",
+                                    { name: "kind", defaultValue: item.kind },
+                                    ...["photo", "floor_plan", "video"].map((kind) =>
+                                      h("option", { key: kind, value: kind, selected: item.kind === kind ? true : undefined }, fieldText(ui, `media_kind_${kind}`)),
+                                    ),
+                                  ),
+                                ),
+                                h("label", null, ui.mediaAlt, h("textarea", { name: "alt", rows: 2, defaultValue: item.alt || "" })),
+                                h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.webp" })),
+                                h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
+                                h(
+                                  "label",
+                                  { className: "adm-check" },
+                                  h("input", { type: "checkbox", name: "reviewConfirmed", required: true }),
+                                  ` ${ui.mediaReviewConfirmation}`,
+                                ),
+                                h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+                                h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, ui.saveMediaReview)),
                             ),
-                            h("label", null, ui.mediaAlt, h("textarea", { name: "alt", rows: 2, defaultValue: item.alt || "" })),
-                            h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.webp" })),
-                            h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
-                            h(
-                              "label",
-                              { className: "adm-check" },
-                              h("input", { type: "checkbox", name: "reviewConfirmed", required: true }),
-                              ` ${ui.mediaReviewConfirmation}`,
-                            ),
-                            h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
-                            h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, ui.saveMediaReview)),
-                        ),
-                      )
-                    : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
-                );
-              })
-            : h("p", { className: "adm-note", "data-media-empty": "true" }, ui.noReviewableMedia),
-        ),
-        canEditContent
-          ? h(
-              "form",
+                          )
+                        : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
+                    );
+                  })
+                : h("p", { className: "adm-note", "data-media-empty": "true" }, ui.noReviewableMedia),
+            ),
+            canEditContent
+              ? h(
+                  "form",
           {
             method: "post",
             action: "/api/admin/tours/approve",
@@ -5052,47 +5241,17 @@ function ListingEditorBody({ page }) {
             "div",
             { className: "adm-tour-form__actions" },
             h("p", { className: "adm-tour-form__status", role: "status", "aria-live": "polite", "data-tour-save-status": "true" }),
-            h(
-              "button",
-              { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" },
-              h(Icon, { name: "globe", size: 16 }),
-              h("span", null, ui.tourApprovePublish),
-            ),
-          ),
-        )
-          : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
-      ),
-      h(
-        Panel,
-        { title: label(copy, "qualityStatus", "Quality"), id: "listing-quality", "aria-label": label(copy, "qualityStatus", "Quality"), "data-quality-panel": "true" },
-        qualityReview
-          ? h(
-              "div",
-              {
-                className: "adm-evidence",
-                "data-listing-quality-issues": qualityReview.issues.length,
-                "data-listing-quality-required-fields": qualityReview.required_editor_fields.join(","),
-              },
-              ...qualityReview.issues.map((issue) =>
-                h(StatusPill, { key: issue, tone: "brick", "data-quality-issue": issue }, listingQualityIssueText(ui, issue)),
+              h(
+                "button",
+                { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" },
+                h(Icon, { name: "globe", size: 16 }),
+                h("span", null, ui.tourApprovePublish),
               ),
-            )
-          : h("p", { className: "adm-note", "data-listing-quality-issues": "0" }, `${ui.issues}: 0 · ${ui.reviewRequired}`),
-        qualityReview?.required_editor_fields?.length
-          ? h(
-              "p",
-              { className: "adm-note" },
-              `${ui.reviewRequired}: ${qualityReview.required_editor_fields.map((field) => fieldText(ui, field)).join(", ")}`,
-            )
-          : null,
-        h(StatGrid, {
-          metrics: [
-            [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), "file-check", PILL_TONES[page.listing.cms_status] || "ink"],
-            [ui.schema, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), "check-circle-2", page.listing.seo?.schema_present ? "success" : "brick"],
-            [ui.availabilityVerification, workflow.availability_verified_at ? formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale) : ui.notVerified, "calendar-check", workflow.availability_verified_at ? "success" : "sun"],
-            [ui.publishApproval, workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing, "shield-check", workflow.publish_approved ? "success" : "sun"],
-          ],
-        }),
+            ),
+          )
+              : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
+          ),
+        ),
       ),
     ],
   });
@@ -5802,7 +5961,7 @@ function MigrationReviewBody({ page }) {
                 h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui }),
               ),
             )
-          : h("p", { className: "adm-empty", "data-empty-route-decisions": "true" }, ui.noPendingLegacyDecisions),
+          : h("p", { className: "adm-empty", "data-empty-route-decisions": "true", tabIndex: "-1" }, ui.noPendingLegacyDecisions),
         h(
           "datalist",
           { id: "legacy-route-targets", "data-route-target-options": "true" },
