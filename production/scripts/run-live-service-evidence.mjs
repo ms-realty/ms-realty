@@ -9,6 +9,7 @@ import {
   writeSearchEngineQueryReport,
   writeSearchEngineSyncReport,
 } from "../lib/search-engine-sync.mjs";
+import { loadPayloadApprovedSearchProjection } from "../lib/payload-search-projection.mjs";
 import {
   openAiCompatibleHermesProvider,
   runHermesDraftWorker,
@@ -27,10 +28,11 @@ async function capture() {
     throw new Error(`live service provisioning must pass before capture: ${failed}`);
   }
 
-  const syncReport = await runSearchEngineSync({ generatedAt: runAt });
+  const projection = await loadPayloadApprovedSearchProjection();
+  const syncReport = await runSearchEngineSync({ projection, generatedAt: runAt });
   writeSearchEngineSyncReport(syncReport, process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined);
 
-  const queryReport = await runSearchEngineQuerySmoke({ generatedAt: runAt });
+  const queryReport = await runSearchEngineQuerySmoke({ projection, generatedAt: runAt });
   writeSearchEngineQueryReport(queryReport, process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH || undefined);
 
   const hermesReport = await runHermesDraftWorker({
