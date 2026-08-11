@@ -3,13 +3,20 @@ export const REQUIRED_SOURCE_DOMAINS = ["makler-realty.com", "makler-realty.ru"]
 const SEO_SOURCE_STATUSES = new Set(["missing_export", "empty_export", "imported"]);
 
 export function missingRequiredExport(summary) {
+  if (
+    summary?.status === "imported" &&
+    summary.verified_zero_result === true &&
+    summary.row_count === 0 &&
+    /^[a-f0-9]{64}$/.test(summary.input_sha256 || "")
+  ) {
+    return false;
+  }
   return (
     summary?.status !== "imported" ||
     summary.matched_rows < 1 ||
-    summary.signal_rows < 1 ||
+    summary.template_copy === true ||
     summary.placeholder_rows > 0 ||
-    REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain)) ||
-    REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.signal_source_domains?.includes(domain))
+    REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain))
   );
 }
 
@@ -23,6 +30,14 @@ export function missingRequiredSources(sourceSummaries) {
 export function assertSeoSourceSummary(summary, source) {
   if (summary?.source && summary.source !== source) throw new Error(`SEO evidence ${source} source name mismatch`);
   if (!SEO_SOURCE_STATUSES.has(summary?.status)) throw new Error(`SEO evidence ${source} status must be known`);
+  if (summary.status !== "missing_export") {
+    if (!/^[a-f0-9]{64}$/.test(summary.input_sha256 || "")) {
+      throw new Error(`SEO evidence ${source} input hash must be a lowercase SHA-256 digest`);
+    }
+    if (!Number.isInteger(summary.input_bytes) || summary.input_bytes < 1) {
+      throw new Error(`SEO evidence ${source} input bytes must be a positive integer`);
+    }
+  }
   for (const key of ["row_count", "matched_rows", "unmatched_rows", "duplicate_rows", "signal_rows", "placeholder_rows"]) {
     if (!Number.isInteger(summary?.[key]) || summary[key] < 0) {
       throw new Error(`SEO evidence ${source} counts must be non-negative integers`);
@@ -68,6 +83,16 @@ export function assertSeoSourceSummary(summary, source) {
   }
   if ((summary?.signal_source_domains || []).length > (summary?.signal_rows ?? 0)) {
     throw new Error(`SEO evidence ${source} signal domains must not exceed signal rows`);
+  }
+  if (summary.verified_zero_result === true) {
+    if (
+      summary.status !== "imported" ||
+      [rowCount, matchedRows, unmatchedRows, duplicateRows, summary.signal_rows, summary.placeholder_rows].some((value) => value !== 0)
+    ) {
+      throw new Error(`SEO evidence ${source} verified zero result must describe an empty imported artifact`);
+    }
+  } else if (summary.status === "imported" && rowCount === 0) {
+    throw new Error(`SEO evidence ${source} empty imported artifact must be verified`);
   }
 }
 

@@ -1,3 +1,7 @@
+import { createHash } from "node:crypto";
+import fs from "node:fs";
+import { parseCsv } from "./csv.mjs";
+import { fromRoot } from "./paths.mjs";
 import { REQUIRED_SOURCE_DOMAINS } from "./seo-evidence-contract.mjs";
 
 export const SEO_EXPORTS = {
@@ -6,6 +10,29 @@ export const SEO_EXPORTS = {
   backlinks: "backlinks.csv",
   analytics_export: "analytics.csv",
 };
+
+const REQUIRED_EXPORT_HEADERS = {
+  search_console: ["url", "clicks", "impressions", "position"],
+  yandex_webmaster: ["url", "indexed", "issue"],
+  backlinks: ["target_url", "source_url"],
+  analytics_export: ["url", "page_views"],
+};
+
+export function seoInputArtifact(source, csvText, rows = parseCsv(csvText || "")) {
+  const contents = String(csvText || "");
+  const templatePath = fromRoot("migration", "external", "seo", `${SEO_EXPORTS[source]}.example`);
+  const templateCopy = fs.existsSync(templatePath) && contents.trim() === fs.readFileSync(templatePath, "utf8").trim();
+  const probe = parseCsv(`${contents.trimEnd()}\n__ms_realty_header_probe__\n`)[0] || {};
+  const headers = new Set(Object.keys(probe).map((key) => key.trim().toLowerCase().replaceAll(" ", "_")));
+  const verifiedZeroResult =
+    !templateCopy && rows.length === 0 && (REQUIRED_EXPORT_HEADERS[source] || []).every((key) => headers.has(key));
+  return {
+    input_bytes: Buffer.byteLength(contents),
+    input_sha256: createHash("sha256").update(contents).digest("hex"),
+    template_copy: templateCopy,
+    verified_zero_result: verifiedZeroResult,
+  };
+}
 
 function lowerRow(row) {
   return Object.fromEntries(Object.entries(row).map(([key, value]) => [key.trim().toLowerCase().replaceAll(" ", "_"), value]));

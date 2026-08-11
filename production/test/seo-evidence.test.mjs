@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   assertSeoEvidencePreflightReport,
   assertSeoEvidence,
@@ -31,6 +32,16 @@ function writeCompleteSeoInputFixture(dir) {
   fs.writeFileSync(`${dir}/yandex-webmaster.csv`, `url,indexed,issue\n${com},yes,\n${ru},yes,\n`);
   fs.writeFileSync(`${dir}/backlinks.csv`, `target_url,source_url\n${com},https://regionalbroker.bg/a\n${ru},https://partnerrealty.de/b\n`);
   return { com, ru };
+}
+
+function writeZeroResultSeoInputFixture(dir) {
+  const files = {
+    "search-console.csv": "url,clicks,impressions,position\n",
+    "yandex-webmaster.csv": "url,indexed,issue\n",
+    "backlinks.csv": "target_url,source_url,referring_domain\n",
+  };
+  for (const [filename, contents] of Object.entries(files)) fs.writeFileSync(`${dir}/${filename}`, contents);
+  return files;
 }
 
 test("SEO evidence joins external exports and privacy events to crawled URLs", () => {
@@ -146,7 +157,7 @@ test("required SEO exports need matched coverage for both legacy domains", () =>
   assert.deepEqual(evidence.summary.sources.backlinks.signal_source_domains, ["makler-realty.com", "makler-realty.ru"]);
 });
 
-test("required SEO exports need signal coverage for both legacy domains", () => {
+test("zero-valued SEO rows cover both legacy domains without synthetic positive signals", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-two-domain-seo-signal-`);
   fs.writeFileSync(
     `${dir}/search-console.csv`,
@@ -174,7 +185,33 @@ test("required SEO exports need signal coverage for both legacy domains", () => 
 
   assert.deepEqual(evidence.summary.sources.search_console.matched_source_domains, ["makler-realty.com", "makler-realty.ru"]);
   assert.deepEqual(evidence.summary.sources.search_console.signal_source_domains, ["makler-realty.com"]);
-  assert.ok(evidence.summary.missing_required_sources.includes("search_console"));
+  assert.equal(evidence.summary.missing_required_sources.includes("search_console"), false);
+  assert.match(evidence.summary.sources.search_console.input_sha256, /^[a-f0-9]{64}$/);
+});
+
+test("validated zero-result SEO exports are ready and bound to exact artifact hashes", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-zero-result-seo-evidence-`);
+  const files = writeZeroResultSeoInputFixture(dir);
+  const evidence = buildSeoEvidence({ inputDir: dir, generatedAt: "2026-07-05T00:00:00Z" });
+
+  assert.equal(assertSeoEvidence(evidence), true);
+  assert.deepEqual(evidence.summary.missing_required_sources, []);
+  for (const [source, filename] of [
+    ["search_console", "search-console.csv"],
+    ["yandex_webmaster", "yandex-webmaster.csv"],
+    ["backlinks", "backlinks.csv"],
+  ]) {
+    const summary = evidence.summary.sources[source];
+    assert.equal(summary.status, "imported");
+    assert.equal(summary.verified_zero_result, true);
+    assert.equal(summary.row_count, 0);
+    assert.equal(summary.input_bytes, Buffer.byteLength(files[filename]));
+    assert.equal(summary.input_sha256, createHash("sha256").update(files[filename]).digest("hex"));
+  }
+
+  const tampered = structuredClone(evidence);
+  tampered.summary.sources.search_console.input_sha256 = "not-a-digest";
+  assert.throws(() => assertSeoEvidence(tampered), /input hash/);
 });
 
 test("SEO evidence input preflight passes complete local exports without writing output", () => {
@@ -787,6 +824,34 @@ test("app SEO evidence import summary exposes remaining launch sources", () => {
   assert.equal(readyResult.seoImport.ready, true);
   assert.ok(readyResult.seoImport.nextActions.some((action) => action.includes("seo:evidence")));
   assert.ok(readyResult.seoImport.nextActions.some((action) => action.includes("seo:preflight:report")));
+});
+
+test("app SEO evidence import preserves validated zero-result artifact hashes", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-zero-result-seo-`);
+  const evidencePath = `${dir}/seo-evidence.json`;
+  fs.writeFileSync(
+    evidencePath,
+    `${JSON.stringify(buildSeoEvidence({ generatedAt: "2026-07-05T00:00:00Z" }), null, 2)}\n`,
+  );
+  const files = writeZeroResultSeoInputFixture(dir);
+  let result;
+  for (const [source, filename] of [
+    ["search_console", "search-console.csv"],
+    ["yandex_webmaster", "yandex-webmaster.csv"],
+    ["backlinks", "backlinks.csv"],
+  ]) {
+    result = importAppSeoEvidenceRows(
+      { source, csv: files[filename] },
+      { seoEvidenceInputDir: dir, seoEvidenceOutputPath: evidencePath, reviewedAt: "2026-07-05T00:01:00Z" },
+    );
+  }
+
+  assert.equal(result.seoImport.ready, true);
+  assert.equal(result.sources.backlinks.verified_zero_result, true);
+  assert.equal(
+    result.sources.backlinks.input_sha256,
+    createHash("sha256").update(files["backlinks.csv"]).digest("hex"),
+  );
 });
 
 test("external SEO export templates are present but real CSVs stay local", () => {
