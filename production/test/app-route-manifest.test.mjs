@@ -218,6 +218,7 @@ test("dedicated localized search renderer preserves configured engine hits", asy
   const config = {
     ...approvedConfig,
     search: {
+      engine: "typesense",
       environment: "test",
       typesense: {
         baseUrl: "https://search.makler-realty.com",
@@ -246,7 +247,17 @@ test("dedicated localized search renderer preserves configured engine hits", asy
 
 test("localized Next catch-all delegates configured search paths to the fail-closed search adapter", async () => {
   const previousNodeEnv = process.env.NODE_ENV;
+  const previousSearchEngine = process.env.MS_REALTY_SEARCH_ENGINE;
+  const previousTypesenseUrl = process.env.TYPESENSE_URL;
+  const previousTypesenseKey = process.env.TYPESENSE_API_KEY;
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  const previousPayloadSecret = process.env.PAYLOAD_SECRET;
   process.env.NODE_ENV = "production";
+  process.env.MS_REALTY_SEARCH_ENGINE = "typesense";
+  delete process.env.TYPESENSE_URL;
+  delete process.env.TYPESENSE_API_KEY;
+  delete process.env.DATABASE_URL;
+  delete process.env.PAYLOAD_SECRET;
   try {
     const { GET } = await import("../../app/[locale]/[...slug]/route.js");
     const response = await GET(new Request("https://example.test/bg/tarsene?q=Sandanski"));
@@ -259,6 +270,16 @@ test("localized Next catch-all delegates configured search paths to the fail-clo
   } finally {
     if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previousNodeEnv;
+    if (previousSearchEngine === undefined) delete process.env.MS_REALTY_SEARCH_ENGINE;
+    else process.env.MS_REALTY_SEARCH_ENGINE = previousSearchEngine;
+    if (previousTypesenseUrl === undefined) delete process.env.TYPESENSE_URL;
+    else process.env.TYPESENSE_URL = previousTypesenseUrl;
+    if (previousTypesenseKey === undefined) delete process.env.TYPESENSE_API_KEY;
+    else process.env.TYPESENSE_API_KEY = previousTypesenseKey;
+    if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = previousDatabaseUrl;
+    if (previousPayloadSecret === undefined) delete process.env.PAYLOAD_SECRET;
+    else process.env.PAYLOAD_SECRET = previousPayloadSecret;
   }
 });
 

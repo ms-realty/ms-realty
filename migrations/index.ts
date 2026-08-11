@@ -8,6 +8,7 @@ import * as migration_20260810_000558_durable_lead_store from './20260810_000558
 import * as migration_20260810_143000_repair_durable_lead_relations from './20260810_143000_repair_durable_lead_relations';
 import * as migration_20260810_164700_payload_schema_drift from './20260810_164700_payload_schema_drift';
 import * as migration_20260811_120000_durable_listing_edit_audit from './20260811_120000_durable_listing_edit_audit';
+import * as migration_20260811_153000_postgres_public_search from './20260811_153000_postgres_public_search';
 
 export const migrations = [
   {
@@ -59,5 +60,10 @@ export const migrations = [
     up: migration_20260811_120000_durable_listing_edit_audit.up,
     down: migration_20260811_120000_durable_listing_edit_audit.down,
     name: '20260811_120000_durable_listing_edit_audit',
+  },
+  {
+    up: migration_20260811_153000_postgres_public_search.up,
+    down: migration_20260811_153000_postgres_public_search.down,
+    name: '20260811_153000_postgres_public_search',
   },
 ];

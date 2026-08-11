@@ -100,6 +100,9 @@ export function productionServerConfig(env = process.env) {
     search: {
       engine: env.MS_REALTY_SEARCH_ENGINE,
       environment: env.NODE_ENV,
+      postgres: {
+        env,
+      },
       typesense: {
         baseUrl: env.TYPESENSE_URL,
         apiKey: env.TYPESENSE_API_KEY,

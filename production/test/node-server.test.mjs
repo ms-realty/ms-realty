@@ -99,6 +99,9 @@ async function withServer(fn) {
       sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
       dealClosedAt: "2026-07-10T10:00:00Z",
       slugChangedAt: "2026-07-04T00:09:00Z",
+      search: {
+        postgres: { env: {} },
+      },
     }),
   );
   const address = await listen(server);

@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
@@ -34,6 +35,65 @@ import {
 import { fromRoot } from "../lib/paths.mjs";
 import { assertBenchmarkCorpusCompatibility, benchmarkPublicFilters, loadBenchmarkCorpus } from "../../search/benchmark-corpus.mjs";
 import { bootstrapBenchmarkCorpus } from "../../search/bootstrap_benchmark_corpus.mjs";
+
+const POSTGRES_DATABASE_TARGET = "postgres://db.ms-realty.bg:5432/ms_realty";
+
+function authoritativeProjection(documents = []) {
+  return {
+    schema_version: 1,
+    documents,
+    summary: { input_rows: documents.length, projected_documents: documents.length, skipped_rows: 0 },
+    source: {
+      kind: "payload_postgres",
+      authoritative: true,
+      listing_rows: documents.length,
+      eligible_translation_rows: documents.length,
+      projected_documents: documents.length,
+      locale_codes: [...new Set(documents.map((document) => document.locale))],
+      digest: crypto.createHash("sha256").update(JSON.stringify(documents)).digest("hex"),
+    },
+  };
+}
+
+function postgresFixture(documents = []) {
+  const hits = documents.map((document) => ({
+    id: document.id,
+    source_listing_id: document.source_listing_id,
+    listing_reference: document.listing_reference,
+    locale: document.locale,
+    locale_path: document.locale_path,
+    title: document.title,
+  }));
+  return {
+    env: {
+      DATABASE_URL: POSTGRES_DATABASE_TARGET,
+      PAYLOAD_SECRET: "test-payload-secret",
+    },
+    snapshotQueryImpl: async () => documents,
+    queryImpl: async ({ intent, q, target }) => {
+      const exactReference = String(intent?.exact_reference || q || "").trim();
+      const matched = exactReference
+        ? hits.filter(
+            (hit) =>
+              hit.listing_reference === exactReference ||
+              hit.source_listing_id === exactReference ||
+              hit.id === exactReference,
+          )
+        : hits;
+      return {
+        engine: "postgres",
+        database_target: POSTGRES_DATABASE_TARGET,
+        total: matched.length,
+        hits: matched,
+        page: 1,
+        page_size: Math.max(1, matched.length || 5),
+        locale_codes: [...new Set(matched.map((hit) => hit.locale))],
+        unavailable_engines: [],
+        target,
+      };
+    },
+  };
+}
 
 function fakeFetch(calls, statuses = []) {
   return async (url, options) => {
@@ -260,7 +320,7 @@ test("public search queries Typesense first with only reviewed locale documents"
     assert.equal(result.engine, "typesense");
     assert.equal(result.total, 1);
     assert.deepEqual(result.hits.map((hit) => hit.source_listing_id), ["MS-CRAWL-0001"]);
-    assert.deepEqual(result.unavailable_engines, []);
+    assert.deepEqual(result.unavailable_engines, ["postgres"]);
     assert.equal(calls.length, 1);
     const request = new URL(`http://search.test${calls[0].url}`);
     assert.equal(request.pathname, "/collections/ms_realty_listings/documents/search");
@@ -333,7 +393,7 @@ test("public search uses Meilisearch only when Typesense is unavailable", async 
       });
 
       assert.equal(result.engine, "meilisearch");
-      assert.deepEqual(result.unavailable_engines, ["typesense"]);
+      assert.deepEqual(result.unavailable_engines, ["postgres", "typesense"]);
       assert.equal(calls.length, 2);
       assert.equal(calls[0].url.includes("/documents/search?"), true);
       assert.equal(calls[1].url, "/indexes/ms_realty_listings/search");
@@ -375,7 +435,7 @@ test("public search labels an unconfigured backend as a local seed fallback", as
   const result = await queryPublicSearch({ localeCodes: ["bg"] });
   assert.equal(result.engine, "seed_fallback");
   assert.equal(result.total, null);
-  assert.deepEqual(result.unavailable_engines, ["typesense", "meilisearch"]);
+  assert.deepEqual(result.unavailable_engines, ["postgres", "typesense", "meilisearch"]);
 });
 
 test("approved search projection omits pending and private facts", () => {
@@ -454,7 +514,7 @@ test("approved search projection omits pending and private facts", () => {
 test("production search requires one configured engine and never falls back", async () => {
   assert.throws(
     () => selectSearchRuntime({ environment: "production", typesense: {}, meilisearch: {} }),
-    /MS_REALTY_SEARCH_ENGINE is required in production/,
+    /Payload Postgres search is required in production/,
   );
   assert.deepEqual(
     selectSearchRuntime({
@@ -778,146 +838,103 @@ test("benchmark bootstrap refuses pre-existing benchmark targets before importin
   assert.deepEqual(meilisearchCalls.map(({ url }) => new URL(url).pathname), ["/collections/ms_realty_listings", "/indexes/ms_realty_listings"]);
 });
 
-test("search engine sync posts existing fixtures to Typesense and Meilisearch", async () => {
+test("search engine sync snapshots the authoritative Postgres projection", async () => {
   const calls = [];
+  const documents = [
+    {
+      id: "MS-CRAWL-0001:bg",
+      source_listing_id: "MS-CRAWL-0001",
+      listing_reference: "MS-CRAWL-0001",
+      locale: "bg",
+      locale_path: "/bg/imoti/MS-CRAWL-0001",
+      title: "Reviewed listing",
+    },
+  ];
   const report = await runSearchEngineSync({
+    postgres: postgresFixture(documents),
+    projection: authoritativeProjection(documents),
     fetchImpl: fakeFetch(calls, [201, 202, 202, 202]),
     typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
     meilisearch: { baseUrl: "https://meili.ms-realty.bg", apiKey: "meili-key", lookupImpl: PUBLIC_LOOKUP },
   });
 
   assert.equal(assertSearchEngineSyncReport(report), true);
-  assert.equal(report.engines.find((engine) => engine.engine === "typesense").collection, "ms_realty_listings");
-  assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").index, "ms_realty_listings");
-  assert.deepEqual(report.summary.targets, { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" });
-  assert.deepEqual(report.summary.documents_per_engine, [167, 167]);
-  assert.equal(calls.length, 4);
-  assert.equal(calls[0].url, "https://typesense.ms-realty.bg/collections");
-  assert.equal(calls[1].url, "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert");
-  assert.equal(calls[2].url, "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings");
-  assert.equal(calls[3].url, "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id");
-  assert.equal(calls[1].options.headers["x-typesense-api-key"], "type-key");
-  assert.equal(calls[3].options.headers.authorization, "Bearer meili-key");
-  assert.match(calls[1].body, /MS-CRAWL-0001:bg/);
-  assert.match(calls[3].body, /MS-CRAWL-0001:bg/);
-  assert.match(calls[3].body, /"meili_id":"MS-CRAWL-0001_bg"/);
+  assert.equal(report.engines[0].engine, "postgres");
+  assert.equal(report.engines[0].target, "ms_realty_public_search_documents");
+  assert.equal(report.summary.targets.postgres, "ms_realty_public_search_documents");
+  assert.deepEqual(report.summary.documents_per_engine, [1]);
+  assert.equal(report.summary.total_operations, 1);
+  assert.equal(report.summary.database_target, POSTGRES_DATABASE_TARGET);
+  assert.equal(calls.length, 0);
   assert.throws(
     () => assertSearchEngineSyncReport({ ...report, engines: [report.engines[0], { ...report.engines[0] }] }),
-    /exactly once/,
+    /one Postgres engine row/,
   );
   assert.throws(() => assertSearchEngineSyncReport({ ...report, generated_at: "" }), /valid generated_at/);
   assert.throws(
-    () => assertSearchEngineSyncReport({ ...report, summary: { ...report.summary, documents_per_engine: [167, 166] } }),
+    () => assertSearchEngineSyncReport({ ...report, summary: { ...report.summary, documents_per_engine: [2] } }),
     /summary documents/,
   );
   assert.throws(
-    () => assertSearchEngineSyncReport({ ...report, summary: { ...report.summary, total_operations: 3 } }),
-    /four engine operations/,
+    () => assertSearchEngineSyncReport({ ...report, summary: { ...report.summary, total_operations: 2 } }),
+    /one authoritative Postgres snapshot operation/,
   );
   assert.throws(
     () =>
       assertSearchEngineSyncReport({
         ...report,
-        summary: { ...report.summary, targets: { ...report.summary.targets, typesense: "other_listings" } },
+        summary: { ...report.summary, targets: { postgres: "other_listings" } },
       }),
-    /summary targets/,
+    /summary target/,
   );
   assert.throws(
     () =>
       assertSearchEngineSyncReport({
         ...report,
-        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, collection: "" } : engine)),
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, target: "" } : engine)),
       }),
-    /collection evidence/,
+    /sync target is invalid/,
   );
   assert.throws(
     () =>
       assertSearchEngineSyncReport({
         ...report,
-        summary: { ...report.summary, targets: { ...report.summary.targets, typesense: "other_listings" } },
-        engines: report.engines.map((engine, index) =>
-          index === 0
-            ? { ...engine, collection: "other_listings", operations: [{ ...engine.operations[0] }, { ...engine.operations[1] }] }
-            : engine,
-        ),
+        summary: { ...report.summary, documents_per_engine: [2] },
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, documents: 2 } : engine)),
       }),
-    /operation URL evidence for its target/,
+    /document count must match/,
   );
   assert.throws(
     () =>
       assertSearchEngineSyncReport({
         ...report,
-        engines: report.engines.map((engine, index) =>
-          index === 0 ? { ...engine, operations: [{ ...engine.operations[0], status: 202 }, engine.operations[1]] } : engine,
-        ),
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, operations: [{ ...engine.operations[0], status: 202 }] } : engine)),
       }),
-    /collection create operation evidence/,
+    /operation status is invalid/,
   );
   assert.throws(
     () =>
       assertSearchEngineSyncReport({
         ...report,
-        engines: report.engines.map((engine, index) =>
-          index === 1
-            ? {
-                ...engine,
-                operations: [
-                  { ...engine.operations[0], url: "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id" },
-                  engine.operations[1],
-                ],
-              }
-            : engine,
-        ),
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, digest: "not-a-digest" } : engine)),
       }),
-    /settings operation evidence/,
+    /must include a projection digest/,
   );
   assert.throws(
     () =>
       assertSearchEngineSyncReport({
         ...report,
-        engines: report.engines.map((engine, index) =>
-          index === 0 ? { ...engine, operations: [{ ...engine.operations[0], url: "" }, engine.operations[1]] } : engine,
-        ),
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, operations: [{ ...engine.operations[0], url: "" }] } : engine)),
       }),
-    /service URL evidence/,
+    /database target/,
   );
   assert.throws(
     () =>
       assertSearchEngineSyncReport({
         ...report,
-        engines: report.engines.map((engine, index) =>
-          index === 0
-            ? {
-                ...engine,
-                operations: [
-                  { ...engine.operations[0], url: "https://operator:secret@typesense.ms-realty.bg/collections" },
-                  engine.operations[1],
-                ],
-              }
-            : engine,
-        ),
-      }),
-    /URL credentials/,
-  );
-  assert.throws(
-    () =>
-      assertSearchEngineSyncReport({
-        ...report,
-        engines: report.engines.map((engine, index) =>
-          index === 0 ? { ...engine, operations: [{ ...engine.operations[0], method: "GET" }, engine.operations[1]] } : engine,
-        ),
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, operations: [{ ...engine.operations[0], method: "POST" }] } : engine)),
       }),
     /operation method/,
-  );
-  assert.throws(
-    () =>
-      assertSearchEngineSyncReport({
-        ...report,
-        engines: report.engines.map((engine, index) =>
-          index === 0 ? { ...engine, operations: [{ ...engine.operations[0], status: 500 }, engine.operations[1]] } : engine,
-        ),
-      }),
-    /operation status/,
   );
 });
 
@@ -935,28 +952,18 @@ test("Typesense sync accepts existing collection response before upsert import",
   assert.equal(report.operations[1].status, 201);
 });
 
-test("search engine runtime rejects copied placeholder env before network calls", async () => {
+test("search engine runtime fails closed without an authoritative payload runtime", async () => {
   const fetchImpl = async () => {
-    throw new Error("placeholder search env should not be called");
+    throw new Error("search runtime should not reach fetch without payload runtime");
   };
 
   await assert.rejects(
-    () =>
-      runSearchEngineSync({
-        fetchImpl,
-        typesense: { baseUrl: "https://example.com", apiKey: "replace-with-typesense-key" },
-        meilisearch: { baseUrl: "https://meili.internal", apiKey: "meili-key" },
-      }),
-    /TYPESENSE_URL must not be a placeholder/,
+    () => runSearchEngineSync({ fetchImpl }),
+    /Payload runtime is not configured/,
   );
   await assert.rejects(
-    () =>
-      runSearchEngineQuerySmoke({
-        fetchImpl,
-        typesense: { baseUrl: "https://typesense.internal", apiKey: "change-me" },
-        meilisearch: { baseUrl: "https://meili.internal", apiKey: "meili-key" },
-      }),
-    /TYPESENSE_API_KEY must not be a placeholder/,
+    () => runSearchEngineQuerySmoke({ fetchImpl }),
+    /Payload runtime is not configured/,
   );
 });
 
@@ -1021,87 +1028,60 @@ test("search fixture builder honors mounted locale registry and listing edits", 
   assert.equal(reviewed.every((doc) => doc.thumbnail_alt), true);
 });
 
-test("search engine query smoke normalizes Typesense and Meilisearch hits", async () => {
+test("search engine query smoke reports authoritative Postgres hits", async () => {
   const calls = [];
   const hit = {
     id: "MS-CRAWL-0001:bg",
     source_listing_id: "MS-CRAWL-0001",
+    listing_reference: "MS-CRAWL-0001",
     locale: "bg",
     locale_path: "/bg/imoti/MS-CRAWL-0001",
     title: "Reviewed listing",
   };
   const report = await runSearchEngineQuerySmoke({
-    typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
-    meilisearch: { baseUrl: "https://meili.ms-realty.bg", apiKey: "meili-key", lookupImpl: PUBLIC_LOOKUP },
+    postgres: postgresFixture([hit]),
+    projection: authoritativeProjection([hit]),
     fetchImpl: async (url, options) => {
       calls.push({ url, options });
-      if (url.includes("typesense.ms-realty.bg")) {
-        return { ok: true, status: 200, async json() { return { found: 1, hits: [{ document: hit }] }; } };
-      }
-      return { ok: true, status: 200, async json() { return { estimatedTotalHits: 1, hits: [hit] }; } };
+      return { ok: true, status: 200, async json() { return { hits: [hit] }; } };
     },
   });
 
   assert.equal(assertSearchEngineQueryReport(report), true);
-  assert.equal(report.engines.find((engine) => engine.engine === "typesense").collection, "ms_realty_listings");
-  assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").index, "ms_realty_listings");
-  assert.deepEqual(report.summary.targets, { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" });
-  assert.equal(calls[0].url.includes("/documents/search?"), true);
-  assert.equal(calls[0].options.method, "GET");
-  assert.equal(calls[1].url, "https://meili.ms-realty.bg/indexes/ms_realty_listings/search");
-  assert.equal(calls[1].options.method, "POST");
-  assert.equal(
-    JSON.parse(calls[1].options.body).filter,
-    'publication_state = "published" AND (listing_status = "available" OR listing_status = "reserved") AND translation_indexable = true AND translation_human_approved = true AND locale_indexable = true AND locale = "bg" AND source_listing_id = "MS-CRAWL-0001"',
-  );
-  assert.equal(report.engines.find((engine) => engine.engine === "typesense").operation.method, "GET");
-  assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").operation.url, "https://meili.ms-realty.bg/indexes/ms_realty_listings/search");
+  assert.equal(report.engines[0].engine, "postgres");
+  assert.equal(report.engines[0].target, "ms_realty_public_search_documents");
+  assert.equal(report.engines[0].database_target, POSTGRES_DATABASE_TARGET);
+  assert.deepEqual(report.summary.targets, { postgres: "ms_realty_public_search_documents" });
+  assert.deepEqual(report.summary.first_hit_ids, [hit.id]);
+  assert.equal(calls.length, 0);
   assert.throws(
     () => assertSearchEngineQueryReport({ ...report, engines: [report.engines[0], { ...report.engines[0] }] }),
-    /exactly once/,
+    /one Postgres engine row/,
   );
   assert.throws(() => assertSearchEngineQueryReport({ ...report, generated_at: "not-a-date" }), /valid generated_at/);
   assert.throws(
-    () => assertSearchEngineQueryReport({ ...report, summary: { ...report.summary, total_hits: 1 } }),
+    () => assertSearchEngineQueryReport({ ...report, summary: { ...report.summary, total_hits: 2 } }),
     /summary hits/,
   );
   assert.throws(
-    () => assertSearchEngineQueryReport({ ...report, summary: { ...report.summary, first_hit_ids: ["wrong", "wrong"] } }),
+    () => assertSearchEngineQueryReport({ ...report, summary: { ...report.summary, first_hit_ids: ["wrong"] } }),
     /summary first hits/,
   );
   assert.throws(
     () =>
       assertSearchEngineQueryReport({
         ...report,
-        summary: { ...report.summary, targets: { ...report.summary.targets, meilisearch: "other_listings" } },
+        summary: { ...report.summary, targets: { postgres: "other_listings" } },
       }),
-    /summary targets/,
+    /summary target/,
   );
   assert.throws(
     () =>
       assertSearchEngineQueryReport({
         ...report,
-        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, collection: "" } : engine)),
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, database_target: "" } : engine)),
       }),
-    /collection evidence/,
-  );
-  assert.throws(
-    () =>
-      assertSearchEngineQueryReport({
-        ...report,
-        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, service_url: "" } : engine)),
-      }),
-    /service URL evidence/,
-  );
-  assert.throws(
-    () =>
-      assertSearchEngineQueryReport({
-        ...report,
-        engines: report.engines.map((engine, index) =>
-          index === 0 ? { ...engine, service_url: "https://operator:secret@typesense.ms-realty.bg" } : engine,
-        ),
-      }),
-    /URL credentials/,
+    /database target evidence/,
   );
   assert.throws(
     () =>
@@ -1109,46 +1089,93 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
         ...report,
         engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, operation: null } : engine)),
       }),
-    /query operation/,
+    /database read operation/,
   );
   assert.throws(
     () =>
       assertSearchEngineQueryReport({
         ...report,
         engines: report.engines.map((engine, index) =>
-          index === 1 ? { ...engine, operation: { ...engine.operation, method: "GET" } } : engine,
+          index === 0 ? { ...engine, operation: { ...engine.operation, method: "POST" } } : engine,
         ),
       }),
-    /index search operation evidence/,
+    /database read operation/,
   );
   assert.throws(
     () =>
       assertSearchEngineQueryReport({
         ...report,
-        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, query: "" } : engine)),
+        engines: report.engines.map((engine, index) =>
+          index === 0 ? { ...engine, operation: { ...engine.operation, status: 202 } } : engine,
+        ),
       }),
-    /query evidence/,
+    /database read operation/,
   );
   assert.throws(
     () =>
       assertSearchEngineQueryReport({
         ...report,
-        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, filter: "" } : engine)),
+        summary: { ...report.summary, total_hits: 0, first_hit_ids: [null] },
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, total: 0, hits: [] } : engine)),
       }),
-    /reviewed locale filtering/,
+    /must return search hits/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineQueryReport({
+        ...report,
+        summary: { ...report.summary, first_hit_ids: ["OTHER:bg"] },
+        engines: report.engines.map((engine, index) =>
+          index === 0 ? { ...engine, hits: [{ ...hit, id: "OTHER:bg" }] } : engine,
+        ),
+      }),
+    /find the current projection sample document/,
   );
 });
 
-test("search engine query rejects non-accepted statuses even when fetch reports ok", async () => {
-  await assert.rejects(
-    () =>
-      runSearchEngineQuerySmoke({
-        typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
-        meilisearch: { baseUrl: "https://meili.ms-realty.bg", apiKey: "meili-key", lookupImpl: PUBLIC_LOOKUP },
-        fetchImpl: async () => ({ ok: true, status: 202, async json() { return {}; } }),
-      }),
-    /returned 202/,
-  );
+test("search engine query validator rejects non-success postgres operation evidence", () => {
+  const hit = {
+    id: "MS-CRAWL-0001:bg",
+    source_listing_id: "MS-CRAWL-0001",
+    listing_reference: "MS-CRAWL-0001",
+    locale: "bg",
+    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    title: "Reviewed listing",
+  };
+  const report = {
+    evidence_scope: "live",
+    generated_at: "2026-08-11T08:31:00.000Z",
+    source: authoritativeProjection([hit]).source,
+    expectation: {
+      projected_documents: 1,
+      sample_document_id: hit.id,
+    },
+    summary: {
+      engines: 1,
+      targets: { postgres: "ms_realty_public_search_documents" },
+      total_hits: 1,
+      first_hit_ids: [hit.id],
+      database_target: POSTGRES_DATABASE_TARGET,
+    },
+    engines: [
+      {
+        engine: "postgres",
+        target: "ms_realty_public_search_documents",
+        database_target: POSTGRES_DATABASE_TARGET,
+        query: hit.listing_reference,
+        operation: {
+          method: "SELECT",
+          status: 202,
+          url: POSTGRES_DATABASE_TARGET,
+          rows: 1,
+        },
+        total: 1,
+        hits: [hit],
+      },
+    ],
+  };
+
+  assert.throws(() => assertSearchEngineQueryReport(report), /database read operation/);
 });
 
 test("generated search query smoke report is valid when present", () => {

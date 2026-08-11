@@ -267,10 +267,11 @@ const readyLiveServices = [
     generated_at: "2026-07-05T00:00:00.000Z",
     path: "production/data/search-engine-sync-report.json",
     summary: {
-      engines: 2,
-      targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
-      documents_per_engine: [1, 1],
-      total_operations: 4,
+      engines: 1,
+      targets: { postgres: "ms_realty_public_search_documents" },
+      documents_per_engine: [1],
+      total_operations: 1,
+      database_target: "postgres://db.ms-realty.bg:5432/ms_realty",
     },
     evidence: {
       evidence_scope: "live",
@@ -282,29 +283,11 @@ const readyLiveServices = [
       },
       engines: [
         {
-          engine: "typesense",
-          target: "ms_realty_listings",
+          engine: "postgres",
+          target: "ms_realty_public_search_documents",
+          database_target: "postgres://db.ms-realty.bg:5432/ms_realty",
           operations: [
-            { method: "POST", url: "https://typesense.ms-realty.bg/collections", status: 201, bytes: 1 },
-            {
-              method: "POST",
-              url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert",
-              status: 200,
-              bytes: 1,
-            },
-          ],
-        },
-        {
-          engine: "meilisearch",
-          target: "ms_realty_listings",
-          operations: [
-            { method: "PATCH", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings", status: 202, bytes: 1 },
-            {
-              method: "POST",
-              url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id",
-              status: 202,
-              bytes: 1,
-            },
+            { method: "SELECT", url: "postgres://db.ms-realty.bg:5432/ms_realty", status: 200, rows: 1 },
           ],
         },
       ],
@@ -316,10 +299,11 @@ const readyLiveServices = [
     generated_at: "2026-07-05T00:00:00.000Z",
     path: "production/data/search-engine-query-report.json",
     summary: {
-      engines: 2,
-      targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
-      total_hits: 2,
-      first_hit_ids: ["MS-CURRENT-0001:bg", "MS-CURRENT-0001:bg"],
+      engines: 1,
+      targets: { postgres: "ms_realty_public_search_documents" },
+      total_hits: 1,
+      first_hit_ids: ["MS-CURRENT-0001:bg"],
+      database_target: "postgres://db.ms-realty.bg:5432/ms_realty",
     },
     evidence: {
       evidence_scope: "live",
@@ -335,21 +319,14 @@ const readyLiveServices = [
       },
       engines: [
         {
-          engine: "typesense",
-          target: "ms_realty_listings",
+          engine: "postgres",
+          target: "ms_realty_public_search_documents",
+          database_target: "postgres://db.ms-realty.bg:5432/ms_realty",
           operation: {
-            method: "GET",
-            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=MS-CURRENT-0001&filter_by=publication_state%3A%3Dpublished",
+            method: "SELECT",
+            url: "postgres://db.ms-realty.bg:5432/ms_realty",
             status: 200,
-          },
-        },
-        {
-          engine: "meilisearch",
-          target: "ms_realty_listings",
-          operation: {
-            method: "POST",
-            url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/search",
-            status: 200,
+            rows: 1,
           },
         },
       ],
@@ -594,6 +571,8 @@ function writeLiveReportFixtures(dir, generatedAt = new Date().toISOString()) {
   const syncReportPath = `${dir}/search-engine-sync-report.json`;
   const queryReportPath = `${dir}/search-engine-query-report.json`;
   const hermesReportPath = `${dir}/hermes-draft-worker-report.json`;
+  const databaseTarget = "postgres://db.ms-realty.bg:5432/ms_realty";
+  const postgresTarget = "ms_realty_public_search_documents";
   fs.writeFileSync(
     syncReportPath,
     `${JSON.stringify({
@@ -609,28 +588,21 @@ function writeLiveReportFixtures(dir, generatedAt = new Date().toISOString()) {
         digest: "a".repeat(64),
       },
       summary: {
-        engines: 2,
-        targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
-        documents_per_engine: [1, 1],
-        total_operations: 4,
+        engines: 1,
+        targets: { postgres: postgresTarget },
+        documents_per_engine: [1],
+        total_operations: 1,
+        database_target: databaseTarget,
       },
       engines: [
         {
-          engine: "typesense",
-          collection: "ms_realty_listings",
+          engine: "postgres",
+          target: postgresTarget,
           documents: 1,
+          digest: "a".repeat(64),
+          locale_codes: ["bg"],
           operations: [
-            { method: "POST", url: "https://typesense.ms-realty.bg/collections", status: 201, bytes: 1 },
-            { method: "POST", url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert", status: 200, bytes: 1 },
-          ],
-        },
-        {
-          engine: "meilisearch",
-          index: "ms_realty_listings",
-          documents: 1,
-          operations: [
-            { method: "PATCH", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings", status: 202, bytes: 1 },
-            { method: "POST", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id", status: 202, bytes: 1 },
+            { method: "SELECT", url: databaseTarget, status: 200, rows: 1 },
           ],
         },
       ],
@@ -655,36 +627,23 @@ function writeLiveReportFixtures(dir, generatedAt = new Date().toISOString()) {
         sample_document_id: "MS-CURRENT-0001:bg",
       },
       summary: {
-        engines: 2,
-        targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
-        total_hits: 2,
-        first_hit_ids: ["MS-CURRENT-0001:bg", "MS-CURRENT-0001:bg"],
+        engines: 1,
+        targets: { postgres: postgresTarget },
+        total_hits: 1,
+        first_hit_ids: ["MS-CURRENT-0001:bg"],
+        database_target: databaseTarget,
       },
       engines: [
         {
-          engine: "typesense",
-          service_url: "https://typesense.ms-realty.bg",
-          collection: "ms_realty_listings",
+          engine: "postgres",
+          target: postgresTarget,
+          database_target: databaseTarget,
           query: "MS-CURRENT-0001",
-          filter: "publication_state:=published && (listing_status:=available || listing_status:=reserved) && translation_indexable:=true && translation_human_approved:=true && locale_indexable:=true && locale:=`bg` && source_listing_id:=`MS-CURRENT-0001`",
           operation: {
-            method: "GET",
-            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=MS-CURRENT-0001&filter_by=publication_state%3A%3Dpublished",
+            method: "SELECT",
+            url: databaseTarget,
             status: 200,
-          },
-          total: 1,
-          hits: [{ id: "MS-CURRENT-0001:bg", locale: "bg" }],
-        },
-        {
-          engine: "meilisearch",
-          service_url: "https://meili.ms-realty.bg",
-          index: "ms_realty_listings",
-          query: "MS-CURRENT-0001",
-          filter: 'publication_state = "published" AND (listing_status = "available" OR listing_status = "reserved") AND translation_indexable = true AND translation_human_approved = true AND locale_indexable = true AND locale = "bg" AND source_listing_id = "MS-CURRENT-0001"',
-          operation: {
-            method: "POST",
-            url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/search",
-            status: 200,
+            rows: 1,
           },
           total: 1,
           hits: [{ id: "MS-CURRENT-0001:bg", locale: "bg" }],
@@ -1420,8 +1379,8 @@ test("launch readiness validator rejects weak live service operation evidence", 
             evidence: {
               ...item.evidence,
               engines: item.evidence.engines.map((engine) =>
-                engine.engine === "typesense"
-                  ? { ...engine, operations: engine.operations.map((operation) => ({ ...operation, bytes: 0 })) }
+                engine.engine === "postgres"
+                  ? { ...engine, operations: engine.operations.map((operation) => ({ ...operation, rows: -1 })) }
                   : engine,
               ),
             },
@@ -1446,11 +1405,11 @@ test("launch readiness validator rejects weak live service operation evidence", 
             evidence: {
               ...item.evidence,
               engines: item.evidence.engines.map((engine) =>
-                engine.engine === "meilisearch"
+                engine.engine === "postgres"
                   ? {
                       ...engine,
                       operations: engine.operations.map((operation) =>
-                        operation.method === "PATCH" ? { ...operation, url: "https://meili.ms-realty.bg/indexes/wrong/settings" } : operation,
+                        operation.method === "SELECT" ? { ...operation, method: "POST" } : operation,
                       ),
                     }
                   : engine,
@@ -2085,42 +2044,45 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.equal(localResult.reports.find((report) => report.source === "typesense_meilisearch_sync").status, "invalid_report");
   assert.match(
     localResult.reports.find((report) => report.source === "typesense_meilisearch_sync").error,
-    /localhost or placeholder/,
+    /database target/,
   );
 
   const mixedOriginDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-mixed-origin-live-reports-`);
   const mixedOriginPaths = writeLiveReportFixtures(mixedOriginDir);
   const mixedOriginSync = JSON.parse(fs.readFileSync(mixedOriginPaths.syncReportPath, "utf8"));
-  mixedOriginSync.engines[0].operations[1].url =
-    "https://staging-typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert";
+  mixedOriginSync.engines[0].operations.push({
+    method: "SELECT",
+    url: "postgres://staging-db.ms-realty.bg:5432/ms_realty",
+    status: 200,
+    rows: 1,
+  });
+  mixedOriginSync.summary.total_operations = 2;
   fs.writeFileSync(mixedOriginPaths.syncReportPath, `${JSON.stringify(mixedOriginSync)}\n`);
   const mixedOriginResult = validateLiveServiceReports(mixedOriginPaths);
   assert.equal(mixedOriginResult.ready, false);
   assert.equal(mixedOriginResult.reports.find((report) => report.source === "typesense_meilisearch_sync").status, "invalid_report");
   assert.match(
     mixedOriginResult.reports.find((report) => report.source === "typesense_meilisearch_sync").error,
-    /one service origin/,
+    /authoritative Postgres snapshot operation/,
   );
 
   const mixedQueryOriginDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-mixed-query-origin-live-reports-`);
   const mixedQueryOriginPaths = writeLiveReportFixtures(mixedQueryOriginDir);
   const mixedQueryOrigin = JSON.parse(fs.readFileSync(mixedQueryOriginPaths.queryReportPath, "utf8"));
-  mixedQueryOrigin.engines[0].operation.url =
-    "https://staging-typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg+%26%26+source_listing_id%3A%3DMS-CRAWL-0001";
+  mixedQueryOrigin.engines[0].operation.url = "postgres://staging-db.ms-realty.bg:5432/ms_realty";
   fs.writeFileSync(mixedQueryOriginPaths.queryReportPath, `${JSON.stringify(mixedQueryOrigin)}\n`);
   const mixedQueryOriginResult = validateLiveServiceReports(mixedQueryOriginPaths);
   assert.equal(mixedQueryOriginResult.ready, false);
   assert.equal(mixedQueryOriginResult.reports.find((report) => report.source === "typesense_meilisearch_query").status, "invalid_report");
   assert.match(
     mixedQueryOriginResult.reports.find((report) => report.source === "typesense_meilisearch_query").error,
-    /reported service origin/,
+    /database read operation/,
   );
 
   const reservedDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-reserved-live-reports-`);
   const reservedPaths = writeLiveReportFixtures(reservedDir);
   const reservedQuery = JSON.parse(fs.readFileSync(reservedPaths.queryReportPath, "utf8"));
-  reservedQuery.engines[0].service_url = "https://example.com";
-  reservedQuery.engines[1].service_url = "https://typesense.example";
+  reservedQuery.engines[0].database_target = "postgres://example.com:5432/ms_realty";
   fs.writeFileSync(reservedPaths.queryReportPath, `${JSON.stringify(reservedQuery)}\n`);
   const reservedHermes = JSON.parse(fs.readFileSync(reservedPaths.hermesReportPath, "utf8"));
   reservedHermes.provider.endpoint = "https://hermes.invalid/v1/chat/completions";
@@ -2131,7 +2093,7 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.equal(reservedResult.reports.find((report) => report.source === "hermes_draft_worker").status, "invalid_report");
   assert.match(
     reservedResult.reports.find((report) => report.source === "typesense_meilisearch_query").error,
-    /localhost or placeholder/,
+    /database read operation/,
   );
   assert.match(
     reservedResult.reports.find((report) => report.source === "hermes_draft_worker").error,
@@ -2222,7 +2184,7 @@ test("live service preflight report rejects hand-edited status counts", () => {
             ...item,
             status: "pass",
             path: "/tmp/search-engine-sync-report.json",
-            summary: { engines: 2, documents_per_engine: [167, 167], total_operations: 0 },
+            summary: { engines: 1, documents_per_engine: [167], total_operations: 0 },
           }
         : item,
     ),
@@ -2348,7 +2310,7 @@ test("live service report examples are templates, not launch evidence", () => {
   const template = readLiveServiceReportTemplate("typesense_meilisearch_query");
   assert.equal(template.filename, "search-engine-query-report.json.example");
   assert.equal(JSON.parse(template.json).example, true);
-  assert.equal(JSON.parse(template.json).summary.engines, 2);
+  assert.equal(JSON.parse(template.json).summary.engines, 1);
   assert.throws(() => readLiveServiceReportTemplate("../bad"), /Unknown live service report source/);
 });
 
@@ -2380,7 +2342,7 @@ test("live service report import writes only validated source reports", () => {
     importSummary.blockedReports.map((report) => report.source),
     ["typesense_meilisearch_sync", "hermes_draft_worker"],
   );
-  assert.equal(JSON.parse(fs.readFileSync(outPath, "utf8")).summary.engines, 2);
+  assert.equal(JSON.parse(fs.readFileSync(outPath, "utf8")).summary.engines, 1);
   assert.throws(
     () => writeLiveServiceReport("typesense_meilisearch_query", { ...queryReport, example: true }, { queryReportPath: outPath }),
     /Example live service reports cannot be imported/,
@@ -2402,7 +2364,7 @@ test("live service report import writes only validated source reports", () => {
     () =>
       writeLiveServiceReport(
         "typesense_meilisearch_query",
-        { ...queryReport, engines: [{ ...queryReport.engines[0], service_url: "http://typesense.local" }, queryReport.engines[1]] },
+        { ...queryReport, engines: [{ ...queryReport.engines[0], database_target: "postgres://typesense.local:5432/ms_realty" }] },
         { queryReportPath: outPath },
       ),
     /localhost or placeholder/,
@@ -2420,7 +2382,7 @@ test("live service report import writes only validated source reports", () => {
         },
         { queryReportPath: outPath },
       ),
-    /cover Typesense and Meilisearch/,
+    /current projection expectations/,
   );
   assert.throws(() => writeLiveServiceReport("../bad", queryReport), /Unknown live service report source/);
 });

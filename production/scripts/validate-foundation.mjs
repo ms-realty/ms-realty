@@ -147,11 +147,14 @@ if (hebrewSearchDoc?.search_document_type !== "approved_translation" || hebrewSe
 const searchEngineSyncSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-sync-smoke.json"), "utf8"));
 assertSearchEngineSyncReport(searchEngineSyncSmoke);
 if (
-  searchEngineSyncSmoke.engines.find((engine) => engine.engine === "typesense")?.documents !== 167 ||
-  searchEngineSyncSmoke.engines.find((engine) => engine.engine === "meilisearch")?.documents !== 167 ||
-  searchEngineSyncSmoke.calls.length !== 4
+  searchEngineSyncSmoke.engines.length !== 1 ||
+  searchEngineSyncSmoke.engines[0]?.engine !== "postgres" ||
+  searchEngineSyncSmoke.engines[0]?.documents !== 1 ||
+  searchEngineSyncSmoke.source?.projected_documents !== 1 ||
+  searchEngineSyncSmoke.summary.total_operations !== 1 ||
+  (searchEngineSyncSmoke.calls || []).length !== 0
 ) {
-  throw new Error("Search engine sync smoke must cover Typesense and Meilisearch imports");
+  throw new Error("Search engine sync smoke must cover one authoritative Postgres snapshot");
 }
 const searchEngineQuerySmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-query-smoke.json"), "utf8"));
 assertSearchEngineQueryReport(searchEngineQuerySmoke);

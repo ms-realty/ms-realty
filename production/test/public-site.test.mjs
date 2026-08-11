@@ -313,7 +313,7 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.equal(search.metadata.robots, "noindex,follow");
   assert.equal(search.mobile_policy.list_first_mobile, true);
   assert.equal(search.mobile_policy.map_optional, true);
-  assert.deepEqual(search.search.engines, ["typesense", "meilisearch"]);
+  assert.deepEqual(search.search.engines, ["postgres"]);
   assert.equal(search.search.filters.locale, "he");
   assert.equal(search.search.controls.save_search.endpoint, "/api/saved-searches");
   assert.equal(search.search.controls.save_search.payload.language, "he");

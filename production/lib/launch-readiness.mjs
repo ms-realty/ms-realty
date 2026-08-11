@@ -186,6 +186,27 @@ function assertLaunchServiceUrl(value, label) {
   return parsed;
 }
 
+function assertLaunchDatabaseTarget(value, label) {
+  if (!value) throw new Error(`${label} must include database target evidence`);
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`${label} must include valid database target evidence`);
+  }
+  if (!["postgres:", "postgresql:"].includes(parsed.protocol)) {
+    throw new Error(`${label} must use postgres:// or postgresql://`);
+  }
+  if (parsed.username || parsed.password) throw new Error(`${label} must not include URL credentials`);
+  const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
+  const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];
+  if (reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
+    throw new Error(`${label} must not use localhost or placeholder database targets`);
+  }
+  return parsed;
+}
+
 function assertLiveServiceReportHasNoSecrets(report) {
   if (/Bearer\s+|api[_-]?key|x-typesense-api-key|:\/\/[^/@\s]+:[^/@\s]+@/i.test(JSON.stringify(report))) {
     throw new Error("Live service reports must not persist secrets");
@@ -200,6 +221,11 @@ function assertLaunchLiveServiceEvidence(source, report) {
     for (const engine of report.engines || []) {
       const urls = (engine.operations || []).map((operation) => operation.url);
       if (!urls.length) throw new Error(`${engine.engine} sync report must include operation URL evidence`);
+      if (engine.engine === "postgres") {
+        const targets = new Set(urls.map((url) => assertLaunchDatabaseTarget(url, `${engine.engine} sync report`).href));
+        if (targets.size !== 1) throw new Error(`${engine.engine} sync report operations must use one database target`);
+        continue;
+      }
       const origins = new Set(urls.map((url) => assertLaunchServiceUrl(url, `${engine.engine} sync report`).origin));
       if (origins.size !== 1) throw new Error(`${engine.engine} sync report operations must use one service origin`);
     }
@@ -210,6 +236,14 @@ function assertLaunchLiveServiceEvidence(source, report) {
       throw new Error("Search query launch evidence must use the current Payload projection");
     }
     for (const engine of report.engines || []) {
+      if (engine.engine === "postgres") {
+        const target = assertLaunchDatabaseTarget(engine.database_target, `${engine.engine} query report`).href;
+        const operationTarget = assertLaunchDatabaseTarget(engine.operation?.url, `${engine.engine} query operation`).href;
+        if (operationTarget !== target) {
+          throw new Error(`${engine.engine} query operation must use the reported database target`);
+        }
+        continue;
+      }
       const serviceOrigin = assertLaunchServiceUrl(engine.service_url, `${engine.engine} query report`).origin;
       const operationOrigin = assertLaunchServiceUrl(engine.operation?.url, `${engine.engine} query operation`).origin;
       if (operationOrigin !== serviceOrigin) {
@@ -236,6 +270,7 @@ function operationSnapshot(operation = {}) {
     url: operation.url,
     status: operation.status,
     ...(Number.isInteger(operation.bytes) ? { bytes: operation.bytes } : {}),
+    ...(Number.isInteger(operation.rows) ? { rows: operation.rows } : {}),
   };
 }
 
@@ -246,7 +281,8 @@ function liveServiceEvidenceSnapshot(source, report) {
       source: report.source,
       engines: (report.engines || []).map((engine) => ({
         engine: engine.engine,
-        target: engine.collection || engine.index,
+        target: engine.target || engine.collection || engine.index,
+        ...(engine.database_target ? { database_target: engine.database_target } : {}),
         operations: (engine.operations || []).map(operationSnapshot),
       })),
     };
@@ -258,7 +294,9 @@ function liveServiceEvidenceSnapshot(source, report) {
       expectation: report.expectation,
       engines: (report.engines || []).map((engine) => ({
         engine: engine.engine,
-        target: engine.collection || engine.index,
+        target: engine.target || engine.collection || engine.index,
+        ...(engine.database_target ? { database_target: engine.database_target } : {}),
+        ...(engine.service_url ? { service_url: engine.service_url } : {}),
         operation: operationSnapshot(engine.operation),
       })),
     };
@@ -594,36 +632,32 @@ function assertLiveServiceSummaryEvidence(item) {
     Number.isInteger(projectedDocuments) &&
     projectedDocuments >= 0 &&
     /^[a-f0-9]{64}$/.test(String(source.digest || ""));
-  const hasSearchTargets =
-    typeof summary.targets?.typesense === "string" &&
-    summary.targets.typesense.trim() &&
-    typeof summary.targets?.meilisearch === "string" &&
-    summary.targets.meilisearch.trim();
+  const hasSearchTargets = typeof summary.targets?.postgres === "string" && summary.targets.postgres.trim();
   if (
     item.source === "typesense_meilisearch_sync" &&
-    (summary.engines !== 2 ||
+    (summary.engines !== 1 ||
       !hasPayloadProjection ||
       !hasSearchTargets ||
       !Array.isArray(summary.documents_per_engine) ||
-      summary.documents_per_engine.length !== 2 ||
+      summary.documents_per_engine.length !== 1 ||
       summary.documents_per_engine.some((count) => count !== projectedDocuments) ||
       !Number.isInteger(summary.total_operations) ||
-      summary.total_operations !== (projectedDocuments === 0 ? 2 : 4))
+      summary.total_operations !== 1)
   ) {
     throw new Error("Launch readiness live services require search sync summary evidence");
   }
   const expectation = item.evidence?.expectation || {};
   const expectedSample = expectation.sample_document_id;
-  const expectedFirstHits = projectedDocuments === 0 ? [null, null] : [expectedSample, expectedSample];
+  const expectedFirstHits = projectedDocuments === 0 ? [null] : [expectedSample];
   if (
     item.source === "typesense_meilisearch_query" &&
-    (summary.engines !== 2 ||
+    (summary.engines !== 1 ||
       !hasPayloadProjection ||
       !hasSearchTargets ||
       expectation.projected_documents !== projectedDocuments ||
       (projectedDocuments === 0 ? expectedSample !== null : !String(expectedSample || "").trim()) ||
       !Number.isInteger(summary.total_hits) ||
-      (projectedDocuments === 0 ? summary.total_hits !== 0 : summary.total_hits < 2) ||
+      (projectedDocuments === 0 ? summary.total_hits !== 0 : summary.total_hits < 1) ||
       !Array.isArray(summary.first_hit_ids) ||
       JSON.stringify(summary.first_hit_ids) !== JSON.stringify(expectedFirstHits))
   ) {
@@ -652,9 +686,8 @@ function assertLiveServiceReportPassEvidence(item) {
 
 function assertLiveServiceEngineEvidence(item, expectedMessage) {
   const engines = item.evidence?.engines || [];
-  if (engines.length !== 2) throw new Error(expectedMessage);
-  const engineNames = engines.map((engine) => engine.engine).sort().join("|");
-  if (engineNames !== "meilisearch|typesense") throw new Error(expectedMessage);
+  if (engines.length !== 1) throw new Error(expectedMessage);
+  if (engines[0]?.engine !== "postgres") throw new Error(expectedMessage);
   for (const engine of engines) {
     const target = item.summary?.targets?.[engine.engine];
     if (!target || engine.target !== target) throw new Error(expectedMessage);
@@ -664,12 +697,18 @@ function assertLiveServiceEngineEvidence(item, expectedMessage) {
 
 function assertLiveServiceSyncOperationEvidence(item) {
   const engines = assertLiveServiceEngineEvidence(item, "Launch readiness live services require search sync operation evidence");
-  const projectedDocuments = item.evidence?.source?.projected_documents;
   const operations = engines.flatMap((engine) => (engine.operations || []).map((operation) => ({ engine: engine.engine, operation })));
   if (operations.length !== item.summary.total_operations) {
     throw new Error("Launch readiness live services require search sync operation evidence");
   }
   for (const { engine, operation } of operations) {
+    if (engine === "postgres") {
+      assertLaunchDatabaseTarget(operation.url, `${engine} sync operation`);
+      if (operation.method !== "SELECT" || operation.status !== 200 || !Number.isInteger(operation.rows) || operation.rows < 0) {
+        throw new Error("Launch readiness live services require search sync operation evidence");
+      }
+      continue;
+    }
     assertLaunchServiceUrl(operation.url, `${engine} sync operation`);
     if (!["PATCH", "POST"].includes(operation.method) || ![200, 201, 202, 409].includes(operation.status)) {
       throw new Error("Launch readiness live services require search sync operation evidence");
@@ -679,6 +718,7 @@ function assertLiveServiceSyncOperationEvidence(item) {
     }
   }
   for (const engine of engines) {
+    if (engine.engine === "postgres") continue;
     const encoded = encodeURIComponent(engine.target);
     if (engine.engine === "typesense") {
       if (
@@ -715,6 +755,20 @@ function assertLiveServiceQueryOperationEvidence(item) {
   const engines = assertLiveServiceEngineEvidence(item, "Launch readiness live services require search query operation evidence");
   for (const engine of engines) {
     const operation = engine.operation || {};
+    if (engine.engine === "postgres") {
+      assertLaunchDatabaseTarget(engine.database_target, `${engine.engine} query report`);
+      assertLaunchDatabaseTarget(operation.url, `${engine.engine} query operation`);
+      if (
+        operation.method !== "SELECT" ||
+        operation.status !== 200 ||
+        operation.url !== engine.database_target ||
+        !Number.isInteger(operation.rows) ||
+        operation.rows < 0
+      ) {
+        throw new Error("Launch readiness live services require search query operation evidence");
+      }
+      continue;
+    }
     assertLaunchServiceUrl(operation.url, `${engine.engine} query operation`);
     const parsed = new URL(operation.url);
     const encoded = encodeURIComponent(engine.target);
