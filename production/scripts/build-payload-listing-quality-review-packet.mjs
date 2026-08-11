@@ -28,6 +28,7 @@ const packetPath = process.env.MS_REALTY_LISTING_QUALITY_REVIEW_PACKET_PATH || D
 const draftCsvPath = process.env.MS_REALTY_LISTING_QUALITY_REVIEW_DRAFT_PATH || DEFAULT_LISTING_QUALITY_REVIEW_DRAFT;
 const reviewPath = process.env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
 
+let exitCode = 0;
 let payload;
 try {
   payload = await loadPayloadCmsImportRuntime();
@@ -49,7 +50,9 @@ try {
   console.log(`Wrote Payload listing quality review packet to ${packetPath}`);
 } catch (error) {
   console.error(`PAYLOAD LISTING QUALITY PACKET FAILED: ${error.message}`);
-  process.exitCode = 1;
+  exitCode = 1;
 } finally {
   await payload?.destroy?.();
 }
+
+process.exit(exitCode);
