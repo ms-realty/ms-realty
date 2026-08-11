@@ -246,6 +246,69 @@ test("saveListingDraft is idempotent when the same patch is already present", as
   assert.equal(runtime.payload.calls.update.filter((call) => call.collection === "listing_translations").length, 2);
 });
 
+test("saveListingDraft retries one exact concurrent enrichment-task id duplicate in a fresh transaction", async () => {
+  const seed = loadCmsSeed();
+  let attempts = 0;
+  const runtime = createPayloadDraftRuntime(seed, {
+    afterUpdate({ collection }) {
+      if (collection !== "listings" || attempts++ > 0) return;
+      const error = new Error("The following field is invalid: id");
+      error.name = "ValidationError";
+      error.data = {
+        collection: "listing_enrichment_tasks",
+        errors: [{ path: "id", message: "Value must be unique" }],
+      };
+      throw error;
+    },
+  });
+
+  const result = await saveListingDraft(seed, {
+    payload: runtime.payload,
+    principal,
+    input: { listingId: "MS-CRAWL-0001", patch: { title: "Concurrent retry title" } },
+    editedAt: "2026-08-10T09:12:00.000Z",
+  });
+
+  assert.equal(result.idempotent, false);
+  assert.equal(runtime.payload.calls.begin, 2);
+  assert.equal(runtime.payload.calls.rollback, 1);
+  assert.equal(runtime.payload.calls.commit, 1);
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.title, "Concurrent retry title");
+});
+
+for (const [label, data] of [
+  ["wrong collection", { collection: "search_outbox", errors: [{ path: "id", message: "Value must be unique" }] }],
+  ["wrong field", { collection: "listing_enrichment_tasks", errors: [{ path: "listing_id", message: "Value must be unique" }] }],
+  ["wrong message", { collection: "listing_enrichment_tasks", errors: [{ path: "id", message: "Already exists" }] }],
+]) {
+  test(`saveListingDraft does not retry an enrichment duplicate classifier near miss: ${label}`, async () => {
+    const seed = loadCmsSeed();
+    const runtime = createPayloadDraftRuntime(seed, {
+      afterUpdate({ collection }) {
+        if (collection !== "listings") return;
+        const error = new Error("simulated validation failure");
+        error.name = "ValidationError";
+        error.data = data;
+        throw error;
+      },
+    });
+
+    await assert.rejects(
+      () =>
+        saveListingDraft(seed, {
+          payload: runtime.payload,
+          principal,
+          input: { listingId: "MS-CRAWL-0001", patch: { title: "Must not retry" } },
+          editedAt: "2026-08-10T09:13:00.000Z",
+        }),
+      /simulated validation failure/,
+    );
+    assert.equal(runtime.payload.calls.begin, 1);
+    assert.equal(runtime.payload.calls.rollback, 1);
+    assert.equal(runtime.payload.calls.commit, 0);
+  });
+}
+
 test("saveListingDraft rolls back the draft mutation when readback fails", async () => {
   const seed = loadCmsSeed();
   const runtime = createPayloadDraftRuntime(seed, {

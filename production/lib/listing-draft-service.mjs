@@ -115,6 +115,27 @@ async function withPayloadTransaction(payload, { principal, accessMode, isolatio
   }
 }
 
+function listingEnrichmentTaskIdDuplicate(error) {
+  const validationErrors = error?.data?.errors;
+  return (
+    error?.name === "ValidationError" &&
+    error?.data?.collection === "listing_enrichment_tasks" &&
+    Array.isArray(validationErrors) &&
+    validationErrors.length === 1 &&
+    validationErrors[0]?.path === "id" &&
+    validationErrors[0]?.message === "Value must be unique"
+  );
+}
+
+async function withListingEnrichmentDuplicateRetry(payload, transactionOptions, work) {
+  try {
+    return await withPayloadTransaction(payload, transactionOptions, work);
+  } catch (error) {
+    if (!listingEnrichmentTaskIdDuplicate(error)) throw error;
+    return withPayloadTransaction(payload, transactionOptions, work);
+  }
+}
+
 function patchSourceFromInput(input = {}) {
   if (input.patch !== undefined) {
     if (!input.patch || typeof input.patch !== "object" || Array.isArray(input.patch)) {
@@ -326,7 +347,7 @@ export async function saveListingDraft(
     throw unavailableError("Payload draft store is not configured", error);
   }
 
-  return withPayloadTransaction(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
+  return withListingEnrichmentDuplicateRetry(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
     const current = await runtime.findByID({
       collection: "listings",
       id: listingId,
