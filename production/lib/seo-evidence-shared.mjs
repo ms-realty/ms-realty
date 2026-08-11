@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import { parseCsv } from "./csv.mjs";
 import { fromRoot } from "./paths.mjs";
-import { REQUIRED_SOURCE_DOMAINS } from "./seo-evidence-contract.mjs";
+import { REQUIRED_SOURCE_DOMAINS, zeroResultProvenanceErrors } from "./seo-evidence-contract.mjs";
 
 export const SEO_EXPORTS = {
   search_console: "search-console.csv",
@@ -18,19 +18,78 @@ const REQUIRED_EXPORT_HEADERS = {
   analytics_export: ["url", "page_views"],
 };
 
-export function seoInputArtifact(source, csvText, rows = parseCsv(csvText || "")) {
+function publicZeroResultProvenance(provenance, { manifestPath, validatedAt, status, errors }) {
+  return {
+    status,
+    manifest_path: manifestPath,
+    schema: provenance?.schema,
+    source: provenance?.source,
+    input_sha256: provenance?.input_sha256,
+    source_domains: Array.isArray(provenance?.source_domains) ? [...provenance.source_domains] : undefined,
+    properties: Array.isArray(provenance?.properties)
+      ? provenance.properties.map((property) => ({
+          source_domain: property?.source_domain,
+          property_id: property?.property_id,
+        }))
+      : undefined,
+    report_window:
+      provenance?.report_window && typeof provenance.report_window === "object"
+        ? { start: provenance.report_window.start, end: provenance.report_window.end }
+        : undefined,
+    exported_at: provenance?.exported_at,
+    validated_at: validatedAt,
+    errors,
+  };
+}
+
+export function seoInputArtifact(
+  source,
+  csvText,
+  rows = parseCsv(csvText || ""),
+  { provenance = null, provenancePath = "", provenanceError = "", provenanceValidatedAt = new Date().toISOString() } = {},
+) {
   const contents = String(csvText || "");
   const templatePath = fromRoot("migration", "external", "seo", `${SEO_EXPORTS[source]}.example`);
   const templateCopy = fs.existsSync(templatePath) && contents.trim() === fs.readFileSync(templatePath, "utf8").trim();
   const probe = parseCsv(`${contents.trimEnd()}\n__ms_realty_header_probe__\n`)[0] || {};
   const headers = new Set(Object.keys(probe).map((key) => key.trim().toLowerCase().replaceAll(" ", "_")));
-  const verifiedZeroResult =
-    !templateCopy && rows.length === 0 && (REQUIRED_EXPORT_HEADERS[source] || []).every((key) => headers.has(key));
+  const headersValid = (REQUIRED_EXPORT_HEADERS[source] || []).every((key) => headers.has(key));
+  const inputSha256 = createHash("sha256").update(contents).digest("hex");
+  const zeroResultErrors =
+    rows.length === 0
+      ? [
+          ...(templateCopy ? [`SEO evidence ${source} zero-result CSV must not be a template copy`] : []),
+          ...(headersValid ? [] : [`SEO evidence ${source} zero-result CSV must include required headers`]),
+          ...(provenanceError
+            ? [`SEO evidence ${source} zero-result provenance manifest must contain valid JSON`]
+            : zeroResultProvenanceErrors(
+                provenance ? { ...provenance, validated_at: provenanceValidatedAt } : provenance,
+                source,
+                { inputSha256 },
+              )),
+        ]
+      : [];
+  const verifiedZeroResult = rows.length === 0 && zeroResultErrors.length === 0;
+  const zeroResultStatus = verifiedZeroResult
+    ? "verified"
+    : provenance === null && !provenanceError && headersValid && !templateCopy
+      ? "missing"
+      : "invalid";
   return {
     input_bytes: Buffer.byteLength(contents),
-    input_sha256: createHash("sha256").update(contents).digest("hex"),
+    input_sha256: inputSha256,
     template_copy: templateCopy,
     verified_zero_result: verifiedZeroResult,
+    ...(rows.length === 0
+      ? {
+          zero_result_provenance: publicZeroResultProvenance(provenance, {
+            manifestPath: provenancePath,
+            validatedAt: provenanceValidatedAt,
+            status: zeroResultStatus,
+            errors: zeroResultErrors,
+          }),
+        }
+      : {}),
   };
 }
 

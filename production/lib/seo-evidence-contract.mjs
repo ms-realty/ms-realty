@@ -1,11 +1,134 @@
+import { maxAgeForEvidenceClass } from "./evidence-freshness.mjs";
+
 export const REQUIRED_EXPORTS = ["search_console", "yandex_webmaster", "backlinks"];
 export const REQUIRED_SOURCE_DOMAINS = ["makler-realty.com", "makler-realty.ru"];
+export const SEO_ZERO_RESULT_PROVENANCE_SCHEMA = "ms-realty.seo-zero-result-provenance.v1";
 const SEO_SOURCE_STATUSES = new Set(["missing_export", "empty_export", "imported"]);
+const ZERO_RESULT_PROVENANCE_STATUSES = new Set(["missing", "invalid", "verified"]);
+const FUTURE_CLOCK_SKEW_MS = 60_000;
+const EXTERNAL_SEO_MAX_AGE_MS = maxAgeForEvidenceClass("external_seo_exports");
+
+function sameStringSet(actual, expected) {
+  return (
+    Array.isArray(actual) &&
+    actual.length === expected.length &&
+    [...actual].sort().join("|") === [...expected].sort().join("|")
+  );
+}
+
+function dateOnlyMs(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return NaN;
+  const parsed = Date.parse(`${value}T00:00:00Z`);
+  return Number.isFinite(parsed) && new Date(parsed).toISOString().slice(0, 10) === value ? parsed : NaN;
+}
+
+function timestampMs(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(value)) return NaN;
+  return Date.parse(value);
+}
+
+function propertyDomain(source, propertyId) {
+  const value = String(propertyId || "").trim().toLowerCase();
+  if (source === "search_console" && value.startsWith("sc-domain:")) {
+    return value.slice("sc-domain:".length);
+  }
+  if (source === "yandex_webmaster") {
+    const hostId = value.match(/^(https?):([^/:]+):(\d+)$/);
+    if (hostId && ((hostId[1] === "https" && hostId[3] === "443") || (hostId[1] === "http" && hostId[3] === "80"))) {
+      return hostId[2];
+    }
+  }
+  if (source === "backlinks" && /^[a-z0-9.-]+$/.test(value)) return value;
+  try {
+    const url = new URL(value);
+    if (
+      !["http:", "https:"].includes(url.protocol) ||
+      url.pathname !== "/" ||
+      url.search ||
+      url.hash ||
+      url.username ||
+      url.password
+    ) {
+      return "";
+    }
+    return url.hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+export function zeroResultProvenanceErrors(provenance, source, { inputSha256 } = {}) {
+  if (!provenance || typeof provenance !== "object" || Array.isArray(provenance)) {
+    return [`SEO evidence ${source} zero-result provenance manifest is missing`];
+  }
+
+  const errors = [];
+  if (provenance.schema !== SEO_ZERO_RESULT_PROVENANCE_SCHEMA) {
+    errors.push(`SEO evidence ${source} zero-result provenance schema must be ${SEO_ZERO_RESULT_PROVENANCE_SCHEMA}`);
+  }
+  if (provenance.source !== source) {
+    errors.push(`SEO evidence ${source} zero-result provenance source must match the export`);
+  }
+  if (!/^[a-f0-9]{64}$/.test(provenance.input_sha256 || "") || provenance.input_sha256 !== inputSha256) {
+    errors.push(`SEO evidence ${source} zero-result provenance input_sha256 must match the CSV artifact`);
+  }
+  if (!sameStringSet(provenance.source_domains, REQUIRED_SOURCE_DOMAINS)) {
+    errors.push(`SEO evidence ${source} zero-result provenance source_domains must exactly match legacy domains`);
+  }
+
+  if (!Array.isArray(provenance.properties) || provenance.properties.length !== REQUIRED_SOURCE_DOMAINS.length) {
+    errors.push(`SEO evidence ${source} zero-result provenance properties must cover both legacy domains`);
+  } else {
+    const propertyDomains = [];
+    for (const property of provenance.properties) {
+      const sourceDomain = String(property?.source_domain || "").trim().toLowerCase();
+      propertyDomains.push(sourceDomain);
+      if (!REQUIRED_SOURCE_DOMAINS.includes(sourceDomain)) {
+        errors.push(`SEO evidence ${source} zero-result provenance property source_domain must be a legacy domain`);
+        continue;
+      }
+      if (propertyDomain(source, property?.property_id) !== sourceDomain) {
+        errors.push(`SEO evidence ${source} zero-result provenance property_id must bind to ${sourceDomain}`);
+      }
+    }
+    if (!sameStringSet(propertyDomains, REQUIRED_SOURCE_DOMAINS)) {
+      errors.push(`SEO evidence ${source} zero-result provenance properties must uniquely cover legacy domains`);
+    }
+  }
+
+  const reportStartMs = dateOnlyMs(provenance.report_window?.start);
+  const reportEndMs = dateOnlyMs(provenance.report_window?.end);
+  const exportedAtMs = timestampMs(provenance.exported_at);
+  const validatedAtMs = timestampMs(provenance.validated_at);
+  if (!Number.isFinite(reportStartMs) || !Number.isFinite(reportEndMs) || reportStartMs > reportEndMs) {
+    errors.push(`SEO evidence ${source} zero-result provenance report window must be a valid ordered date range`);
+  }
+  if (!Number.isFinite(exportedAtMs)) {
+    errors.push(`SEO evidence ${source} zero-result provenance exported_at must be a valid timestamp`);
+  }
+  if (!Number.isFinite(validatedAtMs)) {
+    errors.push(`SEO evidence ${source} zero-result provenance validated_at must be a valid timestamp`);
+  }
+  if (Number.isFinite(reportEndMs) && Number.isFinite(exportedAtMs)) {
+    const reportEndExclusiveMs = reportEndMs + 24 * 60 * 60 * 1000;
+    if (exportedAtMs < reportEndMs || exportedAtMs - reportEndExclusiveMs > EXTERNAL_SEO_MAX_AGE_MS) {
+      errors.push(`SEO evidence ${source} zero-result provenance report window must end within the accepted export window`);
+    }
+  }
+  if (Number.isFinite(exportedAtMs) && Number.isFinite(validatedAtMs)) {
+    const exportAgeMs = validatedAtMs - exportedAtMs;
+    if (exportAgeMs < -FUTURE_CLOCK_SKEW_MS || exportAgeMs > EXTERNAL_SEO_MAX_AGE_MS) {
+      errors.push(`SEO evidence ${source} zero-result provenance exported_at must be within the accepted evidence window`);
+    }
+  }
+  return errors;
+}
 
 export function missingRequiredExport(summary) {
   if (
     summary?.status === "imported" &&
     summary.verified_zero_result === true &&
+    summary.zero_result_provenance?.status === "verified" &&
     summary.template_copy !== true &&
     summary.row_count === 0 &&
     /^[a-f0-9]{64}$/.test(summary.input_sha256 || "")
@@ -35,8 +158,11 @@ export function assertSeoSourceSummary(summary, source) {
     if (!/^[a-f0-9]{64}$/.test(summary.input_sha256 || "")) {
       throw new Error(`SEO evidence ${source} input hash must be a lowercase SHA-256 digest`);
     }
-    if (!Number.isInteger(summary.input_bytes) || summary.input_bytes < 1) {
-      throw new Error(`SEO evidence ${source} input bytes must be a positive integer`);
+    if (!Number.isInteger(summary.input_bytes) || summary.input_bytes < 0) {
+      throw new Error(`SEO evidence ${source} input bytes must be a non-negative integer`);
+    }
+    if (summary.status === "imported" && summary.input_bytes < 1) {
+      throw new Error(`SEO evidence ${source} imported input bytes must be a positive integer`);
     }
   }
   for (const key of ["row_count", "matched_rows", "unmatched_rows", "duplicate_rows", "signal_rows", "placeholder_rows"]) {
@@ -92,8 +218,34 @@ export function assertSeoSourceSummary(summary, source) {
     ) {
       throw new Error(`SEO evidence ${source} verified zero result must describe an empty imported artifact`);
     }
+    if (REQUIRED_EXPORTS.includes(source)) {
+      if (summary.zero_result_provenance?.status !== "verified") {
+        throw new Error(`SEO evidence ${source} verified zero result requires verified zero-result provenance`);
+      }
+      const provenanceErrors = zeroResultProvenanceErrors(summary.zero_result_provenance, source, {
+        inputSha256: summary.input_sha256,
+      });
+      if (provenanceErrors.length) {
+        throw new Error(`SEO evidence ${source} zero-result provenance is invalid: ${provenanceErrors.join("; ")}`);
+      }
+    }
   } else if (summary.status === "imported" && rowCount === 0) {
     throw new Error(`SEO evidence ${source} empty imported artifact must be verified`);
+  }
+  const provenanceStatus = summary.zero_result_provenance?.status;
+  if (provenanceStatus !== undefined) {
+    if (!ZERO_RESULT_PROVENANCE_STATUSES.has(provenanceStatus)) {
+      throw new Error(`SEO evidence ${source} zero-result provenance status must be known`);
+    }
+    if (!Array.isArray(summary.zero_result_provenance.errors)) {
+      throw new Error(`SEO evidence ${source} zero-result provenance errors must be an array`);
+    }
+    if (provenanceStatus === "verified" && summary.verified_zero_result !== true) {
+      throw new Error(`SEO evidence ${source} verified zero-result provenance must match source status`);
+    }
+    if (provenanceStatus !== "verified" && summary.zero_result_provenance.errors.length === 0) {
+      throw new Error(`SEO evidence ${source} blocked zero-result provenance must explain its errors`);
+    }
   }
 }
 
