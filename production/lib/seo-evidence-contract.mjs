@@ -6,6 +6,7 @@ export function missingRequiredExport(summary) {
   if (
     summary?.status === "imported" &&
     summary.verified_zero_result === true &&
+    summary.template_copy !== true &&
     summary.row_count === 0 &&
     /^[a-f0-9]{64}$/.test(summary.input_sha256 || "")
   ) {

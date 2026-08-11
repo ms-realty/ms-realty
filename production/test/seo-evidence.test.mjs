@@ -212,6 +212,10 @@ test("validated zero-result SEO exports are ready and bound to exact artifact ha
   const tampered = structuredClone(evidence);
   tampered.summary.sources.search_console.input_sha256 = "not-a-digest";
   assert.throws(() => assertSeoEvidence(tampered), /input hash/);
+
+  const copiedTemplate = structuredClone(evidence);
+  copiedTemplate.summary.sources.search_console.template_copy = true;
+  assert.throws(() => assertSeoEvidence(copiedTemplate), /missing required sources/);
 });
 
 test("SEO evidence input preflight passes complete local exports without writing output", () => {
