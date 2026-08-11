@@ -115,8 +115,12 @@ async function withPayloadTransaction(payload, { principal, accessMode, isolatio
   }
 }
 
-function listingEnrichmentTaskIdDuplicate(error) {
+function listingWorkQueueDuplicate(error) {
   const validationErrors = error?.data?.errors;
+  if ([error?.code, error?.cause?.code, error?.data?.code, error?.data?.cause?.code].includes("23505")) {
+    const constraint = String(error?.constraint || error?.cause?.constraint || error?.data?.constraint || "");
+    return !constraint || /^(listing_enrichment_tasks|search_outbox)_/.test(constraint);
+  }
   return (
     error?.name === "ValidationError" &&
     error?.data?.collection === "listing_enrichment_tasks" &&
@@ -127,11 +131,11 @@ function listingEnrichmentTaskIdDuplicate(error) {
   );
 }
 
-async function withListingEnrichmentDuplicateRetry(payload, transactionOptions, work) {
+async function withListingWorkQueueDuplicateRetry(payload, transactionOptions, work) {
   try {
     return await withPayloadTransaction(payload, transactionOptions, work);
   } catch (error) {
-    if (!listingEnrichmentTaskIdDuplicate(error)) throw error;
+    if (!listingWorkQueueDuplicate(error)) throw error;
     return withPayloadTransaction(payload, transactionOptions, work);
   }
 }
@@ -347,7 +351,7 @@ export async function saveListingDraft(
     throw unavailableError("Payload draft store is not configured", error);
   }
 
-  return withListingEnrichmentDuplicateRetry(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
+  return withListingWorkQueueDuplicateRetry(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
     const current = await runtime.findByID({
       collection: "listings",
       id: listingId,
@@ -408,7 +412,7 @@ export async function saveBulkListingStatusDrafts(
     throw unavailableError("Payload draft store is not configured", error);
   }
 
-  return withPayloadTransaction(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
+  return withListingWorkQueueDuplicateRetry(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
     const edits = [];
     let localeCodes = null;
     let translationDocs = null;

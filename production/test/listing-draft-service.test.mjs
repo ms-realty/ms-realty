@@ -276,6 +276,29 @@ test("saveListingDraft retries one exact concurrent enrichment-task id duplicate
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.title, "Concurrent retry title");
 });
 
+test("saveListingDraft retries one raw work-queue unique conflict in a fresh transaction", async () => {
+  const seed = loadCmsSeed();
+  let attempts = 0;
+  const runtime = createPayloadDraftRuntime(seed, {
+    afterUpdate({ collection }) {
+      if (collection !== "listings" || attempts++ > 0) return;
+      throw Object.assign(new Error("duplicate work queue row"), { code: "23505" });
+    },
+  });
+
+  const result = await saveListingDraft(seed, {
+    payload: runtime.payload,
+    principal,
+    input: { listingId: "MS-CRAWL-0001", patch: { title: "Raw duplicate retry title" } },
+    editedAt: "2026-08-10T09:12:30.000Z",
+  });
+
+  assert.equal(result.idempotent, false);
+  assert.equal(runtime.payload.calls.begin, 2);
+  assert.equal(runtime.payload.calls.rollback, 1);
+  assert.equal(runtime.payload.calls.commit, 1);
+});
+
 for (const [label, data] of [
   ["wrong collection", { collection: "search_outbox", errors: [{ path: "id", message: "Value must be unique" }] }],
   ["wrong field", { collection: "listing_enrichment_tasks", errors: [{ path: "listing_id", message: "Value must be unique" }] }],
@@ -308,6 +331,30 @@ for (const [label, data] of [
     assert.equal(runtime.payload.calls.commit, 0);
   });
 }
+
+test("saveListingDraft does not retry a raw unique conflict from an unrelated constraint", async () => {
+  const seed = loadCmsSeed();
+  const runtime = createPayloadDraftRuntime(seed, {
+    afterUpdate({ collection }) {
+      if (collection !== "listings") return;
+      throw Object.assign(new Error("unrelated unique conflict"), { code: "23505", constraint: "admins_email_idx" });
+    },
+  });
+
+  await assert.rejects(
+    () =>
+      saveListingDraft(seed, {
+        payload: runtime.payload,
+        principal,
+        input: { listingId: "MS-CRAWL-0001", patch: { title: "Must not retry raw constraint" } },
+        editedAt: "2026-08-10T09:14:00.000Z",
+      }),
+    /unrelated unique conflict/,
+  );
+  assert.equal(runtime.payload.calls.begin, 1);
+  assert.equal(runtime.payload.calls.rollback, 1);
+  assert.equal(runtime.payload.calls.commit, 0);
+});
 
 test("saveListingDraft rolls back the draft mutation when readback fails", async () => {
   const seed = loadCmsSeed();
@@ -380,4 +427,34 @@ test("saveBulkListingStatusDrafts keeps the batch durable and idempotent", async
   assert.equal(runtime.payload.calls.update.filter((call) => call.collection === "listings").length, 2);
   assert.equal(runtime.payload.calls.update.filter((call) => call.collection === "listing_translations").length >= 2, true);
   assert.equal(runtime.payload.calls.find.filter((call) => call.collection === "listing_translations").length, 4);
+});
+
+test("saveBulkListingStatusDrafts retries the full transaction after an enrichment-task race", async () => {
+  const seed = loadCmsSeed();
+  let attempts = 0;
+  const runtime = createPayloadDraftRuntime(seed, {
+    afterUpdate({ collection }) {
+      if (collection !== "listings" || attempts++ > 0) return;
+      const error = new Error("The following field is invalid: id");
+      error.name = "ValidationError";
+      error.data = {
+        collection: "listing_enrichment_tasks",
+        errors: [{ path: "id", message: "Value must be unique" }],
+      };
+      throw error;
+    },
+  });
+
+  const result = await saveBulkListingStatusDrafts(seed, {
+    payload: runtime.payload,
+    principal,
+    input: { listingIds: ["MS-CRAWL-0001", "MS-CRAWL-0002"], targetStatus: "reserved" },
+    editedAt: "2026-08-10T09:32:00.000Z",
+  });
+
+  assert.equal(result.edits.filter((edit) => !edit.idempotent).length, 2);
+  assert.equal(runtime.payload.calls.begin, 2);
+  assert.equal(runtime.payload.calls.rollback, 1);
+  assert.equal(runtime.payload.calls.commit, 1);
+  assert.equal(runtime.currentRows().listings.filter((row) => row.facts.listing_status === "reserved").length, 2);
 });
