@@ -135,6 +135,11 @@ function readySeoEvidenceFixture() {
       duplicate_rows: 0,
       signal_rows: 2,
       placeholder_rows: 0,
+      input_path: `fixture/${source}.csv`,
+      input_bytes: 64,
+      input_sha256: "a".repeat(64),
+      template_copy: false,
+      verified_zero_result: false,
       matched_source_domains: ["makler-realty.com", "makler-realty.ru"],
       signal_source_domains: ["makler-realty.com", "makler-realty.ru"],
     };
@@ -1064,11 +1069,10 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
     monitoringRollback: readyMonitoringRollback,
   });
   const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
-  seoGate.evidence.sources.search_console.signal_rows = 0;
-  seoGate.evidence.sources.search_console.signal_source_domains = [];
+  seoGate.evidence.sources.search_console.input_sha256 = "not-a-digest";
 
-  assert.throws(() => assertLaunchReadinessReport(report), /complete search_console evidence/);
-  seoGate.evidence.sources.search_console.signal_rows = 1;
+  assert.throws(() => assertLaunchReadinessReport(report), /input hash/);
+  seoGate.evidence.sources.search_console.input_sha256 = "a".repeat(64);
   seoGate.evidence.sources.search_console.row_count = 99;
   assert.throws(() => assertLaunchReadinessReport(report), /row counts/);
 });
@@ -1575,7 +1579,13 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
 
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
   completeTerminalDecisions(routeMap, deployableRedirects);
-  seoEvidence.summary.sources.analytics_export.status = "imported";
+  Object.assign(seoEvidence.summary.sources.analytics_export, {
+    status: "imported",
+    input_bytes: 32,
+    input_sha256: "b".repeat(64),
+    template_copy: false,
+    verified_zero_result: true,
+  });
   seoEvidence.summary.sources.privacy_events.status = "";
 
   const report = buildLaunchReadinessReport({

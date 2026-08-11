@@ -15,6 +15,7 @@ import {
   joinExternalRows,
   normalizeExternalRow,
   routeKeys,
+  seoInputArtifact,
 } from "./seo-evidence-shared.mjs";
 
 export {
@@ -30,18 +31,42 @@ const DEFAULT_MIGRATION_RECORDS_PATH = fromRoot("production", "data", "migration
 const DEFAULT_LEGACY_ROUTE_MAP_PATH = fromRoot("production", "data", "legacy-route-map.json");
 const DEFAULT_EVENT_LEDGER_PATH = fromRoot("production", "data", "events.jsonl");
 
-function readExternalSource(source, inputDir) {
+function readZeroResultProvenance(inputPath) {
+  const provenancePath = `${inputPath}.provenance.json`;
+  if (!fs.existsSync(provenancePath)) {
+    return { provenance: null, provenancePath: repoRelativePath(provenancePath), provenanceError: "" };
+  }
+  try {
+    return {
+      provenance: JSON.parse(fs.readFileSync(provenancePath, "utf8")),
+      provenancePath: repoRelativePath(provenancePath),
+      provenanceError: "",
+    };
+  } catch (error) {
+    return {
+      provenance: null,
+      provenancePath: repoRelativePath(provenancePath),
+      provenanceError: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+function readExternalSource(source, inputDir, { provenanceValidatedAt } = {}) {
   const inputPath = path.join(/*turbopackIgnore: true*/ inputDir, SEO_EXPORTS[source]);
   if (!fs.existsSync(inputPath)) {
     return { source, input_path: repoRelativePath(inputPath), status: "missing_export", rows: [], row_count: 0 };
   }
-  const rows = parseCsv(fs.readFileSync(inputPath, "utf8")).map((row) => normalizeExternalRow(source, row));
+  const csv = fs.readFileSync(inputPath, "utf8");
+  const rows = parseCsv(csv).map((row) => normalizeExternalRow(source, row));
+  const provenance = rows.length === 0 ? readZeroResultProvenance(inputPath) : {};
+  const artifact = seoInputArtifact(source, csv, rows, { ...provenance, provenanceValidatedAt });
   return {
     source,
     input_path: repoRelativePath(inputPath),
-    status: rows.length ? "imported" : "empty_export",
+    status: rows.length || artifact.verified_zero_result ? "imported" : "empty_export",
     rows,
     row_count: rows.length,
+    ...artifact,
   };
 }
 
@@ -141,12 +166,13 @@ export function buildSeoEvidence({
   inputDir = DEFAULT_SEO_EVIDENCE_INPUT_DIR,
   events = readPrivacyEventLedger(DEFAULT_EVENT_LEDGER_PATH),
   generatedAt = new Date().toISOString(),
+  provenanceValidatedAt = new Date().toISOString(),
 } = {}) {
   const { evidence, byKey, byListingReference } = indexEvidence(records, routeMap);
   const sourceSummaries = {};
 
   for (const source of Object.keys(SEO_EXPORTS)) {
-    const sourceData = readExternalSource(source, inputDir);
+    const sourceData = readExternalSource(source, inputDir, { provenanceValidatedAt });
     sourceSummaries[source] = { ...sourceData, rows: undefined, ...joinExternalRows(source, sourceData.rows, byKey) };
   }
 
@@ -170,7 +196,8 @@ export function writeExternalSeoExport(source, csvText, { inputDir = DEFAULT_SEO
   fs.mkdirSync(inputDir, { recursive: true });
   const outPath = path.join(/*turbopackIgnore: true*/ inputDir, filename);
   fs.writeFileSync(outPath, csvText || "");
-  return { source, outPath, row_count: parseCsv(csvText || "").length };
+  const rows = parseCsv(csvText || "");
+  return { source, outPath, row_count: rows.length, ...seoInputArtifact(source, csvText, rows) };
 }
 
 export function readSeoExportTemplate(source, { inputDir = DEFAULT_SEO_EVIDENCE_INPUT_DIR } = {}) {

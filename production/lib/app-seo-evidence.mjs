@@ -7,6 +7,7 @@ import {
   countUrlsWithSeoEvidence,
   joinExternalRows,
   normalizeExternalRow,
+  seoInputArtifact,
   seoEvidenceIndex,
 } from "./seo-evidence-shared.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -36,11 +37,13 @@ function overlayInputDirectoryEvidence(config) {
     if (!fs.existsSync(/*turbopackIgnore: true*/ inputPath)) continue;
     const csv = fs.readFileSync(/*turbopackIgnore: true*/ inputPath, "utf8");
     const rows = parseCsv(csv).map((row) => normalizeExternalRow(source, row));
+    const artifact = seoInputArtifact(source, csv, rows);
     evidence.summary.sources[source] = {
       source,
       input_path: inputPath,
-      status: rows.length ? "imported" : "empty_export",
+      status: rows.length || artifact.verified_zero_result ? "imported" : "empty_export",
       row_count: rows.length,
+      ...artifact,
       ...joinExternalRows(source, rows, seoEvidenceIndex(evidence), { resetEvidence: evidence }),
     };
   }
@@ -118,14 +121,16 @@ export function importAppSeoEvidenceRows(input, config) {
   const evidence = readAppSeoEvidence(config);
   const csv = input.csv || "";
   const rows = parseCsv(csv).map((row) => normalizeExternalRow(input.source, row));
+  const artifact = seoInputArtifact(input.source, csv, rows);
   const outPath = seoInputPath(input.source, config);
 
   evidence.generated_at = config.reviewedAt || new Date().toISOString();
   evidence.summary.sources[input.source] = {
     source: input.source,
     input_path: outPath,
-    status: rows.length ? "imported" : "empty_export",
+    status: rows.length || artifact.verified_zero_result ? "imported" : "empty_export",
     row_count: rows.length,
+    ...artifact,
     ...joinExternalRows(input.source, rows, seoEvidenceIndex(evidence), { resetEvidence: evidence }),
   };
   updateMissingRequiredSources(evidence);

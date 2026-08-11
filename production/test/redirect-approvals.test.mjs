@@ -207,7 +207,7 @@ test("redirect approval preflight CLI fails missing CSV and passes valid CSV", (
   assert.match(valid.stdout, /Redirect approval CSV valid: 1 rows/);
 });
 
-test("deployable redirect build CLI honors configured ledger and output paths", () => {
+test("deployable redirect build CLI replaces stale ledger state from the reviewed CSV", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-redirect-build-`);
   const ledgerPath = `${dir}/redirect-approvals.jsonl`;
   const outputPath = `${dir}/deployable-redirects.json`;
@@ -248,11 +248,11 @@ test("deployable redirect build CLI honors configured ledger and output paths", 
   });
 
   assert.equal(rerun.status, 0, rerun.stderr);
-  assert.equal(readRedirectApprovals(ledgerPath).length, 166);
+  assert.equal(readRedirectApprovals(ledgerPath).length, 165);
   const rebuilt = JSON.parse(fs.readFileSync(outputPath, "utf8"));
   assert.equal(rebuilt.redirects.length, 165);
-  assert.equal(rebuilt.decisions.length, 166);
-  assert.equal(rebuilt.decisions.find((row) => row.old_url === taxonomy.old_url).status, 410);
+  assert.equal(rebuilt.decisions.length, 165);
+  assert.equal(rebuilt.decisions.some((row) => row.old_url === taxonomy.old_url), false);
 });
 
 test("duplicate approval imports keep one deployable redirect per old URL", () => {

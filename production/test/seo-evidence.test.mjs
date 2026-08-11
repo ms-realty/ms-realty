@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   assertSeoEvidencePreflightReport,
   assertSeoEvidence,
@@ -31,6 +32,55 @@ function writeCompleteSeoInputFixture(dir) {
   fs.writeFileSync(`${dir}/yandex-webmaster.csv`, `url,indexed,issue\n${com},yes,\n${ru},yes,\n`);
   fs.writeFileSync(`${dir}/backlinks.csv`, `target_url,source_url\n${com},https://regionalbroker.bg/a\n${ru},https://partnerrealty.de/b\n`);
   return { com, ru };
+}
+
+function writeZeroResultSeoInputFixture(dir) {
+  const files = {
+    "search-console.csv": "url,clicks,impressions,position\n",
+    "yandex-webmaster.csv": "url,indexed,issue\n",
+    "backlinks.csv": "target_url,source_url,referring_domain\n",
+  };
+  const sourceByFilename = {
+    "search-console.csv": "search_console",
+    "yandex-webmaster.csv": "yandex_webmaster",
+    "backlinks.csv": "backlinks",
+  };
+  const propertyId = (source, domain) => {
+    if (source === "search_console") return `sc-domain:${domain}`;
+    if (source === "yandex_webmaster") return `https:${domain}:443`;
+    return domain;
+  };
+  for (const [filename, contents] of Object.entries(files)) {
+    const source = sourceByFilename[filename];
+    fs.writeFileSync(`${dir}/${filename}`, contents);
+    fs.writeFileSync(
+      `${dir}/${filename}.provenance.json`,
+      `${JSON.stringify(
+        {
+          schema: "ms-realty.seo-zero-result-provenance.v1",
+          source,
+          input_sha256: createHash("sha256").update(contents).digest("hex"),
+          source_domains: ["makler-realty.com", "makler-realty.ru"],
+          properties: ["makler-realty.com", "makler-realty.ru"].map((sourceDomain) => ({
+            source_domain: sourceDomain,
+            property_id: propertyId(source, sourceDomain),
+          })),
+          report_window: { start: "2026-06-01", end: "2026-07-01" },
+          exported_at: "2026-07-04T12:00:00Z",
+        },
+        null,
+        2,
+      )}\n`,
+    );
+  }
+  return files;
+}
+
+function mutateZeroResultProvenance(dir, filename, mutate) {
+  const provenancePath = `${dir}/${filename}.provenance.json`;
+  const provenance = JSON.parse(fs.readFileSync(provenancePath, "utf8"));
+  mutate(provenance);
+  fs.writeFileSync(provenancePath, `${JSON.stringify(provenance, null, 2)}\n`);
 }
 
 test("SEO evidence joins external exports and privacy events to crawled URLs", () => {
@@ -146,7 +196,7 @@ test("required SEO exports need matched coverage for both legacy domains", () =>
   assert.deepEqual(evidence.summary.sources.backlinks.signal_source_domains, ["makler-realty.com", "makler-realty.ru"]);
 });
 
-test("required SEO exports need signal coverage for both legacy domains", () => {
+test("zero-valued SEO rows cover both legacy domains without synthetic positive signals", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-two-domain-seo-signal-`);
   fs.writeFileSync(
     `${dir}/search-console.csv`,
@@ -174,7 +224,141 @@ test("required SEO exports need signal coverage for both legacy domains", () => 
 
   assert.deepEqual(evidence.summary.sources.search_console.matched_source_domains, ["makler-realty.com", "makler-realty.ru"]);
   assert.deepEqual(evidence.summary.sources.search_console.signal_source_domains, ["makler-realty.com"]);
-  assert.ok(evidence.summary.missing_required_sources.includes("search_console"));
+  assert.equal(evidence.summary.missing_required_sources.includes("search_console"), false);
+  assert.match(evidence.summary.sources.search_console.input_sha256, /^[a-f0-9]{64}$/);
+});
+
+test("validated zero-result SEO exports are ready and bound to exact artifact hashes", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-zero-result-seo-evidence-`);
+  const files = writeZeroResultSeoInputFixture(dir);
+  const evidence = buildSeoEvidence({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    provenanceValidatedAt: "2026-07-05T00:00:00Z",
+  });
+
+  assert.equal(assertSeoEvidence(evidence), true);
+  assert.deepEqual(evidence.summary.missing_required_sources, []);
+  for (const [source, filename] of [
+    ["search_console", "search-console.csv"],
+    ["yandex_webmaster", "yandex-webmaster.csv"],
+    ["backlinks", "backlinks.csv"],
+  ]) {
+    const summary = evidence.summary.sources[source];
+    assert.equal(summary.status, "imported");
+    assert.equal(summary.verified_zero_result, true);
+    assert.equal(summary.row_count, 0);
+    assert.equal(summary.input_bytes, Buffer.byteLength(files[filename]));
+    assert.equal(summary.input_sha256, createHash("sha256").update(files[filename]).digest("hex"));
+    assert.equal(summary.zero_result_provenance.status, "verified");
+    assert.deepEqual(summary.zero_result_provenance.source_domains, ["makler-realty.com", "makler-realty.ru"]);
+    assert.deepEqual(summary.zero_result_provenance.report_window, { start: "2026-06-01", end: "2026-07-01" });
+    assert.equal(summary.zero_result_provenance.exported_at, "2026-07-04T12:00:00Z");
+  }
+
+  const tampered = structuredClone(evidence);
+  tampered.summary.sources.search_console.input_sha256 = "not-a-digest";
+  assert.throws(() => assertSeoEvidence(tampered), /input hash/);
+
+  const copiedTemplate = structuredClone(evidence);
+  copiedTemplate.summary.sources.search_console.template_copy = true;
+  assert.throws(() => assertSeoEvidence(copiedTemplate), /missing required sources/);
+
+  const wrongProperty = structuredClone(evidence);
+  wrongProperty.summary.sources.search_console.zero_result_provenance.properties[0].property_id =
+    "sc-domain:example.com";
+  assert.throws(() => assertSeoEvidence(wrongProperty), /zero-result provenance/);
+});
+
+test("zero-result SEO provenance rejects wrong property, domain, window, timestamp, or input hash", () => {
+  const cases = [
+    {
+      name: "property",
+      mutate(provenance) {
+        provenance.properties[0].property_id = "sc-domain:example.com";
+      },
+      error: /property_id/,
+    },
+    {
+      name: "domain",
+      mutate(provenance) {
+        provenance.source_domains[0] = "example.com";
+      },
+      error: /source_domains/,
+    },
+    {
+      name: "window",
+      mutate(provenance) {
+        provenance.report_window = { start: "2026-03-01", end: "2026-04-01" };
+      },
+      error: /report window/,
+    },
+    {
+      name: "timestamp",
+      mutate(provenance) {
+        provenance.exported_at = "2026-07-06T00:00:00Z";
+      },
+      error: /exported_at/,
+    },
+    {
+      name: "hash",
+      mutate(provenance) {
+        provenance.input_sha256 = "a".repeat(64);
+      },
+      error: /input_sha256/,
+    },
+  ];
+
+  for (const item of cases) {
+    const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-zero-result-${item.name}-`);
+    const files = writeZeroResultSeoInputFixture(dir);
+    mutateZeroResultProvenance(dir, "search-console.csv", item.mutate);
+
+    const evidence = buildSeoEvidence({
+      inputDir: dir,
+      generatedAt: "2026-07-05T00:00:00Z",
+      provenanceValidatedAt: "2026-07-05T00:00:00Z",
+    });
+    const source = evidence.summary.sources.search_console;
+
+    assert.equal(assertSeoEvidence(evidence), true);
+    assert.equal(source.status, "empty_export");
+    assert.equal(source.verified_zero_result, false);
+    assert.equal(source.zero_result_provenance.status, "invalid");
+    assert.ok(source.zero_result_provenance.errors.some((error) => item.error.test(error)));
+    assert.equal(source.input_bytes, Buffer.byteLength(files["search-console.csv"]));
+    assert.equal(source.input_sha256, createHash("sha256").update(files["search-console.csv"]).digest("hex"));
+    assert.ok(evidence.summary.missing_required_sources.includes("search_console"));
+  }
+});
+
+test("blank SEO exports produce a valid blocked preflight with hashes and zero byte counts", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-blank-seo-evidence-`);
+  for (const filename of ["search-console.csv", "yandex-webmaster.csv", "backlinks.csv"]) {
+    fs.writeFileSync(`${dir}/${filename}`, "");
+  }
+
+  const result = validateSeoEvidenceInputs({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    provenanceValidatedAt: "2026-07-05T00:00:00Z",
+  });
+  const report = buildSeoEvidencePreflightReport({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    provenanceValidatedAt: "2026-07-05T00:00:00Z",
+  });
+
+  assert.equal(result.ready, false);
+  assert.deepEqual(result.missing_required_sources, ["search_console", "yandex_webmaster", "backlinks"]);
+  assert.equal(report.status, "blocked");
+  assert.equal(assertSeoEvidencePreflightReport(report), true);
+  for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
+    assert.equal(result.sources[source].status, "empty_export");
+    assert.equal(result.sources[source].input_bytes, 0);
+    assert.equal(result.sources[source].input_sha256, createHash("sha256").update("").digest("hex"));
+    assert.equal(result.sources[source].verified_zero_result, false);
+  }
 });
 
 test("SEO evidence input preflight passes complete local exports without writing output", () => {
@@ -789,6 +973,36 @@ test("app SEO evidence import summary exposes remaining launch sources", () => {
   assert.ok(readyResult.seoImport.nextActions.some((action) => action.includes("seo:preflight:report")));
 });
 
+test("app SEO evidence import keeps header-only uploads blocked without provenance", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-zero-result-seo-`);
+  const evidencePath = `${dir}/seo-evidence.json`;
+  fs.writeFileSync(
+    evidencePath,
+    `${JSON.stringify(buildSeoEvidence({ generatedAt: "2026-07-05T00:00:00Z" }), null, 2)}\n`,
+  );
+  const files = writeZeroResultSeoInputFixture(dir);
+  let result;
+  for (const [source, filename] of [
+    ["search_console", "search-console.csv"],
+    ["yandex_webmaster", "yandex-webmaster.csv"],
+    ["backlinks", "backlinks.csv"],
+  ]) {
+    result = importAppSeoEvidenceRows(
+      { source, csv: files[filename] },
+      { seoEvidenceInputDir: dir, seoEvidenceOutputPath: evidencePath, reviewedAt: "2026-07-05T00:01:00Z" },
+    );
+  }
+
+  assert.equal(result.seoImport.ready, false);
+  assert.deepEqual(result.seoImport.missingRequiredSources, ["search_console", "yandex_webmaster", "backlinks"]);
+  assert.equal(result.sources.backlinks.status, "empty_export");
+  assert.equal(result.sources.backlinks.verified_zero_result, false);
+  assert.equal(
+    result.sources.backlinks.input_sha256,
+    createHash("sha256").update(files["backlinks.csv"]).digest("hex"),
+  );
+});
+
 test("external SEO export templates are present but real CSVs stay local", () => {
   const dir = fromRoot("migration", "external", "seo");
   for (const file of ["search-console.csv", "yandex-webmaster.csv", "backlinks.csv"]) {
@@ -797,7 +1011,9 @@ test("external SEO export templates are present but real CSVs stay local", () =>
     assert.match(template, /makler-realty\.com/);
     assert.match(template, /makler-realty\.ru/);
   }
-  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /migration\/external\/seo\/\*\.csv/);
+  const gitignore = fs.readFileSync(fromRoot(".gitignore"), "utf8");
+  assert.match(gitignore, /^migration\/external\/seo\/\*\.csv$/m);
+  assert.match(gitignore, /^migration\/external\/seo\/\*\.provenance\.json$/m);
 });
 
 test("external SEO export writer only writes known source files", () => {
