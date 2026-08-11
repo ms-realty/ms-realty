@@ -3,9 +3,35 @@ import {
   runSearchEngineSync,
   writeSearchEngineSyncReport,
 } from "../lib/search-engine-sync.mjs";
+import { fromRoot } from "../lib/paths.mjs";
+import fs from "node:fs";
+import crypto from "node:crypto";
 
 const calls = [];
-const PUBLIC_LOOKUP = async () => [{ address: "1.1.1.1", family: 4 }];
+const docs = JSON.parse(fs.readFileSync(fromRoot("search", "data", "index-listings.json"), "utf8"));
+const reviewed = docs.find((doc) => doc.id === "MS-CRAWL-0001:bg");
+const documents = reviewed ? [reviewed] : [];
+const projection = {
+  schema_version: 1,
+  documents,
+  summary: { input_rows: documents.length, projected_documents: documents.length, skipped_rows: 0 },
+  source: {
+    kind: "payload_postgres",
+    authoritative: true,
+    listing_rows: documents.length,
+    eligible_translation_rows: documents.length,
+    projected_documents: documents.length,
+    locale_codes: [...new Set(documents.map((document) => document.locale))],
+    digest: crypto.createHash("sha256").update(JSON.stringify(documents)).digest("hex"),
+  },
+};
+const postgres = {
+  env: {
+    DATABASE_URL: "postgres://db.ms-realty.bg:5432/ms_realty",
+    PAYLOAD_SECRET: "dev-ms-realty-payload-secret",
+  },
+  snapshotQueryImpl: async () => projection.documents,
+};
 
 async function fakeFetch(url, options) {
   calls.push({
@@ -18,9 +44,9 @@ async function fakeFetch(url, options) {
 }
 
 const report = await runSearchEngineSync({
+  postgres,
+  projection,
   fetchImpl: fakeFetch,
-  typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "dev-ms-realty", lookupImpl: PUBLIC_LOOKUP },
-  meilisearch: { baseUrl: "https://meili.ms-realty.bg", apiKey: "dev-ms-realty", lookupImpl: PUBLIC_LOOKUP },
 });
 writeSearchEngineSyncReport({ ...report, calls }, DEFAULT_SEARCH_ENGINE_SYNC_SMOKE);
 console.log(`Wrote search engine sync smoke report to ${DEFAULT_SEARCH_ENGINE_SYNC_SMOKE}`);

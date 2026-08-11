@@ -2052,7 +2052,7 @@ export function renderSearchPage({
     chrome: publicChrome(registry, locale, { active: savedView ? "saved" : "search" }),
     search: {
       saved_view: savedView === true,
-      engines: ["typesense", "meilisearch"],
+      engines: ["postgres"],
       intent: searchIntent,
       query: searchIntent.text_query,
       sort: selectedSort,

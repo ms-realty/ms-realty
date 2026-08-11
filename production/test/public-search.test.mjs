@@ -138,7 +138,7 @@ test("public search falls back from unavailable Typesense to Meilisearch", async
 
   assert.equal(engineResult.engine, "meilisearch");
   assert.equal(result.search.backend.mode, "fallback");
-  assert.deepEqual(result.search.backend.unavailable_engines, ["typesense"]);
+  assert.deepEqual(result.search.backend.unavailable_engines, ["postgres", "typesense"]);
   assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
   assert.equal(calls.length, 2);
 });
@@ -153,7 +153,7 @@ test("public search uses the deterministic seed fallback when no engine is confi
 
   assert.equal(engineResult.engine, "seed_fallback");
   assert.equal(result.search.backend.mode, "local_fallback");
-  assert.deepEqual(result.search.backend.unavailable_engines, ["typesense", "meilisearch"]);
+  assert.deepEqual(result.search.backend.unavailable_engines, ["postgres", "typesense", "meilisearch"]);
   assert.ok(result.cards.length > 0);
 });
 

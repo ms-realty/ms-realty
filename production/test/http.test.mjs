@@ -471,6 +471,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     dealClosedAt: "2026-07-10T10:00:00Z",
     slugChangedAt: "2026-07-04T00:09:00Z",
     leadSlaGeneratedAt: "2026-07-06T00:00:00Z",
+    search: {
+      postgres: { env: {} },
+    },
     hermesReplyProvider: async (prompt) => {
       hermesReplyPrompts.push(prompt);
       return {
@@ -1980,16 +1983,20 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   syncReport.generated_at = runtimeGeneratedAt;
   queryReport.generated_at = runtimeGeneratedAt;
   hermesReport.generated_at = runtimeGeneratedAt;
+  syncReport.summary.database_target = "postgres://db.ms-realty.bg:5432/ms_realty";
+  queryReport.summary.database_target = "postgres://db.ms-realty.bg:5432/ms_realty";
   for (const engine of syncReport.engines) {
-    const host = engine.engine === "typesense" ? "typesense.ms-realty.bg" : "meili.ms-realty.bg";
-    for (const operation of engine.operations) {
-      operation.url = operation.url.replace(`${engine.engine === "typesense" ? "typesense" : "meili"}.example.com`, host);
-    }
+    engine.operations = (engine.operations || []).map((operation) => ({
+      ...operation,
+      url: "postgres://db.ms-realty.bg:5432/ms_realty",
+    }));
   }
   for (const engine of queryReport.engines) {
-    const baseUrl = engine.engine === "typesense" ? "https://typesense.ms-realty.bg" : "https://meili.ms-realty.bg";
-    engine.operation.url = engine.operation.url.replace(new URL(engine.service_url).origin, baseUrl);
-    engine.service_url = baseUrl;
+    engine.database_target = "postgres://db.ms-realty.bg:5432/ms_realty";
+    engine.operation = {
+      ...engine.operation,
+      url: "postgres://db.ms-realty.bg:5432/ms_realty",
+    };
   }
   hermesReport.provider.endpoint = "https://hermes.ms-realty.bg/v1/chat/completions";
   const app = createHttpApp({
@@ -2235,7 +2242,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(liveTemplate.status, 200);
   assert.equal(liveTemplate.headers["content-disposition"], 'attachment; filename="search-engine-sync-report.json.example"');
   assert.equal(JSON.parse(liveTemplate.body).example, true);
-  assert.equal(JSON.parse(liveTemplate.body).summary.engines, 2);
+  assert.equal(JSON.parse(liveTemplate.body).summary.engines, 1);
   assert.equal(liveImportUnauthorized.status, 401);
   assert.equal(liveProvisioningImportUnauthorized.status, 401);
   assert.equal(liveProvisioningImport.status, 201);

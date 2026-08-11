@@ -1,87 +1,46 @@
 {
-  "evidence_scope": "smoke",
+  "evidence_scope": "live",
   "generated_at": "2026-07-06T00:00:00Z",
   "source": {
-    "kind": "search_fixture",
-    "authoritative": false,
-    "projected_documents": 167
+    "kind": "payload_postgres",
+    "authoritative": true,
+    "listing_rows": 1,
+    "eligible_translation_rows": 1,
+    "projected_documents": 1,
+    "locale_codes": [
+      "bg"
+    ],
+    "digest": "dd4012977ab5098195917cfefabb0df2344569d52375b16e4a9adea22ad4391f"
   },
   "summary": {
-    "engines": 2,
+    "engines": 1,
     "targets": {
-      "typesense": "ms_realty_listings",
-      "meilisearch": "ms_realty_listings"
+      "postgres": "ms_realty_public_search_documents"
     },
     "documents_per_engine": [
-      167,
-      167
+      1
     ],
-    "total_operations": 4
+    "total_operations": 1,
+    "database_target": "postgres://db.ms-realty.bg:5432/ms_realty"
   },
   "engines": [
     {
-      "engine": "typesense",
-      "collection": "ms_realty_listings",
-      "documents": 167,
+      "engine": "postgres",
+      "target": "ms_realty_public_search_documents",
+      "documents": 1,
+      "digest": "dd4012977ab5098195917cfefabb0df2344569d52375b16e4a9adea22ad4391f",
+      "locale_codes": [
+        "bg"
+      ],
       "operations": [
         {
-          "method": "POST",
-          "url": "https://typesense.ms-realty.bg/collections",
-          "status": 201,
-          "bytes": 4929
-        },
-        {
-          "method": "POST",
-          "url": "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert",
-          "status": 201,
-          "bytes": 803256
-        }
-      ]
-    },
-    {
-      "engine": "meilisearch",
-      "index": "ms_realty_listings",
-      "documents": 167,
-      "operations": [
-        {
-          "method": "PATCH",
-          "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings",
-          "status": 202,
-          "bytes": 1416
-        },
-        {
-          "method": "POST",
-          "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id",
-          "status": 201,
-          "bytes": 808260
+          "method": "SELECT",
+          "status": 200,
+          "url": "postgres://db.ms-realty.bg:5432/ms_realty",
+          "rows": 1
         }
       ]
     }
   ],
-  "calls": [
-    {
-      "method": "POST",
-      "url": "https://typesense.ms-realty.bg/collections",
-      "content_type": "application/json",
-      "bytes": 4929
-    },
-    {
-      "method": "POST",
-      "url": "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert",
-      "content_type": "application/x-ndjson",
-      "bytes": 803256
-    },
-    {
-      "method": "PATCH",
-      "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings",
-      "content_type": "application/json",
-      "bytes": 1416
-    },
-    {
-      "method": "POST",
-      "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id",
-      "content_type": "application/x-ndjson",
-      "bytes": 808260
-    }
-  ]
+  "calls": []
 }

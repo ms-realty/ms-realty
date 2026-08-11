@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-10T15:19:43.028Z",
+  "generated_at": "2026-08-11T17:18:07.848Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
@@ -834,7 +834,7 @@
         "freshness": {
           "id": "payload_runtime",
           "status": "stale",
-          "age_ms": 3079183028,
+          "age_ms": 3172687848,
           "max_age_ms": 604800000
         },
         "next_actions": [
