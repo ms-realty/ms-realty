@@ -78,9 +78,10 @@ test("custom listing editor writes durable draft changes through the shared serv
 });
 
 test("custom listing editor preserves explicit empty-string form clears for durable drafts", async () => {
-  const runtime = createPayloadDraftRuntime(loadCmsSeed());
-  const listing = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001");
+  const seed = loadCmsSeed();
+  const listing = seed.records.find((record) => record.id === "MS-CRAWL-0001");
   listing.seo.canonical_override = "/bg/custom-canonical";
+  const runtime = createPayloadDraftRuntime(seed);
   const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
   process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
   const app = createHttpApp({ payloadListingRuntime: runtime.payload });
