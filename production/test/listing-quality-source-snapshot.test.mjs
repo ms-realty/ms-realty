@@ -117,6 +117,7 @@ test("Payload listing-quality packet CLI fails closed without Neon runtime autho
     env: {
       ...process.env,
       DATABASE_URL: "",
+      NODE_ENV: "production",
       PAYLOAD_SECRET: "",
       MS_REALTY_LISTING_QUALITY_SOURCE_SNAPSHOT_PATH: `${dir}/snapshot.json`,
       MS_REALTY_LISTING_QUALITY_REPORT_PATH: `${dir}/report.json`,
@@ -128,5 +129,24 @@ test("Payload listing-quality packet CLI fails closed without Neon runtime autho
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Payload runtime is not configured/);
+  assert.deepEqual(fs.readdirSync(dir), []);
+});
+
+test("Payload listing-quality packet CLI refuses development schema mode", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-quality-development-cli-`);
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-payload-listing-quality-review-packet.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      DATABASE_URL: "configured-but-must-not-be-used",
+      NODE_ENV: "development",
+      PAYLOAD_SECRET: "configured-but-must-not-be-used",
+      MS_REALTY_LISTING_QUALITY_SOURCE_SNAPSHOT_PATH: `${dir}/snapshot.json`,
+    },
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /requires NODE_ENV=production for read-only authority access/);
   assert.deepEqual(fs.readdirSync(dir), []);
 });

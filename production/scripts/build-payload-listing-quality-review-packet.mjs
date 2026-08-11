@@ -31,6 +31,9 @@ const reviewPath = process.env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH || DEFAULT_
 let exitCode = 0;
 let payload;
 try {
+  if (process.env.NODE_ENV !== "production") {
+    throw new Error("Payload listing quality packet requires NODE_ENV=production for read-only authority access");
+  }
   payload = await loadPayloadCmsImportRuntime();
   const seed = await buildListingQualitySourceSnapshot({ capturedAt: generatedAt, payload });
   const report = buildListingQualityReport({ seed, tourApprovals: [], generatedAt });
