@@ -264,10 +264,17 @@ const readyLiveServices = [
     summary: {
       engines: 2,
       targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
-      documents_per_engine: [167, 167],
+      documents_per_engine: [1, 1],
       total_operations: 4,
     },
     evidence: {
+      evidence_scope: "live",
+      source: {
+        kind: "payload_postgres",
+        authoritative: true,
+        projected_documents: 1,
+        digest: "a".repeat(64),
+      },
       engines: [
         {
           engine: "typesense",
@@ -307,16 +314,27 @@ const readyLiveServices = [
       engines: 2,
       targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
       total_hits: 2,
-      first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"],
+      first_hit_ids: ["MS-CURRENT-0001:bg", "MS-CURRENT-0001:bg"],
     },
     evidence: {
+      evidence_scope: "live",
+      source: {
+        kind: "payload_postgres",
+        authoritative: true,
+        projected_documents: 1,
+        digest: "a".repeat(64),
+      },
+      expectation: {
+        projected_documents: 1,
+        sample_document_id: "MS-CURRENT-0001:bg",
+      },
       engines: [
         {
           engine: "typesense",
           target: "ms_realty_listings",
           operation: {
             method: "GET",
-            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg+%26%26+source_listing_id%3A%3DMS-CRAWL-0001",
+            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=MS-CURRENT-0001&filter_by=publication_state%3A%3Dpublished",
             status: 200,
           },
         },
@@ -535,18 +553,28 @@ function writeLiveReportFixtures(dir, generatedAt = new Date().toISOString()) {
   fs.writeFileSync(
     syncReportPath,
     `${JSON.stringify({
+      evidence_scope: "live",
       generated_at: generatedAt,
+      source: {
+        kind: "payload_postgres",
+        authoritative: true,
+        listing_rows: 1,
+        eligible_translation_rows: 1,
+        projected_documents: 1,
+        locale_codes: ["bg"],
+        digest: "a".repeat(64),
+      },
       summary: {
         engines: 2,
         targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
-        documents_per_engine: [167, 167],
+        documents_per_engine: [1, 1],
         total_operations: 4,
       },
       engines: [
         {
           engine: "typesense",
           collection: "ms_realty_listings",
-          documents: 167,
+          documents: 1,
           operations: [
             { method: "POST", url: "https://typesense.ms-realty.bg/collections", status: 201, bytes: 1 },
             { method: "POST", url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert", status: 200, bytes: 1 },
@@ -555,7 +583,7 @@ function writeLiveReportFixtures(dir, generatedAt = new Date().toISOString()) {
         {
           engine: "meilisearch",
           index: "ms_realty_listings",
-          documents: 167,
+          documents: 1,
           operations: [
             { method: "PATCH", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings", status: 202, bytes: 1 },
             { method: "POST", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id", status: 202, bytes: 1 },
@@ -567,41 +595,55 @@ function writeLiveReportFixtures(dir, generatedAt = new Date().toISOString()) {
   fs.writeFileSync(
     queryReportPath,
     `${JSON.stringify({
+      evidence_scope: "live",
       generated_at: generatedAt,
+      source: {
+        kind: "payload_postgres",
+        authoritative: true,
+        listing_rows: 1,
+        eligible_translation_rows: 1,
+        projected_documents: 1,
+        locale_codes: ["bg"],
+        digest: "a".repeat(64),
+      },
+      expectation: {
+        projected_documents: 1,
+        sample_document_id: "MS-CURRENT-0001:bg",
+      },
       summary: {
         engines: 2,
         targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
         total_hits: 2,
-        first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"],
+        first_hit_ids: ["MS-CURRENT-0001:bg", "MS-CURRENT-0001:bg"],
       },
       engines: [
         {
           engine: "typesense",
           service_url: "https://typesense.ms-realty.bg",
           collection: "ms_realty_listings",
-          query: "Sandanski",
-          filter: "translation_indexable:=true && locale:=bg && source_listing_id:=MS-CRAWL-0001",
+          query: "MS-CURRENT-0001",
+          filter: "publication_state:=published && (listing_status:=available || listing_status:=reserved) && translation_indexable:=true && translation_human_approved:=true && locale_indexable:=true && locale:=`bg` && source_listing_id:=`MS-CURRENT-0001`",
           operation: {
             method: "GET",
-            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg+%26%26+source_listing_id%3A%3DMS-CRAWL-0001",
+            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=MS-CURRENT-0001&filter_by=publication_state%3A%3Dpublished",
             status: 200,
           },
           total: 1,
-          hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }],
+          hits: [{ id: "MS-CURRENT-0001:bg", locale: "bg" }],
         },
         {
           engine: "meilisearch",
           service_url: "https://meili.ms-realty.bg",
           index: "ms_realty_listings",
-          query: "Sandanski",
-          filter: 'translation_indexable = true AND locale = bg AND source_listing_id = "MS-CRAWL-0001"',
+          query: "MS-CURRENT-0001",
+          filter: 'publication_state = "published" AND (listing_status = "available" OR listing_status = "reserved") AND translation_indexable = true AND translation_human_approved = true AND locale_indexable = true AND locale = "bg" AND source_listing_id = "MS-CURRENT-0001"',
           operation: {
             method: "POST",
             url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/search",
             status: 200,
           },
           total: 1,
-          hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }],
+          hits: [{ id: "MS-CURRENT-0001:bg", locale: "bg" }],
         },
       ],
     })}\n`,
@@ -1285,7 +1327,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices.map((item) =>
-      item.source === "typesense_meilisearch_query" ? { ...item, evidence: { engines: [] } } : item,
+      item.source === "typesense_meilisearch_query" ? { ...item, evidence: { ...item.evidence, engines: [] } } : item,
     ),
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
@@ -1333,6 +1375,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
         ? {
             ...item,
             evidence: {
+              ...item.evidence,
               engines: item.evidence.engines.map((engine) =>
                 engine.engine === "typesense"
                   ? { ...engine, operations: engine.operations.map((operation) => ({ ...operation, bytes: 0 })) }
@@ -1358,6 +1401,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
         ? {
             ...item,
             evidence: {
+              ...item.evidence,
               engines: item.evidence.engines.map((engine) =>
                 engine.engine === "meilisearch"
                   ? {
@@ -2318,7 +2362,13 @@ test("live service report import writes only validated source reports", () => {
     () =>
       writeLiveServiceReport(
         "typesense_meilisearch_query",
-        { generated_at: "2026-07-06T00:00:00Z", summary: { engines: 1 }, engines: [] },
+        {
+          evidence_scope: "live",
+          generated_at: "2026-07-06T00:00:00Z",
+          source: queryReport.source,
+          summary: { engines: 1 },
+          engines: [],
+        },
         { queryReportPath: outPath },
       ),
     /cover Typesense and Meilisearch/,

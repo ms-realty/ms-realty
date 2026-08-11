@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  assertSearchEngineEvidenceConsistency,
   assertSearchEngineQueryReport,
   assertSearchEngineSyncReport,
   DEFAULT_SEARCH_ENGINE_QUERY_REPORT,
@@ -193,6 +194,9 @@ function assertLiveServiceReportHasNoSecrets(report) {
 
 function assertLaunchLiveServiceEvidence(source, report) {
   if (source === "typesense_meilisearch_sync") {
+    if (report.evidence_scope !== "live" || report.source?.kind !== "payload_postgres" || report.source?.authoritative !== true) {
+      throw new Error("Search sync launch evidence must use the current Payload projection");
+    }
     for (const engine of report.engines || []) {
       const urls = (engine.operations || []).map((operation) => operation.url);
       if (!urls.length) throw new Error(`${engine.engine} sync report must include operation URL evidence`);
@@ -202,6 +206,9 @@ function assertLaunchLiveServiceEvidence(source, report) {
     return;
   }
   if (source === "typesense_meilisearch_query") {
+    if (report.evidence_scope !== "live" || report.source?.kind !== "payload_postgres" || report.source?.authoritative !== true) {
+      throw new Error("Search query launch evidence must use the current Payload projection");
+    }
     for (const engine of report.engines || []) {
       const serviceOrigin = assertLaunchServiceUrl(engine.service_url, `${engine.engine} query report`).origin;
       const operationOrigin = assertLaunchServiceUrl(engine.operation?.url, `${engine.engine} query operation`).origin;
@@ -235,6 +242,8 @@ function operationSnapshot(operation = {}) {
 function liveServiceEvidenceSnapshot(source, report) {
   if (source === "typesense_meilisearch_sync") {
     return {
+      evidence_scope: report.evidence_scope,
+      source: report.source,
       engines: (report.engines || []).map((engine) => ({
         engine: engine.engine,
         target: engine.collection || engine.index,
@@ -244,6 +253,9 @@ function liveServiceEvidenceSnapshot(source, report) {
   }
   if (source === "typesense_meilisearch_query") {
     return {
+      evidence_scope: report.evidence_scope,
+      source: report.source,
+      expectation: report.expectation,
       engines: (report.engines || []).map((engine) => ({
         engine: engine.engine,
         target: engine.collection || engine.index,
@@ -573,6 +585,15 @@ function assertPassRuntimeSmokeEvidence(report) {
 
 function assertLiveServiceSummaryEvidence(item) {
   const summary = item.summary || {};
+  const source = item.evidence?.source || {};
+  const projectedDocuments = source.projected_documents;
+  const hasPayloadProjection =
+    item.evidence?.evidence_scope === "live" &&
+    source.kind === "payload_postgres" &&
+    source.authoritative === true &&
+    Number.isInteger(projectedDocuments) &&
+    projectedDocuments >= 0 &&
+    /^[a-f0-9]{64}$/.test(String(source.digest || ""));
   const hasSearchTargets =
     typeof summary.targets?.typesense === "string" &&
     summary.targets.typesense.trim() &&
@@ -581,23 +602,30 @@ function assertLiveServiceSummaryEvidence(item) {
   if (
     item.source === "typesense_meilisearch_sync" &&
     (summary.engines !== 2 ||
+      !hasPayloadProjection ||
       !hasSearchTargets ||
       !Array.isArray(summary.documents_per_engine) ||
       summary.documents_per_engine.length !== 2 ||
-      summary.documents_per_engine.some((count) => !Number.isInteger(count) || count < 167) ||
+      summary.documents_per_engine.some((count) => count !== projectedDocuments) ||
       !Number.isInteger(summary.total_operations) ||
-      summary.total_operations < 4)
+      summary.total_operations !== (projectedDocuments === 0 ? 2 : 4))
   ) {
     throw new Error("Launch readiness live services require search sync summary evidence");
   }
+  const expectation = item.evidence?.expectation || {};
+  const expectedSample = expectation.sample_document_id;
+  const expectedFirstHits = projectedDocuments === 0 ? [null, null] : [expectedSample, expectedSample];
   if (
     item.source === "typesense_meilisearch_query" &&
     (summary.engines !== 2 ||
+      !hasPayloadProjection ||
       !hasSearchTargets ||
+      expectation.projected_documents !== projectedDocuments ||
+      (projectedDocuments === 0 ? expectedSample !== null : !String(expectedSample || "").trim()) ||
       !Number.isInteger(summary.total_hits) ||
-      summary.total_hits < 1 ||
+      (projectedDocuments === 0 ? summary.total_hits !== 0 : summary.total_hits < 2) ||
       !Array.isArray(summary.first_hit_ids) ||
-      summary.first_hit_ids.length < 2)
+      JSON.stringify(summary.first_hit_ids) !== JSON.stringify(expectedFirstHits))
   ) {
     throw new Error("Launch readiness live services require search query summary evidence");
   }
@@ -636,6 +664,7 @@ function assertLiveServiceEngineEvidence(item, expectedMessage) {
 
 function assertLiveServiceSyncOperationEvidence(item) {
   const engines = assertLiveServiceEngineEvidence(item, "Launch readiness live services require search sync operation evidence");
+  const projectedDocuments = item.evidence?.source?.projected_documents;
   const operations = engines.flatMap((engine) => (engine.operations || []).map((operation) => ({ engine: engine.engine, operation })));
   if (operations.length !== item.summary.total_operations) {
     throw new Error("Launch readiness live services require search sync operation evidence");
@@ -654,12 +683,13 @@ function assertLiveServiceSyncOperationEvidence(item) {
     if (engine.engine === "typesense") {
       if (
         !hasLiveServiceOperation(engine, { method: "POST", path: "/collections", statuses: [200, 201, 409] }) ||
-        !hasLiveServiceOperation(engine, {
-          method: "POST",
-          path: `/collections/${encoded}/documents/import`,
-          searchParam: { key: "action", value: "upsert" },
-          statuses: [200, 201, 202],
-        })
+        (projectedDocuments > 0 &&
+          !hasLiveServiceOperation(engine, {
+            method: "POST",
+            path: `/collections/${encoded}/documents/import`,
+            searchParam: { key: "action", value: "upsert" },
+            statuses: [200, 201, 202],
+          }))
       ) {
         throw new Error("Launch readiness live services require search sync operation evidence");
       }
@@ -667,12 +697,13 @@ function assertLiveServiceSyncOperationEvidence(item) {
     if (engine.engine === "meilisearch") {
       if (
         !hasLiveServiceOperation(engine, { method: "PATCH", path: `/indexes/${encoded}/settings`, statuses: [200, 201, 202] }) ||
-        !hasLiveServiceOperation(engine, {
-          method: "POST",
-          path: `/indexes/${encoded}/documents`,
-          searchParam: { key: "primaryKey", value: "meili_id" },
-          statuses: [200, 201, 202],
-        })
+        (projectedDocuments > 0 &&
+          !hasLiveServiceOperation(engine, {
+            method: "POST",
+            path: `/indexes/${encoded}/documents`,
+            searchParam: { key: "primaryKey", value: "meili_id" },
+            statuses: [200, 201, 202],
+          }))
       ) {
         throw new Error("Launch readiness live services require search sync operation evidence");
       }
@@ -786,6 +817,15 @@ function assertPassRuntimeEvidence(report) {
     }
     for (const item of reports) {
       assertLiveServiceReportPassEvidence(item);
+    }
+    const sync = reports.find((item) => item.source === "typesense_meilisearch_sync");
+    const query = reports.find((item) => item.source === "typesense_meilisearch_query");
+    if (
+      sync?.evidence?.source?.kind !== query?.evidence?.source?.kind ||
+      sync?.evidence?.source?.projected_documents !== query?.evidence?.source?.projected_documents ||
+      sync?.evidence?.source?.digest !== query?.evidence?.source?.digest
+    ) {
+      throw new Error("Launch readiness search sync and query evidence must use the same Payload projection");
     }
   }
 
@@ -1060,6 +1100,19 @@ export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT,
 
 export function validateLiveServiceReports(options = {}) {
   const reports = liveServiceReports(options);
+  const sync = reports.find((item) => item.source === "typesense_meilisearch_sync");
+  const query = reports.find((item) => item.source === "typesense_meilisearch_query");
+  if (sync?.status === "pass" && query?.status === "pass") {
+    try {
+      assertSearchEngineEvidenceConsistency(
+        readJson(options.syncReportPath || DEFAULT_SEARCH_ENGINE_SYNC_REPORT),
+        readJson(options.queryReportPath || DEFAULT_SEARCH_ENGINE_QUERY_REPORT),
+      );
+    } catch (error) {
+      query.status = "invalid_report";
+      query.error = error.message;
+    }
+  }
   return {
     ready: reports.every((item) => item.status === "pass"),
     reports,
