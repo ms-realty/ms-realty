@@ -1843,7 +1843,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
 });
 
 test("launch preflight and input checklist honor env-mounted redirect and evidence paths", async () => {
-  const generatedAt = "2026-08-10T12:00:00.000Z";
+  const generatedAt = new Date().toISOString();
   const emptyRedirectsPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-empty-redirects-`)}/deployable-redirects.json`;
   fs.writeFileSync(
     emptyRedirectsPath,
@@ -1889,7 +1889,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
 
   assert.equal(ready.status, 0, ready.stderr);
   assert.match(markdown, /Status: blocked/);
-  assert.match(markdown, /Generated: 2026-08-10T12:00:00.000Z/);
+  assert.match(markdown, new RegExp(`Generated: ${generatedAt.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
   assert.match(markdown, /Blockers: redirect_reviews, payload_runtime/);
   assert.match(markdown, /MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH/);
 });
