@@ -52,6 +52,7 @@
     "listing:verification": "node production/scripts/build-listing-verification-report.mjs",
     "listing:preflight:report": "node production/scripts/build-listing-quality-preflight-report.mjs",
     "listing:review-pack": "node production/scripts/build-listing-quality-review-packet.mjs",
+    "listing:review-pack:payload": "node production/scripts/build-payload-listing-quality-review-packet.mjs",
     "listing:preflight": "node production/scripts/validate-listing-quality-review.mjs",
     "app:routes": "node production/scripts/build-app-route-manifest.mjs",
     "public:build": "node production/scripts/render-public-fixtures.mjs",
