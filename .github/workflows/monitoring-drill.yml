@@ -1,4 +1,5 @@
 name: Monitoring and rollback drill
+run-name: Monitoring rollback drill for ${{ inputs.release_sha }}
 
 on:
   workflow_dispatch:
@@ -8,24 +9,43 @@ on:
         required: true
         type: string
       confirm_alert_drill:
-        description: Intentionally fail the final job to test alert delivery
+        description: Exercise the real journey monitor failure and send a workflow-failure alert
         required: true
         default: false
         type: boolean
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
   isolated-drill:
-    name: Verify exact release and isolated rollback
+    name: Exercise monitoring and exact artifact rollback
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
+    # Repository administrators must configure this environment with at least
+    # one required reviewer and prevent self-review. The first step verifies
+    # those provider-side rules before any isolated Worker is created.
+    environment:
+      name: monitoring-alert-drill
     env:
+      APPROVAL_ENVIRONMENT: monitoring-alert-drill
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       RELEASE_SHA: ${{ inputs.release_sha }}
     steps:
+      - name: Verify protected reviewer gate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl --fail --silent --show-error --max-time 20 \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/environments/${APPROVAL_ENVIRONMENT}" \
+            --output "$RUNNER_TEMP/approval-environment.json"
+          node -e 'const fs=require("node:fs"); const d=JSON.parse(fs.readFileSync(process.argv[1], "utf8")); const rule=d.protection_rules?.find(({ type }) => type === "required_reviewers"); if (!rule || rule.prevent_self_review !== true || !Array.isArray(rule.reviewers) || rule.reviewers.length < 1) { throw new Error("monitoring-alert-drill must require a reviewer and prevent self-review"); }' "$RUNNER_TEMP/approval-environment.json"
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -34,207 +54,316 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+
+      - name: Install deployment dependencies
+        run: npm ci
 
       - name: Require exact release and deployment authority
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
+          test -f Dockerfile
           test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
           node -e 'if (!/^[0-9a-f]{40}$/i.test(process.argv[1])) process.exit(1)' "$RELEASE_SHA"
           git merge-base --is-ancestor "$RELEASE_SHA" origin/main
 
-      - name: Allocate isolated Worker names
-        id: names
+      - name: Allocate isolated Worker identity
+        id: identity
         run: |
           suffix="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          echo "canary=msr-canary-${suffix}" >> "$GITHUB_OUTPUT"
-          echo "rollback=msr-rollback-${suffix}" >> "$GITHUB_OUTPUT"
+          worker="msr-monitoring-drill-${suffix}"
+          correlation_id="${GITHUB_REPOSITORY}:monitoring-drill:${GITHUB_RUN_ID}:${GITHUB_RUN_ATTEMPT}"
+          fault_marker="monitoring-drill-failure-${suffix}"
+          run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}"
+          {
+            echo "worker=$worker"
+            echo "correlation_id=$correlation_id"
+            echo "fault_marker=$fault_marker"
+            echo "run_url=$run_url"
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Resolve workers.dev subdomain
+      - name: Resolve isolated workers.dev URL
         id: workers-dev
+        env:
+          DRILL_WORKER: ${{ steps.identity.outputs.worker }}
         run: |
           response="$(curl --fail --silent --show-error --max-time 20 \
             --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain")"
           subdomain="$(node -e 'const d=JSON.parse(process.argv[1]); const value=d.success && d.result?.subdomain; if (typeof value !== "string" || !/^[a-z0-9-]{1,63}$/i.test(value)) process.exit(1); process.stdout.write(value)' "$response")"
-          echo "subdomain=$subdomain" >> "$GITHUB_OUTPUT"
+          echo "url=https://${DRILL_WORKER}.${subdomain}.workers.dev" >> "$GITHUB_OUTPUT"
 
-      - name: Verify release is currently deployed
+      - name: Verify exact release through production journeys
         id: production
         env:
-          PRODUCTION_URL: ${{ vars.MS_REALTY_PRODUCTION_URL }}
+          MS_REALTY_PRODUCTION_URL: ${{ vars.MS_REALTY_PRODUCTION_URL }}
         run: |
-          test -n "$PRODUCTION_URL"
-          health_url="${PRODUCTION_URL%/}/api/health"
-          curl --fail --silent --show-error --max-time 20 --header 'Cache-Control: no-cache' "$health_url" --output "$RUNNER_TEMP/production-health.json"
-          node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== process.argv[2]) process.exit(1)' "$RUNNER_TEMP/production-health.json" "$RELEASE_SHA"
-          echo "url=$health_url" >> "$GITHUB_OUTPUT"
+          test -n "$MS_REALTY_PRODUCTION_URL"
+          node production/scripts/probe-production-journeys.mjs | tee "$RUNNER_TEMP/production-journey.json"
+          node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const health=d.checks?.find(({ id }) => id === "health"); if (d.failed !== 0 || health?.status !== "pass" || health.build_marker !== process.argv[2]) process.exit(1)' "$RUNNER_TEMP/production-journey.json" "$RELEASE_SHA"
+          echo "url=${MS_REALTY_PRODUCTION_URL%/}/api/health" >> "$GITHUB_OUTPUT"
           echo "checked_at=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy exact-release canary
-        env:
-          CANARY_NAME: ${{ steps.names.outputs.canary }}
+      - name: Stamp the exact release marker into the deploy artifact
         run: |
           node --input-type=module <<'NODE'
           import fs from "node:fs";
 
           const marker = process.env.RELEASE_SHA;
           const placeholder = "__MS_REALTY_BUILD_MARKER__";
-          const config = fs.readFileSync("wrangler.jsonc", "utf8");
+          const configPath = "wrangler.jsonc";
+          const config = fs.readFileSync(configPath, "utf8");
           if (config.split(placeholder).length !== 2) throw new Error("Expected exactly one Container image marker placeholder");
-          fs.writeFileSync("wrangler.jsonc", config.replace(placeholder, marker));
+          fs.writeFileSync(configPath, config.replace(placeholder, marker));
           NODE
+
+      - name: Deploy exact-release MS Realty artifact to the isolated Worker
+        id: baseline
+        env:
+          DRILL_URL: ${{ steps.workers-dev.outputs.url }}
+          DRILL_WORKER: ${{ steps.identity.outputs.worker }}
+        run: |
           npx --yes wrangler@4.117.0 deploy \
             --config wrangler.jsonc \
-            --name "$CANARY_NAME" \
+            --name "$DRILL_WORKER" \
+            --strict \
             --containers-rollout immediate \
-            --var 'PAYLOAD_SECRET:canary-only-secret-never-used-for-production-0123456789' \
-            --var 'DATABASE_URL:postgresql://canary:canary@db-canary.invalid:5432/canary'
+            --tag "$RELEASE_SHA" \
+            --message "Monitoring drill baseline ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}" \
+            --var 'PAYLOAD_SECRET:monitoring-drill-only-secret-not-for-production-0123456789' \
+            --var 'DATABASE_URL:postgresql://monitoring:monitoring@db-monitoring.invalid:5432/monitoring' \
+            --var "MS_REALTY_PUBLIC_ORIGIN:$DRILL_URL"
+          status="$(npx --yes wrangler@4.117.0 deployments status --name "$DRILL_WORKER" --json)"
+          baseline_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v?.version_id) process.exit(1); process.stdout.write(v.version_id)' "$status")"
+          echo "version=$baseline_version" >> "$GITHUB_OUTPUT"
 
-      - name: Verify exact-release canary
+      - name: Verify the real canary journey and exact marker
         id: canary
         env:
-          CANARY_NAME: ${{ steps.names.outputs.canary }}
-          WORKERS_DEV_SUBDOMAIN: ${{ steps.workers-dev.outputs.subdomain }}
+          DRILL_URL: ${{ steps.workers-dev.outputs.url }}
+          MS_REALTY_PRODUCTION_URL: ${{ steps.workers-dev.outputs.url }}
         run: |
-          url="https://${CANARY_NAME}.${WORKERS_DEV_SUBDOMAIN}.workers.dev/api/health"
+          health_url="${DRILL_URL%/}/api/health"
+          matched=false
           for attempt in $(seq 1 100); do
-            if curl --fail --silent --show-error --max-time 20 --header 'Cache-Control: no-cache' "$url" --output "$RUNNER_TEMP/canary-health.json" &&
+            if curl --fail --silent --show-error --max-time 20 --header 'Cache-Control: no-cache' "$health_url" --output "$RUNNER_TEMP/canary-health.json" &&
               node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== process.argv[2]) process.exit(1)' "$RUNNER_TEMP/canary-health.json" "$RELEASE_SHA"; then
-              echo "url=$url" >> "$GITHUB_OUTPUT"
-              echo "checked_at=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> "$GITHUB_OUTPUT"
-              exit 0
+              matched=true
+              break
             fi
             echo "Canary marker check attempt $attempt/100 failed; retrying."
             sleep 10
           done
-          exit 1
+          test "$matched" = true
+          node production/scripts/probe-production-journeys.mjs | tee "$RUNNER_TEMP/canary-journey.json"
+          echo "checked_at=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy two isolated rollback versions
-        id: versions
+      - name: Deploy the real artifact with an isolated monitor-fault marker
+        id: fault
         env:
-          ROLLBACK_NAME: ${{ steps.names.outputs.rollback }}
-          WORKERS_DEV_SUBDOMAIN: ${{ steps.workers-dev.outputs.subdomain }}
-        run: |
-          worker_dir="$RUNNER_TEMP/ms-realty-rollback-drill"
-          mkdir -p "$worker_dir"
-          cat > "$worker_dir/wrangler.jsonc" <<JSON
-          { "name": "$ROLLBACK_NAME", "main": "worker.mjs", "compatibility_date": "2026-07-01", "workers_dev": true }
-          JSON
-          printf '%s\n' 'export default { fetch() { return Response.json({ marker: "first" }); } };' > "$worker_dir/worker.mjs"
-          npx --yes wrangler@4.117.0 deploy --config "$worker_dir/wrangler.jsonc" --tag first --message "Rollback drill first version $GITHUB_RUN_ID"
-          status="$(npx --yes wrangler@4.117.0 deployments status --config "$worker_dir/wrangler.jsonc" --json)"
-          first_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
-
-          printf '%s\n' 'export default { fetch() { return Response.json({ marker: "second" }); } };' > "$worker_dir/worker.mjs"
-          npx --yes wrangler@4.117.0 deploy --config "$worker_dir/wrangler.jsonc" --tag second --message "Rollback drill second version $GITHUB_RUN_ID"
-          status="$(npx --yes wrangler@4.117.0 deployments status --config "$worker_dir/wrangler.jsonc" --json)"
-          second_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
-          test "$first_version" != "$second_version"
-
-          url="https://${ROLLBACK_NAME}.${WORKERS_DEV_SUBDOMAIN}.workers.dev/"
-          for attempt in $(seq 1 30); do
-            if [ "$(curl --fail --silent --show-error --max-time 20 --header 'Cache-Control: no-cache' "$url" | node -e 'let s=""; process.stdin.on("data", d => s += d).on("end", () => process.stdout.write(JSON.parse(s).marker || ""))')" = second ]; then
-              break
-            fi
-            test "$attempt" -lt 30
-            sleep 2
-          done
-
-          npx --yes wrangler@4.117.0 rollback "$first_version" --config "$worker_dir/wrangler.jsonc" --message "Isolated rollback drill $GITHUB_RUN_ID" --yes
-          status="$(npx --yes wrangler@4.117.0 deployments status --config "$worker_dir/wrangler.jsonc" --json)"
-          active_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
-          test "$active_version" = "$first_version"
-          for attempt in $(seq 1 30); do
-            if [ "$(curl --fail --silent --show-error --max-time 20 --header 'Cache-Control: no-cache' "$url" | node -e 'let s=""; process.stdin.on("data", d => s += d).on("end", () => process.stdout.write(JSON.parse(s).marker || ""))')" = first ]; then
-              {
-                echo "first_version=$first_version"
-                echo "second_version=$second_version"
-                echo "verified_at=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
-              } >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            test "$attempt" -lt 30
-            sleep 2
-          done
-          exit 1
-
-      - name: Write redacted machine evidence
-        env:
-          CANARY_NAME: ${{ steps.names.outputs.canary }}
-          CANARY_URL: ${{ steps.canary.outputs.url }}
-          CANARY_CHECKED_AT: ${{ steps.canary.outputs.checked_at }}
-          PRODUCTION_URL: ${{ steps.production.outputs.url }}
-          PRODUCTION_CHECKED_AT: ${{ steps.production.outputs.checked_at }}
-          ROLLBACK_NAME: ${{ steps.names.outputs.rollback }}
-          FIRST_VERSION: ${{ steps.versions.outputs.first_version }}
-          SECOND_VERSION: ${{ steps.versions.outputs.second_version }}
-          ROLLBACK_VERIFIED_AT: ${{ steps.versions.outputs.verified_at }}
+          BASELINE_VERSION: ${{ steps.baseline.outputs.version }}
+          DRILL_URL: ${{ steps.workers-dev.outputs.url }}
+          DRILL_WORKER: ${{ steps.identity.outputs.worker }}
+          FAULT_MARKER: ${{ steps.identity.outputs.fault_marker }}
         run: |
           node --input-type=module <<'NODE'
           import fs from "node:fs";
 
+          const configPath = "wrangler.jsonc";
+          const config = fs.readFileSync(configPath, "utf8");
+          if (config.split(process.env.RELEASE_SHA).length !== 2) throw new Error("Expected exactly one exact-release image marker");
+          fs.writeFileSync(configPath, config.replace(process.env.RELEASE_SHA, process.env.FAULT_MARKER));
+          NODE
+          npx --yes wrangler@4.117.0 deploy \
+            --config wrangler.jsonc \
+            --name "$DRILL_WORKER" \
+            --strict \
+            --containers-rollout immediate \
+            --tag "monitoring-drill-fault-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --message "Monitoring drill fault ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}" \
+            --var 'PAYLOAD_SECRET:monitoring-drill-only-secret-not-for-production-0123456789' \
+            --var 'DATABASE_URL:postgresql://monitoring:monitoring@db-monitoring.invalid:5432/monitoring' \
+            --var "MS_REALTY_PUBLIC_ORIGIN:$DRILL_URL"
+          status="$(npx --yes wrangler@4.117.0 deployments status --name "$DRILL_WORKER" --json)"
+          fault_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v?.version_id) process.exit(1); process.stdout.write(v.version_id)' "$status")"
+          test "$fault_version" != "$BASELINE_VERSION"
+          echo "version=$fault_version" >> "$GITHUB_OUTPUT"
+
+          health_url="${DRILL_URL%/}/api/health"
+          matched=false
+          for attempt in $(seq 1 100); do
+            if curl --fail --silent --show-error --max-time 20 --header 'Cache-Control: no-cache' "$health_url" --output "$RUNNER_TEMP/fault-health.json" &&
+              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== process.argv[2]) process.exit(1)' "$RUNNER_TEMP/fault-health.json" "$FAULT_MARKER"; then
+              matched=true
+              break
+            fi
+            echo "Fault marker check attempt $attempt/100 failed; retrying."
+            sleep 10
+          done
+          test "$matched" = true
+
+      - name: Confirm the injected marker fails the shared journey probe
+        env:
+          MS_REALTY_PRODUCTION_URL: ${{ steps.workers-dev.outputs.url }}
+        run: |
+          set +e
+          node production/scripts/probe-production-journeys.mjs > "$RUNNER_TEMP/fault-probe-validation.json"
+          probe_status=$?
+          set -e
+          cat "$RUNNER_TEMP/fault-probe-validation.json"
+          test "$probe_status" -eq 1
+          node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const failed=d.checks?.filter(({ status }) => status === "fail") || []; if (d.failed !== 1 || failed.length !== 1 || failed[0].id !== "health" || !/commit build marker/.test(failed[0].error || "")) process.exit(1)' "$RUNNER_TEMP/fault-probe-validation.json"
+
+      - name: Record alert drill correlation
+        id: alert-correlation
+        if: ${{ inputs.confirm_alert_drill }}
+        env:
+          CORRELATION_ID: ${{ steps.identity.outputs.correlation_id }}
+          RUN_URL: ${{ steps.identity.outputs.run_url }}
+        run: |
+          echo "triggered_at=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Monitoring drill correlation::${CORRELATION_ID} ${RUN_URL}"
+
+      - name: Exercise the production monitor failure surface
+        id: alert-probe
+        if: ${{ inputs.confirm_alert_drill }}
+        env:
+          CORRELATION_ID: ${{ steps.identity.outputs.correlation_id }}
+          MS_REALTY_PRODUCTION_URL: ${{ steps.workers-dev.outputs.url }}
+        run: |
+          echo "Expected production journey failure correlation: $CORRELATION_ID"
+          node production/scripts/probe-production-journeys.mjs | tee "$RUNNER_TEMP/alert-failure-probe.json"
+
+      - name: Roll back the isolated MS Realty artifact
+        id: rollback
+        if: always() && steps.baseline.outputs.version != '' && steps.fault.outputs.version != ''
+        env:
+          DRILL_URL: ${{ steps.workers-dev.outputs.url }}
+          DRILL_WORKER: ${{ steps.identity.outputs.worker }}
+          MS_REALTY_PRODUCTION_URL: ${{ steps.workers-dev.outputs.url }}
+        run: |
+          baseline_version="${{ steps.baseline.outputs.version }}"
+          npx --yes wrangler@4.117.0 rollback "$baseline_version" --name "$DRILL_WORKER" --message "Monitoring drill rollback ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}" --yes
+          status="$(npx --yes wrangler@4.117.0 deployments status --name "$DRILL_WORKER" --json)"
+          restored_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v?.version_id) process.exit(1); process.stdout.write(v.version_id)' "$status")"
+          test "$restored_version" = "$baseline_version"
+
+          health_url="${DRILL_URL%/}/api/health"
+          restored_marker=""
+          for attempt in $(seq 1 100); do
+            if curl --fail --silent --show-error --max-time 20 --header 'Cache-Control: no-cache' "$health_url" --output "$RUNNER_TEMP/rollback-health.json"; then
+              restored_marker="$(node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok") process.exit(1); process.stdout.write(String(d.build_marker || ""))' "$RUNNER_TEMP/rollback-health.json")"
+              if [ "$restored_marker" = "$RELEASE_SHA" ]; then
+                break
+              fi
+            fi
+            echo "Rollback marker check attempt $attempt/100 failed; retrying."
+            sleep 10
+          done
+          test "$restored_marker" = "$RELEASE_SHA"
+          node production/scripts/probe-production-journeys.mjs | tee "$RUNNER_TEMP/rollback-journey.json"
+          {
+            echo "version=$restored_version"
+            echo "build_marker=$restored_marker"
+            echo "verified_at=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Write redacted machine evidence
+        if: always()
+        env:
+          ALERT_OUTCOME: ${{ steps.alert-probe.outcome }}
+          ALERT_TRIGGERED_AT: ${{ steps.alert-correlation.outputs.triggered_at }}
+          BASELINE_VERSION: ${{ steps.baseline.outputs.version }}
+          CANARY_CHECKED_AT: ${{ steps.canary.outputs.checked_at }}
+          CONFIRM_ALERT_DRILL: ${{ inputs.confirm_alert_drill }}
+          CORRELATION_ID: ${{ steps.identity.outputs.correlation_id }}
+          DRILL_URL: ${{ steps.workers-dev.outputs.url }}
+          DRILL_WORKER: ${{ steps.identity.outputs.worker }}
+          FAULT_VERSION: ${{ steps.fault.outputs.version }}
+          PRODUCTION_CHECKED_AT: ${{ steps.production.outputs.checked_at }}
+          PRODUCTION_URL: ${{ steps.production.outputs.url }}
+          RESTORED_BUILD_MARKER: ${{ steps.rollback.outputs.build_marker }}
+          RESTORED_VERSION: ${{ steps.rollback.outputs.version }}
+          ROLLBACK_VERIFIED_AT: ${{ steps.rollback.outputs.verified_at }}
+          RUN_URL: ${{ steps.identity.outputs.run_url }}
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+
+          const releaseMatches = process.env.RESTORED_BUILD_MARKER === process.env.RELEASE_SHA;
+          const rollbackMatches = process.env.RESTORED_VERSION === process.env.BASELINE_VERSION;
           const evidence = {
-            schema_version: 1,
+            schema_version: 2,
             environment: "production",
             release_id: process.env.RELEASE_SHA,
             provider: "github-actions-cloudflare-workers",
             provider_run_id: process.env.GITHUB_RUN_ID,
+            provider_run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+            repository: process.env.GITHUB_REPOSITORY,
+            workflow_ref: process.env.GITHUB_WORKFLOW_REF,
+            run_url: process.env.RUN_URL,
+            correlation_id: process.env.CORRELATION_ID,
+            artifact_name: `monitoring-drill-machine-evidence-${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`,
             production: {
               url: process.env.PRODUCTION_URL,
-              status: "pass",
+              status: process.env.PRODUCTION_CHECKED_AT ? "pass" : "fail",
               checked_at: process.env.PRODUCTION_CHECKED_AT,
+              build_marker: process.env.RELEASE_SHA,
+              probe: "production/scripts/probe-production-journeys.mjs",
             },
             canary: {
-              worker: process.env.CANARY_NAME,
-              url: process.env.CANARY_URL,
-              status: "pass",
+              worker: process.env.DRILL_WORKER,
+              url: process.env.DRILL_URL,
+              version_id: process.env.BASELINE_VERSION,
+              build_marker: process.env.RELEASE_SHA,
+              status: process.env.CANARY_CHECKED_AT ? "pass" : "fail",
               checked_at: process.env.CANARY_CHECKED_AT,
+              probe: "production/scripts/probe-production-journeys.mjs",
+            },
+            alert_drill: {
+              status: process.env.CONFIRM_ALERT_DRILL === "true" ? process.env.ALERT_OUTCOME : "skipped",
+              correlation_id: process.env.CORRELATION_ID,
+              failure_surface: "production_journey_probe",
+              probe: "production/scripts/probe-production-journeys.mjs",
+              triggered_at: process.env.ALERT_TRIGGERED_AT,
             },
             rollback: {
-              worker: process.env.ROLLBACK_NAME,
-              first_version_id: process.env.FIRST_VERSION,
-              second_version_id: process.env.SECOND_VERSION,
-              active_version_id: process.env.FIRST_VERSION,
-              status: "pass",
+              worker: process.env.DRILL_WORKER,
+              url: process.env.DRILL_URL,
+              baseline_version_id: process.env.BASELINE_VERSION,
+              fault_version_id: process.env.FAULT_VERSION,
+              restored_version_id: process.env.RESTORED_VERSION,
+              restored_build_marker: process.env.RESTORED_BUILD_MARKER,
+              status: releaseMatches && rollbackMatches ? "pass" : "fail",
               target: "isolated",
               verified_at: process.env.ROLLBACK_VERIFIED_AT,
+              probe: "production/scripts/probe-production-journeys.mjs",
             },
           };
           fs.writeFileSync("monitoring-drill-machine-evidence.json", `${JSON.stringify(evidence, null, 2)}\n`);
           NODE
 
-      - name: Delete only isolated drill Workers
+      - name: Delete only the isolated drill Worker
         if: always()
         env:
-          CANARY_NAME: ${{ steps.names.outputs.canary }}
-          ROLLBACK_NAME: ${{ steps.names.outputs.rollback }}
+          DRILL_WORKER: ${{ steps.identity.outputs.worker }}
         run: |
-          status=0
-          for worker in "$CANARY_NAME" "$ROLLBACK_NAME"; do
-            if [ -n "$worker" ]; then
-              npx --yes wrangler@4.117.0 delete "$worker" --force || status=1
-            fi
-          done
-          exit "$status"
+          if [ -n "$DRILL_WORKER" ]; then
+            npx --yes wrangler@4.117.0 delete "$DRILL_WORKER" --force
+          fi
 
-      - name: Upload redacted machine evidence
+      - name: Upload redacted drill evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: monitoring-drill-machine-evidence-${{ github.run_id }}
-          path: monitoring-drill-machine-evidence.json
+          name: monitoring-drill-machine-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            monitoring-drill-machine-evidence.json
+            ${{ runner.temp }}/production-journey.json
+            ${{ runner.temp }}/canary-journey.json
+            ${{ runner.temp }}/fault-probe-validation.json
+            ${{ runner.temp }}/alert-failure-probe.json
+            ${{ runner.temp }}/rollback-journey.json
           if-no-files-found: warn
-          retention-days: 30
-
-  alert-delivery-drill:
-    name: Intentional alert-delivery failure
-    needs: isolated-drill
-    if: ${{ needs.isolated-drill.result == 'success' && inputs.confirm_alert_drill }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fail deliberately after the isolated drill passed
-        run: |
-          echo "Intentional failure for MS Realty alert-delivery verification."
-          echo "Human confirmation of the received notification is still required."
-          exit 1
+          retention-days: 90

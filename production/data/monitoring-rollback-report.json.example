@@ -1,36 +1,65 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "example": true,
   "generated_at": "2026-07-31T10:30:00.000Z",
   "environment": "production",
   "ready": false,
-  "release_id": "replace-with-production-release-id",
+  "release_id": "replace-with-exact-production-commit-sha",
   "monitoring": {
-    "provider": "replace-with-monitoring-provider",
-    "provider_run_id": "replace-with-monitor-run-id",
+    "provider": "github-actions-cloudflare-workers",
+    "provider_run_id": "replace-with-github-run-id",
+    "provider_run_attempt": "replace-with-github-run-attempt",
+    "repository": "replace-with-owner-and-repository",
+    "workflow_ref": "replace-with-workflow-ref",
+    "run_url": "https://replace-with-github-run-url.example",
+    "correlation_id": "replace-with-drill-correlation-id",
+    "machine_artifact_name": "replace-with-machine-artifact-name",
     "endpoints": [
       {
         "url": "https://replace-with-public-health-endpoint.example/health",
         "status": "pass",
-        "checked_at": "2026-07-31T10:25:00.000Z"
+        "checked_at": "2026-07-31T10:25:00.000Z",
+        "build_marker": "replace-with-exact-production-commit-sha",
+        "probe": "production/scripts/probe-production-journeys.mjs"
       }
     ]
   },
   "alert_delivery": {
     "status": "pass",
+    "provider": "replace-with-alert-provider",
+    "receipt_id": "replace-with-provider-receipt-id",
+    "correlation_id": "replace-with-drill-correlation-id",
+    "provider_run_id": "replace-with-github-run-id",
+    "provider_run_attempt": "replace-with-github-run-attempt",
+    "repository": "replace-with-owner-and-repository",
+    "run_url": "https://replace-with-github-run-url.example",
+    "triggered_at": "2026-07-31T10:25:30.000Z",
     "delivered_at": "2026-07-31T10:26:00.000Z"
   },
   "rollback": {
-    "automatic_policy_id": "replace-with-automatic-rollback-policy-id",
+    "automatic_policy_id": "github-actions-ci-failed-health-rollback",
     "canary": {
-      "run_id": "replace-with-canary-run-id",
-      "release_id": "replace-with-production-release-id",
+      "run_id": "replace-with-worker-and-baseline-version-id",
+      "release_id": "replace-with-exact-production-commit-sha",
+      "worker": "replace-with-isolated-worker-name",
+      "url": "https://replace-with-isolated-worker-url.example",
+      "version_id": "replace-with-baseline-cloudflare-version-id",
+      "build_marker": "replace-with-exact-production-commit-sha",
+      "probe": "production/scripts/probe-production-journeys.mjs",
       "status": "pass",
       "checked_at": "2026-07-31T10:27:00.000Z"
     },
     "drill": {
-      "drill_id": "replace-with-isolated-rollback-drill-id",
-      "release_id": "replace-with-production-release-id",
+      "drill_id": "replace-with-drill-correlation-id",
+      "release_id": "replace-with-exact-production-commit-sha",
+      "worker": "replace-with-isolated-worker-name",
+      "url": "https://replace-with-isolated-worker-url.example",
+      "baseline_version_id": "replace-with-baseline-cloudflare-version-id",
+      "fault_version_id": "replace-with-fault-cloudflare-version-id",
+      "restored_version_id": "replace-with-restored-cloudflare-version-id",
+      "restored_build_marker": "replace-with-exact-production-commit-sha",
+      "failure_surface": "production_journey_probe",
+      "probe": "production/scripts/probe-production-journeys.mjs",
       "status": "pass",
       "target": "isolated",
       "rollback_procedure_verified": true,
