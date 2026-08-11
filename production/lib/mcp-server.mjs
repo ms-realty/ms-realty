@@ -4,7 +4,6 @@ import { z } from "zod";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "./app-admin-adapter.mjs";
 import { appApiConfigFromEnv, renderAppApiResponse } from "./app-api-adapter.mjs";
 import { canAdminAccess, canAdminMutate, normalizedRoles, operatorId, resolveAdminPrincipal } from "./admin-auth.mjs";
-import { appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { applyListingEdits, LISTING_STATUSES, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
@@ -348,22 +347,6 @@ function errorResult(message) {
   return { content: [{ type: "text", text: message }], isError: true };
 }
 
-function recordPayloadListingEdit(config, principal, listingId, changedFields) {
-  appendAuditLog(
-    createAuditLogEntry(
-      {
-        action: "listing_edited",
-        actor: principal.id,
-        objectType: "listing",
-        objectId: listingId,
-        metadata: { changed_fields: changedFields, source: "mcp_payload_draft" },
-      },
-      config.adminConfig.reviewedAt || new Date().toISOString(),
-    ),
-    { filePath: config.adminConfig.auditLogPath },
-  );
-}
-
 function currentSeed(config) {
   const api = config.apiConfig;
   return applyMediaReviews(
@@ -463,6 +446,7 @@ async function adminJson(config, principal, pathname, { method = "GET", body } =
         ...config.adminConfig,
         adminPrincipal: principal,
         payloadListingRuntime: config.payloadListingRuntime || config.adminConfig.payloadListingRuntime || null,
+        requestChannel: "mcp",
       },
     },
   );
@@ -1016,7 +1000,6 @@ function authenticatedToolDefinitions(server, config, principal) {
           const changedFields = payload.idempotent
             ? []
             : Object.keys(patch).filter((field) => LISTING_CONTENT_FIELDS.includes(field));
-          if (!payload.idempotent) recordPayloadListingEdit(config, principal, listingId, changedFields);
           return textResult({
             listing_id: listingId,
             changed_fields: changedFields,

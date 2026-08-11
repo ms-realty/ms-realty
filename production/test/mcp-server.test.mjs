@@ -497,6 +497,10 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
   assert.equal("edits" in status, false);
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").facts.listing_status, "reserved");
+  const listingAudits = readAuditLog(paths.auditLogPath).filter((row) => row.action === "listing_edited");
+  assert.equal(listingAudits.length, 3);
+  assert.equal(listingAudits.every((row) => row.metadata.source === "mcp_payload_draft"), true);
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").workflow.last_edit_event.channel, "mcp");
   assert.equal(
     readAuditLog(paths.auditLogPath).every((row) => !["translation_approved", "translation_published"].includes(row.action)),
     true,

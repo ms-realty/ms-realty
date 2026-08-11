@@ -276,10 +276,12 @@ test("Payload collection configs adapt CMS manifest fields without adding Payloa
 
   assert.equal(summary.collections, 8);
   assert.equal(listingsConfig.versions.drafts, true);
+  assert.equal(listingsConfig.versions.maxPerDoc, 0);
   assert.equal(listingsConfig.custom.publish_requires_human_review, true);
   assert.equal(facts.fields.some((field) => field.name === "price_eur" && field.type === "number"), true);
   assert.equal(facts.fields.some((field) => field.name === "settlement_ekatte" && field.type === "text"), true);
   assert.equal(facts.fields.some((field) => field.name === "district_code" && field.type === "text"), true);
+  assert.deepEqual(facts.fields.find((field) => field.name === "listing_status").options, ["available", "reserved", "sold", "rented", "archived"]);
   assert.equal(mediaConfig.fields.find((field) => field.name === "url").type, "text");
   assert.equal(toursConfig.fields.find((field) => field.name === "fallback_gallery").fields[0].name, "url");
   assert.equal(toursConfig.fields.find((field) => field.name === "viewer_url").type, "text");
@@ -291,9 +293,13 @@ test("Payload collection configs adapt CMS manifest fields without adding Payloa
   assert.equal(propertyFacts.fields.find((field) => field.name === "bedrooms_count").custom.property_families.includes("apartment"), true);
   assert.equal(propertyFacts.fields.find((field) => field.name === "bedrooms_count").custom.property_families.includes("plot"), false);
   const workflow = listingsConfig.fields.find((field) => field.name === "workflow");
+  const seo = listingsConfig.fields.find((field) => field.name === "seo");
+  assert.equal(seo.fields.find((field) => field.name === "canonical_override").type, "text");
+  assert.deepEqual(seo.fields.find((field) => field.name === "robots").options, ["index,follow", "noindex,follow"]);
   assert.equal(workflow.fields.find((field) => field.name === "location_verified_at").type, "date");
   assert.equal(workflow.fields.find((field) => field.name === "price_on_request_verified_at").type, "date");
   assert.equal(workflow.fields.find((field) => field.name === "publish_approved").type, "checkbox");
+  assert.equal(workflow.fields.find((field) => field.name === "last_edit_event").type, "json");
   assert.equal(typeof payload.taxonomy_contract.version, "string");
   assert.ok(payload.taxonomy_contract.version);
   const taskConfig = payload.collections.find((collection) => collection.slug === "listing_enrichment_tasks");

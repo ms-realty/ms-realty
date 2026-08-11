@@ -32,6 +32,11 @@ const GROUP_FIELDS = {
     ["location_precision", "text"],
     ["property_type", "text"],
     ["offer_type", "text"],
+    {
+      name: "listing_status",
+      type: "select",
+      options: ["available", "reserved", "sold", "rented", "archived"],
+    },
     ["bedrooms", "number"],
     ["bedrooms_not_applicable", "checkbox"],
     ["price_eur", "number"],
@@ -49,6 +54,12 @@ const GROUP_FIELDS = {
     ["og_title", "text"],
     ["og_description", "textarea"],
     ["canonical", "text"],
+    ["canonical_override", "text"],
+    {
+      name: "robots",
+      type: "select",
+      options: ["index,follow", "noindex,follow"],
+    },
     ["schema_present", "checkbox"],
   ],
   workflow: [
@@ -65,6 +76,7 @@ const GROUP_FIELDS = {
     ["publish_approved_by", "text"],
     ["last_edited_at", "date"],
     ["last_editor", "text"],
+    ["last_edit_event", "json"],
   ],
   routing: [
     ["target_path", "text"],
@@ -188,7 +200,9 @@ export function buildPayloadCollections(manifest) {
                 : collection.fields[0]?.name || "id",
         defaultColumns: collection.fields.slice(0, 4).map((field) => field.name),
       },
-      versions: collection.versions === false ? false : { drafts: true },
+      versions: collection.versions === false
+        ? false
+        : { drafts: true, ...(collection.slug === "listings" ? { maxPerDoc: 0 } : {}) },
       labels: {
         singular: collection.slug.replaceAll("_", " "),
         plural: collection.slug.replaceAll("_", " "),

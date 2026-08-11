@@ -215,7 +215,8 @@ async function markListingTranslationsStale(
   return { staleTranslations: persisted, localeCodes: codes };
 }
 
-function mutationFromEdit(current, edit, actorId, editedAt) {
+function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "admin") {
+  const actorId = principal.id;
   const patch = { ...(edit.patch || {}), ...(edit.listing_patch || {}) };
   const facts = { ...(current.facts || {}) };
   const seo = { ...(current.seo || {}) };
@@ -251,6 +252,18 @@ function mutationFromEdit(current, edit, actorId, editedAt) {
 
   workflow.last_editor = actorId;
   workflow.last_edited_at = editedAt;
+  workflow.last_edit_event = {
+    actor_id: actorId,
+    auth_source: String(principal.source || "admin"),
+    channel: requestChannel === "mcp" ? "mcp" : "admin",
+    changed_fields: [...changedFields].sort(),
+    edited_at: editedAt,
+    source_hash_before: edit.source_hash_before,
+    source_hash_after: edit.source_hash_after,
+    source_locale: edit.source_locale,
+    stale_locales: [...(edit.stale_locales || [])].sort(),
+    stale_translation_count: Number(edit.stale_translation_count || 0),
+  };
   if (priceChanged && !Object.hasOwn(patch, "price_verified_at")) {
     workflow.price_verified_at = null;
     workflow.price_verified_by = null;
@@ -285,7 +298,7 @@ export async function projectListingDraftSeed(seed, { env = process.env, payload
 
 export async function saveListingDraft(
   seed,
-  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString() } = {},
+  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString(), requestChannel = "admin" } = {},
 ) {
   const listingId = listingIdFor(input?.listingId || input?.listing_id);
   const patch = listingDraftPatchFromInput(input);
@@ -316,7 +329,7 @@ export async function saveListingDraft(
       req,
     });
     if (!current) throw notFoundError("Known listingId is required");
-    const mutation = mutationFromEdit(current, validated.edit, principal.id, editedAt);
+    const mutation = mutationFromEdit(current, validated.edit, principal, editedAt, requestChannel);
     let staleTranslations = [];
     if (!mutation.idempotent) {
       await runtime.update({
@@ -356,7 +369,7 @@ export async function saveListingDraft(
 
 export async function saveBulkListingStatusDrafts(
   seed,
-  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString() } = {},
+  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString(), requestChannel = "admin" } = {},
 ) {
   const attributed = { ...(input || {}), editor: requiredText(principal?.id, "Authenticated operator id", 64) };
   const batch = createBulkListingStatusEdits(seed, attributed, [], editedAt);
@@ -389,7 +402,7 @@ export async function saveBulkListingStatusDrafts(
         req,
       });
       if (!current) throw notFoundError(`Known listingId is required: ${result.listingId}`);
-      const mutation = mutationFromEdit(current, result.edit, principal.id, editedAt);
+      const mutation = mutationFromEdit(current, result.edit, principal, editedAt, requestChannel);
       if (!mutation.idempotent) {
         await runtime.update({
           collection: "listings",

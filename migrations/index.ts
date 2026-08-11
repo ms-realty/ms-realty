@@ -7,6 +7,7 @@ import * as migration_20260730_170000_add_realty_case_conditions from './2026073
 import * as migration_20260810_000558_durable_lead_store from './20260810_000558_durable_lead_store';
 import * as migration_20260810_143000_repair_durable_lead_relations from './20260810_143000_repair_durable_lead_relations';
 import * as migration_20260810_164700_payload_schema_drift from './20260810_164700_payload_schema_drift';
+import * as migration_20260811_120000_durable_listing_edit_audit from './20260811_120000_durable_listing_edit_audit';
 
 export const migrations = [
   {
@@ -53,5 +54,10 @@ export const migrations = [
     up: migration_20260810_164700_payload_schema_drift.up,
     down: migration_20260810_164700_payload_schema_drift.down,
     name: '20260810_164700_payload_schema_drift',
+  },
+  {
+    up: migration_20260811_120000_durable_listing_edit_audit.up,
+    down: migration_20260811_120000_durable_listing_edit_audit.down,
+    name: '20260811_120000_durable_listing_edit_audit',
   },
 ];

@@ -90,6 +90,39 @@ test("saveListingDraft writes one durable draft mutation and overlays the import
   assert.equal(runtime.payload.calls.findByID.every((call) => call.transactionID === "tx-1"), true);
   assert.equal(runtime.payload.calls.find.every((call) => call.transactionID === "tx-1"), true);
   assert.equal(runtime.payload.calls.update[0].context.ms_realty_operator.id, "editor_bg");
+  const event = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").workflow.last_edit_event;
+  assert.deepEqual({ ...event, source_hash_before: "hash", source_hash_after: "hash" }, {
+    actor_id: "editor_bg",
+    auth_source: "credential_registry",
+    channel: "admin",
+    changed_fields: ["availability_verified_at", "location_precision", "title"],
+    edited_at: "2026-08-10T09:00:00.000Z",
+    source_hash_before: "hash",
+    source_hash_after: "hash",
+    source_locale: "bg",
+    stale_locales: ["el", "he"],
+    stale_translation_count: 2,
+  });
+  assert.match(event.source_hash_before, /^[a-f0-9]{64}$/);
+  assert.match(event.source_hash_after, /^[a-f0-9]{64}$/);
+  assert.notEqual(event.source_hash_before, event.source_hash_after);
+});
+
+test("saveListingDraft records the trusted MCP channel in the durable listing version data", async () => {
+  const seed = loadCmsSeed();
+  const runtime = createPayloadDraftRuntime(seed);
+  await saveListingDraft(seed, {
+    payload: runtime.payload,
+    principal,
+    input: { listingId: "MS-CRAWL-0001", patch: { condition: "MCP-reviewed condition" } },
+    editedAt: "2026-08-10T09:05:00.000Z",
+    requestChannel: "mcp",
+  });
+
+  const event = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").workflow.last_edit_event;
+  assert.equal(event.channel, "mcp");
+  assert.equal(event.auth_source, "credential_registry");
+  assert.deepEqual(event.changed_fields, ["condition"]);
 });
 
 test("saveListingDraft is idempotent when the same patch is already present", async () => {

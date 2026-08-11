@@ -7,6 +7,7 @@ import { fromRoot } from "../lib/paths.mjs";
 
 const propertySearchMigration = fromRoot("migrations", "20260730_120000_property_search_schema.ts");
 const payloadSchemaDriftMigration = fromRoot("migrations", "20260810_164700_payload_schema_drift.ts");
+const durableListingEditMigration = fromRoot("migrations", "20260811_120000_durable_listing_edit_audit.ts");
 
 function tableSql(source, name) {
   const start = source.indexOf(`CREATE TABLE "${name}" (`);
@@ -25,7 +26,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
   ]);
-  for (const migration of ["20260710_132716_initial_schema.ts", "20260730_120000_property_search_schema.ts", "20260810_164700_payload_schema_drift.ts"]) {
+  for (const migration of ["20260710_132716_initial_schema.ts", "20260730_120000_property_search_schema.ts", "20260810_164700_payload_schema_drift.ts", "20260811_120000_durable_listing_edit_audit.ts"]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
       /import \{ sql, type MigrateDownArgs, type MigrateUpArgs \} from '@payloadcms\/db-postgres'/,
@@ -120,6 +121,22 @@ test("Payload migration boot configuration and generated constraints stay runnab
   const driftDown = driftPatch.match(/export async function down[\s\S]*$/)?.[0] || "";
   assert.match(driftDown, /export async function down\(\{ db \}: MigrateDownArgs\): Promise<void> \{\s+void db\s+\}/);
   assert.doesNotMatch(driftDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
+
+  const listingEditPatch = fs.readFileSync(durableListingEditMigration, "utf8");
+  for (const column of [
+    '"facts_listing_status" varchar',
+    '"seo_canonical_override" varchar',
+    '"seo_robots" varchar',
+    '"workflow_last_edit_event" jsonb',
+    '"version_facts_listing_status" varchar',
+    '"version_seo_canonical_override" varchar',
+    '"version_seo_robots" varchar',
+    '"version_workflow_last_edit_event" jsonb',
+  ]) {
+    assert.match(listingEditPatch, new RegExp(`ADD COLUMN IF NOT EXISTS ${column.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+  }
+  const listingEditDown = listingEditPatch.match(/export async function down[\s\S]*$/)?.[0] || "";
+  assert.doesNotMatch(listingEditDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
 
   const typesDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-migration-`);
   const env = {
