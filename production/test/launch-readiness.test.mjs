@@ -497,28 +497,66 @@ const readyMonitoringRollback = {
   status: "pass",
   path: "production/data/monitoring-rollback-report.json",
   report: {
-    schema_version: 1,
+    schema_version: 2,
     generated_at: "2026-07-05T00:00:00.000Z",
     environment: "production",
     ready: true,
-    release_id: "release-20260705-001",
+    release_id: "a".repeat(40),
     monitoring: {
-      provider: "production-monitor",
-      provider_run_id: "monitor-run-20260705-001",
-      endpoints: [{ url: "https://status.ms-realty.bg/health", status: "pass", checked_at: "2026-07-04T23:55:00.000Z" }],
+      provider: "github-actions-cloudflare-workers",
+      provider_run_id: "31485358241",
+      provider_run_attempt: "1",
+      repository: "ms-realty/ms-realty",
+      workflow_ref: "ms-realty/ms-realty/.github/workflows/monitoring-drill.yml@refs/heads/main",
+      run_url: "https://github.com/ms-realty/ms-realty/actions/runs/31485358241/attempts/1",
+      correlation_id: "ms-realty/ms-realty:monitoring-drill:31485358241:1",
+      machine_artifact_name: "monitoring-drill-machine-evidence-31485358241-1",
+      endpoints: [
+        {
+          url: "https://status.ms-realty.bg/health",
+          status: "pass",
+          checked_at: "2026-07-04T23:55:00.000Z",
+          build_marker: "a".repeat(40),
+          probe: "production/scripts/probe-production-journeys.mjs",
+        },
+      ],
     },
-    alert_delivery: { status: "pass", delivered_at: "2026-07-04T23:56:00.000Z" },
+    alert_delivery: {
+      status: "pass",
+      provider: "github-actions-email",
+      receipt_id: "message-id-31485358241-1",
+      correlation_id: "ms-realty/ms-realty:monitoring-drill:31485358241:1",
+      provider_run_id: "31485358241",
+      provider_run_attempt: "1",
+      repository: "ms-realty/ms-realty",
+      run_url: "https://github.com/ms-realty/ms-realty/actions/runs/31485358241/attempts/1",
+      triggered_at: "2026-07-04T23:55:30.000Z",
+      delivered_at: "2026-07-04T23:56:00.000Z",
+    },
     rollback: {
       automatic_policy_id: "rollback-policy-prod-001",
       canary: {
-        run_id: "canary-20260705-001",
-        release_id: "release-20260705-001",
+        run_id: "msr-monitoring-drill-31485358241-1:11111111-1111-4111-8111-111111111111",
+        release_id: "a".repeat(40),
+        worker: "msr-monitoring-drill-31485358241-1",
+        url: "https://msr-monitoring-drill-31485358241-1.ms-realty-bg.workers.dev",
+        version_id: "11111111-1111-4111-8111-111111111111",
+        build_marker: "a".repeat(40),
+        probe: "production/scripts/probe-production-journeys.mjs",
         status: "pass",
         checked_at: "2026-07-04T23:57:00.000Z",
       },
       drill: {
-        drill_id: "rollback-drill-20260705-001",
-        release_id: "release-20260705-001",
+        drill_id: "ms-realty/ms-realty:monitoring-drill:31485358241:1",
+        release_id: "a".repeat(40),
+        worker: "msr-monitoring-drill-31485358241-1",
+        url: "https://msr-monitoring-drill-31485358241-1.ms-realty-bg.workers.dev",
+        baseline_version_id: "11111111-1111-4111-8111-111111111111",
+        fault_version_id: "22222222-2222-4222-8222-222222222222",
+        restored_version_id: "11111111-1111-4111-8111-111111111111",
+        restored_build_marker: "a".repeat(40),
+        failure_surface: "production_journey_probe",
+        probe: "production/scripts/probe-production-journeys.mjs",
         status: "pass",
         target: "isolated",
         rollback_procedure_verified: true,
@@ -544,6 +582,7 @@ function writeMonitoringRollbackFixture(dir, generatedAt = new Date().toISOStrin
   const report = structuredClone(readyMonitoringRollback.report);
   report.generated_at = generatedAt;
   report.monitoring.endpoints[0].checked_at = generatedAt;
+  report.alert_delivery.triggered_at = generatedAt;
   report.alert_delivery.delivered_at = generatedAt;
   report.rollback.canary.checked_at = generatedAt;
   report.rollback.drill.verified_at = generatedAt;

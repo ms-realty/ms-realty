@@ -11,6 +11,9 @@ const PLACEHOLDER_PATTERN = /\b(example|placeholder|change[-_ ]?me|replace[-_ ]?
 const URL_USERINFO_PATTERN = /:\/\/[^/\s@]*@/;
 const SECRET_QUERY_PATTERN = /[?&](authorization|password|secret|token|apikey|accesskey|privatekey|credential|bearer)=/i;
 const ISO_TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
+const POSITIVE_INTEGER_PATTERN = /^[1-9]\d*$/;
+const CLOUDFLARE_VERSION_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const PROBE_PATH = "production/scripts/probe-production-journeys.mjs";
 
 function object(value, label) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${label} must be an object`);
@@ -58,6 +61,7 @@ function publicHttpsEndpoint(value, label) {
   if (parsed.protocol !== "https:" || parsed.username || parsed.password || localHostname(parsed.hostname)) {
     throw new Error(`${label} must be a non-local HTTPS endpoint without userinfo`);
   }
+  return parsed;
 }
 
 function assertRedacted(value, ancestors = new WeakSet()) {
@@ -81,10 +85,16 @@ function assertRedacted(value, ancestors = new WeakSet()) {
   ancestors.delete(value);
 }
 
-function passEndpoint(endpoint, generatedAt) {
+function passEndpoint(endpoint, generatedAt, releaseId) {
   object(endpoint, "monitoring.endpoints entry");
   if (endpoint.status !== "pass") return false;
   publicHttpsEndpoint(endpoint.url, "monitoring endpoint URL");
+  if (evidenceText(endpoint.build_marker, "monitoring endpoint build_marker") !== releaseId) {
+    throw new Error("Monitoring endpoint must report the exact release build marker");
+  }
+  if (endpoint.probe !== PROBE_PATH) {
+    throw new Error("Monitoring endpoint must use the production journey probe");
+  }
   evidenceTimestamp(endpoint.checked_at, "monitoring endpoint checked_at", generatedAt);
   return true;
 }
@@ -108,6 +118,7 @@ function evidenceTimes(report) {
   return [
     timestamp(report.generated_at, "generated_at"),
     timestamp(endpoint.checked_at, "monitoring endpoint checked_at"),
+    timestamp(report.alert_delivery.triggered_at, "alert_delivery.triggered_at"),
     timestamp(report.alert_delivery.delivered_at, "alert_delivery.delivered_at"),
     timestamp(report.rollback.canary.checked_at, "rollback.canary.checked_at"),
     timestamp(report.rollback.drill.verified_at, "rollback.drill.verified_at"),
@@ -119,22 +130,64 @@ export function assertMonitoringRollbackReport(report) {
   object(report, "Monitoring rollback report");
   if (report.example === true) throw new Error("Monitoring rollback example cannot clear launch readiness");
   assertRedacted(report);
-  if (report.schema_version !== 1 || report.environment !== "production" || report.ready !== true) {
-    throw new Error("Monitoring rollback report must be ready production schema v1 evidence");
+  if (report.schema_version !== 2 || report.environment !== "production" || report.ready !== true) {
+    throw new Error("Monitoring rollback report must be ready production schema v2 evidence");
   }
 
   const generatedAt = timestamp(report.generated_at, "generated_at");
   const releaseId = evidenceText(report.release_id, "release_id");
+  if (!/^[0-9a-f]{40}$/i.test(releaseId)) throw new Error("Monitoring rollback release_id must be an exact commit SHA");
   const monitoring = object(report.monitoring, "monitoring");
-  evidenceText(monitoring.provider, "monitoring.provider");
-  evidenceText(monitoring.provider_run_id, "monitoring.provider_run_id");
-  if (!Array.isArray(monitoring.endpoints) || !monitoring.endpoints.some((endpoint) => passEndpoint(endpoint, generatedAt))) {
+  if (monitoring.provider !== "github-actions-cloudflare-workers") {
+    throw new Error("Monitoring rollback report must come from the GitHub Actions Cloudflare drill");
+  }
+  const providerRunId = evidenceText(monitoring.provider_run_id, "monitoring.provider_run_id");
+  if (!/^\d+$/.test(providerRunId)) throw new Error("monitoring.provider_run_id must be a GitHub run ID");
+  const providerRunAttempt = evidenceText(monitoring.provider_run_attempt, "monitoring.provider_run_attempt");
+  if (!POSITIVE_INTEGER_PATTERN.test(providerRunAttempt)) throw new Error("monitoring.provider_run_attempt must be positive");
+  const repository = evidenceText(monitoring.repository, "monitoring.repository");
+  if (!/^[^/\s]+\/[^/\s]+$/.test(repository)) throw new Error("monitoring.repository must be owner/repository");
+  const workflowRef = evidenceText(monitoring.workflow_ref, "monitoring.workflow_ref");
+  if (!workflowRef.includes(`${repository}/.github/workflows/monitoring-drill.yml@`)) {
+    throw new Error("monitoring.workflow_ref must identify the monitoring drill workflow");
+  }
+  const expectedRunUrl = `https://github.com/${repository}/actions/runs/${providerRunId}/attempts/${providerRunAttempt}`;
+  publicHttpsEndpoint(monitoring.run_url, "monitoring.run_url");
+  if (monitoring.run_url !== expectedRunUrl) throw new Error("monitoring.run_url must identify the exact GitHub run attempt");
+  const expectedCorrelation = `${repository}:monitoring-drill:${providerRunId}:${providerRunAttempt}`;
+  if (evidenceText(monitoring.correlation_id, "monitoring.correlation_id") !== expectedCorrelation) {
+    throw new Error("monitoring.correlation_id must bind repository, run, and attempt");
+  }
+  if (evidenceText(monitoring.machine_artifact_name, "monitoring.machine_artifact_name") !== `monitoring-drill-machine-evidence-${providerRunId}-${providerRunAttempt}`) {
+    throw new Error("monitoring.machine_artifact_name must bind the exact GitHub run attempt");
+  }
+  if (!Array.isArray(monitoring.endpoints) || !monitoring.endpoints.some((endpoint) => passEndpoint(endpoint, generatedAt, releaseId))) {
     throw new Error("Monitoring rollback report requires a passing non-local HTTPS endpoint check");
   }
 
   const alertDelivery = object(report.alert_delivery, "alert_delivery");
   if (alertDelivery.status !== "pass") throw new Error("Monitoring rollback report requires passing alert delivery");
-  evidenceTimestamp(alertDelivery.delivered_at, "alert_delivery.delivered_at", generatedAt);
+  evidenceText(alertDelivery.provider, "alert_delivery.provider");
+  const receiptId = evidenceText(alertDelivery.receipt_id, "alert_delivery.receipt_id");
+  if (receiptId.length < 8 || ISO_TIMESTAMP_PATTERN.test(receiptId)) {
+    throw new Error("alert_delivery.receipt_id must be a durable provider receipt identifier, not a timestamp");
+  }
+  const correlationId = evidenceText(alertDelivery.correlation_id, "alert_delivery.correlation_id");
+  if (correlationId !== monitoring.correlation_id) throw new Error("Alert receipt must correlate to the monitoring run");
+  if (evidenceText(alertDelivery.provider_run_id, "alert_delivery.provider_run_id") !== monitoring.provider_run_id) {
+    throw new Error("Alert receipt must reference the monitoring provider run");
+  }
+  if (evidenceText(alertDelivery.provider_run_attempt, "alert_delivery.provider_run_attempt") !== monitoring.provider_run_attempt) {
+    throw new Error("Alert receipt must reference the monitoring provider run attempt");
+  }
+  if (evidenceText(alertDelivery.repository, "alert_delivery.repository") !== monitoring.repository) {
+    throw new Error("Alert receipt must reference the monitoring repository");
+  }
+  publicHttpsEndpoint(alertDelivery.run_url, "alert_delivery.run_url");
+  if (alertDelivery.run_url !== monitoring.run_url) throw new Error("Alert receipt must reference the monitoring run URL");
+  const triggeredAt = evidenceTimestamp(alertDelivery.triggered_at, "alert_delivery.triggered_at", generatedAt);
+  const deliveredAt = evidenceTimestamp(alertDelivery.delivered_at, "alert_delivery.delivered_at", generatedAt);
+  if (deliveredAt < triggeredAt) throw new Error("Alert receipt cannot predate the monitor failure");
 
   const rollback = object(report.rollback, "rollback");
   evidenceText(rollback.automatic_policy_id, "rollback.automatic_policy_id");
@@ -143,6 +196,23 @@ export function assertMonitoringRollbackReport(report) {
   evidenceText(canary.run_id, "rollback.canary.run_id");
   if (evidenceText(canary.release_id, "rollback.canary.release_id") !== releaseId) {
     throw new Error("Monitoring rollback canary must reference the report release_id");
+  }
+  const canaryWorker = evidenceText(canary.worker, "rollback.canary.worker");
+  if (canaryWorker !== `msr-monitoring-drill-${providerRunId}-${providerRunAttempt}`) {
+    throw new Error("Monitoring rollback canary Worker must bind the exact GitHub run attempt");
+  }
+  const canaryUrl = publicHttpsEndpoint(canary.url, "rollback.canary.url");
+  if (!canaryUrl.hostname.startsWith(`${canaryWorker}.`) || !canaryUrl.hostname.endsWith(".workers.dev")) {
+    throw new Error("Monitoring rollback canary URL must identify its isolated Cloudflare Worker");
+  }
+  const canaryVersion = evidenceText(canary.version_id, "rollback.canary.version_id");
+  if (!CLOUDFLARE_VERSION_PATTERN.test(canaryVersion)) throw new Error("rollback.canary.version_id must be a Cloudflare Worker version ID");
+  if (canary.run_id !== `${canaryWorker}:${canaryVersion}`) throw new Error("rollback.canary.run_id must bind Worker and version");
+  if (evidenceText(canary.build_marker, "rollback.canary.build_marker") !== releaseId) {
+    throw new Error("Monitoring rollback canary must report the exact release build marker");
+  }
+  if (canary.probe !== PROBE_PATH) {
+    throw new Error("Monitoring rollback canary must use the production journey probe");
   }
   evidenceTimestamp(canary.checked_at, "rollback.canary.checked_at", generatedAt);
 
@@ -154,6 +224,27 @@ export function assertMonitoringRollbackReport(report) {
   if (evidenceText(drill.release_id, "rollback.drill.release_id") !== releaseId) {
     throw new Error("Monitoring rollback drill must reference the report release_id");
   }
+  if (evidenceText(drill.worker, "rollback.drill.worker") !== canaryWorker) {
+    throw new Error("Monitoring rollback drill must use the canary Worker identity");
+  }
+  publicHttpsEndpoint(drill.url, "rollback.drill.url");
+  if (drill.url !== canary.url) throw new Error("Monitoring rollback drill must use the canary URL");
+  const baselineVersion = evidenceText(drill.baseline_version_id, "rollback.drill.baseline_version_id");
+  const faultVersion = evidenceText(drill.fault_version_id, "rollback.drill.fault_version_id");
+  const restoredVersion = evidenceText(drill.restored_version_id, "rollback.drill.restored_version_id");
+  if (![baselineVersion, faultVersion, restoredVersion].every((value) => CLOUDFLARE_VERSION_PATTERN.test(value))) {
+    throw new Error("Monitoring rollback drill version IDs must be Cloudflare Worker version IDs");
+  }
+  if (baselineVersion !== canaryVersion || faultVersion === baselineVersion || restoredVersion !== baselineVersion) {
+    throw new Error("Monitoring rollback drill must retain distinct fault and exact restored version IDs");
+  }
+  if (evidenceText(drill.restored_build_marker, "rollback.drill.restored_build_marker") !== releaseId) {
+    throw new Error("Monitoring rollback drill must restore the exact release build marker");
+  }
+  if (drill.failure_surface !== "production_journey_probe" || drill.probe !== PROBE_PATH) {
+    throw new Error("Monitoring rollback drill must exercise the production journey monitor failure surface");
+  }
+  if (drill.drill_id !== correlationId) throw new Error("Monitoring rollback drill must correlate to the alert receipt");
   evidenceTimestamp(drill.verified_at, "rollback.drill.verified_at", generatedAt);
   return true;
 }
