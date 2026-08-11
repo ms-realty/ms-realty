@@ -1011,7 +1011,9 @@ test("external SEO export templates are present but real CSVs stay local", () =>
     assert.match(template, /makler-realty\.com/);
     assert.match(template, /makler-realty\.ru/);
   }
-  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /migration\/external\/seo\/\*\.csv/);
+  const gitignore = fs.readFileSync(fromRoot(".gitignore"), "utf8");
+  assert.match(gitignore, /^migration\/external\/seo\/\*\.csv$/m);
+  assert.match(gitignore, /^migration\/external\/seo\/\*\.provenance\.json$/m);
 });
 
 test("external SEO export writer only writes known source files", () => {

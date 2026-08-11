@@ -9,6 +9,7 @@ dist/
 coverage/
 .local-backups/
 migration/external/seo/*.csv
+migration/external/seo/*.provenance.json
 !migration/external/seo/*.csv.example
 production/data/search-engine-sync-report.json
 production/data/search-engine-query-report.json
