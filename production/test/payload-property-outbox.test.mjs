@@ -87,6 +87,54 @@ test("listing changes reuse an existing deterministic enrichment task without at
   assert.deepEqual(creates.map((input) => input.collection), ["search_outbox"]);
 });
 
+test("standalone enrichment task creation tolerates a concurrent duplicate", async () => {
+  const req = {
+    payload: {
+      async find() {
+        return { docs: [] };
+      },
+      async create(input) {
+        if (input.collection === "listing_enrichment_tasks") {
+          throw Object.assign(new Error("duplicate enrichment task"), { code: "23505" });
+        }
+      },
+    },
+  };
+
+  await assert.doesNotReject(() =>
+    listingSearchOutboxHook({
+      doc: { id: "MS-CRAWL-0001", property: "property-MS-CRAWL-0001", updatedAt: "2026-08-10T18:45:00.000Z" },
+      operation: "update",
+      req,
+    }),
+  );
+});
+
+test("transactional enrichment duplicates escape so the outer transaction can retry", async () => {
+  const duplicate = Object.assign(new Error("duplicate enrichment task"), { code: "23505" });
+  const req = {
+    transactionID: "tx-1",
+    payload: {
+      async find() {
+        return { docs: [] };
+      },
+      async create(input) {
+        if (input.collection === "listing_enrichment_tasks") throw duplicate;
+      },
+    },
+  };
+
+  await assert.rejects(
+    () =>
+      listingSearchOutboxHook({
+        doc: { id: "MS-CRAWL-0001", property: "property-MS-CRAWL-0001", updatedAt: "2026-08-10T18:45:00.000Z" },
+        operation: "update",
+        req,
+      }),
+    (error) => error === duplicate,
+  );
+});
+
 test("listing deletion enqueues an unlinked delete event after the Listing is gone", async () => {
   const fake = fakePayload();
   const doc = { id: "MS-CRAWL-0001", updatedAt: "2026-07-30T10:00:00.000Z" };
