@@ -633,6 +633,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(russianEditorHtml, /data-editor-dirty-message="[^"]+"/);
       assert.match(russianEditorHtml, /data-editor-clean-message="[^"]+"/);
       assert.match(russianEditorHtml, /data-editor-readiness-rail="true"/);
+      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=bg"/);
+      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=ru"/);
+      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001"/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();
