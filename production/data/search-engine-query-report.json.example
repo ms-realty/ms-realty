@@ -16,42 +16,27 @@
     "sample_document_id": null
   },
   "summary": {
-    "engines": 2,
+    "engines": 1,
     "targets": {
-      "typesense": "ms_realty_listings",
-      "meilisearch": "ms_realty_listings"
+      "postgres": "ms_realty_public_search_documents"
     },
     "total_hits": 0,
     "first_hit_ids": [
-      null,
       null
-    ]
+    ],
+    "database_target": "postgres://db.ms-realty.bg:5432/ms_realty"
   },
   "engines": [
     {
-      "engine": "typesense",
-      "service_url": "https://ms-realty-typesense.workers.dev/",
-      "collection": "ms_realty_listings",
-      "query": "*",
-      "filter": "publication_state:=published && (listing_status:=available || listing_status:=reserved) && translation_indexable:=true && translation_human_approved:=true && locale_indexable:=true && locale:=`bg`",
+      "engine": "postgres",
+      "target": "ms_realty_public_search_documents",
+      "database_target": "postgres://db.ms-realty.bg:5432/ms_realty",
+      "query": "",
       "operation": {
-        "method": "GET",
-        "url": "https://ms-realty-typesense.workers.dev/collections/ms_realty_listings/documents/search?q=*&query_by=title%2Cdescription%2Csearch_text%2Clocation_label%2Clisting_reference&filter_by=publication_state%3A%3Dpublished+%26%26+%28listing_status%3A%3Davailable+%7C%7C+listing_status%3A%3Dreserved%29+%26%26+translation_indexable%3A%3Dtrue+%26%26+translation_human_approved%3A%3Dtrue+%26%26+locale_indexable%3A%3Dtrue+%26%26+locale%3A%3D%60bg%60&per_page=5",
-        "status": 200
-      },
-      "total": 0,
-      "hits": []
-    },
-    {
-      "engine": "meilisearch",
-      "service_url": "https://ms-realty-meilisearch.workers.dev/",
-      "index": "ms_realty_listings",
-      "query": "*",
-      "filter": "publication_state = \"published\" AND (listing_status = \"available\" OR listing_status = \"reserved\") AND translation_indexable = true AND translation_human_approved = true AND locale_indexable = true AND locale = \"bg\"",
-      "operation": {
-        "method": "POST",
-        "url": "https://ms-realty-meilisearch.workers.dev/indexes/ms_realty_listings/search",
-        "status": 200
+        "method": "SELECT",
+        "url": "postgres://db.ms-realty.bg:5432/ms_realty",
+        "status": 200,
+        "rows": 0
       },
       "total": 0,
       "hits": []

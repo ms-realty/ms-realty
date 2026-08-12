@@ -2917,8 +2917,7 @@
     "search": {
       "saved_view": false,
       "engines": [
-        "typesense",
-        "meilisearch"
+        "postgres"
       ],
       "intent": {
         "schema_version": 1,

@@ -364,7 +364,12 @@ function seedForSearchHits(seed, hits) {
 function withSearchBackend(result, engineResult) {
   const backend = {
     engine: engineResult.engine,
-    mode: engineResult.engine === "typesense" ? "primary" : engineResult.engine === "meilisearch" ? "fallback" : "local_fallback",
+    mode:
+      engineResult.engine === "postgres" || engineResult.engine === "typesense"
+        ? "primary"
+        : engineResult.engine === "meilisearch"
+          ? "fallback"
+          : "local_fallback",
     locale_codes: engineResult.locale_codes,
     unavailable_engines: engineResult.unavailable_engines,
   };

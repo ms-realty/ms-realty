@@ -1,66 +1,50 @@
 {
-  "evidence_scope": "smoke",
+  "evidence_scope": "live",
   "generated_at": "2026-07-06T00:00:00Z",
   "source": {
-    "kind": "search_fixture",
-    "authoritative": false,
-    "projected_documents": 167
+    "kind": "payload_postgres",
+    "authoritative": true,
+    "listing_rows": 1,
+    "eligible_translation_rows": 1,
+    "projected_documents": 1,
+    "locale_codes": [
+      "bg"
+    ],
+    "digest": "dd4012977ab5098195917cfefabb0df2344569d52375b16e4a9adea22ad4391f"
   },
   "expectation": {
-    "projected_documents": 167,
+    "projected_documents": 1,
     "sample_document_id": "MS-CRAWL-0001:bg"
   },
   "summary": {
-    "engines": 2,
+    "engines": 1,
     "targets": {
-      "typesense": "ms_realty_listings",
-      "meilisearch": "ms_realty_listings"
+      "postgres": "ms_realty_public_search_documents"
     },
-    "total_hits": 2,
+    "total_hits": 1,
     "first_hit_ids": [
-      "MS-CRAWL-0001:bg",
       "MS-CRAWL-0001:bg"
-    ]
+    ],
+    "database_target": "postgres://db.ms-realty.bg:5432/ms_realty"
   },
   "engines": [
     {
-      "engine": "typesense",
-      "service_url": "https://typesense.ms-realty.bg/",
-      "collection": "ms_realty_listings",
+      "engine": "postgres",
+      "target": "ms_realty_public_search_documents",
+      "database_target": "postgres://db.ms-realty.bg:5432/ms_realty",
       "query": "MS-CRAWL-0001",
-      "filter": "publication_state:=published && (listing_status:=available || listing_status:=reserved) && translation_indexable:=true && translation_human_approved:=true && locale_indexable:=true && locale:=`bg` && source_listing_id:=`MS-CRAWL-0001`",
       "operation": {
-        "method": "GET",
-        "url": "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=MS-CRAWL-0001&query_by=listing_reference%2Csource_listing_id&filter_by=publication_state%3A%3Dpublished+%26%26+%28listing_status%3A%3Davailable+%7C%7C+listing_status%3A%3Dreserved%29+%26%26+translation_indexable%3A%3Dtrue+%26%26+translation_human_approved%3A%3Dtrue+%26%26+locale_indexable%3A%3Dtrue+%26%26+locale%3A%3D%60bg%60+%26%26+source_listing_id%3A%3D%60MS-CRAWL-0001%60&per_page=5&num_typos=0&drop_tokens_threshold=0",
-        "status": 200
+        "method": "SELECT",
+        "status": 200,
+        "url": "postgres://db.ms-realty.bg:5432/ms_realty",
+        "rows": 1
       },
       "total": 1,
       "hits": [
         {
           "id": "MS-CRAWL-0001:bg",
           "source_listing_id": "MS-CRAWL-0001",
-          "locale": "bg",
-          "locale_path": "/bg/imoti/MS-CRAWL-0001",
-          "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
-        }
-      ]
-    },
-    {
-      "engine": "meilisearch",
-      "service_url": "https://meili.ms-realty.bg/",
-      "index": "ms_realty_listings",
-      "query": "MS-CRAWL-0001",
-      "filter": "publication_state = \"published\" AND (listing_status = \"available\" OR listing_status = \"reserved\") AND translation_indexable = true AND translation_human_approved = true AND locale_indexable = true AND locale = \"bg\" AND source_listing_id = \"MS-CRAWL-0001\"",
-      "operation": {
-        "method": "POST",
-        "url": "https://meili.ms-realty.bg/indexes/ms_realty_listings/search",
-        "status": 200
-      },
-      "total": 1,
-      "hits": [
-        {
-          "id": "MS-CRAWL-0001:bg",
-          "source_listing_id": "MS-CRAWL-0001",
+          "listing_reference": "MS-CRAWL-0001",
           "locale": "bg",
           "locale_path": "/bg/imoti/MS-CRAWL-0001",
           "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"

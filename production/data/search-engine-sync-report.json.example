@@ -12,41 +12,29 @@
     "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
   },
   "summary": {
-    "engines": 2,
+    "engines": 1,
     "targets": {
-      "typesense": "ms_realty_listings",
-      "meilisearch": "ms_realty_listings"
+      "postgres": "ms_realty_public_search_documents"
     },
     "documents_per_engine": [
-      0,
       0
     ],
-    "total_operations": 2
+    "total_operations": 1,
+    "database_target": "postgres://db.ms-realty.bg:5432/ms_realty"
   },
   "engines": [
     {
-      "engine": "typesense",
-      "collection": "ms_realty_listings",
+      "engine": "postgres",
+      "target": "ms_realty_public_search_documents",
       "documents": 0,
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "locale_codes": [],
       "operations": [
         {
-          "method": "POST",
-          "url": "https://ms-realty-typesense.workers.dev/collections",
-          "status": 201,
-          "bytes": 4929
-        }
-      ]
-    },
-    {
-      "engine": "meilisearch",
-      "index": "ms_realty_listings",
-      "documents": 0,
-      "operations": [
-        {
-          "method": "PATCH",
-          "url": "https://ms-realty-meilisearch.workers.dev/indexes/ms_realty_listings/settings",
-          "status": 202,
-          "bytes": 1416
+          "method": "SELECT",
+          "url": "postgres://db.ms-realty.bg:5432/ms_realty",
+          "status": 200,
+          "rows": 0
         }
       ]
     }

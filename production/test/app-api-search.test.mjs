@@ -115,7 +115,7 @@ test("public API search falls back to Meilisearch only after Typesense is unavai
       assert.equal(response.status, 200);
       assert.deepEqual(body.search.engines, ["meilisearch"]);
       assert.equal(body.search.backend.mode, "fallback");
-      assert.deepEqual(body.search.backend.unavailable_engines, ["typesense"]);
+      assert.deepEqual(body.search.backend.unavailable_engines, ["postgres", "typesense"]);
       assert.equal(calls.length, 2);
       assert.equal(calls[0].url.includes("/documents/search?"), true);
       assert.equal(calls[1].url, "/indexes/ms_realty_listings/search");
@@ -130,7 +130,7 @@ test("public API search labels local data as a seed fallback only when both engi
   assert.equal(response.status, 200);
   assert.deepEqual(body.search.engines, ["seed_fallback"]);
   assert.equal(body.search.backend.mode, "local_fallback");
-  assert.deepEqual(body.search.backend.unavailable_engines, ["typesense", "meilisearch"]);
+  assert.deepEqual(body.search.backend.unavailable_engines, ["postgres", "typesense", "meilisearch"]);
   assert.ok(body.search.total_matches > 0);
 });
 
