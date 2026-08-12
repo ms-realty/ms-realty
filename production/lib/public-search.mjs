@@ -20,18 +20,20 @@ export class PublicSearchUnavailableError extends Error {
 }
 
 export function publicSearchConfigFromEnv(env = process.env) {
-  const privateReview = env.MS_REALTY_PRIVATE_REVIEW_MODE === "true";
   return {
-    engine: privateReview ? undefined : env.MS_REALTY_SEARCH_ENGINE,
-    environment: privateReview ? "review" : env.NODE_ENV,
-    typesense: privateReview ? {} : {
+    engine: env.MS_REALTY_SEARCH_ENGINE,
+    environment: env.NODE_ENV,
+    postgres: {
+      env,
+    },
+    typesense: {
       baseUrl: env.TYPESENSE_URL,
       apiKey: env.TYPESENSE_API_KEY,
       queryApiKey: env.TYPESENSE_QUERY_API_KEY || env.TYPESENSE_API_KEY,
       allowPrivateNetwork: privateSearchServiceNetworkAllowed(env),
       collectionName: env.TYPESENSE_COLLECTION || "ms_realty_listings"
     },
-    meilisearch: privateReview ? {} : {
+    meilisearch: {
       baseUrl: env.MEILI_URL,
       apiKey: env.MEILI_API_KEY,
       queryApiKey: env.MEILI_QUERY_API_KEY || env.MEILI_API_KEY,

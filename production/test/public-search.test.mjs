@@ -58,6 +58,8 @@ function searchConfig(fetchImpl, { environment = "test", typesense = true, meili
 
 test("public search prefers optional query-only credentials and keeps admin-key fallback", () => {
   const separated = publicSearchConfigFromEnv({
+    DATABASE_URL: "postgres://db.ms-realty.bg:5432/ms_realty",
+    PAYLOAD_SECRET: "payload-secret",
     TYPESENSE_URL: "https://typesense.ms-realty.bg",
     TYPESENSE_API_KEY: "typesense-admin",
     TYPESENSE_QUERY_API_KEY: "typesense-query",
@@ -70,6 +72,8 @@ test("public search prefers optional query-only credentials and keeps admin-key 
     MEILI_API_KEY: "meili-admin",
   });
 
+  assert.equal(separated.postgres.env.DATABASE_URL, "postgres://db.ms-realty.bg:5432/ms_realty");
+  assert.equal(separated.postgres.env.PAYLOAD_SECRET, "payload-secret");
   assert.equal(separated.typesense.queryApiKey, "typesense-query");
   assert.equal(separated.meilisearch.queryApiKey, "meili-query");
   assert.equal(compatible.typesense.queryApiKey, "typesense-admin");
