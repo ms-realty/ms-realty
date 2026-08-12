@@ -518,10 +518,8 @@ export function assertPayloadRuntimeReport(report) {
   ) {
     throw new Error("Payload runtime ready report must include database network scope evidence");
   }
-  if (ready) {
-    assertProductionDatabaseHost(report.summary.database.host);
-    assertProductionDatabaseHost(databaseTcp.host);
-  }
+  if (report.summary.database.host) assertProductionDatabaseHost(report.summary.database.host);
+  if (databaseTcp.host) assertProductionDatabaseHost(databaseTcp.host);
   return true;
 }
 
