@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
+
+const adminAdapterCss = fs.readFileSync(new URL("../lib/ui/adapter-admin.css", import.meta.url), "utf8");
+const generatedDesignCss = fs.readFileSync(new URL("../../public/vendor/ms-realty.css", import.meta.url), "utf8");
 
 test("admin reply client submits broker-only drafts and reviewed replies as JSON", () => {
   assert.match(ADMIN_APP_JS, /function initReplyForms\(\)/);
@@ -47,4 +51,15 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /window\.addEventListener\("scroll", scheduleSync/);
   assert.match(ADMIN_APP_JS, /data-admin-mobile-nav-close/);
   assert.match(ADMIN_APP_JS, /var target = returnFocusTarget && returnFocusTarget\.isConnected \? returnFocusTarget : summary/);
+});
+
+test("admin keeps desktop navigation visible from 1024px through 1439px", () => {
+  for (const css of [adminAdapterCss, generatedDesignCss]) {
+    const desktopNavigation = css.slice(css.lastIndexOf("@media (min-width"));
+    assert.match(desktopNavigation, /min-width:\s*1024px/);
+    assert.match(desktopNavigation, /max-width:\s*1439px/);
+    assert.match(desktopNavigation, /grid-template-columns:\s*244px\s+minmax\(0,\s*1fr\)/);
+    assert.match(desktopNavigation, /\.crm-sb\s*\{[^}]*display:\s*flex/);
+    assert.match(desktopNavigation, /\.adm-mobile-nav\s*\{[^}]*display:\s*none/);
+  }
 });

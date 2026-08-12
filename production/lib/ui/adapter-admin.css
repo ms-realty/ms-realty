@@ -1480,3 +1480,10 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Keep the full workbench navigation on tablet-sized desktop screens. */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .crm-app { grid-template-columns: 244px minmax(0, 1fr); }
+  .crm-sb { display: flex; }
+  .adm-mobile-nav { display: none; }
+}

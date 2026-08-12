@@ -922,6 +922,16 @@ function adminHref(path, page) {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
+function adminLocaleHref(page, locale) {
+  const url = new URL(page.path || "/admin", "http://ms-realty.local");
+  for (const [key, value] of Object.entries(page.filters || {})) {
+    if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, String(value));
+  }
+  if (page.listing?.id) url.searchParams.set("listingId", page.listing.id);
+  if (locale && locale !== "en") url.searchParams.set("locale", locale);
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 function payloadAdminListingHref(listingId, page) {
   return adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(listingId)}`, page);
 }
@@ -1270,7 +1280,7 @@ function Topbar({ page, title }) {
           "a",
           {
             key: code,
-            href: code === "en" ? page.path : `${page.path}?locale=${code}`,
+            href: adminLocaleHref(page, code),
             "data-on": code === page.workspace?.locale ? "1" : "0",
             "aria-current": code === page.workspace?.locale ? "page" : undefined,
           },
