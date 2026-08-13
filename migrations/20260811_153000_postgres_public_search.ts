@@ -1,32 +1,5 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres'
-
-const SEARCH_FOLD_SQL = `
-  trim(
-    regexp_replace(
-      replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(
-        lower(coalesce(input, '')),
-        'щ', 'sht'
-      ), 'ш', 'sh'
-      ), 'ч', 'ch'
-      ), 'ц', 'ts'
-      ), 'ж', 'zh'
-      ), 'ю', 'yu'
-      ), 'я', 'ya'
-      ), 'й', 'y'
-      ), 'х', 'h'
-      ), 'ъ', 'a'
-      ), 'ь', 'y'
-      ), 'ѝ', 'i'
-      ), 'ы', 'y'
-      ), 'э', 'e'
-      ), 'ё', 'yo'
-      ), '№', ' no '),
-      '[^[:alnum:][:space:]-]+',
-      ' ',
-      'g'
-    )
-  )
-`
+import { POSTGRES_SEARCH_FOLD_SQL } from '../production/lib/search-fold.mjs'
 
 // Keep the indexed expression identical to the view's public lexical field.
 // PostgreSQL can then use the trigram index for the runtime's
@@ -72,7 +45,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     PARALLEL SAFE
     SET search_path = pg_catalog, pg_temp
     AS $function$
-      SELECT ${sql.raw(SEARCH_FOLD_SQL)};
+      SELECT ${sql.raw(POSTGRES_SEARCH_FOLD_SQL)};
     $function$;
 
     -- Translation rows currently carry approval/indexability state; listing copy

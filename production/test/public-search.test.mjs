@@ -249,3 +249,71 @@ test("Postgres result pages preserve database totals and requested page size", a
   });
   assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0002", "MS-CRAWL-0001"]);
 });
+
+test("Postgres cards keep database-only listings and database-updated facts authoritative", async () => {
+  const { result } = await executePublicSearch({
+    registry,
+    seed,
+    params: new URLSearchParams("locale=bg&page_size=5"),
+    search: {
+      engine: "postgres",
+      environment: "production",
+      postgres: {
+        queryImpl: async ({ intent }) => ({
+          engine: "postgres",
+          total: 2,
+          page: intent.page,
+          page_size: intent.page_size,
+          target: "ms_realty_public_search_documents",
+          hits: [
+            {
+              ...hit,
+              title: "Authoritative database title",
+              location_label: "Database Sandanski",
+              property_family: "apartment",
+              offer_type: "sale",
+              listing_status: "reserved",
+              price_amount: 123456,
+              price_currency: "EUR",
+              price_on_request: false,
+              bedrooms_count: 2,
+              primary_area_sqm: 88,
+            },
+            {
+              id: "MS-DB-ONLY-0001:bg",
+              source_listing_id: "MS-DB-ONLY-0001",
+              listing_reference: "MS-DB-ONLY-0001",
+              locale: "bg",
+              locale_path: "/bg/imoti/db-only-listing",
+              title: "Database-only approved listing",
+              description: "Approved database description",
+              location_label: "Petrich",
+              municipality: "Petrich",
+              district: "Blagoevgrad",
+              country_code: "BG",
+              property_family: "house",
+              offer_type: "rent",
+              listing_status: "available",
+              price_amount: 950,
+              price_currency: "EUR",
+              price_on_request: false,
+              bedrooms_count: 3,
+              primary_area_sqm: 120,
+            },
+          ],
+        }),
+      },
+    },
+  });
+
+  assert.equal(result.cards.length, 2);
+  assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0001", "MS-DB-ONLY-0001"]);
+  assert.equal(result.cards[0].title, "Authoritative database title");
+  assert.equal(result.cards[0].location, "Database Sandanski");
+  assert.equal(result.cards[0].price_eur, 123456);
+  assert.equal(result.cards[0].area_sqm, 88);
+  assert.equal(result.cards[1].title, "Database-only approved listing");
+  assert.equal(result.cards[1].path, "/bg/imoti/db-only-listing");
+  assert.equal(result.cards[1].price_eur, 950);
+  assert.equal(result.cards[1].bedrooms, 3);
+});

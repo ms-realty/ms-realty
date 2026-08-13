@@ -74,6 +74,90 @@ export function seedForSearchHits(seed, hits) {
   return { ...seed, records };
 }
 
+function authoritativeSearchTranslation(hit) {
+  return {
+    locale: hit.locale,
+    source_locale: hit.locale,
+    status: "published",
+    translation_state: "published",
+    reviewer: "postgres_public_search_projection",
+    human_approved: true,
+    public_indexable: true,
+    approved_at: "database_projection",
+    listing: hit.source_listing_id,
+  };
+}
+
+function postgresSearchRecord(hit, existing = null) {
+  const id = String(hit?.source_listing_id || "").trim();
+  const locale = String(hit?.locale || "").trim();
+  const title = String(hit?.title || "").trim();
+  if (!id || !locale || !title) throw new Error("Postgres public search returned an incomplete authoritative card");
+  const previousFacts = existing?.facts || {};
+  const translations = [
+    authoritativeSearchTranslation(hit),
+    ...(existing?.translations || []).filter((translation) => translation.locale !== locale),
+  ];
+  return {
+    ...(existing || {}),
+    id,
+    collection: "listings",
+    cms_status: "published",
+    source_locale: locale,
+    source_domain: existing?.source_domain || "",
+    source_url: existing?.source_url || "",
+    facts: {
+      ...previousFacts,
+      id,
+      title,
+      h1: title,
+      description: hit.description || "",
+      location: hit.location_label || hit.municipality || hit.district || "",
+      municipality: hit.municipality || "",
+      district: hit.district || "",
+      region_id: hit.region_id || "",
+      country_code: hit.country_code || "",
+      geography_id: hit.geography_id || "",
+      geography_path: Array.isArray(hit.geography_path) ? hit.geography_path : [],
+      property_type: hit.property_family || hit.property_subtype || "property",
+      offer_type: hit.offer_type || "sale",
+      listing_status: hit.listing_status || "available",
+      bedrooms: hit.bedrooms_count ?? null,
+      bedrooms_not_applicable: false,
+      area_sqm: hit.primary_area_sqm ?? null,
+      condition: hit.condition || "",
+      location_precision: hit.public_location_precision || null,
+      price_eur: hit.price_currency === "EUR" && hit.price_on_request !== true ? hit.price_amount : null,
+      price_on_request: hit.price_on_request === true,
+    },
+    seo: {
+      ...(existing?.seo || {}),
+      title,
+      description: hit.description || "",
+      canonical: existing?.seo?.canonical || "",
+      human_approved: true,
+    },
+    translations,
+    media: existing?.media || [],
+    public_search_document: { ...hit, source_listing_id: id, locale, title },
+  };
+}
+
+export function seedForPostgresSearchHits(seed, hits) {
+  const byId = new Map(
+    (seed.records || []).filter((record) => record.collection === "listings").map((record) => [record.id, record]),
+  );
+  const records = [];
+  const seen = new Set();
+  for (const hit of hits || []) {
+    const id = String(hit?.source_listing_id || "").trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    records.push(postgresSearchRecord(hit, byId.get(id) || null));
+  }
+  return { ...seed, records };
+}
+
 function searchBackend(engineResult) {
   const backend = {
     engine: engineResult.engine,
@@ -179,7 +263,10 @@ export async function executePublicSearch({
   const result =
     engineResult.engine === "seed_fallback" || (!databasePage && !engineResultIsComplete(engineResult))
       ? localResult
-      : searchRuntimeListings(registry, seedForSearchHits(seed, engineResult.hits), {
+      : searchRuntimeListings(
+          registry,
+          databasePage ? seedForPostgresSearchHits(seed, engineResult.hits) : seedForSearchHits(seed, engineResult.hits),
+          {
           ...options,
           query: "",
           ...(databasePage
@@ -189,7 +276,8 @@ export async function executePublicSearch({
                 totalMatches: engineResult.total,
               }
             : {}),
-        });
+          },
+        );
 
   return {
     result: withSearchRequest(result, engineResult, request),

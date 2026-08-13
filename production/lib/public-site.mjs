@@ -1349,6 +1349,12 @@ function translationsForSearchListing(registry, listing) {
 
 const ACTIVE_LISTING_STATUSES = new Set(["available", "reserved"]);
 
+function searchListingPath(registry, localeCode, listing) {
+  const projected = String(listing.locale_path || "").trim();
+  if (projected.startsWith("/") && !projected.startsWith("//") && !/[\\?#\u0000-\u001f]/u.test(projected)) return projected;
+  return listingPath(registry, localeCode, listing.id);
+}
+
 export function isActiveListing(listing) {
   return ACTIVE_LISTING_STATUSES.has(listingToPublicViewModel(listing).listing_status || "available");
 }
@@ -1385,10 +1391,11 @@ function listingCard(registry, listing, locale) {
       : null,
   });
   const thumbnail = publicMedia.gallery[0] || null;
+  const path = searchListingPath(registry, locale.code, listing);
   return {
     id: listing.id,
     title: copy.title,
-    path: listingPath(registry, locale.code, listing.id),
+    path,
     review_badge: reviewedTranslation ? "reviewed_translation" : null,
     translation_display: state.display,
     translation_locale: state.translation?.locale || locale.code,
@@ -1415,7 +1422,7 @@ function listingCard(registry, listing, locale) {
     legacy_image_count: Number(view.image_count || listing.image_count || 0),
     thumbnail,
     actions: {
-      detail: { label: ui.details, href: listingPath(registry, locale.code, listing.id) },
+      detail: { label: ui.details, href: path },
       inquiry: {
         label: labelsFor(locale.code).inquiry,
         endpoint: "/api/leads",
