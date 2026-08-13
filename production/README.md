@@ -242,6 +242,60 @@ Production launch stays blocked until a named operator and reviewer supply a val
 `production/data/production-recovery-report.json` using the committed `.json.example` contract;
 `MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH` may mount that evidence outside the repository.
 
+### Neon to private EU R2 production recovery
+
+The production operator workflow uses the installed Docker, `age`, and AWS CLIs without an
+additional application dependency. It runs PostgreSQL 18 clients in `postgres:18-alpine`,
+creates a custom-format Neon dump, encrypts it before upload, and writes only ciphertext plus
+a SHA-256 manifest to the private `ms-realty-production-backups-eu` bucket through its
+jurisdiction-specific EU endpoint. Database URLs and R2 secrets are never written to reports
+or command output. Plaintext dumps are mode-private and removed after each command.
+
+Before the separately approved backup upload, provide a bucket-scoped R2 object Read & Write
+credential and the age recipient through the environment:
+
+```bash
+export DATABASE_URL_DIRECT='<Neon direct PostgreSQL URL>'
+export CLOUDFLARE_ACCOUNT_ID='<MS Realty Cloudflare account ID>'
+export AWS_ACCESS_KEY_ID='<bucket-scoped R2 access key ID>'
+export AWS_SECRET_ACCESS_KEY='<bucket-scoped R2 secret access key>'
+export MS_REALTY_RECOVERY_AGE_RECIPIENT='<age1... public recipient>'
+npm run recovery:r2:backup -- --confirm-upload-encrypted-production-backup
+```
+
+The command prints the generated backup ID. After separate approval for the isolated restore
+drill, make the private age identity readable only by its owner and run:
+
+```bash
+chmod 600 '<path-to-ms-realty-recovery-age-identity>'
+export MS_REALTY_RECOVERY_AGE_IDENTITY_FILE='<path-to-ms-realty-recovery-age-identity>'
+export MS_REALTY_RECOVERY_OPERATOR='<named restore operator>'
+npm run recovery:r2:restore -- '<backup-id>' --confirm-isolated-restore-drill
+```
+
+Restore downloads and checksum-verifies the R2 objects, decrypts locally, and restores into a
+uniquely named `postgres:18-alpine` container on an internal Docker network. The target has no
+published ports or volumes. Migration identity and mapped table counts must exactly match the
+source; container and network cleanup is also part of the pass condition.
+
+`production/data/production-recovery-component-map.json` is deliberately fail-closed. It lists
+the runtime-data and runtime-evidence authorities that still exist only as container files.
+A successful Neon restore therefore remains `blocked` until every listed source is moved to a
+mapped PostgreSQL table (or a separately implemented, encrypted and restorable component).
+Never remove an uncovered source merely to clear readiness.
+
+Only after the restore result is `pass` may a distinct named human reviewer approve the redacted
+report consumed by the existing launch-readiness validator:
+
+```bash
+export MS_REALTY_RECOVERY_REVIEWER='<named human reviewer distinct from the operator>'
+npm run recovery:r2:approve -- '<backup-id>' --confirm-reviewed-recovery-evidence
+```
+
+The ignored `.recovery-work/` directory contains local ciphertext, manifests, and drill receipts.
+These commands do not create Cloudflare credentials, change production data, deploy code, access
+Mindburn infrastructure, or delete any DigitalOcean resource.
+
 After `docker:up` or `docker:seed`, the app atomically materializes schema-valid runtime reports
 that are no older than 15 minutes into `/runtime-evidence/local-launch-readiness.json`. It preserves
 all external launch blockers and adds a local-preview-only block, so `/api/ready` remains `503` until
