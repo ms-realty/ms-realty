@@ -219,22 +219,22 @@ function r2Endpoint(env) {
 
 function privateDirectory(directory) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
-  fs.chmodSync(directory, 0o700);
   const stat = fs.lstatSync(directory);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error(`Recovery work path is unsafe: ${directory}`);
+  fs.chmodSync(directory, 0o700);
   return directory;
 }
 
-function workRoot(env) {
-  return privateDirectory(path.resolve(env.MS_REALTY_RECOVERY_WORK_ROOT || DEFAULT_WORK_ROOT));
+function workRoot() {
+  return privateDirectory(DEFAULT_WORK_ROOT);
 }
 
-function backupDirectory(env, backupId) {
-  return privateDirectory(path.join(workRoot(env), assertSafeBackupId(backupId)));
+function backupDirectory(backupId) {
+  return privateDirectory(path.join(workRoot(), assertSafeBackupId(backupId)));
 }
 
 function backupId(now = new Date()) {
-  return `ms-realty-${now.toISOString().replace(/[-:.]/g, "").replace("Z", "z")}-${crypto.randomBytes(4).toString("hex")}`;
+  return `ms-realty-${now.toISOString().replace(/[-:.]/g, "").replace("Z", "z")}-${crypto.randomBytes(8).toString("hex")}`;
 }
 
 function readManifest(filePath) {
@@ -269,7 +269,7 @@ async function captureBackup(env) {
   const ageRecipient = required(env, "MS_REALTY_RECOVERY_AGE_RECIPIENT");
   const secrets = [databaseUrl, env.AWS_ACCESS_KEY_ID, env.AWS_SECRET_ACCESS_KEY];
   const id = backupId();
-  const directory = backupDirectory(env, id);
+  const directory = backupDirectory(id);
   const secretDirectory = privateDirectory(path.join(directory, ".postgres-client"));
   const plaintextFile = path.join(directory, "neon-postgres.dump");
   const encryptedFile = path.join(directory, "neon-postgres.dump.age");
@@ -358,7 +358,7 @@ async function restoreDrill(env, requestedBackupId) {
   if ((identityStat.mode & 0o077) !== 0) throw new Error("Age identity file must not be group/world accessible");
 
   const secrets = [env.AWS_ACCESS_KEY_ID, env.AWS_SECRET_ACCESS_KEY];
-  const directory = backupDirectory(env, id);
+  const directory = backupDirectory(id);
   const manifestPath = path.join(directory, "manifest.json");
   const encryptedFile = path.join(directory, "neon-postgres.dump.age");
   const plaintextFile = path.join(directory, "neon-postgres.restore.dump");
@@ -438,7 +438,7 @@ function approveDrill(env, requestedBackupId) {
     throw new Error("approval requires --confirm-reviewed-recovery-evidence from the named human reviewer");
   }
   const id = assertSafeBackupId(requestedBackupId);
-  const directory = backupDirectory(env, id);
+  const directory = backupDirectory(id);
   const manifest = readManifest(path.join(directory, "manifest.json"));
   const drill = JSON.parse(fs.readFileSync(path.join(directory, "restore-drill-result.json"), "utf8"));
   const now = new Date().toISOString();
