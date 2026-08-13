@@ -25,6 +25,14 @@ test("search request normalizes a single versioned intent and rejects unknown fi
     () => normalizeSearchRequest(new URLSearchParams("locale=bg&price_period=month")),
     /price_period is unavailable/,
   );
+  assert.throws(
+    () => normalizeSearchRequest(new URLSearchParams("locale=bg&sort=newest")),
+    /sort is not supported/,
+  );
+  assert.throws(
+    () => normalizeSearchRequest(new URLSearchParams("locale=bg&radius=25")),
+    /radius is unavailable/,
+  );
 
   assert.throws(
     () => normalizeSearchRequest(new URLSearchParams("locale=bg&unsupported_filter=value")),

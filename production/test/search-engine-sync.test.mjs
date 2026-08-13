@@ -33,6 +33,7 @@ import {
   writeApprovedSearchProjection,
 } from "../lib/search-engine-sync.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { CYRILLIC_SEARCH_FOLD_PAIRS, foldSearchText, POSTGRES_SEARCH_FOLD_SQL } from "../lib/search-fold.mjs";
 import { assertBenchmarkCorpusCompatibility, benchmarkPublicFilters, loadBenchmarkCorpus } from "../../search/benchmark-corpus.mjs";
 import { bootstrapBenchmarkCorpus } from "../../search/bootstrap_benchmark_corpus.mjs";
 
@@ -486,7 +487,9 @@ test("Postgres search counts independently and binds page, active status, and ge
     payload: {
       db: {
         drizzle: {
+          receiver: "postgres-query",
           async execute(statement) {
+            assert.equal(this.receiver, "postgres-query");
             statements.push(statement);
             return statements.length === 1 ? [{ total_count: "23" }] : [];
           },
@@ -531,10 +534,38 @@ test("Postgres search counts independently and binds page, active status, and ge
   assert.deepEqual(page.params.slice(-2), [7, 14]);
 });
 
+test("Postgres search folds Bulgarian Cyrillic from the shared JavaScript and SQL mapping", async () => {
+  assert.equal(CYRILLIC_SEARCH_FOLD_PAIRS.length, 34);
+  assert.equal(foldSearchText("Сандански"), "sandanski");
+  for (const [source, replacement] of CYRILLIC_SEARCH_FOLD_PAIRS) {
+    assert.match(POSTGRES_SEARCH_FOLD_SQL, new RegExp(`'${source}', '${replacement}'`));
+  }
+
+  const statements = [];
+  await queryPublicSearch({
+    engine: "postgres",
+    environment: "production",
+    postgres: {
+      env: { DATABASE_URL: POSTGRES_DATABASE_TARGET, PAYLOAD_SECRET: "test-payload-secret" },
+      payload: { db: { drizzle: { execute: async (statement) => (statements.push(statement), statements.length === 1 ? [{ total_count: "0" }] : []) } } },
+    },
+    localeCodes: ["bg"],
+    intent: { locale: "bg", text_query: "Сандански", page: 1, page_size: 12 },
+  });
+  const dialect = {
+    escapeName: (name) => `"${name}"`,
+    escapeParam: (index) => `$${index + 1}`,
+    escapeString: (value) => `'${String(value).replaceAll("'", "''")}'`,
+    casing: { getColumnCasing: (column) => column.name },
+  };
+  assert.equal(statements[0].toQuery(dialect).params[1], "%sandanski%");
+});
+
 test("Postgres search migration keeps locale routing and index operators aligned with runtime queries", () => {
   const migration = fs.readFileSync(fromRoot("migrations", "20260811_153000_postgres_public_search.ts"), "utf8");
   assert.match(migration, /routing_target_locale[^\n]+source_locale\."code"/);
   assert.match(migration, /SET search_path = pg_catalog, pg_temp/);
+  assert.match(migration, /POSTGRES_SEARCH_FOLD_SQL/);
   assert.match(migration, /EXISTS \(\s*SELECT 1\s*FROM "public"\."listing_translations"/);
   assert.match(migration, /VERIFIED_GEOGRAPHY_PATH_SQL\(""\)\)\}\) jsonb_path_ops/);
   assert.match(migration, /ms_realty_search_fold"\(\$\{sql\.raw\(SEARCH_TEXT_SQL\(""\)\)\}\) gin_trgm_ops/);
@@ -953,7 +984,23 @@ test("search engine sync snapshots the authoritative Postgres projection", async
     },
   ];
   const report = await runSearchEngineSync({
-    postgres: postgresFixture(documents),
+    postgres: {
+      env: {
+        DATABASE_URL: POSTGRES_DATABASE_TARGET,
+        PAYLOAD_SECRET: "test-payload-secret",
+      },
+      payload: {
+        db: {
+          drizzle: {
+            receiver: "postgres-projection",
+            async execute() {
+              assert.equal(this.receiver, "postgres-projection");
+              return documents;
+            },
+          },
+        },
+      },
+    },
     projection: authoritativeProjection(documents),
     fetchImpl: fakeFetch(calls, [201, 202, 202, 202]),
     typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },

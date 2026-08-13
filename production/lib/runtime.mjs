@@ -155,11 +155,73 @@ function locationNames(seed) {
   return publicLocationNames(listingRecords(seed).map((record) => listingFromCmsRecord(record)));
 }
 
+function optionalFiniteNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function listingFromPostgresSearchDocument(record, listing) {
+  const document = record.public_search_document;
+  if (!document) return listing;
+  const latitude = optionalFiniteNumber(document.public_latitude);
+  const longitude = optionalFiniteNumber(document.public_longitude);
+  const publicCoordinates =
+    latitude !== null && longitude !== null && latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180
+      ? { latitude, longitude }
+      : null;
+  const priceAmount = optionalFiniteNumber(document.price_amount);
+  const area = optionalFiniteNumber(document.primary_area_sqm);
+  const bedrooms = optionalFiniteNumber(document.bedrooms_count);
+  const location = document.location_label || document.municipality || document.district || "";
+  return {
+    ...listing,
+    id: document.source_listing_id,
+    locale: document.locale,
+    language: document.locale,
+    locale_path: document.locale_path,
+    translation_status: "published",
+    title: document.title,
+    h1: document.title,
+    description: document.description || document.title,
+    location,
+    location_native: location,
+    location_legacy: location,
+    municipality: document.municipality || "",
+    district: document.district || "",
+    region_id: document.region_id || "",
+    country_code: document.country_code || "",
+    geography_id: document.geography_id || "",
+    geography_path: Array.isArray(document.geography_path) ? document.geography_path : [],
+    location_review_status: document.geography_id ? "confirmed_settlement" : "verified_area",
+    property_type: document.property_family || document.property_subtype || "property",
+    property_family: document.property_family || null,
+    property_subtype: document.property_subtype || null,
+    offer_type: document.offer_type || "sale",
+    listing_status: document.listing_status || "available",
+    bedrooms,
+    bedrooms_count: bedrooms,
+    bedrooms_not_applicable: false,
+    area_sqm: area,
+    primary_area_sqm: area,
+    condition: document.condition || "",
+    price_eur:
+      document.price_currency === "EUR" && document.price_on_request !== true ? priceAmount : null,
+    price_on_request: document.price_on_request === true,
+    location_precision: document.public_location_precision || null,
+    public_location_precision: document.public_location_precision || null,
+    public_coordinates: publicCoordinates,
+  };
+}
+
 function runtimeListings(seed, translationTasks = []) {
-  return listingRecords(seed).map((record) => ({
-    ...listingFromCmsRecord(record, null, propertyForRecord(seed, record)),
-    translations: mergeRuntimeTranslations(record, translationTasks),
-  }));
+  return listingRecords(seed).map((record) => {
+    const listing = listingFromCmsRecord(record, null, propertyForRecord(seed, record));
+    return {
+      ...listingFromPostgresSearchDocument(record, listing),
+      translations: mergeRuntimeTranslations(record, translationTasks),
+    };
+  });
 }
 
 export function resolveRuntimePath(registry, seed, pathname, translationTasks = [], tourApprovals = []) {

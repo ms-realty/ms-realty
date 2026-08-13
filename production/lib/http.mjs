@@ -293,6 +293,7 @@ import {
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { fromRoot } from "./paths.mjs";
+import { seedForPostgresSearchHits } from "./public-search.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
@@ -1423,7 +1424,10 @@ export function createHttpApp({
     const result =
       engineResult.engine === "seed_fallback" || (!databasePage && !searchEngineResultIsComplete(engineResult))
         ? localResult
-        : searchRuntimeListings(activeRegistry, seedForSearchHits(seedForRequest, engineResult.hits), {
+        : searchRuntimeListings(
+            activeRegistry,
+            databasePage ? seedForPostgresSearchHits(seedForRequest, engineResult.hits) : seedForSearchHits(seedForRequest, engineResult.hits),
+            {
             ...searchOptions,
             query: "",
             ...(databasePage
@@ -1433,7 +1437,8 @@ export function createHttpApp({
                   totalMatches: engineResult.total,
                 }
               : {}),
-          });
+            },
+          );
     return withSearchBackend(result, engineResult);
   };
   const searchResultOrUnavailable = async (searchRequest, options) => {

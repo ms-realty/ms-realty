@@ -4,6 +4,7 @@ import path from "node:path";
 import { derivePrimaryAreaSqm } from "./listing-facts.mjs";
 import { fromRoot } from "./paths.mjs";
 import { loadPayloadCmsImportRuntime } from "./payload-cms-import.mjs";
+import { foldSearchText } from "./search-fold.mjs";
 import { normalizeSearchIntent } from "./search-intent.mjs";
 import {
   fetchSearchService,
@@ -26,6 +27,35 @@ const APPROVED_PUBLICATION_STATE = "published";
 const BROKER_VERIFIED = "broker_verified";
 const MAX_PUBLIC_SEARCH_HITS = 250;
 const POSTGRES_PUBLIC_SEARCH_VIEW = "ms_realty_public_search_documents";
+const POSTGRES_PUBLIC_SEARCH_CARD_COLUMNS = Object.freeze([
+  "id",
+  "source_listing_id",
+  "listing_reference",
+  "locale",
+  "locale_path",
+  "title",
+  "description",
+  "property_family",
+  "property_subtype",
+  "location_label",
+  "municipality",
+  "district",
+  "region_id",
+  "country_code",
+  "geography_id",
+  "geography_path",
+  "price_amount",
+  "price_currency",
+  "price_on_request",
+  "offer_type",
+  "listing_status",
+  "bedrooms_count",
+  "primary_area_sqm",
+  "condition",
+  "public_latitude",
+  "public_longitude",
+  "public_location_precision",
+]);
 const POSTGRES_VIEW_COLUMNS = Object.freeze([
   "id",
   "source_listing_id",
@@ -141,21 +171,6 @@ async function loadPostgresSql() {
   const module = await postgresSqlModulePromise;
   if (typeof module?.sql !== "function") throw new Error("@payloadcms/db-postgres did not expose sql");
   return module.sql;
-}
-
-const CYRILLIC_TO_LATIN = Object.freeze({
-  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m",
-  н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh", щ: "sht",
-  ъ: "a", ы: "y", ь: "y", э: "e", ю: "yu", я: "ya", ѝ: "i",
-});
-
-function foldSearchText(value) {
-  return [...String(value ?? "").toLocaleLowerCase().normalize("NFKD").replace(/\p{M}/gu, "")]
-    .map((character) => CYRILLIC_TO_LATIN[character] || character)
-    .join("")
-    .replace(/[^\p{L}\p{N}\s-]+/gu, " ")
-    .replace(/\s+/gu, " ")
-    .trim();
 }
 
 function foldedTokens(value) {
@@ -1525,6 +1540,13 @@ function postgresRows(result) {
 }
 
 function postgresSearchHit(row = {}) {
+  const optionalText = (value) => String(value ?? "").trim() || null;
+  const optionalNumber = (value) => {
+    if (value === null || value === undefined || value === "") return null;
+    const number = Number(value);
+    if (!Number.isFinite(number)) throw new Error("Postgres public search returned an invalid numeric card field");
+    return number;
+  };
   return {
     id: String(row.id || "").trim(),
     source_listing_id: String(row.source_listing_id || "").trim(),
@@ -1532,6 +1554,27 @@ function postgresSearchHit(row = {}) {
     locale: String(row.locale || "").trim(),
     locale_path: String(row.locale_path || "").trim(),
     title: String(row.title || "").trim(),
+    description: optionalText(row.description),
+    property_family: optionalText(row.property_family),
+    property_subtype: optionalText(row.property_subtype),
+    location_label: optionalText(row.location_label),
+    municipality: optionalText(row.municipality),
+    district: optionalText(row.district),
+    region_id: optionalText(row.region_id),
+    country_code: optionalText(row.country_code),
+    geography_id: optionalText(row.geography_id),
+    geography_path: Array.isArray(row.geography_path) ? row.geography_path.map(String) : [],
+    price_amount: optionalNumber(row.price_amount),
+    price_currency: optionalText(row.price_currency),
+    price_on_request: row.price_on_request === true,
+    offer_type: optionalText(row.offer_type),
+    listing_status: optionalText(row.listing_status),
+    bedrooms_count: optionalNumber(row.bedrooms_count),
+    primary_area_sqm: optionalNumber(row.primary_area_sqm),
+    condition: optionalText(row.condition),
+    public_latitude: optionalNumber(row.public_latitude),
+    public_longitude: optionalNumber(row.public_longitude),
+    public_location_precision: optionalText(row.public_location_precision),
   };
 }
 
@@ -1679,12 +1722,7 @@ async function queryPostgres({
   `;
   const pageStatement = sql`
     SELECT
-      d."id",
-      d."source_listing_id",
-      d."listing_reference",
-      d."locale",
-      d."locale_path",
-      d."title"
+      ${sql.raw(POSTGRES_PUBLIC_SEARCH_CARD_COLUMNS.map((column) => `d."${column}"`).join(",\n      "))}
     FROM ${sql.raw(`"public"."${POSTGRES_PUBLIC_SEARCH_VIEW}"`)} d
     WHERE ${sql.join(conditions, sql` AND `)}
     ORDER BY ${postgresSortOrder(sql, normalized)}
