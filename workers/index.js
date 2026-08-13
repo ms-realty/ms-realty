@@ -45,6 +45,7 @@ export class MsRealtyContainer extends Container {
     // This runtime's disk is ephemeral; MCP ledger-writing tools must not
     // register here or drafts would vanish on container sleep.
     MS_REALTY_MCP_WRITES_DISABLED: "1",
+    MS_REALTY_MCP_DURABLE_LISTING_WRITES: this.env.MS_REALTY_MCP_DURABLE_LISTING_WRITES ?? "",
     MS_REALTY_ADMIN_CREDENTIALS_JSON: this.env.MS_REALTY_ADMIN_CREDENTIALS_JSON ?? "",
     MS_REALTY_ADMIN_TOKEN: this.env.MS_REALTY_ADMIN_TOKEN ?? "",
     MS_REALTY_LEAD_CONTACT_KEY: this.env.MS_REALTY_LEAD_CONTACT_KEY ?? "",

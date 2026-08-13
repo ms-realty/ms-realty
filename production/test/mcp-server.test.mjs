@@ -71,9 +71,11 @@ function fixture({ durableListingWrites = false } = {}) {
   };
   const config = mcpConfigFromEnv(env);
   const runtime = createPayloadDraftRuntime();
+  const durableListingAudits = [];
   config.payloadListingRuntime = runtime.payload;
   config.adminConfig.payloadListingRuntime = runtime.payload;
-  return { config, paths, runtime };
+  config.adminConfig.durableListingAuditLogger = (line) => durableListingAudits.push(JSON.parse(line));
+  return { config, durableListingAudits, paths, runtime };
 }
 
 function ssePayload(text) {
@@ -205,7 +207,7 @@ test("MCP OIDC configuration requires a complete HTTPS resource-server identity"
 });
 
 test("MCP publishes OAuth metadata and binds a verified OIDC subject to existing role tools", async () => {
-  const { config, paths, runtime } = fixture({ durableListingWrites: true });
+  const { config, durableListingAudits, runtime } = fixture({ durableListingWrites: true });
   config.publicOrigin = "https://realty.example";
   config.oidc = {
     issuer: "https://identity.example",
@@ -259,7 +261,8 @@ test("MCP publishes OAuth metadata and binds a verified OIDC subject to existing
   assert.equal(edit.draft_only, true);
   assert.equal(edit.editor_url, "/admin/listings/edit?listingId=MS-CRAWL-0001");
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.description, "OIDC-attributed staff edit for human publication review.");
-  assert.equal(readAuditLog(paths.auditLogPath)[0].actor, "staff_editor");
+  assert.equal(durableListingAudits[0].actor, "staff_editor");
+  assert.equal(durableListingAudits[0].receipt, "listing.workflow.last_edit_event");
 
   for (const token of ["wrong-scope-token", "unknown-subject-token", "invalid-token"]) {
     const rejected = await mcpCall(
@@ -344,7 +347,7 @@ test("MCP exposes a privacy-safe broker queue and routes confirmed work through 
 });
 
 test("MCP bounds listing-content operations to authenticated, confirmed, non-approval changes", async () => {
-  const { config, paths, runtime } = fixture({ durableListingWrites: true });
+  const { config, durableListingAudits, paths, runtime } = fixture({ durableListingWrites: true });
   const auth = { authorization: `Bearer ${EDITOR_TOKEN}` };
 
   const queue = await callTool(config, "get_listing_content_queue", { locale: "en", query: "MS-CRAWL-0001" }, auth);
@@ -497,9 +500,10 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
   assert.equal("edits" in status, false);
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").facts.listing_status, "reserved");
-  const listingAudits = readAuditLog(paths.auditLogPath).filter((row) => row.action === "listing_edited");
+  const listingAudits = durableListingAudits.filter((row) => row.action === "listing_edited");
   assert.equal(listingAudits.length, 3);
   assert.equal(listingAudits.every((row) => row.metadata.source === "mcp_payload_draft"), true);
+  assert.equal(readAuditLog(paths.auditLogPath).filter((row) => row.action === "listing_edited").length, 0);
   assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").workflow.last_edit_event.channel, "mcp");
   assert.equal(
     readAuditLog(paths.auditLogPath).every((row) => !["translation_approved", "translation_published"].includes(row.action)),
@@ -548,11 +552,25 @@ test("ephemeral runtimes mask every ledger-writing MCP tool", async () => {
   }
 
   const brokerTools = await listTools(masked, { authorization: `Bearer ${BROKER_TOKEN}` });
-  for (const name of brokerTools) {
-    assert.equal(/queue_reviewed_reply|run_operator_workflow/.test(name), false, `${name} is a write tool`);
-  }
+  assert.deepEqual(brokerTools, [
+    "search_public_listings",
+    "get_public_listing",
+    "get_launch_status",
+    "get_operator_brief",
+    "get_broker_work_queue",
+    "get_listing_content_queue",
+  ]);
+  const translatorTools = await listTools(masked, { authorization: `Bearer ${TRANSLATOR_TOKEN}` });
+  assert.deepEqual(translatorTools, [
+    "search_public_listings",
+    "get_public_listing",
+    "get_launch_status",
+    "get_listing_content_queue",
+    "get_translation_queue",
+  ]);
 
   const flagged = mcpConfigFromEnv({ NODE_ENV: "test", MS_REALTY_MCP_WRITES_DISABLED: "1", MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1" });
   assert.equal(flagged.writesDisabled, true);
   assert.equal(flagged.durableListingWritesEnabled, true);
+  assert.equal(mcpConfigFromEnv({ NODE_ENV: "test", MS_REALTY_MCP_WRITES_DISABLED: "1" }).durableListingWritesEnabled, false);
 });

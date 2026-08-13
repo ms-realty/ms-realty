@@ -29,6 +29,7 @@ const wranglerConfig = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_ADMIN_CREDENTIALS_JSON",
   "MS_REALTY_ADMIN_TOKEN",
+  "MS_REALTY_MCP_DURABLE_LISTING_WRITES",
   "MS_REALTY_LEAD_CONTACT_KEY",
   "MS_REALTY_LEAD_DURABLE_STORE_ENABLED",
   "MS_REALTY_PUBLIC_CONTACT_KEY",
@@ -284,6 +285,11 @@ test("successful exact-head CI runs merge without a review gate", () => {
 test("Cloudflare Container admits authenticated MCP without opening ledger writes", () => {
   assert.match(workerSource, /allowsMcpRequest\(\{ method: request\.method, pathname: url\.pathname, env \}\)/);
   assert.match(workerSource, /MS_REALTY_MCP_WRITES_DISABLED: "1"/);
+  assert.match(
+    workerSource,
+    /MS_REALTY_MCP_DURABLE_LISTING_WRITES: this\.env\.MS_REALTY_MCP_DURABLE_LISTING_WRITES \?\? ""/,
+  );
+  assert.doesNotMatch(wranglerConfig, /MS_REALTY_MCP_DURABLE_LISTING_WRITES/);
 
   const env = { MS_REALTY_PUBLIC_ORIGIN: "https://ms-realty.example.workers.dev" };
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env }), true);

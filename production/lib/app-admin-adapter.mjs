@@ -342,6 +342,7 @@ export function appAdminConfigFromEnv(env = process.env) {
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
+    durableListingAuditToFile: env.NODE_ENV !== "production",
     accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
@@ -784,6 +785,29 @@ function recordProviderConnectionFailure(provider, phase, error, config) {
     },
     config,
   );
+}
+
+function recordDurableListingAudit(input, config, recordedAt = auditRecordedAt(config)) {
+  try {
+    const entry = createAuditLogEntry(withAuthenticatedAuditActor(input, config.adminPrincipal), recordedAt);
+    if (config.durableListingAuditToFile !== false) {
+      appendAuditLog(entry, { filePath: config.auditLogPath });
+    } else {
+      (config.durableListingAuditLogger || console.info)(
+        JSON.stringify({
+          kind: "durable_listing_mutation",
+          authority: "payload_postgres",
+          receipt: "listing.workflow.last_edit_event",
+          ...entry,
+        }),
+      );
+    }
+    return entry;
+  } catch {
+    // Payload's listing version is authoritative. A replica/telemetry failure
+    // must never turn an already committed durable mutation into an API error.
+    return null;
+  }
 }
 
 function recordAuditReplica(input, config, recordedAt, alreadyRecorded, bestEffort) {
@@ -1662,7 +1686,7 @@ async function appendBulkListingStatusChanges(input, config) {
   });
   const changes = result.edits.filter((edit) => !edit.idempotent);
   for (const edit of changes) {
-    recordAudit(
+    recordDurableListingAudit(
       {
         action: "listing_edited",
         actor: edit.editor,
@@ -3672,7 +3696,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           requestChannel: config.requestChannel || "admin",
         });
         if (!result.idempotent) {
-          recordAudit(
+          recordDurableListingAudit(
             {
               action: "listing_edited",
               actor: config.adminPrincipal?.id,
