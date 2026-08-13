@@ -3,6 +3,12 @@ import { readBuildMarker } from "./build-marker.mjs";
 import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, appendEvent, createEvent } from "./events.mjs";
 import {
+  EventStoreUnavailableError,
+  eventDurableStoreConfigFromEnv,
+  isEventDurableStoreEnabled,
+  persistEventDurably,
+} from "./event-durable-store.mjs";
+import {
   DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
   appendLanguageRequest,
   createLanguageRequest,
@@ -77,6 +83,7 @@ export function appApiConfigFromEnv(env = process.env) {
     trustProxy: env.MS_REALTY_TRUST_PROXY === "1",
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
+    eventDurableStore: eventDurableStoreConfigFromEnv(env),
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     leadContactVaultPath:
@@ -203,8 +210,25 @@ function publicWriteLimiterFor(config) {
   return sharedPublicWriteLimiter;
 }
 
-function recordEvent(input, config) {
-  return appendEvent(createEvent(input, config.receivedAt || new Date().toISOString()), { filePath: config.eventLedgerPath });
+async function recordEvent(input, config) {
+  const event = createEvent(input, config.receivedAt || new Date().toISOString());
+  const durableStore = config.eventDurableStore || {};
+  const durableRequested = durableStore.eventDurableStoreEnabled === true;
+  if (durableRequested && !isEventDurableStoreEnabled(durableStore)) {
+    throw new EventStoreUnavailableError("Durable funnel event store is enabled but not fully configured");
+  }
+  return durableRequested
+    ? (config.persistEventDurably || persistEventDurably)(event, { payload: config.eventDurablePayload || null })
+    : appendEvent(event, { filePath: config.eventLedgerPath });
+}
+
+async function recordOperationalEvent(input, config) {
+  try {
+    return await recordEvent(input, config);
+  } catch (error) {
+    if (error instanceof EventStoreUnavailableError) return null;
+    throw error;
+  }
 }
 
 function recordConsent(input, config) {
@@ -224,7 +248,7 @@ async function routeSearch(requestUrl, registry, seed, config, preview = false) 
       translationTasks: currentTranslationTasks(config),
     });
     const { intent, query, filters, sort, page } = request;
-    if (!preview) recordEvent({ type: "search", path: requestUrl.pathname, locale: intent.locale, query, filters, sort, page }, config);
+    if (!preview) await recordOperationalEvent({ type: "search", path: requestUrl.pathname, locale: intent.locale, query, filters, sort, page }, config);
     return json(200, result);
   } catch (error) {
     if (error instanceof PublicSearchInputError) {
@@ -286,16 +310,18 @@ async function routeLead(request, body, registry, seed, config) {
             filePath: config.sellerPipelinePath,
           })
         : null;
-    recordEvent(
-      {
-        type: "lead_submitted",
-        path: "/api/leads",
-        locale: lead.original_language,
-        listingReference: lead.lead?.listingReference,
-        action: lead.lead?.source,
-      },
-      config,
-    );
+    if (durable?.created !== false) {
+      await recordOperationalEvent(
+        {
+          type: "lead_submitted",
+          path: "/api/leads",
+          locale: lead.original_language,
+          listingReference: lead.lead?.listingReference,
+          action: lead.lead?.source,
+        },
+        config,
+      );
+    }
     return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline });
   } catch (error) {
     if (error instanceof LeadStoreUnavailableError) {
@@ -305,12 +331,14 @@ async function routeLead(request, body, registry, seed, config) {
   }
 }
 
-function routeEvent(request, body, config) {
+async function routeEvent(request, body, config) {
   try {
-    const event = createEvent(parseBody(request, body), config.receivedAt || new Date().toISOString());
-    const ledger = appendEvent(event, { filePath: config.eventLedgerPath });
-    return json(201, { ...event, ledger });
+    const event = await recordEvent(parseBody(request, body), config);
+    return json(201, event);
   } catch (error) {
+    if (error instanceof EventStoreUnavailableError) {
+      return json(503, { kind: error.code, message: "Analytics storage is temporarily unavailable" }, PRIVATE_HEADERS);
+    }
     return json(400, { kind: "bad_request", message: error.message });
   }
 }
@@ -425,7 +453,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     if (url.pathname === "/api/hermes/chat") {
       return webResponse(privateJson(404, { kind: "not_found" }));
     }
-    if (request.method === "POST" && url.pathname === "/api/leads") {
+    if (request.method === "POST" && ["/api/leads", "/api/events"].includes(url.pathname)) {
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : url.protocol.slice(0, -1);
       const host = requestHost(request.headers);
@@ -512,7 +540,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     }
 
     if (request.method === "POST" && url.pathname === "/api/events") {
-      return webResponse(routeEvent(request, body, config));
+      return webResponse(await routeEvent(request, body, config));
     }
 
     if (request.method === "POST" && url.pathname === "/api/language-requests") {

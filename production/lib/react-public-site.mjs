@@ -2265,6 +2265,7 @@ function ListingBody({ page }) {
       id: "main",
       tabIndex: -1,
       "data-kind": "listing",
+      "data-listing-id": facts.id,
       "data-react-public-ui": "listing",
       "data-review-status": page.body.actions.direct_contact.review_status,
       "data-listing-status": page.body.lifecycle?.status || "available",

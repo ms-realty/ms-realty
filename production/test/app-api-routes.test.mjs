@@ -235,7 +235,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       const event = await eventRoute.POST(
         new Request("https://example.test/api/events", {
           method: "POST",
-          headers: { "content-type": "application/x-www-form-urlencoded" },
+          headers: { "content-type": "application/x-www-form-urlencoded", origin: "https://example.test" },
           body: new URLSearchParams({ type: "cta_click", path: "/he/properties/MS-CRAWL-0001", locale: "he", action: "call" }),
         }),
       );

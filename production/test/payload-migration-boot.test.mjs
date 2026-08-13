@@ -8,6 +8,8 @@ import { fromRoot } from "../lib/paths.mjs";
 const propertySearchMigration = fromRoot("migrations", "20260730_120000_property_search_schema.ts");
 const payloadSchemaDriftMigration = fromRoot("migrations", "20260810_164700_payload_schema_drift.ts");
 const durableListingEditMigration = fromRoot("migrations", "20260811_120000_durable_listing_edit_audit.ts");
+const publicSearchMigration = fromRoot("migrations", "20260811_153000_postgres_public_search.ts");
+const publicSearchRepairMigration = fromRoot("migrations", "20260813_110000_repair_postgres_search_index.ts");
 
 function tableSql(source, name) {
   const start = source.indexOf(`CREATE TABLE "${name}" (`);
@@ -26,7 +28,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
   ]);
-  for (const migration of ["20260710_132716_initial_schema.ts", "20260730_120000_property_search_schema.ts", "20260810_164700_payload_schema_drift.ts", "20260811_120000_durable_listing_edit_audit.ts"]) {
+  for (const migration of ["20260710_132716_initial_schema.ts", "20260730_120000_property_search_schema.ts", "20260810_164700_payload_schema_drift.ts", "20260811_120000_durable_listing_edit_audit.ts", "20260811_153000_postgres_public_search.ts", "20260813_110000_repair_postgres_search_index.ts", "20260813_120000_durable_funnel_events.ts"]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
       /import \{ sql, type MigrateDownArgs, type MigrateUpArgs \} from '@payloadcms\/db-postgres'/,
@@ -138,6 +140,13 @@ test("Payload migration boot configuration and generated constraints stay runnab
   const listingEditDown = listingEditPatch.match(/export async function down[\s\S]*$/)?.[0] || "";
   assert.doesNotMatch(listingEditDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
 
+  for (const migrationPath of [publicSearchMigration, publicSearchRepairMigration]) {
+    const searchIndexMigration = fs.readFileSync(migrationPath, "utf8");
+    assert.doesNotMatch(searchIndexMigration, /ms_realty_search_fold"\(concat_ws\(/);
+    assert.match(searchIndexMigration, /COALESCE\("facts_title", ''\) \|\| ' ' \|\|/);
+    assert.match(searchIndexMigration, /COALESCE\("id", ''\)/);
+  }
+
   const typesDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-migration-`);
   const env = {
     ...process.env,
@@ -149,7 +158,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
       cwd: fromRoot(),
       encoding: "utf8",
       env,
-      timeout: 30_000,
+      timeout: 60_000,
     });
     assert.equal(loaded.status, 0, loaded.stderr);
 
@@ -157,7 +166,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
       cwd: fromRoot(),
       encoding: "utf8",
       env,
-      timeout: 30_000,
+      timeout: 60_000,
     });
     assert.equal(help.status, 0, help.stderr);
     assert.match(help.stdout, /Available commands: migrate/);

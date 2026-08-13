@@ -234,3 +234,40 @@ test("durable mode rejects admin mutations that only persist to local lead files
     assert.equal((await response.json()).kind, "lead_store_read_only", pathname);
   }
 });
+
+test("owner reports read durable funnel events and never fall back to the container ledger", async () => {
+  const routeConfig = config(async () => [durableLead], {
+    eventDurableStore: {
+      eventDurableStoreEnabled: true,
+      payloadSecret: "p".repeat(32),
+      databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
+    },
+    readEventsDurably: async () => [
+      { recorded_at: "2026-08-10T09:00:00.000Z", type: "page_view", path: "/bg/", locale: "bg", filters: {} },
+      { recorded_at: "2026-08-10T09:01:00.000Z", type: "cta_click", path: "/bg/imoti/one", locale: "bg", action: "inquiry", filters: {} },
+    ],
+  });
+
+  const response = await adminGet("/api/admin/reports", routeConfig);
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.report.website_funnel.stages, [
+    { key: "page_view", count: 1 },
+    { key: "search", count: 0 },
+    { key: "cta_click", count: 1 },
+    { key: "lead", count: 0 },
+  ]);
+  assert.equal(body.report.website_funnel.lead_conversion_pct, 0);
+  assert.equal(body.report.website_funnel.durable_website_leads, 1);
+  assert.equal(body.report.website_funnel.lead_tracking_gap, 1);
+  assert.equal(body.report.website_funnel.lead_tracking_status, "mismatch");
+
+  const unavailable = await adminGet("/api/admin/reports", {
+    ...routeConfig,
+    readEventsDurably: async () => {
+      throw new Error("database unavailable");
+    },
+  });
+  assert.equal(unavailable.status, 503);
+  assert.equal((await unavailable.json()).kind, "event_store_unavailable");
+});

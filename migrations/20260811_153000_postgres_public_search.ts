@@ -231,18 +231,17 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     CREATE INDEX IF NOT EXISTS "listings_public_search_fold_trgm_idx"
       ON "listings"
       USING gin (
-        "public"."ms_realty_search_fold"(concat_ws(
-          ' ',
-          COALESCE("facts_title", ''),
-          COALESCE("facts_h1", ''),
-          COALESCE("facts_description", ''),
-          COALESCE("facts_location", ''),
-          COALESCE("facts_municipality", ''),
-          COALESCE("facts_district", ''),
-          COALESCE("facts_country_code", ''),
-          COALESCE("facts_offer_type", ''),
-          "id"
-        )) gin_trgm_ops
+        "public"."ms_realty_search_fold"(
+          COALESCE("facts_title", '') || ' ' ||
+          COALESCE("facts_h1", '') || ' ' ||
+          COALESCE("facts_description", '') || ' ' ||
+          COALESCE("facts_location", '') || ' ' ||
+          COALESCE("facts_municipality", '') || ' ' ||
+          COALESCE("facts_district", '') || ' ' ||
+          COALESCE("facts_country_code", '') || ' ' ||
+          COALESCE("facts_offer_type", '') || ' ' ||
+          COALESCE("id", '')
+        ) gin_trgm_ops
       )
       WHERE "cms_status" = 'published' AND COALESCE("workflow_publish_approved", false) = true;
   `);

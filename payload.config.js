@@ -7,6 +7,7 @@ import { en } from "@payloadcms/translations/languages/en";
 import { ru } from "@payloadcms/translations/languages/ru";
 import { buildConfig } from "payload";
 import { LEAD_COLLECTIONS } from "./production/lib/lead-collections.mjs";
+import { FUNNEL_EVENT_COLLECTION } from "./production/lib/event-durable-store.mjs";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 import { payloadCmsImportContextEnabled } from "./production/lib/payload-cms-import.mjs";
@@ -289,6 +290,11 @@ const leadCollectionsWithAccess = LEAD_COLLECTIONS.map((collection) => ({
   },
 }));
 
+const funnelEventCollectionWithAccess = {
+  ...FUNNEL_EVENT_COLLECTION,
+  access: serverOwnedCollectionAccess,
+};
+
 export default buildConfig({
   admin: { user: "admins" },
   graphQL: { disable: true, disablePlaygroundInProduction: true },
@@ -306,5 +312,5 @@ export default buildConfig({
       connectionString: runtimeConfig.databaseUrl,
     },
   }),
-  collections: [admins, locales, ...collections, ...caseCollectionsWithAccess, ...leadCollectionsWithAccess],
+  collections: [admins, locales, ...collections, ...caseCollectionsWithAccess, ...leadCollectionsWithAccess, funnelEventCollectionWithAccess],
 });

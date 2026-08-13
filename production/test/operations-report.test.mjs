@@ -98,6 +98,13 @@ test("operations report derives privacy-safe source, response, pipeline, invento
         zero_result_queries: [{ locale: "bg", query: "pool", filters: {} }],
       },
     },
+    funnelEvents: [
+      { recorded_at: "2026-07-19T08:30:00.000Z", type: "page_view", path: "/bg/", locale: "bg" },
+      { recorded_at: "2026-07-19T08:31:00.000Z", type: "page_view", path: "/bg/imoti/MS-CRAWL-0001", locale: "bg", listing_reference: "MS-CRAWL-0001" },
+      { recorded_at: "2026-07-19T08:32:00.000Z", type: "search", path: "/bg/imoti", locale: "bg" },
+      { recorded_at: "2026-07-19T08:33:00.000Z", type: "cta_click", path: "/bg/imoti/MS-CRAWL-0001", locale: "bg", action: "request_viewing" },
+      { recorded_at: "2026-07-19T09:01:00.000Z", type: "lead_submitted", path: "/api/leads", locale: "bg", action: "website_listing_detail" },
+    ],
     generatedAt: "2026-07-19T12:00:00.000Z",
   });
 
@@ -117,6 +124,17 @@ test("operations report derives privacy-safe source, response, pipeline, invento
   assert.equal(report.listing_inventory.translation_review, 1);
   assert.equal(report.task_health.rows.find((row) => row.queue === "translation_review").overdue, 1);
   assert.equal(report.search.zero_result_events, 1);
+  assert.deepEqual(report.website_funnel.stages, [
+    { key: "page_view", count: 2 },
+    { key: "search", count: 1 },
+    { key: "cta_click", count: 1 },
+    { key: "lead", count: 1 },
+  ]);
+  assert.equal(report.website_funnel.cta_click_rate_pct, 50);
+  assert.equal(report.website_funnel.lead_conversion_pct, 50);
+  assert.equal(report.website_funnel.durable_website_leads, 2);
+  assert.equal(report.website_funnel.lead_tracking_gap, 1);
+  assert.equal(report.website_funnel.lead_tracking_status, "mismatch");
   assert.equal(JSON.stringify(report).includes("reviewed_reply"), false);
   assert.doesNotMatch(JSON.stringify(report), /\"(?:contact|email|message|phone|whatsapp)\":/);
 

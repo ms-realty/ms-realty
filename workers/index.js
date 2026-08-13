@@ -5,6 +5,7 @@ import {
   allowsDurableCaseAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
+  allowsPublicEventMutation,
   allowsPublicLeadMutation,
   isPayloadPrivatePath,
   secretMatches,
@@ -40,6 +41,7 @@ export class MsRealtyContainer extends Container {
     MS_REALTY_ADMIN_TOKEN: this.env.MS_REALTY_ADMIN_TOKEN ?? "",
     MS_REALTY_LEAD_CONTACT_KEY: this.env.MS_REALTY_LEAD_CONTACT_KEY ?? "",
     MS_REALTY_LEAD_DURABLE_STORE_ENABLED: this.env.MS_REALTY_LEAD_DURABLE_STORE_ENABLED ?? "",
+    MS_REALTY_EVENT_DURABLE_STORE_ENABLED: this.env.MS_REALTY_EVENT_DURABLE_STORE_ENABLED ?? "",
     MS_REALTY_PUBLIC_CONTACT_KEY: this.env.MS_REALTY_PUBLIC_CONTACT_KEY ?? "",
     MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: this.env.MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST ?? "",
     MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: this.env.MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED ?? "",
@@ -245,11 +247,13 @@ export default {
     const mutating = MUTATING_METHODS.has(request.method);
     const leadProbe = mutating && (await allowsLeadProbeMutation({ request, pathname: url.pathname, env }));
     const publicLead = mutating && allowsPublicLeadMutation({ method: request.method, pathname: url.pathname, env });
+    const publicEvent = mutating && allowsPublicEventMutation({ method: request.method, pathname: url.pathname, env });
     if (
       mutating &&
       !allowsAdminSessionMutation({ request, method: request.method, pathname: url.pathname }) &&
       !leadProbe &&
       !publicLead &&
+      !publicEvent &&
       !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
     ) {

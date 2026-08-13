@@ -63,6 +63,12 @@ import { loadMigrationRecords } from "./content.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, readEventLedger } from "./events.mjs";
+import {
+  EventStoreUnavailableError,
+  eventDurableStoreConfigFromEnv,
+  isEventDurableStoreEnabled,
+  readEventsDurably,
+} from "./event-durable-store.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
@@ -323,6 +329,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     documentChecklistLedgerPath:
       env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
+    eventDurableStore: eventDurableStoreConfigFromEnv(env),
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
@@ -801,6 +808,22 @@ async function adminLeadSource(config) {
   }
 }
 
+async function adminEventSource(config) {
+  const durableStore = config.eventDurableStore || {};
+  if (!durableStore.eventDurableStoreEnabled) return readEventLedger(config.eventLedgerPath);
+  if (!isEventDurableStoreEnabled(durableStore)) {
+    throw new EventStoreUnavailableError("Durable funnel event store is enabled but not fully configured");
+  }
+  try {
+    const events = await (config.readEventsDurably || readEventsDurably)({ payload: config.eventDurablePayload || null });
+    if (!Array.isArray(events)) throw new Error("Durable funnel event readback returned invalid rows");
+    return events;
+  } catch (error) {
+    if (error instanceof EventStoreUnavailableError) throw error;
+    throw new EventStoreUnavailableError("Durable funnel event read failed", error);
+  }
+}
+
 function rowsForLeadIds(rows, leadIds) {
   return rows.filter((row) => leadIds.has(row.lead_id));
 }
@@ -1062,6 +1085,7 @@ async function operationsReport(registry, config) {
   const viewingFollowUps = filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath));
   const deals = filterRows(readDeals(config.dealLedgerPath));
   const translationTasks = readTranslationLedger(config.translationLedgerPath);
+  const funnelEvents = await adminEventSource(config);
   return buildOperationsReport({
     leads,
     replies,
@@ -1080,9 +1104,10 @@ async function operationsReport(registry, config) {
     searchAnalytics: buildSearchAnalyticsReport({
       registry,
       seed,
-      events: readEventLedger(config.eventLedgerPath),
+      events: funnelEvents,
       generatedAt,
     }),
+    funnelEvents,
     generatedAt,
   });
 }
@@ -3304,6 +3329,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
   } catch (error) {
     if (error instanceof LeadStoreUnavailableError || error?.code === "lead_store_unavailable") {
       return leadStoreUnavailable();
+    }
+    if (error instanceof EventStoreUnavailableError || error?.code === "event_store_unavailable") {
+      return jsonResponse(503, { kind: "event_store_unavailable", message: "Analytics storage is temporarily unavailable" });
     }
     if (error.status === 413) return jsonResponse(413, { kind: "request_too_large" });
     if (error.status === 403) return adminForbidden(error.capability || "administration:write");

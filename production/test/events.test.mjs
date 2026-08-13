@@ -26,5 +26,13 @@ test("analytics events keep routing fields and reject contact payloads", () => {
     () => createEvent({ type: "cta_click", path: "/he/contact", locale: "he", action: "callback", contact: { name: "Noa" } }),
     /must not include contact/,
   );
+  assert.throws(
+    () => createEvent({ type: "search", path: "/he/search", locale: "he", filters: { Contact: { Email: "buyer@example.test" } } }),
+    /must not include contact/,
+  );
+  assert.deepEqual(
+    createEvent({ type: "search", path: "/he/search", locale: "he", filters: { property_type: "apartment", visitor_id: "person-1" } }).filters,
+    { property_type: "apartment" },
+  );
   assert.throws(() => createEvent({ type: "cta_click", path: "/he/contact", locale: "he" }), /require an action/);
 });

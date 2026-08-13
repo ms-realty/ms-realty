@@ -192,6 +192,67 @@
         }
       });
   }
+  function analyticsLocale() {
+    return String(document.documentElement.getAttribute && document.documentElement.getAttribute("lang") || document.documentElement.lang || "bg").split("-")[0];
+  }
+  function analyticsListingReference(control) {
+    var owner = control && control.closest ? control.closest("[data-listing-id]") : null;
+    var direct = control && control.getAttribute ? control.getAttribute("data-listing-reference") : "";
+    return direct || (owner && owner.getAttribute("data-listing-id")) || null;
+  }
+  function sendAnalyticsEvent(input) {
+    var body = {
+      type: input.type,
+      path: window.location.pathname || "/",
+      locale: analyticsLocale(),
+      listingReference: input.listingReference || null,
+      action: input.action || null,
+      query: input.query || null,
+      filters: input.filters || {},
+      sort: input.sort || null,
+      page: input.page || null,
+    };
+    Promise.resolve(fetch("/api/events", {
+      method: "POST",
+      credentials: "same-origin",
+      keepalive: true,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    })).catch(function () {});
+  }
+  function analyticsAction(target) {
+    if (!target || !target.closest) return null;
+    var control = target.closest('[data-listing-action], [data-card-action], [data-endpoint="/api/leads"], a[href^="tel:"], a[href^="mailto:"], a[href^="viber:"], a[href*="wa.me"]');
+    if (!control) return null;
+    var action = control.getAttribute("data-listing-action") || control.getAttribute("data-card-action") || control.getAttribute("data-lead-intent");
+    var href = control.getAttribute("href") || "";
+    if (!action && href.indexOf("wa.me") !== -1) action = "whatsapp";
+    else if (!action && href.indexOf("viber:") === 0) action = "viber";
+    else if (!action && href.indexOf("tel:") === 0) action = "phone";
+    else if (!action && href.indexOf("mailto:") === 0) action = "email";
+    if (["detail", "inquiry", "callback", "viewing", "phone", "email", "viber", "whatsapp"].indexOf(action) === -1) return null;
+    return action ? { action: action, listingReference: analyticsListingReference(control) } : null;
+  }
+  function initPrivacySafeAnalytics() {
+    var main = document.querySelector("main[data-kind]");
+    sendAnalyticsEvent({ type: "page_view", listingReference: analyticsListingReference(main) });
+    if (!main || main.getAttribute("data-kind") !== "search") return;
+    var params = new URLSearchParams(window.location.search || "");
+    var filters = {};
+    ["location", "country_code", "geography_id", "region_id", "municipality", "district", "property_family", "property_type", "offer_type", "status", "price_min", "price_max", "bedrooms_min", "bedrooms_max", "premises_min", "hotel_rooms_min", "area_min", "area_max", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min", "storeys_max", "exact_reference"].forEach(function (key) {
+      if (params.get(key)) filters[key] = params.get(key);
+    });
+    [["deal", "offer_type"], ["type", "property_type"], ["price", "price_max"], ["min_price", "price_min"], ["max_price", "price_max"], ["bedrooms", "bedrooms_min"]].forEach(function (pair) {
+      if (!filters[pair[1]] && params.get(pair[0])) filters[pair[1]] = params.get(pair[0]);
+    });
+    sendAnalyticsEvent({
+      type: "search",
+      query: params.get("q") || params.get("query") || "",
+      filters: filters,
+      sort: params.get("sort") || null,
+      page: Number(params.get("page") || 1),
+    });
+  }
   function isApprovedPanoramaUrl(value) {
     if (typeof value !== "string" || !/^https:\/\//i.test(value)) return false;
     try {
@@ -1303,6 +1364,8 @@
     }
   }
   document.addEventListener("click", function (event) {
+    var trackedAction = analyticsAction(event.target);
+    if (trackedAction) sendAnalyticsEvent({ type: "cta_click", action: trackedAction.action, listingReference: trackedAction.listingReference });
     if (event.target && event.target.matches && event.target.matches("#mk-enquiry")) {
       event.target.close();
       return;
@@ -1454,4 +1517,5 @@
  initMobileListingGallery();
  initSellerIntake();
  initPhotoSphereViewers();
+ initPrivacySafeAnalytics();
 })();

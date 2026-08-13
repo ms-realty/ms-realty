@@ -39,6 +39,16 @@ export function allowsPublicLeadMutation({ method, pathname, env }) {
   );
 }
 
+export function allowsPublicEventMutation({ method, pathname, env }) {
+  return (
+    method === "POST" &&
+    pathname === "/api/events" &&
+    String(env.MS_REALTY_EVENT_DURABLE_STORE_ENABLED || "").trim() === "true" &&
+    Boolean(env.PAYLOAD_SECRET?.trim()) &&
+    Boolean(env.DATABASE_URL?.trim())
+  );
+}
+
 const ADMIN_SESSION_COOKIE = "ms_admin";
 const ADMIN_MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 

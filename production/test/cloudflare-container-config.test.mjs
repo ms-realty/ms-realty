@@ -383,3 +383,17 @@ test("Cloudflare Container admits public leads only with a complete durable runt
   assert.equal(allowed({ ...complete, MS_REALTY_LEAD_CONTACT_KEY: "short" }), false);
   assert.match(workerSource, /allowsPublicLeadMutation\(\{ method: request\.method, pathname: url\.pathname, env \}\)/);
 });
+
+test("Cloudflare Container admits public funnel events only through the same complete durable runtime", async () => {
+  const { allowsPublicEventMutation } = await import("../../workers/durable-case-authority.mjs");
+  const complete = {
+    MS_REALTY_EVENT_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: "p".repeat(32),
+    DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+  };
+  assert.equal(allowsPublicEventMutation({ env: complete, method: "POST", pathname: "/api/events" }), true);
+  assert.equal(allowsPublicEventMutation({ env: complete, method: "POST", pathname: "/api/events/" }), false);
+  assert.equal(allowsPublicEventMutation({ env: complete, method: "GET", pathname: "/api/events" }), false);
+  assert.equal(allowsPublicEventMutation({ env: { ...complete, DATABASE_URL: "" }, method: "POST", pathname: "/api/events" }), false);
+  assert.match(workerSource, /allowsPublicEventMutation/);
+});

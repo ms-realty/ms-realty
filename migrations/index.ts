@@ -9,6 +9,8 @@ import * as migration_20260810_143000_repair_durable_lead_relations from './2026
 import * as migration_20260810_164700_payload_schema_drift from './20260810_164700_payload_schema_drift';
 import * as migration_20260811_120000_durable_listing_edit_audit from './20260811_120000_durable_listing_edit_audit';
 import * as migration_20260811_153000_postgres_public_search from './20260811_153000_postgres_public_search';
+import * as migration_20260813_110000_repair_postgres_search_index from './20260813_110000_repair_postgres_search_index';
+import * as migration_20260813_120000_durable_funnel_events from './20260813_120000_durable_funnel_events';
 
 export const migrations = [
   {
@@ -65,5 +67,15 @@ export const migrations = [
     up: migration_20260811_153000_postgres_public_search.up,
     down: migration_20260811_153000_postgres_public_search.down,
     name: '20260811_153000_postgres_public_search',
+  },
+  {
+    up: migration_20260813_110000_repair_postgres_search_index.up,
+    down: migration_20260813_110000_repair_postgres_search_index.down,
+    name: '20260813_110000_repair_postgres_search_index',
+  },
+  {
+    up: migration_20260813_120000_durable_funnel_events.up,
+    down: migration_20260813_120000_durable_funnel_events.down,
+    name: '20260813_120000_durable_funnel_events',
   },
 ];
