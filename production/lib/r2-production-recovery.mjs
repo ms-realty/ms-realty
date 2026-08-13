@@ -280,14 +280,50 @@ export function buildRestoreDrillResult({
   };
 }
 
-export function buildProductionRecoveryReport({ manifest, drill, reviewer, approvedAt, generatedAt = new Date().toISOString() }) {
+export function assertRestoreDrillResult(drill, manifest) {
   assertR2RecoveryManifest(manifest);
-  if (drill?.status !== "pass" || drill.backup_id !== manifest.backup_id || drill.blockers?.length !== 0) {
-    throw new Error("A blocked or unrelated restore drill cannot become production recovery evidence");
+  if (!drill || typeof drill !== "object" || Array.isArray(drill)) throw new Error("Restore drill result must be an object");
+  if (
+    drill.schema_version !== 1 ||
+    drill.environment !== "production" ||
+    drill.backup_id !== manifest.backup_id ||
+    drill.target !== "isolated-postgresql-18" ||
+    drill.status !== "pass"
+  ) {
+    throw new Error("Restore drill must be a passing isolated PostgreSQL 18 result for the cited backup");
   }
-  if (R2_RECOVERY_COMPONENTS.some((component) => !drill.components_verified.includes(component))) {
-    throw new Error("Production recovery approval requires every component to be verified");
+  timestamp(drill.completed_at, "restore completed_at");
+  requiredText(drill.operator, "restore operator");
+  if (
+    drill.checksum_verified !== true ||
+    drill.cleanup_verified !== true ||
+    drill.rollback_procedure_verified !== true ||
+    drill.latest_migration_matches !== true
+  ) {
+    throw new Error("Restore drill must verify checksum, migration, cleanup, and rollback");
   }
+  if (
+    !Array.isArray(drill.blockers) || drill.blockers.length !== 0 ||
+    !Array.isArray(drill.mismatched_tables) || drill.mismatched_tables.length !== 0 ||
+    !Array.isArray(drill.uncovered_components) || drill.uncovered_components.length !== 0 ||
+    !Array.isArray(drill.components_verified) ||
+    R2_RECOVERY_COMPONENTS.some((component) => !drill.components_verified.includes(component))
+  ) {
+    throw new Error("Restore drill has blockers, mismatches, or unverified components");
+  }
+  const expectedCounts = manifest.database.table_counts;
+  assertCounts(drill.source_table_counts, Object.keys(expectedCounts), "Drill source");
+  assertCounts(drill.restored_table_counts, Object.keys(expectedCounts), "Drill restored");
+  for (const [table, expected] of Object.entries(expectedCounts)) {
+    if (drill.source_table_counts[table] !== expected || drill.restored_table_counts[table] !== expected) {
+      throw new Error(`Restore drill count is not bound to the manifest: ${table}`);
+    }
+  }
+  return true;
+}
+
+export function buildProductionRecoveryReport({ manifest, drill, reviewer, approvedAt, generatedAt = new Date().toISOString() }) {
+  assertRestoreDrillResult(drill, manifest);
   const report = {
     schema_version: 1,
     generated_at: timestamp(generatedAt, "generated_at"),

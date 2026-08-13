@@ -71,7 +71,7 @@ test("isolated restore stays blocked until all logical components and exact coun
       approvedAt: "2026-08-13T12:30:00.000Z",
       generatedAt: "2026-08-13T12:30:00.000Z",
     }),
-    /blocked or unrelated/,
+    /passing isolated PostgreSQL 18/,
   );
 
   const mismatched = buildRestoreDrillResult({
@@ -130,6 +130,19 @@ test("fully covered restore can produce the existing redacted launch report cont
   assert.equal(report.ready, true);
   assert.deepEqual(report.backup.components, ["payload_postgres", "runtime_data", "runtime_evidence"]);
   assert.doesNotMatch(JSON.stringify(report), /password|secret|token|postgres(?:ql)?:\/\//i);
+
+  const tampered = structuredClone(drill);
+  tampered.restored_table_counts["public.listings"] += 1;
+  assert.throws(
+    () => buildProductionRecoveryReport({
+      manifest,
+      drill: tampered,
+      reviewer: "ivan-reviewer",
+      approvedAt: "2026-08-13T12:30:00.000Z",
+      generatedAt: "2026-08-13T12:30:00.000Z",
+    }),
+    /not bound to the manifest/,
+  );
 });
 
 test("operator commands require their exact approval flags before reading credentials", () => {

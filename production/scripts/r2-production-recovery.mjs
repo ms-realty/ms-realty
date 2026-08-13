@@ -150,11 +150,54 @@ function parseCounts(output, expectedTables) {
   return { tableCounts, latestMigration };
 }
 
-async function querySource(config, tables, secrets) {
+async function querySource(config, tables, snapshotId, secrets) {
+  if (!/^[a-z0-9-]+$/i.test(snapshotId)) throw new Error("PostgreSQL exported snapshot ID is invalid");
+  const query = [
+    "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY",
+    `SET TRANSACTION SNAPSHOT '${snapshotId}'`,
+    countsSql(tables),
+    "COMMIT",
+  ].join("; ");
   const result = await run("docker", sourceClientArgs(config, "psql", [
-    "--no-psqlrc", "--tuples-only", "--no-align", "--field-separator", "\t", "--command", countsSql(tables),
+    "--no-psqlrc", "--quiet", "--tuples-only", "--no-align", "--field-separator", "\t", "--command", query,
   ]), { secrets });
   return parseCounts(result.stdout, tables);
+}
+
+async function exportedSnapshot(config, secrets) {
+  const snapshotPath = path.join(config.secretDirectory, "snapshot-id");
+  const snapshotSqlPath = path.join(config.secretDirectory, "export-snapshot.sql");
+  fs.rmSync(snapshotPath, { force: true });
+  fs.writeFileSync(snapshotSqlPath, [
+    "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY;",
+    "\\o /run/ms-realty-recovery/snapshot-id",
+    "SELECT pg_export_snapshot();",
+    "\\o",
+    "SELECT pg_sleep(600);",
+  ].join("\n"), { mode: 0o600 });
+  const container = `msr-recovery-snapshot-${crypto.randomBytes(6).toString("hex")}`;
+  await run("docker", [
+    "run", "--detach", "--rm", "--name", container,
+    "--volume", `${config.secretDirectory}:/run/ms-realty-recovery:rw`,
+    "--env", "PGPASSFILE=/run/ms-realty-recovery/.pgpass",
+    "--env", `PGSSLMODE=${config.sslmode}`,
+    "--env", `PGCHANNELBINDING=${config.channelBinding}`,
+    "--env", `PGHOST=${config.host}`,
+    "--env", `PGPORT=${config.port}`,
+    "--env", `PGUSER=${config.user}`,
+    "--env", `PGDATABASE=${config.database}`,
+    POSTGRES_IMAGE, "psql", "--no-psqlrc", "--quiet", "--tuples-only", "--no-align",
+    "--file", "/run/ms-realty-recovery/export-snapshot.sql",
+  ], { secrets });
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    if (fs.existsSync(snapshotPath)) {
+      const snapshotId = fs.readFileSync(snapshotPath, "utf8").trim();
+      if (/^[a-z0-9-]+$/i.test(snapshotId)) return { container, snapshotId };
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  try { await run("docker", ["stop", "--time", "5", container], { secrets }); } catch { /* report the snapshot failure */ }
+  throw new Error("PostgreSQL 18 could not export a consistent backup snapshot within 30 seconds");
 }
 
 function r2Environment(env) {
@@ -237,13 +280,18 @@ async function captureBackup(env) {
   createPgpass(secretDirectory, config);
 
   let completed = false;
+  let snapshot;
   try {
-    const source = await querySource(config, tables, secrets);
+    snapshot = await exportedSnapshot(config, secrets);
+    const source = await querySource(config, tables, snapshot.snapshotId, secrets);
     await run("docker", sourceClientArgs(config, "pg_dump", [
-      "--format=custom", "--no-owner", "--no-privileges",
+      "--format=custom", "--no-owner", "--no-privileges", `--snapshot=${snapshot.snapshotId}`,
     ]), { outputFile: plaintextFile, secrets });
+    await run("docker", ["stop", "--time", "5", snapshot.container], { secrets });
+    snapshot = null;
     await run("age", ["--encrypt", "--recipient", ageRecipient, "--output", encryptedFile, plaintextFile], { secrets });
     fs.chmodSync(encryptedFile, 0o600);
+    await uploadFile(env, encryptedFile, `backups/${id}/neon-postgres.dump.age`, secrets);
     const manifest = createR2RecoveryManifest({
       backupId: id,
       completedAt: new Date().toISOString(),
@@ -256,7 +304,6 @@ async function captureBackup(env) {
     assertR2RecoveryManifest(manifest);
     writePrivateJson(manifestPath, manifest);
 
-    await uploadFile(env, encryptedFile, manifest.artifact.object_key, secrets);
     await uploadFile(env, manifestPath, manifest.manifest_object_key, secrets);
     completed = true;
     process.stdout.write(`${JSON.stringify({
@@ -270,6 +317,9 @@ async function captureBackup(env) {
       next: `npm run recovery:r2:restore -- ${id} --confirm-isolated-restore-drill`,
     }, null, 2)}\n`);
   } finally {
+    if (snapshot) {
+      try { await run("docker", ["stop", "--time", "5", snapshot.container], { secrets }); } catch { /* original failure remains authoritative */ }
+    }
     fs.rmSync(plaintextFile, { force: true });
     fs.rmSync(secretDirectory, { recursive: true, force: true });
     if (!completed) fs.rmSync(encryptedFile, { force: true });
@@ -350,7 +400,7 @@ async function restoreDrill(env, requestedBackupId) {
   } finally {
     let cleanupFailed = false;
     if (containerCreated) {
-      try { await run("docker", ["rm", "--force", container], { secrets }); } catch { cleanupFailed = true; }
+      try { await run("docker", ["stop", "--time", "5", container], { secrets }); } catch { cleanupFailed = true; }
     }
     if (networkCreated) {
       try { await run("docker", ["network", "rm", network], { secrets }); } catch { cleanupFailed = true; }
