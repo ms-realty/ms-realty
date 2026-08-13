@@ -1,6 +1,23 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres'
 import { POSTGRES_SEARCH_FOLD_SQL } from '../production/lib/search-fold.mjs'
 
+// Every public location projection, including the lexical search segment, must
+// pass through this exact workflow gate. Keeping one CASE builder prevents an
+// unverified location from remaining searchable while its card fields are
+// correctly hidden.
+const VERIFIED_LOCATION_SQL = (
+  verifiedValue: string,
+  listing = 'l.',
+  unverifiedValue = 'NULL',
+) => `
+  CASE
+    WHEN ${listing}"workflow_location_verified_at" IS NOT NULL
+      AND COALESCE(${listing}"workflow_location_verified_by", '') <> ''
+      THEN ${verifiedValue}
+    ELSE ${unverifiedValue}
+  END
+`
+
 // Keep the indexed expression identical to the view's public lexical field.
 // PostgreSQL can then use the trigram index for the runtime's
 // ms_realty_search_fold(d.search_text) LIKE query after expanding the view.
@@ -8,22 +25,16 @@ const SEARCH_TEXT_SQL = (listing = "l.") => `
   trim(
     COALESCE(NULLIF(${listing}"facts_title", ''), NULLIF(${listing}"facts_h1", ''), NULLIF(${listing}"seo_title", ''), ${listing}"id") || ' ' ||
     COALESCE(NULLIF(${listing}"facts_description", ''), '') || ' ' ||
-    COALESCE(NULLIF(${listing}"facts_location", ''), '') || ' ' ||
-    COALESCE(NULLIF(${listing}"facts_municipality", ''), '') || ' ' ||
-    COALESCE(NULLIF(${listing}"facts_district", ''), '') || ' ' ||
-    COALESCE(NULLIF(${listing}"facts_country_code", ''), '') || ' ' ||
+    COALESCE(${VERIFIED_LOCATION_SQL(`NULLIF(${listing}"facts_location", '')`, listing)}, '') || ' ' ||
+    COALESCE(${VERIFIED_LOCATION_SQL(`NULLIF(${listing}"facts_municipality", '')`, listing)}, '') || ' ' ||
+    COALESCE(${VERIFIED_LOCATION_SQL(`NULLIF(${listing}"facts_district", '')`, listing)}, '') || ' ' ||
+    COALESCE(${VERIFIED_LOCATION_SQL(`NULLIF(${listing}"facts_country_code", '')`, listing)}, '') || ' ' ||
     COALESCE(NULLIF(${listing}"facts_offer_type", ''), '')
   )
 `
 
-const VERIFIED_GEOGRAPHY_PATH_SQL = (listing = "l.") => `
-  CASE
-    WHEN ${listing}"workflow_location_verified_at" IS NOT NULL
-      AND COALESCE(${listing}"workflow_location_verified_by", '') <> ''
-      THEN COALESCE(${listing}"facts_geography_path", '[]'::jsonb)
-    ELSE '[]'::jsonb
-  END
-`
+const VERIFIED_GEOGRAPHY_PATH_SQL = (listing = "l.") =>
+  VERIFIED_LOCATION_SQL(`COALESCE(${listing}"facts_geography_path", '[]'::jsonb)`, listing, `'[]'::jsonb`)
 
 const VERIFIED = (field: string) =>
   sql.raw(`EXISTS (
@@ -72,34 +83,13 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         (tour."is_public" = true AND tour."review_status" = 'published') AS "has_approved_tour",
         p."property_family"::varchar AS "property_family",
         NULLIF(p."property_subtype", '') AS "property_subtype",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN loc."id"
-          ELSE NULL
-        END AS "location_id",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN NULLIF(loc."label", '')
-          ELSE NULL
-        END AS "location_label",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN NULLIF(l."facts_municipality", '')
-          ELSE NULL
-        END AS "municipality",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN NULLIF(l."facts_district", '')
-          ELSE NULL
-        END AS "district",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN NULLIF(l."facts_region_id", '')
-          ELSE NULL
-        END AS "region_id",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN NULLIF(l."facts_country_code", '')
-          ELSE NULL
-        END AS "country_code",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN NULLIF(l."facts_geography_id", '')
-          ELSE NULL
-        END AS "geography_id",
+        ${sql.raw(VERIFIED_LOCATION_SQL(`loc."id"`))} AS "location_id",
+        ${sql.raw(VERIFIED_LOCATION_SQL(`NULLIF(loc."label", '')`))} AS "location_label",
+        ${sql.raw(VERIFIED_LOCATION_SQL(`NULLIF(l."facts_municipality", '')`))} AS "municipality",
+        ${sql.raw(VERIFIED_LOCATION_SQL(`NULLIF(l."facts_district", '')`))} AS "district",
+        ${sql.raw(VERIFIED_LOCATION_SQL(`NULLIF(l."facts_region_id", '')`))} AS "region_id",
+        ${sql.raw(VERIFIED_LOCATION_SQL(`NULLIF(l."facts_country_code", '')`))} AS "country_code",
+        ${sql.raw(VERIFIED_LOCATION_SQL(`NULLIF(l."facts_geography_id", '')`))} AS "geography_id",
         ${sql.raw(VERIFIED_GEOGRAPHY_PATH_SQL())} AS "geography_path",
         CASE
           WHEN l."workflow_price_verified_at" IS NOT NULL AND COALESCE(l."workflow_price_verified_by", '') <> '' AND l."facts_price_on_request" IS DISTINCT FROM true
@@ -163,26 +153,21 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         CASE WHEN ${VERIFIED("land_category")} THEN NULLIF(p."facts_land_category", '') ELSE NULL END AS "land_category",
         CASE WHEN ${VERIFIED("permanent_use")} THEN NULLIF(p."facts_permanent_use", '') ELSE NULL END AS "permanent_use",
         CASE WHEN ${VERIFIED("permitted_use")} THEN NULLIF(p."facts_permitted_use", '') ELSE NULL END AS "permitted_use",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL
-            AND COALESCE(l."workflow_location_verified_by", '') <> ''
-            AND loc."public_latitude" BETWEEN -90 AND 90
-            AND loc."public_longitude" BETWEEN -180 AND 180
+        ${sql.raw(VERIFIED_LOCATION_SQL(`
+          CASE
+            WHEN loc."public_latitude" BETWEEN -90 AND 90 AND loc."public_longitude" BETWEEN -180 AND 180
               THEN loc."public_latitude"
-          ELSE NULL
-        END AS "public_latitude",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL
-            AND COALESCE(l."workflow_location_verified_by", '') <> ''
-            AND loc."public_latitude" BETWEEN -90 AND 90
-            AND loc."public_longitude" BETWEEN -180 AND 180
+            ELSE NULL
+          END
+        `))} AS "public_latitude",
+        ${sql.raw(VERIFIED_LOCATION_SQL(`
+          CASE
+            WHEN loc."public_latitude" BETWEEN -90 AND 90 AND loc."public_longitude" BETWEEN -180 AND 180
               THEN loc."public_longitude"
-          ELSE NULL
-        END AS "public_longitude",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN loc."public_location_precision"::varchar
-          ELSE NULL
-        END AS "public_location_precision"
+            ELSE NULL
+          END
+        `))} AS "public_longitude",
+        ${sql.raw(VERIFIED_LOCATION_SQL(`loc."public_location_precision"::varchar`))} AS "public_location_precision"
       FROM "public"."listings" l
       JOIN "public"."locales" source_locale
         ON source_locale."id" = l."source_locale_id"
