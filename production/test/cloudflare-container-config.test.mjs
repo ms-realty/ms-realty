@@ -84,6 +84,8 @@ function sourceFilesUnder(target) {
 
 test("Cloudflare Container forwards every production runtime binding", () => {
   assert.match(workerSource, /pingEndpoint = "localhost\/api\/health";/);
+  assert.match(workerSource, /MS_REALTY_SEARCH_ENGINE: "postgres"/);
+  assert.doesNotMatch(workerSource, /this\.env\.(?:TYPESENSE|MEILI)_/);
 
   for (const binding of CONTAINER_RUNTIME_BINDINGS) {
     assert.match(workerSource, new RegExp(`${binding}: this\\.env\\.${binding} \\?\\? ""`));

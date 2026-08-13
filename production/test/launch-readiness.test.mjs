@@ -353,10 +353,11 @@ const readyLiveServices = [
 const readyLiveServiceProvisioning = {
   status: "pass",
   path: "production/data/live-service-provisioning-report.json",
-  summary: { checks: 6, missing_env: [], placeholder_env: [], services: ["postgres_search", "hermes"] },
+  summary: { checks: 7, missing_env: [], placeholder_env: [], services: ["postgres_search", "hermes"] },
   checks: [
     { id: "database_url", env: "DATABASE_URL", status: "pass" },
     { id: "payload_secret", env: "PAYLOAD_SECRET", status: "pass" },
+    { id: "search_engine", env: "MS_REALTY_SEARCH_ENGINE", engine: "postgres", status: "pass" },
     { id: "postgres_database_target", database_target: "postgres://db.ms-realty.bg:5432/ms_realty", status: "pass" },
     { id: "hermes_provider", missing: [], mode: "self_hosted", status: "pass" },
     { id: "hermes_agent_health", status: "pass", status_code: 200 },
@@ -689,6 +690,7 @@ async function writeLiveProvisioningFixture(dir, generatedAt = new Date().toISOS
     env: {
       DATABASE_URL: "postgres://ms_realty:database-password@db.ms-realty.bg:5432/ms_realty",
       PAYLOAD_SECRET: "payload-runtime-secret",
+      MS_REALTY_SEARCH_ENGINE: "postgres",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-key",
     },
@@ -2072,13 +2074,15 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.equal(mixedQueryOriginResult.reports.find((report) => report.source === "postgres_search_query").status, "invalid_report");
   assert.match(
     mixedQueryOriginResult.reports.find((report) => report.source === "postgres_search_query").error,
-    /database read operation/,
+    /database targets must match exactly/,
   );
 
   const reservedDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-reserved-live-reports-`);
   const reservedPaths = writeLiveReportFixtures(reservedDir);
   const reservedQuery = JSON.parse(fs.readFileSync(reservedPaths.queryReportPath, "utf8"));
-  reservedQuery.engines[0].database_target = "postgres://example.com:5432/ms_realty";
+  reservedQuery.summary.database_target = "postgres://example.com:5432/ms_realty";
+  reservedQuery.engines[0].database_target = reservedQuery.summary.database_target;
+  reservedQuery.engines[0].operation.url = reservedQuery.summary.database_target;
   fs.writeFileSync(reservedPaths.queryReportPath, `${JSON.stringify(reservedQuery)}\n`);
   const reservedHermes = JSON.parse(fs.readFileSync(reservedPaths.hermesReportPath, "utf8"));
   reservedHermes.provider.endpoint = "https://hermes.invalid/v1/chat/completions";
@@ -2089,7 +2093,7 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.equal(reservedResult.reports.find((report) => report.source === "hermes_draft_worker").status, "invalid_report");
   assert.match(
     reservedResult.reports.find((report) => report.source === "postgres_search_query").error,
-    /database read operation/,
+    /localhost or placeholder database targets/,
   );
   assert.match(
     reservedResult.reports.find((report) => report.source === "hermes_draft_worker").error,
@@ -2203,6 +2207,7 @@ test("live service evidence command refuses an unprovisioned production database
       ...process.env,
       DATABASE_URL: "postgres://user:password@localhost/ms_realty",
       PAYLOAD_SECRET: "payload-runtime-secret",
+      MS_REALTY_SEARCH_ENGINE: "postgres",
       HERMES_CHAT_COMPLETIONS_URL: `${baseUrl}/v1/chat/completions`,
       HERMES_API_KEY: "hermes-test",
       HERMES_DRAFT_LIMIT: "1",
@@ -2444,7 +2449,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /postgres_search_sync: missing_report .*postgres-search-sync-report\.json/);
   assert.match(markdown, /postgres_search_query: missing_report .*postgres-search-query-report\.json/);
   assert.match(markdown, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
-  assert.match(markdown, /blocked_report .*live-service-provisioning-report\.json.*missing DATABASE_URL, PAYLOAD_SECRET, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
+  assert.match(markdown, /blocked_report .*live-service-provisioning-report\.json.*missing DATABASE_URL, PAYLOAD_SECRET, MS_REALTY_SEARCH_ENGINE, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
   assert.match(markdown, /DATABASE_URL/);
   assert.match(markdown, /PAYLOAD_SECRET/);
   assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);

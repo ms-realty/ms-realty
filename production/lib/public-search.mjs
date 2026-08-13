@@ -2,6 +2,7 @@ import { searchRuntimeListings } from "./runtime.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
 import { privateSearchServiceNetworkAllowed } from "./search-service-http.mjs";
+import { isProductionEnvironment, searchRuntimeEnvironment } from "./launch-service-contract.mjs";
 
 export class PublicSearchInputError extends Error {
   constructor(message, options) {
@@ -20,20 +21,19 @@ export class PublicSearchUnavailableError extends Error {
 }
 
 export function publicSearchConfigFromEnv(env = process.env) {
+  const production = isProductionEnvironment(env.NODE_ENV);
   return {
     engine: "postgres",
     environment: env.NODE_ENV,
-    postgres: {
-      env,
-    },
-    typesense: {
+    postgres: { env: searchRuntimeEnvironment(env) },
+    typesense: production ? {} : {
       baseUrl: env.TYPESENSE_URL,
       apiKey: env.TYPESENSE_API_KEY,
       queryApiKey: env.TYPESENSE_QUERY_API_KEY || env.TYPESENSE_API_KEY,
       allowPrivateNetwork: privateSearchServiceNetworkAllowed(env),
       collectionName: env.TYPESENSE_COLLECTION || "ms_realty_listings"
     },
-    meilisearch: {
+    meilisearch: production ? {} : {
       baseUrl: env.MEILI_URL,
       apiKey: env.MEILI_API_KEY,
       queryApiKey: env.MEILI_QUERY_API_KEY || env.MEILI_API_KEY,

@@ -15,6 +15,7 @@ export function payloadRuntimeEnvExample() {
     "PAYLOAD_POSTGRES_HOST=127.0.0.1",
     "PAYLOAD_POSTGRES_PORT=5432",
     "DATABASE_URL=postgres://ms_realty_payload:replace-with-postgres-password@127.0.0.1:5432/ms_realty_payload",
+    "MS_REALTY_SEARCH_ENGINE=postgres",
     "# Set to 1 only for a production private-network database host reachable by the app runtime.",
     "MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST=0",
     "MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH=production/data/payload-runtime-report.json",
@@ -51,7 +52,7 @@ export function payloadRuntimeComposeFile() {
 export function payloadRuntimeBootstrapChecklist() {
   return [
     "1. Copy `production/data/payload-runtime.env.example` to a private env file such as `.env.payload-runtime`.",
-    "2. Replace `PAYLOAD_SECRET` with `openssl rand -base64 32` output and replace the Postgres password placeholders.",
+    "2. Replace `PAYLOAD_SECRET` with `openssl rand -base64 32` output, replace the Postgres password placeholders, and keep `MS_REALTY_SEARCH_ENGINE=postgres`.",
     "3. Start Postgres with `docker compose --env-file .env.payload-runtime -f production/docker-compose.payload.yml up -d payload-postgres`.",
     "4. Export or source the same private env file in the application runtime.",
     "5. If DATABASE_URL uses a production private-network host, set `MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST=1` in that private env.",
@@ -69,8 +70,11 @@ export function payloadRuntimeBootstrapPayload() {
 }
 
 export function assertPayloadRuntimeBootstrap({ compose = payloadRuntimeComposeFile(), envExample = payloadRuntimeEnvExample() } = {}) {
-  for (const key of ["PAYLOAD_SECRET", "DATABASE_URL", "PAYLOAD_POSTGRES_PASSWORD"]) {
+  for (const key of ["PAYLOAD_SECRET", "DATABASE_URL", "PAYLOAD_POSTGRES_PASSWORD", "MS_REALTY_SEARCH_ENGINE"]) {
     if (!envExample.includes(`${key}=`)) throw new Error(`Payload runtime env example must include ${key}`);
+  }
+  if (!envExample.includes("MS_REALTY_SEARCH_ENGINE=postgres")) {
+    throw new Error("Payload runtime env example must pin MS_REALTY_SEARCH_ENGINE=postgres");
   }
   if (!compose.includes("postgres:16-alpine")) throw new Error("Payload runtime compose file must pin the Postgres image");
   if (!compose.includes("payload-postgres-data")) throw new Error("Payload runtime compose file must persist Postgres data");

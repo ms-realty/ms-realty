@@ -51,7 +51,7 @@ test("Hermes remains an explicit, isolated launch decision", () => {
   assert.equal(HERMES_LAUNCH_REQUIRED, true);
   assert.deepEqual(buildLaunchServiceRequirements({ hermesRequired: false }), {
     reportSources: ["postgres_search_sync", "postgres_search_query"],
-    provisioningChecks: ["database_url", "payload_secret", "postgres_database_target"],
+    provisioningChecks: ["database_url", "payload_secret", "search_engine", "postgres_database_target"],
     provisioningServices: ["postgres_search"],
   });
 });
@@ -69,6 +69,7 @@ test("live provisioning requires Postgres and Hermes without Typesense or Meilis
   assert.deepEqual(blocked.summary.services, ["postgres_search", "hermes"]);
   assert.ok(blocked.summary.missing_env.includes("DATABASE_URL"));
   assert.ok(blocked.summary.missing_env.includes("PAYLOAD_SECRET"));
+  assert.ok(blocked.summary.missing_env.includes("MS_REALTY_SEARCH_ENGINE"));
   assert.equal(blocked.summary.missing_env.some((name) => /TYPESENSE|MEILI/.test(name)), false);
   assert.equal(blocked.checks.some((check) => /typesense|meili/i.test(check.id)), false);
 
@@ -76,6 +77,7 @@ test("live provisioning requires Postgres and Hermes without Typesense or Meilis
     env: {
       DATABASE_URL: "postgresql://ms_realty:secret@ep-late-river.eu-central-1.aws.neon.tech/ms_realty?sslmode=require",
       PAYLOAD_SECRET: "payload-secret-value",
+      MS_REALTY_SEARCH_ENGINE: "postgres",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-secret",
     },
@@ -88,4 +90,30 @@ test("live provisioning requires Postgres and Hermes without Typesense or Meilis
   assert.equal(ready.checks.find((check) => check.id === "postgres_database_target")?.database_target,
     "postgresql://ep-late-river.eu-central-1.aws.neon.tech:5432/ms_realty");
   assert.equal(JSON.stringify(ready).includes("ms_realty:secret"), false);
+});
+
+test("live provisioning cannot be ready when production search selects a legacy engine", async () => {
+  const report = await buildLiveServiceProvisioningReport({
+    env: {
+      DATABASE_URL: "postgresql://ms_realty:secret@ep-late-river.eu-central-1.aws.neon.tech/ms_realty?sslmode=require",
+      PAYLOAD_SECRET: "payload-secret-value",
+      MS_REALTY_SEARCH_ENGINE: "typesense",
+      TYPESENSE_URL: "https://legacy-search.invalid",
+      TYPESENSE_API_KEY: "legacy-secret",
+      HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+      HERMES_API_KEY: "hermes-secret",
+    },
+    fetchImpl: healthyHermesFetch,
+    generatedAt: "2026-08-13T00:00:00.000Z",
+  });
+
+  assert.equal(report.ready, false);
+  assert.equal(report.status, "blocked");
+  assert.deepEqual(report.checks.find((check) => check.id === "search_engine"), {
+    id: "search_engine",
+    env: "MS_REALTY_SEARCH_ENGINE",
+    status: "fail",
+    error: "MS_REALTY_SEARCH_ENGINE must be postgres in production",
+  });
+  assert.equal(report.checks.some((check) => /typesense|meili/i.test(check.id)), false);
 });

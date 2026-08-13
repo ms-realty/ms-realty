@@ -5,7 +5,9 @@ import { derivePrimaryAreaSqm } from "./listing-facts.mjs";
 import { fromRoot } from "./paths.mjs";
 import { loadPayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { foldSearchText } from "./search-fold.mjs";
+import { assertProductionSearchEngine, isProductionEnvironment } from "./launch-service-contract.mjs";
 import { normalizeSearchIntent } from "./search-intent.mjs";
+import { assertExactRedactedPostgresTarget, redactPostgresDatabaseTarget } from "./postgres-target.mjs";
 import {
   fetchSearchService,
   privateSearchServiceNetworkAllowed,
@@ -165,9 +167,7 @@ function redactedUrl(value) {
 }
 
 function redactedDatabaseTarget(value) {
-  const parsed = new URL(required(value, "DATABASE_URL"));
-  if (!["postgres:", "postgresql:"].includes(parsed.protocol)) throw new Error("DATABASE_URL must use postgres:// or postgresql://");
-  return `${parsed.protocol}//${parsed.hostname}:${Number(parsed.port || 5432)}/${parsed.pathname.replace(/^\//, "")}`;
+  return redactPostgresDatabaseTarget(required(value, "DATABASE_URL"));
 }
 
 async function loadPostgresSql() {
@@ -585,10 +585,6 @@ function normalizedSearchEngine(value) {
   return engine || null;
 }
 
-function productionEnvironment(value) {
-  return String(value || "").trim().toLowerCase() === "production";
-}
-
 export function selectSearchRuntime({
   engine = process.env.MS_REALTY_SEARCH_ENGINE,
   environment = process.env.NODE_ENV,
@@ -597,22 +593,26 @@ export function selectSearchRuntime({
   meilisearch = {},
 } = {}) {
   const selected = normalizedSearchEngine(engine);
-  const production = productionEnvironment(environment);
+  const production = isProductionEnvironment(environment);
+  if (production) {
+    assertProductionSearchEngine(selected);
+    if (missingPostgresSearchConfig(postgres)) {
+      throw new Error("Payload Postgres search configuration is required in production");
+    }
+    return { engine: "postgres", mode: "single" };
+  }
   if (selected === "postgres") {
     if (missingPostgresSearchConfig(postgres)) {
-      if (production) throw new Error("Payload Postgres search configuration is required in production");
       return { engine: "postgres", mode: "local_fallback" };
     }
     return { engine: "postgres", mode: "single" };
   }
   if (!selected) {
-    if (!missingPostgresSearchConfig(postgres)) return { engine: "postgres", mode: production ? "single" : "authoritative_local" };
-    if (production) throw new Error("Payload Postgres search is required in production");
+    if (!missingPostgresSearchConfig(postgres)) return { engine: "postgres", mode: "authoritative_local" };
     return { engine: null, mode: "legacy_fallback" };
   }
   const config = selected === "typesense" ? typesense : meilisearch;
   if (missingSearchEngineConfig(config)) {
-    if (production) throw new Error(`${selected} search engine configuration is required in production`);
     return { engine: selected, mode: "local_fallback" };
   }
   return { engine: selected, mode: "single" };
@@ -1411,6 +1411,7 @@ export function assertSearchEngineSyncReport(report) {
   }
   const operationCount = report.engines.reduce((sum, engine) => sum + (engine.operations || []).length, 0);
   if (report.summary.total_operations !== operationCount) throw new Error("Search sync summary operations must match engine rows");
+  const databaseTarget = assertExactRedactedPostgresTarget(report.summary.database_target, "Search sync summary database target");
   for (const engine of report.engines) {
     if (engine.target !== POSTGRES_PUBLIC_SEARCH_VIEW) throw new Error("Postgres sync target is invalid");
     if (report.summary.targets?.postgres !== POSTGRES_PUBLIC_SEARCH_VIEW) throw new Error("Search sync summary target must match the Postgres view");
@@ -1418,7 +1419,8 @@ export function assertSearchEngineSyncReport(report) {
       throw new Error("Postgres document count must match the current Payload projection");
     }
     for (const operation of engine.operations || []) {
-      if (!String(operation.url || "").startsWith("postgres")) throw new Error("Postgres sync operation must record the database target");
+      const operationTarget = assertExactRedactedPostgresTarget(operation.url, "Postgres sync operation database target");
+      if (operationTarget !== databaseTarget) throw new Error("Postgres sync operation must match the summary database target");
       if (operation.method !== "SELECT") throw new Error("Postgres sync operation method is invalid");
       if (operation.status !== 200) throw new Error("Postgres sync operation status is invalid");
     }
@@ -2227,11 +2229,16 @@ export function assertSearchEngineQueryReport(report) {
   if (JSON.stringify(report.summary.first_hit_ids) !== JSON.stringify(report.engines.map((engine) => engine.hits?.[0]?.id || null))) {
     throw new Error("Search query summary first hits must match engine rows");
   }
+  const databaseTarget = assertExactRedactedPostgresTarget(report.summary.database_target, "Search query summary database target");
   for (const engine of report.engines) {
     if (engine.target !== POSTGRES_PUBLIC_SEARCH_VIEW) throw new Error("Postgres query target is invalid");
     if (report.summary.targets?.postgres !== POSTGRES_PUBLIC_SEARCH_VIEW) throw new Error("Search query summary target must match the Postgres view");
-    if (!String(engine.database_target || "").startsWith("postgres")) throw new Error("Postgres query report must include database target evidence");
-    if (engine.operation?.method !== "SELECT" || engine.operation?.status !== 200 || engine.operation?.url !== engine.database_target) {
+    const engineTarget = assertExactRedactedPostgresTarget(engine.database_target, "Postgres query engine database target");
+    const operationTarget = assertExactRedactedPostgresTarget(engine.operation?.url, "Postgres query operation database target");
+    if (engineTarget !== databaseTarget || operationTarget !== databaseTarget) {
+      throw new Error("Postgres query database targets must match exactly");
+    }
+    if (engine.operation?.method !== "SELECT" || engine.operation?.status !== 200) {
       throw new Error("Postgres query report must include the database read operation");
     }
     if (source.projected_documents === 0) {

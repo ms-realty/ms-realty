@@ -71,8 +71,8 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - postgres_search_query: missing_report (path production/data/postgres-search-query-report.json)
 - hermes_draft_worker: missing_report (path production/data/hermes-draft-worker-report.json)
 - Current provisioning evidence:
-- blocked_report (path production/data/live-service-provisioning-report.json; missing DATABASE_URL, PAYLOAD_SECRET, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
-- Postgres search: set `DATABASE_URL` and `PAYLOAD_SECRET`; apply the public-search migration before capture so sync and query evidence use the same authoritative Neon target.
+- blocked_report (path production/data/live-service-provisioning-report.json; missing DATABASE_URL, PAYLOAD_SECRET, MS_REALTY_SEARCH_ENGINE, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
+- Postgres search: set `MS_REALTY_SEARCH_ENGINE=postgres`, `DATABASE_URL`, and `PAYLOAD_SECRET`; apply the public-search migration before capture so sync and query evidence use the same authoritative Neon target.
 - Hermes Agent: set `HERMES_CHAT_COMPLETIONS_URL` to its internal `/v1/chat/completions` API and set `HERMES_API_KEY`; production Hermes evidence must be authenticated.
 - Hermes runtime: `npm run hermes:runtime` verifies its `/health` endpoint and authenticated `/v1/capabilities` response before any draft-worker evidence is accepted.
 - Managed local profile: set `HERMES_AGENT_MODEL`, `HERMES_AGENT_LLM_BASE_URL`, and `HERMES_AGENT_LLM_API_KEY`, then run `npm run docker:hermes:up`. The Agent only forwards to a private OpenAI-compatible model provider; its tools and persistent memory are disabled.

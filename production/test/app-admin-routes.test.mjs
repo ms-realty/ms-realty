@@ -757,6 +757,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         env: {
           DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
           PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+          MS_REALTY_SEARCH_ENGINE: "postgres",
           HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
           HERMES_API_KEY: "hermes-key",
         },

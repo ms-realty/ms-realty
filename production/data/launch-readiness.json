@@ -532,10 +532,11 @@
           "status": "blocked_report",
           "path": "production/data/live-service-provisioning-report.json",
           "summary": {
-            "checks": 6,
+            "checks": 7,
             "missing_env": [
               "DATABASE_URL",
               "PAYLOAD_SECRET",
+              "MS_REALTY_SEARCH_ENGINE",
               "HERMES_CHAT_COMPLETIONS_URL",
               "HERMES_API_KEY"
             ],
@@ -554,6 +555,11 @@
             {
               "id": "payload_secret",
               "env": "PAYLOAD_SECRET",
+              "status": "missing_env"
+            },
+            {
+              "id": "search_engine",
+              "env": "MS_REALTY_SEARCH_ENGINE",
               "status": "missing_env"
             },
             {
@@ -657,7 +663,7 @@
             ]
           },
           "next_actions": [
-            "Set DATABASE_URL, PAYLOAD_SECRET, and Hermes provider env.",
+            "Set DATABASE_URL, PAYLOAD_SECRET, MS_REALTY_SEARCH_ENGINE=postgres, and Hermes provider env.",
             "Run npm run live:provisioning until all required service checks pass.",
             "Run npm run live:capture only after provisioning passes."
           ]

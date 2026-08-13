@@ -56,6 +56,7 @@ export class MsRealtyContainer extends Container {
     MS_REALTY_WORKSPACE_ID: this.env.MS_REALTY_WORKSPACE_ID ?? "",
     PAYLOAD_SECRET: this.env.PAYLOAD_SECRET ?? "",
     DATABASE_URL: this.env.DATABASE_URL ?? "",
+    MS_REALTY_SEARCH_ENGINE: "postgres",
     HERMES_CHAT_COMPLETIONS_URL: this.env.HERMES_CHAT_COMPLETIONS_URL ?? "",
     HERMES_API_KEY: this.env.HERMES_API_KEY ?? "",
     HERMES_MODEL: this.env.HERMES_MODEL ?? "",

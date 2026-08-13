@@ -19,11 +19,13 @@ test("Payload runtime bootstrap files define the exact env and Postgres handoff"
   assert.equal(assertPayloadRuntimeBootstrap({ compose, envExample }), true);
   assert.match(envExample, /^PAYLOAD_SECRET=/m);
   assert.match(envExample, /^DATABASE_URL=postgres:\/\/ms_realty_payload:replace-with-postgres-password@127\.0\.0\.1:5432\/ms_realty_payload$/m);
+  assert.match(envExample, /^MS_REALTY_SEARCH_ENGINE=postgres$/m);
   assert.match(envExample, /^MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST=0$/m);
   assert.match(compose, /image: postgres:16-alpine/);
   assert.match(compose, /127\.0\.0\.1/);
   assert.match(compose, /pg_isready/);
   assert.equal(payloadRuntimeBootstrapChecklist().some((line) => line.includes("MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST=1")), true);
+  assert.equal(payloadRuntimeBootstrapChecklist().some((line) => line.includes("MS_REALTY_SEARCH_ENGINE=postgres")), true);
   assert.equal(payloadRuntimeBootstrapChecklist().some((line) => line.includes("npm run payload:preflight")), true);
 });
 

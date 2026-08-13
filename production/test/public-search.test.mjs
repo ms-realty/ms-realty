@@ -80,6 +80,27 @@ test("public search prefers optional query-only credentials and keeps admin-key 
   assert.equal(compatible.meilisearch.queryApiKey, "meili-admin");
 });
 
+test("production public search config keeps Postgres and ignores legacy engine credentials", () => {
+  const env = {
+    NODE_ENV: "production",
+    MS_REALTY_SEARCH_ENGINE: "postgres",
+    DATABASE_URL: "postgresql://runtime:secret@db.ms-realty.bg/ms_realty",
+    PAYLOAD_SECRET: "payload-secret",
+    TYPESENSE_URL: "https://typesense.ms-realty.bg",
+    TYPESENSE_API_KEY: "typesense-admin",
+    MEILI_URL: "https://meili.ms-realty.bg",
+    MEILI_API_KEY: "meili-admin",
+  };
+  const config = publicSearchConfigFromEnv(env);
+
+  assert.equal(config.engine, "postgres");
+  assert.equal(config.postgres.env.DATABASE_URL, env.DATABASE_URL);
+  assert.equal("TYPESENSE_API_KEY" in config.postgres.env, false);
+  assert.equal("MEILI_API_KEY" in config.postgres.env, false);
+  assert.deepEqual(config.typesense, {});
+  assert.deepEqual(config.meilisearch, {});
+});
+
 function apiConfig(search) {
   const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-public-search-`);
   const eventLedgerPath = `${directory}/events.jsonl`;
