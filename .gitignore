@@ -8,6 +8,7 @@ node_modules/
 dist/
 coverage/
 .local-backups/
+.recovery-work/
 migration/external/seo/*.csv
 migration/external/seo/*.provenance.json
 !migration/external/seo/*.csv.example

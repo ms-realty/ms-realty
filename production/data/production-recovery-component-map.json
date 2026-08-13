@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "environment": "production",
+  "components": {
+    "payload_postgres": {
+      "tables": [
+        { "name": "public.payload_migrations", "sources": ["Payload migration registry"] },
+        { "name": "public.admins", "sources": ["Payload admins"] },
+        { "name": "public.listings", "sources": ["Payload listings"] },
+        { "name": "public.listing_translations", "sources": ["Payload listing translations"] },
+        { "name": "public.public_leads", "sources": ["Payload public lead ledger"] },
+        { "name": "public.lead_contacts", "sources": ["Payload encrypted lead contacts"] }
+      ],
+      "uncovered_sources": []
+    },
+    "runtime_data": {
+      "tables": [
+        { "name": "public.public_leads", "sources": ["MS_REALTY_LEAD_LEDGER_PATH"] },
+        { "name": "public.lead_contacts", "sources": ["MS_REALTY_LEAD_CONTACT_VAULT_PATH"] },
+        { "name": "public.realty_case_events", "sources": ["MS_REALTY_CASE_LEDGER_PATH"] },
+        { "name": "public.realty_case_condition_events", "sources": ["MS_REALTY_CASE_CONDITION_LEDGER_PATH"] }
+      ],
+      "uncovered_sources": [
+        "MS_REALTY_AUDIT_LOG_PATH",
+        "MS_REALTY_ACCOUNT_LEDGER_PATH",
+        "MS_REALTY_BROKER_CONTACT_LEDGER_PATH",
+        "MS_REALTY_CONSENT_LEDGER_PATH",
+        "MS_REALTY_DEAL_LEDGER_PATH",
+        "MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH",
+        "MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH",
+        "MS_REALTY_EVENT_LEDGER_PATH",
+        "MS_REALTY_HERMES_AUDIT_PATH",
+        "MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH",
+        "MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH",
+        "MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH",
+        "MS_REALTY_PUBLIC_CONTACT_VAULT_PATH",
+        "MS_REALTY_LISTING_EDIT_LEDGER_PATH",
+        "MS_REALTY_MEDIA_REVIEW_LEDGER_PATH",
+        "MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH",
+        "MS_REALTY_LOCALE_REGISTRY_PATH",
+        "MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH",
+        "MS_REALTY_REDIRECT_APPROVALS_PATH",
+        "MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH",
+        "MS_REALTY_REPLY_OUTBOX_PATH",
+        "MS_REALTY_SAVED_SEARCH_LEDGER_PATH",
+        "MS_REALTY_SELLER_PIPELINE_PATH",
+        "MS_REALTY_SELLER_PIPELINE_OUTCOME_LEDGER_PATH",
+        "MS_REALTY_SLUG_HISTORY_PATH",
+        "MS_REALTY_TOUR_APPROVAL_LEDGER_PATH",
+        "MS_REALTY_TRANSLATION_LEDGER_PATH",
+        "MS_REALTY_VIEWING_LEDGER_PATH",
+        "MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH"
+      ]
+    },
+    "runtime_evidence": {
+      "tables": [],
+      "uncovered_sources": [
+        "MS_REALTY_LISTING_QUALITY_REVIEW_PATH",
+        "MS_REALTY_SEO_EVIDENCE_INPUT_DIR",
+        "MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH",
+        "MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH",
+        "MS_REALTY_SEARCH_SYNC_REPORT_PATH",
+        "MS_REALTY_SEARCH_QUERY_REPORT_PATH",
+        "MS_REALTY_HERMES_WORKER_REPORT_PATH",
+        "MS_REALTY_HERMES_AGENT_RUNTIME_REPORT_PATH",
+        "MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH",
+        "MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH",
+        "MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH",
+        "MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH"
+      ]
+    }
+  }
+}
