@@ -297,7 +297,17 @@ test("fully covered restore requires machine rollback evidence and immutable hum
     generatedAt: "2026-08-13T12:30:00.000Z",
   });
   assert.equal(report.ready, true);
+  assert.equal(report.schema_version, 2);
   assert.deepEqual(report.backup.components, ["payload_postgres", "runtime_data", "runtime_evidence"]);
+  assert.equal(report.backup.ciphertext_sha256, manifest.artifact.sha256);
+  assert.equal(report.backup.manifest_sha256, report.restore_drill.manifest_sha256);
+  assert.equal(report.backup.manifest_sha256, report.approval.manifest_sha256);
+  assert.equal(report.backup.monitoring_rollback_report_sha256, report.restore_drill.monitoring_rollback_report_sha256);
+  assert.equal(report.backup.monitoring_rollback_report_sha256, report.approval.monitoring_rollback_report_sha256);
+  assert.equal(report.backup.release_id, report.restore_drill.release_id);
+  assert.equal(report.backup.release_id, report.approval.release_id);
+  assert.equal(report.restore_drill.result_sha256, report.approval.restore_drill_sha256);
+  assert.equal(report.approval.artifact_sha256, approvalArtifactSha256);
   assert.doesNotMatch(JSON.stringify(report), /password|secret|token|postgres(?:ql)?:\/\//i);
 
   const tampered = structuredClone(passingDrill);

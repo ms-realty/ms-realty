@@ -565,7 +565,7 @@ export function buildProductionRecoveryReport({
   });
   assertRecoveryApprovalArtifact(approval, { manifest, drill, manifestSha256, restoreDrillSha256 });
   const report = {
-    schema_version: 1,
+    schema_version: 2,
     generated_at: timestamp(generatedAt, "generated_at"),
     environment: "production",
     ready: true,
@@ -582,7 +582,10 @@ export function buildProductionRecoveryReport({
       backup_id: manifest.backup_id,
       completed_at: manifest.completed_at,
       checksum_verified: true,
+      ciphertext_sha256: manifest.artifact.sha256,
       manifest_sha256: manifestSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: monitoringRollbackReport.release_id,
       components: [...R2_RECOVERY_COMPONENTS],
     },
     restore_drill: {
@@ -593,6 +596,9 @@ export function buildProductionRecoveryReport({
       status: "pass",
       checksum_verified: drill.checksum_verified,
       rollback_procedure_verified: drill.rollback_procedure_verified,
+      ciphertext_sha256: manifest.artifact.sha256,
+      manifest_sha256: manifestSha256,
+      result_sha256: restoreDrillSha256,
       monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
       release_id: monitoringRollbackReport.release_id,
       components_verified: [...drill.components_verified],
@@ -604,9 +610,11 @@ export function buildProductionRecoveryReport({
       reviewer: approval.reviewer,
       approved_at: timestamp(approval.approved_at, "approved_at"),
       artifact_sha256: approvalArtifactSha256,
+      ciphertext_sha256: manifest.artifact.sha256,
       manifest_sha256: manifestSha256,
       restore_drill_sha256: restoreDrillSha256,
       monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: monitoringRollbackReport.release_id,
     },
   };
   assertProductionRecoveryReport(report);

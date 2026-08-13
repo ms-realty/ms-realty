@@ -65,8 +65,13 @@ function actionCounts(rows) {
 function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
   const generatedAtMs = Date.parse(generatedAt);
   const minutesBefore = (minutes) => new Date(generatedAtMs - minutes * 60_000).toISOString();
+  const ciphertextSha256 = "1".repeat(64);
+  const manifestSha256 = "2".repeat(64);
+  const restoreDrillSha256 = "3".repeat(64);
+  const monitoringRollbackReportSha256 = "4".repeat(64);
+  const releaseId = "a".repeat(40);
   return {
-    schema_version: 1,
+    schema_version: 2,
     generated_at: generatedAt,
     environment: "production",
     ready: true,
@@ -83,6 +88,10 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
       backup_id: "backup-20260722-001",
       completed_at: minutesBefore(40),
       checksum_verified: true,
+      ciphertext_sha256: ciphertextSha256,
+      manifest_sha256: manifestSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: releaseId,
       components: ["payload_postgres", "runtime_data", "runtime_evidence"],
     },
     restore_drill: {
@@ -93,13 +102,25 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
       status: "pass",
       checksum_verified: true,
       rollback_procedure_verified: true,
+      ciphertext_sha256: ciphertextSha256,
+      manifest_sha256: manifestSha256,
+      result_sha256: restoreDrillSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: releaseId,
       components_verified: ["payload_postgres", "runtime_data", "runtime_evidence"],
       operator: "operations_manager",
     },
     approval: {
       status: "approved",
+      approval_id: "recovery-approval-20260722-001",
       reviewer: "agency_owner",
       approved_at: minutesBefore(10),
+      artifact_sha256: "5".repeat(64),
+      ciphertext_sha256: ciphertextSha256,
+      manifest_sha256: manifestSha256,
+      restore_drill_sha256: restoreDrillSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: releaseId,
     },
   };
 }
@@ -1000,6 +1021,20 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const invalidProductionRecoveryImportBody = await invalidProductionRecoveryImport.json();
       assert.equal(invalidProductionRecoveryImport.status, 400);
       assert.match(invalidProductionRecoveryImportBody.message, /valid JSON/);
+      assert.equal(fs.existsSync(productionRecoveryReportPath), false);
+
+      const legacyProductionRecoveryImport = await productionRecoveryImportRoute.POST(
+        new Request("https://example.test/api/admin/production-recovery/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            report: JSON.stringify({ ...validProductionRecoveryReport(), schema_version: 1 }),
+          }),
+        }),
+      );
+      const legacyProductionRecoveryImportBody = await legacyProductionRecoveryImport.json();
+      assert.equal(legacyProductionRecoveryImport.status, 400);
+      assert.match(legacyProductionRecoveryImportBody.message, /schema v2/);
       assert.equal(fs.existsSync(productionRecoveryReportPath), false);
 
       const productionRecoveryImport = await productionRecoveryImportRoute.POST(

@@ -437,7 +437,7 @@ const readyProductionRecovery = {
   status: "pass",
   path: "production/data/production-recovery-report.json",
   report: {
-    schema_version: 1,
+    schema_version: 2,
     generated_at: "2026-07-05T00:00:00.000Z",
     environment: "production",
     ready: true,
@@ -454,6 +454,10 @@ const readyProductionRecovery = {
       backup_id: "backup-20260704-001",
       completed_at: "2026-07-04T23:00:00.000Z",
       checksum_verified: true,
+      ciphertext_sha256: "1".repeat(64),
+      manifest_sha256: "2".repeat(64),
+      monitoring_rollback_report_sha256: "4".repeat(64),
+      release_id: "a".repeat(40),
       components: ["payload_postgres", "runtime_data", "runtime_evidence"],
     },
     restore_drill: {
@@ -464,10 +468,26 @@ const readyProductionRecovery = {
       status: "pass",
       checksum_verified: true,
       rollback_procedure_verified: true,
+      ciphertext_sha256: "1".repeat(64),
+      manifest_sha256: "2".repeat(64),
+      result_sha256: "3".repeat(64),
+      monitoring_rollback_report_sha256: "4".repeat(64),
+      release_id: "a".repeat(40),
       components_verified: ["payload_postgres", "runtime_data", "runtime_evidence"],
       operator: "operations_manager",
     },
-    approval: { status: "approved", reviewer: "agency_owner", approved_at: "2026-07-04T23:30:00.000Z" },
+    approval: {
+      status: "approved",
+      approval_id: "recovery-approval-20260704-001",
+      reviewer: "agency_owner",
+      approved_at: "2026-07-04T23:30:00.000Z",
+      artifact_sha256: "5".repeat(64),
+      ciphertext_sha256: "1".repeat(64),
+      manifest_sha256: "2".repeat(64),
+      restore_drill_sha256: "3".repeat(64),
+      monitoring_rollback_report_sha256: "4".repeat(64),
+      release_id: "a".repeat(40),
+    },
   },
 };
 const readyMonitoringRollback = {
@@ -893,6 +913,30 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.deepEqual(report.blockers, []);
   assert.deepEqual(publicLaunchReadinessPayload(report).blocked_gates, []);
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store" });
+});
+
+test("launch readiness validator rejects legacy schema-v1 production recovery evidence", () => {
+  const routeMap = completeRouteMap();
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence: readySeoEvidenceFixture(),
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+    productionRecovery: structuredClone(readyProductionRecovery),
+    monitoringRollback: readyMonitoringRollback,
+  });
+  const recoveryGate = report.gates.find((gate) => gate.id === "production_recovery");
+  recoveryGate.evidence.report.schema_version = 1;
+
+  assert.throws(() => assertLaunchReadinessReport(report), /schema v2/);
 });
 
 test("launch readiness fail-closes stale and future mounted runtime evidence", () => {

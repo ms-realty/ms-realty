@@ -12,6 +12,8 @@ export const DEFAULT_PRODUCTION_RECOVERY_REPORT_EXAMPLE = fromRoot(
 
 const REQUIRED_COMPONENTS = ["payload_postgres", "runtime_data", "runtime_evidence"];
 const SECRET_FIELD_PATTERN = /(authorization|password|secret|token|api(?:access)?key|accesskey|privatekey)/i;
+const SHA256_PATTERN = /^[a-f0-9]{64}$/;
+const RELEASE_SHA_PATTERN = /^[a-f0-9]{40}$/;
 
 function timestamp(value, label) {
   const parsed = Date.parse(value);
@@ -27,6 +29,18 @@ function text(value, label) {
 
 function positiveNumber(value, label) {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) throw new Error(`${label} must be positive`);
+}
+
+function sha256(value, label) {
+  const normalized = text(value, label);
+  if (!SHA256_PATTERN.test(normalized)) throw new Error(`${label} must be a SHA-256 digest`);
+  return normalized;
+}
+
+function releaseSha(value, label) {
+  const normalized = text(value, label);
+  if (!RELEASE_SHA_PATTERN.test(normalized)) throw new Error(`${label} must be an exact 40-character release SHA`);
+  return normalized;
 }
 
 function assertComponents(value, label) {
@@ -47,8 +61,8 @@ function hasSecretField(value) {
 export function assertProductionRecoveryReport(report) {
   if (!report || typeof report !== "object" || Array.isArray(report)) throw new Error("Production recovery report must be an object");
   if (report.example === true) throw new Error("Production recovery example cannot clear launch readiness");
-  if (report.schema_version !== 1 || report.environment !== "production" || report.ready !== true) {
-    throw new Error("Production recovery report must be ready production evidence");
+  if (report.schema_version !== 2 || report.environment !== "production" || report.ready !== true) {
+    throw new Error("Production recovery report must be ready production evidence using schema v2");
   }
   if (
     hasSecretField(report) ||
@@ -75,11 +89,26 @@ export function assertProductionRecoveryReport(report) {
   positiveNumber(report.policy?.rto_hours, "policy.rto_hours");
 
   const backupId = text(report.backup?.backup_id, "backup.backup_id");
+  const backupCiphertextSha = sha256(report.backup?.ciphertext_sha256, "backup.ciphertext_sha256");
+  const backupManifestSha = sha256(report.backup?.manifest_sha256, "backup.manifest_sha256");
+  const backupMonitoringSha = sha256(
+    report.backup?.monitoring_rollback_report_sha256,
+    "backup.monitoring_rollback_report_sha256",
+  );
+  const backupReleaseSha = releaseSha(report.backup?.release_id, "backup.release_id");
   if (report.backup?.checksum_verified !== true) throw new Error("Production backup checksum must be verified");
   assertComponents(report.backup?.components, "Production backup");
 
   text(report.restore_drill?.drill_id, "restore_drill.drill_id");
   const restoredBackupId = text(report.restore_drill?.source_backup_id, "restore_drill.source_backup_id");
+  const restoreCiphertextSha = sha256(report.restore_drill?.ciphertext_sha256, "restore_drill.ciphertext_sha256");
+  const restoreManifestSha = sha256(report.restore_drill?.manifest_sha256, "restore_drill.manifest_sha256");
+  const restoreResultSha = sha256(report.restore_drill?.result_sha256, "restore_drill.result_sha256");
+  const restoreMonitoringSha = sha256(
+    report.restore_drill?.monitoring_rollback_report_sha256,
+    "restore_drill.monitoring_rollback_report_sha256",
+  );
+  const restoreReleaseSha = releaseSha(report.restore_drill?.release_id, "restore_drill.release_id");
   const operator = text(report.restore_drill?.operator, "restore_drill.operator");
   if (restoredBackupId !== backupId) throw new Error("Production restore drill must reference the cited backup");
   if (
@@ -94,6 +123,29 @@ export function assertProductionRecoveryReport(report) {
 
   const reviewer = text(report.approval?.reviewer, "approval.reviewer");
   if (report.approval?.status !== "approved") throw new Error("Production recovery evidence requires explicit approval");
+  text(report.approval?.approval_id, "approval.approval_id");
+  sha256(report.approval?.artifact_sha256, "approval.artifact_sha256");
+  const approvalCiphertextSha = sha256(report.approval?.ciphertext_sha256, "approval.ciphertext_sha256");
+  const approvalManifestSha = sha256(report.approval?.manifest_sha256, "approval.manifest_sha256");
+  const approvalRestoreSha = sha256(report.approval?.restore_drill_sha256, "approval.restore_drill_sha256");
+  const approvalMonitoringSha = sha256(
+    report.approval?.monitoring_rollback_report_sha256,
+    "approval.monitoring_rollback_report_sha256",
+  );
+  const approvalReleaseSha = releaseSha(report.approval?.release_id, "approval.release_id");
+  if (
+    backupCiphertextSha !== restoreCiphertextSha ||
+    backupCiphertextSha !== approvalCiphertextSha ||
+    backupManifestSha !== restoreManifestSha ||
+    backupManifestSha !== approvalManifestSha ||
+    backupMonitoringSha !== restoreMonitoringSha ||
+    backupMonitoringSha !== approvalMonitoringSha ||
+    backupReleaseSha !== restoreReleaseSha ||
+    backupReleaseSha !== approvalReleaseSha ||
+    restoreResultSha !== approvalRestoreSha
+  ) {
+    throw new Error("Production recovery backup, restore, and approval evidence identities must match");
+  }
   if (reviewer.toLowerCase() === operator.toLowerCase()) {
     throw new Error("Production recovery reviewer must be distinct from the restore operator");
   }
