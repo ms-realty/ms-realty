@@ -13,7 +13,18 @@ test("search request normalizes a single versioned intent and rejects unknown fi
   assert.deepEqual(normalized.intent.property_families, ["apartment"]);
   assert.equal(normalized.intent.price_max, 120000);
   assert.equal(normalized.intent.page, 2);
+  assert.equal(normalizeSearchRequest(new URLSearchParams("locale=bg&page_size=7")).intent.page_size, 7);
   assert.equal(normalized.filters.property_family, "apartment");
+
+  assert.equal(normalizeSearchRequest(new URLSearchParams("locale=bg&listing_status=reserved")).intent.listing_status, "reserved");
+  assert.throws(
+    () => normalizeSearchRequest(new URLSearchParams("locale=bg&listing_status=sold")),
+    /conflicts with mandatory public availability filters/,
+  );
+  assert.throws(
+    () => normalizeSearchRequest(new URLSearchParams("locale=bg&price_period=month")),
+    /price_period is unavailable/,
+  );
 
   assert.throws(
     () => normalizeSearchRequest(new URLSearchParams("locale=bg&unsupported_filter=value")),

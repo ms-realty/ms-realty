@@ -21,7 +21,7 @@ export class PublicSearchUnavailableError extends Error {
 
 export function publicSearchConfigFromEnv(env = process.env) {
   return {
-    engine: env.MS_REALTY_SEARCH_ENGINE,
+    engine: "postgres",
     environment: env.NODE_ENV,
     postgres: {
       env,
@@ -77,7 +77,7 @@ export function seedForSearchHits(seed, hits) {
 function searchBackend(engineResult) {
   const backend = {
     engine: engineResult.engine,
-    mode: engineResult.engine === "typesense" ? "primary" : engineResult.engine === "meilisearch" ? "fallback" : "local_fallback",
+    mode: engineResult.engine === "typesense" ? "primary" : engineResult.engine === "meilisearch" ? "fallback" : engineResult.engine === "postgres" ? "primary" : "local_fallback",
     locale_codes: engineResult.locale_codes,
     unavailable_engines: engineResult.unavailable_engines || []
   };
@@ -153,7 +153,7 @@ export async function executePublicSearch({
     filters: request.filters,
     sort: request.sort,
     page: request.page,
-    pageSize,
+    pageSize: savedView && pageSize === null ? null : request.intent.page_size,
     savedView,
     translationTasks
   };
@@ -174,13 +174,22 @@ export async function executePublicSearch({
     throw error;
   }
 
+  const databasePage = engineResult.engine === "postgres";
   const localResult = searchRuntimeListings(registry, seed, options);
-  const result = engineResult.engine === "seed_fallback" || !engineResultIsComplete(engineResult)
-    ? localResult
-    : searchRuntimeListings(registry, seedForSearchHits(seed, engineResult.hits), {
-        ...options,
-        query: ""
-      });
+  const result =
+    engineResult.engine === "seed_fallback" || (!databasePage && !engineResultIsComplete(engineResult))
+      ? localResult
+      : searchRuntimeListings(registry, seedForSearchHits(seed, engineResult.hits), {
+          ...options,
+          query: "",
+          ...(databasePage
+            ? {
+                databasePage: true,
+                pageSize: engineResult.page_size,
+                totalMatches: engineResult.total,
+              }
+            : {}),
+        });
 
   return {
     result: withSearchRequest(result, engineResult, request),

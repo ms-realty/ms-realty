@@ -35,17 +35,6 @@ const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_WORKSPACE_ID",
   "PAYLOAD_SECRET",
   "DATABASE_URL",
-  "MS_REALTY_SEARCH_ENGINE",
-  "TYPESENSE_URL",
-  "TYPESENSE_API_KEY",
-  "TYPESENSE_QUERY_API_KEY",
-  "TYPESENSE_COLLECTION",
-  "MEILI_URL",
-  "MEILI_API_KEY",
-  "MEILI_QUERY_API_KEY",
-  "MEILI_INDEX",
-  "MS_REALTY_SEARCH_ENGINE",
-  "MS_REALTY_SEARCH_ALLOW_PRIVATE_SERVICE_NETWORK",
   "HERMES_CHAT_COMPLETIONS_URL",
   "HERMES_API_KEY",
   "HERMES_MODEL",
@@ -99,6 +88,14 @@ test("Cloudflare Container forwards every production runtime binding", () => {
   for (const binding of CONTAINER_RUNTIME_BINDINGS) {
     assert.match(workerSource, new RegExp(`${binding}: this\\.env\\.${binding} \\?\\? ""`));
   }
+});
+
+test("Cloudflare Container search depends only on Payload Postgres", () => {
+  for (const binding of ["MS_REALTY_SEARCH_ENGINE", "TYPESENSE_URL", "TYPESENSE_API_KEY", "MEILI_URL", "MEILI_API_KEY"]) {
+    assert.doesNotMatch(workerSource, new RegExp(`${binding}: this\\.env\\.`));
+  }
+  assert.match(workerSource, /PAYLOAD_SECRET: this\.env\.PAYLOAD_SECRET/);
+  assert.match(workerSource, /DATABASE_URL: this\.env\.DATABASE_URL/);
 });
 
 test("every forwarded binding is actually read by the running app", () => {

@@ -86,6 +86,10 @@ export function assertSearchIntentCompatibility(intent) {
 }
 
 export function normalizeSearchIntent(input = {}, { defaultLocale = "bg" } = {}) {
+  const pricePeriod = String(input.price_period || "").trim();
+  // Listings do not yet have an authoritative billing-period field. Reject the
+  // filter instead of treating every document's absent value as a zero-result.
+  if (pricePeriod) throw new Error("price_period is unavailable until listings have an authoritative billing-period field");
   const propertyFamilies = values(input.property_families || input.property_family || input.property_type).map((value) => {
     const normalized = String(value).trim().toLowerCase();
     const legacyFamily = taxonomyForLegacyPropertyType(normalized).family;
@@ -104,7 +108,7 @@ export function normalizeSearchIntent(input = {}, { defaultLocale = "bg" } = {})
     offer_type: requiredEnum(input.offer_type, SEARCH_OFFER_TYPES, "offer_type"),
     listing_status: requiredEnum(input.listing_status || input.status, SEARCH_STATUSES, "listing_status"),
     price_currency: String(input.price_currency || input.currency || "EUR").trim().toUpperCase() || "EUR",
-    price_period: String(input.price_period || "").trim() || null,
+    price_period: null,
     parking_kinds: [...new Set(values(input.parking_kinds || input.parking_kind))],
     construction_statuses: [...new Set(values(input.construction_statuses || input.construction_status))],
     has_approved_tour:

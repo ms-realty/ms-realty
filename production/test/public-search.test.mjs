@@ -193,14 +193,13 @@ test("production public search fails closed when no configured engine can serve 
   assert.match(fallbackHtml, /tel:\+359879696870/);
 });
 
-test("private review exposes the full inventory through HTML and API without changing the public default", async () => {
+test("private review keeps the production Postgres search contract while exposing review inventory", () => {
   const productionConfig = appRouterConfigFromEnv({ NODE_ENV: "production" });
   const reviewEnv = {
     NODE_ENV: "production",
     MS_REALTY_PRIVATE_REVIEW_MODE: "true",
-    MS_REALTY_SEARCH_ENGINE: "typesense",
-    TYPESENSE_URL: "http://typesense:8108",
-    TYPESENSE_API_KEY: "private-review-test-key",
+    DATABASE_URL: "postgres://db.ms-realty.bg:5432/ms_realty",
+    PAYLOAD_SECRET: "private-review-test-secret",
   };
   const reviewConfig = appRouterConfigFromEnv(reviewEnv);
 
@@ -214,9 +213,9 @@ test("private review exposes the full inventory through HTML and API without cha
     404,
   );
   assert.equal(reviewConfig.privateReview, true);
-  assert.equal(reviewConfig.search.environment, "review");
-  assert.equal(reviewConfig.search.engine, undefined);
-  assert.deepEqual(reviewConfig.search.typesense, {});
+  assert.equal(reviewConfig.search.environment, "production");
+  assert.equal(reviewConfig.search.engine, "postgres");
+  assert.equal(reviewConfig.search.postgres.env.DATABASE_URL, reviewEnv.DATABASE_URL);
   assert.equal(
     renderAppRoute({
       pathname: "/bg/imoti/MS-CRAWL-0001",
@@ -226,24 +225,6 @@ test("private review exposes the full inventory through HTML and API without cha
     200,
   );
 
-  const htmlResponse = await renderAppSearchRouteResponse({
-    pathname: "/bg/tarsene",
-    url: "https://example.test/bg/tarsene?q=Sandanski",
-    config: reviewConfig,
-  });
-  const apiResponse = await renderAppApiResponse(
-    new Request("https://example.test/api/search?locale=bg&q=Sandanski", {
-      headers: { "x-ms-realty-preview": "search-count" },
-    }),
-    { config: appApiConfigFromEnv(reviewEnv) },
-  );
-  const api = await apiResponse.json();
-
-  assert.equal(htmlResponse.status, 200);
-  assert.match(await htmlResponse.text(), /MS-CRAWL-/);
-  assert.equal(apiResponse.status, 200);
-  assert.ok(api.cards.length > 0);
-  assert.equal(api.search.backend.engine, "seed_fallback");
 });
 
 test("localized HTML and API search share engine-ranked cards and request intent", async () => {
@@ -266,4 +247,44 @@ test("localized HTML and API search share engine-ranked cards and request intent
   assert.equal(html.rendered.search.query, api.search.query);
   assert.deepEqual(html.rendered.search.intent, api.search.intent);
   assert.match(html.html, /MS-CRAWL-0001/);
+});
+
+test("Postgres result pages preserve database totals and requested page size", async () => {
+  const intents = [];
+  const { result, engineResult } = await executePublicSearch({
+    registry,
+    seed,
+    params: new URLSearchParams("locale=bg&page=3&page_size=7&listing_status=reserved"),
+    search: {
+      engine: "postgres",
+      environment: "production",
+      postgres: {
+        queryImpl: async ({ intent }) => {
+          intents.push(intent);
+          return {
+            engine: "postgres",
+            total: 23,
+            hits: [higherRankedHit, hit],
+            page: intent.page,
+            page_size: intent.page_size,
+            target: "ms_realty_public_search_documents",
+          };
+        },
+      },
+    },
+  });
+
+  assert.equal(intents[0].page, 3);
+  assert.equal(intents[0].page_size, 7);
+  assert.equal(intents[0].listing_status, "reserved");
+  assert.equal(engineResult.total, 23);
+  assert.equal(result.search.total_matches, 23);
+  assert.deepEqual(result.search.pagination, {
+    page: 3,
+    per_page: 7,
+    total_pages: 4,
+    has_previous: true,
+    has_next: true,
+  });
+  assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0002", "MS-CRAWL-0001"]);
 });

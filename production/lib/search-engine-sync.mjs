@@ -1561,6 +1561,16 @@ function postgresLocationCondition(sql, locationIds = []) {
   return sql`(${sql.join(clauses, sql` OR `)})`;
 }
 
+function postgresGeographyCondition(sql, value) {
+  return sql`d."geography_path" @> ${JSON.stringify([value])}::jsonb`;
+}
+
+function postgresResultCount(rows) {
+  const value = Number(rows[0]?.total_count ?? 0);
+  if (!Number.isSafeInteger(value) || value < 0) throw new Error("Postgres public search returned an invalid total count");
+  return value;
+}
+
 function postgresSortOrder(sql, intent) {
   if (intent?.sort === "price_asc") return sql`d."price_amount" ASC NULLS LAST, d."id" ASC`;
   if (intent?.sort === "price_desc") return sql`d."price_amount" DESC NULLS LAST, d."id" ASC`;
@@ -1632,8 +1642,8 @@ async function queryPostgres({
   const locationClause = postgresLocationCondition(sql, normalized?.location_ids || []);
   if (locationClause) conditions.push(locationClause);
   if (normalized?.country_code) conditions.push(postgresViewCondition(sql, "country_code", normalized.country_code));
-  if (normalized?.region_id) conditions.push(sql`d."geography_path" ? ${normalized.region_id}`);
-  if (normalized?.geography_id) conditions.push(sql`d."geography_path" ? ${normalized.geography_id}`);
+  if (normalized?.region_id) conditions.push(postgresGeographyCondition(sql, normalized.region_id));
+  if (normalized?.geography_id) conditions.push(postgresGeographyCondition(sql, normalized.geography_id));
   if (normalized?.municipality) conditions.push(postgresViewCondition(sql, "municipality", normalized.municipality));
   if (normalized?.district) conditions.push(postgresViewCondition(sql, "district", normalized.district));
   for (const [field, min, max] of [
@@ -1650,6 +1660,7 @@ async function queryPostgres({
     if (clause) conditions.push(clause);
   }
   if (normalized?.offer_type) conditions.push(postgresViewCondition(sql, "offer_type", normalized.offer_type));
+  if (normalized?.listing_status) conditions.push(postgresViewCondition(sql, "listing_status", normalized.listing_status));
   if (normalized?.price_period) conditions.push(postgresViewCondition(sql, "price_period", normalized.price_period));
   if (normalized?.has_approved_tour === true) conditions.push(sql`d."has_approved_tour" = true`);
   if (normalized?.map_bounds) {
@@ -1661,30 +1672,32 @@ async function queryPostgres({
   const pageSize = Math.min(100, Math.max(1, Number(normalized?.page_size || 12)));
   const page = Math.max(1, Number(normalized?.page || 1));
   const offset = (page - 1) * pageSize;
-  const statement = sql`
-    WITH filtered AS (
-      SELECT
-        d."id",
-        d."source_listing_id",
-        d."listing_reference",
-        d."locale",
-        d."locale_path",
-        d."title",
-        count(*) OVER() AS total_count
-      FROM ${sql.raw(`"public"."${POSTGRES_PUBLIC_SEARCH_VIEW}"`)} d
-      WHERE ${sql.join(conditions, sql` AND `)}
-      ORDER BY ${postgresSortOrder(sql, normalized)}
-      LIMIT ${pageSize}
-      OFFSET ${offset}
-    )
-    SELECT * FROM filtered
+  const countStatement = sql`
+    SELECT count(*) AS total_count
+    FROM ${sql.raw(`"public"."${POSTGRES_PUBLIC_SEARCH_VIEW}"`)} d
+    WHERE ${sql.join(conditions, sql` AND `)}
   `;
-  const rows = postgresRows(await execute(statement));
+  const pageStatement = sql`
+    SELECT
+      d."id",
+      d."source_listing_id",
+      d."listing_reference",
+      d."locale",
+      d."locale_path",
+      d."title"
+    FROM ${sql.raw(`"public"."${POSTGRES_PUBLIC_SEARCH_VIEW}"`)} d
+    WHERE ${sql.join(conditions, sql` AND `)}
+    ORDER BY ${postgresSortOrder(sql, normalized)}
+    LIMIT ${pageSize}
+    OFFSET ${offset}
+  `;
+  const total = postgresResultCount(postgresRows(await execute(countStatement)));
+  const rows = postgresRows(await execute(pageStatement));
   const hits = rows.map(postgresSearchHit);
   return {
     engine: "postgres",
     database_target: redactedDatabaseTarget(postgres.env?.DATABASE_URL || process.env.DATABASE_URL),
-    total: rows.length ? Number(rows[0].total_count || 0) : 0,
+    total,
     hits,
     page,
     page_size: pageSize,
@@ -1960,22 +1973,22 @@ export async function queryPublicSearch({
               localeCodes: normalizedLocales,
             })
           : selected === "typesense"
-          ? await queryTypesense({
-              ...typesense,
-              q: query,
-              filterBy: typesenseFilter,
-              perPage,
-              exactReference: normalizedIntent?.exact_reference,
-              sortBy: typesenseSort,
-              fetchImpl,
-            })
-          : await queryMeilisearch({
-              ...meilisearch,
-              q: query,
-              filter: meilisearchFilter,
-              limit: perPage,
-              fetchImpl,
-            });
+            ? await queryTypesense({
+                ...typesense,
+                q: query,
+                filterBy: typesenseFilter,
+                perPage,
+                exactReference: normalizedIntent?.exact_reference,
+                sortBy: typesenseSort,
+                fetchImpl,
+              })
+            : await queryMeilisearch({
+                ...meilisearch,
+                q: query,
+                filter: meilisearchFilter,
+                limit: perPage,
+                fetchImpl,
+              });
       return {
         engine: selected,
         total: result.total,
