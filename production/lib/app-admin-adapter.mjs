@@ -118,11 +118,7 @@ import {
   readLeadIntakesDurably,
 } from "./lead-durable-store.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
-import {
-  projectListingDraftSeed,
-  saveBulkListingStatusDrafts,
-  saveListingDraft,
-} from "./listing-draft-service.mjs";
+import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import {
   DEFAULT_CONSENT_LEDGER_PATH,
   appendConsentRecord,
@@ -277,6 +273,7 @@ import {
 } from "./tours.mjs";
 import { crossOriginWriteRejection } from "./request-guard.mjs";
 import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
+import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import {
   DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -325,10 +322,12 @@ function bytesFrom(value) {
 }
 
 export function appAdminConfigFromEnv(env = process.env) {
+  const durableOnly = env.NODE_ENV === "production" && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload";
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
     durableListingAuditToFile: env.NODE_ENV !== "production",
+    runtimeDataDurableOnly: durableOnly,
     accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
@@ -428,8 +427,8 @@ function adminForbidden(capability) {
 }
 
 function adminBadRequest(error) {
-  return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
-    status: 400,
+  return new Response(JSON.stringify({ kind: error?.code || "bad_request", message: error.message }), {
+    status: error?.status || 400,
     headers: PRIVATE_JSON_HEADERS,
   });
 }
@@ -714,6 +713,7 @@ function bindRealtyCaseConditionExecutor(input, principal, action) {
 }
 
 function currentSeed(config) {
+  if (config.runtimeDataDurableOnly) return loadCmsSeed();
   return applyMediaReviews(
     applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
     readMediaReviews(config.mediaReviewLedgerPath),
@@ -799,6 +799,7 @@ function recordDurableListingAudit(input, config, recordedAt = auditRecordedAt(c
 
 function recordAuditReplica(input, config, recordedAt, alreadyRecorded, bestEffort) {
   try {
+    if (bestEffort && config.runtimeDataDurableOnly) return true;
     if (!readAuditLog(config.auditLogPath).some(alreadyRecorded)) recordAudit(input, config, recordedAt);
     return false;
   } catch (error) {
@@ -836,6 +837,9 @@ function currentPublicRequestQueue(config) {
 async function adminLeadSource(config) {
   const durableStore = config.leadDurableStore || {};
   if (!durableStore.leadDurableStoreEnabled) {
+    if (config.runtimeDataDurableOnly) {
+      throw new LeadStoreUnavailableError("Production admin leads require the durable store");
+    }
     return {
       durable: false,
       leads: withLeadContacts(readLeadLedger(config.leadLedgerPath), {
@@ -910,15 +914,6 @@ function leadScopedRows(source) {
 async function leadInboxPayload(registry, url, config) {
   const source = await adminLeadSource(config);
   const filterRows = leadScopedRows(source);
-  const leads = applyLeadAssignments(source.leads, filterRows(readLeadAssignments(config.leadAssignmentLedgerPath)));
-  const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
-  const replyDeliveryOutcomes = filterRows(readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath));
-  const viewingSource = await adminViewingSource(config);
-  const viewings = filterRows(viewingSource.viewings);
-  const viewingFollowUps = filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath));
-  const deals = filterRows(readDeals(config.dealLedgerPath));
-  const sellerPipeline = filterRows(readSellerPipeline(config.sellerPipelinePath));
-  const sellerPipelineOutcomes = filterRows(readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath));
   let providerConnections = {};
   const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
   const providerAvailability = providerConnectionAvailability(providerConfig);
@@ -941,6 +936,58 @@ async function leadInboxPayload(registry, url, config) {
       providerConnections = {};
     }
   }
+  if (source.durable && config.runtimeDataDurableOnly) {
+    const seed = await projectListingDraftSeed(loadCmsSeed(), {
+      env: config.authEnv || process.env,
+      payload: config.payloadListingRuntime || null,
+      requirePayload: true,
+    });
+    const viewingSource = await adminViewingSource(config);
+    const viewings = filterRows(viewingSource.viewings);
+    return {
+      ...renderAdminLeadsPayload(registry, url.searchParams.get("locale") || "en", {
+        leads: source.leads,
+        replies: [],
+        communicationThreads: [],
+        communicationTemplates: Object.fromEntries(
+          source.leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
+        ),
+        languageRequests: [],
+        translationTasks: [],
+        listingEdits: [],
+        leadMatching: buildLeadMatchingReport({
+          registry,
+          seed,
+          leads: source.leads,
+          leadPipelineStates: [],
+          generatedAt: config.reviewedAt || new Date().toISOString(),
+        }),
+        operatorId: config.adminPrincipal || null,
+        leadSourceDurable: true,
+        providerConnections,
+        viewings,
+        viewingFollowUpWritable: false,
+        viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, [], {
+          now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
+        }),
+        savedSearches: [],
+        sellerPipeline: [],
+        deals: [],
+        brokerContacts: [],
+        brokerProfiles: [],
+      }),
+      runtime_data_mode: "durable_only",
+    };
+  }
+  const leads = applyLeadAssignments(source.leads, filterRows(readLeadAssignments(config.leadAssignmentLedgerPath)));
+  const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
+  const replyDeliveryOutcomes = filterRows(readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath));
+  const viewingSource = await adminViewingSource(config);
+  const viewings = filterRows(viewingSource.viewings);
+  const viewingFollowUps = filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath));
+  const deals = filterRows(readDeals(config.dealLedgerPath));
+  const sellerPipeline = filterRows(readSellerPipeline(config.sellerPipelinePath));
+  const sellerPipelineOutcomes = filterRows(readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath));
   const leadPipelineQueue = buildLeadPipelineQueue(
     {
       leads,
@@ -1115,6 +1162,7 @@ async function realtyCasesPayload(registry, url, config) {
     realtyCaseConditionQueue: buildRealtyCaseConditionQueue(conditionEvents, {
       now,
     }),
+    ...(config.runtimeDataDurableOnly ? { runtime_data_mode: "durable_only" } : {}),
   };
 }
 
@@ -1224,15 +1272,18 @@ async function listingManagerPayload(registry, url, config) {
   const seed = await projectListingDraftSeed(currentSeed(config), {
     env: config.authEnv || process.env,
     payload: config.payloadListingRuntime || null,
+    requirePayload: config.runtimeDataDurableOnly,
   });
-  const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
-  return renderAdminListingManagerPayload(registry, url.searchParams.get("locale") || "en", {
+  const translationTasks = config.runtimeDataDurableOnly
+    ? []
+    : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
+  const payload = renderAdminListingManagerPayload(registry, url.searchParams.get("locale") || "en", {
     seed,
     translationTasks,
     generatedAt: config.reviewedAt || new Date().toISOString(),
     operatorId: config.adminPrincipal || null,
     publicationScheduleQueue: buildListingPublicationScheduleQueue(
-      readListingPublicationSchedules(config.listingPublicationSchedulePath),
+      config.runtimeDataDurableOnly ? [] : readListingPublicationSchedules(config.listingPublicationSchedulePath),
       { now: config.listingPublicationAt || config.reviewedAt || new Date().toISOString() },
     ),
     query: url.searchParams.get("q") || "",
@@ -1240,32 +1291,38 @@ async function listingManagerPayload(registry, url, config) {
     sourceLocale: url.searchParams.get("sourceLocale") || "",
     page: url.searchParams.get("page") || 1,
   });
+  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
 }
 
 async function listingEditorPayload(registry, url, config) {
   const seed = await projectListingDraftSeed(currentSeed(config), {
     env: config.authEnv || process.env,
     payload: config.payloadListingRuntime || null,
+    requirePayload: config.runtimeDataDurableOnly,
   });
-  return renderAdminListingEditorPayload(
+  const payload = renderAdminListingEditorPayload(
     registry,
     url.searchParams.get("locale") || "en",
     seed,
     url.searchParams.get("listingId"),
-    readListingEdits(config.listingEditLedgerPath),
-    latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
-    readTourApprovals(config.tourApprovalLedgerPath),
+    config.runtimeDataDurableOnly ? [] : readListingEdits(config.listingEditLedgerPath),
+    config.runtimeDataDurableOnly ? [] : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
+    config.runtimeDataDurableOnly ? [] : readTourApprovals(config.tourApprovalLedgerPath),
     config.adminPrincipal || null,
   );
+  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
 }
 
 async function translationQueuePayload(registry, url, config) {
   const seed = await projectListingDraftSeed(currentSeed(config), {
-    payload: config.payloadListingRuntime,
-    env: process.env,
+    payload: config.payloadListingRuntime || null,
+    env: config.authEnv || process.env,
+    requirePayload: config.runtimeDataDurableOnly,
   });
-  const tasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
-  return renderAdminTranslationQueuePayload(registry, url.searchParams.get("locale") || "en", {
+  const tasks = config.runtimeDataDurableOnly
+    ? []
+    : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
+  const payload = renderAdminTranslationQueuePayload(registry, url.searchParams.get("locale") || "en", {
     seed,
     translationTasks: tasks,
     generatedAt: config.reviewedAt || new Date().toISOString(),
@@ -1275,6 +1332,7 @@ async function translationQueuePayload(registry, url, config) {
     taskType: url.searchParams.get("taskType") || "",
     page: url.searchParams.get("page") || 1,
   });
+  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
 }
 
 function readJsonData(filename) {
@@ -3090,6 +3148,22 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       })
     ) {
       return leadStoreUnavailable("lead_store_read_only");
+    }
+    if (productionRuntimeDataUnavailable({
+      durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
+      durableOnly: config.runtimeDataDurableOnly,
+      durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
+      method: request.method,
+      pathname: url.pathname,
+    })) {
+      return jsonResponse(503, runtimeDataUnavailablePayload(url.pathname));
+    }
+    if (
+      config.runtimeDataDurableOnly &&
+      ["/admin/cases", "/api/admin/cases", "/api/admin/cases/intents", "/api/admin/cases/conditions"].includes(url.pathname) &&
+      !realtyCasePayloadAuthorityActive(config)
+    ) {
+      return jsonResponse(503, realtyCasePayloadAuthorityFailure());
     }
     if (
       principal.source === "payload_session" &&

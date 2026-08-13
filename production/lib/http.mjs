@@ -93,6 +93,7 @@ import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
+import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
 import {
   LeadStoreUnavailableError,
   isLeadDurableStoreEnabled,
@@ -162,11 +163,7 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
-import {
-  projectListingDraftSeed,
-  saveBulkListingStatusDrafts,
-  saveListingDraft,
-} from "./listing-draft-service.mjs";
+import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
   appendListingPublicationSchedule,
@@ -863,6 +860,8 @@ export function createHttpApp({
   syncViewingToGoogleCalendar = syncViewingToGoogleCalendarProvider,
   nowSeconds = () => Math.floor(Date.now() / 1000),
   search = {},
+  runtimeDataDurableOnly =
+    process.env.NODE_ENV === "production" && process.env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload",
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
@@ -881,27 +880,55 @@ export function createHttpApp({
     }
   };
   const currentSeed = () =>
-    applyMediaReviews(
+    runtimeDataDurableOnly
+      ? seed
+      : applyMediaReviews(
       applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined)),
       readMediaReviews(mediaReviewLedgerPath || undefined),
     );
-  const currentPublicSeed = () => publicSeedFor(currentSeed());
+  const currentPublicSeed = () => {
+    if (runtimeDataDurableOnly) throw Object.assign(new Error("Payload public listing authority is required"), { status: 503 });
+    return publicSeedFor(currentSeed());
+  };
+  const currentPublicContext = async () => {
+    if (!runtimeDataDurableOnly) {
+      return { registry: activeRegistry, seed: currentPublicSeed(), translationTasks: currentTranslationTasks() };
+    }
+    const projected = await projectListingDraftSeed(seed, {
+      payload: payloadListingRuntime,
+      env: payloadListingEnv,
+      requirePayload: true,
+    });
+    return { registry: activeRegistry, seed: publicSeedFor(projected), translationTasks: [] };
+  };
   const currentTranslationTasks = () =>
-    readThroughCached(translationLedgerPath || DEFAULT_TRANSLATION_LEDGER_PATH, () =>
-      readTranslationLedger(translationLedgerPath || undefined),
-    );
+    runtimeDataDurableOnly
+      ? []
+      : readThroughCached(translationLedgerPath || DEFAULT_TRANSLATION_LEDGER_PATH, () =>
+          readTranslationLedger(translationLedgerPath || undefined),
+        );
   const currentBrokerContacts = () =>
-    readThroughCached(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH, () =>
-      readBrokerContacts(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH),
-    );
+    runtimeDataDurableOnly
+      ? []
+      : readThroughCached(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH, () =>
+          readBrokerContacts(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH),
+        );
   const currentTourApprovals = () =>
-    readThroughCached(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH, () =>
-      readTourApprovals(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH),
-    );
+    runtimeDataDurableOnly
+      ? []
+      : readThroughCached(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH, () =>
+          readTourApprovals(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH),
+        );
   const currentSlugHistory = () =>
-    readThroughCached(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH, () => readSlugHistory(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH));
+    runtimeDataDurableOnly
+      ? []
+      : readThroughCached(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH, () =>
+          readSlugHistory(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH),
+        );
   const currentLeads = () =>
-    applyLeadAssignments(
+    runtimeDataDurableOnly
+      ? []
+      : applyLeadAssignments(
       withLeadContacts(readLeadLedger(leadLedgerPath || undefined), {
         filePath: leadContactVaultPath,
         secret: leadContactKey,
@@ -1047,6 +1074,39 @@ export function createHttpApp({
       now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
     });
   const currentAdminLeadPayload = (requestedLocale, operatorId = null, leads = currentLeads()) => {
+    if (runtimeDataDurableOnly) {
+      const generatedAt = reviewedAt || receivedAt || new Date().toISOString();
+      return {
+        ...renderAdminLeadsPayload(activeRegistry, requestedLocale, {
+          leads,
+          replies: [],
+          communicationThreads: [],
+          communicationTemplates: {},
+          languageRequests: [],
+          translationTasks: [],
+          listingEdits: [],
+          leadMatching: {
+            generated_at: generatedAt,
+            summary: {
+              matchable_leads_with_listing_reference: 0,
+              active_matchable_leads: 0,
+              qualified_leads: 0,
+              leads_with_matches: 0,
+              open_broker_tasks: 0,
+            },
+            rows: [],
+          },
+          operatorId,
+          viewings: [],
+          savedSearches: [],
+          sellerPipeline: [],
+          deals: [],
+          brokerContacts: [],
+          brokerProfiles: [],
+        }),
+        runtime_data_mode: "durable_only",
+      };
+    }
     const leadPipelineQueue = currentLeadPipelineQueue(leads);
     const replyData = currentReplyData();
     return renderAdminLeadsPayload(activeRegistry, requestedLocale, {
@@ -1171,8 +1231,8 @@ export function createHttpApp({
     realtyCasePayloadAuthorityActive()
       ? readRealtyCaseConditionEventsFromPayload({ payload: realtyCasePayload, workspaceId: realtyCaseWorkspaceId })
       : readRealtyCaseConditionEvents(realtyCaseConditionLedgerPath || undefined);
-  const currentRealtyCasePayload = async (requestedLocale, operatorId = null) =>
-    renderAdminRealtyCasesPayload(
+  const currentRealtyCasePayload = async (requestedLocale, operatorId = null) => {
+    const payload = renderAdminRealtyCasesPayload(
       activeRegistry,
       requestedLocale,
       buildRealtyCaseQueue(await currentRealtyCaseEvents(), {
@@ -1180,6 +1240,8 @@ export function createHttpApp({
       }),
       operatorId,
     );
+    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  };
   const currentAutonomousRealtyCaseIntents = async () =>
     buildAutonomousRealtyCaseIntents(await currentRealtyCaseEvents(), {
       now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
@@ -1299,9 +1361,13 @@ export function createHttpApp({
         page: url.searchParams.get("page"),
       },
     );
-  const currentListingManagerPayload = async (url, operatorId = null) =>
-    renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
+  const currentListingManagerPayload = async (url, operatorId = null) => {
+    const payload = renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
+      seed: await projectListingDraftSeed(currentSeed(), {
+        payload: payloadListingRuntime,
+        env: payloadListingEnv,
+        requirePayload: runtimeDataDurableOnly,
+      }),
       translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       status: url.searchParams.get("status") || "",
@@ -1310,25 +1376,37 @@ export function createHttpApp({
       generatedAt: reviewedAt || new Date().toISOString(),
       operatorId,
       publicationScheduleQueue: buildListingPublicationScheduleQueue(
-        readListingPublicationSchedules(listingPublicationSchedulePath || undefined),
+        runtimeDataDurableOnly ? [] : readListingPublicationSchedules(listingPublicationSchedulePath || undefined),
         { now: listingPublicationAt || reviewedAt || editedAt || new Date().toISOString() },
       ),
     });
-  const currentListingEditorPayload = async (url, operatorId = null) =>
-    renderAdminListingEditorPayload(
+    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  };
+  const currentListingEditorPayload = async (url, operatorId = null) => {
+    const payload = renderAdminListingEditorPayload(
       activeRegistry,
       url.searchParams.get("locale") || "en",
-      await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
+      await projectListingDraftSeed(currentSeed(), {
+        payload: payloadListingRuntime,
+        env: payloadListingEnv,
+        requirePayload: runtimeDataDurableOnly,
+      }),
       url.searchParams.get("listingId"),
-      readListingEdits(listingEditLedgerPath || undefined),
-      latestTranslationTasks(currentTranslationTasks()),
-      currentTourApprovals(),
+      runtimeDataDurableOnly ? [] : readListingEdits(listingEditLedgerPath || undefined),
+      runtimeDataDurableOnly ? [] : latestTranslationTasks(currentTranslationTasks()),
+      runtimeDataDurableOnly ? [] : currentTourApprovals(),
       operatorId,
     );
-  const currentTranslationQueuePayload = async (url, operatorId = null) =>
-    renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
-      translationTasks: latestTranslationTasks(currentTranslationTasks()),
+    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  };
+  const currentTranslationQueuePayload = async (url, operatorId = null) => {
+    const payload = renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
+      seed: await projectListingDraftSeed(currentSeed(), {
+        payload: payloadListingRuntime,
+        env: payloadListingEnv,
+        requirePayload: runtimeDataDurableOnly,
+      }),
+      translationTasks: runtimeDataDurableOnly ? [] : latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       targetLocale: url.searchParams.get("targetLocale") || "",
       taskType: url.searchParams.get("taskType") || "",
@@ -1336,6 +1414,8 @@ export function createHttpApp({
       generatedAt: reviewedAt || new Date().toISOString(),
       operatorId,
     });
+    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  };
   const currentSeoEvidence = () =>
     buildSeoEvidence({
       inputDir: seoEvidenceInputDir || undefined,
@@ -1445,13 +1525,15 @@ export function createHttpApp({
     };
   };
   const recordEvent = (input) =>
-    eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
+    !runtimeDataDurableOnly && eventLedgerPath
+      ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath })
+      : null;
   const recordConsent = (input) =>
-    consentLedgerPath
+    !runtimeDataDurableOnly && consentLedgerPath
       ? appendConsentRecord(createConsentRecord(input, receivedAt || new Date().toISOString()), { filePath: consentLedgerPath })
       : null;
   const writeAudit = (input, recordedAt = reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()) =>
-    auditLogPath
+    !runtimeDataDurableOnly && auditLogPath
       ? appendAuditLog(createAuditLogEntry(input, recordedAt), {
           filePath: auditLogPath,
         })
@@ -1459,22 +1541,24 @@ export function createHttpApp({
   const productionSearch = String(search.environment ?? process.env.NODE_ENV ?? "").trim().toLowerCase() === "production";
   const currentSearchResult = async (searchRequest, options = {}) => {
     const { intent, query, filters, sort, page } = searchRequest;
-    const seedForRequest = currentPublicSeed();
-    const translationTasks = currentTranslationTasks();
+    const context = await currentPublicContext();
+    const seedForRequest = context.seed;
+    const translationTasks = context.translationTasks;
+    const registryForRequest = context.registry;
     const searchOptions = { localeCode: intent.locale, query, filters, sort, page, pageSize: intent.page_size, translationTasks, ...options };
-    const localResult = searchRuntimeListings(activeRegistry, seedForRequest, searchOptions);
+    const localResult = searchRuntimeListings(registryForRequest, seedForRequest, searchOptions);
     const engineResult = await queryPublicSearch({
       ...search,
       q: query,
       intent,
-      localeCodes: engineLocaleCodes(seedForRequest, activeRegistry, localResult),
+      localeCodes: engineLocaleCodes(seedForRequest, registryForRequest, localResult),
     });
     const databasePage = engineResult.engine === "postgres";
     const result =
       engineResult.engine === "seed_fallback" || (!databasePage && !searchEngineResultIsComplete(engineResult))
         ? localResult
         : searchRuntimeListings(
-            activeRegistry,
+            registryForRequest,
             databasePage ? seedForPostgresSearchHits(seedForRequest, engineResult.hits) : seedForSearchHits(seedForRequest, engineResult.hits),
             {
             ...searchOptions,
@@ -1494,11 +1578,14 @@ export function createHttpApp({
     try {
       return { result: await currentSearchResult(searchRequest, options) };
     } catch (error) {
+      if (error?.status === 503) {
+        return { response: json(503, { kind: error.code || "payload_draft_unavailable", message: error.message }) };
+      }
       if (!productionSearch) throw error;
       return { response: json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" }) };
     }
   };
- return async function handle(request) {
+  return async function handle(request) {
    const url = new URL(request.url, "http://localhost");
    const mcpMetadataRoute =
      url.pathname === "/.well-known/oauth-protected-resource" ||
@@ -1569,6 +1656,15 @@ export function createHttpApp({
     // because connector clients are legitimately cross-origin.
     const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
     if (crossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
+    const runtimeDataAdminRequest =
+      url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
+    if (!runtimeDataAdminRequest && productionRuntimeDataUnavailable({
+      durableOnly: runtimeDataDurableOnly,
+      method: request.method,
+      pathname: url.pathname,
+    })) {
+      return adminJson(503, runtimeDataUnavailablePayload(url.pathname));
+    }
    let auth = request.headers?.authorization || request.headers?.Authorization || "";
     const sessionToken = auth ? "" : adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
 
@@ -1660,6 +1756,15 @@ export function createHttpApp({
         // The route handler returns the normal bad-request response.
       }
     }
+    if (productionRuntimeDataUnavailable({
+      durableProviderDelivery,
+      durableOnly: runtimeDataDurableOnly,
+      durableViewing: viewingDurableStore?.viewingDurableStoreEnabled === true,
+      method: request.method,
+      pathname: url.pathname,
+    })) {
+      return adminJson(503, runtimeDataUnavailablePayload(url.pathname));
+    }
     if (
       isFileBackedLeadMutationBlocked({
         durableProviderDelivery,
@@ -1675,6 +1780,13 @@ export function createHttpApp({
       });
     }
     if (
+      runtimeDataDurableOnly &&
+      ["/admin/cases", "/api/admin/cases", "/api/admin/cases/intents", "/api/admin/cases/conditions"].includes(url.pathname) &&
+      !realtyCasePayloadAuthorityActive()
+    ) {
+      return adminJson(503, realtyCasePayloadAuthorityFailure());
+    }
+    if (
       principal?.source === "payload_session" &&
       ["cases:read", "cases:write"].includes(requiredCapability) &&
       !canAdminAccessWorkspace(principal, realtyCaseWorkspaceId)
@@ -1682,16 +1794,19 @@ export function createHttpApp({
       return adminForbidden("workspace:access");
     }
     let requestLeadRows;
-    if (
-      request.method === "GET" &&
-      leadDurableStore.leadDurableStoreEnabled === true &&
-      LEAD_BACKED_ADMIN_READ_PATHS.has(url.pathname)
-    ) {
+    if (request.method === "GET" && LEAD_BACKED_ADMIN_READ_PATHS.has(url.pathname)) {
+      if (runtimeDataDurableOnly && !isLeadDurableStoreEnabled(leadDurableStore)) {
+        return adminJson(503, { kind: "lead_store_unavailable", message: "Lead storage is temporarily unavailable" });
+      }
+      if (leadDurableStore.leadDurableStoreEnabled !== true) {
+        requestLeadRows = undefined;
+      } else {
       try {
         requestLeadRows = await currentDurableLeads(principal, payloadSession);
       } catch (error) {
         if (error?.status === 403) return adminForbidden(error.capability || "workspace:access");
         return adminJson(503, { kind: "lead_store_unavailable", message: "Lead storage is temporarily unavailable" });
+      }
       }
     }
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
@@ -1881,14 +1996,20 @@ export function createHttpApp({
       return response(410, { kind: "legacy_gone", old_url: legacyDecision.old_url }, "application/json; charset=utf-8");
     }
     if (legacyDecision?.status === 200) {
-      const retained = renderRuntimePath(
-        activeRegistry,
-        currentPublicSeed(),
-        legacyDecision.target_path,
-        currentTranslationTasks(),
-        currentBrokerContacts(),
-        currentTourApprovals(),
-      );
+      let retained;
+      try {
+        const context = await currentPublicContext();
+        retained = renderRuntimePath(
+          context.registry,
+          context.seed,
+          legacyDecision.target_path,
+          context.translationTasks,
+          currentBrokerContacts(),
+          currentTourApprovals(),
+        );
+      } catch (error) {
+        return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
       if ((retained.status || 200) >= 400) {
         return response(503, { kind: "legacy_retain_unavailable", old_url: legacyDecision.old_url }, "application/json; charset=utf-8", {
           "cache-control": "no-store",
@@ -1909,11 +2030,16 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
-      return response(
-        200,
-        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentPublicSeed(), currentTranslationTasks())),
-        "application/xml; charset=utf-8",
-      );
+      try {
+        const context = await currentPublicContext();
+        return response(
+          200,
+          renderSitemapXml(buildRuntimeLocalizedSitemap(context.registry, context.seed, context.translationTasks)),
+          "application/xml; charset=utf-8",
+        );
+      } catch (error) {
+        return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/") {
@@ -2374,20 +2500,28 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/listings", "/admin/listings"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = await currentListingManagerPayload(url, principal);
-      if (url.pathname === "/admin/listings" || wantsHtml(request, url)) {
-        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      try {
+        const payload = await currentListingManagerPayload(url, principal);
+        if (url.pathname === "/admin/listings" || wantsHtml(request, url)) {
+          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        }
+        return adminJson(200, payload);
+      } catch (error) {
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
-      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && ["/api/admin/translations", "/admin/translations"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = await currentTranslationQueuePayload(url, principal);
-      if (url.pathname === "/admin/translations" || wantsHtml(request, url)) {
-        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      try {
+        const payload = await currentTranslationQueuePayload(url, principal);
+        if (url.pathname === "/admin/translations" || wantsHtml(request, url)) {
+          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        }
+        return adminJson(200, payload);
+      } catch (error) {
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
-      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && ["/api/admin/reports", "/admin/reports"].includes(url.pathname)) {
@@ -2446,6 +2580,7 @@ export function createHttpApp({
       return adminJson(200, {
         workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
         locales: activeRegistry.locales,
+        ...(runtimeDataDurableOnly ? { runtime_data_mode: "durable_only" } : {}),
       });
     }
 
@@ -3150,7 +3285,7 @@ export function createHttpApp({
         }
         return adminJson(persisted.idempotent ? 200 : 201, persisted);
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
@@ -4210,15 +4345,19 @@ export function createHttpApp({
         });
         return adminJson(201, tour);
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
         const input = parseBody(request);
-        const lead = submitRuntimeLead(activeRegistry, currentPublicSeed(), input);
+        const context = await currentPublicContext();
+        const lead = submitRuntimeLead(context.registry, context.seed, input);
         const durableRequested = leadDurableStore.leadDurableStoreEnabled === true;
+        if (runtimeDataDurableOnly && !durableRequested) {
+          throw new LeadStoreUnavailableError("Production lead intake requires the durable store");
+        }
         if (durableRequested && !isLeadDurableStoreEnabled(leadDurableStore)) {
           throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
         }
@@ -4271,7 +4410,7 @@ export function createHttpApp({
         if (error instanceof LeadStoreUnavailableError) {
           return privateJson(503, { kind: error.code, message: "Lead storage is temporarily unavailable" });
         }
-        return privateJson(400, { kind: "bad_request", message: error.message });
+        return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
@@ -4336,20 +4475,21 @@ export function createHttpApp({
         const filters = Object.fromEntries(
           Object.entries(searchIntentToQueryFilters(intent)).filter(([, value]) => value !== "" && value !== null && value !== undefined),
         );
-        const search = searchRuntimeListings(activeRegistry, currentPublicSeed(), {
+        const context = await currentPublicContext();
+        const search = searchRuntimeListings(context.registry, context.seed, {
           localeCode: intent.locale,
           query: intent.text_query,
           filters,
           sort: intent.sort,
           page: intent.page,
           pageSize: null,
-          translationTasks: currentTranslationTasks(),
+          translationTasks: context.translationTasks,
         });
         const priceSnapshot = Object.fromEntries(
           search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
         );
         const savedSearch = createSavedSearch(
-          activeRegistry,
+          context.registry,
           { ...input, search_intent: intent, priceSnapshot },
           { matchCount: search.search.total_matches, savedAt },
         );
@@ -4379,20 +4519,26 @@ export function createHttpApp({
         });
         return privateJson(201, { ...safeSearch, ledger, contactVault, consent });
       } catch (error) {
-        return privateJson(400, { kind: "bad_request", message: error.message });
+        return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
     if (request.method !== "GET") return json(405, { kind: "method_not_allowed" });
 
-    const rendered = renderRuntimePath(
-      activeRegistry,
-      currentPublicSeed(),
-      url.pathname,
-      currentTranslationTasks(),
-      currentBrokerContacts(),
-      currentTourApprovals(),
-    );
+    let rendered;
+    try {
+      const context = await currentPublicContext();
+      rendered = renderRuntimePath(
+        context.registry,
+        context.seed,
+        url.pathname,
+        context.translationTasks,
+        currentBrokerContacts(),
+        currentTourApprovals(),
+      );
+    } catch (error) {
+      return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+    }
     if (rendered.status === 200) {
       recordEvent({
         type: "page_view",

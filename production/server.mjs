@@ -98,6 +98,7 @@ export function productionServerConfig(env = process.env) {
   return {
     host: hostFrom(env.MS_REALTY_HOST || env.HOST),
     port: portFrom(env.MS_REALTY_PORT || env.PORT),
+    runtimeDataDurableOnly: production && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload",
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     rateLimit: rateLimitConfigFromEnv(env),
     cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
@@ -273,6 +274,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     sellerPipelineCreatedAt: config.sellerPipelineCreatedAt,
     listingPublicationAt: config.listingPublicationAt,
     realtyCaseRecordedAt: config.realtyCaseRecordedAt,
+    runtimeDataDurableOnly: config.runtimeDataDurableOnly,
   });
 }
 

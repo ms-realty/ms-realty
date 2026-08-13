@@ -14,6 +14,8 @@ import {
   buildR2UploadPlan,
   buildProductionRecoveryReport,
   buildRestoreDrillResult,
+  buildRuntimeAuthorityEvidence,
+  componentCoverage,
   componentMapDigest,
   createR2RecoveryManifest,
   mappedTableNames,
@@ -27,6 +29,7 @@ import {
   writePrivateJson,
 } from "../lib/r2-production-recovery.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { DURABLE_CASE_AUTHORITY_PATHS, DURABLE_LISTING_AUTHORITY_PATHS } from "../../workers/durable-case-authority.mjs";
 
 const componentMapPath = fromRoot("production", "data", "production-recovery-component-map.json");
 const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
@@ -124,6 +127,7 @@ function fixture(t) {
     componentMap,
     tableCounts,
     latestMigration: "20260811_120000_durable_listing_edit_audit",
+    runtimeAuthorityEvidence: buildRuntimeAuthorityEvidence({ releaseId: RECOVERY_RELEASE_ID }),
   });
   const manifestPath = path.join(directory, "manifest.json");
   writePrivateJson(manifestPath, manifest);
@@ -131,16 +135,72 @@ function fixture(t) {
   return { componentMap, manifest, manifestPath, manifestSha256: sha256File(manifestPath), tableCounts };
 }
 
-test("committed production component map names every authority gap instead of manufacturing coverage", (t) => {
+test("committed production component map covers runtime_data without manufacturing runtime authorities", (t) => {
   const { componentMap, manifest } = fixture(t);
   assert.equal(assertRecoveryComponentMap(componentMap), true);
   assert.equal(assertR2RecoveryManifest(manifest, componentMap), true);
   assert.equal(manifest.component_coverage.payload_postgres.status, "covered");
-  assert.equal(manifest.component_coverage.runtime_data.status, "uncovered");
+  assert.equal(manifest.component_coverage.runtime_data.status, "covered");
   assert.equal(manifest.component_coverage.runtime_evidence.status, "uncovered");
-  assert.ok(manifest.component_coverage.runtime_data.uncovered_sources.includes("MS_REALTY_AUDIT_LOG_PATH"));
+  assert.deepEqual(manifest.component_coverage.runtime_data.uncovered_sources, []);
+  assert.ok("public.consent_events" in manifest.component_coverage.runtime_data.mapped_tables);
+  assert.ok("public.seller_pipeline_events" in manifest.component_coverage.runtime_data.mapped_tables);
   assert.ok(manifest.component_coverage.runtime_evidence.uncovered_sources.includes("MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH"));
   assert.doesNotMatch(JSON.stringify(manifest), /postgres(?:ql)?:\/\//i);
+});
+
+test("runtime_data coverage is bound to the exact Worker authority gate and admitted Neon tables", (t) => {
+  const { componentMap, manifest, tableCounts } = fixture(t);
+  const withoutProof = componentCoverage(componentMap, tableCounts);
+  assert.equal(withoutProof.runtime_data.status, "uncovered");
+  assert.match(withoutProof.runtime_data.uncovered_sources[0], /release-bound Cloudflare Payload runtime authority proof/);
+
+  const authorities = new Map(componentMap.components.runtime_data.authority_gate.authorities.map((row) => [row.id, row]));
+  assert.deepEqual(authorities.get("listing_authority").routes.slice(0, 2), [...DURABLE_LISTING_AUTHORITY_PATHS]);
+  assert.deepEqual(authorities.get("realty_case_authority").routes, [...DURABLE_CASE_AUTHORITY_PATHS]);
+  assert.equal(manifest.runtime_authority.required_value, "payload");
+  assert.equal(manifest.runtime_authority.release_id, manifest.release_id);
+
+  const incomplete = structuredClone(componentMap);
+  incomplete.components.runtime_data.authority_gate.authorities.find((row) => row.id === "listing_authority").tables.pop();
+  assert.throws(() => assertRecoveryComponentMap(incomplete), /incomplete listing_authority route\/table authority/);
+  assert.throws(
+    () => buildRuntimeAuthorityEvidence({ releaseId: RECOVERY_RELEASE_ID, workerSource: "export default {};" }),
+    /must set MS_REALTY_RUNTIME_DATA_AUTHORITY=payload/,
+  );
+});
+
+test("runtime_data recovery cannot claim coverage without durable consent and seller event tables", (t) => {
+  const { componentMap, plaintextFile, encryptedFile } = (() => {
+    const data = fixture(t);
+    const directory = path.dirname(data.manifestPath);
+    return {
+      ...data,
+      plaintextFile: path.join(directory, "database.dump"),
+      encryptedFile: path.join(directory, "database.dump.age"),
+    };
+  })();
+
+  for (const table of ["public.consent_events", "public.seller_pipeline_events"]) {
+    const incomplete = structuredClone(componentMap);
+    incomplete.components.runtime_data.tables = incomplete.components.runtime_data.tables.filter(
+      (mapping) => mapping.name !== table,
+    );
+    assert.throws(() => assertRecoveryComponentMap(incomplete), new RegExp(`missing required durable table ${table.replace(".", "\\.")}`));
+    assert.throws(
+      () => createR2RecoveryManifest({
+        backupId: "ms-realty-20260813t120000z-abcd1234",
+        releaseId: RECOVERY_RELEASE_ID,
+        completedAt: "2026-08-13T12:00:00.000Z",
+        plaintextFile,
+        encryptedFile,
+        componentMap: incomplete,
+        tableCounts: {},
+        latestMigration: "20260811_120000_durable_listing_edit_audit",
+      }),
+      new RegExp(`missing required durable table ${table.replace(".", "\\.")}`),
+    );
+  }
 });
 
 test("isolated restore stays blocked until all logical components and exact counts are proven", (t) => {
@@ -156,7 +216,7 @@ test("isolated restore stays blocked until all logical components and exact coun
     cleanupVerified: true,
   });
   assert.equal(blocked.status, "blocked");
-  assert.deepEqual(blocked.uncovered_components, ["runtime_data", "runtime_evidence"]);
+  assert.deepEqual(blocked.uncovered_components, ["runtime_evidence"]);
   assert.throws(
     () => buildProductionRecoveryReport({
       manifest,
@@ -206,6 +266,7 @@ test("fully covered restore requires machine rollback evidence and immutable hum
     componentMap: coveredMap,
     tableCounts: coveredCounts,
     latestMigration: blockedManifest.database.latest_migration,
+    runtimeAuthorityEvidence: buildRuntimeAuthorityEvidence({ releaseId: blockedManifest.release_id }),
   });
   const drill = buildRestoreDrillResult({
     manifest,
@@ -489,6 +550,7 @@ test("approval is bound to exact evidence and distinct case-insensitive identiti
     componentMap: coveredMap,
     tableCounts: coveredCounts,
     latestMigration: manifest.database.latest_migration,
+    runtimeAuthorityEvidence: buildRuntimeAuthorityEvidence({ releaseId: manifest.release_id }),
   });
   const manifestPath = path.join(directory, "manifest.json");
   writePrivateJson(manifestPath, coveredManifest);

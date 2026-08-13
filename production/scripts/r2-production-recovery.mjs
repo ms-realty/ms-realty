@@ -11,6 +11,7 @@ import {
   buildR2UploadPlan,
   buildProductionRecoveryReport,
   buildRestoreDrillResult,
+  buildRuntimeAuthorityEvidence,
   createR2RecoveryManifest,
   mappedTableNames,
   readImmutableJson,
@@ -318,6 +319,7 @@ async function captureBackup(env) {
       componentMap,
       tableCounts: source.tableCounts,
       latestMigration: source.latestMigration,
+      runtimeAuthorityEvidence: buildRuntimeAuthorityEvidence({ releaseId }),
     });
     assertR2RecoveryManifest(manifest, componentMap, id);
     writePrivateJson(manifestPath, manifest);

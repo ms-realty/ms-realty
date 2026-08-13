@@ -50,7 +50,9 @@ import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelin
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
+import { projectListingDraftSeed } from "./listing-draft-service.mjs";
 import { readHeader, requestHost, sameOriginWriteRejection } from "./request-guard.mjs";
+import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
 
 const ERROR_JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -76,6 +78,7 @@ function bytesFrom(value) {
 }
 
 export function appApiConfigFromEnv(env = process.env) {
+  const durableOnly = env.NODE_ENV === "production" && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload";
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
@@ -107,6 +110,7 @@ export function appApiConfigFromEnv(env = process.env) {
     savedAt: env.MS_REALTY_SAVED_AT,
     sellerPipelineCreatedAt: env.MS_REALTY_SELLER_PIPELINE_CREATED_AT,
     recordSearchEventsToFile: env.NODE_ENV !== "production",
+    runtimeDataDurableOnly: durableOnly,
   };
 }
 
@@ -181,6 +185,7 @@ function readLaunchReadiness(filePath = LAUNCH_READINESS_PATH) {
 function currentSeed(config) {
   const seedPath = config.cmsSeedPath || DEFAULT_CMS_SEED_PATH;
   const seed = readThroughCached(seedPath, () => loadCmsSeed(seedPath));
+  if (config.runtimeDataDurableOnly) return publicSeedFor(seed);
   const reviewedSeed = applyMediaReviews(
     applyListingEdits(
       seed,
@@ -191,12 +196,25 @@ function currentSeed(config) {
   return config.privateReview === true ? reviewedSeed : publicSeedFor(reviewedSeed);
 }
 
+async function currentRequestSeed(config) {
+  if (!config.runtimeDataDurableOnly) return currentSeed(config);
+  const seedPath = config.cmsSeedPath || DEFAULT_CMS_SEED_PATH;
+  const seed = readThroughCached(seedPath, () => loadCmsSeed(seedPath));
+  const projected = await projectListingDraftSeed(seed, {
+    env: config.payloadListingEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+    requirePayload: true,
+  });
+  return publicSeedFor(projected);
+}
+
 function currentRegistry(config) {
   const filePath = config.localeRegistryPath || DEFAULT_LOCALE_REGISTRY_PATH;
   return readThroughCached(filePath, () => loadLocaleRegistry(filePath));
 }
 
 function currentTranslationTasks(config) {
+  if (config.runtimeDataDurableOnly) return [];
   const filePath = config.translationLedgerPath || DEFAULT_TRANSLATION_LEDGER_PATH;
   return readThroughCached(filePath, () => readTranslationLedger(filePath));
 }
@@ -273,6 +291,9 @@ async function routeLead(request, body, registry, seed, config) {
     const lead = submitRuntimeLead(registry, seed, input);
     const durableStore = config.leadDurableStore || {};
     const durableRequested = durableStore.leadDurableStoreEnabled === true;
+    if (config.runtimeDataDurableOnly && !durableRequested) {
+      throw new LeadStoreUnavailableError("Production lead intake requires the durable store");
+    }
     if (durableRequested && !isLeadDurableStoreEnabled(durableStore)) {
       throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
     }
@@ -475,6 +496,14 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
         return webResponse(privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin }));
       }
     }
+    if (productionRuntimeDataUnavailable({
+      durableEvent: config.eventDurableStore?.eventDurableStoreEnabled === true,
+      durableOnly: config.runtimeDataDurableOnly,
+      method: request.method,
+      pathname: url.pathname,
+    })) {
+      return webResponse(privateJson(503, runtimeDataUnavailablePayload(url.pathname)));
+    }
     const limiter = publicWriteLimiterFor(config);
     if (limiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
       // Behind Cloudflare (trustProxy) the verified cf-connecting-ip is used;
@@ -541,13 +570,13 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
 
     if (request.method === "GET" && url.pathname === "/api/search") {
       const registry = currentRegistry(config);
-      const seed = currentSeed(config);
+      const seed = await currentRequestSeed(config);
       return webResponse(await routeSearch(url, registry, seed, config, request.headers.get("x-ms-realty-preview") === "search-count"));
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
       const registry = currentRegistry(config);
-      const seed = currentSeed(config);
+      const seed = await currentRequestSeed(config);
       return webResponse(await routeLead(request, body, registry, seed, config));
     }
 
@@ -562,14 +591,14 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
 
     if (request.method === "POST" && url.pathname === "/api/saved-searches") {
       const registry = currentRegistry(config);
-      const seed = currentSeed(config);
+      const seed = await currentRequestSeed(config);
       return webResponse(routeSavedSearch(request, body, registry, seed, config));
     }
 
     return webResponse(json(405, { kind: "method_not_allowed" }));
   } catch (error) {
     const status = error.status || 500;
-    return new Response(JSON.stringify({ kind: status === 413 ? "request_too_large" : "server_error" }), {
+    return new Response(JSON.stringify({ kind: status === 413 ? "request_too_large" : error.code || "server_error" }), {
       status,
       headers: ERROR_JSON_HEADERS,
     });

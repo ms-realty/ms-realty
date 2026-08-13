@@ -79,7 +79,9 @@ test("durable event reads and writes fail closed when Payload is unavailable", a
 test("public event API writes durably and rejects incomplete durable configuration", async () => {
   const payload = fakePayload();
   const config = appApiConfigFromEnv({
+    NODE_ENV: "production",
     MS_REALTY_EVENT_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_RUNTIME_DATA_AUTHORITY: "payload",
     PAYLOAD_SECRET: "p".repeat(32),
     DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
     MS_REALTY_RATE_LIMIT_DISABLED: "true",

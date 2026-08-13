@@ -8,6 +8,54 @@ export const R2_RECOVERY_SCHEMA_VERSION = 2;
 export const R2_RECOVERY_BUCKET = "ms-realty-production-backups-eu";
 export const R2_RECOVERY_JURISDICTION = "eu";
 export const R2_RECOVERY_COMPONENTS = Object.freeze(["payload_postgres", "runtime_data", "runtime_evidence"]);
+const REQUIRED_RUNTIME_DATA_TABLES = Object.freeze([
+  "public.admins",
+  "public.consent_events",
+  "public.lead_contacts",
+  "public.listing_tours",
+  "public.listing_translations",
+  "public.listings",
+  "public.locales",
+  "public.media_assets",
+  "public.public_leads",
+  "public.realty_case_conditions",
+  "public.realty_case_condition_events",
+  "public.realty_case_evidence",
+  "public.realty_case_events",
+  "public.realty_case_mandate_versions",
+  "public.realty_case_outbox",
+  "public.realty_cases",
+  "public.seller_pipeline_events",
+]);
+const RUNTIME_DATA_AUTHORITY_ENV = "MS_REALTY_RUNTIME_DATA_AUTHORITY";
+const RUNTIME_DATA_AUTHORITY_VALUE = "payload";
+const RUNTIME_DATA_AUTHORITY_MISSING = "release-bound Cloudflare Payload runtime authority proof";
+const REQUIRED_RUNTIME_DATA_AUTHORITIES = Object.freeze({
+  payload_admins: {
+    routes: ["/admin/login", "/admin/logout", "/api/admin/team"],
+    tables: ["public.admins"],
+  },
+  public_lead_intake: {
+    routes: ["/api/leads"],
+    tables: ["public.public_leads", "public.lead_contacts", "public.consent_events", "public.seller_pipeline_events"],
+  },
+  listing_authority: {
+    routes: ["/api/admin/listings/edit", "/api/admin/listings/status", "/mcp"],
+    tables: ["public.listings", "public.listing_translations", "public.media_assets", "public.listing_tours", "public.locales"],
+  },
+  realty_case_authority: {
+    routes: ["/api/admin/cases", "/api/admin/cases/actions", "/api/admin/cases/conditions", "/api/admin/cases/conditions/actions"],
+    tables: [
+      "public.realty_cases",
+      "public.realty_case_events",
+      "public.realty_case_mandate_versions",
+      "public.realty_case_evidence",
+      "public.realty_case_outbox",
+      "public.realty_case_conditions",
+      "public.realty_case_condition_events",
+    ],
+  },
+});
 
 const SAFE_BACKUP_ID = /^[a-z0-9][a-z0-9._-]{7,95}$/i;
 const SAFE_TABLE = /^(?:[a-z_][a-z0-9_]*\.)?[a-z_][a-z0-9_]*$/;
@@ -51,6 +99,33 @@ export function assertRecoveryReleaseId(value) {
 
 export function sha256File(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+export function buildRuntimeAuthorityEvidence({ releaseId, workerSource = null } = {}) {
+  const source = workerSource ?? fs.readFileSync(new URL("../../workers/index.js", import.meta.url), "utf8");
+  if (!new RegExp(`${RUNTIME_DATA_AUTHORITY_ENV}:\\s*["']${RUNTIME_DATA_AUTHORITY_VALUE}["']`).test(source)) {
+    throw new Error(`Worker source must set ${RUNTIME_DATA_AUTHORITY_ENV}=${RUNTIME_DATA_AUTHORITY_VALUE}`);
+  }
+  return {
+    schema_version: 1,
+    release_id: assertRecoveryReleaseId(releaseId),
+    environment_variable: RUNTIME_DATA_AUTHORITY_ENV,
+    required_value: RUNTIME_DATA_AUTHORITY_VALUE,
+    worker_source_sha256: crypto.createHash("sha256").update(source).digest("hex"),
+  };
+}
+
+export function assertRuntimeAuthorityEvidence(evidence, releaseId) {
+  if (
+    evidence?.schema_version !== 1 ||
+    evidence?.release_id !== assertRecoveryReleaseId(releaseId) ||
+    evidence?.environment_variable !== RUNTIME_DATA_AUTHORITY_ENV ||
+    evidence?.required_value !== RUNTIME_DATA_AUTHORITY_VALUE ||
+    !SHA256.test(evidence?.worker_source_sha256 || "")
+  ) {
+    throw new Error("Recovery manifest requires release-bound Cloudflare Payload runtime authority proof");
+  }
+  return true;
 }
 
 export function assertFileSha256(filePath, expected, label = "Recovery artifact") {
@@ -142,6 +217,11 @@ export function assertRecoveryComponentMap(map) {
     if (!Array.isArray(entry.tables) || !Array.isArray(entry.uncovered_sources)) {
       throw new Error(`Recovery component map ${component} requires tables and uncovered_sources arrays`);
     }
+    for (const field of ["deterministic_sources", "unreachable_sources"]) {
+      if (entry[field] !== undefined && !Array.isArray(entry[field])) {
+        throw new Error(`Recovery component map ${component} ${field} must be an array`);
+      }
+    }
     const seenTables = new Set();
     for (const mapping of entry.tables) {
       const table = assertSafeTableName(mapping?.name);
@@ -153,9 +233,50 @@ export function assertRecoveryComponentMap(map) {
       seenTables.add(table);
     }
     for (const source of entry.uncovered_sources) requiredText(source, `${component} uncovered source`);
+    for (const field of ["deterministic_sources", "unreachable_sources"]) {
+      for (const source of entry[field] || []) requiredText(source, `${component} ${field} source`);
+    }
+    const classifiedSources = [
+      ...entry.tables.flatMap((mapping) => mapping.sources),
+      ...entry.uncovered_sources,
+      ...(entry.deterministic_sources || []),
+      ...(entry.unreachable_sources || []),
+    ];
+    if (new Set(classifiedSources).size !== classifiedSources.length) {
+      throw new Error(`Recovery component ${component} classifies a source more than once`);
+    }
     if (entry.uncovered_sources.length === 0 && entry.tables.length === 0) {
       throw new Error(`Recovery component ${component} cannot be covered without a mapped PostgreSQL table`);
     }
+  }
+  const runtimeTables = new Set(map.components.runtime_data.tables.map((mapping) => mapping.name));
+  for (const table of REQUIRED_RUNTIME_DATA_TABLES) {
+    if (!runtimeTables.has(table)) throw new Error(`Recovery runtime_data map is missing required durable table ${table}`);
+  }
+  const authorityGate = map.components.runtime_data.authority_gate;
+  if (
+    authorityGate?.environment_variable !== RUNTIME_DATA_AUTHORITY_ENV ||
+    authorityGate?.required_value !== RUNTIME_DATA_AUTHORITY_VALUE ||
+    authorityGate?.worker_source !== "workers/index.js" ||
+    !Array.isArray(authorityGate?.authorities)
+  ) {
+    throw new Error("Recovery runtime_data map requires the strict Cloudflare Payload authority gate");
+  }
+  const authorities = new Map(authorityGate.authorities.map((authority) => [authority?.id, authority]));
+  if (authorities.size !== authorityGate.authorities.length) {
+    throw new Error("Recovery runtime_data map has duplicate authority ids");
+  }
+  for (const [id, required] of Object.entries(REQUIRED_RUNTIME_DATA_AUTHORITIES)) {
+    const authority = authorities.get(id);
+    if (!authority || !sameJson(authority.routes, required.routes) || !sameJson(authority.tables, required.tables)) {
+      throw new Error(`Recovery runtime_data map has incomplete ${id} route/table authority`);
+    }
+    for (const table of authority.tables) {
+      if (!runtimeTables.has(table)) throw new Error(`Recovery runtime_data authority ${id} references unmapped table ${table}`);
+    }
+  }
+  if (authorities.size !== Object.keys(REQUIRED_RUNTIME_DATA_AUTHORITIES).length) {
+    throw new Error("Recovery runtime_data map contains an unknown production authority");
   }
   return true;
 }
@@ -178,13 +299,19 @@ function assertCounts(counts, tables, label) {
   }
 }
 
-export function componentCoverage(map, tableCounts) {
+export function componentCoverage(map, tableCounts, { runtimeAuthorityEvidence = null, releaseId = null } = {}) {
   const tables = mappedTableNames(map);
   assertCounts(tableCounts, tables, "Source");
+  const runtimeAuthorityVerified = runtimeAuthorityEvidence
+    ? assertRuntimeAuthorityEvidence(runtimeAuthorityEvidence, releaseId)
+    : false;
   return Object.fromEntries(R2_RECOVERY_COMPONENTS.map((component) => {
     const entry = map.components[component];
     const mappedTables = entry.tables.map((mapping) => assertSafeTableName(mapping.name));
-    const uncoveredSources = [...entry.uncovered_sources];
+    const uncoveredSources = [
+      ...entry.uncovered_sources,
+      ...(component === "runtime_data" && !runtimeAuthorityVerified ? [RUNTIME_DATA_AUTHORITY_MISSING] : []),
+    ];
     return [component, {
       status: uncoveredSources.length === 0 ? "covered" : "uncovered",
       mapped_tables: Object.fromEntries(mappedTables.map((table) => [table, tableCounts[table]])),
@@ -206,14 +333,16 @@ export function createR2RecoveryManifest({
   componentMap,
   tableCounts,
   latestMigration,
+  runtimeAuthorityEvidence = null,
   prefix = "backups",
 }) {
   const safeBackupId = assertSafeBackupId(backupId);
+  const safeReleaseId = assertRecoveryReleaseId(releaseId);
   const safePrefix = requiredText(prefix, "object prefix").replace(/^\/+|\/+$/g, "");
   if (!/^[a-z0-9][a-z0-9/_-]*$/i.test(safePrefix) || safePrefix.split("/").includes("..")) {
     throw new Error("object prefix must be a safe R2 key prefix");
   }
-  const coverage = componentCoverage(componentMap, tableCounts);
+  const coverage = componentCoverage(componentMap, tableCounts, { runtimeAuthorityEvidence, releaseId: safeReleaseId });
   const encryptedStat = fs.lstatSync(encryptedFile);
   const plaintextStat = fs.lstatSync(plaintextFile);
   if (!encryptedStat.isFile() || encryptedStat.isSymbolicLink() || !plaintextStat.isFile() || plaintextStat.isSymbolicLink()) {
@@ -225,7 +354,7 @@ export function createR2RecoveryManifest({
     schema_version: R2_RECOVERY_SCHEMA_VERSION,
     environment: "production",
     backup_id: safeBackupId,
-    release_id: assertRecoveryReleaseId(releaseId),
+    release_id: safeReleaseId,
     completed_at: timestamp(completedAt, "completed_at"),
     provider: "Cloudflare R2 EU",
     bucket: R2_RECOVERY_BUCKET,
@@ -238,6 +367,7 @@ export function createR2RecoveryManifest({
       table_counts: Object.fromEntries(mappedTableNames(componentMap).map((table) => [table, tableCounts[table]])),
     },
     component_map_sha256: componentMapDigest(componentMap),
+    runtime_authority: runtimeAuthorityEvidence,
     encryption: { format: "age-v1", encrypted_before_upload: true },
     artifact: {
       object_key: `${objectRoot}/staged/neon-postgres.dump.age`,
@@ -256,6 +386,7 @@ export function assertR2RecoveryManifest(manifest, trustedComponentMap, expected
   assertRecoveryComponentMap(trustedComponentMap);
   const backupId = assertSafeBackupId(manifest.backup_id);
   assertRecoveryReleaseId(manifest.release_id);
+  assertRuntimeAuthorityEvidence(manifest.runtime_authority, manifest.release_id);
   if (expectedBackupId !== null && backupId !== assertSafeBackupId(expectedBackupId)) {
     throw new Error("Recovery manifest backup_id does not match the requested backup");
   }
@@ -310,7 +441,10 @@ export function assertR2RecoveryManifest(manifest, trustedComponentMap, expected
   if (manifest.component_map_sha256 !== componentMapDigest(trustedComponentMap)) {
     throw new Error("Recovery manifest component map digest does not match the trusted component map");
   }
-  const expectedCoverage = componentCoverage(trustedComponentMap, tableCounts);
+  const expectedCoverage = componentCoverage(trustedComponentMap, tableCounts, {
+    runtimeAuthorityEvidence: manifest.runtime_authority,
+    releaseId: manifest.release_id,
+  });
   if (!sameJson(manifest.component_coverage, expectedCoverage)) {
     throw new Error("Recovery manifest coverage does not match the trusted component map");
   }

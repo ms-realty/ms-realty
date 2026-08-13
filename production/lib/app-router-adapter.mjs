@@ -22,6 +22,7 @@ import {
   publicSearchConfigFromEnv,
 } from "./public-search.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
+import { projectListingDraftSeed } from "./listing-draft-service.mjs";
 
 const DEFAULT_LOCALE_REGISTRY_PATH = fromRoot("locales", "registry.json");
 
@@ -29,6 +30,7 @@ const PUBLIC_CACHE = "public, max-age=300, s-maxage=3600";
 const HTML = "text/html; charset=utf-8";
 
 export function appRouterConfigFromEnv(env = process.env) {
+  const durableOnly = env.NODE_ENV === "production" && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload";
   return {
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
@@ -41,6 +43,8 @@ export function appRouterConfigFromEnv(env = process.env) {
     privateReview: env.MS_REALTY_PRIVATE_REVIEW_MODE === "true",
     search: publicSearchConfigFromEnv(env),
     naturalLanguageSearchEnabled: env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
+    runtimeDataDurableOnly: durableOnly,
+    payloadListingEnv: env,
   };
 }
 
@@ -84,6 +88,9 @@ export function isAppSearchPath({ pathname, config = appRouterConfigFromEnv() } 
 
 function currentPublicSeed(config) {
   const seed = readThroughCached(config.cmsSeedPath, () => loadCmsSeed(config.cmsSeedPath));
+  if (config.runtimeDataDurableOnly) {
+    throw new Error("Production public inventory must use the asynchronous Payload authority path");
+  }
   const reviewedSeed = applyMediaReviews(
     applyListingEdits(
       seed,
@@ -94,7 +101,19 @@ function currentPublicSeed(config) {
   return config.privateReview === true ? reviewedSeed : publicSeedFor(reviewedSeed);
 }
 
+async function durablePublicContext(config) {
+  const registry = currentRegistry(config);
+  const seed = readThroughCached(config.cmsSeedPath, () => loadCmsSeed(config.cmsSeedPath));
+  const projected = await projectListingDraftSeed(seed, {
+    env: config.payloadListingEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+    requirePayload: true,
+  });
+  return { registry, seed: publicSeedFor(projected), translationTasks: [] };
+}
+
 function currentTranslationTasks(config) {
+  if (config.runtimeDataDurableOnly) return [];
   return readThroughCached(config.translationLedgerPath, () => readTranslationLedger(config.translationLedgerPath));
 }
 
@@ -115,13 +134,9 @@ function renderedHtmlResponse(rendered, requestUrl) {
   };
 }
 
-export function renderAppRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
+function renderAppRouteWithContext({ pathname, url, config, registry, seed, translationTasks }) {
   if (!pathname) throw new Error("App route pathname is required");
-
-  const registry = currentRegistry(config);
-  const seed = currentPublicSeed(config);
   const requestUrl = new URL(url, "http://localhost");
-  const translationTasks = currentTranslationTasks(config);
   const searchLocale = searchLocaleFor(registry, pathname);
   const savedView = requestUrl.searchParams.get("saved") === "1";
   const searchRequest = searchLocale
@@ -146,16 +161,34 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
         seed,
         pathname,
         translationTasks,
-        readThroughCached(config.brokerContactLedgerPath, () => readBrokerContacts(config.brokerContactLedgerPath)),
-        readThroughCached(config.tourApprovalLedgerPath, () => readTourApprovals(config.tourApprovalLedgerPath)),
+        config.runtimeDataDurableOnly
+          ? []
+          : readThroughCached(config.brokerContactLedgerPath, () => readBrokerContacts(config.brokerContactLedgerPath)),
+        config.runtimeDataDurableOnly
+          ? []
+          : readThroughCached(config.tourApprovalLedgerPath, () => readTourApprovals(config.tourApprovalLedgerPath)),
       );
   return renderedHtmlResponse(rendered, requestUrl);
+}
+
+export function renderAppRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
+  return renderAppRouteWithContext({
+    pathname,
+    url,
+    config,
+    registry: currentRegistry(config),
+    seed: currentPublicSeed(config),
+    translationTasks: currentTranslationTasks(config),
+  });
 }
 
 export async function renderAppSearchRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
   if (!pathname) throw new Error("App route pathname is required");
 
-  const registry = currentRegistry(config);
+  const context = config.runtimeDataDurableOnly
+    ? await durablePublicContext(config)
+    : { registry: currentRegistry(config), seed: currentPublicSeed(config), translationTasks: currentTranslationTasks(config) };
+  const { registry } = context;
   const searchLocale = searchLocaleFor(registry, pathname);
   if (!searchLocale) throw new PublicSearchInputError("Localized search route is required");
 
@@ -166,11 +199,11 @@ export async function renderAppSearchRoute({ pathname, url = pathname, config = 
   };
   const { result } = await executePublicSearch({
     registry,
-    seed: currentPublicSeed(config),
+    seed: context.seed,
     params: requestUrl.searchParams,
     defaultLocale: searchLocale.code,
     search,
-    translationTasks: currentTranslationTasks(config),
+    translationTasks: context.translationTasks,
     pageSize: savedView ? null : 12,
     savedView,
   });
@@ -192,12 +225,33 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", co
   if (legacyDecision?.status === 200) {
     pathname = legacyDecision.target_path;
   }
+  if (config.runtimeDataDurableOnly) return renderDurableAppRouteResponse({ pathname, url, config });
   let result;
   try {
     result = renderAppRoute({ pathname, url, config });
   } catch (error) {
     return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
       status: 400,
+      headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    });
+  }
+  if (result.status === 200 && pathname.length > 1 && pathname.endsWith("/")) {
+    return new Response(null, {
+      status: 308,
+      headers: { location: `${pathname.replace(/\/+$/, "")}${new URL(url, "http://localhost").search}`, "cache-control": PUBLIC_CACHE },
+    });
+  }
+  return new Response(result.html, { status: result.status, headers: result.headers });
+}
+
+async function renderDurableAppRouteResponse({ pathname, url, config }) {
+  let result;
+  try {
+    const context = await durablePublicContext(config);
+    result = renderAppRouteWithContext({ pathname, url, config, ...context });
+  } catch (error) {
+    return new Response(JSON.stringify({ kind: error.code || "payload_draft_unavailable", message: error.message }), {
+      status: error.status || 503,
       headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
     });
   }
@@ -239,8 +293,8 @@ export async function renderAppSearchRouteResponse({ pathname, url = pathname, h
       const out = renderedHtmlResponse(page, requestUrl);
       return new Response(out.html, { status: out.status, headers: { ...out.headers, "cache-control": "no-store" } });
     }
-    return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
-      status: 400,
+    return new Response(JSON.stringify({ kind: error.code || "bad_request", message: error.message }), {
+      status: error.status || 400,
       headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
     });
   }
@@ -289,8 +343,25 @@ export function renderAppFavicon() {
 }
 
 export function renderAppSitemapResponse({ config = appRouterConfigFromEnv() } = {}) {
+  if (config.runtimeDataDurableOnly) return renderDurableAppSitemapResponse(config);
   const result = renderAppSitemap({ config });
   return new Response(result.body, { status: result.status, headers: result.headers });
+}
+
+async function renderDurableAppSitemapResponse(config) {
+  try {
+    const context = await durablePublicContext(config);
+    const sitemap = buildRuntimeLocalizedSitemap(context.registry, context.seed, context.translationTasks);
+    return new Response(renderSitemapXml(sitemap), {
+      status: 200,
+      headers: { "content-type": "application/xml; charset=utf-8", "cache-control": PUBLIC_CACHE },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ kind: error.code || "payload_draft_unavailable", message: error.message }), {
+      status: error.status || 503,
+      headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    });
+  }
 }
 
 export function renderAppRobotsResponse() {

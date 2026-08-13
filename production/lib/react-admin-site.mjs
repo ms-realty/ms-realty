@@ -17,6 +17,26 @@ function pageCan(page, capability) {
   return capabilities.includes("*") || capabilities.includes(capability);
 }
 
+const DURABLE_ONLY_NAV_IDS = new Set([
+  "today",
+  "lead_inbox",
+  "realty_cases",
+  "listing_manager",
+  "translation_queue",
+]);
+
+function durableRuntimeMutationAvailable(page, pathname) {
+  if (page.runtime_data_mode !== "durable_only") return true;
+  return [
+    "/api/admin/listings/edit",
+    "/api/admin/listings/status",
+    "/api/admin/cases",
+    "/api/admin/cases/actions",
+    "/api/admin/cases/conditions",
+    "/api/admin/cases/conditions/actions",
+  ].includes(pathname);
+}
+
 function adminHomeForPage(page) {
   const roles = page.workspace?.operator_roles || [];
   if (roles.includes("admin") || roles.includes("broker")) return "/admin/today";
@@ -1173,7 +1193,13 @@ function adminNavigationGroups(page) {
     },
   ];
   return groups
-    .map((group) => ({ ...group, items: group.items.filter((item) => pageCan(page, item.capability)) }))
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) => pageCan(page, item.capability) &&
+          (page.runtime_data_mode !== "durable_only" || DURABLE_ONLY_NAV_IDS.has(item.id)),
+      ),
+    }))
     .filter((group) => group.items.length);
 }
 
@@ -4766,7 +4792,9 @@ function ListingManagerBody({ page }) {
                           "div",
                           { className: "adm-task-list__actions" },
                           h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: payloadAdminListingHref(row.id, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
-                          h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+                          page.runtime_data_mode === "durable_only"
+                            ? null
+                            : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
                         ),
                       ),
                     ),
@@ -4778,7 +4806,9 @@ function ListingManagerBody({ page }) {
           : h("p", { className: "adm-empty" }, label(copy, "noResults", "No results.")),
       ),
       h(Pagination, { page, path: "/admin/listings" }),
-      canEditContent ? h(PublicationSchedulePanel, { page }) : null,
+      canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/listings/publication-schedules")
+        ? h(PublicationSchedulePanel, { page })
+        : null,
     ],
   });
 }
@@ -5057,7 +5087,9 @@ function ListingEditorBody({ page }) {
           subtitle: `${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
+        page.runtime_data_mode === "durable_only"
+          ? null
+          : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
       h(
         "nav",
@@ -5255,7 +5287,7 @@ function ListingEditorBody({ page }) {
                       sourceUrl
                         ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
                         : null,
-                      canEditContent
+                      canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/media/reviews")
                         ? h(
                             "details",
                             { className: "adm-media-review", "data-media-review-disclosure": item.asset_id },
@@ -5319,7 +5351,7 @@ function ListingEditorBody({ page }) {
                   })
                 : h("p", { className: "adm-note", "data-media-empty": "true" }, ui.noReviewableMedia),
             ),
-            canEditContent
+            canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/tours/approve")
               ? h(
                   "form",
           {

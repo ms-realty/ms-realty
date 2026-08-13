@@ -85,6 +85,19 @@ function notFoundError(message) {
   return error;
 }
 
+function assertCompletePayloadSnapshot(seed, snapshot) {
+  for (const [collection, rows] of [
+    ["listings", seed.records || []],
+    ["properties", seed.properties || []],
+    ["locations", seed.locations || []],
+  ]) {
+    const missing = rows.map((row) => String(row.id || "").trim()).filter((id) => id && !snapshot[collection].byId.has(id));
+    if (missing.length) {
+      throw unavailableError(`Payload ${collection} snapshot is incomplete: ${missing.slice(0, 5).join(", ")}`);
+    }
+  }
+}
+
 function payloadUser(principal) {
   const id = requiredText(principal?.id, "Authenticated operator id", 64);
   const roles = Array.isArray(principal?.roles) ? principal.roles.map((role) => String(role || "").trim()).filter(Boolean) : [];
@@ -315,14 +328,22 @@ function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "
   return { changedFields, data: { facts, seo, workflow }, idempotent: false };
 }
 
-export async function projectListingDraftSeed(seed, { env = process.env, payload = null, req = null } = {}) {
-  if (!payload && missingPayloadRuntime(env)) return seed;
+export async function projectListingDraftSeed(
+  seed,
+  { env = process.env, payload = null, req = null, requirePayload = false } = {},
+) {
+  if (!payload && missingPayloadRuntime(env)) {
+    if (requirePayload) throw unavailableError("Payload listing authority is not configured");
+    return seed;
+  }
   try {
     const runtime = await loadPayloadCmsImportRuntime({ env, payload });
     const snapshot = await readPayloadCmsSnapshot({ payload: runtime, req });
+    if (requirePayload) assertCompletePayloadSnapshot(seed, snapshot);
     return projectPayloadCmsSeed(seed, snapshot);
   } catch (error) {
-    if (!payload && /Payload runtime is not configured/i.test(String(error?.message || ""))) return seed;
+    if (!requirePayload && !payload && /Payload runtime is not configured/i.test(String(error?.message || ""))) return seed;
+    if (requirePayload && !error?.status) throw unavailableError("Payload listing authority is unavailable", error);
     throw error;
   }
 }

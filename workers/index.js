@@ -41,6 +41,7 @@ export class MsRealtyContainer extends Container {
   // Secrets reach the container through the Worker's env, never the image.
   envVars = {
     NODE_ENV: "production",
+    MS_REALTY_RUNTIME_DATA_AUTHORITY: "payload",
     MS_REALTY_TRUST_PROXY: "1",
     // This runtime's disk is ephemeral; MCP ledger-writing tools must not
     // register here or drafts would vanish on container sleep.

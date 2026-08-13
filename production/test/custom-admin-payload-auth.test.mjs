@@ -9,6 +9,8 @@ import {
   createPayloadAdminAuthService,
   payloadAdminPrincipal,
 } from "../lib/payload-admin-auth.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
+import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
 const BASE_URL = "https://ms-realty.ms-realty-bg.workers.dev";
 const NOW_SECONDS = 1_786_377_600;
@@ -399,6 +401,8 @@ test("Payload admin can approve and send a durable lead reply without the file o
   const config = {
     ...adapterConfig(sessionService),
     auditLogPath,
+    payloadListingRuntime: createPayloadDraftRuntime(loadCmsSeed()).payload,
+    runtimeDataDurableOnly: true,
     leadDurableStore: {
       leadDurableStoreEnabled: true,
       payloadSecret: "payload-secret-for-test",
@@ -495,6 +499,8 @@ test("Payload admin books a durable viewing and persists the Google Calendar rec
     ...adapterConfig(sessionService),
     auditLogPath: path.join(directory, "audit.jsonl"),
     bookedAt: "2026-08-13T12:00:00.000Z",
+    payloadListingRuntime: createPayloadDraftRuntime(loadCmsSeed()).payload,
+    runtimeDataDurableOnly: true,
     leadDurableStore: {
       leadDurableStoreEnabled: true,
       payloadSecret: "payload-secret-for-test",
