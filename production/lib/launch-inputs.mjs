@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { parseCsv } from "./csv.mjs";
 import { launchBlockerSummary } from "./launch-readiness.mjs";
+import { HERMES_LAUNCH_REQUIRED } from "./launch-service-contract.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -119,6 +120,18 @@ function liveServiceProvisioningLine(provisioning) {
       : "",
   ].filter(Boolean);
   return `- ${provisioning.status || "unknown"}${details.length ? ` (${details.join("; ")})` : ""}`;
+}
+
+function hermesLaunchChecklistLines() {
+  if (!HERMES_LAUNCH_REQUIRED) {
+    return "- Hermes Agent is an optional draft-only capability and does not block launch.";
+  }
+  return [
+    "- Hermes Agent: set `HERMES_CHAT_COMPLETIONS_URL` to its internal `/v1/chat/completions` API and set `HERMES_API_KEY`; production Hermes evidence must be authenticated.",
+    "- Hermes runtime: `npm run hermes:runtime` verifies its `/health` endpoint and authenticated `/v1/capabilities` response before any draft-worker evidence is accepted.",
+    "- Managed local profile: set `HERMES_AGENT_MODEL`, `HERMES_AGENT_LLM_BASE_URL`, and `HERMES_AGENT_LLM_API_KEY`, then run `npm run docker:hermes:up`. The Agent only forwards to a private OpenAI-compatible model provider; its tools and persistent memory are disabled.",
+    "- Hermes provider report: `npm run hermes:provisioning` writes `production/data/hermes-provider-provisioning-report.json` without persisting API keys.",
+  ].join("\n");
 }
 
 function monitoringRollbackEvidenceLine(evidence) {
@@ -280,16 +293,13 @@ ${liveServiceReportLines(liveServiceEvidence).join("\n")}
 - Current provisioning evidence:
 ${liveServiceProvisioningLine(liveServiceProvisioning)}
 - Postgres search: set \`DATABASE_URL\` and \`PAYLOAD_SECRET\`; apply the public-search migration before capture so sync and query evidence use the same authoritative Neon target.
-- Hermes Agent: set \`HERMES_CHAT_COMPLETIONS_URL\` to its internal \`/v1/chat/completions\` API and set \`HERMES_API_KEY\`; production Hermes evidence must be authenticated.
-- Hermes runtime: \`npm run hermes:runtime\` verifies its \`/health\` endpoint and authenticated \`/v1/capabilities\` response before any draft-worker evidence is accepted.
-- Managed local profile: set \`HERMES_AGENT_MODEL\`, \`HERMES_AGENT_LLM_BASE_URL\`, and \`HERMES_AGENT_LLM_API_KEY\`, then run \`npm run docker:hermes:up\`. The Agent only forwards to a private OpenAI-compatible model provider; its tools and persistent memory are disabled.
-- Hermes provider report: \`npm run hermes:provisioning\` writes \`production/data/hermes-provider-provisioning-report.json\` without persisting API keys.
-- Live service provisioning report: \`npm run live:provisioning\` writes \`production/data/live-service-provisioning-report.json\` with the redacted Postgres target, Hermes endpoint health, and missing-env evidence.
+${hermesLaunchChecklistLines()}
+- Live service provisioning report: \`npm run live:provisioning\` writes \`production/data/live-service-provisioning-report.json\` with the redacted Postgres target${HERMES_LAUNCH_REQUIRED ? ", Hermes endpoint health," : ""} and missing-env evidence.
 - Admin provisioning status endpoint: \`GET /api/admin/live-service-provisioning\`.
 - Admin provisioning import endpoint: \`POST /api/admin/live-service-provisioning/import\` accepts the redacted JSON from \`npm run live:provisioning\`.
 - Provisioning preflight: \`npm run live:provisioning:preflight\` must pass before live evidence capture.
-- Live evidence capture: \`npm run live:capture\` verifies the Postgres search projection, queries that same Postgres target, runs the Hermes draft worker, and validates all three report outputs.
-- Individual debug commands: \`npm run search:sync\`, \`npm run search:query\`, \`npm run hermes:worker\`.
+- Live evidence capture: \`npm run live:capture\` verifies the Postgres search projection, queries that same Postgres target${HERMES_LAUNCH_REQUIRED ? ", runs the Hermes draft worker," : ""} and validates every required report output.
+- Individual debug commands: \`npm run search:sync\`, \`npm run search:query\`${HERMES_LAUNCH_REQUIRED ? ", `npm run hermes:worker`" : ""}.
 - Status report: \`npm run live:report\` writes current missing/invalid live-service report state without clearing the launch gate.
 - Admin live-services status endpoint: \`GET /api/admin/live-services\`.
 - Report preflight: \`npm run live:preflight\`.
@@ -299,7 +309,7 @@ ${liveServiceProvisioningLine(liveServiceProvisioning)}
 - Production/CLI report path overrides: \`MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH\`, \`MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH\`, \`MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH\`, \`MS_REALTY_HERMES_WORKER_REPORT_PATH\`, \`MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH\`.
 - Hermes ledger path overrides: \`MS_REALTY_TRANSLATION_LEDGER_PATH\`, \`MS_REALTY_HERMES_AUDIT_PATH\`, \`MS_REALTY_AUDIT_LOG_PATH\`.
 - Real report outputs stay local and ignored; examples do not count as launch evidence.
-- Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
+- Launch rule: run live search${HERMES_LAUNCH_REQUIRED ? " and Hermes" : ""} commands after provisioning; the checked-in smoke commands remain local contract tests only.
 
 ## Payload Runtime
 

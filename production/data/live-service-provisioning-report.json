@@ -129,7 +129,7 @@
   },
   "next_actions": [
     "Set DATABASE_URL, PAYLOAD_SECRET, and Hermes provider env.",
-    "Run npm run live:provisioning until all service checks pass.",
+    "Run npm run live:provisioning until all required service checks pass.",
     "Run npm run live:capture only after provisioning passes."
   ]
 }
