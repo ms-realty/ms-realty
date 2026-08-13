@@ -40,7 +40,8 @@ export function allowsPublicLeadMutation({ method, pathname, env }) {
     String(env.MS_REALTY_LEAD_DURABLE_STORE_ENABLED || "").trim() === "true" &&
     Boolean(env.PAYLOAD_SECRET?.trim()) &&
     Boolean(env.DATABASE_URL?.trim()) &&
-    String(env.MS_REALTY_LEAD_CONTACT_KEY || "").length >= 32
+    String(env.MS_REALTY_LEAD_CONTACT_KEY || "").length >= 32 &&
+    Boolean(env.MS_REALTY_WORKSPACE_ID?.trim())
   );
 }
 

@@ -14,6 +14,9 @@ const PRIVATE_EVENT_FIELD_NAMES = new Set([
   "viber",
   "whatsapp",
 ]);
+const IDEMPOTENCY_CONSTRAINT = "public_leads_workspace_id_idempotency_key_idx";
+const IDEMPOTENCY_RECOVERY_ATTEMPTS = 8;
+const IDEMPOTENCY_RECOVERY_DEADLINE_MS = 750;
 
 function containsPlaintextContactField(value) {
   if (Array.isArray(value)) return value.some(containsPlaintextContactField);
@@ -206,6 +209,101 @@ async function findOne(payload, collection, where, req = undefined) {
   return result.docs[0] || null;
 }
 
+function errorChain(error) {
+  const errors = [];
+  const pending = [error];
+  const seen = new Set();
+  while (pending.length) {
+    const current = pending.shift();
+    if (!current || (typeof current !== "object" && typeof current !== "function") || seen.has(current)) continue;
+    seen.add(current);
+    errors.push(current);
+    for (const key of ["cause", "error", "originalError", "parent"]) {
+      if (current[key]) pending.push(current[key]);
+    }
+  }
+  return errors;
+}
+
+function isConcurrentIdempotencyConflict(error) {
+  return errorChain(error).some((current) => {
+    const code = String(current.code || current.sqlState || "");
+    if (code === "40001") return true;
+    if (code !== "23505") return false;
+    const constraint = String(current.constraint || current.constraint_name || "");
+    const message = String(current.message || "");
+    return constraint === IDEMPOTENCY_CONSTRAINT || message.includes(IDEMPOTENCY_CONSTRAINT);
+  });
+}
+
+async function storedLeadOutcome(runtime, document, workspaceId, req = undefined) {
+  if (!document) return null;
+  if (requiredText(document.workspace_id, "Stored lead workspace_id") !== workspaceId) {
+    throw new Error("Stored lead belongs to another workspace");
+  }
+  const lead = document.ledger_row || document;
+  const leadId = requiredText(lead.lead_id, "Stored lead_id");
+  const contact = await findOne(
+    runtime,
+    "lead_contacts",
+    workspaceScopedWhere(workspaceId, { subject_id: { equals: leadId } }),
+    req,
+  );
+  if (!contact?.ciphertext || !contact?.iv || !contact?.auth_tag) {
+    throw new Error("Stored lead is missing its transactional encrypted contact");
+  }
+  if (requiredText(contact.workspace_id, "Stored lead contact workspace_id") !== workspaceId) {
+    throw new Error("Stored lead contact belongs to another workspace");
+  }
+  const consent = await findOne(
+    runtime,
+    "consent_events",
+    workspaceScopedWhere(workspaceId, { lead_id: { equals: leadId } }),
+    req,
+  );
+  if (!consent?.payload) throw new Error("Stored lead is missing its transactional consent event");
+  const sellerPipeline =
+    lead.lead_type === "seller"
+      ? await findOne(
+          runtime,
+          "seller_pipeline_events",
+          workspaceScopedWhere(workspaceId, { lead_id: { equals: leadId } }),
+          req,
+        )
+      : null;
+  if (lead.lead_type === "seller" && !sellerPipeline?.payload) {
+    throw new Error("Stored seller lead is missing its transactional pipeline event");
+  }
+  return {
+    lead,
+    consent: consent.payload,
+    sellerPipeline: sellerPipeline?.payload || null,
+    created: false,
+    idempotent: true,
+  };
+}
+
+async function recoverCommittedIdempotentLead(runtime, { idempotencyKey, workspaceId }) {
+  const deadline = Date.now() + IDEMPOTENCY_RECOVERY_DEADLINE_MS;
+  for (let attempt = 0; attempt < IDEMPOTENCY_RECOVERY_ATTEMPTS; attempt += 1) {
+    try {
+      const document = await findOne(
+        runtime,
+        "public_leads",
+        workspaceScopedWhere(workspaceId, { idempotency_key: { equals: idempotencyKey } }),
+      );
+      if (document) return await storedLeadOutcome(runtime, document, workspaceId);
+    } catch {
+      // The winning serializable transaction may not be visible yet. Only
+      // this already-classified idempotency race receives bounded rereads.
+    }
+    const remaining = deadline - Date.now();
+    if (attempt + 1 >= IDEMPOTENCY_RECOVERY_ATTEMPTS || remaining <= 0) break;
+    await new Promise((resolve) => setTimeout(resolve, Math.min(25 * (attempt + 1), remaining)));
+  }
+  return null;
+}
+
 export async function findLeadByIdempotencyKey(idempotencyKey, { payload = null, workspaceId } = {}) {
   if (!idempotencyKey) return null;
   const scope = requiredText(workspaceId, "Durable lead workspace_id");
@@ -364,6 +462,7 @@ export async function persistLeadDurably({
   const runtime = await runtimePayload(payload);
   let transactionId = null;
   let committed = false;
+  let insertAttempted = false;
   try {
     transactionId = await runtime.db.beginTransaction({ accessMode: "read write", isolationLevel: "serializable" });
     if (!transactionId) throw new Error("Payload database adapter did not open a transaction");
@@ -384,39 +483,10 @@ export async function persistLeadDurably({
       : await findOne(runtime, "public_leads", workspaceScopedWhere(workspaceId, { lead_id: { equals: leadId } }), req);
     const existing = byKey || byId;
     if (existing) {
-      const existingLead = existing.ledger_row || existing;
-      const existingLeadId = requiredText(existingLead.lead_id, "Stored lead_id");
-      if (requiredText(existing.workspace_id, "Stored lead workspace_id") !== workspaceId) {
-        throw new Error("Stored lead belongs to another workspace");
-      }
-      const storedConsent = await findOne(
-        runtime,
-        "consent_events",
-        workspaceScopedWhere(workspaceId, { lead_id: { equals: existingLeadId } }),
-        req,
-      );
-      if (!storedConsent?.payload) throw new Error("Stored lead is missing its transactional consent event");
-      const storedSellerPipeline =
-        existingLead.lead_type === "seller"
-          ? await findOne(
-              runtime,
-              "seller_pipeline_events",
-              workspaceScopedWhere(workspaceId, { lead_id: { equals: existingLeadId } }),
-              req,
-            )
-          : null;
-      if (existingLead.lead_type === "seller" && !storedSellerPipeline?.payload) {
-        throw new Error("Stored seller lead is missing its transactional pipeline event");
-      }
+      const outcome = await storedLeadOutcome(runtime, existing, workspaceId, req);
       await runtime.db.commitTransaction(transactionId);
       committed = true;
-      return {
-        lead: existingLead,
-        consent: storedConsent.payload,
-        sellerPipeline: storedSellerPipeline?.payload || null,
-        created: false,
-        idempotent: true,
-      };
+      return outcome;
     }
 
     const possibleDuplicate = ledgerRow.contact_fingerprint
@@ -431,6 +501,7 @@ export async function persistLeadDurably({
       ? { ...ledgerRow, duplicate_status: "possible_duplicate", possible_duplicate_of: possibleDuplicate.lead_id }
       : ledgerRow;
 
+    insertAttempted = true;
     await runtime.create({
       collection: "public_leads",
       overrideAccess: true,
@@ -487,7 +558,27 @@ export async function persistLeadDurably({
       idempotent: false,
     };
   } catch (error) {
-    if (transactionId && !committed) await runtime.db.rollbackTransaction(transactionId).catch(() => undefined);
+    let rolledBack = false;
+    if (transactionId && !committed) {
+      try {
+        await runtime.db.rollbackTransaction(transactionId);
+        rolledBack = true;
+      } catch {
+        rolledBack = false;
+      }
+    }
+    if (
+      rolledBack &&
+      insertAttempted &&
+      ledgerRow.idempotency_key &&
+      isConcurrentIdempotencyConflict(error)
+    ) {
+      const recovered = await recoverCommittedIdempotentLead(runtime, {
+        idempotencyKey: ledgerRow.idempotency_key,
+        workspaceId,
+      });
+      if (recovered) return recovered;
+    }
     // Never answer 201 for an enquiry that was not actually stored.
     throw new LeadStoreUnavailableError("Durable lead store rejected the submission", error);
   }

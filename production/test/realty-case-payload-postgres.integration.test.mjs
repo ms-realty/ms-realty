@@ -21,6 +21,7 @@ const payloadConfig = path.join(root, "payload.config.js");
 const payloadRuntime = path.join(root, "node_modules", "payload", "dist", "index.js");
 const payloadAuthority = path.join(root, "production", "lib", "realty-case-payload-authority.mjs");
 const leadDurableStore = path.join(root, "production", "lib", "lead-durable-store.mjs");
+const httpRuntime = path.join(root, "production", "lib", "http.mjs");
 const durableLeadMigration = path.join(root, "migrations", "20260813_120000_durable_lead_side_effects.ts");
 const COMMAND_TIMEOUT_MS = 120_000;
 
@@ -500,6 +501,7 @@ function exerciseDurableLeadStore(env) {
     import assert from "node:assert/strict";
     import { getPayload } from ${JSON.stringify(pathToFileURL(payloadRuntime).href)};
     import { persistLeadIntakeDurably, readLeadIntakesDurably } from ${JSON.stringify(pathToFileURL(leadDurableStore).href)};
+    import { createHttpApp, dispatchHttp } from ${JSON.stringify(pathToFileURL(httpRuntime).href)};
 
     const leadId = "lead-draft-33333333-3333-4333-8333-333333333333";
     const idempotencyKey = "payload-postgres-durable-lead-it";
@@ -600,6 +602,60 @@ function exerciseDurableLeadStore(env) {
       assert.equal(opened[0].workspace_id, process.env.MS_REALTY_WORKSPACE_ID);
       assert.equal(opened[0].contact.name, plaintextName);
       assert.equal(opened[0].contact.phone, plaintextPhone);
+
+      const concurrentIdempotencyKey = "payload-postgres-concurrent-http-lead-it";
+      const concurrentInput = {
+        source: "website_seller_valuation",
+        intent: "valuation",
+        leadType: "seller",
+        language: "bg",
+        idempotencyKey: concurrentIdempotencyKey,
+        contact: { name: "Concurrent Durable Seller", phone: "+359000000099" },
+        contact_preference: "phone",
+        property: { location: "Sandanski", type: "apartment" },
+        message: "One request submitted concurrently twice.",
+        marketingOptIn: true,
+      };
+      const app = createHttpApp({
+        leadDurableStore: {
+          leadDurableStoreEnabled: true,
+          payloadSecret: process.env.PAYLOAD_SECRET,
+          databaseUrl: process.env.DATABASE_URL,
+          contactSecret: process.env.MS_REALTY_LEAD_CONTACT_KEY,
+          workspaceId: process.env.MS_REALTY_WORKSPACE_ID,
+        },
+        persistLeadIntake: (input) => persistLeadIntakeDurably({ ...input, payload }),
+        receivedAt: "2026-08-10T09:05:00.000Z",
+        sellerPipelineCreatedAt: "2026-08-10T09:05:01.000Z",
+      });
+      const submit = () =>
+        dispatchHttp(app, {
+          method: "POST",
+          url: "/api/leads",
+          headers: { host: "localhost", origin: "http://localhost" },
+          body: concurrentInput,
+        });
+      const concurrentResponses = await Promise.all([submit(), submit()]);
+      assert.deepEqual(concurrentResponses.map(({ status }) => status).sort(), [200, 201]);
+      const concurrentLeadIds = concurrentResponses.map(({ body }) => body.ledger.lead_id);
+      assert.equal(new Set(concurrentLeadIds).size, 1, "both requests must resolve to the committed original lead");
+      const concurrentLeadId = concurrentLeadIds[0];
+      const [concurrentLeads, concurrentContacts, concurrentConsents, concurrentSellerEvents] = await Promise.all([
+        rows("public_leads", {
+          and: [
+            { workspace_id: { equals: process.env.MS_REALTY_WORKSPACE_ID } },
+            { idempotency_key: { equals: concurrentIdempotencyKey } },
+          ],
+        }),
+        rows("lead_contacts", { subject_id: { equals: concurrentLeadId } }),
+        rows("consent_events", { lead_id: { equals: concurrentLeadId } }),
+        rows("seller_pipeline_events", { lead_id: { equals: concurrentLeadId } }),
+      ]);
+      assert.deepEqual(
+        [concurrentLeads.length, concurrentContacts.length, concurrentConsents.length, concurrentSellerEvents.length],
+        [1, 1, 1, 1],
+        "the concurrent retry must leave exactly one atomic lead intake",
+      );
     } catch (error) {
       console.error(error.stack || error);
       exitCode = 1;

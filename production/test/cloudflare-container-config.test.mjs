@@ -495,6 +495,7 @@ test("Cloudflare Container admits public leads only with a complete durable runt
     PAYLOAD_SECRET: "p".repeat(32),
     DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
     MS_REALTY_LEAD_CONTACT_KEY: "c".repeat(32),
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
   };
   const allowed = (env = complete, pathname = "/api/leads", method = "POST") =>
     allowsPublicLeadMutation({ env, method, pathname });
@@ -509,9 +510,14 @@ test("Cloudflare Container admits public leads only with a complete durable runt
     "PAYLOAD_SECRET",
     "DATABASE_URL",
     "MS_REALTY_LEAD_CONTACT_KEY",
+    "MS_REALTY_WORKSPACE_ID",
   ]) {
     assert.equal(allowed({ ...complete, [key]: "" }), false, key);
+    assert.equal(allowed({ ...complete, [key]: "   " }), false, `${key} whitespace`);
   }
+  const missingWorkspace = { ...complete };
+  delete missingWorkspace.MS_REALTY_WORKSPACE_ID;
+  assert.equal(allowed(missingWorkspace), false, "MS_REALTY_WORKSPACE_ID missing");
   assert.equal(allowed({ ...complete, MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "false" }), false);
   assert.equal(allowed({ ...complete, MS_REALTY_LEAD_CONTACT_KEY: "short" }), false);
   assert.match(workerSource, /allowsPublicLeadMutation\(\{ method: request\.method, pathname: url\.pathname, env \}\)/);

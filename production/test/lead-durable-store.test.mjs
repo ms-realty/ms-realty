@@ -14,7 +14,7 @@ import {
 
 // A minimal stand-in for the Payload runtime: enough to prove the store's
 // ordering, idempotency, and failure behaviour without a database.
-function fakePayload({ failOn = null } = {}) {
+function fakePayload({ failOn = null, failWith = null } = {}) {
   const rows = { public_leads: [], lead_contacts: [], consent_events: [], seller_pipeline_events: [] };
   const calls = { create: [], find: [] };
   let snapshot = null;
@@ -54,7 +54,7 @@ function fakePayload({ failOn = null } = {}) {
     async create(input) {
       calls.create.push(input);
       const { collection, data } = input;
-      if (failOn === collection) throw new Error(`${collection} write rejected`);
+      if (failOn === collection) throw failWith || new Error(`${collection} write rejected`);
       rows[collection].push(data);
       return data;
     },
@@ -652,6 +652,24 @@ test("every seller-intake write rolls the full transaction back on failure", asy
       assert.equal(rows.length, 0, `${storedCollection} must roll back when ${collection} fails`);
     }
   }
+});
+
+test("an unrelated unique conflict is never treated as an idempotent retry", async () => {
+  const conflict = Object.assign(new Error("duplicate lead id"), {
+    code: "23505",
+    constraint: "public_leads_lead_id_idx",
+  });
+  const payload = fakePayload({ failOn: "public_leads", failWith: conflict });
+  const row = ledgerRow({ idempotency_key: "browser-retry-unrelated-conflict" });
+
+  await assert.rejects(
+    () => persistLeadDurably(durableArgs({ ledgerRow: row, payload })),
+    (error) => error instanceof LeadStoreUnavailableError && error.cause === conflict,
+  );
+  assert.deepEqual(
+    Object.values(payload.rows).map((rows) => rows.length),
+    [0, 0, 0, 0],
+  );
 });
 
 test("the store refuses malformed input outright", async () => {
