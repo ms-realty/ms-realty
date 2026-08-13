@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import html
 import json
 import os
 import re
@@ -35,18 +36,6 @@ def repo_relative_path(path: Path) -> str:
         return str(path)
 
 
-LOCATION_PATTERNS = [
-    ("Sandanski", re.compile(r"\b(sandanski|сандански)\b", re.I)),
-    ("Bansko", re.compile(r"\b(bansko|банско)\b", re.I)),
-    ("Sveti Vlas", re.compile(r"\b(sveti[-\s]?vlas|свети\s+влас)\b", re.I)),
-    ("Ofrinio", re.compile(r"\b(ofrinio|офринио)\b", re.I)),
-    ("Blagoevgrad", re.compile(r"\b(blagoevgrad|благоевград)\b", re.I)),
-    ("Melnik", re.compile(r"\b(melnik|мелник)\b", re.I)),
-    ("Petrich", re.compile(r"\b(petrich|петрич)\b", re.I)),
-    ("Kresna", re.compile(r"\b(kresna|кресна)\b", re.I)),
-    ("Sofia", re.compile(r"\b(sofia|софия)\b", re.I)),
-]
-
 TYPE_PATTERNS = [
     ("apartment", re.compile(r"\b(apartment|flat|апартамент\w*|квартир\w*|мезонет\w*|студио)\b", re.I)),
     ("house", re.compile(r"\b(house|villa|къщ\w*|вил\w*|дом)\b", re.I)),
@@ -68,7 +57,7 @@ CYRILLIC_TO_LATIN = {
 
 
 def textish(value: str | None) -> str:
-    return re.sub(r"\s+", " ", value or "").strip()
+    return re.sub(r"\s+", " ", html.unescape(value or "")).strip()
 
 
 def search_text(*values: object) -> str:
@@ -130,13 +119,6 @@ def load_listing_thumbnails(artifact_dir: Path) -> dict[str, dict[str, str]]:
                 "thumbnail_alt": textish(row.get("alt")),
             }
     return thumbnails
-
-
-def infer_location(text: str) -> str:
-    for location, pattern in LOCATION_PATTERNS:
-        if pattern.search(text):
-            return location
-    return ""
 
 
 def infer_property_type(text: str) -> str:
@@ -291,7 +273,7 @@ def infer_offer(text: str) -> str:
 
 
 def infer_bedrooms(text: str) -> int | None:
-    match = re.search(r"\b([1-6])\s*(?:bed|bedroom|bedrooms|стай|стаен|спал)", text, re.I)
+    match = re.search(r"\b([1-6])\s*(?:bed|bedroom|bedrooms|спал)", text, re.I)
     if match:
         return int(match.group(1))
     lowered = text.lower()
@@ -445,7 +427,7 @@ def load_listing_docs(
     with metadata_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
-            if row.get("url_type") != "listing":
+            if row.get("url_type") != "listing" or textish(row.get("status")) != "200" or textish(row.get("error")):
                 continue
 
             url = textish(row.get("url"))
@@ -476,7 +458,7 @@ def load_listing_docs(
                     "title": title,
                     "description": description,
                     "h1": h1,
-                    "location": infer_location(combined),
+                    "location": "",
                     "property_type": infer_property_type(type_text),
                     "offer_type": infer_offer(combined),
                     "bedrooms": infer_bedrooms(combined),
