@@ -246,10 +246,12 @@ Production launch stays blocked until a named operator and reviewer supply a val
 
 The production operator workflow uses the installed Docker, `age`, and AWS CLIs without an
 additional application dependency. It runs PostgreSQL 18 clients in `postgres:18-alpine`,
-creates a custom-format Neon dump, encrypts it before upload, and writes only ciphertext plus
-a SHA-256 manifest to the private `ms-realty-production-backups-eu` bucket through its
+creates a custom-format Neon dump, encrypts it before upload, and writes staged ciphertext plus
+a final SHA-256 manifest commit marker to the private `ms-realty-production-backups-eu` bucket through its
 jurisdiction-specific EU endpoint. Database URLs and R2 secrets are never written to reports
 or command output. Plaintext dumps are mode-private and removed after each command.
+The manifest is bound to the canonical committed component map and cannot define its own table
+or coverage requirements. Production component-map overrides are disabled.
 
 Before the separately approved backup upload, provide a bucket-scoped R2 object Read & Write
 credential and the age recipient through the environment:
@@ -263,12 +265,40 @@ export MS_REALTY_RECOVERY_AGE_RECIPIENT='<age1... public recipient>'
 npm run recovery:r2:backup -- --confirm-upload-encrypted-production-backup
 ```
 
-The command prints the generated backup ID. After separate approval for the isolated restore
-drill, make the private age identity readable only by its owner and run:
+The command prints the generated backup ID and leaves a private `r2-upload-plan.json`. The R2
+bucket's object lock prevents destructive failure cleanup, so an interrupted upload remains an
+uncommitted staged object covered by the bucket lifecycle rather than being silently deleted.
+
+After the approved exact-release rollback exercise, provide its read-only JSON receipt. It must
+bind the backup ID and local `manifest.json` SHA-256, name distinct source and rollback release
+identities, and record successful exact-release, health, and authenticated admin-journey checks:
+
+```json
+{
+  "schema_version": 1,
+  "environment": "production",
+  "status": "pass",
+  "receipt_id": "rollback-<unique-id>",
+  "backup_id": "<backup-id>",
+  "manifest_sha256": "<sha256-of-.recovery-work/backup-id/manifest.json>",
+  "executed_at": "<ISO-8601 timestamp after backup>",
+  "operator": "<named rollback operator>",
+  "from_release": "<exact source release SHA>",
+  "to_release": "<exact rollback release SHA>",
+  "exact_release_verified": true,
+  "post_rollback_health_verified": true,
+  "post_rollback_admin_journey_verified": true
+}
+```
+
+After separate approval for the isolated restore drill, make both the private age identity and
+rollback receipt owner-only, then run:
 
 ```bash
 chmod 600 '<path-to-ms-realty-recovery-age-identity>'
+chmod 400 '<path-to-rollback-receipt.json>'
 export MS_REALTY_RECOVERY_AGE_IDENTITY_FILE='<path-to-ms-realty-recovery-age-identity>'
+export MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE='<path-to-rollback-receipt.json>'
 export MS_REALTY_RECOVERY_OPERATOR='<named restore operator>'
 npm run recovery:r2:restore -- '<backup-id>' --confirm-isolated-restore-drill
 ```
@@ -276,7 +306,8 @@ npm run recovery:r2:restore -- '<backup-id>' --confirm-isolated-restore-drill
 Restore downloads and checksum-verifies the R2 objects, decrypts locally, and restores into a
 uniquely named `postgres:18-alpine` container on an internal Docker network. The target has no
 published ports or volumes. Migration identity and mapped table counts must exactly match the
-source; container and network cleanup is also part of the pass condition.
+source; container and network cleanup is also part of the pass condition. Cleanup is recorded
+separately and never treated as proof that the production rollback procedure passed.
 
 `production/data/production-recovery-component-map.json` is deliberately fail-closed. It lists
 the runtime-data and runtime-evidence authorities that still exist only as container files.
@@ -284,11 +315,38 @@ A successful Neon restore therefore remains `blocked` until every listed source 
 mapped PostgreSQL table (or a separately implemented, encrypted and restorable component).
 Never remove an uncovered source merely to clear readiness.
 
-Only after the restore result is `pass` may a distinct named human reviewer approve the redacted
-report consumed by the existing launch-readiness validator:
+Only after the restore result is `pass` may a distinct named human reviewer provide a read-only
+approval artifact. It must bind the exact ciphertext, manifest, restore result, and rollback
+receipt digests; explicitly confirm reviewing all three evidence records; and name an operator
+and reviewer that differ case-insensitively:
+
+```json
+{
+  "schema_version": 1,
+  "environment": "production",
+  "decision": "approved",
+  "approval_id": "recovery-approval-<unique-id>",
+  "backup_id": "<backup-id>",
+  "ciphertext_sha256": "<artifact.sha256 from manifest.json>",
+  "manifest_sha256": "<sha256-of-manifest.json>",
+  "restore_drill_sha256": "<sha256-of-restore-drill-result.json>",
+  "rollback_receipt_sha256": "<sha256-of-rollback-receipt.json>",
+  "operator": "<exact restore operator>",
+  "reviewer": "<distinct named human reviewer>",
+  "approved_at": "<ISO-8601 timestamp after restore>",
+  "manifest_reviewed": true,
+  "restore_drill_reviewed": true,
+  "rollback_receipt_reviewed": true
+}
+```
+
+The approval command consumes that artifact and emits the redacted report used by the existing
+launch-readiness validator:
 
 ```bash
-export MS_REALTY_RECOVERY_REVIEWER='<named human reviewer distinct from the operator>'
+chmod 400 '<path-to-recovery-approval.json>'
+export MS_REALTY_RECOVERY_APPROVAL_FILE='<path-to-recovery-approval.json>'
+export MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE='<path-to-rollback-receipt.json>'
 npm run recovery:r2:approve -- '<backup-id>' --confirm-reviewed-recovery-evidence
 ```
 

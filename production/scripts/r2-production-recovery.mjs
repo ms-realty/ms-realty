@@ -4,14 +4,22 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import {
   R2_RECOVERY_BUCKET,
+  assertFileSha256,
   assertR2RecoveryManifest,
   assertSafeBackupId,
+  buildR2UploadPlan,
   buildProductionRecoveryReport,
   buildRestoreDrillResult,
   createR2RecoveryManifest,
   mappedTableNames,
+  readImmutableJson,
   readRecoveryComponentMap,
+  recoveryCommandEnvironment,
+  resolveRecoveryComponentMapPath,
   sha256File,
+  trustedManifestDigest,
+  updateR2UploadPlan,
+  withPlaintextCleanup,
   writePrivateJson,
 } from "../lib/r2-production-recovery.mjs";
 import {
@@ -41,7 +49,7 @@ function redact(value, secrets = []) {
   return result;
 }
 
-async function run(command, args, { env = process.env, outputFile, secrets = [] } = {}) {
+async function run(command, args, { env = recoveryCommandEnvironment(process.env), outputFile, secrets = [] } = {}) {
   let stderr = "";
   let stdout = "";
   const output = outputFile ? fs.openSync(outputFile, "wx", 0o600) : "pipe";
@@ -92,7 +100,9 @@ function connectionConfig(databaseUrl) {
 }
 
 function pgpassValue(value) {
-  return String(value).replace(/\\/g, "\\\\").replace(/:/g, "\\:");
+  const text = String(value);
+  if (/[\r\n\0]/.test(text)) throw new Error("PostgreSQL connection fields cannot contain control characters");
+  return text.replace(/\\/g, "\\\\").replace(/:/g, "\\:");
 }
 
 function createPgpass(directory, config) {
@@ -202,7 +212,7 @@ async function exportedSnapshot(config, secrets) {
 
 function r2Environment(env) {
   return {
-    ...env,
+    ...recoveryCommandEnvironment(env),
     AWS_REGION: "auto",
     AWS_DEFAULT_REGION: "auto",
     AWS_EC2_METADATA_DISABLED: "true",
@@ -237,12 +247,18 @@ function backupId(now = new Date()) {
   return `ms-realty-${now.toISOString().replace(/[-:.]/g, "").replace("Z", "z")}-${crypto.randomBytes(8).toString("hex")}`;
 }
 
-function readManifest(filePath) {
+function readManifest(filePath, componentMap) {
   const stat = fs.lstatSync(filePath);
   if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("Recovery manifest must be a regular file");
   const manifest = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  assertR2RecoveryManifest(manifest);
+  assertR2RecoveryManifest(manifest, componentMap);
   return manifest;
+}
+
+function readRegularJson(filePath, label) {
+  const stat = fs.lstatSync(filePath);
+  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error(`${label} must be a regular file`);
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
 async function uploadFile(env, filePath, objectKey, secrets) {
@@ -274,7 +290,9 @@ async function captureBackup(env) {
   const plaintextFile = path.join(directory, "neon-postgres.dump");
   const encryptedFile = path.join(directory, "neon-postgres.dump.age");
   const manifestPath = path.join(directory, "manifest.json");
-  const componentMap = readRecoveryComponentMap(env.MS_REALTY_RECOVERY_COMPONENT_MAP_PATH || DEFAULT_COMPONENT_MAP);
+  const uploadPlanPath = path.join(directory, "r2-upload-plan.json");
+  const componentMapPath = resolveRecoveryComponentMapPath(env, DEFAULT_COMPONENT_MAP);
+  const componentMap = readRecoveryComponentMap(componentMapPath);
   const tables = mappedTableNames(componentMap);
   const config = { ...connectionConfig(databaseUrl), secretDirectory };
   createPgpass(secretDirectory, config);
@@ -291,7 +309,6 @@ async function captureBackup(env) {
     snapshot = null;
     await run("age", ["--encrypt", "--recipient", ageRecipient, "--output", encryptedFile, plaintextFile], { secrets });
     fs.chmodSync(encryptedFile, 0o600);
-    await uploadFile(env, encryptedFile, `backups/${id}/neon-postgres.dump.age`, secrets);
     const manifest = createR2RecoveryManifest({
       backupId: id,
       completedAt: new Date().toISOString(),
@@ -301,16 +318,40 @@ async function captureBackup(env) {
       tableCounts: source.tableCounts,
       latestMigration: source.latestMigration,
     });
-    assertR2RecoveryManifest(manifest);
+    assertR2RecoveryManifest(manifest, componentMap);
     writePrivateJson(manifestPath, manifest);
+    fs.chmodSync(manifestPath, 0o400);
+    let uploadPlan = buildR2UploadPlan(manifest);
+    writePrivateJson(uploadPlanPath, uploadPlan);
+    try {
+      uploadPlan = updateR2UploadPlan(uploadPlan, { event: "attempted", objectKey: manifest.artifact.object_key });
+      writePrivateJson(uploadPlanPath, uploadPlan);
+      await uploadFile(env, encryptedFile, manifest.artifact.object_key, secrets);
+      uploadPlan = updateR2UploadPlan(uploadPlan, { event: "uploaded", objectKey: manifest.artifact.object_key });
+      writePrivateJson(uploadPlanPath, uploadPlan);
 
-    await uploadFile(env, manifestPath, manifest.manifest_object_key, secrets);
+      uploadPlan = updateR2UploadPlan(uploadPlan, { event: "attempted", objectKey: manifest.manifest_object_key });
+      writePrivateJson(uploadPlanPath, uploadPlan);
+      await uploadFile(env, manifestPath, manifest.manifest_object_key, secrets);
+      uploadPlan = updateR2UploadPlan(uploadPlan, { event: "uploaded", objectKey: manifest.manifest_object_key });
+      uploadPlan = updateR2UploadPlan(uploadPlan, { event: "committed", at: new Date().toISOString() });
+      writePrivateJson(uploadPlanPath, uploadPlan);
+    } catch (error) {
+      uploadPlan = updateR2UploadPlan(uploadPlan, {
+        event: "partial",
+        at: new Date().toISOString(),
+        error: redact(error.message, secrets),
+      });
+      writePrivateJson(uploadPlanPath, uploadPlan);
+      throw new Error(`${error.message}; non-destructive cleanup plan: ${uploadPlanPath}`);
+    }
     completed = true;
     process.stdout.write(`${JSON.stringify({
       status: "uploaded",
       backup_id: id,
       bucket: R2_RECOVERY_BUCKET,
       manifest_object_key: manifest.manifest_object_key,
+      upload_plan: uploadPlanPath,
       uncovered_components: Object.entries(manifest.component_coverage)
         .filter(([, coverage]) => coverage.status !== "covered")
         .map(([component]) => component),
@@ -359,64 +400,82 @@ async function restoreDrill(env, requestedBackupId) {
 
   const secrets = [env.AWS_ACCESS_KEY_ID, env.AWS_SECRET_ACCESS_KEY];
   const directory = backupDirectory(id);
-  const manifestPath = path.join(directory, "manifest.json");
+  const localManifestPath = path.join(directory, "manifest.json");
+  const manifestPath = path.join(directory, "manifest.downloaded.json");
   const encryptedFile = path.join(directory, "neon-postgres.dump.age");
   const plaintextFile = path.join(directory, "neon-postgres.restore.dump");
   const drillPath = path.join(directory, "restore-drill-result.json");
+  const componentMapPath = resolveRecoveryComponentMapPath(env, DEFAULT_COMPONENT_MAP);
+  const componentMap = readRecoveryComponentMap(componentMapPath);
+  const expectedManifestSha256 = trustedManifestDigest({
+    localManifestPath,
+    recoveryReportPath: String(env.MS_REALTY_RECOVERY_TRUSTED_REPORT_FILE || "").trim() || null,
+    backupId: id,
+  });
   await downloadFile(env, `backups/${id}/manifest.json`, manifestPath, secrets);
-  const manifest = readManifest(manifestPath);
+  assertFileSha256(manifestPath, expectedManifestSha256, "Downloaded R2 manifest");
+  const manifest = readManifest(manifestPath, componentMap);
+  const manifestSha256 = sha256File(manifestPath);
+  const rollbackReceiptPath = String(env.MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE || "").trim();
+  const rollbackReceipt = rollbackReceiptPath ? readImmutableJson(rollbackReceiptPath, "Rollback drill receipt") : null;
+  const rollbackReceiptSha256 = rollbackReceiptPath ? sha256File(path.resolve(rollbackReceiptPath)) : null;
   await downloadFile(env, manifest.artifact.object_key, encryptedFile, secrets);
-  if (sha256File(encryptedFile) !== manifest.artifact.sha256) throw new Error("Downloaded R2 ciphertext checksum mismatch");
-  await run("age", ["--decrypt", "--identity", identityFile, "--output", plaintextFile, encryptedFile], { secrets });
-  fs.chmodSync(plaintextFile, 0o600);
-  if (sha256File(plaintextFile) !== manifest.artifact.plaintext_sha256) throw new Error("Decrypted PostgreSQL dump checksum mismatch");
-
-  const suffix = crypto.randomBytes(6).toString("hex");
-  const network = `msr-recovery-${suffix}`;
-  const container = `msr-recovery-postgres-${suffix}`;
-  let networkCreated = false;
-  let containerCreated = false;
+  assertFileSha256(encryptedFile, manifest.artifact.sha256, "Downloaded R2 ciphertext");
   let restored;
   let restoreCompletedAt;
   let cleanupVerified = false;
-  try {
-    await run("docker", ["network", "create", "--internal", network], { secrets });
-    networkCreated = true;
-    await run("docker", [
-      "run", "--detach", "--rm", "--name", container, "--network", network,
-      "--env", "POSTGRES_HOST_AUTH_METHOD=trust", "--env", `POSTGRES_DB=${DATABASE_NAME}`,
-      POSTGRES_IMAGE,
-    ], { secrets });
-    containerCreated = true;
-    await waitForPostgres(container, secrets);
-    await run("docker", ["cp", plaintextFile, `${container}:/tmp/neon-postgres.dump`], { secrets });
-    await run("docker", ["exec", container, "pg_restore", "--list", "/tmp/neon-postgres.dump"], { secrets });
-    await run("docker", [
-      "exec", container, "pg_restore", "--username", "postgres", "--dbname", DATABASE_NAME,
-      "--no-owner", "--no-privileges", "--exit-on-error", "/tmp/neon-postgres.dump",
-    ], { secrets });
-    restored = await queryRestored(container, Object.keys(manifest.database.table_counts), secrets);
-    restoreCompletedAt = new Date().toISOString();
-  } finally {
-    let cleanupFailed = false;
-    if (containerCreated) {
-      try { await run("docker", ["stop", "--time", "5", container], { secrets }); } catch { cleanupFailed = true; }
+  await withPlaintextCleanup(plaintextFile, async () => {
+    await run("age", ["--decrypt", "--identity", identityFile, "--output", plaintextFile, encryptedFile], { secrets });
+    fs.chmodSync(plaintextFile, 0o600);
+    assertFileSha256(plaintextFile, manifest.artifact.plaintext_sha256, "Decrypted PostgreSQL dump");
+
+    const suffix = crypto.randomBytes(6).toString("hex");
+    const network = `msr-recovery-${suffix}`;
+    const container = `msr-recovery-postgres-${suffix}`;
+    let networkCreated = false;
+    let containerCreated = false;
+    try {
+      await run("docker", ["network", "create", "--internal", network], { secrets });
+      networkCreated = true;
+      await run("docker", [
+        "run", "--detach", "--rm", "--name", container, "--network", network,
+        "--env", "POSTGRES_HOST_AUTH_METHOD=trust", "--env", `POSTGRES_DB=${DATABASE_NAME}`,
+        POSTGRES_IMAGE,
+      ], { secrets });
+      containerCreated = true;
+      await waitForPostgres(container, secrets);
+      await run("docker", ["cp", plaintextFile, `${container}:/tmp/neon-postgres.dump`], { secrets });
+      await run("docker", ["exec", container, "pg_restore", "--list", "/tmp/neon-postgres.dump"], { secrets });
+      await run("docker", [
+        "exec", container, "pg_restore", "--username", "postgres", "--dbname", DATABASE_NAME,
+        "--no-owner", "--no-privileges", "--exit-on-error", "/tmp/neon-postgres.dump",
+      ], { secrets });
+      restored = await queryRestored(container, Object.keys(manifest.database.table_counts), secrets);
+      restoreCompletedAt = new Date().toISOString();
+    } finally {
+      let cleanupFailed = false;
+      if (containerCreated) {
+        try { await run("docker", ["stop", "--time", "5", container], { secrets }); } catch { cleanupFailed = true; }
+      }
+      if (networkCreated) {
+        try { await run("docker", ["network", "rm", network], { secrets }); } catch { cleanupFailed = true; }
+      }
+      cleanupVerified = !cleanupFailed;
     }
-    if (networkCreated) {
-      try { await run("docker", ["network", "rm", network], { secrets }); } catch { cleanupFailed = true; }
-    }
-    cleanupVerified = !cleanupFailed;
-    fs.rmSync(plaintextFile, { force: true });
-  }
+  });
 
   const drill = buildRestoreDrillResult({
     manifest,
+    componentMap,
     restoredTableCounts: restored.tableCounts,
     restoredLatestMigration: restored.latestMigration,
     completedAt: restoreCompletedAt,
     operator,
     checksumVerified: true,
     cleanupVerified,
+    rollbackReceipt,
+    rollbackReceiptSha256,
+    manifestSha256,
   });
   writePrivateJson(drillPath, drill);
   process.stdout.write(`${JSON.stringify({
@@ -427,8 +486,10 @@ async function restoreDrill(env, requestedBackupId) {
     uncovered_components: drill.uncovered_components,
     blockers: drill.blockers,
     next: drill.status === "pass"
-      ? `npm run recovery:r2:approve -- ${id} --confirm-reviewed-recovery-evidence`
-      : "Move every uncovered runtime/evidence authority to mapped Postgres tables or a separately restorable encrypted component, then repeat backup and restore.",
+      ? `Provide immutable approval and rollback receipt files, then run npm run recovery:r2:approve -- ${id} --confirm-reviewed-recovery-evidence`
+      : rollbackReceipt
+        ? "Move every uncovered runtime/evidence authority to mapped PostgreSQL tables, then repeat backup and restore."
+        : "Provide MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE as an immutable exact-release rollback receipt, then repeat the restore drill.",
   }, null, 2)}\n`);
   if (drill.status !== "pass") process.exitCode = 2;
 }
@@ -439,19 +500,43 @@ function approveDrill(env, requestedBackupId) {
   }
   const id = assertSafeBackupId(requestedBackupId);
   const directory = backupDirectory(id);
-  const manifest = readManifest(path.join(directory, "manifest.json"));
-  const drill = JSON.parse(fs.readFileSync(path.join(directory, "restore-drill-result.json"), "utf8"));
+  const componentMapPath = resolveRecoveryComponentMapPath(env, DEFAULT_COMPONENT_MAP);
+  const componentMap = readRecoveryComponentMap(componentMapPath);
+  const manifestPath = fs.existsSync(path.join(directory, "manifest.downloaded.json"))
+    ? path.join(directory, "manifest.downloaded.json")
+    : path.join(directory, "manifest.json");
+  const drillPath = path.join(directory, "restore-drill-result.json");
+  const manifest = readManifest(manifestPath, componentMap);
+  const drill = readRegularJson(drillPath, "Restore drill result");
+  const rollbackReceiptPath = path.resolve(required(env, "MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE"));
+  const approvalPath = path.resolve(required(env, "MS_REALTY_RECOVERY_APPROVAL_FILE"));
+  const rollbackReceipt = readImmutableJson(rollbackReceiptPath, "Rollback drill receipt");
+  const approval = readImmutableJson(approvalPath, "Recovery approval");
+  const manifestSha256 = sha256File(manifestPath);
+  const restoreDrillSha256 = sha256File(drillPath);
+  const rollbackReceiptSha256 = sha256File(rollbackReceiptPath);
+  const approvalArtifactSha256 = sha256File(approvalPath);
   const now = new Date().toISOString();
   const report = buildProductionRecoveryReport({
     manifest,
+    componentMap,
     drill,
-    reviewer: required(env, "MS_REALTY_RECOVERY_REVIEWER"),
-    approvedAt: now,
+    rollbackReceipt,
+    rollbackReceiptSha256,
+    approval,
+    manifestSha256,
+    restoreDrillSha256,
+    approvalArtifactSha256,
     generatedAt: now,
   });
   const reportPath = path.resolve(env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH || DEFAULT_PRODUCTION_RECOVERY_REPORT);
   writeProductionRecoveryReport(report, reportPath);
-  process.stdout.write(`${JSON.stringify({ status: "approved", backup_id: id, report_path: reportPath }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({
+    status: "approved",
+    backup_id: id,
+    report_path: reportPath,
+    approval_artifact_sha256: approvalArtifactSha256,
+  }, null, 2)}\n`);
 }
 
 async function main() {
