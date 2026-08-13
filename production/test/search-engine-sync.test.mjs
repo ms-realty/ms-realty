@@ -438,6 +438,67 @@ test("public search labels an unconfigured backend as a local seed fallback", as
   assert.deepEqual(result.unavailable_engines, ["postgres", "typesense", "meilisearch"]);
 });
 
+test("Postgres search counts independently and binds page, active status, and geography filters", async () => {
+  const statements = [];
+  const postgres = {
+    env: { DATABASE_URL: POSTGRES_DATABASE_TARGET, PAYLOAD_SECRET: "test-payload-secret" },
+    payload: {
+      db: {
+        drizzle: {
+          async execute(statement) {
+            statements.push(statement);
+            return statements.length === 1 ? [{ total_count: "23" }] : [];
+          },
+        },
+      },
+    },
+  };
+  const result = await queryPublicSearch({
+    engine: "postgres",
+    environment: "production",
+    postgres,
+    localeCodes: ["bg"],
+    intent: {
+      locale: "bg",
+      text_query: "Сандански",
+      listing_status: "reserved",
+      region_id: "BG:district:BLG",
+      page: 3,
+      page_size: 7,
+    },
+  });
+
+  assert.equal(result.total, 23);
+  assert.equal(result.page, 3);
+  assert.equal(result.page_size, 7);
+  assert.deepEqual(result.hits, []);
+  assert.equal(statements.length, 2);
+  const dialect = {
+    escapeName: (name) => `"${name}"`,
+    escapeParam: (index) => `$${index + 1}`,
+    escapeString: (value) => `'${String(value).replaceAll("'", "''")}'`,
+    casing: { getColumnCasing: (column) => column.name },
+  };
+  const count = statements[0].toQuery(dialect);
+  const page = statements[1].toQuery(dialect);
+  assert.match(count.sql, /SELECT count\(\*\) AS total_count/);
+  assert.match(count.sql, /ms_realty_search_fold"?\(d\."search_text"\) LIKE/);
+  assert.match(count.sql, /d\."geography_path" @>/);
+  assert.match(count.sql, /d\."listing_status" =/);
+  assert.deepEqual(count.params, ["bg", "%sandanski%", '["BG:district:BLG"]', "reserved"]);
+  assert.match(page.sql, /LIMIT \$5\s+OFFSET \$6/);
+  assert.deepEqual(page.params.slice(-2), [7, 14]);
+});
+
+test("Postgres search migration keeps locale routing and index operators aligned with runtime queries", () => {
+  const migration = fs.readFileSync(fromRoot("migrations", "20260811_153000_postgres_public_search.ts"), "utf8");
+  assert.match(migration, /routing_target_locale[^\n]+source_locale\."code"/);
+  assert.match(migration, /SET search_path = pg_catalog, pg_temp/);
+  assert.match(migration, /EXISTS \(\s*SELECT 1\s*FROM "public"\."listing_translations"/);
+  assert.match(migration, /VERIFIED_GEOGRAPHY_PATH_SQL\(""\)\)\}\) jsonb_path_ops/);
+  assert.match(migration, /ms_realty_search_fold"\(\$\{sql\.raw\(SEARCH_TEXT_SQL\(""\)\)\}\) gin_trgm_ops/);
+});
+
 test("approved search projection omits pending and private facts", () => {
   const listing = {
     id: "MS-2026-0001",

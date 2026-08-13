@@ -66,20 +66,62 @@ test("production Node search renders only IDs returned by the selected engine", 
   assert.equal(calls[0].url.startsWith("https://search.makler-realty.com/collections/ms_realty_listings/documents/search?"), true);
 });
 
-test("production server passes the selected search engine configuration to the Node app", () => {
-  const config = productionServerConfig({
+test("direct HTTP Postgres search preserves database totals and requested page size", async () => {
+  const intents = [];
+  const app = createHttpApp({
+    ...approvedPublicSeedFixtureOptions(),
+    search: {
+      environment: "production",
+      engine: "postgres",
+      postgres: {
+        queryImpl: async ({ intent }) => {
+          intents.push(intent);
+          return {
+            engine: "postgres",
+            total: 23,
+            hits: [
+              {
+                id: "MS-CRAWL-0001:bg",
+                source_listing_id: "MS-CRAWL-0001",
+                locale: "bg",
+                locale_path: "/bg/imoti/MS-CRAWL-0001",
+                title: "Reviewed Sandanski listing",
+              },
+            ],
+            page: intent.page,
+            page_size: intent.page_size,
+            target: "ms_realty_public_search_documents",
+          };
+        },
+      },
+    },
+  });
+
+  const response = await dispatchHttp(app, {
+    url: "/api/search?locale=bg&page=3&page_size=7&listing_status=reserved",
+  });
+  assert.equal(response.status, 200);
+  assert.equal(intents[0].page_size, 7);
+  assert.equal(response.body.search.total_matches, 23);
+  assert.equal(response.body.search.pagination.page, 3);
+  assert.equal(response.body.search.pagination.per_page, 7);
+  assert.equal(response.body.search.pagination.total_pages, 4);
+});
+
+test("production server ignores legacy search selection and binds Payload Postgres", () => {
+  const env = {
     NODE_ENV: "production",
     MS_REALTY_SEARCH_ENGINE: "meilisearch",
     MEILI_URL: "https://meili.test",
     MEILI_API_KEY: "meili-test",
     MEILI_INDEX: "ms_realty_listings",
-  });
+    DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
+    PAYLOAD_SECRET: "payload-secret",
+  };
+  const config = productionServerConfig(env);
 
   assert.equal(config.search.environment, "production");
-  assert.equal(config.search.engine, "meilisearch");
-  assert.deepEqual(config.search.meilisearch, {
-    baseUrl: "https://meili.test",
-    apiKey: "meili-test",
-    indexName: "ms_realty_listings",
-  });
+  assert.equal(config.search.engine, "postgres");
+  assert.equal(config.search.postgres.env, env);
+  assert.equal(config.search.meilisearch, undefined);
 });

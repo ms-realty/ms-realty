@@ -1878,6 +1878,8 @@ export function renderSearchPage({
   pageSize = 12,
   savedView = false,
   view = "list",
+  databasePage = false,
+  totalMatches = null,
 }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -1977,22 +1979,26 @@ export function renderSearchPage({
     }[field];
     return !fact || applicable(fact);
   });
-  const matchedListings = searchableListings.filter((listing) =>
-    matchesSearch(listingToPublicViewModel(listing), searchIntent.text_query, intentFilters),
-  );
+  if (databasePage && (!Number.isSafeInteger(totalMatches) || totalMatches < 0)) {
+    throw new Error("Database search page requires a non-negative integer total");
+  }
+  const matchedListings = databasePage
+    ? searchableListings
+    : searchableListings.filter((listing) => matchesSearch(listingToPublicViewModel(listing), searchIntent.text_query, intentFilters));
   const selectedSort = publicSearchSort(searchIntent.sort);
   const selectedView = !savedView && view === "map" ? "map" : "list";
-  const sortedListings = sortListingsForPublicSearch(matchedListings, selectedSort);
+  const sortedListings = databasePage ? matchedListings : sortListingsForPublicSearch(matchedListings, selectedSort);
   const requestedPage = Number(page);
   const normalizedPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const requestedPageSize = savedView || pageSize === null ? Math.max(sortedListings.length, 1) : Number(pageSize);
   const normalizedPageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0 ? Math.min(requestedPageSize, 1000) : 12;
-  const totalPages = Math.max(1, Math.ceil(sortedListings.length / normalizedPageSize));
-  const currentPage = Math.min(normalizedPage, totalPages);
+  const matchedTotal = databasePage ? totalMatches : sortedListings.length;
+  const totalPages = Math.max(1, Math.ceil(matchedTotal / normalizedPageSize));
+  const currentPage = databasePage ? normalizedPage : Math.min(normalizedPage, totalPages);
   const offset = (currentPage - 1) * normalizedPageSize;
-  const cards = sortedListings
-    .slice(offset, offset + normalizedPageSize)
-    .map((listing) => listingCard(registry, listing, locale));
+  const cards = (databasePage ? sortedListings : sortedListings.slice(offset, offset + normalizedPageSize)).map((listing) =>
+    listingCard(registry, listing, locale),
+  );
   const activeFilterChips = [
     "exact_reference",
     "location",
@@ -2063,7 +2069,7 @@ export function renderSearchPage({
         indexable: true,
         ...intentFilters,
       },
-      total_matches: matchedListings.length,
+      total_matches: matchedTotal,
       returned: cards.length,
       pagination: {
         page: currentPage,

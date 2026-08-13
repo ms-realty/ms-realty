@@ -49,7 +49,7 @@ function searchConfig({ typesenseUrl = "", meiliUrl = "", naturalLanguageEnabled
   const translationLedgerPath = `${dir}/translations.jsonl`;
   fs.writeFileSync(listingEditLedgerPath, "");
   fs.writeFileSync(translationLedgerPath, "");
-  return appApiConfigFromEnv({
+  const config = appApiConfigFromEnv({
     MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
     MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
     MS_REALTY_TRANSLATION_LEDGER_PATH: translationLedgerPath,
@@ -65,6 +65,10 @@ function searchConfig({ typesenseUrl = "", meiliUrl = "", naturalLanguageEnabled
     NODE_ENV: environment,
     MS_REALTY_SEARCH_NL_INTENT_ENABLED: naturalLanguageEnabled ? "true" : "false",
   });
+  // Production env wiring is Postgres-only. These compatibility tests inject a
+  // legacy backend explicitly so the adapters remain testable without making
+  // Cloudflare depend on either service.
+  return { ...config, search: { ...config.search, engine: engine || undefined } };
 }
 
 async function searchResponse(config, query) {

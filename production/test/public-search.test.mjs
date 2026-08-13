@@ -209,3 +209,43 @@ test("localized HTML and API search share engine-ranked cards and request intent
   assert.deepEqual(html.rendered.search.intent, api.search.intent);
   assert.match(html.html, /MS-CRAWL-0001/);
 });
+
+test("Postgres result pages preserve database totals and requested page size", async () => {
+  const intents = [];
+  const { result, engineResult } = await executePublicSearch({
+    registry,
+    seed,
+    params: new URLSearchParams("locale=bg&page=3&page_size=7&listing_status=reserved"),
+    search: {
+      engine: "postgres",
+      environment: "production",
+      postgres: {
+        queryImpl: async ({ intent }) => {
+          intents.push(intent);
+          return {
+            engine: "postgres",
+            total: 23,
+            hits: [higherRankedHit, hit],
+            page: intent.page,
+            page_size: intent.page_size,
+            target: "ms_realty_public_search_documents",
+          };
+        },
+      },
+    },
+  });
+
+  assert.equal(intents[0].page, 3);
+  assert.equal(intents[0].page_size, 7);
+  assert.equal(intents[0].listing_status, "reserved");
+  assert.equal(engineResult.total, 23);
+  assert.equal(result.search.total_matches, 23);
+  assert.deepEqual(result.search.pagination, {
+    page: 3,
+    per_page: 7,
+    total_pages: 4,
+    has_previous: true,
+    has_next: true,
+  });
+  assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0002", "MS-CRAWL-0001"]);
+});

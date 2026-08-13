@@ -28,10 +28,34 @@ const SEARCH_FOLD_SQL = `
   )
 `
 
+// Keep the indexed expression identical to the view's public lexical field.
+// PostgreSQL can then use the trigram index for the runtime's
+// ms_realty_search_fold(d.search_text) LIKE query after expanding the view.
+const SEARCH_TEXT_SQL = (listing = "l.") => `
+  trim(
+    COALESCE(NULLIF(${listing}"facts_title", ''), NULLIF(${listing}"facts_h1", ''), NULLIF(${listing}"seo_title", ''), ${listing}"id") || ' ' ||
+    COALESCE(NULLIF(${listing}"facts_description", ''), '') || ' ' ||
+    COALESCE(NULLIF(${listing}"facts_location", ''), '') || ' ' ||
+    COALESCE(NULLIF(${listing}"facts_municipality", ''), '') || ' ' ||
+    COALESCE(NULLIF(${listing}"facts_district", ''), '') || ' ' ||
+    COALESCE(NULLIF(${listing}"facts_country_code", ''), '') || ' ' ||
+    COALESCE(NULLIF(${listing}"facts_offer_type", ''), '')
+  )
+`
+
+const VERIFIED_GEOGRAPHY_PATH_SQL = (listing = "l.") => `
+  CASE
+    WHEN ${listing}"workflow_location_verified_at" IS NOT NULL
+      AND COALESCE(${listing}"workflow_location_verified_by", '') <> ''
+      THEN COALESCE(${listing}"facts_geography_path", '[]'::jsonb)
+    ELSE '[]'::jsonb
+  END
+`
+
 const VERIFIED = (field: string) =>
   sql.raw(`EXISTS (
     SELECT 1
-    FROM "properties_fact_verification" pfv
+    FROM "public"."properties_fact_verification" pfv
     WHERE pfv."_parent_id" = p."id"
       AND pfv."field" = '${field}'
       AND pfv."state" = 'broker_verified'
@@ -46,36 +70,32 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     LANGUAGE sql
     IMMUTABLE
     PARALLEL SAFE
+    SET search_path = pg_catalog, pg_temp
     AS $function$
       SELECT ${sql.raw(SEARCH_FOLD_SQL)};
     $function$;
 
+    -- Translation rows currently carry approval/indexability state; listing copy
+    -- remains the approved source-locale Payload content until localized copy is
+    -- stored in the canonical tables.
     CREATE OR REPLACE VIEW "public"."ms_realty_public_search_documents" AS
-      SELECT DISTINCT ON (l."id", source_locale."code")
+      SELECT
         (l."id" || ':' || source_locale."code") AS "id",
         l."id" AS "source_listing_id",
         l."id" AS "listing_reference",
         source_locale."code" AS "locale",
-        COALESCE(NULLIF(l."routing_target_path", ''), '/' || source_locale."code" || '/imoti/' || l."id") AS "locale_path",
+        CASE
+          WHEN NULLIF(l."routing_target_locale", '') = source_locale."code" AND NULLIF(l."routing_target_path", '') IS NOT NULL
+            THEN l."routing_target_path"
+          ELSE '/' || source_locale."code" || '/imoti/' || l."id"
+        END AS "locale_path",
         COALESCE(NULLIF(l."facts_title", ''), NULLIF(l."facts_h1", ''), NULLIF(l."seo_title", ''), l."id") AS "title",
         'published'::varchar AS "publication_state",
         true AS "translation_human_approved",
         true AS "locale_indexable",
         true AS "translation_indexable",
         NULLIF(l."facts_description", '') AS "description",
-        trim(concat_ws(
-          ' ',
-          COALESCE(NULLIF(l."facts_title", ''), NULLIF(l."facts_h1", ''), NULLIF(l."seo_title", ''), l."id"),
-          NULLIF(l."facts_description", ''),
-          NULLIF(loc."label", ''),
-          NULLIF(l."facts_location", ''),
-          NULLIF(l."facts_municipality", ''),
-          NULLIF(l."facts_district", ''),
-          NULLIF(l."facts_country_code", ''),
-          NULLIF(p."property_family"::varchar, ''),
-          NULLIF(p."property_subtype", ''),
-          NULLIF(l."facts_offer_type", '')
-        )) AS "search_text",
+        ${sql.raw(SEARCH_TEXT_SQL())} AS "search_text",
         (tour."is_public" = true AND tour."review_status" = 'published') AS "has_approved_tour",
         p."property_family"::varchar AS "property_family",
         NULLIF(p."property_subtype", '') AS "property_subtype",
@@ -107,10 +127,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
           WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN NULLIF(l."facts_geography_id", '')
           ELSE NULL
         END AS "geography_id",
-        CASE
-          WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN COALESCE(l."facts_geography_path", '[]'::jsonb)
-          ELSE '[]'::jsonb
-        END AS "geography_path",
+        ${sql.raw(VERIFIED_GEOGRAPHY_PATH_SQL())} AS "geography_path",
         CASE
           WHEN l."workflow_price_verified_at" IS NOT NULL AND COALESCE(l."workflow_price_verified_by", '') <> '' AND l."facts_price_on_request" IS DISTINCT FROM true
             THEN l."facts_price_eur"
@@ -193,56 +210,46 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
           WHEN l."workflow_location_verified_at" IS NOT NULL AND COALESCE(l."workflow_location_verified_by", '') <> '' THEN loc."public_location_precision"::varchar
           ELSE NULL
         END AS "public_location_precision"
-      FROM "listings" l
-      JOIN "locales" source_locale
+      FROM "public"."listings" l
+      JOIN "public"."locales" source_locale
         ON source_locale."id" = l."source_locale_id"
-      JOIN "listing_translations" lt
-        ON lt."listing_id" = l."id"
-      JOIN "locales" public_locale
-        ON public_locale."id" = lt."locale_id"
-      LEFT JOIN "properties" p
+      LEFT JOIN "public"."properties" p
         ON p."id" = l."property_id"
-      LEFT JOIN "locations" loc
+      LEFT JOIN "public"."locations" loc
         ON loc."id" = l."location_id"
-      LEFT JOIN "listing_tours" tour
+      LEFT JOIN "public"."listing_tours" tour
         ON tour."id" = l."tour_id"
       WHERE l."cms_status" = 'published'
         AND COALESCE(l."workflow_publish_approved", false) = true
-        AND public_locale."code" = source_locale."code"
-        AND public_locale."public_enabled" = true
-        AND public_locale."indexable" = true
-        AND lt."status" = 'published'
-        AND lt."translation_state" = 'published'
-        AND lt."public_indexable" = true
-        AND COALESCE(lt."reviewer", '') <> ''
-        AND lt."approved_at" IS NOT NULL
-      ORDER BY l."id", source_locale."code", lt."approved_at" DESC, lt."updated_at" DESC;
+        AND source_locale."public_enabled" = true
+        AND source_locale."indexable" = true
+        AND EXISTS (
+          SELECT 1
+          FROM "public"."listing_translations" lt
+          WHERE lt."listing_id" = l."id"
+            AND lt."locale_id" = source_locale."id"
+            AND lt."status" = 'published'
+            AND lt."translation_state" = 'published'
+            AND lt."public_indexable" = true
+            AND COALESCE(lt."reviewer", '') <> ''
+            AND lt."approved_at" IS NOT NULL
+        );
 
     CREATE INDEX IF NOT EXISTS "listings_public_search_status_idx"
-      ON "listings" USING btree ("cms_status", "workflow_publish_approved", "source_locale_id", "workflow_publish_approved_at", "id");
+      ON "public"."listings" USING btree ("cms_status", "workflow_publish_approved", "source_locale_id", "workflow_publish_approved_at", "id");
 
     CREATE INDEX IF NOT EXISTS "listing_translations_public_search_idx"
-      ON "listing_translations" USING btree ("listing_id", "locale_id", "approved_at", "updated_at")
+      ON "public"."listing_translations" USING btree ("listing_id", "locale_id", "approved_at", "updated_at")
       WHERE "status" = 'published' AND "translation_state" = 'published' AND "public_indexable" = true;
 
     CREATE INDEX IF NOT EXISTS "listings_public_search_geography_idx"
-      ON "listings" USING gin ("facts_geography_path" jsonb_path_ops);
+      ON "public"."listings" USING gin ((${sql.raw(VERIFIED_GEOGRAPHY_PATH_SQL(""))}) jsonb_path_ops)
+      WHERE "cms_status" = 'published' AND COALESCE("workflow_publish_approved", false) = true;
 
     CREATE INDEX IF NOT EXISTS "listings_public_search_fold_trgm_idx"
-      ON "listings"
+      ON "public"."listings"
       USING gin (
-        "public"."ms_realty_search_fold"(concat_ws(
-          ' ',
-          COALESCE("facts_title", ''),
-          COALESCE("facts_h1", ''),
-          COALESCE("facts_description", ''),
-          COALESCE("facts_location", ''),
-          COALESCE("facts_municipality", ''),
-          COALESCE("facts_district", ''),
-          COALESCE("facts_country_code", ''),
-          COALESCE("facts_offer_type", ''),
-          "id"
-        )) gin_trgm_ops
+        "public"."ms_realty_search_fold"(${sql.raw(SEARCH_TEXT_SQL(""))}) gin_trgm_ops
       )
       WHERE "cms_status" = 'published' AND COALESCE("workflow_publish_approved", false) = true;
   `);
@@ -250,10 +257,10 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
-    DROP INDEX IF EXISTS "listings_public_search_fold_trgm_idx";
-    DROP INDEX IF EXISTS "listings_public_search_geography_idx";
-    DROP INDEX IF EXISTS "listing_translations_public_search_idx";
-    DROP INDEX IF EXISTS "listings_public_search_status_idx";
+    DROP INDEX IF EXISTS "public"."listings_public_search_fold_trgm_idx";
+    DROP INDEX IF EXISTS "public"."listings_public_search_geography_idx";
+    DROP INDEX IF EXISTS "public"."listing_translations_public_search_idx";
+    DROP INDEX IF EXISTS "public"."listings_public_search_status_idx";
     DROP VIEW IF EXISTS "public"."ms_realty_public_search_documents";
     DROP FUNCTION IF EXISTS "public"."ms_realty_search_fold"(text);
   `);

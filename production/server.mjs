@@ -98,22 +98,11 @@ export function productionServerConfig(env = process.env) {
     rateLimit: rateLimitConfigFromEnv(env),
     cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
     search: {
-      engine: env.MS_REALTY_SEARCH_ENGINE,
+      engine: "postgres",
       environment: env.NODE_ENV,
       postgres: {
         env,
       },
-      typesense: {
-        baseUrl: env.TYPESENSE_URL,
-        apiKey: env.TYPESENSE_API_KEY,
-        collectionName: env.TYPESENSE_COLLECTION || "ms_realty_listings",
-      },
-      meilisearch: {
-        baseUrl: env.MEILI_URL,
-        apiKey: env.MEILI_API_KEY,
-        indexName: env.MEILI_INDEX || "ms_realty_listings",
-      },
-      fetchImpl: globalThis.fetch,
     },
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,

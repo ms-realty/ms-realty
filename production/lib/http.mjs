@@ -384,6 +384,10 @@ function withSearchBackend(result, engineResult) {
   };
 }
 
+function searchEngineResultIsComplete(engineResult) {
+  return !Number.isFinite(engineResult.total) || engineResult.total <= engineResult.hits.length;
+}
+
 function adminHtml(page) {
   return renderHtmlPage(page, { bodyHtml: renderReactAdminBody(page) });
 }
@@ -1239,7 +1243,7 @@ export function createHttpApp({
     const { intent, query, filters, sort, page } = searchRequest;
     const seedForRequest = currentPublicSeed();
     const translationTasks = currentTranslationTasks();
-    const searchOptions = { localeCode: intent.locale, query, filters, sort, page, translationTasks, ...options };
+    const searchOptions = { localeCode: intent.locale, query, filters, sort, page, pageSize: intent.page_size, translationTasks, ...options };
     const localResult = searchRuntimeListings(activeRegistry, seedForRequest, searchOptions);
     const engineResult = await queryPublicSearch({
       ...search,
@@ -1247,13 +1251,21 @@ export function createHttpApp({
       intent,
       localeCodes: engineLocaleCodes(seedForRequest, activeRegistry, localResult),
     });
-    if (productionSearch && engineResult.engine === "seed_fallback") {
-      throw new Error("Production search requires a selected configured engine");
-    }
+    const databasePage = engineResult.engine === "postgres";
     const result =
-      engineResult.engine === "seed_fallback"
+      engineResult.engine === "seed_fallback" || (!databasePage && !searchEngineResultIsComplete(engineResult))
         ? localResult
-        : searchRuntimeListings(activeRegistry, seedForSearchHits(seedForRequest, engineResult.hits), searchOptions);
+        : searchRuntimeListings(activeRegistry, seedForSearchHits(seedForRequest, engineResult.hits), {
+            ...searchOptions,
+            query: "",
+            ...(databasePage
+              ? {
+                  databasePage: true,
+                  pageSize: engineResult.page_size,
+                  totalMatches: engineResult.total,
+                }
+              : {}),
+          });
     return withSearchBackend(result, engineResult);
   };
   const searchResultOrUnavailable = async (searchRequest, options) => {
@@ -1618,7 +1630,11 @@ export function createHttpApp({
         const { intent, query, filters, sort, page } = searchRequest;
         const savedView = url.searchParams.get("saved") === "1";
         const view = url.searchParams.get("view") || "list";
-        const outcome = await searchResultOrUnavailable(searchRequest, { pageSize: savedView ? null : 12, savedView, view });
+        const outcome = await searchResultOrUnavailable(searchRequest, {
+          pageSize: savedView ? null : intent.page_size,
+          savedView,
+          view,
+        });
         if (outcome.response) {
           // The API keeps its JSON contract, but a person on the search PAGE
           // gets a branded page with working contact channels, not raw JSON.
