@@ -8,6 +8,7 @@ import { readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs
 import { appendLeadContact } from "../lib/lead-contact-vault.mjs";
 import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
+import { FILE_BACKED_LEAD_MUTATION_PATHS, isFileBackedLeadMutationBlocked } from "../lib/lead-durable-boundary.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { dispatchHttp } from "../lib/http.mjs";
 import { saveProviderConnection } from "../lib/provider-connections.mjs";
@@ -582,6 +583,111 @@ test("production server routes seller intake through one durable write with zero
     assert.equal(response.body.sellerPipeline.created_at, sellerPipelineCreatedAt);
     for (const [kind, filePath] of Object.entries(paths)) {
       assert.equal(fs.existsSync(filePath), false, `durable production intake must not create ${kind} JSONL`);
+    }
+  } finally {
+    await close(server);
+  }
+});
+
+test("production server blocks every file-backed lead mutation while durable intake is enabled", async (t) => {
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-production-durable-read-only-`);
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const guardedPaths = [
+    "/api/admin/replies",
+    "/api/admin/replies/delivery",
+    "/api/admin/lead-pipeline/outcome",
+    "/api/admin/leads",
+    "/api/admin/leads/assign",
+    "/api/admin/accounts",
+    "/api/admin/accounts/link",
+    "/api/admin/documents/outcome",
+    "/api/admin/consents/withdraw",
+    "/api/admin/replies/draft",
+    "/api/admin/viewings",
+    "/api/admin/viewings/follow-up",
+    "/api/admin/seller-pipeline/outcome",
+    "/api/admin/deals/close",
+  ];
+  assert.deepEqual([...FILE_BACKED_LEAD_MUTATION_PATHS], guardedPaths, "both runtime adapters must guard the same exact surface");
+  const boundary = { durableStore: { leadDurableStoreEnabled: true }, method: "POST" };
+  assert.equal(isFileBackedLeadMutationBlocked({ ...boundary, pathname: "/api/admin/replies" }), true);
+  assert.equal(
+    isFileBackedLeadMutationBlocked({
+      ...boundary,
+      pathname: "/api/admin/replies/delivery",
+      durableProviderDelivery: true,
+    }),
+    false,
+  );
+  assert.equal(
+    isFileBackedLeadMutationBlocked({ ...boundary, pathname: "/api/admin/viewings", durableViewing: true }),
+    false,
+  );
+  assert.equal(
+    isFileBackedLeadMutationBlocked({ ...boundary, pathname: "/api/admin/viewings/follow-up", durableViewing: true }),
+    false,
+  );
+
+  const files = {
+    account: `${directory}/accounts.jsonl`,
+    audit: `${directory}/audit.jsonl`,
+    consent: `${directory}/consents.jsonl`,
+    contact: `${directory}/contacts.jsonl`,
+    deal: `${directory}/deals.jsonl`,
+    document: `${directory}/documents.jsonl`,
+    event: `${directory}/events.jsonl`,
+    lead: `${directory}/leads.jsonl`,
+    leadAssignment: `${directory}/lead-assignments.jsonl`,
+    leadPipelineOutcome: `${directory}/lead-pipeline-outcomes.jsonl`,
+    reply: `${directory}/replies.jsonl`,
+    replyDelivery: `${directory}/reply-delivery.jsonl`,
+    seller: `${directory}/seller-pipeline.jsonl`,
+    sellerOutcome: `${directory}/seller-outcomes.jsonl`,
+    viewing: `${directory}/viewings.jsonl`,
+    viewingFollowUp: `${directory}/viewing-follow-ups.jsonl`,
+  };
+  const config = productionServerConfig({
+    ...approvedPublicSeedFixtureEnv(),
+    PORT: "0",
+    HOST: "127.0.0.1",
+    MS_REALTY_ACCOUNT_LEDGER_PATH: files.account,
+    MS_REALTY_AUDIT_LOG_PATH: files.audit,
+    MS_REALTY_CONSENT_LEDGER_PATH: files.consent,
+    MS_REALTY_DEAL_LEDGER_PATH: files.deal,
+    MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH: files.document,
+    MS_REALTY_EVENT_LEDGER_PATH: files.event,
+    MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH: files.leadAssignment,
+    MS_REALTY_LEAD_CONTACT_VAULT_PATH: files.contact,
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_LEDGER_PATH: files.lead,
+    MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH: files.leadPipelineOutcome,
+    MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH: files.replyDelivery,
+    MS_REALTY_REPLY_OUTBOX_PATH: files.reply,
+    MS_REALTY_SELLER_PIPELINE_OUTCOME_LEDGER_PATH: files.sellerOutcome,
+    MS_REALTY_SELLER_PIPELINE_PATH: files.seller,
+    MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH: files.viewingFollowUp,
+    MS_REALTY_VIEWING_LEDGER_PATH: files.viewing,
+    MS_REALTY_LEAD_CONTACT_KEY: "production-read-only-contact-key-32-characters-minimum",
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
+    PAYLOAD_SECRET: "p".repeat(40),
+    DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+  });
+
+  const server = createProductionServer(config);
+  const address = await listen(server, 0, "127.0.0.1");
+  const baseUrl = `http://${address.address}:${address.port}`;
+  try {
+    for (const pathname of guardedPaths) {
+      const response = await jsonFetch(baseUrl, pathname, {
+        method: "POST",
+        headers: { authorization: "Bearer local-admin-smoke" },
+        body: "{}",
+      });
+      assert.equal(response.status, 503, pathname);
+      assert.equal(response.body.kind, "lead_store_read_only", pathname);
+    }
+    for (const [kind, filePath] of Object.entries(files)) {
+      assert.equal(fs.existsSync(filePath), false, `blocked durable-mode mutations must not create ${kind} state`);
     }
   } finally {
     await close(server);

@@ -276,6 +276,7 @@ import {
   readTourApprovals,
 } from "./tours.mjs";
 import { crossOriginWriteRejection } from "./request-guard.mjs";
+import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import {
   DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -315,23 +316,6 @@ const PRIVATE_JSON_HEADERS = {
 const PRIVATE_MARKDOWN_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/markdown; charset=utf-8", "cache-control": "no-store" };
 const PRIVATE_CSV_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/csv; charset=utf-8", "cache-control": "no-store" };
 const PRIVATE_DOWNLOAD_JSON_HEADERS = { ...SECURITY_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
-const FILE_BACKED_LEAD_MUTATION_PATHS = new Set([
-  "/api/admin/replies",
-  "/api/admin/replies/delivery",
-  "/api/admin/lead-pipeline/outcome",
-  "/api/admin/leads",
-  "/api/admin/leads/assign",
-  "/api/admin/accounts",
-  "/api/admin/accounts/link",
-  "/api/admin/documents/outcome",
-  "/api/admin/consents/withdraw",
-  "/api/admin/replies/draft",
-  "/api/admin/viewings",
-  "/api/admin/viewings/follow-up",
-  "/api/admin/seller-pipeline/outcome",
-  "/api/admin/deals/close",
-]);
-
 function bytesFrom(value) {
   const raw = value === undefined || value === "" ? String(10 * 1024 * 1024) : String(value);
   if (!/^\d+$/.test(raw)) throw new Error("MS_REALTY_MAX_BODY_BYTES must be a positive integer");
@@ -3097,11 +3081,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         ? parseBody(request, await readRequestBody(request, config.maxBodyBytes))
         : null;
     if (
-      request.method !== "GET" &&
-      config.leadDurableStore?.leadDurableStoreEnabled === true &&
-      FILE_BACKED_LEAD_MUTATION_PATHS.has(url.pathname) &&
-      !(url.pathname === "/api/admin/replies/delivery" && parsedDeliveryBody?.provider && !parsedDeliveryBody?.action) &&
-      !(url.pathname === "/api/admin/viewings" && config.viewingDurableStore?.viewingDurableStoreEnabled === true)
+      isFileBackedLeadMutationBlocked({
+        durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
+        durableStore: config.leadDurableStore,
+        durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
+        method: request.method,
+        pathname: url.pathname,
+      })
     ) {
       return leadStoreUnavailable("lead_store_read_only");
     }

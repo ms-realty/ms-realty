@@ -120,6 +120,7 @@ test("standalone durable viewing booking uses durable leads, persists calendar r
       payloadSecret: "payload-secret-for-test",
       databaseUrl: "postgres://test.invalid/ms_realty",
       contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+      workspaceId: "workspace-sandanski",
     },
     readLeadIntakesDurably: async () => [durableLead()],
     viewingDurableStore: {
@@ -231,6 +232,7 @@ test("standalone durable viewings map booking conflicts to 409", async (t) => {
       payloadSecret: "payload-secret-for-test",
       databaseUrl: "postgres://test.invalid/ms_realty",
       contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+      workspaceId: "workspace-sandanski",
     },
     readLeadIntakesDurably: async () => [durableLead()],
     viewingDurableStore: {

@@ -92,6 +92,7 @@ import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
+import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
 import {
   LeadStoreUnavailableError,
   isLeadDurableStoreEnabled,
@@ -775,7 +776,8 @@ export function createHttpApp({
   leadDurableStore = leadDurableStoreConfigFromEnv(),
   leadDurablePayload = null,
   persistLeadIntake = persistLeadIntakeDurably,
-  readLeadIntakes = readLeadIntakesDurablyStore,
+  readLeadIntakes = null,
+  readLeadIntakesDurably = readLeadIntakesDurablyStore,
   publicContactVaultPath = null,
   publicContactKey = null,
   replyOutboxPath = null,
@@ -911,7 +913,7 @@ export function createHttpApp({
       throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
     }
     const scope = leadReadScopeForPrincipal(principal, leadDurableStore.workspaceId);
-    return readLeadIntakes({
+    return (readLeadIntakes || readLeadIntakesDurably)({
       admin: scope.admin,
       contactSecret: leadDurableStore.contactSecret,
       payload: leadDurablePayload,
@@ -1649,6 +1651,29 @@ export function createHttpApp({
     if (adminRequest && request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
     const requiredCapability = adminRequest ? requiredAdminCapability(request.method, url.pathname) : null;
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
+    let durableProviderDelivery = false;
+    if (request.method === "POST" && url.pathname === "/api/admin/replies/delivery") {
+      try {
+        const delivery = parseBody(request);
+        durableProviderDelivery = Boolean(delivery?.provider && !delivery?.action);
+      } catch {
+        // The route handler returns the normal bad-request response.
+      }
+    }
+    if (
+      isFileBackedLeadMutationBlocked({
+        durableProviderDelivery,
+        durableStore: leadDurableStore,
+        durableViewing: viewingDurableStore?.viewingDurableStoreEnabled === true,
+        method: request.method,
+        pathname: url.pathname,
+      })
+    ) {
+      return adminJson(503, {
+        kind: "lead_store_read_only",
+        message: "This lead operation is disabled until it has durable persistence.",
+      });
+    }
     if (
       principal?.source === "payload_session" &&
       ["cases:read", "cases:write"].includes(requiredCapability) &&

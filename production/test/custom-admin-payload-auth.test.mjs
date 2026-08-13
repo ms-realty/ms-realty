@@ -404,6 +404,7 @@ test("Payload admin can approve and send a durable lead reply without the file o
       payloadSecret: "payload-secret-for-test",
       databaseUrl: "postgres://test.invalid/ms_realty",
       contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+      workspaceId: "workspace-sandanski",
     },
     readLeadIntakesDurably: async () => [
       {
@@ -499,6 +500,7 @@ test("Payload admin books a durable viewing and persists the Google Calendar rec
       payloadSecret: "payload-secret-for-test",
       databaseUrl: "postgres://test.invalid/ms_realty",
       contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+      workspaceId: "workspace-sandanski",
     },
     readLeadIntakesDurably: async () => [
       {
