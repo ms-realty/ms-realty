@@ -507,6 +507,87 @@ test("production server HTTP app forwards provider runtimes and durable viewing 
   assert.equal(viewings.body.viewings[0].listing_reference, "MS-CRAWL-0001");
 });
 
+test("production server routes seller intake through one durable write with zero JSONL side effects", async (t) => {
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-production-durable-lead-`);
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const paths = {
+    consent: `${directory}/consents.jsonl`,
+    contact: `${directory}/contacts.jsonl`,
+    event: `${directory}/events.jsonl`,
+    lead: `${directory}/leads.jsonl`,
+    seller: `${directory}/seller-pipeline.jsonl`,
+  };
+  const receivedAt = "2026-08-13T08:00:00.000Z";
+  const sellerPipelineCreatedAt = "2026-08-13T08:00:01.000Z";
+  const contactSecret = "production-route-contact-key-32-characters-minimum";
+  const config = productionServerConfig({
+    ...approvedPublicSeedFixtureEnv(),
+    PORT: "0",
+    HOST: "127.0.0.1",
+    MS_REALTY_CONSENT_LEDGER_PATH: paths.consent,
+    MS_REALTY_EVENT_LEDGER_PATH: paths.event,
+    MS_REALTY_LEAD_CONTACT_VAULT_PATH: paths.contact,
+    MS_REALTY_LEAD_LEDGER_PATH: paths.lead,
+    MS_REALTY_SELLER_PIPELINE_PATH: paths.seller,
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_CONTACT_KEY: contactSecret,
+    MS_REALTY_RECEIVED_AT: receivedAt,
+    MS_REALTY_SELLER_PIPELINE_CREATED_AT: sellerPipelineCreatedAt,
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
+    PAYLOAD_SECRET: "p".repeat(40),
+    DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+  });
+  const calls = [];
+  config.persistLeadIntake = async (input) => {
+    calls.push(input);
+    assert.equal(input.contactSecret, contactSecret);
+    assert.equal(input.marketingOptIn, true);
+    assert.equal(input.receivedAt, receivedAt);
+    assert.equal(input.sellerPipelineCreatedAt, sellerPipelineCreatedAt);
+    assert.equal(input.workspaceId, "workspace-sandanski");
+    assert.equal(input.lead.lead.leadType, "seller");
+    const leadId = input.lead.lead.id;
+    return {
+      lead: { lead_id: leadId, received_at: receivedAt, source: input.lead.lead.source, lead_type: "seller" },
+      contactVault: { lead_id: leadId, stored_at: receivedAt, encrypted: true, durable: true },
+      consent: { consent_type: "inquiry_follow_up", subject_id: leadId, marketing_opt_in: true },
+      sellerPipeline: { id: `seller-pipeline-${leadId}`, lead_id: leadId, created_at: sellerPipelineCreatedAt },
+      created: true,
+      idempotent: false,
+    };
+  };
+
+  const server = createProductionServer(config);
+  const address = await listen(server, 0, "127.0.0.1");
+  const baseUrl = `http://${address.address}:${address.port}`;
+  try {
+    const response = await jsonFetch(baseUrl, "/api/leads", {
+      method: "POST",
+      headers: { origin: baseUrl },
+      body: JSON.stringify({
+        source: "website_seller_valuation",
+        leadType: "seller",
+        language: "bg",
+        contact: { name: "Durable Seller", phone: "+359000000000" },
+        contact_preference: "phone",
+        property: { location: "Sandanski", type: "apartment" },
+        message: "Please arrange a valuation.",
+        marketingOptIn: true,
+      }),
+    });
+    assert.equal(response.status, 201, JSON.stringify(response.body));
+    assert.equal(calls.length, 1);
+    assert.equal(response.body.contactVault.durable, true);
+    assert.equal(response.body.consent.marketing_opt_in, true);
+    assert.equal(response.body.sellerPipeline.created_at, sellerPipelineCreatedAt);
+    for (const [kind, filePath] of Object.entries(paths)) {
+      assert.equal(fs.existsSync(filePath), false, `durable production intake must not create ${kind} JSONL`);
+    }
+  } finally {
+    await close(server);
+  }
+});
+
 test("production server keeps admin locale additions in memory without mounted registry path", async () => {
   const registryPath = fromRoot("locales", "registry.json");
   const originalRegistry = fs.readFileSync(registryPath, "utf8");

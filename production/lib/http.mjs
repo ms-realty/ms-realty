@@ -95,7 +95,9 @@ import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import {
   LeadStoreUnavailableError,
   isLeadDurableStoreEnabled,
+  leadReadScopeForPrincipal,
   leadDurableStoreConfigFromEnv,
+  payloadUserForLeadRead,
   persistLeadIntakeDurably,
   readLeadIntakesDurably as readLeadIntakesDurablyStore,
 } from "./lead-durable-store.mjs";
@@ -309,6 +311,26 @@ const PRIVATE_HEADERS = { "cache-control": "no-store" };
 
 // Public (unauthenticated) write endpoints protected by the rate limiter.
 const PUBLIC_WRITE_PATHS = new Set(["/api/leads", "/api/events", "/api/language-requests", "/api/saved-searches"]);
+const LEAD_BACKED_ADMIN_READ_PATHS = new Set([
+  "/api/admin/leads",
+  "/admin/leads",
+  "/api/admin/today",
+  "/admin/today",
+  "/api/admin/pipeline",
+  "/admin/pipeline",
+  "/api/admin/requests",
+  "/admin/requests",
+  "/api/admin/viewings",
+  "/admin/viewings",
+  "/api/admin/contacts",
+  "/admin/contacts",
+  "/api/admin/documents",
+  "/admin/documents",
+  "/api/admin/reports",
+  "/admin/reports",
+  "/api/admin/reports/export",
+  "/api/admin/viewings.ics",
+]);
 
 function response(status, body, contentType, headers = {}) {
   const csp = contentType.startsWith("text/html") ? { "content-security-policy": CONTENT_SECURITY_POLICY } : {};
@@ -753,7 +775,7 @@ export function createHttpApp({
   leadDurableStore = leadDurableStoreConfigFromEnv(),
   leadDurablePayload = null,
   persistLeadIntake = persistLeadIntakeDurably,
-  readLeadIntakesDurably = readLeadIntakesDurablyStore,
+  readLeadIntakes = readLeadIntakesDurablyStore,
   publicContactVaultPath = null,
   publicContactKey = null,
   replyOutboxPath = null,
@@ -884,6 +906,19 @@ export function createHttpApp({
       }),
       readLeadAssignments(leadAssignmentLedgerPath || undefined),
     );
+  const currentDurableLeads = async (principal, payloadSession = null) => {
+    if (!isLeadDurableStoreEnabled(leadDurableStore)) {
+      throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
+    }
+    const scope = leadReadScopeForPrincipal(principal, leadDurableStore.workspaceId);
+    return readLeadIntakes({
+      admin: scope.admin,
+      contactSecret: leadDurableStore.contactSecret,
+      payload: leadDurablePayload,
+      user: payloadUserForLeadRead(principal, payloadSession?.user || null),
+      workspaceIds: scope.workspaceIds,
+    });
+  };
   const currentListingQualityReport = (options = {}) =>
     buildListingQualityReport({
       seed: currentSeed(),
@@ -969,20 +1004,14 @@ export function createHttpApp({
     const leadIds = new Set(source.leads.map((lead) => lead.lead_id));
     return (rows) => rowsForLeadIds(rows, leadIds);
   };
-  const currentDurableLeadSource = async () => {
-    if (!leadDurableStore?.leadDurableStoreEnabled) return { durable: false, leads: currentLeads() };
-    if (!isLeadDurableStoreEnabled(leadDurableStore)) {
-      throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
-    }
+  const currentDurableLeadSource = async (principal = null, payloadSession = null, leads = null) => {
+    if (!leadDurableStore?.leadDurableStoreEnabled) return { durable: false, leads: leads || currentLeads() };
     try {
-      const leads = await readLeadIntakesDurably({
-        contactSecret: leadDurableStore.contactSecret,
-        payload: leadDurablePayload || null,
-      });
-      if (!Array.isArray(leads) || leads.some((lead) => !lead?.lead_id)) {
+      const durableLeads = leads || (await currentDurableLeads(principal, payloadSession));
+      if (!Array.isArray(durableLeads) || durableLeads.some((lead) => !lead?.lead_id)) {
         throw new Error("Durable lead readback returned invalid rows");
       }
-      return { durable: true, leads };
+      return { durable: true, leads: durableLeads };
     } catch (error) {
       if (error instanceof LeadStoreUnavailableError) throw error;
       throw new LeadStoreUnavailableError("Durable lead store read failed", error);
@@ -999,22 +1028,24 @@ export function createHttpApp({
     if (!Array.isArray(viewings)) throw new ViewingStoreUnavailableError("Durable viewing readback returned invalid rows");
     return { durable: true, viewings };
   };
-  const currentLeadJourneyContext = () => ({
-    leads: currentLeads(),
-    outcomes: readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined),
-    viewings: readViewings(viewingLedgerPath || undefined),
-    viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
-    deals: readDeals(dealLedgerPath || undefined),
-    sellerPipelines: readSellerPipeline(sellerPipelinePath || undefined),
-    sellerPipelineOutcomes: readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined),
-  });
-  const currentLeadPipelineQueue = () =>
-    buildLeadPipelineQueue(currentLeadJourneyContext(), {
+  const currentLeadJourneyContext = (leads = currentLeads()) => {
+    const filterRows = leadScopedRows({ durable: leadDurableStore?.leadDurableStoreEnabled === true, leads });
+    return {
+      leads,
+      outcomes: filterRows(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined)),
+      viewings: filterRows(readViewings(viewingLedgerPath || undefined)),
+      viewingFollowUps: filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined)),
+      deals: filterRows(readDeals(dealLedgerPath || undefined)),
+      sellerPipelines: filterRows(readSellerPipeline(sellerPipelinePath || undefined)),
+      sellerPipelineOutcomes: filterRows(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined)),
+    };
+  };
+  const currentLeadPipelineQueue = (leads = currentLeads()) =>
+    buildLeadPipelineQueue(currentLeadJourneyContext(leads), {
       now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
     });
-  const currentAdminLeadPayload = (requestedLocale, operatorId = null) => {
-    const leads = currentLeads();
-    const leadPipelineQueue = currentLeadPipelineQueue();
+  const currentAdminLeadPayload = (requestedLocale, operatorId = null, leads = currentLeads()) => {
+    const leadPipelineQueue = currentLeadPipelineQueue(leads);
     const replyData = currentReplyData();
     return renderAdminLeadsPayload(activeRegistry, requestedLocale, {
       leads,
@@ -1046,8 +1077,11 @@ export function createHttpApp({
       brokerContacts: currentBrokerContacts(),
     });
   };
-  const currentAdminViewingsPayload = async (requestedLocale, operatorId = null) => {
-    const [leadSource, viewingSource] = await Promise.all([currentDurableLeadSource(), currentDurableViewingSource()]);
+  const currentAdminViewingsPayload = async (requestedLocale, operatorId = null, scopedLeads = null, payloadSession = null) => {
+    const [leadSource, viewingSource] = await Promise.all([
+      currentDurableLeadSource(operatorId, payloadSession, scopedLeads),
+      currentDurableViewingSource(),
+    ]);
     const filterRows = leadScopedRows(leadSource);
     const leads = applyLeadAssignments(leadSource.leads, filterRows(readLeadAssignments(leadAssignmentLedgerPath || undefined)));
     const outcomes = filterRows(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined));
@@ -1099,8 +1133,7 @@ export function createHttpApp({
       brokerContacts: currentBrokerContacts(),
     });
   };
-  const currentContactPayload = (requestedLocale, operatorId = null) => {
-    const leads = currentLeads();
+  const currentContactPayload = (requestedLocale, operatorId = null, leads = currentLeads()) => {
     const replies = readReplyOutbox(replyOutboxPath || undefined);
     const outcomes = readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined);
     const communicationThreads = buildCommunicationThreads({ leads, replies, outcomes });
@@ -1111,11 +1144,11 @@ export function createHttpApp({
       operatorId,
     });
   };
-  const currentDocumentChecklistPayload = (requestedLocale, operatorId = null) =>
+  const currentDocumentChecklistPayload = (requestedLocale, operatorId = null, leads = currentLeads()) =>
     renderAdminDocumentChecklistPayload(
       activeRegistry,
       requestedLocale,
-      buildDocumentChecklistQueue(currentLeads(), readDocumentChecklistOutcomes(documentChecklistLedgerPath || undefined), {
+      buildDocumentChecklistQueue(leads, readDocumentChecklistOutcomes(documentChecklistLedgerPath || undefined), {
         locale: requestedLocale,
       }),
       operatorId,
@@ -1180,10 +1213,10 @@ export function createHttpApp({
       latestConsentStates(readConsentLedger(consentLedgerPath || undefined)),
       operatorId,
     );
-  const currentOperationsReport = async () => {
+  const currentOperationsReport = async (leads = null, principal = null, payloadSession = null) => {
     const generatedAt = reviewedAt || editedAt || receivedAt || new Date().toISOString();
     const reportSeed = currentSeed();
-    const leadSource = await currentDurableLeadSource();
+    const leadSource = await currentDurableLeadSource(principal, payloadSession, leads);
     const viewingSource = await currentDurableViewingSource();
     const filterRows = leadScopedRows(leadSource);
     return buildOperationsReport({
@@ -1210,38 +1243,46 @@ export function createHttpApp({
       generatedAt,
     });
   };
-  const currentReportsPayload = async (requestedLocale, operatorId = null) =>
-    renderAdminOperationsReportPayload(activeRegistry, requestedLocale, await currentOperationsReport(), operatorId);
-  const currentRequestsPayload = (requestedLocale, operatorId = null) => {
-    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
+  const currentReportsPayload = async (requestedLocale, operatorId = null, leads = null, payloadSession = null) =>
+    renderAdminOperationsReportPayload(
+      activeRegistry,
+      requestedLocale,
+      await currentOperationsReport(leads, operatorId, payloadSession),
+      operatorId,
+    );
+  const currentRequestsPayload = (requestedLocale, operatorId = null, leads) => {
+    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId, leads), {
       kind: "admin_requests",
       path: "/admin/requests",
       titleKey: "requestsWorkspace",
       descriptionKey: "requestsDescription",
     });
   };
-  const currentPipelinePayload = (requestedLocale, operatorId = null) => {
-    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
+  const currentPipelinePayload = (requestedLocale, operatorId = null, leads) => {
+    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId, leads), {
       kind: "admin_lead_pipeline",
       path: "/admin/pipeline",
       titleKey: "pipelineWorkspace",
       descriptionKey: "pipelineDescription",
     });
   };
-  const currentTodayPayload = (requestedLocale, operatorId = null) =>
-    renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
+  const currentTodayPayload = (requestedLocale, operatorId = null, leads) =>
+    renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId, leads), {
       kind: "admin_today",
       path: "/admin/today",
       titleKey: "today",
       descriptionKey: "todayDescription",
     });
-  const currentViewingsPayload = async (requestedLocale, operatorId = null) =>
-    renderAdminOperationalQueuePayload(await currentAdminViewingsPayload(requestedLocale, operatorId), {
+  const currentViewingsPayload = async (requestedLocale, operatorId = null, leads = null, payloadSession = null) =>
+    renderAdminOperationalQueuePayload(
+      await currentAdminViewingsPayload(requestedLocale, operatorId, leads, payloadSession),
+      {
       kind: "admin_viewings",
       path: "/admin/viewings",
       titleKey: "viewingsWorkspace",
       descriptionKey: "viewingsDescription",
-    });
+      },
+    );
   const currentActivityPayload = (url, operatorId = null) =>
     renderAdminActivityPayload(
       activeRegistry,
@@ -1615,6 +1656,19 @@ export function createHttpApp({
     ) {
       return adminForbidden("workspace:access");
     }
+    let requestLeadRows;
+    if (
+      request.method === "GET" &&
+      leadDurableStore.leadDurableStoreEnabled === true &&
+      LEAD_BACKED_ADMIN_READ_PATHS.has(url.pathname)
+    ) {
+      try {
+        requestLeadRows = await currentDurableLeads(principal, payloadSession);
+      } catch (error) {
+        if (error?.status === 403) return adminForbidden(error.capability || "workspace:access");
+        return adminJson(503, { kind: "lead_store_unavailable", message: "Lead storage is temporarily unavailable" });
+      }
+    }
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
       const service = await configuredPayloadAdminAuth();
       if (!payloadSession || !service) return adminForbidden("payload_session");
@@ -1718,7 +1772,10 @@ export function createHttpApp({
       }
     };
     const appendViewingBooking = async (input) => {
-      const [leadSource, viewingSource] = await Promise.all([currentDurableLeadSource(), currentDurableViewingSource()]);
+      const [leadSource, viewingSource] = await Promise.all([
+        currentDurableLeadSource(principal, payloadSession),
+        currentDurableViewingSource(),
+      ]);
       const filterRows = leadScopedRows(leadSource);
       const context = {
         leads: applyLeadAssignments(leadSource.leads, filterRows(readLeadAssignments(leadAssignmentLedgerPath || undefined))),
@@ -1981,7 +2038,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
-      const payload = currentAdminLeadPayload(requestedLocale, principal);
+      const payload = currentAdminLeadPayload(requestedLocale, principal, requestLeadRows);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
@@ -2161,14 +2218,14 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal)),
+        adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows)),
         "text/html; charset=utf-8",
       );
     }
 
     if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentContactPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentContactPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/contacts" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2177,7 +2234,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/documents", "/admin/documents"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentDocumentChecklistPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentDocumentChecklistPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/documents" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2238,7 +2295,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/today", "/admin/today"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentTodayPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentTodayPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/today" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2247,7 +2304,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/pipeline" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2256,7 +2313,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/requests", "/admin/requests"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/requests" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2266,7 +2323,12 @@ export function createHttpApp({
     if (request.method === "GET" && ["/api/admin/viewings", "/admin/viewings"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const payload = await currentViewingsPayload(url.searchParams.get("locale") || "en", principal);
+        const payload = await currentViewingsPayload(
+          url.searchParams.get("locale") || "en",
+          principal,
+          requestLeadRows,
+          payloadSession,
+        );
         if (url.pathname === "/admin/viewings" || wantsHtml(request, url)) {
           return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
         }
@@ -2306,7 +2368,12 @@ export function createHttpApp({
     if (request.method === "GET" && ["/api/admin/reports", "/admin/reports"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const payload = await currentReportsPayload(url.searchParams.get("locale") || "en", principal);
+        const payload = await currentReportsPayload(
+          url.searchParams.get("locale") || "en",
+          principal,
+          requestLeadRows,
+          payloadSession,
+        );
         if (url.pathname === "/admin/reports" || wantsHtml(request, url)) {
           return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
         }
@@ -2319,9 +2386,14 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/reports/export") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return adminResponse(200, renderOperationsReportCsv(await currentOperationsReport()), "text/csv; charset=utf-8", {
+        return adminResponse(
+          200,
+          renderOperationsReportCsv(await currentOperationsReport(requestLeadRows, principal, payloadSession)),
+          "text/csv; charset=utf-8",
+          {
           "content-disposition": 'attachment; filename="ms-realty-source-quality.csv"',
-        });
+          },
+        );
       } catch (error) {
         return viewingStoreErrorResponse(error) || adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -2330,7 +2402,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const leadSource = await currentDurableLeadSource();
+        const leadSource = await currentDurableLeadSource(principal, payloadSession, requestLeadRows);
         const source = await currentDurableViewingSource();
         return adminResponse(
           200,
@@ -4126,7 +4198,14 @@ export function createHttpApp({
           throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
         }
         const durable = durableRequested
-          ? await persistLeadIntake({ lead, contactSecret: leadDurableStore.contactSecret, receivedAt })
+          ? await persistLeadIntake({
+              lead,
+              contactSecret: leadDurableStore.contactSecret,
+              marketingOptIn: input.marketingOptIn === true,
+              receivedAt,
+              sellerPipelineCreatedAt,
+              workspaceId: leadDurableStore.workspaceId,
+            })
           : null;
         const contactVault = durable
           ? durable.contactVault
@@ -4136,27 +4215,32 @@ export function createHttpApp({
         const ledger =
           durable?.lead ||
           (leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt, contactSecret: leadContactKey }) : null);
-        const consent = recordConsent({
-          consentType: "inquiry_follow_up",
-          source: lead.lead?.source,
-          subjectId: lead.lead?.id,
-          locale: lead.original_language,
-          contact: lead.lead?.contact,
-          marketingOptIn: input.marketingOptIn === true,
-        });
-        const sellerPipeline =
-          sellerPipelinePath && lead.lead?.leadType === "seller"
+        const consent = durable
+          ? durable.consent
+          : recordConsent({
+              consentType: "inquiry_follow_up",
+              source: lead.lead?.source,
+              subjectId: lead.lead?.id,
+              locale: lead.original_language,
+              contact: lead.lead?.contact,
+              marketingOptIn: input.marketingOptIn === true,
+            });
+        const sellerPipeline = durable
+          ? durable.sellerPipeline
+          : sellerPipelinePath && lead.lead?.leadType === "seller"
             ? appendSellerPipeline(createSellerPipelineItem(lead, { createdAt: sellerPipelineCreatedAt }), {
                 filePath: sellerPipelinePath,
               })
             : null;
-        recordEvent({
-          type: "lead_submitted",
-          path: "/api/leads",
-          locale: lead.original_language,
-          listingReference: lead.lead?.listingReference,
-          action: lead.lead?.source,
-        });
+        if (!durable) {
+          recordEvent({
+            type: "lead_submitted",
+            path: "/api/leads",
+            locale: lead.original_language,
+            listingReference: lead.lead?.listingReference,
+            action: lead.lead?.source,
+          });
+        }
         return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline });
       } catch (error) {
         if (error instanceof LeadStoreUnavailableError) {

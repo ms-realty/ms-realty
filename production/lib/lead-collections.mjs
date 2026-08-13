@@ -25,6 +25,7 @@ export const LEAD_COLLECTIONS = [
       defaultColumns: ["lead_id", "received_at", "source", "lead_type", "admin_locale", "assigned_broker"],
     },
     fields: [
+      { name: "workspace_id", type: "text", required: true, index: true, maxLength: 160, ...immutableField },
       { name: "lead_id", type: "text", required: true, unique: true, index: true, maxLength: 160, ...immutableField },
       // Set only when the submitter supplied one; a repeat collapses onto the
       // original row instead of creating a second person.
@@ -58,6 +59,7 @@ export const LEAD_COLLECTIONS = [
     slug: "lead_contacts",
     admin: { useAsTitle: "subject_id", defaultColumns: ["subject_id", "subject_type", "stored_at", "algorithm"] },
     fields: [
+      { name: "workspace_id", type: "text", required: true, index: true, maxLength: 160, ...immutableField },
       { name: "subject_type", type: "text", required: true, maxLength: 40, ...immutableField },
       { name: "subject_id", type: "text", required: true, index: true, maxLength: 160, ...immutableField },
       { name: "stored_at", type: "date", required: true, ...immutableField },

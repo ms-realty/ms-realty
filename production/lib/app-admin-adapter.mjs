@@ -112,7 +112,9 @@ import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, withLeadContacts } 
 import {
   LeadStoreUnavailableError,
   isLeadDurableStoreEnabled,
+  leadReadScopeForPrincipal,
   leadDurableStoreConfigFromEnv,
+  payloadUserForLeadRead,
   readLeadIntakesDurably,
 } from "./lead-durable-store.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
@@ -861,10 +863,14 @@ async function adminLeadSource(config) {
   if (!isLeadDurableStoreEnabled(durableStore)) {
     throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
   }
+  const scope = leadReadScopeForPrincipal(config.adminPrincipal, durableStore.workspaceId);
   try {
     const leads = await (config.readLeadIntakesDurably || readLeadIntakesDurably)({
+      admin: scope.admin,
       contactSecret: durableStore.contactSecret,
       payload: config.leadDurablePayload || null,
+      user: payloadUserForLeadRead(config.adminPrincipal, config.payloadAdminSession?.user || null),
+      workspaceIds: scope.workspaceIds,
     });
     if (!Array.isArray(leads) || leads.some((lead) => !lead?.lead_id)) {
       throw new Error("Durable lead readback returned invalid rows");

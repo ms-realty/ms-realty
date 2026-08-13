@@ -175,10 +175,17 @@ test("Payload migration boot configuration and generated constraints stay runnab
     assert.match(leadSideEffects, new RegExp(`CREATE UNIQUE INDEX "${table}_event_id_idx"`));
     assert.match(leadSideEffects, new RegExp(`payload_locked_documents_rels_${table}_fk`));
   }
-  assert.match(leadSideEffects, /CREATE UNIQUE INDEX "public_leads_idempotency_key_idx"/);
+  assert.match(leadSideEffects, /ALTER TABLE "public_leads" ADD COLUMN "workspace_id" varchar/);
+  assert.match(leadSideEffects, /ALTER TABLE "lead_contacts" ADD COLUMN "workspace_id" varchar/);
+  assert.match(leadSideEffects, /ALTER TABLE "public_leads" ALTER COLUMN "workspace_id" SET NOT NULL/);
+  assert.match(leadSideEffects, /ALTER TABLE "lead_contacts" ALTER COLUMN "workspace_id" SET NOT NULL/);
+  assert.match(leadSideEffects, /CREATE UNIQUE INDEX "public_leads_workspace_id_idempotency_key_idx"/);
+  assert.match(leadSideEffects, /CREATE INDEX "public_leads_workspace_id_idx"/);
+  assert.match(leadSideEffects, /CREATE INDEX "lead_contacts_workspace_id_idx"/);
   const leadSideEffectsDown = leadSideEffects.match(/export async function down[\s\S]*$/)?.[0] || "";
   assert.match(leadSideEffectsDown, /DROP TABLE "seller_pipeline_events"/);
   assert.match(leadSideEffectsDown, /DROP TABLE "consent_events"/);
+  assert.match(leadSideEffectsDown, /DROP COLUMN "workspace_id"/);
   assert.match(leadSideEffectsDown, /CREATE INDEX "public_leads_idempotency_key_idx"/);
 
   const typesDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-migration-`);

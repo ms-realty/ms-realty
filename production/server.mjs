@@ -190,6 +190,8 @@ export function productionServerConfig(env = process.env) {
     leadPipelineOutcomeAt: env.MS_REALTY_LEAD_PIPELINE_OUTCOME_AT,
     replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
     sellerPipelineOutcomeAt: env.MS_REALTY_SELLER_PIPELINE_OUTCOME_AT,
+    receivedAt: env.MS_REALTY_RECEIVED_AT,
+    sellerPipelineCreatedAt: env.MS_REALTY_SELLER_PIPELINE_CREATED_AT,
     listingPublicationAt: env.MS_REALTY_LISTING_PUBLICATION_AT,
     realtyCaseRecordedAt: env.MS_REALTY_CASE_RECORDED_AT,
   };
@@ -212,6 +214,8 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     leadContactKey: config.leadContactKey,
     leadDurableStore: config.leadDurableStore,
     leadDurablePayload: config.leadDurablePayload,
+    persistLeadIntake: config.persistLeadIntake,
+    readLeadIntakes: config.readLeadIntakes,
     publicContactVaultPath: config.publicContactVaultPath,
     publicContactKey: config.publicContactKey,
     replyOutboxPath: config.replyOutboxPath,
@@ -265,6 +269,8 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     leadPipelineOutcomeAt: config.leadPipelineOutcomeAt,
     replyDeliveredAt: config.replyDeliveredAt,
     sellerPipelineOutcomeAt: config.sellerPipelineOutcomeAt,
+    receivedAt: config.receivedAt,
+    sellerPipelineCreatedAt: config.sellerPipelineCreatedAt,
     listingPublicationAt: config.listingPublicationAt,
     realtyCaseRecordedAt: config.realtyCaseRecordedAt,
   });

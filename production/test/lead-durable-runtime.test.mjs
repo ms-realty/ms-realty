@@ -195,6 +195,30 @@ test("the standalone HTTP runtime uses the same durable lead path", async () => 
   assert.equal(response.body.contactVault.durable, true);
 });
 
+test("standalone admin lead reads pass an authenticated workspace scope to the durable reader", async () => {
+  const calls = [];
+  const app = createHttpApp({
+    seed: approvedPublicSeedFixture(),
+    leadDurableStore: STORE_CONFIG,
+    readLeadIntakes: async (input) => {
+      calls.push(input);
+      return [];
+    },
+  });
+  const response = await dispatchHttp(app, {
+    method: "GET",
+    url: "/api/admin/leads",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+
+  assert.equal(response.status, 200, JSON.stringify(response.body));
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].admin, true);
+  assert.deepEqual(calls[0].workspaceIds, ["workspace-sandanski"]);
+  assert.equal(calls[0].user.role, "admin");
+  assert.deepEqual(response.body.leads, []);
+});
+
 test("standalone lead intake requires an exact same-origin browser Origin", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-durable-http-origin-"));
   const calls = [];

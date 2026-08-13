@@ -284,13 +284,14 @@ const caseCollectionsWithAccess = REALTY_CASE_COLLECTIONS.map((collection) => ({
   },
 }));
 
-// Lead intake is append-only server-owned state written through overrideAccess.
-// Brokers may read the privacy-safe ledger; contact envelopes stay admin-only.
+// Lead intake is append-only server-owned state. Human reads are always
+// workspace-scoped; the application opens contact envelopes only after this
+// collection-level boundary has been applied.
 const leadCollectionsWithAccess = LEAD_COLLECTIONS.map((collection) => ({
   ...collection,
   access: {
     ...serverOwnedCollectionAccess,
-    read: collection.slug === "lead_contacts" ? isAdmin : hasRole("admin", "broker"),
+    read: caseCollectionAccess.read,
   },
 }));
 

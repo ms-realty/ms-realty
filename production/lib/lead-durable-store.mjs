@@ -39,6 +39,47 @@ function requiredText(value, label, maxLength = 160) {
   return text;
 }
 
+function workspaceIds(value) {
+  const values = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
+  return [...new Set(values.map((entry) => String(entry || "").trim()).filter(Boolean))].sort();
+}
+
+function workspaceScopedWhere(workspaceId, clause) {
+  return { and: [{ workspace_id: { equals: workspaceId } }, clause] };
+}
+
+function forbiddenWorkspaceError() {
+  const error = new Error("The authenticated operator is not assigned to the durable lead workspace");
+  error.status = 403;
+  error.capability = "workspace:access";
+  return error;
+}
+
+export function leadReadScopeForPrincipal(principal, configuredWorkspaceIds) {
+  const configured = workspaceIds(configuredWorkspaceIds);
+  const roles = workspaceIds(principal?.roles || principal?.role);
+  const admin = roles.includes("admin");
+  if (admin) return { admin: true, workspaceIds: configured };
+  if (!roles.includes("broker")) throw forbiddenWorkspaceError();
+  const assigned = workspaceIds(principal?.workspace_ids);
+  const allowed = configured.length ? configured.filter((workspaceId) => assigned.includes(workspaceId)) : assigned;
+  if (!allowed.length) throw forbiddenWorkspaceError();
+  return { admin: false, workspaceIds: allowed };
+}
+
+export function payloadUserForLeadRead(principal, payloadUser = null) {
+  if (payloadUser) return payloadUser;
+  const roles = workspaceIds(principal?.roles || principal?.role);
+  const role = roles.includes("admin") ? "admin" : roles.includes("broker") ? "broker" : "";
+  if (!role) return null;
+  return {
+    collection: "admins",
+    id: principal?.payload_user_id || principal?.id || `lead-reader-${role}`,
+    role,
+    workspace_ids: workspaceIds(principal?.workspace_ids),
+  };
+}
+
 function assertPrivacySafeEvent(event, { collection, leadId, workspaceId }) {
   if (!event || typeof event !== "object" || Array.isArray(event)) throw new Error(`${collection} event is required`);
   if (requiredText(event.lead_id, `${collection} lead_id`) !== leadId) {
@@ -165,19 +206,40 @@ async function findOne(payload, collection, where, req = undefined) {
   return result.docs[0] || null;
 }
 
-export async function findLeadByIdempotencyKey(idempotencyKey, { payload = null } = {}) {
+export async function findLeadByIdempotencyKey(idempotencyKey, { payload = null, workspaceId } = {}) {
   if (!idempotencyKey) return null;
+  const scope = requiredText(workspaceId, "Durable lead workspace_id");
   const runtime = await runtimePayload(payload);
-  return findOne(runtime, "public_leads", { idempotency_key: { equals: idempotencyKey } });
+  return findOne(
+    runtime,
+    "public_leads",
+    workspaceScopedWhere(scope, { idempotency_key: { equals: idempotencyKey } }),
+  );
 }
 
-export async function readLeadIntakesDurably({ contactSecret, payload = null } = {}) {
+export async function readLeadIntakesDurably({ admin = false, contactSecret, payload = null, user = null, workspaceId, workspaceIds: scopeInput } = {}) {
   try {
+    const scope = workspaceIds(scopeInput || workspaceId);
+    if (!admin && !scope.length) throw forbiddenWorkspaceError();
     const runtime = await runtimePayload(payload);
-    const leadResult = await runtime.find({ collection: "public_leads", depth: 0, overrideAccess: true, pagination: false });
+    const access = user ? { overrideAccess: false, user } : { overrideAccess: true };
+    const where = scope.length ? { workspace_id: { in: scope } } : undefined;
+    const leadResult = await runtime.find({
+      collection: "public_leads",
+      depth: 0,
+      ...access,
+      pagination: false,
+      ...(where ? { where } : {}),
+    });
     if (!Array.isArray(leadResult?.docs)) throw new Error("Payload public_leads query did not return documents");
 
+    const allowed = new Set(scope);
+    const leadWorkspaces = new Map();
     const leads = leadResult.docs.map((document) => {
+      const documentWorkspaceId = requiredText(document?.workspace_id, "Payload public_leads workspace_id");
+      if (allowed.size && !allowed.has(documentWorkspaceId)) {
+        throw new Error("Payload public_leads query crossed the requested workspace boundary");
+      }
       const lead = document?.ledger_row;
       if (!lead?.lead_id || lead.lead_id !== document.lead_id) throw new Error("Payload public_leads ledger_row is invalid");
       if (containsPlaintextContactField(lead)) {
@@ -186,16 +248,30 @@ export async function readLeadIntakesDurably({ contactSecret, payload = null } =
       if (containsPlaintextMessageField(lead)) {
         throw new Error("Payload public_leads ledger_row contains a plaintext message");
       }
-      return lead;
+      leadWorkspaces.set(lead.lead_id, documentWorkspaceId);
+      return { ...lead, workspace_id: documentWorkspaceId };
     });
     // Leads are append-only. Taking their snapshot first ensures the later
     // contact snapshot cannot omit an envelope for a lead we already saw.
-    const contactResult = await runtime.find({ collection: "lead_contacts", depth: 0, overrideAccess: true, pagination: false });
+    const contactResult = await runtime.find({
+      collection: "lead_contacts",
+      depth: 0,
+      ...access,
+      pagination: false,
+      ...(where ? { where } : {}),
+    });
     if (!Array.isArray(contactResult?.docs)) throw new Error("Payload lead_contacts query did not return documents");
     const leadIds = new Set(leads.map((lead) => lead.lead_id));
     const contacts = new Map();
     for (const envelope of contactResult.docs) {
+      const envelopeWorkspaceId = requiredText(envelope?.workspace_id, "Payload lead_contacts workspace_id");
+      if (allowed.size && !allowed.has(envelopeWorkspaceId)) {
+        throw new Error("Payload lead_contacts query crossed the requested workspace boundary");
+      }
       if (envelope?.subject_type !== "lead" || !leadIds.has(envelope.subject_id)) continue;
+      if (leadWorkspaces.get(envelope.subject_id) !== envelopeWorkspaceId) {
+        throw new Error("Payload lead contact envelope crossed its lead workspace boundary");
+      }
       const opened = openPrivateContactEnvelope(envelope, {
         secret: contactSecret,
         secretName: "MS_REALTY_LEAD_CONTACT_KEY",
@@ -210,6 +286,7 @@ export async function readLeadIntakesDurably({ contactSecret, payload = null } =
     });
   } catch (error) {
     if (error instanceof LeadStoreUnavailableError) throw error;
+    if (error?.status === 403) throw error;
     throw new LeadStoreUnavailableError("Durable lead store read failed", error);
   }
 }
@@ -295,18 +372,38 @@ export async function persistLeadDurably({
     // Idempotency is checked inside the transaction: a retry must not create a
     // second person, and a repeated lead_id never overwrites the original.
     const byKey = ledgerRow.idempotency_key
-      ? await findOne(runtime, "public_leads", { idempotency_key: { equals: ledgerRow.idempotency_key } }, req)
+      ? await findOne(
+          runtime,
+          "public_leads",
+          workspaceScopedWhere(workspaceId, { idempotency_key: { equals: ledgerRow.idempotency_key } }),
+          req,
+        )
       : null;
-    const byId = byKey ? null : await findOne(runtime, "public_leads", { lead_id: { equals: leadId } }, req);
+    const byId = byKey
+      ? null
+      : await findOne(runtime, "public_leads", workspaceScopedWhere(workspaceId, { lead_id: { equals: leadId } }), req);
     const existing = byKey || byId;
     if (existing) {
       const existingLead = existing.ledger_row || existing;
       const existingLeadId = requiredText(existingLead.lead_id, "Stored lead_id");
-      const storedConsent = await findOne(runtime, "consent_events", { lead_id: { equals: existingLeadId } }, req);
+      if (requiredText(existing.workspace_id, "Stored lead workspace_id") !== workspaceId) {
+        throw new Error("Stored lead belongs to another workspace");
+      }
+      const storedConsent = await findOne(
+        runtime,
+        "consent_events",
+        workspaceScopedWhere(workspaceId, { lead_id: { equals: existingLeadId } }),
+        req,
+      );
       if (!storedConsent?.payload) throw new Error("Stored lead is missing its transactional consent event");
       const storedSellerPipeline =
         existingLead.lead_type === "seller"
-          ? await findOne(runtime, "seller_pipeline_events", { lead_id: { equals: existingLeadId } }, req)
+          ? await findOne(
+              runtime,
+              "seller_pipeline_events",
+              workspaceScopedWhere(workspaceId, { lead_id: { equals: existingLeadId } }),
+              req,
+            )
           : null;
       if (existingLead.lead_type === "seller" && !storedSellerPipeline?.payload) {
         throw new Error("Stored seller lead is missing its transactional pipeline event");
@@ -323,7 +420,12 @@ export async function persistLeadDurably({
     }
 
     const possibleDuplicate = ledgerRow.contact_fingerprint
-      ? await findOne(runtime, "public_leads", { contact_fingerprint: { equals: ledgerRow.contact_fingerprint } }, req)
+      ? await findOne(
+          runtime,
+          "public_leads",
+          workspaceScopedWhere(workspaceId, { contact_fingerprint: { equals: ledgerRow.contact_fingerprint } }),
+          req,
+        )
       : null;
     const storedRow = possibleDuplicate
       ? { ...ledgerRow, duplicate_status: "possible_duplicate", possible_duplicate_of: possibleDuplicate.lead_id }
@@ -334,6 +436,7 @@ export async function persistLeadDurably({
       overrideAccess: true,
       req,
       data: {
+        workspace_id: workspaceId,
         lead_id: leadId,
         idempotency_key: storedRow.idempotency_key || null,
         received_at: storedRow.received_at,
@@ -360,6 +463,7 @@ export async function persistLeadDurably({
       overrideAccess: true,
       req,
       data: {
+        workspace_id: workspaceId,
         subject_type: contactEnvelope.subject_type || "lead",
         subject_id: contactEnvelope.subject_id || leadId,
         stored_at: contactEnvelope.stored_at,

@@ -39,9 +39,16 @@ function fakePayload({ failOn = null } = {}) {
     async find(input) {
       calls.find.push(input);
       const { collection, where, limit } = input;
-      const [field, condition] = Object.entries(where || {})[0] || [];
-      const wanted = condition?.equals;
-      const docs = rows[collection].filter((row) => row[field] === wanted);
+      const matches = (row, clause) => {
+        if (!clause || !Object.keys(clause).length) return true;
+        if (Array.isArray(clause.and)) return clause.and.every((nested) => matches(row, nested));
+        return Object.entries(clause).every(([field, condition]) => {
+          if (Object.hasOwn(condition || {}, "equals")) return row[field] === condition.equals;
+          if (Array.isArray(condition?.in)) return condition.in.includes(row[field]);
+          return false;
+        });
+      };
+      const docs = rows[collection].filter((row) => matches(row, where));
       return { docs: limit ? docs.slice(0, limit) : docs };
     },
     async create(input) {
@@ -153,9 +160,11 @@ test("a lead persists with its encrypted contact envelope and consent event in o
   assert.equal(payload.calls.create.every((call) => call.req?.transactionID === "lead-test-transaction"), true);
 
   const stored = payload.rows.public_leads[0];
+  assert.equal(stored.workspace_id, "workspace-sandanski");
   assert.equal(stored.lead_id, ledgerRow().lead_id);
   assert.deepEqual(stored.ledger_row, ledgerRow());
   const storedContact = payload.rows.lead_contacts[0];
+  assert.equal(storedContact.workspace_id, "workspace-sandanski");
   assert.equal(storedContact.ciphertext, "Y2lwaGVydGV4dA==");
   // Nothing readable about the person may reach the database.
   const serialized = JSON.stringify(payload.rows);
@@ -184,9 +193,9 @@ test("a retried submission collapses onto the original record", async () => {
   assert.equal(payload.rows.consent_events.length, 1);
   assert.equal(second.lead.lead_id, row.lead_id, "the original record is returned");
 
-  const found = await findLeadByIdempotencyKey("browser-retry-1", { payload });
+  const found = await findLeadByIdempotencyKey("browser-retry-1", { payload, workspaceId: "workspace-sandanski" });
   assert.equal(found.lead_id, row.lead_id);
-  assert.equal(await findLeadByIdempotencyKey(null, { payload }), null);
+  assert.equal(await findLeadByIdempotencyKey(null, { payload, workspaceId: "workspace-sandanski" }), null);
 });
 
 test("an intake retry reports the contact row belonging to the original lead", async () => {
@@ -335,20 +344,35 @@ test("durable admin readback joins only matching encrypted contacts", async () =
     workspaceId: "workspace-sandanski",
     payload,
   });
-  payload.rows.lead_contacts.push(envelope({ subject_id: "orphan-fixture-lead", ciphertext: "not-valid-base64" }));
+  payload.rows.lead_contacts.push(
+    envelope({ workspace_id: "workspace-sandanski", subject_id: "orphan-fixture-lead", ciphertext: "not-valid-base64" }),
+  );
 
   const readFindStart = payload.calls.find.length;
-  const leads = await readLeadIntakesDurably({ contactSecret, payload });
+  const leads = await readLeadIntakesDurably({ contactSecret, payload, workspaceId: "workspace-sandanski" });
   assert.deepEqual(
-    payload.calls.find.slice(readFindStart).map(({ collection, depth, overrideAccess, pagination }) => ({
+    payload.calls.find.slice(readFindStart).map(({ collection, depth, overrideAccess, pagination, where }) => ({
       collection,
       depth,
       overrideAccess,
       pagination,
+      where,
     })),
     [
-      { collection: "public_leads", depth: 0, overrideAccess: true, pagination: false },
-      { collection: "lead_contacts", depth: 0, overrideAccess: true, pagination: false },
+      {
+        collection: "public_leads",
+        depth: 0,
+        overrideAccess: true,
+        pagination: false,
+        where: { workspace_id: { in: ["workspace-sandanski"] } },
+      },
+      {
+        collection: "lead_contacts",
+        depth: 0,
+        overrideAccess: true,
+        pagination: false,
+        where: { workspace_id: { in: ["workspace-sandanski"] } },
+      },
     ],
   );
   assert.equal(leads.length, 1);
@@ -356,6 +380,70 @@ test("durable admin readback joins only matching encrypted contacts", async () =
   assert.deepEqual(leads[0].contact, lead.lead.contact);
   assert.equal(leads[0].message_original, message);
   assert.equal(leads[0].contact_available, true);
+});
+
+test("durable lead readback requires scope and never decrypts another workspace", async () => {
+  const payload = fakePayload();
+  const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
+  const intake = (leadId, name, email) => ({
+    id: `inbox-${leadId}`,
+    message_original: `Private message for ${name}`,
+    lead: {
+      id: leadId,
+      source: "website_contact_callback",
+      intent: "callback",
+      leadType: "general",
+      contact: { name, email },
+    },
+    original_language: "en",
+    admin_locale: "en",
+    contact_preference: "email",
+  });
+  await persistLeadIntakeDurably({
+    lead: intake("lead-workspace-a", "Workspace A Person", "a@example.invalid"),
+    contactSecret,
+    payload,
+    receivedAt: "2026-08-10T09:00:00.000Z",
+    workspaceId: "workspace-a",
+  });
+  await persistLeadIntakeDurably({
+    lead: intake("lead-workspace-b", "Workspace B Person", "b@example.invalid"),
+    contactSecret,
+    payload,
+    receivedAt: "2026-08-10T09:01:00.000Z",
+    workspaceId: "workspace-b",
+  });
+
+  await assert.rejects(
+    () => readLeadIntakesDurably({ contactSecret, payload }),
+    (error) => error?.status === 403 && error?.capability === "workspace:access",
+  );
+
+  const workspaceA = await readLeadIntakesDurably({
+    contactSecret,
+    payload,
+    user: { collection: "admins", id: "broker-a", role: "broker", workspace_ids: ["workspace-a"] },
+    workspaceId: "workspace-a",
+  });
+  assert.deepEqual(workspaceA.map(({ lead_id, workspace_id }) => ({ lead_id, workspace_id })), [
+    { lead_id: "lead-workspace-a", workspace_id: "workspace-a" },
+  ]);
+  assert.equal(workspaceA[0].contact.name, "Workspace A Person");
+  assert.equal(JSON.stringify(workspaceA).includes("Workspace B Person"), false);
+  assert.equal(JSON.stringify(workspaceA).includes("b@example.invalid"), false);
+
+  const find = payload.find.bind(payload);
+  payload.find = async (query) => {
+    await find(query);
+    return { docs: payload.rows[query.collection] };
+  };
+  await assert.rejects(
+    () => readLeadIntakesDurably({ contactSecret, payload, workspaceId: "workspace-a" }),
+    (error) =>
+      error instanceof LeadStoreUnavailableError &&
+      /crossed the requested workspace boundary/.test(error.cause?.message || ""),
+    "a permissive Local API response is rejected before a foreign contact can be decrypted",
+  );
 });
 
 test("durable admin readback takes the lead snapshot before querying contacts", async () => {
@@ -399,7 +487,7 @@ test("durable admin readback takes the lead snapshot before querying contacts", 
     return find(query);
   };
 
-  const pendingRead = readLeadIntakesDurably({ contactSecret, payload });
+  const pendingRead = readLeadIntakesDurably({ contactSecret, payload, workspaceId: "workspace-sandanski" });
   await leadQueryStarted;
   assert.equal(contactQueryStarted, false, "the contact query must wait for a stable lead snapshot");
   releaseLeadQuery();
@@ -451,7 +539,7 @@ test("durable admin readback rejects plaintext private fields in stored ledger r
     const previous = stored[field];
     stored[field] = value;
     await assert.rejects(
-      () => readLeadIntakesDurably({ contactSecret, payload }),
+      () => readLeadIntakesDurably({ contactSecret, payload, workspaceId: "workspace-sandanski" }),
       (error) =>
         error instanceof LeadStoreUnavailableError &&
         error.code === "lead_store_unavailable" &&
@@ -473,6 +561,7 @@ test("durable admin readback fails closed when Payload cannot be read", async ()
       readLeadIntakesDurably({
         contactSecret: "test-only-durable-contact-key-32-characters-minimum",
         payload,
+        workspaceId: "workspace-sandanski",
       }),
     (error) => error instanceof LeadStoreUnavailableError && error.code === "lead_store_unavailable",
   );
@@ -629,6 +718,8 @@ test("the collections keep contact envelopes opaque and ledger rows immutable", 
   const bySlug = Object.fromEntries(LEAD_COLLECTIONS.map((c) => [c.slug, c]));
 
   const leadFields = Object.fromEntries(bySlug.public_leads.fields.map((f) => [f.name, f]));
+  assert.equal(leadFields.workspace_id.required, true);
+  assert.equal(leadFields.workspace_id.access.update(), false, "workspace identity is immutable once written");
   assert.equal(leadFields.lead_id.unique, true);
   assert.equal(leadFields.lead_id.access.update(), false, "identity is immutable once written");
   assert.equal(leadFields.received_at.access.update(), false);
@@ -639,6 +730,8 @@ test("the collections keep contact envelopes opaque and ledger rows immutable", 
   }
 
   const contactFields = Object.fromEntries(bySlug.lead_contacts.fields.map((f) => [f.name, f]));
+  assert.equal(contactFields.workspace_id.required, true);
+  assert.equal(contactFields.workspace_id.access.update(), false, "contact workspace identity is immutable once written");
   for (const name of ["iv", "auth_tag", "ciphertext", "algorithm"]) {
     assert.equal(contactFields[name].required, true);
     assert.equal(contactFields[name].access.update(), false, `${name} is write-once`);

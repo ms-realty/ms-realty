@@ -74,8 +74,11 @@ async function adminGet(pathname, routeConfig, headers = HEADERS) {
 
 test("durable admin leads are read only after authentication and never merged with fixtures", async () => {
   let reads = 0;
-  const routeConfig = config(async () => {
+  const routeConfig = config(async (input) => {
     reads += 1;
+    assert.equal(input.admin, true);
+    assert.deepEqual(input.workspaceIds, ["workspace-sandanski"]);
+    assert.equal(input.user.role, "admin");
     return [durableLead];
   });
 
@@ -101,6 +104,53 @@ test("durable admin leads are read only after authentication and never merged wi
   assert.equal(today.status, 200);
   assert.deepEqual(todayBody.leads.map((lead) => lead.lead_id), [durableLead.lead_id]);
   assert.equal(JSON.stringify(todayBody).includes("lead-draft-62c8e259-c555-4583-a2c4-0a1b5be53731"), false);
+});
+
+test("broker durable reads use only the intersection of assigned and configured workspaces", async () => {
+  const brokerToken = "durable-broker-read-token-0123456789abcdef";
+  const brokerEnv = {
+    NODE_ENV: "production",
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: JSON.stringify([
+      {
+        id: "durable_broker",
+        token: brokerToken,
+        roles: ["broker"],
+        workspace_ids: ["workspace-sandanski", "workspace-other"],
+      },
+    ]),
+  };
+  let readInput;
+  const allowedConfig = config(async (input) => {
+    readInput = input;
+    return [durableLead];
+  }, { authEnv: brokerEnv });
+  const allowed = await adminGet("/api/admin/leads", allowedConfig, { authorization: `Bearer ${brokerToken}` });
+  assert.equal(allowed.status, 200);
+  assert.equal(readInput.admin, false);
+  assert.deepEqual(readInput.workspaceIds, ["workspace-sandanski"]);
+  assert.equal(readInput.user.role, "broker");
+  assert.deepEqual(readInput.user.workspace_ids, ["workspace-other", "workspace-sandanski"]);
+
+  let forbiddenReads = 0;
+  const forbiddenEnv = {
+    NODE_ENV: "production",
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: JSON.stringify([
+      {
+        id: "foreign_broker",
+        token: brokerToken,
+        roles: ["broker"],
+        workspace_ids: ["workspace-other"],
+      },
+    ]),
+  };
+  const forbiddenConfig = config(async () => {
+    forbiddenReads += 1;
+    return [durableLead];
+  }, { authEnv: forbiddenEnv });
+  const forbidden = await adminGet("/api/admin/leads", forbiddenConfig, { authorization: `Bearer ${brokerToken}` });
+  assert.equal(forbidden.status, 403);
+  assert.equal((await forbidden.json()).required_capability, "workspace:access");
+  assert.equal(forbiddenReads, 0, "a foreign broker must be rejected before contact decryption starts");
 });
 
 test("every lead-backed admin read uses durable leads and filters file or SQLite fixtures", async (t) => {
