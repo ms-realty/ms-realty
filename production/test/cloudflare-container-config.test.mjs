@@ -8,6 +8,7 @@ import { readBuildMarker } from "../lib/build-marker.mjs";
 import {
   allowsAdminSessionMutation,
   allowsDurableCaseAuthorityMutation,
+  allowsDurableListingAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
   allowsProviderWebhookMutation,
@@ -17,6 +18,8 @@ import {
 } from "../../workers/durable-case-authority.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
+const appAdminSource = fs.readFileSync(fromRoot("production", "lib", "app-admin-adapter.mjs"), "utf8");
+const legacyHttpSource = fs.readFileSync(fromRoot("production", "lib", "http.mjs"), "utf8");
 const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
 const autoMergeWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "auto-merge.yml"), "utf8");
 const dockerignore = fs.readFileSync(fromRoot(".dockerignore"), "utf8");
@@ -140,7 +143,17 @@ test("Cloudflare Container allows only configured durable case-authority writes"
     assert.equal(allowsDurableCaseAuthorityMutation({ method: "POST", pathname, env }), true);
   }
   assert.equal(allowsDurableCaseAuthorityMutation({ method: "PATCH", pathname: "/api/admin/cases", env }), false);
-  assert.equal(allowsDurableCaseAuthorityMutation({ method: "POST", pathname: "/api/admin/cases/unknown", env }), false);
+  for (const pathname of [
+    "/api/admin/cases/",
+    "/api/admin/cases/unknown",
+    "/api/admin/cases-extra",
+    "/api/admin/cases%2Factions",
+    "/api%2Fadmin%2Fcases",
+    "/api%252Fadmin%252Fcases",
+    "/api/admin/cases\\actions",
+  ]) {
+    assert.equal(allowsDurableCaseAuthorityMutation({ method: "POST", pathname, env }), false, pathname);
+  }
   assert.equal(
     allowsDurableCaseAuthorityMutation({
       method: "POST",
@@ -282,14 +295,22 @@ test("Cloudflare Container admits authenticated MCP without opening ledger write
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: {} }), false);
 });
 
-test("Cloudflare Container admits only the exact anonymous login and cookie-present custom admin mutations", () => {
+test("Cloudflare Container admits only exact Payload-backed browser auth mutations", () => {
   assert.match(workerSource, /allowsAdminSessionMutation\(\{ request, method: request\.method, pathname: url\.pathname \}\)/);
   const request = (cookie = "") => new Request("https://ms-realty.example/admin", { headers: cookie ? { cookie } : {} });
   assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin/login" }), true);
   assert.equal(allowsAdminSessionMutation({ request: request(), method: "GET", pathname: "/admin/login" }), false);
-  assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin/login/" }), false);
-  assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin/login%2fextra" }), false);
-  assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin%252flogin%252fextra" }), false);
+  for (const pathname of [
+    "/admin/login/",
+    "/admin/login/extra",
+    "/admin/logins",
+    "/admin%2Flogin",
+    "/admin/login%2Fextra",
+    "/admin%252Flogin",
+    "/admin\\login",
+  ]) {
+    assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname }), false, pathname);
+  }
 
   assert.equal(allowsAdminSessionMutation({ request: request(), method: "POST", pathname: "/admin/logout" }), false);
   assert.equal(
@@ -300,6 +321,25 @@ test("Cloudflare Container admits only the exact anonymous login and cookie-pres
     allowsAdminSessionMutation({ request: request("ms_admin=session"), method: "POST", pathname: "/api/admin/team" }),
     true,
   );
+  for (const pathname of [
+    "/api/admin/team/",
+    "/api/admin/team/extra",
+    "/api/admin/teams",
+    "/api/admin/team%2Fextra",
+    "/api%2Fadmin%2Fteam",
+    "/api%252Fadmin%252Fteam",
+    "/api/admin/team\\extra",
+  ]) {
+    assert.equal(
+      allowsAdminSessionMutation({ request: request("ms_admin=session"), method: "POST", pathname }),
+      false,
+      pathname,
+    );
+  }
+  assert.equal(
+    allowsAdminSessionMutation({ request: request("ms_admin=session"), method: "POST", pathname: "/api/admin/listings/edit" }),
+    false,
+  );
   assert.equal(
     allowsAdminSessionMutation({ request: request("other=session"), method: "POST", pathname: "/api/admin/team" }),
     false,
@@ -307,6 +347,78 @@ test("Cloudflare Container admits only the exact anonymous login and cookie-pres
   assert.equal(hasAdminSessionCookie("other=1; ms_admin=payload.jwt.session"), true);
   assert.equal(hasAdminSessionCookie("ms_admin=; other=1"), false);
   assert.equal(hasAdminSessionCookie("xms_admin=session"), false);
+});
+
+test("Cloudflare Container admits only exact Payload-backed listing mutations", () => {
+  assert.match(
+    workerSource,
+    /allowsDurableListingAuthorityMutation\(\{ method: request\.method, pathname: url\.pathname, env \}\)/,
+  );
+  const env = {
+    PAYLOAD_SECRET: "payload-secret",
+    DATABASE_URL: "postgres://payload:secret@db.example.test:5432/ms_realty",
+  };
+  for (const pathname of ["/api/admin/listings/edit", "/api/admin/listings/status"]) {
+    assert.equal(allowsDurableListingAuthorityMutation({ method: "POST", pathname, env }), true, pathname);
+  }
+  for (const pathname of [
+    "/api/admin/listings/edit/",
+    "/api/admin/listings/edit/extra",
+    "/api/admin/listings/edits",
+    "/api/admin/listings/edit%2Fextra",
+    "/api%2Fadmin%2Flistings%2Fedit",
+    "/api%252Fadmin%252Flistings%252Fedit",
+    "/api/admin/listings\\edit",
+    "/api/admin/listings/status/",
+    "/api/admin/listings/status/extra",
+    "/api/admin/listings/statuses",
+  ]) {
+    assert.equal(allowsDurableListingAuthorityMutation({ method: "POST", pathname, env }), false, pathname);
+  }
+  assert.equal(allowsDurableListingAuthorityMutation({ method: "PATCH", pathname: "/api/admin/listings/edit", env }), false);
+  assert.equal(
+    allowsDurableListingAuthorityMutation({ method: "POST", pathname: "/api/admin/listings/edit", env: { ...env, DATABASE_URL: "" } }),
+    false,
+  );
+  assert.equal(
+    allowsDurableListingAuthorityMutation({ method: "POST", pathname: "/api/admin/listings/status", env: { ...env, PAYLOAD_SECRET: "" } }),
+    false,
+  );
+});
+
+test("Cloudflare Container route matrix rejects every file-only admin mutation", () => {
+  const env = {
+    MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: "true",
+    MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED: "false",
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
+    PAYLOAD_SECRET: "payload-secret",
+    DATABASE_URL: "postgres://payload:secret@db.example.test:5432/ms_realty",
+  };
+  const request = new Request("https://ms-realty.example/admin", { headers: { cookie: "ms_admin=session" } });
+  const discovered = new Set(
+    [appAdminSource, legacyHttpSource].flatMap((source) =>
+      [...source.matchAll(/request\.method === "POST" && url\.pathname === "(\/api\/admin\/[^"]+)"/g)].map((match) => match[1]),
+    ),
+  );
+  const durable = new Set([
+    "/api/admin/team",
+    "/api/admin/listings/edit",
+    "/api/admin/listings/status",
+    "/api/admin/cases",
+    "/api/admin/cases/actions",
+    "/api/admin/cases/conditions",
+    "/api/admin/cases/conditions/actions",
+  ]);
+
+  for (const pathname of durable) assert.equal(discovered.has(pathname), true, `missing live route ${pathname}`);
+  for (const pathname of discovered) {
+    const admitted =
+      allowsAdminSessionMutation({ request, method: "POST", pathname }) ||
+      allowsDurableListingAuthorityMutation({ method: "POST", pathname, env }) ||
+      allowsDurableCaseAuthorityMutation({ method: "POST", pathname, env });
+    assert.equal(admitted, durable.has(pathname), pathname);
+  }
+  assert.ok(discovered.size > durable.size, "matrix must exercise file-only routes");
 });
 
 test("Cloudflare Container hides every external Payload UI, identity REST, and GraphQL path variant", () => {

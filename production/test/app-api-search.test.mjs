@@ -146,6 +146,24 @@ test("production API search fails closed instead of serving the seed fixture", a
   assert.equal(body.search, undefined);
 });
 
+test("successful production API search relies on observability without appending file analytics", async () => {
+  const config = searchConfig({ environment: "production", engine: "postgres" });
+  config.search.postgres.queryImpl = async ({ intent, target }) => ({
+    engine: "postgres",
+    total: 1,
+    hits: [hit],
+    page: intent.page,
+    page_size: intent.page_size,
+    target,
+  });
+
+  const { response, body } = await searchResponse(config, "locale=bg&q=Sandanski");
+
+  assert.equal(response.status, 200);
+  assert.equal(body.search.backend.engine, "postgres");
+  assert.equal(fs.existsSync(config.eventLedgerPath), false);
+});
+
 test("public API search preserves requested sorting and pagination in seed fallback mode", async () => {
   const first = await searchResponse(searchConfig(), "locale=bg&q=Sandanski&sort=price_desc&page=1");
   const second = await searchResponse(searchConfig(), "locale=bg&q=Sandanski&sort=price_desc&page=2");

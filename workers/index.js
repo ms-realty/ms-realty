@@ -3,6 +3,7 @@ import {
   LEAD_PROBE_HEADER,
   allowsAdminSessionMutation,
   allowsDurableCaseAuthorityMutation,
+  allowsDurableListingAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
   allowsProviderWebhookMutation,
@@ -295,6 +296,7 @@ export default {
       !publicEvent &&
       !providerWebhook &&
       !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
+      !allowsDurableListingAuthorityMutation({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
     ) {
       return ephemeralRuntimeDataResponse();

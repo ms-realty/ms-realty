@@ -106,6 +106,7 @@ export function appApiConfigFromEnv(env = process.env) {
     requestedAt: env.MS_REALTY_REQUESTED_AT,
     savedAt: env.MS_REALTY_SAVED_AT,
     sellerPipelineCreatedAt: env.MS_REALTY_SELLER_PIPELINE_CREATED_AT,
+    recordSearchEventsToFile: env.NODE_ENV !== "production",
   };
 }
 
@@ -250,7 +251,10 @@ async function routeSearch(requestUrl, registry, seed, config, preview = false) 
       translationTasks: currentTranslationTasks(config),
     });
     const { intent, query, filters, sort, page } = request;
-    if (!preview) await recordOperationalEvent({ type: "search", path: requestUrl.pathname, locale: intent.locale, query, filters, sort, page }, config);
+    const durableEventsEnabled = config.eventDurableStore?.eventDurableStoreEnabled === true;
+    if (!preview && (config.recordSearchEventsToFile || durableEventsEnabled)) {
+      await recordOperationalEvent({ type: "search", path: requestUrl.pathname, locale: intent.locale, query, filters, sort, page }, config);
+    }
     return json(200, result);
   } catch (error) {
     if (error instanceof PublicSearchInputError) {

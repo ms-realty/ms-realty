@@ -5,6 +5,11 @@ export const DURABLE_CASE_AUTHORITY_PATHS = new Set([
   "/api/admin/cases/conditions/actions",
 ]);
 
+export const DURABLE_LISTING_AUTHORITY_PATHS = new Set([
+  "/api/admin/listings/edit",
+  "/api/admin/listings/status",
+]);
+
 export const LEAD_PROBE_HEADER = "x-ms-realty-lead-probe";
 
 async function sha256(value) {
@@ -62,7 +67,6 @@ export function allowsProviderWebhookMutation({ method, pathname, env }) {
 }
 
 const ADMIN_SESSION_COOKIE = "ms_admin";
-const ADMIN_MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 function decodedSecurityPath(pathname) {
   let current = String(pathname || "");
@@ -113,25 +117,21 @@ export function isPayloadPrivatePath(pathname) {
 }
 
 function isExactSecurityPath(pathname, expected) {
-  return decodedSecurityPath(pathname) === expected;
+  return String(pathname || "") === expected;
 }
 
-function isCustomAdminApiPath(pathname) {
-  const [first, second, third] = securityPathSegments(pathname);
-  return first === "api" && second === "admin" && Boolean(third);
-}
-
-// Login is the only anonymous browser mutation. Every other custom workbench
-// mutation needs the exact Payload session cookie name at the edge; Payload
-// then validates its signed token, database session, role, workspace, and CSRF.
+// Login is the only anonymous browser mutation. Logout and team management use
+// the exact Payload session cookie name; Payload then validates the signed
+// token, database session, role, workspace, and CSRF. Business mutations are
+// admitted separately only when their durable authority is configured.
 export function allowsAdminSessionMutation({ request, method, pathname }) {
   const verb = String(method || "").toUpperCase();
   if (verb === "POST" && isExactSecurityPath(pathname, "/admin/login")) return true;
-  if (!ADMIN_MUTATING_METHODS.has(verb)) return false;
+  if (verb !== "POST") return false;
   const hasSession = hasAdminSessionCookie(request?.headers?.get("cookie") || "");
   if (!hasSession) return false;
   if (verb === "POST" && isExactSecurityPath(pathname, "/admin/logout")) return true;
-  return isCustomAdminApiPath(pathname);
+  return isExactSecurityPath(pathname, "/api/admin/team");
 }
 
 // The MCP endpoint speaks JSON-RPC over POST (and DELETE for session close).
@@ -155,6 +155,15 @@ export function allowsDurableCaseAuthorityMutation({ method, pathname, env }) {
     env.MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED === "true" &&
     env.MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED !== "true" &&
     Boolean(env.MS_REALTY_WORKSPACE_ID?.trim()) &&
+    Boolean(env.PAYLOAD_SECRET?.trim()) &&
+    Boolean(env.DATABASE_URL?.trim())
+  );
+}
+
+export function allowsDurableListingAuthorityMutation({ method, pathname, env }) {
+  return (
+    method === "POST" &&
+    DURABLE_LISTING_AUTHORITY_PATHS.has(pathname) &&
     Boolean(env.PAYLOAD_SECRET?.trim()) &&
     Boolean(env.DATABASE_URL?.trim())
   );
