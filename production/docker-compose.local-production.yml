@@ -63,8 +63,8 @@ x-app-environment: &app-environment
   MS_REALTY_LOCAL_READINESS_SOURCE_PATH: /app/production/data/launch-readiness.json
   MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: /runtime-evidence/local-launch-readiness.json
   MS_REALTY_LOCAL_READINESS_MAX_AGE_SECONDS: "900"
-  MS_REALTY_SEARCH_SYNC_REPORT_PATH: /runtime-evidence/search-engine-sync-report.json
-  MS_REALTY_SEARCH_QUERY_REPORT_PATH: /runtime-evidence/search-engine-query-report.json
+  MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: /runtime-evidence/postgres-search-sync-report.json
+  MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: /runtime-evidence/postgres-search-query-report.json
   MS_REALTY_HERMES_WORKER_REPORT_PATH: /runtime-evidence/hermes-draft-worker-report.json
   MS_REALTY_HERMES_AGENT_RUNTIME_REPORT_PATH: /runtime-evidence/hermes-agent-runtime-report.json
   MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: /runtime-evidence/live-service-provisioning-report.json

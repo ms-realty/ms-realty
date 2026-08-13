@@ -1,51 +1,34 @@
 {
-  "generated_at": "2026-07-06T00:00:00Z",
+  "generated_at": "2026-08-13T00:00:00.000Z",
   "ready": false,
   "status": "blocked",
   "summary": {
-    "checks": 9,
+    "checks": 6,
     "missing_env": [
-      "TYPESENSE_URL",
-      "TYPESENSE_API_KEY",
-      "MEILI_URL",
-      "MEILI_API_KEY",
+      "DATABASE_URL",
+      "PAYLOAD_SECRET",
       "HERMES_CHAT_COMPLETIONS_URL",
       "HERMES_API_KEY"
     ],
     "placeholder_env": [],
     "services": [
-      "typesense",
-      "meilisearch",
+      "postgres_search",
       "hermes"
     ]
   },
   "checks": [
     {
-      "id": "typesense_url",
-      "env": "TYPESENSE_URL",
+      "id": "database_url",
+      "env": "DATABASE_URL",
       "status": "missing_env"
     },
     {
-      "id": "typesense_api_key",
-      "env": "TYPESENSE_API_KEY",
+      "id": "payload_secret",
+      "env": "PAYLOAD_SECRET",
       "status": "missing_env"
     },
     {
-      "id": "meili_url",
-      "env": "MEILI_URL",
-      "status": "missing_env"
-    },
-    {
-      "id": "meili_api_key",
-      "env": "MEILI_API_KEY",
-      "status": "missing_env"
-    },
-    {
-      "id": "typesense_health",
-      "status": "missing_env"
-    },
-    {
-      "id": "meilisearch_health",
+      "id": "postgres_database_target",
       "status": "missing_env"
     },
     {
@@ -104,7 +87,7 @@
     "agent_runtime": {
       "kind": "hermes_agent_runtime",
       "evidence_scope": "live",
-      "generated_at": "2026-07-06T00:00:00Z",
+      "generated_at": "2026-08-13T00:00:00.000Z",
       "ready": false,
       "status": "blocked",
       "endpoint": null,
@@ -145,7 +128,7 @@
     ]
   },
   "next_actions": [
-    "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",
+    "Set DATABASE_URL, PAYLOAD_SECRET, and Hermes provider env.",
     "Run npm run live:provisioning until all service checks pass.",
     "Run npm run live:capture only after provisioning passes."
   ]

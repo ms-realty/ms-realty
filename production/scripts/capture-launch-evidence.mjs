@@ -13,8 +13,8 @@ const REQUIRED_ARTIFACT_ENV = {
   seo_evidence: "MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH",
   listing_quality_review: "MS_REALTY_LISTING_QUALITY_REVIEW_PATH",
   live_service_provisioning: "MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH",
-  search_sync: "MS_REALTY_SEARCH_SYNC_REPORT_PATH",
-  search_query: "MS_REALTY_SEARCH_QUERY_REPORT_PATH",
+  search_sync: ["MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH", "MS_REALTY_SEARCH_SYNC_REPORT_PATH"],
+  search_query: ["MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH", "MS_REALTY_SEARCH_QUERY_REPORT_PATH"],
   hermes_worker: "MS_REALTY_HERMES_WORKER_REPORT_PATH",
   monitoring_rollback: "MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH",
   payload_runtime: "MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH",
@@ -22,8 +22,9 @@ const REQUIRED_ARTIFACT_ENV = {
 };
 
 function required(env, key) {
-  const value = String(env[key] || "").trim();
-  if (!value) throw new Error(`Missing ${key}`);
+  const keys = Array.isArray(key) ? key : [key];
+  const value = keys.map((name) => String(env[name] || "").trim()).find(Boolean);
+  if (!value) throw new Error(`Missing ${keys[0]}`);
   return value;
 }
 

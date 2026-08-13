@@ -372,8 +372,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     publicRequestOutcomeLedgerPath:
       env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH || DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
     listingQualityReviewPath: env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH,
-    searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
-    searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
+    searchSyncReportPath: env.MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH || env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
+    searchQueryReportPath: env.MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH || env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
     hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
     liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
     monitoringRollbackReportPath: env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH,

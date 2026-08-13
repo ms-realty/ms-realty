@@ -120,7 +120,7 @@ area code хранится как справочная географическ�
 2. `external_seo_exports` — предоставить реальные Search Console, Yandex Webmaster и
    backlink exports по обоим legacy-доменам.
 3. `listing_quality_review` — завершить human review CSV для 165 listings.
-4. `live_services` — предоставить live Typesense, Meilisearch и Hermes worker reports.
+4. `live_services` — предоставить live Postgres search sync/query и отдельный Hermes worker report.
 5. `monitoring_rollback` — подтвердить production monitoring и rollback proof.
 6. `payload_runtime` — предоставить реальный Payload/Postgres runtime report.
 7. `production_recovery` — выполнить и подписать recovery drill с разделёнными ролями.

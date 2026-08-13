@@ -1594,7 +1594,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.ok(preflightReports.body.reports.listing_quality.next_actions.some((action) => action.includes("listing:preflight")));
   assert.equal(preflightReports.body.reports.live_services.status, "blocked");
   assert.equal(preflightReports.body.reports.live_service_provisioning.status, "blocked_report");
-  assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+  assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("DATABASE_URL"));
   assert.ok(preflightReports.body.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
   assert.equal(preflightReports.body.reports.payload_runtime.status, "blocked_report");
   assert.ok(preflightReports.body.reports.payload_runtime.next_actions.some((action) => action.includes("payload:runtime")));
@@ -1613,7 +1613,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(liveServiceProvisioning.status, 200);
   assert.equal(liveServiceProvisioning.body.kind, "admin_live_service_provisioning");
   assert.equal(liveServiceProvisioning.body.provisioning.status, "blocked_report");
-  assert.ok(liveServiceProvisioning.body.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+  assert.ok(liveServiceProvisioning.body.provisioning.summary.missing_env.includes("DATABASE_URL"));
   assert.ok(liveServiceProvisioning.body.provisioning.next_actions.some((action) => action.includes("live:provisioning")));
   assert.equal(liveServiceProvisioning.body.provisioning.hermes.install_command, "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash");
   assert.equal(liveServiceProvisioning.body.provisioning.hermes.safety.can_publish, false);
@@ -1944,13 +1944,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const seoEvidenceInputDir = tempSeoEvidenceDir();
   const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
   const launchReadinessOutputPath = `${seoEvidenceInputDir}/launch-readiness.json`;
-  const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
-  const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
+  const searchSyncReportPath = `${seoEvidenceInputDir}/postgres-search-sync-report.json`;
+  const searchQueryReportPath = `${seoEvidenceInputDir}/postgres-search-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
   const liveServiceProvisioningReportPath = `${seoEvidenceInputDir}/live-service-provisioning-report.json`;
   const payloadRuntimeReportPath = `${seoEvidenceInputDir}/payload-runtime-report.json`;
-  const syncReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-sync-report.json.example"), "utf8"));
-  const queryReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-query-report.json.example"), "utf8"));
+  const syncReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "postgres-search-sync-report.json.example"), "utf8"));
+  const queryReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "postgres-search-query-report.json.example"), "utf8"));
   const hermesReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-worker-report.json.example"), "utf8"));
   const payloadReport = await buildPayloadRuntimeReport({
     databaseProbe: async ({ database, host, port }) => ({ database, host, port, status: "pass" }),
@@ -1966,15 +1966,12 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   });
   const liveServiceProvisioningReport = await buildLiveServiceProvisioningReport({
     env: {
-      TYPESENSE_URL: "https://typesense.ms-realty.bg",
-      TYPESENSE_API_KEY: "typesense-key",
-      MEILI_URL: "https://meili.ms-realty.bg",
-      MEILI_API_KEY: "meili-key",
+      DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: healthyHermesAgentFetch,
-    lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
     generatedAt: runtimeGeneratedAt,
   });
   delete syncReport.example;
@@ -2100,15 +2097,15 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   const liveTemplateUnauthorized = await dispatchHttp(app, {
-    url: "/api/admin/live-service-report-template?source=typesense_meilisearch_sync",
+    url: "/api/admin/live-service-report-template?source=postgres_search_sync",
   });
   const liveTemplate = await dispatchHttp(app, {
-    url: "/api/admin/live-service-report-template?source=typesense_meilisearch_sync",
+    url: "/api/admin/live-service-report-template?source=postgres_search_sync",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   const liveImportUnauthorized = await dispatchHttp(app, {
     method: "POST",
-    url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_sync",
+    url: "/api/admin/live-service-reports/import?source=postgres_search_sync",
     body: syncReport,
   });
   const liveProvisioningImportUnauthorized = await dispatchHttp(app, {
@@ -2124,13 +2121,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   });
   const liveSyncImport = await dispatchHttp(app, {
     method: "POST",
-    url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_sync",
+    url: "/api/admin/live-service-reports/import?source=postgres_search_sync",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: syncReport,
   });
   const liveQueryImport = await dispatchHttp(app, {
     method: "POST",
-    url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_query",
+    url: "/api/admin/live-service-reports/import?source=postgres_search_query",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: queryReport,
   });
@@ -2240,7 +2237,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   ]);
   assert.equal(liveTemplateUnauthorized.status, 401);
   assert.equal(liveTemplate.status, 200);
-  assert.equal(liveTemplate.headers["content-disposition"], 'attachment; filename="search-engine-sync-report.json.example"');
+  assert.equal(liveTemplate.headers["content-disposition"], 'attachment; filename="postgres-search-sync-report.json.example"');
   assert.equal(JSON.parse(liveTemplate.body).example, true);
   assert.equal(JSON.parse(liveTemplate.body).summary.engines, 1);
   assert.equal(liveImportUnauthorized.status, 401);
@@ -2256,10 +2253,10 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(liveSyncImport.body.livePreflight.summary.missing_report, 2);
   assert.equal(liveSyncImport.body.liveImport.ready, false);
   assert.equal(liveSyncImport.body.liveImport.status, "blocked");
-  assert.equal(liveSyncImport.body.liveImport.importedSource, "typesense_meilisearch_sync");
+  assert.equal(liveSyncImport.body.liveImport.importedSource, "postgres_search_sync");
   assert.deepEqual(
     liveSyncImport.body.liveImport.blockedReports.map((report) => report.source),
-    ["typesense_meilisearch_query", "hermes_draft_worker"],
+    ["postgres_search_query", "hermes_draft_worker"],
   );
   assert.equal(liveQueryImport.status, 202);
   assert.equal(liveHermesImport.status, 201);

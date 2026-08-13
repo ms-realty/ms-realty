@@ -1,8 +1,8 @@
 import { validateLiveServiceReports } from "../lib/launch-readiness.mjs";
 
 const result = validateLiveServiceReports({
-  syncReportPath: process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
-  queryReportPath: process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
+  syncReportPath: process.env.MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH || process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
+  queryReportPath: process.env.MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH || process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
   hermesReportPath: process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
 });
 

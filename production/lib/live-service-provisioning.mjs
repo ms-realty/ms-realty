@@ -9,11 +9,8 @@ import {
 } from "./hermes-provider-provisioning.mjs";
 import { assertHermesAgentRuntimeReport, probeHermesAgentRuntime } from "./hermes-agent-runtime.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
-import {
-  assertSearchServiceUrl,
-  fetchSearchService,
-  privateSearchServiceNetworkAllowed,
-} from "./search-service-http.mjs";
+import { assertProductionDatabaseHost } from "./payload-runtime.mjs";
+import { assertSearchServiceUrl } from "./search-service-http.mjs";
 
 export const DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT = fromRoot(
   "production",
@@ -21,26 +18,20 @@ export const DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT = fromRoot(
   "live-service-provisioning-report.json",
 );
 const REQUIRED_CHECK_IDS = [
-  "typesense_url",
-  "typesense_api_key",
-  "meili_url",
-  "meili_api_key",
-  "typesense_health",
-  "meilisearch_health",
+  "database_url",
+  "payload_secret",
+  "postgres_database_target",
   "hermes_provider",
   "hermes_agent_health",
   "hermes_agent_capabilities",
 ];
-const REQUIRED_SERVICES = ["typesense", "meilisearch", "hermes"];
+const REQUIRED_SERVICES = ["postgres_search", "hermes"];
 const CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "fail", "not_run"]);
 const REQUIRED_ENV_BY_CHECK = {
-  typesense_url: "TYPESENSE_URL",
-  typesense_api_key: "TYPESENSE_API_KEY",
-  meili_url: "MEILI_URL",
-  meili_api_key: "MEILI_API_KEY",
+  database_url: "DATABASE_URL",
+  payload_secret: "PAYLOAD_SECRET",
 };
 const HERMES_REQUIRED_ENV_NAMES = new Set(["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
-const SEARCH_HEALTH_TIMEOUT_MS = 3_000;
 
 function assertProvisioningServiceUrl(value, label) {
   const parsed = assertSearchServiceUrl(value, { label, exactOrigin: false });
@@ -60,42 +51,31 @@ function envCheck(id, env, key) {
   return { id, env: key, status: "pass" };
 }
 
-async function healthCheck({
-  fetchImpl,
-  headers = {},
-  id,
-  path: route,
-  url,
-  lookupImpl,
-  allowPrivateNetwork = false,
-}) {
-  if (!url) return { id, status: "missing_env" };
-  let redacted_url = null;
+function assertProvisioningDatabaseTarget(value) {
+  const parsed = new URL(value);
+  if (!["postgres:", "postgresql:"].includes(parsed.protocol)) {
+    throw new Error("DATABASE_URL must use postgres:// or postgresql://");
+  }
+  const database = decodeURIComponent(parsed.pathname.replace(/^\//, "")).trim();
+  if (!database) throw new Error("DATABASE_URL must include a database name");
+  if (!parsed.hostname) throw new Error("DATABASE_URL must include a database host");
+  assertProductionDatabaseHost(parsed.hostname);
+  return parsed;
+}
+
+function postgresDatabaseTargetCheck(env) {
+  const value = String(env.DATABASE_URL || "").trim();
+  if (!value) return { id: "postgres_database_target", status: "missing_env" };
   try {
-    redacted_url = assertSearchServiceUrl(url, { label: id }).origin;
-    const { response, clearDeadline } = await fetchSearchService({
-      baseUrl: url,
-      route,
-      fetchImpl,
-      lookupImpl,
-      allowPrivateNetwork,
-      timeoutMs: SEARCH_HEALTH_TIMEOUT_MS,
-      options: { headers, method: "GET" },
-      label: id,
-    });
-    try {
-      return {
-        id,
-        redacted_url,
-        status: response.ok ? "pass" : "fail",
-        status_code: response.status,
-        ...(allowPrivateNetwork ? { private_network_allowed: true } : {}),
-      };
-    } finally {
-      clearDeadline();
-    }
+    const parsed = assertProvisioningDatabaseTarget(value);
+    if (!parsed.username || !parsed.password) throw new Error("DATABASE_URL must include database credentials");
+    return {
+      id: "postgres_database_target",
+      status: "pass",
+      database_target: `${parsed.protocol}//${parsed.hostname}:${Number(parsed.port || 5432)}/${decodeURIComponent(parsed.pathname.replace(/^\//, ""))}`,
+    };
   } catch (error) {
-    return { error: error.message, id, redacted_url, status: "fail" };
+    return { id: "postgres_database_target", status: "fail", error: error.message };
   }
 }
 
@@ -175,48 +155,13 @@ async function hermesProviderCheck(hermes, { env, fetchImpl, generatedAt }) {
 export async function buildLiveServiceProvisioningReport({
   env = process.env,
   fetchImpl = globalThis.fetch,
-  lookupImpl,
   generatedAt = new Date().toISOString(),
 } = {}) {
-  const allowPrivateNetwork = privateSearchServiceNetworkAllowed(env);
   const checks = [
-    envCheck("typesense_url", env, "TYPESENSE_URL"),
-    envCheck("typesense_api_key", env, "TYPESENSE_API_KEY"),
-    envCheck("meili_url", env, "MEILI_URL"),
-    envCheck("meili_api_key", env, "MEILI_API_KEY"),
+    envCheck("database_url", env, "DATABASE_URL"),
+    envCheck("payload_secret", env, "PAYLOAD_SECRET"),
   ];
-
-  if (checks.find((check) => check.id === "typesense_url").status === "pass" && checks.find((check) => check.id === "typesense_api_key").status === "pass") {
-    checks.push(
-      await healthCheck({
-        fetchImpl,
-        headers: { "x-typesense-api-key": env.TYPESENSE_API_KEY },
-        id: "typesense_health",
-        path: "/health",
-        url: env.TYPESENSE_URL,
-        lookupImpl,
-        allowPrivateNetwork,
-      }),
-    );
-  } else {
-    checks.push({ id: "typesense_health", status: "missing_env" });
-  }
-
-  if (checks.find((check) => check.id === "meili_url").status === "pass" && checks.find((check) => check.id === "meili_api_key").status === "pass") {
-    checks.push(
-      await healthCheck({
-        fetchImpl,
-        headers: { authorization: `Bearer ${env.MEILI_API_KEY}` },
-        id: "meilisearch_health",
-        path: "/health",
-        url: env.MEILI_URL,
-        lookupImpl,
-        allowPrivateNetwork,
-      }),
-    );
-  } else {
-    checks.push({ id: "meilisearch_health", status: "missing_env" });
-  }
+  checks.push(checks[0].status === "pass" ? postgresDatabaseTargetCheck(env) : { id: "postgres_database_target", status: "missing_env" });
 
   const hermes = buildHermesProviderProvisioningReport({ env, generatedAt });
   const hermesChecks = await hermesProviderCheck(hermes, { env, fetchImpl, generatedAt });
@@ -266,7 +211,7 @@ export async function buildLiveServiceProvisioningReport({
     next_actions: ready
       ? ["Run npm run live:provisioning:preflight, then npm run live:capture and npm run live:preflight."]
       : [
-          "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",
+          "Set DATABASE_URL, PAYLOAD_SECRET, and Hermes provider env.",
           "Run npm run live:provisioning until all service checks pass.",
           "Run npm run live:capture only after provisioning passes.",
         ],
@@ -316,16 +261,11 @@ export function assertLiveServiceProvisioningReport(report) {
   if (JSON.stringify(report.summary.placeholder_env) !== JSON.stringify([...new Set(placeholderEnv)])) {
     throw new Error("Live service provisioning placeholder env summary must match checks");
   }
-  for (const id of ["typesense_health", "meilisearch_health"]) {
-    const check = report.checks.find((item) => item.id === id);
-    if (ready && (!check.redacted_url || !Number.isInteger(check.status_code) || check.status_code < 200 || check.status_code > 299)) {
-      throw new Error(`${id} must include successful endpoint evidence`);
-    }
-    if (ready && check.redacted_url) {
-      const parsed = assertSearchServiceUrl(check.redacted_url, { label: id });
-      if (parsed.protocol !== "https:" && check.private_network_allowed !== true) {
-        throw new Error(`${id} must use HTTPS unless private network evidence is explicit`);
-      }
+  const postgresTarget = report.checks.find((item) => item.id === "postgres_database_target");
+  if (postgresTarget?.status === "pass") {
+    const parsed = assertProvisioningDatabaseTarget(postgresTarget.database_target);
+    if (parsed.username || parsed.password || parsed.search || parsed.hash) {
+      throw new Error("Postgres provisioning target must be redacted");
     }
   }
   for (const id of ["hermes_agent_health", "hermes_agent_capabilities"]) {
@@ -397,14 +337,14 @@ export function assertLiveServiceProvisioningReport(report) {
     throw new Error("Ready live service provisioning report must point to provisioning preflight, capture, and live preflight");
   }
   const serialized = JSON.stringify(report);
-  if (/secret|Bearer\s+|sk-[A-Za-z0-9_-]+|user:pass/i.test(serialized)) {
+  if (/Bearer\s+\S+|sk-[A-Za-z0-9_-]+|:\/\/[^/@\s]+:[^/@\s]+@/i.test(serialized)) {
     throw new Error("Live service provisioning report must not persist secrets");
   }
   return true;
 }
 
 const LIVE_SERVICE_PROVISIONING_MISSING_REPORT_ACTIONS = [
-  "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",
+  "Set DATABASE_URL, PAYLOAD_SECRET, and Hermes provider env.",
   "Run npm run live:provisioning, then npm run live:provisioning:preflight.",
 ];
 const LIVE_SERVICE_PROVISIONING_INVALID_REPORT_ACTIONS = [

@@ -136,8 +136,8 @@ test("production server entrypoint serves runtime routes with env config", async
     MS_REALTY_LOCALE_REGISTRY_PATH: localeRegistryPath,
     MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoEvidenceInputDir,
     MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoEvidenceOutputPath,
-    MS_REALTY_SEARCH_SYNC_REPORT_PATH: fromRoot("production", "data", "search-engine-sync-report.json.example"),
-    MS_REALTY_SEARCH_QUERY_REPORT_PATH: fromRoot("production", "data", "search-engine-query-report.json.example"),
+    MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: fromRoot("production", "data", "postgres-search-sync-report.json.example"),
+    MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: fromRoot("production", "data", "postgres-search-query-report.json.example"),
     MS_REALTY_HERMES_WORKER_REPORT_PATH: fromRoot("production", "data", "hermes-draft-worker-report.json.example"),
     MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: monitoringRollbackReportPath,
   });
@@ -153,8 +153,8 @@ test("production server entrypoint serves runtime routes with env config", async
   assert.equal(config.localeRegistryPath, localeRegistryPath);
   assert.equal(config.seoEvidenceInputDir, seoEvidenceInputDir);
   assert.equal(config.seoEvidenceOutputPath, seoEvidenceOutputPath);
-  assert.match(config.searchSyncReportPath, /search-engine-sync-report\.json\.example$/);
-  assert.match(config.searchQueryReportPath, /search-engine-query-report\.json\.example$/);
+  assert.match(config.searchSyncReportPath, /postgres-search-sync-report\.json\.example$/);
+  assert.match(config.searchQueryReportPath, /postgres-search-query-report\.json\.example$/);
   assert.match(config.hermesWorkerReportPath, /hermes-draft-worker-report\.json\.example$/);
   assert.equal(config.monitoringRollbackReportPath, monitoringRollbackReportPath);
 

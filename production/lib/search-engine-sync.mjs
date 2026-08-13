@@ -16,11 +16,15 @@ import {
 import { createLedgerStore } from "./sqlite-ledger.mjs";
 
 export const DEFAULT_SEARCH_DATA_DIR = fromRoot("search", "data");
-export const DEFAULT_SEARCH_ENGINE_SYNC_REPORT = fromRoot("production", "data", "search-engine-sync-report.json");
+export const DEFAULT_POSTGRES_SEARCH_SYNC_REPORT = fromRoot("production", "data", "postgres-search-sync-report.json");
 export const DEFAULT_SEARCH_ENGINE_SYNC_SMOKE = fromRoot("production", "data", "search-engine-sync-smoke.json");
-export const DEFAULT_SEARCH_ENGINE_QUERY_REPORT = fromRoot("production", "data", "search-engine-query-report.json");
+export const DEFAULT_POSTGRES_SEARCH_QUERY_REPORT = fromRoot("production", "data", "postgres-search-query-report.json");
 export const DEFAULT_SEARCH_ENGINE_QUERY_SMOKE = fromRoot("production", "data", "search-engine-query-smoke.json");
 export const DEFAULT_SEARCH_OUTBOX_PATH = fromRoot("production", "data", "search-outbox.jsonl");
+
+// Compatibility exports for local multi-engine tooling. Live launch evidence uses the explicit Postgres names above.
+export const DEFAULT_SEARCH_ENGINE_SYNC_REPORT = DEFAULT_POSTGRES_SEARCH_SYNC_REPORT;
+export const DEFAULT_SEARCH_ENGINE_QUERY_REPORT = DEFAULT_POSTGRES_SEARCH_QUERY_REPORT;
 
 const SEARCH_ENGINES = new Set(["postgres", "typesense", "meilisearch"]);
 const APPROVED_PUBLICATION_STATE = "published";

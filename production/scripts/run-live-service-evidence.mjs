@@ -19,6 +19,11 @@ import {
 const PROVISIONING_NEXT =
   "Next: run `npm run live:provisioning:preflight`; after it passes, rerun `npm run live:capture`, then `npm run live:preflight`.";
 
+const postgresSyncReportPath = () =>
+  process.env.MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH || process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined;
+const postgresQueryReportPath = () =>
+  process.env.MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH || process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH || undefined;
+
 async function capture() {
   const runAt = new Date().toISOString();
   const provisioning = await buildLiveServiceProvisioningReport({ generatedAt: runAt });
@@ -30,10 +35,10 @@ async function capture() {
 
   const projection = await loadPayloadApprovedSearchProjection();
   const syncReport = await runSearchEngineSync({ projection, generatedAt: runAt });
-  writeSearchEngineSyncReport(syncReport, process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined);
+  writeSearchEngineSyncReport(syncReport, postgresSyncReportPath());
 
   const queryReport = await runSearchEngineQuerySmoke({ projection, generatedAt: runAt });
-  writeSearchEngineQueryReport(queryReport, process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH || undefined);
+  writeSearchEngineQueryReport(queryReport, postgresQueryReportPath());
 
   const hermesReport = await runHermesDraftWorker({
     provider: openAiCompatibleHermesProvider(),
@@ -47,8 +52,8 @@ async function capture() {
   writeHermesDraftWorkerReport(hermesReport, process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH || undefined);
 
   const result = validateLiveServiceReports({
-    syncReportPath: process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
-    queryReportPath: process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
+    syncReportPath: postgresSyncReportPath(),
+    queryReportPath: postgresQueryReportPath(),
     hermesReportPath: process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
   });
   if (!result.ready) {

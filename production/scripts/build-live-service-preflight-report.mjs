@@ -9,8 +9,8 @@ const generatedAt = process.env.MS_REALTY_GENERATED_AT || new Date().toISOString
 
 const report = buildLiveServicePreflightReport({
   generatedAt,
-  syncReportPath: process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
-  queryReportPath: process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
+  syncReportPath: process.env.MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH || process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
+  queryReportPath: process.env.MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH || process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
   hermesReportPath: process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
 });
 const outPath = writeLiveServicePreflightReport(report, outputPath);

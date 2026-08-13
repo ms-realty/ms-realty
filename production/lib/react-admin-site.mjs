@@ -5899,8 +5899,8 @@ function MigrationReviewBody({ page }) {
   );
   const title = label(copy, "migrationReview", "Migration review");
   const liveReportSources = [
-    ["typesense_meilisearch_sync", "Typesense / Meilisearch sync"],
-    ["typesense_meilisearch_query", "Typesense / Meilisearch query"],
+    ["postgres_search_sync", "Postgres search projection"],
+    ["postgres_search_query", "Postgres search query"],
     ["hermes_draft_worker", "Hermes draft worker"],
   ];
   const evidenceLinks = [
