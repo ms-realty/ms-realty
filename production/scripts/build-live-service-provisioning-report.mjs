@@ -20,6 +20,6 @@ if (!report.ready) {
   if (report.summary.missing_env.length) console.log(`Missing env: ${report.summary.missing_env.join(", ")}`);
   if (report.summary.placeholder_env.length) console.log(`Placeholder env: ${report.summary.placeholder_env.join(", ")}`);
   console.log(
-    "Next: set real Typesense, Meilisearch, and Hermes provider env, rerun `npm run live:provisioning`, then `npm run live:provisioning:preflight`.",
+    "Next: set real Postgres/Payload and Hermes provider env, rerun `npm run live:provisioning`, then `npm run live:provisioning:preflight`.",
   );
 }

@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-08-11T17:18:08.153Z
+Generated: 2026-08-13T00:00:00.000Z
 
 Status: blocked
 Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
@@ -14,7 +14,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - listing_quality_review: Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.
 - listing_quality_review: Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.
 - listing_quality_review: Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.
-- live_services: Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.
+- live_services: Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path and Hermes service.
 - live_services: Import or mount the three live service reports, then run npm run live:preflight before launch.
 - monitoring_rollback: Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.
 - monitoring_rollback: Mount a current redacted monitoring and rollback report, then run npm run monitoring:preflight.
@@ -67,29 +67,29 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 ## Live Service Provisioning
 
 - Current report evidence:
-- typesense_meilisearch_sync: missing_report (path production/data/search-engine-sync-report.json)
-- typesense_meilisearch_query: missing_report (path production/data/search-engine-query-report.json)
+- postgres_search_sync: missing_report (path production/data/postgres-search-sync-report.json)
+- postgres_search_query: missing_report (path production/data/postgres-search-query-report.json)
 - hermes_draft_worker: missing_report (path production/data/hermes-draft-worker-report.json)
 - Current provisioning evidence:
-- blocked_report (path production/data/live-service-provisioning-report.json; missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
-- Search engines: set `TYPESENSE_URL`, `TYPESENSE_API_KEY`, `MEILI_URL`, and `MEILI_API_KEY`.
+- blocked_report (path production/data/live-service-provisioning-report.json; missing DATABASE_URL, PAYLOAD_SECRET, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
+- Postgres search: set `DATABASE_URL` and `PAYLOAD_SECRET`; apply the public-search migration before capture so sync and query evidence use the same authoritative Neon target.
 - Hermes Agent: set `HERMES_CHAT_COMPLETIONS_URL` to its internal `/v1/chat/completions` API and set `HERMES_API_KEY`; production Hermes evidence must be authenticated.
 - Hermes runtime: `npm run hermes:runtime` verifies its `/health` endpoint and authenticated `/v1/capabilities` response before any draft-worker evidence is accepted.
 - Managed local profile: set `HERMES_AGENT_MODEL`, `HERMES_AGENT_LLM_BASE_URL`, and `HERMES_AGENT_LLM_API_KEY`, then run `npm run docker:hermes:up`. The Agent only forwards to a private OpenAI-compatible model provider; its tools and persistent memory are disabled.
 - Hermes provider report: `npm run hermes:provisioning` writes `production/data/hermes-provider-provisioning-report.json` without persisting API keys.
-- Live service provisioning report: `npm run live:provisioning` writes `production/data/live-service-provisioning-report.json` with redacted endpoint health and missing-env evidence.
+- Live service provisioning report: `npm run live:provisioning` writes `production/data/live-service-provisioning-report.json` with the redacted Postgres target, Hermes endpoint health, and missing-env evidence.
 - Admin provisioning status endpoint: `GET /api/admin/live-service-provisioning`.
 - Admin provisioning import endpoint: `POST /api/admin/live-service-provisioning/import` accepts the redacted JSON from `npm run live:provisioning`.
 - Provisioning preflight: `npm run live:provisioning:preflight` must pass before live evidence capture.
-- Live evidence capture: `npm run live:capture` runs search sync, search query, Hermes draft worker, and validates the three report outputs.
+- Live evidence capture: `npm run live:capture` verifies the Postgres search projection, queries that same Postgres target, runs the Hermes draft worker, and validates all three report outputs.
 - Individual debug commands: `npm run search:sync`, `npm run search:query`, `npm run hermes:worker`.
 - Status report: `npm run live:report` writes current missing/invalid live-service report state without clearing the launch gate.
 - Admin live-services status endpoint: `GET /api/admin/live-services`.
 - Report preflight: `npm run live:preflight`.
-- Report examples: `production/data/search-engine-sync-report.json.example`, `production/data/search-engine-query-report.json.example`, `production/data/hermes-draft-worker-report.json.example`.
-- Admin template endpoint: `GET /api/admin/live-service-report-template?source=typesense_meilisearch_sync`, `?source=typesense_meilisearch_query`, `?source=hermes_draft_worker`.
-- Admin import endpoint: `POST /api/admin/live-service-reports/import?source=typesense_meilisearch_sync`, `?source=typesense_meilisearch_query`, `?source=hermes_draft_worker`.
-- Production/CLI report path overrides: `MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH`, `MS_REALTY_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_SEARCH_QUERY_REPORT_PATH`, `MS_REALTY_HERMES_WORKER_REPORT_PATH`, `MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH`.
+- Report examples: `production/data/postgres-search-sync-report.json.example`, `production/data/postgres-search-query-report.json.example`, `production/data/hermes-draft-worker-report.json.example`.
+- Admin template endpoint: `GET /api/admin/live-service-report-template?source=postgres_search_sync`, `?source=postgres_search_query`, `?source=hermes_draft_worker`.
+- Admin import endpoint: `POST /api/admin/live-service-reports/import?source=postgres_search_sync`, `?source=postgres_search_query`, `?source=hermes_draft_worker`.
+- Production/CLI report path overrides: `MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH`, `MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH`, `MS_REALTY_HERMES_WORKER_REPORT_PATH`, `MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH`.
 - Hermes ledger path overrides: `MS_REALTY_TRANSLATION_LEDGER_PATH`, `MS_REALTY_HERMES_AUDIT_PATH`, `MS_REALTY_AUDIT_LOG_PATH`.
 - Real report outputs stay local and ignored; examples do not count as launch evidence.
 - Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
@@ -100,10 +100,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Runtime report: `production/data/payload-runtime-report.json` (real output stays local and ignored)
 - Runtime report example: `production/data/payload-runtime-report.json.example`
 - Current check evidence:
-- payload_secret: missing_env (env PAYLOAD_SECRET)
-- database_url: missing_env (env DATABASE_URL)
-- database_network_scope: missing_env (env DATABASE_URL)
-- database_tcp: missing_env (env DATABASE_URL)
+- no Payload runtime check rows available
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`

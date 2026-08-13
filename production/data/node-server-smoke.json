@@ -59,7 +59,7 @@
         {
           "id": "live_services",
           "status": "blocked",
-          "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning."
+          "message": "Run live Postgres sync/query and Hermes draft worker commands after provisioning."
         },
         {
           "id": "monitoring_rollback",

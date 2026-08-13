@@ -78,8 +78,8 @@ What it proves now:
 - Lead contact preference validation and persistence for phone, Viber, WhatsApp, and email.
 - Search API overlays translation ledger state before card display/indexability.
 - Search API returns reviewed translation cards for admin-added approved locales.
-- Search engine sync worker path for Typesense and Meilisearch imports from the same reviewed 167-document fixture.
-- Search engine query smoke path that verifies both engines can return the reviewed BG listing document without draft locales.
+- Canonical production search sync verifies the reviewed Payload projection against the Postgres public-search view.
+- Canonical production query smoke proves that same Postgres target returns the reviewed BG listing without draft locales; Typesense/Meilisearch remain local compatibility tooling only.
 - Language request intake for unavailable public locales.
 - Authenticated admin locale creation for non-indexable website locales.
 - Locale rollout report that turns requested disabled locales into approval tasks and Hermes draft queue summaries.
@@ -176,8 +176,8 @@ SEO export status without clearing the launch gate, and `seo:preflight` still ex
 non-zero until real external SEO exports are complete. `listing:preflight:report` writes the current
 listing review status without clearing the launch gate, and `listing:preflight` still exits non-zero until
 the reviewed listing-quality CSV is present. `listing:review-pack` writes a complete draft review packet
-for editors, but it is not launch evidence until reviewer fields are filled. `launch:preflight` also requires live Typesense/Meilisearch
-reports from `npm run search:sync && npm run search:query`, a Hermes draft-worker report from
+for editors, but it is not launch evidence until reviewer fields are filled. `launch:preflight` also requires live Postgres search
+reports from `npm run search:sync && npm run search:query`, a separate Hermes draft-worker report from
 `npm run hermes:worker`, and a configured Payload runtime app; `live:preflight` checks those report files directly.
 `live:provisioning` writes redacted endpoint and missing-env evidence before live capture, and
 `live:provisioning:preflight` must pass before treating `live:capture` output as launch evidence.
@@ -349,7 +349,7 @@ Set these path overrides when operator evidence is mounted outside the repo:
 `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`,
 `MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH`,
 `MS_REALTY_LISTING_QUALITY_REVIEW_PATH`, `MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH`,
-`MS_REALTY_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_SEARCH_QUERY_REPORT_PATH`, and
+`MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH`, and
 `MS_REALTY_HERMES_WORKER_REPORT_PATH`.
 
 Generated production data:

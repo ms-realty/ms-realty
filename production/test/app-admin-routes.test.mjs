@@ -180,8 +180,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
   }
   const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
   const launchReadinessOutputPath = tempJson("app-admin-launch-readiness", "{}\n");
-  const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
-  const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
+  const searchSyncReportPath = `${seoEvidenceInputDir}/postgres-search-sync-report.json`;
+  const searchQueryReportPath = `${seoEvidenceInputDir}/postgres-search-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
   const liveServiceProvisioningReportPath = tempJson(
     "app-admin-live-service-provisioning",
@@ -214,8 +214,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH: tempJsonl("app-admin-lead-pipeline-outcomes"),
       MS_REALTY_LEAD_PIPELINE_OUTCOME_AT: "2026-07-18T10:05:00.000Z",
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
-      MS_REALTY_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
-      MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
+      MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
+      MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveServiceProvisioningReportPath,
       MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: monitoringRollbackReportPath,
@@ -722,7 +722,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(preflightReportsBody.reports.listing_quality.status, "blocked");
       assert.equal(preflightReportsBody.reports.live_services.status, "blocked");
       assert.equal(preflightReportsBody.reports.live_service_provisioning.status, "blocked_report");
-      assert.ok(preflightReportsBody.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+      assert.ok(preflightReportsBody.reports.live_service_provisioning.summary.missing_env.includes("DATABASE_URL"));
       assert.ok(preflightReportsBody.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
       assert.equal(preflightReportsBody.reports.payload_runtime.status, "missing_report");
       assert.ok(preflightReportsBody.reports.payload_runtime.next_actions.some((action) => action.includes("payload:bootstrap")));
@@ -749,20 +749,17 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(liveServiceProvisioning.status, 200);
       assert.equal(liveServiceProvisioningBody.kind, "admin_live_service_provisioning");
       assert.equal(liveServiceProvisioningBody.provisioning.status, "blocked_report");
-      assert.ok(liveServiceProvisioningBody.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+      assert.ok(liveServiceProvisioningBody.provisioning.summary.missing_env.includes("DATABASE_URL"));
       assert.ok(liveServiceProvisioningBody.provisioning.next_actions.some((action) => action.includes("live:provisioning")));
 
       const readyProvisioningReport = await buildLiveServiceProvisioningReport({
         env: {
-          TYPESENSE_URL: "https://typesense.ms-realty.bg",
-          TYPESENSE_API_KEY: "typesense-key",
-          MEILI_URL: "https://meili.ms-realty.bg",
-          MEILI_API_KEY: "meili-key",
+          DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
+          PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
           HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
           HERMES_API_KEY: "hermes-key",
         },
         fetchImpl: healthyHermesAgentFetch,
-        lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
         generatedAt: runtimeGeneratedAt,
       });
       const liveServiceProvisioningImport = await liveServiceProvisioningImportRoute.POST(
@@ -885,7 +882,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(liveImportValidBody.liveImport.importedSource, "hermes_draft_worker");
       assert.deepEqual(
         liveImportValidBody.liveImport.blockedReports.map((report) => report.source),
-        ["typesense_meilisearch_sync", "typesense_meilisearch_query"],
+        ["postgres_search_sync", "postgres_search_query"],
       );
       assert.equal(liveImportValidBody.livePreflight.status, "blocked");
       assert.equal(liveImportValidBody.livePreflight.summary.pass, 1);

@@ -15,6 +15,8 @@ migration/external/seo/*.csv
 migration/content-evidence/
 production/data/search-engine-sync-report.json
 production/data/search-engine-query-report.json
+production/data/postgres-search-sync-report.json
+production/data/postgres-search-query-report.json
 production/data/hermes-draft-worker-report.json
 production/data/hermes-agent-runtime-report.json
 production/data/payload-runtime-report.json

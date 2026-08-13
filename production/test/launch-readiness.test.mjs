@@ -262,10 +262,10 @@ function writePartialListingQualityReviewFixture(dir) {
 
 const readyLiveServices = [
   {
-    source: "typesense_meilisearch_sync",
+    source: "postgres_search_sync",
     status: "pass",
     generated_at: "2026-07-05T00:00:00.000Z",
-    path: "production/data/search-engine-sync-report.json",
+    path: "production/data/postgres-search-sync-report.json",
     summary: {
       engines: 1,
       targets: { postgres: "ms_realty_public_search_documents" },
@@ -294,10 +294,10 @@ const readyLiveServices = [
     },
   },
   {
-    source: "typesense_meilisearch_query",
+    source: "postgres_search_query",
     status: "pass",
     generated_at: "2026-07-05T00:00:00.000Z",
-    path: "production/data/search-engine-query-report.json",
+    path: "production/data/postgres-search-query-report.json",
     summary: {
       engines: 1,
       targets: { postgres: "ms_realty_public_search_documents" },
@@ -353,15 +353,14 @@ const readyLiveServices = [
 const readyLiveServiceProvisioning = {
   status: "pass",
   path: "production/data/live-service-provisioning-report.json",
-  summary: { checks: 7, missing_env: [], placeholder_env: [], services: ["typesense", "meilisearch", "hermes"] },
+  summary: { checks: 6, missing_env: [], placeholder_env: [], services: ["postgres_search", "hermes"] },
   checks: [
-    { id: "typesense_url", env: "TYPESENSE_URL", status: "pass" },
-    { id: "typesense_api_key", env: "TYPESENSE_API_KEY", status: "pass" },
-    { id: "meili_url", env: "MEILI_URL", status: "pass" },
-    { id: "meili_api_key", env: "MEILI_API_KEY", status: "pass" },
-    { id: "typesense_health", redacted_url: "https://typesense.ms-realty.bg", status: "pass", status_code: 200 },
-    { id: "meilisearch_health", redacted_url: "https://meili.ms-realty.bg", status: "pass", status_code: 200 },
+    { id: "database_url", env: "DATABASE_URL", status: "pass" },
+    { id: "payload_secret", env: "PAYLOAD_SECRET", status: "pass" },
+    { id: "postgres_database_target", database_target: "postgres://db.ms-realty.bg:5432/ms_realty", status: "pass" },
     { id: "hermes_provider", missing: [], mode: "self_hosted", status: "pass" },
+    { id: "hermes_agent_health", status: "pass", status_code: 200 },
+    { id: "hermes_agent_capabilities", status: "pass", status_code: 200 },
   ],
   hermes: { ready: true, endpoint: "https://hermes.ms-realty.bg/v1/chat/completions" },
   next_actions: ["Run npm run live:capture, then npm run live:preflight."],
@@ -568,8 +567,8 @@ function writeMonitoringRollbackFixture(dir, generatedAt = new Date().toISOStrin
 }
 
 function writeLiveReportFixtures(dir, generatedAt = new Date().toISOString()) {
-  const syncReportPath = `${dir}/search-engine-sync-report.json`;
-  const queryReportPath = `${dir}/search-engine-query-report.json`;
+  const syncReportPath = `${dir}/postgres-search-sync-report.json`;
+  const queryReportPath = `${dir}/postgres-search-query-report.json`;
   const hermesReportPath = `${dir}/hermes-draft-worker-report.json`;
   const databaseTarget = "postgres://db.ms-realty.bg:5432/ms_realty";
   const postgresTarget = "ms_realty_public_search_documents";
@@ -688,15 +687,12 @@ async function writeLiveProvisioningFixture(dir, generatedAt = new Date().toISOS
   const reportPath = `${dir}/live-service-provisioning-report.json`;
   const report = await buildLiveServiceProvisioningReport({
     env: {
-      TYPESENSE_URL: "https://typesense.ms-realty.bg",
-      TYPESENSE_API_KEY: "typesense-key",
-      MEILI_URL: "https://meili.ms-realty.bg",
-      MEILI_API_KEY: "meili-key",
+      DATABASE_URL: "postgres://ms_realty:database-password@db.ms-realty.bg:5432/ms_realty",
+      PAYLOAD_SECRET: "payload-runtime-secret",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: healthyHermesAgentFetch,
-    lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
     generatedAt,
   });
   return writeLiveServiceProvisioningReport(report, reportPath);
@@ -825,7 +821,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
   });
   assert.equal(liveGate.status, "blocked");
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
-  assert.ok(liveGate.evidence.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+  assert.ok(liveGate.evidence.provisioning.summary.missing_env.includes("DATABASE_URL"));
   assert.match(liveGate.next_actions.join(" "), /npm run live:preflight/);
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
   assert.match(report.gates.find((gate) => gate.id === "payload_runtime").next_actions.join(" "), /npm run payload:preflight/);
@@ -862,7 +858,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
       "production_recovery",
     ],
   );
-  assert.match(publicPayload.blocked_gates.find((gate) => gate.id === "live_services").message, /Typesense\/Meilisearch/);
+  assert.match(publicPayload.blocked_gates.find((gate) => gate.id === "live_services").message, /Postgres sync\/query/);
   assert.equal("next_actions" in publicPayload.blocked_gates.find((gate) => gate.id === "live_services"), false);
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store", "retry-after": "60" });
 });
@@ -1304,7 +1300,7 @@ test("launch readiness validator rejects weak live service pass summaries", () =
     seoEvidence: readySeoEvidenceFixture(),
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices.map((item) =>
-      item.source === "typesense_meilisearch_sync" ? { ...item, summary: { ...item.summary, total_operations: 0 } } : item,
+      item.source === "postgres_search_sync" ? { ...item, summary: { ...item.summary, total_operations: 0 } } : item,
     ),
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
@@ -1329,7 +1325,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices.map((item) =>
-      item.source === "typesense_meilisearch_query" ? { ...item, evidence: { ...item.evidence, engines: [] } } : item,
+      item.source === "postgres_search_query" ? { ...item, evidence: { ...item.evidence, engines: [] } } : item,
     ),
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
@@ -1373,7 +1369,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices.map((item) =>
-      item.source === "typesense_meilisearch_sync"
+      item.source === "postgres_search_sync"
         ? {
             ...item,
             evidence: {
@@ -1399,7 +1395,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices.map((item) =>
-      item.source === "typesense_meilisearch_sync"
+      item.source === "postgres_search_sync"
         ? {
             ...item,
             evidence: {
@@ -1447,14 +1443,14 @@ test("launch readiness validator rejects weak live provisioning pass evidence", 
     liveServiceProvisioning: {
       ...readyLiveServiceProvisioning,
       summary: { ...readyLiveServiceProvisioning.summary, checks: readyLiveServiceProvisioning.summary.checks - 1 },
-      checks: readyLiveServiceProvisioning.checks.filter((check) => check.id !== "meilisearch_health"),
+      checks: readyLiveServiceProvisioning.checks.filter((check) => check.id !== "postgres_database_target"),
     },
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
   });
 
-  assert.throws(() => assertLaunchReadinessReport(report), /provisioning check meilisearch_health/);
+  assert.throws(() => assertLaunchReadinessReport(report), /provisioning check postgres_database_target/);
 });
 
 test("launch readiness blocks live services until provisioning passes", () => {
@@ -1473,8 +1469,8 @@ test("launch readiness blocks live services until provisioning passes", () => {
     liveServiceProvisioning: {
       status: "blocked_report",
       path: "production/data/live-service-provisioning-report.json",
-      summary: { checks: 7, missing_env: ["TYPESENSE_URL"], placeholder_env: [], services: ["typesense", "meilisearch", "hermes"] },
-      checks: [{ id: "typesense_health", status: "missing_env" }],
+      summary: { checks: 3, missing_env: ["DATABASE_URL"], placeholder_env: [], services: ["postgres_search", "hermes"] },
+      checks: [{ id: "database_url", env: "DATABASE_URL", status: "missing_env" }],
       next_actions: ["Run npm run live:provisioning until all service checks pass."],
     },
     appState: readyAppState,
@@ -1706,12 +1702,12 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   const sourcePath = fromRoot("production", "data", "launch-readiness.json");
   const source = JSON.parse(fs.readFileSync(sourcePath, "utf8"));
   const generatedAt = "2026-07-10T12:00:00.000Z";
-  const syncPath = `${directory}/search-engine-sync-report.json`;
-  const queryPath = `${directory}/search-engine-query-report.json`;
+  const syncPath = `${directory}/postgres-search-sync-report.json`;
+  const queryPath = `${directory}/postgres-search-query-report.json`;
   const payloadPath = `${directory}/payload-runtime-report.json`;
   const outputPath = `${directory}/local-launch-readiness.json`;
-  const sync = readJson(["production", "data", "search-engine-sync-report.json.example"]);
-  const query = readJson(["production", "data", "search-engine-query-report.json.example"]);
+  const sync = readJson(["production", "data", "postgres-search-sync-report.json.example"]);
+  const query = readJson(["production", "data", "postgres-search-query-report.json.example"]);
   delete sync.example;
   delete query.example;
   sync.generated_at = "2026-07-10T11:59:00.000Z";
@@ -1749,8 +1745,8 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   assert.deepEqual(
     result.report.local_preview.reports.map((report) => [report.id, report.status]),
     [
-      ["typesense_meilisearch_sync", "pass"],
-      ["typesense_meilisearch_query", "pass"],
+      ["postgres_search_sync", "pass"],
+      ["postgres_search_query", "pass"],
       ["hermes_draft_worker", "missing_report"],
       ["payload_runtime", "pass"],
     ],
@@ -1798,7 +1794,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   );
   assert.match(result.stderr, /external_seo_exports missing: search_console, yandex_webmaster, backlinks/);
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
-  assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
+  assert.match(result.stderr, /postgres_search_sync: missing_report .*postgres-search-sync-report\.json/);
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
   assert.match(result.stderr, /payload_runtime: blocked_report .*payload-runtime-report\.json.*missing PAYLOAD_SECRET, DATABASE_URL/);
   assert.match(result.stderr, /external_seo_exports next: Import Search Console/);
@@ -1851,8 +1847,8 @@ test("launch preflight fails closed while launch blockers remain", async () => {
       ...preflightEnv,
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath,
       MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoDir,
-      MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
-      MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
+      MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
+      MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
       MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryPath,
@@ -1882,8 +1878,8 @@ test("launch preflight fails closed while launch blockers remain", async () => {
       ...preflightEnv,
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath,
       MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoOutputPath,
-      MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
-      MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
+      MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
+      MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
       MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryPath,
@@ -1928,8 +1924,8 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
       MS_REALTY_GENERATED_AT: generatedAt,
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath,
       MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoDir,
-      MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
-      MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
+      MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
+      MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
       MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryPath,
@@ -1950,8 +1946,8 @@ test("live service report preflight fails missing reports and passes valid repor
   const missingDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-missing-live-reports-`);
   const missingEnv = {
     ...process.env,
-    MS_REALTY_SEARCH_SYNC_REPORT_PATH: `${missingDir}/search-engine-sync-report.json`,
-    MS_REALTY_SEARCH_QUERY_REPORT_PATH: `${missingDir}/search-engine-query-report.json`,
+    MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: `${missingDir}/postgres-search-sync-report.json`,
+    MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: `${missingDir}/postgres-search-query-report.json`,
     MS_REALTY_HERMES_WORKER_REPORT_PATH: `${missingDir}/hermes-draft-worker-report.json`,
   };
   const missing = spawnSync(process.execPath, [fromRoot("production", "scripts", "validate-live-service-reports.mjs")], {
@@ -1961,7 +1957,7 @@ test("live service report preflight fails missing reports and passes valid repor
   });
 
   assert.notEqual(missing.status, 0);
-  assert.match(missing.stderr, /typesense_meilisearch_sync: missing_report/);
+  assert.match(missing.stderr, /postgres_search_sync: missing_report/);
   assert.match(missing.stderr, /LIVE SERVICE PREFLIGHT FAILED/);
   assert.match(missing.stderr, /Next: run `npm run live:provisioning:preflight`/);
 
@@ -1999,7 +1995,7 @@ test("live service report preflight fails missing reports and passes valid repor
   const duplicateSourceReport = {
     ...readyReport,
     reports: readyReport.reports.map((report, index) =>
-      index === 2 ? { ...report, source: "typesense_meilisearch_query" } : report,
+      index === 2 ? { ...report, source: "postgres_search_query" } : report,
     ),
   };
   assert.throws(() => assertLiveServicePreflightReport(duplicateSourceReport), /sources must be unique/);
@@ -2016,7 +2012,7 @@ test("live service report preflight fails missing reports and passes valid repor
   const expiredReport = buildLiveServicePreflightReport({ generatedAt: expiredAt, ...paths });
   assert.equal(assertLiveServicePreflightReport(expiredReport), true);
   assert.equal(expiredReport.summary.expired_report, 3);
-  readyReport.reports.find((report) => report.source === "typesense_meilisearch_sync").summary.total_operations = 0;
+  readyReport.reports.find((report) => report.source === "postgres_search_sync").summary.total_operations = 0;
   assert.throws(() => assertLiveServicePreflightReport(readyReport), /search sync summary evidence/);
 
   const valid = spawnSync(process.execPath, [fromRoot("production", "scripts", "validate-live-service-reports.mjs")], {
@@ -2024,14 +2020,14 @@ test("live service report preflight fails missing reports and passes valid repor
     encoding: "utf8",
     env: {
       ...process.env,
-      MS_REALTY_SEARCH_SYNC_REPORT_PATH: paths.syncReportPath,
-      MS_REALTY_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
+      MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: paths.syncReportPath,
+      MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: paths.hermesReportPath,
     },
   });
 
   assert.equal(valid.status, 0, valid.stderr);
-  assert.match(valid.stdout, /typesense_meilisearch_sync: pass/);
+  assert.match(valid.stdout, /postgres_search_sync: pass/);
   assert.match(valid.stdout, /Live service reports valid/);
 
   const localDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-local-live-reports-`);
@@ -2041,9 +2037,9 @@ test("live service report preflight fails missing reports and passes valid repor
   fs.writeFileSync(localPaths.syncReportPath, `${JSON.stringify(localSync)}\n`);
   const localResult = validateLiveServiceReports(localPaths);
   assert.equal(localResult.ready, false);
-  assert.equal(localResult.reports.find((report) => report.source === "typesense_meilisearch_sync").status, "invalid_report");
+  assert.equal(localResult.reports.find((report) => report.source === "postgres_search_sync").status, "invalid_report");
   assert.match(
-    localResult.reports.find((report) => report.source === "typesense_meilisearch_sync").error,
+    localResult.reports.find((report) => report.source === "postgres_search_sync").error,
     /database target/,
   );
 
@@ -2060,9 +2056,9 @@ test("live service report preflight fails missing reports and passes valid repor
   fs.writeFileSync(mixedOriginPaths.syncReportPath, `${JSON.stringify(mixedOriginSync)}\n`);
   const mixedOriginResult = validateLiveServiceReports(mixedOriginPaths);
   assert.equal(mixedOriginResult.ready, false);
-  assert.equal(mixedOriginResult.reports.find((report) => report.source === "typesense_meilisearch_sync").status, "invalid_report");
+  assert.equal(mixedOriginResult.reports.find((report) => report.source === "postgres_search_sync").status, "invalid_report");
   assert.match(
-    mixedOriginResult.reports.find((report) => report.source === "typesense_meilisearch_sync").error,
+    mixedOriginResult.reports.find((report) => report.source === "postgres_search_sync").error,
     /authoritative Postgres snapshot operation/,
   );
 
@@ -2073,9 +2069,9 @@ test("live service report preflight fails missing reports and passes valid repor
   fs.writeFileSync(mixedQueryOriginPaths.queryReportPath, `${JSON.stringify(mixedQueryOrigin)}\n`);
   const mixedQueryOriginResult = validateLiveServiceReports(mixedQueryOriginPaths);
   assert.equal(mixedQueryOriginResult.ready, false);
-  assert.equal(mixedQueryOriginResult.reports.find((report) => report.source === "typesense_meilisearch_query").status, "invalid_report");
+  assert.equal(mixedQueryOriginResult.reports.find((report) => report.source === "postgres_search_query").status, "invalid_report");
   assert.match(
-    mixedQueryOriginResult.reports.find((report) => report.source === "typesense_meilisearch_query").error,
+    mixedQueryOriginResult.reports.find((report) => report.source === "postgres_search_query").error,
     /database read operation/,
   );
 
@@ -2089,10 +2085,10 @@ test("live service report preflight fails missing reports and passes valid repor
   fs.writeFileSync(reservedPaths.hermesReportPath, `${JSON.stringify(reservedHermes)}\n`);
   const reservedResult = validateLiveServiceReports(reservedPaths);
   assert.equal(reservedResult.ready, false);
-  assert.equal(reservedResult.reports.find((report) => report.source === "typesense_meilisearch_query").status, "invalid_report");
+  assert.equal(reservedResult.reports.find((report) => report.source === "postgres_search_query").status, "invalid_report");
   assert.equal(reservedResult.reports.find((report) => report.source === "hermes_draft_worker").status, "invalid_report");
   assert.match(
-    reservedResult.reports.find((report) => report.source === "typesense_meilisearch_query").error,
+    reservedResult.reports.find((report) => report.source === "postgres_search_query").error,
     /database read operation/,
   );
   assert.match(
@@ -2161,7 +2157,7 @@ test("live service preflight report rejects hand-edited status counts", () => {
           ...report.summary,
           configured_paths: {
             ...report.summary.configured_paths,
-            typesense_meilisearch_sync: "/tmp/wrong-search-engine-sync-report.json",
+            postgres_search_sync: "/tmp/wrong-postgres-search-sync-report.json",
           },
         },
       }),
@@ -2175,15 +2171,15 @@ test("live service preflight report rejects hand-edited status counts", () => {
       missing_report: 2,
       configured_paths: {
         ...report.summary.configured_paths,
-        typesense_meilisearch_sync: "/tmp/search-engine-sync-report.json",
+        postgres_search_sync: "/tmp/postgres-search-sync-report.json",
       },
     },
     reports: report.reports.map((item) =>
-      item.source === "typesense_meilisearch_sync"
+      item.source === "postgres_search_sync"
         ? {
             ...item,
             status: "pass",
-            path: "/tmp/search-engine-sync-report.json",
+            path: "/tmp/postgres-search-sync-report.json",
             summary: { engines: 1, documents_per_engine: [167], total_operations: 0 },
           }
         : item,
@@ -2195,25 +2191,23 @@ test("live service preflight report rejects hand-edited status counts", () => {
   assert.throws(() => assertLiveServicePreflightReport(report), /status counts must match reports/);
 });
 
-test("live service evidence command refuses localhost launch evidence", async () => {
+test("live service evidence command refuses an unprovisioned production database target", async () => {
   await withLiveServiceServer(async (baseUrl) => {
     const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-capture-`);
     const paths = {
-      syncReportPath: `${dir}/search-engine-sync-report.json`,
-      queryReportPath: `${dir}/search-engine-query-report.json`,
+      syncReportPath: `${dir}/postgres-search-sync-report.json`,
+      queryReportPath: `${dir}/postgres-search-query-report.json`,
       hermesReportPath: `${dir}/hermes-draft-worker-report.json`,
     };
     const result = await runScript("run-live-service-evidence.mjs", {
       ...process.env,
-      TYPESENSE_URL: baseUrl,
-      TYPESENSE_API_KEY: "typesense-test",
-      MEILI_URL: baseUrl,
-      MEILI_API_KEY: "meili-test",
+      DATABASE_URL: "postgres://user:password@localhost/ms_realty",
+      PAYLOAD_SECRET: "payload-runtime-secret",
       HERMES_CHAT_COMPLETIONS_URL: `${baseUrl}/v1/chat/completions`,
       HERMES_API_KEY: "hermes-test",
       HERMES_DRAFT_LIMIT: "1",
-      MS_REALTY_SEARCH_SYNC_REPORT_PATH: paths.syncReportPath,
-      MS_REALTY_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
+      MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: paths.syncReportPath,
+      MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: paths.hermesReportPath,
       MS_REALTY_TRANSLATION_LEDGER_PATH: `${dir}/translation-tasks.jsonl`,
       MS_REALTY_HERMES_AUDIT_PATH: `${dir}/hermes-audit.jsonl`,
@@ -2223,7 +2217,7 @@ test("live service evidence command refuses localhost launch evidence", async ()
     assert.notEqual(result.status, 0);
     assert.match(
       result.stderr,
-      /LIVE SERVICE EVIDENCE FAILED: live service provisioning must pass before capture: typesense_health, meilisearch_health, hermes_provider/,
+      /LIVE SERVICE EVIDENCE FAILED: live service provisioning must pass before capture: postgres_database_target, hermes_provider/,
     );
     assert.match(result.stderr, /Next: run `npm run live:provisioning:preflight`/);
     const validation = validateLiveServiceReports(paths);
@@ -2236,8 +2230,8 @@ test("live service preflight report records blockers without clearing the gate",
   const missingDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-preflight-report-missing-`);
   const missingReport = buildLiveServicePreflightReport({
     generatedAt: "2026-07-06T00:00:00Z",
-    syncReportPath: `${missingDir}/search-engine-sync-report.json`,
-    queryReportPath: `${missingDir}/search-engine-query-report.json`,
+    syncReportPath: `${missingDir}/postgres-search-sync-report.json`,
+    queryReportPath: `${missingDir}/postgres-search-query-report.json`,
     hermesReportPath: `${missingDir}/hermes-draft-worker-report.json`,
   });
 
@@ -2254,8 +2248,8 @@ test("live service preflight report records blockers without clearing the gate",
     encoding: "utf8",
     env: {
       ...process.env,
-      MS_REALTY_SEARCH_SYNC_REPORT_PATH: `${missingDir}/search-engine-sync-report.json`,
-      MS_REALTY_SEARCH_QUERY_REPORT_PATH: `${missingDir}/search-engine-query-report.json`,
+      MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: `${missingDir}/postgres-search-sync-report.json`,
+      MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: `${missingDir}/postgres-search-query-report.json`,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: `${missingDir}/hermes-draft-worker-report.json`,
       MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH: missingOutputPath,
       MS_REALTY_GENERATED_AT: "2026-07-08T12:00:00Z",
@@ -2263,7 +2257,7 @@ test("live service preflight report records blockers without clearing the gate",
   });
 
   assert.equal(missingResult.status, 0, missingResult.stderr);
-  assert.match(missingResult.stdout, /Live service reports blocked: typesense_meilisearch_sync, typesense_meilisearch_query, hermes_draft_worker/);
+  assert.match(missingResult.stdout, /Live service reports blocked: postgres_search_sync, postgres_search_query, hermes_draft_worker/);
   assert.match(missingResult.stdout, /Missing reports: 3/);
   assert.match(missingResult.stdout, /Next: run `npm run live:provisioning:preflight`/);
   assert.equal(JSON.parse(fs.readFileSync(missingOutputPath, "utf8")).generated_at, "2026-07-08T12:00:00Z");
@@ -2277,8 +2271,8 @@ test("live service preflight report records blockers without clearing the gate",
     encoding: "utf8",
     env: {
       ...process.env,
-      MS_REALTY_SEARCH_SYNC_REPORT_PATH: paths.syncReportPath,
-      MS_REALTY_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
+      MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: paths.syncReportPath,
+      MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: paths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH: outputPath,
       MS_REALTY_GENERATED_AT: generatedAt,
@@ -2296,19 +2290,19 @@ test("live service preflight report records blockers without clearing the gate",
 
 test("live service report examples are templates, not launch evidence", () => {
   const result = validateLiveServiceReports({
-    syncReportPath: fromRoot("production", "data", "search-engine-sync-report.json.example"),
-    queryReportPath: fromRoot("production", "data", "search-engine-query-report.json.example"),
+    syncReportPath: fromRoot("production", "data", "postgres-search-sync-report.json.example"),
+    queryReportPath: fromRoot("production", "data", "postgres-search-query-report.json.example"),
     hermesReportPath: fromRoot("production", "data", "hermes-draft-worker-report.json.example"),
   });
 
   assert.equal(result.ready, false);
   assert.equal(result.reports.every((report) => report.status === "example_report"), true);
-  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/search-engine-sync-report\.json/);
-  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/search-engine-query-report\.json/);
+  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/postgres-search-sync-report\.json/);
+  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/postgres-search-query-report\.json/);
   assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/hermes-draft-worker-report\.json/);
 
-  const template = readLiveServiceReportTemplate("typesense_meilisearch_query");
-  assert.equal(template.filename, "search-engine-query-report.json.example");
+  const template = readLiveServiceReportTemplate("postgres_search_query");
+  assert.equal(template.filename, "postgres-search-query-report.json.example");
   assert.equal(JSON.parse(template.json).example, true);
   assert.equal(JSON.parse(template.json).summary.engines, 1);
   assert.throws(() => readLiveServiceReportTemplate("../bad"), /Unknown live service report source/);
@@ -2320,7 +2314,7 @@ test("live service report import writes only validated source reports", () => {
   const queryReport = JSON.parse(fs.readFileSync(paths.queryReportPath, "utf8"));
   const outPath = `${dir}/imported-query-report.json`;
 
-  const imported = writeLiveServiceReport("typesense_meilisearch_query", queryReport, { queryReportPath: outPath });
+  const imported = writeLiveServiceReport("postgres_search_query", queryReport, { queryReportPath: outPath });
   const importSummary = liveServiceImportSummary(
     imported,
     buildLiveServicePreflightReport({
@@ -2333,28 +2327,28 @@ test("live service report import writes only validated source reports", () => {
   assert.equal(imported.outPath, outPath);
   assert.equal(importSummary.ready, false);
   assert.equal(importSummary.status, "blocked");
-  assert.equal(importSummary.importedSource, "typesense_meilisearch_query");
+  assert.equal(importSummary.importedSource, "postgres_search_query");
   assert.equal(importSummary.importedReportStatus, "pass");
   const readyImportSummary = liveServiceImportSummary(imported, buildLiveServicePreflightReport(paths));
   assert.equal(readyImportSummary.ready, true);
   assert.match(readyImportSummary.nextActions.join(" "), /npm run live:preflight/);
   assert.deepEqual(
     importSummary.blockedReports.map((report) => report.source),
-    ["typesense_meilisearch_sync", "hermes_draft_worker"],
+    ["postgres_search_sync", "hermes_draft_worker"],
   );
   assert.equal(JSON.parse(fs.readFileSync(outPath, "utf8")).summary.engines, 1);
   assert.throws(
-    () => writeLiveServiceReport("typesense_meilisearch_query", { ...queryReport, example: true }, { queryReportPath: outPath }),
+    () => writeLiveServiceReport("postgres_search_query", { ...queryReport, example: true }, { queryReportPath: outPath }),
     /Example live service reports cannot be imported/,
   );
   assert.throws(
-    () => writeLiveServiceReport("typesense_meilisearch_query", { ...queryReport, generated_at: "" }, { queryReportPath: outPath }),
+    () => writeLiveServiceReport("postgres_search_query", { ...queryReport, generated_at: "" }, { queryReportPath: outPath }),
     /valid generated_at/,
   );
   assert.throws(
     () =>
       writeLiveServiceReport(
-        "typesense_meilisearch_query",
+        "postgres_search_query",
         { ...queryReport, api_key: "test-secret-key" },
         { queryReportPath: outPath },
       ),
@@ -2363,7 +2357,7 @@ test("live service report import writes only validated source reports", () => {
   assert.throws(
     () =>
       writeLiveServiceReport(
-        "typesense_meilisearch_query",
+        "postgres_search_query",
         { ...queryReport, engines: [{ ...queryReport.engines[0], database_target: "postgres://typesense.local:5432/ms_realty" }] },
         { queryReportPath: outPath },
       ),
@@ -2372,7 +2366,7 @@ test("live service report import writes only validated source reports", () => {
   assert.throws(
     () =>
       writeLiveServiceReport(
-        "typesense_meilisearch_query",
+        "postgres_search_query",
         {
           evidence_scope: "live",
           generated_at: "2026-07-06T00:00:00Z",
@@ -2382,7 +2376,7 @@ test("live service report import writes only validated source reports", () => {
         },
         { queryReportPath: outPath },
       ),
-    /current projection expectations/,
+    /exactly one Postgres engine/,
   );
   assert.throws(() => writeLiveServiceReport("../bad", queryReport), /Unknown live service report source/);
 });
@@ -2447,12 +2441,12 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /MS_REALTY_SEO_PREFLIGHT_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH/);
   assert.match(markdown, /Live Service Provisioning/);
-  assert.match(markdown, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
-  assert.match(markdown, /typesense_meilisearch_query: missing_report .*search-engine-query-report\.json/);
+  assert.match(markdown, /postgres_search_sync: missing_report .*postgres-search-sync-report\.json/);
+  assert.match(markdown, /postgres_search_query: missing_report .*postgres-search-query-report\.json/);
   assert.match(markdown, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
-  assert.match(markdown, /blocked_report .*live-service-provisioning-report\.json.*missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
-  assert.match(markdown, /TYPESENSE_URL/);
-  assert.match(markdown, /MEILI_API_KEY/);
+  assert.match(markdown, /blocked_report .*live-service-provisioning-report\.json.*missing DATABASE_URL, PAYLOAD_SECRET, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
+  assert.match(markdown, /DATABASE_URL/);
+  assert.match(markdown, /PAYLOAD_SECRET/);
   assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);
   assert.match(markdown, /npm run hermes:runtime/);
   assert.match(markdown, /private OpenAI-compatible model provider/);
@@ -2466,10 +2460,10 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /npm run live:preflight/);
   assert.match(markdown, /GET \/api\/admin\/live-services/);
   assert.match(markdown, /GET \/api\/admin\/live-service-provisioning/);
-  assert.match(markdown, /search-engine-sync-report\.json\.example/);
-  assert.match(markdown, /live-service-report-template\?source=typesense_meilisearch_sync/);
-  assert.match(markdown, /live-service-reports\/import\?source=typesense_meilisearch_sync/);
-  assert.match(markdown, /MS_REALTY_SEARCH_SYNC_REPORT_PATH/);
+  assert.match(markdown, /postgres-search-sync-report\.json\.example/);
+  assert.match(markdown, /live-service-report-template\?source=postgres_search_sync/);
+  assert.match(markdown, /live-service-reports\/import\?source=postgres_search_sync/);
+  assert.match(markdown, /MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_HERMES_WORKER_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_HERMES_AUDIT_PATH/);

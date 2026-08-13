@@ -12,7 +12,7 @@ parity against the old sites.
 - **Domains:** `makler-realty.com` (multilingual main) + `makler-realty.ru` (active Russian, first-class).
 - **Crawl universe:** 457 URLs (278 `.com` + 179 `.ru`) · 165 listings · 11,859 media rows.
 - **Locales:** public BG, EN, DE, NL, RU, EL (Greek), HE (Hebrew RTL); admin CMS/CRM BG, RU, EN.
-- **Target stack:** Next.js + Payload CMS + PostgreSQL + Typesense/Meilisearch + MapLibre GL JS +
+- **Target stack:** Next.js + Payload CMS + PostgreSQL (including canonical public search) + MapLibre GL JS +
   Photo Sphere Viewer + the **Hermes Agent** AI layer (self-hosted Nous Research open-weight Hermes
   models + function-calling format; draft-only, human-approved). `production/` holds the executable
   contracts, and `app/` now exposes them through build-checked Next App Router handlers.

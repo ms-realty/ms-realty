@@ -157,8 +157,8 @@ function materializeLocalReadiness(env = process.env) {
   return materializeLocalLaunchReadiness({
     sourceReadinessPath,
     outPath,
-    syncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
-    queryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
+    syncReportPath: env.MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH || env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
+    queryReportPath: env.MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH || env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
     hermesReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     maxReportAgeMs: localReadinessMaxAgeMs(env),

@@ -70,7 +70,7 @@
         {
           "id": "live_services",
           "status": "blocked",
-          "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning."
+          "message": "Run live Postgres sync/query and Hermes draft worker commands after provisioning."
         },
         {
           "id": "monitoring_rollback",
@@ -19345,9 +19345,9 @@
           },
           {
             "id": "live_services",
-            "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning.",
+            "message": "Run live Postgres sync/query and Hermes draft worker commands after provisioning.",
             "next_actions": [
-              "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
+              "Run npm run live:provisioning:preflight, then npm run live:capture against real Postgres and Hermes services.",
               "Import or mount the three live service reports, then run npm run live:preflight before launch."
             ]
           },

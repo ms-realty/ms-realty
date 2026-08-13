@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-11T17:18:07.848Z",
+  "generated_at": "2026-08-13T00:00:00.000Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
@@ -486,13 +486,13 @@
     {
       "id": "live_services",
       "status": "blocked",
-      "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning.",
+      "message": "Run live Postgres sync/query and Hermes draft worker commands after provisioning.",
       "evidence": {
         "reports": [
           {
-            "source": "typesense_meilisearch_sync",
+            "source": "postgres_search_sync",
             "status": "missing_report",
-            "path": "production/data/search-engine-sync-report.json",
+            "path": "production/data/postgres-search-sync-report.json",
             "freshness": {
               "id": "live_services",
               "status": "invalid",
@@ -500,9 +500,9 @@
             }
           },
           {
-            "source": "typesense_meilisearch_query",
+            "source": "postgres_search_query",
             "status": "missing_report",
-            "path": "production/data/search-engine-query-report.json",
+            "path": "production/data/postgres-search-query-report.json",
             "freshness": {
               "id": "live_services",
               "status": "invalid",
@@ -524,49 +524,32 @@
           "status": "blocked_report",
           "path": "production/data/live-service-provisioning-report.json",
           "summary": {
-            "checks": 9,
+            "checks": 6,
             "missing_env": [
-              "TYPESENSE_URL",
-              "TYPESENSE_API_KEY",
-              "MEILI_URL",
-              "MEILI_API_KEY",
+              "DATABASE_URL",
+              "PAYLOAD_SECRET",
               "HERMES_CHAT_COMPLETIONS_URL",
               "HERMES_API_KEY"
             ],
             "placeholder_env": [],
             "services": [
-              "typesense",
-              "meilisearch",
+              "postgres_search",
               "hermes"
             ]
           },
           "checks": [
             {
-              "id": "typesense_url",
-              "env": "TYPESENSE_URL",
+              "id": "database_url",
+              "env": "DATABASE_URL",
               "status": "missing_env"
             },
             {
-              "id": "typesense_api_key",
-              "env": "TYPESENSE_API_KEY",
+              "id": "payload_secret",
+              "env": "PAYLOAD_SECRET",
               "status": "missing_env"
             },
             {
-              "id": "meili_url",
-              "env": "MEILI_URL",
-              "status": "missing_env"
-            },
-            {
-              "id": "meili_api_key",
-              "env": "MEILI_API_KEY",
-              "status": "missing_env"
-            },
-            {
-              "id": "typesense_health",
-              "status": "missing_env"
-            },
-            {
-              "id": "meilisearch_health",
+              "id": "postgres_database_target",
               "status": "missing_env"
             },
             {
@@ -625,7 +608,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-06T00:00:00Z",
+              "generated_at": "2026-08-13T00:00:00.000Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,
@@ -666,14 +649,14 @@
             ]
           },
           "next_actions": [
-            "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",
+            "Set DATABASE_URL, PAYLOAD_SECRET, and Hermes provider env.",
             "Run npm run live:provisioning until all service checks pass.",
             "Run npm run live:capture only after provisioning passes."
           ]
         }
       },
       "next_actions": [
-        "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
+        "Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path and Hermes service.",
         "Import or mount the three live service reports, then run npm run live:preflight before launch."
       ]
     },
@@ -726,122 +709,17 @@
       "status": "blocked",
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "status": "blocked_report",
-        "generated_at": "2026-07-06T00:00:00Z",
+        "status": "missing_report",
         "path": "production/data/payload-runtime-report.json",
-        "summary": {
-          "admin_route": "/admin",
-          "checks": 12,
-          "database": {
-            "status": "missing_env"
-          },
-          "identity_collection": "admins",
-          "missing_env": [
-            "PAYLOAD_SECRET",
-            "DATABASE_URL"
-          ],
-          "payload_admin_ui": "edge_hidden",
-          "payload_identity_rest": "edge_hidden",
-          "placeholder_env": [],
-          "weak_env": [],
-          "route_files": 6
-        },
-        "checks": [
-          {
-            "id": "payload_secret",
-            "status": "missing_env",
-            "env": "PAYLOAD_SECRET"
-          },
-          {
-            "id": "database_url",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "route:app/admin/route.js",
-            "status": "pass",
-            "file": "app/admin/route.js"
-          },
-          {
-            "id": "route:app/admin/login/route.js",
-            "status": "pass",
-            "file": "app/admin/login/route.js"
-          },
-          {
-            "id": "route:app/admin/logout/route.js",
-            "status": "pass",
-            "file": "app/admin/logout/route.js"
-          },
-          {
-            "id": "route:app/admin/team/route.js",
-            "status": "pass",
-            "file": "app/admin/team/route.js"
-          },
-          {
-            "id": "route:app/api/admin/team/route.js",
-            "status": "pass",
-            "file": "app/api/admin/team/route.js"
-          },
-          {
-            "id": "route:app/(payload)/api/[...slug]/route.js",
-            "status": "pass",
-            "file": "app/(payload)/api/[...slug]/route.js"
-          },
-          {
-            "id": "payload_edge_boundary",
-            "status": "pass",
-            "custom_admin_route": "/admin",
-            "payload_admin_ui": "edge_hidden",
-            "payload_graphql_encoded_paths": [
-              "/graph%71l",
-              "/graph%2571l",
-              "/graphql%2fquery",
-              "/graphql%252fquery",
-              "/graphql%2dplayground",
-              "/graphql%252dplayground%252f",
-              "/api%2fgraphql",
-              "/api%252fgraphql%252f"
-            ],
-            "payload_graphql_paths": [
-              "/graphql",
-              "/graphql-playground",
-              "/api/graphql"
-            ],
-            "payload_identity_rest": "edge_hidden"
-          },
-          {
-            "id": "payload_config_import",
-            "status": "pass",
-            "collections": 13,
-            "graphql_disabled": true,
-            "graphql_playground_disabled_in_production": true,
-            "identity_collection": "admins",
-            "internal_admin_route": "/payload-admin",
-            "session_max_age_seconds": 7200,
-            "sessions": "database_backed"
-          },
-          {
-            "id": "database_network_scope",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "database_tcp",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          }
+        "next_actions": [
+          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
+          "Run npm run payload:runtime, then npm run payload:preflight."
         ],
         "freshness": {
           "id": "payload_runtime",
-          "status": "stale",
-          "age_ms": 3172687848,
-          "max_age_ms": 604800000
-        },
-        "next_actions": [
-          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
-          "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
-          "Run npm run payload:preflight before launch:preflight."
-        ]
+          "status": "invalid",
+          "error": "generated_at is not a timestamp"
+        }
       },
       "next_actions": [
         "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
@@ -869,9 +747,9 @@
   ],
   "live_services": [
     {
-      "source": "typesense_meilisearch_sync",
+      "source": "postgres_search_sync",
       "status": "missing_report",
-      "path": "production/data/search-engine-sync-report.json",
+      "path": "production/data/postgres-search-sync-report.json",
       "freshness": {
         "id": "live_services",
         "status": "invalid",
@@ -879,9 +757,9 @@
       }
     },
     {
-      "source": "typesense_meilisearch_query",
+      "source": "postgres_search_query",
       "status": "missing_report",
-      "path": "production/data/search-engine-query-report.json",
+      "path": "production/data/postgres-search-query-report.json",
       "freshness": {
         "id": "live_services",
         "status": "invalid",
