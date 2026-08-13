@@ -15,7 +15,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - listing_quality_review: Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.
 - listing_quality_review: Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.
 - live_services: Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path and Hermes service.
-- live_services: Import or mount the three live service reports, then run npm run live:preflight before launch.
+- live_services: Import or mount the 3 required live service reports, then run npm run live:preflight before launch.
 - monitoring_rollback: Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.
 - monitoring_rollback: Mount a current redacted monitoring and rollback report, then run npm run monitoring:preflight.
 - monitoring_rollback: Confirm the automated rollback policy, canary, and isolated drill cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.
@@ -81,7 +81,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Admin provisioning status endpoint: `GET /api/admin/live-service-provisioning`.
 - Admin provisioning import endpoint: `POST /api/admin/live-service-provisioning/import` accepts the redacted JSON from `npm run live:provisioning`.
 - Provisioning preflight: `npm run live:provisioning:preflight` must pass before live evidence capture.
-- Live evidence capture: `npm run live:capture` verifies the Postgres search projection, queries that same Postgres target, runs the Hermes draft worker, and validates all three report outputs.
+- Live evidence capture: `npm run live:capture` verifies the Postgres search projection, queries that same Postgres target, runs the Hermes draft worker, and validates every required report output.
 - Individual debug commands: `npm run search:sync`, `npm run search:query`, `npm run hermes:worker`.
 - Status report: `npm run live:report` writes current missing/invalid live-service report state without clearing the launch gate.
 - Admin live-services status endpoint: `GET /api/admin/live-services`.

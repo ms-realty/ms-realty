@@ -15,6 +15,15 @@ import {
   writeHermesDraftWorkerReport,
 } from "./hermes-draft-worker.mjs";
 import { assertHermesChatCompletionsEndpoint } from "./hermes-provider-provisioning.mjs";
+import {
+  HERMES_DRAFT_WORKER_SOURCE,
+  HERMES_LAUNCH_REQUIRED,
+  POSTGRES_SEARCH_QUERY_SOURCE,
+  POSTGRES_SEARCH_SYNC_SOURCE,
+  REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS,
+  REQUIRED_LIVE_SERVICE_PROVISIONING_SERVICES,
+  REQUIRED_LIVE_SERVICE_REPORT_SOURCES,
+} from "./launch-service-contract.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { buildListingQualityPreflightReport, DEFAULT_LISTING_QUALITY_REVIEW_INPUT } from "./listing-quality.mjs";
 import {
@@ -54,8 +63,6 @@ const LOCAL_PREVIEW_GATE_NEXT_ACTIONS = [
   "Complete the external SEO, human-review, and live production evidence gates before launch.",
 ];
 
-const POSTGRES_SEARCH_SYNC_SOURCE = "postgres_search_sync";
-const POSTGRES_SEARCH_QUERY_SOURCE = "postgres_search_query";
 const LIVE_SERVICE_SOURCE_ALIASES = {
   typesense_meilisearch_sync: POSTGRES_SEARCH_SYNC_SOURCE,
   typesense_meilisearch_query: POSTGRES_SEARCH_QUERY_SOURCE,
@@ -63,22 +70,14 @@ const LIVE_SERVICE_SOURCE_ALIASES = {
 const LIVE_SERVICE_REPORT_TEMPLATES = {
   [POSTGRES_SEARCH_SYNC_SOURCE]: "postgres-search-sync-report.json.example",
   [POSTGRES_SEARCH_QUERY_SOURCE]: "postgres-search-query-report.json.example",
-  hermes_draft_worker: "hermes-draft-worker-report.json.example",
+  [HERMES_DRAFT_WORKER_SOURCE]: "hermes-draft-worker-report.json.example",
 };
 
 const LIVE_SERVICE_REPORT_WRITERS = {
   [POSTGRES_SEARCH_SYNC_SOURCE]: { write: writeSearchEngineSyncReport, pathKey: "syncReportPath" },
   [POSTGRES_SEARCH_QUERY_SOURCE]: { write: writeSearchEngineQueryReport, pathKey: "queryReportPath" },
-  hermes_draft_worker: { write: writeHermesDraftWorkerReport, pathKey: "hermesReportPath" },
+  [HERMES_DRAFT_WORKER_SOURCE]: { write: writeHermesDraftWorkerReport, pathKey: "hermesReportPath" },
 };
-const REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS = [
-  "database_url",
-  "payload_secret",
-  "postgres_database_target",
-  "hermes_provider",
-  "hermes_agent_health",
-  "hermes_agent_capabilities",
-];
 const REQUIRED_PAYLOAD_RUNTIME_ROUTE_FILES = [
   "app/admin/route.js",
   "app/admin/login/route.js",
@@ -136,8 +135,10 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
     "Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.",
   ],
   live_services: [
-    "Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path and Hermes service.",
-    "Import or mount the three live service reports, then run npm run live:preflight before launch.",
+    HERMES_LAUNCH_REQUIRED
+      ? "Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path and Hermes service."
+      : "Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path.",
+    `Import or mount the ${REQUIRED_LIVE_SERVICE_REPORT_SOURCES.length} required live service reports, then run npm run live:preflight before launch.`,
   ],
   runtime_smoke: [
     "Run npm run runtime:build and npm run server:smoke against the production Node adapter and HTTP listing route.",
@@ -222,6 +223,15 @@ function canonicalLiveServiceSource(source) {
   return LIVE_SERVICE_SOURCE_ALIASES[source] || source;
 }
 
+function requiredLiveServiceReports(reports) {
+  return REQUIRED_LIVE_SERVICE_REPORT_SOURCES.map((source) => reports.find((report) => report.source === source)).filter(Boolean);
+}
+
+function requiredLiveServiceReportsPass(reports, predicate = (report) => report.status === "pass") {
+  const required = requiredLiveServiceReports(reports);
+  return required.length === REQUIRED_LIVE_SERVICE_REPORT_SOURCES.length && required.every(predicate);
+}
+
 function assertLaunchLiveServiceEvidence(source, report) {
   if (source === POSTGRES_SEARCH_SYNC_SOURCE) {
     if (report.evidence_scope !== "live" || report.source?.kind !== "payload_postgres" || report.source?.authoritative !== true) {
@@ -252,7 +262,7 @@ function assertLaunchLiveServiceEvidence(source, report) {
     }
     return;
   }
-  if (source === "hermes_draft_worker") {
+  if (source === HERMES_DRAFT_WORKER_SOURCE) {
     assertLaunchServiceUrl(report.provider?.endpoint, "Hermes worker report");
     assertHermesChatCompletionsEndpoint(report.provider.endpoint, "Hermes worker report endpoint");
     if (report.provider?.mode !== "self_hosted" || report.provider?.sensitive_data_allowed !== true) {
@@ -301,7 +311,7 @@ function liveServiceEvidenceSnapshot(source, report) {
       })),
     };
   }
-  if (source === "hermes_draft_worker") {
+  if (source === HERMES_DRAFT_WORKER_SOURCE) {
     return {
       provider: {
         mode: report.provider?.mode,
@@ -664,7 +674,7 @@ function assertLiveServiceSummaryEvidence(item) {
     throw new Error("Launch readiness live services require search query summary evidence");
   }
   if (
-    item.source === "hermes_draft_worker" &&
+    item.source === HERMES_DRAFT_WORKER_SOURCE &&
     (!Number.isInteger(summary.attempted) ||
       !Number.isInteger(summary.persisted) ||
       !Number.isInteger(summary.rejected) ||
@@ -746,7 +756,7 @@ function assertLiveServiceHermesProviderEvidence(item) {
 function assertLiveServiceReportDetailedEvidence(item) {
   if (item.source === POSTGRES_SEARCH_SYNC_SOURCE) assertLiveServiceSyncOperationEvidence(item);
   if (item.source === POSTGRES_SEARCH_QUERY_SOURCE) assertLiveServiceQueryOperationEvidence(item);
-  if (item.source === "hermes_draft_worker") assertLiveServiceHermesProviderEvidence(item);
+  if (item.source === HERMES_DRAFT_WORKER_SOURCE) assertLiveServiceHermesProviderEvidence(item);
 }
 
 function assertLiveServiceProvisioningPassEvidence(provisioning) {
@@ -757,7 +767,7 @@ function assertLiveServiceProvisioningPassEvidence(provisioning) {
     provisioning.summary.checks !== provisioning.checks.length ||
     provisioning.summary.missing_env?.length !== 0 ||
     provisioning.summary.placeholder_env?.length !== 0 ||
-    JSON.stringify(provisioning.summary.services) !== JSON.stringify(["postgres_search", "hermes"])
+    JSON.stringify(provisioning.summary.services) !== JSON.stringify(REQUIRED_LIVE_SERVICE_PROVISIONING_SERVICES)
   ) {
     throw new Error("Launch readiness live services require complete provisioning summary evidence");
   }
@@ -767,11 +777,13 @@ function assertLiveServiceProvisioningPassEvidence(provisioning) {
   }
   const databaseTarget = checks.get("postgres_database_target")?.database_target;
   assertLaunchDatabaseTarget(databaseTarget, "Live service provisioning Postgres target");
-  if (provisioning.hermes?.ready !== true || !provisioning.hermes.endpoint) {
-    throw new Error("Launch readiness live services require Hermes provisioning endpoint evidence");
+  if (HERMES_LAUNCH_REQUIRED) {
+    if (provisioning.hermes?.ready !== true || !provisioning.hermes.endpoint) {
+      throw new Error("Launch readiness live services require Hermes provisioning endpoint evidence");
+    }
+    assertLaunchServiceUrl(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
+    assertHermesChatCompletionsEndpoint(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
   }
-  assertLaunchServiceUrl(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
-  assertHermesChatCompletionsEndpoint(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
 }
 
 function assertPassRuntimeEvidence(report) {
@@ -780,10 +792,10 @@ function assertPassRuntimeEvidence(report) {
     const reports = liveServices.evidence?.reports || [];
     assertLiveServiceProvisioningPassEvidence(liveServices.evidence?.provisioning || {});
     const sources = new Set(reports.map((item) => item.source));
-    for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
+    for (const source of REQUIRED_LIVE_SERVICE_REPORT_SOURCES) {
       if (!sources.has(source)) throw new Error(`Launch readiness live services missing ${source} evidence`);
     }
-    for (const item of reports) {
+    for (const item of requiredLiveServiceReports(reports)) {
       assertLiveServiceReportPassEvidence(item);
     }
     const sync = reports.find((item) => item.source === POSTGRES_SEARCH_SYNC_SOURCE);
@@ -890,7 +902,7 @@ function assertPassProductionRecoveryEvidence(report) {
 function assertPassEvidenceFreshness(report, now) {
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
-    for (const item of liveServices.evidence?.reports || []) {
+    for (const item of requiredLiveServiceReports(liveServices.evidence?.reports || [])) {
       assertFreshEvidence("live_services", item.generated_at, item.freshness, now);
     }
   }
@@ -1030,7 +1042,7 @@ export function liveServiceReports({
   return [
     reportStatus(POSTGRES_SEARCH_SYNC_SOURCE, syncReportPath, assertSearchEngineSyncReport, now),
     reportStatus(POSTGRES_SEARCH_QUERY_SOURCE, queryReportPath, assertSearchEngineQueryReport, now),
-    reportStatus("hermes_draft_worker", hermesReportPath, assertHermesDraftWorkerReport, now),
+    reportStatus(HERMES_DRAFT_WORKER_SOURCE, hermesReportPath, assertHermesDraftWorkerReport, now),
   ];
 }
 
@@ -1087,7 +1099,7 @@ export function validateLiveServiceReports(options = {}) {
     }
   }
   return {
-    ready: reports.every((item) => item.status === "pass"),
+    ready: requiredLiveServiceReportsPass(reports),
     reports,
   };
 }
@@ -1121,11 +1133,17 @@ export function buildLiveServicePreflightReport({ generatedAt = new Date().toISO
     next_actions: result.ready
       ? ["Run npm run live:preflight, then npm run launch:preflight with the same mounted live report paths."]
       : [
-          "Provision DATABASE_URL, PAYLOAD_SECRET, and Hermes provider credentials.",
+          HERMES_LAUNCH_REQUIRED
+            ? "Provision DATABASE_URL, PAYLOAD_SECRET, and Hermes provider credentials."
+            : "Provision DATABASE_URL and PAYLOAD_SECRET.",
           "Run npm run search:sync && npm run search:query against the production Postgres search path.",
-          "Run npm run hermes:provisioning to verify the self-hosted Hermes/vLLM provider settings.",
-          "Run npm run hermes:worker.",
-          "Run npm run live:capture to generate the three live service reports.",
+          ...(HERMES_LAUNCH_REQUIRED
+            ? [
+                "Run npm run hermes:provisioning to verify the self-hosted Hermes/vLLM provider settings.",
+                "Run npm run hermes:worker.",
+              ]
+            : []),
+          `Run npm run live:capture to generate the ${REQUIRED_LIVE_SERVICE_REPORT_SOURCES.length} required live service reports.`,
           "Run npm run live:preflight before launch:preflight.",
         ],
   };
@@ -1138,7 +1156,14 @@ export function assertLiveServicePreflightReport(report) {
   if (!Array.isArray(report.reports) || report.reports.length !== 3) {
     throw new Error("Live service preflight report must include three service reports");
   }
-  const ready = report.reports.every((item) => item.status === "pass");
+  const sources = new Set(report.reports.map((item) => item.source));
+  if (sources.size !== report.reports.length) {
+    throw new Error("Live service preflight report sources must be unique");
+  }
+  for (const source of REQUIRED_LIVE_SERVICE_REPORT_SOURCES) {
+    if (!sources.has(source)) throw new Error(`Live service preflight missing ${source} evidence`);
+  }
+  const ready = requiredLiveServiceReportsPass(report.reports);
   if (report.ready !== ready) throw new Error("Live service preflight ready flag must match reports");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Live service preflight status must match ready flag");
   if (!Array.isArray(report.next_actions) || report.next_actions.length === 0) {
@@ -1168,13 +1193,6 @@ export function assertLiveServicePreflightReport(report) {
       throw new Error("Live service preflight summary status counts must match reports");
     }
   }
-  const sources = new Set(report.reports.map((item) => item.source));
-  if (sources.size !== report.reports.length) {
-    throw new Error("Live service preflight report sources must be unique");
-  }
-  for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
-    if (!sources.has(source)) throw new Error(`Live service preflight missing ${source} evidence`);
-  }
   for (const item of report.reports) {
     if (report.summary.configured_paths?.[item.source] !== item.path) {
       throw new Error("Live service preflight configured paths must match reports");
@@ -1182,7 +1200,7 @@ export function assertLiveServicePreflightReport(report) {
     if (item.status === "pass") assertLiveServiceReportPassEvidence(item);
   }
   if (ready) {
-    for (const item of report.reports) assertLiveServiceReportPassEvidence(item);
+    for (const item of requiredLiveServiceReports(report.reports)) assertLiveServiceReportPassEvidence(item);
   }
   return true;
 }
@@ -1223,7 +1241,7 @@ export function writeLiveServiceReport(source, report, options = {}) {
 }
 
 export function liveServiceImportSummary(imported, preflight) {
-  const blockedReports = preflight.reports
+  const blockedReports = requiredLiveServiceReports(preflight.reports)
     .filter((report) => report.status !== "pass")
     .map((report) => ({ source: report.source, status: report.status, path: report.path }));
   const importedReport = preflight.reports.find((report) => report.source === imported.source);
@@ -1307,8 +1325,10 @@ export function buildLaunchReadinessReport({
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const listingQualityReady = hasCompleteListingQualityEvidence(listingQualityReview);
   const liveServicesReady =
-    liveServiceEvidence.every((item) => item.status === "pass" && item.freshness.status === "fresh") &&
-    liveServiceProvisioning.status === "pass";
+    requiredLiveServiceReportsPass(
+      liveServiceEvidence,
+      (item) => item.status === "pass" && item.freshness.status === "fresh",
+    ) && liveServiceProvisioning.status === "pass";
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
   const payloadRuntimeReady = payloadRuntimeEvidence.status === "pass" && payloadRuntimeEvidence.freshness.status === "fresh";
   const productionRecoveryReady =
@@ -1431,7 +1451,9 @@ export function buildLaunchReadinessReport({
       { reports: liveServiceEvidence, provisioning: liveServiceProvisioning },
       liveServicesReady
         ? ""
-        : "Run live Postgres sync/query and Hermes draft worker commands after provisioning.",
+        : HERMES_LAUNCH_REQUIRED
+          ? "Run live Postgres sync/query and Hermes draft worker commands after provisioning."
+          : "Run live Postgres sync/query commands after provisioning.",
     ),
     gate(
       "monitoring_rollback",
@@ -1679,7 +1701,7 @@ export function materializeLocalLaunchReadiness({
       maxReportAgeMs,
     }),
     localReportSnapshot({
-      id: "hermes_draft_worker",
+      id: HERMES_DRAFT_WORKER_SOURCE,
       path: hermesReportPath,
       assertReport: assertHermesDraftWorkerReport,
       generatedAtMs,

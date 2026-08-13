@@ -8,6 +8,11 @@ import {
   buildHermesProviderProvisioningReport,
 } from "./hermes-provider-provisioning.mjs";
 import { assertHermesAgentRuntimeReport, probeHermesAgentRuntime } from "./hermes-agent-runtime.mjs";
+import {
+  HERMES_LAUNCH_REQUIRED,
+  REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS,
+  REQUIRED_LIVE_SERVICE_PROVISIONING_SERVICES,
+} from "./launch-service-contract.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
 import { assertProductionDatabaseHost } from "./payload-runtime.mjs";
 import { assertSearchServiceUrl } from "./search-service-http.mjs";
@@ -17,15 +22,6 @@ export const DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT = fromRoot(
   "data",
   "live-service-provisioning-report.json",
 );
-const REQUIRED_CHECK_IDS = [
-  "database_url",
-  "payload_secret",
-  "postgres_database_target",
-  "hermes_provider",
-  "hermes_agent_health",
-  "hermes_agent_capabilities",
-];
-const REQUIRED_SERVICES = ["postgres_search", "hermes"];
 const CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "fail", "not_run"]);
 const REQUIRED_ENV_BY_CHECK = {
   database_url: "DATABASE_URL",
@@ -81,6 +77,15 @@ function postgresDatabaseTargetCheck(env) {
 
 function runtimeChecks(runtime) {
   return runtime.checks.map((check) => ({ ...check, id: `hermes_agent_${check.id}` }));
+}
+
+function requiredChecksPass(checks) {
+  const byId = new Map(checks.map((check) => [check.id, check]));
+  return REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS.every((id) => byId.get(id)?.status === "pass");
+}
+
+function requiredCheck(check) {
+  return REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS.includes(check.id);
 }
 
 async function hermesProviderCheck(hermes, { env, fetchImpl, generatedAt }) {
@@ -168,11 +173,14 @@ export async function buildLiveServiceProvisioningReport({
   checks.push(hermesChecks.provider, ...runtimeChecks(hermesChecks.runtime));
 
   const missingEnv = [
-    ...checks.filter((check) => check.status === "missing_env").map((check) => check.env).filter(Boolean),
-    ...hermes.missing,
+    ...checks.filter((check) => requiredCheck(check) && check.status === "missing_env").map((check) => check.env).filter(Boolean),
+    ...(HERMES_LAUNCH_REQUIRED ? hermes.missing : []),
   ];
-  const placeholderEnv = checks.filter((check) => check.status === "placeholder").map((check) => check.env).filter(Boolean);
-  const ready = checks.every((check) => check.status === "pass");
+  const placeholderEnv = checks
+    .filter((check) => requiredCheck(check) && check.status === "placeholder")
+    .map((check) => check.env)
+    .filter(Boolean);
+  const ready = requiredChecksPass(checks);
   return {
     generated_at: generatedAt,
     ready,
@@ -181,7 +189,7 @@ export async function buildLiveServiceProvisioningReport({
       checks: checks.length,
       missing_env: [...new Set(missingEnv)],
       placeholder_env: [...new Set(placeholderEnv)],
-      services: REQUIRED_SERVICES,
+      services: REQUIRED_LIVE_SERVICE_PROVISIONING_SERVICES,
     },
     checks,
     hermes: {
@@ -211,8 +219,10 @@ export async function buildLiveServiceProvisioningReport({
     next_actions: ready
       ? ["Run npm run live:provisioning:preflight, then npm run live:capture and npm run live:preflight."]
       : [
-          "Set DATABASE_URL, PAYLOAD_SECRET, and Hermes provider env.",
-          "Run npm run live:provisioning until all service checks pass.",
+          HERMES_LAUNCH_REQUIRED
+            ? "Set DATABASE_URL, PAYLOAD_SECRET, and Hermes provider env."
+            : "Set DATABASE_URL and PAYLOAD_SECRET.",
+          "Run npm run live:provisioning until all required service checks pass.",
           "Run npm run live:capture only after provisioning passes.",
         ],
   };
@@ -235,10 +245,10 @@ export function assertLiveServiceProvisioningReport(report) {
     }
     checkIds.add(check.id);
   }
-  for (const id of REQUIRED_CHECK_IDS) {
+  for (const id of REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS) {
     if (!checkIds.has(id)) throw new Error(`Live service provisioning report missing required check ${id}`);
   }
-  const ready = report.checks.every((check) => check.status === "pass");
+  const ready = requiredChecksPass(report.checks);
   if (report.ready !== ready) throw new Error("Live service provisioning ready flag must match checks");
   if (report.status !== (ready ? "ready" : "blocked")) {
     throw new Error("Live service provisioning status must match ready flag");
@@ -246,18 +256,24 @@ export function assertLiveServiceProvisioningReport(report) {
   if (!report.summary || !Array.isArray(report.summary.missing_env) || !Array.isArray(report.summary.placeholder_env)) {
     throw new Error("Live service provisioning report must summarize missing and placeholder env");
   }
-  if (JSON.stringify(report.summary.services) !== JSON.stringify(REQUIRED_SERVICES)) {
+  if (JSON.stringify(report.summary.services) !== JSON.stringify(REQUIRED_LIVE_SERVICE_PROVISIONING_SERVICES)) {
     throw new Error("Live service provisioning services summary must match required services");
   }
   if (report.summary.checks !== report.checks.length) throw new Error("Live service provisioning summary check count must match checks");
   const missingEnv = [
-    ...report.checks.filter((check) => check.status === "missing_env").map((check) => check.env).filter(Boolean),
-    ...((report.checks.find((check) => check.id === "hermes_provider")?.missing) || []),
+    ...report.checks
+      .filter((check) => requiredCheck(check) && check.status === "missing_env")
+      .map((check) => check.env)
+      .filter(Boolean),
+    ...(HERMES_LAUNCH_REQUIRED ? (report.checks.find((check) => check.id === "hermes_provider")?.missing || []) : []),
   ];
   if (JSON.stringify(report.summary.missing_env) !== JSON.stringify([...new Set(missingEnv)])) {
     throw new Error("Live service provisioning missing env summary must match checks");
   }
-  const placeholderEnv = report.checks.filter((check) => check.status === "placeholder").map((check) => check.env).filter(Boolean);
+  const placeholderEnv = report.checks
+    .filter((check) => requiredCheck(check) && check.status === "placeholder")
+    .map((check) => check.env)
+    .filter(Boolean);
   if (JSON.stringify(report.summary.placeholder_env) !== JSON.stringify([...new Set(placeholderEnv)])) {
     throw new Error("Live service provisioning placeholder env summary must match checks");
   }
@@ -270,7 +286,11 @@ export function assertLiveServiceProvisioningReport(report) {
   }
   for (const id of ["hermes_agent_health", "hermes_agent_capabilities"]) {
     const check = report.checks.find((item) => item.id === id);
-    if (ready && (!Number.isInteger(check.status_code) || check.status_code < 200 || check.status_code > 299)) {
+    if (
+      HERMES_LAUNCH_REQUIRED &&
+      ready &&
+      (!Number.isInteger(check.status_code) || check.status_code < 200 || check.status_code > 299)
+    ) {
       throw new Error(`${id} must include successful endpoint evidence`);
     }
   }
@@ -286,10 +306,11 @@ export function assertLiveServiceProvisioningReport(report) {
       throw new Error(`Live service provisioning Hermes check must use canonical env label ${env}`);
     }
   }
-  if ((ready || hermesProvider?.status === "pass") && (!report.hermes?.endpoint || report.hermes.ready !== true)) {
+  const hermesEvidenceRequired = (HERMES_LAUNCH_REQUIRED && ready) || hermesProvider?.status === "pass";
+  if (hermesEvidenceRequired && (!report.hermes?.endpoint || report.hermes.ready !== true)) {
     throw new Error("Live service provisioning ready report must include Hermes endpoint evidence");
   }
-  if ((ready || hermesProvider?.status === "pass") && report.hermes?.endpoint) {
+  if (hermesEvidenceRequired && report.hermes?.endpoint) {
     assertProvisioningServiceUrl(report.hermes.endpoint, "Live service provisioning Hermes endpoint");
     assertHermesChatCompletionsEndpoint(report.hermes.endpoint, "Live service provisioning Hermes endpoint");
   }

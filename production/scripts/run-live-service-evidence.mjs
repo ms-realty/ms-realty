@@ -15,6 +15,7 @@ import {
   runHermesDraftWorker,
   writeHermesDraftWorkerReport,
 } from "../lib/hermes-draft-worker.mjs";
+import { HERMES_LAUNCH_REQUIRED } from "../lib/launch-service-contract.mjs";
 
 const PROVISIONING_NEXT =
   "Next: run `npm run live:provisioning:preflight`; after it passes, rerun `npm run live:capture`, then `npm run live:preflight`.";
@@ -40,16 +41,20 @@ async function capture() {
   const queryReport = await runSearchEngineQuerySmoke({ projection, generatedAt: runAt });
   writeSearchEngineQueryReport(queryReport, postgresQueryReportPath());
 
-  const hermesReport = await runHermesDraftWorker({
-    provider: openAiCompatibleHermesProvider(),
-    filePath: process.env.MS_REALTY_TRANSLATION_LEDGER_PATH || undefined,
-    auditPath: process.env.MS_REALTY_HERMES_AUDIT_PATH || undefined,
-    auditLogPath: process.env.MS_REALTY_AUDIT_LOG_PATH || undefined,
-    limit: Number(process.env.HERMES_DRAFT_LIMIT || 25),
-    generatedAt: runAt,
-    recordedAt: runAt,
-  });
-  writeHermesDraftWorkerReport(hermesReport, process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH || undefined);
+  const hermesReport = HERMES_LAUNCH_REQUIRED
+    ? await runHermesDraftWorker({
+        provider: openAiCompatibleHermesProvider(),
+        filePath: process.env.MS_REALTY_TRANSLATION_LEDGER_PATH || undefined,
+        auditPath: process.env.MS_REALTY_HERMES_AUDIT_PATH || undefined,
+        auditLogPath: process.env.MS_REALTY_AUDIT_LOG_PATH || undefined,
+        limit: Number(process.env.HERMES_DRAFT_LIMIT || 25),
+        generatedAt: runAt,
+        recordedAt: runAt,
+      })
+    : null;
+  if (hermesReport) {
+    writeHermesDraftWorkerReport(hermesReport, process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH || undefined);
+  }
 
   const result = validateLiveServiceReports({
     syncReportPath: postgresSyncReportPath(),
@@ -69,7 +74,9 @@ try {
     [
       `Search sync: ${syncReport.summary.documents_per_engine.join("/")} documents`,
       `Search query: ${queryReport.summary.total_hits} hits`,
-      `Hermes drafts: ${hermesReport.summary.persisted}/${hermesReport.summary.attempted} persisted`,
+      ...(hermesReport
+        ? [`Hermes drafts: ${hermesReport.summary.persisted}/${hermesReport.summary.attempted} persisted`]
+        : []),
     ].join("\n"),
   );
 } catch (error) {
