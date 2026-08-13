@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { assertMonitoringRollbackReport } from "./monitoring-rollback.mjs";
 import { assertProductionRecoveryReport } from "./production-recovery.mjs";
 
 export const R2_RECOVERY_SCHEMA_VERSION = 1;
@@ -75,15 +76,6 @@ export function componentMapDigest(map) {
   return crypto.createHash("sha256").update(canonicalJson(map)).digest("hex");
 }
 
-export function resolveRecoveryComponentMapPath(env, defaultPath) {
-  const override = String(env.MS_REALTY_RECOVERY_COMPONENT_MAP_PATH || "").trim();
-  if (!override) return path.resolve(defaultPath);
-  if (env.NODE_ENV !== "test" || env.MS_REALTY_RECOVERY_ALLOW_TEST_COMPONENT_MAP_OVERRIDE !== "true") {
-    throw new Error("MS_REALTY_RECOVERY_COMPONENT_MAP_PATH is a test-only override");
-  }
-  return path.resolve(override);
-}
-
 export function readImmutableJson(filePath, label = "Recovery receipt") {
   const resolved = path.resolve(requiredText(filePath, `${label} path`));
   const stat = fs.lstatSync(resolved);
@@ -94,8 +86,12 @@ export function readImmutableJson(filePath, label = "Recovery receipt") {
 }
 
 export function trustedManifestDigest({ localManifestPath, recoveryReportPath = null, backupId }) {
+  const requestedBackupId = assertSafeBackupId(backupId);
   if (fs.existsSync(localManifestPath)) {
-    readImmutableJson(localManifestPath, "Local recovery manifest");
+    const manifest = readImmutableJson(localManifestPath, "Local recovery manifest");
+    if (manifest.backup_id !== requestedBackupId) {
+      throw new Error("Local recovery manifest backup_id does not match the requested backup");
+    }
     return sha256File(localManifestPath);
   }
   if (!recoveryReportPath) {
@@ -103,7 +99,7 @@ export function trustedManifestDigest({ localManifestPath, recoveryReportPath = 
   }
   const report = readImmutableJson(recoveryReportPath, "Approved recovery report");
   assertProductionRecoveryReport(report);
-  if (report.backup?.backup_id !== assertSafeBackupId(backupId)) {
+  if (report.backup?.backup_id !== requestedBackupId) {
     throw new Error("Approved recovery report does not match backup_id");
   }
   const digest = report.approval?.manifest_sha256;
@@ -245,11 +241,14 @@ export function createR2RecoveryManifest({
   };
 }
 
-export function assertR2RecoveryManifest(manifest, trustedComponentMap) {
+export function assertR2RecoveryManifest(manifest, trustedComponentMap, expectedBackupId = null) {
   if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) throw new Error("Recovery manifest must be an object");
   if (!trustedComponentMap) throw new Error("Recovery manifest verification requires the trusted component map");
   assertRecoveryComponentMap(trustedComponentMap);
   const backupId = assertSafeBackupId(manifest.backup_id);
+  if (expectedBackupId !== null && backupId !== assertSafeBackupId(expectedBackupId)) {
+    throw new Error("Recovery manifest backup_id does not match the requested backup");
+  }
   if (manifest.schema_version !== R2_RECOVERY_SCHEMA_VERSION || manifest.environment !== "production") {
     throw new Error("Recovery manifest must use the production schema");
   }
@@ -366,30 +365,15 @@ export function updateR2UploadPlan(plan, { event, objectKey = null, at = null, e
   return next;
 }
 
-export function assertRollbackDrillReceipt(receipt, { manifest, manifestSha256 }) {
-  if (!receipt || typeof receipt !== "object" || Array.isArray(receipt)) throw new Error("Rollback drill receipt is required");
-  if (receipt.schema_version !== 1 || receipt.environment !== "production" || receipt.status !== "pass") {
-    throw new Error("Rollback drill receipt must be passing production evidence");
+export function assertRecoveryMonitoringRollbackEvidence(report, { manifest, completedAt = null }) {
+  assertMonitoringRollbackReport(report);
+  const generatedAt = timestamp(report.generated_at, "monitoring rollback generated_at");
+  const verifiedAt = timestamp(report.rollback.drill.verified_at, "monitoring rollback verified_at");
+  if (verifiedAt < timestamp(manifest.completed_at, "manifest completed_at")) {
+    throw new Error("Monitoring rollback evidence must follow the bound backup");
   }
-  if (!SHA256.test(manifestSha256 || "") || receipt.manifest_sha256 !== manifestSha256) {
-    throw new Error("Rollback drill receipt manifest digest does not match");
-  }
-  if (receipt.backup_id !== manifest.backup_id) throw new Error("Rollback drill receipt backup_id does not match");
-  requiredText(receipt.receipt_id, "rollback receipt_id");
-  requiredText(receipt.operator, "rollback operator");
-  const executedAt = timestamp(receipt.executed_at, "rollback executed_at");
-  if (executedAt < timestamp(manifest.completed_at, "manifest completed_at")) {
-    throw new Error("Rollback drill receipt must follow the bound backup");
-  }
-  const fromRelease = requiredText(receipt.from_release, "rollback from_release");
-  const toRelease = requiredText(receipt.to_release, "rollback to_release");
-  if (fromRelease === toRelease) throw new Error("Rollback drill must move between distinct releases");
-  if (
-    receipt.exact_release_verified !== true ||
-    receipt.post_rollback_health_verified !== true ||
-    receipt.post_rollback_admin_journey_verified !== true
-  ) {
-    throw new Error("Rollback drill receipt must verify exact release, health, and admin journey");
+  if (completedAt !== null && generatedAt > timestamp(completedAt, "restore completed_at")) {
+    throw new Error("Monitoring rollback evidence must precede restore completion");
   }
   return true;
 }
@@ -403,8 +387,8 @@ export function buildRestoreDrillResult({
   operator,
   checksumVerified,
   cleanupVerified,
-  rollbackReceipt = null,
-  rollbackReceiptSha256 = null,
+  monitoringRollbackReport = null,
+  monitoringRollbackReportSha256 = null,
   manifestSha256 = null,
 }) {
   assertR2RecoveryManifest(manifest, componentMap);
@@ -415,14 +399,11 @@ export function buildRestoreDrillResult({
     (component) => manifest.component_coverage[component].status !== "covered",
   );
   const migrationMatches = requiredText(restoredLatestMigration, "restored latest migration") === manifest.database.latest_migration;
-  const rollbackVerified = rollbackReceipt !== null && rollbackReceipt !== undefined;
+  const rollbackVerified = monitoringRollbackReport !== null && monitoringRollbackReport !== undefined;
   const manifestDigestValid = SHA256.test(manifestSha256 || "");
   if (rollbackVerified) {
-    if (!SHA256.test(rollbackReceiptSha256 || "")) throw new Error("Rollback drill receipt digest is invalid");
-    assertRollbackDrillReceipt(rollbackReceipt, { manifest, manifestSha256 });
-    if (timestamp(rollbackReceipt.executed_at, "rollback executed_at") > timestamp(completedAt, "restore completed_at")) {
-      throw new Error("Rollback drill receipt must precede restore completion");
-    }
+    if (!SHA256.test(monitoringRollbackReportSha256 || "")) throw new Error("Monitoring rollback report digest is invalid");
+    assertRecoveryMonitoringRollbackEvidence(monitoringRollbackReport, { manifest, completedAt });
   }
   const blockers = [
     ...uncoveredComponents.map((component) => ({ id: `uncovered_component:${component}`, component })),
@@ -431,7 +412,7 @@ export function buildRestoreDrillResult({
     ...(checksumVerified ? [] : [{ id: "checksum_not_verified" }]),
     ...(cleanupVerified ? [] : [{ id: "isolated_target_cleanup_not_verified" }]),
     ...(manifestDigestValid ? [] : [{ id: "manifest_digest_missing" }]),
-    ...(rollbackVerified ? [] : [{ id: "rollback_drill_receipt_missing" }]),
+    ...(rollbackVerified ? [] : [{ id: "monitoring_rollback_report_missing" }]),
   ];
   const verifiedComponents = R2_RECOVERY_COMPONENTS.filter((component) => !uncoveredComponents.includes(component));
 
@@ -447,7 +428,8 @@ export function buildRestoreDrillResult({
     checksum_verified: checksumVerified === true,
     cleanup_verified: cleanupVerified === true,
     rollback_procedure_verified: rollbackVerified,
-    rollback_receipt: rollbackVerified ? { ...rollbackReceipt, sha256: rollbackReceiptSha256 } : null,
+    monitoring_rollback_report_sha256: rollbackVerified ? monitoringRollbackReportSha256 : null,
+    monitoring_release_id: rollbackVerified ? monitoringRollbackReport.release_id : null,
     latest_migration_matches: migrationMatches,
     source_table_counts: sourceCounts,
     restored_table_counts: restoredTableCounts,
@@ -459,7 +441,11 @@ export function buildRestoreDrillResult({
   };
 }
 
-export function assertRestoreDrillResult(drill, manifest, componentMap, { rollbackReceipt, rollbackReceiptSha256, manifestSha256 } = {}) {
+export function assertRestoreDrillResult(drill, manifest, componentMap, {
+  monitoringRollbackReport,
+  monitoringRollbackReportSha256,
+  manifestSha256,
+} = {}) {
   assertR2RecoveryManifest(manifest, componentMap);
   if (!drill || typeof drill !== "object" || Array.isArray(drill)) throw new Error("Restore drill result must be an object");
   if (
@@ -474,17 +460,13 @@ export function assertRestoreDrillResult(drill, manifest, componentMap, { rollba
   if (!SHA256.test(manifestSha256 || "") || drill.manifest_sha256 !== manifestSha256) {
     throw new Error("Restore drill is not bound to the trusted manifest digest");
   }
-  assertRollbackDrillReceipt(rollbackReceipt, { manifest, manifestSha256 });
-  if (timestamp(rollbackReceipt.executed_at, "rollback executed_at") > timestamp(drill.completed_at, "restore completed_at")) {
-    throw new Error("Rollback drill receipt must precede restore completion");
-  }
-  const { sha256: drillRollbackSha256, ...drillRollbackReceipt } = drill.rollback_receipt || {};
+  assertRecoveryMonitoringRollbackEvidence(monitoringRollbackReport, { manifest, completedAt: drill.completed_at });
   if (
-    !SHA256.test(rollbackReceiptSha256 || "") ||
-    drillRollbackSha256 !== rollbackReceiptSha256 ||
-    !sameJson(drillRollbackReceipt, rollbackReceipt)
+    !SHA256.test(monitoringRollbackReportSha256 || "") ||
+    drill.monitoring_rollback_report_sha256 !== monitoringRollbackReportSha256 ||
+    drill.monitoring_release_id !== monitoringRollbackReport.release_id
   ) {
-    throw new Error("Restore drill is not bound to the immutable rollback receipt");
+    throw new Error("Restore drill is not bound to the immutable monitoring rollback report");
   }
   timestamp(drill.completed_at, "restore completed_at");
   requiredText(drill.operator, "restore operator");
@@ -530,9 +512,9 @@ export function assertRecoveryApprovalArtifact(approval, {
   if (
     approval.manifest_reviewed !== true ||
     approval.restore_drill_reviewed !== true ||
-    approval.rollback_receipt_reviewed !== true
+    approval.monitoring_rollback_report_reviewed !== true
   ) {
-    throw new Error("Recovery approval must explicitly review the manifest, restore drill, and rollback receipt");
+    throw new Error("Recovery approval must explicitly review the manifest, restore drill, and monitoring rollback report");
   }
   if (approval.backup_id !== manifest.backup_id) throw new Error("Recovery approval backup_id does not match");
   if (approval.ciphertext_sha256 !== manifest.artifact.sha256) throw new Error("Recovery approval backup digest does not match");
@@ -543,10 +525,11 @@ export function assertRecoveryApprovalArtifact(approval, {
     throw new Error("Recovery approval restore digest does not match");
   }
   if (
-    !SHA256.test(drill.rollback_receipt?.sha256 || "") ||
-    approval.rollback_receipt_sha256 !== drill.rollback_receipt.sha256
+    !SHA256.test(drill.monitoring_rollback_report_sha256 || "") ||
+    approval.monitoring_rollback_report_sha256 !== drill.monitoring_rollback_report_sha256 ||
+    approval.release_id !== drill.monitoring_release_id
   ) {
-    throw new Error("Recovery approval rollback receipt digest does not match");
+    throw new Error("Recovery approval monitoring rollback evidence does not match");
   }
   const operator = requiredText(approval.operator, "recovery approval operator");
   const reviewer = requiredText(approval.reviewer, "recovery approval reviewer");
@@ -555,9 +538,6 @@ export function assertRecoveryApprovalArtifact(approval, {
   }
   if (reviewer.toLowerCase() === operator.toLowerCase()) {
     throw new Error("Recovery approval reviewer must be distinct from the restore operator");
-  }
-  if (reviewer.toLowerCase() === requiredText(drill.rollback_receipt?.operator, "rollback operator").toLowerCase()) {
-    throw new Error("Recovery approval reviewer must be distinct from the rollback operator");
   }
   if (timestamp(approval.approved_at, "recovery approved_at") < timestamp(drill.completed_at, "restore completed_at")) {
     throw new Error("Recovery approval must follow the restore drill");
@@ -569,8 +549,8 @@ export function buildProductionRecoveryReport({
   manifest,
   componentMap,
   drill,
-  rollbackReceipt,
-  rollbackReceiptSha256,
+  monitoringRollbackReport,
+  monitoringRollbackReportSha256,
   approval,
   manifestSha256,
   restoreDrillSha256,
@@ -578,7 +558,11 @@ export function buildProductionRecoveryReport({
   generatedAt = new Date().toISOString(),
 }) {
   if (!SHA256.test(approvalArtifactSha256 || "")) throw new Error("Recovery approval artifact digest is invalid");
-  assertRestoreDrillResult(drill, manifest, componentMap, { rollbackReceipt, rollbackReceiptSha256, manifestSha256 });
+  assertRestoreDrillResult(drill, manifest, componentMap, {
+    monitoringRollbackReport,
+    monitoringRollbackReportSha256,
+    manifestSha256,
+  });
   assertRecoveryApprovalArtifact(approval, { manifest, drill, manifestSha256, restoreDrillSha256 });
   const report = {
     schema_version: 1,
@@ -609,7 +593,8 @@ export function buildProductionRecoveryReport({
       status: "pass",
       checksum_verified: drill.checksum_verified,
       rollback_procedure_verified: drill.rollback_procedure_verified,
-      rollback_receipt_sha256: rollbackReceiptSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: monitoringRollbackReport.release_id,
       components_verified: [...drill.components_verified],
       operator: drill.operator,
     },
@@ -621,6 +606,7 @@ export function buildProductionRecoveryReport({
       artifact_sha256: approvalArtifactSha256,
       manifest_sha256: manifestSha256,
       restore_drill_sha256: restoreDrillSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
     },
   };
   assertProductionRecoveryReport(report);

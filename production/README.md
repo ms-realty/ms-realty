@@ -269,36 +269,20 @@ The command prints the generated backup ID and leaves a private `r2-upload-plan.
 bucket's object lock prevents destructive failure cleanup, so an interrupted upload remains an
 uncommitted staged object covered by the bucket lifecycle rather than being silently deleted.
 
-After the approved exact-release rollback exercise, provide its read-only JSON receipt. It must
-bind the backup ID and local `manifest.json` SHA-256, name distinct source and rollback release
-identities, and record successful exact-release, health, and authenticated admin-journey checks:
-
-```json
-{
-  "schema_version": 1,
-  "environment": "production",
-  "status": "pass",
-  "receipt_id": "rollback-<unique-id>",
-  "backup_id": "<backup-id>",
-  "manifest_sha256": "<sha256-of-.recovery-work/backup-id/manifest.json>",
-  "executed_at": "<ISO-8601 timestamp after backup>",
-  "operator": "<named rollback operator>",
-  "from_release": "<exact source release SHA>",
-  "to_release": "<exact rollback release SHA>",
-  "exact_release_verified": true,
-  "post_rollback_health_verified": true,
-  "post_rollback_admin_journey_verified": true
-}
-```
+After the approved exact-release rollback exercise, use the read-only schema-v2 monitoring report
+produced by `.github/workflows/monitoring-drill.yml`. The existing monitoring validator requires
+the exact 40-character source SHA, GitHub run and attempt, Cloudflare baseline/fault/restored
+version IDs, the restored build marker, and the production-journey probe. A hand-written rollback
+receipt or symbolic release labels cannot satisfy recovery evidence.
 
 After separate approval for the isolated restore drill, make both the private age identity and
-rollback receipt owner-only, then run:
+machine monitoring report owner-only, then run:
 
 ```bash
 chmod 600 '<path-to-ms-realty-recovery-age-identity>'
-chmod 400 '<path-to-rollback-receipt.json>'
+chmod 400 '<path-to-monitoring-rollback-report.json>'
 export MS_REALTY_RECOVERY_AGE_IDENTITY_FILE='<path-to-ms-realty-recovery-age-identity>'
-export MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE='<path-to-rollback-receipt.json>'
+export MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH='<path-to-monitoring-rollback-report.json>'
 export MS_REALTY_RECOVERY_OPERATOR='<named restore operator>'
 npm run recovery:r2:restore -- '<backup-id>' --confirm-isolated-restore-drill
 ```
@@ -316,8 +300,8 @@ mapped PostgreSQL table (or a separately implemented, encrypted and restorable c
 Never remove an uncovered source merely to clear readiness.
 
 Only after the restore result is `pass` may a distinct named human reviewer provide a read-only
-approval artifact. It must bind the exact ciphertext, manifest, restore result, and rollback
-receipt digests; explicitly confirm reviewing all three evidence records; and name an operator
+approval artifact. It must bind the exact ciphertext, manifest, restore result, monitoring report
+digest, and exact release SHA; explicitly confirm reviewing all evidence records; and name an operator
 and reviewer that differ case-insensitively:
 
 ```json
@@ -330,13 +314,14 @@ and reviewer that differ case-insensitively:
   "ciphertext_sha256": "<artifact.sha256 from manifest.json>",
   "manifest_sha256": "<sha256-of-manifest.json>",
   "restore_drill_sha256": "<sha256-of-restore-drill-result.json>",
-  "rollback_receipt_sha256": "<sha256-of-rollback-receipt.json>",
+  "release_id": "<exact-40-character-source-SHA>",
+  "monitoring_rollback_report_sha256": "<sha256-of-monitoring-rollback-report.json>",
   "operator": "<exact restore operator>",
   "reviewer": "<distinct named human reviewer>",
   "approved_at": "<ISO-8601 timestamp after restore>",
   "manifest_reviewed": true,
   "restore_drill_reviewed": true,
-  "rollback_receipt_reviewed": true
+  "monitoring_rollback_report_reviewed": true
 }
 ```
 
@@ -346,7 +331,7 @@ launch-readiness validator:
 ```bash
 chmod 400 '<path-to-recovery-approval.json>'
 export MS_REALTY_RECOVERY_APPROVAL_FILE='<path-to-recovery-approval.json>'
-export MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE='<path-to-rollback-receipt.json>'
+export MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH='<path-to-monitoring-rollback-report.json>'
 npm run recovery:r2:approve -- '<backup-id>' --confirm-reviewed-recovery-evidence
 ```
 

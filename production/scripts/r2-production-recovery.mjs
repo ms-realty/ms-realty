@@ -15,7 +15,6 @@ import {
   readImmutableJson,
   readRecoveryComponentMap,
   recoveryCommandEnvironment,
-  resolveRecoveryComponentMapPath,
   sha256File,
   trustedManifestDigest,
   updateR2UploadPlan,
@@ -247,11 +246,11 @@ function backupId(now = new Date()) {
   return `ms-realty-${now.toISOString().replace(/[-:.]/g, "").replace("Z", "z")}-${crypto.randomBytes(8).toString("hex")}`;
 }
 
-function readManifest(filePath, componentMap) {
+function readManifest(filePath, componentMap, expectedBackupId) {
   const stat = fs.lstatSync(filePath);
   if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("Recovery manifest must be a regular file");
   const manifest = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  assertR2RecoveryManifest(manifest, componentMap);
+  assertR2RecoveryManifest(manifest, componentMap, expectedBackupId);
   return manifest;
 }
 
@@ -291,8 +290,7 @@ async function captureBackup(env) {
   const encryptedFile = path.join(directory, "neon-postgres.dump.age");
   const manifestPath = path.join(directory, "manifest.json");
   const uploadPlanPath = path.join(directory, "r2-upload-plan.json");
-  const componentMapPath = resolveRecoveryComponentMapPath(env, DEFAULT_COMPONENT_MAP);
-  const componentMap = readRecoveryComponentMap(componentMapPath);
+  const componentMap = readRecoveryComponentMap(DEFAULT_COMPONENT_MAP);
   const tables = mappedTableNames(componentMap);
   const config = { ...connectionConfig(databaseUrl), secretDirectory };
   createPgpass(secretDirectory, config);
@@ -318,7 +316,7 @@ async function captureBackup(env) {
       tableCounts: source.tableCounts,
       latestMigration: source.latestMigration,
     });
-    assertR2RecoveryManifest(manifest, componentMap);
+    assertR2RecoveryManifest(manifest, componentMap, id);
     writePrivateJson(manifestPath, manifest);
     fs.chmodSync(manifestPath, 0o400);
     let uploadPlan = buildR2UploadPlan(manifest);
@@ -405,8 +403,7 @@ async function restoreDrill(env, requestedBackupId) {
   const encryptedFile = path.join(directory, "neon-postgres.dump.age");
   const plaintextFile = path.join(directory, "neon-postgres.restore.dump");
   const drillPath = path.join(directory, "restore-drill-result.json");
-  const componentMapPath = resolveRecoveryComponentMapPath(env, DEFAULT_COMPONENT_MAP);
-  const componentMap = readRecoveryComponentMap(componentMapPath);
+  const componentMap = readRecoveryComponentMap(DEFAULT_COMPONENT_MAP);
   const expectedManifestSha256 = trustedManifestDigest({
     localManifestPath,
     recoveryReportPath: String(env.MS_REALTY_RECOVERY_TRUSTED_REPORT_FILE || "").trim() || null,
@@ -414,11 +411,15 @@ async function restoreDrill(env, requestedBackupId) {
   });
   await downloadFile(env, `backups/${id}/manifest.json`, manifestPath, secrets);
   assertFileSha256(manifestPath, expectedManifestSha256, "Downloaded R2 manifest");
-  const manifest = readManifest(manifestPath, componentMap);
+  const manifest = readManifest(manifestPath, componentMap, id);
   const manifestSha256 = sha256File(manifestPath);
-  const rollbackReceiptPath = String(env.MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE || "").trim();
-  const rollbackReceipt = rollbackReceiptPath ? readImmutableJson(rollbackReceiptPath, "Rollback drill receipt") : null;
-  const rollbackReceiptSha256 = rollbackReceiptPath ? sha256File(path.resolve(rollbackReceiptPath)) : null;
+  const monitoringRollbackReportPath = String(env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH || "").trim();
+  const monitoringRollbackReport = monitoringRollbackReportPath
+    ? readImmutableJson(monitoringRollbackReportPath, "Monitoring rollback report")
+    : null;
+  const monitoringRollbackReportSha256 = monitoringRollbackReportPath
+    ? sha256File(path.resolve(monitoringRollbackReportPath))
+    : null;
   await downloadFile(env, manifest.artifact.object_key, encryptedFile, secrets);
   assertFileSha256(encryptedFile, manifest.artifact.sha256, "Downloaded R2 ciphertext");
   let restored;
@@ -473,8 +474,8 @@ async function restoreDrill(env, requestedBackupId) {
     operator,
     checksumVerified: true,
     cleanupVerified,
-    rollbackReceipt,
-    rollbackReceiptSha256,
+    monitoringRollbackReport,
+    monitoringRollbackReportSha256,
     manifestSha256,
   });
   writePrivateJson(drillPath, drill);
@@ -486,10 +487,10 @@ async function restoreDrill(env, requestedBackupId) {
     uncovered_components: drill.uncovered_components,
     blockers: drill.blockers,
     next: drill.status === "pass"
-      ? `Provide immutable approval and rollback receipt files, then run npm run recovery:r2:approve -- ${id} --confirm-reviewed-recovery-evidence`
-      : rollbackReceipt
+      ? `Provide immutable approval and monitoring rollback report files, then run npm run recovery:r2:approve -- ${id} --confirm-reviewed-recovery-evidence`
+      : monitoringRollbackReport
         ? "Move every uncovered runtime/evidence authority to mapped PostgreSQL tables, then repeat backup and restore."
-        : "Provide MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE as an immutable exact-release rollback receipt, then repeat the restore drill.",
+        : "Provide MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH as immutable machine-generated exact-release evidence, then repeat the restore drill.",
   }, null, 2)}\n`);
   if (drill.status !== "pass") process.exitCode = 2;
 }
@@ -500,29 +501,28 @@ function approveDrill(env, requestedBackupId) {
   }
   const id = assertSafeBackupId(requestedBackupId);
   const directory = backupDirectory(id);
-  const componentMapPath = resolveRecoveryComponentMapPath(env, DEFAULT_COMPONENT_MAP);
-  const componentMap = readRecoveryComponentMap(componentMapPath);
+  const componentMap = readRecoveryComponentMap(DEFAULT_COMPONENT_MAP);
   const manifestPath = fs.existsSync(path.join(directory, "manifest.downloaded.json"))
     ? path.join(directory, "manifest.downloaded.json")
     : path.join(directory, "manifest.json");
   const drillPath = path.join(directory, "restore-drill-result.json");
-  const manifest = readManifest(manifestPath, componentMap);
+  const manifest = readManifest(manifestPath, componentMap, id);
   const drill = readRegularJson(drillPath, "Restore drill result");
-  const rollbackReceiptPath = path.resolve(required(env, "MS_REALTY_RECOVERY_ROLLBACK_RECEIPT_FILE"));
+  const monitoringRollbackReportPath = path.resolve(required(env, "MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH"));
   const approvalPath = path.resolve(required(env, "MS_REALTY_RECOVERY_APPROVAL_FILE"));
-  const rollbackReceipt = readImmutableJson(rollbackReceiptPath, "Rollback drill receipt");
+  const monitoringRollbackReport = readImmutableJson(monitoringRollbackReportPath, "Monitoring rollback report");
   const approval = readImmutableJson(approvalPath, "Recovery approval");
   const manifestSha256 = sha256File(manifestPath);
   const restoreDrillSha256 = sha256File(drillPath);
-  const rollbackReceiptSha256 = sha256File(rollbackReceiptPath);
+  const monitoringRollbackReportSha256 = sha256File(monitoringRollbackReportPath);
   const approvalArtifactSha256 = sha256File(approvalPath);
   const now = new Date().toISOString();
   const report = buildProductionRecoveryReport({
     manifest,
     componentMap,
     drill,
-    rollbackReceipt,
-    rollbackReceiptSha256,
+    monitoringRollbackReport,
+    monitoringRollbackReportSha256,
     approval,
     manifestSha256,
     restoreDrillSha256,

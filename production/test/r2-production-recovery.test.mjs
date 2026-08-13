@@ -7,9 +7,9 @@ import { spawnSync } from "node:child_process";
 import {
   assertFileSha256,
   assertRecoveryApprovalArtifact,
+  assertRecoveryMonitoringRollbackEvidence,
   assertR2RecoveryManifest,
   assertRecoveryComponentMap,
-  assertRollbackDrillReceipt,
   buildR2UploadPlan,
   buildProductionRecoveryReport,
   buildRestoreDrillResult,
@@ -19,7 +19,6 @@ import {
   readImmutableJson,
   readRecoveryComponentMap,
   recoveryCommandEnvironment,
-  resolveRecoveryComponentMapPath,
   sha256File,
   trustedManifestDigest,
   updateR2UploadPlan,
@@ -29,6 +28,81 @@ import {
 import { fromRoot } from "../lib/paths.mjs";
 
 const componentMapPath = fromRoot("production", "data", "production-recovery-component-map.json");
+
+function machineRollbackReport() {
+  const releaseId = "a".repeat(40);
+  const correlationId = "ms-realty/ms-realty:monitoring-drill:31485358241:1";
+  const runUrl = "https://github.com/ms-realty/ms-realty/actions/runs/31485358241/attempts/1";
+  const worker = "msr-monitoring-drill-31485358241-1";
+  const workerUrl = `https://${worker}.ms-realty-bg.workers.dev`;
+  const baselineVersion = "11111111-1111-4111-8111-111111111111";
+  return {
+    schema_version: 2,
+    generated_at: "2026-08-13T12:15:00.000Z",
+    environment: "production",
+    ready: true,
+    release_id: releaseId,
+    monitoring: {
+      provider: "github-actions-cloudflare-workers",
+      provider_run_id: "31485358241",
+      provider_run_attempt: "1",
+      repository: "ms-realty/ms-realty",
+      workflow_ref: "ms-realty/ms-realty/.github/workflows/monitoring-drill.yml@refs/heads/main",
+      run_url: runUrl,
+      correlation_id: correlationId,
+      machine_artifact_name: "monitoring-drill-machine-evidence-31485358241-1",
+      endpoints: [{
+        url: "https://ms-realty.ms-realty-bg.workers.dev/api/health",
+        status: "pass",
+        checked_at: "2026-08-13T12:10:00.000Z",
+        build_marker: releaseId,
+        probe: "production/scripts/probe-production-journeys.mjs",
+      }],
+    },
+    alert_delivery: {
+      status: "pass",
+      provider: "github-actions-email",
+      receipt_id: "message-id-31485358241-1",
+      correlation_id: correlationId,
+      provider_run_id: "31485358241",
+      provider_run_attempt: "1",
+      repository: "ms-realty/ms-realty",
+      run_url: runUrl,
+      triggered_at: "2026-08-13T12:10:30.000Z",
+      delivered_at: "2026-08-13T12:11:00.000Z",
+    },
+    rollback: {
+      automatic_policy_id: "github-actions-ci-failed-health-rollback",
+      canary: {
+        run_id: `${worker}:${baselineVersion}`,
+        release_id: releaseId,
+        worker,
+        url: workerUrl,
+        version_id: baselineVersion,
+        build_marker: releaseId,
+        probe: "production/scripts/probe-production-journeys.mjs",
+        status: "pass",
+        checked_at: "2026-08-13T12:12:00.000Z",
+      },
+      drill: {
+        drill_id: correlationId,
+        release_id: releaseId,
+        worker,
+        url: workerUrl,
+        baseline_version_id: baselineVersion,
+        fault_version_id: "22222222-2222-4222-8222-222222222222",
+        restored_version_id: baselineVersion,
+        restored_build_marker: releaseId,
+        failure_surface: "production_journey_probe",
+        probe: "production/scripts/probe-production-journeys.mjs",
+        status: "pass",
+        target: "isolated",
+        rollback_procedure_verified: true,
+        verified_at: "2026-08-13T12:13:00.000Z",
+      },
+    },
+  };
+}
 
 function fixture(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-r2-recovery-"));
@@ -105,7 +179,7 @@ test("isolated restore stays blocked until all logical components and exact coun
   assert.ok(mismatched.blockers.some((blocker) => blocker.id === "row_count_mismatch:public.listings"));
 });
 
-test("fully covered restore requires real rollback and immutable human approval receipts", (t) => {
+test("fully covered restore requires machine rollback evidence and immutable human approval", (t) => {
   const { componentMap, tableCounts, manifest: blockedManifest } = fixture(t);
   const coveredMap = structuredClone(componentMap);
   for (const component of Object.values(coveredMap.components)) component.uncovered_sources = [];
@@ -141,27 +215,29 @@ test("fully covered restore requires real rollback and immutable human approval 
   });
   assert.equal(drill.status, "blocked");
   assert.equal(drill.rollback_procedure_verified, false);
-  assert.ok(drill.blockers.some((blocker) => blocker.id === "rollback_drill_receipt_missing"));
+  assert.ok(drill.blockers.some((blocker) => blocker.id === "monitoring_rollback_report_missing"));
 
   const manifestPath = path.join(directory, "manifest.json");
   writePrivateJson(manifestPath, manifest);
   const manifestSha256 = sha256File(manifestPath);
-  const rollbackReceipt = {
-    schema_version: 1,
-    environment: "production",
-    status: "pass",
-    receipt_id: "rollback-ms-realty-20260813-001",
-    backup_id: manifest.backup_id,
-    manifest_sha256: manifestSha256,
-    executed_at: "2026-08-13T12:15:00.000Z",
-    operator: "release-operator",
-    from_release: "release-before",
-    to_release: "release-rollback-target",
-    exact_release_verified: true,
-    post_rollback_health_verified: true,
-    post_rollback_admin_journey_verified: true,
-  };
-  assert.equal(assertRollbackDrillReceipt(rollbackReceipt, { manifest, manifestSha256 }), true);
+  const monitoringRollbackReport = machineRollbackReport();
+  const monitoringRollbackReportPath = path.join(directory, "monitoring-rollback-report.json");
+  writePrivateJson(monitoringRollbackReportPath, monitoringRollbackReport);
+  fs.chmodSync(monitoringRollbackReportPath, 0o400);
+  const monitoringRollbackReportSha256 = sha256File(monitoringRollbackReportPath);
+  assert.equal(assertRecoveryMonitoringRollbackEvidence(monitoringRollbackReport, {
+    manifest,
+    completedAt: "2026-08-13T12:20:00.000Z",
+  }), true);
+  const preBackupRollback = structuredClone(monitoringRollbackReport);
+  preBackupRollback.rollback.drill.verified_at = "2026-08-13T11:59:00.000Z";
+  assert.throws(
+    () => assertRecoveryMonitoringRollbackEvidence(preBackupRollback, {
+      manifest,
+      completedAt: "2026-08-13T12:20:00.000Z",
+    }),
+    /must follow the bound backup/i,
+  );
   const passingDrill = buildRestoreDrillResult({
     manifest,
     componentMap: coveredMap,
@@ -171,8 +247,8 @@ test("fully covered restore requires real rollback and immutable human approval 
     operator: "codex-operator",
     checksumVerified: true,
     cleanupVerified: true,
-    rollbackReceipt,
-    rollbackReceiptSha256: "c".repeat(64),
+    monitoringRollbackReport,
+    monitoringRollbackReportSha256,
     manifestSha256,
   });
   assert.equal(passingDrill.status, "pass");
@@ -188,13 +264,14 @@ test("fully covered restore requires real rollback and immutable human approval 
     ciphertext_sha256: manifest.artifact.sha256,
     manifest_sha256: manifestSha256,
     restore_drill_sha256: restoreDrillSha256,
-    rollback_receipt_sha256: "c".repeat(64),
+    release_id: monitoringRollbackReport.release_id,
+    monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
     operator: passingDrill.operator,
     reviewer: "ivan-reviewer",
     approved_at: "2026-08-13T12:30:00.000Z",
     manifest_reviewed: true,
     restore_drill_reviewed: true,
-    rollback_receipt_reviewed: true,
+    monitoring_rollback_report_reviewed: true,
   };
   const approvalPath = path.join(directory, "approval.json");
   writePrivateJson(approvalPath, approval);
@@ -211,8 +288,8 @@ test("fully covered restore requires real rollback and immutable human approval 
     manifest,
     componentMap: coveredMap,
     drill: passingDrill,
-    rollbackReceipt,
-    rollbackReceiptSha256: "c".repeat(64),
+    monitoringRollbackReport,
+    monitoringRollbackReportSha256,
     approval: immutableApproval,
     manifestSha256,
     restoreDrillSha256,
@@ -230,8 +307,8 @@ test("fully covered restore requires real rollback and immutable human approval 
       manifest,
       componentMap: coveredMap,
       drill: tampered,
-      rollbackReceipt,
-      rollbackReceiptSha256: "c".repeat(64),
+      monitoringRollbackReport,
+      monitoringRollbackReportSha256,
       approval: immutableApproval,
       manifestSha256,
       restoreDrillSha256,
@@ -262,19 +339,12 @@ test("downloaded manifests cannot define their own proof requirements", (t) => {
   assert.throws(() => assertR2RecoveryManifest(manifest, changedMap), /component map digest/i);
 });
 
-test("production component map overrides are rejected outside explicit test mode", () => {
-  assert.equal(resolveRecoveryComponentMapPath({}, componentMapPath), componentMapPath);
-  assert.throws(
-    () => resolveRecoveryComponentMapPath({ MS_REALTY_RECOVERY_COMPONENT_MAP_PATH: "/tmp/map.json" }, componentMapPath),
-    /test-only/i,
-  );
-  assert.equal(
-    resolveRecoveryComponentMapPath({
-      NODE_ENV: "test",
-      MS_REALTY_RECOVERY_ALLOW_TEST_COMPONENT_MAP_OVERRIDE: "true",
-      MS_REALTY_RECOVERY_COMPONENT_MAP_PATH: "/tmp/map.json",
-    }, componentMapPath),
-    "/tmp/map.json",
+test("production recovery exposes no environment component-map override", () => {
+  const script = fs.readFileSync(fromRoot("production", "scripts", "r2-production-recovery.mjs"), "utf8");
+  const library = fs.readFileSync(fromRoot("production", "lib", "r2-production-recovery.mjs"), "utf8");
+  assert.doesNotMatch(
+    `${script}\n${library}`,
+    /MS_REALTY_RECOVERY_(?:ALLOW_TEST_)?COMPONENT_MAP_PATH/,
   );
 });
 
@@ -333,6 +403,53 @@ test("restore manifest authenticity is anchored to a read-only local manifest di
   );
 });
 
+test("a local manifest anchor cannot cross-bind a different requested backup", (t) => {
+  const { componentMap, manifest, manifestPath } = fixture(t);
+  const requestedBackupId = "ms-realty-20260813t120000z-other123";
+  assert.throws(
+    () => trustedManifestDigest({
+      localManifestPath: manifestPath,
+      backupId: requestedBackupId,
+    }),
+    new RegExp(`backup_id.*${manifest.backup_id}|does not match`, "i"),
+  );
+  assert.throws(
+    () => assertR2RecoveryManifest(manifest, componentMap, requestedBackupId),
+    /backup_id does not match the requested backup/i,
+  );
+
+  const wrongPrefix = structuredClone(manifest);
+  wrongPrefix.artifact.object_key = `backups/${requestedBackupId}/staged/neon-postgres.dump.age`;
+  assert.throws(() => assertR2RecoveryManifest(wrongPrefix, componentMap), /object keys do not match backup_id/i);
+});
+
+test("symbolic x/y rollback assertions cannot satisfy recovery evidence", () => {
+  assert.throws(
+    () => assertRecoveryMonitoringRollbackEvidence({
+      schema_version: 1,
+      environment: "production",
+      status: "pass",
+      receipt_id: "rollback-review-poc",
+      backup_id: "ms-realty-20260813t120000z-abcd1234",
+      manifest_sha256: "a".repeat(64),
+      executed_at: "2026-08-13T12:15:00.000Z",
+      operator: "release-operator",
+      from_release: "x",
+      to_release: "y",
+      exact_release_verified: true,
+      post_rollback_health_verified: true,
+      post_rollback_admin_journey_verified: true,
+    }, {
+      manifest: {
+        backup_id: "ms-realty-20260813t120000z-abcd1234",
+        completed_at: "2026-08-13T12:00:00.000Z",
+      },
+      completedAt: "2026-08-13T12:20:00.000Z",
+    }),
+    /schema v2|monitoring rollback/i,
+  );
+});
+
 test("approval is bound to exact evidence and distinct case-insensitive identities", (t) => {
   const { componentMap, manifest, tableCounts } = fixture(t);
   const coveredMap = structuredClone(componentMap);
@@ -357,18 +474,15 @@ test("approval is bound to exact evidence and distinct case-insensitive identiti
   const manifestPath = path.join(directory, "manifest.json");
   writePrivateJson(manifestPath, coveredManifest);
   const manifestSha256 = sha256File(manifestPath);
-  const rollbackReceipt = {
-    schema_version: 1, environment: "production", status: "pass", receipt_id: "rollback-approval-test",
-    backup_id: coveredManifest.backup_id, manifest_sha256: manifestSha256,
-    executed_at: "2026-08-13T12:15:00.000Z", operator: "release-operator",
-    from_release: "release-before", to_release: "release-after", exact_release_verified: true,
-    post_rollback_health_verified: true, post_rollback_admin_journey_verified: true,
-  };
+  const monitoringRollbackReport = machineRollbackReport();
+  const monitoringRollbackReportPath = path.join(directory, "monitoring-rollback-report.json");
+  writePrivateJson(monitoringRollbackReportPath, monitoringRollbackReport);
+  const monitoringRollbackReportSha256 = sha256File(monitoringRollbackReportPath);
   const drill = buildRestoreDrillResult({
     manifest: coveredManifest, componentMap: coveredMap, restoredTableCounts: coveredCounts,
     restoredLatestMigration: coveredManifest.database.latest_migration, completedAt: "2026-08-13T12:20:00.000Z",
     operator: "Restore Operator", checksumVerified: true, cleanupVerified: true,
-    rollbackReceipt, rollbackReceiptSha256: "d".repeat(64), manifestSha256,
+    monitoringRollbackReport, monitoringRollbackReportSha256, manifestSha256,
   });
   const drillPath = path.join(directory, "drill.json");
   writePrivateJson(drillPath, drill);
@@ -377,9 +491,10 @@ test("approval is bound to exact evidence and distinct case-insensitive identiti
     schema_version: 1, environment: "production", decision: "approved", approval_id: "recovery-approval-test",
     backup_id: coveredManifest.backup_id, ciphertext_sha256: coveredManifest.artifact.sha256,
     manifest_sha256: manifestSha256, restore_drill_sha256: restoreDrillSha256,
-    rollback_receipt_sha256: "d".repeat(64),
+    release_id: monitoringRollbackReport.release_id,
+    monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
     operator: "restore operator", reviewer: "RESTORE OPERATOR", approved_at: "2026-08-13T12:30:00.000Z",
-    manifest_reviewed: true, restore_drill_reviewed: true, rollback_receipt_reviewed: true,
+    manifest_reviewed: true, restore_drill_reviewed: true, monitoring_rollback_report_reviewed: true,
   };
   assert.throws(() => assertRecoveryApprovalArtifact(approval, {
     manifest: coveredManifest, drill, manifestSha256, restoreDrillSha256,
@@ -390,10 +505,11 @@ test("approval is bound to exact evidence and distinct case-insensitive identiti
     manifest: coveredManifest, drill, manifestSha256, restoreDrillSha256,
   }), /manifest digest/i);
   approval.manifest_sha256 = manifestSha256;
-  approval.reviewer = rollbackReceipt.operator.toUpperCase();
+  approval.reviewer = "human-reviewer";
+  approval.release_id = "b".repeat(40);
   assert.throws(() => assertRecoveryApprovalArtifact(approval, {
     manifest: coveredManifest, drill, manifestSha256, restoreDrillSha256,
-  }), /distinct from the rollback operator/i);
+  }), /monitoring rollback evidence/i);
 });
 
 test("R2 upload plan uses an immutable staged object and a final manifest commit marker", (t) => {
