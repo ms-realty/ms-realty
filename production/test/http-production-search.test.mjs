@@ -20,7 +20,7 @@ test("production Node search fails closed for API and public search routes witho
   assert.match(page.body, /tel:\+359879696870/);
 });
 
-test("production Node search renders only IDs returned by the selected engine", async () => {
+test("production Node search rejects a selected legacy engine before network access", async () => {
   const calls = [];
   const app = createHttpApp({
     ...approvedPublicSeedFixtureOptions(),
@@ -58,12 +58,9 @@ test("production Node search renders only IDs returned by the selected engine", 
 
   const response = await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" });
 
-  assert.equal(response.status, 200);
-  assert.deepEqual(response.body.search.engines, ["typesense"]);
-  assert.equal(response.body.search.backend.engine, "typesense");
-  assert.deepEqual(response.body.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0].url.startsWith("https://search.makler-realty.com/collections/ms_realty_listings/documents/search?"), true);
+  assert.equal(response.status, 503);
+  assert.deepEqual(response.body, { kind: "search_unavailable", message: "Search is temporarily unavailable" });
+  assert.equal(calls.length, 0);
 });
 
 test("direct HTTP Postgres search preserves database totals and requested page size", async () => {
@@ -143,20 +140,24 @@ test("direct HTTP Postgres search preserves database totals and requested page s
   assert.equal(response.body.cards[1].bedrooms, 3);
 });
 
-test("production server ignores legacy search selection and binds Payload Postgres", () => {
-  const env = {
+test("production server preserves the Postgres invariant and strips legacy search credentials", () => {
+  const config = productionServerConfig({
     NODE_ENV: "production",
-    MS_REALTY_SEARCH_ENGINE: "meilisearch",
+    MS_REALTY_SEARCH_ENGINE: "postgres",
+    DATABASE_URL: "postgresql://runtime:secret@db.ms-realty.bg/ms_realty",
+    PAYLOAD_SECRET: "payload-secret",
     MEILI_URL: "https://meili.test",
     MEILI_API_KEY: "meili-test",
     MEILI_INDEX: "ms_realty_listings",
-    DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
-    PAYLOAD_SECRET: "payload-secret",
-  };
-  const config = productionServerConfig(env);
+    TYPESENSE_URL: "https://typesense.test",
+    TYPESENSE_API_KEY: "typesense-test",
+  });
 
   assert.equal(config.search.environment, "production");
   assert.equal(config.search.engine, "postgres");
-  assert.equal(config.search.postgres.env, env);
-  assert.equal(config.search.meilisearch, undefined);
+  assert.equal(config.search.postgres.env.DATABASE_URL, "postgresql://runtime:secret@db.ms-realty.bg/ms_realty");
+  assert.equal("TYPESENSE_API_KEY" in config.search.postgres.env, false);
+  assert.equal("MEILI_API_KEY" in config.search.postgres.env, false);
+  assert.deepEqual(config.search.typesense, {});
+  assert.deepEqual(config.search.meilisearch, {});
 });

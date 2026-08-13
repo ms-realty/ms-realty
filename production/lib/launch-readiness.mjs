@@ -16,6 +16,7 @@ import {
 } from "./hermes-draft-worker.mjs";
 import { assertHermesChatCompletionsEndpoint } from "./hermes-provider-provisioning.mjs";
 import {
+  assertProductionSearchEngine,
   HERMES_DRAFT_WORKER_SOURCE,
   HERMES_LAUNCH_REQUIRED,
   POSTGRES_SEARCH_QUERY_SOURCE,
@@ -26,6 +27,7 @@ import {
 } from "./launch-service-contract.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { buildListingQualityPreflightReport, DEFAULT_LISTING_QUALITY_REVIEW_INPUT } from "./listing-quality.mjs";
+import { assertExactRedactedPostgresTarget } from "./postgres-target.mjs";
 import {
   assertPayloadRuntimeReport,
   assertProductionDatabaseHost,
@@ -193,17 +195,8 @@ function assertLaunchServiceUrl(value, label) {
 }
 
 function assertLaunchDatabaseTarget(value, label) {
-  if (!value) throw new Error(`${label} must include database target evidence`);
-  let parsed;
-  try {
-    parsed = new URL(value);
-  } catch {
-    throw new Error(`${label} must include valid database target evidence`);
-  }
-  if (!["postgres:", "postgresql:"].includes(parsed.protocol)) {
-    throw new Error(`${label} must use postgres:// or postgresql://`);
-  }
-  if (parsed.username || parsed.password) throw new Error(`${label} must not include URL credentials`);
+  const canonical = assertExactRedactedPostgresTarget(value, label);
+  const parsed = new URL(canonical);
   const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
   const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];
@@ -711,8 +704,12 @@ function assertLiveServiceSyncOperationEvidence(item) {
   if (operations.length !== item.summary.total_operations) {
     throw new Error("Launch readiness live services require search sync operation evidence");
   }
+  const summaryTarget = assertLaunchDatabaseTarget(item.summary.database_target, "postgres sync summary").href;
   for (const { engine, operation } of operations) {
-    assertLaunchDatabaseTarget(operation.url, `${engine} sync operation`);
+    const operationTarget = assertLaunchDatabaseTarget(operation.url, `${engine} sync operation`).href;
+    if (operationTarget !== summaryTarget) {
+      throw new Error("Launch readiness live services require matching search sync database targets");
+    }
     if (operation.method !== "SELECT" || operation.status !== 200 || !Number.isInteger(operation.rows) || operation.rows < 0) {
       throw new Error("Launch readiness live services require search sync operation evidence");
     }
@@ -721,14 +718,16 @@ function assertLiveServiceSyncOperationEvidence(item) {
 
 function assertLiveServiceQueryOperationEvidence(item) {
   const engines = assertLiveServiceEngineEvidence(item, "Launch readiness live services require search query operation evidence");
+  const summaryTarget = assertLaunchDatabaseTarget(item.summary.database_target, "postgres query summary").href;
   for (const engine of engines) {
     const operation = engine.operation || {};
-    assertLaunchDatabaseTarget(engine.database_target, `${engine.engine} query report`);
-    assertLaunchDatabaseTarget(operation.url, `${engine.engine} query operation`);
+    const engineTarget = assertLaunchDatabaseTarget(engine.database_target, `${engine.engine} query report`).href;
+    const operationTarget = assertLaunchDatabaseTarget(operation.url, `${engine.engine} query operation`).href;
     if (
       operation.method !== "SELECT" ||
       operation.status !== 200 ||
-      operation.url !== engine.database_target ||
+      operationTarget !== engineTarget ||
+      engineTarget !== summaryTarget ||
       !Number.isInteger(operation.rows) ||
       operation.rows < 0
     ) {
@@ -775,6 +774,7 @@ function assertLiveServiceProvisioningPassEvidence(provisioning) {
   for (const id of REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS) {
     if (checks.get(id)?.status !== "pass") throw new Error(`Launch readiness live services require provisioning check ${id}`);
   }
+  assertProductionSearchEngine(checks.get("search_engine")?.engine);
   const databaseTarget = checks.get("postgres_database_target")?.database_target;
   assertLaunchDatabaseTarget(databaseTarget, "Live service provisioning Postgres target");
   if (HERMES_LAUNCH_REQUIRED) {

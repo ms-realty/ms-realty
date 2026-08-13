@@ -256,7 +256,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 ${liveServiceReportLines(liveServiceEvidence).join("\n")}
 - Current provisioning evidence:
 ${liveServiceProvisioningLine(liveServiceProvisioning)}
-- Postgres search: set \`DATABASE_URL\` and \`PAYLOAD_SECRET\`; apply the public-search migration before capture so sync and query evidence use the same authoritative Neon target.
+- Postgres search: set \`MS_REALTY_SEARCH_ENGINE=postgres\`, \`DATABASE_URL\`, and \`PAYLOAD_SECRET\`; apply the public-search migration before capture so sync and query evidence use the same authoritative Neon target.
 ${hermesLaunchChecklistLines()}
 - Live service provisioning report: \`npm run live:provisioning\` writes \`production/data/live-service-provisioning-report.json\` with the redacted Postgres target${HERMES_LAUNCH_REQUIRED ? ", Hermes endpoint health," : ""} and missing-env evidence.
 - Admin provisioning status endpoint: \`GET /api/admin/live-service-provisioning\`.

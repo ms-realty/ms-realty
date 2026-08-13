@@ -30,6 +30,7 @@ function healthyHermesFetch(url) {
 const readyEnv = {
   DATABASE_URL: "postgresql://ms_realty:database-password@ep-late-river.eu-central-1.aws.neon.tech/ms_realty?sslmode=require",
   PAYLOAD_SECRET: "payload-runtime-secret",
+  MS_REALTY_SEARCH_ENGINE: "postgres",
   HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
   HERMES_API_KEY: "hermes-test-key",
 };
@@ -50,6 +51,7 @@ test("live service provisioning fails closed on Postgres/Payload and Hermes env"
   assert.deepEqual(report.summary.missing_env, [
     "DATABASE_URL",
     "PAYLOAD_SECRET",
+    "MS_REALTY_SEARCH_ENGINE",
     "HERMES_CHAT_COMPLETIONS_URL",
     "HERMES_API_KEY",
   ]);
@@ -147,6 +149,13 @@ test("live service provisioning validator requires the canonical shape", async (
       check.id === "postgres_database_target" ? { ...check, database_target: readyEnv.DATABASE_URL } : check) }),
     /redacted/,
   );
+  for (const suffix of ["?sslpassword=secret", "#secret-fragment"]) {
+    assert.throws(
+      () => assertLiveServiceProvisioningReport({ ...ready, checks: ready.checks.map((check) =>
+        check.id === "postgres_database_target" ? { ...check, database_target: `${check.database_target}${suffix}` } : check) }),
+      /exact redacted Postgres target/,
+    );
+  }
   assert.throws(
     () => assertLiveServiceProvisioningReport({ ...ready, hermes: { ...ready.hermes, safety: { ...ready.hermes.safety, can_publish: true } } }),
     /draft-only safety/,
@@ -191,8 +200,8 @@ test("live service provisioning writer and CLIs preserve redacted evidence", asy
     },
   });
   assert.equal(build.status, 0, build.stderr);
-  assert.match(build.stdout, /Live service provisioning blocked: database_url, payload_secret, postgres_database_target/);
-  assert.match(build.stdout, /Missing env: DATABASE_URL, PAYLOAD_SECRET/);
+  assert.match(build.stdout, /Live service provisioning blocked: database_url, payload_secret, search_engine, postgres_database_target/);
+  assert.match(build.stdout, /Missing env: DATABASE_URL, PAYLOAD_SECRET, MS_REALTY_SEARCH_ENGINE/);
   assert.match(build.stdout, /Next: set real Postgres\/Payload and Hermes provider env/);
   assert.equal(assertLiveServiceProvisioningReport(JSON.parse(fs.readFileSync(cliPath, "utf8"))), true);
 });

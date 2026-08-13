@@ -11,13 +11,7 @@ x-app-environment: &app-environment
   MS_REALTY_ADMIN_TOKEN: ${MS_REALTY_ADMIN_TOKEN:?MS_REALTY_ADMIN_TOKEN is required}
   MS_REALTY_ADMIN_ACTOR: local_preview
   MS_REALTY_LEAD_CONTACT_KEY: ${MS_REALTY_LEAD_CONTACT_KEY:?MS_REALTY_LEAD_CONTACT_KEY is required}
-  TYPESENSE_URL: http://typesense:8108
-  TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY is required}
-  TYPESENSE_COLLECTION: ${TYPESENSE_COLLECTION:-ms_realty_listings}
-  MS_REALTY_SEARCH_ENGINE: ${MS_REALTY_SEARCH_ENGINE:-typesense}
-  MEILI_URL: http://meilisearch:7700
-  MEILI_API_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
-  MEILI_INDEX: ms_realty_listings
+  MS_REALTY_SEARCH_ENGINE: postgres
   HERMES_CHAT_COMPLETIONS_URL: ${HERMES_CHAT_COMPLETIONS_URL:-}
   HERMES_API_KEY: ${HERMES_API_KEY:-}
   HERMES_MODEL: ${HERMES_MODEL:-}
@@ -255,7 +249,17 @@ services:
     <<: *app-image
     profiles: ["tools"]
     restart: "no"
-    environment: *app-environment
+    environment:
+      <<: *app-environment
+      # Compatibility-only tooling may still exercise the legacy engines;
+      # the production app itself is hardwired to Postgres above.
+      NODE_ENV: test
+      TYPESENSE_URL: http://typesense:8108
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY is required}
+      TYPESENSE_COLLECTION: ${TYPESENSE_COLLECTION:-ms_realty_listings}
+      MEILI_URL: http://meilisearch:7700
+      MEILI_API_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
+      MEILI_INDEX: ms_realty_listings
     depends_on:
       typesense:
         condition: service_started

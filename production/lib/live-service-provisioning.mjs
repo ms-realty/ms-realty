@@ -9,11 +9,13 @@ import {
 } from "./hermes-provider-provisioning.mjs";
 import { assertHermesAgentRuntimeReport, probeHermesAgentRuntime } from "./hermes-agent-runtime.mjs";
 import {
+  assertProductionSearchEngine,
   HERMES_LAUNCH_REQUIRED,
   REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS,
   REQUIRED_LIVE_SERVICE_PROVISIONING_SERVICES,
 } from "./launch-service-contract.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
+import { assertExactRedactedPostgresTarget, redactPostgresDatabaseTarget } from "./postgres-target.mjs";
 import { assertProductionDatabaseHost } from "./payload-runtime.mjs";
 import { assertSearchServiceUrl } from "./search-service-http.mjs";
 
@@ -26,6 +28,7 @@ const CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "fail", "n
 const REQUIRED_ENV_BY_CHECK = {
   database_url: "DATABASE_URL",
   payload_secret: "PAYLOAD_SECRET",
+  search_engine: "MS_REALTY_SEARCH_ENGINE",
 };
 const HERMES_REQUIRED_ENV_NAMES = new Set(["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
 
@@ -68,10 +71,20 @@ function postgresDatabaseTargetCheck(env) {
     return {
       id: "postgres_database_target",
       status: "pass",
-      database_target: `${parsed.protocol}//${parsed.hostname}:${Number(parsed.port || 5432)}/${decodeURIComponent(parsed.pathname.replace(/^\//, ""))}`,
+      database_target: redactPostgresDatabaseTarget(value),
     };
   } catch (error) {
     return { id: "postgres_database_target", status: "fail", error: error.message };
+  }
+}
+
+function productionSearchEngineCheck(env) {
+  const check = envCheck("search_engine", env, "MS_REALTY_SEARCH_ENGINE");
+  if (check.status !== "pass") return check;
+  try {
+    return { ...check, engine: assertProductionSearchEngine(env.MS_REALTY_SEARCH_ENGINE) };
+  } catch (error) {
+    return { ...check, status: "fail", error: error.message };
   }
 }
 
@@ -165,6 +178,7 @@ export async function buildLiveServiceProvisioningReport({
   const checks = [
     envCheck("database_url", env, "DATABASE_URL"),
     envCheck("payload_secret", env, "PAYLOAD_SECRET"),
+    productionSearchEngineCheck(env),
   ];
   checks.push(checks[0].status === "pass" ? postgresDatabaseTargetCheck(env) : { id: "postgres_database_target", status: "missing_env" });
 
@@ -220,8 +234,8 @@ export async function buildLiveServiceProvisioningReport({
       ? ["Run npm run live:provisioning:preflight, then npm run live:capture and npm run live:preflight."]
       : [
           HERMES_LAUNCH_REQUIRED
-            ? "Set DATABASE_URL, PAYLOAD_SECRET, and Hermes provider env."
-            : "Set DATABASE_URL and PAYLOAD_SECRET.",
+            ? "Set DATABASE_URL, PAYLOAD_SECRET, MS_REALTY_SEARCH_ENGINE=postgres, and Hermes provider env."
+            : "Set DATABASE_URL, PAYLOAD_SECRET, and MS_REALTY_SEARCH_ENGINE=postgres.",
           "Run npm run live:provisioning until all required service checks pass.",
           "Run npm run live:capture only after provisioning passes.",
         ],
@@ -279,10 +293,12 @@ export function assertLiveServiceProvisioningReport(report) {
   }
   const postgresTarget = report.checks.find((item) => item.id === "postgres_database_target");
   if (postgresTarget?.status === "pass") {
-    const parsed = assertProvisioningDatabaseTarget(postgresTarget.database_target);
-    if (parsed.username || parsed.password || parsed.search || parsed.hash) {
-      throw new Error("Postgres provisioning target must be redacted");
-    }
+    const canonical = assertExactRedactedPostgresTarget(postgresTarget.database_target, "Postgres provisioning target");
+    assertProductionDatabaseHost(new URL(canonical).hostname);
+  }
+  const searchEngine = report.checks.find((item) => item.id === "search_engine");
+  if (searchEngine?.status === "pass" && searchEngine.engine !== assertProductionSearchEngine(searchEngine.engine)) {
+    throw new Error("Live service provisioning search engine must match the production invariant");
   }
   for (const id of ["hermes_agent_health", "hermes_agent_capabilities"]) {
     const check = report.checks.find((item) => item.id === id);
