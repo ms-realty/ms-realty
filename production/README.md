@@ -238,8 +238,8 @@ npm run docker:restore -- .local-backups/backup-<timestamp>-<id> --confirm-repla
 
 This is tested local recovery machinery, not proof of an encrypted off-site production
 backup policy, retention schedule, or successful production disaster-recovery drill.
-Production launch stays blocked until a named operator and reviewer supply a valid private
-`production/data/production-recovery-report.json` using the committed `.json.example` contract;
+Production launch stays blocked until the governed operator workflow produces a valid Ed25519-signed
+`production/data/production-recovery-report.json`; the committed `.json.example` is shape documentation only;
 `MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH` may mount that evidence outside the repository.
 
 ### Neon to private EU R2 production recovery
@@ -262,6 +262,7 @@ export CLOUDFLARE_ACCOUNT_ID='<MS Realty Cloudflare account ID>'
 export AWS_ACCESS_KEY_ID='<bucket-scoped R2 access key ID>'
 export AWS_SECRET_ACCESS_KEY='<bucket-scoped R2 secret access key>'
 export MS_REALTY_RECOVERY_AGE_RECIPIENT='<age1... public recipient>'
+export MS_REALTY_RELEASE_ID='<exact-40-character-source-SHA>'
 npm run recovery:r2:backup -- --confirm-upload-encrypted-production-backup
 ```
 
@@ -330,10 +331,18 @@ launch-readiness validator:
 
 ```bash
 chmod 400 '<path-to-recovery-approval.json>'
+chmod 600 '<path-to-recovery-ed25519-private-key.pem>'
 export MS_REALTY_RECOVERY_APPROVAL_FILE='<path-to-recovery-approval.json>'
 export MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH='<path-to-monitoring-rollback-report.json>'
+export MS_REALTY_RECOVERY_SIGNING_PRIVATE_KEY_FILE='<path-to-recovery-ed25519-private-key.pem>'
+export MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY='<base64-SPKI-public-key>'
 npm run recovery:r2:approve -- '<backup-id>' --confirm-reviewed-recovery-evidence
 ```
+
+The approval command signs the canonical schema-v2 report with Ed25519. The report persists only
+the detached signature and the SHA-256 key ID; runtime/import/readiness receive the public SPKI
+through `MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY`, never the private key. Unsigned, tampered, or
+unknown-key reports remain blocked even when every JSON claim and digest is internally consistent.
 
 The ignored `.recovery-work/` directory contains local ciphertext, manifests, and drill receipts.
 These commands do not create Cloudflare credentials, change production data, deploy code, access

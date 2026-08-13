@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { evidenceFreshness } from "./evidence-freshness.mjs";
@@ -14,6 +15,8 @@ const REQUIRED_COMPONENTS = ["payload_postgres", "runtime_data", "runtime_eviden
 const SECRET_FIELD_PATTERN = /(authorization|password|secret|token|api(?:access)?key|accesskey|privatekey)/i;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 const RELEASE_SHA_PATTERN = /^[a-f0-9]{40}$/;
+const RECOVERY_SIGNATURE_ALGORITHM = "Ed25519";
+const RECOVERY_KEY_ID_PATTERN = /^ed25519-sha256:[a-f0-9]{64}$/;
 
 function timestamp(value, label) {
   const parsed = Date.parse(value);
@@ -43,6 +46,113 @@ function releaseSha(value, label) {
   return normalized;
 }
 
+function canonicalJson(value) {
+  if (value === null || typeof value === "string" || typeof value === "boolean") return JSON.stringify(value);
+  if (typeof value === "number" && Number.isFinite(value)) return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object" && Object.getPrototypeOf(value) === Object.prototype) {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
+  }
+  throw new Error("Production recovery report must contain canonical JSON values only");
+}
+
+function ed25519PublicKey(value = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY) {
+  if (value instanceof crypto.KeyObject) {
+    if (value.type !== "public" || value.asymmetricKeyType !== "ed25519") {
+      throw new Error("Production recovery verification requires an Ed25519 public key");
+    }
+    return value;
+  }
+  const configured = String(value || "").trim();
+  if (!configured) throw new Error("MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY is required to verify production recovery evidence");
+  if (/PRIVATE KEY/.test(configured)) throw new Error("Production recovery runtime must not receive a private signing key");
+  let key;
+  try {
+    key = configured.includes("BEGIN PUBLIC KEY")
+      ? crypto.createPublicKey(configured)
+      : crypto.createPublicKey({ key: Buffer.from(configured, "base64"), format: "der", type: "spki" });
+  } catch {
+    throw new Error("MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY must be an Ed25519 PEM or base64 SPKI public key");
+  }
+  if (key.asymmetricKeyType !== "ed25519") throw new Error("Production recovery verification requires an Ed25519 public key");
+  return key;
+}
+
+function ed25519PrivateKey(value) {
+  if (value instanceof crypto.KeyObject) {
+    if (value.type !== "private" || value.asymmetricKeyType !== "ed25519") {
+      throw new Error("Production recovery signing requires an Ed25519 private key");
+    }
+    return value;
+  }
+  const configured = typeof value === "string" || Buffer.isBuffer(value) ? value : "";
+  if (!configured || configured.length === 0) throw new Error("Production recovery signing requires an Ed25519 private key");
+  let key;
+  try {
+    key = crypto.createPrivateKey(configured);
+  } catch {
+    throw new Error("Production recovery signing key must be a valid Ed25519 private key");
+  }
+  if (key.asymmetricKeyType !== "ed25519") throw new Error("Production recovery signing requires an Ed25519 private key");
+  return key;
+}
+
+export function productionRecoverySigningKeyId(publicKey) {
+  const key = ed25519PublicKey(publicKey);
+  const digest = crypto.createHash("sha256").update(key.export({ format: "der", type: "spki" })).digest("hex");
+  return `ed25519-sha256:${digest}`;
+}
+
+function recoverySigningPayload(report) {
+  const provenance = report?.provenance;
+  return Buffer.from(canonicalJson({
+    ...report,
+    provenance: {
+      algorithm: provenance?.algorithm,
+      key_id: provenance?.key_id,
+    },
+  }));
+}
+
+export function signProductionRecoveryReport(report, { privateKey } = {}) {
+  const signingKey = ed25519PrivateKey(privateKey);
+  const publicKey = crypto.createPublicKey(signingKey);
+  const signed = structuredClone(report);
+  if (signed.example === true) throw new Error("Production recovery example cannot be signed as launch evidence");
+  signed.provenance = {
+    algorithm: RECOVERY_SIGNATURE_ALGORITHM,
+    key_id: productionRecoverySigningKeyId(publicKey),
+  };
+  signed.provenance.signature = crypto.sign(null, recoverySigningPayload(signed), signingKey).toString("base64");
+  assertProductionRecoveryReport(signed, { publicKey });
+  return signed;
+}
+
+function assertProductionRecoveryProvenance(report, publicKey) {
+  const provenance = report.provenance;
+  if (!provenance || typeof provenance !== "object" || Array.isArray(provenance)) {
+    throw new Error("Production recovery report requires machine-generated Ed25519 provenance");
+  }
+  const keys = Object.keys(provenance).sort();
+  if (keys.join(",") !== "algorithm,key_id,signature") {
+    throw new Error("Production recovery provenance has unsupported or missing fields");
+  }
+  if (provenance.algorithm !== RECOVERY_SIGNATURE_ALGORITHM || !RECOVERY_KEY_ID_PATTERN.test(provenance.key_id || "")) {
+    throw new Error("Production recovery report requires Ed25519 signature metadata");
+  }
+  const verificationKey = ed25519PublicKey(publicKey);
+  if (provenance.key_id !== productionRecoverySigningKeyId(verificationKey)) {
+    throw new Error("Production recovery signing key ID does not match the configured verification key");
+  }
+  const signature = Buffer.from(String(provenance.signature || ""), "base64");
+  if (signature.length !== 64 || signature.toString("base64") !== provenance.signature) {
+    throw new Error("Production recovery signature must be canonical base64 Ed25519 evidence");
+  }
+  if (!crypto.verify(null, recoverySigningPayload(report), verificationKey, signature)) {
+    throw new Error("Production recovery report signature is invalid");
+  }
+}
+
 function assertComponents(value, label) {
   if (!Array.isArray(value) || REQUIRED_COMPONENTS.some((component) => !value.includes(component))) {
     throw new Error(`${label} must cover ${REQUIRED_COMPONENTS.join(", ")}`);
@@ -58,7 +168,7 @@ function hasSecretField(value) {
   });
 }
 
-export function assertProductionRecoveryReport(report) {
+export function assertProductionRecoveryReport(report, { publicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY } = {}) {
   if (!report || typeof report !== "object" || Array.isArray(report)) throw new Error("Production recovery report must be an object");
   if (report.example === true) throw new Error("Production recovery example cannot clear launch readiness");
   if (report.schema_version !== 2 || report.environment !== "production" || report.ready !== true) {
@@ -70,6 +180,7 @@ export function assertProductionRecoveryReport(report) {
   ) {
     throw new Error("Production recovery report must not contain secrets");
   }
+  assertProductionRecoveryProvenance(report, publicKey);
 
   const generatedAt = timestamp(report.generated_at, "generated_at");
   const backupCompletedAt = timestamp(report.backup?.completed_at, "backup.completed_at");
@@ -163,8 +274,11 @@ export function productionRecoveryEvidenceAt(report) {
   ).toISOString();
 }
 
-export function productionRecoveryFreshness(report, { now = Date.now() } = {}) {
-  assertProductionRecoveryReport(report);
+export function productionRecoveryFreshness(report, {
+  now = Date.now(),
+  publicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
+} = {}) {
+  assertProductionRecoveryReport(report, { publicKey });
   const nowMs = now instanceof Date ? now.getTime() : typeof now === "number" ? now : Date.parse(now);
   if (!Number.isFinite(nowMs)) throw new Error("Production recovery freshness requires a valid current timestamp");
   const generatedFreshness = evidenceFreshness("production_recovery", report.generated_at, { now: nowMs });
@@ -172,15 +286,18 @@ export function productionRecoveryFreshness(report, { now = Date.now() } = {}) {
   return evidenceFreshness("production_recovery", productionRecoveryEvidenceAt(report), { now: nowMs });
 }
 
-export function productionRecoveryState(reportPath = DEFAULT_PRODUCTION_RECOVERY_REPORT, { now = Date.now() } = {}) {
+export function productionRecoveryState(reportPath = DEFAULT_PRODUCTION_RECOVERY_REPORT, {
+  now = Date.now(),
+  publicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
+} = {}) {
   if (!fs.existsSync(reportPath)) return { status: "missing_report", path: repoRelativePath(reportPath) };
   try {
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
     if (report.example === true || reportPath.endsWith(".example")) {
       return { status: "example_report", path: repoRelativePath(reportPath) };
     }
-    assertProductionRecoveryReport(report);
-    const freshness = productionRecoveryFreshness(report, { now });
+    assertProductionRecoveryReport(report, { publicKey });
+    const freshness = productionRecoveryFreshness(report, { now, publicKey });
     if (freshness.status === "invalid") throw new Error(freshness.error);
     return {
       status: freshness.status === "fresh" ? "pass" : "expired_report",
@@ -199,8 +316,10 @@ export function readProductionRecoveryTemplate(reportPath = DEFAULT_PRODUCTION_R
   return fs.readFileSync(reportPath, "utf8");
 }
 
-export function writeProductionRecoveryReport(report, outPath = DEFAULT_PRODUCTION_RECOVERY_REPORT) {
-  assertProductionRecoveryReport(report);
+export function writeProductionRecoveryReport(report, outPath = DEFAULT_PRODUCTION_RECOVERY_REPORT, {
+  publicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
+} = {}) {
+  assertProductionRecoveryReport(report, { publicKey });
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
   return outPath;

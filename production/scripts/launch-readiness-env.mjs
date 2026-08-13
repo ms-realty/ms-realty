@@ -59,7 +59,11 @@ export function launchReadinessInputsFromEnv(env = process.env) {
     inputs.payloadRuntime = payloadRuntimeState(env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH, { now });
   }
   if (env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH) {
-    inputs.productionRecovery = productionRecoveryState(env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH, { now });
+    inputs.productionRecovery = productionRecoveryState(env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH, {
+      now,
+      publicKey: env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
+    });
+    inputs.productionRecoveryPublicKey = env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY;
   }
   if (env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH) {
     inputs.monitoringRollback = monitoringRollbackState(env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH, { now });

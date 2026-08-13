@@ -2,9 +2,9 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { assertMonitoringRollbackReport } from "./monitoring-rollback.mjs";
-import { assertProductionRecoveryReport } from "./production-recovery.mjs";
+import { assertProductionRecoveryReport, signProductionRecoveryReport } from "./production-recovery.mjs";
 
-export const R2_RECOVERY_SCHEMA_VERSION = 1;
+export const R2_RECOVERY_SCHEMA_VERSION = 2;
 export const R2_RECOVERY_BUCKET = "ms-realty-production-backups-eu";
 export const R2_RECOVERY_JURISDICTION = "eu";
 export const R2_RECOVERY_COMPONENTS = Object.freeze(["payload_postgres", "runtime_data", "runtime_evidence"]);
@@ -12,6 +12,7 @@ export const R2_RECOVERY_COMPONENTS = Object.freeze(["payload_postgres", "runtim
 const SAFE_BACKUP_ID = /^[a-z0-9][a-z0-9._-]{7,95}$/i;
 const SAFE_TABLE = /^(?:[a-z_][a-z0-9_]*\.)?[a-z_][a-z0-9_]*$/;
 const SHA256 = /^[a-f0-9]{64}$/;
+const RELEASE_SHA = /^[a-f0-9]{40}$/;
 const RECOVERY_COMMAND_ENV_KEYS = Object.freeze([
   "PATH", "HOME", "TMPDIR", "LANG", "LC_ALL", "TERM",
   "SSL_CERT_FILE", "SSL_CERT_DIR", "HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY",
@@ -40,6 +41,12 @@ export function assertSafeTableName(value) {
   const table = requiredText(value, "table name");
   if (!SAFE_TABLE.test(table)) throw new Error(`Unsafe PostgreSQL table name: ${table}`);
   return table.includes(".") ? table : `public.${table}`;
+}
+
+export function assertRecoveryReleaseId(value) {
+  const releaseId = requiredText(value, "release_id");
+  if (!RELEASE_SHA.test(releaseId)) throw new Error("release_id must be an exact lowercase 40-character release SHA");
+  return releaseId;
 }
 
 export function sha256File(filePath) {
@@ -85,7 +92,7 @@ export function readImmutableJson(filePath, label = "Recovery receipt") {
   return JSON.parse(fs.readFileSync(resolved, "utf8"));
 }
 
-export function trustedManifestDigest({ localManifestPath, recoveryReportPath = null, backupId }) {
+export function trustedManifestDigest({ localManifestPath, recoveryReportPath = null, backupId, publicKey }) {
   const requestedBackupId = assertSafeBackupId(backupId);
   if (fs.existsSync(localManifestPath)) {
     const manifest = readImmutableJson(localManifestPath, "Local recovery manifest");
@@ -98,7 +105,7 @@ export function trustedManifestDigest({ localManifestPath, recoveryReportPath = 
     throw new Error("Restore requires the read-only local manifest or an immutable approved recovery report");
   }
   const report = readImmutableJson(recoveryReportPath, "Approved recovery report");
-  assertProductionRecoveryReport(report);
+  assertProductionRecoveryReport(report, { publicKey });
   if (report.backup?.backup_id !== requestedBackupId) {
     throw new Error("Approved recovery report does not match backup_id");
   }
@@ -192,6 +199,7 @@ export function componentCoverage(map, tableCounts) {
 
 export function createR2RecoveryManifest({
   backupId,
+  releaseId,
   completedAt,
   encryptedFile,
   plaintextFile,
@@ -217,6 +225,7 @@ export function createR2RecoveryManifest({
     schema_version: R2_RECOVERY_SCHEMA_VERSION,
     environment: "production",
     backup_id: safeBackupId,
+    release_id: assertRecoveryReleaseId(releaseId),
     completed_at: timestamp(completedAt, "completed_at"),
     provider: "Cloudflare R2 EU",
     bucket: R2_RECOVERY_BUCKET,
@@ -246,6 +255,7 @@ export function assertR2RecoveryManifest(manifest, trustedComponentMap, expected
   if (!trustedComponentMap) throw new Error("Recovery manifest verification requires the trusted component map");
   assertRecoveryComponentMap(trustedComponentMap);
   const backupId = assertSafeBackupId(manifest.backup_id);
+  assertRecoveryReleaseId(manifest.release_id);
   if (expectedBackupId !== null && backupId !== assertSafeBackupId(expectedBackupId)) {
     throw new Error("Recovery manifest backup_id does not match the requested backup");
   }
@@ -367,6 +377,9 @@ export function updateR2UploadPlan(plan, { event, objectKey = null, at = null, e
 
 export function assertRecoveryMonitoringRollbackEvidence(report, { manifest, completedAt = null }) {
   assertMonitoringRollbackReport(report);
+  if (report.release_id !== assertRecoveryReleaseId(manifest.release_id)) {
+    throw new Error("Monitoring rollback release_id does not match the backup manifest release_id");
+  }
   const generatedAt = timestamp(report.generated_at, "monitoring rollback generated_at");
   const verifiedAt = timestamp(report.rollback.drill.verified_at, "monitoring rollback verified_at");
   if (verifiedAt < timestamp(manifest.completed_at, "manifest completed_at")) {
@@ -420,6 +433,7 @@ export function buildRestoreDrillResult({
     schema_version: 1,
     environment: "production",
     backup_id: manifest.backup_id,
+    release_id: manifest.release_id,
     manifest_sha256: manifestDigestValid ? manifestSha256 : null,
     completed_at: timestamp(completedAt, "restore completed_at"),
     status: blockers.length === 0 ? "pass" : "blocked",
@@ -452,6 +466,7 @@ export function assertRestoreDrillResult(drill, manifest, componentMap, {
     drill.schema_version !== 1 ||
     drill.environment !== "production" ||
     drill.backup_id !== manifest.backup_id ||
+    drill.release_id !== manifest.release_id ||
     drill.target !== "isolated-postgresql-18" ||
     drill.status !== "pass"
   ) {
@@ -517,6 +532,9 @@ export function assertRecoveryApprovalArtifact(approval, {
     throw new Error("Recovery approval must explicitly review the manifest, restore drill, and monitoring rollback report");
   }
   if (approval.backup_id !== manifest.backup_id) throw new Error("Recovery approval backup_id does not match");
+  if (approval.release_id !== manifest.release_id || drill.release_id !== manifest.release_id) {
+    throw new Error("Recovery approval release_id is not bound to the backup manifest");
+  }
   if (approval.ciphertext_sha256 !== manifest.artifact.sha256) throw new Error("Recovery approval backup digest does not match");
   if (!SHA256.test(manifestSha256 || "") || approval.manifest_sha256 !== manifestSha256) {
     throw new Error("Recovery approval manifest digest does not match");
@@ -555,6 +573,7 @@ export function buildProductionRecoveryReport({
   manifestSha256,
   restoreDrillSha256,
   approvalArtifactSha256 = null,
+  signingPrivateKey,
   generatedAt = new Date().toISOString(),
 }) {
   if (!SHA256.test(approvalArtifactSha256 || "")) throw new Error("Recovery approval artifact digest is invalid");
@@ -585,7 +604,7 @@ export function buildProductionRecoveryReport({
       ciphertext_sha256: manifest.artifact.sha256,
       manifest_sha256: manifestSha256,
       monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
-      release_id: monitoringRollbackReport.release_id,
+      release_id: manifest.release_id,
       components: [...R2_RECOVERY_COMPONENTS],
     },
     restore_drill: {
@@ -600,7 +619,7 @@ export function buildProductionRecoveryReport({
       manifest_sha256: manifestSha256,
       result_sha256: restoreDrillSha256,
       monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
-      release_id: monitoringRollbackReport.release_id,
+      release_id: manifest.release_id,
       components_verified: [...drill.components_verified],
       operator: drill.operator,
     },
@@ -614,11 +633,10 @@ export function buildProductionRecoveryReport({
       manifest_sha256: manifestSha256,
       restore_drill_sha256: restoreDrillSha256,
       monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
-      release_id: monitoringRollbackReport.release_id,
+      release_id: manifest.release_id,
     },
   };
-  assertProductionRecoveryReport(report);
-  return report;
+  return signProductionRecoveryReport(report, { privateKey: signingPrivateKey });
 }
 
 export function writePrivateJson(filePath, value) {

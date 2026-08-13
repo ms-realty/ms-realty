@@ -341,11 +341,12 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 - Current gate: ${recoveryGate?.status || "unknown"}
 - Current evidence: ${recoveryEvidence.status || "unknown"}${recoveryEvidence.path ? ` (${recoveryEvidence.path})` : ""}${recoveryEvidence.error ? ` — ${recoveryEvidence.error}` : ""}
 - Private report: \`production/data/production-recovery-report.json\` (ignored)
-- Report example: \`production/data/production-recovery-report.json.example\`
+- Report example: \`production/data/production-recovery-report.json.example\` (shape reference only; it cannot clear readiness)
 - Admin template endpoint: \`GET /api/admin/production-recovery-template\`
 - Admin status endpoint: \`GET /api/admin/production-recovery\`
-- Admin import endpoint: \`POST /api/admin/production-recovery/import\` accepts only validated, redacted production evidence.
+- Admin import endpoint: \`POST /api/admin/production-recovery/import\` accepts only redacted Ed25519-signed production evidence from the governed recovery workflow.
 - Path override: \`MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH\`
+- Verification key: \`MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY\` contains public SPKI only; the private key is operator-only.
 - Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
 - Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.
 - Launch rule: the tested local \`docker:backup\` path is not production disaster-recovery evidence.

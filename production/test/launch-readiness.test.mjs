@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import http from "node:http";
 import os from "node:os";
 import { spawn, spawnSync } from "node:child_process";
@@ -33,6 +34,12 @@ import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { summarizeLegacyRouteMap } from "../lib/migration.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { summarizeDeployableRedirects, summarizeLegacyRouteDecisions } from "../lib/redirect-approvals.mjs";
+import { signProductionRecoveryReport } from "../lib/production-recovery.mjs";
+
+const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
+process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY = RECOVERY_KEYPAIR.publicKey
+  .export({ format: "der", type: "spki" })
+  .toString("base64");
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -436,7 +443,7 @@ const readyPayloadRuntime = {
 const readyProductionRecovery = {
   status: "pass",
   path: "production/data/production-recovery-report.json",
-  report: {
+  report: signProductionRecoveryReport({
     schema_version: 2,
     generated_at: "2026-07-05T00:00:00.000Z",
     environment: "production",
@@ -488,7 +495,7 @@ const readyProductionRecovery = {
       monitoring_rollback_report_sha256: "4".repeat(64),
       release_id: "a".repeat(40),
     },
-  },
+  }, { privateKey: RECOVERY_KEYPAIR.privateKey }),
 };
 const readyMonitoringRollback = {
   status: "pass",
@@ -570,7 +577,7 @@ function writeProductionRecoveryFixture(dir, generatedAt = new Date().toISOStrin
   report.backup.completed_at = generatedAt;
   report.restore_drill.completed_at = generatedAt;
   report.approval.approved_at = generatedAt;
-  writeJson(reportPath, report);
+  writeJson(reportPath, signProductionRecoveryReport(report, { privateKey: RECOVERY_KEYPAIR.privateKey }));
   return reportPath;
 }
 
@@ -939,19 +946,37 @@ test("launch readiness validator rejects legacy schema-v1 production recovery ev
   assert.throws(() => assertLaunchReadinessReport(report), /schema v2/);
 });
 
+test("launch readiness rejects unsigned and tampered schema-v2 recovery evidence", () => {
+  for (const mutate of [
+    (report) => { delete report.provenance; },
+    (report) => { report.backup.backup_id = "handwritten-backup-9999"; },
+  ]) {
+    const productionRecovery = structuredClone(readyProductionRecovery);
+    mutate(productionRecovery.report);
+    assert.throws(
+      () => buildLaunchReadinessReport({
+        generatedAt: "2026-07-05T00:00:00Z",
+        productionRecovery,
+      }),
+      /Ed25519 provenance|signature is invalid/,
+    );
+  }
+});
+
 test("launch readiness fail-closes stale and future mounted runtime evidence", () => {
   const generatedAt = "2026-08-10T12:00:00.000Z";
   const staleAt = "2026-07-10T11:59:59.999Z";
   const futureAt = "2026-08-10T12:01:00.001Z";
   const recoveryAt = (timestamp) => ({
     ...readyProductionRecovery,
-    report: {
+    report: signProductionRecoveryReport({
       ...readyProductionRecovery.report,
+      provenance: undefined,
       generated_at: timestamp,
       backup: { ...readyProductionRecovery.report.backup, completed_at: timestamp },
       restore_drill: { ...readyProductionRecovery.report.restore_drill, completed_at: timestamp },
       approval: { ...readyProductionRecovery.report.approval, approved_at: timestamp },
-    },
+    }, { privateKey: RECOVERY_KEYPAIR.privateKey }),
   });
   const freshEvidence = () => ({
     liveServices: readyLiveServices.map((item) => ({ ...item, generated_at: generatedAt })),
@@ -995,7 +1020,9 @@ test("launch readiness validator rejects a hand-cleared stale runtime gate", () 
     payloadRuntime: { ...readyPayloadRuntime, generated_at: generatedAt },
     productionRecovery: {
       ...readyProductionRecovery,
-      report: { ...readyProductionRecovery.report, generated_at: generatedAt },
+      report: signProductionRecoveryReport({ ...readyProductionRecovery.report, provenance: undefined, generated_at: generatedAt }, {
+        privateKey: RECOVERY_KEYPAIR.privateKey,
+      }),
     },
   };
   const report = buildLaunchReadinessReport({

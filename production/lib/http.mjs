@@ -796,6 +796,7 @@ export function createHttpApp({
   monitoringRollbackReportPath = null,
   payloadRuntimeReportPath = null,
   productionRecoveryReportPath = null,
+  productionRecoverySigningPublicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
@@ -1339,7 +1340,10 @@ export function createHttpApp({
       liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
       monitoringRollback: monitoringRollbackState(monitoringRollbackReportPath || undefined),
       payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
-      productionRecovery: productionRecoveryState(productionRecoveryReportPath || undefined),
+      productionRecovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
+        publicKey: productionRecoverySigningPublicKey,
+      }),
+      productionRecoveryPublicKey: productionRecoverySigningPublicKey,
     });
   };
   const currentLaunchInputChecklist = () =>
@@ -1391,7 +1395,9 @@ export function createHttpApp({
         }),
         live_service_provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
         payload_runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
-        production_recovery: productionRecoveryState(productionRecoveryReportPath || undefined),
+        production_recovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
+          publicKey: productionRecoverySigningPublicKey,
+        }),
       },
     };
   };
@@ -2506,7 +2512,9 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminJson(200, {
         kind: "admin_production_recovery",
-        recovery: productionRecoveryState(productionRecoveryReportPath || undefined),
+        recovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
+          publicKey: productionRecoverySigningPublicKey,
+        }),
       });
     }
 
@@ -2592,8 +2600,12 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const report = reportJsonInput(parseJsonBody(request));
-        const outPath = writeProductionRecoveryReport(report, productionRecoveryReportPath || undefined);
-        const recovery = productionRecoveryState(productionRecoveryReportPath || undefined);
+        const outPath = writeProductionRecoveryReport(report, productionRecoveryReportPath || undefined, {
+          publicKey: productionRecoverySigningPublicKey,
+        });
+        const recovery = productionRecoveryState(productionRecoveryReportPath || undefined, {
+          publicKey: productionRecoverySigningPublicKey,
+        });
         recordAudit({
           action: "production_recovery_report_imported",
           actor: "operations",
@@ -2616,7 +2628,9 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const report = currentLaunchReadiness();
-      const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined);
+      const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined, {
+        productionRecoveryPublicKey: productionRecoverySigningPublicKey,
+      });
       recordAudit({
         action: "launch_readiness_exported",
         actor: "operations",

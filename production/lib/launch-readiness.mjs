@@ -161,7 +161,7 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   ],
   production_recovery: [
     "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
-    "Download /api/admin/production-recovery-template, complete it with real evidence, and import it through /api/admin/production-recovery/import.",
+    "Run the governed recovery:r2 backup, restore, and approval commands; only their Ed25519-signed report can be imported through /api/admin/production-recovery/import.",
   ],
 };
 
@@ -894,12 +894,12 @@ function assertPassMonitoringRollbackEvidence(report) {
   assertMonitoringRollbackReport(machineEvidence.report);
 }
 
-function assertPassProductionRecoveryEvidence(report) {
+function assertPassProductionRecoveryEvidence(report, publicKey) {
   const recovery = gateById(report, "production_recovery");
-  if (recovery?.status === "pass") assertProductionRecoveryReport(recovery.evidence?.report);
+  if (recovery?.status === "pass") assertProductionRecoveryReport(recovery.evidence?.report, { publicKey });
 }
 
-function assertPassEvidenceFreshness(report, now) {
+function assertPassEvidenceFreshness(report, now, publicKey) {
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
     for (const item of requiredLiveServiceReports(liveServices.evidence?.reports || [])) {
@@ -912,7 +912,7 @@ function assertPassEvidenceFreshness(report, now) {
   }
   const productionRecovery = gateById(report, "production_recovery");
   if (productionRecovery?.status === "pass") {
-    const expectedFreshness = productionRecoveryFreshness(productionRecovery.evidence?.report, { now });
+    const expectedFreshness = productionRecoveryFreshness(productionRecovery.evidence?.report, { now, publicKey });
     if (expectedFreshness.status !== "fresh" || !sameJson(productionRecovery.evidence?.freshness, expectedFreshness)) {
       throw new Error("Launch readiness requires fresh production_recovery evidence");
     }
@@ -1272,7 +1272,8 @@ export function buildLaunchReadinessReport({
   liveServiceProvisioning = liveServiceProvisioningState(),
   appState = packageState(),
   payloadRuntime = payloadRuntimeState(undefined, { now: generatedAt }),
-  productionRecovery = productionRecoveryState(undefined, { now: generatedAt }),
+  productionRecoveryPublicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
+  productionRecovery = productionRecoveryState(undefined, { now: generatedAt, publicKey: productionRecoveryPublicKey }),
   monitoringRollback = monitoringRollbackState(undefined, { now: generatedAt }),
 } = {}) {
   const generatedAtMs = Date.parse(generatedAt);
@@ -1292,7 +1293,7 @@ export function buildLaunchReadinessReport({
   const productionRecoveryEvidence = {
     ...productionRecovery,
     freshness: productionRecovery.report
-      ? productionRecoveryFreshness(productionRecovery.report, { now: generatedAtMs })
+      ? productionRecoveryFreshness(productionRecovery.report, { now: generatedAtMs, publicKey: productionRecoveryPublicKey })
       : evidenceFreshnessAt("production_recovery", null, generatedAtMs),
   };
 
@@ -1507,7 +1508,9 @@ export function buildLaunchReadinessReport({
   };
 }
 
-export function assertLaunchReadinessReport(report) {
+export function assertLaunchReadinessReport(report, {
+  productionRecoveryPublicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
+} = {}) {
   const generatedAtMs = Date.parse(report.generated_at);
   if (!Number.isFinite(generatedAtMs)) throw new Error("Launch readiness report must include valid generated_at");
   if (!Array.isArray(report.gates) || report.gates.length < 7) throw new Error("Launch readiness report must include core gates");
@@ -1536,8 +1539,8 @@ export function assertLaunchReadinessReport(report) {
   assertPassRuntimeEvidence(report);
   assertPassAppLayerEvidence(report);
   assertPassMonitoringRollbackEvidence(report);
-  assertPassProductionRecoveryEvidence(report);
-  assertPassEvidenceFreshness(report, generatedAtMs);
+  assertPassProductionRecoveryEvidence(report, productionRecoveryPublicKey);
+  assertPassEvidenceFreshness(report, generatedAtMs, productionRecoveryPublicKey);
   if (report.launch_ready && !report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");
   }
@@ -1550,9 +1553,9 @@ export function assertLaunchReadinessReport(report) {
   return true;
 }
 
-export function writeLaunchReadinessReport(report, outPath = DEFAULT_LAUNCH_READINESS_OUTPUT) {
+export function writeLaunchReadinessReport(report, outPath = DEFAULT_LAUNCH_READINESS_OUTPUT, options = {}) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  assertLaunchReadinessReport(report);
+  assertLaunchReadinessReport(report, options);
   fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
   return outPath;
 }

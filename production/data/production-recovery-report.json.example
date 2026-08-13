@@ -4,6 +4,11 @@
   "generated_at": "2026-07-23T01:00:00.000Z",
   "environment": "production",
   "ready": false,
+  "provenance": {
+    "algorithm": "Ed25519",
+    "key_id": "replace-with-ed25519-sha256-public-key-id",
+    "signature": "replace-with-detached-base64-ed25519-signature"
+  },
   "policy": {
     "provider": "replace-with-backup-provider",
     "offsite": true,

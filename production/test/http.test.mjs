@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
@@ -40,6 +41,7 @@ import {
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { signProductionRecoveryReport } from "../lib/production-recovery.mjs";
 import { appendRedirectApproval } from "../lib/redirect-approvals.mjs";
 import { LOGO_URL, LOGO_URL_REVERSED } from "../lib/ui/design-assets.mjs";
 import {
@@ -53,6 +55,8 @@ const SAME_ORIGIN_LEAD_HEADERS = Object.freeze({
   origin: "http://localhost",
   "sec-fetch-site": "same-origin",
 });
+const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
+const RECOVERY_PUBLIC_KEY = RECOVERY_KEYPAIR.publicKey.export({ format: "der", type: "spki" }).toString("base64");
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -78,7 +82,7 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
   const restoreDrillSha256 = "3".repeat(64);
   const monitoringRollbackReportSha256 = "4".repeat(64);
   const releaseId = "a".repeat(40);
-  return {
+  return signProductionRecoveryReport({
     schema_version: 2,
     generated_at: generatedAt,
     environment: "production",
@@ -130,7 +134,7 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
       monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
       release_id: releaseId,
     },
-  };
+  }, { privateKey: RECOVERY_KEYPAIR.privateKey });
 }
 
 function tempLedger() {
@@ -2901,6 +2905,7 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
   const app = createHttpApp({
     auditLogPath,
     productionRecoveryReportPath,
+    productionRecoverySigningPublicKey: RECOVERY_PUBLIC_KEY,
     reviewedAt: "2026-07-23T00:00:00.000Z",
   });
   const auth = { authorization: "Bearer local-admin-smoke" };
@@ -2920,6 +2925,22 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
     headers: auth,
     body: { report: JSON.stringify({ ...validProductionRecoveryReport(), schema_version: 1 }) },
   });
+  const unsignedReport = validProductionRecoveryReport();
+  delete unsignedReport.provenance;
+  const unsigned = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/production-recovery/import",
+    headers: auth,
+    body: { report: JSON.stringify(unsignedReport) },
+  });
+  const tamperedReport = validProductionRecoveryReport();
+  tamperedReport.backup.backup_id = "handwritten-backup-9999";
+  const tampered = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/production-recovery/import",
+    headers: auth,
+    body: { report: JSON.stringify(tamperedReport) },
+  });
   const imported = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/production-recovery/import",
@@ -2937,6 +2958,10 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
   assert.equal(before.body.recovery.status, "missing_report");
   assert.equal(template.status, 200);
   assert.equal(template.headers["content-disposition"], 'attachment; filename="production-recovery-report.json.example"');
+  assert.equal(unsigned.status, 400);
+  assert.match(unsigned.body.message, /Ed25519 provenance/);
+  assert.equal(tampered.status, 400);
+  assert.match(tampered.body.message, /signature is invalid/);
   assert.equal(JSON.parse(template.body).example, true);
   assert.equal(invalid.status, 400);
   assert.match(invalid.body.message, /valid JSON/);

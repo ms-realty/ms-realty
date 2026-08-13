@@ -22,7 +22,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - payload_runtime: Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.
 - payload_runtime: Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.
 - production_recovery: Complete an encrypted off-site backup and isolated restore drill using production data stores.
-- production_recovery: Download /api/admin/production-recovery-template, complete it with real evidence, and import it through /api/admin/production-recovery/import.
+- production_recovery: Run the governed recovery:r2 backup, restore, and approval commands; only their Ed25519-signed report can be imported through /api/admin/production-recovery/import.
 
 ## Redirect Reviews
 
@@ -124,11 +124,12 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Current gate: blocked
 - Current evidence: missing_report (production/data/production-recovery-report.json)
 - Private report: `production/data/production-recovery-report.json` (ignored)
-- Report example: `production/data/production-recovery-report.json.example`
+- Report example: `production/data/production-recovery-report.json.example` (shape reference only; it cannot clear readiness)
 - Admin template endpoint: `GET /api/admin/production-recovery-template`
 - Admin status endpoint: `GET /api/admin/production-recovery`
-- Admin import endpoint: `POST /api/admin/production-recovery/import` accepts only validated, redacted production evidence.
+- Admin import endpoint: `POST /api/admin/production-recovery/import` accepts only redacted Ed25519-signed production evidence from the governed recovery workflow.
 - Path override: `MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH`
+- Verification key: `MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY` contains public SPKI only; the private key is operator-only.
 - Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
 - Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.
 - Launch rule: the tested local `docker:backup` path is not production disaster-recovery evidence.

@@ -380,6 +380,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     monitoringRollbackReportPath: env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     productionRecoveryReportPath: env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH,
+    productionRecoverySigningPublicKey: env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
@@ -1368,7 +1369,10 @@ function launchReadiness(config) {
     liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
     monitoringRollback: monitoringRollbackState(config.monitoringRollbackReportPath || undefined),
     payloadRuntime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
-    productionRecovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
+    productionRecovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+      publicKey: config.productionRecoverySigningPublicKey,
+    }),
+    productionRecoveryPublicKey: config.productionRecoverySigningPublicKey,
   });
 }
 
@@ -1421,7 +1425,9 @@ function preflightReports(config) {
       }),
       live_service_provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
       payload_runtime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
-      production_recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
+      production_recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+        publicKey: config.productionRecoverySigningPublicKey,
+      }),
     },
   };
 }
@@ -2732,7 +2738,9 @@ function exportDeployableRedirectRows(config) {
 
 function exportLaunchReadiness(config) {
   const report = launchReadiness(config);
-  const outPath = writeLaunchReadinessReport(report, config.launchReadinessOutputPath || undefined);
+  const outPath = writeLaunchReadinessReport(report, config.launchReadinessOutputPath || undefined, {
+    productionRecoveryPublicKey: config.productionRecoverySigningPublicKey,
+  });
   recordAudit(
     {
       action: "launch_readiness_exported",
@@ -2820,8 +2828,12 @@ function importLiveServiceProvisioningReport(report, config) {
 }
 
 function importProductionRecoveryReport(report, config) {
-  const outPath = writeProductionRecoveryReport(report, config.productionRecoveryReportPath || undefined);
-  const recovery = productionRecoveryState(config.productionRecoveryReportPath || undefined);
+  const outPath = writeProductionRecoveryReport(report, config.productionRecoveryReportPath || undefined, {
+    publicKey: config.productionRecoverySigningPublicKey,
+  });
+  const recovery = productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+    publicKey: config.productionRecoverySigningPublicKey,
+  });
   recordAudit(
     {
       action: "production_recovery_report_imported",
@@ -3453,7 +3465,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/production-recovery") {
       return jsonResponse(200, {
         kind: "admin_production_recovery",
-        recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
+        recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+          publicKey: config.productionRecoverySigningPublicKey,
+        }),
       });
     }
     if (request.method === "GET" && url.pathname === "/api/admin/production-recovery-template") {

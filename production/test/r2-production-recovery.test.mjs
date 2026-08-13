@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -28,9 +29,10 @@ import {
 import { fromRoot } from "../lib/paths.mjs";
 
 const componentMapPath = fromRoot("production", "data", "production-recovery-component-map.json");
+const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
+const RECOVERY_RELEASE_ID = "a".repeat(40);
 
-function machineRollbackReport() {
-  const releaseId = "a".repeat(40);
+function machineRollbackReport(releaseId = RECOVERY_RELEASE_ID) {
   const correlationId = "ms-realty/ms-realty:monitoring-drill:31485358241:1";
   const runUrl = "https://github.com/ms-realty/ms-realty/actions/runs/31485358241/attempts/1";
   const worker = "msr-monitoring-drill-31485358241-1";
@@ -115,6 +117,7 @@ function fixture(t) {
   const tableCounts = Object.fromEntries(mappedTableNames(componentMap).map((table, index) => [table, index + 1]));
   const manifest = createR2RecoveryManifest({
     backupId: "ms-realty-20260813t120000z-abcd1234",
+    releaseId: RECOVERY_RELEASE_ID,
     completedAt: "2026-08-13T12:00:00.000Z",
     plaintextFile,
     encryptedFile,
@@ -196,6 +199,7 @@ test("fully covered restore requires machine rollback evidence and immutable hum
   fs.writeFileSync(encryptedFile, "age-encrypted-postgres-custom-dump", { mode: 0o600 });
   const manifest = createR2RecoveryManifest({
     backupId: blockedManifest.backup_id,
+    releaseId: blockedManifest.release_id,
     completedAt: blockedManifest.completed_at,
     plaintextFile,
     encryptedFile,
@@ -294,6 +298,7 @@ test("fully covered restore requires machine rollback evidence and immutable hum
     manifestSha256,
     restoreDrillSha256,
     approvalArtifactSha256,
+    signingPrivateKey: RECOVERY_KEYPAIR.privateKey,
     generatedAt: "2026-08-13T12:30:00.000Z",
   });
   assert.equal(report.ready, true);
@@ -308,7 +313,10 @@ test("fully covered restore requires machine rollback evidence and immutable hum
   assert.equal(report.backup.release_id, report.approval.release_id);
   assert.equal(report.restore_drill.result_sha256, report.approval.restore_drill_sha256);
   assert.equal(report.approval.artifact_sha256, approvalArtifactSha256);
+  assert.equal(report.provenance.algorithm, "Ed25519");
+  assert.match(report.provenance.key_id, /^ed25519-sha256:[a-f0-9]{64}$/);
   assert.doesNotMatch(JSON.stringify(report), /password|secret|token|postgres(?:ql)?:\/\//i);
+  assert.doesNotMatch(JSON.stringify(report), /PRIVATE KEY/);
 
   const tampered = structuredClone(passingDrill);
   tampered.restored_table_counts["public.listings"] += 1;
@@ -474,6 +482,7 @@ test("approval is bound to exact evidence and distinct case-insensitive identiti
   fs.writeFileSync(encryptedFile, "encrypted", { mode: 0o600 });
   const coveredManifest = createR2RecoveryManifest({
     backupId: manifest.backup_id,
+    releaseId: manifest.release_id,
     completedAt: manifest.completed_at,
     plaintextFile,
     encryptedFile,
@@ -519,7 +528,48 @@ test("approval is bound to exact evidence and distinct case-insensitive identiti
   approval.release_id = "b".repeat(40);
   assert.throws(() => assertRecoveryApprovalArtifact(approval, {
     manifest: coveredManifest, drill, manifestSha256, restoreDrillSha256,
-  }), /monitoring rollback evidence/i);
+  }), /release_id.*backup manifest/i);
+});
+
+test("backup release identity cannot be relabeled by later monitoring or approval", (t) => {
+  const { componentMap, manifest, tableCounts } = fixture(t);
+  const releaseB = "b".repeat(40);
+  assert.throws(
+    () => buildRestoreDrillResult({
+      manifest,
+      componentMap,
+      restoredTableCounts: tableCounts,
+      restoredLatestMigration: manifest.database.latest_migration,
+      completedAt: "2026-08-13T12:20:00.000Z",
+      operator: "codex-operator",
+      checksumVerified: true,
+      cleanupVerified: true,
+      monitoringRollbackReport: machineRollbackReport(releaseB),
+      monitoringRollbackReportSha256: "4".repeat(64),
+      manifestSha256: "2".repeat(64),
+    }),
+    /release_id does not match the backup manifest/i,
+  );
+
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-r2-release-binding-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const plaintextFile = path.join(directory, "dump");
+  const encryptedFile = path.join(directory, "dump.age");
+  fs.writeFileSync(plaintextFile, "dump", { mode: 0o600 });
+  fs.writeFileSync(encryptedFile, "encrypted", { mode: 0o600 });
+  assert.throws(
+    () => createR2RecoveryManifest({
+      backupId: manifest.backup_id,
+      releaseId: "release-a",
+      completedAt: manifest.completed_at,
+      plaintextFile,
+      encryptedFile,
+      componentMap,
+      tableCounts,
+      latestMigration: manifest.database.latest_migration,
+    }),
+    /exact lowercase 40-character release SHA/i,
+  );
 });
 
 test("R2 upload plan uses an immutable staged object and a final manifest commit marker", (t) => {

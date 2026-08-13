@@ -5,6 +5,7 @@ import { spawn } from "node:child_process";
 import {
   R2_RECOVERY_BUCKET,
   assertFileSha256,
+  assertRecoveryReleaseId,
   assertR2RecoveryManifest,
   assertSafeBackupId,
   buildR2UploadPlan,
@@ -282,6 +283,7 @@ async function captureBackup(env) {
   }
   const databaseUrl = required(env, "DATABASE_URL_DIRECT");
   const ageRecipient = required(env, "MS_REALTY_RECOVERY_AGE_RECIPIENT");
+  const releaseId = assertRecoveryReleaseId(required(env, "MS_REALTY_RELEASE_ID"));
   const secrets = [databaseUrl, env.AWS_ACCESS_KEY_ID, env.AWS_SECRET_ACCESS_KEY];
   const id = backupId();
   const directory = backupDirectory(id);
@@ -309,6 +311,7 @@ async function captureBackup(env) {
     fs.chmodSync(encryptedFile, 0o600);
     const manifest = createR2RecoveryManifest({
       backupId: id,
+      releaseId,
       completedAt: new Date().toISOString(),
       encryptedFile,
       plaintextFile,
@@ -408,6 +411,7 @@ async function restoreDrill(env, requestedBackupId) {
     localManifestPath,
     recoveryReportPath: String(env.MS_REALTY_RECOVERY_TRUSTED_REPORT_FILE || "").trim() || null,
     backupId: id,
+    publicKey: env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
   });
   await downloadFile(env, `backups/${id}/manifest.json`, manifestPath, secrets);
   assertFileSha256(manifestPath, expectedManifestSha256, "Downloaded R2 manifest");
@@ -510,6 +514,16 @@ function approveDrill(env, requestedBackupId) {
   const drill = readRegularJson(drillPath, "Restore drill result");
   const monitoringRollbackReportPath = path.resolve(required(env, "MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH"));
   const approvalPath = path.resolve(required(env, "MS_REALTY_RECOVERY_APPROVAL_FILE"));
+  const signingPrivateKeyPath = path.resolve(required(env, "MS_REALTY_RECOVERY_SIGNING_PRIVATE_KEY_FILE"));
+  const signingPrivateKeyStat = fs.lstatSync(signingPrivateKeyPath);
+  if (!signingPrivateKeyStat.isFile() || signingPrivateKeyStat.isSymbolicLink()) {
+    throw new Error("Recovery signing private key must be a regular file");
+  }
+  if ((signingPrivateKeyStat.mode & 0o077) !== 0) {
+    throw new Error("Recovery signing private key must not be group/world accessible");
+  }
+  const signingPrivateKey = fs.readFileSync(signingPrivateKeyPath);
+  const signingPublicKey = required(env, "MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY");
   const monitoringRollbackReport = readImmutableJson(monitoringRollbackReportPath, "Monitoring rollback report");
   const approval = readImmutableJson(approvalPath, "Recovery approval");
   const manifestSha256 = sha256File(manifestPath);
@@ -527,10 +541,11 @@ function approveDrill(env, requestedBackupId) {
     manifestSha256,
     restoreDrillSha256,
     approvalArtifactSha256,
+    signingPrivateKey,
     generatedAt: now,
   });
   const reportPath = path.resolve(env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH || DEFAULT_PRODUCTION_RECOVERY_REPORT);
-  writeProductionRecoveryReport(report, reportPath);
+  writeProductionRecoveryReport(report, reportPath, { publicKey: signingPublicKey });
   process.stdout.write(`${JSON.stringify({
     status: "approved",
     backup_id: id,

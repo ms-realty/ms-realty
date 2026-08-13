@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import os from "node:os";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
@@ -11,6 +12,10 @@ import { readReplyDeliveryOutcomes } from "../lib/reply-delivery-outcomes.mjs";
 import { mediaAssetId } from "../lib/media-reviews.mjs";
 import { saveProviderConnection } from "../lib/provider-connections.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
+import { signProductionRecoveryReport } from "../lib/production-recovery.mjs";
+
+const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
+const RECOVERY_PUBLIC_KEY = RECOVERY_KEYPAIR.publicKey.export({ format: "der", type: "spki" }).toString("base64");
 
 function tempJsonl(prefix) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
@@ -70,7 +75,7 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
   const restoreDrillSha256 = "3".repeat(64);
   const monitoringRollbackReportSha256 = "4".repeat(64);
   const releaseId = "a".repeat(40);
-  return {
+  return signProductionRecoveryReport({
     schema_version: 2,
     generated_at: generatedAt,
     environment: "production",
@@ -122,7 +127,7 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
       monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
       release_id: releaseId,
     },
-  };
+  }, { privateKey: RECOVERY_KEYPAIR.privateKey });
 }
 
 function completeListingQualityReviewCsv(workbookCsv, limit = null) {
@@ -243,6 +248,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: monitoringRollbackReportPath,
       MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: payloadRuntimeReportPath,
       MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryReportPath,
+      MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: RECOVERY_PUBLIC_KEY,
       MS_REALTY_RECEIVED_AT: "2026-07-04T00:00:00Z",
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
@@ -1035,6 +1041,20 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const legacyProductionRecoveryImportBody = await legacyProductionRecoveryImport.json();
       assert.equal(legacyProductionRecoveryImport.status, 400);
       assert.match(legacyProductionRecoveryImportBody.message, /schema v2/);
+      assert.equal(fs.existsSync(productionRecoveryReportPath), false);
+
+      const unsignedReport = validProductionRecoveryReport();
+      delete unsignedReport.provenance;
+      const unsignedProductionRecoveryImport = await productionRecoveryImportRoute.POST(
+        new Request("https://example.test/api/admin/production-recovery/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({ report: JSON.stringify(unsignedReport) }),
+        }),
+      );
+      const unsignedProductionRecoveryImportBody = await unsignedProductionRecoveryImport.json();
+      assert.equal(unsignedProductionRecoveryImport.status, 400);
+      assert.match(unsignedProductionRecoveryImportBody.message, /Ed25519 provenance/);
       assert.equal(fs.existsSync(productionRecoveryReportPath), false);
 
       const productionRecoveryImport = await productionRecoveryImportRoute.POST(
