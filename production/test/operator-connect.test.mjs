@@ -53,6 +53,10 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
     operatorId: "connect_operator",
   });
   assert.ok(html.includes("Скопировать текст"));
+  assert.ok(html.includes("Gmail + Google Calendar"));
+  assert.ok(html.includes("WhatsApp Business"));
+  assert.ok(html.includes("Viber Bot"));
+  assert.match(html, /<label class="hint" for="prompt">[^<]+<\/label>\s*<textarea id="prompt"/);
   assert.ok(html.includes("noindex"));
   assert.ok(html.includes(OPERATOR_TOKEN));
   assert.equal(html.includes("<script>alert"), false);
@@ -60,7 +64,17 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
 
 test("standalone HTTP runtime serves /admin/connect behind admin auth", async () => {
   await withNamedOperator(async (headers) => {
-    const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+    const app = createHttpApp({
+      reviewedAt: "2026-07-19T12:00:00.000Z",
+      providerConnection: {
+        publicOrigin: "https://ms-realty.ms-realty-bg.workers.dev",
+        credentialSecret: "",
+        stateSecret: "",
+        payloadSecret: "",
+        databaseUrl: "",
+        webhookMaxBytes: 1024 * 1024,
+      },
+    });
     const denied = await dispatchHttp(app, { method: "GET", url: "/admin/connect", headers: {} });
     assert.equal(denied.status, 401);
 

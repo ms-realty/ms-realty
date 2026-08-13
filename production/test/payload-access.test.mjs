@@ -261,6 +261,11 @@ test("config wires shared access onto admins, content, and case collections", as
     assert.equal(bySlug.public_leads.access.read(req(editor)), false);
     assert.equal(bySlug.lead_contacts.access.read(req(admin)), true);
     assert.equal(bySlug.lead_contacts.access.read(req(broker)), false);
+    for (const slug of ["provider_connections", "provider_webhook_events", "provider_delivery_receipts", "viewings"]) {
+      for (const operation of ["create", "read", "update", "delete"]) {
+        assert.equal(bySlug[slug].access[operation](req(admin)), false, `${slug} ${operation} must stay server-only`);
+      }
+    }
     // realty_cases: broker read is workspace-scoped; append-only update preserved
     assert.deepEqual(bySlug.realty_cases.access.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });
     assert.equal(bySlug.realty_cases.hooks.beforeValidate.length, 1, "workspace boundary hook is wired");

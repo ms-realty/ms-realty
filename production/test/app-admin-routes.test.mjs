@@ -9,6 +9,7 @@ import { buildLiveServiceProvisioningReport } from "../lib/live-service-provisio
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { readReplyDeliveryOutcomes } from "../lib/reply-delivery-outcomes.mjs";
 import { mediaAssetId } from "../lib/media-reviews.mjs";
+import { saveProviderConnection } from "../lib/provider-connections.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 
 function tempJsonl(prefix) {
@@ -2214,6 +2215,7 @@ test("Next admin replies bind the named production operator before queueing", as
       listing_reference: "MS-CRAWL-0001",
       original_language: "ru",
       message_original: "Please contact me about this listing.",
+      contact: { email: "buyer@example.com" },
     })}\n`,
   );
   const previous = {
@@ -2232,11 +2234,84 @@ test("Next admin replies bind the named production operator before queueing", as
     const config = appAdminConfigFromEnv({
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
+      MS_REALTY_PROVIDER_TOKEN_KEY: "provider-test-secret-that-is-longer-than-thirty-two-characters",
+      MS_REALTY_GOOGLE_OAUTH_CLIENT_ID: "google-client-id",
+      MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET: "google-client-secret",
+      PAYLOAD_SECRET: "payload-test-secret-that-is-longer-than-thirty-two-characters",
+      DATABASE_URL: "postgres://payload:payload@db/ms_realty",
       MS_REALTY_REPLY_OUTBOX_PATH: replyOutboxPath,
       MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH: replyDeliveryOutcomeLedgerPath,
       MS_REALTY_REVIEWED_AT: "2026-07-18T18:00:00Z",
       MS_REALTY_REPLY_DELIVERED_AT: "2026-07-18T18:05:00Z",
     });
+    const providerConnectionPayload = {
+      providerDocs: [],
+      deliveryDocs: [],
+      async find(query) {
+        const docs = query.collection === "provider_delivery_receipts" ? this.deliveryDocs : this.providerDocs;
+        const provider = query.where?.provider?.equals;
+        const idempotencyKey = query.where?.idempotency_key?.equals;
+        return {
+          docs: provider
+            ? docs.filter((doc) => doc.provider === provider)
+            : idempotencyKey
+              ? docs.filter((doc) => doc.idempotency_key === idempotencyKey)
+              : [...docs],
+        };
+      },
+      async create({ collection, data }) {
+        const docs = collection === "provider_delivery_receipts" ? this.deliveryDocs : this.providerDocs;
+        const doc = { id: docs.length + 1, ...data };
+        docs.push(doc);
+        return doc;
+      },
+      async update({ collection, id, data }) {
+        const docs = collection === "provider_delivery_receipts" ? this.deliveryDocs : this.providerDocs;
+        const index = docs.findIndex((doc) => doc.id === id);
+        docs[index] = { ...docs[index], ...data };
+        return docs[index];
+      },
+    };
+    await saveProviderConnection(
+      {
+        provider: "google",
+        status: "connected",
+        accountLabel: "owner@example.com",
+        externalAccountId: "google-user-1",
+        scopes: [
+          "openid",
+          "email",
+          "https://www.googleapis.com/auth/gmail.send",
+          "https://www.googleapis.com/auth/calendar.events.owned",
+          "https://www.googleapis.com/auth/calendar.freebusy",
+        ],
+        metadata: { email: "owner@example.com", email_verified: true },
+        credentials: { refresh_token: "google-refresh-token-plain" },
+      },
+      {
+        connectedBy: "operations_lead",
+        credentialSecret: "provider-test-secret-that-is-longer-than-thirty-two-characters",
+        payload: providerConnectionPayload,
+        verifiedAt: "2026-07-18T18:00:00Z",
+      },
+    );
+    config.providerConnectionPayload = providerConnectionPayload;
+    config.providerDeliveryPayload = providerConnectionPayload;
+    config.providerFetch = async (url, init = {}) => {
+      const value = String(url);
+      if (value.includes("/token")) {
+        return Response.json({
+          access_token: "refreshed-google-access-token",
+          scope: "https://www.googleapis.com/auth/gmail.send",
+        });
+      }
+      if (value.includes("/gmail/v1/users/me/messages/send")) {
+        const body = JSON.parse(String(init.body || "{}"));
+        assert.ok(body.raw);
+        return Response.json({ id: "gmail-message-1", threadId: "gmail-thread-1" });
+      }
+      throw new Error(`Unexpected provider request: ${value}`);
+    };
     const headers = {
       authorization: "Bearer next-operations-token-0123456789",
       "content-type": "application/json",
@@ -2287,6 +2362,7 @@ test("Next admin replies bind the named production operator before queueing", as
     assert.match(queuedHtml, /data-reply-delivery-form="true"/);
     assert.match(queuedHtml, /data-lead-replied="false"/);
     assert.match(queuedHtml, /Broker-reviewed reply\./);
+    assert.match(queuedHtml, /Send with Gmail/);
 
     const spoofedDelivery = await renderAppAdminResponse(
       new Request("https://example.test/api/admin/replies/delivery", {
@@ -2302,7 +2378,7 @@ test("Next admin replies bind the named production operator before queueing", as
       new Request("https://example.test/api/admin/replies/delivery", {
         method: "POST",
         headers,
-        body: JSON.stringify({ replyId: queuedBody.id, action: "sent", channel: "email" }),
+        body: JSON.stringify({ replyId: queuedBody.id, deliveryMode: "provider_send", provider: "google" }),
       }),
       { config },
     );
@@ -2310,6 +2386,7 @@ test("Next admin replies bind the named production operator before queueing", as
     assert.equal(delivered.status, 201);
     assert.equal(deliveredBody.delivery.status, "sent");
     assert.equal(deliveredBody.outcome.actor, "operations_lead");
+    assert.equal(deliveredBody.provider_delivery.external_message_id, "gmail-message-1");
     assert.equal(readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath).length, 1);
 
     const inboxResponse = await renderAppAdminResponse(
@@ -2321,6 +2398,7 @@ test("Next admin replies bind the named production operator before queueing", as
     assert.equal(inbox.summary.repliesSent, 1);
     assert.equal(inbox.leadSla.rows[0].status, "customer_reply_sent");
     assert.equal(readAuditLog(auditLogPath).filter((row) => row.action === "reply_delivery_recorded").length, 1);
+    assert.equal(readAuditLog(auditLogPath).filter((row) => row.action === "provider_reply_sent").length, 1);
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];

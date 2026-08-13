@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import {
@@ -353,7 +356,7 @@ test("browser session mutations still require same-origin CSRF evidence", async 
   assert.equal(creates, 1);
 });
 
-test("Payload browser sessions never become MCP bearer credentials; named bearer MCP stays compatible", async () => {
+test("Payload browser sessions see provider connections without becoming MCP bearer credentials", async () => {
   const sessionService = {
     async resolve() {
       const admin = user();
@@ -364,8 +367,10 @@ test("Payload browser sessions never become MCP bearer credentials; named bearer
     new Request(`${BASE_URL}/admin/connect`, { headers: { cookie: "ms_admin=payload.jwt.session" } }),
     { config: adapterConfig(sessionService) },
   );
-  assert.equal(sessionResponse.status, 403);
-  assert.doesNotMatch(await sessionResponse.text(), /payload\.jwt\.session/);
+  assert.equal(sessionResponse.status, 200);
+  const sessionBody = await sessionResponse.text();
+  assert.match(sessionBody, /Подключения MS Realty/);
+  assert.doesNotMatch(sessionBody, /payload\.jwt\.session/);
 
   const token = "named-mcp-operator-token-0123456789";
   const bearerResponse = await renderAppAdminResponse(
@@ -379,6 +384,207 @@ test("Payload browser sessions never become MCP bearer credentials; named bearer
   );
   assert.equal(bearerResponse.status, 200);
   assert.match(await bearerResponse.text(), new RegExp(token));
+});
+
+test("Payload admin can approve and send a durable lead reply without the file outbox", async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-provider-reply-"));
+  const auditLogPath = path.join(directory, "audit.jsonl");
+  const captured = [];
+  const sessionService = {
+    async resolve() {
+      const admin = user();
+      return { user: admin, principal: payloadAdminPrincipal(admin) };
+    },
+  };
+  const config = {
+    ...adapterConfig(sessionService),
+    auditLogPath,
+    leadDurableStore: {
+      leadDurableStoreEnabled: true,
+      payloadSecret: "payload-secret-for-test",
+      databaseUrl: "postgres://test.invalid/ms_realty",
+      contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+    },
+    readLeadIntakesDurably: async () => [
+      {
+        lead_id: "lead-durable-1",
+        original_language: "bg",
+        admin_locale: "bg",
+        listing_reference: "MS-42",
+        contact: { phone: "+359888123456" },
+      },
+    ],
+    deliverApprovedProviderMessage: async (input) => {
+      captured.push(input);
+      return {
+        idempotency_key: input.idempotencyKey,
+        lead_id: input.leadId,
+        provider: input.provider,
+        status: "sent",
+        external_message_id: "wamid.test-1",
+        started_at: "2026-08-13T12:00:00.000Z",
+        completed_at: "2026-08-13T12:00:01.000Z",
+        idempotent: false,
+      };
+    },
+    providerConnection: {
+      credentialSecret: "provider-secret-longer-than-thirty-two-characters",
+      payloadSecret: "payload-secret-for-test",
+      databaseUrl: "postgres://test.invalid/ms_realty",
+    },
+    readProviderConnections: async () => [{ provider: "whatsapp", status: "connected", account_label: "MS Realty" }],
+  };
+  const response = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/replies/delivery`, {
+      method: "POST",
+      headers: {
+        cookie: "ms_admin=payload.jwt.session",
+        "content-type": "application/json",
+        host: "ms-realty.ms-realty-bg.workers.dev",
+        origin: BASE_URL,
+        "sec-fetch-site": "same-origin",
+      },
+      body: JSON.stringify({
+        leadId: "lead-durable-1",
+        provider: "whatsapp",
+        reviewedReply: "Одобренный ответ покупателю",
+        approved: "true",
+        idempotencyKey: "provider:00000000-0000-4000-8000-000000000001",
+        actor: "spoofed-operator",
+      }),
+    }),
+    { config },
+  );
+
+  assert.equal(response.status, 201);
+  const body = await response.json();
+  assert.equal(body.delivery.status, "sent");
+  assert.equal(captured.length, 1);
+  assert.equal(captured[0].approvedBy, "payload-1");
+  assert.equal(captured[0].leadId, "lead-durable-1");
+  assert.equal(captured[0].recipient, "+359888123456");
+  const audit = fs.readFileSync(auditLogPath, "utf8");
+  assert.doesNotMatch(audit, /359888123456|Одобренный ответ покупателю|spoofed-operator/);
+  assert.match(audit, /provider_reply_sent/);
+
+  const page = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/leads`, { headers: { cookie: "ms_admin=payload.jwt.session" } }),
+    { config },
+  );
+  assert.equal(page.status, 200);
+  const html = await page.text();
+  assert.match(html, /data-direct-provider-reply="true"/);
+  assert.match(html, /action="\/api\/admin\/replies\/delivery"/);
+  assert.match(html, /name="idempotencyKey" value="provider:[0-9a-f-]+"/);
+  assert.match(html, /<option value="whatsapp">WhatsApp<\/option>/);
+  assert.match(html, /name="reviewedReply"/);
+});
+
+test("Payload admin books a durable viewing and persists the Google Calendar receipt", async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-durable-viewing-"));
+  const sessionService = {
+    async resolve() {
+      const admin = user();
+      return { user: admin, principal: payloadAdminPrincipal(admin) };
+    },
+  };
+  const rows = [];
+  const calendarReceipts = [];
+  const config = {
+    ...adapterConfig(sessionService),
+    auditLogPath: path.join(directory, "audit.jsonl"),
+    bookedAt: "2026-08-13T12:00:00.000Z",
+    leadDurableStore: {
+      leadDurableStoreEnabled: true,
+      payloadSecret: "payload-secret-for-test",
+      databaseUrl: "postgres://test.invalid/ms_realty",
+      contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+    },
+    readLeadIntakesDurably: async () => [
+      {
+        lead_id: "lead-durable-viewing",
+        lead_type: "seller",
+        received_at: "2026-08-13T10:00:00.000Z",
+        original_language: "bg",
+        admin_locale: "bg",
+        listing_reference: "MS-99",
+      },
+    ],
+    viewingDurableStore: {
+      viewingDurableStoreEnabled: true,
+      payloadSecret: "payload-secret-for-test",
+      databaseUrl: "postgres://test.invalid/ms_realty",
+    },
+    readViewingsDurably: async () => rows,
+    persistViewingDurably: async (viewing) => {
+      rows.push(viewing);
+      return { ...viewing, durable: true };
+    },
+    syncViewingToGoogleCalendar: async () => ({
+      status: "synced",
+      provider: "google",
+      calendar_event_id: "msr-calendar-viewing",
+    }),
+    recordViewingCalendarSync: async (viewingId, result) => {
+      calendarReceipts.push({ viewingId, ...result });
+      return { ...result, recorded_at: "2026-08-13T12:00:00.000Z" };
+    },
+  };
+  const request = () =>
+    new Request(`${BASE_URL}/api/admin/viewings`, {
+      method: "POST",
+      headers: {
+        cookie: "ms_admin=payload.jwt.session",
+        "content-type": "application/json",
+        host: "ms-realty.ms-realty-bg.workers.dev",
+        origin: BASE_URL,
+        "sec-fetch-site": "same-origin",
+      },
+      body: JSON.stringify({
+        leadId: "lead-durable-viewing",
+        broker: "payload-1",
+        startsAt: "2026-08-20T10:00:00.000Z",
+      }),
+    });
+
+  const response = await renderAppAdminResponse(request(), { config });
+  assert.equal(response.status, 201);
+  const body = await response.json();
+  assert.equal(body.durable, true);
+  assert.equal(body.calendar_sync.calendar_event_id, "msr-calendar-viewing");
+  assert.equal(rows.length, 1);
+  assert.deepEqual(calendarReceipts, [
+    { viewingId: body.id, status: "synced", provider: "google", calendar_event_id: "msr-calendar-viewing" },
+  ]);
+
+  rows.push({
+    ...rows[0],
+    id: "viewing-hidden-from-session",
+    lead_id: "lead-hidden-from-session",
+    listing_reference: "MS-HIDDEN",
+  });
+  const calendar = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/viewings.ics`, { headers: { cookie: "ms_admin=payload.jwt.session" } }),
+    { config },
+  );
+  const calendarBody = await calendar.text();
+  assert.equal(calendar.status, 200);
+  assert.match(calendarBody, /MS Realty viewing MS-99/);
+  assert.doesNotMatch(calendarBody, /MS Realty viewing MS-HIDDEN/);
+
+  const viewingsPage = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/viewings`, { headers: { cookie: "ms_admin=payload.jwt.session" } }),
+    { config },
+  );
+  const viewingsHtml = await viewingsPage.text();
+  assert.equal(viewingsPage.status, 200);
+  assert.match(viewingsHtml, /data-viewing-follow-up-read-only="true"/);
+  assert.doesNotMatch(viewingsHtml, /data-viewing-follow-up-actions="true"/);
+
+  const retry = await renderAppAdminResponse(request(), { config });
+  assert.equal(retry.status, 200);
+  assert.equal((await retry.json()).idempotent, true);
+  assert.equal(rows.length, 2);
 });
 
 test("logout revokes the Payload session before clearing its browser cookie", async () => {

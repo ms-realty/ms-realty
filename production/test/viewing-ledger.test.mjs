@@ -5,10 +5,45 @@ import os from "node:os";
 import {
   appendViewing,
   assertViewingLedger,
+  createViewing,
   readViewings,
   renderViewingCalendar,
   resetViewingLedger,
 } from "../lib/viewing-ledger.mjs";
+
+test("pure viewing creation matches the file-backed wrapper", () => {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-viewing-parity-`)}/viewings.jsonl`;
+  resetViewingLedger(file);
+  const context = {
+    leads: [
+      {
+        lead_id: "lead-parity",
+        listing_reference: "MS-PARITY-1",
+        original_language: "bg",
+        admin_locale: "en",
+        contact_preference: "email",
+      },
+    ],
+  };
+  const input = {
+    leadId: "lead-parity",
+    startsAt: "2026-08-15T10:00:00Z",
+    broker: "broker-bg",
+    followUpDueAt: "2026-08-15T11:00:00Z",
+    feedbackDueAt: "2026-08-15T12:00:00Z",
+  };
+  const bookedAt = "2026-08-13T16:00:00Z";
+
+  const pure = createViewing(context, input, { rows: [], bookedAt });
+  const fileBacked = appendViewing(context, input, { filePath: file, bookedAt });
+  assert.deepEqual(fileBacked, pure);
+  const { idempotent, ...stored } = pure;
+  assert.equal(idempotent, false);
+  assert.deepEqual(readViewings(file), [stored]);
+
+  const retry = createViewing(context, input, { rows: readViewings(file), bookedAt });
+  assert.deepEqual(retry, { ...fileBacked, idempotent: true });
+});
 
 test("viewing ledger requires a known lead and creates follow-up task", () => {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-viewings-`)}/viewings.jsonl`;

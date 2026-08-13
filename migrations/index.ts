@@ -11,6 +11,10 @@ import * as migration_20260811_120000_durable_listing_edit_audit from './2026081
 import * as migration_20260811_153000_postgres_public_search from './20260811_153000_postgres_public_search';
 import * as migration_20260813_110000_repair_postgres_search_index from './20260813_110000_repair_postgres_search_index';
 import * as migration_20260813_120000_durable_funnel_events from './20260813_120000_durable_funnel_events';
+import * as migration_20260813_130000_provider_connections from './20260813_130000_provider_connections';
+import * as migration_20260813_140000_provider_webhook_events from './20260813_140000_provider_webhook_events';
+import * as migration_20260813_150000_provider_delivery_receipts from './20260813_150000_provider_delivery_receipts';
+import * as migration_20260813_160000_durable_viewings from './20260813_160000_durable_viewings';
 
 export const migrations = [
   {
@@ -77,5 +81,25 @@ export const migrations = [
     up: migration_20260813_120000_durable_funnel_events.up,
     down: migration_20260813_120000_durable_funnel_events.down,
     name: '20260813_120000_durable_funnel_events',
+  },
+  {
+    up: migration_20260813_130000_provider_connections.up,
+    down: migration_20260813_130000_provider_connections.down,
+    name: '20260813_130000_provider_connections',
+  },
+  {
+    up: migration_20260813_140000_provider_webhook_events.up,
+    down: migration_20260813_140000_provider_webhook_events.down,
+    name: '20260813_140000_provider_webhook_events',
+  },
+  {
+    up: migration_20260813_150000_provider_delivery_receipts.up,
+    down: migration_20260813_150000_provider_delivery_receipts.down,
+    name: '20260813_150000_provider_delivery_receipts',
+  },
+  {
+    up: migration_20260813_160000_durable_viewings.up,
+    down: migration_20260813_160000_durable_viewings.down,
+    name: '20260813_160000_durable_viewings',
   },
 ];

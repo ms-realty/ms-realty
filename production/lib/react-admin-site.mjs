@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
@@ -297,6 +297,7 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Изтегли CSV по източници",
     privacySafeReport: "Отчетът използва оперативните регистри и не включва лични контакти или съобщения.",
     readOnlyAccess: "Достъп само за преглед за тази роля.",
+    viewingFollowUpReadOnly: "Записването е скрито, докато надеждната история на действията не бъде включена.",
     minutesShort: "мин",
     noReportData: "Все още няма данни за този отчет.",
     auditActions: {
@@ -595,6 +596,7 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Скачать CSV по источникам",
     privacySafeReport: "Отчет использует операционные журналы и не включает личные контакты или сообщения.",
     readOnlyAccess: "Для этой роли доступен только просмотр.",
+    viewingFollowUpReadOnly: "Запись скрыта, пока не включено надежное хранение истории действий.",
     minutesShort: "мин",
     noReportData: "Для этого отчета пока нет данных.",
     auditActions: {
@@ -877,6 +879,7 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Download source CSV",
     privacySafeReport: "This report uses operating ledgers and excludes private contacts and messages.",
     readOnlyAccess: "This role has read-only access.",
+    viewingFollowUpReadOnly: "Recording is hidden until durable action history is enabled.",
     minutesShort: "min",
     noReportData: "There is no data for this report yet.",
     auditActions: {
@@ -2105,10 +2108,15 @@ function OperationsReportsBody({ page }) {
    Lead inbox (ui_kits/crm Dashboard + Messages patterns)
    ============================================================ */
 
-function ReplyDeliveryForm({ page, reply, delivery, copy, ui }) {
+function ReplyDeliveryForm({ page, lead, reply, delivery, copy, ui }) {
   const failed = delivery?.status === "failed";
   const status = delivery?.status || "queued";
   const operator = currentOperatorId(page, reply.reviewer);
+  const canSendViaGoogle = Boolean(page.providerConnections?.google?.connected && lead?.contact?.email);
+  const canSendViaWhatsApp = Boolean(
+    page.providerConnections?.whatsapp?.connected && (lead?.contact?.whatsapp || lead?.contact?.phone),
+  );
+  const canSendViaViber = Boolean(page.providerConnections?.viber?.connected && lead?.contact?.viber_user_id);
   return h(
     "details",
     { className: "adm-delivery", open: failed, "data-reply-delivery": status },
@@ -2178,9 +2186,122 @@ function ReplyDeliveryForm({ page, reply, delivery, copy, ui }) {
               label(copy, "requeueReply", "Return to queue"),
             )
           : [
+              canSendViaGoogle
+                ? h(
+                    "button",
+                    {
+                      key: "gmail-send",
+                      type: "submit",
+                      name: "provider",
+                      value: "google",
+                      formNoValidate: true,
+                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                    },
+                    label(copy, "sendWithGmail", "Send with Gmail"),
+                  )
+                : null,
+              canSendViaWhatsApp
+                ? h(
+                    "button",
+                    {
+                      key: "whatsapp-send",
+                      type: "submit",
+                      name: "provider",
+                      value: "whatsapp",
+                      formNoValidate: true,
+                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                    },
+                    label(copy, "sendWithWhatsApp", "Send with WhatsApp"),
+                  )
+                : null,
+              canSendViaViber
+                ? h(
+                    "button",
+                    {
+                      key: "viber-send",
+                      type: "submit",
+                      name: "provider",
+                      value: "viber",
+                      formNoValidate: true,
+                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                    },
+                    label(copy, "sendWithViber", "Send with Viber"),
+                  )
+                : null,
               h("button", { key: "sent", type: "submit", name: "action", value: "sent", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "markSent", "Mark sent")),
               h("button", { key: "failed", type: "submit", name: "action", value: "failed", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "recordDeliveryFailure", "Record delivery failure")),
             ],
+      ),
+      h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-delivery-status": "true" }),
+    ),
+  );
+}
+
+function DirectProviderReplyForm({ page, lead, copy, ui }) {
+  const providers = [
+    page.providerConnections?.google?.connected && lead?.contact?.email ? ["google", "Gmail"] : null,
+    page.providerConnections?.whatsapp?.connected && (lead?.contact?.whatsapp || lead?.contact?.phone)
+      ? ["whatsapp", "WhatsApp"]
+      : null,
+    page.providerConnections?.viber?.connected && lead?.contact?.viber_user_id ? ["viber", "Viber"] : null,
+  ].filter(Boolean);
+  if (!providers.length) {
+    return h(
+      "p",
+      { className: "adm-reply-status", role: "status" },
+      label(copy, "providerReplyUnavailable", "No connected provider can reach this lead. "),
+      h("a", { href: "/admin/connect" }, label(copy, "openConnectionCenter", "Open Connection Center")),
+    );
+  }
+  return h(
+    "details",
+    { className: "adm-reply", "data-direct-provider-reply": "true" },
+    h(
+      "summary",
+      { className: "mk-btn mk-btn--primary mk-btn--sm" },
+      h(Icon, { name: "send", size: 16 }),
+      h("span", null, label(copy, "approveAndSend", "Approve and send")),
+    ),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/replies/delivery",
+        className: "adm-reply-form",
+        "data-reply-delivery-form": "true",
+        "data-reply-delivery-saving": label(copy, "providerReplySending", "Sending approved reply…"),
+        "data-reply-delivery-success": label(copy, "providerReplySent", "Provider confirmed the reply."),
+        "data-reply-delivery-failure": label(copy, "providerReplyFailed", "The provider did not confirm the reply."),
+      },
+      h("input", { type: "hidden", name: "leadId", value: lead.lead_id }),
+      h("input", { type: "hidden", name: "approved", value: "true" }),
+      h("input", { type: "hidden", name: "idempotencyKey", value: `provider:${randomUUID()}` }),
+      h(CommunicationTemplateSelect, { templates: page.communicationTemplates?.[lead.lead_id] || [], copy, ui }),
+      h(
+        "label",
+        null,
+        label(copy, "reviewedReply", "Reviewed reply"),
+        h("textarea", { name: "reviewedReply", rows: 6, maxLength: 4096, required: true }),
+      ),
+      h(
+        "label",
+        null,
+        label(copy, "deliveryProvider", "Delivery provider"),
+        h(
+          "select",
+          { name: "provider", required: true },
+          ...providers.map(([value, text]) => h("option", { key: value, value }, text)),
+        ),
+      ),
+      h(
+        "button",
+        { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
+        label(copy, "approveAndSend", "Approve and send"),
+      ),
+      h(
+        "small",
+        { className: "adm-lead-context" },
+        label(copy, "providerApprovalNotice", "Sending records your operator identity and the exact approved text in an encrypted receipt."),
       ),
       h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-delivery-status": "true" }),
     ),
@@ -3927,7 +4048,10 @@ function LeadInboxBody({ page }) {
                   h(
                     "td",
                     { className: "adm-reply-cell", "data-lead-column": "reply", "data-label": leadColumns.reply },
-                    queuedReply && delivery && !delivered ? h(ReplyDeliveryForm, { page, reply: queuedReply, delivery, copy, ui }) : null,
+                    queuedReply && delivery && !delivered ? h(ReplyDeliveryForm, { page, lead, reply: queuedReply, delivery, copy, ui }) : null,
+                    page.leadSourceDurable && !(queuedReply && delivery && !delivered) && pageCan(page, "operations:write")
+                      ? h(DirectProviderReplyForm, { page, lead, copy, ui })
+                      : null,
                     h(
                       "form",
                       {
@@ -3945,6 +4069,7 @@ function LeadInboxBody({ page }) {
                           "replyDraftUnavailable",
                           "Hermes is not configured in this environment. Use an approved template or write the reply manually.",
                         ),
+                        hidden: page.leadSourceDurable || undefined,
                       },
                       h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
                       h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
@@ -3957,7 +4082,7 @@ function LeadInboxBody({ page }) {
                     ),
                     h(
                       "details",
-                      { className: "adm-reply" },
+                      { className: "adm-reply", hidden: page.leadSourceDurable || undefined },
                       h("summary", { className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "send", size: 16 }), h("span", null, label(copy, "queueReply", "Queue reply"))),
                       h(
                         "form",
@@ -4031,6 +4156,7 @@ function datetimeLocalValue(value) {
 
 function ViewingFollowUpQueue({ page, copy, ui }) {
   const queue = page.viewingFollowUpQueue || { rows: [] };
+  const writable = page.viewingFollowUpWritable !== false;
   const columns = {
     viewing: label(copy, "viewings", "Viewings"),
     task: label(copy, "task", "Task"),
@@ -4094,7 +4220,8 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                   h(
                     "td",
                     { "data-viewing-column": "action", "data-label": columns.action },
-                    h(
+                    writable
+                      ? h(
                       "details",
                       { className: "adm-reply", "data-viewing-follow-up-actions": "true" },
                       h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "calendar-check", size: 16 }), h("span", null, label(copy, "recordOutcome", "Record"))),
@@ -4135,7 +4262,8 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                           h("button", { type: "submit", name: "action", value: "note", className: "mk-btn mk-btn--ghost mk-btn--sm" }, label(copy, "addNote", "Add note")),
                         ),
                       ),
-                    ),
+                        )
+                      : h("p", { className: "adm-note", role: "note", "data-viewing-follow-up-read-only": "true" }, ui.viewingFollowUpReadOnly),
                   ),
                 ),
               ),

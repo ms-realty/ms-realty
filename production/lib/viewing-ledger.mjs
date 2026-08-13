@@ -18,10 +18,11 @@ export function readViewings(filePath = DEFAULT_VIEWING_LEDGER_PATH) {
   return store.readRows(filePath);
 }
 
-export function appendViewing(context, input, { filePath = DEFAULT_VIEWING_LEDGER_PATH, bookedAt = new Date().toISOString() } = {}) {
+export function createViewing(context, input, { rows = [], bookedAt = new Date().toISOString() } = {}) {
   if (!context || typeof context !== "object" || !Array.isArray(context.leads)) {
     throw new Error("Viewing requires lead journey context");
   }
+  if (!Array.isArray(rows)) throw new Error("Viewing rows must be an array");
   const leads = context.leads;
   const lead = leads.find((row) => row.lead_id === input.leadId);
   if (!lead) throw new Error("Viewing requires a known leadId");
@@ -30,7 +31,6 @@ export function appendViewing(context, input, { filePath = DEFAULT_VIEWING_LEDGE
   const startsAt = new Date(input.startsAt).toISOString();
   if (Number.isNaN(Date.parse(bookedAt))) throw new Error("bookedAt must be an ISO date");
   const normalizedBookedAt = new Date(bookedAt).toISOString();
-  const rows = readViewings(filePath);
   const listingReference = input.listingReference || lead.listing_reference || null;
   const semanticMatch = rows.find(
     (row) =>
@@ -88,8 +88,16 @@ export function appendViewing(context, input, { filePath = DEFAULT_VIEWING_LEDGE
     },
   };
 
-  store.appendRow(filePath, row);
   return { ...row, idempotent: false };
+}
+
+export function appendViewing(context, input, { filePath = DEFAULT_VIEWING_LEDGER_PATH, bookedAt = new Date().toISOString() } = {}) {
+  const result = createViewing(context, input, { rows: readViewings(filePath), bookedAt });
+  if (!result.idempotent) {
+    const { idempotent, ...row } = result;
+    store.appendRow(filePath, row);
+  }
+  return result;
 }
 
 export function assertViewingLedger(rows) {

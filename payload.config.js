@@ -8,6 +8,10 @@ import { ru } from "@payloadcms/translations/languages/ru";
 import { buildConfig } from "payload";
 import { LEAD_COLLECTIONS } from "./production/lib/lead-collections.mjs";
 import { FUNNEL_EVENT_COLLECTION } from "./production/lib/event-durable-store.mjs";
+import { PROVIDER_CONNECTION_COLLECTION } from "./production/lib/provider-connections.mjs";
+import { PROVIDER_DELIVERY_RECEIPT_COLLECTION } from "./production/lib/provider-delivery.mjs";
+import { PROVIDER_WEBHOOK_EVENT_COLLECTION } from "./production/lib/provider-webhooks.mjs";
+import { VIEWING_COLLECTION } from "./production/lib/viewing-durable-store.mjs";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 import { payloadCmsImportContextEnabled } from "./production/lib/payload-cms-import.mjs";
@@ -295,6 +299,21 @@ const funnelEventCollectionWithAccess = {
   access: serverOwnedCollectionAccess,
 };
 
+const providerConnectionCollectionWithAccess = {
+  ...PROVIDER_CONNECTION_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
+const providerWebhookEventCollectionWithAccess = {
+  ...PROVIDER_WEBHOOK_EVENT_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
+const providerDeliveryReceiptCollectionWithAccess = {
+  ...PROVIDER_DELIVERY_RECEIPT_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
 export default buildConfig({
   admin: { user: "admins" },
   graphQL: { disable: true, disablePlaygroundInProduction: true },
@@ -312,5 +331,16 @@ export default buildConfig({
       connectionString: runtimeConfig.databaseUrl,
     },
   }),
-  collections: [admins, locales, ...collections, ...caseCollectionsWithAccess, ...leadCollectionsWithAccess, funnelEventCollectionWithAccess],
+  collections: [
+    admins,
+    locales,
+    ...collections,
+    ...caseCollectionsWithAccess,
+    ...leadCollectionsWithAccess,
+    funnelEventCollectionWithAccess,
+    providerConnectionCollectionWithAccess,
+    providerWebhookEventCollectionWithAccess,
+    providerDeliveryReceiptCollectionWithAccess,
+    VIEWING_COLLECTION,
+  ],
 });

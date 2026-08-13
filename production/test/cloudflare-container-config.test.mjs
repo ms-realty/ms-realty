@@ -10,6 +10,7 @@ import {
   allowsDurableCaseAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
+  allowsProviderWebhookMutation,
   allowsPublicLeadMutation,
   hasAdminSessionCookie,
   isPayloadPrivatePath,
@@ -56,6 +57,18 @@ const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_MCP_ALLOWED_ORIGINS",
   "MS_REALTY_PUBLIC_ORIGIN",
   "MS_REALTY_MAX_BODY_BYTES",
+  "MS_REALTY_PROVIDER_TOKEN_KEY",
+  "MS_REALTY_PROVIDER_OAUTH_STATE_SECRET",
+  "MS_REALTY_GOOGLE_OAUTH_CLIENT_ID",
+  "MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET",
+  "MS_REALTY_META_APP_ID",
+  "MS_REALTY_META_APP_SECRET",
+  "MS_REALTY_META_EMBEDDED_SIGNUP_CONFIG_ID",
+  "MS_REALTY_META_GRAPH_VERSION",
+  "MS_REALTY_META_WEBHOOK_VERIFY_TOKEN",
+  "MS_REALTY_VIBER_COMMERCIAL_READY",
+  "MS_REALTY_PROVIDER_WEBHOOK_MAX_BYTES",
+  "MS_REALTY_VIEWING_DURABLE_STORE_ENABLED",
 ];
 
 // Directories a forwarded binding may legitimately be read from. workers/ and
@@ -170,6 +183,12 @@ test("main deploys automatically with image-marker rollback", () => {
   assert.match(ciWorkflow, /github\.event\.action == 'auto_merge_deploy'/);
   assert.match(ciWorkflow, /github\.event\.client_payload\.merge_sha == github\.sha/);
   assert.match(ciWorkflow, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
+  assert.match(ciWorkflow, /DATABASE_URL: \$\{\{ secrets\.DATABASE_URL \}\}/);
+  assert.match(ciWorkflow, /PAYLOAD_SECRET: \$\{\{ secrets\.PAYLOAD_SECRET \}\}/);
+  const migrationStep = ciWorkflow.indexOf("- name: Apply additive Payload migrations");
+  const deployStep = ciWorkflow.indexOf("- name: Deploy exact main commit");
+  assert.ok(migrationStep > 0 && migrationStep < deployStep, "database migrations must pass before Worker deploy");
+  assert.match(ciWorkflow.slice(migrationStep, deployStep), /npm run payload:migrate/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
   assert.match(ciWorkflow, /accounts\/\$\{CLOUDFLARE_ACCOUNT_ID\}\/workers\/subdomain/);
@@ -396,4 +415,26 @@ test("Cloudflare Container admits public funnel events only through the same com
   assert.equal(allowsPublicEventMutation({ env: complete, method: "GET", pathname: "/api/events" }), false);
   assert.equal(allowsPublicEventMutation({ env: { ...complete, DATABASE_URL: "" }, method: "POST", pathname: "/api/events" }), false);
   assert.match(workerSource, /allowsPublicEventMutation/);
+});
+
+test("Cloudflare Container admits only exact signed-provider webhook paths with durable storage", () => {
+  const complete = {
+    PAYLOAD_SECRET: "p".repeat(32),
+    DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+    MS_REALTY_PROVIDER_TOKEN_KEY: "k".repeat(32),
+    MS_REALTY_META_APP_SECRET: "m".repeat(16),
+  };
+  const allowed = (pathname, env = complete, method = "POST") =>
+    allowsProviderWebhookMutation({ env, method, pathname });
+
+  assert.equal(allowed("/api/webhooks/whatsapp"), true);
+  assert.equal(allowed("/api/webhooks/viber"), true);
+  assert.equal(allowed("/api/webhooks/whatsapp/"), false);
+  assert.equal(allowed("/api/webhooks/whatsapp", complete, "GET"), false);
+  assert.equal(allowed("/api/webhooks/whatsapp", { ...complete, MS_REALTY_META_APP_SECRET: "" }), false);
+  assert.equal(allowed("/api/webhooks/viber", { ...complete, MS_REALTY_META_APP_SECRET: "" }), true);
+  for (const key of ["PAYLOAD_SECRET", "DATABASE_URL", "MS_REALTY_PROVIDER_TOKEN_KEY"]) {
+    assert.equal(allowed("/api/webhooks/viber", { ...complete, [key]: "" }), false, key);
+  }
+  assert.match(workerSource, /allowsProviderWebhookMutation/);
 });

@@ -49,6 +49,18 @@ export function allowsPublicEventMutation({ method, pathname, env }) {
   );
 }
 
+export function allowsProviderWebhookMutation({ method, pathname, env }) {
+  if (method !== "POST" || !["/api/webhooks/whatsapp", "/api/webhooks/viber"].includes(pathname)) return false;
+  if (
+    !env.PAYLOAD_SECRET?.trim() ||
+    !env.DATABASE_URL?.trim() ||
+    String(env.MS_REALTY_PROVIDER_TOKEN_KEY || "").length < 32
+  ) {
+    return false;
+  }
+  return pathname === "/api/webhooks/viber" || String(env.MS_REALTY_META_APP_SECRET || "").length >= 16;
+}
+
 const ADMIN_SESSION_COOKIE = "ms_admin";
 const ADMIN_MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 

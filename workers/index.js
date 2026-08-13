@@ -5,6 +5,7 @@ import {
   allowsDurableCaseAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
+  allowsProviderWebhookMutation,
   allowsPublicEventMutation,
   allowsPublicLeadMutation,
   isPayloadPrivatePath,
@@ -71,6 +72,18 @@ export class MsRealtyContainer extends Container {
     MS_REALTY_MCP_ALLOWED_ORIGINS: this.env.MS_REALTY_MCP_ALLOWED_ORIGINS ?? "",
     MS_REALTY_PUBLIC_ORIGIN: this.env.MS_REALTY_PUBLIC_ORIGIN ?? "",
     MS_REALTY_MAX_BODY_BYTES: this.env.MS_REALTY_MAX_BODY_BYTES ?? "",
+    MS_REALTY_PROVIDER_TOKEN_KEY: this.env.MS_REALTY_PROVIDER_TOKEN_KEY ?? "",
+    MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: this.env.MS_REALTY_PROVIDER_OAUTH_STATE_SECRET ?? "",
+    MS_REALTY_GOOGLE_OAUTH_CLIENT_ID: this.env.MS_REALTY_GOOGLE_OAUTH_CLIENT_ID ?? "",
+    MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET: this.env.MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET ?? "",
+    MS_REALTY_META_APP_ID: this.env.MS_REALTY_META_APP_ID ?? "",
+    MS_REALTY_META_APP_SECRET: this.env.MS_REALTY_META_APP_SECRET ?? "",
+    MS_REALTY_META_EMBEDDED_SIGNUP_CONFIG_ID: this.env.MS_REALTY_META_EMBEDDED_SIGNUP_CONFIG_ID ?? "",
+    MS_REALTY_META_GRAPH_VERSION: this.env.MS_REALTY_META_GRAPH_VERSION ?? "",
+    MS_REALTY_META_WEBHOOK_VERIFY_TOKEN: this.env.MS_REALTY_META_WEBHOOK_VERIFY_TOKEN ?? "",
+    MS_REALTY_VIBER_COMMERCIAL_READY: this.env.MS_REALTY_VIBER_COMMERCIAL_READY ?? "",
+    MS_REALTY_PROVIDER_WEBHOOK_MAX_BYTES: this.env.MS_REALTY_PROVIDER_WEBHOOK_MAX_BYTES ?? "",
+    MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: this.env.MS_REALTY_VIEWING_DURABLE_STORE_ENABLED ?? "",
   };
 
   onStart() {
@@ -248,12 +261,14 @@ export default {
     const leadProbe = mutating && (await allowsLeadProbeMutation({ request, pathname: url.pathname, env }));
     const publicLead = mutating && allowsPublicLeadMutation({ method: request.method, pathname: url.pathname, env });
     const publicEvent = mutating && allowsPublicEventMutation({ method: request.method, pathname: url.pathname, env });
+    const providerWebhook = mutating && allowsProviderWebhookMutation({ method: request.method, pathname: url.pathname, env });
     if (
       mutating &&
       !allowsAdminSessionMutation({ request, method: request.method, pathname: url.pathname }) &&
       !leadProbe &&
       !publicLead &&
       !publicEvent &&
+      !providerWebhook &&
       !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
     ) {

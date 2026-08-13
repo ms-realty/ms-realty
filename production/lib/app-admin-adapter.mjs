@@ -22,6 +22,22 @@ import {
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
+import {
+  ProviderConnectionUnavailableError,
+  completeGoogleOAuth,
+  completeViberConnection,
+  completeWhatsAppEmbeddedSignup,
+  googleAuthorizationUrl,
+  providerConnectionAvailability,
+  providerConnectionConfigFromEnv,
+  readProviderConnections,
+  readProviderCredentials,
+  registerWhatsAppWebhook,
+  registerViberWebhook,
+  saveProviderConnection,
+  syncViewingToGoogleCalendar,
+} from "./provider-connections.mjs";
+import { ProviderDeliveryError, deliverApprovedProviderMessage } from "./provider-delivery.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
@@ -265,7 +281,16 @@ import {
   latestTranslationTasks,
   readTranslationLedger,
 } from "./translation-ledger.mjs";
-import { DEFAULT_VIEWING_LEDGER_PATH, appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
+import { DEFAULT_VIEWING_LEDGER_PATH, appendViewing, createViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
+import {
+  ViewingConflictError,
+  ViewingStoreUnavailableError,
+  isViewingDurableStoreEnabled,
+  persistViewingDurably,
+  readViewingsDurably,
+  recordViewingCalendarSync,
+  viewingDurableStoreConfigFromEnv,
+} from "./viewing-durable-store.mjs";
 import {
   DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
   appendViewingFollowUp,
@@ -375,6 +400,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
+    viewingDurableStore: viewingDurableStoreConfigFromEnv(env),
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
     bookedAt: env.MS_REALTY_BOOKED_AT,
     viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
@@ -388,6 +414,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
     listingPublicationAt: env.MS_REALTY_LISTING_PUBLICATION_AT,
     payloadAdminAuth: getPayloadAdminAuthService,
+    providerConnection: providerConnectionConfigFromEnv(env),
   };
 }
 
@@ -743,6 +770,22 @@ function recordAudit(input, config, recordedAt = auditRecordedAt(config)) {
   });
 }
 
+function recordProviderConnectionFailure(provider, phase, error, config) {
+  recordAudit(
+    {
+      action: "provider_connection_failed",
+      actor: config.adminPrincipal?.id,
+      objectType: "provider_connection",
+      objectId: String(provider || "unknown"),
+      metadata: {
+        phase: String(phase || "unknown"),
+        error_code: String(error?.code || error?.name || "provider_rejected").slice(0, 80),
+      },
+    },
+    config,
+  );
+}
+
 function recordAuditReplica(input, config, recordedAt, alreadyRecorded, bestEffort) {
   try {
     if (!readAuditLog(config.auditLogPath).some(alreadyRecorded)) recordAudit(input, config, recordedAt);
@@ -824,6 +867,21 @@ async function adminEventSource(config) {
   }
 }
 
+async function adminViewingSource(config) {
+  const durableStore = config.viewingDurableStore || {};
+  if (!durableStore.viewingDurableStoreEnabled) {
+    return { durable: false, viewings: readViewings(config.viewingLedgerPath) };
+  }
+  if (!isViewingDurableStoreEnabled(durableStore)) {
+    throw new ViewingStoreUnavailableError("Durable viewing store is enabled but not fully configured");
+  }
+  const viewings = await (config.readViewingsDurably || readViewingsDurably)({
+    payload: config.viewingDurablePayload || null,
+  });
+  if (!Array.isArray(viewings)) throw new ViewingStoreUnavailableError("Durable viewing readback returned invalid rows");
+  return { durable: true, viewings };
+}
+
 function rowsForLeadIds(rows, leadIds) {
   return rows.filter((row) => leadIds.has(row.lead_id));
 }
@@ -840,11 +898,34 @@ async function leadInboxPayload(registry, url, config) {
   const leads = applyLeadAssignments(source.leads, filterRows(readLeadAssignments(config.leadAssignmentLedgerPath)));
   const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
   const replyDeliveryOutcomes = filterRows(readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath));
-  const viewings = filterRows(readViewings(config.viewingLedgerPath));
+  const viewingSource = await adminViewingSource(config);
+  const viewings = filterRows(viewingSource.viewings);
   const viewingFollowUps = filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath));
   const deals = filterRows(readDeals(config.dealLedgerPath));
   const sellerPipeline = filterRows(readSellerPipeline(config.sellerPipelinePath));
   const sellerPipelineOutcomes = filterRows(readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath));
+  let providerConnections = {};
+  const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+  const providerAvailability = providerConnectionAvailability(providerConfig);
+  if (providerAvailability.store.ready) {
+    try {
+      const connections = await (config.readProviderConnections || readProviderConnections)({
+        payload: config.providerConnectionPayload || null,
+      });
+      providerConnections = Object.fromEntries(
+        connections.map((connection) => [
+          connection.provider,
+          {
+            connected: connection.status === "connected",
+            status: connection.status,
+            account_label: connection.account_label || "",
+          },
+        ]),
+      );
+    } catch {
+      providerConnections = {};
+    }
+  }
   const leadPipelineQueue = buildLeadPipelineQueue(
     {
       leads,
@@ -876,7 +957,10 @@ async function leadInboxPayload(registry, url, config) {
     listingEdits: readListingEdits(config.listingEditLedgerPath),
     leadSlaGeneratedAt: config.reviewedAt,
     operatorId: config.adminPrincipal || null,
+    leadSourceDurable: source.durable,
+    providerConnections,
     viewings,
+    viewingFollowUpWritable: !viewingSource.durable,
     viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, viewingFollowUps, {
       now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
     }),
@@ -1081,7 +1165,7 @@ async function operationsReport(registry, config) {
   const filterRows = leadScopedRows(source);
   const leads = source.leads;
   const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
-  const viewings = filterRows(readViewings(config.viewingLedgerPath));
+  const viewings = filterRows((await adminViewingSource(config)).viewings);
   const viewingFollowUps = filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath));
   const deals = filterRows(readDeals(config.dealLedgerPath));
   const translationTasks = readTranslationLedger(config.translationLedgerPath);
@@ -1688,11 +1772,83 @@ function runDueListingPublications(config) {
   return result;
 }
 
-function appendViewingBooking(input, config) {
-  const viewing = appendViewing(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
-    filePath: config.viewingLedgerPath,
-    bookedAt: config.bookedAt,
-  });
+async function syncViewingBookingCalendar(viewing, config) {
+  const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+  try {
+    const result = await (config.syncViewingToGoogleCalendar || syncViewingToGoogleCalendar)(viewing, {
+      config: providerConfig,
+      payload: config.providerConnectionPayload || null,
+      fetchImpl: config.providerFetch || fetch,
+    });
+    if (result.status === "synced") {
+      recordAudit(
+        {
+          action: "provider_calendar_synced",
+          actor: viewing.broker,
+          objectType: "provider_connection",
+          objectId: "google",
+          locale: viewing.original_language,
+          metadata: {
+            viewing_id: viewing.id,
+            lead_id: viewing.lead_id,
+            listing_reference: viewing.listing_reference,
+            calendar_event_id: result.calendar_event_id,
+          },
+        },
+        config,
+      );
+    }
+    return result;
+  } catch (error) {
+    const message =
+      error instanceof ProviderConnectionUnavailableError
+        ? "Provider connection store is unavailable"
+        : String(error?.message || "Google Calendar sync failed");
+    recordAudit(
+      {
+        action: "provider_calendar_sync_failed",
+        actor: viewing.broker,
+        objectType: "provider_connection",
+        objectId: "google",
+        locale: viewing.original_language,
+        metadata: {
+          viewing_id: viewing.id,
+          lead_id: viewing.lead_id,
+          listing_reference: viewing.listing_reference,
+          reason: message,
+        },
+      },
+      config,
+    );
+    return { status: "failed", provider: "google", message };
+  }
+}
+
+async function appendViewingBooking(input, config) {
+  const [leadSource, viewingSource] = await Promise.all([adminLeadSource(config), adminViewingSource(config)]);
+  const filterRows = leadScopedRows(leadSource);
+  const rows = filterRows(viewingSource.viewings);
+  const context = {
+    leads: applyLeadAssignments(leadSource.leads, filterRows(readLeadAssignments(config.leadAssignmentLedgerPath))),
+    outcomes: filterRows(readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath)),
+    viewings: rows,
+    viewingFollowUps: filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath)),
+    deals: filterRows(readDeals(config.dealLedgerPath)),
+    sellerPipelines: filterRows(readSellerPipeline(config.sellerPipelinePath)),
+    sellerPipelineOutcomes: filterRows(readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath)),
+  };
+  const boundInput = bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]);
+  let viewing;
+  if (viewingSource.durable) {
+    const candidate = createViewing(context, boundInput, { rows, bookedAt: config.bookedAt });
+    viewing = candidate.idempotent
+      ? { ...candidate, durable: true }
+      : await (config.persistViewingDurably || persistViewingDurably)(candidate, {
+          payload: config.viewingDurablePayload || null,
+        });
+  } else {
+    viewing = appendViewing(context, boundInput, { filePath: config.viewingLedgerPath, bookedAt: config.bookedAt });
+  }
   if (!viewing.idempotent) {
     recordAudit(
       {
@@ -1706,7 +1862,38 @@ function appendViewingBooking(input, config) {
       config,
     );
   }
-  return viewing;
+  let calendarSync = await syncViewingBookingCalendar(viewing, config);
+  if (viewingSource.durable) {
+    calendarSync = await (config.recordViewingCalendarSync || recordViewingCalendarSync)(viewing.id, calendarSync, {
+      payload: config.viewingDurablePayload || null,
+      recordedAt: config.bookedAt || new Date().toISOString(),
+    });
+  }
+  if (calendarSync.status === "synced") {
+    return {
+      ...viewing,
+      calendar_sync: calendarSync,
+      message: "Viewing booked and added to Google Calendar.",
+    };
+  }
+  if (calendarSync.status === "failed") {
+    return {
+      ...viewing,
+      calendar_sync: calendarSync,
+      message: "Viewing booked, but Google Calendar sync failed.",
+    };
+  }
+  if (["not_configured", "not_connected"].includes(calendarSync.status)) {
+    return {
+      ...viewing,
+      calendar_sync: calendarSync,
+      message: "Viewing booked. Connect Google Calendar to sync it automatically.",
+    };
+  }
+  return {
+    ...viewing,
+    calendar_sync: calendarSync,
+  };
 }
 
 function appendViewingFollowUpEntry(input, config) {
@@ -1846,6 +2033,88 @@ function appendReplyDeliveryOutcomeEntry(input, config) {
     );
   }
   return result;
+}
+
+async function sendQueuedReplyViaProvider(input, config) {
+  const replyId = String(input?.replyId || "").trim();
+  const reply = replyId ? readReplyOutbox(config.replyOutboxPath).find((row) => row.id === replyId) : null;
+  if (replyId && !reply) throw new Error("Approved reply was not found");
+  const source = await adminLeadSource(config);
+  const leadId = String(reply?.lead_id || input?.leadId || "").trim();
+  if (!leadId) throw new Error("Lead id is required");
+  const lead = source.leads.find((row) => row.lead_id === leadId);
+  if (!lead) throw new Error("Lead was not found for the approved reply");
+  const provider = String(input.provider || input.channel || "google").trim().toLowerCase();
+  const channel = provider === "google" ? "email" : provider;
+  const recipient = String(
+    provider === "google"
+      ? lead.contact?.email
+      : provider === "whatsapp"
+        ? lead.contact?.whatsapp || lead.contact?.phone
+        : lead.contact?.viber_user_id,
+  ).trim();
+  if (!recipient) throw new Error(`Lead has no ${channel} recipient for provider delivery`);
+  const directApproval = !reply;
+  if (directApproval && String(input.approved || "").trim().toLowerCase() !== "true") {
+    throw new Error("Human approval is required before provider delivery");
+  }
+  const approvedAt = directApproval
+    ? config.replyDeliveredAt || config.reviewedAt || new Date().toISOString()
+    : reply.reviewed_at;
+  const approvedBy = directApproval ? config.adminPrincipal?.id : reply.reviewer;
+  const message = directApproval ? String(input.message || input.reviewedReply || "") : reply.reviewed_reply;
+  const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+  const providerDelivery = await (config.deliverApprovedProviderMessage || deliverApprovedProviderMessage)(
+    {
+      provider,
+      leadId,
+      idempotencyKey: String(input.idempotencyKey || (reply ? `reply:${reply.id}:${provider}` : "")),
+      recipient,
+      message,
+      ...(provider === "google"
+        ? { subject: `MS Realty reply regarding ${String(lead.listing_reference || lead.lead_id || "your enquiry").trim()}` }
+        : {}),
+      approved: directApproval ? true : reply.broker_approved === true,
+      approvedBy,
+      approvedAt,
+    },
+    {
+      config: providerConfig,
+      payload: config.providerDeliveryPayload || config.providerConnectionPayload || null,
+      fetchImpl: config.providerFetch || fetch,
+    },
+  );
+  if (providerDelivery.status !== "sent") throw new Error("Provider did not confirm message delivery");
+  const result =
+    reply && !source.durable
+      ? appendReplyDeliveryOutcomeEntry({ ...input, action: "sent", channel }, config)
+      : {
+          idempotent: providerDelivery.idempotent,
+          delivery: {
+            lead_id: leadId,
+            status: "sent",
+            delivery_channel: channel,
+            sent_at: providerDelivery.completed_at,
+          },
+        };
+  recordAudit(
+    {
+      action: "provider_reply_sent",
+      actor: config.adminPrincipal?.id || approvedBy,
+      objectType: "provider_connection",
+      objectId: provider,
+      locale: reply?.reply_language || lead.original_language || lead.admin_locale || "en",
+      metadata: {
+        ...(reply ? { reply_id: reply.id } : {}),
+        lead_id: leadId,
+        receipt_id: providerDelivery.idempotency_key,
+        external_message_id: providerDelivery.external_message_id,
+      },
+    },
+    config,
+    result.delivery.sent_at || approvedAt,
+  );
+  return { ...result, provider_delivery: providerDelivery };
 }
 
 function appendLeadPipelineOutcomeEntry(input, config) {
@@ -2781,10 +3050,16 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     const url = new URL(request.url, "http://localhost");
     const requiredCapability = requiredAdminCapability(request.method, url.pathname);
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
+    const parsedDeliveryBody =
+      request.method === "POST" && url.pathname === "/api/admin/replies/delivery"
+        ? parseBody(request, await readRequestBody(request, config.maxBodyBytes))
+        : null;
     if (
       request.method !== "GET" &&
       config.leadDurableStore?.leadDurableStoreEnabled === true &&
-      FILE_BACKED_LEAD_MUTATION_PATHS.has(url.pathname)
+      FILE_BACKED_LEAD_MUTATION_PATHS.has(url.pathname) &&
+      !(url.pathname === "/api/admin/replies/delivery" && parsedDeliveryBody?.provider && !parsedDeliveryBody?.action) &&
+      !(url.pathname === "/api/admin/viewings" && config.viewingDurableStore?.viewingDurableStoreEnabled === true)
     ) {
       return leadStoreUnavailable("lead_store_read_only");
     }
@@ -2846,23 +3121,175 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/connect") {
-      if (!authHeader || principal.source === "payload_session") {
-        return jsonResponse(403, {
-          kind: "mcp_credential_required",
-          message: "Use a named MCP operator credential; browser sessions are never exported as bearer tokens.",
-        });
+      const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+      let availability = providerConnectionAvailability(providerConfig);
+      let connections = [];
+      let storeError = !availability.store.ready;
+      try {
+        if (availability.store.ready) {
+          connections = await (config.readProviderConnections || readProviderConnections)({
+            payload: config.providerConnectionPayload || null,
+          });
+        }
+      } catch {
+        storeError = true;
       }
-      const token = String(authHeader).replace(/^Bearer\s+/i, "").trim();
+      if (storeError) {
+        availability = Object.fromEntries(
+          Object.entries(availability).map(([key, value]) => [key, { ...value, ready: false }]),
+        );
+      }
+      const token = principal.source === "payload_session" ? "" : String(authHeader).replace(/^Bearer\s+/i, "").trim();
       const base =
         String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
-      return new Response(renderOperatorConnectPage({ baseUrl: base, token, operatorId: principal?.id || "operator" }), {
-        status: 200,
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "cache-control": "no-store",
-          "x-robots-tag": "noindex, nofollow",
+      const connected = url.searchParams.get("connected");
+      const result = connected
+        ? `${connected === "google" ? "Google" : connected === "whatsapp" ? "WhatsApp" : "Viber"} подтверждён и подключён.`
+        : url.searchParams.get("error")
+          ? "Провайдер не подтвердил подключение. Проверь настройки и повтори."
+          : storeError
+            ? "Хранилище подключений сейчас недоступно; новые credentials не будут приняты."
+            : "";
+      return new Response(
+        renderOperatorConnectPage({
+          baseUrl: base,
+          token,
+          operatorId: principal?.id || "operator",
+          connections,
+          availability,
+          result,
+        }),
+        {
+          status: 200,
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "cache-control": "no-store",
+            "x-robots-tag": "noindex, nofollow",
+          },
         },
-      });
+      );
+    }
+    if (url.pathname === "/api/admin/connections") {
+      const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+      const availability = providerConnectionAvailability(providerConfig);
+      const storeOptions = {
+        credentialSecret: providerConfig.credentialSecret,
+        payload: config.providerConnectionPayload || null,
+      };
+      const readConnections = config.readProviderConnections || readProviderConnections;
+      const readCredentials = config.readProviderCredentials || readProviderCredentials;
+      const saveConnection = config.saveProviderConnection || saveProviderConnection;
+      if (request.method === "GET" && !url.searchParams.get("action")) {
+        return jsonResponse(200, {
+          kind: "provider_connections",
+          availability,
+          connections: await readConnections({ payload: storeOptions.payload }),
+        });
+      }
+      if (!payloadSession || principal.source !== "payload_session" || !principal.roles?.includes("admin")) {
+        return adminForbidden("payload_admin_session");
+      }
+      if (request.method === "GET" && url.searchParams.get("provider") === "google") {
+        const action = url.searchParams.get("action");
+        if (action === "start") {
+          return new Response(null, {
+            status: 303,
+            headers: { location: googleAuthorizationUrl({ config: providerConfig, operatorId: principal.id }), "cache-control": "no-store" },
+          });
+        }
+        if (action === "callback") {
+          if (url.searchParams.get("error")) {
+            recordProviderConnectionFailure("google", "oauth_callback", new Error("provider_rejected"), config);
+            return new Response(null, { status: 303, headers: { location: "/admin/connect?error=google", "cache-control": "no-store" } });
+          }
+          try {
+            const prior = await readCredentials("google", storeOptions);
+            const connection = await (config.completeGoogleOAuth || completeGoogleOAuth)(
+              {
+                code: url.searchParams.get("code"),
+                state: url.searchParams.get("state"),
+                operatorId: principal.id,
+                existingRefreshToken: prior?.refresh_token || "",
+              },
+              { config: providerConfig, fetchImpl: config.providerFetch || fetch },
+            );
+            const saved = await saveConnection(connection, { ...storeOptions, connectedBy: principal.id });
+            recordAudit(
+              {
+                action: "provider_connected",
+                actor: principal.id,
+                objectType: "provider_connection",
+                objectId: saved.provider,
+                metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
+              },
+              config,
+            );
+            return new Response(null, { status: 303, headers: { location: "/admin/connect?connected=google", "cache-control": "no-store" } });
+          } catch (error) {
+            recordProviderConnectionFailure("google", "oauth_callback", error, config);
+            return new Response(null, { status: 303, headers: { location: "/admin/connect?error=google", "cache-control": "no-store" } });
+          }
+        }
+      }
+      if (request.method === "POST") {
+        const formEncoded = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        const provider = String(input.provider || "").trim().toLowerCase();
+        try {
+          let connection;
+          if (provider === "whatsapp") {
+            const verified = await (config.completeWhatsAppEmbeddedSignup || completeWhatsAppEmbeddedSignup)(
+              { code: input.code, wabaId: input.waba_id, phoneNumberId: input.phone_number_id },
+              { config: providerConfig, fetchImpl: config.providerFetch || fetch },
+            );
+            await saveConnection(verified, { ...storeOptions, connectedBy: principal.id });
+            connection = await (config.registerWhatsAppWebhook || registerWhatsAppWebhook)(verified, {
+              config: providerConfig,
+              fetchImpl: config.providerFetch || fetch,
+            });
+          } else if (provider === "viber") {
+            const verified = await (config.completeViberConnection || completeViberConnection)(
+              { token: input.token },
+              { config: providerConfig, fetchImpl: config.providerFetch || fetch },
+            );
+            await saveConnection(verified, { ...storeOptions, connectedBy: principal.id });
+            connection = await (config.registerViberWebhook || registerViberWebhook)(verified, {
+              config: providerConfig,
+              fetchImpl: config.providerFetch || fetch,
+            });
+          } else {
+            throw new Error("Unsupported provider connection");
+          }
+          const saved = await saveConnection(connection, { ...storeOptions, connectedBy: principal.id });
+          recordAudit(
+            {
+              action: "provider_connected",
+              actor: principal.id,
+              objectType: "provider_connection",
+              objectId: saved.provider,
+              metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
+            },
+            config,
+          );
+          if (formEncoded) {
+            return new Response(null, {
+              status: 303,
+              headers: { location: `/admin/connect?connected=${encodeURIComponent(provider)}`, "cache-control": "no-store" },
+            });
+          }
+          return jsonResponse(201, { kind: "provider_connection", connection: saved });
+        } catch (error) {
+          recordProviderConnectionFailure(provider, provider === "viber" ? "account_or_webhook" : "embedded_signup", error, config);
+          if (formEncoded) {
+            return new Response(null, {
+              status: 303,
+              headers: { location: `/admin/connect?error=${encodeURIComponent(provider || "provider")}`, "cache-control": "no-store" },
+            });
+          }
+          return jsonResponse(400, { kind: "provider_connection_rejected", message: "The provider did not confirm the connection" });
+        }
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
     }
     if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(await todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, await todayPayload(registry, url, config));
@@ -3089,7 +3516,11 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(reply.idempotent ? 200 : 201, reply);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/delivery") {
-      const result = appendReplyDeliveryOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const input = parsedDeliveryBody;
+      const result =
+        String(input.deliveryMode || "").trim() === "provider_send" || (input.provider && !input.action)
+          ? await sendQueuedReplyViaProvider(input, config)
+          : appendReplyDeliveryOutcomeEntry(input, config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
@@ -3297,7 +3728,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, appendListingSlugChange(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
-      const viewing = appendViewingBooking(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const viewing = await appendViewingBooking(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(viewing.idempotent ? 200 : 201, viewing);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
@@ -3313,7 +3744,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
-      return calendarResponse(renderViewingCalendar(readViewings(config.viewingLedgerPath), { now: config.bookedAt }));
+      const source = await adminLeadSource(config);
+      const viewings = leadScopedRows(source)((await adminViewingSource(config)).viewings);
+      return calendarResponse(renderViewingCalendar(viewings, { now: config.bookedAt }));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
       const deal = appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
@@ -3332,6 +3765,24 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (error instanceof EventStoreUnavailableError || error?.code === "event_store_unavailable") {
       return jsonResponse(503, { kind: "event_store_unavailable", message: "Analytics storage is temporarily unavailable" });
+    }
+    if (error instanceof ViewingStoreUnavailableError || error?.code === "viewing_store_unavailable") {
+      return jsonResponse(503, { kind: "viewing_store_unavailable", message: "Viewing storage is temporarily unavailable" });
+    }
+    if (error instanceof ViewingConflictError || error?.code === "viewing_conflict") {
+      return jsonResponse(409, { kind: "viewing_conflict", message: error.message });
+    }
+    if (error instanceof ProviderConnectionUnavailableError || error?.code === "provider_connection_unavailable") {
+      return jsonResponse(503, { kind: "provider_connection_unavailable", message: "Provider connection storage is unavailable" });
+    }
+    if (error instanceof ProviderDeliveryError) {
+      const status =
+        error.code === "provider_delivery_unavailable" || error.code === "provider_delivery_not_connected"
+          ? 503
+          : ["provider_delivery_uncertain", "provider_delivery_conflict"].includes(error.code)
+            ? 409
+            : 502;
+      return jsonResponse(status, { kind: error.code, message: error.message, receipt: error.receipt || null });
     }
     if (error.status === 413) return jsonResponse(413, { kind: "request_too_large" });
     if (error.status === 403) return adminForbidden(error.capability || "administration:write");
