@@ -29,9 +29,11 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   const polenitsaListing = seed.records.find((record) => record.id === "MS-CRAWL-0033");
   const greekListing = seed.records.find((record) => record.id === "MS-CRAWL-0072");
   const ruListing = seed.records.find((record) => record.source_locale === "ru");
-  const areaOnlyListing = seed.records.find((record) => record.facts.location_precision === "area_only");
+  const areaOnlyListing = seed.records.find((record) => record.location && record.facts.location_precision === "area_only");
   const areaOnlyProperty = seed.properties.find((record) => record.id === areaOnlyListing.property);
   const areaOnlyLocation = seed.locations.find((record) => record.id === areaOnlyListing.location);
+  const unknownLocationListing = seed.records.find((record) => !record.facts.location);
+  const unknownLocationProperty = seed.properties.find((record) => record.id === unknownLocationListing.property);
 
   assert.equal(summary.listings, 165);
   assert.equal(summary.properties, 165);
@@ -48,7 +50,7 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(fixtureListing.routing.deployable, false);
   assert.equal(fixtureListing.routing.review_required, true);
   assert.equal(fixtureListing.property, "property-MS-CRAWL-0001");
-  assert.ok(fixtureListing.location.startsWith("location:"));
+  assert.equal(fixtureListing.location, "location:sandanski");
   assert.equal(fixtureListing.translations.every((translation) => translation.listing === fixtureListing.id), true);
   assert.equal(fixtureListing.translations.every((translation) => translation.translation_state === translation.status), true);
   assert.ok(fixtureListing.media.length > 0);
@@ -110,6 +112,9 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(areaOnlyListing.facts.location_precision, "area_only");
   assert.equal(areaOnlyProperty.facts.public_location_precision, "area_only");
   assert.equal(areaOnlyLocation.public_location_precision, "locality");
+  assert.equal(unknownLocationListing.location, null);
+  assert.equal(unknownLocationProperty.location, null);
+  assert.equal(seed.locations.some((location) => /unknown|unreviewed/i.test(location.label)), false);
   assert.deepEqual(seed.taxonomy_contract.mappings.find((mapping) => mapping.legacy_property_type === "land"), {
     legacy_property_type: "land",
     property_family: "plot",
@@ -227,11 +232,13 @@ test("CMS collection manifest exposes implemented Payload-style contracts only",
   assert.equal(listingFields.get("tour").relationTo, "listing_tours");
   assert.equal(listingFields.get("property").relationTo, "properties");
   assert.equal(listingFields.get("location").relationTo, "locations");
+  assert.equal(listingFields.get("location").required, false);
   assert.equal(listingFields.get("workflow").type, "group");
 
   const propertyContract = manifest.collections.find((collection) => collection.slug === "properties");
   const propertyFields = new Map(propertyContract.fields.map((field) => [field.name, field]));
   assert.equal(propertyFields.get("location").relationTo, "locations");
+  assert.equal(propertyFields.get("location").required, false);
   assert.equal(propertyFields.get("facts").type, "group");
   assert.equal(propertyFields.get("fact_verification").type, "array");
 

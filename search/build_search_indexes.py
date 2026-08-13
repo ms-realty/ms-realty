@@ -234,6 +234,31 @@ def reviewed_location_fields(
     }
 
 
+def reviewed_legacy_location(text: str, reviews: dict[str, object]) -> str:
+    defaults = reviews.get("legacy_defaults", {})
+    places = reviews.get("places", {})
+    if not isinstance(defaults, dict) or not isinstance(places, dict):
+        return ""
+    matches: list[tuple[int, int, str]] = []
+    for legacy_label, place_key in defaults.items():
+        place = places.get(place_key)
+        if not isinstance(place, dict):
+            continue
+        settlement = place.get("settlement", {}) if isinstance(place.get("settlement"), dict) else {}
+        aliases = {
+            textish(legacy_label),
+            textish(place.get("location_name")),
+            textish(place.get("location_native")),
+            textish(settlement.get("name")),
+            textish(settlement.get("native_name")),
+        }
+        for alias in aliases - {""}:
+            match = re.search(rf"(?<!\w){re.escape(alias)}(?!\w)", text, re.I)
+            if match:
+                matches.append((match.start(), -len(alias), textish(legacy_label)))
+    return min(matches)[2] if matches else ""
+
+
 def path_from_env(name: str, default: Path) -> Path:
     return Path(os.environ.get(name) or default)
 
@@ -458,7 +483,7 @@ def load_listing_docs(
                     "title": title,
                     "description": description,
                     "h1": h1,
-                    "location": "",
+                    "location": reviewed_legacy_location(" ".join([title, h1, unquote(url)]), reviews),
                     "property_type": infer_property_type(type_text),
                     "offer_type": infer_offer(combined),
                     "bedrooms": infer_bedrooms(combined),

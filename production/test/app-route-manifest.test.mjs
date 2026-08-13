@@ -16,11 +16,18 @@ import {
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLegacyArchive } from "../lib/legacy-archive.mjs";
+import { publicSeedFor } from "../lib/public-inventory.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
 import { approvedPublicSeedFixtureEnv, durableLeadStoreFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const registry = loadLocaleRegistry();
 Object.assign(process.env, durableLeadStoreFixtureEnv());
 const approvedConfig = appRouterConfigFromEnv({ ...process.env, ...approvedPublicSeedFixtureEnv() });
+const approvedPublicListingIds = new Set(
+  publicSeedFor(loadCmsSeed(approvedConfig.cmsSeedPath)).records
+    .filter((record) => record.collection === "listings")
+    .map((record) => record.id),
+);
 
 test("App Router manifest maps sitemap entries plus no-store search routes", () => {
   const manifest = buildAppRouteManifest({
@@ -78,6 +85,13 @@ test("every manifest page renders a complete public content contract", () => {
   for (const route of manifest.routes) {
     const page = renderAppRoute({ pathname: route.path, url: `https://audit.test${route.path}`, config: approvedConfig });
     const label = `${route.type} ${route.path}`;
+    if (route.type === "listing" && !approvedPublicListingIds.has(route.params.listingId)) {
+      assert.equal(page.status, 404, `${label} must fail closed until its facts are complete`);
+      assert.equal(page.rendered.kind, "not_found");
+      assert.equal(page.rendered.indexable, false);
+      assert.match(page.html, /<meta name="robots" content="noindex,follow">/);
+      continue;
+    }
     assert.equal(page.status, 200, `${label} must render`);
     assert.equal(page.rendered.kind, route.type, `${label} must use its declared renderer`);
     assert.equal(page.rendered.indexable, route.public_indexable, `${label} must match its sitemap indexability`);
@@ -323,9 +337,14 @@ test("App Router restores a legacy WordPress gallery without serving tiny deriva
 
 test("App Router adapter serves approved sitemap, robots text, and favicon", async () => {
   const sitemap = renderAppSitemap({ config: approvedConfig });
+  const manifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
+  const blockedListingRoutes = manifest.routes.filter(
+    (route) => route.type === "listing" && !approvedPublicListingIds.has(route.params.listingId),
+  );
   assert.equal(sitemap.status, 200);
   assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
-  assert.equal(sitemap.sitemap.summary.entries, 198);
+  assert.equal(sitemap.sitemap.summary.entries, manifest.summary.eligible_routes - blockedListingRoutes.length);
+  assert.equal(blockedListingRoutes.length, 2);
   assert.match(sitemap.body, /<loc>https:\/\/makler-realty.com\/he<\/loc>/);
   assert.match(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
   assert.match(sitemap.body, /\/en\/guides\/foreign-buyers/);

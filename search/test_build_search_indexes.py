@@ -15,6 +15,16 @@ class SearchListingExtractionTests(unittest.TestCase):
         self.assertIsNone(build_search_indexes.infer_bedrooms("4 стаи"))
         self.assertEqual(build_search_indexes.infer_bedrooms("Двустаен апартамент"), 1)
         self.assertEqual(build_search_indexes.infer_bedrooms("3 bedrooms"), 3)
+        self.assertEqual(
+            build_search_indexes.reviewed_legacy_location(
+                "Апартамент в г. Сандански",
+                {
+                    "legacy_defaults": {"Sandanski": "sandanski"},
+                    "places": {"sandanski": {"location_name": "Sandanski", "location_native": "Сандански"}},
+                },
+            ),
+            "Sandanski",
+        )
 
     def test_loader_skips_error_rows_and_uses_only_reviewed_location_mappings(self) -> None:
         fields = [

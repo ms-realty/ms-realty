@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-08-11T17:18:08.153Z
+Generated: 2026-08-13T14:24:31.129Z
 
 Status: blocked
 Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
@@ -171,10 +171,12 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - Review pack command: `npm run listing:review-pack`.
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
+- structured_data.missing_location: 2
 - structured_data.missing_area: 166
 - structured_data.missing_bedrooms: 81
 - structured_data.missing_public_images: 4
 - listing_quality.missing_area: 165
+- listing_quality.missing_location: 2
 - listing_quality.thin_public_gallery: 18
 
 ## Broker Verification

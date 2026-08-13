@@ -416,7 +416,8 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.match(html, /data-mobile-menu-close="true"/);
   assert.match(html, /role="dialog" aria-modal="true" aria-label="Primary navigation"/);
   assert.match(html, /data-language-switcher="desktop"/);
-  assert.match(html, /aria-label="Language: English"/);
+  assert.match(html, /aria-label="EN — Language: English"/);
+  assert.doesNotMatch(html, /<h4>/);
   assert.match(html, /data-language-switcher="mobile"/);
   assert.match(html, /data-mobile-task-navigation="true"/);
   assert.match(html, /data-mobile-task="buy" data-active="true" aria-current="page"/);
@@ -470,6 +471,8 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-card-action="save"/);
   assert.match(html, /data-card-spec="reference"/);
   assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*loading="eager"/);
+  const thumbnailLink = html.match(/<a[^>]*data-card-thumbnail="true"[^>]*>/)?.[0] || "";
+  assert.match(thumbnailLink, /aria-label="[^"]+; \d+ photos?"/);
   assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*fetchPriority="high"/);
   assert.match(html, /<img[^>]*loading="lazy"[^>]*decoding="async"/);
 });

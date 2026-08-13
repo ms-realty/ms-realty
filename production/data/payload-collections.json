@@ -389,7 +389,7 @@
         {
           "name": "location",
           "type": "relationship",
-          "required": true,
+          "required": false,
           "localized": false,
           "relationTo": "locations"
         },
@@ -644,7 +644,7 @@
         {
           "name": "location",
           "type": "relationship",
-          "required": true,
+          "required": false,
           "localized": false,
           "relationTo": "locations"
         },

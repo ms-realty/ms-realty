@@ -6,7 +6,7 @@
     "failing_entries": 0,
     "entries_with_offer": 135,
     "warnings": {
-      "missing_location": 0,
+      "missing_location": 2,
       "missing_price": 0,
       "missing_area": 166,
       "missing_bedrooms": 81,
@@ -1880,6 +1880,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
+        "missing_location",
         "missing_area"
       ]
     },
@@ -2338,6 +2339,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
+        "missing_location",
         "missing_area"
       ]
     },

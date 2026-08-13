@@ -49,8 +49,7 @@ export function propertyIdForListing(listingId) {
 
 export function locationIdForLabel(label) {
   const normalized = String(label || "").trim().toLowerCase();
-  if (!normalized) throw new Error("Location backfill requires a location label");
-  return `location:${normalized}`;
+  return normalized ? `location:${normalized}` : null;
 }
 
 export function enrichmentTaskForListing({ listingId, propertyId, factFields = [], source = "legacy_backfill" }) {
@@ -243,17 +242,19 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
     const snapshot = listingSourceSnapshot(listing);
     if (snapshot.price_on_request) snapshot.price_eur = null;
     const locationId = locationIdForLabel(snapshot.location);
-    const existingLocation = locationsById.get(locationId);
-    if (existingLocation && existingLocation.label !== snapshot.location) {
-      throw new Error(`Location id collision for ${snapshot.location}`);
-    }
-    if (!existingLocation) {
-      locationsById.set(locationId, {
-        id: locationId,
-        collection: "locations",
-        label: snapshot.location,
-        public_location_precision: snapshot.location_precision === "area_only" ? "locality" : snapshot.location_precision || "approximate",
-      });
+    if (locationId) {
+      const existingLocation = locationsById.get(locationId);
+      if (existingLocation && existingLocation.label !== snapshot.location) {
+        throw new Error(`Location id collision for ${snapshot.location}`);
+      }
+      if (!existingLocation) {
+        locationsById.set(locationId, {
+          id: locationId,
+          collection: "locations",
+          label: snapshot.location,
+          public_location_precision: snapshot.location_precision === "area_only" ? "locality" : snapshot.location_precision || "approximate",
+        });
+      }
     }
     const property = propertyFactsForListing(listing, snapshot, locationId);
     properties.push(property);
@@ -382,8 +383,8 @@ export function assertCmsSeed(seed) {
   if (!seed.taxonomy_contract?.version || !Array.isArray(seed.taxonomy_contract.mappings)) {
     throw new Error("CMS seed must expose the versioned legacy property taxonomy contract");
   }
-  if (seed.properties?.some((property) => !property.location || !Array.isArray(property.fact_verification))) {
-    throw new Error("Property backfill must retain a Location and fact verification metadata");
+  if (seed.properties?.some((property) => !Array.isArray(property.fact_verification))) {
+    throw new Error("Property backfill must retain fact verification metadata");
   }
   if (seed.enrichment_tasks?.some((task) => !task.idempotency_key || task.task_type !== ENRICHMENT_TASK_TYPE)) {
     throw new Error("Enrichment tasks must be idempotent per listing");
@@ -418,7 +419,6 @@ const REQUIRED_COLLECTION_FIELDS = {
     facts: "group",
     seo: "group",
     property: "relationship",
-    location: "relationship",
   },
   listing_translations: {
     listing: "relationship",
@@ -444,7 +444,6 @@ const REQUIRED_COLLECTION_FIELDS = {
   },
   properties: {
     id: "text",
-    location: "relationship",
     facts: "group",
     fact_verification: "array",
   },
@@ -470,7 +469,8 @@ const REQUIRED_COLLECTION_FIELDS = {
 };
 
 const TYPED_OPTIONAL_COLLECTION_FIELDS = {
-  listings: { workflow: "group" },
+  listings: { workflow: "group", location: "relationship" },
+  properties: { location: "relationship" },
 };
 
 export function buildCmsCollections(seed) {
@@ -573,7 +573,7 @@ export function buildCmsCollections(seed) {
             ],
           }),
           collectionField("property", "relationship", { required: true, relationTo: "properties" }),
-          collectionField("location", "relationship", { required: true, relationTo: "locations" }),
+          collectionField("location", "relationship", { relationTo: "locations" }),
           collectionField("translations", "relationship", {
             hasMany: true,
             relationTo: "listing_translations",
@@ -627,7 +627,7 @@ export function buildCmsCollections(seed) {
         versions: false,
         fields: [
           collectionField("id", "text", { required: true, unique: true }),
-          collectionField("location", "relationship", { required: true, relationTo: "locations" }),
+          collectionField("location", "relationship", { relationTo: "locations" }),
           collectionField("property_family", "select", {
             options: ["apartment", "house", "plot", "agricultural_land", "commercial", "hotel"],
           }),
