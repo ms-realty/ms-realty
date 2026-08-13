@@ -30,6 +30,7 @@ const REQUIRED_RUNTIME_DATA_TABLES = Object.freeze([
 const RUNTIME_DATA_AUTHORITY_ENV = "MS_REALTY_RUNTIME_DATA_AUTHORITY";
 const RUNTIME_DATA_AUTHORITY_VALUE = "payload";
 const RUNTIME_DATA_AUTHORITY_MISSING = "release-bound Cloudflare Payload runtime authority proof";
+const TRUSTED_WORKER_SOURCE = new URL("../../workers/index.js", import.meta.url);
 const REQUIRED_RUNTIME_DATA_AUTHORITIES = Object.freeze({
   payload_admins: {
     routes: ["/admin/login", "/admin/logout", "/api/admin/team"],
@@ -102,7 +103,7 @@ export function sha256File(filePath) {
 }
 
 export function buildRuntimeAuthorityEvidence({ releaseId, workerSource = null } = {}) {
-  const source = workerSource ?? fs.readFileSync(new URL("../../workers/index.js", import.meta.url), "utf8");
+  const source = workerSource ?? fs.readFileSync(TRUSTED_WORKER_SOURCE, "utf8");
   if (!new RegExp(`${RUNTIME_DATA_AUTHORITY_ENV}:\\s*["']${RUNTIME_DATA_AUTHORITY_VALUE}["']`).test(source)) {
     throw new Error(`Worker source must set ${RUNTIME_DATA_AUTHORITY_ENV}=${RUNTIME_DATA_AUTHORITY_VALUE}`);
   }
@@ -115,13 +116,16 @@ export function buildRuntimeAuthorityEvidence({ releaseId, workerSource = null }
   };
 }
 
-export function assertRuntimeAuthorityEvidence(evidence, releaseId) {
+export function assertRuntimeAuthorityEvidence(evidence, releaseId, { workerSource = null } = {}) {
+  const source = workerSource ?? fs.readFileSync(TRUSTED_WORKER_SOURCE, "utf8");
+  const trustedWorkerSourceSha256 = crypto.createHash("sha256").update(source).digest("hex");
   if (
     evidence?.schema_version !== 1 ||
     evidence?.release_id !== assertRecoveryReleaseId(releaseId) ||
     evidence?.environment_variable !== RUNTIME_DATA_AUTHORITY_ENV ||
     evidence?.required_value !== RUNTIME_DATA_AUTHORITY_VALUE ||
-    !SHA256.test(evidence?.worker_source_sha256 || "")
+    !SHA256.test(evidence?.worker_source_sha256 || "") ||
+    evidence.worker_source_sha256 !== trustedWorkerSourceSha256
   ) {
     throw new Error("Recovery manifest requires release-bound Cloudflare Payload runtime authority proof");
   }

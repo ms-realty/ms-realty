@@ -161,6 +161,13 @@ test("runtime_data coverage is bound to the exact Worker authority gate and admi
   assert.equal(manifest.runtime_authority.required_value, "payload");
   assert.equal(manifest.runtime_authority.release_id, manifest.release_id);
 
+  const forged = structuredClone(manifest);
+  forged.runtime_authority.worker_source_sha256 = "0".repeat(64);
+  assert.throws(
+    () => assertR2RecoveryManifest(forged, componentMap),
+    /release-bound Cloudflare Payload runtime authority proof/,
+  );
+
   const incomplete = structuredClone(componentMap);
   incomplete.components.runtime_data.authority_gate.authorities.find((row) => row.id === "listing_authority").tables.pop();
   assert.throws(() => assertRecoveryComponentMap(incomplete), /incomplete listing_authority route\/table authority/);
