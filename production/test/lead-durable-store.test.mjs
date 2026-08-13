@@ -15,7 +15,7 @@ import {
 // A minimal stand-in for the Payload runtime: enough to prove the store's
 // ordering, idempotency, and failure behaviour without a database.
 function fakePayload({ failOn = null } = {}) {
-  const rows = { public_leads: [], lead_contacts: [] };
+  const rows = { public_leads: [], lead_contacts: [], consent_events: [], seller_pipeline_events: [] };
   const calls = { create: [], find: [] };
   let snapshot = null;
   return {
@@ -30,8 +30,9 @@ function fakePayload({ failOn = null } = {}) {
         snapshot = null;
       },
       async rollbackTransaction() {
-        rows.public_leads.splice(0, rows.public_leads.length, ...snapshot.public_leads);
-        rows.lead_contacts.splice(0, rows.lead_contacts.length, ...snapshot.lead_contacts);
+        for (const collection of Object.keys(rows)) {
+          rows[collection].splice(0, rows[collection].length, ...snapshot[collection]);
+        }
         snapshot = null;
       },
     },
@@ -80,12 +81,50 @@ const envelope = (overrides = {}) => ({
   ...overrides,
 });
 
+const consentEvent = (row = ledgerRow(), overrides = {}) => ({
+  event_id: `consent-inquiry-follow-up:${row.lead_id}`,
+  workspace_id: "workspace-sandanski",
+  lead_id: row.lead_id,
+  recorded_at: row.received_at,
+  payload: {
+    recorded_at: row.received_at,
+    consent_type: "inquiry_follow_up",
+    source: row.source,
+    subject_id: row.lead_id,
+    locale: row.original_language,
+    contact_fingerprint: row.contact_fingerprint,
+    granted: true,
+    legal_basis: "legitimate_interest",
+    marketing_opt_in: false,
+  },
+  ...overrides,
+});
+
+const sellerPipelineEvent = (row, overrides = {}) => ({
+  event_id: `seller-pipeline-created:${row.lead_id}`,
+  workspace_id: "workspace-sandanski",
+  lead_id: row.lead_id,
+  recorded_at: row.received_at,
+  payload: {
+    id: `seller-pipeline-${row.lead_id}`,
+    lead_id: row.lead_id,
+    stage: "valuation_requested",
+    status: "open",
+  },
+  ...overrides,
+});
+
+function durableArgs({ ledgerRow: row = ledgerRow(), ...overrides } = {}) {
+  return { ledgerRow: row, contactEnvelope: envelope({ subject_id: row.lead_id }), consentEvent: consentEvent(row), ...overrides };
+}
+
 test("the durable store stays off unless it is both requested and configured", () => {
   const base = {
     MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
     PAYLOAD_SECRET: "s".repeat(40),
     DATABASE_URL: "postgres://x/y",
     MS_REALTY_LEAD_CONTACT_KEY: "c".repeat(32),
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
   };
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv(base)), true);
   // The runtime adapters use this false result plus the requested flag to fail
@@ -93,20 +132,25 @@ test("the durable store stays off unless it is both requested and configured", (
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, DATABASE_URL: "" })), false);
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, PAYLOAD_SECRET: "" })), false);
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, MS_REALTY_LEAD_CONTACT_KEY: "short" })), false);
+  assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, MS_REALTY_WORKSPACE_ID: "" })), false);
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({ ...base, MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "false" })), false);
   assert.equal(isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv({})), false);
 });
 
-test("a lead persists with its encrypted contact envelope and no plaintext", async () => {
+test("a lead persists with its encrypted contact envelope and consent event in one transaction", async () => {
   const payload = fakePayload();
-  const result = await persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload });
+  const result = await persistLeadDurably(durableArgs({ payload }));
 
   assert.equal(result.created, true);
   assert.equal(result.idempotent, false);
   assert.equal(payload.rows.public_leads.length, 1);
   assert.equal(payload.rows.lead_contacts.length, 1);
+  assert.equal(payload.rows.consent_events.length, 1);
+  assert.equal(payload.rows.seller_pipeline_events.length, 0);
   assert.equal(payload.calls.find.every((call) => call.overrideAccess === true), true);
   assert.equal(payload.calls.create.every((call) => call.overrideAccess === true), true);
+  assert.equal(payload.calls.find.every((call) => call.req?.transactionID === "lead-test-transaction"), true);
+  assert.equal(payload.calls.create.every((call) => call.req?.transactionID === "lead-test-transaction"), true);
 
   const stored = payload.rows.public_leads[0];
   assert.equal(stored.lead_id, ledgerRow().lead_id);
@@ -118,22 +162,26 @@ test("a lead persists with its encrypted contact envelope and no plaintext", asy
   for (const plaintext of ["whatsapp:+359", "Noa", "@example"]) {
     assert.equal(serialized.includes(plaintext), false, `${plaintext} must not be stored`);
   }
+  assert.equal(result.consent.consent_type, "inquiry_follow_up");
+  assert.equal(payload.rows.consent_events[0].workspace_id, "workspace-sandanski");
 });
 
 test("a retried submission collapses onto the original record", async () => {
   const payload = fakePayload();
   const row = ledgerRow({ idempotency_key: "browser-retry-1" });
-  const first = await persistLeadDurably({ ledgerRow: row, contactEnvelope: envelope(), payload });
-  const second = await persistLeadDurably({
-    ledgerRow: { ...row, lead_id: "lead-draft-22222222-2222-4222-8222-222222222222" },
-    contactEnvelope: envelope({ subject_id: "lead-draft-22222222-2222-4222-8222-222222222222" }),
+  const first = await persistLeadDurably(durableArgs({ ledgerRow: row, payload }));
+  const retryRow = { ...row, lead_id: "lead-draft-22222222-2222-4222-8222-222222222222" };
+  const second = await persistLeadDurably(durableArgs({
+    ledgerRow: retryRow,
     payload,
-  });
+  }));
 
   assert.equal(first.created, true);
   assert.equal(second.created, false);
   assert.equal(second.idempotent, true);
   assert.equal(payload.rows.public_leads.length, 1, "a retry must not create a second person");
+  assert.equal(payload.rows.lead_contacts.length, 1);
+  assert.equal(payload.rows.consent_events.length, 1);
   assert.equal(second.lead.lead_id, row.lead_id, "the original record is returned");
 
   const found = await findLeadByIdempotencyKey("browser-retry-1", { payload });
@@ -163,12 +211,14 @@ test("an intake retry reports the contact row belonging to the original lead", a
     lead: input(firstId),
     contactSecret: "test-only-durable-contact-key-32-characters-minimum",
     receivedAt: "2026-08-10T09:00:00.000Z",
+    workspaceId: "workspace-sandanski",
     payload,
   });
   const retry = await persistLeadIntakeDurably({
     lead: input(secondId),
     contactSecret: "test-only-durable-contact-key-32-characters-minimum",
     receivedAt: "2026-08-10T09:01:00.000Z",
+    workspaceId: "workspace-sandanski",
     payload,
   });
 
@@ -197,7 +247,13 @@ test("durable lead messages stay encrypted and authorized readback reconstructs 
     contact_preference: "phone",
   };
 
-  await persistLeadIntakeDurably({ lead, contactSecret, receivedAt: "2026-08-10T09:00:00.000Z", payload });
+  await persistLeadIntakeDurably({
+    lead,
+    contactSecret,
+    receivedAt: "2026-08-10T09:00:00.000Z",
+    workspaceId: "workspace-sandanski",
+    payload,
+  });
 
   const publicSerialized = JSON.stringify(payload.rows.public_leads);
   for (const plaintext of [message, "Test Buyer", "+359000000000", "test-buyer@example.invalid"]) {
@@ -242,6 +298,7 @@ test("durable persistence strips mixed-case nested plaintext message fields", as
       },
       contactSecret: "test-only-durable-contact-key-32-characters-minimum",
       receivedAt: "2026-08-10T09:00:00.000Z",
+      workspaceId: "workspace-sandanski",
       payload,
     });
 
@@ -271,7 +328,13 @@ test("durable admin readback joins only matching encrypted contacts", async () =
     contact_preference: "email",
   };
 
-  await persistLeadIntakeDurably({ lead, contactSecret, receivedAt: "2026-08-10T09:00:00.000Z", payload });
+  await persistLeadIntakeDurably({
+    lead,
+    contactSecret,
+    receivedAt: "2026-08-10T09:00:00.000Z",
+    workspaceId: "workspace-sandanski",
+    payload,
+  });
   payload.rows.lead_contacts.push(envelope({ subject_id: "orphan-fixture-lead", ciphertext: "not-valid-base64" }));
 
   const readFindStart = payload.calls.find.length;
@@ -314,6 +377,7 @@ test("durable admin readback takes the lead snapshot before querying contacts", 
     },
     contactSecret,
     receivedAt: "2026-08-10T09:00:00.000Z",
+    workspaceId: "workspace-sandanski",
     payload,
   });
 
@@ -364,6 +428,7 @@ test("durable admin readback rejects plaintext private fields in stored ledger r
     },
     contactSecret,
     receivedAt: "2026-08-10T09:00:00.000Z",
+    workspaceId: "workspace-sandanski",
     payload,
   });
 
@@ -415,33 +480,89 @@ test("durable admin readback fails closed when Payload cannot be read", async ()
 
 test("a repeated lead id never overwrites the original", async () => {
   const payload = fakePayload();
-  await persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload });
-  const again = await persistLeadDurably({
-    ledgerRow: ledgerRow({ source: "website_contact_callback" }),
-    contactEnvelope: envelope(),
-    payload,
-  });
+  await persistLeadDurably(durableArgs({ payload }));
+  const again = await persistLeadDurably(durableArgs({ ledgerRow: ledgerRow({ source: "website_contact_callback" }), payload }));
   assert.equal(again.created, false);
   assert.equal(payload.rows.public_leads.length, 1);
   assert.equal(payload.rows.public_leads[0].source, "website_listing_detail", "the first write wins");
 });
 
-test("a failed write raises rather than reporting a stored lead", async () => {
-  const payload = fakePayload({ failOn: "public_leads" });
-  await assert.rejects(
-    () => persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload }),
-    (error) => error instanceof LeadStoreUnavailableError && error.code === "lead_store_unavailable",
-  );
+test("a seller intake atomically creates all four durable records without plaintext side effects", async () => {
+  const payload = fakePayload();
+  const contactSecret = "test-only-durable-contact-key-32-characters-minimum";
+  const result = await persistLeadIntakeDurably({
+    lead: {
+      id: "inbox-durable-seller",
+      message_original: "Please value my apartment and call tomorrow.",
+      lead: {
+        id: "lead-draft-44444444-4444-4444-8444-444444444444",
+        idempotency_key: "durable-seller-intake-1",
+        source: "website_seller_valuation",
+        intent: "valuation",
+        leadType: "seller",
+        contact: { name: "Mira Private", phone: "+359000000004" },
+        property: { location: "Sandanski", type: "apartment" },
+      },
+      original_language: "bg",
+      admin_locale: "bg",
+      contact_preference: "phone",
+      broker_assignment: { broker_id: "broker_bg", method: "language_and_location" },
+    },
+    contactSecret,
+    marketingOptIn: true,
+    payload,
+    receivedAt: "2026-08-10T09:00:00.000Z",
+    sellerPipelineCreatedAt: "2026-08-10T09:00:01.000Z",
+    workspaceId: "workspace-sandanski",
+  });
 
-  // A contact-store failure must also fail loudly: a lead nobody can answer is
-  // worse than a refused submission.
-  const contactFailure = fakePayload({ failOn: "lead_contacts" });
-  await assert.rejects(
-    () => persistLeadDurably({ ledgerRow: ledgerRow(), contactEnvelope: envelope(), payload: contactFailure }),
-    LeadStoreUnavailableError,
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(payload.rows).map(([collection, rows]) => [collection, rows.length])),
+    { public_leads: 1, lead_contacts: 1, consent_events: 1, seller_pipeline_events: 1 },
   );
-  assert.equal(contactFailure.rows.public_leads.length, 0, "lead and contact must roll back together");
-  assert.equal(contactFailure.rows.lead_contacts.length, 0);
+  assert.equal(result.consent.marketing_opt_in, true);
+  assert.equal(result.sellerPipeline.stage, "valuation_requested");
+  assert.equal(result.sellerPipeline.created_at, "2026-08-10T09:00:01.000Z");
+  assert.equal("contact_name" in result.sellerPipeline, false);
+  const sideEffects = JSON.stringify({ consent: payload.rows.consent_events, seller: payload.rows.seller_pipeline_events });
+  for (const plaintext of ["Mira Private", "+359000000004", "Please value my apartment"]) {
+    assert.equal(sideEffects.includes(plaintext), false, `${plaintext} must not enter durable side-effect events`);
+  }
+});
+
+test("event payloads recursively reject contact and message keys case-insensitively", async () => {
+  for (const privateField of ["Contact", "EMAIL", "Phone", "WhatsApp", "VIBER", "Message", "MESSAGE_ORIGINAL", "contact-name"]) {
+    const payload = fakePayload();
+    const row = ledgerRow();
+    const event = consentEvent(row, {
+      payload: { safe: { nested: [{ retained: true }, { [privateField]: "private" }] } },
+    });
+    await assert.rejects(
+      () => persistLeadDurably(durableArgs({ consentEvent: event, ledgerRow: row, payload })),
+      /payload must not contain plaintext contact or message fields/,
+    );
+    assert.deepEqual(
+      Object.values(payload.rows).map((rows) => rows.length),
+      [0, 0, 0, 0],
+    );
+  }
+});
+
+test("every seller-intake write rolls the full transaction back on failure", async () => {
+  const row = ledgerRow({ lead_type: "seller" });
+  for (const collection of ["public_leads", "lead_contacts", "consent_events", "seller_pipeline_events"]) {
+    const payload = fakePayload({ failOn: collection });
+    await assert.rejects(
+      () =>
+        persistLeadDurably(
+          durableArgs({ ledgerRow: row, payload, sellerPipelineEvent: sellerPipelineEvent(row) }),
+        ),
+      (error) => error instanceof LeadStoreUnavailableError && error.code === "lead_store_unavailable",
+    );
+    for (const [storedCollection, rows] of Object.entries(payload.rows)) {
+      assert.equal(rows.length, 0, `${storedCollection} must roll back when ${collection} fails`);
+    }
+  }
 });
 
 test("the store refuses malformed input outright", async () => {
@@ -493,6 +614,7 @@ test("durable persistence rejects mixed-case nested plaintext contact fields bef
           },
           contactSecret: "test-only-durable-contact-key-32-characters-minimum",
           receivedAt: "2026-08-10T09:00:00.000Z",
+          workspaceId: "workspace-sandanski",
           payload,
         }),
       /must not contain raw contact data/,

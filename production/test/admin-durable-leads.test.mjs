@@ -20,6 +20,7 @@ const DURABLE_ENV = {
   PAYLOAD_SECRET: "p".repeat(40),
   DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
   MS_REALTY_LEAD_CONTACT_KEY: CONTACT_SECRET,
+  MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
 };
 const HEADERS = { authorization: `Bearer ${TOKEN}` };
 

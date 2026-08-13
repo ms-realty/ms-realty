@@ -249,7 +249,7 @@ test("config wires shared access onto admins, content, and case collections", as
     assert.equal(bySlug.search_outbox.access.create(req(admin)), false);
     assert.equal(bySlug.search_outbox.access.update(req(editor)), false);
     assert.equal(bySlug.listing_enrichment_tasks.access.delete(req(admin)), false);
-    for (const slug of ["public_leads", "lead_contacts"]) {
+    for (const slug of ["public_leads", "lead_contacts", "consent_events", "seller_pipeline_events"]) {
       for (const user of [admin, broker, editor, translator]) {
         assert.equal(bySlug[slug].access.create(req(user)), false, `${slug} REST create must remain server-owned`);
         assert.equal(bySlug[slug].access.update(req(user)), false, `${slug} REST update must remain server-owned`);
@@ -265,6 +265,12 @@ test("config wires shared access onto admins, content, and case collections", as
       for (const operation of ["create", "read", "update", "delete"]) {
         assert.equal(bySlug[slug].access[operation](req(admin)), false, `${slug} ${operation} must stay server-only`);
       }
+    }
+    for (const slug of ["consent_events", "seller_pipeline_events"]) {
+      assert.equal(bySlug[slug].access.read(req(admin)), true);
+      assert.deepEqual(bySlug[slug].access.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });
+      assert.equal(bySlug[slug].access.read(req(brokerNoScope)), false);
+      assert.equal(bySlug[slug].access.read(req(editor)), false);
     }
     // realty_cases: broker read is workspace-scoped; append-only update preserved
     assert.deepEqual(bySlug.realty_cases.access.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });

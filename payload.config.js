@@ -314,6 +314,36 @@ const providerDeliveryReceiptCollectionWithAccess = {
   access: { ...serverOwnedCollectionAccess, read: () => false },
 };
 
+// Request-time lead side effects share the lead transaction. They remain
+// append-only, server-owned event records; brokers can inspect their
+// privacy-safe payloads but cannot forge or rewrite them.
+const durableLeadSideEffectCollections = [
+  {
+    slug: "consent_events",
+    admin: { useAsTitle: "event_id", defaultColumns: ["workspace_id", "lead_id", "recorded_at"] },
+    access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
+    fields: [
+      { name: "event_id", type: "text", required: true, unique: true, index: true, maxLength: 160 },
+      { name: "workspace_id", type: "text", required: true, index: true, maxLength: 160 },
+      { name: "lead_id", type: "text", required: true, index: true, maxLength: 160 },
+      { name: "recorded_at", type: "date", required: true },
+      { name: "payload", type: "json", required: true },
+    ],
+  },
+  {
+    slug: "seller_pipeline_events",
+    admin: { useAsTitle: "event_id", defaultColumns: ["workspace_id", "lead_id", "recorded_at"] },
+    access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
+    fields: [
+      { name: "event_id", type: "text", required: true, unique: true, index: true, maxLength: 160 },
+      { name: "workspace_id", type: "text", required: true, index: true, maxLength: 160 },
+      { name: "lead_id", type: "text", required: true, index: true, maxLength: 160 },
+      { name: "recorded_at", type: "date", required: true },
+      { name: "payload", type: "json", required: true },
+    ],
+  },
+];
+
 export default buildConfig({
   admin: { user: "admins" },
   graphQL: { disable: true, disablePlaygroundInProduction: true },
@@ -342,5 +372,6 @@ export default buildConfig({
     providerWebhookEventCollectionWithAccess,
     providerDeliveryReceiptCollectionWithAccess,
     VIEWING_COLLECTION,
+    ...durableLeadSideEffectCollections,
   ],
 });

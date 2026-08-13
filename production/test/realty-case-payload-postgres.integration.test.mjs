@@ -510,10 +510,11 @@ function exerciseDurableLeadStore(env) {
       lead: {
         id: leadId,
         idempotency_key: idempotencyKey,
-        source: "website_contact_callback",
-        intent: "callback",
-        leadType: "general",
+        source: "website_seller_valuation",
+        intent: "valuation",
+        leadType: "seller",
         contact: { name: plaintextName, phone: plaintextPhone },
+        property: { location: "Sandanski", type: "apartment" },
         intake: { complete: true, missing_fields: [], captured_fields: ["contact"] },
       },
       original_language: "en",
@@ -541,7 +542,15 @@ function exerciseDurableLeadStore(env) {
     try {
       const configModule = await import(${JSON.stringify(pathToFileURL(payloadConfig).href)});
       payload = await getPayload({ config: configModule.default });
-      const options = { lead, contactSecret: process.env.MS_REALTY_LEAD_CONTACT_KEY, receivedAt, payload };
+      const options = {
+        lead,
+        contactSecret: process.env.MS_REALTY_LEAD_CONTACT_KEY,
+        marketingOptIn: true,
+        receivedAt,
+        sellerPipelineCreatedAt: receivedAt,
+        workspaceId: process.env.MS_REALTY_WORKSPACE_ID,
+        payload,
+      };
       const first = await persistLeadIntakeDurably(options);
       const retry = await persistLeadIntakeDurably(options);
       assert.equal(first.created, true);
@@ -549,18 +558,27 @@ function exerciseDurableLeadStore(env) {
       assert.equal(retry.created, false);
       assert.equal(retry.idempotent, true);
 
-      const [leads, contacts] = await Promise.all([
+      const [leads, contacts, consents, sellerEvents] = await Promise.all([
         rows("public_leads", { lead_id: { equals: leadId } }),
         rows("lead_contacts", { subject_id: { equals: leadId } }),
+        rows("consent_events", { lead_id: { equals: leadId } }),
+        rows("seller_pipeline_events", { lead_id: { equals: leadId } }),
       ]);
       assert.equal(leads.length, 1, "expected exactly one durable public lead");
       assert.equal(contacts.length, 1, "expected exactly one encrypted lead contact");
+      assert.equal(consents.length, 1, "expected exactly one consent event");
+      assert.equal(sellerEvents.length, 1, "expected exactly one seller pipeline event");
       assert.equal(leads[0].idempotency_key, idempotencyKey);
       assert.equal(contacts[0].algorithm, "aes-256-gcm");
       for (const field of ["iv", "auth_tag", "ciphertext"]) assert.ok(contacts[0][field], "missing encrypted envelope field " + field);
       for (const field of ["contact", "name", "phone", "email", "message"]) assert.equal(field in contacts[0], false);
 
-      const serialized = JSON.stringify({ lead: leads[0], contact: contacts[0] });
+      assert.equal(consents[0].workspace_id, process.env.MS_REALTY_WORKSPACE_ID);
+      assert.equal(consents[0].payload.marketing_opt_in, true);
+      assert.equal(sellerEvents[0].payload.stage, "valuation_requested");
+      assert.equal("contact_name" in sellerEvents[0].payload, false);
+
+      const serialized = JSON.stringify({ lead: leads[0], contact: contacts[0], consent: consents[0], seller: sellerEvents[0] });
       assert.equal(serialized.includes(plaintextName), false, "plaintext name reached Postgres");
       assert.equal(serialized.includes(plaintextPhone), false, "plaintext phone reached Postgres");
     } catch (error) {
@@ -617,6 +635,7 @@ function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outbo
         "20260730_170000_add_realty_case_conditions",
         "20260810_000558_durable_lead_store",
         "20260810_143000_repair_durable_lead_relations",
+        "20260813_120000_durable_lead_side_effects",
       ]) {
         assert.ok(migrationNames.has(name), \`missing applied Payload migration \${name}\`);
       }
@@ -710,6 +729,7 @@ test(
       PAYLOAD_POSTGRES_USER: databaseUser,
       PAYLOAD_SECRET: payloadSecret,
       MS_REALTY_LEAD_CONTACT_KEY: leadContactKey,
+      MS_REALTY_WORKSPACE_ID: workspaceId,
     };
     try {
       runCompose(project, ["up", "--detach", "--wait", "payload-postgres"], env, "starting isolated Payload Postgres");

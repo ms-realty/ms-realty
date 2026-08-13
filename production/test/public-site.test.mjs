@@ -26,6 +26,7 @@ Object.assign(process.env, {
   PAYLOAD_SECRET: "test-only-public-site-payload-secret-32-characters",
   DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
   MS_REALTY_LEAD_CONTACT_KEY: "test-only-public-site-contact-key-32-characters",
+  MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
 });
 
 const registry = loadLocaleRegistry();

@@ -1,8 +1,19 @@
 import { createLeadContactEnvelope } from "./lead-contact-vault.mjs";
 import { containsPlaintextMessageField, createLeadLedgerRow } from "./lead-ledger.mjs";
 import { openPrivateContactEnvelope } from "./private-contact-vault.mjs";
+import { createSellerPipelineItem } from "./seller-pipeline.mjs";
 
 const PLAINTEXT_CONTACT_FIELDS = new Set(["contact", "email", "phone", "whatsapp", "viber"]);
+const PRIVATE_EVENT_FIELD_NAMES = new Set([
+  "contact",
+  "contactname",
+  "email",
+  "message",
+  "messageoriginal",
+  "phone",
+  "viber",
+  "whatsapp",
+]);
 
 function containsPlaintextContactField(value) {
   if (Array.isArray(value)) return value.some(containsPlaintextContactField);
@@ -10,6 +21,76 @@ function containsPlaintextContactField(value) {
   return Object.entries(value).some(
     ([key, nested]) => PLAINTEXT_CONTACT_FIELDS.has(key.toLowerCase()) || containsPlaintextContactField(nested),
   );
+}
+
+function containsPrivateEventField(value) {
+  if (Array.isArray(value)) return value.some(containsPrivateEventField);
+  if (!value || typeof value !== "object") return false;
+  return Object.entries(value).some(([key, nested]) => {
+    const normalized = key.toLowerCase().replace(/[^a-z]/g, "");
+    return PRIVATE_EVENT_FIELD_NAMES.has(normalized) || containsPrivateEventField(nested);
+  });
+}
+
+function requiredText(value, label, maxLength = 160) {
+  const text = String(value || "").trim();
+  if (!text) throw new Error(`${label} is required`);
+  if (text.length > maxLength) throw new Error(`${label} must be ${maxLength} characters or fewer`);
+  return text;
+}
+
+function assertPrivacySafeEvent(event, { collection, leadId, workspaceId }) {
+  if (!event || typeof event !== "object" || Array.isArray(event)) throw new Error(`${collection} event is required`);
+  if (requiredText(event.lead_id, `${collection} lead_id`) !== leadId) {
+    throw new Error(`${collection} event must belong to the stored lead`);
+  }
+  if (requiredText(event.workspace_id, `${collection} workspace_id`) !== workspaceId) {
+    throw new Error(`${collection} event must belong to the stored workspace`);
+  }
+  requiredText(event.event_id, `${collection} event_id`);
+  if (!Number.isFinite(Date.parse(event.recorded_at))) throw new Error(`${collection} recorded_at must be an ISO timestamp`);
+  if (!event.payload || typeof event.payload !== "object" || Array.isArray(event.payload)) {
+    throw new Error(`${collection} payload must be an object`);
+  }
+  if (containsPrivateEventField(event.payload)) {
+    throw new Error(`${collection} payload must not contain plaintext contact or message fields`);
+  }
+  return event;
+}
+
+function consentEventFor(ledgerRow, { marketingOptIn = false, workspaceId }) {
+  const leadId = ledgerRow.lead_id;
+  return {
+    event_id: `consent-inquiry-follow-up:${leadId}`,
+    workspace_id: workspaceId,
+    lead_id: leadId,
+    recorded_at: ledgerRow.received_at,
+    payload: {
+      recorded_at: ledgerRow.received_at,
+      consent_type: "inquiry_follow_up",
+      source: ledgerRow.source,
+      subject_id: leadId,
+      locale: ledgerRow.original_language,
+      contact_fingerprint: ledgerRow.contact_fingerprint || null,
+      granted: true,
+      legal_basis: "legitimate_interest",
+      marketing_opt_in: marketingOptIn === true,
+    },
+  };
+}
+
+function sellerPipelineEventFor(lead, ledgerRow, { createdAt, workspaceId }) {
+  if (ledgerRow.lead_type !== "seller") return null;
+  const { contact_name: _contactName, ...payload } = createSellerPipelineItem(lead, {
+    createdAt: createdAt || ledgerRow.received_at,
+  });
+  return {
+    event_id: `seller-pipeline-created:${ledgerRow.lead_id}`,
+    workspace_id: workspaceId,
+    lead_id: ledgerRow.lead_id,
+    recorded_at: ledgerRow.received_at,
+    payload,
+  };
 }
 
 // Durable persistence for public lead intake, following the same shape as the
@@ -36,6 +117,7 @@ export function leadDurableStoreConfigFromEnv(env = process.env) {
     payloadSecret: String(env.PAYLOAD_SECRET || "").trim(),
     databaseUrl: String(env.DATABASE_URL || "").trim(),
     contactSecret: String(env.MS_REALTY_LEAD_CONTACT_KEY || ""),
+    workspaceId: String(env.MS_REALTY_WORKSPACE_ID || "").trim(),
   };
 }
 
@@ -47,7 +129,8 @@ export function isLeadDurableStoreEnabled(config = leadDurableStoreConfigFromEnv
     config.leadDurableStoreEnabled &&
       config.payloadSecret &&
       config.databaseUrl &&
-      String(config.contactSecret || "").length >= 32,
+      String(config.contactSecret || "").length >= 32 &&
+      String(config.workspaceId || "").trim(),
   );
 }
 
@@ -131,10 +214,24 @@ export async function readLeadIntakesDurably({ contactSecret, payload = null } =
   }
 }
 
-export async function persistLeadIntakeDurably({ lead, contactSecret, receivedAt, payload = null } = {}) {
+export async function persistLeadIntakeDurably({
+  lead,
+  contactSecret,
+  marketingOptIn = false,
+  payload = null,
+  receivedAt,
+  sellerPipelineCreatedAt,
+  workspaceId,
+} = {}) {
+  const durableWorkspaceId = requiredText(workspaceId, "Durable lead workspace_id");
   const ledgerRow = createLeadLedgerRow(lead, { receivedAt, contactSecret });
   const contactEnvelope = createLeadContactEnvelope(lead, { secret: contactSecret, storedAt: receivedAt });
-  const result = await persistLeadDurably({ ledgerRow, contactEnvelope, payload });
+  const consentEvent = consentEventFor(ledgerRow, { marketingOptIn, workspaceId: durableWorkspaceId });
+  const sellerPipelineEvent = sellerPipelineEventFor(lead, ledgerRow, {
+    createdAt: sellerPipelineCreatedAt,
+    workspaceId: durableWorkspaceId,
+  });
+  const result = await persistLeadDurably({ consentEvent, contactEnvelope, ledgerRow, payload, sellerPipelineEvent });
   return {
     ...result,
     contactVault: {
@@ -147,11 +244,17 @@ export async function persistLeadIntakeDurably({ lead, contactSecret, receivedAt
 }
 
 /**
- * Persist one public lead and its encrypted contact envelope in a durable
- * store. Returns the stored ledger row plus whether this call created it, so
- * a retried submission can answer 200 with the original rather than 201.
+ * Persist one public lead, encrypted contact, consent event, and (for sellers)
+ * pipeline event in one durable transaction. A retry returns the original
+ * business records rather than creating a second person.
  */
-export async function persistLeadDurably({ ledgerRow, contactEnvelope, payload = null } = {}) {
+export async function persistLeadDurably({
+  consentEvent,
+  contactEnvelope,
+  ledgerRow,
+  payload = null,
+  sellerPipelineEvent = null,
+} = {}) {
   if (!ledgerRow || typeof ledgerRow !== "object") throw new Error("A privacy-safe ledger row is required");
   const leadId = String(ledgerRow.lead_id || "").trim();
   if (!leadId) throw new Error("The ledger row must carry a lead_id");
@@ -168,6 +271,17 @@ export async function persistLeadDurably({ ledgerRow, contactEnvelope, payload =
   }
   if ((contactEnvelope.subject_type || "lead") !== "lead" || (contactEnvelope.subject_id || leadId) !== leadId) {
     throw new Error("The contact envelope must belong to the stored lead");
+  }
+  const workspaceId = requiredText(consentEvent?.workspace_id, "consent_events workspace_id");
+  assertPrivacySafeEvent(consentEvent, { collection: "consent_events", leadId, workspaceId });
+  if (ledgerRow.lead_type === "seller" && !sellerPipelineEvent) {
+    throw new Error("Seller leads require a seller_pipeline_events event");
+  }
+  if (ledgerRow.lead_type !== "seller" && sellerPipelineEvent) {
+    throw new Error("Only seller leads may create a seller_pipeline_events event");
+  }
+  if (sellerPipelineEvent) {
+    assertPrivacySafeEvent(sellerPipelineEvent, { collection: "seller_pipeline_events", leadId, workspaceId });
   }
 
   const runtime = await runtimePayload(payload);
@@ -186,9 +300,26 @@ export async function persistLeadDurably({ ledgerRow, contactEnvelope, payload =
     const byId = byKey ? null : await findOne(runtime, "public_leads", { lead_id: { equals: leadId } }, req);
     const existing = byKey || byId;
     if (existing) {
+      const existingLead = existing.ledger_row || existing;
+      const existingLeadId = requiredText(existingLead.lead_id, "Stored lead_id");
+      const storedConsent = await findOne(runtime, "consent_events", { lead_id: { equals: existingLeadId } }, req);
+      if (!storedConsent?.payload) throw new Error("Stored lead is missing its transactional consent event");
+      const storedSellerPipeline =
+        existingLead.lead_type === "seller"
+          ? await findOne(runtime, "seller_pipeline_events", { lead_id: { equals: existingLeadId } }, req)
+          : null;
+      if (existingLead.lead_type === "seller" && !storedSellerPipeline?.payload) {
+        throw new Error("Stored seller lead is missing its transactional pipeline event");
+      }
       await runtime.db.commitTransaction(transactionId);
       committed = true;
-      return { lead: existing.ledger_row || existing, created: false, idempotent: true };
+      return {
+        lead: existingLead,
+        consent: storedConsent.payload,
+        sellerPipeline: storedSellerPipeline?.payload || null,
+        created: false,
+        idempotent: true,
+      };
     }
 
     const possibleDuplicate = ledgerRow.contact_fingerprint
@@ -238,9 +369,19 @@ export async function persistLeadDurably({ ledgerRow, contactEnvelope, payload =
         ciphertext: contactEnvelope.ciphertext,
       },
     });
+    await runtime.create({ collection: "consent_events", overrideAccess: true, req, data: consentEvent });
+    if (sellerPipelineEvent) {
+      await runtime.create({ collection: "seller_pipeline_events", overrideAccess: true, req, data: sellerPipelineEvent });
+    }
     await runtime.db.commitTransaction(transactionId);
     committed = true;
-    return { lead: storedRow, created: true, idempotent: false };
+    return {
+      lead: storedRow,
+      consent: consentEvent.payload,
+      sellerPipeline: sellerPipelineEvent?.payload || null,
+      created: true,
+      idempotent: false,
+    };
   } catch (error) {
     if (transactionId && !committed) await runtime.db.rollbackTransaction(transactionId).catch(() => undefined);
     // Never answer 201 for an enquiry that was not actually stored.

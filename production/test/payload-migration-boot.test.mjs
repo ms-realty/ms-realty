@@ -10,6 +10,7 @@ const payloadSchemaDriftMigration = fromRoot("migrations", "20260810_164700_payl
 const durableListingEditMigration = fromRoot("migrations", "20260811_120000_durable_listing_edit_audit.ts");
 const publicSearchMigration = fromRoot("migrations", "20260811_153000_postgres_public_search.ts");
 const publicSearchRepairMigration = fromRoot("migrations", "20260813_110000_repair_postgres_search_index.ts");
+const durableLeadSideEffectsMigration = fromRoot("migrations", "20260813_120000_durable_lead_side_effects.ts");
 
 function tableSql(source, name) {
   const start = source.indexOf(`CREATE TABLE "${name}" (`);
@@ -28,7 +29,16 @@ test("Payload migration boot configuration and generated constraints stay runnab
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
   ]);
-  for (const migration of ["20260710_132716_initial_schema.ts", "20260730_120000_property_search_schema.ts", "20260810_164700_payload_schema_drift.ts", "20260811_120000_durable_listing_edit_audit.ts", "20260811_153000_postgres_public_search.ts", "20260813_110000_repair_postgres_search_index.ts", "20260813_120000_durable_funnel_events.ts"]) {
+  for (const migration of [
+    "20260710_132716_initial_schema.ts",
+    "20260730_120000_property_search_schema.ts",
+    "20260810_164700_payload_schema_drift.ts",
+    "20260811_120000_durable_listing_edit_audit.ts",
+    "20260811_153000_postgres_public_search.ts",
+    "20260813_110000_repair_postgres_search_index.ts",
+    "20260813_120000_durable_funnel_events.ts",
+    "20260813_120000_durable_lead_side_effects.ts",
+  ]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
       /import \{ sql, type MigrateDownArgs, type MigrateUpArgs \} from '@payloadcms\/db-postgres'/,
@@ -140,12 +150,36 @@ test("Payload migration boot configuration and generated constraints stay runnab
   const listingEditDown = listingEditPatch.match(/export async function down[\s\S]*$/)?.[0] || "";
   assert.doesNotMatch(listingEditDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
 
-  for (const migrationPath of [publicSearchMigration, publicSearchRepairMigration]) {
-    const searchIndexMigration = fs.readFileSync(migrationPath, "utf8");
-    assert.doesNotMatch(searchIndexMigration, /ms_realty_search_fold"\(concat_ws\(/);
-    assert.match(searchIndexMigration, /COALESCE\("facts_title", ''\) \|\| ' ' \|\|/);
-    assert.match(searchIndexMigration, /COALESCE\("id", ''\)/);
+  const publicSearch = fs.readFileSync(publicSearchMigration, "utf8");
+  assert.doesNotMatch(publicSearch, /ms_realty_search_fold"\(concat_ws\(/);
+  assert.match(publicSearch, /SEARCH_TEXT_SQL\(""\)/);
+  assert.match(publicSearch, /COALESCE\(NULLIF\(\$\{listing\}"facts_title", ''\)/);
+
+  const publicSearchRepair = fs.readFileSync(publicSearchRepairMigration, "utf8");
+  assert.doesNotMatch(publicSearchRepair, /ms_realty_search_fold"\(concat_ws\(/);
+  assert.match(publicSearchRepair, /COALESCE\("facts_title", ''\) \|\| ' ' \|\|/);
+  assert.match(publicSearchRepair, /COALESCE\("id", ''\)/);
+
+  const leadSideEffects = fs.readFileSync(durableLeadSideEffectsMigration, "utf8");
+  for (const table of ["consent_events", "seller_pipeline_events"]) {
+    const tableDefinition = tableSql(leadSideEffects, table);
+    for (const column of [
+      '"event_id" varchar NOT NULL',
+      '"workspace_id" varchar NOT NULL',
+      '"lead_id" varchar NOT NULL',
+      '"recorded_at" timestamp(3) with time zone NOT NULL',
+      '"payload" jsonb NOT NULL',
+    ]) {
+      assert.ok(tableDefinition.includes(column), `${table}.${column} must be required`);
+    }
+    assert.match(leadSideEffects, new RegExp(`CREATE UNIQUE INDEX "${table}_event_id_idx"`));
+    assert.match(leadSideEffects, new RegExp(`payload_locked_documents_rels_${table}_fk`));
   }
+  assert.match(leadSideEffects, /CREATE UNIQUE INDEX "public_leads_idempotency_key_idx"/);
+  const leadSideEffectsDown = leadSideEffects.match(/export async function down[\s\S]*$/)?.[0] || "";
+  assert.match(leadSideEffectsDown, /DROP TABLE "seller_pipeline_events"/);
+  assert.match(leadSideEffectsDown, /DROP TABLE "consent_events"/);
+  assert.match(leadSideEffectsDown, /CREATE INDEX "public_leads_idempotency_key_idx"/);
 
   const typesDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-migration-`);
   const env = {

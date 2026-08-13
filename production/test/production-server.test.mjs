@@ -300,6 +300,7 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   assert.equal(config.providerConnection.metaWebhookVerifyToken, "meta-webhook-verify-token-at-least-24");
   assert.equal(config.providerConnection.metaGraphVersion, "v22.0");
   assert.equal(config.providerWebhookReceivedAt, "2026-08-13T17:00:00.000Z");
+  assert.equal(config.leadDurableStore.workspaceId, "workspace-sandanski");
   assert.equal(productionServerConfig({}).localeRegistryPath, undefined);
   assert.equal(productionServerConfig({ HOST: "" }).host, "127.0.0.1");
   assert.throws(() => productionServerConfig({ HOST: " 127.0.0.1" }), /HOST must be a non-empty/);

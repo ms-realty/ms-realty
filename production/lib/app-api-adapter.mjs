@@ -280,7 +280,10 @@ async function routeLead(request, body, registry, seed, config) {
       ? await (config.persistLeadIntakeDurably || persistLeadIntakeDurably)({
           lead,
           contactSecret: durableStore.contactSecret,
+          marketingOptIn: input.marketingOptIn === true,
           receivedAt: config.receivedAt,
+          sellerPipelineCreatedAt: config.sellerPipelineCreatedAt,
+          workspaceId: durableStore.workspaceId,
         })
       : null;
     const contactVault = durable
@@ -299,19 +302,22 @@ async function routeLead(request, body, registry, seed, config) {
         receivedAt: config.receivedAt,
         contactSecret: config.leadContactKey,
       });
-    const consent = recordConsent(
-      {
-        consentType: "inquiry_follow_up",
-        source: lead.lead?.source,
-        subjectId: lead.lead?.id,
-        locale: lead.original_language,
-        contact: lead.lead?.contact,
-        marketingOptIn: input.marketingOptIn === true,
-      },
-      config,
-    );
-    const sellerPipeline =
-      lead.lead?.leadType === "seller"
+    const consent = durable
+      ? durable.consent
+      : recordConsent(
+        {
+          consentType: "inquiry_follow_up",
+          source: lead.lead?.source,
+          subjectId: lead.lead?.id,
+          locale: lead.original_language,
+          contact: lead.lead?.contact,
+          marketingOptIn: input.marketingOptIn === true,
+        },
+        config,
+      );
+    const sellerPipeline = durable
+      ? durable.sellerPipeline
+      : lead.lead?.leadType === "seller"
         ? appendSellerPipeline(createSellerPipelineItem(lead, { createdAt: config.sellerPipelineCreatedAt }), {
             filePath: config.sellerPipelinePath,
           })

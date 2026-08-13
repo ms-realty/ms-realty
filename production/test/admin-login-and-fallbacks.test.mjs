@@ -201,6 +201,7 @@ test("contact form availability follows only complete durable lead-store readine
     PAYLOAD_SECRET: "p".repeat(32),
     DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
     MS_REALTY_LEAD_CONTACT_KEY: "c".repeat(32),
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     MS_REALTY_MCP_WRITES_DISABLED: "1",
   };
   const enabled = renderContactPage({
@@ -215,6 +216,7 @@ test("contact form availability follows only complete durable lead-store readine
     "PAYLOAD_SECRET",
     "DATABASE_URL",
     "MS_REALTY_LEAD_CONTACT_KEY",
+    "MS_REALTY_WORKSPACE_ID",
   ]) {
     const disabled = renderContactPage({
       registry,
