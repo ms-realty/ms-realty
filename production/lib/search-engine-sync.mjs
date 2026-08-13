@@ -2257,6 +2257,21 @@ export function assertSearchEngineQueryReport(report) {
 export function assertSearchEngineEvidenceConsistency(syncReport, queryReport) {
   assertSearchEngineSyncReport(syncReport);
   assertSearchEngineQueryReport(queryReport);
+  const syncDatabaseTarget = assertExactRedactedPostgresTarget(
+    syncReport.summary.database_target,
+    "Search sync summary database target",
+  );
+  const queryDatabaseTarget = assertExactRedactedPostgresTarget(
+    queryReport.summary.database_target,
+    "Search query summary database target",
+  );
+  if (
+    syncDatabaseTarget !== queryDatabaseTarget ||
+    syncReport.summary.targets?.postgres !== queryReport.summary.targets?.postgres ||
+    syncReport.engines[0]?.target !== queryReport.engines[0]?.target
+  ) {
+    throw new Error("Search sync and query evidence must use the same canonical Postgres database identity");
+  }
   if (
     syncReport.evidence_scope !== queryReport.evidence_scope ||
     syncReport.source.kind !== queryReport.source.kind ||

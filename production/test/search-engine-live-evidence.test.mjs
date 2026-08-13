@@ -169,7 +169,7 @@ test("live query evidence uses the first current Payload document as its dynamic
   assert.deepEqual(report.summary.first_hit_ids, [DOCUMENT.id]);
 });
 
-test("sync and query launch evidence must describe the same Payload snapshot", async () => {
+test("sync and query launch evidence must describe the same Payload snapshot and canonical database identity", async () => {
   const sync = await runSearchEngineSync({
     ...CONFIG,
     postgres: postgresConfig(),
@@ -190,4 +190,20 @@ test("sync and query launch evidence must describe the same Payload snapshot", a
     () => assertSearchEngineEvidenceConsistency(sync, { ...query, source: { ...query.source, digest: "b".repeat(64) } }),
     /same Payload projection/,
   );
+
+  for (const databaseTarget of [
+    "postgres://db-b.ms-realty.bg:5432/ms_realty",
+    "postgresql://db.ms-realty.bg:5432/ms_realty",
+  ]) {
+    const mismatchedQuery = structuredClone(query);
+    mismatchedQuery.summary.database_target = databaseTarget;
+    mismatchedQuery.engines[0].database_target = databaseTarget;
+    mismatchedQuery.engines[0].operation.url = databaseTarget;
+
+    assert.equal(assertSearchEngineQueryReport(mismatchedQuery), true);
+    assert.throws(
+      () => assertSearchEngineEvidenceConsistency(sync, mismatchedQuery),
+      /same canonical Postgres database identity/,
+    );
+  }
 });

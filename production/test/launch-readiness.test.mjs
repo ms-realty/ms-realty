@@ -1970,6 +1970,25 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.equal(result.ready, true);
   assert.equal(result.reports.every((report) => report.status === "pass"), true);
 
+  const mismatchedDatabaseDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-mismatched-database-live-reports-`);
+  const mismatchedDatabasePaths = writeLiveReportFixtures(mismatchedDatabaseDir, generatedAt);
+  const mismatchedDatabaseQuery = JSON.parse(fs.readFileSync(mismatchedDatabasePaths.queryReportPath, "utf8"));
+  const mismatchedDatabaseTarget = "postgres://db-b.ms-realty.bg:5432/ms_realty";
+  mismatchedDatabaseQuery.summary.database_target = mismatchedDatabaseTarget;
+  mismatchedDatabaseQuery.engines[0].database_target = mismatchedDatabaseTarget;
+  mismatchedDatabaseQuery.engines[0].operation.url = mismatchedDatabaseTarget;
+  fs.writeFileSync(mismatchedDatabasePaths.queryReportPath, `${JSON.stringify(mismatchedDatabaseQuery)}\n`);
+  const mismatchedDatabaseResult = validateLiveServiceReports(mismatchedDatabasePaths);
+  assert.equal(mismatchedDatabaseResult.ready, false);
+  assert.equal(
+    mismatchedDatabaseResult.reports.find((report) => report.source === "postgres_search_query").status,
+    "invalid_report",
+  );
+  assert.match(
+    mismatchedDatabaseResult.reports.find((report) => report.source === "postgres_search_query").error,
+    /same canonical Postgres database identity/,
+  );
+
   const expiredAt = new Date(Date.parse(generatedAt) + 7 * 24 * 60 * 60 * 1000 + 1).toISOString();
   const expired = validateLiveServiceReports({ ...paths, now: expiredAt });
   assert.equal(expired.ready, false);
