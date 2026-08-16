@@ -183,12 +183,8 @@ test("main deploys automatically with image-marker rollback", () => {
   assert.match(ciWorkflow, /github\.event\.action == 'auto_merge_deploy'/);
   assert.match(ciWorkflow, /github\.event\.client_payload\.merge_sha == github\.sha/);
   assert.match(ciWorkflow, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
-  assert.match(ciWorkflow, /DATABASE_URL: \$\{\{ secrets\.DATABASE_URL \}\}/);
-  assert.match(ciWorkflow, /PAYLOAD_SECRET: \$\{\{ secrets\.PAYLOAD_SECRET \}\}/);
-  const migrationStep = ciWorkflow.indexOf("- name: Apply additive Payload migrations");
-  const deployStep = ciWorkflow.indexOf("- name: Deploy exact main commit");
-  assert.ok(migrationStep > 0 && migrationStep < deployStep, "database migrations must pass before Worker deploy");
-  assert.match(ciWorkflow.slice(migrationStep, deployStep), /npm run payload:migrate/);
+  const deployJob = ciWorkflow.slice(ciWorkflow.indexOf("\n  deploy:"));
+  assert.doesNotMatch(deployJob, /secrets\.DATABASE_URL|secrets\.PAYLOAD_SECRET|payload:migrate/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
   assert.match(ciWorkflow, /accounts\/\$\{CLOUDFLARE_ACCOUNT_ID\}\/workers\/subdomain/);
