@@ -166,8 +166,8 @@ jobs:
           const configPath = "wrangler.jsonc";
           if (!/^[0-9a-f]{40}$/i.test(marker)) throw new Error("GITHUB_SHA must be a full commit SHA");
           const config = fs.readFileSync(configPath, "utf8");
-          if (config.split(placeholder).length !== 2) throw new Error("Expected exactly one Container image marker placeholder");
-          fs.writeFileSync(configPath, config.replace(placeholder, marker));
+          if (config.split(placeholder).length !== 3) throw new Error("Expected Container and edge image marker placeholders");
+          fs.writeFileSync(configPath, config.replaceAll(placeholder, marker));
           NODE
 
       - name: Deploy exact main commit

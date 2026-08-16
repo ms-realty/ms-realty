@@ -1,22 +1,30 @@
 {
 	admin off
+	servers {
+		# https://www.cloudflare.com/ips/ — pin the edge ranges so arbitrary
+		# clients cannot forge CF-Connecting-IP on the public origin.
+		trusted_proxies static 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+		trusted_proxies_strict
+		client_ip_headers CF-Connecting-IP X-Forwarded-For
+	}
 }
 
 (app_proxy) {
-	encode zstd gzip
-
-	route {
-		@operator path /admin/* /api/admin/*
-		reverse_proxy @operator app:3000 {
-			header_up Authorization "Bearer {$MS_REALTY_ADMIN_TOKEN}"
-		}
-
-		reverse_proxy app:3000
+	@app_operator path /admin /admin/* /api/admin/*
+	reverse_proxy @app_operator app:3000 {
+		header_up Authorization "Bearer {$MS_REALTY_ADMIN_TOKEN}"
+		header_up CF-Connecting-IP {client_ip}
+	}
+	reverse_proxy app:3000 {
+		header_up CF-Connecting-IP {client_ip}
 	}
 }
 
 :8080 {
-	import app_proxy
+	encode zstd gzip
+	route {
+		import app_proxy
+	}
 }
 
 {$MS_REALTY_REVIEW_HOST} {
@@ -100,12 +108,66 @@
 		basic_auth {
 			{$MS_REALTY_REVIEW_USER} {$MS_REALTY_REVIEW_PASSWORD_HASH}
 		}
-		@review_root path /
-		redir @review_root /admin/migration/review?locale=bg 302
-		@operator path /admin/* /api/admin/*
-		reverse_proxy @operator app:3000 {
-			header_up Authorization "Bearer {$MS_REALTY_ADMIN_TOKEN}"
+		@legacy_media path /wp-content/uploads/*
+		handle @legacy_media {
+			header Cache-Control "public, max-age=31536000, immutable"
+			header X-Content-Type-Options "nosniff"
+			root * /srv/media
+			try_files /makler-realty.com{path} /makler-realty.ru{path}
+			file_server
 		}
-		reverse_proxy app:3000
+		import app_proxy
+	}
+}
+
+www.makler-realty.com {
+	redir https://makler-realty.com{uri} permanent
+}
+
+www.makler-realty.ru {
+	redir https://makler-realty.ru{uri} permanent
+}
+
+makler-realty.com {
+	encode zstd gzip
+	route {
+		@legacy_media path /wp-content/uploads/*
+		handle @legacy_media {
+			header Cache-Control "public, max-age=31536000, immutable"
+			header X-Content-Type-Options "nosniff"
+			root * /srv/media/makler-realty.com
+			file_server
+		}
+
+		@payload_private path /payload-admin /payload-admin/* /api/admins /api/admins/* /graphql /graphql/* /graphql-playground /graphql-playground/* /api/graphql /api/graphql/*
+		respond @payload_private "Not found" 404
+
+		@public_operator path /admin /admin/* /api/admin/*
+		basic_auth @public_operator {
+			{$MS_REALTY_REVIEW_USER} {$MS_REALTY_REVIEW_PASSWORD_HASH}
+		}
+		import app_proxy
+	}
+}
+
+makler-realty.ru {
+	encode zstd gzip
+	route {
+		@legacy_media path /wp-content/uploads/*
+		handle @legacy_media {
+			header Cache-Control "public, max-age=31536000, immutable"
+			header X-Content-Type-Options "nosniff"
+			root * /srv/media/makler-realty.ru
+			file_server
+		}
+
+		@payload_private path /payload-admin /payload-admin/* /api/admins /api/admins/* /graphql /graphql/* /graphql-playground /graphql-playground/* /api/graphql /api/graphql/*
+		respond @payload_private "Not found" 404
+
+		@public_operator path /admin /admin/* /api/admin/*
+		basic_auth @public_operator {
+			{$MS_REALTY_REVIEW_USER} {$MS_REALTY_REVIEW_PASSWORD_HASH}
+		}
+		import app_proxy
 	}
 }

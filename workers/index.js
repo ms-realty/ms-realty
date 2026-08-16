@@ -12,6 +12,12 @@ import {
   secretMatches,
 } from "./durable-case-authority.mjs";
 import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
+import {
+  OriginProxyError,
+  requestForOrigin,
+  responseForPublicOrigin,
+  responseWithEdgeBuildMarker,
+} from "./origin-proxy.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
 // process that reads the filesystem — the CMS seed and (for now) the JSONL
@@ -59,7 +65,6 @@ export class MsRealtyContainer extends Container {
     MEILI_API_KEY: this.env.MEILI_API_KEY ?? "",
     MEILI_QUERY_API_KEY: this.env.MEILI_QUERY_API_KEY ?? "",
     MEILI_INDEX: this.env.MEILI_INDEX ?? "",
-    MS_REALTY_SEARCH_ENGINE: this.env.MS_REALTY_SEARCH_ENGINE ?? "",
     MS_REALTY_SEARCH_ALLOW_PRIVATE_SERVICE_NETWORK: this.env.MS_REALTY_SEARCH_ALLOW_PRIVATE_SERVICE_NETWORK ?? "",
     HERMES_CHAT_COMPLETIONS_URL: this.env.HERMES_CHAT_COMPLETIONS_URL ?? "",
     HERMES_API_KEY: this.env.HERMES_API_KEY ?? "",
@@ -232,6 +237,29 @@ function payloadPrivateResponse() {
   });
 }
 
+async function proxyDurableOrigin(request, env, url, preview) {
+  try {
+    const upstreamRequest = requestForOrigin(request, env.MS_REALTY_ORIGIN_URL);
+    const upstreamResponse = await fetch(upstreamRequest);
+    const publicResponse = responseForPublicOrigin(upstreamResponse, {
+      originValue: env.MS_REALTY_ORIGIN_URL,
+      publicUrl: url,
+    });
+    const versionedResponse = await responseWithEdgeBuildMarker(
+      publicResponse,
+      env.MS_REALTY_EDGE_BUILD_MARKER,
+      url.pathname,
+    );
+    return preview ? withPreviewNoindex(versionedResponse) : versionedResponse;
+  } catch (error) {
+    const status = error instanceof OriginProxyError ? error.status : 502;
+    return new Response(JSON.stringify({ kind: status === 403 ? "cross_origin_write_blocked" : "origin_unavailable" }), {
+      status,
+      headers: { "cache-control": "no-store", "content-type": "application/json; charset=utf-8" },
+    });
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -250,8 +278,14 @@ export default {
       }
       const media = await serveMedia(request, env, url);
       if (media) return media;
+      if (env.MS_REALTY_ORIGIN_URL) return proxyDurableOrigin(request, env, url, preview);
       return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
     }
+
+    // The durable handoff runtime lives on the agency's fixed origin. Keeping
+    // this switch optional preserves the Container as a fail-closed fallback
+    // for accounts that have not provisioned that origin.
+    if (env.MS_REALTY_ORIGIN_URL) return proxyDurableOrigin(request, env, url, preview);
 
     // Container disk resets on sleep, so only the existing Payload/Postgres
     // authority routes can write. Every other mutation remains read-only.

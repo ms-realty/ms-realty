@@ -5,8 +5,9 @@ services:
     environment:
       MS_REALTY_ADMIN_ACTOR: ${MS_REALTY_ADMIN_ACTOR:-agency_admin}
       MS_REALTY_PUBLIC_CONTACT_KEY: ${MS_REALTY_PUBLIC_CONTACT_KEY:?MS_REALTY_PUBLIC_CONTACT_KEY is required}
-      MS_REALTY_PUBLIC_ORIGIN: https://${MS_REALTY_REVIEW_HOST:?MS_REALTY_REVIEW_HOST is required}
-      MS_REALTY_MCP_ALLOWED_ORIGINS: https://${MS_REALTY_REVIEW_HOST}
+      MS_REALTY_TRUST_PROXY: "1"
+      MS_REALTY_PUBLIC_ORIGIN: https://makler-realty.com
+      MS_REALTY_MCP_ALLOWED_ORIGINS: https://makler-realty.com,https://makler-realty.ru,https://ms-realty.ms-realty-bg.workers.dev
 
   edge:
     environment:
@@ -22,6 +23,7 @@ services:
       - "443:443/udp"
     volumes:
       - ./Caddyfile.production-review:/etc/caddy/Caddyfile:ro
+      - /opt/ms-realty/shared/media:/srv/media:ro
 
 volumes:
   payload-postgres-data:
