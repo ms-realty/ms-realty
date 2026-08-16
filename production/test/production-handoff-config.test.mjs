@@ -10,8 +10,14 @@ const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 
 test("handoff puts the same governed app behind the private preview and final domains", () => {
+  const reviewHost = caddy.indexOf("{$MS_REALTY_REVIEW_HOST}");
+  const publicHealth = caddy.indexOf("@edge_health path /api/health", reviewHost);
+  const reviewAuth = caddy.indexOf("basic_auth {", reviewHost);
+
   assert.match(caddy, /\{\$MS_REALTY_REVIEW_HOST\}/);
   assert.match(caddy, /basic_auth \{/);
+  assert.ok(reviewHost >= 0 && publicHealth > reviewHost && reviewAuth > publicHealth);
+  assert.match(caddy, /handle @edge_health \{\s+reverse_proxy app:3000/);
   assert.match(caddy, /import app_proxy/);
   assert.match(caddy, /trusted_proxies static 173\.245\.48\.0\/20[\s\S]*2c0f:f248::\/32/);
   assert.match(caddy, /client_ip_headers CF-Connecting-IP X-Forwarded-For/);
