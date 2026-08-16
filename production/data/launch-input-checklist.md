@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-08-13T14:24:31.129Z
+Generated: 2026-08-16T17:28:57.512Z
 
 Status: blocked
 Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
@@ -178,6 +178,14 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - listing_quality.missing_area: 165
 - listing_quality.missing_location: 2
 - listing_quality.thin_public_gallery: 18
+
+## Manual Source Audit (Non-Approval Evidence)
+
+- Artifact: `production/data/manual-listing-audit.json`: complete_non_approval_evidence
+- Coverage: 165/165 source rows (pass: 30, review: 75, hold: 52, source unavailable: 8).
+- Broker approvals in this artifact: 0; broker confirmations still required: 165.
+- Broker packet: `production/data/launch-candidate30-broker-packet.json` — 30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6.
+- This evidence does not clear `listing_quality_review`; use the packet to prioritize human fact, media, availability, and publication review.
 
 ## Broker Verification
 

@@ -167,6 +167,9 @@
     })
       .then(function (response) {
         if (!response.ok) throw new Error(String(response.status));
+        return response.text();
+      })
+      .then(function () {
         onDone();
       })
       .catch(function () {

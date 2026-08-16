@@ -2527,6 +2527,11 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /public_gallery_sample/);
   assert.match(markdown, /POST \/api\/admin\/listings\/edit/);
   assert.match(markdown, /one valid row for every workbook row/);
+  assert.match(markdown, /Manual Source Audit \(Non-Approval Evidence\)/);
+  assert.match(markdown, /Coverage: 165\/165 source rows \(pass: 30, review: 75, hold: 52, source unavailable: 8\)/);
+  assert.match(markdown, /Broker approvals in this artifact: 0; broker confirmations still required: 165/);
+  assert.match(markdown, /30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6/);
+  assert.match(markdown, /does not clear `listing_quality_review`/);
   assert.match(markdown, /Broker Verification/);
   assert.match(markdown, /production\/data\/listing-verification-report\.json/);
   assert.match(markdown, /Broker verification tasks: 165/);

@@ -30,6 +30,40 @@ function defaultListingVerification() {
   return JSON.parse(fs.readFileSync(fromRoot("production", "data", "listing-verification-report.json"), "utf8"));
 }
 
+function manualListingAuditState() {
+  const auditPath = fromRoot("production", "data", "manual-listing-audit.json");
+  const packetPath = fromRoot("production", "data", "launch-candidate30-broker-packet.json");
+  try {
+    const audit = JSON.parse(fs.readFileSync(auditPath, "utf8"));
+    const packet = JSON.parse(fs.readFileSync(packetPath, "utf8"));
+    const listings = Array.isArray(audit.listings) ? audit.listings : [];
+    const candidates = Array.isArray(packet.listings) ? packet.listings : [];
+    const statusCounts = audit.summary?.review_status_counts || {};
+    const valid =
+      audit.schema_version === 1 &&
+      audit.broker_approval_granted === false &&
+      listings.length === 165 &&
+      packet.schema_version === 1 &&
+      candidates.length === 30 &&
+      packet.candidate_count === 30 &&
+      packet.publish_ready_count === 0 &&
+      packet.candidate_count === candidates.length;
+    return {
+      status: valid ? "complete_non_approval_evidence" : "invalid",
+      listing_count: listings.length,
+      review_status_counts: statusCounts,
+      broker_approval_granted: audit.broker_approval_granted === true,
+      broker_confirmation_required: audit.summary?.broker_confirmation_required || 0,
+      candidate_count: packet.candidate_count || candidates.length,
+      publish_ready_count: packet.publish_ready_count || 0,
+      selection_basis: packet.selection_basis || "unknown",
+      previous_launch_candidate_overlap: packet.previous_launch_candidate_overlap || 0,
+    };
+  } catch (error) {
+    return { status: "missing_or_invalid", error: error.message };
+  }
+}
+
 function sourceLine(source, summary) {
   const state = summary.sources[source];
   const filename = SEO_EXPORTS[source].filename;
@@ -154,6 +188,7 @@ export function renderLaunchInputChecklist({
   routeMap,
   listingVerification = defaultListingVerification(),
   liveServiceProvisioning = liveServiceProvisioningState(),
+  manualListingAudit = manualListingAuditState(),
 }) {
   const redirectEvidence = launchReadiness.gates.find((gate) => gate.id === "redirect_reviews")?.evidence || {};
   const totalLegacyUrls = redirectEvidence.total_legacy_urls ?? routeMap.summary.total ?? 0;
@@ -190,6 +225,7 @@ export function renderLaunchInputChecklist({
   const recoveryEvidence = recoveryGate?.evidence || {};
   const monitoringGate = launchReadiness.gates.find((gate) => gate.id === "monitoring_rollback");
   const monitoringEvidence = monitoringGate?.evidence?.machine_evidence || {};
+  const manualAuditCounts = manualListingAudit.review_status_counts || {};
 
   return `# Launch Input Checklist
 
@@ -331,6 +367,14 @@ ${listingPendingReviewLines(listingReviewEvidence)}
 - Review pack command: \`npm run listing:review-pack\`.
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
 ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`).join("\n")}
+
+## Manual Source Audit (Non-Approval Evidence)
+
+- Artifact: \`production/data/manual-listing-audit.json\`: ${manualListingAudit.status}
+- Coverage: ${manualListingAudit.listing_count || 0}/165 source rows (pass: ${manualAuditCounts.pass || 0}, review: ${manualAuditCounts.review || 0}, hold: ${manualAuditCounts.hold || 0}, source unavailable: ${manualAuditCounts.source_unavailable || 0}).
+- Broker approvals in this artifact: ${manualListingAudit.broker_approval_granted ? "present (invalid)" : "0"}; broker confirmations still required: ${manualListingAudit.broker_confirmation_required || 0}.
+- Broker packet: \`production/data/launch-candidate30-broker-packet.json\` — ${manualListingAudit.candidate_count || 0} candidates, ${manualListingAudit.publish_ready_count || 0} publish-ready; selection: ${manualListingAudit.selection_basis || "unknown"}; overlap with prior automatic shortlist: ${manualListingAudit.previous_launch_candidate_overlap || 0}.
+- This evidence does not clear \`listing_quality_review\`; use the packet to prioritize human fact, media, availability, and publication review.${manualListingAudit.error ? ` Error: ${manualListingAudit.error}` : ""}
 
 ## Broker Verification
 

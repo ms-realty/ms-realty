@@ -1,0 +1,2365 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "source": "production/data/live-listing-audit.json.listings",
+    "indexing": "zero_based_inclusive",
+    "start_index": 55,
+    "end_index": 109
+  },
+  "count": 55,
+  "reviewer_kind": "codex_manual_source_review_not_broker_approval",
+  "review_method": "Rendered each current source URL in headless Chromium at 1440x900, read the visible listing facts, compared them with search/data/listings.json and the audit row, and sampled property-specific gallery assets. No availability, legal fact, or media ownership was broker-approved.",
+  "listings": [
+    {
+      "id": "MS-CRAWL-0055",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/",
+      "checked_at": "2026-08-13T14:38:10.645538Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ПАРЦЕЛ В САНДАНСКИ",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": 2203,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Sandanski, Nisan Tashi area",
+        "property_scope": "single urban land parcel; source says it may be divided into 967 sqm and 1,236 sqm parts",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 6,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2020/08/770-2-680x383.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2020/08/770-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2020/08/770-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "whether the 2,203 sqm parcel is still available and whether sale is whole-only or divisible"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0056",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "checked_at": "2026-08-13T14:38:13.140766Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ПАРЦЕЛ В САНДАНСКИ",
+        "price_eur_or_por": 60000,
+        "area_sqm_or_unknown": 1495,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Sandanski, Nisan Tashi area",
+        "property_scope": "single 1,495 sqm urban land parcel with current dirt-road access",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 2,
+          "sampled": 2,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2024/03/321-680x383.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2024/03/321-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 2,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "only two public gallery assets are recorded, below the three-asset launch threshold",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability and whether road/access status remains accurate"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0057",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
+      "checked_at": "2026-08-13T14:38:16.699016Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ПАРЦЕЛ В С.МИКРЕВО",
+        "price_eur_or_por": 17000,
+        "area_sqm_or_unknown": 611,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Mikrevo, Strumyani municipality",
+        "property_scope": "single 611 sqm land parcel",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 4,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/07/898-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/07/898-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/07/898-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability and utility connections at the parcel boundary"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0058",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
+      "checked_at": "2026-08-13T14:38:21.543638Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА ПАРЦЕЛ В С.ПОЛЕНИЦА",
+        "price_eur_or_por": 25000,
+        "area_sqm_or_unknown": {
+          "offered_ideal_share_sqm": 288,
+          "whole_regulated_plot_sqm": 576,
+          "existing_building_footprint_sqm": 60
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Polenitsa",
+        "property_scope": "one-half ideal share of a regulated plot containing an existing residential building; construction is described on a party wall",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 4,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2020/04/749-1-680x383.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2020/04/749-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2020/04/749-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "canonical land type does not express that the offer is a one-half ideal share with an existing building",
+        "rights, buildable footprint, and exact cadastral scope require legal/broker confirmation",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability",
+        "exact title/cadastral interest being sold",
+        "whether the 60 sqm building or only the 288 sqm ideal land share is included",
+        "permitted party-wall construction scope"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0059",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
+      "checked_at": "2026-08-13T14:38:24.161191Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ПАРЦЕЛ В С.ХОТОВО",
+        "price_eur_or_por": 14000,
+        "area_sqm_or_unknown": {
+          "aggregate_sqm": 762,
+          "component_parcels_sqm": [
+            478,
+            284
+          ]
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Hotovo, Sandanski municipality",
+        "property_scope": "two adjacent parcels offered as one 762 sqm aggregate",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 4,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2026/06/954-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2026/06/954-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2026/06/954-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "gallery filenames use listing number 954 while the visible source reference is 945",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "whether both parcels must be sold together",
+        "that the sampled gallery belongs to source reference 945"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0060",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b7%d0%b0-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4/",
+      "checked_at": "2026-08-13T14:38:26.600187Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ПАРЦЕЛ ЗА СТРОИТЕЛСТВО В САНДАНСКИ",
+        "price_eur_or_por": 170400,
+        "area_sqm_or_unknown": {
+          "land_sqm": 1704,
+          "displayed_building_area_sqm": 1704
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Sandanski, Spartak district",
+        "property_scope": "single regulated 1,704 sqm land parcel intended for complex development",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 4,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2024/02/234-2-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2024/02/234-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2024/02/234-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "source repeats 1,704 sqm as both area and plot area; canonical field must preserve land-area semantics",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "current development designation and planning parameters"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0061",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd/",
+      "checked_at": "2026-08-13T14:38:30.794230Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ПАРЦЕЛ ЗА СТРОИТЕЛСТВО В С.СТРУМЯНИ",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": 677,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Strumyani",
+        "property_scope": "single 677 sqm building plot",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 16,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2020/01/470-dron-new-680x383.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2018/09/470-2-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2018/09/470-4-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "current negotiated price",
+        "utility and concrete-road claims"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0062",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d0%b8%d1%88%d0%bb%d0%b5%d0%bd%d0%b8-%d1%85%d0%b0%d0%bb%d0%b5%d1%82%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4/",
+      "checked_at": "2026-08-13T14:38:32.801997Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ПРОМИШЛЕНИ ХАЛЕТА В БЛИЗОСТ ДО ГР.САНДАНСКИ",
+        "price_eur_or_por": 563000,
+        "area_sqm_or_unknown": {
+          "industrial_buildings_total_sqm": 2600,
+          "land_sqm": 3000
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "near Sandanski; exact settlement unknown",
+        "property_scope": "3,000 sqm industrial property containing several halls with 2,600 sqm stated total built area",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 14,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/05/894-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/05/894-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/05/894-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "exact settlement is not stated on the live page",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "exact settlement/cadastral location",
+        "whether all listed halls and the full 3,000 sqm plot are included"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0063",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d0%b5-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%b3%d1%80%d0%b0%d0%bb%d0%b8%d1%89%d0%b5-%d0%bc%d0%b0%d0%bb%d0%b5%d1%88%d0%b5%d0%b2%d0%be/",
+      "checked_at": "2026-08-13T14:38:34.940249Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА СЕ ВИЛА В С. ИГРАЛИЩЕ, ОБЩИНА СТРУМЯНИ",
+        "price_eur_or_por": {
+          "mode": "scope_dependent",
+          "values_eur": [
+            28000,
+            32000
+          ],
+          "scopes": [
+            "villa plus 342 sqm plot",
+            "villa plus 342 sqm plot and optional 1,068 sqm adjacent agricultural land"
+          ]
+        },
+        "area_sqm_or_unknown": {
+          "villa_sqm": 36,
+          "included_plot_sqm": 342,
+          "optional_adjacent_land_sqm": 1068
+        },
+        "bedrooms_or_unknown": "unknown",
+        "location_or_unknown": "Igralishte, Strumyani municipality",
+        "property_scope": "36 sqm one-room prefabricated villa on 342 sqm plot, with optional adjacent 1,068 sqm agricultural parcel",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 5,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2026/06/960-v-680x456.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2026/06/960-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2026/06/960-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "canonical price-on-request conflicts with live fixed prices of EUR 28,000 and EUR 32,000",
+        "offer has two materially different land scopes and prices",
+        "canonical bedrooms value 0 is not supported; source only says one room",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability",
+        "which land scope is actively offered",
+        "whether the one room is a bedroom/studio room",
+        "title and status of the optional agricultural parcel"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0064",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d0%b0%d1%80%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
+      "checked_at": "2026-08-13T14:38:37.061574Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА СТАРА КЪЩА В С.ХОТОВО",
+        "price_eur_or_por": {
+          "mode": "scope_dependent",
+          "values_eur": [
+            18500,
+            35000
+          ],
+          "scopes": [
+            "one house",
+            "two adjoining houses together"
+          ]
+        },
+        "area_sqm_or_unknown": {
+          "per_house_sqm": 160,
+          "plot_per_house_sqm": 218
+        },
+        "bedrooms_or_unknown": "unknown",
+        "location_or_unknown": "Hotovo",
+        "property_scope": "one of two adjoining two-level old houses, or both houses together; each described with the same area and plot size",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 3,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2024/10/1729152754546-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "single-listing header does not make the one-house versus two-house sale scope machine-safe",
+        "bedroom count is not stated",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability of each house",
+        "whether EUR 18,500 is per house and EUR 35,000 is for both",
+        "separate cadastral identifiers and included plots",
+        "bedroom count per house"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0065",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be-%d0%b2-%d1%81%d0%b0%d0%bf%d1%84%d0%b8%d1%80-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
+      "checked_at": "2026-08-13T14:38:43.229218Z",
+      "http_status": 404,
+      "review_status": "source_unavailable",
+      "observed": {
+        "title": "unknown",
+        "price_eur_or_por": "unknown",
+        "area_sqm_or_unknown": "unknown",
+        "bedrooms_or_unknown": "unknown",
+        "location_or_unknown": "unknown",
+        "property_scope": "source page unavailable (HTTP 404); former canonical record described a studio in Sapphire, Bansko",
+        "availability_signal": "HTTP 404; no current availability signal can be verified",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 0,
+          "sampled": 0,
+          "sample_urls": [],
+          "browser_loaded_in_sample": 0,
+          "broken_in_sample": 0,
+          "note": "HTTP 404 template images excluded; listing gallery unavailable"
+        }
+      },
+      "issues": [
+        "live source returns HTTP 404",
+        "404 template media are unrelated and excluded from review"
+      ],
+      "required_action": "Keep unpublished; obtain a current approved source/replacement URL or approve withdrawal/410 before any canonical publication.",
+      "broker_confirm": [
+        "replacement source URL or withdrawal decision",
+        "current availability and canonical facts from an approved source"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0066",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8/",
+      "checked_at": "2026-08-13T14:38:48.113261Z",
+      "http_status": 404,
+      "review_status": "source_unavailable",
+      "observed": {
+        "title": "unknown",
+        "price_eur_or_por": "unknown",
+        "area_sqm_or_unknown": "unknown",
+        "bedrooms_or_unknown": "unknown",
+        "location_or_unknown": "unknown",
+        "property_scope": "source page unavailable (HTTP 404); former canonical record described a three-room apartment in Ofrinio",
+        "availability_signal": "HTTP 404; no current availability signal can be verified",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 0,
+          "sampled": 0,
+          "sample_urls": [],
+          "browser_loaded_in_sample": 0,
+          "broken_in_sample": 0,
+          "note": "HTTP 404 template images excluded; listing gallery unavailable"
+        }
+      },
+      "issues": [
+        "live source returns HTTP 404",
+        "404 template media are unrelated and excluded from review"
+      ],
+      "required_action": "Keep unpublished; obtain a current approved source/replacement URL or approve withdrawal/410 before any canonical publication.",
+      "broker_confirm": [
+        "replacement source URL or withdrawal decision",
+        "current availability and canonical facts from an approved source"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0067",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
+      "checked_at": "2026-08-13T14:38:52.404536Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ТРИСТАЕН АПАРТАМЕНТ В ЦЕНТЪРА НА ГР.САНДАНСКИ",
+        "price_eur_or_por": 126000,
+        "area_sqm_or_unknown": {
+          "total_sqm": 90,
+          "built_sqm": 80,
+          "storage_sqm": 3.6
+        },
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "Sandanski, 15B Boris Sarafov Street",
+        "property_scope": "single three-room apartment with two bedrooms and storage",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 8,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/08/903-2-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/08/903-2-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/08/903-6-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "gallery filenames use reference 903 while the visible listing reference is 902",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "that the sampled gallery belongs to visible source reference 902",
+        "whether 90 sqm includes common parts exactly as described"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0068",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-15%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%ba%d0%b0%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be/",
+      "checked_at": "2026-08-13T14:38:55.001744Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА 15ДКА ЗЕМЯ В РАЙОНА НА С.КАПАТОВО",
+        "price_eur_or_por": 16000,
+        "area_sqm_or_unknown": {
+          "aggregate_land_sqm": 15000,
+          "composition": "several adjacent smaller agricultural parcels"
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "land area near Kapatovo, about 1.5 km from the village boundary",
+        "property_scope": "several adjacent agricultural parcels sold as a 15,000 sqm aggregate",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 1,
+          "sampled": 0,
+          "sample_urls": [],
+          "browser_loaded_in_sample": 0,
+          "broken_in_sample": 0,
+          "note": "Only the shared DJI_0696 site image was observed; no property-specific gallery asset could be sampled"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "no property-specific gallery asset was observed; only the shared site drone image is recorded",
+        "individual parcel count, identifiers, and areas are absent",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability",
+        "all cadastral identifiers and component areas",
+        "whether parcels are sold only as one package",
+        "property-specific media"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0069",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-8%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%b2-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8%d1%89%d0%b5%d1%82%d0%be-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8/",
+      "checked_at": "2026-08-13T14:38:57.688332Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА 8ДКА ЗЕМЯ В ЗЕМЛИЩЕТО НА С.ЛЕШНИЦА",
+        "price_eur_or_por": 9000,
+        "area_sqm_or_unknown": 8000,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Leshnitsa land area",
+        "property_scope": "single or aggregate agricultural land offer described as 8,000 sqm arable land, category 6",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 3,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2020/02/744-2-680x383.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2020/02/744-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2020/02/744-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "source does not state a cadastral identifier or whether 8,000 sqm is one parcel",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "cadastral scope and whether the offer is one parcel",
+        "agricultural category"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0070",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%b8%d0%b7%d0%bd%d0%b5%d1%81-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d0%bf%d0%b5%d1%82%d1%80%d0%b8/",
+      "checked_at": "2026-08-13T14:38:59.879868Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА БИЗНЕС СГРАДА В ЦЕНТЪРА НА ПЕТРИЧ",
+        "price_eur_or_por": 748900,
+        "area_sqm_or_unknown": {
+          "combined_gross_sqm": 3111,
+          "completed_building_sqm": 707,
+          "unfinished_commercial_sqm": 746,
+          "unfinished_residential_sqm": 1658
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "central Petrich",
+        "property_scope": "package of a completed three-level mixed-use building and an adjacent unfinished four-level mixed-use building in one regulated plot",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 1,
+          "sampled": 0,
+          "sample_urls": [],
+          "browser_loaded_in_sample": 0,
+          "broken_in_sample": 0,
+          "note": "Only the shared DJI_0696 site image was observed; no property-specific gallery asset could be sampled"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "no property-specific gallery asset was observed; only the shared site drone image is recorded",
+        "complex package scope and construction stages need document-level verification",
+        "source combines two buildings and multiple use classes under one price",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability",
+        "exact regulated plot and both building identifiers",
+        "construction permit/Act status for unfinished building",
+        "whether EUR 748,900 includes both buildings",
+        "property-specific media"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0071",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
+      "checked_at": "2026-08-13T14:39:02.755626Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАЖБА НА 38ДКА ЗЕМЯ В БЛИЗОСТ ДО МИНЕРАЛНА ВОДА",
+        "price_eur_or_por": 50000,
+        "area_sqm_or_unknown": 38016,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Hotovo land area, near the Sandanski-Melnik road and mineral bath",
+        "property_scope": "38,016 sqm agricultural land parcel or aggregate",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 4,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2016/01/499-680x382.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2016/01/499-map-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2016/01/499-%D1%81%D0%BA%D0%B8%D1%86%D0%B0-%D1%85%D0%BE%D1%82%D0%BE%D0%B2%D0%BE-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "source does not state whether 38,016 sqm is one cadastral parcel",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "cadastral scope",
+        "mineral-water proximity claim"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0072",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bb%d0%be%d0%b3%d0%b0%d1%80%d0%b8-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/",
+      "checked_at": "2026-08-13T14:39:05.766535Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАЖБА НА АПАРТАМЕНТИ В ЛОГАРИ, ГЪРЦИЯ",
+        "price_eur_or_por": {
+          "mode": "per_unit",
+          "values_eur": [
+            160000,
+            164000
+          ],
+          "unit_statuses": {
+            "T1": "sold",
+            "T2": "sold",
+            "T3": 160000,
+            "T4": 164000,
+            "T5": 164000,
+            "T6": 164000,
+            "T7": 164000,
+            "T8": "sold"
+          }
+        },
+        "area_sqm_or_unknown": {
+          "per_residence_sqm": 66
+        },
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "Logari, Greece",
+        "property_scope": "eight two-level detached seaside residences in the THEROS project, not one apartment",
+        "availability_signal": "unit table marks T1, T2, and T8 sold; T3-T7 show prices but current availability is not broker-confirmed",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 8,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/11/930-4-1-680x382.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/11/930-1-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/11/930-1-72x72.png"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "canonical type apartment and one bedroom conflict with source description of detached two-bedroom residences",
+        "header EUR 160,000 is only the lowest live unit price, not a project-wide fixed price",
+        "availability is unit-specific"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability of T3-T7",
+        "correct property type and legal unit identifiers",
+        "price and included features for each unit",
+        "project completion/legal status"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0073",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "checked_at": "2026-08-13T14:39:09.073350Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАЖБА НА АПАРТАМЕНТИ В ГР.САНДАНСКИ",
+        "price_eur_or_por": {
+          "mode": "rate",
+          "value_eur_per_sqm": 1450,
+          "displayed_from_price_eur": 60233
+        },
+        "area_sqm_or_unknown": {
+          "range_sqm": [
+            41.54,
+            112.82
+          ]
+        },
+        "bedrooms_or_unknown": "varies_by_unit_0_to_3",
+        "location_or_unknown": "between Sandanski and Polenitsa",
+        "property_scope": "multi-unit four-storey project with studios and one-, two-, and three-bedroom apartments",
+        "availability_signal": "unit table marks some apartments sold and leaves others without an explicit status; current inventory is unverified",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 6,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/03/IMG_20260325_172443-680x356.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/03/2-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/03/E2_4-1-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "displayed EUR 60,233 is a derived minimum, while source pricing is EUR 1,450 per sqm",
+        "availability, area, bedroom count, and price vary by unit",
+        "expected commissioning text says mid-2026 and requires a current completion check"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current unsold unit inventory",
+        "price and VAT basis per unit",
+        "current building/commissioning status",
+        "exact location/settlement assignment",
+        "garage and parking availability per unit"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0074",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bb%d1%83%d0%ba%d1%81%d0%be%d0%b7%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
+      "checked_at": "2026-08-13T14:39:11.401937Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАЖБА НА ЛУКСОЗНА КЪЩА В ГР. САНДАНСКИ",
+        "price_eur_or_por": 339000,
+        "area_sqm_or_unknown": 220,
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "Sandanski park area, gated residential complex",
+        "property_scope": "single furnished three-level house with two garages",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 22,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2026/03/939-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2026/03/939-5-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2026/03/939-6-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "source taxonomy also labels the property as apartment although the description is a house",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "correct public taxonomy as house/villa only",
+        "whether 220 sqm is built or total area"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0075",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd-%d0%b2-%d0%b3%d1%80-%d0%b1%d0%bb%d0%b0%d0%b3%d0%be%d0%b5%d0%b2%d0%b3%d1%80%d0%b0%d0%b4/",
+      "checked_at": "2026-08-13T14:39:13.724289Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАЖБА НА МАГАЗИН В ГР.БЛАГОЕВГРАД",
+        "price_eur_or_por": 150000,
+        "area_sqm_or_unknown": {
+          "total_sqm": 175,
+          "ground_floor_sqm": 117,
+          "basement_sqm": 58
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Blagoevgrad, Ivan Garvanov Street",
+        "property_scope": "single two-level commercial shop",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 18,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2023/03/852-4-680x510.jpeg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2023/03/852-1-72x72.jpeg",
+            "https://makler-realty.com/wp-content/uploads/2023/03/852-2-72x72.jpeg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "whether price includes VAT and the basement is part of the same legal object"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0077",
+      "source_url": "https://makler-realty.com/listing/%d1%81%d0%b2%d0%b5%d1%82%d1%8a%d0%bb-%d1%8e%d0%b6%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b4%d0%be-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81/",
+      "checked_at": "2026-08-13T14:39:15.774737Z",
+      "http_status": 404,
+      "review_status": "source_unavailable",
+      "observed": {
+        "title": "unknown",
+        "price_eur_or_por": "unknown",
+        "area_sqm_or_unknown": "unknown",
+        "bedrooms_or_unknown": "unknown",
+        "location_or_unknown": "unknown",
+        "property_scope": "source page unavailable (HTTP 404); former canonical record described a bright south-facing apartment near Sandanski park",
+        "availability_signal": "HTTP 404; no current availability signal can be verified",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 0,
+          "sampled": 0,
+          "sample_urls": [],
+          "browser_loaded_in_sample": 0,
+          "broken_in_sample": 0,
+          "note": "HTTP 404 template images excluded; listing gallery unavailable"
+        }
+      },
+      "issues": [
+        "live source returns HTTP 404",
+        "404 template media are unrelated and excluded from review"
+      ],
+      "required_action": "Keep unpublished; obtain a current approved source/replacement URL or approve withdrawal/410 before any canonical publication.",
+      "broker_confirm": [
+        "replacement source URL or withdrawal decision",
+        "current availability and canonical facts from an approved source"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0078",
+      "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "checked_at": "2026-08-13T14:39:18.061038Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАЖБА НА ТРИСТАЕН АПАРТАМЕНТ В ГР.САНДАНСКИ",
+        "price_eur_or_por": 100000,
+        "area_sqm_or_unknown": {
+          "total_sqm": 107,
+          "built_sqm": 96.5
+        },
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "Sandanski, Boris Sarafov Street",
+        "property_scope": "single three-room apartment with two bedrooms",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 9,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/03/900-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/03/900-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/03/900-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "whether 107 sqm includes common parts exactly as described"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0079",
+      "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0/",
+      "checked_at": "2026-08-13T14:39:21.458884Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ТРИСТАЕН АПАРТАМЕНТ В ЦЕНТЪРА НА ГР.САНДАНСКИ",
+        "price_eur_or_por": 206000,
+        "area_sqm_or_unknown": 120,
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "central Sandanski",
+        "property_scope": "single furnished multi-room apartment currently marketed as a three-room/two-bedroom apartment",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 17,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2024/05/242-7-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2024/05/242-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2024/05/242-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "description says the living room could become a third bedroom, but current configuration has two bedrooms",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "current legal room/bedroom configuration"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0080",
+      "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
+      "checked_at": "2026-08-13T14:39:23.651929Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ТРИСТАЕН АПАРТАМЕНТ ПОД НАЕМ В С.ПОЛЕНИЦА",
+        "price_eur_or_por": 450,
+        "area_sqm_or_unknown": 120,
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "Polenitsa",
+        "property_scope": "single furnished three-room long-term rental apartment",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 26,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2026/06/955-9-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2026/06/955-17-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2026/06/955-16-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "rental period, deposit, utilities, and fee basis are not stated",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current rental availability",
+        "whether EUR 450 is monthly and which utilities/fees are included",
+        "minimum term and deposit"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0081",
+      "source_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
+      "checked_at": "2026-08-13T14:39:25.836263Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "НЕДВИЖИМИ ИМОТИ В САНДАНСКИ. ПРОДАВА ПАРЦЕЛ В С.СТРУМЯНИ",
+        "price_eur_or_por": 45000,
+        "area_sqm_or_unknown": 734,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Strumyani",
+        "property_scope": "single 734 sqm land parcel",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 6,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2013/11/286-dron-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2013/11/286-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2013/11/286-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "utility distance and access status"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0082",
+      "source_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%84%d0%b5%d1%80%d0%bc%d1%83-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "checked_at": "2026-08-13T14:39:27.887204Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "СТОПАНСКИ ДВОР",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": 900,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Sandanski area; exact settlement/cadastral location unknown",
+        "property_scope": "900 sqm land property marketed for livestock/farm use",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 1,
+          "sampled": 0,
+          "sample_urls": [],
+          "browser_loaded_in_sample": 0,
+          "broken_in_sample": 0,
+          "note": "Only the shared DJI_0696 site image was observed; no property-specific gallery asset could be sampled"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "no property-specific gallery asset was observed; only the shared site drone image is recorded",
+        "exact location, cadastral identity, zoning, and permitted use are absent",
+        "livestock-use suitability is an unverified planning/legal claim",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability and negotiated price",
+        "exact cadastral location and ownership scope",
+        "zoning and permitted livestock/farm use",
+        "property-specific media"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0083",
+      "source_url": "https://makler-realty.com/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b0-%d1%80%d0%b5%d1%85%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8/",
+      "checked_at": "2026-08-13T14:39:30.710732Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ЦЕНТЪР ЗА ПРОФИЛАКТИКА, РЕХАБИЛИТАЦИЯ И РАЗКРАСИТЕЛНИ ПРОЦЕДУРИ",
+        "price_eur_or_por": 155000,
+        "area_sqm_or_unknown": 164.5,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "central Sandanski",
+        "property_scope": "single basement-level commercial object fitted as a prevention, rehabilitation, and beauty center, sold with listed equipment",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 16,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/04/891-2-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/04/891-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/04/891-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "canonical location review is unresolved even though the source says central Sandanski",
+        "medical/rehabilitation use and equipment claims require current verification",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "exact cadastral location",
+        "permitted use and licensing status",
+        "included equipment inventory"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0084",
+      "source_url": "https://makler-realty.com/listing/2-bedrooms-apartment-for-sale-in-sandanski/",
+      "checked_at": "2026-08-13T14:39:32.904464Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ТРИСТАЕН АПАРТАМЕНТ В САНДАНСКИ",
+        "price_eur_or_por": 165000,
+        "area_sqm_or_unknown": 190,
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "Sandanski, Medite complex",
+        "property_scope": "single furnished three-room apartment with two bedrooms",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 16,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2023/11/869-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2023/11/869-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2023/11/869-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "source says suitable for rental use; this is not an availability/rented marker",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "whether 190 sqm is total/legal area",
+        "included furnishings and any complex fees"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0085",
+      "source_url": "https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/",
+      "checked_at": "2026-08-13T14:39:36.898780Z",
+      "http_status": 404,
+      "review_status": "source_unavailable",
+      "observed": {
+        "title": "unknown",
+        "price_eur_or_por": "unknown",
+        "area_sqm_or_unknown": "unknown",
+        "bedrooms_or_unknown": "unknown",
+        "location_or_unknown": "unknown",
+        "property_scope": "source page unavailable (HTTP 404); former canonical record described a one-bedroom rental in Sandanski",
+        "availability_signal": "HTTP 404; no current availability signal can be verified",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 0,
+          "sampled": 0,
+          "sample_urls": [],
+          "browser_loaded_in_sample": 0,
+          "broken_in_sample": 0,
+          "note": "HTTP 404 template images excluded; listing gallery unavailable"
+        }
+      },
+      "issues": [
+        "live source returns HTTP 404",
+        "404 template media are unrelated and excluded from review"
+      ],
+      "required_action": "Keep unpublished; obtain a current approved source/replacement URL or approve withdrawal/410 before any canonical publication.",
+      "broker_confirm": [
+        "replacement source URL or withdrawal decision",
+        "current availability and canonical facts from an approved source"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0086",
+      "source_url": "https://makler-realty.com/listing/apartments-park-hotel-pirin-sandanski/",
+      "checked_at": "2026-08-13T14:39:39.431709Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА АПАРТАМЕНТИ В ПАРК ХОТЕЛ ПИРИН",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": {
+          "range_sqm": [
+            67.57,
+            195
+          ]
+        },
+        "bedrooms_or_unknown": "varies_by_unit_1_to_3",
+        "location_or_unknown": "Sandanski, Park Hotel Pirin",
+        "property_scope": "seven apartment rows in the Park Hotel Pirin residential inventory table",
+        "availability_signal": "every unit shown in the live table is explicitly marked sold",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 10,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2013/11/191-1.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2013/11/191-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2013/11/191-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "all displayed units are sold; listing must not be marketed as available",
+        "price-on-request header is incompatible with a fully sold table",
+        "canonical location review is unresolved",
+        "source makes a medical superlative claim about asthma treatment that requires legal/editorial approval"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "whether the project listing should be withdrawn/410 or whether new verified inventory exists",
+        "current unit inventory from an approved source",
+        "medical-claim source and legal/editorial approval"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0087",
+      "source_url": "https://makler-realty.com/listing/big-plot-of-land-and-buildings-for-sale-near-sandanski/",
+      "checked_at": "2026-08-13T14:39:42.095586Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА ЗЕМЯ И СГРАДИ В БЛИЗОСТ ДО САНДАНСКИ",
+        "price_eur_or_por": 85000,
+        "area_sqm_or_unknown": {
+          "land_sqm": 20740,
+          "buildings_total_sqm": 720
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Palat, Strumyani municipality",
+        "property_scope": "20,740 sqm land parcel with five buildings; two additional neighboring agricultural parcels of 13,014 sqm are optional",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 8,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2021/03/791-1-680x383.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2021/03/791-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2021/03/791-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "canonical EUR 75,000 conflicts with live EUR 85,000",
+        "canonical Sandanski location conflicts with explicit Palat, Strumyani municipality",
+        "header labels 20,740 sqm as area and 720 sqm as plot area, while description establishes 20,740 sqm land and 720 sqm total buildings",
+        "optional neighboring parcels create a second possible scope",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability and EUR 85,000 price",
+        "whether optional 13,014 sqm parcels are included or separately priced",
+        "correct Palat cadastral location",
+        "building areas and condition"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0088",
+      "source_url": "https://makler-realty.com/listing/building-land-with-a-great-view-in-sandanski/",
+      "checked_at": "2026-08-13T14:39:44.457794Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА ПАРЦЕЛ В САНДАНСКИ",
+        "price_eur_or_por": {
+          "mode": "whole_or_rate",
+          "whole_displayed_eur": 122500,
+          "rate_eur_per_sqm": 49
+        },
+        "area_sqm_or_unknown": 2500,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Sandanski, Sanatorium area",
+        "property_scope": "2,500 sqm land parcel offered whole or divisible into smaller parcels",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 3,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2019/12/734-dron-680x382.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2019/12/734-dron-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2019/12/734-dron-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "one listing represents both the whole parcel and unspecified partial-parcel offers",
+        "minimum divisible area and resulting price are not stated",
+        "current availability is not broker-confirmed",
+        "live description contains a visibly incomplete sentence ending with 'в'"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability",
+        "whether EUR 122,500 remains the whole-parcel price",
+        "minimum split size, cadastral process, and per-part availability"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0089",
+      "source_url": "https://makler-realty.com/listing/ein-zimmer-wohnung-zum-verkauf-im-park-hotel-pirin-sandanski/",
+      "checked_at": "2026-08-13T14:39:47.355721Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА ДВУСТАЕН АПАРТАМЕНТ В ПАРК ХОТЕЛ ПИРИН САНДАНСКИ",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": {
+          "displayed_total_sqm": 67.57,
+          "description_total_sqm": 68,
+          "built_sqm": 58
+        },
+        "bedrooms_or_unknown": 1,
+        "location_or_unknown": "Sandanski, Park Hotel Pirin",
+        "property_scope": "single furnished one-bedroom apartment in Park Hotel Pirin",
+        "availability_signal": "page explicitly says Продаден (sold)",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 16,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2019/03/707-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2019/03/707-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2019/03/707-6-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "property is explicitly sold and must not be marketed as available",
+        "source rounds total area differently between header and description"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "withdrawal/410 or archival treatment",
+        "whether any replacement unit exists under a separate source"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0090",
+      "source_url": "https://makler-realty.com/listing/front-compartment-in-pasalimani-piraeus-in-6th-floor/",
+      "checked_at": "2026-08-13T14:39:50.332225Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "АПАРТАМЕНТ НА ПЪРВА ЛИНИЯ В ПАСАЛИМАНИ, ПИРЕУС -ГЪРЦИЯ",
+        "price_eur_or_por": 1250000,
+        "area_sqm_or_unknown": {
+          "total_sqm": 240,
+          "interior_sqm": 200,
+          "balconies_sqm": 40
+        },
+        "bedrooms_or_unknown": 3,
+        "location_or_unknown": "Pasalimani, Piraeus, Greece",
+        "property_scope": "single sixth-floor apartment",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 30,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2024/04/543-17.jpeg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2024/04/543-1-72x72.jpeg",
+            "https://makler-realty.com/wp-content/uploads/2024/04/543-2-72x72.jpeg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "source includes several office-like rooms in addition to residential rooms; legal use should be confirmed",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "legal use and floor plan",
+        "whether 240 sqm is the legal total including balconies"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0091",
+      "source_url": "https://makler-realty.com/listing/haus-zum-verkauf-im-dorf-vinogradi-3-km-von-melnik-entfernt/",
+      "checked_at": "2026-08-13T14:39:52.797933Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА КЪЩА В С.ВИНОГРАДИ, 3 КМ ОТ МЕЛНИК",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": {
+          "built_sqm": 90,
+          "plot_sqm": 350
+        },
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "Vinogradi, about 3 km from Melnik",
+        "property_scope": "single restored old house with cellar/basement and one residential level",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 12,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2023/11/870-2-680x510.jpeg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2023/11/870-4-72x72.jpeg",
+            "https://makler-realty.com/wp-content/uploads/2023/11/870-3-72x72.jpeg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "gallery filenames use reference 870 while the visible source reference is 872",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability and negotiated price",
+        "that sampled media belong to source reference 872",
+        "whether 90 sqm is footprint or total built area"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0092",
+      "source_url": "https://makler-realty.com/listing/house-for-sale-in-the-park-of-sandanski/",
+      "checked_at": "2026-08-13T14:39:55.452985Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА КЪЩА В ПАРКА НА САНДАНСКИ",
+        "price_eur_or_por": {
+          "mode": "scope_conflict",
+          "header_eur": 300000,
+          "smaller_house_text_eur": 250000
+        },
+        "area_sqm_or_unknown": "unknown",
+        "bedrooms_or_unknown": {
+          "per_house": 4
+        },
+        "location_or_unknown": "Sandanski park area",
+        "property_scope": "two adjoining houses on one property; source separately describes 275 sqm and 260 sqm houses",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 16,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2018/08/671-new-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2018/08/671-7-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2018/08/671-8-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed has no confirmed area and the live source does not provide one unambiguous publishable area",
+        "header says 514 sqm while individual house areas sum to 535 sqm",
+        "header plot area says 245 sqm while description says the shared property is 540 sqm",
+        "header EUR 300,000 conflicts with EUR 250,000 for the smaller house and does not identify the priced scope",
+        "canonical three bedrooms conflicts with four bedrooms described per house",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability of each house",
+        "price and exact cadastral scope for each house versus both together",
+        "authoritative built and land areas",
+        "whether each house has four bedrooms"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0093",
+      "source_url": "https://makler-realty.com/listing/house-for-sale-in-the-village-of-leshnitsa/",
+      "checked_at": "2026-08-13T14:39:57.694768Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА КЪЩА В С. ЛЕШНИЦА",
+        "price_eur_or_por": 110000,
+        "area_sqm_or_unknown": "unknown",
+        "bedrooms_or_unknown": 4,
+        "location_or_unknown": "Leshnitsa",
+        "property_scope": "single three-level house on a 594 sqm plot",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 7,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2024/09/190-17-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2024/09/190-17-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2024/09/190-16-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed has no confirmed area and the live source does not provide one unambiguous publishable area",
+        "header area 50 sqm is ambiguous for a three-level house and is not identified as footprint or total",
+        "canonical two bedrooms conflicts with two bedrooms on each of the second and third levels (four total)",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability",
+        "legal total built area and whether 50 sqm is footprint/per-floor",
+        "bedroom count and approved floor plan"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0094",
+      "source_url": "https://makler-realty.com/listing/industrial-building-for-rent-in-petrich/",
+      "checked_at": "2026-08-13T14:40:00.050369Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ИНДУСТРИАЛНА СГРАДА ПОД НАЕМ В ПЕТРИЧ",
+        "price_eur_or_por": {
+          "mode": "rate_conflict",
+          "header_eur": 1,
+          "text_rate_bgn_per_sqm": 3,
+          "tax": "excluding VAT",
+          "period": "unknown"
+        },
+        "area_sqm_or_unknown": 1500,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Petrich",
+        "property_scope": "third and fourth floors of an industrial building, 800 sqm plus 700 sqm",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 3,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2016/08/619-1.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2016/08/619-3-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2016/08/619-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "EUR 1 header is a placeholder and conflicts with 3 BGN per sqm in text",
+        "rental period is not stated",
+        "two-floor scope needs a single legal-object or divisible-scope confirmation",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability",
+        "rental period and VAT basis",
+        "whether floors can be rented separately",
+        "authoritative price in BGN/EUR without placeholder"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0095",
+      "source_url": "https://makler-realty.com/listing/industrial-building-for-sale-petrich-municipality/",
+      "checked_at": "2026-08-13T14:40:02.455018Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ИНДУСТРИАЛНА СГРАДА. ОБЩИНА ПЕТРИЧ",
+        "price_eur_or_por": 125000,
+        "area_sqm_or_unknown": {
+          "building_sqm": 417,
+          "land_sqm": 2205
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "unknown village in Petrich municipality",
+        "property_scope": "single industrial building and yard",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 9,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2019/02/699-dron-7-680x383.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2019/02/699-dron-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2019/02/699-dron-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "source intentionally omits the village, so exact settlement remains unknown",
+        "building is stated to be currently used as a sewing workshop; possession/tenancy status is unclear",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "exact settlement/cadastral location",
+        "whether property is vacant, owner-occupied, or tenanted",
+        "included machinery or fixtures"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0096",
+      "source_url": "https://makler-realty.com/listing/industrial-buildings-for-rent-near-sandanski/",
+      "checked_at": "2026-08-13T14:40:04.931932Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ИНДУСТРИАЛНА СГРАДА ПОД НАЕМ",
+        "price_eur_or_por": {
+          "mode": "ambiguous",
+          "header": "price_on_request",
+          "text_values_eur": [
+            1500,
+            1500,
+            700
+          ],
+          "text_unit": "/m2 as displayed",
+          "period": "unknown"
+        },
+        "area_sqm_or_unknown": "unknown",
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "unknown village in Sandanski municipality",
+        "property_scope": "7,000 sqm industrial base with multiple buildings offered for rent",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 10,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2020/04/750-outside-2-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2020/04/750-outside-5-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2020/04/750-outside-4-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed has no confirmed area and the live source does not provide one unambiguous publishable area",
+        "header area 2,859 sqm conflicts with described building areas totaling 2,964 sqm",
+        "text labels EUR 1,500 / EUR 700 as per-square-meter amounts, which is commercially and semantically ambiguous",
+        "the first/second/third building labels do not map cleanly to the five described structures",
+        "exact village is omitted",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability of each rentable component",
+        "authoritative area total",
+        "whether prices are monthly totals or rates and whether VAT applies",
+        "exact village/cadastral location",
+        "which buildings are offered together or separately"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0097",
+      "source_url": "https://makler-realty.com/listing/industriegebaude-zur-miete-in-petrich-bulgarien/",
+      "checked_at": "2026-08-13T14:40:07.293405Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ИНДУСТРИАЛНО ПОМЕЩЕНИЕ ПОД НАЕМ В ГР.ПЕТРИЧ",
+        "price_eur_or_por": 750,
+        "area_sqm_or_unknown": 500,
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Petrich",
+        "property_scope": "single 500 sqm industrial unit for rent",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 4,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2020/04/751-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2020/04/751-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2020/04/751-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "live description contains no facts beyond the header",
+        "rental period, VAT, access, utilities, and condition are not stated",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "whether EUR 750 is monthly and whether VAT applies",
+        "legal unit, access, utilities, and condition"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0098",
+      "source_url": "https://makler-realty.com/listing/industrieraume-zum-verkauf-rund-um-sandanski/",
+      "checked_at": "2026-08-13T14:40:09.471828Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА ИНДУСТРИАЛНА БАЗА ОКОЛО САНДАНСКИ",
+        "price_eur_or_por": 345000,
+        "area_sqm_or_unknown": "unknown",
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "unknown village in Sandanski municipality",
+        "property_scope": "7,000 sqm industrial base with multiple buildings sold as one property",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 10,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2020/04/750-outside-2-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2020/04/750-5-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2020/04/750-1-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed has no confirmed area and the live source does not provide one unambiguous publishable area",
+        "header area 2,850 sqm conflicts with described building areas totaling 2,964 sqm",
+        "exact village is omitted",
+        "canonical location review is unresolved",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability and price",
+        "authoritative total building area",
+        "exact village/cadastral location",
+        "whether every described building is included"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0099",
+      "source_url": "https://makler-realty.com/listing/luxushaus-zum-verkauf-in-sandanski/",
+      "checked_at": "2026-08-13T14:40:21.639892Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА ЛУКСОЗНА КЪЩА В САНДАНСКИ",
+        "price_eur_or_por": {
+          "mode": "displayed",
+          "value_eur": 235790,
+          "scope": "not stated whether per house or for both offered houses"
+        },
+        "area_sqm_or_unknown": {
+          "per_house_sqm": 140.66,
+          "offered_house_numbers": [
+            2,
+            3
+          ]
+        },
+        "bedrooms_or_unknown": {
+          "per_house": 2
+        },
+        "location_or_unknown": "Polenitsa, about 2 km from Sandanski centre",
+        "property_scope": "houses 2 and 3 in a six-house gated complex; both described as identical",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 21,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2014/10/400-6.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2014/10/400-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2014/10/400-0-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "canonical Sandanski location is less precise than explicit Polenitsa",
+        "single displayed price is not assigned to one house or both houses",
+        "unit-specific current availability is absent",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "availability of houses 2 and 3",
+        "whether EUR 235,790 is per house",
+        "separate legal identifiers and included parking/common rights",
+        "correct Polenitsa location"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0100",
+      "source_url": "https://makler-realty.com/listing/neue-1-zimmer-wohnung-zur-miete-in-sandanski/",
+      "checked_at": "2026-08-13T14:40:23.946815Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ДВУСТАЕН ЛУКСОЗЕН АПАРТАМЕНТ ПОД НАЕМ В САНДАНСКИ",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": 60,
+        "bedrooms_or_unknown": 1,
+        "location_or_unknown": "Sandanski, near Park Hotel Pirin",
+        "property_scope": "single furnished one-bedroom long-term rental apartment",
+        "availability_signal": "page explicitly says НАЕТ (rented)",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 9,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2019/01/695-1-1.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2019/01/695-1-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2019/01/695-2-1-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "property is explicitly rented and must not be marketed as available",
+        "no rent amount or end date is stated"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "whether/when the apartment returns to market",
+        "current rent and lease terms only after it becomes available"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0101",
+      "source_url": "https://makler-realty.com/listing/new-apartment-for-rent-in-sandanski/",
+      "checked_at": "2026-08-13T14:40:26.277609Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ДВУСТАЕН АПАРТАМЕНТ ПОД НАЕМ В САНДАНСКИ",
+        "price_eur_or_por": {
+          "mode": "term_dependent",
+          "long_term_displayed_eur": 350,
+          "short_term": "price_on_request",
+          "period": "unknown"
+        },
+        "area_sqm_or_unknown": 65,
+        "bedrooms_or_unknown": 1,
+        "location_or_unknown": "Sandanski, near the Sanatorium",
+        "property_scope": "single furnished one-bedroom apartment offered for long- or short-term rent",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 19,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2019/11/731-1-680x505.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2019/11/731-19-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2019/11/731-18-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "EUR 350 is stated for long-term rent but the billing period is not explicit",
+        "short-term rate varies by season and nights",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "whether EUR 350 is monthly",
+        "minimum long-term term, deposit, utilities, and fees",
+        "current short-term rate rules"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0102",
+      "source_url": "https://makler-realty.com/listing/one-bedroom-apartment-in-the-park-of-sandanski/",
+      "checked_at": "2026-08-13T14:40:28.986267Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ДВУСТАЕН АПАРТАМЕНТ В ПАРКА НА ГР.САНДАНСКИ",
+        "price_eur_or_por": {
+          "value_eur": 100000,
+          "tax": "excluding VAT",
+          "includes": [
+            "apartment",
+            "basement",
+            "covered outdoor parking space"
+          ]
+        },
+        "area_sqm_or_unknown": {
+          "total_sqm": 76.7,
+          "built_sqm": 61
+        },
+        "bedrooms_or_unknown": 1,
+        "location_or_unknown": "Sandanski, near the park and city stadium",
+        "property_scope": "single one-bedroom apartment in a building whose completion was expected in December 2025",
+        "availability_signal": "no explicit sold/reserved marker, but the stated December 2025 completion date is stale and current state is unverified",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 13,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/03/PHOTO-2026-03-04-13-00-13-680x383.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/03/879-dron-4-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/03/879-dron-1-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "source still describes the building as under construction with completion expected in 12.2025, a past date",
+        "price excludes VAT and must not be presented as an all-in consumer price without context"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability",
+        "actual commissioning/Act status",
+        "current price, VAT treatment, and included parking/basement",
+        "whether construction description remains accurate"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0103",
+      "source_url": "https://makler-realty.com/listing/prodava-mezonet-ul-pirin-sandanski/",
+      "checked_at": "2026-08-13T14:40:33.512584Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА МЕЗОНЕТ НА УЛ.ПИРИН, ГР.САНДАНСКИ",
+        "price_eur_or_por": 155000,
+        "area_sqm_or_unknown": {
+          "total_sqm": 113,
+          "built_sqm": 102
+        },
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "Sandanski, Pirin Street",
+        "property_scope": "single two-level maisonette with two bedrooms",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 9,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2024/02/123-1-680x510.jpeg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2024/02/123-new-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2024/02/123-new-3-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "source says the building was commissioned in 2026; documentary status is not provided",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "commissioning/Act status",
+        "included furnishings"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0104",
+      "source_url": "https://makler-realty.com/listing/real-estate-for-sale-in-nafplio-greece/",
+      "checked_at": "2026-08-13T14:40:38.410369Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ИМЕНИЕ В ГЪРЦИЯ, ГР.НАФЛИО",
+        "price_eur_or_por": 650000,
+        "area_sqm_or_unknown": {
+          "main_house_sqm": 250,
+          "guest_house_sqm": 35,
+          "residential_total_sqm": 285,
+          "land_sqm": 9000,
+          "stable_sqm": 30,
+          "henhouse_sqm": 15
+        },
+        "bedrooms_or_unknown": {
+          "main_house": 2,
+          "guest_house": "unknown"
+        },
+        "location_or_unknown": "about 5 km from Nafplio, Greece",
+        "property_scope": "9,000 sqm estate containing a main house, guest house, stable, henhouse, barbecue area, olives, and vines",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 30,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2024/04/999-10-510x680.jpeg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2024/04/999-10-72x72.jpeg",
+            "https://makler-realty.com/wp-content/uploads/2024/04/999-17-72x72.jpeg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "legal identifiers and agricultural/outbuilding scope are not stated",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "exact cadastral location and included parcels",
+        "legal status of all buildings/outbuildings",
+        "whether furnishings and agricultural assets are included"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0105",
+      "source_url": "https://makler-realty.com/listing/spa-hotel-mit-mineralwasser-zum-verkauf-in-sandanski-bulgarien/",
+      "checked_at": "2026-08-13T14:40:41.325953Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА СПА ХОТЕЛ В ГР.САНДАНСКИ",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": {
+          "gross_sqm": 2771.09,
+          "gfa_sqm": 1161.25,
+          "footprint_sqm": 420.49,
+          "pool_area_sqm": 432.39,
+          "hotel_area_sqm": 660.23
+        },
+        "bedrooms_or_unknown": "not_applicable",
+        "location_or_unknown": "Sandanski, near the park and Macedonia pedestrian street",
+        "property_scope": "operating SPA hotel complex with garage level, spa/pool, 40-bed hotel section, fitness, café/bar, restaurant, and ten garages",
+        "availability_signal": "source says the SPA centre currently operates; sale availability and negotiated price are not broker-confirmed",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 30,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2020/01/IMG_6227-680x453.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2020/01/1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2020/01/1%D0%92%D0%90-%D0%A1%D0%A2%D0%90%D0%AF-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "multiple legitimate area definitions cannot be collapsed into one canonical area without choosing the correct semantic field",
+        "mineral-water connection, Act 16, operating status, and ten-year concession are legal/operational claims requiring documentary verification",
+        "price is not public"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current sale availability and price",
+        "authoritative property/GFA/gross area fields",
+        "Act 16 and permitted uses",
+        "mineral-water concession scope and expiry",
+        "included equipment, operating company, licences, and encumbrances"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0106",
+      "source_url": "https://makler-realty.com/listing/studio-for-rent-in-sandanski/",
+      "checked_at": "2026-08-13T14:40:43.659995Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ЕДНОСТАЕН АПАРТАМЕНТ ПОД НАЕМ",
+        "price_eur_or_por": 220,
+        "area_sqm_or_unknown": 40.39,
+        "bedrooms_or_unknown": 0,
+        "location_or_unknown": "Sandanski, unspecified new district",
+        "property_scope": "single furnished studio rental with basement",
+        "availability_signal": "page explicitly says НАЕТ до 01.09.2026 (rented until 2026-09-01)",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 14,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2018/07/635-1-800x600-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2018/07/635-2-800x600-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2018/07/635-1-800x600-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "property is explicitly unavailable until 2026-09-01",
+        "canonical location review remains unresolved",
+        "rental period and terms for any later offer are unstated"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "whether the lease ends on 2026-09-01 and whether the property will return to market",
+        "future rent, billing period, deposit, and utilities",
+        "exact district/location"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0107",
+      "source_url": "https://makler-realty.com/listing/two-bedroom-apartment-in-the-complex-arena-1-st-vlas-for-sale/",
+      "checked_at": "2026-08-13T14:40:47.565622Z",
+      "http_status": 200,
+      "review_status": "review",
+      "observed": {
+        "title": "ПРОДАВА ТРИСТАЕН АПАРТАМЕНТ В КОМПЛЕК “АРЕНА 1”, СВ.ВЛАС",
+        "price_eur_or_por": 220000,
+        "area_sqm_or_unknown": {
+          "displayed_sqm": 88,
+          "source_text_net_sqm": 88.22
+        },
+        "bedrooms_or_unknown": 2,
+        "location_or_unknown": "Sveti Vlas, Arena 1 complex",
+        "property_scope": "single renovated two-bedroom apartment with individual access",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 14,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/11/933-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/11/933-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/11/933-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "header rounds area to 88 sqm while text gives 88.22 sqm net area",
+        "current availability is not broker-confirmed",
+        "visible H1 contains the spelling error 'КОМПЛЕК' instead of 'КОМПЛЕКС'"
+      ],
+      "required_action": "Keep in review: update canonical facts with the observed semantics, complete full media review, and obtain broker availability confirmation before publication.",
+      "broker_confirm": [
+        "current availability",
+        "legal net/total area and common-parts share",
+        "complex maintenance fees and included furniture"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0108",
+      "source_url": "https://makler-realty.com/listing/villa-for-sale-in-the-mountains-near-sandanski/",
+      "checked_at": "2026-08-13T14:40:49.881095Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ПРОДАВА ВИЛА В МАЛЕШЕВСКА ПЛАНИНА",
+        "price_eur_or_por": 60000,
+        "area_sqm_or_unknown": {
+          "total_sqm": 520,
+          "footprint_sqm": 260
+        },
+        "bedrooms_or_unknown": "unknown",
+        "location_or_unknown": "unknown mountain village, about 40 km from Sandanski and 3 km from the North Macedonia border",
+        "property_scope": "single two-level villa/large guest-accommodation building with two apartments and three en-suite rooms on the second floor",
+        "availability_signal": "no explicit sold, rented, or reserved marker; current availability requires broker confirmation",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 6,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/03/870-3-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2025/03/870-3-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2025/03/870-1-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "canonical multi_unit type is not sufficient to distinguish a villa/guest-accommodation building from separate sale units",
+        "exact village/cadastral location is omitted",
+        "bedroom count and legal use are not stated",
+        "text contains an unfinished phrase about required interior work",
+        "current availability is not broker-confirmed"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "current availability",
+        "exact village/cadastral location",
+        "legal property/use type",
+        "room/bedroom count and whether any units are legally separate",
+        "condition and required renovation"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0109",
+      "source_url": "https://makler-realty.com/listing/wohnung-zu-vermieten-beim-aquasun-in-sandanski/",
+      "checked_at": "2026-08-13T14:40:52.432268Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "ДВУСТАЕН АПАРТАМЕНТ ПОД НАЕМ В САНДАНСКИ",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": {
+          "apartment_sqm": 55,
+          "basement_sqm": 3.46
+        },
+        "bedrooms_or_unknown": 1,
+        "location_or_unknown": "Sandanski, Aqua Sun complex",
+        "property_scope": "single furnished one-bedroom apartment with garage and basement",
+        "availability_signal": "page explicitly says НАЕТ (rented)",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 17,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2020/06/760-1-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2020/06/760-1-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2020/06/760-2-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "property is explicitly rented and must not be marketed as available",
+        "header says fourth floor while description says third residential floor"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "whether/when the apartment returns to market",
+        "correct legal floor",
+        "future rent and lease terms",
+        "garage and basement inclusion"
+      ]
+    },
+    {
+      "id": "MS-CRAWL-0110",
+      "source_url": "https://makler-realty.com/listing/wohnung-zur-miete-in-spa-complex-medite-sandanski/",
+      "checked_at": "2026-08-13T14:40:54.691416Z",
+      "http_status": 200,
+      "review_status": "hold",
+      "observed": {
+        "title": "АПАРТАМЕНТ ПОД НАЕМ В КОМПЛЕКС МЕДИТЕ",
+        "price_eur_or_por": "price_on_request",
+        "area_sqm_or_unknown": 73.73,
+        "bedrooms_or_unknown": "unknown",
+        "location_or_unknown": "Sandanski, Medite complex",
+        "property_scope": "single two-room apartment offered for rent",
+        "availability_signal": "page explicitly says НАЕТ (rented)",
+        "gallery_assets_observed_or_sampled": {
+          "reported_public_gallery_assets": 11,
+          "sampled": 3,
+          "sample_urls": [
+            "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2018/04/651-7-680x510.jpg&h=600&w=1000&zc=1",
+            "https://makler-realty.com/wp-content/uploads/2018/04/651-11-72x72.jpg",
+            "https://makler-realty.com/wp-content/uploads/2018/04/651-10-72x72.jpg"
+          ],
+          "browser_loaded_in_sample": 3,
+          "broken_in_sample": 0,
+          "note": "Sampled from rendered Chromium; sample loaded without an obvious broken asset. This is not broker approval or a full visual deduplication review"
+        }
+      },
+      "issues": [
+        "canonical seed omits the live-displayed area or its required area semantics",
+        "property is explicitly rented and must not be marketed as available",
+        "source provides no substantive description beyond the title/header",
+        "bedroom count is not explicit"
+      ],
+      "required_action": "Keep unpublished until the listed conflicts, scope, or availability are resolved by broker/editor; then update canonical facts and repeat media/publication review.",
+      "broker_confirm": [
+        "whether/when the apartment returns to market",
+        "bedroom/layout facts",
+        "future rent, period, deposit, and utilities"
+      ]
+    }
+  ]
+}
