@@ -547,6 +547,24 @@ test("Payload CMS importer commits one durable draft graph and reuses it on reru
   assert.equal(target.calls.commit, 2);
 });
 
+test("Payload CMS importer preserves an unknown source location for operator review", async () => {
+  const seed = minimalSeed();
+  seed.records[0].location = null;
+  const target = fakePayload();
+
+  const result = await runPayloadCmsImport({
+    payload: target.payload,
+    registry: minimalRegistry(),
+    seed,
+    validateRegistry: false,
+    validateSeed: false,
+  });
+
+  assert.equal(result.status, "committed");
+  assert.equal(result.integrity.readback.target.listings.linked_locations, 0);
+  assert.equal(target.rows.listings[0].location, null);
+});
+
 test("Payload CMS importer ignores generated array row ids without hiding operator changes", async () => {
   const registry = minimalRegistry();
   const seed = minimalSeed();

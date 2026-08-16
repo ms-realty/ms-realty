@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { appApiConfigFromEnv, renderAppApiResponse } from "../lib/app-api-adapter.mjs";
-import { appRouterConfigFromEnv, renderAppSearchRoute, renderAppSearchRouteResponse } from "../lib/app-router-adapter.mjs";
+import {
+  appRouterConfigFromEnv,
+  renderAppRoute,
+  renderAppSearchRoute,
+  renderAppSearchRouteResponse,
+} from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   executePublicSearch,
@@ -182,6 +187,59 @@ test("production public search fails closed when no configured engine can serve 
   const fallbackHtml = await responseFromRoute.text();
   assert.match(fallbackHtml, /data-kind="search-unavailable"/);
   assert.match(fallbackHtml, /tel:\+359879696870/);
+});
+
+test("private review exposes the full inventory through HTML and API without changing the public default", async () => {
+  const productionConfig = appRouterConfigFromEnv({ NODE_ENV: "production" });
+  const reviewEnv = {
+    NODE_ENV: "production",
+    MS_REALTY_PRIVATE_REVIEW_MODE: "true",
+    MS_REALTY_SEARCH_ENGINE: "typesense",
+    TYPESENSE_URL: "http://typesense:8108",
+    TYPESENSE_API_KEY: "private-review-test-key",
+  };
+  const reviewConfig = appRouterConfigFromEnv(reviewEnv);
+
+  assert.equal(productionConfig.privateReview, false);
+  assert.equal(
+    renderAppRoute({
+      pathname: "/bg/imoti/MS-CRAWL-0001",
+      url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+      config: productionConfig,
+    }).status,
+    404,
+  );
+  assert.equal(reviewConfig.privateReview, true);
+  assert.equal(reviewConfig.search.environment, "review");
+  assert.equal(reviewConfig.search.engine, undefined);
+  assert.deepEqual(reviewConfig.search.typesense, {});
+  assert.equal(
+    renderAppRoute({
+      pathname: "/bg/imoti/MS-CRAWL-0001",
+      url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+      config: reviewConfig,
+    }).status,
+    200,
+  );
+
+  const htmlResponse = await renderAppSearchRouteResponse({
+    pathname: "/bg/tarsene",
+    url: "https://example.test/bg/tarsene?q=Sandanski",
+    config: reviewConfig,
+  });
+  const apiResponse = await renderAppApiResponse(
+    new Request("https://example.test/api/search?locale=bg&q=Sandanski", {
+      headers: { "x-ms-realty-preview": "search-count" },
+    }),
+    { config: appApiConfigFromEnv(reviewEnv) },
+  );
+  const api = await apiResponse.json();
+
+  assert.equal(htmlResponse.status, 200);
+  assert.match(await htmlResponse.text(), /MS-CRAWL-/);
+  assert.equal(apiResponse.status, 200);
+  assert.ok(api.cards.length > 0);
+  assert.equal(api.search.backend.engine, "seed_fallback");
 });
 
 test("localized HTML and API search share engine-ranked cards and request intent", async () => {

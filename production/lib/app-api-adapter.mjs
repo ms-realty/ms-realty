@@ -99,6 +99,7 @@ export function appApiConfigFromEnv(env = process.env) {
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
+    privateReview: env.MS_REALTY_PRIVATE_REVIEW_MODE === "true",
     search: publicSearchConfigFromEnv(env),
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     receivedAt: env.MS_REALTY_RECEIVED_AT,
@@ -179,13 +180,14 @@ function readLaunchReadiness(filePath = LAUNCH_READINESS_PATH) {
 function currentSeed(config) {
   const seedPath = config.cmsSeedPath || DEFAULT_CMS_SEED_PATH;
   const seed = readThroughCached(seedPath, () => loadCmsSeed(seedPath));
-  return publicSeedFor(applyMediaReviews(
+  const reviewedSeed = applyMediaReviews(
     applyListingEdits(
       seed,
       readThroughCached(config.listingEditLedgerPath, () => readListingEdits(config.listingEditLedgerPath)),
     ),
     readThroughCached(config.mediaReviewLedgerPath, () => readMediaReviews(config.mediaReviewLedgerPath)),
-  ));
+  );
+  return config.privateReview === true ? reviewedSeed : publicSeedFor(reviewedSeed);
 }
 
 function currentRegistry(config) {

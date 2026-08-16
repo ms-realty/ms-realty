@@ -38,6 +38,7 @@ export function appRouterConfigFromEnv(env = process.env) {
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
+    privateReview: env.MS_REALTY_PRIVATE_REVIEW_MODE === "true",
     search: publicSearchConfigFromEnv(env),
     naturalLanguageSearchEnabled: env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
   };
@@ -83,13 +84,14 @@ export function isAppSearchPath({ pathname, config = appRouterConfigFromEnv() } 
 
 function currentPublicSeed(config) {
   const seed = readThroughCached(config.cmsSeedPath, () => loadCmsSeed(config.cmsSeedPath));
-  return publicSeedFor(applyMediaReviews(
+  const reviewedSeed = applyMediaReviews(
     applyListingEdits(
       seed,
       readThroughCached(config.listingEditLedgerPath, () => readListingEdits(config.listingEditLedgerPath)),
     ),
     readThroughCached(config.mediaReviewLedgerPath, () => readMediaReviews(config.mediaReviewLedgerPath)),
-  ));
+  );
+  return config.privateReview === true ? reviewedSeed : publicSeedFor(reviewedSeed);
 }
 
 function currentTranslationTasks(config) {

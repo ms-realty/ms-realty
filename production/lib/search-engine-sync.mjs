@@ -1329,44 +1329,51 @@ export async function runSearchEngineSync({
   void typesense;
   void meilisearch;
   void fetchImpl;
-  const approved = await postgresProjectionSnapshot({ postgres, projection });
-  const viewDocuments = await readPostgresProjectionDocuments({ postgres });
-  const digest = crypto.createHash("sha256").update(JSON.stringify(viewDocuments)).digest("hex");
-  if (digest !== approved.source.digest) {
-    throw new Error("Payload Postgres search view does not match the authoritative Payload projection");
-  }
-  const databaseTarget = redactedDatabaseTarget((postgres.env || process.env).DATABASE_URL);
-  const engines = [
-    {
-      engine: "postgres",
-      target: POSTGRES_PUBLIC_SEARCH_VIEW,
-      documents: viewDocuments.length,
-      digest,
-      locale_codes: [...new Set(viewDocuments.map((document) => document.locale).filter(Boolean))].sort(),
-      operations: [
-        {
-          method: "SELECT",
-          status: 200,
-          url: databaseTarget,
-          rows: viewDocuments.length,
-        },
-      ],
-    },
-  ];
+  const needsRuntime = !postgres.payload && (!projection || typeof postgres.snapshotQueryImpl !== "function");
+  const ownedRuntime = needsRuntime ? await postgresQueryRuntime(postgres) : null;
+  const runtimePostgres = ownedRuntime ? { ...postgres, payload: ownedRuntime } : postgres;
+  try {
+    const approved = await postgresProjectionSnapshot({ postgres: runtimePostgres, projection });
+    const viewDocuments = await readPostgresProjectionDocuments({ postgres: runtimePostgres });
+    const digest = crypto.createHash("sha256").update(JSON.stringify(viewDocuments)).digest("hex");
+    if (digest !== approved.source.digest) {
+      throw new Error("Payload Postgres search view does not match the authoritative Payload projection");
+    }
+    const databaseTarget = redactedDatabaseTarget((postgres.env || process.env).DATABASE_URL);
+    const engines = [
+      {
+        engine: "postgres",
+        target: POSTGRES_PUBLIC_SEARCH_VIEW,
+        documents: viewDocuments.length,
+        digest,
+        locale_codes: [...new Set(viewDocuments.map((document) => document.locale).filter(Boolean))].sort(),
+        operations: [
+          {
+            method: "SELECT",
+            status: 200,
+            url: databaseTarget,
+            rows: viewDocuments.length,
+          },
+        ],
+      },
+    ];
 
-  return {
-    evidence_scope: approved ? "live" : "smoke",
-    generated_at: generatedAt,
-    source: approved?.source || fixtureSource(viewDocuments.length),
-    summary: {
-      engines: engines.length,
-      targets: { postgres: POSTGRES_PUBLIC_SEARCH_VIEW },
-      documents_per_engine: engines.map((engine) => engine.documents),
-      total_operations: engines.reduce((sum, engine) => sum + engine.operations.length, 0),
-      database_target: databaseTarget,
-    },
-    engines,
-  };
+    return {
+      evidence_scope: approved ? "live" : "smoke",
+      generated_at: generatedAt,
+      source: approved?.source || fixtureSource(viewDocuments.length),
+      summary: {
+        engines: engines.length,
+        targets: { postgres: POSTGRES_PUBLIC_SEARCH_VIEW },
+        documents_per_engine: engines.map((engine) => engine.documents),
+        total_operations: engines.reduce((sum, engine) => sum + engine.operations.length, 0),
+        database_target: databaseTarget,
+      },
+      engines,
+    };
+  } finally {
+    await ownedRuntime?.destroy?.();
+  }
 }
 
 export function assertSearchEngineSyncReport(report) {
@@ -1561,9 +1568,16 @@ function postgresSortOrder(sql, intent) {
 }
 
 async function postgresQueryRuntime({ payload, loadPayloadRuntime, env }) {
-  if (payload?.db?.drizzle?.execute) return payload;
+  if (payload?.db?.execute || payload?.db?.drizzle?.execute) return payload;
   const loader = typeof loadPayloadRuntime === "function" ? loadPayloadRuntime : loadPayloadCmsImportRuntime;
   return loader({ env, payload });
+}
+
+function postgresExecutor(runtime) {
+  const adapter = runtime?.db;
+  if (typeof adapter?.execute === "function") return (statement) => adapter.execute({ drizzle: adapter.drizzle, sql: statement });
+  if (typeof adapter?.drizzle?.execute === "function") return (statement) => adapter.drizzle.execute(statement);
+  throw new Error("Payload Postgres runtime does not expose a compatible SQL executor");
 }
 
 async function queryPostgres({
@@ -1577,8 +1591,7 @@ async function queryPostgres({
   }
   const sql = await loadPostgresSql();
   const runtime = await postgresQueryRuntime(postgres);
-  const execute = runtime?.db?.drizzle?.execute;
-  if (typeof execute !== "function") throw new Error("Payload Postgres runtime does not expose drizzle.execute");
+  const execute = postgresExecutor(runtime);
 
   const normalizedLocales = normalizedLocaleCodes(localeCodes);
   const normalized = backendIntent(intent, normalizedLocales);
@@ -1695,8 +1708,7 @@ async function readPostgresProjectionDocuments({ postgres = {} } = {}) {
   if (typeof postgres.snapshotQueryImpl === "function") return postgres.snapshotQueryImpl({ target: POSTGRES_PUBLIC_SEARCH_VIEW });
   const sql = await loadPostgresSql();
   const runtime = await postgresQueryRuntime(postgres);
-  const execute = runtime?.db?.drizzle?.execute;
-  if (typeof execute !== "function") throw new Error("Payload Postgres runtime does not expose drizzle.execute");
+  const execute = postgresExecutor(runtime);
   const rows = postgresRows(await execute(sql`SELECT * FROM ${sql.raw(`"public"."${POSTGRES_PUBLIC_SEARCH_VIEW}"`)} ORDER BY "id" ASC`));
   return rows.map(postgresProjectionDocument);
 }

@@ -12,7 +12,10 @@ FROM dependencies AS build
 
 ENV NODE_ENV=production
 COPY . .
-RUN npm run design:build && npm run next:build
+RUN npm run design:build && \
+    PAYLOAD_SECRET=build-only-secret-not-used-at-runtime-0123456789 \
+    DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build_only \
+    npm run next:build
 
 FROM node:22-bookworm-slim AS runtime
 

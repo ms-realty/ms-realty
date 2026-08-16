@@ -1,0 +1,22 @@
+{
+	admin off
+	auto_https off
+}
+
+:8081 {
+	encode zstd gzip
+	header X-Robots-Tag "noindex, nofollow, noarchive"
+
+	route {
+		basic_auth {
+			{$MS_REALTY_REVIEW_USER} {$MS_REALTY_REVIEW_PASSWORD_HASH}
+		}
+
+		@operator path /admin/* /api/admin/*
+		reverse_proxy @operator app:3000 {
+			header_up Authorization "Bearer {$MS_REALTY_ADMIN_TOKEN}"
+		}
+
+		reverse_proxy app:3000
+	}
+}

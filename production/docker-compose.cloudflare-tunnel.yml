@@ -1,0 +1,17 @@
+services:
+  app:
+    environment:
+      MS_REALTY_ADMIN_ACTOR: cloudflare_review
+      MS_REALTY_PRIVATE_REVIEW_MODE: "true"
+      MS_REALTY_TRUST_PROXY: "1"
+      MS_REALTY_PUBLIC_ORIGIN: ${MS_REALTY_REVIEW_ORIGIN:-https://review.invalid}
+      MS_REALTY_MCP_ALLOWED_ORIGINS: ${MS_REALTY_REVIEW_ORIGIN:-https://review.invalid}
+
+  edge:
+    environment:
+      MS_REALTY_REVIEW_USER: ${MS_REALTY_REVIEW_USER:?MS_REALTY_REVIEW_USER is required}
+      MS_REALTY_REVIEW_PASSWORD_HASH: ${MS_REALTY_REVIEW_PASSWORD_HASH:?MS_REALTY_REVIEW_PASSWORD_HASH is required}
+    ports:
+      - "127.0.0.1:${MS_REALTY_CLOUDFLARE_TUNNEL_PORT:-3202}:8081"
+    volumes:
+      - ./Caddyfile.cloudflare-tunnel:/etc/caddy/Caddyfile:ro

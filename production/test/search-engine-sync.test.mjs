@@ -438,6 +438,47 @@ test("public search labels an unconfigured backend as a local seed fallback", as
   assert.deepEqual(result.unavailable_engines, ["postgres", "typesense", "meilisearch"]);
 });
 
+test("search sync reuses the current Payload adapter until its SQL snapshot completes", async () => {
+  let executeArgs = null;
+  let loadCalls = 0;
+  let destroyCalls = 0;
+  const drizzle = { kind: "current-payload-drizzle" };
+  const payload = {
+    db: {
+      drizzle,
+      beginTransaction: async () => "tx",
+      commitTransaction: async () => undefined,
+      rollbackTransaction: async () => undefined,
+      execute: async (args) => {
+        executeArgs = args;
+        return { rows: [] };
+      },
+    },
+    find: async () => ({ docs: [], totalPages: 1 }),
+    create: async () => undefined,
+    update: async () => undefined,
+    destroy: async () => {
+      destroyCalls += 1;
+      payload.db.drizzle = undefined;
+    },
+  };
+  const result = await runSearchEngineSync({
+    postgres: {
+      env: { DATABASE_URL: POSTGRES_DATABASE_TARGET, PAYLOAD_SECRET: "test-payload-secret" },
+      loadPayloadRuntime: async () => {
+        loadCalls += 1;
+        return payload;
+      },
+    },
+  });
+
+  assert.deepEqual(result.summary.documents_per_engine, [0]);
+  assert.equal(loadCalls, 1);
+  assert.equal(destroyCalls, 1);
+  assert.ok(executeArgs?.sql);
+  assert.equal(executeArgs.drizzle, drizzle);
+});
+
 test("approved search projection omits pending and private facts", () => {
   const listing = {
     id: "MS-2026-0001",

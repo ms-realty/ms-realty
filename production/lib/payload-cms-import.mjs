@@ -832,6 +832,7 @@ function aggregateReadback(snapshot, beforeSnapshot, target, seed, registry) {
   const targets = importedTargets(snapshot, seed, registry);
   const localeIds = targets.localeIds;
   const outboxRows = snapshot.search_outbox.docs.length;
+  const listingsWithLocations = seed.records.filter((record) => !missingValue(record.location)).length;
   const listingsWithMedia = seed.records.filter((record) => (record.media || []).length > 0).length;
   const listingsWithTranslations = seed.records.filter((record) => (record.translations || []).length > 0).length;
 
@@ -918,7 +919,7 @@ function aggregateReadback(snapshot, beforeSnapshot, target, seed, registry) {
       id: "listing_relationships_resolved",
       ok:
         readback.target.listings.linked_properties === target.listings &&
-        readback.target.listings.linked_locations === target.listings &&
+        readback.target.listings.linked_locations === listingsWithLocations &&
         readback.target.listings.linked_translations === listingsWithTranslations &&
         readback.target.listings.linked_media === listingsWithMedia &&
         readback.target.listings.linked_tours >= target.listing_tours &&
