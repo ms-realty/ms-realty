@@ -42,6 +42,17 @@ test("production compose runs one durable app before and after DNS cutover", () 
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);
 });
 
+test("production handoff runs Hermes drafts against one private local model", () => {
+  assert.match(compose, /image: ollama\/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad/);
+  assert.match(compose, /command: \["pull", "qwen3:1\.7b"\]/);
+  assert.match(compose, /HERMES_CHAT_COMPLETIONS_URL: http:\/\/hermes-agent:8642\/v1\/chat\/completions/);
+  assert.match(compose, /HERMES_AGENT_LLM_BASE_URL: http:\/\/ollama:11434\/v1/);
+  assert.match(compose, /MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE: live/);
+  assert.match(compose, /mem_limit: 2200m/);
+  assert.match(compose, /name: ms-realty-production-review-ollama/);
+  assert.doesNotMatch(compose, /- "11434:11434"/);
+});
+
 test("workers.dev delegates dynamic traffic to the fixed origin and carries an exact edge marker", () => {
   assert.match(worker, /if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(worker, /if \(media\) return media;\n\s+if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
