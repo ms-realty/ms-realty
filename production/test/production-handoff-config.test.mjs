@@ -5,6 +5,7 @@ import { fromRoot } from "../lib/paths.mjs";
 
 const caddy = fs.readFileSync(fromRoot("production", "Caddyfile.production-review"), "utf8");
 const compose = fs.readFileSync(fromRoot("production", "docker-compose.production-review.yml"), "utf8");
+const dockerfile = fs.readFileSync(fromRoot("production", "Dockerfile"), "utf8");
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 
@@ -30,6 +31,8 @@ test("production compose runs one durable app before and after DNS cutover", () 
   assert.doesNotMatch(compose, /MS_REALTY_PRIVATE_REVIEW_MODE/);
   assert.equal(compose.match(/MS_REALTY_TRUST_PROXY: "1"/g)?.length, 1);
   assert.match(compose, /MS_REALTY_PUBLIC_ORIGIN: https:\/\/makler-realty\.com/);
+  assert.match(compose, /MS_REALTY_BUILD_MARKER: \$\{MS_REALTY_BUILD_MARKER:-unversioned\}/);
+  assert.match(dockerfile, /ARG MS_REALTY_BUILD_MARKER=unversioned[\s\S]*\.ms-realty-build-marker/);
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);
 });
 

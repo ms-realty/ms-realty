@@ -2,6 +2,9 @@ name: ms-realty-production-review
 
 services:
   app:
+    build:
+      args:
+        MS_REALTY_BUILD_MARKER: ${MS_REALTY_BUILD_MARKER:-unversioned}
     environment:
       MS_REALTY_ADMIN_ACTOR: ${MS_REALTY_ADMIN_ACTOR:-agency_admin}
       MS_REALTY_PUBLIC_CONTACT_KEY: ${MS_REALTY_PUBLIC_CONTACT_KEY:?MS_REALTY_PUBLIC_CONTACT_KEY is required}

@@ -10,8 +10,10 @@ RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 FROM dependencies AS build
 
+ARG MS_REALTY_BUILD_MARKER=unversioned
 ENV NODE_ENV=production
 COPY . .
+RUN printf '%s\n' "$MS_REALTY_BUILD_MARKER" > .ms-realty-build-marker
 RUN npm run design:build && \
     PAYLOAD_SECRET=build-only-secret-not-used-at-runtime-0123456789 \
     DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build_only \
