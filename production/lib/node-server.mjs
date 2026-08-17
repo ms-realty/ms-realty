@@ -151,6 +151,12 @@ export function assertServerSmoke(smoke) {
   const contactLeadUiValid = contactLeadUiDisabled
     ? smoke.contact?.body?.body?.callback === null && Boolean(smoke.contact?.body?.body?.form_unavailable)
     : smoke.contact?.body?.body?.callback?.payload?.source === "website_contact_callback";
+  // Same durable-store readiness rule for the seller valuation intake.
+  const sellerLeadUiDisabled = smoke.sellerPage?.body?.chrome?.lead_writes_disabled === true;
+  const sellerLeadUiValid = sellerLeadUiDisabled
+    ? smoke.sellerPage?.body?.body?.valuation === null &&
+      Boolean(smoke.sellerPage?.body?.body?.form_unavailable)
+    : smoke.sellerPage?.body?.body?.valuation?.payload?.source === "website_seller_valuation";
   const expectedBlockers = [
     "redirect_reviews",
     "external_seo_exports",
@@ -384,10 +390,13 @@ export function assertServerSmoke(smoke) {
   }
   if (
     smoke.sellerPage?.status !== 200 ||
-    smoke.sellerPage.body.body.valuation.payload.source !== "website_seller_valuation" ||
-    !smoke.sellerHtml?.body.includes("data-lead-type=\"seller\"")
+    !sellerLeadUiValid ||
+    (sellerLeadUiDisabled
+      ? !smoke.sellerHtml?.body.includes("data-form-unavailable=\"true\"") ||
+        smoke.sellerHtml?.body.includes("data-lead-type=\"seller\"")
+      : !smoke.sellerHtml?.body.includes("data-lead-type=\"seller\""))
   ) {
-    throw new Error("Server must serve seller valuation page");
+    throw new Error("Server seller valuation page must match durable lead-store readiness");
   }
   if (
     smoke.contactHtml?.status !== 200 ||
