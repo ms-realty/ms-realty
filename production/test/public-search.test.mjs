@@ -11,6 +11,7 @@ import {
   PublicSearchUnavailableError,
 } from "../lib/public-search.mjs";
 import { loadCmsSeed, searchRuntimeListings } from "../lib/runtime.mjs";
+import { selectSearchRuntime } from "../lib/search-engine-sync.mjs";
 import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const registry = loadLocaleRegistry();
@@ -73,6 +74,35 @@ test("public search prefers optional query-only credentials and keeps admin-key 
   assert.equal(separated.meilisearch.queryApiKey, "meili-query");
   assert.equal(compatible.typesense.queryApiKey, "typesense-admin");
   assert.equal(compatible.meilisearch.queryApiKey, "meili-admin");
+});
+
+// Regression guard for the live 503 on /bg/tarsene: production carries
+// DATABASE_URL and PAYLOAD_SECRET but no Typesense/Meilisearch credentials.
+// If publicSearchConfigFromEnv stops forwarding the Postgres env, engine
+// selection throws "Payload Postgres search is required in production",
+// executePublicSearch converts that to PublicSearchUnavailableError, and every
+// visitor gets the branded search-unavailable page instead of results.
+test("production Postgres-only env selects the postgres search engine instead of failing closed", () => {
+  const productionEnv = {
+    NODE_ENV: "production",
+    DATABASE_URL: "postgres://db.ms-realty.bg:5432/ms_realty",
+    PAYLOAD_SECRET: "payload-secret",
+  };
+
+  const config = publicSearchConfigFromEnv(productionEnv);
+  assert.equal(config.environment, "production");
+  assert.equal(config.postgres.env.DATABASE_URL, productionEnv.DATABASE_URL);
+  assert.equal(config.typesense.baseUrl, undefined);
+  assert.equal(config.meilisearch.baseUrl, undefined);
+
+  assert.deepEqual(selectSearchRuntime(config), { engine: "postgres", mode: "single" });
+
+  // The same env without the Postgres forwarding is exactly the failure that
+  // is live today, so the guard proves the wiring is what keeps search up.
+  assert.throws(
+    () => selectSearchRuntime({ ...config, postgres: {} }),
+    /Payload Postgres search is required in production/,
+  );
 });
 
 function apiConfig(search) {
