@@ -909,36 +909,43 @@ const SELLER_COPY = {
     title: "Продайте имота си с MS Realty",
     description: "Заявете брокерска оценка и обратна връзка от екипа на MS Realty.",
     h1: "Продайте имота си",
+    form_unavailable: "Формата е временно недостъпна. Обадете се или ни пишете — отговаряме бързо.",
   },
   en: {
     title: "Sell your property with MS Realty",
     description: "Request a broker valuation and follow-up from the MS Realty team.",
     h1: "Sell your property",
+    form_unavailable: "The form is temporarily unavailable. Call or message us instead — we reply quickly.",
   },
   de: {
     title: "Verkaufen Sie Ihre Immobilie mit MS Realty",
     description: "Fordern Sie eine Maklerbewertung und Rückmeldung vom MS Realty Team an.",
     h1: "Immobilie verkaufen",
+    form_unavailable: "Das Formular ist vorübergehend nicht verfügbar. Rufen Sie uns an oder schreiben Sie uns.",
   },
   nl: {
     title: "Verkoop uw vastgoed met MS Realty",
     description: "Vraag een makelaarswaardering en opvolging van het MS Realty team aan.",
     h1: "Vastgoed verkopen",
+    form_unavailable: "Het formulier is tijdelijk niet beschikbaar. Bel of stuur ons een bericht.",
   },
   ru: {
     title: "Продайте недвижимость с MS Realty",
     description: "Запросите брокерскую оценку и обратную связь от команды MS Realty.",
     h1: "Продайте недвижимость",
+    form_unavailable: "Форма временно недоступна. Позвоните или напишите нам — мы быстро отвечаем.",
   },
   el: {
     title: "Πουλήστε το ακίνητό σας με τη MS Realty",
     description: "Ζητήστε εκτίμηση από μεσίτη και επικοινωνία από την ομάδα της MS Realty.",
     h1: "Πουλήστε το ακίνητό σας",
+    form_unavailable: "Η φόρμα δεν είναι προσωρινά διαθέσιμη. Καλέστε μας ή στείλτε μήνυμα.",
   },
   he: {
     title: "מכירת נכס עם MS Realty",
     description: "בקשו הערכת מתווך וחזרה מצוות MS Realty.",
     h1: "מכירת נכס",
+    form_unavailable: "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
   },
 };
 
@@ -2569,7 +2576,14 @@ export function renderLocationPage({ registry, localeCode, location, listings })
   };
 }
 
-export function renderSellerPage({ registry, localeCode }) {
+export function renderSellerPage({
+  registry,
+  localeCode,
+  // Same durable-store readiness predicate the contact page, API, and Worker
+  // edge use. Without it the seller page renders a live POST form that the
+  // edge rejects, so the highest-intent seller lead ends on a generic error.
+  leadWritesDisabled = leadWritesDisabledFromEnv(),
+} = {}) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const path = sellerPath(registry, locale.code);
@@ -2592,35 +2606,50 @@ export function renderSellerPage({ registry, localeCode }) {
       robots: resolved.available ? "index,follow" : "noindex,follow",
     },
     hreflang: resolved.available ? hreflangForSeller(registry) : [],
-    chrome: publicChrome(registry, locale, { hreflang: resolved.available ? hreflangForSeller(registry) : [], active: "seller" }),
+    chrome: publicChrome(registry, locale, {
+      hreflang: resolved.available ? hreflangForSeller(registry) : [],
+      active: "seller",
+      leadWritesDisabled,
+    }),
     body: {
       h1: copy.h1,
       intro: copy.description,
-      valuation: {
-        endpoint: "/api/leads",
-        method: "POST",
-        minimum_tap_target_px: 44,
-        required_fields: ["contact.name", "contact.phone", "property.location", "property.type", "message"],
-        payload: {
-          source: "website_seller_valuation",
-          intent: "valuation",
-          leadType: "seller",
-          language: locale.code,
-          contact_preference: "phone",
-        },
-        label: labels.valuation,
+      contact_channels: {
+        phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
+        whatsapp: { href: BRAND_CONTACT.whatsapp, label: "WhatsApp" },
+        viber: { href: BRAND_CONTACT.viber, label: "Viber" },
+        email: { href: `mailto:${BRAND_CONTACT.email}`, label: BRAND_CONTACT.email },
       },
-      callback: {
-        endpoint: "/api/leads",
-        method: "POST",
-        payload: {
-          source: "website_seller_callback",
-          leadType: "seller",
-          language: locale.code,
-          contact_preference: "phone",
-        },
-        label: labels.callback,
-      },
+      form_unavailable: leadWritesDisabled ? copy.form_unavailable : null,
+      valuation: leadWritesDisabled
+        ? null
+        : {
+            endpoint: "/api/leads",
+            method: "POST",
+            minimum_tap_target_px: 44,
+            required_fields: ["contact.name", "contact.phone", "property.location", "property.type", "message"],
+            payload: {
+              source: "website_seller_valuation",
+              intent: "valuation",
+              leadType: "seller",
+              language: locale.code,
+              contact_preference: "phone",
+            },
+            label: labels.valuation,
+          },
+      callback: leadWritesDisabled
+        ? null
+        : {
+            endpoint: "/api/leads",
+            method: "POST",
+            payload: {
+              source: "website_seller_callback",
+              leadType: "seller",
+              language: locale.code,
+              contact_preference: "phone",
+            },
+            label: labels.callback,
+          },
     },
   };
 }
