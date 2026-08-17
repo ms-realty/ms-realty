@@ -821,6 +821,41 @@ test("seller valuation page is locale-prefixed and posts seller leads", () => {
   assert.doesNotMatch(html, /data-mobile-task-navigation="true"/);
 });
 
+// The seller valuation request is the primary seller-lead engine, so it must
+// never render a form that the edge will reject. The contact page already
+// degrades to a phone CTA when lead writes are disabled; this asserts the
+// seller page does the same instead of showing a form that always errors.
+test("seller valuation page degrades to a phone CTA when lead writes are disabled", () => {
+  const disabled = renderSellerPage({ registry, localeCode: "bg", leadWritesDisabled: true });
+  const enabled = renderSellerPage({ registry, localeCode: "bg", leadWritesDisabled: false });
+  const disabledHtml = renderReactPublicBody(disabled);
+  const enabledHtml = renderReactPublicBody(enabled);
+
+  // The page still answers 200 and stays indexable — only the form is withheld.
+  assert.equal(disabled.status, 200);
+  assert.equal(disabled.indexable, true);
+  assert.equal(disabled.chrome.lead_writes_disabled, true);
+  assert.equal(disabled.body.valuation, null);
+  assert.equal(disabled.body.callback, null);
+  assert.equal(
+    disabled.body.form_unavailable,
+    "Формата е временно недостъпна. Обадете се или ни пишете — отговаряме бързо.",
+  );
+  assert.equal(disabled.body.contact_channels.phone.href, "tel:+359879696870");
+
+  // No submittable seller intake may reach the visitor in this state.
+  assert.doesNotMatch(disabledHtml, /data-seller-intake="true"/);
+  assert.doesNotMatch(disabledHtml, /action="\/api\/leads"/);
+  assert.match(disabledHtml, /data-form-unavailable="true"/);
+  assert.match(disabledHtml, /href="tel:\+359879696870"/);
+
+  // And the working path is unchanged when the durable store is available.
+  assert.equal(enabled.body.form_unavailable, null);
+  assert.equal(enabled.body.valuation.endpoint, "/api/leads");
+  assert.match(enabledHtml, /data-seller-intake="true"/);
+  assert.doesNotMatch(enabledHtml, /data-form-unavailable="true"/);
+});
+
 test("contact callback page is locale-prefixed and posts generic CRM leads", () => {
   const he = renderContactPage({ registry, localeCode: "he" });
   const el = renderContactPage({ registry, localeCode: "el" });

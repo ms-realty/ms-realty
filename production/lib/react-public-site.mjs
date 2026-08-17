@@ -2680,7 +2680,8 @@ function SellerBody({ page }) {
         ),
       ),
     ),
-    h(
+    valuation
+      ? h(
       "form",
       {
         className: "mk-card mk-card--elevated mk-card--pad-lg ct-form",
@@ -2781,7 +2782,27 @@ function SellerBody({ page }) {
           h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "send" }, valuation.label),
         ),
       ),
-    ),
+        )
+      : h(
+          "div",
+          { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
+          h("h2", { className: "ct-form__title" }, labels.sellerValuation),
+          h("p", null, page.body.form_unavailable),
+          page.body.contact_channels
+            ? h(
+                Btn,
+                {
+                  tag: "a",
+                  variant: "accent",
+                  size: "lg",
+                  full: true,
+                  iconStart: "phone",
+                  href: page.body.contact_channels.phone.href,
+                },
+                page.body.contact_channels.phone.label,
+              )
+            : null,
+        ),
   );
   return shell(page, main);
 }
