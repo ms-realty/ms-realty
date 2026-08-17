@@ -87,6 +87,19 @@ function contactPageMatchesLeadReadiness(page, html = null) {
     : html.includes("data-lead-type=\"general\"");
 }
 
+// The seller valuation intake follows the same durable-store readiness rule as
+// the contact callback: a submittable form, or an explicit unavailable notice.
+function sellerPageMatchesLeadReadiness(page, html = null) {
+  const disabled = page?.chrome?.lead_writes_disabled === true;
+  const jsonMatches = disabled
+    ? page?.body?.valuation === null && Boolean(page?.body?.form_unavailable)
+    : page?.body?.valuation?.payload?.leadType === "seller";
+  if (!jsonMatches || html === null) return jsonMatches;
+  return disabled
+    ? html.includes("data-form-unavailable=\"true\"") && !html.includes("data-lead-type=\"seller\"")
+    : html.includes("data-lead-type=\"seller\"");
+}
+
 function assertRuntimeAuditSummary(summary, label, expectedActions) {
   const expectedRows = Object.values(expectedActions).reduce((total, count) => total + count, 0);
   if (summary?.rows !== expectedRows) throw new Error(`${label} audit log must contain ${expectedRows} admin mutation rows`);
@@ -529,10 +542,9 @@ if (httpSmoke.searchHtml.status !== 200 || !httpSmoke.searchHtml.body.includes("
 }
 if (
   httpSmoke.sellerPage.status !== 200 ||
-  httpSmoke.sellerPage.body.body.valuation.payload.leadType !== "seller" ||
-  !httpSmoke.sellerHtml.body.includes("data-lead-type=\"seller\"")
+  !sellerPageMatchesLeadReadiness(httpSmoke.sellerPage.body, httpSmoke.sellerHtml.body)
 ) {
-  throw new Error("HTTP smoke must expose seller valuation page contract");
+  throw new Error("HTTP smoke seller valuation page must match durable lead-store readiness");
 }
 if (
   httpSmoke.contact.status !== 200 ||

@@ -3256,37 +3256,27 @@
     "body": {
       "h1": "מכירת נכס",
       "intro": "בקשו הערכת מתווך וחזרה מצוות MS Realty.",
-      "valuation": {
-        "endpoint": "/api/leads",
-        "method": "POST",
-        "minimum_tap_target_px": 44,
-        "required_fields": [
-          "contact.name",
-          "contact.phone",
-          "property.location",
-          "property.type",
-          "message"
-        ],
-        "payload": {
-          "source": "website_seller_valuation",
-          "intent": "valuation",
-          "leadType": "seller",
-          "language": "he",
-          "contact_preference": "phone"
+      "contact_channels": {
+        "phone": {
+          "href": "tel:+359879696870",
+          "label": "+359 879 69 68 70"
         },
-        "label": "הערכת מוכר"
+        "whatsapp": {
+          "href": "https://wa.me/359879696870",
+          "label": "WhatsApp"
+        },
+        "viber": {
+          "href": "viber://chat?number=%2B359879696870",
+          "label": "Viber"
+        },
+        "email": {
+          "href": "mailto:office@makler-realty.com",
+          "label": "office@makler-realty.com"
+        }
       },
-      "callback": {
-        "endpoint": "/api/leads",
-        "method": "POST",
-        "payload": {
-          "source": "website_seller_callback",
-          "leadType": "seller",
-          "language": "he",
-          "contact_preference": "phone"
-        },
-        "label": "שיחה חוזרת"
-      }
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
+      "valuation": null,
+      "callback": null
     }
   },
   "contact_he": {
@@ -8660,9 +8650,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-76be7bfa-733c-4636-ae43-bb9772d88c10",
+    "id": "inbox-lead-draft-5a08f537-f342-4c0f-83d7-6a6a7a519396",
     "lead": {
-      "id": "lead-draft-76be7bfa-733c-4636-ae43-bb9772d88c10",
+      "id": "lead-draft-5a08f537-f342-4c0f-83d7-6a6a7a519396",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -8761,9 +8751,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-6a6a2a43-8ff0-441d-8495-ab66a1e1f758",
+    "id": "inbox-lead-draft-d3e2c8a5-0b07-43d6-b234-4b4e4405356f",
     "lead": {
-      "id": "lead-draft-6a6a2a43-8ff0-441d-8495-ab66a1e1f758",
+      "id": "lead-draft-d3e2c8a5-0b07-43d6-b234-4b4e4405356f",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -8865,9 +8855,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-22a7a1a7-3216-46a7-abc1-ac0585212ea4",
+    "id": "inbox-lead-draft-838309d9-b88d-41f4-91c7-80ecf9648d0b",
     "lead": {
-      "id": "lead-draft-22a7a1a7-3216-46a7-abc1-ac0585212ea4",
+      "id": "lead-draft-838309d9-b88d-41f4-91c7-80ecf9648d0b",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",

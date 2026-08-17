@@ -482,6 +482,16 @@ export function assertRuntimeSmoke(smoke) {
     ? smoke.contact_he?.body?.callback === null && Boolean(smoke.contact_he?.body?.form_unavailable)
     : smoke.contact_he?.body?.callback?.payload?.source === "website_contact_callback" &&
       smoke.contact_he?.body?.callback?.payload?.leadType === "general";
+  // The seller valuation page follows the same durable-store readiness rule as
+  // the contact page: either a submittable intake, or an explicit unavailable
+  // notice — never a form the edge will reject.
+  const sellerLeadUiDisabled = smoke.seller_he?.chrome?.lead_writes_disabled === true;
+  const sellerLeadUiValid = sellerLeadUiDisabled
+    ? smoke.seller_he?.body?.valuation === null &&
+      smoke.seller_he?.body?.callback === null &&
+      Boolean(smoke.seller_he?.body?.form_unavailable) &&
+      Boolean(smoke.seller_he?.body?.contact_channels?.phone?.href)
+    : smoke.seller_he?.body?.valuation?.payload?.source === "website_seller_valuation";
   if (smoke.listing_he.status !== 200 || smoke.listing_he.dir !== "rtl") {
     throw new Error("Runtime Hebrew listing must render as RTL 200");
   }
@@ -515,8 +525,8 @@ export function assertRuntimeSmoke(smoke) {
   }
   if (smoke.home_he.body.seller.path !== "/he/sell") throw new Error("Runtime Hebrew home must expose seller path");
   if (smoke.fallback_fr.indexable !== false) throw new Error("Runtime French fallback must not be indexable");
-  if (smoke.seller_he.status !== 200 || smoke.seller_he.body.valuation.payload.source !== "website_seller_valuation") {
-    throw new Error("Runtime seller page must expose seller valuation lead action");
+  if (smoke.seller_he.status !== 200 || !sellerLeadUiValid) {
+    throw new Error("Runtime seller page must match durable lead-store readiness");
   }
   if (
     smoke.contact_he.status !== 200 ||

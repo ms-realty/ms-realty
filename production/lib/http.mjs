@@ -4569,6 +4569,12 @@ export function assertHttpSmoke(smoke) {
   const contactLeadUiValid = contactLeadUiDisabled
     ? smoke.contact?.body?.body?.callback === null && Boolean(smoke.contact?.body?.body?.form_unavailable)
     : smoke.contact?.body?.body?.callback?.payload?.source === "website_contact_callback";
+  // Same durable-store readiness rule for the seller valuation intake.
+  const sellerLeadUiDisabled = smoke.sellerPage?.body?.chrome?.lead_writes_disabled === true;
+  const sellerLeadUiValid = sellerLeadUiDisabled
+    ? smoke.sellerPage?.body?.body?.valuation === null &&
+      Boolean(smoke.sellerPage?.body?.body?.form_unavailable)
+    : smoke.sellerPage?.body?.body?.valuation?.payload?.source === "website_seller_valuation";
   const expectedBlockers = [
     "external_seo_exports",
     "listing_quality_review",
@@ -4850,15 +4856,17 @@ export function assertHttpSmoke(smoke) {
   if (smoke.locationHtml?.status !== 200 || !smoke.locationHtml.body.includes("data-kind=\"location\"")) {
     throw new Error("HTTP smoke must serve rendered location HTML");
   }
-  if (
-    smoke.sellerPage?.status !== 200 ||
-    smoke.sellerPage.body.body.valuation.payload.source !== "website_seller_valuation" ||
-    smoke.sellerPage.body.dir !== "rtl"
-  ) {
-    throw new Error("HTTP smoke must serve seller valuation page");
+  if (smoke.sellerPage?.status !== 200 || !sellerLeadUiValid || smoke.sellerPage.body.dir !== "rtl") {
+    throw new Error("HTTP smoke seller valuation page must match durable lead-store readiness");
   }
-  if (smoke.sellerHtml?.status !== 200 || !smoke.sellerHtml.body.includes("data-lead-type=\"seller\"")) {
-    throw new Error("HTTP smoke must serve rendered seller valuation HTML");
+  if (
+    smoke.sellerHtml?.status !== 200 ||
+    (sellerLeadUiDisabled
+      ? !smoke.sellerHtml.body.includes("data-form-unavailable=\"true\"") ||
+        smoke.sellerHtml.body.includes("data-lead-type=\"seller\"")
+      : !smoke.sellerHtml.body.includes("data-lead-type=\"seller\""))
+  ) {
+    throw new Error("HTTP smoke rendered seller page must match durable lead-store readiness");
   }
   if (
     smoke.contactHtml?.status !== 200 ||
