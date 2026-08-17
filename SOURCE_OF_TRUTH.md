@@ -1,7 +1,7 @@
 # MS Realty — Source of Truth
 
 **Single canonical document for the MS Realty rebuild** (`makler-realty.com` + `makler-realty.ru`).
-Last updated: 2026-08-09.
+Last updated: 2026-08-17.
 
 > **Precedence.** Running code, crawl artifacts, generated `production/data/*`, and the
 > subsystem READMEs (`production/`, `migration/`, `search/`, `locales/`,
@@ -67,6 +67,25 @@ Authoritative launch baseline: `migration/artifacts/20260704-211155/` (generated
 `crawl-delta.md` records one historical `.com` listing URL that disappeared from the sitemap and now
 returns `404`; the baseline remains authoritative until a reviewer approves a same-content mapping or a
 410. No crawl refresh may silently remove a legacy URL or create a homepage/search redirect.
+
+### 3.1 Documented gap — no access to the legacy site (owner decision, 2026-08-17)
+
+**The old WordPress site was built by a third party and MS Realty holds no credentials for it.** There
+is no admin login, no hosting panel, no database export, and no Search Console / Yandex Webmaster
+property in hand. This is recorded as a **known, accepted gap — it does not block development.**
+
+Consequences that are now settled policy, not open questions:
+
+- **No content can be migrated from the old site.** The public crawl in `migration/artifacts/` is the
+  only source of legacy content, and captured legacy text stays **review-only**: it is never
+  republished automatically. Where no approved equivalent exists, the terminal proposal is `410`.
+- **Production-readiness comes first.** Google Search Console, Yandex Webmaster, and backlink evidence
+  work happens **after** access is obtained and after the domain switch — not before. The
+  `external_seo_exports` launch gate therefore stays blocked by design for now, and its blocked state
+  must not be read as a delivery failure.
+- The `.ru` search-ownership verification step (`RU-SEO-VERIFY-1`) is **confirmed by the owner**.
+
+Recovering access (or formally writing it off) is tracked as its own task — see Linear `HELM-606`.
 
 **Two live domains — both first-class:**
 - `makler-realty.com` — multilingual main domain. Legacy WordPress sitemap index at `/sitemap.html`
@@ -520,6 +539,72 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Deterministic workflow truth, human approval boundaries, translation coverage/rollout, draft dispatch/worker validation, and audit contracts are implemented. Hermes still has no public/customer write capability; a real self-hosted Hermes/private-model endpoint and live worker report remain required. |
 | **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; backup/rollback plan | Local build/runtime, mobile/RTL/browser QA, privacy analytics, and a checksummed backup/restore drill across Payload/Postgres plus CRM/CMS/evidence volumes are proven. The 457-row workbook still has 292 unresolved page/post/taxonomy URLs; **launch remains blocked on those reviews, Search Console/Yandex/backlink exports, the complete 165-row human listing review, provisioned live search/Hermes reports, and a real encrypted off-site backup/DR policy** (the production Payload runtime itself passes preflight as of 2026-08-09). |
 
+### 16.1 Deterministic launch freeze (2026-08-17)
+
+`production/data/launch-freeze.json`, built by `production/lib/launch-freeze.mjs` (`npm run launch:freeze`),
+is the reproducible answer to "what is Active vs Archived, and what happens to each of the 457 URLs."
+It is pinned to the manual audit's timestamp rather than wall-clock and records a `sha256` for all six
+inputs, so it cannot be silently rebased onto different evidence. It regenerates byte-identically.
+
+| | |
+|---|---|
+| Catalog | **165** listings — **30 active-at-freeze**, **135 archived**, `publish_ready: 0` |
+| Routes | 457 total — **200×10**, **301×179**, **410×268** |
+| Approval | **165 approved + deployable**, **292 `approval_state: required` + `deployable: false`** |
+| `contract_ready` | `false` |
+
+Classification is **mechanical, not editorial**: `pass → active`, `review|hold|source_unavailable →
+archived`. Catalog classification is explicitly **not** broker or publication approval. Where no
+approved equivalent exists the proposal is `410` — review-only crawl text is never republished.
+
+**The 292 non-listing decisions are not final and must not be applied** until the owner confirms them.
+Delivered on branch `codex/helm-595-launch-freeze` (PR #62, draft). Tracked as Linear `HELM-595`.
+
+### 16.2 Current live production state (verified 2026-08-17)
+
+A production Worker is already deployed at `https://ms-realty.ms-realty-bg.workers.dev` serving the
+current `main`. `.github/workflows/health-check.yml` probes it hourly. What a real visitor gets today:
+
+| Surface | State |
+|---|---|
+| Home, listing, location, guide pages | Working |
+| Legacy media, preview `noindex` guard, admin login + 401 boundary | Working |
+| Phone / WhatsApp / Viber on the **contact page** | Working (hardcoded agency line) |
+| **Public search** | **`503`** branded unavailable page — see below |
+| **Lead writes** (contact, enquiry, viewing, seller valuation) | **Disabled** — phone is the only working channel |
+| Call / WhatsApp / Viber **on listing pages** | Off — `production/data/broker-contacts.jsonl` is empty; needs one approved broker-contact row per listing |
+| Saved search, language request | Rejected at the Worker edge — no allow-rule exists |
+| Email delivery, analytics click tracking | Not implemented |
+| `/api/ready` | `503` — correct while launch gates are blocked |
+
+Two consequences worth stating plainly:
+
+- **Search is 503 because of missing config, not missing capability.** `main` already contains a
+  complete Postgres search backend and the `ms_realty_public_search_documents` view
+  (`migrations/20260811_153000_postgres_public_search.ts`), and production already has `DATABASE_URL`
+  + `PAYLOAD_SECRET`. `publicSearchConfigFromEnv()` simply never forwarded a `postgres` config, so
+  engine selection throws and the route fails closed. Fix prepared in PR #63 (draft). **Typesense and
+  Meilisearch are not required for search to work** — the `live_services` gate's definition should be
+  revisited in light of that. Caveat: the view only returns human-approved, indexable translations,
+  so results stay thin until the listing/translation reviews land.
+- **Public leads and broker lead-work are currently mutually exclusive.** Enabling
+  `MS_REALTY_LEAD_DURABLE_STORE_ENABLED` is the only way to accept public leads, but it also trips the
+  `lead_store_read_only` guard that disables 14 broker mutations (replies, assignment, viewings,
+  pipeline outcomes, deal close). **The broker cannot both receive leads and work them.** This is an
+  unresolved design contradiction, not an external blocker, and it is the largest single obstacle to
+  "the client can actually use it."
+
+### 16.3 Deploying is automatic — read before opening a PR
+
+**In this repo a merged PR ships to production with no further human action.**
+`.github/workflows/auto-merge.yml` squash-merges any open **non-draft** PR to `main` from a
+collaborator as soon as CI passes, then fires an `auto_merge_deploy` `repository_dispatch`;
+`.github/workflows/ci.yml` listens for it and runs `wrangler deploy` against the live Worker.
+
+Practical rule: **work that must not deploy yet belongs in a draft PR** — the auto-merge script skips
+drafts. Nothing mechanically prevents a green PR from deploying changed route decisions, so the
+launch-freeze gate is currently protected by convention only.
+
 **What is proven in code right now** (see `production/README.md` and git history):
 crawl pack for both domains (457 URLs), SQLite migration DB + review dashboards, Typesense/Meilisearch
 import fixtures (165 source listings → 167 locale-scoped docs), 457-row legacy-route decision workbook,
@@ -549,6 +634,15 @@ live Typesense/Meilisearch URLs/API keys, Hermes/vLLM endpoint, sync/query and H
 reports, plus encrypted off-site backup/restore evidence (production Payload secrets, database, and
 operator setup were completed 2026-08-09 — see `production/DEPLOYMENT.md`). Only the 165 mapped listing redirects are covered by the reviewed deployable 301 export; the
 remaining legacy URLs must not be treated as complete.
+
+**All seven launch gates are currently blocked on external input, not on unwritten code** —
+`redirect_reviews` (owner confirmation), `external_seo_exports` (deferred by decision, §3.1),
+`listing_quality_review` (human review + source facts that the crawl does not contain),
+`live_services` (search/Hermes credentials — but see §16.2 on Postgres search),
+`monitoring_rollback` and `production_recovery` (operator evidence + off-site backup),
+`payload_runtime` (passes in production; blocked only in local checkouts without the private env).
+Progress on production readiness should therefore be judged on §16.2's live-surface list, not on the
+gate count, which cannot move until the owner supplies those inputs.
 
 The authoritative launch report now enforces that recovery evidence as `production_recovery`: a local
 Docker snapshot cannot pass it, and the private report must prove encrypted off-site coverage plus a
