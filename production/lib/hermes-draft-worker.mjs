@@ -33,6 +33,8 @@ export function providerRequestBody(row, model) {
   return {
     model,
     temperature: 0.2,
+    max_tokens: 1024,
+    reasoning_effort: "none",
     response_format: { type: "json_object" },
     tool_choice: "none",
     messages: [
@@ -253,6 +255,7 @@ export function openAiCompatibleHermesProvider({
   return async function callHermes(row) {
     const response = await fetchImpl(endpoint, {
       method: "POST",
+      signal: AbortSignal.timeout(180_000),
       headers: {
         "content-type": "application/json",
         ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}),
