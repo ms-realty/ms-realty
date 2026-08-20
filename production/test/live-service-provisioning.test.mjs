@@ -86,6 +86,21 @@ test("live service provisioning records a redacted Neon target and authenticated
   assert.equal(serialized.includes("hermes-test-key"), false);
 });
 
+test("live service provisioning permits only the private production Hermes HTTP service", async () => {
+  const internal = await buildLiveServiceProvisioningReport({
+    env: { ...readyEnv, HERMES_CHAT_COMPLETIONS_URL: "http://hermes-agent:8642/v1/chat/completions" },
+    fetchImpl: healthyHermesFetch,
+  });
+  const external = await buildLiveServiceProvisioningReport({
+    env: { ...readyEnv, HERMES_CHAT_COMPLETIONS_URL: "http://hermes.ms-realty.bg/v1/chat/completions" },
+    fetchImpl: healthyHermesFetch,
+  });
+
+  assert.equal(internal.ready, true);
+  assert.equal(external.ready, false);
+  assert.match(external.checks.find((check) => check.id === "hermes_provider").error, /must use HTTPS/);
+});
+
 test("live service provisioning rejects placeholder, local, and credential-free database targets", async () => {
   const placeholder = await buildLiveServiceProvisioningReport({
     env: { ...readyEnv, DATABASE_URL: "postgresql://user:pass@example.com/database" },
