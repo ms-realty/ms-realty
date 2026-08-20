@@ -4576,8 +4576,6 @@ export function assertHttpSmoke(smoke) {
       Boolean(smoke.sellerPage?.body?.body?.form_unavailable)
     : smoke.sellerPage?.body?.body?.valuation?.payload?.source === "website_seller_valuation";
   const expectedBlockers = [
-    "external_seo_exports",
-    "listing_quality_review",
     "live_services",
     "monitoring_rollback",
     "payload_runtime",

@@ -16,6 +16,7 @@ import * as migration_20260813_130000_provider_connections from './20260813_1300
 import * as migration_20260813_140000_provider_webhook_events from './20260813_140000_provider_webhook_events';
 import * as migration_20260813_150000_provider_delivery_receipts from './20260813_150000_provider_delivery_receipts';
 import * as migration_20260813_160000_durable_viewings from './20260813_160000_durable_viewings';
+import * as migration_20260820_190500_repair_postgres_search_view from './20260820_190500_repair_postgres_search_view';
 
 export const migrations = [
   {
@@ -107,5 +108,10 @@ export const migrations = [
     up: migration_20260813_160000_durable_viewings.up,
     down: migration_20260813_160000_durable_viewings.down,
     name: '20260813_160000_durable_viewings',
+  },
+  {
+    up: migration_20260820_190500_repair_postgres_search_view.up,
+    down: migration_20260820_190500_repair_postgres_search_view.down,
+    name: '20260820_190500_repair_postgres_search_view',
   },
 ];

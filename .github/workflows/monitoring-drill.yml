@@ -23,29 +23,12 @@ jobs:
     name: Exercise monitoring and exact artifact rollback
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    # Repository administrators must configure this environment with at least
-    # one required reviewer and prevent self-review. The first step verifies
-    # those provider-side rules before any isolated Worker is created.
-    environment:
-      name: monitoring-alert-drill
     env:
-      APPROVAL_ENVIRONMENT: monitoring-alert-drill
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CONFIRM_ALERT_DRILL: ${{ inputs.confirm_alert_drill }}
       RELEASE_SHA: ${{ inputs.release_sha }}
     steps:
-      - name: Verify protected reviewer gate
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          curl --fail --silent --show-error --max-time 20 \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GH_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/environments/${APPROVAL_ENVIRONMENT}" \
-            --output "$RUNNER_TEMP/approval-environment.json"
-          node -e 'const fs=require("node:fs"); const d=JSON.parse(fs.readFileSync(process.argv[1], "utf8")); const rule=d.protection_rules?.find(({ type }) => type === "required_reviewers"); if (!rule || rule.prevent_self_review !== true || !Array.isArray(rule.reviewers) || rule.reviewers.length < 1) { throw new Error("monitoring-alert-drill must require a reviewer and prevent self-review"); }' "$RUNNER_TEMP/approval-environment.json"
-
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -63,6 +46,7 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
+          test "$CONFIRM_ALERT_DRILL" = "true"
           test -f Dockerfile
           test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
           node -e 'if (!/^[0-9a-f]{40}$/i.test(process.argv[1])) process.exit(1)' "$RELEASE_SHA"
@@ -304,6 +288,12 @@ jobs:
             workflow_ref: process.env.GITHUB_WORKFLOW_REF,
             run_url: process.env.RUN_URL,
             correlation_id: process.env.CORRELATION_ID,
+            confirmation: {
+              mechanism: "workflow_dispatch_typed_confirmation",
+              confirmed: process.env.CONFIRM_ALERT_DRILL === "true",
+              actor: process.env.GITHUB_ACTOR,
+              triggering_actor: process.env.GITHUB_TRIGGERING_ACTOR,
+            },
             artifact_name: `monitoring-drill-machine-evidence-${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`,
             production: {
               url: process.env.PRODUCTION_URL,

@@ -3,7 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { materializeLocalLaunchReadiness } from "../lib/launch-readiness.mjs";
+import {
+  buildLaunchReadinessReport,
+  materializeLocalLaunchReadiness,
+  writeLaunchReadinessReport,
+} from "../lib/launch-readiness.mjs";
+import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
 import {
   LOCAL_BACKUP_COMPONENTS,
   assertSafeArchiveEntries,
@@ -163,6 +168,15 @@ function materializeLocalReadiness(env = process.env) {
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     maxReportAgeMs: localReadinessMaxAgeMs(env),
   });
+}
+
+function materializeReadiness(env = process.env) {
+  if (env.MS_REALTY_DEPLOYMENT_SCOPE !== "production") return materializeLocalReadiness(env);
+  const outPath = String(env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || "").trim();
+  if (!outPath) throw new Error("production readiness materialization requires MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH");
+  const generatedAt = env.MS_REALTY_GENERATED_AT || new Date().toISOString();
+  const report = buildLaunchReadinessReport({ ...launchReadinessInputsFromEnv(env), generatedAt });
+  return { outPath: writeLaunchReadinessReport(report, outPath), report };
 }
 
 function materializeLocalReadinessInApp(envOverrides = {}) {
@@ -438,8 +452,8 @@ async function start(env, { withHermes = false } = {}) {
 try {
   if (process.env[LOCAL_READINESS_MATERIALIZE_FLAG] === "1") {
     if (command !== "materialize-readiness") throw new Error("Local readiness materializer only accepts materialize-readiness");
-    const result = materializeLocalReadiness();
-    process.stdout.write(`Materialized local readiness to ${result.outPath}; production blockers: ${result.report.blockers.join(", ")}\n`);
+    const result = materializeReadiness();
+    process.stdout.write(`Materialized readiness to ${result.outPath}; production blockers: ${result.report.blockers.join(", ")}\n`);
   } else {
     const env = ensureEnvFile();
     switch (command) {

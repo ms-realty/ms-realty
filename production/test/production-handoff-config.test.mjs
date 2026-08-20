@@ -5,8 +5,10 @@ import { fromRoot } from "../lib/paths.mjs";
 
 const caddy = fs.readFileSync(fromRoot("production", "Caddyfile.production-review"), "utf8");
 const compose = fs.readFileSync(fromRoot("production", "docker-compose.production-review.yml"), "utf8");
+const localCompose = fs.readFileSync(fromRoot("production", "docker-compose.local-production.yml"), "utf8");
 const dockerfile = fs.readFileSync(fromRoot("production", "Dockerfile"), "utf8");
 const deployScript = fs.readFileSync(fromRoot("production", "scripts", "deploy-production-review.sh"), "utf8");
+const searchSyncCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-sync.mjs"), "utf8");
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 
@@ -71,6 +73,13 @@ test("production handoff runs Hermes drafts against one private local model", ()
   assert.doesNotMatch(compose, /- "11434:11434"/);
 });
 
+test("production search evidence uses one migrated Payload runtime", () => {
+  const searchSeed = localCompose.slice(localCompose.indexOf("  search-seed:"), localCompose.indexOf("  runtime-init:"));
+  assert.doesNotMatch(searchSeed, /NODE_ENV:\s*test/);
+  assert.doesNotMatch(searchSyncCli, /loadPayloadApprovedSearchProjection/);
+  assert.match(searchSyncCli, /runSearchEngineSync\(\{ generatedAt: new Date\(\)\.toISOString\(\) \}\)/);
+});
+
 test("workers.dev delegates dynamic traffic to the fixed origin and carries an exact edge marker", () => {
   assert.match(worker, /if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(worker, /requestForOrigin\(request, env\.MS_REALTY_ORIGIN_URL, env\.MS_REALTY_ORIGIN_TOKEN\)/);
@@ -80,13 +89,18 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
 });
 
 test("origin deployment is immutable, backup-first, and rolls back the active release", () => {
+  assert.match(deployScript, /^set -euo pipefail$/m);
+  assert.doesNotMatch(deployScript, /^set -E/m);
   assert.match(deployScript, /\^\[0-9a-f\]\{40\}\$/);
   assert.match(deployScript, /tar -tzf "\$archive" \| awk/);
   assert.doesNotMatch(deployScript, /tar -tzf "\$archive" \| grep -q/);
   assert.match(deployScript, /run_stack "\$previous" docker:backup/);
+  assert.match(deployScript, /run_stack "\$release" docker:status "\$release_id"/);
   assert.match(deployScript, /run_stack "\$release" docker:hermes:up "\$release_id"/);
   assert.match(deployScript, /d\.build_marker !== process\.argv\[2\]/);
   assert.match(deployScript, /deployment failed; restoring \$previous/);
+  assert.match(deployScript, /local status="\$\{1:-1\}"/);
+  assert.match(deployScript, /trap 'rollback "\$\?"' ERR/);
   assert.match(deployScript, /mv -Tf "\$base\/\.current-\$release_id" "\$current"/);
   assert.doesNotMatch(deployScript, /docker:reset|docker compose down --volumes/);
 });

@@ -64,6 +64,11 @@ function machineRollbackReport(releaseId = RECOVERY_RELEASE_ID) {
         probe: "production/scripts/probe-production-journeys.mjs",
       }],
     },
+    dispatch_confirmation: {
+      mechanism: "workflow_dispatch_typed_confirmation",
+      actor: "ivan-peychev",
+      triggering_actor: "ivan-peychev",
+    },
     alert_delivery: {
       status: "pass",
       provider: "github-actions-email",
@@ -141,12 +146,23 @@ test("committed production component map covers runtime_data without manufacturi
   assert.equal(assertR2RecoveryManifest(manifest, componentMap), true);
   assert.equal(manifest.component_coverage.payload_postgres.status, "covered");
   assert.equal(manifest.component_coverage.runtime_data.status, "covered");
-  assert.equal(manifest.component_coverage.runtime_evidence.status, "uncovered");
+  assert.equal(manifest.component_coverage.runtime_evidence.status, "covered");
   assert.deepEqual(manifest.component_coverage.runtime_data.uncovered_sources, []);
   assert.ok("public.consent_events" in manifest.component_coverage.runtime_data.mapped_tables);
   assert.ok("public.seller_pipeline_events" in manifest.component_coverage.runtime_data.mapped_tables);
-  assert.ok(manifest.component_coverage.runtime_evidence.uncovered_sources.includes("MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH"));
+  assert.ok(manifest.component_coverage.runtime_evidence.deterministic_sources.includes("MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH"));
+  assert.deepEqual(manifest.component_coverage.runtime_evidence.uncovered_sources, []);
   assert.doesNotMatch(JSON.stringify(manifest), /postgres(?:ql)?:\/\//i);
+});
+
+test("recovery components cannot claim coverage through an empty classification", (t) => {
+  const { componentMap } = fixture(t);
+  const incomplete = structuredClone(componentMap);
+  incomplete.components.runtime_evidence.deterministic_sources = [];
+  assert.throws(
+    () => assertRecoveryComponentMap(incomplete),
+    /mapped PostgreSQL table or deterministic source/,
+  );
 });
 
 test("runtime_data coverage is bound to the exact Worker authority gate and admitted Neon tables", (t) => {
@@ -210,7 +226,7 @@ test("runtime_data recovery cannot claim coverage without durable consent and se
   }
 });
 
-test("isolated restore stays blocked until all logical components and exact counts are proven", (t) => {
+test("isolated restore stays blocked until exact counts and monitoring rollback are proven", (t) => {
   const { manifest, tableCounts } = fixture(t);
   const blocked = buildRestoreDrillResult({
     manifest,
@@ -223,7 +239,8 @@ test("isolated restore stays blocked until all logical components and exact coun
     cleanupVerified: true,
   });
   assert.equal(blocked.status, "blocked");
-  assert.deepEqual(blocked.uncovered_components, ["runtime_evidence"]);
+  assert.deepEqual(blocked.uncovered_components, []);
+  assert.ok(blocked.blockers.some((blocker) => blocker.id === "monitoring_rollback_report_missing"));
   assert.throws(
     () => buildProductionRecoveryReport({
       manifest,
@@ -251,13 +268,8 @@ test("isolated restore stays blocked until all logical components and exact coun
 
 test("fully covered restore requires machine rollback evidence and immutable human approval", (t) => {
   const { componentMap, tableCounts, manifest: blockedManifest } = fixture(t);
-  const coveredMap = structuredClone(componentMap);
-  for (const component of Object.values(coveredMap.components)) component.uncovered_sources = [];
-  coveredMap.components.runtime_evidence.tables.push({
-    name: "public.realty_case_evidence",
-    sources: ["synthetic covered evidence fixture"],
-  });
-  const coveredCounts = { ...tableCounts, "public.realty_case_evidence": 4 };
+  const coveredMap = componentMap;
+  const coveredCounts = tableCounts;
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-r2-covered-"));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const plaintextFile = path.join(directory, "database.dump");
@@ -423,6 +435,10 @@ test("downloaded manifests cannot define their own proof requirements", (t) => {
   changedMap.components.payload_postgres.tables[0].sources = ["tampered source claim"];
   assert.notEqual(componentMapDigest(changedMap), manifest.component_map_sha256);
   assert.throws(() => assertR2RecoveryManifest(manifest, changedMap), /component map digest/i);
+
+  const forgedClassification = structuredClone(manifest);
+  forgedClassification.component_coverage.runtime_evidence.deterministic_sources = ["tampered source claim"];
+  assert.throws(() => assertR2RecoveryManifest(forgedClassification, componentMap), /coverage/i);
 });
 
 test("production recovery exposes no environment component-map override", () => {
@@ -538,10 +554,8 @@ test("symbolic x/y rollback assertions cannot satisfy recovery evidence", () => 
 
 test("approval is bound to exact evidence and distinct case-insensitive identities", (t) => {
   const { componentMap, manifest, tableCounts } = fixture(t);
-  const coveredMap = structuredClone(componentMap);
-  for (const component of Object.values(coveredMap.components)) component.uncovered_sources = [];
-  coveredMap.components.runtime_evidence.tables.push({ name: "public.realty_case_evidence", sources: ["runtime evidence"] });
-  const coveredCounts = { ...tableCounts, "public.realty_case_evidence": 1 };
+  const coveredMap = componentMap;
+  const coveredCounts = tableCounts;
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-r2-approval-"));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const plaintextFile = path.join(directory, "dump");

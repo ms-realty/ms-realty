@@ -5,12 +5,13 @@ import { fromRoot } from "../lib/paths.mjs";
 
 const workflow = fs.readFileSync(fromRoot(".github", "workflows", "monitoring-drill.yml"), "utf8");
 
-test("monitoring drill gates intentional failure behind a protected reviewer environment", () => {
+test("monitoring drill gates intentional failure behind an auditable typed dispatch confirmation", () => {
   assert.match(workflow, /permissions:\n\s+actions: read\n\s+contents: read/);
-  assert.match(workflow, /environment:\n\s+name: monitoring-alert-drill/);
-  assert.match(workflow, /environments\/\$\{APPROVAL_ENVIRONMENT\}/);
-  assert.match(workflow, /type === "required_reviewers"/);
-  assert.match(workflow, /prevent_self_review !== true/);
+  assert.doesNotMatch(workflow, /environment:\n\s+name: monitoring-alert-drill/);
+  assert.match(workflow, /test "\$CONFIRM_ALERT_DRILL" = "true"/);
+  assert.match(workflow, /mechanism: "workflow_dispatch_typed_confirmation"/);
+  assert.match(workflow, /actor: process\.env\.GITHUB_ACTOR/);
+  assert.match(workflow, /triggering_actor: process\.env\.GITHUB_TRIGGERING_ACTOR/);
 
   const failureStep = workflow.slice(
     workflow.indexOf("- name: Exercise the production monitor failure surface"),

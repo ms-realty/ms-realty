@@ -1,9 +1,7 @@
 import { runSearchEngineSync, writeSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
-import { loadPayloadApprovedSearchProjection } from "../lib/payload-search-projection.mjs";
 
 try {
-  const projection = await loadPayloadApprovedSearchProjection();
-  const report = await runSearchEngineSync({ projection, generatedAt: new Date().toISOString() });
+  const report = await runSearchEngineSync({ generatedAt: new Date().toISOString() });
   writeSearchEngineSyncReport(
     report,
     process.env.MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH || process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined,

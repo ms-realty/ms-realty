@@ -28,6 +28,12 @@ function machineEvidence(overrides = {}) {
     workflow_ref: `${REPOSITORY}/.github/workflows/monitoring-drill.yml@refs/heads/main`,
     run_url: RUN_URL,
     correlation_id: CORRELATION_ID,
+    confirmation: {
+      mechanism: "workflow_dispatch_typed_confirmation",
+      confirmed: true,
+      actor: "ivan-peychev",
+      triggering_actor: "ivan-peychev",
+    },
     artifact_name: `monitoring-drill-machine-evidence-${RUN_ID}-${RUN_ATTEMPT}`,
     production: {
       url: "https://ms-realty.ms-realty-bg.workers.dev/api/health",
@@ -116,6 +122,11 @@ test("monitoring report builder preserves correlated machine, provider, and roll
   assert.equal(report.release_id, RELEASE_ID);
   assert.equal(report.monitoring.provider_run_id, RUN_ID);
   assert.equal(report.monitoring.provider_run_attempt, RUN_ATTEMPT);
+  assert.deepEqual(report.dispatch_confirmation, {
+    mechanism: "workflow_dispatch_typed_confirmation",
+    actor: "ivan-peychev",
+    triggering_actor: "ivan-peychev",
+  });
   assert.equal(report.alert_delivery.receipt_id, "message-id-20260811-31485358241-2");
   assert.equal(report.alert_delivery.correlation_id, CORRELATION_ID);
   assert.equal(report.rollback.canary.worker, WORKER);
@@ -156,6 +167,15 @@ test("monitoring report builder rejects rollback evidence without the exact rest
   const evidence = machineEvidence({
     rollback: { ...machineEvidence().rollback, restored_build_marker: "2".repeat(40) },
   });
+  const { result } = runBuilder(t, { evidence });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /actual MS Realty artifact rollback/);
+});
+
+test("monitoring report builder rejects machine evidence without typed dispatch authorization", (t) => {
+  const evidence = machineEvidence();
+  delete evidence.confirmation;
   const { result } = runBuilder(t, { evidence });
 
   assert.notEqual(result.status, 0);

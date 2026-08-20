@@ -529,6 +529,11 @@ const readyMonitoringRollback = {
         },
       ],
     },
+    dispatch_confirmation: {
+      mechanism: "workflow_dispatch_typed_confirmation",
+      actor: "ivan-peychev",
+      triggering_actor: "ivan-peychev",
+    },
     alert_delivery: {
       status: "pass",
       provider: "github-actions-email",
@@ -795,8 +800,6 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
   assert.deepEqual(report.blockers, [
-    "external_seo_exports",
-    "listing_quality_review",
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
@@ -838,29 +841,22 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.deepEqual(seoGate.evidence.url_types, { page: 104, post: 42, taxonomy: 146, listing: 165 });
   assert.equal(seoGate.evidence.urls_with_any_evidence, seoEvidence.summary.urls_with_any_evidence);
   assert.ok(seoGate.evidence.next_actions.some((action) => action.includes("seo:preflight")));
-  assert.equal(listingGate.status, "blocked");
-  assert.ok(listingGate.evidence.next_actions.some((action) => action.includes("listing:preflight")));
-  assert.match(listingGate.next_actions.join(" "), /npm run listing:preflight/);
+  assert.equal(seoGate.status, "deferred");
+  assert.match(seoGate.message, /Production-Live, not Production-Ready/);
+  assert.equal(listingGate.status, "pass");
+  assert.equal(listingGate.evidence.mode, "approved_launch_freeze_preservation");
+  assert.equal(listingGate.evidence.approval_id, "MSR-LAUNCH-FREEZE-1");
   assert.deepEqual(listingGate.evidence.summary, {
     expected_review_rows: 165,
-    review_rows: 0,
-    missing_review_rows: 165,
-    facts_review_rows: 0,
+    review_rows: 165,
+    missing_review_rows: 0,
+    facts_review_rows: 30,
     media_review_rows: 0,
-  });
-  assert.equal(listingGate.evidence.pending_review_sample.length, 10);
-  assert.deepEqual(listingGate.evidence.pending_review_sample[0], {
-    listing_id: "MS-CRAWL-0001",
-    target_path: "/bg/imoti/MS-CRAWL-0001",
-    editor_path: "/admin/listings/edit?listingId=MS-CRAWL-0001",
-    issues: ["missing_area"],
-    required_editor_fields: ["area_sqm"],
-    public_gallery_assets: 17,
-    public_gallery_sample: [
-      "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
-      "https://makler-realty.com/wp-content/uploads/2024/12/815-1.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
-      "https://makler-realty.com/wp-content/uploads/2024/12/815-2.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
-    ],
+    active_listings: 30,
+    archived_listings: 135,
+    publish_ready: 0,
+    publication_approvals: 0,
+    public_listing_entries: 0,
   });
   assert.equal(liveGate.status, "blocked");
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
@@ -869,8 +865,6 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
   assert.match(report.gates.find((gate) => gate.id === "payload_runtime").next_actions.join(" "), /npm run payload:preflight/);
   for (const id of [
-    "external_seo_exports",
-    "listing_quality_review",
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
@@ -890,8 +884,6 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.deepEqual(
     publicPayload.blocked_gates.map((gate) => gate.id),
     [
-      "external_seo_exports",
-      "listing_quality_review",
       "live_services",
       "monitoring_rollback",
       "payload_runtime",
@@ -1087,7 +1079,7 @@ test("launch readiness blocks forged terminal-decision summaries when rows lack 
 test("launch readiness validator requires blocked gate next actions", () => {
   for (const nextActions of [undefined, [], [""]]) {
     const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
-    const gate = report.gates.find((item) => item.id === "external_seo_exports");
+    const gate = report.gates.find((item) => item.id === "live_services");
     if (nextActions === undefined) {
       delete gate.next_actions;
     } else {
@@ -1096,7 +1088,7 @@ test("launch readiness validator requires blocked gate next actions", () => {
 
     assert.throws(
       () => assertLaunchReadinessReport(report),
-      /Launch readiness blocked gate external_seo_exports must include next actions/,
+      /Launch readiness blocked gate live_services must include next actions/,
     );
   }
 });
@@ -1604,7 +1596,7 @@ test("launch readiness validator rejects weak monitoring rollback pass evidence"
   assert.throws(() => assertLaunchReadinessReport(report), /passing canary run/);
 });
 
-test("launch readiness validator rejects weak listing quality pass evidence", () => {
+test("launch readiness validator binds listing preservation to the exact approved freeze", () => {
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
@@ -1628,12 +1620,10 @@ test("launch readiness validator rejects weak listing quality pass evidence", ()
   });
 
   const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
-  assert.equal(listingGate.status, "blocked");
-  listingGate.status = "pass";
-  report.blockers = [];
-  report.launch_ready = true;
-  report.status = "ready";
-  assert.throws(() => assertLaunchReadinessReport(report), /complete non-example review evidence/);
+  assert.equal(listingGate.status, "pass");
+  assert.equal(listingGate.evidence.mode, "approved_launch_freeze_preservation");
+  listingGate.evidence.artifact_sha256 = "0".repeat(64);
+  assert.throws(() => assertLaunchReadinessReport(report), /approved launch-freeze preservation evidence/);
 });
 
 test("launch readiness accepts reviewed location page growth", () => {
@@ -1650,7 +1640,7 @@ test("launch readiness accepts reviewed location page growth", () => {
   assert.equal(report.gates.find((gate) => gate.id === "localized_sitemap").status, "pass");
 });
 
-test("launch readiness blocks incomplete monitoring configuration", () => {
+test("launch readiness accepts imported analytics before canonical SEO evidence exists", () => {
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
@@ -1680,10 +1670,10 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
     monitoringRollback: readyMonitoringRollback,
   });
 
-  assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
+  assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
   assert.equal(report.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
   assert.equal(assertLaunchReadinessReport(report), true);
-  assert.deepEqual(report.blockers, ["monitoring_rollback"]);
+  assert.deepEqual(report.blockers, []);
 });
 
 test("launch readiness blocks broad or duplicate deployable redirect exports", () => {
@@ -1754,8 +1744,6 @@ test("launch readiness build honors output path override", () => {
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.ok(Date.parse(report.generated_at) >= startedAt && Date.parse(report.generated_at) <= completedAt);
   assert.deepEqual(report.blockers, [
-    "external_seo_exports",
-    "listing_quality_review",
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
@@ -1815,11 +1803,7 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   assert.equal(assertLaunchReadinessReport(result.report), true);
   assert.equal(result.report.launch_ready, false);
   assert.deepEqual(result.report.blockers, [
-    "external_seo_exports",
-    "listing_quality_review",
-    "live_services",
-    "monitoring_rollback",
-    "production_recovery",
+    ...source.blockers.filter((id) => id !== "payload_runtime"),
     "local_preview_only",
   ]);
   assert.equal(result.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
@@ -1872,15 +1856,11 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.notEqual(result.status, 0);
   assert.match(
     result.stderr,
-    /LAUNCH BLOCKED: external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery/,
+    /LAUNCH BLOCKED: live_services, monitoring_rollback, payload_runtime, production_recovery/,
   );
-  assert.match(result.stderr, /external_seo_exports missing: search_console, yandex_webmaster, backlinks/);
-  assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
   assert.match(result.stderr, /postgres_search_sync: missing_report .*postgres-search-sync-report\.json/);
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
   assert.match(result.stderr, /payload_runtime: blocked_report .*payload-runtime-report\.json.*missing PAYLOAD_SECRET, DATABASE_URL/);
-  assert.match(result.stderr, /external_seo_exports next: Import Search Console/);
-  assert.match(result.stderr, /listing_quality_review next: Download \/api\/admin\/listing-quality-review-packet/);
   assert.match(result.stderr, /live_services next: Run npm run live:provisioning:preflight/);
   assert.match(result.stderr, /payload_runtime next: Use \/api\/admin\/payload-runtime-bootstrap/);
   assert.match(result.stderr, /production\/data\/launch-input-checklist\.md/);
@@ -1896,8 +1876,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   });
 
   assert.notEqual(withPartialReviewPath.status, 0);
-  assert.match(withPartialReviewPath.stderr, /listing_quality_review: invalid_review/);
-  assert.match(withPartialReviewPath.stderr, /incomplete/);
+  assert.doesNotMatch(withPartialReviewPath.stderr, /listing_quality_review/);
 
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-listing-review-`);
   const reviewPath = writeListingQualityReviewFixture(dir);
@@ -1910,7 +1889,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.notEqual(withReviewPath.status, 0);
   assert.match(
     withReviewPath.stderr,
-    /LAUNCH BLOCKED: external_seo_exports, live_services, monitoring_rollback, payload_runtime, production_recovery/,
+    /LAUNCH BLOCKED: live_services, monitoring_rollback, payload_runtime, production_recovery/,
   );
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review next:/);
@@ -2502,12 +2481,14 @@ test("launch input checklist names remaining operator-owned blockers", async () 
 
   assert.match(markdown, /Status: blocked/);
   assert.match(markdown, /## Blocked Gate Actions/);
-  assert.match(markdown, /external_seo_exports: Import Search Console/);
-  assert.match(markdown, /listing_quality_review: Download \/api\/admin\/listing-quality-review-packet/);
+  assert.doesNotMatch(markdown, /external_seo_exports: Import Search Console/);
+  assert.doesNotMatch(markdown, /listing_quality_review: Download \/api\/admin\/listing-quality-review-packet/);
   assert.match(markdown, /live_services: Run npm run live:provisioning:preflight/);
   assert.match(markdown, /payload_runtime: Run npm run payload:runtime/);
-  assert.match(markdown, /production_recovery: Complete an encrypted off-site backup/);
+  assert.match(markdown, /production_recovery: Complete an encrypted off-site backup.*durable Payload\/Postgres and CRM\/CMS data/);
   assert.match(markdown, /MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH/);
+  assert.match(markdown, /runtime evidence is deterministically regenerated and revalidated after restore/);
+  assert.match(markdown, /MSR-LAUNCH-FREEZE-1.*0 publish-ready listings/);
   assert.match(markdown, /Reviewed one-hop 301 redirects: 179/);
   assert.match(markdown, /Terminal route decisions: 457\/457 \(200: 10, 301: 179, 410: 268\)/);
   assert.match(markdown, /Remaining terminal route decisions: 0/);
@@ -2522,6 +2503,8 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /same_content_checklist/);
   assert.match(markdown, /Approval import columns: `old_url`, `decision`, `target_path`, `equivalent_content`, `reviewer`/);
   assert.match(markdown, /Missing required sources: search_console, yandex_webmaster, backlinks/);
+  assert.match(markdown, /External SEO Exports \(Production-Live, Post-DNS\)/);
+  assert.match(markdown, /without blocking pre-DNS Production-Ready/);
   assert.match(
     markdown,
     new RegExp(`Crawl coverage: 457 URLs \\(page 104, post 42, taxonomy 146, listing 165\\); URLs with any evidence: ${seoEvidence.summary.urls_with_any_evidence}`),
@@ -2600,10 +2583,8 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /hidden Payload Admin UI is not a launch requirement/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /Current review evidence/);
-  assert.match(markdown, /missing_review .*migration\/reviews\/listing-quality\.csv.*expected 165.*reviewed 0.*missing 165/);
-  assert.match(markdown, /Pending review sample/);
-  assert.match(markdown, /MS-CRAWL-0001: area_sqm \(missing_area\) \/admin\/listings\/edit\?listingId=MS-CRAWL-0001/);
-  assert.match(markdown, /MS-CRAWL-0006: area_sqm\|public_gallery \(missing_area\|thin_public_gallery\) \/admin\/listings\/edit\?listingId=MS-CRAWL-0006/);
+  assert.match(markdown, /pass .*production\/data\/launch-freeze\.json.*expected 165.*reviewed 165.*missing 0/);
+  assert.match(markdown, /Pending review sample:\n- none/);
   assert.match(markdown, /production\/data\/listing-quality-review-packet\.json/);
   assert.match(markdown, /production\/data\/listing-quality-review-draft\.csv/);
   assert.match(markdown, /listing_quality\.thin_public_gallery: 18/);
@@ -2628,7 +2609,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /Coverage: 165\/165 source rows \(pass: 30, review: 75, hold: 52, source unavailable: 8\)/);
   assert.match(markdown, /Broker approvals in this artifact: 0; broker confirmations still required: 165/);
   assert.match(markdown, /30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6/);
-  assert.match(markdown, /does not clear `listing_quality_review`/);
+  assert.match(markdown, /grants no publication approval/);
   assert.match(markdown, /Broker Verification/);
   assert.match(markdown, /production\/data\/listing-verification-report\.json/);
   assert.match(markdown, /Broker verification tasks: 165/);

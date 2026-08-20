@@ -24,6 +24,11 @@
       }
     ]
   },
+  "dispatch_confirmation": {
+    "mechanism": "workflow_dispatch_typed_confirmation",
+    "actor": "replace-with-github-actor",
+    "triggering_actor": "replace-with-github-triggering-actor"
+  },
   "alert_delivery": {
     "status": "pass",
     "provider": "replace-with-alert-provider",

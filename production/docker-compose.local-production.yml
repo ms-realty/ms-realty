@@ -63,6 +63,8 @@ x-app-environment: &app-environment
   MS_REALTY_HERMES_AGENT_RUNTIME_REPORT_PATH: /runtime-evidence/hermes-agent-runtime-report.json
   MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: /runtime-evidence/live-service-provisioning-report.json
   MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: /runtime-evidence/payload-runtime-report.json
+  MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: /runtime-evidence/monitoring-rollback-report.json
+  MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: /runtime-evidence/production-recovery-report.json
 
 services:
   postgres:
@@ -251,9 +253,6 @@ services:
     restart: "no"
     environment:
       <<: *app-environment
-      # Compatibility-only tooling may still exercise the legacy engines;
-      # the production app itself is hardwired to Postgres above.
-      NODE_ENV: test
       TYPESENSE_URL: http://typesense:8108
       TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY is required}
       TYPESENSE_COLLECTION: ${TYPESENSE_COLLECTION:-ms_realty_listings}

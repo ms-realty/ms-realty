@@ -1027,8 +1027,6 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.health.body.status, "ok");
   assert.equal(smoke.health.body.build_marker, "unversioned");
   assert.deepEqual(smoke.health.body.blockers, [
-    "external_seo_exports",
-    "listing_quality_review",
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
@@ -1039,8 +1037,6 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.deepEqual(
     smoke.ready.body.blocked_gates.map((gate) => gate.id),
     [
-      "external_seo_exports",
-      "listing_quality_review",
       "live_services",
       "monitoring_rollback",
       "payload_runtime",
@@ -1587,8 +1583,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityImported.body.reviewImport.reviewRows, qualityImported.body.imported);
   assert.equal(qualityImported.body.reviewImport.missingReviewRows, qualityImported.body.missingReviewRows);
   assert.ok(qualityImported.body.reviewImport.pendingReviewSample.length > 0);
-  assert.equal(qualityImported.body.report.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
-  assert.equal(qualityImported.body.report.blockers.includes("listing_quality_review"), true);
+  assert.equal(qualityImported.body.report.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+  assert.equal(qualityImported.body.report.blockers.includes("listing_quality_review"), false);
   assert.equal(qualityImported.body.reviewPersisted, true);
   assert.equal(qualityImported.body.reviewPath, listingQualityReviewPath);
   assert.equal(parseCsv(fs.readFileSync(listingQualityReviewPath, "utf8")).length, 1);
@@ -1733,8 +1729,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.ok(review.body.agencyReviewQueue.summary.open_tasks > 0);
   assert.equal(review.body.agencyReviewQueue.guardrails.unreviewed_translation_indexing, "blocked");
   assert.equal(review.body.launchBlockers.blockers.includes("redirect_reviews"), false);
-  assert.ok(review.body.launchBlockers.blockers.includes("external_seo_exports"));
-  assert.ok(review.body.launchBlockers.blockers.includes("listing_quality_review"));
+  assert.equal(review.body.launchBlockers.blockers.includes("external_seo_exports"), false);
+  assert.equal(review.body.launchBlockers.blockers.includes("listing_quality_review"), false);
   assert.ok(review.body.launchBlockers.blockers.includes("live_services"));
   assert.ok(review.body.launchBlockers.blockers.includes("payload_runtime"));
   assert.ok(review.body.launchBlockers.blocked_gates.every((gate) => gate.next_actions.length > 0));
@@ -2204,8 +2200,8 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(searchConsole.body.seoImport.status, "blocked");
   assert.equal(searchConsole.body.seoImport.importedSource, "search_console");
   assert.deepEqual(searchConsole.body.seoImport.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
-  assert.equal(searchConsole.body.report.gates.find((gate) => gate.id === "external_seo_exports").status, "blocked");
-  assert.equal(searchConsole.body.report.blockers.includes("external_seo_exports"), true);
+  assert.equal(searchConsole.body.report.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
+  assert.equal(searchConsole.body.report.blockers.includes("external_seo_exports"), false);
   assert.deepEqual(searchConsole.body.sources.search_console.matched_source_domains, [
     "makler-realty.com",
     "makler-realty.ru",
@@ -2237,14 +2233,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(launchUnauthorized.status, 401);
   assert.equal(launch.status, 200);
   assert.deepEqual(launch.body.blockers, [
-    "listing_quality_review",
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
     "production_recovery",
   ]);
   assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
-  assert.equal(launch.body.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
+  assert.equal(launch.body.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
   assert.equal(launch.body.gates.find((gate) => gate.id === "live_services").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "monitoring_rollback").evidence.machine_evidence.status, "missing");
   assert.equal(launch.body.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
@@ -2252,7 +2247,6 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(launchExport.status, 201);
   assert.equal(fs.existsSync(launchReadinessOutputPath), true);
   assert.deepEqual(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).blockers, [
-    "listing_quality_review",
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
@@ -2310,7 +2304,6 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(liveServiceProvisioningReportPath), true);
   assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
   assert.deepEqual(launchAfterLive.body.blockers, [
-    "listing_quality_review",
     "monitoring_rollback",
     "production_recovery",
   ]);

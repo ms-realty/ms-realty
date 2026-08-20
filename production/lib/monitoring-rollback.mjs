@@ -165,6 +165,13 @@ export function assertMonitoringRollbackReport(report) {
     throw new Error("Monitoring rollback report requires a passing non-local HTTPS endpoint check");
   }
 
+  const dispatchConfirmation = object(report.dispatch_confirmation, "dispatch_confirmation");
+  if (dispatchConfirmation.mechanism !== "workflow_dispatch_typed_confirmation") {
+    throw new Error("Monitoring rollback report requires typed workflow dispatch authorization");
+  }
+  evidenceText(dispatchConfirmation.actor, "dispatch_confirmation.actor");
+  evidenceText(dispatchConfirmation.triggering_actor, "dispatch_confirmation.triggering_actor");
+
   const alertDelivery = object(report.alert_delivery, "alert_delivery");
   if (alertDelivery.status !== "pass") throw new Error("Monitoring rollback report requires passing alert delivery");
   evidenceText(alertDelivery.provider, "alert_delivery.provider");

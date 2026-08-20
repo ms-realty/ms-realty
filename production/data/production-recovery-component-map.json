@@ -102,7 +102,7 @@
     },
     "runtime_evidence": {
       "tables": [],
-      "uncovered_sources": [
+      "deterministic_sources": [
         "MS_REALTY_LISTING_QUALITY_REVIEW_PATH",
         "MS_REALTY_SEO_EVIDENCE_INPUT_DIR",
         "MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH",
@@ -115,7 +115,8 @@
         "MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH",
         "MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH",
         "MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH"
-      ]
+      ],
+      "uncovered_sources": []
     }
   }
 }

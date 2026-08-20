@@ -268,7 +268,7 @@ ${blockedGateActionLines(launchReadiness)}
 - Approval import columns: \`old_url\`, \`decision\`, \`target_path\`, \`equivalent_content\`, \`reviewer\`, optional \`approved_at\`, \`reason\`
 - Launch rule: each of all ${totalLegacyUrls} legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set \`equivalent_content=true\` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
 
-## External SEO Exports
+## External SEO Exports (Production-Live, Post-DNS)
 
 - Missing required sources: ${missingSeoSourcesLine(seoGateEvidence)}
 ${seoCoverageLine(seoEvidence.summary)}
@@ -280,11 +280,11 @@ ${sourceDomainSampleLines(seoEvidence)}
 ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")}
 - Template endpoints: \`GET /api/admin/seo-evidence/template?source=search_console\`, \`?source=yandex_webmaster\`, \`?source=backlinks\`
 - Joined evidence export endpoint: \`GET /api/admin/seo-evidence/export\`
-- Status report: \`npm run seo:preflight:report\` writes current missing/invalid SEO export state without clearing the launch gate.
+- Status report: \`npm run seo:preflight:report\` records current missing/invalid post-DNS evidence without blocking pre-DNS Production-Ready.
 - Admin SEO preflight endpoint: \`GET /api/admin/seo-preflight\`.
 - Production/CLI path overrides: \`MS_REALTY_SEO_EVIDENCE_INPUT_DIR\`, \`MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH\`, \`MS_REALTY_SEO_PREFLIGHT_REPORT_PATH\`, \`MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH\`, \`MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH\`
 - Optional analytics: \`migration/external/seo/analytics.csv\`; privacy events are already imported.
-- Launch rule: required SEO exports must match crawled URLs from both \`makler-realty.com\` and \`makler-realty.ru\`.
+- Production-Live rule: after canonical DNS cutover, required SEO exports must match crawled URLs from both \`makler-realty.com\` and \`makler-realty.ru\`.
 
 ## Live Service Provisioning
 
@@ -347,7 +347,7 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 - Admin import endpoint: \`POST /api/admin/production-recovery/import\` accepts only redacted Ed25519-signed production evidence from the governed recovery workflow.
 - Path override: \`MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH\`
 - Verification key: \`MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY\` contains public SPKI only; the private key is operator-only.
-- Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
+- Required scope: encrypted-at-rest and encrypted-in-transit off-site backups cover durable Payload/Postgres and CRM/CMS runtime data; exact-release runtime evidence is deterministically regenerated and revalidated after restore.
 - Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.
 - Launch rule: the tested local \`docker:backup\` path is not production disaster-recovery evidence.
 
@@ -385,7 +385,7 @@ ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`)
 - Coverage: ${manualListingAudit.listing_count || 0}/165 source rows (pass: ${manualAuditCounts.pass || 0}, review: ${manualAuditCounts.review || 0}, hold: ${manualAuditCounts.hold || 0}, source unavailable: ${manualAuditCounts.source_unavailable || 0}).
 - Broker approvals in this artifact: ${manualListingAudit.broker_approval_granted ? "present (invalid)" : "0"}; broker confirmations still required: ${manualListingAudit.broker_confirmation_required || 0}.
 - Broker packet: \`production/data/launch-candidate30-broker-packet.json\` — ${manualListingAudit.candidate_count || 0} candidates, ${manualListingAudit.publish_ready_count || 0} publish-ready; selection: ${manualListingAudit.selection_basis || "unknown"}; overlap with prior automatic shortlist: ${manualListingAudit.previous_launch_candidate_overlap || 0}.
-- This evidence does not clear \`listing_quality_review\`; use the packet to prioritize human fact, media, availability, and publication review.${manualListingAudit.error ? ` Error: ${manualListingAudit.error}` : ""}
+- This evidence grants no publication approval. The exact \`MSR-LAUNCH-FREEZE-1\` approval clears only the 165-row preservation gate with 0 publish-ready listings; use the packet for later fact, media, availability, and publication review.${manualListingAudit.error ? ` Error: ${manualListingAudit.error}` : ""}
 
 ## Broker Verification
 
@@ -407,7 +407,7 @@ ${monitoringRollbackEvidenceLine(monitoringEvidence)}
 - Path override: \`MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH\`; validate it with \`npm run monitoring:preflight\`.
 - Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.
 - Release attestation: after every existing gate passes, set \`MS_REALTY_RELEASE_SHA\`, the mounted evidence paths, and the private signing key; run \`npm run launch:evidence:capture\`, then \`npm run launch:evidence:verify\` on the exact release SHA.
-- Launch rule: an evidence bundle records validated inputs; it does not create human listing reviews, SEO exports, broker approval, or production readiness.
+- Launch rule: an evidence bundle records validated inputs; it does not invent publication approvals, post-DNS SEO evidence, or production readiness.
 
 ## Validate After Inputs
 

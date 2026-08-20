@@ -66,6 +66,10 @@ const machineEvidenceValid =
   text(evidence.workflow_ref).includes(`${repository}/.github/workflows/monitoring-drill.yml@`) &&
   evidence.run_url === expectedRunUrl &&
   evidence.correlation_id === expectedCorrelation &&
+  evidence?.confirmation?.mechanism === "workflow_dispatch_typed_confirmation" &&
+  evidence?.confirmation?.confirmed === true &&
+  text(evidence?.confirmation?.actor) !== "" &&
+  text(evidence?.confirmation?.triggering_actor) !== "" &&
   evidence.artifact_name === `monitoring-drill-machine-evidence-${runId}-${runAttempt}` &&
   evidence?.production?.status === "pass" &&
   evidence?.production?.build_marker === releaseId &&
@@ -138,6 +142,11 @@ const report = {
     correlation_id: expectedCorrelation,
     machine_artifact_name: evidence.artifact_name,
     endpoints: [evidence.production],
+  },
+  dispatch_confirmation: {
+    mechanism: evidence.confirmation.mechanism,
+    actor: text(evidence.confirmation.actor),
+    triggering_actor: text(evidence.confirmation.triggering_actor),
   },
   alert_delivery: {
     status: "pass",
