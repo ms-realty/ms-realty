@@ -197,9 +197,14 @@ test("main deploys automatically with image-marker rollback", () => {
   assert.match(ciWorkflow, /github\.event\.action == 'auto_merge_deploy'/);
   assert.match(ciWorkflow, /github\.event\.client_payload\.merge_sha == github\.sha/);
   assert.match(ciWorkflow, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
+  assert.match(ciWorkflow, /deploy_origin:\n\s+name: Deploy durable origin/);
+  assert.match(ciWorkflow, /MS_REALTY_DEPLOY_SSH_PRIVATE_KEY: \$\{\{ secrets\.MS_REALTY_DEPLOY_SSH_PRIVATE_KEY \}\}/);
+  assert.match(ciWorkflow, /MS_REALTY_DEPLOY_KNOWN_HOSTS: \$\{\{ secrets\.MS_REALTY_DEPLOY_KNOWN_HOSTS \}\}/);
   const deployJob = ciWorkflow.slice(ciWorkflow.indexOf("\n  deploy:"));
   assert.doesNotMatch(deployJob, /secrets\.DATABASE_URL|secrets\.PAYLOAD_SECRET|payload:migrate/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
+  assert.match(deployJob, /needs: \[check, deploy_origin\]/);
+  assert.match(deployJob, /wrangler@4\.117\.0 secret put MS_REALTY_ORIGIN_TOKEN/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
   assert.match(ciWorkflow, /accounts\/\$\{CLOUDFLARE_ACCOUNT_ID\}\/workers\/subdomain/);
   assert.match(ciWorkflow, /https:\/\/ms-realty\.\$\{subdomain\}\.workers\.dev\/api\/health/);

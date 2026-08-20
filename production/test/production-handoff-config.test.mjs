@@ -6,6 +6,7 @@ import { fromRoot } from "../lib/paths.mjs";
 const caddy = fs.readFileSync(fromRoot("production", "Caddyfile.production-review"), "utf8");
 const compose = fs.readFileSync(fromRoot("production", "docker-compose.production-review.yml"), "utf8");
 const dockerfile = fs.readFileSync(fromRoot("production", "Dockerfile"), "utf8");
+const deployScript = fs.readFileSync(fromRoot("production", "scripts", "deploy-production-review.sh"), "utf8");
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 
@@ -76,6 +77,16 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.match(worker, /if \(media\) return media;\n\s+if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
   assert.equal(wrangler.split("__MS_REALTY_BUILD_MARKER__").length - 1, 2);
+});
+
+test("origin deployment is immutable, backup-first, and rolls back the active release", () => {
+  assert.match(deployScript, /\^\[0-9a-f\]\{40\}\$/);
+  assert.match(deployScript, /run_stack "\$previous" docker:backup/);
+  assert.match(deployScript, /run_stack "\$release" docker:hermes:up "\$release_id"/);
+  assert.match(deployScript, /d\.build_marker !== process\.argv\[2\]/);
+  assert.match(deployScript, /deployment failed; restoring \$previous/);
+  assert.match(deployScript, /mv -Tf "\$base\/\.current-\$release_id" "\$current"/);
+  assert.doesNotMatch(deployScript, /docker:reset|docker compose down --volumes/);
 });
 
 test("every public CMS media asset is mirrorable under one of the two final hosts", () => {
