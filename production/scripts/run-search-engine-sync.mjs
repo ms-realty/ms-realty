@@ -1,5 +1,6 @@
 import { runSearchEngineSync, writeSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
 
+let exitCode = 0;
 try {
   const report = await runSearchEngineSync({ generatedAt: new Date().toISOString() });
   writeSearchEngineSyncReport(
@@ -9,5 +10,7 @@ try {
   console.log(`Verified ${report.summary.documents_per_engine[0]} documents in the Postgres search view`);
 } catch (error) {
   console.error(`SEARCH ENGINE SYNC FAILED: ${error.message}`);
-  process.exitCode = 1;
+  exitCode = 1;
 }
+
+process.exit(exitCode);

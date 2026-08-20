@@ -1,6 +1,7 @@
 import { runSearchEngineQuerySmoke, writeSearchEngineQueryReport } from "../lib/search-engine-sync.mjs";
 import { loadPayloadApprovedSearchProjection } from "../lib/payload-search-projection.mjs";
 
+let exitCode = 0;
 try {
   const projection = await loadPayloadApprovedSearchProjection();
   const report = await runSearchEngineQuerySmoke({ projection, generatedAt: new Date().toISOString() });
@@ -11,5 +12,7 @@ try {
   console.log(`Queried Postgres search; first hits: ${report.summary.first_hit_ids.join(", ")}`);
 } catch (error) {
   console.error(`SEARCH ENGINE QUERY FAILED: ${error.message}`);
-  process.exitCode = 1;
+  exitCode = 1;
 }
+
+process.exit(exitCode);
