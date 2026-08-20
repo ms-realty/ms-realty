@@ -56,8 +56,15 @@ test("local Docker compose persists preview CRM and CMS state in a named local-o
 
 test("local Docker startup recreates the edge after an app update", () => {
   const script = fs.readFileSync(fromRoot("production", "scripts", "local-production.mjs"), "utf8");
+  const importer = fs.readFileSync(fromRoot("production", "scripts", "run-payload-cms-import.mjs"), "utf8");
+  const start = script.slice(script.indexOf("async function start("), script.indexOf("\ntry {", script.indexOf("async function start(")));
+  const importAt = start.indexOf('"payload:cms:import", "--", "--skip-if-initialized"');
+  const searchAt = start.indexOf('"search-seed"');
   assert.match(script, /Caddy resolves the app service address when it starts/);
   assert.match(script, /\["up", "--detach", "--wait", "--no-deps", "--force-recreate", "edge"\]/);
+  assert.ok(importAt >= 0 && searchAt > importAt);
+  assert.match(importer, /--skip-if-initialized/);
+  assert.match(importer, /collection: "listings", depth: 0, draft: true, limit: 1, overrideAccess: true/);
 });
 
 test("production review reuses the tested stack with durable volumes and an authenticated noindex edge", () => {
