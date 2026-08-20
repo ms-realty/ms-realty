@@ -1247,14 +1247,15 @@ const launchReadiness = JSON.parse(fs.readFileSync(fromRoot("production", "data"
 if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocked") {
   throw new Error("Launch readiness report must stay blocked until production blockers are cleared");
 }
-for (const blocker of ["external_seo_exports", "live_services"]) {
-  if (!launchReadiness.blockers.includes(blocker)) throw new Error(`Launch readiness report must include ${blocker}`);
+const expectedLaunchBlockers = ["live_services", "monitoring_rollback", "payload_runtime", "production_recovery"];
+if (JSON.stringify(launchReadiness.blockers) !== JSON.stringify(expectedLaunchBlockers)) {
+  throw new Error(`Launch readiness report must expose only current pre-DNS blockers: ${expectedLaunchBlockers.join(", ")}`);
 }
-if (launchReadiness.blockers.includes("redirect_reviews")) {
-  throw new Error("Launch readiness report must clear redirect_reviews after the approved 457-URL contract is active");
+if (launchReadiness.gates.find((gate) => gate.id === "external_seo_exports")?.status !== "deferred") {
+  throw new Error("External SEO evidence must remain deferred until Production-Live after DNS cutover");
 }
-if (launchReadiness.blockers.includes("production_app_layer")) {
-  throw new Error("Launch readiness report should not include production_app_layer after the Node adapter is present");
+if (launchReadiness.gates.find((gate) => gate.id === "listing_quality_review")?.status !== "pass") {
+  throw new Error("Approved launch-freeze listing preservation must pass without granting publication approval");
 }
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

@@ -713,8 +713,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const launchReadinessBody = await launchReadiness.json();
       assert.equal(launchReadiness.status, 200);
       assert.equal(launchReadinessBody.status, "blocked");
-      assert.ok(launchReadinessBody.blockers.includes("external_seo_exports"));
-      assert.ok(launchReadinessBody.blockers.includes("listing_quality_review"));
+      assert.equal(launchReadinessBody.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
+      assert.equal(launchReadinessBody.blockers.includes("external_seo_exports"), false);
+      assert.equal(launchReadinessBody.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+      assert.equal(launchReadinessBody.blockers.includes("listing_quality_review"), false);
       assert.equal(
         launchReadinessBody.gates.find((gate) => gate.id === "live_services").evidence.provisioning.path,
         liveServiceProvisioningReportPath,
@@ -1125,8 +1127,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.payloadCollectionsEndpoint, "/api/admin/payload-collections");
       assert.equal(migrationReviewBody.listingQualityEndpoint, "/api/admin/listing-quality");
       assert.equal(migrationReviewBody.launchBlockers.blockers.includes("redirect_reviews"), false);
-      assert.ok(migrationReviewBody.launchBlockers.blockers.includes("external_seo_exports"));
-      assert.ok(migrationReviewBody.launchBlockers.blockers.includes("listing_quality_review"));
+      assert.equal(migrationReviewBody.launchBlockers.blockers.includes("external_seo_exports"), false);
+      assert.equal(migrationReviewBody.launchBlockers.blockers.includes("listing_quality_review"), false);
       assert.ok(migrationReviewBody.launchBlockers.blockers.includes("live_services"));
       assert.ok(migrationReviewBody.launchBlockers.blocked_gates.every((gate) => gate.next_actions.length > 0));
       const migrationReviewBlockers = migrationReviewBody.launchBlockers.blockers.join(",");
@@ -1193,7 +1195,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /data-react-admin-ui="migration-review"/);
       assert.match(migrationReviewHtmlBody, /Работно място за преглед на старите URL адреси/);
       assert.match(migrationReviewHtmlBody, />Търсене<input type="search"/);
-      assert.match(migrationReviewHtmlBody, /външни SEO данни, преглед на качеството/);
+      assert.match(migrationReviewHtmlBody, /работещи услуги/);
+      assert.match(migrationReviewHtmlBody, /наблюдение и връщане към предишна версия/);
       assert.match(migrationReviewHtmlBody, /data-pending-route-count="457"/);
       assert.match(migrationReviewHtmlBody, /data-reviewed-route-count="0"/);
       assert.match(migrationReviewHtmlBody, /data-pending-route-decision="true"/);
@@ -1304,8 +1307,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(seoImportBody.seoImport.status, "blocked");
       assert.equal(seoImportBody.seoImport.importedSource, "search_console");
       assert.deepEqual(seoImportBody.seoImport.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
-      assert.equal(seoImportBody.report.gates.find((gate) => gate.id === "external_seo_exports").status, "blocked");
-      assert.equal(seoImportBody.report.blockers.includes("external_seo_exports"), true);
+      assert.equal(seoImportBody.report.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
+      assert.equal(seoImportBody.report.blockers.includes("external_seo_exports"), false);
       assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
 
       const postSeoReadiness = await launchReadinessRoute.GET(
@@ -1445,8 +1448,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingQualityImportBody.reviewImport.reviewRows, listingQualityImportBody.imported);
       assert.equal(listingQualityImportBody.reviewImport.missingReviewRows, listingQualityImportBody.missingReviewRows);
       assert.ok(listingQualityImportBody.reviewImport.pendingReviewSample.length > 0);
-      assert.equal(listingQualityImportBody.report.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
-      assert.equal(listingQualityImportBody.report.blockers.includes("listing_quality_review"), true);
+      assert.equal(listingQualityImportBody.report.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+      assert.equal(listingQualityImportBody.report.blockers.includes("listing_quality_review"), false);
       assert.equal(listingQualityImportBody.reviewPersisted, true);
       assert.equal(listingQualityImportBody.reviewPath, listingQualityReviewPath);
       assert.equal(parseCsv(fs.readFileSync(listingQualityReviewPath, "utf8")).length, 1);

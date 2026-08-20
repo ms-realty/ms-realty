@@ -224,7 +224,8 @@ test("production server entrypoint serves runtime routes with env config", async
       headers: { authorization: "Bearer local-admin-smoke" },
     });
     assert.equal(readiness.status, 200);
-    assert.equal(readiness.body.blockers.includes("listing_quality_review"), true);
+    assert.equal(readiness.body.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+    assert.equal(readiness.body.blockers.includes("listing_quality_review"), false);
     assert.equal(readiness.body.blockers.includes("live_services"), true);
     assert.equal(
       readiness.body.gates.find((gate) => gate.id === "monitoring_rollback").evidence.machine_evidence.path,
