@@ -692,6 +692,15 @@ test("home page exposes search, seller, location, and featured listing paths", (
   assert.equal(he.body.guides, null);
 });
 
+test("home page explains an empty reviewed catalog without inventing featured cards", () => {
+  const page = renderHomePage({ registry, listings: [], localeCode: "bg" });
+  const html = renderReactPublicBody(page);
+
+  assert.equal(page.cards.length, 0);
+  assert.match(html, /data-featured-empty="true"/);
+  assert.match(html, />0 проверени обяви</);
+});
+
 test("English home makes every approved buyer guide discoverable without expanding the mobile task dock", () => {
   const en = renderHomePage({ registry, listings, localeCode: "en" });
   const bg = renderHomePage({ registry, listings, localeCode: "bg" });
