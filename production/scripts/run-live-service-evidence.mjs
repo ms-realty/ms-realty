@@ -76,6 +76,7 @@ async function capture() {
   return { syncReport, queryReport, hermesReport };
 }
 
+let exitCode = 0;
 try {
   const { syncReport, queryReport, hermesReport } = await capture();
   console.log(
@@ -90,5 +91,7 @@ try {
 } catch (error) {
   console.error(`LIVE SERVICE EVIDENCE FAILED: ${error.message}`);
   if (/live service provisioning must pass before capture/.test(error.message)) console.error(PROVISIONING_NEXT);
-  process.exitCode = 1;
+  exitCode = 1;
 }
+
+process.exit(exitCode);
