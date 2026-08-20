@@ -8,8 +8,8 @@ function read(...parts) {
   return JSON.parse(fs.readFileSync(fromRoot(...parts), "utf8"));
 }
 
-function inputs() {
-  return {
+function inputs({ withApproval = true } = {}) {
+  const value = {
     migrationRecords: read("production", "data", "migration-records.json").records,
     routeMap: read("production", "data", "legacy-route-map.json").routes,
     legacyDecisions: read("production", "data", "deployable-redirects.json").decisions,
@@ -23,10 +23,12 @@ function inputs() {
     appRouteManifest: read("production", "data", "app-route-manifest.json"),
     inputs: {},
   };
+  if (withApproval) value.routeApproval = read("production", "data", "launch-freeze-approval.json");
+  return value;
 }
 
 test("launch freeze covers the exact catalog and every legacy URL without granting proposal approval", () => {
-  const freeze = buildLaunchFreeze(inputs());
+  const freeze = buildLaunchFreeze(inputs({ withApproval: false }));
 
   assert.deepEqual(freeze.summary.catalog.by_state, { active: 30, archived: 135 });
   assert.equal(freeze.summary.catalog.publish_ready, 0);
@@ -40,9 +42,25 @@ test("launch freeze covers the exact catalog and every legacy URL without granti
   );
 });
 
+test("launch freeze applies the exact approved non-listing route contract", () => {
+  const freeze = buildLaunchFreeze(inputs());
+
+  assert.deepEqual(freeze.summary.routes.by_approval_state, { approved: 457 });
+  assert.equal(freeze.summary.contract_ready, true);
+  assert.equal(freeze.summary.catalog.publish_ready, 0);
+  assert.equal(freeze.routes.every((route) => route.approval_state === "approved" && route.deployable), true);
+  assert.equal(freeze.routes.filter((route) => route.approval_id === "MSR-LAUNCH-FREEZE-1").length, 292);
+  assert.equal(freeze.blockers.some((blocker) => blocker.includes("route approval")), false);
+});
+
+test("launch freeze rejects approval when any proposed route drifts", () => {
+  const value = inputs();
+  value.routeApproval = { ...value.routeApproval, proposal_sha256: "0".repeat(64) };
+  assert.throws(() => buildLaunchFreeze(value), /proposal fingerprint does not match/);
+});
+
 test("launch freeze rejects incomplete listing evidence", () => {
   const value = inputs();
   value.manualAudit = { ...value.manualAudit, listings: value.manualAudit.listings.slice(1) };
   assert.throws(() => buildLaunchFreeze(value), /manual audit listings must be 165/);
 });
-

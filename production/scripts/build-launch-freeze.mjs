@@ -15,6 +15,7 @@ const files = Object.freeze({
     "content-parity-report.json",
   ),
   app_route_manifest: fromRoot("production", "data", "app-route-manifest.json"),
+  launch_freeze_approval: fromRoot("production", "data", "launch-freeze-approval.json"),
 });
 
 function readJson(filePath) {
@@ -36,9 +37,9 @@ const freeze = buildLaunchFreeze({
   manualAudit: data.manual_listing_audit,
   contentParity: data.content_parity,
   appRouteManifest: data.app_route_manifest,
+  routeApproval: data.launch_freeze_approval,
   inputs,
 });
 const output = fromRoot("production", "data", "launch-freeze.json");
 fs.writeFileSync(output, `${JSON.stringify(freeze, null, 2)}\n`);
 console.log(JSON.stringify(freeze.summary));
-

@@ -1,3 +1,10 @@
+import crypto from "node:crypto";
+
+const ARTIFACT_ID = "20260817-deterministic-launch-freeze";
+const APPROVAL_ID = "MSR-LAUNCH-FREEZE-1";
+const APPROVED_SOURCE_COMMIT = "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720";
+const APPROVED_SOURCE_ARTIFACT_SHA256 = "c627594492d253a2831bb72227920e092d32d253e89ba9a16b8a87ea32743360";
+
 const EXPECTED = Object.freeze({
   legacy_urls: 457,
   listings: 165,
@@ -63,6 +70,64 @@ function countBy(rows, key) {
   );
 }
 
+function proposalFingerprint(routes) {
+  const fields = [
+    "old_url",
+    "source_domain",
+    "url_type",
+    "decision",
+    "status",
+    "target_path",
+    "target_kind",
+    "equivalent_content",
+  ];
+  const proposals = routes
+    .filter((route) => route.approval_state === "required")
+    .map((route) => Object.fromEntries(fields.map((field) => [field, route[field] ?? null])))
+    .sort((left, right) => left.old_url.localeCompare(right.old_url));
+  return crypto.createHash("sha256").update(JSON.stringify(proposals)).digest("hex");
+}
+
+function applyRouteApproval(routes, approval) {
+  if (!approval) return routes;
+  if (approval.schema_version !== 1 || approval.approval_id !== APPROVAL_ID || approval.artifact_id !== ARTIFACT_ID) {
+    throw new Error(`Route approval must identify ${APPROVAL_ID} for ${ARTIFACT_ID}`);
+  }
+  if (approval.based_on_commit !== APPROVED_SOURCE_COMMIT) {
+    throw new Error("Route approval requires the exact approved source commit");
+  }
+  if (approval.source_artifact_sha256 !== APPROVED_SOURCE_ARTIFACT_SHA256) {
+    throw new Error("Route approval requires the exact approved source artifact hash");
+  }
+  if (!String(approval.approved_by || "").trim() || Number.isNaN(Date.parse(approval.approved_at))) {
+    throw new Error("Route approval requires an approver and valid approval timestamp");
+  }
+
+  const proposals = routes.filter((route) => route.approval_state === "required");
+  requireExact("approval scope routes", approval.scope?.routes, proposals.length);
+  const actualByDecision = countBy(proposals, "decision");
+  const approvedByDecision = approval.scope?.by_decision || {};
+  for (const decision of new Set([...Object.keys(actualByDecision), ...Object.keys(approvedByDecision)])) {
+    requireExact(`approval scope ${decision}`, approvedByDecision[decision] || 0, actualByDecision[decision] || 0);
+  }
+  if (approval.proposal_sha256 !== proposalFingerprint(routes)) {
+    throw new Error("Route approval proposal fingerprint does not match the generated launch freeze");
+  }
+
+  return routes.map((route) =>
+    route.approval_state === "required"
+      ? {
+          ...route,
+          approval_state: "approved",
+          approval_id: approval.approval_id,
+          reviewer: approval.approved_by,
+          approved_at: approval.approved_at,
+          deployable: true,
+        }
+      : route,
+  );
+}
+
 function listingIdFromRoute(route) {
   return String(route.target_path || "").split("/").filter(Boolean).at(-1) || "";
 }
@@ -113,6 +178,7 @@ export function buildLaunchFreeze({
   manualAudit,
   contentParity,
   appRouteManifest,
+  routeApproval,
   inputs,
 }) {
   requireExact("migration records", migrationRecords.length, EXPECTED.legacy_urls);
@@ -172,7 +238,7 @@ export function buildLaunchFreeze({
   requireExact("archived listings", catalogCounts.archived || 0, EXPECTED.archived);
 
   const catalogBySource = new Map(catalog.map((listing) => [listing.source_url, listing]));
-  const routes = migrationRecords.map((record) => {
+  const draftRoutes = migrationRecords.map((record) => {
     const listing = catalogBySource.get(record.old_url);
     if (listing) {
       const decision = decisionsByUrl.get(record.old_url);
@@ -186,10 +252,14 @@ export function buildLaunchFreeze({
     return proposedRoute(record, contentByUrl.get(record.old_url), publicPaths);
   });
 
-  const approvalCounts = countBy(routes, "approval_state");
-  const statusCounts = countBy(routes, "status");
-  requireExact("approved routes", approvalCounts.approved || 0, EXPECTED.approved_listing_redirects);
-  requireExact("routes requiring approval", approvalCounts.required || 0, EXPECTED.legacy_urls - EXPECTED.approved_listing_redirects);
+  const draftApprovalCounts = countBy(draftRoutes, "approval_state");
+  const statusCounts = countBy(draftRoutes, "status");
+  requireExact("draft approved routes", draftApprovalCounts.approved || 0, EXPECTED.approved_listing_redirects);
+  requireExact(
+    "draft routes requiring approval",
+    draftApprovalCounts.required || 0,
+    EXPECTED.legacy_urls - EXPECTED.approved_listing_redirects,
+  );
   requireExact("terminal 200 proposals", statusCounts[200] || 0, EXPECTED.proposed_retain_200);
   requireExact(
     "terminal 301 decisions and proposals",
@@ -198,11 +268,25 @@ export function buildLaunchFreeze({
   );
   requireExact("terminal 410 proposals", statusCounts[410] || 0, EXPECTED.proposed_410);
 
+  const routes = applyRouteApproval(draftRoutes, routeApproval);
+  const approvalCounts = countBy(routes, "approval_state");
+  requireExact(
+    "approved routes",
+    approvalCounts.approved || 0,
+    routeApproval ? EXPECTED.legacy_urls : EXPECTED.approved_listing_redirects,
+  );
+  requireExact(
+    "routes requiring approval",
+    approvalCounts.required || 0,
+    routeApproval ? 0 : EXPECTED.legacy_urls - EXPECTED.approved_listing_redirects,
+  );
+
   return {
     schema_version: 1,
-    artifact_id: "20260817-deterministic-launch-freeze",
+    artifact_id: ARTIFACT_ID,
     freeze_at: manualAudit.generated_at,
     inputs,
+    route_approval: routeApproval || null,
     policy: {
       active_listing: "manual source review status pass against the approved launch-freeze source",
       archived_listing: "manual source review status review, hold, or source_unavailable",
@@ -215,15 +299,16 @@ export function buildLaunchFreeze({
       legacy_urls: routes.length,
       catalog: { total: catalog.length, by_state: catalogCounts, publish_ready: 0 },
       routes: { by_status: statusCounts, by_approval_state: approvalCounts },
-      contract_ready: false,
+      contract_ready: (approvalCounts.required || 0) === 0,
     },
     blockers: [
       "30 active-at-freeze listings still need fact normalization and publication approval",
       "135 archived listings need truthful archived 200 surfaces outside active search",
-      "292 non-listing terminal proposals need explicit human route approval",
+      ...((approvalCounts.required || 0) > 0
+        ? ["292 non-listing terminal proposals need explicit human route approval"]
+        : []),
     ],
     catalog,
     routes,
   };
 }
-
