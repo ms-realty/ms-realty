@@ -2485,8 +2485,10 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.doesNotMatch(markdown, /listing_quality_review: Download \/api\/admin\/listing-quality-review-packet/);
   assert.match(markdown, /live_services: Run npm run live:provisioning:preflight/);
   assert.match(markdown, /payload_runtime: Run npm run payload:runtime/);
-  assert.match(markdown, /production_recovery: Complete an encrypted off-site backup/);
+  assert.match(markdown, /production_recovery: Complete an encrypted off-site backup.*durable Payload\/Postgres and CRM\/CMS data/);
   assert.match(markdown, /MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH/);
+  assert.match(markdown, /runtime evidence is deterministically regenerated and revalidated after restore/);
+  assert.match(markdown, /MSR-LAUNCH-FREEZE-1.*0 publish-ready listings/);
   assert.match(markdown, /Reviewed one-hop 301 redirects: 179/);
   assert.match(markdown, /Terminal route decisions: 457\/457 \(200: 10, 301: 179, 410: 268\)/);
   assert.match(markdown, /Remaining terminal route decisions: 0/);
@@ -2501,6 +2503,8 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /same_content_checklist/);
   assert.match(markdown, /Approval import columns: `old_url`, `decision`, `target_path`, `equivalent_content`, `reviewer`/);
   assert.match(markdown, /Missing required sources: search_console, yandex_webmaster, backlinks/);
+  assert.match(markdown, /External SEO Exports \(Production-Live, Post-DNS\)/);
+  assert.match(markdown, /without blocking pre-DNS Production-Ready/);
   assert.match(
     markdown,
     new RegExp(`Crawl coverage: 457 URLs \\(page 104, post 42, taxonomy 146, listing 165\\); URLs with any evidence: ${seoEvidence.summary.urls_with_any_evidence}`),
@@ -2605,7 +2609,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /Coverage: 165\/165 source rows \(pass: 30, review: 75, hold: 52, source unavailable: 8\)/);
   assert.match(markdown, /Broker approvals in this artifact: 0; broker confirmations still required: 165/);
   assert.match(markdown, /30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6/);
-  assert.match(markdown, /does not clear `listing_quality_review`/);
+  assert.match(markdown, /grants no publication approval/);
   assert.match(markdown, /Broker Verification/);
   assert.match(markdown, /production\/data\/listing-verification-report\.json/);
   assert.match(markdown, /Broker verification tasks: 165/);

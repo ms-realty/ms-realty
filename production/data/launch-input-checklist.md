@@ -1,25 +1,19 @@
 # Launch Input Checklist
 
-Generated: 2026-08-20T17:14:21.405Z
+Generated: 2026-08-20T19:22:41.099Z
 
 Status: blocked
-Blockers: external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
+Blockers: live_services, monitoring_rollback, payload_runtime, production_recovery
 
 ## Blocked Gate Actions
 
-- external_seo_exports: Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.
-- external_seo_exports: Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.
-- listing_quality_review: Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.
-- listing_quality_review: Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.
-- listing_quality_review: Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.
 - live_services: Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path and Hermes service.
 - live_services: Import or mount the 3 required live service reports, then run npm run live:preflight before launch.
-- monitoring_rollback: Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.
 - monitoring_rollback: Mount a current redacted monitoring and rollback report, then run npm run monitoring:preflight.
 - monitoring_rollback: Confirm the automated rollback policy, canary, and isolated drill cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.
 - payload_runtime: Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.
 - payload_runtime: Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.
-- production_recovery: Complete an encrypted off-site backup and isolated restore drill using production data stores.
+- production_recovery: Complete an encrypted off-site backup and isolated restore drill for durable Payload/Postgres and CRM/CMS data.
 - production_recovery: Run the governed recovery:r2 backup, restore, and approval commands; only their Ed25519-signed report can be imported through /api/admin/production-recovery/import.
 
 ## Redirect Reviews
@@ -39,7 +33,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, monitorin
 - Approval import columns: `old_url`, `decision`, `target_path`, `equivalent_content`, `reviewer`, optional `approved_at`, `reason`
 - Launch rule: each of all 457 legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set `equivalent_content=true` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
 
-## External SEO Exports
+## External SEO Exports (Production-Live, Post-DNS)
 
 - Missing required sources: search_console, yandex_webmaster, backlinks
 - Crawl coverage: 457 URLs (page 104, post 42, taxonomy 146, listing 165); URLs with any evidence: 4
@@ -56,11 +50,11 @@ Blockers: external_seo_exports, listing_quality_review, live_services, monitorin
 - `POST /api/admin/seo-evidence/import?source=backlinks`: `target_url,source_url,referring_domain`
 - Template endpoints: `GET /api/admin/seo-evidence/template?source=search_console`, `?source=yandex_webmaster`, `?source=backlinks`
 - Joined evidence export endpoint: `GET /api/admin/seo-evidence/export`
-- Status report: `npm run seo:preflight:report` writes current missing/invalid SEO export state without clearing the launch gate.
+- Status report: `npm run seo:preflight:report` records current missing/invalid post-DNS evidence without blocking pre-DNS Production-Ready.
 - Admin SEO preflight endpoint: `GET /api/admin/seo-preflight`.
 - Production/CLI path overrides: `MS_REALTY_SEO_EVIDENCE_INPUT_DIR`, `MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH`, `MS_REALTY_SEO_PREFLIGHT_REPORT_PATH`, `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`
 - Optional analytics: `migration/external/seo/analytics.csv`; privacy events are already imported.
-- Launch rule: required SEO exports must match crawled URLs from both `makler-realty.com` and `makler-realty.ru`.
+- Production-Live rule: after canonical DNS cutover, required SEO exports must match crawled URLs from both `makler-realty.com` and `makler-realty.ru`.
 
 ## Live Service Provisioning
 
@@ -128,25 +122,16 @@ Blockers: external_seo_exports, listing_quality_review, live_services, monitorin
 - Admin import endpoint: `POST /api/admin/production-recovery/import` accepts only redacted Ed25519-signed production evidence from the governed recovery workflow.
 - Path override: `MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH`
 - Verification key: `MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY` contains public SPKI only; the private key is operator-only.
-- Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
+- Required scope: encrypted-at-rest and encrypted-in-transit off-site backups cover durable Payload/Postgres and CRM/CMS runtime data; exact-release runtime evidence is deterministically regenerated and revalidated after restore.
 - Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.
 - Launch rule: the tested local `docker:backup` path is not production disaster-recovery evidence.
 
 ## Content Quality Warnings
 
 - Current review evidence:
-- missing_review (path migration/reviews/listing-quality.csv; expected 165; reviewed 0; missing 165)
+- pass (path production/data/launch-freeze.json; expected 165; reviewed 165; missing 0)
 - Pending review sample:
-- MS-CRAWL-0001: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0001
-- MS-CRAWL-0002: area_sqm|public_gallery (missing_area|thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0002
-- MS-CRAWL-0003: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0003
-- MS-CRAWL-0004: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0004
-- MS-CRAWL-0005: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0005
-- MS-CRAWL-0006: area_sqm|public_gallery (missing_area|thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0006
-- MS-CRAWL-0007: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0007
-- MS-CRAWL-0008: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0008
-- MS-CRAWL-0009: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0009
-- MS-CRAWL-0010: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0010
+- none
 - Workbook: `production/data/listing-quality-workbook.csv`
 - Review packet: `production/data/listing-quality-review-packet.json`
 - Draft review CSV: `production/data/listing-quality-review-draft.csv`
@@ -181,7 +166,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, monitorin
 - Coverage: 165/165 source rows (pass: 30, review: 75, hold: 52, source unavailable: 8).
 - Broker approvals in this artifact: 0; broker confirmations still required: 165.
 - Broker packet: `production/data/launch-candidate30-broker-packet.json` — 30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6.
-- This evidence does not clear `listing_quality_review`; use the packet to prioritize human fact, media, availability, and publication review.
+- This evidence grants no publication approval. The exact `MSR-LAUNCH-FREEZE-1` approval clears only the 165-row preservation gate with 0 publish-ready listings; use the packet for later fact, media, availability, and publication review.
 
 ## Broker Verification
 
@@ -195,7 +180,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, monitorin
 
 - Report: `production/data/launch-readiness.json`
 - Admin endpoint: `GET /api/admin/launch-readiness`
-- Monitoring sources: privacy_events: imported, search_console: missing_export, yandex_webmaster: missing_export, backlinks: missing_export
+- Monitoring sources: privacy_events: imported, analytics_export: missing_export, search_console: missing_export, yandex_webmaster: missing_export, backlinks: missing_export
 - Rollback steps: 4
 - Current machine evidence:
 - missing (path production/data/monitoring-rollback-report.json)
@@ -203,7 +188,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, monitorin
 - Path override: `MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH`; validate it with `npm run monitoring:preflight`.
 - Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.
 - Release attestation: after every existing gate passes, set `MS_REALTY_RELEASE_SHA`, the mounted evidence paths, and the private signing key; run `npm run launch:evidence:capture`, then `npm run launch:evidence:verify` on the exact release SHA.
-- Launch rule: an evidence bundle records validated inputs; it does not create human listing reviews, SEO exports, broker approval, or production readiness.
+- Launch rule: an evidence bundle records validated inputs; it does not invent publication approvals, post-DNS SEO evidence, or production readiness.
 
 ## Validate After Inputs
 

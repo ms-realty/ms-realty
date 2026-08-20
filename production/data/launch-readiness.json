@@ -1,10 +1,8 @@
 {
-  "generated_at": "2026-08-20T17:14:21.177Z",
+  "generated_at": "2026-08-20T19:22:40.868Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
-    "external_seo_exports",
-    "listing_quality_review",
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
@@ -174,8 +172,8 @@
     },
     {
       "id": "external_seo_exports",
-      "status": "blocked",
-      "message": "Search Console, Yandex, and backlink exports are required before launch.",
+      "status": "deferred",
+      "message": "Deferred until canonical DNS cutover: Search Console, Yandex, and backlink evidence is required for Production-Live, not Production-Ready.",
       "evidence": {
         "crawl_urls": 457,
         "url_types": {
@@ -278,210 +276,32 @@
           "Place them in migration/external/seo or set MS_REALTY_SEO_EVIDENCE_INPUT_DIR.",
           "Run npm run seo:preflight before launch:preflight."
         ]
-      },
-      "next_actions": [
-        "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
-        "Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import."
-      ]
+      }
     },
     {
       "id": "listing_quality_review",
-      "status": "blocked",
-      "message": "Human listing quality review CSV is required before launch.",
+      "status": "pass",
+      "message": "MSR-LAUNCH-FREEZE-1 preserves all 165 accepted listings while publication remains review-gated.",
       "evidence": {
-        "status": "missing_review",
-        "path": "migration/reviews/listing-quality.csv",
+        "status": "pass",
+        "mode": "approved_launch_freeze_preservation",
+        "path": "production/data/launch-freeze.json",
+        "artifact_sha256": "38b34064a8f37e2281ff97bd9b804b5e685984462709c56464de0a5be959158f",
+        "approval_id": "MSR-LAUNCH-FREEZE-1",
         "summary": {
           "expected_review_rows": 165,
-          "review_rows": 0,
-          "missing_review_rows": 165,
-          "facts_review_rows": 0,
-          "media_review_rows": 0
+          "review_rows": 165,
+          "missing_review_rows": 0,
+          "facts_review_rows": 30,
+          "media_review_rows": 0,
+          "active_listings": 30,
+          "archived_listings": 135,
+          "publish_ready": 0,
+          "publication_approvals": 0,
+          "public_listing_entries": 0
         },
-        "pending_review_sample": [
-          {
-            "listing_id": "MS-CRAWL-0001",
-            "target_path": "/bg/imoti/MS-CRAWL-0001",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0001",
-            "issues": [
-              "missing_area"
-            ],
-            "required_editor_fields": [
-              "area_sqm"
-            ],
-            "public_gallery_assets": 17,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
-              "https://makler-realty.com/wp-content/uploads/2024/12/815-1.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
-              "https://makler-realty.com/wp-content/uploads/2024/12/815-2.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]"
-            ]
-          },
-          {
-            "listing_id": "MS-CRAWL-0002",
-            "target_path": "/bg/imoti/MS-CRAWL-0002",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0002",
-            "issues": [
-              "missing_area",
-              "thin_public_gallery"
-            ],
-            "required_editor_fields": [
-              "area_sqm",
-              "public_gallery"
-            ],
-            "public_gallery_assets": 2,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]",
-              "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]"
-            ]
-          },
-          {
-            "listing_id": "MS-CRAWL-0003",
-            "target_path": "/bg/imoti/MS-CRAWL-0003",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0003",
-            "issues": [
-              "missing_area"
-            ],
-            "required_editor_fields": [
-              "area_sqm"
-            ],
-            "public_gallery_assets": 14,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
-              "https://makler-realty.com/wp-content/uploads/2025/10/922-1.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
-              "https://makler-realty.com/wp-content/uploads/2025/10/922-2.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]"
-            ]
-          },
-          {
-            "listing_id": "MS-CRAWL-0004",
-            "target_path": "/bg/imoti/MS-CRAWL-0004",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0004",
-            "issues": [
-              "missing_area"
-            ],
-            "required_editor_fields": [
-              "area_sqm"
-            ],
-            "public_gallery_assets": 8,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2025/08/905-1.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2025/08/905-2.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]"
-            ]
-          },
-          {
-            "listing_id": "MS-CRAWL-0005",
-            "target_path": "/bg/imoti/MS-CRAWL-0005",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0005",
-            "issues": [
-              "missing_area"
-            ],
-            "required_editor_fields": [
-              "area_sqm"
-            ],
-            "public_gallery_assets": 8,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2025/07/899-2-680x510.jpg [alt: Апартамент под наем в гр.Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2025/07/899-1.jpg [alt: Апартамент под наем в гр.Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2025/07/899-2.jpg [alt: Апартамент под наем в гр.Сандански]"
-            ]
-          },
-          {
-            "listing_id": "MS-CRAWL-0006",
-            "target_path": "/bg/imoti/MS-CRAWL-0006",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0006",
-            "issues": [
-              "missing_area",
-              "thin_public_gallery"
-            ],
-            "required_editor_fields": [
-              "area_sqm",
-              "public_gallery"
-            ],
-            "public_gallery_assets": 1,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Дава под наем промишлена сграда в Сандански]"
-            ]
-          },
-          {
-            "listing_id": "MS-CRAWL-0007",
-            "target_path": "/bg/imoti/MS-CRAWL-0007",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0007",
-            "issues": [
-              "missing_area"
-            ],
-            "required_editor_fields": [
-              "area_sqm"
-            ],
-            "public_gallery_assets": 6,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2025/09/911-2-680x514.jpg [alt: Продава двустаен апартамент в гр.Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2025/09/911-2.jpg [alt: продажба на апартаменти в гр.Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2025/09/911-5.jpg [alt: продажба на апартаменти в гр.Сандански]"
-            ]
-          },
-          {
-            "listing_id": "MS-CRAWL-0008",
-            "target_path": "/bg/imoti/MS-CRAWL-0008",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0008",
-            "issues": [
-              "missing_area"
-            ],
-            "required_editor_fields": [
-              "area_sqm"
-            ],
-            "public_gallery_assets": 17,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
-              "https://makler-realty.com/wp-content/uploads/2023/06/662-4.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
-              "https://makler-realty.com/wp-content/uploads/2018/07/662.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
-            ]
-          },
-          {
-            "listing_id": "MS-CRAWL-0009",
-            "target_path": "/bg/imoti/MS-CRAWL-0009",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0009",
-            "issues": [
-              "missing_area"
-            ],
-            "required_editor_fields": [
-              "area_sqm"
-            ],
-            "public_gallery_assets": 8,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2026/06/957-1-680x510.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2026/06/957-1.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2026/06/957-8.jpg [alt: Двустаен апартамент под наем в парка на Сандански]"
-            ]
-          },
-          {
-            "listing_id": "MS-CRAWL-0010",
-            "target_path": "/bg/imoti/MS-CRAWL-0010",
-            "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0010",
-            "issues": [
-              "missing_area"
-            ],
-            "required_editor_fields": [
-              "area_sqm"
-            ],
-            "public_gallery_assets": 16,
-            "public_gallery_sample": [
-              "https://makler-realty.com/wp-content/uploads/2026/06/987-main-1-510x680.jpg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2024/05/987-16.jpeg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
-              "https://makler-realty.com/wp-content/uploads/2024/05/987-14.jpeg [alt: Двустаен апартамент в идеалния център на гр. Сандански]"
-            ]
-          }
-        ],
-        "next_actions": [
-          "Review production/data/listing-quality-workbook.csv.",
-          "Write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH.",
-          "Run npm run listing:preflight before launch:preflight."
-        ]
-      },
-      "next_actions": [
-        "Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.",
-        "Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.",
-        "Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight."
-      ]
+        "publication_boundary": "catalog classification is not broker or publication approval"
+      }
     },
     {
       "id": "runtime_smoke",
@@ -683,17 +503,27 @@
       "evidence": {
         "monitoring_sources": [
           "privacy_events",
+          "analytics_export",
           "search_console",
           "yandex_webmaster",
           "backlinks"
         ],
         "monitoring_source_statuses": {
           "privacy_events": "imported",
+          "analytics_export": "missing_export",
           "search_console": "missing_export",
           "yandex_webmaster": "missing_export",
           "backlinks": "missing_export"
         },
+        "monitoring_source_requirements": {
+          "privacy_events": "production_ready",
+          "analytics_export": "production_ready",
+          "search_console": "production_live",
+          "yandex_webmaster": "production_live",
+          "backlinks": "production_live"
+        },
         "privacy_events_status": "imported",
+        "analytics_export_status": "missing_export",
         "rollback_steps": 4,
         "machine_evidence": {
           "status": "missing",
@@ -701,7 +531,6 @@
         }
       },
       "next_actions": [
-        "Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.",
         "Mount a current redacted monitoring and rollback report, then run npm run monitoring:preflight.",
         "Confirm the automated rollback policy, canary, and isolated drill cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback."
       ]
@@ -756,7 +585,7 @@
         }
       },
       "next_actions": [
-        "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
+        "Complete an encrypted off-site backup and isolated restore drill for durable Payload/Postgres and CRM/CMS data.",
         "Run the governed recovery:r2 backup, restore, and approval commands; only their Ed25519-signed report can be imported through /api/admin/production-recovery/import."
       ]
     }
@@ -796,19 +625,28 @@
   "monitoring_plan": [
     {
       "source": "privacy_events",
-      "status": "imported"
+      "status": "imported",
+      "required_for": "production_ready"
+    },
+    {
+      "source": "analytics_export",
+      "status": "missing_export",
+      "required_for": "production_ready"
     },
     {
       "source": "search_console",
-      "status": "missing_export"
+      "status": "missing_export",
+      "required_for": "production_live"
     },
     {
       "source": "yandex_webmaster",
-      "status": "missing_export"
+      "status": "missing_export",
+      "required_for": "production_live"
     },
     {
       "source": "backlinks",
-      "status": "missing_export"
+      "status": "missing_export",
+      "required_for": "production_live"
     }
   ],
   "rollback_plan": [

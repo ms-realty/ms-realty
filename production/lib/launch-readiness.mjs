@@ -154,7 +154,6 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
     "Fix any failing route status evidence before launch readiness is rebuilt.",
   ],
   monitoring_rollback: [
-    "Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.",
     "Mount a current redacted monitoring and rollback report, then run npm run monitoring:preflight.",
     "Confirm the automated rollback policy, canary, and isolated drill cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.",
   ],
@@ -167,7 +166,7 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
     "Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.",
   ],
   production_recovery: [
-    "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
+    "Complete an encrypted off-site backup and isolated restore drill for durable Payload/Postgres and CRM/CMS data.",
     "Run the governed recovery:r2 backup, restore, and approval commands; only their Ed25519-signed report can be imported through /api/admin/production-recovery/import.",
   ],
 };
