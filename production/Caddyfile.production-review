@@ -14,9 +14,11 @@
 	reverse_proxy @app_operator app:3000 {
 		header_up Authorization "Bearer {$MS_REALTY_ADMIN_TOKEN}"
 		header_up CF-Connecting-IP {client_ip}
+		header_up -X-MS-Realty-Origin-Token
 	}
 	reverse_proxy app:3000 {
 		header_up CF-Connecting-IP {client_ip}
+		header_up -X-MS-Realty-Origin-Token
 	}
 }
 
@@ -30,6 +32,22 @@
 {$MS_REALTY_REVIEW_HOST} {
 	header X-Robots-Tag "noindex, nofollow, noarchive"
 	route {
+		@worker_origin header X-MS-Realty-Origin-Token {$MS_REALTY_ORIGIN_TOKEN}
+		handle @worker_origin {
+			@worker_legacy_media path /wp-content/uploads/*
+			handle @worker_legacy_media {
+				header Cache-Control "public, max-age=31536000, immutable"
+				header X-Content-Type-Options "nosniff"
+				root * /srv/media
+				try_files /makler-realty.com{path} /makler-realty.ru{path}
+				file_server
+			}
+			reverse_proxy app:3000 {
+				header_up CF-Connecting-IP {client_ip}
+				header_up -X-MS-Realty-Origin-Token
+			}
+		}
+
 		@edge_health path /api/health
 		handle @edge_health {
 			reverse_proxy app:3000 {

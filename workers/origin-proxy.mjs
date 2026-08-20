@@ -1,5 +1,6 @@
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const SAME_SITE_VALUES = new Set(["same-origin", "none"]);
+export const ORIGIN_TOKEN_HEADER = "x-ms-realty-origin-token";
 
 export class OriginProxyError extends Error {
   constructor(message, status = 502) {
@@ -29,6 +30,14 @@ function configuredOrigin(value) {
   return url;
 }
 
+function configuredOriginToken(value) {
+  const token = String(value || "").trim();
+  if (token.length < 32) {
+    throw new OriginProxyError("MS_REALTY_ORIGIN_TOKEN must be at least 32 characters");
+  }
+  return token;
+}
+
 function assertSameOriginBrowserWrite(request, publicUrl) {
   if (SAFE_METHODS.has(request.method.toUpperCase())) return;
 
@@ -50,8 +59,9 @@ function assertSameOriginBrowserWrite(request, publicUrl) {
   }
 }
 
-export function requestForOrigin(request, originValue) {
+export function requestForOrigin(request, originValue, originTokenValue) {
   const origin = configuredOrigin(originValue);
+  const originToken = configuredOriginToken(originTokenValue);
   const publicUrl = new URL(request.url);
   assertSameOriginBrowserWrite(request, publicUrl);
 
@@ -60,6 +70,8 @@ export function requestForOrigin(request, originValue) {
   headers.delete("x-forwarded-for");
   headers.delete("x-forwarded-host");
   headers.delete("x-forwarded-proto");
+  headers.delete(ORIGIN_TOKEN_HEADER);
+  headers.set(ORIGIN_TOKEN_HEADER, originToken);
   if (headers.has("origin")) headers.set("origin", origin.origin);
 
   return new Request(new Request(upstreamUrl, request), { headers, redirect: "manual" });

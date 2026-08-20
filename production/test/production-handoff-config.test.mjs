@@ -22,6 +22,11 @@ test("handoff puts the same governed app behind the private preview and final do
   assert.match(caddy, /trusted_proxies static 173\.245\.48\.0\/20[\s\S]*2c0f:f248::\/32/);
   assert.match(caddy, /client_ip_headers CF-Connecting-IP X-Forwarded-For/);
   assert.match(caddy, /header_up CF-Connecting-IP \{client_ip\}/);
+  assert.match(caddy, /@worker_origin header X-MS-Realty-Origin-Token \{\$MS_REALTY_ORIGIN_TOKEN\}/);
+  assert.match(caddy, /header_up -X-MS-Realty-Origin-Token/);
+  const workerOrigin = caddy.slice(caddy.indexOf("handle @worker_origin"), caddy.indexOf("@edge_health"));
+  assert.match(workerOrigin, /reverse_proxy app:3000/);
+  assert.doesNotMatch(workerOrigin, /MS_REALTY_ADMIN_TOKEN|import app_proxy/);
   for (const domain of ["makler-realty.com", "www.makler-realty.com", "makler-realty.ru", "www.makler-realty.ru"]) {
     assert.match(caddy, new RegExp(domain.replaceAll(".", "\\.")));
   }
@@ -38,6 +43,7 @@ test("production compose runs one durable app before and after DNS cutover", () 
   assert.equal(compose.match(/MS_REALTY_TRUST_PROXY: "1"/g)?.length, 1);
   assert.match(compose, /MS_REALTY_PUBLIC_ORIGIN: https:\/\/makler-realty\.com/);
   assert.match(compose, /MS_REALTY_BUILD_MARKER: \$\{MS_REALTY_BUILD_MARKER:-unversioned\}/);
+  assert.match(compose, /MS_REALTY_ORIGIN_TOKEN: \$\{MS_REALTY_ORIGIN_TOKEN:\?MS_REALTY_ORIGIN_TOKEN is required\}/);
   assert.match(dockerfile, /ARG MS_REALTY_BUILD_MARKER=unversioned[\s\S]*\.ms-realty-build-marker/);
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);
 });
@@ -55,6 +61,7 @@ test("production handoff runs Hermes drafts against one private local model", ()
 
 test("workers.dev delegates dynamic traffic to the fixed origin and carries an exact edge marker", () => {
   assert.match(worker, /if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
+  assert.match(worker, /requestForOrigin\(request, env\.MS_REALTY_ORIGIN_URL, env\.MS_REALTY_ORIGIN_TOKEN\)/);
   assert.match(worker, /if \(media\) return media;\n\s+if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
   assert.equal(wrangler.split("__MS_REALTY_BUILD_MARKER__").length - 1, 2);

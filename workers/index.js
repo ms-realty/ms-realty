@@ -234,7 +234,7 @@ function payloadPrivateResponse() {
 
 async function proxyDurableOrigin(request, env, url, preview) {
   try {
-    const upstreamRequest = requestForOrigin(request, env.MS_REALTY_ORIGIN_URL);
+    const upstreamRequest = requestForOrigin(request, env.MS_REALTY_ORIGIN_URL, env.MS_REALTY_ORIGIN_TOKEN);
     const upstreamResponse = await fetch(upstreamRequest);
     const publicResponse = responseForPublicOrigin(upstreamResponse, {
       originValue: env.MS_REALTY_ORIGIN_URL,
