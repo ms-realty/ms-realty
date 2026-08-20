@@ -30,6 +30,7 @@ test("local Docker compose persists preview CRM and CMS state in a named local-o
   ];
   for (const line of requiredPaths) assert.ok(compose.includes(line), `missing ${line}`);
   assert.match(compose, /MS_REALTY_SEARCH_ENGINE: postgres/);
+  assert.match(compose, /image: ms-realty-local-app:\$\{MS_REALTY_BUILD_MARKER:-latest\}/);
   assert.doesNotMatch(compose.split("services:")[0], /TYPESENSE_URL|TYPESENSE_API_KEY|MEILI_URL|MEILI_API_KEY/);
   assert.match(compose, /- local-dev-app-data:\/runtime-data/);
   assert.match(compose, /seed_runtime_file\(\)/);

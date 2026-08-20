@@ -43,6 +43,17 @@ test("production compose runs one durable app before and after DNS cutover", () 
   assert.equal(compose.match(/MS_REALTY_TRUST_PROXY: "1"/g)?.length, 1);
   assert.match(compose, /MS_REALTY_PUBLIC_ORIGIN: https:\/\/makler-realty\.com/);
   assert.match(compose, /MS_REALTY_BUILD_MARKER: \$\{MS_REALTY_BUILD_MARKER:-unversioned\}/);
+  assert.match(compose, /MS_REALTY_RUNTIME_DATA_AUTHORITY: payload/);
+  assert.match(compose, /MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true"/);
+  assert.match(compose, /MS_REALTY_EVENT_DURABLE_STORE_ENABLED: "true"/);
+  assert.match(compose, /MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true"/);
+  assert.match(compose, /MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: "true"/);
+  assert.match(compose, /MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED: "false"/);
+  assert.match(compose, /MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1"/);
+  assert.match(compose, /MS_REALTY_WORKSPACE_ID: \$\{MS_REALTY_WORKSPACE_ID:-workspace-sandanski\}/);
+  assert.match(compose, /MS_REALTY_PROVIDER_TOKEN_KEY: \$\{MS_REALTY_PROVIDER_TOKEN_KEY:\?/);
+  assert.match(compose, /MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: \$\{MS_REALTY_PROVIDER_OAUTH_STATE_SECRET:\?/);
+  assert.match(compose, /MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: \$\{MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY:\?/);
   assert.match(compose, /MS_REALTY_ORIGIN_TOKEN: \$\{MS_REALTY_ORIGIN_TOKEN:\?MS_REALTY_ORIGIN_TOKEN is required\}/);
   assert.match(dockerfile, /ARG MS_REALTY_BUILD_MARKER=unversioned[\s\S]*\.ms-realty-build-marker/);
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);

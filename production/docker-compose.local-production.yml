@@ -1,7 +1,7 @@
 name: ms-realty-local-production
 
 x-app-image: &app-image
-  image: ms-realty-local-app:latest
+  image: ms-realty-local-app:${MS_REALTY_BUILD_MARKER:-latest}
 
 x-app-environment: &app-environment
   NODE_ENV: production
