@@ -129,7 +129,8 @@ jobs:
           ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
           ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" 'install -d -m 0700 /opt/ms-realty/incoming'
           scp "${ssh_args[@]}" "$archive" "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.tar.gz"
-          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "bash -s -- '$GITHUB_SHA'" < production/scripts/deploy-production-review.sh
+          scp "${ssh_args[@]}" production/scripts/deploy-production-review.sh "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh"
+          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; trap 'rm -f /opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' EXIT; bash '/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' '$GITHUB_SHA' </dev/null; test \"\$(readlink -f /opt/ms-realty/current)\" = '/opt/ms-realty/releases/${GITHUB_SHA}'"
 
   deploy:
     name: Deploy production

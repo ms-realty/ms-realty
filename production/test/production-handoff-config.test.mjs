@@ -8,6 +8,7 @@ const compose = fs.readFileSync(fromRoot("production", "docker-compose.productio
 const localCompose = fs.readFileSync(fromRoot("production", "docker-compose.local-production.yml"), "utf8");
 const dockerfile = fs.readFileSync(fromRoot("production", "Dockerfile"), "utf8");
 const deployScript = fs.readFileSync(fromRoot("production", "scripts", "deploy-production-review.sh"), "utf8");
+const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
 const searchSyncCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-sync.mjs"), "utf8");
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
@@ -103,6 +104,10 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(deployScript, /trap 'rollback "\$\?"' ERR/);
   assert.match(deployScript, /mv -Tf "\$base\/\.current-\$release_id" "\$current"/);
   assert.doesNotMatch(deployScript, /docker:reset|docker compose down --volumes/);
+  assert.match(ciWorkflow, /scp .*production\/scripts\/deploy-production-review\.sh .*\$\{GITHUB_SHA\}\.deploy\.sh/);
+  assert.match(ciWorkflow, /bash '\/opt\/ms-realty\/incoming\/\$\{GITHUB_SHA\}\.deploy\.sh' '\$GITHUB_SHA' <\/dev\/null/);
+  assert.match(ciWorkflow, /readlink -f \/opt\/ms-realty\/current/);
+  assert.doesNotMatch(ciWorkflow, /bash -s --/);
 });
 
 test("every public CMS media asset is mirrorable under one of the two final hosts", () => {
