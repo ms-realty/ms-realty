@@ -2155,57 +2155,64 @@ export async function runSearchEngineQuerySmoke({
   void typesense;
   void meilisearch;
   void fetchImpl;
-  const approved = await postgresProjectionSnapshot({ postgres, projection });
-  const documents = approved?.documents ?? [];
-  const sample = documents[0] || null;
-  const localeCodes = [sample?.locale || "bg"];
-  const postgresResult = await queryPostgres({
-    postgres,
-    q: sample?.listing_reference || "",
-    intent: normalizeSearchIntent(
-      {
-        locale: localeCodes[0],
-        exact_reference: sample?.listing_reference || null,
-        page: 1,
-        page_size: 5,
-      },
-      { defaultLocale: localeCodes[0] },
-    ),
-    localeCodes,
-  });
-  const projectedDocuments = documents.length;
-  return {
-    evidence_scope: approved ? "live" : "smoke",
-    generated_at: generatedAt,
-    source: approved?.source || fixtureSource(projectedDocuments),
-    expectation: {
-      projected_documents: projectedDocuments,
-      sample_document_id: sample?.id || null,
-    },
-    summary: {
-      engines: 1,
-      targets: { postgres: POSTGRES_PUBLIC_SEARCH_VIEW },
-      total_hits: postgresResult.total,
-      first_hit_ids: [postgresResult.hits[0]?.id || null],
-      database_target: postgresResult.database_target,
-    },
-    engines: [
-      {
-        engine: "postgres",
-        target: POSTGRES_PUBLIC_SEARCH_VIEW,
-        database_target: postgresResult.database_target,
-        query: sample?.listing_reference || "",
-        operation: {
-          method: "SELECT",
-          status: 200,
-          url: postgresResult.database_target,
-          rows: postgresResult.hits.length,
+  const needsRuntime = !postgres.payload && (!projection || typeof postgres.queryImpl !== "function");
+  const ownedRuntime = needsRuntime ? await postgresQueryRuntime(postgres) : null;
+  const runtimePostgres = ownedRuntime ? { ...postgres, payload: ownedRuntime } : postgres;
+  try {
+    const approved = await postgresProjectionSnapshot({ postgres: runtimePostgres, projection });
+    const documents = approved?.documents ?? [];
+    const sample = documents[0] || null;
+    const localeCodes = [sample?.locale || "bg"];
+    const postgresResult = await queryPostgres({
+      postgres: runtimePostgres,
+      q: sample?.listing_reference || "",
+      intent: normalizeSearchIntent(
+        {
+          locale: localeCodes[0],
+          exact_reference: sample?.listing_reference || null,
+          page: 1,
+          page_size: 5,
         },
-        total: postgresResult.total,
-        hits: postgresResult.hits,
+        { defaultLocale: localeCodes[0] },
+      ),
+      localeCodes,
+    });
+    const projectedDocuments = documents.length;
+    return {
+      evidence_scope: approved ? "live" : "smoke",
+      generated_at: generatedAt,
+      source: approved?.source || fixtureSource(projectedDocuments),
+      expectation: {
+        projected_documents: projectedDocuments,
+        sample_document_id: sample?.id || null,
       },
-    ],
-  };
+      summary: {
+        engines: 1,
+        targets: { postgres: POSTGRES_PUBLIC_SEARCH_VIEW },
+        total_hits: postgresResult.total,
+        first_hit_ids: [postgresResult.hits[0]?.id || null],
+        database_target: postgresResult.database_target,
+      },
+      engines: [
+        {
+          engine: "postgres",
+          target: POSTGRES_PUBLIC_SEARCH_VIEW,
+          database_target: postgresResult.database_target,
+          query: sample?.listing_reference || "",
+          operation: {
+            method: "SELECT",
+            status: 200,
+            url: postgresResult.database_target,
+            rows: postgresResult.hits.length,
+          },
+          total: postgresResult.total,
+          hits: postgresResult.hits,
+        },
+      ],
+    };
+  } finally {
+    await ownedRuntime?.destroy?.();
+  }
 }
 
 export function assertSearchEngineQueryReport(report) {

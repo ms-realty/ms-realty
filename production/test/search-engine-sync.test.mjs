@@ -480,6 +480,47 @@ test("search sync reuses the current Payload adapter until its SQL snapshot comp
   assert.equal(executeArgs.drizzle, drizzle);
 });
 
+test("search query reuses the current Payload adapter until count and page queries complete", async () => {
+  const executeArgs = [];
+  let loadCalls = 0;
+  let destroyCalls = 0;
+  const drizzle = { kind: "current-payload-drizzle" };
+  const payload = {
+    db: {
+      drizzle,
+      beginTransaction: async () => "tx",
+      commitTransaction: async () => undefined,
+      rollbackTransaction: async () => undefined,
+      execute: async (args) => {
+        executeArgs.push(args);
+        return { rows: executeArgs.length === 1 ? [{ total_count: "0" }] : [] };
+      },
+    },
+    find: async () => ({ docs: [], totalPages: 1 }),
+    create: async () => undefined,
+    update: async () => undefined,
+    destroy: async () => {
+      destroyCalls += 1;
+      payload.db.drizzle = undefined;
+    },
+  };
+  const report = await runSearchEngineQuerySmoke({
+    postgres: {
+      env: { DATABASE_URL: POSTGRES_DATABASE_TARGET, PAYLOAD_SECRET: "test-payload-secret" },
+      loadPayloadRuntime: async () => {
+        loadCalls += 1;
+        return payload;
+      },
+    },
+  });
+
+  assert.equal(report.summary.total_hits, 0);
+  assert.equal(loadCalls, 1);
+  assert.equal(destroyCalls, 1);
+  assert.equal(executeArgs.length, 2);
+  assert.ok(executeArgs.every((args) => args.drizzle === drizzle && args.sql));
+});
+
 test("Postgres search counts independently and binds page, active status, and geography filters", async () => {
   const statements = [];
   const postgres = {

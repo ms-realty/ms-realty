@@ -10,6 +10,7 @@ import {
   writeSearchEngineSyncReport,
 } from "../lib/search-engine-sync.mjs";
 import { loadPayloadApprovedSearchProjection } from "../lib/payload-search-projection.mjs";
+import { loadPayloadCmsImportRuntime } from "../lib/payload-cms-import.mjs";
 import {
   openAiCompatibleHermesProvider,
   runHermesDraftWorker,
@@ -34,12 +35,19 @@ async function capture() {
     throw new Error(`live service provisioning must pass before capture: ${failed}`);
   }
 
-  const projection = await loadPayloadApprovedSearchProjection();
-  const syncReport = await runSearchEngineSync({ projection, generatedAt: runAt });
-  writeSearchEngineSyncReport(syncReport, postgresSyncReportPath());
+  const payload = await loadPayloadCmsImportRuntime();
+  let syncReport;
+  let queryReport;
+  try {
+    const projection = await loadPayloadApprovedSearchProjection({ payload });
+    syncReport = await runSearchEngineSync({ postgres: { payload }, projection, generatedAt: runAt });
+    writeSearchEngineSyncReport(syncReport, postgresSyncReportPath());
 
-  const queryReport = await runSearchEngineQuerySmoke({ projection, generatedAt: runAt });
-  writeSearchEngineQueryReport(queryReport, postgresQueryReportPath());
+    queryReport = await runSearchEngineQuerySmoke({ postgres: { payload }, projection, generatedAt: runAt });
+    writeSearchEngineQueryReport(queryReport, postgresQueryReportPath());
+  } finally {
+    await payload.destroy?.();
+  }
 
   const hermesReport = HERMES_LAUNCH_REQUIRED
     ? await runHermesDraftWorker({
