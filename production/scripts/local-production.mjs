@@ -426,6 +426,7 @@ async function start(env, { withHermes = false } = {}) {
     waitFor(`http://127.0.0.1:${env.MS_REALTY_MEILI_PORT}/health`),
   ]);
 
+  compose(["exec", "-T", "app", "npm", "run", "payload:cms:import", "--", "--skip-if-initialized"], { envOverrides });
   compose(["--profile", "tools", "run", "--rm", "search-seed"], { envOverrides });
   compose(["exec", "-T", "app", "npm", "run", "payload:runtime"], { envOverrides });
   if (withHermes) compose([...profile, "exec", "-T", "app", "npm", "run", "hermes:runtime"], { envOverrides });
