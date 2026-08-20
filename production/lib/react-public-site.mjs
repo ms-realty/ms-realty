@@ -1174,11 +1174,19 @@ function HomeBody({ page }) {
         h("div", null, h("h2", null, labels.featuredListings)),
         h(Btn, { tag: "a", variant: "secondary", iconEnd: "arrow-right", href: page.body.search.path }, labels.searchResults),
       ),
-      h(
-        "div",
-        { className: "hp-grid" },
-        ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale })),
-      ),
+      (page.cards || []).length
+        ? h(
+            "div",
+            { className: "hp-grid" },
+            ...page.cards.map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale })),
+          )
+        : h(
+            "div",
+            { className: "mk-empty", "data-featured-empty": "true", "aria-live": "polite" },
+            h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "shield-check", size: 24 })),
+            h("h3", { className: "mk-empty__title" }, labels.reviewRequired),
+            h("p", { className: "mk-empty__text" }, `0 ${labels.reviewedListings}`),
+          ),
     ),
     h(
       "section",
