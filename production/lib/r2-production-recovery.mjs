@@ -249,8 +249,12 @@ export function assertRecoveryComponentMap(map) {
     if (new Set(classifiedSources).size !== classifiedSources.length) {
       throw new Error(`Recovery component ${component} classifies a source more than once`);
     }
-    if (entry.uncovered_sources.length === 0 && entry.tables.length === 0) {
-      throw new Error(`Recovery component ${component} cannot be covered without a mapped PostgreSQL table`);
+    if (
+      entry.uncovered_sources.length === 0 &&
+      entry.tables.length === 0 &&
+      (entry.deterministic_sources || []).length === 0
+    ) {
+      throw new Error(`Recovery component ${component} cannot be covered without a mapped PostgreSQL table or deterministic source`);
     }
   }
   const runtimeTables = new Set(map.components.runtime_data.tables.map((mapping) => mapping.name));
@@ -323,6 +327,7 @@ export function componentCoverage(map, tableCounts, { runtimeAuthorityEvidence =
         assertSafeTableName(mapping.name),
         [...mapping.sources],
       ])),
+      deterministic_sources: [...(entry.deterministic_sources || [])],
       uncovered_sources: uncoveredSources,
     }];
   }));
@@ -454,7 +459,11 @@ export function assertR2RecoveryManifest(manifest, trustedComponentMap, expected
   }
   for (const component of R2_RECOVERY_COMPONENTS) {
     const coverage = expectedCoverage[component];
-    if (coverage.status === "covered" && Object.keys(coverage.mapped_tables).length === 0) {
+    if (
+      coverage.status === "covered" &&
+      Object.keys(coverage.mapped_tables).length === 0 &&
+      coverage.deterministic_sources.length === 0
+    ) {
       throw new Error(`Recovery component ${component} cannot be covered by an empty mapping`);
     }
   }
