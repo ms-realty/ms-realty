@@ -67,7 +67,8 @@ test("production compose runs one durable app before and after DNS cutover", () 
 
 test("production handoff runs Hermes drafts against one private local model", () => {
   assert.match(compose, /image: ollama\/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad/);
-  assert.match(compose, /command: \["pull", "qwen3:1\.7b"\]/);
+  assert.match(compose, /command: \["pull", "qwen3\.5:0\.8b"\]/);
+  assert.match(compose, /HERMES_AGENT_MODEL: qwen3\.5:0\.8b/);
   assert.match(compose, /HERMES_CHAT_COMPLETIONS_URL: http:\/\/hermes-agent:8642\/v1\/chat\/completions/);
   assert.match(compose, /HERMES_AGENT_LLM_BASE_URL: http:\/\/ollama:11434\/v1/);
   assert.match(compose, /MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE: live/);
@@ -102,7 +103,7 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.doesNotMatch(deployScript, /tar -tzf "\$archive" \| grep -q/);
   assert.match(deployScript, /run_stack "\$previous" docker:backup/);
   assert.match(deployScript, /run_stack "\$release" docker:status "\$release_id"/);
-  assert.match(deployScript, /run_stack "\$release" docker:hermes:up "\$release_id"/);
+  assert.match(deployScript, /run_stack "\$release" docker:hermes:up "\$release_id" \|\| rollback "\$\?"/);
   assert.match(deployScript, /d\.build_marker !== process\.argv\[2\]/);
   assert.match(deployScript, /deployment failed; restoring \$previous/);
   assert.match(deployScript, /local status="\$\{1:-1\}"/);

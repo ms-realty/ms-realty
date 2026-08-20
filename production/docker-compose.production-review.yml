@@ -63,7 +63,7 @@ services:
     restart: "no"
     environment:
       OLLAMA_HOST: http://ollama:11434
-    command: ["pull", "qwen3:1.7b"]
+    command: ["pull", "qwen3.5:0.8b"]
     depends_on:
       ollama:
         condition: service_healthy
@@ -77,7 +77,7 @@ services:
   hermes-agent:
     environment:
       HERMES_AGENT_API_SERVER_KEY: ${HERMES_AGENT_API_SERVER_KEY:?HERMES_AGENT_API_SERVER_KEY is required}
-      HERMES_AGENT_MODEL: qwen3:1.7b
+      HERMES_AGENT_MODEL: qwen3.5:0.8b
       HERMES_AGENT_LLM_BASE_URL: http://ollama:11434/v1
       HERMES_AGENT_LLM_API_KEY: ollama-local
     depends_on:

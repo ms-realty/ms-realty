@@ -109,7 +109,7 @@ test("managed Hermes Agent profile uses a self-hosted model and exposes no tools
   const soul = fs.readFileSync(fromRoot("production", "hermes-agent", "SOUL.md"), "utf8");
 
   assert.match(config, /provider: custom/);
-  assert.match(config, /default: "qwen3:1\.7b"/);
+  assert.match(config, /default: "qwen3\.5:0\.8b"/);
   assert.doesNotMatch(config, /default: "\$\{/);
   assert.match(config, /base_url: "\$\{HERMES_AGENT_LLM_BASE_URL\}"/);
   assert.match(config, /api_key: "\$\{HERMES_AGENT_LLM_API_KEY\}"/);

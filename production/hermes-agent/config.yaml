@@ -2,7 +2,7 @@
 # environment; this file intentionally exposes no host filesystem or CRM tools.
 model:
   provider: custom
-  default: "qwen3:1.7b"
+  default: "qwen3.5:0.8b"
   base_url: "${HERMES_AGENT_LLM_BASE_URL}"
   api_key: "${HERMES_AGENT_LLM_API_KEY}"
   api_mode: chat_completions

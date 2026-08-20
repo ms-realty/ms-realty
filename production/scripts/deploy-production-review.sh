@@ -87,7 +87,7 @@ fi
 
 activate "$release"
 switched=true
-run_stack "$release" docker:hermes:up "$release_id"
+run_stack "$release" docker:hermes:up "$release_id" || rollback "$?"
 
 health_file="$(mktemp)"
 trap 'rm -f "$health_file"' EXIT
