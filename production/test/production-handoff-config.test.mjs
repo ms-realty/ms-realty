@@ -11,6 +11,7 @@ const deployScript = fs.readFileSync(fromRoot("production", "scripts", "deploy-p
 const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
 const searchSyncCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-sync.mjs"), "utf8");
 const searchQueryCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-query.mjs"), "utf8");
+const liveServiceEvidenceCli = fs.readFileSync(fromRoot("production", "scripts", "run-live-service-evidence.mjs"), "utf8");
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 
@@ -82,6 +83,7 @@ test("production search evidence uses one migrated Payload runtime", () => {
   assert.match(searchSyncCli, /runSearchEngineSync\(\{ generatedAt: new Date\(\)\.toISOString\(\) \}\)/);
   assert.match(searchSyncCli, /process\.exit\(exitCode\)/);
   assert.match(searchQueryCli, /process\.exit\(exitCode\)/);
+  assert.match(liveServiceEvidenceCli, /process\.exit\(exitCode\)/);
 });
 
 test("workers.dev delegates dynamic traffic to the fixed origin and carries an exact edge marker", () => {
