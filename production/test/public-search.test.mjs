@@ -223,28 +223,28 @@ test("private review keeps the production Postgres search contract while exposin
     PAYLOAD_SECRET: "private-review-test-secret",
   };
   const reviewConfig = appRouterConfigFromEnv(reviewEnv);
+  const productionListing = renderAppRoute({
+    pathname: "/bg/imoti/MS-CRAWL-0001",
+    url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+    config: productionConfig,
+  });
+  const reviewListing = renderAppRoute({
+    pathname: "/bg/imoti/MS-CRAWL-0001",
+    url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+    config: reviewConfig,
+  });
 
   assert.equal(productionConfig.privateReview, false);
-  assert.equal(
-    renderAppRoute({
-      pathname: "/bg/imoti/MS-CRAWL-0001",
-      url: "https://example.test/bg/imoti/MS-CRAWL-0001",
-      config: productionConfig,
-    }).status,
-    404,
-  );
+  assert.equal(productionListing.status, 200);
+  assert.equal(productionListing.rendered.kind, "listing_preservation");
+  assert.equal(productionListing.rendered.indexable, false);
   assert.equal(reviewConfig.privateReview, true);
   assert.equal(reviewConfig.search.environment, "production");
   assert.equal(reviewConfig.search.engine, "postgres");
   assert.equal(reviewConfig.search.postgres.env.DATABASE_URL, reviewEnv.DATABASE_URL);
-  assert.equal(
-    renderAppRoute({
-      pathname: "/bg/imoti/MS-CRAWL-0001",
-      url: "https://example.test/bg/imoti/MS-CRAWL-0001",
-      config: reviewConfig,
-    }).status,
-    200,
-  );
+  assert.equal(reviewListing.status, 200);
+  assert.equal(reviewListing.rendered.kind, "listing");
+  assert.equal(reviewListing.rendered.indexable, true);
 
 });
 
