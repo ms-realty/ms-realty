@@ -42,6 +42,11 @@ function report() {
         },
       ],
     },
+    dispatch_confirmation: {
+      mechanism: "workflow_dispatch_typed_confirmation",
+      actor: "ivan-peychev",
+      triggering_actor: "ivan-peychev",
+    },
     alert_delivery: {
       status: "pass",
       provider: "github-actions-email",

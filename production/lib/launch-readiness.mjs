@@ -55,6 +55,11 @@ import {
   summarizeLegacyRouteDecisions,
   validateLegacyRouteDecisionArtifact,
 } from "./redirect-approvals.mjs";
+import {
+  APPROVED_LAUNCH_FREEZE_SHA256,
+  DEFAULT_LAUNCH_FREEZE_PATH,
+  loadApprovedLaunchFreeze,
+} from "./launch-freeze.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -583,6 +588,7 @@ function hasCompleteListingQualityEvidence(evidence) {
   const countKeys = ["expected_review_rows", "review_rows", "missing_review_rows", "facts_review_rows", "media_review_rows"];
   return (
     evidence?.status === "pass" &&
+    evidence?.mode !== "approved_launch_freeze_preservation" &&
     Boolean(evidence?.path) &&
     !evidence.path.endsWith(".example") &&
     countKeys.every((key) => Number.isInteger(summary?.[key]) && summary[key] >= 0) &&
@@ -595,17 +601,77 @@ function hasCompleteListingQualityEvidence(evidence) {
   );
 }
 
+function approvedLaunchFreezeListingEvidence(launchFreeze, sitemap) {
+  const catalog = Array.isArray(launchFreeze?.catalog) ? launchFreeze.catalog : [];
+  const publicListingEntries = sitemap?.summary?.public?.listing_entries;
+  const publicationApprovals = catalog.filter((listing) => listing.publication_approval_granted === true).length;
+  const summary = {
+    expected_review_rows: launchFreeze?.summary?.catalog?.total,
+    review_rows: catalog.length,
+    missing_review_rows: Math.max(0, (launchFreeze?.summary?.catalog?.total || 0) - catalog.length),
+    facts_review_rows: catalog.filter((listing) => listing.source_review_status === "pass").length,
+    media_review_rows: 0,
+    active_listings: launchFreeze?.summary?.catalog?.by_state?.active,
+    archived_listings: launchFreeze?.summary?.catalog?.by_state?.archived,
+    publish_ready: launchFreeze?.summary?.catalog?.publish_ready,
+    publication_approvals: publicationApprovals,
+    public_listing_entries: publicListingEntries,
+  };
+  const ready =
+    launchFreeze?.summary?.contract_ready === true &&
+    summary.expected_review_rows === 165 &&
+    summary.review_rows === 165 &&
+    summary.missing_review_rows === 0 &&
+    summary.active_listings === 30 &&
+    summary.archived_listings === 135 &&
+    summary.publish_ready === 0 &&
+    summary.publication_approvals === 0 &&
+    summary.public_listing_entries === 0 &&
+    catalog.every(
+      (listing) =>
+        listing.publication_state === "review_required" && listing.publication_approval_granted === false,
+    );
+  return {
+    status: ready ? "pass" : "blocked",
+    mode: "approved_launch_freeze_preservation",
+    path: repoRelativePath(DEFAULT_LAUNCH_FREEZE_PATH),
+    artifact_sha256: APPROVED_LAUNCH_FREEZE_SHA256,
+    approval_id: launchFreeze?.route_approval?.approval_id,
+    summary,
+    publication_boundary: launchFreeze?.policy?.publication_boundary,
+  };
+}
+
+function hasApprovedLaunchFreezeListingEvidence(evidence) {
+  const summary = evidence?.summary || {};
+  return (
+    evidence?.status === "pass" &&
+    evidence?.mode === "approved_launch_freeze_preservation" &&
+    evidence?.path === repoRelativePath(DEFAULT_LAUNCH_FREEZE_PATH) &&
+    evidence?.artifact_sha256 === APPROVED_LAUNCH_FREEZE_SHA256 &&
+    evidence?.approval_id === "MSR-LAUNCH-FREEZE-1" &&
+    summary.expected_review_rows === 165 &&
+    summary.review_rows === 165 &&
+    summary.missing_review_rows === 0 &&
+    summary.active_listings === 30 &&
+    summary.archived_listings === 135 &&
+    summary.publish_ready === 0 &&
+    summary.publication_approvals === 0 &&
+    summary.public_listing_entries === 0
+  );
+}
+
 function assertPassListingQualityEvidence(report) {
   const review = gateById(report, "listing_quality_review");
   if (review?.status !== "pass") return;
-  if (!hasCompleteListingQualityEvidence(review.evidence)) {
-    throw new Error("Launch readiness listing quality requires complete non-example review evidence");
+  if (!hasCompleteListingQualityEvidence(review.evidence) && !hasApprovedLaunchFreezeListingEvidence(review.evidence)) {
+    throw new Error("Launch readiness listing quality requires complete review or approved launch-freeze preservation evidence");
   }
 }
 
 function assertPassExternalSeoEvidence(report) {
   const seo = gateById(report, "external_seo_exports");
-  if (seo?.status !== "pass") return;
+  if (!seo || !["pass", "deferred"].includes(seo.status)) return;
   const evidence = seo.evidence || {};
   const sourceSummaries = {
     ...(evidence.sources || {}),
@@ -618,17 +684,19 @@ function assertPassExternalSeoEvidence(report) {
   for (const source of REQUIRED_EXPORTS) {
     const sourceSummary = sourceSummaries[source];
     assertSeoSourceSummary(sourceSummary, source);
-    if (missingRequiredExport(sourceSummary)) {
+    if (seo.status === "pass" && missingRequiredExport(sourceSummary)) {
       throw new Error(`Launch readiness external SEO requires complete ${source} evidence`);
     }
   }
   const expectedMissing = missingRequiredSources(sourceSummaries);
-  if (
-    !Array.isArray(evidence.missing_required_sources) ||
-    JSON.stringify(evidence.missing_required_sources) !== JSON.stringify(expectedMissing) ||
-    expectedMissing.length !== 0
-  ) {
-    throw new Error("Launch readiness external SEO requires imported privacy or analytics evidence and no missing sources");
+  if (!Array.isArray(evidence.missing_required_sources) || JSON.stringify(evidence.missing_required_sources) !== JSON.stringify(expectedMissing)) {
+    throw new Error("Launch readiness external SEO missing sources must match imported evidence");
+  }
+  if (seo.status === "pass" && expectedMissing.length !== 0) {
+    throw new Error("Launch readiness external SEO pass requires imported privacy or analytics evidence and no missing sources");
+  }
+  if (seo.status === "deferred" && expectedMissing.length === 0) {
+    throw new Error("Launch readiness external SEO cannot remain deferred after all post-DNS evidence is imported");
   }
 }
 
@@ -895,14 +963,12 @@ function assertPassMonitoringRollbackEvidence(report) {
   if (monitoring?.status !== "pass") return;
   const sources = new Set(monitoring.evidence?.monitoring_sources || []);
   const sourceStatuses = monitoring.evidence?.monitoring_source_statuses || {};
-  for (const source of ["privacy_events", "search_console", "yandex_webmaster", "backlinks"]) {
+  for (const source of ["privacy_events", "analytics_export", "search_console", "yandex_webmaster", "backlinks"]) {
     if (!sources.has(source)) throw new Error("Launch readiness monitoring rollback requires source evidence");
-    if (sourceStatuses[source] !== "imported") {
-      throw new Error("Launch readiness monitoring rollback requires imported source evidence");
-    }
   }
+  const analyticsReady = sourceStatuses.privacy_events === "imported" || sourceStatuses.analytics_export === "imported";
   if (
-    monitoring.evidence?.privacy_events_status !== "imported" ||
+    !analyticsReady ||
     !Number.isInteger(monitoring.evidence?.rollback_steps) ||
     monitoring.evidence.rollback_steps < 3
   ) {
@@ -1296,6 +1362,7 @@ export function buildLaunchReadinessReport({
   productionRecoveryPublicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
   productionRecovery = productionRecoveryState(undefined, { now: generatedAt, publicKey: productionRecoveryPublicKey }),
   monitoringRollback = monitoringRollbackState(undefined, { now: generatedAt }),
+  launchFreeze = loadApprovedLaunchFreeze(),
 } = {}) {
   const generatedAtMs = Date.parse(generatedAt);
   if (!Number.isFinite(generatedAtMs)) throw new Error("Launch readiness requires valid generatedAt");
@@ -1344,7 +1411,13 @@ export function buildLaunchReadinessReport({
     routeReview.redirectSummary.duplicateOldUrls === 0 &&
     routeReview.decisionSummary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
-  const listingQualityReady = hasCompleteListingQualityEvidence(listingQualityReview);
+  const launchFreezeListingEvidence = approvedLaunchFreezeListingEvidence(launchFreeze, sitemap);
+  const listingQualityEvidence = hasCompleteListingQualityEvidence(listingQualityReview)
+    ? listingQualityReview
+    : launchFreezeListingEvidence;
+  const listingQualityReady =
+    hasCompleteListingQualityEvidence(listingQualityEvidence) ||
+    hasApprovedLaunchFreezeListingEvidence(listingQualityEvidence);
   const liveServicesReady =
     requiredLiveServiceReportsPass(
       liveServiceEvidence,
@@ -1355,10 +1428,11 @@ export function buildLaunchReadinessReport({
   const productionRecoveryReady =
     productionRecoveryEvidence.status === "pass" && productionRecoveryEvidence.freshness.status === "fresh";
   const monitoringPlan = [
-    { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status },
-    { source: "search_console", status: seoEvidence.summary.sources.search_console.status },
-    { source: "yandex_webmaster", status: seoEvidence.summary.sources.yandex_webmaster.status },
-    { source: "backlinks", status: seoEvidence.summary.sources.backlinks.status },
+    { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status, required_for: "production_ready" },
+    { source: "analytics_export", status: seoEvidence.summary.sources.analytics_export.status, required_for: "production_ready" },
+    { source: "search_console", status: seoEvidence.summary.sources.search_console.status, required_for: "production_live" },
+    { source: "yandex_webmaster", status: seoEvidence.summary.sources.yandex_webmaster.status, required_for: "production_live" },
+    { source: "backlinks", status: seoEvidence.summary.sources.backlinks.status, required_for: "production_live" },
   ];
   const rollbackPlan = [
     "Keep legacy DNS/origin rollback available until post-launch crawl is stable.",
@@ -1366,7 +1440,9 @@ export function buildLaunchReadinessReport({
     "Republish previous sitemap and robots files if indexable route coverage regresses.",
     "Use migration review queue owners to triage failed old URLs before broad redirects.",
   ];
-  const monitoringReady = monitoringPlan.every((item) => item.status === "imported");
+  const monitoringReady = monitoringPlan.some(
+    (item) => item.required_for === "production_ready" && item.status === "imported",
+  );
   const monitoringRollbackReady = monitoringRollback.status === "pass";
   const rollbackReady = rollbackPlan.length >= 3;
   const expectedSitemapEntries =
@@ -1441,7 +1517,7 @@ export function buildLaunchReadinessReport({
     ),
     gate(
       "external_seo_exports",
-      seoExportsReady ? "pass" : "blocked",
+      seoExportsReady ? "pass" : "deferred",
       {
         crawl_urls: seoEvidence.summary.crawl_urls,
         url_types: seoEvidence.summary.url_types,
@@ -1452,13 +1528,19 @@ export function buildLaunchReadinessReport({
         sources: seoLaunchSourceSummaries(seoEvidence.summary.sources),
         next_actions: seoPreflight.next_actions,
       },
-      seoExportsReady ? "" : "Search Console, Yandex, and backlink exports are required before launch.",
+      seoExportsReady
+        ? "Canonical-domain SEO evidence is complete."
+        : "Deferred until canonical DNS cutover: Search Console, Yandex, and backlink evidence is required for Production-Live, not Production-Ready.",
     ),
     gate(
       "listing_quality_review",
       listingQualityReady ? "pass" : "blocked",
-      listingQualityReview,
-      listingQualityReady ? "" : "Human listing quality review CSV is required before launch.",
+      listingQualityEvidence,
+      listingQualityReady
+        ? listingQualityEvidence.mode === "approved_launch_freeze_preservation"
+          ? "MSR-LAUNCH-FREEZE-1 preserves all 165 accepted listings while publication remains review-gated."
+          : "Complete human listing review evidence passed."
+        : "Human listing quality review or approved non-public preservation evidence is required before launch.",
     ),
     gate(
       "runtime_smoke",
@@ -1485,7 +1567,9 @@ export function buildLaunchReadinessReport({
       {
         monitoring_sources: monitoringPlan.map((item) => item.source),
         monitoring_source_statuses: Object.fromEntries(monitoringPlan.map((item) => [item.source, item.status])),
+        monitoring_source_requirements: Object.fromEntries(monitoringPlan.map((item) => [item.source, item.required_for])),
         privacy_events_status: monitoringPlan.find((item) => item.source === "privacy_events")?.status,
+        analytics_export_status: monitoringPlan.find((item) => item.source === "analytics_export")?.status,
         rollback_steps: rollbackPlan.length,
         machine_evidence: monitoringRollback,
       },
@@ -1564,7 +1648,12 @@ export function assertLaunchReadinessReport(report, {
   assertPassMonitoringRollbackEvidence(report);
   assertPassProductionRecoveryEvidence(report, productionRecoveryPublicKey);
   assertPassEvidenceFreshness(report, generatedAtMs, productionRecoveryPublicKey);
-  if (report.launch_ready && !report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
+  if (
+    report.launch_ready &&
+    !report.monitoring_plan.some(
+      (item) => ["privacy_events", "analytics_export"].includes(item.source) && item.status === "imported",
+    )
+  ) {
     throw new Error("Launch readiness must include privacy analytics monitoring");
   }
   if (!Array.isArray(report.rollback_plan) || report.rollback_plan.length < 3) {
