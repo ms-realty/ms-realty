@@ -429,7 +429,13 @@ async function start(env, { withHermes = false } = {}) {
   compose(["exec", "-T", "app", "npm", "run", "payload:cms:import", "--", "--skip-if-initialized"], { envOverrides });
   compose(["--profile", "tools", "run", "--rm", "search-seed"], { envOverrides });
   compose(["exec", "-T", "app", "npm", "run", "payload:runtime"], { envOverrides });
-  if (withHermes) compose([...profile, "exec", "-T", "app", "npm", "run", "hermes:runtime"], { envOverrides });
+  if (withHermes) {
+    compose([...profile, "exec", "-T", "app", "npm", "run", "hermes:runtime"], { envOverrides });
+    compose([...profile, "exec", "-T", "app", "npm", "run", "live:provisioning"], { envOverrides });
+    compose([...profile, "exec", "-T", "app", "npm", "run", "live:provisioning:preflight"], { envOverrides });
+    compose([...profile, "exec", "-T", "app", "npm", "run", "live:capture"], { envOverrides });
+    compose([...profile, "exec", "-T", "app", "npm", "run", "live:preflight"], { envOverrides });
+  }
   materializeLocalReadinessInApp(envOverrides);
 
   process.stdout.write(
