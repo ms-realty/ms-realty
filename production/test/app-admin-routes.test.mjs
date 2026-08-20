@@ -1124,7 +1124,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.cmsCollectionsEndpoint, "/api/admin/cms-collections");
       assert.equal(migrationReviewBody.payloadCollectionsEndpoint, "/api/admin/payload-collections");
       assert.equal(migrationReviewBody.listingQualityEndpoint, "/api/admin/listing-quality");
-      assert.ok(migrationReviewBody.launchBlockers.blockers.includes("redirect_reviews"));
+      assert.equal(migrationReviewBody.launchBlockers.blockers.includes("redirect_reviews"), false);
       assert.ok(migrationReviewBody.launchBlockers.blockers.includes("external_seo_exports"));
       assert.ok(migrationReviewBody.launchBlockers.blockers.includes("listing_quality_review"));
       assert.ok(migrationReviewBody.launchBlockers.blockers.includes("live_services"));
@@ -1193,7 +1193,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /data-react-admin-ui="migration-review"/);
       assert.match(migrationReviewHtmlBody, /Работно място за преглед на старите URL адреси/);
       assert.match(migrationReviewHtmlBody, />Търсене<input type="search"/);
-      assert.match(migrationReviewHtmlBody, /преглед на старите URL адреси, външни SEO данни/);
+      assert.match(migrationReviewHtmlBody, /външни SEO данни, преглед на качеството/);
       assert.match(migrationReviewHtmlBody, /data-pending-route-count="457"/);
       assert.match(migrationReviewHtmlBody, /data-reviewed-route-count="0"/);
       assert.match(migrationReviewHtmlBody, /data-pending-route-decision="true"/);
@@ -1362,7 +1362,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectApproval.status, 201);
       assert.equal(redirectApprovalBody.approval.target_path, firstRedirect.target_path);
       assert.equal(redirectApprovalBody.deployablePreview.length, 1);
-      assert.equal(redirectApprovalBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+      assert.equal(redirectApprovalBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
 
       const migrationReviewAfterDecision = await migrationReviewRoute.GET(
         new Request("https://example.test/api/admin/migration/review?locale=bg", { headers: auth }),
@@ -1384,7 +1384,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectImport.status, 201);
       assert.equal(redirectImportBody.imported, 1);
       assert.equal(redirectImportBody.deployablePreview.length, 2);
-      assert.equal(redirectImportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+      assert.equal(redirectImportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
 
       const pendingRedirectWorkbook = await redirectApprovalWorkbookRoute.GET(
         new Request("https://example.test/api/admin/redirect-approval-workbook?pending=1", { headers: auth }),
@@ -1401,7 +1401,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectExport.status, 201);
       assert.equal(redirectExportBody.exported, 2);
       assert.equal(redirectExportBody.summary.total, 2);
-      assert.equal(redirectExportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+      assert.equal(redirectExportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
       assert.equal(JSON.parse(fs.readFileSync(deployableRedirectOutputPath, "utf8")).redirects.length, 2);
 
       const listingQualityWorkbook = await listingQualityWorkbookRoute.GET(

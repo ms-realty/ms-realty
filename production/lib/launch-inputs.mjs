@@ -266,7 +266,7 @@ ${blockedGateActionLines(launchReadiness)}
 - Production adapter path overrides: \`MS_REALTY_REDIRECT_APPROVALS_PATH\`, \`MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH\`
 - Review helper columns: \`decision\`, \`target_path\`, \`target_listing_id\`, \`review_status\`, \`same_content_checklist\`
 - Approval import columns: \`old_url\`, \`decision\`, \`target_path\`, \`equivalent_content\`, \`reviewer\`, optional \`approved_at\`, \`reason\`
-- Launch rule: each of all ${totalLegacyUrls} legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set \`equivalent_content=true\` only after same-content human review; homepage and search targets stay blocked.
+- Launch rule: each of all ${totalLegacyUrls} legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set \`equivalent_content=true\` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
 
 ## External SEO Exports
 

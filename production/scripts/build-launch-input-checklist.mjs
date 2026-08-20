@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import {
-  DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
+  approvedLaunchFreezeRouteArtifact,
   buildRedirectApprovalWorkbook,
   renderRedirectApprovalWorkbook,
 } from "../lib/redirect-approvals.mjs";
@@ -27,17 +27,11 @@ function currentSeoEvidence(inputs) {
   return readJson(fs.existsSync(outputPath) ? outputPath : DEFAULT_SEO_EVIDENCE_OUTPUT);
 }
 
-function currentDeployableRedirects(inputs) {
-  if (inputs.deployableRedirects) return inputs.deployableRedirects;
-  const outputPath = process.env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT;
-  return readJson(outputPath);
-}
-
 const generatedAt = process.env.MS_REALTY_GENERATED_AT || new Date().toISOString();
 const inputs = launchReadinessInputsFromEnv();
 const routeMap = inputs.routeMap || readJson(fromRoot("production", "data", "legacy-route-map.json"));
 const seoEvidence = currentSeoEvidence(inputs);
-const deployableRedirects = currentDeployableRedirects(inputs);
+const deployableRedirects = approvedLaunchFreezeRouteArtifact();
 const liveServiceProvisioning = liveServiceProvisioningState(process.env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH || undefined);
 const outputPath = process.env.MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH || DEFAULT_LAUNCH_INPUT_CHECKLIST_OUTPUT;
 

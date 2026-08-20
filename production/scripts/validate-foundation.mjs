@@ -15,7 +15,12 @@ import { assertLeadLedger } from "../lib/lead-ledger.mjs";
 import { assertLeadMatchingReport } from "../lib/lead-matching.mjs";
 import { assertLeadSlaReport } from "../lib/lead-sla.mjs";
 import { assertMigrationLaunchGate } from "../lib/migration.mjs";
-import { assertDeployableRedirects, assertLegacyRouteDecisions } from "../lib/redirect-approvals.mjs";
+import {
+  approvedLaunchFreezeRouteArtifact,
+  assertDeployableRedirects,
+  assertLegacyRouteDecisions,
+  isApprovedLaunchFreezeRouteArtifact,
+} from "../lib/redirect-approvals.mjs";
 import { assertSlugHistory } from "../lib/slug-history.mjs";
 import { assertListingPublicationReport } from "../lib/listing-publication.mjs";
 import { assertListingVerificationReport } from "../lib/listing-verification.mjs";
@@ -198,6 +203,22 @@ if (redirectSummary.homepageTargets !== 0 || redirectSummary.duplicateOldUrls !=
 }
 if (decisionSummary.total !== redirectSummary.total || decisionSummary.byStatus[301] !== redirectSummary.total) {
   throw new Error("Current redirect export must preserve its reviewed terminal decisions alongside 301 rows");
+}
+const preservationContract = approvedLaunchFreezeRouteArtifact();
+if (!isApprovedLaunchFreezeRouteArtifact(preservationContract)) {
+  throw new Error("SEO preservation runtime must consume the exact approved launch freeze");
+}
+if (
+  preservationContract.decisions.length !== 457 ||
+  preservationContract.redirects.length !== 179 ||
+  preservationContract.decision_summary.byStatus[200] !== 10 ||
+  preservationContract.decision_summary.byStatus[301] !== 179 ||
+  preservationContract.decision_summary.byStatus[410] !== 268 ||
+  preservationContract.catalog.length !== 165 ||
+  preservationContract.catalog.filter((entry) => entry.catalog_state === "active").length !== 30 ||
+  preservationContract.catalog.filter((entry) => entry.catalog_state === "archived").length !== 135
+) {
+  throw new Error("SEO preservation runtime must retain the approved 457-URL and 165-listing contract");
 }
 const redirectWorkbook = fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8").trim().split("\n");
 if (redirectWorkbook.length !== 458 || !redirectWorkbook[0].includes("equivalent_content") || !redirectWorkbook[0].includes("decision")) {
@@ -1217,8 +1238,8 @@ if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocke
 for (const blocker of ["external_seo_exports", "live_services"]) {
   if (!launchReadiness.blockers.includes(blocker)) throw new Error(`Launch readiness report must include ${blocker}`);
 }
-if (!launchReadiness.blockers.includes("redirect_reviews")) {
-  throw new Error("Launch readiness report must include redirect_reviews until every legacy URL has a terminal route decision");
+if (launchReadiness.blockers.includes("redirect_reviews")) {
+  throw new Error("Launch readiness report must clear redirect_reviews after the approved 457-URL contract is active");
 }
 if (launchReadiness.blockers.includes("production_app_layer")) {
   throw new Error("Launch readiness report should not include production_app_layer after the Node adapter is present");

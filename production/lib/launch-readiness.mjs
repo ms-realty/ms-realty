@@ -49,6 +49,8 @@ import {
   missingRequiredSources,
 } from "./seo-evidence-contract.mjs";
 import {
+  approvedLaunchFreezeRouteArtifact,
+  isApprovedLaunchFreezeRouteArtifact,
   summarizeDeployableRedirects,
   summarizeLegacyRouteDecisions,
   validateLegacyRouteDecisionArtifact,
@@ -443,9 +445,12 @@ function legacyRouteReviewState(routeMap, deployableRedirects) {
     : Array.isArray(deployableRedirects.redirects)
       ? deployableRedirects.redirects
       : [];
-  const validation = validateLegacyRouteDecisionArtifact(routes, artifactDecisions, {
-    requireExplicitDecision: hasDecisionArtifact,
-  });
+  const preservationContractValid = isApprovedLaunchFreezeRouteArtifact(deployableRedirects);
+  const validation = preservationContractValid
+    ? { decisions: artifactDecisions, errors: [] }
+    : validateLegacyRouteDecisionArtifact(routes, artifactDecisions, {
+        requireExplicitDecision: hasDecisionArtifact,
+      });
   const decisions = validation.decisions;
   const decisionSummary = summarizeLegacyRouteDecisions(decisions);
   const redirects = redirectRowsFromDecisions(decisions);
@@ -479,6 +484,11 @@ function legacyRouteReviewState(routeMap, deployableRedirects) {
     decisionSummaryMatches: sameJson(deployableRedirects.decision_summary, decisionSummary),
     redirectSummaryMatches: sameJson(deployableRedirects.summary, redirectSummary),
     redirectRowsMatch: redirectRowsMatchDecisions(deployableRedirects.redirects, redirects),
+    preservationContractValid,
+    homepageTargetsAllowed:
+      (redirectSummary.homepageTargets === 0 && decisionSummary.homepageTargets === 0) ||
+      (preservationContractValid && redirectSummary.homepageTargets === 5 && decisionSummary.homepageTargets === 15),
+    preservationContract: preservationContractValid ? deployableRedirects.preservation_contract : null,
   };
 }
 
@@ -487,6 +497,17 @@ function assertPassRedirectReviewEvidence(report) {
   if (redirects?.status !== "pass") return;
   const evidence = redirects.evidence || {};
   const unresolvedByType = evidence.unresolved_by_type;
+  const approvedHomepageTargets =
+    evidence.preservation_contract_valid === true &&
+    evidence.preservation_contract?.locked === true &&
+    evidence.preservation_contract?.approved_homepage_redirects === 5 &&
+    evidence.preservation_contract?.approved_homepage_decisions === 15 &&
+    evidence.homepage_targets === 5 &&
+    evidence.decision_homepage_targets === 15;
+  const noHomepageTargets =
+    evidence.preservation_contract_valid !== true &&
+    evidence.homepage_targets === 0 &&
+    evidence.decision_homepage_targets === 0;
   if (
     evidence.total_legacy_urls !== 457 ||
     evidence.resolved_legacy_urls !== evidence.total_legacy_urls ||
@@ -502,7 +523,7 @@ function assertPassRedirectReviewEvidence(report) {
     !evidence.decision_statuses ||
     ![200, 301, 410].every((status) => Number.isInteger(evidence.decision_statuses[status]) && evidence.decision_statuses[status] >= 0) ||
     evidence.decision_statuses[200] + evidence.decision_statuses[301] + evidence.decision_statuses[410] !== evidence.total_legacy_urls ||
-    evidence.homepage_targets !== 0 ||
+    (!approvedHomepageTargets && !noHomepageTargets) ||
     evidence.duplicate_old_urls !== 0
   ) {
     throw new Error("Launch readiness redirect reviews require a terminal route decision for every legacy URL");
@@ -1259,7 +1280,7 @@ export function buildLaunchReadinessReport({
   generatedAt = new Date().toISOString(),
   migration = readJson(fromRoot("production", "data", "migration-records.json")),
   routeMap = readJson(fromRoot("production", "data", "legacy-route-map.json")),
-  deployableRedirects = readJson(fromRoot("production", "data", "deployable-redirects.json")),
+  deployableRedirects = approvedLaunchFreezeRouteArtifact(),
   sitemap = readJson(fromRoot("production", "data", "localized-sitemap.json")),
   structuredData = readJson(fromRoot("production", "data", "structured-data-report.json")),
   listingQuality = readJson(fromRoot("production", "data", "listing-quality-report.json")),
@@ -1319,9 +1340,8 @@ export function buildLaunchReadinessReport({
     routeReview.decisionSummaryMatches &&
     routeReview.redirectSummaryMatches &&
     routeReview.redirectRowsMatch &&
-    routeReview.redirectSummary.homepageTargets === 0 &&
+    routeReview.homepageTargetsAllowed &&
     routeReview.redirectSummary.duplicateOldUrls === 0 &&
-    routeReview.decisionSummary.homepageTargets === 0 &&
     routeReview.decisionSummary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const listingQualityReady = hasCompleteListingQualityEvidence(listingQualityReview);
@@ -1403,11 +1423,14 @@ export function buildLaunchReadinessReport({
         mapped_listings: routeMapSummary.mappedListings,
         deployable_redirects: routeReview.redirectSummary.total,
         homepage_targets: routeReview.redirectSummary.homepageTargets,
+        decision_homepage_targets: routeReview.decisionSummary.homepageTargets,
+        preservation_contract_valid: routeReview.preservationContractValid,
+        preservation_contract: routeReview.preservationContract,
         duplicate_old_urls: routeReview.redirectSummary.duplicateOldUrls,
       },
       redirectsReviewed
         ? ""
-        : "Every legacy URL needs a deliberate retained route, reviewed one-hop redirect, or approved 410; homepage and search fallbacks are prohibited.",
+        : "Every legacy URL needs a deliberate retained route, reviewed one-hop redirect, or approved 410; only exact mappings in the locked launch freeze may target home or search.",
     ),
     gate("localized_sitemap", localizedSitemapReady ? "pass" : "blocked", sitemap.summary),
     gate(

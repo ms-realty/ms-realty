@@ -85,14 +85,14 @@ test("every manifest page renders a complete public content contract", () => {
   for (const route of manifest.routes) {
     const page = renderAppRoute({ pathname: route.path, url: `https://audit.test${route.path}`, config: approvedConfig });
     const label = `${route.type} ${route.path}`;
+    assert.equal(page.status, 200, `${label} must render`);
     if (route.type === "listing" && !approvedPublicListingIds.has(route.params.listingId)) {
-      assert.equal(page.status, 404, `${label} must fail closed until its facts are complete`);
-      assert.equal(page.rendered.kind, "not_found");
+      assert.equal(page.rendered.kind, "listing_preservation", `${label} must preserve its approved URL without inventing facts`);
       assert.equal(page.rendered.indexable, false);
       assert.match(page.html, /<meta name="robots" content="noindex,follow">/);
+      assert.match(page.html, /data-react-public-ui="listing-preservation"/);
       continue;
     }
-    assert.equal(page.status, 200, `${label} must render`);
     assert.equal(page.rendered.kind, route.type, `${label} must use its declared renderer`);
     assert.equal(page.rendered.indexable, route.public_indexable, `${label} must match its sitemap indexability`);
     assert.match(page.html, /<title>\s*[^<\s]/, `${label} must have a title`);
@@ -385,7 +385,7 @@ test("App Router serves reviewed legacy URLs as direct domain-aware redirects", 
       ],
     })}\n`,
   );
-  const config = { ...appRouterConfigFromEnv(), deployableRedirectOutputPath };
+  const config = { ...appRouterConfigFromEnv(), launchFreezePath: null, deployableRedirectOutputPath };
 
   const response = renderAppRouteResponse({
     pathname: "/listing/reviewed-legacy/",
@@ -451,7 +451,7 @@ test("reviewed legacy redirects take priority over an archive capture", () => {
     pathname,
     url: `http://app:3000${pathname}`,
     host: "makler-realty.com",
-    config: { ...appRouterConfigFromEnv(), deployableRedirectOutputPath },
+    config: { ...appRouterConfigFromEnv(), launchFreezePath: null, deployableRedirectOutputPath },
   });
 
   assert.equal(response.status, 301);

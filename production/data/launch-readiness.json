@@ -1,9 +1,8 @@
 {
-  "generated_at": "2026-08-20T16:51:56.303Z",
+  "generated_at": "2026-08-20T17:12:40.693Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -71,35 +70,38 @@
     },
     {
       "id": "redirect_reviews",
-      "status": "blocked",
-      "message": "Every legacy URL needs a deliberate retained route, reviewed one-hop redirect, or approved 410; homepage and search fallbacks are prohibited.",
+      "status": "pass",
+      "message": "",
       "evidence": {
         "total_legacy_urls": 457,
-        "resolved_legacy_urls": 165,
-        "unresolved_legacy_urls": 292,
-        "unresolved_by_type": {
-          "page": 104,
-          "post": 42,
-          "taxonomy": 146
-        },
-        "terminal_decisions": 165,
+        "resolved_legacy_urls": 457,
+        "unresolved_legacy_urls": 0,
+        "unresolved_by_type": {},
+        "terminal_decisions": 457,
         "invalid_terminal_decisions": 0,
         "decision_artifact_valid": true,
         "deployed_redirect_export_matches": true,
         "decision_statuses": {
-          "200": 0,
-          "301": 165,
-          "410": 0
+          "200": 10,
+          "301": 179,
+          "410": 268
         },
         "mapped_listings": 165,
-        "deployable_redirects": 165,
-        "homepage_targets": 0,
+        "deployable_redirects": 179,
+        "homepage_targets": 5,
+        "decision_homepage_targets": 15,
+        "preservation_contract_valid": true,
+        "preservation_contract": {
+          "locked": true,
+          "artifact_id": "20260817-deterministic-launch-freeze",
+          "approval_id": "MSR-LAUNCH-FREEZE-1",
+          "based_on_commit": "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
+          "source_sha256": "38b34064a8f37e2281ff97bd9b804b5e685984462709c56464de0a5be959158f",
+          "approved_homepage_redirects": 5,
+          "approved_homepage_decisions": 15
+        },
         "duplicate_old_urls": 0
-      },
-      "next_actions": [
-        "Review every unresolved legacy URL in /admin/migration/review; retain equivalent content, map one-hop 301s, or approve a 410 individually.",
-        "Download /api/admin/redirect-approval-workbook?pending=1, record a terminal decision for each row, then import it through /api/admin/redirect-approvals/import."
-      ]
+      }
     },
     {
       "id": "localized_sitemap",
@@ -755,7 +757,7 @@
       },
       "next_actions": [
         "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
-        "Download /api/admin/production-recovery-template, complete it with real evidence, and import it through /api/admin/production-recovery/import."
+        "Run the governed recovery:r2 backup, restore, and approval commands; only their Ed25519-signed report can be imported through /api/admin/production-recovery/import."
       ]
     }
   ],

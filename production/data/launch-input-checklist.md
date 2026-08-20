@@ -1,14 +1,12 @@
 # Launch Input Checklist
 
-Generated: 2026-08-20T16:51:56.600Z
+Generated: 2026-08-20T17:12:40.934Z
 
 Status: blocked
-Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
+Blockers: external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
 
 ## Blocked Gate Actions
 
-- redirect_reviews: Review every unresolved legacy URL in /admin/migration/review; retain equivalent content, map one-hop 301s, or approve a 410 individually.
-- redirect_reviews: Download /api/admin/redirect-approval-workbook?pending=1, record a terminal decision for each row, then import it through /api/admin/redirect-approvals/import.
 - external_seo_exports: Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.
 - external_seo_exports: Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.
 - listing_quality_review: Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.
@@ -28,18 +26,18 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 
 - Workbook: `production/data/redirect-approval-workbook.csv`
 - Legacy route decision workbook rows: 457
-- Reviewed one-hop 301 redirects: 165
-- Terminal route decisions: 165/457 (200: 0, 301: 165, 410: 0)
-- Remaining terminal route decisions: 292
-- Legacy route coverage: 165/457
-- Unresolved legacy URLs: 292 (page 104, post 42, taxonomy 146)
+- Reviewed one-hop 301 redirects: 179
+- Terminal route decisions: 457/457 (200: 10, 301: 179, 410: 268)
+- Remaining terminal route decisions: 0
+- Legacy route coverage: 457/457
+- Unresolved legacy URLs: 0 (none)
 - Import path: `migration/reviews/redirect-approvals.csv`
 - Admin import endpoint: `POST /api/admin/redirect-approvals/import`
 - Admin workbook endpoint: `GET /api/admin/redirect-approval-workbook?pending=1`
 - Production adapter path overrides: `MS_REALTY_REDIRECT_APPROVALS_PATH`, `MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH`
 - Review helper columns: `decision`, `target_path`, `target_listing_id`, `review_status`, `same_content_checklist`
 - Approval import columns: `old_url`, `decision`, `target_path`, `equivalent_content`, `reviewer`, optional `approved_at`, `reason`
-- Launch rule: each of all 457 legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set `equivalent_content=true` only after same-content human review; homepage and search targets stay blocked.
+- Launch rule: each of all 457 legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set `equivalent_content=true` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
 
 ## External SEO Exports
 

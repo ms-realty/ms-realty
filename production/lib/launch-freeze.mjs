@@ -1,9 +1,13 @@
 import crypto from "node:crypto";
+import fs from "node:fs";
+import { fromRoot } from "./paths.mjs";
 
 const ARTIFACT_ID = "20260817-deterministic-launch-freeze";
 const APPROVAL_ID = "MSR-LAUNCH-FREEZE-1";
 const APPROVED_SOURCE_COMMIT = "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720";
 const APPROVED_SOURCE_ARTIFACT_SHA256 = "c627594492d253a2831bb72227920e092d32d253e89ba9a16b8a87ea32743360";
+export const APPROVED_LAUNCH_FREEZE_SHA256 = "38b34064a8f37e2281ff97bd9b804b5e685984462709c56464de0a5be959158f";
+export const DEFAULT_LAUNCH_FREEZE_PATH = fromRoot("production", "data", "launch-freeze.json");
 
 const EXPECTED = Object.freeze({
   legacy_urls: 457,
@@ -51,6 +55,40 @@ const PUBLIC_EQUIVALENTS = new Map(
     "url-0444": ["redirect_301", "/ru/search", "search"],
   }).map(([id, [decision, targetPath, targetKind]]) => [id, { decision, targetPath, targetKind }]),
 );
+
+function sha256(bytes) {
+  return crypto.createHash("sha256").update(bytes).digest("hex");
+}
+
+export function loadApprovedLaunchFreeze(filePath = DEFAULT_LAUNCH_FREEZE_PATH) {
+  const bytes = fs.readFileSync(filePath);
+  const digest = sha256(bytes);
+  if (digest !== APPROVED_LAUNCH_FREEZE_SHA256) {
+    throw new Error(`Launch freeze must match approved SHA-256 ${APPROVED_LAUNCH_FREEZE_SHA256}, got ${digest}`);
+  }
+  const freeze = JSON.parse(bytes.toString("utf8"));
+  if (
+    freeze.schema_version !== 1 ||
+    freeze.artifact_id !== ARTIFACT_ID ||
+    freeze.route_approval?.approval_id !== APPROVAL_ID ||
+    freeze.route_approval?.based_on_commit !== APPROVED_SOURCE_COMMIT ||
+    freeze.summary?.legacy_urls !== EXPECTED.legacy_urls ||
+    freeze.summary?.catalog?.total !== EXPECTED.listings ||
+    freeze.summary?.catalog?.by_state?.active !== EXPECTED.active ||
+    freeze.summary?.catalog?.by_state?.archived !== EXPECTED.archived ||
+    freeze.summary?.catalog?.publish_ready !== 0 ||
+    freeze.summary?.routes?.by_status?.[200] !== EXPECTED.proposed_retain_200 ||
+    freeze.summary?.routes?.by_status?.[301] !== EXPECTED.approved_listing_redirects + EXPECTED.proposed_redirect_301 ||
+    freeze.summary?.routes?.by_status?.[410] !== EXPECTED.proposed_410 ||
+    freeze.summary?.routes?.by_approval_state?.approved !== EXPECTED.legacy_urls ||
+    freeze.summary?.contract_ready !== true ||
+    freeze.catalog?.length !== EXPECTED.listings ||
+    freeze.routes?.length !== EXPECTED.legacy_urls
+  ) {
+    throw new Error("Launch freeze does not match the approved catalog and terminal-route contract");
+  }
+  return freeze;
+}
 
 function requireExact(label, actual, expected) {
   if (actual !== expected) throw new Error(`${label} must be ${expected}, got ${actual}`);

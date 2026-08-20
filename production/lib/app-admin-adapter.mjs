@@ -243,6 +243,7 @@ import { fromRoot } from "./paths.mjs";
 import {
   DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
   DEFAULT_REDIRECT_APPROVALS_PATH,
+  approvedLaunchFreezeRouteArtifact,
   appendRedirectApproval,
   buildDeployableRedirects,
   buildLegacyRouteDecisions,
@@ -255,6 +256,7 @@ import {
   summarizeLegacyRouteDecisions,
   writeDeployableRedirects,
 } from "./redirect-approvals.mjs";
+import { DEFAULT_LAUNCH_FREEZE_PATH, loadApprovedLaunchFreeze } from "./launch-freeze.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
@@ -342,6 +344,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     eventDurableStore: eventDurableStoreConfigFromEnv(env),
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
+    launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
@@ -1401,11 +1404,15 @@ function currentSeoEvidence(config) {
   return readAppSeoEvidence(config);
 }
 
+function approvedRouteArtifact(config) {
+  return approvedLaunchFreezeRouteArtifact(loadApprovedLaunchFreeze(config.launchFreezePath));
+}
+
 function launchReadiness(config) {
   return buildLaunchReadinessReport({
     generatedAt: config.reviewedAt || new Date().toISOString(),
     routeMap: routeMapSummary(routeMapRows()),
-    deployableRedirects: deployableRedirectsForLaunch(config),
+    deployableRedirects: approvedRouteArtifact(config),
     listingQuality: currentListingQualityReport(config, { generatedAt: config.reviewedAt || new Date().toISOString() }),
     listingQualityReviewPath: config.listingQualityReviewPath || undefined,
     seoEvidence: currentSeoEvidence(config),
@@ -1426,7 +1433,7 @@ function launchReadiness(config) {
 
 function launchInputChecklist(config) {
   const routes = routeMapRows();
-  const artifact = deployableRedirectsForLaunch(config);
+  const artifact = approvedRouteArtifact(config);
   const generatedAt = config.reviewedAt || new Date().toISOString();
   return renderLaunchInputChecklist({
     generatedAt,

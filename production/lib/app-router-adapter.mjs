@@ -10,7 +10,12 @@ import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from 
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { renderFaviconSvg } from "./favicon.mjs";
-import { DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT, loadLegacyRouteDecisions } from "./redirect-approvals.mjs";
+import {
+  DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
+  approvedLaunchFreezeRouteArtifact,
+  loadLegacyRouteDecisions,
+} from "./redirect-approvals.mjs";
+import { DEFAULT_LAUNCH_FREEZE_PATH, loadApprovedLaunchFreeze } from "./launch-freeze.mjs";
 import { fileSignature, readThroughCached } from "./file-cache.mjs";
 import { fromRoot } from "./paths.mjs";
 import { DEFAULT_CMS_SEED_PATH } from "./runtime.mjs";
@@ -35,6 +40,7 @@ export function appRouterConfigFromEnv(env = process.env) {
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
+    launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
@@ -50,11 +56,20 @@ export function appRouterConfigFromEnv(env = process.env) {
 
 let legacyDecisionIndex = { key: null, byOldUrl: new Map() };
 
+function currentRouteContract(config) {
+  const filePath = config.launchFreezePath || config.deployableRedirectOutputPath;
+  return readThroughCached(filePath, () =>
+    config.launchFreezePath
+      ? approvedLaunchFreezeRouteArtifact(loadApprovedLaunchFreeze(config.launchFreezePath))
+      : { decisions: loadLegacyRouteDecisions(filePath), catalog: [] },
+  );
+}
+
 function legacyDecisionByOldUrl(config) {
-  const filePath = config.deployableRedirectOutputPath;
+  const filePath = config.launchFreezePath || config.deployableRedirectOutputPath;
   const key = fileSignature(filePath);
   if (key !== null && legacyDecisionIndex.key === key) return legacyDecisionIndex.byOldUrl;
-  const rows = readThroughCached(filePath, () => loadLegacyRouteDecisions(filePath));
+  const rows = currentRouteContract(config).decisions;
   const byOldUrl = new Map(rows.map((row) => [row.old_url, row]));
   if (key !== null) legacyDecisionIndex = { key, byOldUrl };
   return byOldUrl;
@@ -167,6 +182,7 @@ function renderAppRouteWithContext({ pathname, url, config, registry, seed, tran
         config.runtimeDataDurableOnly
           ? []
           : readThroughCached(config.tourApprovalLedgerPath, () => readTourApprovals(config.tourApprovalLedgerPath)),
+        currentRouteContract(config).catalog,
       );
   return renderedHtmlResponse(rendered, requestUrl);
 }

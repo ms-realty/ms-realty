@@ -141,14 +141,15 @@ import {
   buildRedirectApprovalWorkbook,
   buildDeployableRedirects,
   buildLegacyRouteDecisions,
+  approvedLaunchFreezeRouteArtifact,
   importRedirectApprovalsCsv,
-  loadLegacyRouteDecisions,
   readRedirectApprovals,
   renderRedirectApprovalWorkbook,
   summarizeDeployableRedirects,
   summarizeLegacyRouteDecisions,
   writeDeployableRedirects,
 } from "./redirect-approvals.mjs";
+import { DEFAULT_LAUNCH_FREEZE_PATH, loadApprovedLaunchFreeze } from "./launch-freeze.mjs";
 import {
   appendLanguageRequest,
   createLanguageRequest,
@@ -808,6 +809,7 @@ export function createHttpApp({
   slugHistoryPath = null,
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
+  launchFreezePath = DEFAULT_LAUNCH_FREEZE_PATH,
   launchReadinessOutputPath = null,
   listingQualityReviewPath = null,
   searchSyncReportPath = null,
@@ -864,7 +866,11 @@ export function createHttpApp({
     process.env.NODE_ENV === "production" && process.env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload",
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
-  const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
+  const activeRouteContract = redirects
+    ? { decisions: redirects, catalog: [] }
+    : approvedLaunchFreezeRouteArtifact(loadApprovedLaunchFreeze(launchFreezePath));
+  const activeLegacyDecisions = activeRouteContract.decisions;
+  const preservationCatalog = activeRouteContract.catalog;
   const activeLegacyDecisionByUrl = new Map(activeLegacyDecisions.map((row) => [row.old_url, row]));
   const publicWriteLimiter = rateLimit ? createRateLimiter(rateLimit) : null;
   let payloadAdminAuthPromise;
@@ -1425,6 +1431,7 @@ export function createHttpApp({
   const currentLegacyRouteDecisions = () =>
     buildLegacyRouteDecisions(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
   const currentDeployedRedirectArtifact = () => {
+    if (activeRouteContract.preservation_contract) return activeRouteContract;
     const decisions = activeLegacyDecisions;
     const redirects = decisions.filter((decision) => decision.status === 301).map((decision) => ({
       old_url: decision.old_url,
@@ -2006,6 +2013,7 @@ export function createHttpApp({
           context.translationTasks,
           currentBrokerContacts(),
           currentTourApprovals(),
+          preservationCatalog,
         );
       } catch (error) {
         return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
@@ -4535,6 +4543,7 @@ export function createHttpApp({
         context.translationTasks,
         currentBrokerContacts(),
         currentTourApprovals(),
+        preservationCatalog,
       );
     } catch (error) {
       return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
@@ -4561,7 +4570,6 @@ export function assertHttpSmoke(smoke) {
     ? smoke.contact?.body?.body?.callback === null && Boolean(smoke.contact?.body?.body?.form_unavailable)
     : smoke.contact?.body?.body?.callback?.payload?.source === "website_contact_callback";
   const expectedBlockers = [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",

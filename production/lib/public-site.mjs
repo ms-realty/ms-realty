@@ -2391,6 +2391,71 @@ export function renderLegacyArchivePage({ registry, entry, path }) {
   };
 }
 
+const LISTING_PRESERVATION_COPY = {
+  bg: {
+    archived: {
+      title: "Архивирана обява | MS Realty",
+      h1: "Тази обява вече не е активна",
+      notice: "Запазваме този адрес за коректна история на сайта. Обявата е архивирана и не участва в активното търсене.",
+    },
+    active: {
+      title: "Обява в проверка | MS Realty",
+      h1: "Тази обява се проверява",
+      notice: "Обявата е била активна при фиксирането на каталога, но фактите и публикуването ѝ още не са одобрени.",
+    },
+    reference: "Референция",
+    checked: "Проверено на",
+    contact: "Свържете се с брокер",
+  },
+  ru: {
+    archived: {
+      title: "Архивное объявление | MS Realty",
+      h1: "Это объявление больше не активно",
+      notice: "Мы сохраняем этот адрес для корректной истории сайта. Объявление архивировано и не участвует в активном поиске.",
+    },
+    active: {
+      title: "Объявление на проверке | MS Realty",
+      h1: "Это объявление проверяется",
+      notice: "Объявление было активно на момент фиксации каталога, но его факты и публикация ещё не одобрены.",
+    },
+    reference: "Референция",
+    checked: "Проверено",
+    contact: "Связаться с брокером",
+  },
+};
+
+export function renderListingPreservationPage({ registry, entry, path }) {
+  const locale = resolvePublicLocale(registry, entry.source_locale).locale;
+  const copy = LISTING_PRESERVATION_COPY[locale.code] || LISTING_PRESERVATION_COPY.bg;
+  const stateCopy = copy[entry.catalog_state] || copy.archived;
+  return {
+    kind: "listing_preservation",
+    status: 200,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: false,
+    metadata: {
+      title: stateCopy.title,
+      description: stateCopy.notice,
+      robots: "noindex,follow",
+    },
+    hreflang: [],
+    schema: null,
+    chrome: publicChrome(registry, locale, { active: null, currentPath: path }),
+    body: {
+      h1: stateCopy.h1,
+      notice: stateCopy.notice,
+      reference: { label: copy.reference, value: entry.id },
+      checked_at: { label: copy.checked, value: entry.checked_at },
+      catalog_state: entry.catalog_state,
+      contact: { label: copy.contact, path: contactPath(registry, locale.code) },
+    },
+  };
+}
+
 function locationPageCopy(localeCode, location) {
   const bgDescriptions = {
     Сандански: "Проверени обяви на MS Realty в Сандански и официални източници за кадастър, Имотен регистър и удостоверения.",

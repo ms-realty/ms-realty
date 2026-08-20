@@ -1027,7 +1027,6 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.health.body.status, "ok");
   assert.equal(smoke.health.body.build_marker, "unversioned");
   assert.deepEqual(smoke.health.body.blockers, [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -1040,7 +1039,6 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.deepEqual(
     smoke.ready.body.blocked_gates.map((gate) => gate.id),
     [
-      "redirect_reviews",
       "external_seo_exports",
       "listing_quality_review",
       "live_services",
@@ -1548,7 +1546,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(approved.body.approval.deployable, true);
   assert.equal(approved.body.deployablePreview.length, 1);
   assert.equal(approved.body.deployablePreview[0].target_path, listing.target_path);
-  assert.equal(approved.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(approved.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(formApproved.status, 201);
   assert.equal(formApproved.body.deployablePreview.length, 2);
   assert.equal(rejected.status, 400);
@@ -1686,11 +1684,11 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
   assert.equal(imported.body.deployablePreview.length, 3);
-  assert.equal(imported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(imported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(formImported.status, 201);
   assert.equal(formImported.body.imported, 1);
   assert.equal(formImported.body.deployablePreview.length, 4);
-  assert.equal(formImported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(formImported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   const pendingRows = parseCsv(pendingWorkbook.body);
   assert.equal(pendingRows.length, 453);
   assert.equal(pendingRows.some((row) => row.old_url === listing.old_url), false);
@@ -1699,7 +1697,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(exported.status, 201);
   assert.equal(exported.body.exported, 4);
   assert.equal(exported.body.summary.total, 4);
-  assert.equal(exported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(exported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(fs.existsSync(deployableRedirectOutputPath), true);
   assert.equal(JSON.parse(fs.readFileSync(deployableRedirectOutputPath, "utf8")).redirects.length, 4);
   assert.equal(review.body.workspace.locale, "ru");
@@ -1734,7 +1732,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.agencyReviewQueue.public_launch_ready, false);
   assert.ok(review.body.agencyReviewQueue.summary.open_tasks > 0);
   assert.equal(review.body.agencyReviewQueue.guardrails.unreviewed_translation_indexing, "blocked");
-  assert.ok(review.body.launchBlockers.blockers.includes("redirect_reviews"));
+  assert.equal(review.body.launchBlockers.blockers.includes("redirect_reviews"), false);
   assert.ok(review.body.launchBlockers.blockers.includes("external_seo_exports"));
   assert.ok(review.body.launchBlockers.blockers.includes("listing_quality_review"));
   assert.ok(review.body.launchBlockers.blockers.includes("live_services"));
@@ -2239,7 +2237,6 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(launchUnauthorized.status, 401);
   assert.equal(launch.status, 200);
   assert.deepEqual(launch.body.blockers, [
-    "redirect_reviews",
     "listing_quality_review",
     "live_services",
     "monitoring_rollback",
@@ -2250,12 +2247,11 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(launch.body.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "live_services").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "monitoring_rollback").evidence.machine_evidence.status, "missing");
-  assert.equal(launch.body.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(launch.body.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(launchExportUnauthorized.status, 401);
   assert.equal(launchExport.status, 201);
   assert.equal(fs.existsSync(launchReadinessOutputPath), true);
   assert.deepEqual(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).blockers, [
-    "redirect_reviews",
     "listing_quality_review",
     "live_services",
     "monitoring_rollback",
@@ -2314,7 +2310,6 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(liveServiceProvisioningReportPath), true);
   assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
   assert.deepEqual(launchAfterLive.body.blockers, [
-    "redirect_reviews",
     "listing_quality_review",
     "monitoring_rollback",
     "production_recovery",
@@ -2362,7 +2357,7 @@ test("HTTP app executes reviewed retained and 410 legacy route decisions", async
   assert.equal(retained.body.body.facts.id, listing.target_path.split("/").at(-1));
 });
 
-test("HTTP launch readiness stays tied to the deployed redirect artifact until export and restart", async () => {
+test("HTTP launch readiness stays tied to the approved freeze while editor approvals change", async () => {
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-stale-redirect-artifact-`);
   const redirectApprovalPath = `${directory}/redirect-approvals.jsonl`;
@@ -2384,9 +2379,10 @@ test("HTTP launch readiness stays tied to the deployed redirect artifact until e
   const redirectGate = readiness.body.gates.find((gate) => gate.id === "redirect_reviews");
 
   assert.equal(readiness.status, 200);
-  assert.equal(redirectGate.status, "blocked");
-  assert.equal(redirectGate.evidence.terminal_decisions, 165);
-  assert.equal(redirectGate.evidence.unresolved_legacy_urls, 292);
+  assert.equal(redirectGate.status, "pass");
+  assert.equal(redirectGate.evidence.terminal_decisions, 457);
+  assert.equal(redirectGate.evidence.unresolved_legacy_urls, 0);
+  assert.equal(redirectGate.evidence.preservation_contract_valid, true);
 });
 
 test("HTTP sitemap ignores editor-only location mutations without removing reviewed landing pages", async () => {

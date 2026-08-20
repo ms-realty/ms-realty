@@ -33,7 +33,11 @@ import {
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { summarizeLegacyRouteMap } from "../lib/migration.mjs";
 import { fromRoot } from "../lib/paths.mjs";
-import { summarizeDeployableRedirects, summarizeLegacyRouteDecisions } from "../lib/redirect-approvals.mjs";
+import {
+  approvedLaunchFreezeRouteArtifact,
+  summarizeDeployableRedirects,
+  summarizeLegacyRouteDecisions,
+} from "../lib/redirect-approvals.mjs";
 import { signProductionRecoveryReport } from "../lib/production-recovery.mjs";
 
 const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
@@ -791,7 +795,6 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
   assert.deepEqual(report.blockers, [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -800,20 +803,31 @@ test("launch readiness stays blocked until production launch blockers are cleare
     "production_recovery",
   ]);
   const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
-  assert.equal(redirectGate.status, "blocked");
+  assert.equal(redirectGate.status, "pass");
   assert.deepEqual(redirectGate.evidence, {
     total_legacy_urls: 457,
-    resolved_legacy_urls: 165,
-    unresolved_legacy_urls: 292,
-    unresolved_by_type: { page: 104, post: 42, taxonomy: 146 },
-    terminal_decisions: 165,
+    resolved_legacy_urls: 457,
+    unresolved_legacy_urls: 0,
+    unresolved_by_type: {},
+    terminal_decisions: 457,
     invalid_terminal_decisions: 0,
     decision_artifact_valid: true,
     deployed_redirect_export_matches: true,
-    decision_statuses: { 200: 0, 301: 165, 410: 0 },
+    decision_statuses: { 200: 10, 301: 179, 410: 268 },
     mapped_listings: 165,
-    deployable_redirects: 165,
-    homepage_targets: 0,
+    deployable_redirects: 179,
+    homepage_targets: 5,
+    decision_homepage_targets: 15,
+    preservation_contract_valid: true,
+    preservation_contract: {
+      locked: true,
+      artifact_id: "20260817-deterministic-launch-freeze",
+      approval_id: "MSR-LAUNCH-FREEZE-1",
+      based_on_commit: "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
+      source_sha256: "38b34064a8f37e2281ff97bd9b804b5e685984462709c56464de0a5be959158f",
+      approved_homepage_redirects: 5,
+      approved_homepage_decisions: 15,
+    },
     duplicate_old_urls: 0,
   });
   const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
@@ -855,7 +869,6 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
   assert.match(report.gates.find((gate) => gate.id === "payload_runtime").next_actions.join(" "), /npm run payload:preflight/);
   for (const id of [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -866,7 +879,6 @@ test("launch readiness stays blocked until production launch blockers are cleare
     const blockedGate = report.gates.find((gate) => gate.id === id);
     assert.ok(blockedGate.next_actions.length > 0);
   }
-  assert.ok(report.gates.find((gate) => gate.id === "redirect_reviews").next_actions.length > 0);
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
   assert.deepEqual(report.warnings.find((warning) => warning.id === "listing_quality.thin_public_gallery"), {
     id: "listing_quality.thin_public_gallery",
@@ -878,7 +890,6 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.deepEqual(
     publicPayload.blocked_gates.map((gate) => gate.id),
     [
-      "redirect_reviews",
       "external_seo_exports",
       "listing_quality_review",
       "live_services",
@@ -1743,7 +1754,6 @@ test("launch readiness build honors output path override", () => {
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.ok(Date.parse(report.generated_at) >= startedAt && Date.parse(report.generated_at) <= completedAt);
   assert.deepEqual(report.blockers, [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -1805,7 +1815,6 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   assert.equal(assertLaunchReadinessReport(result.report), true);
   assert.equal(result.report.launch_ready, false);
   assert.deepEqual(result.report.blockers, [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -1863,7 +1872,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.notEqual(result.status, 0);
   assert.match(
     result.stderr,
-    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery/,
+    /LAUNCH BLOCKED: external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery/,
   );
   assert.match(result.stderr, /external_seo_exports missing: search_console, yandex_webmaster, backlinks/);
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
@@ -1901,7 +1910,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.notEqual(withReviewPath.status, 0);
   assert.match(
     withReviewPath.stderr,
-    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, live_services, monitoring_rollback, payload_runtime, production_recovery/,
+    /LAUNCH BLOCKED: external_seo_exports, live_services, monitoring_rollback, payload_runtime, production_recovery/,
   );
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review next:/);
@@ -1930,7 +1939,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   });
 
   assert.notEqual(ready.status, 0);
-  assert.match(ready.stderr, /LAUNCH BLOCKED: redirect_reviews, payload_runtime/);
+  assert.match(ready.stderr, /LAUNCH BLOCKED: payload_runtime/);
 
   const seoOutputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-seo-output-`)}/seo-evidence.json`;
   const seoBuild = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-seo-evidence.mjs")], {
@@ -1960,10 +1969,10 @@ test("launch preflight fails closed while launch blockers remain", async () => {
     },
   });
   assert.notEqual(readyFromSeoOutput.status, 0);
-  assert.match(readyFromSeoOutput.stderr, /LAUNCH BLOCKED: redirect_reviews, payload_runtime/);
+  assert.match(readyFromSeoOutput.stderr, /LAUNCH BLOCKED: payload_runtime/);
 });
 
-test("launch preflight and input checklist honor env-mounted redirect and evidence paths", async () => {
+test("launch preflight keeps the approved freeze authoritative over editable redirect exports", async () => {
   const generatedAt = new Date().toISOString();
   const emptyRedirectsPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-empty-redirects-`)}/deployable-redirects.json`;
   fs.writeFileSync(
@@ -1977,8 +1986,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
   });
 
   assert.notEqual(blocked.status, 0);
-  assert.match(blocked.stderr, /LAUNCH BLOCKED: redirect_reviews/);
-  assert.match(blocked.stderr, /redirect_reviews next: Review every unresolved legacy URL in \/admin\/migration\/review/);
+  assert.doesNotMatch(blocked.stderr, /redirect_reviews/);
 
   const reviewPath = writeListingQualityReviewFixture(fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-review-`));
   const seoDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-seo-`);
@@ -2011,7 +2019,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
   assert.equal(ready.status, 0, ready.stderr);
   assert.match(markdown, /Status: blocked/);
   assert.match(markdown, new RegExp(`Generated: ${generatedAt.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
-  assert.match(markdown, /Blockers: redirect_reviews, payload_runtime/);
+  assert.match(markdown, /Blockers: payload_runtime/);
   assert.match(markdown, /MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH/);
 });
 
@@ -2488,7 +2496,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
     }),
     seoEvidence,
     redirectWorkbookCsv: fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8"),
-    deployableRedirects: readJson(["production", "data", "deployable-redirects.json"]),
+    deployableRedirects: approvedLaunchFreezeRouteArtifact(),
     routeMap: readJson(["production", "data", "legacy-route-map.json"]),
   });
 
@@ -2500,11 +2508,11 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /payload_runtime: Run npm run payload:runtime/);
   assert.match(markdown, /production_recovery: Complete an encrypted off-site backup/);
   assert.match(markdown, /MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH/);
-  assert.match(markdown, /redirect_reviews: Review every unresolved legacy URL/);
-  assert.match(markdown, /Terminal route decisions: 165\/457 \(200: 0, 301: 165, 410: 0\)/);
-  assert.match(markdown, /Remaining terminal route decisions: 292/);
-  assert.match(markdown, /Legacy route coverage: 165\/457/);
-  assert.match(markdown, /Unresolved legacy URLs: 292 \(page 104, post 42, taxonomy 146\)/);
+  assert.match(markdown, /Reviewed one-hop 301 redirects: 179/);
+  assert.match(markdown, /Terminal route decisions: 457\/457 \(200: 10, 301: 179, 410: 268\)/);
+  assert.match(markdown, /Remaining terminal route decisions: 0/);
+  assert.match(markdown, /Legacy route coverage: 457\/457/);
+  assert.match(markdown, /Unresolved legacy URLs: 0 \(none\)/);
   assert.match(markdown, /migration\/reviews\/redirect-approvals\.csv/);
   assert.match(markdown, /POST \/api\/admin\/redirect-approvals\/import/);
   assert.match(markdown, /MS_REALTY_REDIRECT_APPROVALS_PATH/);

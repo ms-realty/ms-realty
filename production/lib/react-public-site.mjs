@@ -3093,6 +3093,46 @@ function LegacyArchiveBody({ page }) {
   return shell(page, main);
 }
 
+function ListingPreservationBody({ page }) {
+  const main = h(
+    "main",
+    {
+      id: "main",
+      tabIndex: -1,
+      "data-kind": "listing-preservation",
+      "data-react-public-ui": "listing-preservation",
+      "data-catalog-state": page.body.catalog_state,
+      className: "pg-narrow legacy-archive",
+    },
+    h(
+      "header",
+      { className: "ct-page__head guide-head" },
+      h(Badge, { variant: "neutral", icon: "file-check" }, page.body.reference.value),
+      h("h1", null, page.body.h1),
+    ),
+    h(
+      "aside",
+      { className: "legacy-archive__notice", role: "note" },
+      h(Icon, { name: "info", size: 20 }),
+      h("p", null, page.body.notice),
+    ),
+    h(
+      "article",
+      { className: "mk-card mk-card--pad-lg legacy-archive__content" },
+      h(
+        "dl",
+        null,
+        h("dt", null, page.body.reference.label),
+        h("dd", null, page.body.reference.value),
+        h("dt", null, page.body.checked_at.label),
+        h("dd", null, page.body.checked_at.value),
+      ),
+      h(Btn, { tag: "a", variant: "primary", iconStart: "message-circle", href: page.body.contact.path }, page.body.contact.label),
+    ),
+  );
+  return shell(page, main);
+}
+
 export function renderReactPublicBody(page) {
   if (page.kind === "home") return renderStaticElement(h(HomeBody, { page }));
   if (page.kind === "search") return renderStaticElement(h(SearchBody, { page }));
@@ -3104,5 +3144,6 @@ export function renderReactPublicBody(page) {
   if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));
   if (page.kind === "guide") return renderStaticElement(h(GuideBody, { page }));
   if (page.kind === "legacy_archive") return renderStaticElement(h(LegacyArchiveBody, { page }));
+  if (page.kind === "listing_preservation") return renderStaticElement(h(ListingPreservationBody, { page }));
   return "";
 }

@@ -152,7 +152,6 @@ export function assertServerSmoke(smoke) {
     ? smoke.contact?.body?.body?.callback === null && Boolean(smoke.contact?.body?.body?.form_unavailable)
     : smoke.contact?.body?.body?.callback?.payload?.source === "website_contact_callback";
   const expectedBlockers = [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",

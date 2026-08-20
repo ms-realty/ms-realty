@@ -11,6 +11,7 @@ import {
   renderHomePage,
   renderGuidePage,
   renderLegacyArchivePage,
+  renderListingPreservationPage,
   renderLanguageFallback,
   renderListingPage,
   renderLocationPage,
@@ -295,7 +296,15 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   return { type: "not_found", status: 404 };
 }
 
-export function renderRuntimePath(registry, seed, pathname, translationTasks = [], brokerContacts = [], tourApprovals = []) {
+export function renderRuntimePath(
+  registry,
+  seed,
+  pathname,
+  translationTasks = [],
+  brokerContacts = [],
+  tourApprovals = [],
+  preservationCatalog = [],
+) {
   const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks, tourApprovals);
   const listings = () => runtimeListings(seed, translationTasks);
   if (resolved.type === "listing") {
@@ -346,6 +355,11 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
       location: resolved.location,
       listings: listings(),
     });
+  }
+  if (resolved.type === "not_found") {
+    const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+    const preserved = preservationCatalog.find((entry) => entry.target_path === normalized);
+    if (preserved) return renderListingPreservationPage({ registry, entry: preserved, path: normalized });
   }
   return { kind: "not_found", status: 404, path: pathname, indexable: false };
 }
