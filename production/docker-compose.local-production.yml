@@ -251,9 +251,6 @@ services:
     restart: "no"
     environment:
       <<: *app-environment
-      # Compatibility-only tooling may still exercise the legacy engines;
-      # the production app itself is hardwired to Postgres above.
-      NODE_ENV: test
       TYPESENSE_URL: http://typesense:8108
       TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY is required}
       TYPESENSE_COLLECTION: ${TYPESENSE_COLLECTION:-ms_realty_listings}

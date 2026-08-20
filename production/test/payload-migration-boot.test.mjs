@@ -10,6 +10,7 @@ const payloadSchemaDriftMigration = fromRoot("migrations", "20260810_164700_payl
 const durableListingEditMigration = fromRoot("migrations", "20260811_120000_durable_listing_edit_audit.ts");
 const publicSearchMigration = fromRoot("migrations", "20260811_153000_postgres_public_search.ts");
 const publicSearchRepairMigration = fromRoot("migrations", "20260813_110000_repair_postgres_search_index.ts");
+const publicSearchViewRepairMigration = fromRoot("migrations", "20260820_190500_repair_postgres_search_view.ts");
 const durableLeadSideEffectsMigration = fromRoot("migrations", "20260813_120000_durable_lead_side_effects.ts");
 
 function tableSql(source, name) {
@@ -159,6 +160,12 @@ test("Payload migration boot configuration and generated constraints stay runnab
   assert.doesNotMatch(publicSearchRepair, /ms_realty_search_fold"\(concat_ws\(/);
   assert.match(publicSearchRepair, /COALESCE\("facts_title", ''\) \|\| ' ' \|\|/);
   assert.match(publicSearchRepair, /COALESCE\("id", ''\)/);
+
+  const publicSearchViewRepair = fs.readFileSync(publicSearchViewRepairMigration, "utf8");
+  assert.match(publicSearchViewRepair, /up as ensurePostgresSearchView/);
+  assert.match(publicSearchViewRepair, /await ensurePostgresSearchView\(args\)/);
+  const publicSearchViewRepairDown = publicSearchViewRepair.match(/export async function down[\s\S]*$/)?.[0] || "";
+  assert.doesNotMatch(publicSearchViewRepairDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
 
   const leadSideEffects = fs.readFileSync(durableLeadSideEffectsMigration, "utf8");
   for (const table of ["consent_events", "seller_pipeline_events"]) {

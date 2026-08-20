@@ -5,8 +5,10 @@ import { fromRoot } from "../lib/paths.mjs";
 
 const caddy = fs.readFileSync(fromRoot("production", "Caddyfile.production-review"), "utf8");
 const compose = fs.readFileSync(fromRoot("production", "docker-compose.production-review.yml"), "utf8");
+const localCompose = fs.readFileSync(fromRoot("production", "docker-compose.local-production.yml"), "utf8");
 const dockerfile = fs.readFileSync(fromRoot("production", "Dockerfile"), "utf8");
 const deployScript = fs.readFileSync(fromRoot("production", "scripts", "deploy-production-review.sh"), "utf8");
+const searchSyncCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-sync.mjs"), "utf8");
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 
@@ -69,6 +71,13 @@ test("production handoff runs Hermes drafts against one private local model", ()
   assert.match(compose, /mem_limit: 2200m/);
   assert.match(compose, /name: ms-realty-production-review-ollama/);
   assert.doesNotMatch(compose, /- "11434:11434"/);
+});
+
+test("production search evidence uses one migrated Payload runtime", () => {
+  const searchSeed = localCompose.slice(localCompose.indexOf("  search-seed:"), localCompose.indexOf("  runtime-init:"));
+  assert.doesNotMatch(searchSeed, /NODE_ENV:\s*test/);
+  assert.doesNotMatch(searchSyncCli, /loadPayloadApprovedSearchProjection/);
+  assert.match(searchSyncCli, /runSearchEngineSync\(\{ generatedAt: new Date\(\)\.toISOString\(\) \}\)/);
 });
 
 test("workers.dev delegates dynamic traffic to the fixed origin and carries an exact edge marker", () => {
