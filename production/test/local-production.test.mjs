@@ -69,6 +69,7 @@ test("local Docker startup recreates the edge after an app update", () => {
   assert.match(script, /Caddy resolves the app service address when it starts/);
   assert.match(script, /\["up", "--detach", "--wait", "--no-deps", "--force-recreate", "edge"\]/);
   assert.ok(importAt >= 0 && searchAt > importAt);
+  assert.match(start, /"exec", "-T", "--env", "HERMES_DRAFT_LIMIT=1", "app", "npm", "run", "live:capture"/);
   assert.ok(
     searchAt < hermesRuntimeAt &&
       hermesRuntimeAt < liveProvisioningAt &&

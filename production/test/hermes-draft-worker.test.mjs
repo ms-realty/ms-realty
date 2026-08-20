@@ -367,7 +367,10 @@ test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => 
   assert.equal(request.url, "https://hermes.local/v1/chat/completions");
   assert.equal(request.options.headers.authorization, "Bearer test-key");
   assert.equal(request.body.model, "NousResearch/Hermes-4-14B");
+  assert.equal(request.body.max_tokens, 1024);
+  assert.equal(request.body.reasoning_effort, "none");
   assert.equal(request.body.response_format.type, "json_object");
+  assert.ok(request.options.signal instanceof AbortSignal);
   assert.equal(request.body.tools, undefined);
   assert.equal(request.body.tool_choice, "none");
   assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
