@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+set -euo pipefail
 
 release_id="${1:-}"
 if [[ ! "$release_id" =~ ^[0-9a-f]{40}$ ]]; then
@@ -64,16 +64,22 @@ run_stack() {
 
 switched=false
 rollback() {
-  local status=$?
+  local status="${1:-1}"
   trap - ERR
+  set +e
   if [[ "$switched" == true && -n "$previous" ]]; then
     echo "deployment failed; restoring $previous" >&2
-    activate "$previous"
-    run_stack "$previous" docker:up "$(basename "$previous")" || true
+    if activate "$previous"; then
+      run_stack "$previous" docker:up "$(basename "$previous")" || true
+    else
+      echo "deployment rollback failed to restore the previous release pointer" >&2
+    fi
   fi
   exit "$status"
 }
-trap rollback ERR
+trap 'rollback "$?"' ERR
+
+run_stack "$release" docker:status "$release_id"
 
 if [[ -n "$previous" && "$previous" != "$release" ]]; then
   run_stack "$previous" docker:backup "$(basename "$previous")"
