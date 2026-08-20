@@ -60,9 +60,23 @@ test("local Docker startup recreates the edge after an app update", () => {
   const start = script.slice(script.indexOf("async function start("), script.indexOf("\ntry {", script.indexOf("async function start(")));
   const importAt = start.indexOf('"payload:cms:import", "--", "--skip-if-initialized"');
   const searchAt = start.indexOf('"search-seed"');
+  const hermesRuntimeAt = start.indexOf('"hermes:runtime"');
+  const liveProvisioningAt = start.indexOf('"live:provisioning"');
+  const liveProvisioningPreflightAt = start.indexOf('"live:provisioning:preflight"');
+  const liveCaptureAt = start.indexOf('"live:capture"');
+  const livePreflightAt = start.indexOf('"live:preflight"');
+  const readinessAt = start.indexOf("materializeLocalReadinessInApp(envOverrides)");
   assert.match(script, /Caddy resolves the app service address when it starts/);
   assert.match(script, /\["up", "--detach", "--wait", "--no-deps", "--force-recreate", "edge"\]/);
   assert.ok(importAt >= 0 && searchAt > importAt);
+  assert.ok(
+    searchAt < hermesRuntimeAt &&
+      hermesRuntimeAt < liveProvisioningAt &&
+      liveProvisioningAt < liveProvisioningPreflightAt &&
+      liveProvisioningPreflightAt < liveCaptureAt &&
+      liveCaptureAt < livePreflightAt &&
+      livePreflightAt < readinessAt,
+  );
   assert.match(importer, /--skip-if-initialized/);
   assert.match(importer, /collection: "listings", depth: 0, draft: true, limit: 1, overrideAccess: true/);
 });

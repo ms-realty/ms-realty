@@ -40,7 +40,8 @@ function assertProvisioningServiceUrl(value, label) {
   if (reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
     throw new Error(`${label} must not use localhost or placeholder service URLs`);
   }
-  if (parsed.protocol !== "https:") throw new Error(`${label} must use HTTPS`);
+  const internalHermes = parsed.protocol === "http:" && host === "hermes-agent" && parsed.port === "8642";
+  if (parsed.protocol !== "https:" && !internalHermes) throw new Error(`${label} must use HTTPS`);
 }
 
 function envCheck(id, env, key) {
