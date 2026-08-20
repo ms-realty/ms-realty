@@ -81,6 +81,8 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
 
 test("origin deployment is immutable, backup-first, and rolls back the active release", () => {
   assert.match(deployScript, /\^\[0-9a-f\]\{40\}\$/);
+  assert.match(deployScript, /tar -tzf "\$archive" \| awk/);
+  assert.doesNotMatch(deployScript, /tar -tzf "\$archive" \| grep -q/);
   assert.match(deployScript, /run_stack "\$previous" docker:backup/);
   assert.match(deployScript, /run_stack "\$release" docker:hermes:up "\$release_id"/);
   assert.match(deployScript, /d\.build_marker !== process\.argv\[2\]/);

@@ -18,7 +18,7 @@ test -f "$archive"
 test -f "$env_file"
 install -d -m 0700 "$base/incoming" "$releases"
 
-if tar -tzf "$archive" | grep -Eq '(^/|(^|/)\.\.(/|$))'; then
+if tar -tzf "$archive" | awk '/(^\/|(^|\/)\.\.(\/|$))/ { unsafe = 1 } END { exit unsafe ? 0 : 1 }'; then
   echo "release archive contains an unsafe path" >&2
   exit 2
 fi
