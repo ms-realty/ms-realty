@@ -1,45 +1,43 @@
 # Launch Input Checklist
 
-Generated: 2026-08-11T17:18:08.153Z
+Generated: 2026-08-20T17:14:21.405Z
 
 Status: blocked
-Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
+Blockers: external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
 
 ## Blocked Gate Actions
 
-- redirect_reviews: Review every unresolved legacy URL in /admin/migration/review; retain equivalent content, map one-hop 301s, or approve a 410 individually.
-- redirect_reviews: Download /api/admin/redirect-approval-workbook?pending=1, record a terminal decision for each row, then import it through /api/admin/redirect-approvals/import.
 - external_seo_exports: Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.
 - external_seo_exports: Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.
 - listing_quality_review: Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.
 - listing_quality_review: Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.
 - listing_quality_review: Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.
-- live_services: Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.
-- live_services: Import or mount the three live service reports, then run npm run live:preflight before launch.
+- live_services: Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path and Hermes service.
+- live_services: Import or mount the 3 required live service reports, then run npm run live:preflight before launch.
 - monitoring_rollback: Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.
 - monitoring_rollback: Mount a current redacted monitoring and rollback report, then run npm run monitoring:preflight.
 - monitoring_rollback: Confirm the automated rollback policy, canary, and isolated drill cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.
 - payload_runtime: Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.
 - payload_runtime: Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.
 - production_recovery: Complete an encrypted off-site backup and isolated restore drill using production data stores.
-- production_recovery: Download /api/admin/production-recovery-template, complete it with real evidence, and import it through /api/admin/production-recovery/import.
+- production_recovery: Run the governed recovery:r2 backup, restore, and approval commands; only their Ed25519-signed report can be imported through /api/admin/production-recovery/import.
 
 ## Redirect Reviews
 
 - Workbook: `production/data/redirect-approval-workbook.csv`
 - Legacy route decision workbook rows: 457
-- Reviewed one-hop 301 redirects: 165
-- Terminal route decisions: 165/457 (200: 0, 301: 165, 410: 0)
-- Remaining terminal route decisions: 292
-- Legacy route coverage: 165/457
-- Unresolved legacy URLs: 292 (page 104, post 42, taxonomy 146)
+- Reviewed one-hop 301 redirects: 179
+- Terminal route decisions: 457/457 (200: 10, 301: 179, 410: 268)
+- Remaining terminal route decisions: 0
+- Legacy route coverage: 457/457
+- Unresolved legacy URLs: 0 (none)
 - Import path: `migration/reviews/redirect-approvals.csv`
 - Admin import endpoint: `POST /api/admin/redirect-approvals/import`
 - Admin workbook endpoint: `GET /api/admin/redirect-approval-workbook?pending=1`
 - Production adapter path overrides: `MS_REALTY_REDIRECT_APPROVALS_PATH`, `MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH`
 - Review helper columns: `decision`, `target_path`, `target_listing_id`, `review_status`, `same_content_checklist`
 - Approval import columns: `old_url`, `decision`, `target_path`, `equivalent_content`, `reviewer`, optional `approved_at`, `reason`
-- Launch rule: each of all 457 legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set `equivalent_content=true` only after same-content human review; homepage and search targets stay blocked.
+- Launch rule: each of all 457 legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set `equivalent_content=true` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
 
 ## External SEO Exports
 
@@ -67,29 +65,29 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 ## Live Service Provisioning
 
 - Current report evidence:
-- typesense_meilisearch_sync: missing_report (path production/data/search-engine-sync-report.json)
-- typesense_meilisearch_query: missing_report (path production/data/search-engine-query-report.json)
+- postgres_search_sync: missing_report (path production/data/postgres-search-sync-report.json)
+- postgres_search_query: missing_report (path production/data/postgres-search-query-report.json)
 - hermes_draft_worker: missing_report (path production/data/hermes-draft-worker-report.json)
 - Current provisioning evidence:
-- blocked_report (path production/data/live-service-provisioning-report.json; missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
-- Search engines: set `TYPESENSE_URL`, `TYPESENSE_API_KEY`, `MEILI_URL`, and `MEILI_API_KEY`.
+- blocked_report (path production/data/live-service-provisioning-report.json; missing DATABASE_URL, PAYLOAD_SECRET, MS_REALTY_SEARCH_ENGINE, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
+- Postgres search: set `MS_REALTY_SEARCH_ENGINE=postgres`, `DATABASE_URL`, and `PAYLOAD_SECRET`; apply the public-search migration before capture so sync and query evidence use the same authoritative Neon target.
 - Hermes Agent: set `HERMES_CHAT_COMPLETIONS_URL` to its internal `/v1/chat/completions` API and set `HERMES_API_KEY`; production Hermes evidence must be authenticated.
 - Hermes runtime: `npm run hermes:runtime` verifies its `/health` endpoint and authenticated `/v1/capabilities` response before any draft-worker evidence is accepted.
 - Managed local profile: set `HERMES_AGENT_MODEL`, `HERMES_AGENT_LLM_BASE_URL`, and `HERMES_AGENT_LLM_API_KEY`, then run `npm run docker:hermes:up`. The Agent only forwards to a private OpenAI-compatible model provider; its tools and persistent memory are disabled.
 - Hermes provider report: `npm run hermes:provisioning` writes `production/data/hermes-provider-provisioning-report.json` without persisting API keys.
-- Live service provisioning report: `npm run live:provisioning` writes `production/data/live-service-provisioning-report.json` with redacted endpoint health and missing-env evidence.
+- Live service provisioning report: `npm run live:provisioning` writes `production/data/live-service-provisioning-report.json` with the redacted Postgres target, Hermes endpoint health, and missing-env evidence.
 - Admin provisioning status endpoint: `GET /api/admin/live-service-provisioning`.
 - Admin provisioning import endpoint: `POST /api/admin/live-service-provisioning/import` accepts the redacted JSON from `npm run live:provisioning`.
 - Provisioning preflight: `npm run live:provisioning:preflight` must pass before live evidence capture.
-- Live evidence capture: `npm run live:capture` runs search sync, search query, Hermes draft worker, and validates the three report outputs.
+- Live evidence capture: `npm run live:capture` verifies the Postgres search projection, queries that same Postgres target, runs the Hermes draft worker, and validates every required report output.
 - Individual debug commands: `npm run search:sync`, `npm run search:query`, `npm run hermes:worker`.
 - Status report: `npm run live:report` writes current missing/invalid live-service report state without clearing the launch gate.
 - Admin live-services status endpoint: `GET /api/admin/live-services`.
 - Report preflight: `npm run live:preflight`.
-- Report examples: `production/data/search-engine-sync-report.json.example`, `production/data/search-engine-query-report.json.example`, `production/data/hermes-draft-worker-report.json.example`.
-- Admin template endpoint: `GET /api/admin/live-service-report-template?source=typesense_meilisearch_sync`, `?source=typesense_meilisearch_query`, `?source=hermes_draft_worker`.
-- Admin import endpoint: `POST /api/admin/live-service-reports/import?source=typesense_meilisearch_sync`, `?source=typesense_meilisearch_query`, `?source=hermes_draft_worker`.
-- Production/CLI report path overrides: `MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH`, `MS_REALTY_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_SEARCH_QUERY_REPORT_PATH`, `MS_REALTY_HERMES_WORKER_REPORT_PATH`, `MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH`.
+- Report examples: `production/data/postgres-search-sync-report.json.example`, `production/data/postgres-search-query-report.json.example`, `production/data/hermes-draft-worker-report.json.example`.
+- Admin template endpoint: `GET /api/admin/live-service-report-template?source=postgres_search_sync`, `?source=postgres_search_query`, `?source=hermes_draft_worker`.
+- Admin import endpoint: `POST /api/admin/live-service-reports/import?source=postgres_search_sync`, `?source=postgres_search_query`, `?source=hermes_draft_worker`.
+- Production/CLI report path overrides: `MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH`, `MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH`, `MS_REALTY_HERMES_WORKER_REPORT_PATH`, `MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH`.
 - Hermes ledger path overrides: `MS_REALTY_TRANSLATION_LEDGER_PATH`, `MS_REALTY_HERMES_AUDIT_PATH`, `MS_REALTY_AUDIT_LOG_PATH`.
 - Real report outputs stay local and ignored; examples do not count as launch evidence.
 - Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
@@ -100,10 +98,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Runtime report: `production/data/payload-runtime-report.json` (real output stays local and ignored)
 - Runtime report example: `production/data/payload-runtime-report.json.example`
 - Current check evidence:
-- payload_secret: missing_env (env PAYLOAD_SECRET)
-- database_url: missing_env (env DATABASE_URL)
-- database_network_scope: missing_env (env DATABASE_URL)
-- database_tcp: missing_env (env DATABASE_URL)
+- no Payload runtime check rows available
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`
@@ -127,11 +122,12 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Current gate: blocked
 - Current evidence: missing_report (production/data/production-recovery-report.json)
 - Private report: `production/data/production-recovery-report.json` (ignored)
-- Report example: `production/data/production-recovery-report.json.example`
+- Report example: `production/data/production-recovery-report.json.example` (shape reference only; it cannot clear readiness)
 - Admin template endpoint: `GET /api/admin/production-recovery-template`
 - Admin status endpoint: `GET /api/admin/production-recovery`
-- Admin import endpoint: `POST /api/admin/production-recovery/import` accepts only validated, redacted production evidence.
+- Admin import endpoint: `POST /api/admin/production-recovery/import` accepts only redacted Ed25519-signed production evidence from the governed recovery workflow.
 - Path override: `MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH`
+- Verification key: `MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY` contains public SPKI only; the private key is operator-only.
 - Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
 - Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.
 - Launch rule: the tested local `docker:backup` path is not production disaster-recovery evidence.
@@ -171,11 +167,21 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - Review pack command: `npm run listing:review-pack`.
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
+- structured_data.missing_location: 2
 - structured_data.missing_area: 166
 - structured_data.missing_bedrooms: 81
 - structured_data.missing_public_images: 4
 - listing_quality.missing_area: 165
+- listing_quality.missing_location: 2
 - listing_quality.thin_public_gallery: 18
+
+## Manual Source Audit (Non-Approval Evidence)
+
+- Artifact: `production/data/manual-listing-audit.json`: complete_non_approval_evidence
+- Coverage: 165/165 source rows (pass: 30, review: 75, hold: 52, source unavailable: 8).
+- Broker approvals in this artifact: 0; broker confirmations still required: 165.
+- Broker packet: `production/data/launch-candidate30-broker-packet.json` — 30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6.
+- This evidence does not clear `listing_quality_review`; use the packet to prioritize human fact, media, availability, and publication review.
 
 ## Broker Verification
 

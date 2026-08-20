@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import os from "node:os";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
@@ -9,7 +10,12 @@ import { buildLiveServiceProvisioningReport } from "../lib/live-service-provisio
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { readReplyDeliveryOutcomes } from "../lib/reply-delivery-outcomes.mjs";
 import { mediaAssetId } from "../lib/media-reviews.mjs";
+import { saveProviderConnection } from "../lib/provider-connections.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
+import { signProductionRecoveryReport } from "../lib/production-recovery.mjs";
+
+const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
+const RECOVERY_PUBLIC_KEY = RECOVERY_KEYPAIR.publicKey.export({ format: "der", type: "spki" }).toString("base64");
 
 function tempJsonl(prefix) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
@@ -64,8 +70,13 @@ function actionCounts(rows) {
 function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
   const generatedAtMs = Date.parse(generatedAt);
   const minutesBefore = (minutes) => new Date(generatedAtMs - minutes * 60_000).toISOString();
-  return {
-    schema_version: 1,
+  const ciphertextSha256 = "1".repeat(64);
+  const manifestSha256 = "2".repeat(64);
+  const restoreDrillSha256 = "3".repeat(64);
+  const monitoringRollbackReportSha256 = "4".repeat(64);
+  const releaseId = "a".repeat(40);
+  return signProductionRecoveryReport({
+    schema_version: 2,
     generated_at: generatedAt,
     environment: "production",
     ready: true,
@@ -82,6 +93,10 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
       backup_id: "backup-20260722-001",
       completed_at: minutesBefore(40),
       checksum_verified: true,
+      ciphertext_sha256: ciphertextSha256,
+      manifest_sha256: manifestSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: releaseId,
       components: ["payload_postgres", "runtime_data", "runtime_evidence"],
     },
     restore_drill: {
@@ -92,15 +107,27 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
       status: "pass",
       checksum_verified: true,
       rollback_procedure_verified: true,
+      ciphertext_sha256: ciphertextSha256,
+      manifest_sha256: manifestSha256,
+      result_sha256: restoreDrillSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: releaseId,
       components_verified: ["payload_postgres", "runtime_data", "runtime_evidence"],
       operator: "operations_manager",
     },
     approval: {
       status: "approved",
+      approval_id: "recovery-approval-20260722-001",
       reviewer: "agency_owner",
       approved_at: minutesBefore(10),
+      artifact_sha256: "5".repeat(64),
+      ciphertext_sha256: ciphertextSha256,
+      manifest_sha256: manifestSha256,
+      restore_drill_sha256: restoreDrillSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: releaseId,
     },
-  };
+  }, { privateKey: RECOVERY_KEYPAIR.privateKey });
 }
 
 function completeListingQualityReviewCsv(workbookCsv, limit = null) {
@@ -180,8 +207,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
   }
   const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
   const launchReadinessOutputPath = tempJson("app-admin-launch-readiness", "{}\n");
-  const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
-  const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
+  const searchSyncReportPath = `${seoEvidenceInputDir}/postgres-search-sync-report.json`;
+  const searchQueryReportPath = `${seoEvidenceInputDir}/postgres-search-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
   const liveServiceProvisioningReportPath = tempJson(
     "app-admin-live-service-provisioning",
@@ -214,13 +241,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH: tempJsonl("app-admin-lead-pipeline-outcomes"),
       MS_REALTY_LEAD_PIPELINE_OUTCOME_AT: "2026-07-18T10:05:00.000Z",
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
-      MS_REALTY_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
-      MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
+      MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
+      MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveServiceProvisioningReportPath,
       MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: monitoringRollbackReportPath,
       MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: payloadRuntimeReportPath,
       MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryReportPath,
+      MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: RECOVERY_PUBLIC_KEY,
       MS_REALTY_RECEIVED_AT: "2026-07-04T00:00:00Z",
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
@@ -632,6 +660,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(russianEditorHtml, /data-editor-dirty-message="[^"]+"/);
       assert.match(russianEditorHtml, /data-editor-clean-message="[^"]+"/);
       assert.match(russianEditorHtml, /data-editor-readiness-rail="true"/);
+      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=bg"/);
+      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=ru"/);
+      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001"/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();
@@ -722,7 +753,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(preflightReportsBody.reports.listing_quality.status, "blocked");
       assert.equal(preflightReportsBody.reports.live_services.status, "blocked");
       assert.equal(preflightReportsBody.reports.live_service_provisioning.status, "blocked_report");
-      assert.ok(preflightReportsBody.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+      assert.ok(preflightReportsBody.reports.live_service_provisioning.summary.missing_env.includes("DATABASE_URL"));
       assert.ok(preflightReportsBody.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
       assert.equal(preflightReportsBody.reports.payload_runtime.status, "missing_report");
       assert.ok(preflightReportsBody.reports.payload_runtime.next_actions.some((action) => action.includes("payload:bootstrap")));
@@ -749,20 +780,18 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(liveServiceProvisioning.status, 200);
       assert.equal(liveServiceProvisioningBody.kind, "admin_live_service_provisioning");
       assert.equal(liveServiceProvisioningBody.provisioning.status, "blocked_report");
-      assert.ok(liveServiceProvisioningBody.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+      assert.ok(liveServiceProvisioningBody.provisioning.summary.missing_env.includes("DATABASE_URL"));
       assert.ok(liveServiceProvisioningBody.provisioning.next_actions.some((action) => action.includes("live:provisioning")));
 
       const readyProvisioningReport = await buildLiveServiceProvisioningReport({
         env: {
-          TYPESENSE_URL: "https://typesense.ms-realty.bg",
-          TYPESENSE_API_KEY: "typesense-key",
-          MEILI_URL: "https://meili.ms-realty.bg",
-          MEILI_API_KEY: "meili-key",
+          DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
+          PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+          MS_REALTY_SEARCH_ENGINE: "postgres",
           HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
           HERMES_API_KEY: "hermes-key",
         },
         fetchImpl: healthyHermesAgentFetch,
-        lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
         generatedAt: runtimeGeneratedAt,
       });
       const liveServiceProvisioningImport = await liveServiceProvisioningImportRoute.POST(
@@ -885,7 +914,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(liveImportValidBody.liveImport.importedSource, "hermes_draft_worker");
       assert.deepEqual(
         liveImportValidBody.liveImport.blockedReports.map((report) => report.source),
-        ["typesense_meilisearch_sync", "typesense_meilisearch_query"],
+        ["postgres_search_sync", "postgres_search_query"],
       );
       assert.equal(liveImportValidBody.livePreflight.status, "blocked");
       assert.equal(liveImportValidBody.livePreflight.summary.pass, 1);
@@ -1000,6 +1029,34 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(invalidProductionRecoveryImportBody.message, /valid JSON/);
       assert.equal(fs.existsSync(productionRecoveryReportPath), false);
 
+      const legacyProductionRecoveryImport = await productionRecoveryImportRoute.POST(
+        new Request("https://example.test/api/admin/production-recovery/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            report: JSON.stringify({ ...validProductionRecoveryReport(), schema_version: 1 }),
+          }),
+        }),
+      );
+      const legacyProductionRecoveryImportBody = await legacyProductionRecoveryImport.json();
+      assert.equal(legacyProductionRecoveryImport.status, 400);
+      assert.match(legacyProductionRecoveryImportBody.message, /schema v2/);
+      assert.equal(fs.existsSync(productionRecoveryReportPath), false);
+
+      const unsignedReport = validProductionRecoveryReport();
+      delete unsignedReport.provenance;
+      const unsignedProductionRecoveryImport = await productionRecoveryImportRoute.POST(
+        new Request("https://example.test/api/admin/production-recovery/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({ report: JSON.stringify(unsignedReport) }),
+        }),
+      );
+      const unsignedProductionRecoveryImportBody = await unsignedProductionRecoveryImport.json();
+      assert.equal(unsignedProductionRecoveryImport.status, 400);
+      assert.match(unsignedProductionRecoveryImportBody.message, /Ed25519 provenance/);
+      assert.equal(fs.existsSync(productionRecoveryReportPath), false);
+
       const productionRecoveryImport = await productionRecoveryImportRoute.POST(
         new Request("https://example.test/api/admin/production-recovery/import", {
           method: "POST",
@@ -1067,7 +1124,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.cmsCollectionsEndpoint, "/api/admin/cms-collections");
       assert.equal(migrationReviewBody.payloadCollectionsEndpoint, "/api/admin/payload-collections");
       assert.equal(migrationReviewBody.listingQualityEndpoint, "/api/admin/listing-quality");
-      assert.ok(migrationReviewBody.launchBlockers.blockers.includes("redirect_reviews"));
+      assert.equal(migrationReviewBody.launchBlockers.blockers.includes("redirect_reviews"), false);
       assert.ok(migrationReviewBody.launchBlockers.blockers.includes("external_seo_exports"));
       assert.ok(migrationReviewBody.launchBlockers.blockers.includes("listing_quality_review"));
       assert.ok(migrationReviewBody.launchBlockers.blockers.includes("live_services"));
@@ -1136,7 +1193,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /data-react-admin-ui="migration-review"/);
       assert.match(migrationReviewHtmlBody, /Работно място за преглед на старите URL адреси/);
       assert.match(migrationReviewHtmlBody, />Търсене<input type="search"/);
-      assert.match(migrationReviewHtmlBody, /преглед на старите URL адреси, външни SEO данни/);
+      assert.match(migrationReviewHtmlBody, /външни SEO данни, преглед на качеството/);
       assert.match(migrationReviewHtmlBody, /data-pending-route-count="457"/);
       assert.match(migrationReviewHtmlBody, /data-reviewed-route-count="0"/);
       assert.match(migrationReviewHtmlBody, /data-pending-route-decision="true"/);
@@ -1305,7 +1362,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectApproval.status, 201);
       assert.equal(redirectApprovalBody.approval.target_path, firstRedirect.target_path);
       assert.equal(redirectApprovalBody.deployablePreview.length, 1);
-      assert.equal(redirectApprovalBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+      assert.equal(redirectApprovalBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
 
       const migrationReviewAfterDecision = await migrationReviewRoute.GET(
         new Request("https://example.test/api/admin/migration/review?locale=bg", { headers: auth }),
@@ -1327,7 +1384,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectImport.status, 201);
       assert.equal(redirectImportBody.imported, 1);
       assert.equal(redirectImportBody.deployablePreview.length, 2);
-      assert.equal(redirectImportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+      assert.equal(redirectImportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
 
       const pendingRedirectWorkbook = await redirectApprovalWorkbookRoute.GET(
         new Request("https://example.test/api/admin/redirect-approval-workbook?pending=1", { headers: auth }),
@@ -1344,7 +1401,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectExport.status, 201);
       assert.equal(redirectExportBody.exported, 2);
       assert.equal(redirectExportBody.summary.total, 2);
-      assert.equal(redirectExportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+      assert.equal(redirectExportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
       assert.equal(JSON.parse(fs.readFileSync(deployableRedirectOutputPath, "utf8")).redirects.length, 2);
 
       const listingQualityWorkbook = await listingQualityWorkbookRoute.GET(
@@ -2214,6 +2271,7 @@ test("Next admin replies bind the named production operator before queueing", as
       listing_reference: "MS-CRAWL-0001",
       original_language: "ru",
       message_original: "Please contact me about this listing.",
+      contact: { email: "buyer@example.com" },
     })}\n`,
   );
   const previous = {
@@ -2232,11 +2290,84 @@ test("Next admin replies bind the named production operator before queueing", as
     const config = appAdminConfigFromEnv({
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
+      MS_REALTY_PROVIDER_TOKEN_KEY: "provider-test-secret-that-is-longer-than-thirty-two-characters",
+      MS_REALTY_GOOGLE_OAUTH_CLIENT_ID: "google-client-id",
+      MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET: "google-client-secret",
+      PAYLOAD_SECRET: "payload-test-secret-that-is-longer-than-thirty-two-characters",
+      DATABASE_URL: "postgres://payload:payload@db/ms_realty",
       MS_REALTY_REPLY_OUTBOX_PATH: replyOutboxPath,
       MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH: replyDeliveryOutcomeLedgerPath,
       MS_REALTY_REVIEWED_AT: "2026-07-18T18:00:00Z",
       MS_REALTY_REPLY_DELIVERED_AT: "2026-07-18T18:05:00Z",
     });
+    const providerConnectionPayload = {
+      providerDocs: [],
+      deliveryDocs: [],
+      async find(query) {
+        const docs = query.collection === "provider_delivery_receipts" ? this.deliveryDocs : this.providerDocs;
+        const provider = query.where?.provider?.equals;
+        const idempotencyKey = query.where?.idempotency_key?.equals;
+        return {
+          docs: provider
+            ? docs.filter((doc) => doc.provider === provider)
+            : idempotencyKey
+              ? docs.filter((doc) => doc.idempotency_key === idempotencyKey)
+              : [...docs],
+        };
+      },
+      async create({ collection, data }) {
+        const docs = collection === "provider_delivery_receipts" ? this.deliveryDocs : this.providerDocs;
+        const doc = { id: docs.length + 1, ...data };
+        docs.push(doc);
+        return doc;
+      },
+      async update({ collection, id, data }) {
+        const docs = collection === "provider_delivery_receipts" ? this.deliveryDocs : this.providerDocs;
+        const index = docs.findIndex((doc) => doc.id === id);
+        docs[index] = { ...docs[index], ...data };
+        return docs[index];
+      },
+    };
+    await saveProviderConnection(
+      {
+        provider: "google",
+        status: "connected",
+        accountLabel: "owner@example.com",
+        externalAccountId: "google-user-1",
+        scopes: [
+          "openid",
+          "email",
+          "https://www.googleapis.com/auth/gmail.send",
+          "https://www.googleapis.com/auth/calendar.events.owned",
+          "https://www.googleapis.com/auth/calendar.freebusy",
+        ],
+        metadata: { email: "owner@example.com", email_verified: true },
+        credentials: { refresh_token: "google-refresh-token-plain" },
+      },
+      {
+        connectedBy: "operations_lead",
+        credentialSecret: "provider-test-secret-that-is-longer-than-thirty-two-characters",
+        payload: providerConnectionPayload,
+        verifiedAt: "2026-07-18T18:00:00Z",
+      },
+    );
+    config.providerConnectionPayload = providerConnectionPayload;
+    config.providerDeliveryPayload = providerConnectionPayload;
+    config.providerFetch = async (url, init = {}) => {
+      const value = String(url);
+      if (value.includes("/token")) {
+        return Response.json({
+          access_token: "refreshed-google-access-token",
+          scope: "https://www.googleapis.com/auth/gmail.send",
+        });
+      }
+      if (value.includes("/gmail/v1/users/me/messages/send")) {
+        const body = JSON.parse(String(init.body || "{}"));
+        assert.ok(body.raw);
+        return Response.json({ id: "gmail-message-1", threadId: "gmail-thread-1" });
+      }
+      throw new Error(`Unexpected provider request: ${value}`);
+    };
     const headers = {
       authorization: "Bearer next-operations-token-0123456789",
       "content-type": "application/json",
@@ -2287,6 +2418,7 @@ test("Next admin replies bind the named production operator before queueing", as
     assert.match(queuedHtml, /data-reply-delivery-form="true"/);
     assert.match(queuedHtml, /data-lead-replied="false"/);
     assert.match(queuedHtml, /Broker-reviewed reply\./);
+    assert.match(queuedHtml, /Send with Gmail/);
 
     const spoofedDelivery = await renderAppAdminResponse(
       new Request("https://example.test/api/admin/replies/delivery", {
@@ -2302,7 +2434,7 @@ test("Next admin replies bind the named production operator before queueing", as
       new Request("https://example.test/api/admin/replies/delivery", {
         method: "POST",
         headers,
-        body: JSON.stringify({ replyId: queuedBody.id, action: "sent", channel: "email" }),
+        body: JSON.stringify({ replyId: queuedBody.id, deliveryMode: "provider_send", provider: "google" }),
       }),
       { config },
     );
@@ -2310,6 +2442,7 @@ test("Next admin replies bind the named production operator before queueing", as
     assert.equal(delivered.status, 201);
     assert.equal(deliveredBody.delivery.status, "sent");
     assert.equal(deliveredBody.outcome.actor, "operations_lead");
+    assert.equal(deliveredBody.provider_delivery.external_message_id, "gmail-message-1");
     assert.equal(readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath).length, 1);
 
     const inboxResponse = await renderAppAdminResponse(
@@ -2321,6 +2454,7 @@ test("Next admin replies bind the named production operator before queueing", as
     assert.equal(inbox.summary.repliesSent, 1);
     assert.equal(inbox.leadSla.rows[0].status, "customer_reply_sent");
     assert.equal(readAuditLog(auditLogPath).filter((row) => row.action === "reply_delivery_recorded").length, 1);
+    assert.equal(readAuditLog(auditLogPath).filter((row) => row.action === "provider_reply_sent").length, 1);
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];

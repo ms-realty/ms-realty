@@ -1,7 +1,7 @@
 import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable, taxonomyForLegacyPropertyType } from "./listing-facts.mjs";
 
 export const SEARCH_INTENT_SCHEMA_VERSION = 1;
-export const SEARCH_SORTS = Object.freeze(["recommended", "price_asc", "price_desc", "newest"]);
+export const SEARCH_SORTS = Object.freeze(["recommended", "price_asc", "price_desc"]);
 export const SEARCH_STATUSES = Object.freeze(["available", "reserved", "sold", "rented", "archived"]);
 export const SEARCH_OFFER_TYPES = Object.freeze(["sale", "rent"]);
 
@@ -86,6 +86,13 @@ export function assertSearchIntentCompatibility(intent) {
 }
 
 export function normalizeSearchIntent(input = {}, { defaultLocale = "bg" } = {}) {
+  const pricePeriod = String(input.price_period || "").trim();
+  // Listings do not yet have an authoritative billing-period field. Reject the
+  // filter instead of treating every document's absent value as a zero-result.
+  if (pricePeriod) throw new Error("price_period is unavailable until listings have an authoritative billing-period field");
+  if (input.radius !== undefined && input.radius !== null && String(input.radius).trim() !== "") {
+    throw new Error("radius is unavailable until listings have authoritative public coordinates");
+  }
   const propertyFamilies = values(input.property_families || input.property_family || input.property_type).map((value) => {
     const normalized = String(value).trim().toLowerCase();
     const legacyFamily = taxonomyForLegacyPropertyType(normalized).family;
@@ -104,7 +111,7 @@ export function normalizeSearchIntent(input = {}, { defaultLocale = "bg" } = {})
     offer_type: requiredEnum(input.offer_type, SEARCH_OFFER_TYPES, "offer_type"),
     listing_status: requiredEnum(input.listing_status || input.status, SEARCH_STATUSES, "listing_status"),
     price_currency: String(input.price_currency || input.currency || "EUR").trim().toUpperCase() || "EUR",
-    price_period: String(input.price_period || "").trim() || null,
+    price_period: null,
     parking_kinds: [...new Set(values(input.parking_kinds || input.parking_kind))],
     construction_statuses: [...new Set(values(input.construction_statuses || input.construction_status))],
     has_approved_tour:
@@ -116,7 +123,7 @@ export function normalizeSearchIntent(input = {}, { defaultLocale = "bg" } = {})
     municipality: String(input.municipality || "").trim() || null,
     district: String(input.district || "").trim() || null,
     map_bounds: mapBounds(input.map_bounds),
-    radius: optionalNumber(input.radius, "radius"),
+    radius: null,
     sort: requiredEnum(input.sort || "recommended", SEARCH_SORTS, "sort") || "recommended",
     page: Math.max(1, Math.trunc(optionalNumber(input.page, "page") || 1)),
     page_size: Math.min(100, Math.max(1, Math.trunc(optionalNumber(input.page_size || input.per_page, "page_size") || 12))),

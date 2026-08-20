@@ -57,7 +57,7 @@ function LanguageMenu({ languages, label }) {
     { className: "site-language", "data-language-switcher": "desktop" },
     h(
       "summary",
-      { "aria-label": `${label}: ${active.label}`, title: `${label}: ${active.label}` },
+      { "aria-label": `${active.code.toUpperCase()} — ${label}: ${active.label}`, title: `${label}: ${active.label}` },
       h(Icon, { name: "globe", size: 17 }),
       h("span", { className: "site-language__current", lang: active.code }, active.code.toUpperCase()),
       h(Icon, { name: "chevron-down", size: 14, "aria-hidden": "true" }),
@@ -312,7 +312,7 @@ function SiteFooter({ chrome, labels }) {
       h(
         "div",
         { className: "site-ft__desktop-links" },
-        h("h4", null, copy.explore),
+        h("h2", null, copy.explore),
         h(
           "ul",
           null,
@@ -324,7 +324,7 @@ function SiteFooter({ chrome, labels }) {
       h(
         "div",
         { className: "site-ft__desktop-links" },
-        h("h4", null, chrome.footer.locationsLabel),
+        h("h2", null, chrome.footer.locationsLabel),
         h(
           "ul",
           null,
@@ -334,7 +334,7 @@ function SiteFooter({ chrome, labels }) {
       h(
         "div",
         { className: "site-ft__desktop-links" },
-        h("h4", null, copy.getInTouch),
+        h("h2", null, copy.getInTouch),
         h(
           "ul",
           null,
@@ -619,6 +619,7 @@ function publicImageProps(image, fallbackAlt, loading = "lazy", fetchPriority) {
 function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orientation = "vertical", rootAttrs, priority = false }) {
   const badge = cardBadge(card, labels, localeCode);
   const tone = toneFor(card.id);
+  const mediaCountText = `${card.image_count || 0} ${photoCountLabel(card.image_count || 0, labels)}`;
   const mediaChildren = [
     badge
       ? h(
@@ -641,7 +642,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       "span",
       { key: "count", className: "mk-pcard__count", "data-card-media-count": card.image_count },
       h(Icon, { name: "camera", size: 13 }),
-      ` ${card.image_count || 0} ${photoCountLabel(card.image_count || 0, labels)}`,
+      ` ${mediaCountText}`,
     ),
   ];
   const media = card.thumbnail?.url
@@ -651,7 +652,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
           href: card.path,
           className: `mk-pcard__media mk-photo mk-photo--${tone}`,
           "data-card-thumbnail": "true",
-          "aria-label": card.title,
+          "aria-label": `${card.title}; ${mediaCountText}`,
           lang: card.content_locale || undefined,
         },
         h("img", publicImageProps(card.thumbnail, card.title, priority ? "eager" : "lazy", priority ? "high" : undefined)),
@@ -659,7 +660,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       )
     : h(
         "a",
-        { href: card.path, className: `mk-pcard__media mk-photo mk-photo--${tone}`, "aria-label": card.title, lang: card.content_locale || undefined },
+        { href: card.path, className: `mk-pcard__media mk-photo mk-photo--${tone}`, "aria-label": `${card.title}; ${mediaCountText}`, lang: card.content_locale || undefined },
         ...mediaChildren,
       );
   return h(
@@ -2265,6 +2266,7 @@ function ListingBody({ page }) {
       id: "main",
       tabIndex: -1,
       "data-kind": "listing",
+      "data-listing-id": facts.id,
       "data-react-public-ui": "listing",
       "data-review-status": page.body.actions.direct_contact.review_status,
       "data-listing-status": page.body.lifecycle?.status || "available",
@@ -2355,7 +2357,11 @@ function ListingBody({ page }) {
                 key: image?.url || `gallery-placeholder-${index}`,
                 type: "button",
                 className: `ld-g${index === 0 ? " ld-g--main" : ""}${index > 2 ? " ld-g--desktop-extra" : ""} mk-photo mk-photo--${index === 0 ? tone : index === 1 ? "sand" : "sky"}`,
-                "aria-label": `${index + 1} / ${gallerySlides.length}${image?.alt ? `: ${image.alt}` : ""}`,
+                "aria-label": `${index + 1} / ${gallerySlides.length}${image?.alt ? `: ${image.alt}` : ""}${
+                  gallerySlides.length > 3 && index === 2
+                    ? `; ${page.body.media.gallery_count || gallery.length} ${photoCountLabel(page.body.media.gallery_count || gallery.length, labels)}`
+                    : ""
+                }`,
                 "data-mobile-gallery-slide": String(index + 1),
                 "data-gallery-active": index === 0 ? "true" : undefined,
                 "data-listing-gallery-open": String(index),
@@ -2680,7 +2686,8 @@ function SellerBody({ page }) {
         ),
       ),
     ),
-    h(
+    valuation
+      ? h(
       "form",
       {
         className: "mk-card mk-card--elevated mk-card--pad-lg ct-form",
@@ -2781,7 +2788,27 @@ function SellerBody({ page }) {
           h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "send" }, valuation.label),
         ),
       ),
-    ),
+        )
+      : h(
+          "div",
+          { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
+          h("h2", { className: "ct-form__title" }, labels.sellerValuation),
+          h("p", null, page.body.form_unavailable),
+          page.body.contact_channels
+            ? h(
+                Btn,
+                {
+                  tag: "a",
+                  variant: "accent",
+                  size: "lg",
+                  full: true,
+                  iconStart: "phone",
+                  href: page.body.contact_channels.phone.href,
+                },
+                page.body.contact_channels.phone.label,
+              )
+            : null,
+        ),
   );
   return shell(page, main);
 }
@@ -3087,6 +3114,46 @@ function LegacyArchiveBody({ page }) {
   return shell(page, main);
 }
 
+function ListingPreservationBody({ page }) {
+  const main = h(
+    "main",
+    {
+      id: "main",
+      tabIndex: -1,
+      "data-kind": "listing-preservation",
+      "data-react-public-ui": "listing-preservation",
+      "data-catalog-state": page.body.catalog_state,
+      className: "pg-narrow legacy-archive",
+    },
+    h(
+      "header",
+      { className: "ct-page__head guide-head" },
+      h(Badge, { variant: "neutral", icon: "file-check" }, page.body.reference.value),
+      h("h1", null, page.body.h1),
+    ),
+    h(
+      "aside",
+      { className: "legacy-archive__notice", role: "note" },
+      h(Icon, { name: "info", size: 20 }),
+      h("p", null, page.body.notice),
+    ),
+    h(
+      "article",
+      { className: "mk-card mk-card--pad-lg legacy-archive__content" },
+      h(
+        "dl",
+        null,
+        h("dt", null, page.body.reference.label),
+        h("dd", null, page.body.reference.value),
+        h("dt", null, page.body.checked_at.label),
+        h("dd", null, page.body.checked_at.value),
+      ),
+      h(Btn, { tag: "a", variant: "primary", iconStart: "message-circle", href: page.body.contact.path }, page.body.contact.label),
+    ),
+  );
+  return shell(page, main);
+}
+
 export function renderReactPublicBody(page) {
   if (page.kind === "home") return renderStaticElement(h(HomeBody, { page }));
   if (page.kind === "search") return renderStaticElement(h(SearchBody, { page }));
@@ -3098,5 +3165,6 @@ export function renderReactPublicBody(page) {
   if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));
   if (page.kind === "guide") return renderStaticElement(h(GuideBody, { page }));
   if (page.kind === "legacy_archive") return renderStaticElement(h(LegacyArchiveBody, { page }));
+  if (page.kind === "listing_preservation") return renderStaticElement(h(ListingPreservationBody, { page }));
   return "";
 }

@@ -21,6 +21,8 @@ const payloadConfig = path.join(root, "payload.config.js");
 const payloadRuntime = path.join(root, "node_modules", "payload", "dist", "index.js");
 const payloadAuthority = path.join(root, "production", "lib", "realty-case-payload-authority.mjs");
 const leadDurableStore = path.join(root, "production", "lib", "lead-durable-store.mjs");
+const httpRuntime = path.join(root, "production", "lib", "http.mjs");
+const durableLeadMigration = path.join(root, "migrations", "20260813_120000_durable_lead_side_effects.ts");
 const COMMAND_TIMEOUT_MS = 120_000;
 
 function redact(value, env) {
@@ -498,7 +500,8 @@ function exerciseDurableLeadStore(env) {
   const script = `
     import assert from "node:assert/strict";
     import { getPayload } from ${JSON.stringify(pathToFileURL(payloadRuntime).href)};
-    import { persistLeadIntakeDurably } from ${JSON.stringify(pathToFileURL(leadDurableStore).href)};
+    import { persistLeadIntakeDurably, readLeadIntakesDurably } from ${JSON.stringify(pathToFileURL(leadDurableStore).href)};
+    import { createHttpApp, dispatchHttp } from ${JSON.stringify(pathToFileURL(httpRuntime).href)};
 
     const leadId = "lead-draft-33333333-3333-4333-8333-333333333333";
     const idempotencyKey = "payload-postgres-durable-lead-it";
@@ -510,10 +513,11 @@ function exerciseDurableLeadStore(env) {
       lead: {
         id: leadId,
         idempotency_key: idempotencyKey,
-        source: "website_contact_callback",
-        intent: "callback",
-        leadType: "general",
+        source: "website_seller_valuation",
+        intent: "valuation",
+        leadType: "seller",
         contact: { name: plaintextName, phone: plaintextPhone },
+        property: { location: "Sandanski", type: "apartment" },
         intake: { complete: true, missing_fields: [], captured_fields: ["contact"] },
       },
       original_language: "en",
@@ -541,7 +545,15 @@ function exerciseDurableLeadStore(env) {
     try {
       const configModule = await import(${JSON.stringify(pathToFileURL(payloadConfig).href)});
       payload = await getPayload({ config: configModule.default });
-      const options = { lead, contactSecret: process.env.MS_REALTY_LEAD_CONTACT_KEY, receivedAt, payload };
+      const options = {
+        lead,
+        contactSecret: process.env.MS_REALTY_LEAD_CONTACT_KEY,
+        marketingOptIn: true,
+        receivedAt,
+        sellerPipelineCreatedAt: receivedAt,
+        workspaceId: process.env.MS_REALTY_WORKSPACE_ID,
+        payload,
+      };
       const first = await persistLeadIntakeDurably(options);
       const retry = await persistLeadIntakeDurably(options);
       assert.equal(first.created, true);
@@ -549,20 +561,101 @@ function exerciseDurableLeadStore(env) {
       assert.equal(retry.created, false);
       assert.equal(retry.idempotent, true);
 
-      const [leads, contacts] = await Promise.all([
+      const [leads, contacts, consents, sellerEvents] = await Promise.all([
         rows("public_leads", { lead_id: { equals: leadId } }),
         rows("lead_contacts", { subject_id: { equals: leadId } }),
+        rows("consent_events", { lead_id: { equals: leadId } }),
+        rows("seller_pipeline_events", { lead_id: { equals: leadId } }),
       ]);
       assert.equal(leads.length, 1, "expected exactly one durable public lead");
       assert.equal(contacts.length, 1, "expected exactly one encrypted lead contact");
+      assert.equal(consents.length, 1, "expected exactly one consent event");
+      assert.equal(sellerEvents.length, 1, "expected exactly one seller pipeline event");
       assert.equal(leads[0].idempotency_key, idempotencyKey);
+      assert.equal(leads[0].workspace_id, process.env.MS_REALTY_WORKSPACE_ID);
+      assert.equal(contacts[0].workspace_id, process.env.MS_REALTY_WORKSPACE_ID);
       assert.equal(contacts[0].algorithm, "aes-256-gcm");
       for (const field of ["iv", "auth_tag", "ciphertext"]) assert.ok(contacts[0][field], "missing encrypted envelope field " + field);
       for (const field of ["contact", "name", "phone", "email", "message"]) assert.equal(field in contacts[0], false);
 
-      const serialized = JSON.stringify({ lead: leads[0], contact: contacts[0] });
+      assert.equal(consents[0].workspace_id, process.env.MS_REALTY_WORKSPACE_ID);
+      assert.equal(consents[0].payload.marketing_opt_in, true);
+      assert.equal(sellerEvents[0].payload.stage, "valuation_requested");
+      assert.equal("contact_name" in sellerEvents[0].payload, false);
+
+      const serialized = JSON.stringify({ lead: leads[0], contact: contacts[0], consent: consents[0], seller: sellerEvents[0] });
       assert.equal(serialized.includes(plaintextName), false, "plaintext name reached Postgres");
       assert.equal(serialized.includes(plaintextPhone), false, "plaintext phone reached Postgres");
+
+      const opened = await readLeadIntakesDurably({
+        contactSecret: process.env.MS_REALTY_LEAD_CONTACT_KEY,
+        payload,
+        user: {
+          collection: "admins",
+          id: "payload-postgres-broker-it",
+          role: "broker",
+          workspace_ids: [process.env.MS_REALTY_WORKSPACE_ID],
+        },
+        workspaceId: process.env.MS_REALTY_WORKSPACE_ID,
+      });
+      assert.equal(opened.length, 1);
+      assert.equal(opened[0].workspace_id, process.env.MS_REALTY_WORKSPACE_ID);
+      assert.equal(opened[0].contact.name, plaintextName);
+      assert.equal(opened[0].contact.phone, plaintextPhone);
+
+      const concurrentIdempotencyKey = "payload-postgres-concurrent-http-lead-it";
+      const concurrentInput = {
+        source: "website_seller_valuation",
+        intent: "valuation",
+        leadType: "seller",
+        language: "bg",
+        idempotencyKey: concurrentIdempotencyKey,
+        contact: { name: "Concurrent Durable Seller", phone: "+359000000099" },
+        contact_preference: "phone",
+        property: { location: "Sandanski", type: "apartment" },
+        message: "One request submitted concurrently twice.",
+        marketingOptIn: true,
+      };
+      const app = createHttpApp({
+        leadDurableStore: {
+          leadDurableStoreEnabled: true,
+          payloadSecret: process.env.PAYLOAD_SECRET,
+          databaseUrl: process.env.DATABASE_URL,
+          contactSecret: process.env.MS_REALTY_LEAD_CONTACT_KEY,
+          workspaceId: process.env.MS_REALTY_WORKSPACE_ID,
+        },
+        persistLeadIntake: (input) => persistLeadIntakeDurably({ ...input, payload }),
+        receivedAt: "2026-08-10T09:05:00.000Z",
+        sellerPipelineCreatedAt: "2026-08-10T09:05:01.000Z",
+      });
+      const submit = () =>
+        dispatchHttp(app, {
+          method: "POST",
+          url: "/api/leads",
+          headers: { host: "localhost", origin: "http://localhost" },
+          body: concurrentInput,
+        });
+      const concurrentResponses = await Promise.all([submit(), submit()]);
+      assert.deepEqual(concurrentResponses.map(({ status }) => status).sort(), [200, 201]);
+      const concurrentLeadIds = concurrentResponses.map(({ body }) => body.ledger.lead_id);
+      assert.equal(new Set(concurrentLeadIds).size, 1, "both requests must resolve to the committed original lead");
+      const concurrentLeadId = concurrentLeadIds[0];
+      const [concurrentLeads, concurrentContacts, concurrentConsents, concurrentSellerEvents] = await Promise.all([
+        rows("public_leads", {
+          and: [
+            { workspace_id: { equals: process.env.MS_REALTY_WORKSPACE_ID } },
+            { idempotency_key: { equals: concurrentIdempotencyKey } },
+          ],
+        }),
+        rows("lead_contacts", { subject_id: { equals: concurrentLeadId } }),
+        rows("consent_events", { lead_id: { equals: concurrentLeadId } }),
+        rows("seller_pipeline_events", { lead_id: { equals: concurrentLeadId } }),
+      ]);
+      assert.deepEqual(
+        [concurrentLeads.length, concurrentContacts.length, concurrentConsents.length, concurrentSellerEvents.length],
+        [1, 1, 1, 1],
+        "the concurrent retry must leave exactly one atomic lead intake",
+      );
     } catch (error) {
       console.error(error.stack || error);
       exitCode = 1;
@@ -579,6 +672,50 @@ function exerciseDurableLeadStore(env) {
     process.exit(exitCode);
   `;
   command(process.execPath, ["--input-type=module", "--eval", script], { env, label: "exercising durable lead storage" });
+}
+
+function exerciseDurableLeadMigrationRoundTrip(env) {
+  const script = `
+    import assert from "node:assert/strict";
+    import { Pool } from "pg";
+    import { drizzle } from "drizzle-orm/node-postgres";
+    import * as migration from ${JSON.stringify(pathToFileURL(durableLeadMigration).href)};
+
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    const db = drizzle(pool);
+    const exists = async (relation) => {
+      const result = await pool.query("SELECT to_regclass($1) AS relation", ["public." + relation]);
+      return result.rows[0].relation !== null;
+    };
+    const columnExists = async (table, column) => {
+      const result = await pool.query(
+        "SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = $1 AND column_name = $2",
+        [table, column],
+      );
+      return result.rowCount === 1;
+    };
+    try {
+      await migration.down({ db });
+      assert.equal(await exists("consent_events"), false);
+      assert.equal(await exists("seller_pipeline_events"), false);
+      assert.equal(await columnExists("public_leads", "workspace_id"), false);
+      assert.equal(await columnExists("lead_contacts", "workspace_id"), false);
+      assert.equal(await exists("public_leads_idempotency_key_idx"), true);
+
+      await migration.up({ db });
+      assert.equal(await exists("consent_events"), true);
+      assert.equal(await exists("seller_pipeline_events"), true);
+      assert.equal(await columnExists("public_leads", "workspace_id"), true);
+      assert.equal(await columnExists("lead_contacts", "workspace_id"), true);
+      assert.equal(await exists("public_leads_workspace_id_idempotency_key_idx"), true);
+    } finally {
+      await pool.end();
+    }
+  `;
+  command(process.execPath, ["--import", "tsx", "--input-type=module", "--eval", script], {
+    env,
+    label: "round-tripping the durable lead migration",
+  });
 }
 
 function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outboxAttempts }) {
@@ -617,6 +754,7 @@ function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outbo
         "20260730_170000_add_realty_case_conditions",
         "20260810_000558_durable_lead_store",
         "20260810_143000_repair_durable_lead_relations",
+        "20260813_120000_durable_lead_side_effects",
       ]) {
         assert.ok(migrationNames.has(name), \`missing applied Payload migration \${name}\`);
       }
@@ -704,17 +842,21 @@ test(
       NODE_ENV: "production",
       PAYLOAD_CONFIG_PATH: payloadConfig,
       PAYLOAD_POSTGRES_DB: databaseName,
+      PAYLOAD_POSTGRES_DATA_DIR: "/var/lib/postgresql",
       PAYLOAD_POSTGRES_HOST: "127.0.0.1",
+      PAYLOAD_POSTGRES_IMAGE: "postgres:18-alpine",
       PAYLOAD_POSTGRES_PASSWORD: databasePassword,
       PAYLOAD_POSTGRES_PORT: String(port),
       PAYLOAD_POSTGRES_USER: databaseUser,
       PAYLOAD_SECRET: payloadSecret,
       MS_REALTY_LEAD_CONTACT_KEY: leadContactKey,
+      MS_REALTY_WORKSPACE_ID: workspaceId,
     };
     try {
       runCompose(project, ["up", "--detach", "--wait", "payload-postgres"], env, "starting isolated Payload Postgres");
       command(process.execPath, [payloadCli, "migrate"], { env, label: "running Payload migrations" });
       command(process.execPath, [payloadCli, "migrate:status"], { env, label: "checking Payload migration status" });
+      exerciseDurableLeadMigrationRoundTrip(env);
       exerciseDurableLeadStore(env);
       await exercisePayloadAuthority(env, authorityWorkspaceId);
 

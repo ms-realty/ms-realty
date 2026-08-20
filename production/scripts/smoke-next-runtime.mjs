@@ -98,7 +98,10 @@ try {
   assert(!(await home.text()).includes("MS-CRAWL-0001"), "Next localized home exposed an unapproved listing");
 
   const listing = await fetch(`${baseUrl}/bg/imoti/MS-CRAWL-0001`);
-  assert(listing.status === 404, "Next localized listing must stay hidden until publication approval");
+  assert(listing.status === 200, "Next localized listing must preserve its approved URL");
+  const listingHtml = await listing.text();
+  assert(listingHtml.includes('<meta name="robots" content="noindex,follow">'), "Next preserved listing must stay noindex");
+  assert(listingHtml.includes('data-react-public-ui="listing-preservation"'), "Next preserved listing must not invent facts");
 
   const search = await fetch(`${baseUrl}/bg/tarsene?q=Sandanski`);
   assert(search.status === 503, "Next production search must fail closed without a configured engine");

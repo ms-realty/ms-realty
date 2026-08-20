@@ -33,6 +33,7 @@ import {
   writeApprovedSearchProjection,
 } from "../lib/search-engine-sync.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { CYRILLIC_SEARCH_FOLD_PAIRS, foldSearchText, POSTGRES_SEARCH_FOLD_SQL } from "../lib/search-fold.mjs";
 import { assertBenchmarkCorpusCompatibility, benchmarkPublicFilters, loadBenchmarkCorpus } from "../../search/benchmark-corpus.mjs";
 import { bootstrapBenchmarkCorpus } from "../../search/bootstrap_benchmark_corpus.mjs";
 
@@ -344,7 +345,7 @@ test("selected Typesense receives the validated exact and structured intent", as
   await withSearchServer(async (baseUrl, calls) => {
     await queryPublicSearch({
       engine: "typesense",
-      environment: "production",
+      environment: "test",
       typesense: { baseUrl, apiKey: "typesense-key", allowPrivateNetwork: true },
       localeCodes: ["bg"],
       q: "ignored lexical query",
@@ -438,6 +439,145 @@ test("public search labels an unconfigured backend as a local seed fallback", as
   assert.deepEqual(result.unavailable_engines, ["postgres", "typesense", "meilisearch"]);
 });
 
+test("search sync reuses the current Payload adapter until its SQL snapshot completes", async () => {
+  let executeArgs = null;
+  let loadCalls = 0;
+  let destroyCalls = 0;
+  const drizzle = { kind: "current-payload-drizzle" };
+  const payload = {
+    db: {
+      drizzle,
+      beginTransaction: async () => "tx",
+      commitTransaction: async () => undefined,
+      rollbackTransaction: async () => undefined,
+      execute: async (args) => {
+        executeArgs = args;
+        return { rows: [] };
+      },
+    },
+    find: async () => ({ docs: [], totalPages: 1 }),
+    create: async () => undefined,
+    update: async () => undefined,
+    destroy: async () => {
+      destroyCalls += 1;
+      payload.db.drizzle = undefined;
+    },
+  };
+  const result = await runSearchEngineSync({
+    postgres: {
+      env: { DATABASE_URL: POSTGRES_DATABASE_TARGET, PAYLOAD_SECRET: "test-payload-secret" },
+      loadPayloadRuntime: async () => {
+        loadCalls += 1;
+        return payload;
+      },
+    },
+  });
+
+  assert.deepEqual(result.summary.documents_per_engine, [0]);
+  assert.equal(loadCalls, 1);
+  assert.equal(destroyCalls, 1);
+  assert.ok(executeArgs?.sql);
+  assert.equal(executeArgs.drizzle, drizzle);
+});
+
+test("Postgres search counts independently and binds page, active status, and geography filters", async () => {
+  const statements = [];
+  const postgres = {
+    env: { DATABASE_URL: POSTGRES_DATABASE_TARGET, PAYLOAD_SECRET: "test-payload-secret" },
+    payload: {
+      db: {
+        drizzle: {
+          receiver: "postgres-query",
+          async execute(statement) {
+            assert.equal(this.receiver, "postgres-query");
+            statements.push(statement);
+            return statements.length === 1 ? [{ total_count: "23" }] : [];
+          },
+        },
+      },
+    },
+  };
+  const result = await queryPublicSearch({
+    engine: "postgres",
+    environment: "production",
+    postgres,
+    localeCodes: ["bg"],
+    intent: {
+      locale: "bg",
+      text_query: "Сандански",
+      listing_status: "reserved",
+      region_id: "BG:district:BLG",
+      page: 3,
+      page_size: 7,
+    },
+  });
+
+  assert.equal(result.total, 23);
+  assert.equal(result.page, 3);
+  assert.equal(result.page_size, 7);
+  assert.deepEqual(result.hits, []);
+  assert.equal(statements.length, 2);
+  const dialect = {
+    escapeName: (name) => `"${name}"`,
+    escapeParam: (index) => `$${index + 1}`,
+    escapeString: (value) => `'${String(value).replaceAll("'", "''")}'`,
+    casing: { getColumnCasing: (column) => column.name },
+  };
+  const count = statements[0].toQuery(dialect);
+  const page = statements[1].toQuery(dialect);
+  assert.match(count.sql, /SELECT count\(\*\) AS total_count/);
+  assert.match(count.sql, /ms_realty_search_fold"?\(d\."search_text"\) LIKE/);
+  assert.match(count.sql, /d\."geography_path" @>/);
+  assert.match(count.sql, /d\."listing_status" =/);
+  assert.deepEqual(count.params, ["bg", "%sandanski%", '["BG:district:BLG"]', "reserved"]);
+  assert.match(page.sql, /LIMIT \$5\s+OFFSET \$6/);
+  assert.deepEqual(page.params.slice(-2), [7, 14]);
+});
+
+test("Postgres search folds Bulgarian Cyrillic from the shared JavaScript and SQL mapping", async () => {
+  assert.equal(CYRILLIC_SEARCH_FOLD_PAIRS.length, 34);
+  assert.equal(foldSearchText("Сандански"), "sandanski");
+  for (const [source, replacement] of CYRILLIC_SEARCH_FOLD_PAIRS) {
+    assert.match(POSTGRES_SEARCH_FOLD_SQL, new RegExp(`'${source}', '${replacement}'`));
+  }
+
+  const statements = [];
+  await queryPublicSearch({
+    engine: "postgres",
+    environment: "production",
+    postgres: {
+      env: { DATABASE_URL: POSTGRES_DATABASE_TARGET, PAYLOAD_SECRET: "test-payload-secret" },
+      payload: { db: { drizzle: { execute: async (statement) => (statements.push(statement), statements.length === 1 ? [{ total_count: "0" }] : []) } } },
+    },
+    localeCodes: ["bg"],
+    intent: { locale: "bg", text_query: "Сандански", page: 1, page_size: 12 },
+  });
+  const dialect = {
+    escapeName: (name) => `"${name}"`,
+    escapeParam: (index) => `$${index + 1}`,
+    escapeString: (value) => `'${String(value).replaceAll("'", "''")}'`,
+    casing: { getColumnCasing: (column) => column.name },
+  };
+  assert.equal(statements[0].toQuery(dialect).params[1], "%sandanski%");
+});
+
+test("Postgres search migration keeps locale routing and index operators aligned with runtime queries", () => {
+  const migration = fs.readFileSync(fromRoot("migrations", "20260811_153000_postgres_public_search.ts"), "utf8");
+  assert.match(migration, /routing_target_locale[^\n]+source_locale\."code"/);
+  assert.match(migration, /SET search_path = pg_catalog, pg_temp/);
+  assert.match(migration, /POSTGRES_SEARCH_FOLD_SQL/);
+  assert.match(migration, /const VERIFIED_LOCATION_SQL/);
+  assert.equal(migration.match(/workflow_location_verified_at/g)?.length, 1);
+  assert.equal(migration.match(/workflow_location_verified_by/g)?.length, 1);
+  assert.match(migration, /VERIFIED_LOCATION_SQL\(`NULLIF\(\$\{listing\}"facts_location"/);
+  assert.match(migration, /VERIFIED_LOCATION_SQL\(`NULLIF\(\$\{listing\}"facts_municipality"/);
+  assert.match(migration, /VERIFIED_LOCATION_SQL\(`NULLIF\(\$\{listing\}"facts_district"/);
+  assert.match(migration, /VERIFIED_LOCATION_SQL\(`NULLIF\(\$\{listing\}"facts_country_code"/);
+  assert.match(migration, /EXISTS \(\s*SELECT 1\s*FROM "public"\."listing_translations"/);
+  assert.match(migration, /VERIFIED_GEOGRAPHY_PATH_SQL\(""\)\)\}\) jsonb_path_ops/);
+  assert.match(migration, /ms_realty_search_fold"\(\$\{sql\.raw\(SEARCH_TEXT_SQL\(""\)\)\}\) gin_trgm_ops/);
+});
+
 test("approved search projection omits pending and private facts", () => {
   const listing = {
     id: "MS-2026-0001",
@@ -511,19 +651,19 @@ test("approved search projection omits pending and private facts", () => {
   assert.equal(fs.readFileSync(outputs.typesense, "utf8").includes("internal_latitude"), false);
 });
 
-test("production search requires one configured engine and never falls back", async () => {
+test("production search requires Postgres and rejects legacy engine credentials before network access", async () => {
   assert.throws(
     () => selectSearchRuntime({ environment: "production", typesense: {}, meilisearch: {} }),
-    /Payload Postgres search is required in production/,
+    /MS_REALTY_SEARCH_ENGINE must be postgres in production/,
   );
-  assert.deepEqual(
-    selectSearchRuntime({
+  assert.throws(
+    () => selectSearchRuntime({
       engine: "typesense",
       environment: "production",
       typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
       meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
     }),
-    { engine: "typesense", mode: "single" },
+    /MS_REALTY_SEARCH_ENGINE must be postgres in production/,
   );
   const calls = [];
   await assert.rejects(
@@ -539,10 +679,20 @@ test("production search requires one configured engine and never falls back", as
           return { status: 503, async json() { return {}; } };
         },
       }),
-    /Selected search engine typesense is unavailable/,
+    /MS_REALTY_SEARCH_ENGINE must be postgres in production/,
   );
-  assert.equal(calls.length, 1);
-  assert.match(calls[0], /typesense\.ms-realty\.bg/);
+  assert.equal(calls.length, 0);
+
+  assert.deepEqual(
+    selectSearchRuntime({
+      engine: "postgres",
+      environment: "production",
+      postgres: postgresFixture([]),
+      typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "ignored" },
+      meilisearch: { baseUrl: "https://meili.ms-realty.bg", apiKey: "ignored" },
+    }),
+    { engine: "postgres", mode: "single" },
+  );
 });
 
 test("search intent builds approved-only canonical filters with exact-reference precedence", async () => {
@@ -851,7 +1001,23 @@ test("search engine sync snapshots the authoritative Postgres projection", async
     },
   ];
   const report = await runSearchEngineSync({
-    postgres: postgresFixture(documents),
+    postgres: {
+      env: {
+        DATABASE_URL: POSTGRES_DATABASE_TARGET,
+        PAYLOAD_SECRET: "test-payload-secret",
+      },
+      payload: {
+        db: {
+          drizzle: {
+            receiver: "postgres-projection",
+            async execute() {
+              assert.equal(this.receiver, "postgres-projection");
+              return documents;
+            },
+          },
+        },
+      },
+    },
     projection: authoritativeProjection(documents),
     fetchImpl: fakeFetch(calls, [201, 202, 202, 202]),
     typesense: { baseUrl: "https://typesense.ms-realty.bg", apiKey: "type-key", lookupImpl: PUBLIC_LOOKUP },
@@ -927,6 +1093,43 @@ test("search engine sync snapshots the authoritative Postgres projection", async
         engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, operations: [{ ...engine.operations[0], url: "" }] } : engine)),
       }),
     /database target/,
+  );
+  for (const suffix of ["?sslpassword=secret", "#secret-fragment"]) {
+    assert.throws(
+      () => assertSearchEngineSyncReport({
+        ...report,
+        summary: { ...report.summary, database_target: `${report.summary.database_target}${suffix}` },
+      }),
+      /exact redacted Postgres target/,
+    );
+    assert.throws(
+      () => assertSearchEngineSyncReport({
+        ...report,
+        engines: report.engines.map((engine) => ({
+          ...engine,
+          operations: engine.operations.map((operation) => ({ ...operation, url: `${operation.url}${suffix}` })),
+        })),
+      }),
+      /exact redacted Postgres target/,
+    );
+  }
+  const credentialedTarget = POSTGRES_DATABASE_TARGET.replace("postgres://", "postgres://runtime:secret@");
+  assert.throws(
+    () => assertSearchEngineSyncReport({
+      ...report,
+      summary: { ...report.summary, database_target: credentialedTarget },
+    }),
+    /exact redacted Postgres target/,
+  );
+  assert.throws(
+    () => assertSearchEngineSyncReport({
+      ...report,
+      engines: report.engines.map((engine) => ({
+        ...engine,
+        operations: engine.operations.map((operation) => ({ ...operation, url: credentialedTarget })),
+      })),
+    }),
+    /exact redacted Postgres target/,
   );
   assert.throws(
     () =>
@@ -1089,8 +1292,25 @@ test("search engine query smoke reports authoritative Postgres hits", async () =
         ...report,
         engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, operation: null } : engine)),
       }),
-    /database read operation/,
+    /database target/,
   );
+  for (const suffix of ["?sslpassword=secret", "#secret-fragment"]) {
+    for (const field of ["summary", "engine", "operation"]) {
+      const tampered = structuredClone(report);
+      if (field === "summary") tampered.summary.database_target += suffix;
+      if (field === "engine") tampered.engines[0].database_target += suffix;
+      if (field === "operation") tampered.engines[0].operation.url += suffix;
+      assert.throws(() => assertSearchEngineQueryReport(tampered), /exact redacted Postgres target/);
+    }
+  }
+  for (const field of ["summary", "engine", "operation"]) {
+    const tampered = structuredClone(report);
+    const credentialedTarget = POSTGRES_DATABASE_TARGET.replace("postgres://", "postgres://runtime:secret@");
+    if (field === "summary") tampered.summary.database_target = credentialedTarget;
+    if (field === "engine") tampered.engines[0].database_target = credentialedTarget;
+    if (field === "operation") tampered.engines[0].operation.url = credentialedTarget;
+    assert.throws(() => assertSearchEngineQueryReport(tampered), /exact redacted Postgres target/);
+  }
   assert.throws(
     () =>
       assertSearchEngineQueryReport({

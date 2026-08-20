@@ -15,9 +15,15 @@ import {
   runHermesDraftWorker,
   writeHermesDraftWorkerReport,
 } from "../lib/hermes-draft-worker.mjs";
+import { HERMES_LAUNCH_REQUIRED } from "../lib/launch-service-contract.mjs";
 
 const PROVISIONING_NEXT =
   "Next: run `npm run live:provisioning:preflight`; after it passes, rerun `npm run live:capture`, then `npm run live:preflight`.";
+
+const postgresSyncReportPath = () =>
+  process.env.MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH || process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined;
+const postgresQueryReportPath = () =>
+  process.env.MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH || process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH || undefined;
 
 async function capture() {
   const runAt = new Date().toISOString();
@@ -30,25 +36,29 @@ async function capture() {
 
   const projection = await loadPayloadApprovedSearchProjection();
   const syncReport = await runSearchEngineSync({ projection, generatedAt: runAt });
-  writeSearchEngineSyncReport(syncReport, process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined);
+  writeSearchEngineSyncReport(syncReport, postgresSyncReportPath());
 
   const queryReport = await runSearchEngineQuerySmoke({ projection, generatedAt: runAt });
-  writeSearchEngineQueryReport(queryReport, process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH || undefined);
+  writeSearchEngineQueryReport(queryReport, postgresQueryReportPath());
 
-  const hermesReport = await runHermesDraftWorker({
-    provider: openAiCompatibleHermesProvider(),
-    filePath: process.env.MS_REALTY_TRANSLATION_LEDGER_PATH || undefined,
-    auditPath: process.env.MS_REALTY_HERMES_AUDIT_PATH || undefined,
-    auditLogPath: process.env.MS_REALTY_AUDIT_LOG_PATH || undefined,
-    limit: Number(process.env.HERMES_DRAFT_LIMIT || 25),
-    generatedAt: runAt,
-    recordedAt: runAt,
-  });
-  writeHermesDraftWorkerReport(hermesReport, process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH || undefined);
+  const hermesReport = HERMES_LAUNCH_REQUIRED
+    ? await runHermesDraftWorker({
+        provider: openAiCompatibleHermesProvider(),
+        filePath: process.env.MS_REALTY_TRANSLATION_LEDGER_PATH || undefined,
+        auditPath: process.env.MS_REALTY_HERMES_AUDIT_PATH || undefined,
+        auditLogPath: process.env.MS_REALTY_AUDIT_LOG_PATH || undefined,
+        limit: Number(process.env.HERMES_DRAFT_LIMIT || 25),
+        generatedAt: runAt,
+        recordedAt: runAt,
+      })
+    : null;
+  if (hermesReport) {
+    writeHermesDraftWorkerReport(hermesReport, process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH || undefined);
+  }
 
   const result = validateLiveServiceReports({
-    syncReportPath: process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
-    queryReportPath: process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
+    syncReportPath: postgresSyncReportPath(),
+    queryReportPath: postgresQueryReportPath(),
     hermesReportPath: process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
   });
   if (!result.ready) {
@@ -64,7 +74,9 @@ try {
     [
       `Search sync: ${syncReport.summary.documents_per_engine.join("/")} documents`,
       `Search query: ${queryReport.summary.total_hits} hits`,
-      `Hermes drafts: ${hermesReport.summary.persisted}/${hermesReport.summary.attempted} persisted`,
+      ...(hermesReport
+        ? [`Hermes drafts: ${hermesReport.summary.persisted}/${hermesReport.summary.attempted} persisted`]
+        : []),
     ].join("\n"),
   );
 } catch (error) {

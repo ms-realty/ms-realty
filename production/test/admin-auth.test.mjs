@@ -14,9 +14,9 @@ import {
 } from "../lib/admin-auth.mjs";
 
 const credentialRegistry = JSON.stringify([
-  { id: "broker_bg", token: "broker-bg-token-0123456789abcdef", roles: ["broker"] },
-  { id: "broker_bg", token: "broker-bg-rotated-token-0123456789", roles: ["broker"] },
-  { id: "broker_en", token: "broker-en-token-0123456789abcdef", roles: ["broker"] },
+  { id: "broker_bg", token: "broker-bg-token-0123456789abcdef", roles: ["broker"], workspace_ids: ["sandanski"] },
+  { id: "broker_bg", token: "broker-bg-rotated-token-0123456789", roles: ["broker"], workspace_ids: ["sandanski"] },
+  { id: "broker_en", token: "broker-en-token-0123456789abcdef", roles: ["broker"], workspace_ids: ["melnik"] },
 ]);
 
 test("individual admin credentials are authoritative and bind a stable operator", () => {
@@ -28,7 +28,13 @@ test("individual admin credentials are authoritative and bind a stable operator"
   const principal = resolveAdminPrincipal("Bearer broker-bg-token-0123456789abcdef", env);
 
   assert.deepEqual(adminCredentials(env).map((credential) => credential.id), ["broker_bg", "broker_bg", "broker_en"]);
-  assert.deepEqual(principal, { id: "broker_bg", source: "credential_registry", can_mutate: true, roles: ["broker"] });
+  assert.deepEqual(principal, {
+    id: "broker_bg",
+    source: "credential_registry",
+    can_mutate: true,
+    roles: ["broker"],
+    workspace_ids: ["sandanski"],
+  });
   assert.equal(canAdminMutate(principal), true);
   assert.equal(canAdminAccess(principal, "operations:write"), true);
   assert.equal(canAdminAccess(principal, "translations:write"), false);
@@ -118,5 +124,25 @@ test("a named single admin token is a migration path, while invalid registry con
         ]),
       }),
     /must use the same roles/,
+  );
+  assert.throws(
+    () =>
+      adminCredentials({
+        MS_REALTY_ADMIN_CREDENTIALS_JSON: JSON.stringify([
+          {
+            id: "rotating_broker",
+            token: "rotation-one-token-0123456789abcdef",
+            roles: ["broker"],
+            workspace_ids: ["workspace-a"],
+          },
+          {
+            id: "rotating_broker",
+            token: "rotation-two-token-0123456789abcdef",
+            roles: ["broker"],
+            workspace_ids: ["workspace-b"],
+          },
+        ]),
+      }),
+    /must use the same workspace_ids/,
   );
 });

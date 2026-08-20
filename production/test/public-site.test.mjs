@@ -26,6 +26,7 @@ Object.assign(process.env, {
   PAYLOAD_SECRET: "test-only-public-site-payload-secret-32-characters",
   DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
   MS_REALTY_LEAD_CONTACT_KEY: "test-only-public-site-contact-key-32-characters",
+  MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
 });
 
 const registry = loadLocaleRegistry();
@@ -416,7 +417,8 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.match(html, /data-mobile-menu-close="true"/);
   assert.match(html, /role="dialog" aria-modal="true" aria-label="Primary navigation"/);
   assert.match(html, /data-language-switcher="desktop"/);
-  assert.match(html, /aria-label="Language: English"/);
+  assert.match(html, /aria-label="EN — Language: English"/);
+  assert.doesNotMatch(html, /<h4>/);
   assert.match(html, /data-language-switcher="mobile"/);
   assert.match(html, /data-mobile-task-navigation="true"/);
   assert.match(html, /data-mobile-task="buy" data-active="true" aria-current="page"/);
@@ -470,6 +472,8 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-card-action="save"/);
   assert.match(html, /data-card-spec="reference"/);
   assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*loading="eager"/);
+  const thumbnailLink = html.match(/<a[^>]*data-card-thumbnail="true"[^>]*>/)?.[0] || "";
+  assert.match(thumbnailLink, /aria-label="[^"]+; \d+ photos?"/);
   assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*fetchPriority="high"/);
   assert.match(html, /<img[^>]*loading="lazy"[^>]*decoding="async"/);
 });
@@ -819,6 +823,41 @@ test("seller valuation page is locale-prefixed and posts seller leads", () => {
   assert.match(html, /data-no-public-avm="true"/);
   assert.match(html, /data-broker-review-required="true"/);
   assert.doesNotMatch(html, /data-mobile-task-navigation="true"/);
+});
+
+// The seller valuation request is the primary seller-lead engine, so it must
+// never render a form that the edge will reject. The contact page already
+// degrades to a phone CTA when lead writes are disabled; this asserts the
+// seller page does the same instead of showing a form that always errors.
+test("seller valuation page degrades to a phone CTA when lead writes are disabled", () => {
+  const disabled = renderSellerPage({ registry, localeCode: "bg", leadWritesDisabled: true });
+  const enabled = renderSellerPage({ registry, localeCode: "bg", leadWritesDisabled: false });
+  const disabledHtml = renderReactPublicBody(disabled);
+  const enabledHtml = renderReactPublicBody(enabled);
+
+  // The page still answers 200 and stays indexable — only the form is withheld.
+  assert.equal(disabled.status, 200);
+  assert.equal(disabled.indexable, true);
+  assert.equal(disabled.chrome.lead_writes_disabled, true);
+  assert.equal(disabled.body.valuation, null);
+  assert.equal(disabled.body.callback, null);
+  assert.equal(
+    disabled.body.form_unavailable,
+    "Формата е временно недостъпна. Обадете се или ни пишете — отговаряме бързо.",
+  );
+  assert.equal(disabled.body.contact_channels.phone.href, "tel:+359879696870");
+
+  // No submittable seller intake may reach the visitor in this state.
+  assert.doesNotMatch(disabledHtml, /data-seller-intake="true"/);
+  assert.doesNotMatch(disabledHtml, /action="\/api\/leads"/);
+  assert.match(disabledHtml, /data-form-unavailable="true"/);
+  assert.match(disabledHtml, /href="tel:\+359879696870"/);
+
+  // And the working path is unchanged when the durable store is available.
+  assert.equal(enabled.body.form_unavailable, null);
+  assert.equal(enabled.body.valuation.endpoint, "/api/leads");
+  assert.match(enabledHtml, /data-seller-intake="true"/);
+  assert.doesNotMatch(enabledHtml, /data-form-unavailable="true"/);
 });
 
 test("contact callback page is locale-prefixed and posts generic CRM leads", () => {

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
@@ -15,6 +15,26 @@ function pageCan(page, capability) {
   const capabilities = page.workspace?.operator_capabilities;
   if (!Array.isArray(capabilities)) return true;
   return capabilities.includes("*") || capabilities.includes(capability);
+}
+
+const DURABLE_ONLY_NAV_IDS = new Set([
+  "today",
+  "lead_inbox",
+  "realty_cases",
+  "listing_manager",
+  "translation_queue",
+]);
+
+function durableRuntimeMutationAvailable(page, pathname) {
+  if (page.runtime_data_mode !== "durable_only") return true;
+  return [
+    "/api/admin/listings/edit",
+    "/api/admin/listings/status",
+    "/api/admin/cases",
+    "/api/admin/cases/actions",
+    "/api/admin/cases/conditions",
+    "/api/admin/cases/conditions/actions",
+  ].includes(pathname);
 }
 
 function adminHomeForPage(page) {
@@ -282,12 +302,22 @@ const ADMIN_UI_COPY = {
     activeListings: "Активни обяви",
     translationReview: "Преводи за преглед",
     searchSignals: "Сигнали от търсенето",
+    websiteFunnel: "Фуния на сайта",
+    pageViews: "Преглеждания",
+    ctaClicks: "Натискания на действие",
+    funnelLeads: "Запитвания",
+    searchesPer100Views: "Търсения на 100 преглеждания",
+    ctaClickRate: "Дял на натисканията",
+    leadConversion: "Конверсия към запитване",
+    durableWebsiteLeads: "Реално записани запитвания",
+    leadTrackingGap: "Разлика в измерването",
     searchEvents: "Търсения",
     zeroResults: "Без резултати",
     popularFilters: "Популярни филтри",
     downloadSourceReport: "Изтегли CSV по източници",
     privacySafeReport: "Отчетът използва оперативните регистри и не включва лични контакти или съобщения.",
     readOnlyAccess: "Достъп само за преглед за тази роля.",
+    viewingFollowUpReadOnly: "Записването е скрито, докато надеждната история на действията не бъде включена.",
     minutesShort: "мин",
     noReportData: "Все още няма данни за този отчет.",
     auditActions: {
@@ -571,12 +601,22 @@ const ADMIN_UI_COPY = {
     activeListings: "Активные объекты",
     translationReview: "Переводы на проверке",
     searchSignals: "Сигналы поиска",
+    websiteFunnel: "Воронка сайта",
+    pageViews: "Просмотры",
+    ctaClicks: "Клики по действиям",
+    funnelLeads: "Заявки",
+    searchesPer100Views: "Поисков на 100 просмотров",
+    ctaClickRate: "Доля кликов",
+    leadConversion: "Конверсия в заявку",
+    durableWebsiteLeads: "Реально записанные заявки",
+    leadTrackingGap: "Разница измерения",
     searchEvents: "Поиски",
     zeroResults: "Без результатов",
     popularFilters: "Популярные фильтры",
     downloadSourceReport: "Скачать CSV по источникам",
     privacySafeReport: "Отчет использует операционные журналы и не включает личные контакты или сообщения.",
     readOnlyAccess: "Для этой роли доступен только просмотр.",
+    viewingFollowUpReadOnly: "Запись скрыта, пока не включено надежное хранение истории действий.",
     minutesShort: "мин",
     noReportData: "Для этого отчета пока нет данных.",
     auditActions: {
@@ -844,12 +884,22 @@ const ADMIN_UI_COPY = {
     activeListings: "Active listings",
     translationReview: "Translations to review",
     searchSignals: "Search signals",
+    websiteFunnel: "Website funnel",
+    pageViews: "Page views",
+    ctaClicks: "Action clicks",
+    funnelLeads: "Leads",
+    searchesPer100Views: "Searches per 100 views",
+    ctaClickRate: "Action click rate",
+    leadConversion: "Lead conversion",
+    durableWebsiteLeads: "Durable website leads",
+    leadTrackingGap: "Measurement gap",
     searchEvents: "Searches",
     zeroResults: "Zero results",
     popularFilters: "Popular filters",
     downloadSourceReport: "Download source CSV",
     privacySafeReport: "This report uses operating ledgers and excludes private contacts and messages.",
     readOnlyAccess: "This role has read-only access.",
+    viewingFollowUpReadOnly: "Recording is hidden until durable action history is enabled.",
     minutesShort: "min",
     noReportData: "There is no data for this report yet.",
     auditActions: {
@@ -919,6 +969,16 @@ function adminHref(path, page) {
   if (!locale || locale === "en") return path;
   const url = new URL(path, "http://ms-realty.local");
   url.searchParams.set("locale", locale);
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+function adminLocaleHref(page, locale) {
+  const url = new URL(page.path || "/admin", "http://ms-realty.local");
+  for (const [key, value] of Object.entries(page.filters || {})) {
+    if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, String(value));
+  }
+  if (page.listing?.id) url.searchParams.set("listingId", page.listing.id);
+  if (locale && locale !== "en") url.searchParams.set("locale", locale);
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
@@ -1133,7 +1193,13 @@ function adminNavigationGroups(page) {
     },
   ];
   return groups
-    .map((group) => ({ ...group, items: group.items.filter((item) => pageCan(page, item.capability)) }))
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) => pageCan(page, item.capability) &&
+          (page.runtime_data_mode !== "durable_only" || DURABLE_ONLY_NAV_IDS.has(item.id)),
+      ),
+    }))
     .filter((group) => group.items.length);
 }
 
@@ -1270,7 +1336,7 @@ function Topbar({ page, title }) {
           "a",
           {
             key: code,
-            href: code === "en" ? page.path : `${page.path}?locale=${code}`,
+            href: adminLocaleHref(page, code),
             "data-on": code === page.workspace?.locale ? "1" : "0",
             "aria-current": code === page.workspace?.locale ? "page" : undefined,
           },
@@ -1945,6 +2011,28 @@ function OperationsReportsBody({ page }) {
       h(StatGrid, { metrics }),
       h(
         Panel,
+        { title: ui.websiteFunnel, "data-report-section": "website-funnel" },
+        h(
+          "div",
+          { className: "adm-report-grid adm-report-grid--two" },
+          h("section", { className: "adm-report-card" }, h(ReportBars, {
+            rows: report.website_funnel.stages,
+            ui,
+            keyLabel: (row) => ({ page_view: ui.pageViews, search: ui.searchEvents, cta_click: ui.ctaClicks, lead: ui.funnelLeads })[row.key] || row.key,
+          })),
+          h(
+            "dl",
+            { className: "adm-report-facts" },
+            h("div", null, h("dt", null, ui.searchesPer100Views), h("dd", null, report.website_funnel.searches_per_100_views)),
+            h("div", null, h("dt", null, ui.ctaClickRate), h("dd", null, `${report.website_funnel.cta_click_rate_pct}%`)),
+            h("div", null, h("dt", null, ui.leadConversion), h("dd", null, `${report.website_funnel.lead_conversion_pct}%`)),
+            h("div", null, h("dt", null, ui.durableWebsiteLeads), h("dd", null, report.website_funnel.durable_website_leads)),
+            h("div", null, h("dt", null, ui.leadTrackingGap), h("dd", { "data-funnel-tracking-status": report.website_funnel.lead_tracking_status }, report.website_funnel.lead_tracking_gap)),
+          ),
+        ),
+      ),
+      h(
+        Panel,
         { title: ui.leadVolume, "data-report-section": "lead-volume" },
         h(
           "div",
@@ -2056,10 +2144,15 @@ function OperationsReportsBody({ page }) {
    Lead inbox (ui_kits/crm Dashboard + Messages patterns)
    ============================================================ */
 
-function ReplyDeliveryForm({ page, reply, delivery, copy, ui }) {
+function ReplyDeliveryForm({ page, lead, reply, delivery, copy, ui }) {
   const failed = delivery?.status === "failed";
   const status = delivery?.status || "queued";
   const operator = currentOperatorId(page, reply.reviewer);
+  const canSendViaGoogle = Boolean(page.providerConnections?.google?.connected && lead?.contact?.email);
+  const canSendViaWhatsApp = Boolean(
+    page.providerConnections?.whatsapp?.connected && (lead?.contact?.whatsapp || lead?.contact?.phone),
+  );
+  const canSendViaViber = Boolean(page.providerConnections?.viber?.connected && lead?.contact?.viber_user_id);
   return h(
     "details",
     { className: "adm-delivery", open: failed, "data-reply-delivery": status },
@@ -2129,9 +2222,122 @@ function ReplyDeliveryForm({ page, reply, delivery, copy, ui }) {
               label(copy, "requeueReply", "Return to queue"),
             )
           : [
+              canSendViaGoogle
+                ? h(
+                    "button",
+                    {
+                      key: "gmail-send",
+                      type: "submit",
+                      name: "provider",
+                      value: "google",
+                      formNoValidate: true,
+                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                    },
+                    label(copy, "sendWithGmail", "Send with Gmail"),
+                  )
+                : null,
+              canSendViaWhatsApp
+                ? h(
+                    "button",
+                    {
+                      key: "whatsapp-send",
+                      type: "submit",
+                      name: "provider",
+                      value: "whatsapp",
+                      formNoValidate: true,
+                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                    },
+                    label(copy, "sendWithWhatsApp", "Send with WhatsApp"),
+                  )
+                : null,
+              canSendViaViber
+                ? h(
+                    "button",
+                    {
+                      key: "viber-send",
+                      type: "submit",
+                      name: "provider",
+                      value: "viber",
+                      formNoValidate: true,
+                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                    },
+                    label(copy, "sendWithViber", "Send with Viber"),
+                  )
+                : null,
               h("button", { key: "sent", type: "submit", name: "action", value: "sent", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "markSent", "Mark sent")),
               h("button", { key: "failed", type: "submit", name: "action", value: "failed", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "recordDeliveryFailure", "Record delivery failure")),
             ],
+      ),
+      h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-delivery-status": "true" }),
+    ),
+  );
+}
+
+function DirectProviderReplyForm({ page, lead, copy, ui }) {
+  const providers = [
+    page.providerConnections?.google?.connected && lead?.contact?.email ? ["google", "Gmail"] : null,
+    page.providerConnections?.whatsapp?.connected && (lead?.contact?.whatsapp || lead?.contact?.phone)
+      ? ["whatsapp", "WhatsApp"]
+      : null,
+    page.providerConnections?.viber?.connected && lead?.contact?.viber_user_id ? ["viber", "Viber"] : null,
+  ].filter(Boolean);
+  if (!providers.length) {
+    return h(
+      "p",
+      { className: "adm-reply-status", role: "status" },
+      label(copy, "providerReplyUnavailable", "No connected provider can reach this lead. "),
+      h("a", { href: "/admin/connect" }, label(copy, "openConnectionCenter", "Open Connection Center")),
+    );
+  }
+  return h(
+    "details",
+    { className: "adm-reply", "data-direct-provider-reply": "true" },
+    h(
+      "summary",
+      { className: "mk-btn mk-btn--primary mk-btn--sm" },
+      h(Icon, { name: "send", size: 16 }),
+      h("span", null, label(copy, "approveAndSend", "Approve and send")),
+    ),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/replies/delivery",
+        className: "adm-reply-form",
+        "data-reply-delivery-form": "true",
+        "data-reply-delivery-saving": label(copy, "providerReplySending", "Sending approved reply…"),
+        "data-reply-delivery-success": label(copy, "providerReplySent", "Provider confirmed the reply."),
+        "data-reply-delivery-failure": label(copy, "providerReplyFailed", "The provider did not confirm the reply."),
+      },
+      h("input", { type: "hidden", name: "leadId", value: lead.lead_id }),
+      h("input", { type: "hidden", name: "approved", value: "true" }),
+      h("input", { type: "hidden", name: "idempotencyKey", value: `provider:${randomUUID()}` }),
+      h(CommunicationTemplateSelect, { templates: page.communicationTemplates?.[lead.lead_id] || [], copy, ui }),
+      h(
+        "label",
+        null,
+        label(copy, "reviewedReply", "Reviewed reply"),
+        h("textarea", { name: "reviewedReply", rows: 6, maxLength: 4096, required: true }),
+      ),
+      h(
+        "label",
+        null,
+        label(copy, "deliveryProvider", "Delivery provider"),
+        h(
+          "select",
+          { name: "provider", required: true },
+          ...providers.map(([value, text]) => h("option", { key: value, value }, text)),
+        ),
+      ),
+      h(
+        "button",
+        { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
+        label(copy, "approveAndSend", "Approve and send"),
+      ),
+      h(
+        "small",
+        { className: "adm-lead-context" },
+        label(copy, "providerApprovalNotice", "Sending records your operator identity and the exact approved text in an encrypted receipt."),
       ),
       h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-delivery-status": "true" }),
     ),
@@ -3878,7 +4084,10 @@ function LeadInboxBody({ page }) {
                   h(
                     "td",
                     { className: "adm-reply-cell", "data-lead-column": "reply", "data-label": leadColumns.reply },
-                    queuedReply && delivery && !delivered ? h(ReplyDeliveryForm, { page, reply: queuedReply, delivery, copy, ui }) : null,
+                    queuedReply && delivery && !delivered ? h(ReplyDeliveryForm, { page, lead, reply: queuedReply, delivery, copy, ui }) : null,
+                    page.leadSourceDurable && !(queuedReply && delivery && !delivered) && pageCan(page, "operations:write")
+                      ? h(DirectProviderReplyForm, { page, lead, copy, ui })
+                      : null,
                     h(
                       "form",
                       {
@@ -3896,6 +4105,7 @@ function LeadInboxBody({ page }) {
                           "replyDraftUnavailable",
                           "Hermes is not configured in this environment. Use an approved template or write the reply manually.",
                         ),
+                        hidden: page.leadSourceDurable || undefined,
                       },
                       h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
                       h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
@@ -3908,7 +4118,7 @@ function LeadInboxBody({ page }) {
                     ),
                     h(
                       "details",
-                      { className: "adm-reply" },
+                      { className: "adm-reply", hidden: page.leadSourceDurable || undefined },
                       h("summary", { className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "send", size: 16 }), h("span", null, label(copy, "queueReply", "Queue reply"))),
                       h(
                         "form",
@@ -3982,6 +4192,7 @@ function datetimeLocalValue(value) {
 
 function ViewingFollowUpQueue({ page, copy, ui }) {
   const queue = page.viewingFollowUpQueue || { rows: [] };
+  const writable = page.viewingFollowUpWritable !== false;
   const columns = {
     viewing: label(copy, "viewings", "Viewings"),
     task: label(copy, "task", "Task"),
@@ -4045,7 +4256,8 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                   h(
                     "td",
                     { "data-viewing-column": "action", "data-label": columns.action },
-                    h(
+                    writable
+                      ? h(
                       "details",
                       { className: "adm-reply", "data-viewing-follow-up-actions": "true" },
                       h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "calendar-check", size: 16 }), h("span", null, label(copy, "recordOutcome", "Record"))),
@@ -4086,7 +4298,8 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                           h("button", { type: "submit", name: "action", value: "note", className: "mk-btn mk-btn--ghost mk-btn--sm" }, label(copy, "addNote", "Add note")),
                         ),
                       ),
-                    ),
+                        )
+                      : h("p", { className: "adm-note", role: "note", "data-viewing-follow-up-read-only": "true" }, ui.viewingFollowUpReadOnly),
                   ),
                 ),
               ),
@@ -4579,7 +4792,9 @@ function ListingManagerBody({ page }) {
                           "div",
                           { className: "adm-task-list__actions" },
                           h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: payloadAdminListingHref(row.id, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
-                          h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+                          page.runtime_data_mode === "durable_only"
+                            ? null
+                            : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
                         ),
                       ),
                     ),
@@ -4591,7 +4806,9 @@ function ListingManagerBody({ page }) {
           : h("p", { className: "adm-empty" }, label(copy, "noResults", "No results.")),
       ),
       h(Pagination, { page, path: "/admin/listings" }),
-      canEditContent ? h(PublicationSchedulePanel, { page }) : null,
+      canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/listings/publication-schedules")
+        ? h(PublicationSchedulePanel, { page })
+        : null,
     ],
   });
 }
@@ -4870,7 +5087,9 @@ function ListingEditorBody({ page }) {
           subtitle: `${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
+        page.runtime_data_mode === "durable_only"
+          ? null
+          : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
       h(
         "nav",
@@ -5068,7 +5287,7 @@ function ListingEditorBody({ page }) {
                       sourceUrl
                         ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
                         : null,
-                      canEditContent
+                      canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/media/reviews")
                         ? h(
                             "details",
                             { className: "adm-media-review", "data-media-review-disclosure": item.asset_id },
@@ -5132,7 +5351,7 @@ function ListingEditorBody({ page }) {
                   })
                 : h("p", { className: "adm-note", "data-media-empty": "true" }, ui.noReviewableMedia),
             ),
-            canEditContent
+            canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/tours/approve")
               ? h(
                   "form",
           {
@@ -5722,8 +5941,8 @@ function MigrationReviewBody({ page }) {
   );
   const title = label(copy, "migrationReview", "Migration review");
   const liveReportSources = [
-    ["typesense_meilisearch_sync", "Typesense / Meilisearch sync"],
-    ["typesense_meilisearch_query", "Typesense / Meilisearch query"],
+    ["postgres_search_sync", "Postgres search projection"],
+    ["postgres_search_query", "Postgres search query"],
     ["hermes_draft_worker", "Hermes draft worker"],
   ];
   const evidenceLinks = [

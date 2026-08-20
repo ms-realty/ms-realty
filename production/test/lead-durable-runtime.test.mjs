@@ -13,6 +13,7 @@ const STORE_CONFIG = {
   payloadSecret: "p".repeat(40),
   databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
   contactSecret: CONTACT_SECRET,
+  workspaceId: "workspace-sandanski",
 };
 
 function leadInput() {
@@ -30,11 +31,13 @@ function leadInput() {
 }
 
 function successfulStore(calls) {
-  return async ({ lead, contactSecret, receivedAt }) => {
-    calls.push({ lead, contactSecret, receivedAt });
+  return async ({ lead, contactSecret, marketingOptIn, receivedAt, sellerPipelineCreatedAt, workspaceId }) => {
+    calls.push({ lead, contactSecret, marketingOptIn, receivedAt, sellerPipelineCreatedAt, workspaceId });
     return {
       lead: { lead_id: lead.lead.id, idempotency_key: lead.lead.idempotency_key },
       contactVault: { lead_id: lead.lead.id, stored_at: receivedAt, encrypted: true, durable: true },
+      consent: { consent_type: "inquiry_follow_up", subject_id: lead.lead.id },
+      sellerPipeline: null,
       created: true,
       idempotent: false,
     };
@@ -50,10 +53,12 @@ test("Next lead intake uses the durable store without touching lead files", asyn
     PAYLOAD_SECRET: STORE_CONFIG.payloadSecret,
     DATABASE_URL: STORE_CONFIG.databaseUrl,
     MS_REALTY_LEAD_CONTACT_KEY: CONTACT_SECRET,
+    MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId,
     MS_REALTY_LEAD_LEDGER_PATH: path.join(dir, "leads.jsonl"),
     MS_REALTY_LEAD_CONTACT_VAULT_PATH: path.join(dir, "contacts.jsonl"),
     MS_REALTY_CONSENT_LEDGER_PATH: path.join(dir, "consents.jsonl"),
     MS_REALTY_EVENT_LEDGER_PATH: path.join(dir, "events.jsonl"),
+    MS_REALTY_SELLER_PIPELINE_PATH: path.join(dir, "seller-pipeline.jsonl"),
     MS_REALTY_RECEIVED_AT: "2026-08-10T09:00:00.000Z",
   });
   config.persistLeadIntakeDurably = successfulStore(calls);
@@ -72,20 +77,25 @@ test("Next lead intake uses the durable store without touching lead files", asyn
   assert.equal(calls.length, 1);
   assert.equal(calls[0].lead.lead.idempotency_key, "durable-runtime-probe-1");
   assert.equal(calls[0].contactSecret, CONTACT_SECRET);
+  assert.equal(calls[0].workspaceId, STORE_CONFIG.workspaceId);
   assert.equal(body.contactVault.durable, true);
   assert.equal(body.ledger.idempotency_key, "durable-runtime-probe-1");
   assert.equal(fs.existsSync(config.leadLedgerPath), false);
   assert.equal(fs.existsSync(config.leadContactVaultPath), false);
+  assert.equal(fs.existsSync(config.consentLedgerPath), false);
+  assert.equal(fs.existsSync(config.eventLedgerPath), true);
+  assert.equal(fs.existsSync(config.sellerPipelinePath), false);
 });
 
 test("requested durable storage fails closed when its runtime is incomplete", async () => {
-  for (const override of [{ DATABASE_URL: "" }, { MS_REALTY_LEAD_CONTACT_KEY: "short" }]) {
+  for (const override of [{ DATABASE_URL: "" }, { MS_REALTY_LEAD_CONTACT_KEY: "short" }, { MS_REALTY_WORKSPACE_ID: "" }]) {
     const config = appApiConfigFromEnv({
       ...approvedPublicSeedFixtureEnv(),
       MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
       PAYLOAD_SECRET: STORE_CONFIG.payloadSecret,
       DATABASE_URL: STORE_CONFIG.databaseUrl,
       MS_REALTY_LEAD_CONTACT_KEY: CONTACT_SECRET,
+      MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId,
       ...override,
     });
     config.persistLeadIntakeDurably = async () => {
@@ -118,6 +128,7 @@ test("Next lead intake requires an exact same-origin browser Origin", async () =
     PAYLOAD_SECRET: STORE_CONFIG.payloadSecret,
     DATABASE_URL: STORE_CONFIG.databaseUrl,
     MS_REALTY_LEAD_CONTACT_KEY: CONTACT_SECRET,
+    MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId,
     MS_REALTY_CONSENT_LEDGER_PATH: path.join(dir, "consents.jsonl"),
     MS_REALTY_EVENT_LEDGER_PATH: path.join(dir, "events.jsonl"),
   });
@@ -182,6 +193,30 @@ test("the standalone HTTP runtime uses the same durable lead path", async () => 
   assert.equal(calls.length, 1);
   assert.equal(calls[0].lead.lead.idempotency_key, "durable-runtime-probe-1");
   assert.equal(response.body.contactVault.durable, true);
+});
+
+test("standalone admin lead reads pass an authenticated workspace scope to the durable reader", async () => {
+  const calls = [];
+  const app = createHttpApp({
+    seed: approvedPublicSeedFixture(),
+    leadDurableStore: STORE_CONFIG,
+    readLeadIntakes: async (input) => {
+      calls.push(input);
+      return [];
+    },
+  });
+  const response = await dispatchHttp(app, {
+    method: "GET",
+    url: "/api/admin/leads",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+
+  assert.equal(response.status, 200, JSON.stringify(response.body));
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].admin, true);
+  assert.deepEqual(calls[0].workspaceIds, ["workspace-sandanski"]);
+  assert.equal(calls[0].user.role, "admin");
+  assert.deepEqual(response.body.leads, []);
 });
 
 test("standalone lead intake requires an exact same-origin browser Origin", async () => {

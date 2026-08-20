@@ -178,6 +178,41 @@ function containsPrivateField(value) {
   return Object.entries(value).some(([key, child]) => PRIVATE_KEYS.has(key) || containsPrivateField(child));
 }
 
+function websiteFunnel(events, leads, generatedAt) {
+  const count = (type) => events.filter((event) => event.type === type).length;
+  const pageViews = count("page_view");
+  const searches = count("search");
+  const ctaClicks = count("cta_click");
+  const trackedLeads = count("lead_submitted");
+  const recordedTimes = events.map((event) => Date.parse(event.recorded_at)).filter(Number.isFinite);
+  const periodStartedAt = recordedTimes.length ? new Date(Math.min(...recordedTimes)).toISOString() : null;
+  const periodEndedAt = new Date(generatedAt).toISOString();
+  const websiteLeads = periodStartedAt
+    ? leads.filter((lead) => {
+        const receivedAt = Date.parse(lead.received_at);
+        return String(lead.source || "").startsWith("website_") && receivedAt >= Date.parse(periodStartedAt) && receivedAt <= Date.parse(periodEndedAt);
+      })
+    : [];
+  const leadTrackingGap = websiteLeads.length - trackedLeads;
+  return {
+    measurement: "aggregate_privacy_safe_events",
+    period_started_at: periodStartedAt,
+    period_ended_at: periodEndedAt,
+    stages: [
+      { key: "page_view", count: pageViews },
+      { key: "search", count: searches },
+      { key: "cta_click", count: ctaClicks },
+      { key: "lead", count: trackedLeads },
+    ],
+    searches_per_100_views: percent(searches, pageViews),
+    cta_click_rate_pct: percent(ctaClicks, pageViews),
+    lead_conversion_pct: percent(trackedLeads, pageViews),
+    durable_website_leads: websiteLeads.length,
+    lead_tracking_gap: leadTrackingGap,
+    lead_tracking_status: leadTrackingGap === 0 ? "matched" : "mismatch",
+  };
+}
+
 export function buildOperationsReport({
   leads = [],
   replies = [],
@@ -194,6 +229,7 @@ export function buildOperationsReport({
   translationTasks = [],
   seed = { records: [] },
   searchAnalytics = { summary: { search_events: 0, zero_result_events: 0, filtered_search_events: 0, locales: [], popular_filters: [], zero_result_queries: [] } },
+  funnelEvents = [],
   generatedAt = new Date().toISOString(),
 } = {}) {
   const nowTime = Date.parse(generatedAt);
@@ -260,6 +296,7 @@ export function buildOperationsReport({
     task_health: tasks,
     listing_inventory: inventory,
     search: searchAnalytics.summary,
+    website_funnel: websiteFunnel(funnelEvents, leads, generatedAt),
   };
   assertOperationsReport(report);
   return report;

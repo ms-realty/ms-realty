@@ -195,24 +195,21 @@ snapshot to stay blocked (with `external_seo_exports`, `live_services`,
 `redirect_reviews` among blockers) — clearing `payload_runtime` evidence is
 CI-safe; do **not** regenerate the committed `launch-readiness.json` today.
 
-## 5. Phase 3 — live search (optional today; decision box)
+## 5. Phase 3 — canonical Postgres live search
 
-Search fails closed by design: `/{locale}/search` and `/api/search` return 503
-until an engine is configured. PR #16 selected **Typesense** for production
-review.
+Production search has one fail-closed invariant: set
+`MS_REALTY_SEARCH_ENGINE=postgres` together with `DATABASE_URL` and
+`PAYLOAD_SECRET`. A missing value or any legacy engine selection blocks both
+runtime search and live-service provisioning. Typesense and Meilisearch are
+retained only for explicit non-production compatibility tooling; their URLs
+and credentials are ignored by the production runtime.
 
-- **Option A (recommended when billing allows): Typesense Cloud**, smallest
-  single node (~$22/mo, card required — conflicts with the no-card constraint;
-  if the PayPal-only constraint still holds, defer).
-- **Option B: keep 503.** Honest state; listings remain fully browsable via
-  location/listing pages. Zero cost.
-- Self-hosting (VPS) is the domain-era plan alongside Meilisearch + Hermes.
-
-If provisioning: set Worker secrets `TYPESENSE_URL`, `TYPESENSE_API_KEY`,
-`TYPESENSE_COLLECTION`, then push the projection and verify from the repo:
+Apply the public-search migration, capture the authoritative Postgres
+projection and query evidence, then verify the public route:
 
 ```bash
-TYPESENSE_URL=... TYPESENSE_API_KEY=... npm run search:sync
+MS_REALTY_SEARCH_ENGINE=postgres DATABASE_URL=... PAYLOAD_SECRET=... npm run search:sync
+MS_REALTY_SEARCH_ENGINE=postgres DATABASE_URL=... PAYLOAD_SECRET=... npm run search:query
 curl -sS 'https://ms-realty.ms-realty-bg.workers.dev/api/search?q=sandanski&locale=bg' | head -c 300
 ```
 
@@ -272,7 +269,7 @@ Tractability, easiest first:
 | `payload_runtime` | Phase 2 of this plan | **cleared by this plan** |
 | `redirect_reviews` | 292 human same-content decisions (pages/posts/taxonomies) in `migration/reviews/redirect-approvals.csv` | repo-only, human judgement |
 | `listing_quality_review` | complete 165-row reviewer CSV (`migration/reviews/listing-quality.csv`) | human (broker/editor) |
-| `live_services` | real Typesense + Meilisearch + self-hosted Hermes on non-local hosts + capture reports | infra + money |
+| `live_services` | live Postgres sync/query evidence + self-hosted Hermes on non-local hosts + capture reports | infra + money |
 | `external_seo_exports` | verified GSC + Yandex properties for both legacy domains + backlinks export | **domain-dependent** |
 | `monitoring_rollback` | monitoring provider run + canary + isolated rollback drill, evidence <24 h old; transitively needs SEO exports | domain-dependent, perishable |
 | `production_recovery` | off-site encrypted backup + isolated restore drill, two distinct named humans | provider + humans |
@@ -363,8 +360,8 @@ stored contact, so it belongs in the password manager, not only in Cloudflare.
       case-authority writes verified, `payload:preflight` green
 - [x] Phase 4: uptime monitor armed (`health-check.yml`, hourly, fails loud on
       unhealthy response; GitHub emails the workflow author)
-- [x] Phase 3 decision recorded: deferred — Typesense Cloud needs a card, the
-      account is PayPal-only; `/search` stays honestly fail-closed until then
+- [x] Phase 3 contract corrected: production search is Postgres-only and stays
+      fail-closed until its runtime configuration and live evidence pass
 
 Everything unchecked is an operator (dashboard/provider) action with exact
 steps above; no further code is required to complete them.

@@ -4,7 +4,10 @@ import path from "node:path";
 import { derivePrimaryAreaSqm } from "./listing-facts.mjs";
 import { fromRoot } from "./paths.mjs";
 import { loadPayloadCmsImportRuntime } from "./payload-cms-import.mjs";
+import { foldSearchText } from "./search-fold.mjs";
+import { assertProductionSearchEngine, isProductionEnvironment } from "./launch-service-contract.mjs";
 import { normalizeSearchIntent } from "./search-intent.mjs";
+import { assertExactRedactedPostgresTarget, redactPostgresDatabaseTarget } from "./postgres-target.mjs";
 import {
   fetchSearchService,
   privateSearchServiceNetworkAllowed,
@@ -15,17 +18,50 @@ import {
 import { createLedgerStore } from "./sqlite-ledger.mjs";
 
 export const DEFAULT_SEARCH_DATA_DIR = fromRoot("search", "data");
-export const DEFAULT_SEARCH_ENGINE_SYNC_REPORT = fromRoot("production", "data", "search-engine-sync-report.json");
+export const DEFAULT_POSTGRES_SEARCH_SYNC_REPORT = fromRoot("production", "data", "postgres-search-sync-report.json");
 export const DEFAULT_SEARCH_ENGINE_SYNC_SMOKE = fromRoot("production", "data", "search-engine-sync-smoke.json");
-export const DEFAULT_SEARCH_ENGINE_QUERY_REPORT = fromRoot("production", "data", "search-engine-query-report.json");
+export const DEFAULT_POSTGRES_SEARCH_QUERY_REPORT = fromRoot("production", "data", "postgres-search-query-report.json");
 export const DEFAULT_SEARCH_ENGINE_QUERY_SMOKE = fromRoot("production", "data", "search-engine-query-smoke.json");
 export const DEFAULT_SEARCH_OUTBOX_PATH = fromRoot("production", "data", "search-outbox.jsonl");
+
+// Compatibility exports for local multi-engine tooling. Live launch evidence uses the explicit Postgres names above.
+export const DEFAULT_SEARCH_ENGINE_SYNC_REPORT = DEFAULT_POSTGRES_SEARCH_SYNC_REPORT;
+export const DEFAULT_SEARCH_ENGINE_QUERY_REPORT = DEFAULT_POSTGRES_SEARCH_QUERY_REPORT;
 
 const SEARCH_ENGINES = new Set(["postgres", "typesense", "meilisearch"]);
 const APPROVED_PUBLICATION_STATE = "published";
 const BROKER_VERIFIED = "broker_verified";
 const MAX_PUBLIC_SEARCH_HITS = 250;
 const POSTGRES_PUBLIC_SEARCH_VIEW = "ms_realty_public_search_documents";
+const POSTGRES_PUBLIC_SEARCH_CARD_COLUMNS = Object.freeze([
+  "id",
+  "source_listing_id",
+  "listing_reference",
+  "locale",
+  "locale_path",
+  "title",
+  "description",
+  "property_family",
+  "property_subtype",
+  "location_label",
+  "municipality",
+  "district",
+  "region_id",
+  "country_code",
+  "geography_id",
+  "geography_path",
+  "price_amount",
+  "price_currency",
+  "price_on_request",
+  "offer_type",
+  "listing_status",
+  "bedrooms_count",
+  "primary_area_sqm",
+  "condition",
+  "public_latitude",
+  "public_longitude",
+  "public_location_precision",
+]);
 const POSTGRES_VIEW_COLUMNS = Object.freeze([
   "id",
   "source_listing_id",
@@ -131,9 +167,7 @@ function redactedUrl(value) {
 }
 
 function redactedDatabaseTarget(value) {
-  const parsed = new URL(required(value, "DATABASE_URL"));
-  if (!["postgres:", "postgresql:"].includes(parsed.protocol)) throw new Error("DATABASE_URL must use postgres:// or postgresql://");
-  return `${parsed.protocol}//${parsed.hostname}:${Number(parsed.port || 5432)}/${parsed.pathname.replace(/^\//, "")}`;
+  return redactPostgresDatabaseTarget(required(value, "DATABASE_URL"));
 }
 
 async function loadPostgresSql() {
@@ -141,21 +175,6 @@ async function loadPostgresSql() {
   const module = await postgresSqlModulePromise;
   if (typeof module?.sql !== "function") throw new Error("@payloadcms/db-postgres did not expose sql");
   return module.sql;
-}
-
-const CYRILLIC_TO_LATIN = Object.freeze({
-  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m",
-  н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh", щ: "sht",
-  ъ: "a", ы: "y", ь: "y", э: "e", ю: "yu", я: "ya", ѝ: "i",
-});
-
-function foldSearchText(value) {
-  return [...String(value ?? "").toLocaleLowerCase().normalize("NFKD").replace(/\p{M}/gu, "")]
-    .map((character) => CYRILLIC_TO_LATIN[character] || character)
-    .join("")
-    .replace(/[^\p{L}\p{N}\s-]+/gu, " ")
-    .replace(/\s+/gu, " ")
-    .trim();
 }
 
 function foldedTokens(value) {
@@ -566,10 +585,6 @@ function normalizedSearchEngine(value) {
   return engine || null;
 }
 
-function productionEnvironment(value) {
-  return String(value || "").trim().toLowerCase() === "production";
-}
-
 export function selectSearchRuntime({
   engine = process.env.MS_REALTY_SEARCH_ENGINE,
   environment = process.env.NODE_ENV,
@@ -578,22 +593,26 @@ export function selectSearchRuntime({
   meilisearch = {},
 } = {}) {
   const selected = normalizedSearchEngine(engine);
-  const production = productionEnvironment(environment);
+  const production = isProductionEnvironment(environment);
+  if (production) {
+    assertProductionSearchEngine(selected);
+    if (missingPostgresSearchConfig(postgres)) {
+      throw new Error("Payload Postgres search configuration is required in production");
+    }
+    return { engine: "postgres", mode: "single" };
+  }
   if (selected === "postgres") {
     if (missingPostgresSearchConfig(postgres)) {
-      if (production) throw new Error("Payload Postgres search configuration is required in production");
       return { engine: "postgres", mode: "local_fallback" };
     }
     return { engine: "postgres", mode: "single" };
   }
   if (!selected) {
-    if (!missingPostgresSearchConfig(postgres)) return { engine: "postgres", mode: production ? "single" : "authoritative_local" };
-    if (production) throw new Error("Payload Postgres search is required in production");
+    if (!missingPostgresSearchConfig(postgres)) return { engine: "postgres", mode: "authoritative_local" };
     return { engine: null, mode: "legacy_fallback" };
   }
   const config = selected === "typesense" ? typesense : meilisearch;
   if (missingSearchEngineConfig(config)) {
-    if (production) throw new Error(`${selected} search engine configuration is required in production`);
     return { engine: selected, mode: "local_fallback" };
   }
   return { engine: selected, mode: "single" };
@@ -1329,44 +1348,51 @@ export async function runSearchEngineSync({
   void typesense;
   void meilisearch;
   void fetchImpl;
-  const approved = await postgresProjectionSnapshot({ postgres, projection });
-  const viewDocuments = await readPostgresProjectionDocuments({ postgres });
-  const digest = crypto.createHash("sha256").update(JSON.stringify(viewDocuments)).digest("hex");
-  if (digest !== approved.source.digest) {
-    throw new Error("Payload Postgres search view does not match the authoritative Payload projection");
-  }
-  const databaseTarget = redactedDatabaseTarget((postgres.env || process.env).DATABASE_URL);
-  const engines = [
-    {
-      engine: "postgres",
-      target: POSTGRES_PUBLIC_SEARCH_VIEW,
-      documents: viewDocuments.length,
-      digest,
-      locale_codes: [...new Set(viewDocuments.map((document) => document.locale).filter(Boolean))].sort(),
-      operations: [
-        {
-          method: "SELECT",
-          status: 200,
-          url: databaseTarget,
-          rows: viewDocuments.length,
-        },
-      ],
-    },
-  ];
+  const needsRuntime = !postgres.payload && (!projection || typeof postgres.snapshotQueryImpl !== "function");
+  const ownedRuntime = needsRuntime ? await postgresQueryRuntime(postgres) : null;
+  const runtimePostgres = ownedRuntime ? { ...postgres, payload: ownedRuntime } : postgres;
+  try {
+    const approved = await postgresProjectionSnapshot({ postgres: runtimePostgres, projection });
+    const viewDocuments = await readPostgresProjectionDocuments({ postgres: runtimePostgres });
+    const digest = crypto.createHash("sha256").update(JSON.stringify(viewDocuments)).digest("hex");
+    if (digest !== approved.source.digest) {
+      throw new Error("Payload Postgres search view does not match the authoritative Payload projection");
+    }
+    const databaseTarget = redactedDatabaseTarget((postgres.env || process.env).DATABASE_URL);
+    const engines = [
+      {
+        engine: "postgres",
+        target: POSTGRES_PUBLIC_SEARCH_VIEW,
+        documents: viewDocuments.length,
+        digest,
+        locale_codes: [...new Set(viewDocuments.map((document) => document.locale).filter(Boolean))].sort(),
+        operations: [
+          {
+            method: "SELECT",
+            status: 200,
+            url: databaseTarget,
+            rows: viewDocuments.length,
+          },
+        ],
+      },
+    ];
 
-  return {
-    evidence_scope: approved ? "live" : "smoke",
-    generated_at: generatedAt,
-    source: approved?.source || fixtureSource(viewDocuments.length),
-    summary: {
-      engines: engines.length,
-      targets: { postgres: POSTGRES_PUBLIC_SEARCH_VIEW },
-      documents_per_engine: engines.map((engine) => engine.documents),
-      total_operations: engines.reduce((sum, engine) => sum + engine.operations.length, 0),
-      database_target: databaseTarget,
-    },
-    engines,
-  };
+    return {
+      evidence_scope: approved ? "live" : "smoke",
+      generated_at: generatedAt,
+      source: approved?.source || fixtureSource(viewDocuments.length),
+      summary: {
+        engines: engines.length,
+        targets: { postgres: POSTGRES_PUBLIC_SEARCH_VIEW },
+        documents_per_engine: engines.map((engine) => engine.documents),
+        total_operations: engines.reduce((sum, engine) => sum + engine.operations.length, 0),
+        database_target: databaseTarget,
+      },
+      engines,
+    };
+  } finally {
+    await ownedRuntime?.destroy?.();
+  }
 }
 
 export function assertSearchEngineSyncReport(report) {
@@ -1385,6 +1411,7 @@ export function assertSearchEngineSyncReport(report) {
   }
   const operationCount = report.engines.reduce((sum, engine) => sum + (engine.operations || []).length, 0);
   if (report.summary.total_operations !== operationCount) throw new Error("Search sync summary operations must match engine rows");
+  const databaseTarget = assertExactRedactedPostgresTarget(report.summary.database_target, "Search sync summary database target");
   for (const engine of report.engines) {
     if (engine.target !== POSTGRES_PUBLIC_SEARCH_VIEW) throw new Error("Postgres sync target is invalid");
     if (report.summary.targets?.postgres !== POSTGRES_PUBLIC_SEARCH_VIEW) throw new Error("Search sync summary target must match the Postgres view");
@@ -1392,7 +1419,8 @@ export function assertSearchEngineSyncReport(report) {
       throw new Error("Postgres document count must match the current Payload projection");
     }
     for (const operation of engine.operations || []) {
-      if (!String(operation.url || "").startsWith("postgres")) throw new Error("Postgres sync operation must record the database target");
+      const operationTarget = assertExactRedactedPostgresTarget(operation.url, "Postgres sync operation database target");
+      if (operationTarget !== databaseTarget) throw new Error("Postgres sync operation must match the summary database target");
       if (operation.method !== "SELECT") throw new Error("Postgres sync operation method is invalid");
       if (operation.status !== 200) throw new Error("Postgres sync operation status is invalid");
     }
@@ -1518,6 +1546,13 @@ function postgresRows(result) {
 }
 
 function postgresSearchHit(row = {}) {
+  const optionalText = (value) => String(value ?? "").trim() || null;
+  const optionalNumber = (value) => {
+    if (value === null || value === undefined || value === "") return null;
+    const number = Number(value);
+    if (!Number.isFinite(number)) throw new Error("Postgres public search returned an invalid numeric card field");
+    return number;
+  };
   return {
     id: String(row.id || "").trim(),
     source_listing_id: String(row.source_listing_id || "").trim(),
@@ -1525,6 +1560,27 @@ function postgresSearchHit(row = {}) {
     locale: String(row.locale || "").trim(),
     locale_path: String(row.locale_path || "").trim(),
     title: String(row.title || "").trim(),
+    description: optionalText(row.description),
+    property_family: optionalText(row.property_family),
+    property_subtype: optionalText(row.property_subtype),
+    location_label: optionalText(row.location_label),
+    municipality: optionalText(row.municipality),
+    district: optionalText(row.district),
+    region_id: optionalText(row.region_id),
+    country_code: optionalText(row.country_code),
+    geography_id: optionalText(row.geography_id),
+    geography_path: Array.isArray(row.geography_path) ? row.geography_path.map(String) : [],
+    price_amount: optionalNumber(row.price_amount),
+    price_currency: optionalText(row.price_currency),
+    price_on_request: row.price_on_request === true,
+    offer_type: optionalText(row.offer_type),
+    listing_status: optionalText(row.listing_status),
+    bedrooms_count: optionalNumber(row.bedrooms_count),
+    primary_area_sqm: optionalNumber(row.primary_area_sqm),
+    condition: optionalText(row.condition),
+    public_latitude: optionalNumber(row.public_latitude),
+    public_longitude: optionalNumber(row.public_longitude),
+    public_location_precision: optionalText(row.public_location_precision),
   };
 }
 
@@ -1554,6 +1610,16 @@ function postgresLocationCondition(sql, locationIds = []) {
   return sql`(${sql.join(clauses, sql` OR `)})`;
 }
 
+function postgresGeographyCondition(sql, value) {
+  return sql`d."geography_path" @> ${JSON.stringify([value])}::jsonb`;
+}
+
+function postgresResultCount(rows) {
+  const value = Number(rows[0]?.total_count ?? 0);
+  if (!Number.isSafeInteger(value) || value < 0) throw new Error("Postgres public search returned an invalid total count");
+  return value;
+}
+
 function postgresSortOrder(sql, intent) {
   if (intent?.sort === "price_asc") return sql`d."price_amount" ASC NULLS LAST, d."id" ASC`;
   if (intent?.sort === "price_desc") return sql`d."price_amount" DESC NULLS LAST, d."id" ASC`;
@@ -1561,9 +1627,16 @@ function postgresSortOrder(sql, intent) {
 }
 
 async function postgresQueryRuntime({ payload, loadPayloadRuntime, env }) {
-  if (payload?.db?.drizzle?.execute) return payload;
+  if (payload?.db?.execute || payload?.db?.drizzle?.execute) return payload;
   const loader = typeof loadPayloadRuntime === "function" ? loadPayloadRuntime : loadPayloadCmsImportRuntime;
   return loader({ env, payload });
+}
+
+function postgresExecutor(runtime) {
+  const adapter = runtime?.db;
+  if (typeof adapter?.execute === "function") return (statement) => adapter.execute({ drizzle: adapter.drizzle, sql: statement });
+  if (typeof adapter?.drizzle?.execute === "function") return (statement) => adapter.drizzle.execute(statement);
+  throw new Error("Payload Postgres runtime does not expose a compatible SQL executor");
 }
 
 async function queryPostgres({
@@ -1577,8 +1650,7 @@ async function queryPostgres({
   }
   const sql = await loadPostgresSql();
   const runtime = await postgresQueryRuntime(postgres);
-  const execute = runtime?.db?.drizzle?.execute;
-  if (typeof execute !== "function") throw new Error("Payload Postgres runtime does not expose drizzle.execute");
+  const execute = postgresExecutor(runtime);
 
   const normalizedLocales = normalizedLocaleCodes(localeCodes);
   const normalized = backendIntent(intent, normalizedLocales);
@@ -1619,8 +1691,8 @@ async function queryPostgres({
   const locationClause = postgresLocationCondition(sql, normalized?.location_ids || []);
   if (locationClause) conditions.push(locationClause);
   if (normalized?.country_code) conditions.push(postgresViewCondition(sql, "country_code", normalized.country_code));
-  if (normalized?.region_id) conditions.push(sql`d."geography_path" ? ${normalized.region_id}`);
-  if (normalized?.geography_id) conditions.push(sql`d."geography_path" ? ${normalized.geography_id}`);
+  if (normalized?.region_id) conditions.push(postgresGeographyCondition(sql, normalized.region_id));
+  if (normalized?.geography_id) conditions.push(postgresGeographyCondition(sql, normalized.geography_id));
   if (normalized?.municipality) conditions.push(postgresViewCondition(sql, "municipality", normalized.municipality));
   if (normalized?.district) conditions.push(postgresViewCondition(sql, "district", normalized.district));
   for (const [field, min, max] of [
@@ -1637,6 +1709,7 @@ async function queryPostgres({
     if (clause) conditions.push(clause);
   }
   if (normalized?.offer_type) conditions.push(postgresViewCondition(sql, "offer_type", normalized.offer_type));
+  if (normalized?.listing_status) conditions.push(postgresViewCondition(sql, "listing_status", normalized.listing_status));
   if (normalized?.price_period) conditions.push(postgresViewCondition(sql, "price_period", normalized.price_period));
   if (normalized?.has_approved_tour === true) conditions.push(sql`d."has_approved_tour" = true`);
   if (normalized?.map_bounds) {
@@ -1648,30 +1721,27 @@ async function queryPostgres({
   const pageSize = Math.min(100, Math.max(1, Number(normalized?.page_size || 12)));
   const page = Math.max(1, Number(normalized?.page || 1));
   const offset = (page - 1) * pageSize;
-  const statement = sql`
-    WITH filtered AS (
-      SELECT
-        d."id",
-        d."source_listing_id",
-        d."listing_reference",
-        d."locale",
-        d."locale_path",
-        d."title",
-        count(*) OVER() AS total_count
-      FROM ${sql.raw(`"public"."${POSTGRES_PUBLIC_SEARCH_VIEW}"`)} d
-      WHERE ${sql.join(conditions, sql` AND `)}
-      ORDER BY ${postgresSortOrder(sql, normalized)}
-      LIMIT ${pageSize}
-      OFFSET ${offset}
-    )
-    SELECT * FROM filtered
+  const countStatement = sql`
+    SELECT count(*) AS total_count
+    FROM ${sql.raw(`"public"."${POSTGRES_PUBLIC_SEARCH_VIEW}"`)} d
+    WHERE ${sql.join(conditions, sql` AND `)}
   `;
-  const rows = postgresRows(await execute(statement));
+  const pageStatement = sql`
+    SELECT
+      ${sql.raw(POSTGRES_PUBLIC_SEARCH_CARD_COLUMNS.map((column) => `d."${column}"`).join(",\n      "))}
+    FROM ${sql.raw(`"public"."${POSTGRES_PUBLIC_SEARCH_VIEW}"`)} d
+    WHERE ${sql.join(conditions, sql` AND `)}
+    ORDER BY ${postgresSortOrder(sql, normalized)}
+    LIMIT ${pageSize}
+    OFFSET ${offset}
+  `;
+  const total = postgresResultCount(postgresRows(await execute(countStatement)));
+  const rows = postgresRows(await execute(pageStatement));
   const hits = rows.map(postgresSearchHit);
   return {
     engine: "postgres",
     database_target: redactedDatabaseTarget(postgres.env?.DATABASE_URL || process.env.DATABASE_URL),
-    total: rows.length ? Number(rows[0].total_count || 0) : 0,
+    total,
     hits,
     page,
     page_size: pageSize,
@@ -1695,8 +1765,7 @@ async function readPostgresProjectionDocuments({ postgres = {} } = {}) {
   if (typeof postgres.snapshotQueryImpl === "function") return postgres.snapshotQueryImpl({ target: POSTGRES_PUBLIC_SEARCH_VIEW });
   const sql = await loadPostgresSql();
   const runtime = await postgresQueryRuntime(postgres);
-  const execute = runtime?.db?.drizzle?.execute;
-  if (typeof execute !== "function") throw new Error("Payload Postgres runtime does not expose drizzle.execute");
+  const execute = postgresExecutor(runtime);
   const rows = postgresRows(await execute(sql`SELECT * FROM ${sql.raw(`"public"."${POSTGRES_PUBLIC_SEARCH_VIEW}"`)} ORDER BY "id" ASC`));
   return rows.map(postgresProjectionDocument);
 }
@@ -1948,22 +2017,22 @@ export async function queryPublicSearch({
               localeCodes: normalizedLocales,
             })
           : selected === "typesense"
-          ? await queryTypesense({
-              ...typesense,
-              q: query,
-              filterBy: typesenseFilter,
-              perPage,
-              exactReference: normalizedIntent?.exact_reference,
-              sortBy: typesenseSort,
-              fetchImpl,
-            })
-          : await queryMeilisearch({
-              ...meilisearch,
-              q: query,
-              filter: meilisearchFilter,
-              limit: perPage,
-              fetchImpl,
-            });
+            ? await queryTypesense({
+                ...typesense,
+                q: query,
+                filterBy: typesenseFilter,
+                perPage,
+                exactReference: normalizedIntent?.exact_reference,
+                sortBy: typesenseSort,
+                fetchImpl,
+              })
+            : await queryMeilisearch({
+                ...meilisearch,
+                q: query,
+                filter: meilisearchFilter,
+                limit: perPage,
+                fetchImpl,
+              });
       return {
         engine: selected,
         total: result.total,
@@ -2160,11 +2229,16 @@ export function assertSearchEngineQueryReport(report) {
   if (JSON.stringify(report.summary.first_hit_ids) !== JSON.stringify(report.engines.map((engine) => engine.hits?.[0]?.id || null))) {
     throw new Error("Search query summary first hits must match engine rows");
   }
+  const databaseTarget = assertExactRedactedPostgresTarget(report.summary.database_target, "Search query summary database target");
   for (const engine of report.engines) {
     if (engine.target !== POSTGRES_PUBLIC_SEARCH_VIEW) throw new Error("Postgres query target is invalid");
     if (report.summary.targets?.postgres !== POSTGRES_PUBLIC_SEARCH_VIEW) throw new Error("Search query summary target must match the Postgres view");
-    if (!String(engine.database_target || "").startsWith("postgres")) throw new Error("Postgres query report must include database target evidence");
-    if (engine.operation?.method !== "SELECT" || engine.operation?.status !== 200 || engine.operation?.url !== engine.database_target) {
+    const engineTarget = assertExactRedactedPostgresTarget(engine.database_target, "Postgres query engine database target");
+    const operationTarget = assertExactRedactedPostgresTarget(engine.operation?.url, "Postgres query operation database target");
+    if (engineTarget !== databaseTarget || operationTarget !== databaseTarget) {
+      throw new Error("Postgres query database targets must match exactly");
+    }
+    if (engine.operation?.method !== "SELECT" || engine.operation?.status !== 200) {
       throw new Error("Postgres query report must include the database read operation");
     }
     if (source.projected_documents === 0) {
@@ -2183,6 +2257,21 @@ export function assertSearchEngineQueryReport(report) {
 export function assertSearchEngineEvidenceConsistency(syncReport, queryReport) {
   assertSearchEngineSyncReport(syncReport);
   assertSearchEngineQueryReport(queryReport);
+  const syncDatabaseTarget = assertExactRedactedPostgresTarget(
+    syncReport.summary.database_target,
+    "Search sync summary database target",
+  );
+  const queryDatabaseTarget = assertExactRedactedPostgresTarget(
+    queryReport.summary.database_target,
+    "Search query summary database target",
+  );
+  if (
+    syncDatabaseTarget !== queryDatabaseTarget ||
+    syncReport.summary.targets?.postgres !== queryReport.summary.targets?.postgres ||
+    syncReport.engines[0]?.target !== queryReport.engines[0]?.target
+  ) {
+    throw new Error("Search sync and query evidence must use the same canonical Postgres database identity");
+  }
   if (
     syncReport.evidence_scope !== queryReport.evidence_scope ||
     syncReport.source.kind !== queryReport.source.kind ||

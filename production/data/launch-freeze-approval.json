@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "approval_id": "MSR-LAUNCH-FREEZE-1",
+  "artifact_id": "20260817-deterministic-launch-freeze",
+  "based_on_commit": "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
+  "source_artifact_sha256": "c627594492d253a2831bb72227920e092d32d253e89ba9a16b8a87ea32743360",
+  "proposal_sha256": "94e83d506cb1fd934d3df561b56f6e7361e21b9e65529856b25a1c7bb7d34a7c",
+  "approved_by": "Ivan Peychev",
+  "approved_at": "2026-08-20T12:29:16Z",
+  "scope": {
+    "routes": 292,
+    "by_decision": {
+      "approved_410": 268,
+      "redirect_301": 14,
+      "retain_200": 10
+    }
+  },
+  "excludes": [
+    "source push",
+    "deployment",
+    "DNS changes",
+    "listing publication"
+  ]
+}

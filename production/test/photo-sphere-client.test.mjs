@@ -78,6 +78,7 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /note\.focus\(\)/);
   assert.match(PUBLIC_APP_JS, /submit\.disabled = true/);
   assert.match(PUBLIC_APP_JS, /submit\.setAttribute\("aria-busy", "true"\)/);
+  assert.match(PUBLIC_APP_JS, /return response\.text\(\);\s*\}\)\s*\.then\(function \(\) \{\s*onDone\(\);/);
   assert.match(PUBLIC_APP_JS, /warn\.focus\(\{ preventScroll: true \}\)/);
   assert.match(PUBLIC_APP_JS, /prefers-reduced-motion: reduce/);
   assert.match(PUBLIC_APP_JS, /warn\.scrollIntoView\(\{ block: "nearest", behavior: reduceMotion \? "auto" : "smooth" \}\)/);

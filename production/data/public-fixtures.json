@@ -4691,37 +4691,27 @@
     "body": {
       "h1": "מכירת נכס",
       "intro": "בקשו הערכת מתווך וחזרה מצוות MS Realty.",
-      "valuation": {
-        "endpoint": "/api/leads",
-        "method": "POST",
-        "minimum_tap_target_px": 44,
-        "required_fields": [
-          "contact.name",
-          "contact.phone",
-          "property.location",
-          "property.type",
-          "message"
-        ],
-        "payload": {
-          "source": "website_seller_valuation",
-          "intent": "valuation",
-          "leadType": "seller",
-          "language": "he",
-          "contact_preference": "phone"
+      "contact_channels": {
+        "phone": {
+          "href": "tel:+359879696870",
+          "label": "+359 879 69 68 70"
         },
-        "label": "הערכת מוכר"
+        "whatsapp": {
+          "href": "https://wa.me/359879696870",
+          "label": "WhatsApp"
+        },
+        "viber": {
+          "href": "viber://chat?number=%2B359879696870",
+          "label": "Viber"
+        },
+        "email": {
+          "href": "mailto:office@makler-realty.com",
+          "label": "office@makler-realty.com"
+        }
       },
-      "callback": {
-        "endpoint": "/api/leads",
-        "method": "POST",
-        "payload": {
-          "source": "website_seller_callback",
-          "leadType": "seller",
-          "language": "he",
-          "contact_preference": "phone"
-        },
-        "label": "שיחה חוזרת"
-      }
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
+      "valuation": null,
+      "callback": null
     }
   },
   "contact_he": {

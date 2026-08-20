@@ -4,6 +4,10 @@ import { parseCsv } from "./csv.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { loadCmsSeed, resolveRuntimePath } from "./runtime.mjs";
+import {
+  APPROVED_LAUNCH_FREEZE_SHA256,
+  loadApprovedLaunchFreeze,
+} from "./launch-freeze.mjs";
 
 export const DEFAULT_REDIRECT_APPROVALS_PATH = fromRoot("production", "data", "redirect-approvals.jsonl");
 export const DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT = fromRoot("production", "data", "deployable-redirects.json");
@@ -552,6 +556,48 @@ export function summarizeDeployableRedirects(rows) {
   }
 
   return summary;
+}
+
+export function approvedLaunchFreezeRouteArtifact(freeze = loadApprovedLaunchFreeze()) {
+  const decisions = freeze.routes;
+  const redirects = decisions
+    .filter((decision) => decision.status === 301)
+    .map((decision) => ({
+      old_url: decision.old_url,
+      target_path: decision.target_path,
+      status: 301,
+      source_domain: decision.source_domain,
+      target_locale: decision.target_locale,
+      url_type: decision.url_type,
+      reviewer: decision.reviewer,
+      approved_at: decision.approved_at,
+    }));
+  return {
+    preservation_contract: {
+      locked: true,
+      artifact_id: freeze.artifact_id,
+      approval_id: freeze.route_approval.approval_id,
+      based_on_commit: freeze.route_approval.based_on_commit,
+      source_sha256: APPROVED_LAUNCH_FREEZE_SHA256,
+      approved_homepage_redirects: 5,
+      approved_homepage_decisions: 15,
+    },
+    summary: summarizeDeployableRedirects(redirects),
+    decision_summary: summarizeLegacyRouteDecisions(decisions),
+    redirects,
+    decisions,
+    catalog: freeze.catalog,
+  };
+}
+
+export function isApprovedLaunchFreezeRouteArtifact(artifact) {
+  if (!artifact?.preservation_contract?.locked) return false;
+  try {
+    const expected = approvedLaunchFreezeRouteArtifact();
+    return JSON.stringify(artifact) === JSON.stringify(expected);
+  } catch {
+    return false;
+  }
 }
 
 export function assertDeployableRedirects(rows, { allowEmpty = false } = {}) {

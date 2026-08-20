@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-16T17:29:12.419010+00:00",
+  "status": "pass",
+  "source_mode": "production_http_router_with_approved_public_fixture_temporary_ledgers_and_stubbed_durable_lead_receipt",
+  "live_production_verified": false,
+  "screenshots_committed": false,
+  "results": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "listing": {
+        "status": 200,
+        "lead_submit_status": 201,
+        "images_without_alt": 0,
+        "unlabeled_form_controls": 0,
+        "horizontal_overflow_px": 0
+      },
+      "connections": {
+        "status": 200,
+        "providers": [
+          "google",
+          "whatsapp",
+          "viber"
+        ],
+        "images_without_alt": 0,
+        "unlabeled_form_controls": 0,
+        "horizontal_overflow_px": 0
+      },
+      "viewings": {
+        "status": 200,
+        "images_without_alt": 0,
+        "unlabeled_form_controls": 0,
+        "horizontal_overflow_px": 0
+      },
+      "console_errors": [],
+      "page_errors": [],
+      "same_origin_request_failures": []
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "listing": {
+        "status": 200,
+        "lead_submit_status": 201,
+        "images_without_alt": 0,
+        "unlabeled_form_controls": 0,
+        "horizontal_overflow_px": 0
+      },
+      "connections": {
+        "status": 200,
+        "providers": [
+          "google",
+          "whatsapp",
+          "viber"
+        ],
+        "images_without_alt": 0,
+        "unlabeled_form_controls": 0,
+        "horizontal_overflow_px": 0
+      },
+      "viewings": {
+        "status": 200,
+        "images_without_alt": 0,
+        "unlabeled_form_controls": 0,
+        "horizontal_overflow_px": 0
+      },
+      "console_errors": [],
+      "page_errors": [],
+      "same_origin_request_failures": []
+    }
+  ]
+}

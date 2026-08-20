@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { appApiConfigFromEnv, renderAppApiResponse } from "../lib/app-api-adapter.mjs";
-import { appRouterConfigFromEnv, renderAppSearchRoute, renderAppSearchRouteResponse } from "../lib/app-router-adapter.mjs";
+import {
+  appRouterConfigFromEnv,
+  renderAppRoute,
+  renderAppSearchRoute,
+  renderAppSearchRouteResponse,
+} from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   executePublicSearch,
@@ -53,6 +58,8 @@ function searchConfig(fetchImpl, { environment = "test", typesense = true, meili
 
 test("public search prefers optional query-only credentials and keeps admin-key fallback", () => {
   const separated = publicSearchConfigFromEnv({
+    DATABASE_URL: "postgres://db.ms-realty.bg:5432/ms_realty",
+    PAYLOAD_SECRET: "payload-secret",
     TYPESENSE_URL: "https://typesense.ms-realty.bg",
     TYPESENSE_API_KEY: "typesense-admin",
     TYPESENSE_QUERY_API_KEY: "typesense-query",
@@ -65,10 +72,33 @@ test("public search prefers optional query-only credentials and keeps admin-key 
     MEILI_API_KEY: "meili-admin",
   });
 
+  assert.equal(separated.postgres.env.DATABASE_URL, "postgres://db.ms-realty.bg:5432/ms_realty");
+  assert.equal(separated.postgres.env.PAYLOAD_SECRET, "payload-secret");
   assert.equal(separated.typesense.queryApiKey, "typesense-query");
   assert.equal(separated.meilisearch.queryApiKey, "meili-query");
   assert.equal(compatible.typesense.queryApiKey, "typesense-admin");
   assert.equal(compatible.meilisearch.queryApiKey, "meili-admin");
+});
+
+test("production public search config keeps Postgres and ignores legacy engine credentials", () => {
+  const env = {
+    NODE_ENV: "production",
+    MS_REALTY_SEARCH_ENGINE: "postgres",
+    DATABASE_URL: "postgresql://runtime:secret@db.ms-realty.bg/ms_realty",
+    PAYLOAD_SECRET: "payload-secret",
+    TYPESENSE_URL: "https://typesense.ms-realty.bg",
+    TYPESENSE_API_KEY: "typesense-admin",
+    MEILI_URL: "https://meili.ms-realty.bg",
+    MEILI_API_KEY: "meili-admin",
+  };
+  const config = publicSearchConfigFromEnv(env);
+
+  assert.equal(config.engine, "postgres");
+  assert.equal(config.postgres.env.DATABASE_URL, env.DATABASE_URL);
+  assert.equal("TYPESENSE_API_KEY" in config.postgres.env, false);
+  assert.equal("MEILI_API_KEY" in config.postgres.env, false);
+  assert.deepEqual(config.typesense, {});
+  assert.deepEqual(config.meilisearch, {});
 });
 
 function apiConfig(search) {
@@ -184,6 +214,40 @@ test("production public search fails closed when no configured engine can serve 
   assert.match(fallbackHtml, /tel:\+359879696870/);
 });
 
+test("private review keeps the production Postgres search contract while exposing review inventory", () => {
+  const productionConfig = appRouterConfigFromEnv({ NODE_ENV: "production" });
+  const reviewEnv = {
+    NODE_ENV: "production",
+    MS_REALTY_PRIVATE_REVIEW_MODE: "true",
+    DATABASE_URL: "postgres://db.ms-realty.bg:5432/ms_realty",
+    PAYLOAD_SECRET: "private-review-test-secret",
+  };
+  const reviewConfig = appRouterConfigFromEnv(reviewEnv);
+  const productionListing = renderAppRoute({
+    pathname: "/bg/imoti/MS-CRAWL-0001",
+    url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+    config: productionConfig,
+  });
+  const reviewListing = renderAppRoute({
+    pathname: "/bg/imoti/MS-CRAWL-0001",
+    url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+    config: reviewConfig,
+  });
+
+  assert.equal(productionConfig.privateReview, false);
+  assert.equal(productionListing.status, 200);
+  assert.equal(productionListing.rendered.kind, "listing_preservation");
+  assert.equal(productionListing.rendered.indexable, false);
+  assert.equal(reviewConfig.privateReview, true);
+  assert.equal(reviewConfig.search.environment, "production");
+  assert.equal(reviewConfig.search.engine, "postgres");
+  assert.equal(reviewConfig.search.postgres.env.DATABASE_URL, reviewEnv.DATABASE_URL);
+  assert.equal(reviewListing.status, 200);
+  assert.equal(reviewListing.rendered.kind, "listing");
+  assert.equal(reviewListing.rendered.indexable, true);
+
+});
+
 test("localized HTML and API search share engine-ranked cards and request intent", async () => {
   const fetchImpl = async () => response({ found: 1, hits: [{ document: hit }] });
   const search = searchConfig(fetchImpl);
@@ -204,4 +268,112 @@ test("localized HTML and API search share engine-ranked cards and request intent
   assert.equal(html.rendered.search.query, api.search.query);
   assert.deepEqual(html.rendered.search.intent, api.search.intent);
   assert.match(html.html, /MS-CRAWL-0001/);
+});
+
+test("Postgres result pages preserve database totals and requested page size", async () => {
+  const intents = [];
+  const { result, engineResult } = await executePublicSearch({
+    registry,
+    seed,
+    params: new URLSearchParams("locale=bg&page=3&page_size=7&listing_status=reserved"),
+    search: {
+      engine: "postgres",
+      environment: "production",
+      postgres: {
+        queryImpl: async ({ intent }) => {
+          intents.push(intent);
+          return {
+            engine: "postgres",
+            total: 23,
+            hits: [higherRankedHit, hit],
+            page: intent.page,
+            page_size: intent.page_size,
+            target: "ms_realty_public_search_documents",
+          };
+        },
+      },
+    },
+  });
+
+  assert.equal(intents[0].page, 3);
+  assert.equal(intents[0].page_size, 7);
+  assert.equal(intents[0].listing_status, "reserved");
+  assert.equal(engineResult.total, 23);
+  assert.equal(result.search.total_matches, 23);
+  assert.deepEqual(result.search.pagination, {
+    page: 3,
+    per_page: 7,
+    total_pages: 4,
+    has_previous: true,
+    has_next: true,
+  });
+  assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0002", "MS-CRAWL-0001"]);
+});
+
+test("Postgres cards keep database-only listings and database-updated facts authoritative", async () => {
+  const { result } = await executePublicSearch({
+    registry,
+    seed,
+    params: new URLSearchParams("locale=bg&page_size=5"),
+    search: {
+      engine: "postgres",
+      environment: "production",
+      postgres: {
+        queryImpl: async ({ intent }) => ({
+          engine: "postgres",
+          total: 2,
+          page: intent.page,
+          page_size: intent.page_size,
+          target: "ms_realty_public_search_documents",
+          hits: [
+            {
+              ...hit,
+              title: "Authoritative database title",
+              location_label: "Database Sandanski",
+              property_family: "apartment",
+              offer_type: "sale",
+              listing_status: "reserved",
+              price_amount: 123456,
+              price_currency: "EUR",
+              price_on_request: false,
+              bedrooms_count: 2,
+              primary_area_sqm: 88,
+            },
+            {
+              id: "MS-DB-ONLY-0001:bg",
+              source_listing_id: "MS-DB-ONLY-0001",
+              listing_reference: "MS-DB-ONLY-0001",
+              locale: "bg",
+              locale_path: "/bg/imoti/db-only-listing",
+              title: "Database-only approved listing",
+              description: "Approved database description",
+              location_label: "Petrich",
+              municipality: "Petrich",
+              district: "Blagoevgrad",
+              country_code: "BG",
+              property_family: "house",
+              offer_type: "rent",
+              listing_status: "available",
+              price_amount: 950,
+              price_currency: "EUR",
+              price_on_request: false,
+              bedrooms_count: 3,
+              primary_area_sqm: 120,
+            },
+          ],
+        }),
+      },
+    },
+  });
+
+  assert.equal(result.cards.length, 2);
+  assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0001", "MS-DB-ONLY-0001"]);
+  assert.equal(result.cards[0].title, "Authoritative database title");
+  assert.equal(result.cards[0].location, "Database Sandanski");
+  assert.equal(result.cards[0].price_eur, 123456);
+  assert.equal(result.cards[0].area_sqm, 88);
+  assert.equal(result.cards[1].title, "Database-only approved listing");
+  assert.equal(result.cards[1].path, "/bg/imoti/db-only-listing");
+  assert.equal(result.cards[1].price_eur, 950);
+  assert.equal(result.cards[1].bedrooms, 3);
 });

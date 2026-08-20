@@ -2,14 +2,91 @@ name: ms-realty-production-review
 
 services:
   app:
+    build:
+      args:
+        MS_REALTY_BUILD_MARKER: ${MS_REALTY_BUILD_MARKER:-unversioned}
     environment:
+      HERMES_API_KEY: ${HERMES_AGENT_API_SERVER_KEY:?HERMES_AGENT_API_SERVER_KEY is required}
+      HERMES_CHAT_COMPLETIONS_URL: http://hermes-agent:8642/v1/chat/completions
+      HERMES_MODEL: qwen3:1.7b
+      HERMES_PROVIDER_MODE: self_hosted
       MS_REALTY_ADMIN_ACTOR: ${MS_REALTY_ADMIN_ACTOR:-agency_admin}
+      MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: "true"
+      MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED: "false"
+      MS_REALTY_EVENT_DURABLE_STORE_ENABLED: "true"
+      MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE: live
+      MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true"
+      MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1"
+      MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: ${MS_REALTY_PROVIDER_OAUTH_STATE_SECRET:?MS_REALTY_PROVIDER_OAUTH_STATE_SECRET is required}
+      MS_REALTY_PROVIDER_TOKEN_KEY: ${MS_REALTY_PROVIDER_TOKEN_KEY:?MS_REALTY_PROVIDER_TOKEN_KEY is required}
       MS_REALTY_PUBLIC_CONTACT_KEY: ${MS_REALTY_PUBLIC_CONTACT_KEY:?MS_REALTY_PUBLIC_CONTACT_KEY is required}
-      MS_REALTY_PUBLIC_ORIGIN: https://${MS_REALTY_REVIEW_HOST:?MS_REALTY_REVIEW_HOST is required}
-      MS_REALTY_MCP_ALLOWED_ORIGINS: https://${MS_REALTY_REVIEW_HOST}
+      MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: ${MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY:?MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY is required}
+      MS_REALTY_RUNTIME_DATA_AUTHORITY: payload
+      MS_REALTY_TRUST_PROXY: "1"
+      MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true"
+      MS_REALTY_WORKSPACE_ID: ${MS_REALTY_WORKSPACE_ID:-workspace-sandanski}
+      MS_REALTY_PUBLIC_ORIGIN: https://makler-realty.com
+      MS_REALTY_MCP_ALLOWED_ORIGINS: https://makler-realty.com,https://makler-realty.ru,https://ms-realty.ms-realty-bg.workers.dev
+
+  ollama:
+    image: ollama/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad
+    profiles: ["hermes"]
+    restart: unless-stopped
+    environment:
+      OLLAMA_CONTEXT_LENGTH: "4096"
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_KEEP_ALIVE: 2m
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_NUM_PARALLEL: "1"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 2200m
+    cpus: "1.5"
+    networks:
+      - hermes
+      - hermes-egress
+
+  ollama-model:
+    image: ollama/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad
+    profiles: ["hermes"]
+    restart: "no"
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    command: ["pull", "qwen3:1.7b"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 256m
+    networks:
+      - hermes
+
+  hermes-agent:
+    environment:
+      HERMES_AGENT_API_SERVER_KEY: ${HERMES_AGENT_API_SERVER_KEY:?HERMES_AGENT_API_SERVER_KEY is required}
+      HERMES_AGENT_MODEL: qwen3:1.7b
+      HERMES_AGENT_LLM_BASE_URL: http://ollama:11434/v1
+      HERMES_AGENT_LLM_API_KEY: ollama-local
+    depends_on:
+      hermes-agent-bootstrap:
+        condition: service_completed_successfully
+      ollama-model:
+        condition: service_completed_successfully
 
   edge:
     environment:
+      MS_REALTY_ORIGIN_TOKEN: ${MS_REALTY_ORIGIN_TOKEN:?MS_REALTY_ORIGIN_TOKEN is required}
       MS_REALTY_REVIEW_HOST: ${MS_REALTY_REVIEW_HOST}
       MS_REALTY_REVIEW_USER: ${MS_REALTY_REVIEW_USER:?MS_REALTY_REVIEW_USER is required}
       MS_REALTY_REVIEW_PASSWORD_HASH: ${MS_REALTY_REVIEW_PASSWORD_HASH:?MS_REALTY_REVIEW_PASSWORD_HASH is required}
@@ -22,6 +99,7 @@ services:
       - "443:443/udp"
     volumes:
       - ./Caddyfile.production-review:/etc/caddy/Caddyfile:ro
+      - /opt/ms-realty/shared/media:/srv/media:ro
 
 volumes:
   payload-postgres-data:
@@ -36,6 +114,8 @@ volumes:
     name: ms-realty-production-review-runtime-evidence
   hermes-agent-data:
     name: ms-realty-production-review-hermes
+  ollama-data:
+    name: ms-realty-production-review-ollama
   caddy-data:
     name: ms-realty-production-review-caddy-data
   caddy-config:

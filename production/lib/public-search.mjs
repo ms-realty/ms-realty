@@ -2,6 +2,7 @@ import { searchRuntimeListings } from "./runtime.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
 import { privateSearchServiceNetworkAllowed } from "./search-service-http.mjs";
+import { isProductionEnvironment, searchRuntimeEnvironment } from "./launch-service-contract.mjs";
 
 export class PublicSearchInputError extends Error {
   constructor(message, options) {
@@ -20,17 +21,19 @@ export class PublicSearchUnavailableError extends Error {
 }
 
 export function publicSearchConfigFromEnv(env = process.env) {
+  const production = isProductionEnvironment(env.NODE_ENV);
   return {
-    engine: env.MS_REALTY_SEARCH_ENGINE,
+    engine: "postgres",
     environment: env.NODE_ENV,
-    typesense: {
+    postgres: { env: searchRuntimeEnvironment(env) },
+    typesense: production ? {} : {
       baseUrl: env.TYPESENSE_URL,
       apiKey: env.TYPESENSE_API_KEY,
       queryApiKey: env.TYPESENSE_QUERY_API_KEY || env.TYPESENSE_API_KEY,
       allowPrivateNetwork: privateSearchServiceNetworkAllowed(env),
       collectionName: env.TYPESENSE_COLLECTION || "ms_realty_listings"
     },
-    meilisearch: {
+    meilisearch: production ? {} : {
       baseUrl: env.MEILI_URL,
       apiKey: env.MEILI_API_KEY,
       queryApiKey: env.MEILI_QUERY_API_KEY || env.MEILI_API_KEY,
@@ -71,10 +74,94 @@ export function seedForSearchHits(seed, hits) {
   return { ...seed, records };
 }
 
+function authoritativeSearchTranslation(hit) {
+  return {
+    locale: hit.locale,
+    source_locale: hit.locale,
+    status: "published",
+    translation_state: "published",
+    reviewer: "postgres_public_search_projection",
+    human_approved: true,
+    public_indexable: true,
+    approved_at: "database_projection",
+    listing: hit.source_listing_id,
+  };
+}
+
+function postgresSearchRecord(hit, existing = null) {
+  const id = String(hit?.source_listing_id || "").trim();
+  const locale = String(hit?.locale || "").trim();
+  const title = String(hit?.title || "").trim();
+  if (!id || !locale || !title) throw new Error("Postgres public search returned an incomplete authoritative card");
+  const previousFacts = existing?.facts || {};
+  const translations = [
+    authoritativeSearchTranslation(hit),
+    ...(existing?.translations || []).filter((translation) => translation.locale !== locale),
+  ];
+  return {
+    ...(existing || {}),
+    id,
+    collection: "listings",
+    cms_status: "published",
+    source_locale: locale,
+    source_domain: existing?.source_domain || "",
+    source_url: existing?.source_url || "",
+    facts: {
+      ...previousFacts,
+      id,
+      title,
+      h1: title,
+      description: hit.description || "",
+      location: hit.location_label || hit.municipality || hit.district || "",
+      municipality: hit.municipality || "",
+      district: hit.district || "",
+      region_id: hit.region_id || "",
+      country_code: hit.country_code || "",
+      geography_id: hit.geography_id || "",
+      geography_path: Array.isArray(hit.geography_path) ? hit.geography_path : [],
+      property_type: hit.property_family || hit.property_subtype || "property",
+      offer_type: hit.offer_type || "sale",
+      listing_status: hit.listing_status || "available",
+      bedrooms: hit.bedrooms_count ?? null,
+      bedrooms_not_applicable: false,
+      area_sqm: hit.primary_area_sqm ?? null,
+      condition: hit.condition || "",
+      location_precision: hit.public_location_precision || null,
+      price_eur: hit.price_currency === "EUR" && hit.price_on_request !== true ? hit.price_amount : null,
+      price_on_request: hit.price_on_request === true,
+    },
+    seo: {
+      ...(existing?.seo || {}),
+      title,
+      description: hit.description || "",
+      canonical: existing?.seo?.canonical || "",
+      human_approved: true,
+    },
+    translations,
+    media: existing?.media || [],
+    public_search_document: { ...hit, source_listing_id: id, locale, title },
+  };
+}
+
+export function seedForPostgresSearchHits(seed, hits) {
+  const byId = new Map(
+    (seed.records || []).filter((record) => record.collection === "listings").map((record) => [record.id, record]),
+  );
+  const records = [];
+  const seen = new Set();
+  for (const hit of hits || []) {
+    const id = String(hit?.source_listing_id || "").trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    records.push(postgresSearchRecord(hit, byId.get(id) || null));
+  }
+  return { ...seed, records };
+}
+
 function searchBackend(engineResult) {
   const backend = {
     engine: engineResult.engine,
-    mode: engineResult.engine === "typesense" ? "primary" : engineResult.engine === "meilisearch" ? "fallback" : "local_fallback",
+    mode: engineResult.engine === "typesense" ? "primary" : engineResult.engine === "meilisearch" ? "fallback" : engineResult.engine === "postgres" ? "primary" : "local_fallback",
     locale_codes: engineResult.locale_codes,
     unavailable_engines: engineResult.unavailable_engines || []
   };
@@ -150,7 +237,7 @@ export async function executePublicSearch({
     filters: request.filters,
     sort: request.sort,
     page: request.page,
-    pageSize,
+    pageSize: savedView && pageSize === null ? null : request.intent.page_size,
     savedView,
     translationTasks
   };
@@ -171,13 +258,26 @@ export async function executePublicSearch({
     throw error;
   }
 
+  const databasePage = engineResult.engine === "postgres";
   const localResult = searchRuntimeListings(registry, seed, options);
-  const result = engineResult.engine === "seed_fallback" || !engineResultIsComplete(engineResult)
-    ? localResult
-    : searchRuntimeListings(registry, seedForSearchHits(seed, engineResult.hits), {
-        ...options,
-        query: ""
-      });
+  const result =
+    engineResult.engine === "seed_fallback" || (!databasePage && !engineResultIsComplete(engineResult))
+      ? localResult
+      : searchRuntimeListings(
+          registry,
+          databasePage ? seedForPostgresSearchHits(seed, engineResult.hits) : seedForSearchHits(seed, engineResult.hits),
+          {
+          ...options,
+          query: "",
+          ...(databasePage
+            ? {
+                databasePage: true,
+                pageSize: engineResult.page_size,
+                totalMatches: engineResult.total,
+              }
+            : {}),
+          },
+        );
 
   return {
     result: withSearchRequest(result, engineResult, request),

@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 25,
-    "passed": 25,
+    "checks": 26,
+    "passed": 26,
     "failed": 0
   },
   "checks": [
@@ -124,6 +124,11 @@
     },
     {
       "id": "seller_property_intake",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "seller_unavailable_keeps_phone_path",
       "status": "pass",
       "evidence": {}
     },

@@ -90,8 +90,8 @@ jobs:
         if: always() && steps.container_smoke.outputs.container_id != ''
         run: docker rm --force "${{ steps.container_smoke.outputs.container_id }}"
 
-  deploy:
-    name: Deploy production
+  deploy_origin:
+    name: Deploy durable origin
     if: >-
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'push' ||
@@ -100,10 +100,52 @@ jobs:
       github.event.client_payload.merge_sha == github.sha))
     needs: check
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MS_REALTY_DEPLOY_HOST: ${{ vars.MS_REALTY_DEPLOY_HOST }}
+      MS_REALTY_DEPLOY_KNOWN_HOSTS: ${{ secrets.MS_REALTY_DEPLOY_KNOWN_HOSTS }}
+      MS_REALTY_DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.MS_REALTY_DEPLOY_SSH_PRIVATE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require origin deployment credentials
+        run: |
+          test -n "$MS_REALTY_DEPLOY_HOST"
+          test -n "$MS_REALTY_DEPLOY_KNOWN_HOSTS"
+          test -n "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY"
+          test "${#GITHUB_SHA}" = 40
+
+      - name: Prepare pinned SSH identity
+        run: |
+          install -d -m 0700 "$RUNNER_TEMP/ssh"
+          printf '%s\n' "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/ssh/id_ed25519"
+          printf '%s\n' "$MS_REALTY_DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/ssh/id_ed25519" "$RUNNER_TEMP/ssh/known_hosts"
+
+      - name: Upload and activate exact origin release
+        run: |
+          archive="$RUNNER_TEMP/ms-realty-${GITHUB_SHA}.tar.gz"
+          tar --exclude-vcs --exclude=node_modules --exclude=.next --exclude=.local-backups --exclude=.recovery-work -czf "$archive" .
+          ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
+          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" 'install -d -m 0700 /opt/ms-realty/incoming'
+          scp "${ssh_args[@]}" "$archive" "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.tar.gz"
+          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "bash -s -- '$GITHUB_SHA'" < production/scripts/deploy-production-review.sh
+
+  deploy:
+    name: Deploy production
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' ||
+      (github.event_name == 'repository_dispatch' &&
+      github.event.action == 'auto_merge_deploy' &&
+      github.event.client_payload.merge_sha == github.sha))
+    needs: [check, deploy_origin]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      MS_REALTY_ORIGIN_TOKEN: ${{ secrets.MS_REALTY_ORIGIN_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -119,6 +161,7 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
+          test "${#MS_REALTY_ORIGIN_TOKEN}" -ge 32
 
       - name: Resolve workers.dev health endpoint
         id: workers_dev
@@ -159,9 +202,14 @@ jobs:
           const configPath = "wrangler.jsonc";
           if (!/^[0-9a-f]{40}$/i.test(marker)) throw new Error("GITHUB_SHA must be a full commit SHA");
           const config = fs.readFileSync(configPath, "utf8");
-          if (config.split(placeholder).length !== 2) throw new Error("Expected exactly one Container image marker placeholder");
-          fs.writeFileSync(configPath, config.replace(placeholder, marker));
+          if (config.split(placeholder).length !== 3) throw new Error("Expected Container and edge image marker placeholders");
+          fs.writeFileSync(configPath, config.replaceAll(placeholder, marker));
           NODE
+
+      - name: Set durable origin credential
+        run: >-
+          printf '%s' "$MS_REALTY_ORIGIN_TOKEN" |
+          npx --yes wrangler@4.117.0 secret put MS_REALTY_ORIGIN_TOKEN --name ms-realty
 
       - name: Deploy exact main commit
         id: deploy

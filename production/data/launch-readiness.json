@@ -1,9 +1,8 @@
 {
-  "generated_at": "2026-08-11T17:18:07.848Z",
+  "generated_at": "2026-08-20T17:14:21.177Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -12,6 +11,10 @@
     "production_recovery"
   ],
   "warnings": [
+    {
+      "id": "structured_data.missing_location",
+      "count": 2
+    },
     {
       "id": "structured_data.missing_area",
       "count": 166
@@ -27,6 +30,10 @@
     {
       "id": "listing_quality.missing_area",
       "count": 165
+    },
+    {
+      "id": "listing_quality.missing_location",
+      "count": 2
     },
     {
       "id": "listing_quality.thin_public_gallery",
@@ -63,35 +70,38 @@
     },
     {
       "id": "redirect_reviews",
-      "status": "blocked",
-      "message": "Every legacy URL needs a deliberate retained route, reviewed one-hop redirect, or approved 410; homepage and search fallbacks are prohibited.",
+      "status": "pass",
+      "message": "",
       "evidence": {
         "total_legacy_urls": 457,
-        "resolved_legacy_urls": 165,
-        "unresolved_legacy_urls": 292,
-        "unresolved_by_type": {
-          "page": 104,
-          "post": 42,
-          "taxonomy": 146
-        },
-        "terminal_decisions": 165,
+        "resolved_legacy_urls": 457,
+        "unresolved_legacy_urls": 0,
+        "unresolved_by_type": {},
+        "terminal_decisions": 457,
         "invalid_terminal_decisions": 0,
         "decision_artifact_valid": true,
         "deployed_redirect_export_matches": true,
         "decision_statuses": {
-          "200": 0,
-          "301": 165,
-          "410": 0
+          "200": 10,
+          "301": 179,
+          "410": 268
         },
         "mapped_listings": 165,
-        "deployable_redirects": 165,
-        "homepage_targets": 0,
+        "deployable_redirects": 179,
+        "homepage_targets": 5,
+        "decision_homepage_targets": 15,
+        "preservation_contract_valid": true,
+        "preservation_contract": {
+          "locked": true,
+          "artifact_id": "20260817-deterministic-launch-freeze",
+          "approval_id": "MSR-LAUNCH-FREEZE-1",
+          "based_on_commit": "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
+          "source_sha256": "38b34064a8f37e2281ff97bd9b804b5e685984462709c56464de0a5be959158f",
+          "approved_homepage_redirects": 5,
+          "approved_homepage_decisions": 15
+        },
         "duplicate_old_urls": 0
-      },
-      "next_actions": [
-        "Review every unresolved legacy URL in /admin/migration/review; retain equivalent content, map one-hop 301s, or approve a 410 individually.",
-        "Download /api/admin/redirect-approval-workbook?pending=1, record a terminal decision for each row, then import it through /api/admin/redirect-approvals/import."
-      ]
+      }
     },
     {
       "id": "localized_sitemap",
@@ -147,7 +157,7 @@
         "failing_entries": 0,
         "entries_with_offer": 135,
         "warnings": {
-          "missing_location": 0,
+          "missing_location": 2,
           "missing_price": 0,
           "missing_area": 166,
           "missing_bedrooms": 81,
@@ -486,13 +496,13 @@
     {
       "id": "live_services",
       "status": "blocked",
-      "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning.",
+      "message": "Run live Postgres sync/query and Hermes draft worker commands after provisioning.",
       "evidence": {
         "reports": [
           {
-            "source": "typesense_meilisearch_sync",
+            "source": "postgres_search_sync",
             "status": "missing_report",
-            "path": "production/data/search-engine-sync-report.json",
+            "path": "production/data/postgres-search-sync-report.json",
             "freshness": {
               "id": "live_services",
               "status": "invalid",
@@ -500,9 +510,9 @@
             }
           },
           {
-            "source": "typesense_meilisearch_query",
+            "source": "postgres_search_query",
             "status": "missing_report",
-            "path": "production/data/search-engine-query-report.json",
+            "path": "production/data/postgres-search-query-report.json",
             "freshness": {
               "id": "live_services",
               "status": "invalid",
@@ -524,49 +534,38 @@
           "status": "blocked_report",
           "path": "production/data/live-service-provisioning-report.json",
           "summary": {
-            "checks": 9,
+            "checks": 7,
             "missing_env": [
-              "TYPESENSE_URL",
-              "TYPESENSE_API_KEY",
-              "MEILI_URL",
-              "MEILI_API_KEY",
+              "DATABASE_URL",
+              "PAYLOAD_SECRET",
+              "MS_REALTY_SEARCH_ENGINE",
               "HERMES_CHAT_COMPLETIONS_URL",
               "HERMES_API_KEY"
             ],
             "placeholder_env": [],
             "services": [
-              "typesense",
-              "meilisearch",
+              "postgres_search",
               "hermes"
             ]
           },
           "checks": [
             {
-              "id": "typesense_url",
-              "env": "TYPESENSE_URL",
+              "id": "database_url",
+              "env": "DATABASE_URL",
               "status": "missing_env"
             },
             {
-              "id": "typesense_api_key",
-              "env": "TYPESENSE_API_KEY",
+              "id": "payload_secret",
+              "env": "PAYLOAD_SECRET",
               "status": "missing_env"
             },
             {
-              "id": "meili_url",
-              "env": "MEILI_URL",
+              "id": "search_engine",
+              "env": "MS_REALTY_SEARCH_ENGINE",
               "status": "missing_env"
             },
             {
-              "id": "meili_api_key",
-              "env": "MEILI_API_KEY",
-              "status": "missing_env"
-            },
-            {
-              "id": "typesense_health",
-              "status": "missing_env"
-            },
-            {
-              "id": "meilisearch_health",
+              "id": "postgres_database_target",
               "status": "missing_env"
             },
             {
@@ -625,7 +624,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-06T00:00:00Z",
+              "generated_at": "2026-08-13T00:00:00.000Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,
@@ -666,15 +665,15 @@
             ]
           },
           "next_actions": [
-            "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",
-            "Run npm run live:provisioning until all service checks pass.",
+            "Set DATABASE_URL, PAYLOAD_SECRET, MS_REALTY_SEARCH_ENGINE=postgres, and Hermes provider env.",
+            "Run npm run live:provisioning until all required service checks pass.",
             "Run npm run live:capture only after provisioning passes."
           ]
         }
       },
       "next_actions": [
-        "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
-        "Import or mount the three live service reports, then run npm run live:preflight before launch."
+        "Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path and Hermes service.",
+        "Import or mount the 3 required live service reports, then run npm run live:preflight before launch."
       ]
     },
     {
@@ -726,122 +725,17 @@
       "status": "blocked",
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "status": "blocked_report",
-        "generated_at": "2026-07-06T00:00:00Z",
+        "status": "missing_report",
         "path": "production/data/payload-runtime-report.json",
-        "summary": {
-          "admin_route": "/admin",
-          "checks": 12,
-          "database": {
-            "status": "missing_env"
-          },
-          "identity_collection": "admins",
-          "missing_env": [
-            "PAYLOAD_SECRET",
-            "DATABASE_URL"
-          ],
-          "payload_admin_ui": "edge_hidden",
-          "payload_identity_rest": "edge_hidden",
-          "placeholder_env": [],
-          "weak_env": [],
-          "route_files": 6
-        },
-        "checks": [
-          {
-            "id": "payload_secret",
-            "status": "missing_env",
-            "env": "PAYLOAD_SECRET"
-          },
-          {
-            "id": "database_url",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "route:app/admin/route.js",
-            "status": "pass",
-            "file": "app/admin/route.js"
-          },
-          {
-            "id": "route:app/admin/login/route.js",
-            "status": "pass",
-            "file": "app/admin/login/route.js"
-          },
-          {
-            "id": "route:app/admin/logout/route.js",
-            "status": "pass",
-            "file": "app/admin/logout/route.js"
-          },
-          {
-            "id": "route:app/admin/team/route.js",
-            "status": "pass",
-            "file": "app/admin/team/route.js"
-          },
-          {
-            "id": "route:app/api/admin/team/route.js",
-            "status": "pass",
-            "file": "app/api/admin/team/route.js"
-          },
-          {
-            "id": "route:app/(payload)/api/[...slug]/route.js",
-            "status": "pass",
-            "file": "app/(payload)/api/[...slug]/route.js"
-          },
-          {
-            "id": "payload_edge_boundary",
-            "status": "pass",
-            "custom_admin_route": "/admin",
-            "payload_admin_ui": "edge_hidden",
-            "payload_graphql_encoded_paths": [
-              "/graph%71l",
-              "/graph%2571l",
-              "/graphql%2fquery",
-              "/graphql%252fquery",
-              "/graphql%2dplayground",
-              "/graphql%252dplayground%252f",
-              "/api%2fgraphql",
-              "/api%252fgraphql%252f"
-            ],
-            "payload_graphql_paths": [
-              "/graphql",
-              "/graphql-playground",
-              "/api/graphql"
-            ],
-            "payload_identity_rest": "edge_hidden"
-          },
-          {
-            "id": "payload_config_import",
-            "status": "pass",
-            "collections": 13,
-            "graphql_disabled": true,
-            "graphql_playground_disabled_in_production": true,
-            "identity_collection": "admins",
-            "internal_admin_route": "/payload-admin",
-            "session_max_age_seconds": 7200,
-            "sessions": "database_backed"
-          },
-          {
-            "id": "database_network_scope",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "database_tcp",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          }
+        "next_actions": [
+          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
+          "Run npm run payload:runtime, then npm run payload:preflight."
         ],
         "freshness": {
           "id": "payload_runtime",
-          "status": "stale",
-          "age_ms": 3172687848,
-          "max_age_ms": 604800000
-        },
-        "next_actions": [
-          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
-          "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
-          "Run npm run payload:preflight before launch:preflight."
-        ]
+          "status": "invalid",
+          "error": "generated_at is not a timestamp"
+        }
       },
       "next_actions": [
         "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
@@ -863,15 +757,15 @@
       },
       "next_actions": [
         "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
-        "Download /api/admin/production-recovery-template, complete it with real evidence, and import it through /api/admin/production-recovery/import."
+        "Run the governed recovery:r2 backup, restore, and approval commands; only their Ed25519-signed report can be imported through /api/admin/production-recovery/import."
       ]
     }
   ],
   "live_services": [
     {
-      "source": "typesense_meilisearch_sync",
+      "source": "postgres_search_sync",
       "status": "missing_report",
-      "path": "production/data/search-engine-sync-report.json",
+      "path": "production/data/postgres-search-sync-report.json",
       "freshness": {
         "id": "live_services",
         "status": "invalid",
@@ -879,9 +773,9 @@
       }
     },
     {
-      "source": "typesense_meilisearch_query",
+      "source": "postgres_search_query",
       "status": "missing_report",
-      "path": "production/data/search-engine-query-report.json",
+      "path": "production/data/postgres-search-query-report.json",
       "freshness": {
         "id": "live_services",
         "status": "invalid",

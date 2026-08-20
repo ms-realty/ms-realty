@@ -8,6 +8,11 @@
   // Serve on the account's *.workers.dev host until the real domains move to
   // Cloudflare DNS; no custom domain is attached yet.
   "workers_dev": true,
+  "vars": {
+    "MS_REALTY_EVENT_DURABLE_STORE_ENABLED": "true",
+    "MS_REALTY_ORIGIN_URL": "https://ms-realty-review.157-230-109-185.sslip.io",
+    "MS_REALTY_EDGE_BUILD_MARKER": "__MS_REALTY_BUILD_MARKER__"
+  },
 
   "containers": [
     {

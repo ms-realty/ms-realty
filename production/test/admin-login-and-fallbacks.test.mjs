@@ -122,9 +122,9 @@ test("standalone HTTP runtime: login exchanges email/password for a Payload cook
       url: "/admin/connect",
       headers: { cookie, host: "ms-realty.ms-realty-bg.workers.dev" },
     });
-    assert.equal(connect.status, 403);
-    assert.equal(connect.body.kind, "mcp_credential_required");
-    assert.equal(JSON.stringify(connect.body).includes(PAYLOAD_SESSION), false);
+    assert.equal(connect.status, 200);
+    assert.match(connect.body, /Подключения MS Realty/);
+    assert.equal(connect.body.includes(PAYLOAD_SESSION), false);
 
     const authed = await dispatchHttp(app, { method: "GET", url: "/admin/login", headers: { cookie } });
     assert.equal(authed.status, 303);
@@ -159,8 +159,10 @@ test("Next admin adapter: Payload login, cookie auth, and logout behave identica
     const cookie = ok.headers.get("set-cookie").split(";")[0];
 
     const connect = await renderAppAdminResponse(new Request(`${base}/admin/connect`, { headers: { cookie } }), { config });
-    assert.equal(connect.status, 403);
-    assert.doesNotMatch(await connect.text(), new RegExp(PAYLOAD_SESSION));
+    assert.equal(connect.status, 200);
+    const connectBody = await connect.text();
+    assert.match(connectBody, /Подключения MS Realty/);
+    assert.doesNotMatch(connectBody, new RegExp(PAYLOAD_SESSION));
 
     const logout = await renderAppAdminResponse(
       new Request(`${base}/admin/logout`, { method: "POST", headers: { cookie } }),
@@ -199,6 +201,7 @@ test("contact form availability follows only complete durable lead-store readine
     PAYLOAD_SECRET: "p".repeat(32),
     DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
     MS_REALTY_LEAD_CONTACT_KEY: "c".repeat(32),
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     MS_REALTY_MCP_WRITES_DISABLED: "1",
   };
   const enabled = renderContactPage({
@@ -213,6 +216,7 @@ test("contact form availability follows only complete durable lead-store readine
     "PAYLOAD_SECRET",
     "DATABASE_URL",
     "MS_REALTY_LEAD_CONTACT_KEY",
+    "MS_REALTY_WORKSPACE_ID",
   ]) {
     const disabled = renderContactPage({
       registry,

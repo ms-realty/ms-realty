@@ -3,6 +3,7 @@ import {
   DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT,
   writeLiveServiceProvisioningReport,
 } from "../lib/live-service-provisioning.mjs";
+import { HERMES_LAUNCH_REQUIRED } from "../lib/launch-service-contract.mjs";
 
 const outputPath = process.env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH || DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT;
 const generatedAt = process.env.MS_REALTY_GENERATED_AT || new Date().toISOString();
@@ -20,6 +21,8 @@ if (!report.ready) {
   if (report.summary.missing_env.length) console.log(`Missing env: ${report.summary.missing_env.join(", ")}`);
   if (report.summary.placeholder_env.length) console.log(`Placeholder env: ${report.summary.placeholder_env.join(", ")}`);
   console.log(
-    "Next: set real Typesense, Meilisearch, and Hermes provider env, rerun `npm run live:provisioning`, then `npm run live:provisioning:preflight`.",
+    HERMES_LAUNCH_REQUIRED
+      ? "Next: set real Postgres/Payload and Hermes provider env, rerun `npm run live:provisioning`, then `npm run live:provisioning:preflight`."
+      : "Next: set real Postgres/Payload env, rerun `npm run live:provisioning`, then `npm run live:provisioning:preflight`.",
   );
 }

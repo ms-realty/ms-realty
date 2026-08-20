@@ -1,9 +1,14 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "example": true,
   "generated_at": "2026-07-23T01:00:00.000Z",
   "environment": "production",
   "ready": false,
+  "provenance": {
+    "algorithm": "Ed25519",
+    "key_id": "replace-with-ed25519-sha256-public-key-id",
+    "signature": "replace-with-detached-base64-ed25519-signature"
+  },
   "policy": {
     "provider": "replace-with-backup-provider",
     "offsite": true,
@@ -17,6 +22,10 @@
     "backup_id": "replace-with-provider-backup-id",
     "completed_at": "2026-07-22T23:00:00.000Z",
     "checksum_verified": true,
+    "ciphertext_sha256": "replace-with-64-character-ciphertext-sha256",
+    "manifest_sha256": "replace-with-64-character-manifest-sha256",
+    "monitoring_rollback_report_sha256": "replace-with-64-character-monitoring-report-sha256",
+    "release_id": "replace-with-exact-40-character-release-sha",
     "components": [
       "payload_postgres",
       "runtime_data",
@@ -31,6 +40,11 @@
     "status": "pass",
     "checksum_verified": true,
     "rollback_procedure_verified": true,
+    "ciphertext_sha256": "replace-with-identical-64-character-ciphertext-sha256",
+    "manifest_sha256": "replace-with-identical-64-character-manifest-sha256",
+    "result_sha256": "replace-with-64-character-restore-result-sha256",
+    "monitoring_rollback_report_sha256": "replace-with-identical-64-character-monitoring-report-sha256",
+    "release_id": "replace-with-identical-exact-40-character-release-sha",
     "components_verified": [
       "payload_postgres",
       "runtime_data",
@@ -40,7 +54,14 @@
   },
   "approval": {
     "status": "approved",
+    "approval_id": "replace-with-unique-approval-id",
     "reviewer": "replace-with-reviewer",
-    "approved_at": "2026-07-22T23:30:00.000Z"
+    "approved_at": "2026-07-22T23:30:00.000Z",
+    "artifact_sha256": "replace-with-64-character-approval-artifact-sha256",
+    "ciphertext_sha256": "replace-with-identical-64-character-ciphertext-sha256",
+    "manifest_sha256": "replace-with-identical-64-character-manifest-sha256",
+    "restore_drill_sha256": "replace-with-identical-64-character-restore-result-sha256",
+    "monitoring_rollback_report_sha256": "replace-with-identical-64-character-monitoring-report-sha256",
+    "release_id": "replace-with-identical-exact-40-character-release-sha"
   }
 }

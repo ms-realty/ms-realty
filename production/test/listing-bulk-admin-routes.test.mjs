@@ -120,6 +120,63 @@ test("Next listing manager bulk status changes are selected, attributed, audited
   });
 });
 
+test("production listing edits keep a durable Payload receipt when supplemental audit logging is unavailable", async () => {
+  await withNamedOperator(async (auth) => {
+    const paths = tempWorkspace("next-listing-durable-audit");
+    const runtime = createPayloadDraftRuntime(loadCmsSeed());
+    const observed = [];
+    const config = {
+      ...appAdminConfigFromEnv({
+        NODE_ENV: "production",
+        MS_REALTY_LISTING_EDIT_LEDGER_PATH: paths.listingEdits,
+        MS_REALTY_TRANSLATION_LEDGER_PATH: paths.translations,
+        MS_REALTY_AUDIT_LOG_PATH: paths.audit,
+        MS_REALTY_EDITED_AT: "2026-08-13T12:00:00.000Z",
+      }),
+      payloadListingRuntime: runtime.payload,
+      durableListingAuditLogger: (line) => observed.push(JSON.parse(line)),
+    };
+
+    const edit = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/listings/edit", {
+        method: "POST",
+        headers: { ...auth, "content-type": "application/json" },
+        body: JSON.stringify({ listingId: "MS-CRAWL-0001", patch: { condition: "Production-reviewed condition" } }),
+      }),
+      { config },
+    );
+    assert.equal(edit.status, 201);
+    assert.deepEqual(observed.map((entry) => [entry.kind, entry.authority, entry.receipt]), [
+      ["durable_listing_mutation", "payload_postgres", "listing.workflow.last_edit_event"],
+    ]);
+
+    config.durableListingAuditLogger = () => {
+      throw new Error("observability unavailable");
+    };
+    const status = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/listings/status", {
+        method: "POST",
+        headers: { ...auth, "content-type": "application/json" },
+        body: JSON.stringify({ listingIds: ["MS-CRAWL-0002"], targetStatus: "reserved" }),
+      }),
+      { config },
+    );
+    assert.equal(status.status, 201);
+    assert.equal(readAuditLog(paths.audit).length, 0);
+
+    const editReceipt = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").workflow.last_edit_event;
+    assert.deepEqual(
+      { actor: editReceipt.actor_id, source: editReceipt.auth_source, channel: editReceipt.channel, fields: editReceipt.changed_fields },
+      { actor: "listing_operations", source: "credential_registry", channel: "admin", fields: ["condition"] },
+    );
+    const statusReceipt = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").workflow.last_edit_event;
+    assert.deepEqual(
+      { actor: statusReceipt.actor_id, source: statusReceipt.auth_source, channel: statusReceipt.channel, fields: statusReceipt.changed_fields },
+      { actor: "listing_operations", source: "credential_registry", channel: "admin", fields: ["listing_status"] },
+    );
+  });
+});
+
 test("Next listing manager schedules and executes retained-archive publication changes", async () => {
   await withNamedOperator(async (auth) => {
     const paths = tempWorkspace("next-listing-publication");

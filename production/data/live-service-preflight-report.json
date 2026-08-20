@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-06T00:00:00Z",
+  "generated_at": "2026-08-13T00:00:00.000Z",
   "ready": false,
   "status": "blocked",
   "summary": {
@@ -10,21 +10,21 @@
     "example_report": 0,
     "expired_report": 0,
     "configured_paths": {
-      "typesense_meilisearch_sync": "production/data/search-engine-sync-report.json",
-      "typesense_meilisearch_query": "production/data/search-engine-query-report.json",
+      "postgres_search_sync": "production/data/postgres-search-sync-report.json",
+      "postgres_search_query": "production/data/postgres-search-query-report.json",
       "hermes_draft_worker": "production/data/hermes-draft-worker-report.json"
     }
   },
   "reports": [
     {
-      "source": "typesense_meilisearch_sync",
+      "source": "postgres_search_sync",
       "status": "missing_report",
-      "path": "production/data/search-engine-sync-report.json"
+      "path": "production/data/postgres-search-sync-report.json"
     },
     {
-      "source": "typesense_meilisearch_query",
+      "source": "postgres_search_query",
       "status": "missing_report",
-      "path": "production/data/search-engine-query-report.json"
+      "path": "production/data/postgres-search-query-report.json"
     },
     {
       "source": "hermes_draft_worker",
@@ -33,11 +33,11 @@
     }
   ],
   "next_actions": [
-    "Provision Typesense, Meilisearch, and Hermes provider credentials.",
-    "Run npm run search:sync && npm run search:query.",
+    "Provision DATABASE_URL, PAYLOAD_SECRET, and Hermes provider credentials.",
+    "Run npm run search:sync && npm run search:query against the production Postgres search path.",
     "Run npm run hermes:provisioning to verify the self-hosted Hermes/vLLM provider settings.",
     "Run npm run hermes:worker.",
-    "Run npm run live:capture to generate the three live service reports.",
+    "Run npm run live:capture to generate the 3 required live service reports.",
     "Run npm run live:preflight before launch:preflight."
   ]
 }

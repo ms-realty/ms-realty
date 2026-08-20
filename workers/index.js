@@ -3,13 +3,22 @@ import {
   LEAD_PROBE_HEADER,
   allowsAdminSessionMutation,
   allowsDurableCaseAuthorityMutation,
+  allowsDurableListingAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
+  allowsProviderWebhookMutation,
+  allowsPublicEventMutation,
   allowsPublicLeadMutation,
   isPayloadPrivatePath,
   secretMatches,
 } from "./durable-case-authority.mjs";
 import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
+import {
+  OriginProxyError,
+  requestForOrigin,
+  responseForPublicOrigin,
+  responseWithEdgeBuildMarker,
+} from "./origin-proxy.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
 // process that reads the filesystem — the CMS seed and (for now) the JSONL
@@ -32,32 +41,26 @@ export class MsRealtyContainer extends Container {
   // Secrets reach the container through the Worker's env, never the image.
   envVars = {
     NODE_ENV: "production",
+    MS_REALTY_RUNTIME_DATA_AUTHORITY: "payload",
     MS_REALTY_TRUST_PROXY: "1",
     // This runtime's disk is ephemeral; MCP ledger-writing tools must not
     // register here or drafts would vanish on container sleep.
     MS_REALTY_MCP_WRITES_DISABLED: "1",
+    MS_REALTY_MCP_DURABLE_LISTING_WRITES: this.env.MS_REALTY_MCP_DURABLE_LISTING_WRITES ?? "",
     MS_REALTY_ADMIN_CREDENTIALS_JSON: this.env.MS_REALTY_ADMIN_CREDENTIALS_JSON ?? "",
     MS_REALTY_ADMIN_TOKEN: this.env.MS_REALTY_ADMIN_TOKEN ?? "",
     MS_REALTY_LEAD_CONTACT_KEY: this.env.MS_REALTY_LEAD_CONTACT_KEY ?? "",
     MS_REALTY_LEAD_DURABLE_STORE_ENABLED: this.env.MS_REALTY_LEAD_DURABLE_STORE_ENABLED ?? "",
+    MS_REALTY_EVENT_DURABLE_STORE_ENABLED: this.env.MS_REALTY_EVENT_DURABLE_STORE_ENABLED ?? "",
     MS_REALTY_PUBLIC_CONTACT_KEY: this.env.MS_REALTY_PUBLIC_CONTACT_KEY ?? "",
+    MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: this.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY ?? "",
     MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: this.env.MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST ?? "",
     MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: this.env.MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED ?? "",
     MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED: this.env.MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED ?? "",
     MS_REALTY_WORKSPACE_ID: this.env.MS_REALTY_WORKSPACE_ID ?? "",
     PAYLOAD_SECRET: this.env.PAYLOAD_SECRET ?? "",
     DATABASE_URL: this.env.DATABASE_URL ?? "",
-    MS_REALTY_SEARCH_ENGINE: this.env.MS_REALTY_SEARCH_ENGINE ?? "",
-    TYPESENSE_URL: this.env.TYPESENSE_URL ?? "",
-    TYPESENSE_API_KEY: this.env.TYPESENSE_API_KEY ?? "",
-    TYPESENSE_QUERY_API_KEY: this.env.TYPESENSE_QUERY_API_KEY ?? "",
-    TYPESENSE_COLLECTION: this.env.TYPESENSE_COLLECTION ?? "",
-    MEILI_URL: this.env.MEILI_URL ?? "",
-    MEILI_API_KEY: this.env.MEILI_API_KEY ?? "",
-    MEILI_QUERY_API_KEY: this.env.MEILI_QUERY_API_KEY ?? "",
-    MEILI_INDEX: this.env.MEILI_INDEX ?? "",
-    MS_REALTY_SEARCH_ENGINE: this.env.MS_REALTY_SEARCH_ENGINE ?? "",
-    MS_REALTY_SEARCH_ALLOW_PRIVATE_SERVICE_NETWORK: this.env.MS_REALTY_SEARCH_ALLOW_PRIVATE_SERVICE_NETWORK ?? "",
+    MS_REALTY_SEARCH_ENGINE: "postgres",
     HERMES_CHAT_COMPLETIONS_URL: this.env.HERMES_CHAT_COMPLETIONS_URL ?? "",
     HERMES_API_KEY: this.env.HERMES_API_KEY ?? "",
     HERMES_MODEL: this.env.HERMES_MODEL ?? "",
@@ -69,6 +72,18 @@ export class MsRealtyContainer extends Container {
     MS_REALTY_MCP_ALLOWED_ORIGINS: this.env.MS_REALTY_MCP_ALLOWED_ORIGINS ?? "",
     MS_REALTY_PUBLIC_ORIGIN: this.env.MS_REALTY_PUBLIC_ORIGIN ?? "",
     MS_REALTY_MAX_BODY_BYTES: this.env.MS_REALTY_MAX_BODY_BYTES ?? "",
+    MS_REALTY_PROVIDER_TOKEN_KEY: this.env.MS_REALTY_PROVIDER_TOKEN_KEY ?? "",
+    MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: this.env.MS_REALTY_PROVIDER_OAUTH_STATE_SECRET ?? "",
+    MS_REALTY_GOOGLE_OAUTH_CLIENT_ID: this.env.MS_REALTY_GOOGLE_OAUTH_CLIENT_ID ?? "",
+    MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET: this.env.MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET ?? "",
+    MS_REALTY_META_APP_ID: this.env.MS_REALTY_META_APP_ID ?? "",
+    MS_REALTY_META_APP_SECRET: this.env.MS_REALTY_META_APP_SECRET ?? "",
+    MS_REALTY_META_EMBEDDED_SIGNUP_CONFIG_ID: this.env.MS_REALTY_META_EMBEDDED_SIGNUP_CONFIG_ID ?? "",
+    MS_REALTY_META_GRAPH_VERSION: this.env.MS_REALTY_META_GRAPH_VERSION ?? "",
+    MS_REALTY_META_WEBHOOK_VERIFY_TOKEN: this.env.MS_REALTY_META_WEBHOOK_VERIFY_TOKEN ?? "",
+    MS_REALTY_VIBER_COMMERCIAL_READY: this.env.MS_REALTY_VIBER_COMMERCIAL_READY ?? "",
+    MS_REALTY_PROVIDER_WEBHOOK_MAX_BYTES: this.env.MS_REALTY_PROVIDER_WEBHOOK_MAX_BYTES ?? "",
+    MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: this.env.MS_REALTY_VIEWING_DURABLE_STORE_ENABLED ?? "",
   };
 
   onStart() {
@@ -217,6 +232,29 @@ function payloadPrivateResponse() {
   });
 }
 
+async function proxyDurableOrigin(request, env, url, preview) {
+  try {
+    const upstreamRequest = requestForOrigin(request, env.MS_REALTY_ORIGIN_URL, env.MS_REALTY_ORIGIN_TOKEN);
+    const upstreamResponse = await fetch(upstreamRequest);
+    const publicResponse = responseForPublicOrigin(upstreamResponse, {
+      originValue: env.MS_REALTY_ORIGIN_URL,
+      publicUrl: url,
+    });
+    const versionedResponse = await responseWithEdgeBuildMarker(
+      publicResponse,
+      env.MS_REALTY_EDGE_BUILD_MARKER,
+      url.pathname,
+    );
+    return preview ? withPreviewNoindex(versionedResponse) : versionedResponse;
+  } catch (error) {
+    const status = error instanceof OriginProxyError ? error.status : 502;
+    return new Response(JSON.stringify({ kind: status === 403 ? "cross_origin_write_blocked" : "origin_unavailable" }), {
+      status,
+      headers: { "cache-control": "no-store", "content-type": "application/json; charset=utf-8" },
+    });
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -235,8 +273,14 @@ export default {
       }
       const media = await serveMedia(request, env, url);
       if (media) return media;
+      if (env.MS_REALTY_ORIGIN_URL) return proxyDurableOrigin(request, env, url, preview);
       return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
     }
+
+    // The durable handoff runtime lives on the agency's fixed origin. Keeping
+    // this switch optional preserves the Container as a fail-closed fallback
+    // for accounts that have not provisioned that origin.
+    if (env.MS_REALTY_ORIGIN_URL) return proxyDurableOrigin(request, env, url, preview);
 
     // Container disk resets on sleep, so only the existing Payload/Postgres
     // authority routes can write. Every other mutation remains read-only.
@@ -245,12 +289,17 @@ export default {
     const mutating = MUTATING_METHODS.has(request.method);
     const leadProbe = mutating && (await allowsLeadProbeMutation({ request, pathname: url.pathname, env }));
     const publicLead = mutating && allowsPublicLeadMutation({ method: request.method, pathname: url.pathname, env });
+    const publicEvent = mutating && allowsPublicEventMutation({ method: request.method, pathname: url.pathname, env });
+    const providerWebhook = mutating && allowsProviderWebhookMutation({ method: request.method, pathname: url.pathname, env });
     if (
       mutating &&
       !allowsAdminSessionMutation({ request, method: request.method, pathname: url.pathname }) &&
       !leadProbe &&
       !publicLead &&
+      !publicEvent &&
+      !providerWebhook &&
       !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
+      !allowsDurableListingAuthorityMutation({ method: request.method, pathname: url.pathname, env }) &&
       !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
     ) {
       return ephemeralRuntimeDataResponse();

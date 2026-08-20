@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
@@ -40,6 +41,7 @@ import {
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { signProductionRecoveryReport } from "../lib/production-recovery.mjs";
 import { appendRedirectApproval } from "../lib/redirect-approvals.mjs";
 import { LOGO_URL, LOGO_URL_REVERSED } from "../lib/ui/design-assets.mjs";
 import {
@@ -53,6 +55,8 @@ const SAME_ORIGIN_LEAD_HEADERS = Object.freeze({
   origin: "http://localhost",
   "sec-fetch-site": "same-origin",
 });
+const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
+const RECOVERY_PUBLIC_KEY = RECOVERY_KEYPAIR.publicKey.export({ format: "der", type: "spki" }).toString("base64");
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -73,8 +77,13 @@ function healthyHermesAgentFetch(url) {
 function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
   const generatedAtMs = Date.parse(generatedAt);
   const minutesBefore = (minutes) => new Date(generatedAtMs - minutes * 60_000).toISOString();
-  return {
-    schema_version: 1,
+  const ciphertextSha256 = "1".repeat(64);
+  const manifestSha256 = "2".repeat(64);
+  const restoreDrillSha256 = "3".repeat(64);
+  const monitoringRollbackReportSha256 = "4".repeat(64);
+  const releaseId = "a".repeat(40);
+  return signProductionRecoveryReport({
+    schema_version: 2,
     generated_at: generatedAt,
     environment: "production",
     ready: true,
@@ -91,6 +100,10 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
       backup_id: "backup-20260722-001",
       completed_at: minutesBefore(40),
       checksum_verified: true,
+      ciphertext_sha256: ciphertextSha256,
+      manifest_sha256: manifestSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: releaseId,
       components: ["payload_postgres", "runtime_data", "runtime_evidence"],
     },
     restore_drill: {
@@ -101,15 +114,27 @@ function validProductionRecoveryReport(generatedAt = new Date().toISOString()) {
       status: "pass",
       checksum_verified: true,
       rollback_procedure_verified: true,
+      ciphertext_sha256: ciphertextSha256,
+      manifest_sha256: manifestSha256,
+      result_sha256: restoreDrillSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: releaseId,
       components_verified: ["payload_postgres", "runtime_data", "runtime_evidence"],
       operator: "operations_manager",
     },
     approval: {
       status: "approved",
+      approval_id: "recovery-approval-20260722-001",
       reviewer: "agency_owner",
       approved_at: minutesBefore(10),
+      artifact_sha256: "5".repeat(64),
+      ciphertext_sha256: ciphertextSha256,
+      manifest_sha256: manifestSha256,
+      restore_drill_sha256: restoreDrillSha256,
+      monitoring_rollback_report_sha256: monitoringRollbackReportSha256,
+      release_id: releaseId,
     },
-  };
+  }, { privateKey: RECOVERY_KEYPAIR.privateKey });
 }
 
 function tempLedger() {
@@ -1002,7 +1027,6 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.health.body.status, "ok");
   assert.equal(smoke.health.body.build_marker, "unversioned");
   assert.deepEqual(smoke.health.body.blockers, [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -1015,7 +1039,6 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.deepEqual(
     smoke.ready.body.blocked_gates.map((gate) => gate.id),
     [
-      "redirect_reviews",
       "external_seo_exports",
       "listing_quality_review",
       "live_services",
@@ -1523,7 +1546,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(approved.body.approval.deployable, true);
   assert.equal(approved.body.deployablePreview.length, 1);
   assert.equal(approved.body.deployablePreview[0].target_path, listing.target_path);
-  assert.equal(approved.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(approved.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(formApproved.status, 201);
   assert.equal(formApproved.body.deployablePreview.length, 2);
   assert.equal(rejected.status, 400);
@@ -1594,7 +1617,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.ok(preflightReports.body.reports.listing_quality.next_actions.some((action) => action.includes("listing:preflight")));
   assert.equal(preflightReports.body.reports.live_services.status, "blocked");
   assert.equal(preflightReports.body.reports.live_service_provisioning.status, "blocked_report");
-  assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+  assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("DATABASE_URL"));
   assert.ok(preflightReports.body.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
   assert.equal(preflightReports.body.reports.payload_runtime.status, "blocked_report");
   assert.ok(preflightReports.body.reports.payload_runtime.next_actions.some((action) => action.includes("payload:runtime")));
@@ -1613,7 +1636,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(liveServiceProvisioning.status, 200);
   assert.equal(liveServiceProvisioning.body.kind, "admin_live_service_provisioning");
   assert.equal(liveServiceProvisioning.body.provisioning.status, "blocked_report");
-  assert.ok(liveServiceProvisioning.body.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+  assert.ok(liveServiceProvisioning.body.provisioning.summary.missing_env.includes("DATABASE_URL"));
   assert.ok(liveServiceProvisioning.body.provisioning.next_actions.some((action) => action.includes("live:provisioning")));
   assert.equal(liveServiceProvisioning.body.provisioning.hermes.install_command, "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash");
   assert.equal(liveServiceProvisioning.body.provisioning.hermes.safety.can_publish, false);
@@ -1661,11 +1684,11 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
   assert.equal(imported.body.deployablePreview.length, 3);
-  assert.equal(imported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(imported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(formImported.status, 201);
   assert.equal(formImported.body.imported, 1);
   assert.equal(formImported.body.deployablePreview.length, 4);
-  assert.equal(formImported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(formImported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   const pendingRows = parseCsv(pendingWorkbook.body);
   assert.equal(pendingRows.length, 453);
   assert.equal(pendingRows.some((row) => row.old_url === listing.old_url), false);
@@ -1674,7 +1697,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(exported.status, 201);
   assert.equal(exported.body.exported, 4);
   assert.equal(exported.body.summary.total, 4);
-  assert.equal(exported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(exported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(fs.existsSync(deployableRedirectOutputPath), true);
   assert.equal(JSON.parse(fs.readFileSync(deployableRedirectOutputPath, "utf8")).redirects.length, 4);
   assert.equal(review.body.workspace.locale, "ru");
@@ -1709,7 +1732,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.agencyReviewQueue.public_launch_ready, false);
   assert.ok(review.body.agencyReviewQueue.summary.open_tasks > 0);
   assert.equal(review.body.agencyReviewQueue.guardrails.unreviewed_translation_indexing, "blocked");
-  assert.ok(review.body.launchBlockers.blockers.includes("redirect_reviews"));
+  assert.equal(review.body.launchBlockers.blockers.includes("redirect_reviews"), false);
   assert.ok(review.body.launchBlockers.blockers.includes("external_seo_exports"));
   assert.ok(review.body.launchBlockers.blockers.includes("listing_quality_review"));
   assert.ok(review.body.launchBlockers.blockers.includes("live_services"));
@@ -1944,19 +1967,20 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const seoEvidenceInputDir = tempSeoEvidenceDir();
   const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
   const launchReadinessOutputPath = `${seoEvidenceInputDir}/launch-readiness.json`;
-  const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
-  const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
+  const searchSyncReportPath = `${seoEvidenceInputDir}/postgres-search-sync-report.json`;
+  const searchQueryReportPath = `${seoEvidenceInputDir}/postgres-search-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
   const liveServiceProvisioningReportPath = `${seoEvidenceInputDir}/live-service-provisioning-report.json`;
   const payloadRuntimeReportPath = `${seoEvidenceInputDir}/payload-runtime-report.json`;
-  const syncReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-sync-report.json.example"), "utf8"));
-  const queryReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-query-report.json.example"), "utf8"));
+  const syncReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "postgres-search-sync-report.json.example"), "utf8"));
+  const queryReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "postgres-search-query-report.json.example"), "utf8"));
   const hermesReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-worker-report.json.example"), "utf8"));
   const payloadReport = await buildPayloadRuntimeReport({
     databaseProbe: async ({ database, host, port }) => ({ database, host, port, status: "pass" }),
     env: {
       DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
       PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+      MS_REALTY_SEARCH_ENGINE: "postgres",
     },
     generatedAt: runtimeGeneratedAt,
   });
@@ -1966,15 +1990,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   });
   const liveServiceProvisioningReport = await buildLiveServiceProvisioningReport({
     env: {
-      TYPESENSE_URL: "https://typesense.ms-realty.bg",
-      TYPESENSE_API_KEY: "typesense-key",
-      MEILI_URL: "https://meili.ms-realty.bg",
-      MEILI_API_KEY: "meili-key",
+      DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+      MS_REALTY_SEARCH_ENGINE: "postgres",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: healthyHermesAgentFetch,
-    lookupImpl: async () => [{ address: "1.1.1.1", family: 4 }],
     generatedAt: runtimeGeneratedAt,
   });
   delete syncReport.example;
@@ -2100,15 +2122,15 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   const liveTemplateUnauthorized = await dispatchHttp(app, {
-    url: "/api/admin/live-service-report-template?source=typesense_meilisearch_sync",
+    url: "/api/admin/live-service-report-template?source=postgres_search_sync",
   });
   const liveTemplate = await dispatchHttp(app, {
-    url: "/api/admin/live-service-report-template?source=typesense_meilisearch_sync",
+    url: "/api/admin/live-service-report-template?source=postgres_search_sync",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   const liveImportUnauthorized = await dispatchHttp(app, {
     method: "POST",
-    url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_sync",
+    url: "/api/admin/live-service-reports/import?source=postgres_search_sync",
     body: syncReport,
   });
   const liveProvisioningImportUnauthorized = await dispatchHttp(app, {
@@ -2124,13 +2146,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   });
   const liveSyncImport = await dispatchHttp(app, {
     method: "POST",
-    url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_sync",
+    url: "/api/admin/live-service-reports/import?source=postgres_search_sync",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: syncReport,
   });
   const liveQueryImport = await dispatchHttp(app, {
     method: "POST",
-    url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_query",
+    url: "/api/admin/live-service-reports/import?source=postgres_search_query",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: queryReport,
   });
@@ -2215,7 +2237,6 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(launchUnauthorized.status, 401);
   assert.equal(launch.status, 200);
   assert.deepEqual(launch.body.blockers, [
-    "redirect_reviews",
     "listing_quality_review",
     "live_services",
     "monitoring_rollback",
@@ -2226,12 +2247,11 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(launch.body.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "live_services").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "monitoring_rollback").evidence.machine_evidence.status, "missing");
-  assert.equal(launch.body.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.equal(launch.body.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(launchExportUnauthorized.status, 401);
   assert.equal(launchExport.status, 201);
   assert.equal(fs.existsSync(launchReadinessOutputPath), true);
   assert.deepEqual(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).blockers, [
-    "redirect_reviews",
     "listing_quality_review",
     "live_services",
     "monitoring_rollback",
@@ -2240,7 +2260,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   ]);
   assert.equal(liveTemplateUnauthorized.status, 401);
   assert.equal(liveTemplate.status, 200);
-  assert.equal(liveTemplate.headers["content-disposition"], 'attachment; filename="search-engine-sync-report.json.example"');
+  assert.equal(liveTemplate.headers["content-disposition"], 'attachment; filename="postgres-search-sync-report.json.example"');
   assert.equal(JSON.parse(liveTemplate.body).example, true);
   assert.equal(JSON.parse(liveTemplate.body).summary.engines, 1);
   assert.equal(liveImportUnauthorized.status, 401);
@@ -2256,10 +2276,10 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(liveSyncImport.body.livePreflight.summary.missing_report, 2);
   assert.equal(liveSyncImport.body.liveImport.ready, false);
   assert.equal(liveSyncImport.body.liveImport.status, "blocked");
-  assert.equal(liveSyncImport.body.liveImport.importedSource, "typesense_meilisearch_sync");
+  assert.equal(liveSyncImport.body.liveImport.importedSource, "postgres_search_sync");
   assert.deepEqual(
     liveSyncImport.body.liveImport.blockedReports.map((report) => report.source),
-    ["typesense_meilisearch_query", "hermes_draft_worker"],
+    ["postgres_search_query", "hermes_draft_worker"],
   );
   assert.equal(liveQueryImport.status, 202);
   assert.equal(liveHermesImport.status, 201);
@@ -2290,7 +2310,6 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(liveServiceProvisioningReportPath), true);
   assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
   assert.deepEqual(launchAfterLive.body.blockers, [
-    "redirect_reviews",
     "listing_quality_review",
     "monitoring_rollback",
     "production_recovery",
@@ -2338,7 +2357,7 @@ test("HTTP app executes reviewed retained and 410 legacy route decisions", async
   assert.equal(retained.body.body.facts.id, listing.target_path.split("/").at(-1));
 });
 
-test("HTTP launch readiness stays tied to the deployed redirect artifact until export and restart", async () => {
+test("HTTP launch readiness stays tied to the approved freeze while editor approvals change", async () => {
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-stale-redirect-artifact-`);
   const redirectApprovalPath = `${directory}/redirect-approvals.jsonl`;
@@ -2360,9 +2379,10 @@ test("HTTP launch readiness stays tied to the deployed redirect artifact until e
   const redirectGate = readiness.body.gates.find((gate) => gate.id === "redirect_reviews");
 
   assert.equal(readiness.status, 200);
-  assert.equal(redirectGate.status, "blocked");
-  assert.equal(redirectGate.evidence.terminal_decisions, 165);
-  assert.equal(redirectGate.evidence.unresolved_legacy_urls, 292);
+  assert.equal(redirectGate.status, "pass");
+  assert.equal(redirectGate.evidence.terminal_decisions, 457);
+  assert.equal(redirectGate.evidence.unresolved_legacy_urls, 0);
+  assert.equal(redirectGate.evidence.preservation_contract_valid, true);
 });
 
 test("HTTP sitemap ignores editor-only location mutations without removing reviewed landing pages", async () => {
@@ -2881,6 +2901,7 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
   const app = createHttpApp({
     auditLogPath,
     productionRecoveryReportPath,
+    productionRecoverySigningPublicKey: RECOVERY_PUBLIC_KEY,
     reviewedAt: "2026-07-23T00:00:00.000Z",
   });
   const auth = { authorization: "Bearer local-admin-smoke" };
@@ -2893,6 +2914,28 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
     url: "/api/admin/production-recovery/import",
     headers: auth,
     body: { report: "not-json" },
+  });
+  const legacy = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/production-recovery/import",
+    headers: auth,
+    body: { report: JSON.stringify({ ...validProductionRecoveryReport(), schema_version: 1 }) },
+  });
+  const unsignedReport = validProductionRecoveryReport();
+  delete unsignedReport.provenance;
+  const unsigned = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/production-recovery/import",
+    headers: auth,
+    body: { report: JSON.stringify(unsignedReport) },
+  });
+  const tamperedReport = validProductionRecoveryReport();
+  tamperedReport.backup.backup_id = "handwritten-backup-9999";
+  const tampered = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/production-recovery/import",
+    headers: auth,
+    body: { report: JSON.stringify(tamperedReport) },
   });
   const imported = await dispatchHttp(app, {
     method: "POST",
@@ -2911,9 +2954,15 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
   assert.equal(before.body.recovery.status, "missing_report");
   assert.equal(template.status, 200);
   assert.equal(template.headers["content-disposition"], 'attachment; filename="production-recovery-report.json.example"');
+  assert.equal(unsigned.status, 400);
+  assert.match(unsigned.body.message, /Ed25519 provenance/);
+  assert.equal(tampered.status, 400);
+  assert.match(tampered.body.message, /signature is invalid/);
   assert.equal(JSON.parse(template.body).example, true);
   assert.equal(invalid.status, 400);
   assert.match(invalid.body.message, /valid JSON/);
+  assert.equal(legacy.status, 400);
+  assert.match(legacy.body.message, /schema v2/);
   assert.equal(imported.status, 201);
   assert.equal(imported.body.imported.outPath, productionRecoveryReportPath);
   assert.equal(imported.body.recovery.status, "pass");

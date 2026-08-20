@@ -4,8 +4,8 @@ import {
   assertSearchEngineEvidenceConsistency,
   assertSearchEngineQueryReport,
   assertSearchEngineSyncReport,
-  DEFAULT_SEARCH_ENGINE_QUERY_REPORT,
-  DEFAULT_SEARCH_ENGINE_SYNC_REPORT,
+  DEFAULT_POSTGRES_SEARCH_QUERY_REPORT,
+  DEFAULT_POSTGRES_SEARCH_SYNC_REPORT,
   writeSearchEngineQueryReport,
   writeSearchEngineSyncReport,
 } from "./search-engine-sync.mjs";
@@ -15,8 +15,19 @@ import {
   writeHermesDraftWorkerReport,
 } from "./hermes-draft-worker.mjs";
 import { assertHermesChatCompletionsEndpoint } from "./hermes-provider-provisioning.mjs";
+import {
+  assertProductionSearchEngine,
+  HERMES_DRAFT_WORKER_SOURCE,
+  HERMES_LAUNCH_REQUIRED,
+  POSTGRES_SEARCH_QUERY_SOURCE,
+  POSTGRES_SEARCH_SYNC_SOURCE,
+  REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS,
+  REQUIRED_LIVE_SERVICE_PROVISIONING_SERVICES,
+  REQUIRED_LIVE_SERVICE_REPORT_SOURCES,
+} from "./launch-service-contract.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { buildListingQualityPreflightReport, DEFAULT_LISTING_QUALITY_REVIEW_INPUT } from "./listing-quality.mjs";
+import { assertExactRedactedPostgresTarget } from "./postgres-target.mjs";
 import {
   assertPayloadRuntimeReport,
   assertProductionDatabaseHost,
@@ -38,6 +49,8 @@ import {
   missingRequiredSources,
 } from "./seo-evidence-contract.mjs";
 import {
+  approvedLaunchFreezeRouteArtifact,
+  isApprovedLaunchFreezeRouteArtifact,
   summarizeDeployableRedirects,
   summarizeLegacyRouteDecisions,
   validateLegacyRouteDecisionArtifact,
@@ -54,26 +67,21 @@ const LOCAL_PREVIEW_GATE_NEXT_ACTIONS = [
   "Complete the external SEO, human-review, and live production evidence gates before launch.",
 ];
 
+const LIVE_SERVICE_SOURCE_ALIASES = {
+  typesense_meilisearch_sync: POSTGRES_SEARCH_SYNC_SOURCE,
+  typesense_meilisearch_query: POSTGRES_SEARCH_QUERY_SOURCE,
+};
 const LIVE_SERVICE_REPORT_TEMPLATES = {
-  typesense_meilisearch_sync: "search-engine-sync-report.json.example",
-  typesense_meilisearch_query: "search-engine-query-report.json.example",
-  hermes_draft_worker: "hermes-draft-worker-report.json.example",
+  [POSTGRES_SEARCH_SYNC_SOURCE]: "postgres-search-sync-report.json.example",
+  [POSTGRES_SEARCH_QUERY_SOURCE]: "postgres-search-query-report.json.example",
+  [HERMES_DRAFT_WORKER_SOURCE]: "hermes-draft-worker-report.json.example",
 };
 
 const LIVE_SERVICE_REPORT_WRITERS = {
-  typesense_meilisearch_sync: { write: writeSearchEngineSyncReport, pathKey: "syncReportPath" },
-  typesense_meilisearch_query: { write: writeSearchEngineQueryReport, pathKey: "queryReportPath" },
-  hermes_draft_worker: { write: writeHermesDraftWorkerReport, pathKey: "hermesReportPath" },
+  [POSTGRES_SEARCH_SYNC_SOURCE]: { write: writeSearchEngineSyncReport, pathKey: "syncReportPath" },
+  [POSTGRES_SEARCH_QUERY_SOURCE]: { write: writeSearchEngineQueryReport, pathKey: "queryReportPath" },
+  [HERMES_DRAFT_WORKER_SOURCE]: { write: writeHermesDraftWorkerReport, pathKey: "hermesReportPath" },
 };
-const REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS = [
-  "typesense_url",
-  "typesense_api_key",
-  "meili_url",
-  "meili_api_key",
-  "typesense_health",
-  "meilisearch_health",
-  "hermes_provider",
-];
 const REQUIRED_PAYLOAD_RUNTIME_ROUTE_FILES = [
   "app/admin/route.js",
   "app/admin/login/route.js",
@@ -131,8 +139,10 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
     "Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.",
   ],
   live_services: [
-    "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
-    "Import or mount the three live service reports, then run npm run live:preflight before launch.",
+    HERMES_LAUNCH_REQUIRED
+      ? "Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path and Hermes service."
+      : "Run npm run live:provisioning:preflight, then npm run live:capture against the production Postgres search path.",
+    `Import or mount the ${REQUIRED_LIVE_SERVICE_REPORT_SOURCES.length} required live service reports, then run npm run live:preflight before launch.`,
   ],
   runtime_smoke: [
     "Run npm run runtime:build and npm run server:smoke against the production Node adapter and HTTP listing route.",
@@ -153,7 +163,7 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   ],
   production_recovery: [
     "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
-    "Download /api/admin/production-recovery-template, complete it with real evidence, and import it through /api/admin/production-recovery/import.",
+    "Run the governed recovery:r2 backup, restore, and approval commands; only their Ed25519-signed report can be imported through /api/admin/production-recovery/import.",
   ],
 };
 
@@ -187,17 +197,8 @@ function assertLaunchServiceUrl(value, label) {
 }
 
 function assertLaunchDatabaseTarget(value, label) {
-  if (!value) throw new Error(`${label} must include database target evidence`);
-  let parsed;
-  try {
-    parsed = new URL(value);
-  } catch {
-    throw new Error(`${label} must include valid database target evidence`);
-  }
-  if (!["postgres:", "postgresql:"].includes(parsed.protocol)) {
-    throw new Error(`${label} must use postgres:// or postgresql://`);
-  }
-  if (parsed.username || parsed.password) throw new Error(`${label} must not include URL credentials`);
+  const canonical = assertExactRedactedPostgresTarget(value, label);
+  const parsed = new URL(canonical);
   const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
   const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];
@@ -213,46 +214,50 @@ function assertLiveServiceReportHasNoSecrets(report) {
   }
 }
 
+function canonicalLiveServiceSource(source) {
+  return LIVE_SERVICE_SOURCE_ALIASES[source] || source;
+}
+
+function requiredLiveServiceReports(reports) {
+  return REQUIRED_LIVE_SERVICE_REPORT_SOURCES.map((source) => reports.find((report) => report.source === source)).filter(Boolean);
+}
+
+function requiredLiveServiceReportsPass(reports, predicate = (report) => report.status === "pass") {
+  const required = requiredLiveServiceReports(reports);
+  return required.length === REQUIRED_LIVE_SERVICE_REPORT_SOURCES.length && required.every(predicate);
+}
+
 function assertLaunchLiveServiceEvidence(source, report) {
-  if (source === "typesense_meilisearch_sync") {
+  if (source === POSTGRES_SEARCH_SYNC_SOURCE) {
     if (report.evidence_scope !== "live" || report.source?.kind !== "payload_postgres" || report.source?.authoritative !== true) {
       throw new Error("Search sync launch evidence must use the current Payload projection");
     }
-    for (const engine of report.engines || []) {
+    if (report.engines?.length !== 1 || report.engines[0]?.engine !== "postgres") {
+      throw new Error("Search sync launch evidence must contain exactly one Postgres engine");
+    }
+    for (const engine of report.engines) {
       const urls = (engine.operations || []).map((operation) => operation.url);
-      if (!urls.length) throw new Error(`${engine.engine} sync report must include operation URL evidence`);
-      if (engine.engine === "postgres") {
-        const targets = new Set(urls.map((url) => assertLaunchDatabaseTarget(url, `${engine.engine} sync report`).href));
-        if (targets.size !== 1) throw new Error(`${engine.engine} sync report operations must use one database target`);
-        continue;
-      }
-      const origins = new Set(urls.map((url) => assertLaunchServiceUrl(url, `${engine.engine} sync report`).origin));
-      if (origins.size !== 1) throw new Error(`${engine.engine} sync report operations must use one service origin`);
+      if (!urls.length) throw new Error("Postgres sync report must include operation target evidence");
+      const targets = new Set(urls.map((url) => assertLaunchDatabaseTarget(url, "Postgres sync report").href));
+      if (targets.size !== 1) throw new Error("Postgres sync report operations must use one database target");
     }
     return;
   }
-  if (source === "typesense_meilisearch_query") {
+  if (source === POSTGRES_SEARCH_QUERY_SOURCE) {
     if (report.evidence_scope !== "live" || report.source?.kind !== "payload_postgres" || report.source?.authoritative !== true) {
       throw new Error("Search query launch evidence must use the current Payload projection");
     }
-    for (const engine of report.engines || []) {
-      if (engine.engine === "postgres") {
-        const target = assertLaunchDatabaseTarget(engine.database_target, `${engine.engine} query report`).href;
-        const operationTarget = assertLaunchDatabaseTarget(engine.operation?.url, `${engine.engine} query operation`).href;
-        if (operationTarget !== target) {
-          throw new Error(`${engine.engine} query operation must use the reported database target`);
-        }
-        continue;
-      }
-      const serviceOrigin = assertLaunchServiceUrl(engine.service_url, `${engine.engine} query report`).origin;
-      const operationOrigin = assertLaunchServiceUrl(engine.operation?.url, `${engine.engine} query operation`).origin;
-      if (operationOrigin !== serviceOrigin) {
-        throw new Error(`${engine.engine} query operation must use the reported service origin`);
-      }
+    if (report.engines?.length !== 1 || report.engines[0]?.engine !== "postgres") {
+      throw new Error("Search query launch evidence must contain exactly one Postgres engine");
+    }
+    for (const engine of report.engines) {
+      const target = assertLaunchDatabaseTarget(engine.database_target, "Postgres query report").href;
+      const operationTarget = assertLaunchDatabaseTarget(engine.operation?.url, "Postgres query operation").href;
+      if (operationTarget !== target) throw new Error("Postgres query operation must use the reported database target");
     }
     return;
   }
-  if (source === "hermes_draft_worker") {
+  if (source === HERMES_DRAFT_WORKER_SOURCE) {
     assertLaunchServiceUrl(report.provider?.endpoint, "Hermes worker report");
     assertHermesChatCompletionsEndpoint(report.provider.endpoint, "Hermes worker report endpoint");
     if (report.provider?.mode !== "self_hosted" || report.provider?.sensitive_data_allowed !== true) {
@@ -275,7 +280,7 @@ function operationSnapshot(operation = {}) {
 }
 
 function liveServiceEvidenceSnapshot(source, report) {
-  if (source === "typesense_meilisearch_sync") {
+  if (source === POSTGRES_SEARCH_SYNC_SOURCE) {
     return {
       evidence_scope: report.evidence_scope,
       source: report.source,
@@ -287,7 +292,7 @@ function liveServiceEvidenceSnapshot(source, report) {
       })),
     };
   }
-  if (source === "typesense_meilisearch_query") {
+  if (source === POSTGRES_SEARCH_QUERY_SOURCE) {
     return {
       evidence_scope: report.evidence_scope,
       source: report.source,
@@ -301,7 +306,7 @@ function liveServiceEvidenceSnapshot(source, report) {
       })),
     };
   }
-  if (source === "hermes_draft_worker") {
+  if (source === HERMES_DRAFT_WORKER_SOURCE) {
     return {
       provider: {
         mode: report.provider?.mode,
@@ -440,9 +445,12 @@ function legacyRouteReviewState(routeMap, deployableRedirects) {
     : Array.isArray(deployableRedirects.redirects)
       ? deployableRedirects.redirects
       : [];
-  const validation = validateLegacyRouteDecisionArtifact(routes, artifactDecisions, {
-    requireExplicitDecision: hasDecisionArtifact,
-  });
+  const preservationContractValid = isApprovedLaunchFreezeRouteArtifact(deployableRedirects);
+  const validation = preservationContractValid
+    ? { decisions: artifactDecisions, errors: [] }
+    : validateLegacyRouteDecisionArtifact(routes, artifactDecisions, {
+        requireExplicitDecision: hasDecisionArtifact,
+      });
   const decisions = validation.decisions;
   const decisionSummary = summarizeLegacyRouteDecisions(decisions);
   const redirects = redirectRowsFromDecisions(decisions);
@@ -476,6 +484,11 @@ function legacyRouteReviewState(routeMap, deployableRedirects) {
     decisionSummaryMatches: sameJson(deployableRedirects.decision_summary, decisionSummary),
     redirectSummaryMatches: sameJson(deployableRedirects.summary, redirectSummary),
     redirectRowsMatch: redirectRowsMatchDecisions(deployableRedirects.redirects, redirects),
+    preservationContractValid,
+    homepageTargetsAllowed:
+      (redirectSummary.homepageTargets === 0 && decisionSummary.homepageTargets === 0) ||
+      (preservationContractValid && redirectSummary.homepageTargets === 5 && decisionSummary.homepageTargets === 15),
+    preservationContract: preservationContractValid ? deployableRedirects.preservation_contract : null,
   };
 }
 
@@ -484,6 +497,17 @@ function assertPassRedirectReviewEvidence(report) {
   if (redirects?.status !== "pass") return;
   const evidence = redirects.evidence || {};
   const unresolvedByType = evidence.unresolved_by_type;
+  const approvedHomepageTargets =
+    evidence.preservation_contract_valid === true &&
+    evidence.preservation_contract?.locked === true &&
+    evidence.preservation_contract?.approved_homepage_redirects === 5 &&
+    evidence.preservation_contract?.approved_homepage_decisions === 15 &&
+    evidence.homepage_targets === 5 &&
+    evidence.decision_homepage_targets === 15;
+  const noHomepageTargets =
+    evidence.preservation_contract_valid !== true &&
+    evidence.homepage_targets === 0 &&
+    evidence.decision_homepage_targets === 0;
   if (
     evidence.total_legacy_urls !== 457 ||
     evidence.resolved_legacy_urls !== evidence.total_legacy_urls ||
@@ -499,7 +523,7 @@ function assertPassRedirectReviewEvidence(report) {
     !evidence.decision_statuses ||
     ![200, 301, 410].every((status) => Number.isInteger(evidence.decision_statuses[status]) && evidence.decision_statuses[status] >= 0) ||
     evidence.decision_statuses[200] + evidence.decision_statuses[301] + evidence.decision_statuses[410] !== evidence.total_legacy_urls ||
-    evidence.homepage_targets !== 0 ||
+    (!approvedHomepageTargets && !noHomepageTargets) ||
     evidence.duplicate_old_urls !== 0
   ) {
     throw new Error("Launch readiness redirect reviews require a terminal route decision for every legacy URL");
@@ -634,7 +658,7 @@ function assertLiveServiceSummaryEvidence(item) {
     /^[a-f0-9]{64}$/.test(String(source.digest || ""));
   const hasSearchTargets = typeof summary.targets?.postgres === "string" && summary.targets.postgres.trim();
   if (
-    item.source === "typesense_meilisearch_sync" &&
+    item.source === POSTGRES_SEARCH_SYNC_SOURCE &&
     (summary.engines !== 1 ||
       !hasPayloadProjection ||
       !hasSearchTargets ||
@@ -650,7 +674,7 @@ function assertLiveServiceSummaryEvidence(item) {
   const expectedSample = expectation.sample_document_id;
   const expectedFirstHits = projectedDocuments === 0 ? [null] : [expectedSample];
   if (
-    item.source === "typesense_meilisearch_query" &&
+    item.source === POSTGRES_SEARCH_QUERY_SOURCE &&
     (summary.engines !== 1 ||
       !hasPayloadProjection ||
       !hasSearchTargets ||
@@ -664,7 +688,7 @@ function assertLiveServiceSummaryEvidence(item) {
     throw new Error("Launch readiness live services require search query summary evidence");
   }
   if (
-    item.source === "hermes_draft_worker" &&
+    item.source === HERMES_DRAFT_WORKER_SOURCE &&
     (!Number.isInteger(summary.attempted) ||
       !Number.isInteger(summary.persisted) ||
       !Number.isInteger(summary.rejected) ||
@@ -701,111 +725,36 @@ function assertLiveServiceSyncOperationEvidence(item) {
   if (operations.length !== item.summary.total_operations) {
     throw new Error("Launch readiness live services require search sync operation evidence");
   }
+  const summaryTarget = assertLaunchDatabaseTarget(item.summary.database_target, "postgres sync summary").href;
   for (const { engine, operation } of operations) {
-    if (engine === "postgres") {
-      assertLaunchDatabaseTarget(operation.url, `${engine} sync operation`);
-      if (operation.method !== "SELECT" || operation.status !== 200 || !Number.isInteger(operation.rows) || operation.rows < 0) {
-        throw new Error("Launch readiness live services require search sync operation evidence");
-      }
-      continue;
+    const operationTarget = assertLaunchDatabaseTarget(operation.url, `${engine} sync operation`).href;
+    if (operationTarget !== summaryTarget) {
+      throw new Error("Launch readiness live services require matching search sync database targets");
     }
-    assertLaunchServiceUrl(operation.url, `${engine} sync operation`);
-    if (!["PATCH", "POST"].includes(operation.method) || ![200, 201, 202, 409].includes(operation.status)) {
+    if (operation.method !== "SELECT" || operation.status !== 200 || !Number.isInteger(operation.rows) || operation.rows < 0) {
       throw new Error("Launch readiness live services require search sync operation evidence");
-    }
-    if (!Number.isInteger(operation.bytes) || operation.bytes <= 0) {
-      throw new Error("Launch readiness live services require search sync operation evidence");
-    }
-  }
-  for (const engine of engines) {
-    if (engine.engine === "postgres") continue;
-    const encoded = encodeURIComponent(engine.target);
-    if (engine.engine === "typesense") {
-      if (
-        !hasLiveServiceOperation(engine, { method: "POST", path: "/collections", statuses: [200, 201, 409] }) ||
-        (projectedDocuments > 0 &&
-          !hasLiveServiceOperation(engine, {
-            method: "POST",
-            path: `/collections/${encoded}/documents/import`,
-            searchParam: { key: "action", value: "upsert" },
-            statuses: [200, 201, 202],
-          }))
-      ) {
-        throw new Error("Launch readiness live services require search sync operation evidence");
-      }
-    }
-    if (engine.engine === "meilisearch") {
-      if (
-        !hasLiveServiceOperation(engine, { method: "PATCH", path: `/indexes/${encoded}/settings`, statuses: [200, 201, 202] }) ||
-        (projectedDocuments > 0 &&
-          !hasLiveServiceOperation(engine, {
-            method: "POST",
-            path: `/indexes/${encoded}/documents`,
-            searchParam: { key: "primaryKey", value: "meili_id" },
-            statuses: [200, 201, 202],
-          }))
-      ) {
-        throw new Error("Launch readiness live services require search sync operation evidence");
-      }
     }
   }
 }
 
 function assertLiveServiceQueryOperationEvidence(item) {
   const engines = assertLiveServiceEngineEvidence(item, "Launch readiness live services require search query operation evidence");
+  const summaryTarget = assertLaunchDatabaseTarget(item.summary.database_target, "postgres query summary").href;
   for (const engine of engines) {
     const operation = engine.operation || {};
-    if (engine.engine === "postgres") {
-      assertLaunchDatabaseTarget(engine.database_target, `${engine.engine} query report`);
-      assertLaunchDatabaseTarget(operation.url, `${engine.engine} query operation`);
-      if (
-        operation.method !== "SELECT" ||
-        operation.status !== 200 ||
-        operation.url !== engine.database_target ||
-        !Number.isInteger(operation.rows) ||
-        operation.rows < 0
-      ) {
-        throw new Error("Launch readiness live services require search query operation evidence");
-      }
-      continue;
-    }
-    assertLaunchServiceUrl(operation.url, `${engine.engine} query operation`);
-    const parsed = new URL(operation.url);
-    const encoded = encodeURIComponent(engine.target);
+    const engineTarget = assertLaunchDatabaseTarget(engine.database_target, `${engine.engine} query report`).href;
+    const operationTarget = assertLaunchDatabaseTarget(operation.url, `${engine.engine} query operation`).href;
     if (
-      engine.engine === "typesense" &&
-      (operation.method !== "GET" ||
-        operation.status !== 200 ||
-        parsed.pathname !== `/collections/${encoded}/documents/search` ||
-        !parsed.searchParams.get("q") ||
-        !parsed.searchParams.get("filter_by"))
-    ) {
-      throw new Error("Launch readiness live services require search query operation evidence");
-    }
-    if (
-      engine.engine === "meilisearch" &&
-      (operation.method !== "POST" || operation.status !== 200 || parsed.pathname !== `/indexes/${encoded}/search`)
+      operation.method !== "SELECT" ||
+      operation.status !== 200 ||
+      operationTarget !== engineTarget ||
+      engineTarget !== summaryTarget ||
+      !Number.isInteger(operation.rows) ||
+      operation.rows < 0
     ) {
       throw new Error("Launch readiness live services require search query operation evidence");
     }
   }
-}
-
-function hasLiveServiceOperation(engine, { method, path: operationPath, searchParam = null, statuses }) {
-  return (engine.operations || []).some((operation) => {
-    let parsed;
-    try {
-      parsed = new URL(operation.url);
-    } catch {
-      return false;
-    }
-    return (
-      operation.method === method &&
-      parsed.pathname === operationPath &&
-      (!searchParam || parsed.searchParams.get(searchParam.key) === searchParam.value) &&
-      statuses.includes(operation.status)
-    );
-  });
 }
 
 function assertLiveServiceHermesProviderEvidence(item) {
@@ -825,9 +774,9 @@ function assertLiveServiceHermesProviderEvidence(item) {
 }
 
 function assertLiveServiceReportDetailedEvidence(item) {
-  if (item.source === "typesense_meilisearch_sync") assertLiveServiceSyncOperationEvidence(item);
-  if (item.source === "typesense_meilisearch_query") assertLiveServiceQueryOperationEvidence(item);
-  if (item.source === "hermes_draft_worker") assertLiveServiceHermesProviderEvidence(item);
+  if (item.source === POSTGRES_SEARCH_SYNC_SOURCE) assertLiveServiceSyncOperationEvidence(item);
+  if (item.source === POSTGRES_SEARCH_QUERY_SOURCE) assertLiveServiceQueryOperationEvidence(item);
+  if (item.source === HERMES_DRAFT_WORKER_SOURCE) assertLiveServiceHermesProviderEvidence(item);
 }
 
 function assertLiveServiceProvisioningPassEvidence(provisioning) {
@@ -838,7 +787,7 @@ function assertLiveServiceProvisioningPassEvidence(provisioning) {
     provisioning.summary.checks !== provisioning.checks.length ||
     provisioning.summary.missing_env?.length !== 0 ||
     provisioning.summary.placeholder_env?.length !== 0 ||
-    JSON.stringify(provisioning.summary.services) !== JSON.stringify(["typesense", "meilisearch", "hermes"])
+    JSON.stringify(provisioning.summary.services) !== JSON.stringify(REQUIRED_LIVE_SERVICE_PROVISIONING_SERVICES)
   ) {
     throw new Error("Launch readiness live services require complete provisioning summary evidence");
   }
@@ -846,18 +795,16 @@ function assertLiveServiceProvisioningPassEvidence(provisioning) {
   for (const id of REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS) {
     if (checks.get(id)?.status !== "pass") throw new Error(`Launch readiness live services require provisioning check ${id}`);
   }
-  for (const id of ["typesense_health", "meilisearch_health"]) {
-    const check = checks.get(id);
-    if (!check.redacted_url || !Number.isInteger(check.status_code) || check.status_code < 200 || check.status_code > 299) {
-      throw new Error(`Launch readiness live services require ${id} endpoint evidence`);
+  assertProductionSearchEngine(checks.get("search_engine")?.engine);
+  const databaseTarget = checks.get("postgres_database_target")?.database_target;
+  assertLaunchDatabaseTarget(databaseTarget, "Live service provisioning Postgres target");
+  if (HERMES_LAUNCH_REQUIRED) {
+    if (provisioning.hermes?.ready !== true || !provisioning.hermes.endpoint) {
+      throw new Error("Launch readiness live services require Hermes provisioning endpoint evidence");
     }
-    assertLaunchServiceUrl(check.redacted_url, id);
+    assertLaunchServiceUrl(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
+    assertHermesChatCompletionsEndpoint(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
   }
-  if (provisioning.hermes?.ready !== true || !provisioning.hermes.endpoint) {
-    throw new Error("Launch readiness live services require Hermes provisioning endpoint evidence");
-  }
-  assertLaunchServiceUrl(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
-  assertHermesChatCompletionsEndpoint(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
 }
 
 function assertPassRuntimeEvidence(report) {
@@ -866,20 +813,25 @@ function assertPassRuntimeEvidence(report) {
     const reports = liveServices.evidence?.reports || [];
     assertLiveServiceProvisioningPassEvidence(liveServices.evidence?.provisioning || {});
     const sources = new Set(reports.map((item) => item.source));
-    for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
+    for (const source of REQUIRED_LIVE_SERVICE_REPORT_SOURCES) {
       if (!sources.has(source)) throw new Error(`Launch readiness live services missing ${source} evidence`);
     }
-    for (const item of reports) {
+    for (const item of requiredLiveServiceReports(reports)) {
       assertLiveServiceReportPassEvidence(item);
     }
-    const sync = reports.find((item) => item.source === "typesense_meilisearch_sync");
-    const query = reports.find((item) => item.source === "typesense_meilisearch_query");
+    const sync = reports.find((item) => item.source === POSTGRES_SEARCH_SYNC_SOURCE);
+    const query = reports.find((item) => item.source === POSTGRES_SEARCH_QUERY_SOURCE);
+    const provisionedTarget = liveServices.evidence.provisioning.checks.find(
+      (check) => check.id === "postgres_database_target",
+    )?.database_target;
     if (
       sync?.evidence?.source?.kind !== query?.evidence?.source?.kind ||
       sync?.evidence?.source?.projected_documents !== query?.evidence?.source?.projected_documents ||
-      sync?.evidence?.source?.digest !== query?.evidence?.source?.digest
+      sync?.evidence?.source?.digest !== query?.evidence?.source?.digest ||
+      sync?.evidence?.engines?.[0]?.operations?.[0]?.url !== provisionedTarget ||
+      query?.evidence?.engines?.[0]?.database_target !== provisionedTarget
     ) {
-      throw new Error("Launch readiness search sync and query evidence must use the same Payload projection");
+      throw new Error("Launch readiness search sync and query evidence must use the same Postgres target and Payload projection");
     }
   }
 
@@ -963,15 +915,15 @@ function assertPassMonitoringRollbackEvidence(report) {
   assertMonitoringRollbackReport(machineEvidence.report);
 }
 
-function assertPassProductionRecoveryEvidence(report) {
+function assertPassProductionRecoveryEvidence(report, publicKey) {
   const recovery = gateById(report, "production_recovery");
-  if (recovery?.status === "pass") assertProductionRecoveryReport(recovery.evidence?.report);
+  if (recovery?.status === "pass") assertProductionRecoveryReport(recovery.evidence?.report, { publicKey });
 }
 
-function assertPassEvidenceFreshness(report, now) {
+function assertPassEvidenceFreshness(report, now, publicKey) {
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
-    for (const item of liveServices.evidence?.reports || []) {
+    for (const item of requiredLiveServiceReports(liveServices.evidence?.reports || [])) {
       assertFreshEvidence("live_services", item.generated_at, item.freshness, now);
     }
   }
@@ -981,7 +933,7 @@ function assertPassEvidenceFreshness(report, now) {
   }
   const productionRecovery = gateById(report, "production_recovery");
   if (productionRecovery?.status === "pass") {
-    const expectedFreshness = productionRecoveryFreshness(productionRecovery.evidence?.report, { now });
+    const expectedFreshness = productionRecoveryFreshness(productionRecovery.evidence?.report, { now, publicKey });
     if (expectedFreshness.status !== "fresh" || !sameJson(productionRecovery.evidence?.freshness, expectedFreshness)) {
       throw new Error("Launch readiness requires fresh production_recovery evidence");
     }
@@ -1103,15 +1055,15 @@ function reportStatus(source, filePath, assertReport, now) {
 }
 
 export function liveServiceReports({
-  syncReportPath = DEFAULT_SEARCH_ENGINE_SYNC_REPORT,
-  queryReportPath = DEFAULT_SEARCH_ENGINE_QUERY_REPORT,
+  syncReportPath = DEFAULT_POSTGRES_SEARCH_SYNC_REPORT,
+  queryReportPath = DEFAULT_POSTGRES_SEARCH_QUERY_REPORT,
   hermesReportPath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
   now = Date.now(),
 } = {}) {
   return [
-    reportStatus("typesense_meilisearch_sync", syncReportPath, assertSearchEngineSyncReport, now),
-    reportStatus("typesense_meilisearch_query", queryReportPath, assertSearchEngineQueryReport, now),
-    reportStatus("hermes_draft_worker", hermesReportPath, assertHermesDraftWorkerReport, now),
+    reportStatus(POSTGRES_SEARCH_SYNC_SOURCE, syncReportPath, assertSearchEngineSyncReport, now),
+    reportStatus(POSTGRES_SEARCH_QUERY_SOURCE, queryReportPath, assertSearchEngineQueryReport, now),
+    reportStatus(HERMES_DRAFT_WORKER_SOURCE, hermesReportPath, assertHermesDraftWorkerReport, now),
   ];
 }
 
@@ -1154,13 +1106,13 @@ export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT,
 
 export function validateLiveServiceReports(options = {}) {
   const reports = liveServiceReports(options);
-  const sync = reports.find((item) => item.source === "typesense_meilisearch_sync");
-  const query = reports.find((item) => item.source === "typesense_meilisearch_query");
+  const sync = reports.find((item) => item.source === POSTGRES_SEARCH_SYNC_SOURCE);
+  const query = reports.find((item) => item.source === POSTGRES_SEARCH_QUERY_SOURCE);
   if (sync?.status === "pass" && query?.status === "pass") {
     try {
       assertSearchEngineEvidenceConsistency(
-        readJson(options.syncReportPath || DEFAULT_SEARCH_ENGINE_SYNC_REPORT),
-        readJson(options.queryReportPath || DEFAULT_SEARCH_ENGINE_QUERY_REPORT),
+        readJson(options.syncReportPath || DEFAULT_POSTGRES_SEARCH_SYNC_REPORT),
+        readJson(options.queryReportPath || DEFAULT_POSTGRES_SEARCH_QUERY_REPORT),
       );
     } catch (error) {
       query.status = "invalid_report";
@@ -1168,7 +1120,7 @@ export function validateLiveServiceReports(options = {}) {
     }
   }
   return {
-    ready: reports.every((item) => item.status === "pass"),
+    ready: requiredLiveServiceReportsPass(reports),
     reports,
   };
 }
@@ -1202,11 +1154,17 @@ export function buildLiveServicePreflightReport({ generatedAt = new Date().toISO
     next_actions: result.ready
       ? ["Run npm run live:preflight, then npm run launch:preflight with the same mounted live report paths."]
       : [
-          "Provision Typesense, Meilisearch, and Hermes provider credentials.",
-          "Run npm run search:sync && npm run search:query.",
-          "Run npm run hermes:provisioning to verify the self-hosted Hermes/vLLM provider settings.",
-          "Run npm run hermes:worker.",
-          "Run npm run live:capture to generate the three live service reports.",
+          HERMES_LAUNCH_REQUIRED
+            ? "Provision DATABASE_URL, PAYLOAD_SECRET, and Hermes provider credentials."
+            : "Provision DATABASE_URL and PAYLOAD_SECRET.",
+          "Run npm run search:sync && npm run search:query against the production Postgres search path.",
+          ...(HERMES_LAUNCH_REQUIRED
+            ? [
+                "Run npm run hermes:provisioning to verify the self-hosted Hermes/vLLM provider settings.",
+                "Run npm run hermes:worker.",
+              ]
+            : []),
+          `Run npm run live:capture to generate the ${REQUIRED_LIVE_SERVICE_REPORT_SOURCES.length} required live service reports.`,
           "Run npm run live:preflight before launch:preflight.",
         ],
   };
@@ -1219,7 +1177,14 @@ export function assertLiveServicePreflightReport(report) {
   if (!Array.isArray(report.reports) || report.reports.length !== 3) {
     throw new Error("Live service preflight report must include three service reports");
   }
-  const ready = report.reports.every((item) => item.status === "pass");
+  const sources = new Set(report.reports.map((item) => item.source));
+  if (sources.size !== report.reports.length) {
+    throw new Error("Live service preflight report sources must be unique");
+  }
+  for (const source of REQUIRED_LIVE_SERVICE_REPORT_SOURCES) {
+    if (!sources.has(source)) throw new Error(`Live service preflight missing ${source} evidence`);
+  }
+  const ready = requiredLiveServiceReportsPass(report.reports);
   if (report.ready !== ready) throw new Error("Live service preflight ready flag must match reports");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Live service preflight status must match ready flag");
   if (!Array.isArray(report.next_actions) || report.next_actions.length === 0) {
@@ -1249,13 +1214,6 @@ export function assertLiveServicePreflightReport(report) {
       throw new Error("Live service preflight summary status counts must match reports");
     }
   }
-  const sources = new Set(report.reports.map((item) => item.source));
-  if (sources.size !== report.reports.length) {
-    throw new Error("Live service preflight report sources must be unique");
-  }
-  for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
-    if (!sources.has(source)) throw new Error(`Live service preflight missing ${source} evidence`);
-  }
   for (const item of report.reports) {
     if (report.summary.configured_paths?.[item.source] !== item.path) {
       throw new Error("Live service preflight configured paths must match reports");
@@ -1263,7 +1221,7 @@ export function assertLiveServicePreflightReport(report) {
     if (item.status === "pass") assertLiveServiceReportPassEvidence(item);
   }
   if (ready) {
-    for (const item of report.reports) assertLiveServiceReportPassEvidence(item);
+    for (const item of requiredLiveServiceReports(report.reports)) assertLiveServiceReportPassEvidence(item);
   }
   return true;
 }
@@ -1276,28 +1234,35 @@ export function writeLiveServicePreflightReport(report, outPath = DEFAULT_LIVE_S
 }
 
 export function readLiveServiceReportTemplate(source) {
-  const filename = LIVE_SERVICE_REPORT_TEMPLATES[source];
+  const canonicalSource = canonicalLiveServiceSource(source);
+  const filename = LIVE_SERVICE_REPORT_TEMPLATES[canonicalSource];
   if (!filename) throw new Error(`Unknown live service report source: ${source}`);
   return {
-    source,
+    source: canonicalSource,
     filename,
     json: fs.readFileSync(fromRoot("production", "data", filename), "utf8"),
   };
 }
 
 export function writeLiveServiceReport(source, report, options = {}) {
-  const writer = LIVE_SERVICE_REPORT_WRITERS[source];
+  const canonicalSource = canonicalLiveServiceSource(source);
+  const writer = LIVE_SERVICE_REPORT_WRITERS[canonicalSource];
   if (!writer) throw new Error(`Unknown live service report source: ${source}`);
   if (report.example === true) throw new Error("Example live service reports cannot be imported as launch evidence");
   assertLiveServiceReportTimestamp(report);
   assertLiveServiceReportHasNoSecrets(report);
-  assertLaunchLiveServiceEvidence(source, report);
+  assertLaunchLiveServiceEvidence(canonicalSource, report);
   const outPath = writer.write(report, options[writer.pathKey]);
-  return { source, outPath, summary: report.summary, evidence: liveServiceEvidenceSnapshot(source, report) };
+  return {
+    source: canonicalSource,
+    outPath,
+    summary: report.summary,
+    evidence: liveServiceEvidenceSnapshot(canonicalSource, report),
+  };
 }
 
 export function liveServiceImportSummary(imported, preflight) {
-  const blockedReports = preflight.reports
+  const blockedReports = requiredLiveServiceReports(preflight.reports)
     .filter((report) => report.status !== "pass")
     .map((report) => ({ source: report.source, status: report.status, path: report.path }));
   const importedReport = preflight.reports.find((report) => report.source === imported.source);
@@ -1315,7 +1280,7 @@ export function buildLaunchReadinessReport({
   generatedAt = new Date().toISOString(),
   migration = readJson(fromRoot("production", "data", "migration-records.json")),
   routeMap = readJson(fromRoot("production", "data", "legacy-route-map.json")),
-  deployableRedirects = readJson(fromRoot("production", "data", "deployable-redirects.json")),
+  deployableRedirects = approvedLaunchFreezeRouteArtifact(),
   sitemap = readJson(fromRoot("production", "data", "localized-sitemap.json")),
   structuredData = readJson(fromRoot("production", "data", "structured-data-report.json")),
   listingQuality = readJson(fromRoot("production", "data", "listing-quality-report.json")),
@@ -1328,7 +1293,8 @@ export function buildLaunchReadinessReport({
   liveServiceProvisioning = liveServiceProvisioningState(),
   appState = packageState(),
   payloadRuntime = payloadRuntimeState(undefined, { now: generatedAt }),
-  productionRecovery = productionRecoveryState(undefined, { now: generatedAt }),
+  productionRecoveryPublicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
+  productionRecovery = productionRecoveryState(undefined, { now: generatedAt, publicKey: productionRecoveryPublicKey }),
   monitoringRollback = monitoringRollbackState(undefined, { now: generatedAt }),
 } = {}) {
   const generatedAtMs = Date.parse(generatedAt);
@@ -1348,7 +1314,7 @@ export function buildLaunchReadinessReport({
   const productionRecoveryEvidence = {
     ...productionRecovery,
     freshness: productionRecovery.report
-      ? productionRecoveryFreshness(productionRecovery.report, { now: generatedAtMs })
+      ? productionRecoveryFreshness(productionRecovery.report, { now: generatedAtMs, publicKey: productionRecoveryPublicKey })
       : evidenceFreshnessAt("production_recovery", null, generatedAtMs),
   };
 
@@ -1374,15 +1340,16 @@ export function buildLaunchReadinessReport({
     routeReview.decisionSummaryMatches &&
     routeReview.redirectSummaryMatches &&
     routeReview.redirectRowsMatch &&
-    routeReview.redirectSummary.homepageTargets === 0 &&
+    routeReview.homepageTargetsAllowed &&
     routeReview.redirectSummary.duplicateOldUrls === 0 &&
-    routeReview.decisionSummary.homepageTargets === 0 &&
     routeReview.decisionSummary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const listingQualityReady = hasCompleteListingQualityEvidence(listingQualityReview);
   const liveServicesReady =
-    liveServiceEvidence.every((item) => item.status === "pass" && item.freshness.status === "fresh") &&
-    liveServiceProvisioning.status === "pass";
+    requiredLiveServiceReportsPass(
+      liveServiceEvidence,
+      (item) => item.status === "pass" && item.freshness.status === "fresh",
+    ) && liveServiceProvisioning.status === "pass";
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
   const payloadRuntimeReady = payloadRuntimeEvidence.status === "pass" && payloadRuntimeEvidence.freshness.status === "fresh";
   const productionRecoveryReady =
@@ -1456,11 +1423,14 @@ export function buildLaunchReadinessReport({
         mapped_listings: routeMapSummary.mappedListings,
         deployable_redirects: routeReview.redirectSummary.total,
         homepage_targets: routeReview.redirectSummary.homepageTargets,
+        decision_homepage_targets: routeReview.decisionSummary.homepageTargets,
+        preservation_contract_valid: routeReview.preservationContractValid,
+        preservation_contract: routeReview.preservationContract,
         duplicate_old_urls: routeReview.redirectSummary.duplicateOldUrls,
       },
       redirectsReviewed
         ? ""
-        : "Every legacy URL needs a deliberate retained route, reviewed one-hop redirect, or approved 410; homepage and search fallbacks are prohibited.",
+        : "Every legacy URL needs a deliberate retained route, reviewed one-hop redirect, or approved 410; only exact mappings in the locked launch freeze may target home or search.",
     ),
     gate("localized_sitemap", localizedSitemapReady ? "pass" : "blocked", sitemap.summary),
     gate(
@@ -1505,7 +1475,9 @@ export function buildLaunchReadinessReport({
       { reports: liveServiceEvidence, provisioning: liveServiceProvisioning },
       liveServicesReady
         ? ""
-        : "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning.",
+        : HERMES_LAUNCH_REQUIRED
+          ? "Run live Postgres sync/query and Hermes draft worker commands after provisioning."
+          : "Run live Postgres sync/query commands after provisioning.",
     ),
     gate(
       "monitoring_rollback",
@@ -1559,7 +1531,9 @@ export function buildLaunchReadinessReport({
   };
 }
 
-export function assertLaunchReadinessReport(report) {
+export function assertLaunchReadinessReport(report, {
+  productionRecoveryPublicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
+} = {}) {
   const generatedAtMs = Date.parse(report.generated_at);
   if (!Number.isFinite(generatedAtMs)) throw new Error("Launch readiness report must include valid generated_at");
   if (!Array.isArray(report.gates) || report.gates.length < 7) throw new Error("Launch readiness report must include core gates");
@@ -1588,8 +1562,8 @@ export function assertLaunchReadinessReport(report) {
   assertPassRuntimeEvidence(report);
   assertPassAppLayerEvidence(report);
   assertPassMonitoringRollbackEvidence(report);
-  assertPassProductionRecoveryEvidence(report);
-  assertPassEvidenceFreshness(report, generatedAtMs);
+  assertPassProductionRecoveryEvidence(report, productionRecoveryPublicKey);
+  assertPassEvidenceFreshness(report, generatedAtMs, productionRecoveryPublicKey);
   if (report.launch_ready && !report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");
   }
@@ -1602,9 +1576,9 @@ export function assertLaunchReadinessReport(report) {
   return true;
 }
 
-export function writeLaunchReadinessReport(report, outPath = DEFAULT_LAUNCH_READINESS_OUTPUT) {
+export function writeLaunchReadinessReport(report, outPath = DEFAULT_LAUNCH_READINESS_OUTPUT, options = {}) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  assertLaunchReadinessReport(report);
+  assertLaunchReadinessReport(report, options);
   fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
   return outPath;
 }
@@ -1714,8 +1688,8 @@ function localPreviewGate(localPreview) {
 export function materializeLocalLaunchReadiness({
   sourceReadinessPath = DEFAULT_LAUNCH_READINESS_OUTPUT,
   outPath,
-  syncReportPath = DEFAULT_SEARCH_ENGINE_SYNC_REPORT,
-  queryReportPath = DEFAULT_SEARCH_ENGINE_QUERY_REPORT,
+  syncReportPath = DEFAULT_POSTGRES_SEARCH_SYNC_REPORT,
+  queryReportPath = DEFAULT_POSTGRES_SEARCH_QUERY_REPORT,
   hermesReportPath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
   payloadRuntimeReportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT,
   generatedAt = new Date().toISOString(),
@@ -1739,21 +1713,21 @@ export function materializeLocalLaunchReadiness({
 
   const reports = [
     localReportSnapshot({
-      id: "typesense_meilisearch_sync",
+      id: POSTGRES_SEARCH_SYNC_SOURCE,
       path: syncReportPath,
       assertReport: assertSearchEngineSyncReport,
       generatedAtMs,
       maxReportAgeMs,
     }),
     localReportSnapshot({
-      id: "typesense_meilisearch_query",
+      id: POSTGRES_SEARCH_QUERY_SOURCE,
       path: queryReportPath,
       assertReport: assertSearchEngineQueryReport,
       generatedAtMs,
       maxReportAgeMs,
     }),
     localReportSnapshot({
-      id: "hermes_draft_worker",
+      id: HERMES_DRAFT_WORKER_SOURCE,
       path: hermesReportPath,
       assertReport: assertHermesDraftWorkerReport,
       generatedAtMs,

@@ -78,8 +78,8 @@ What it proves now:
 - Lead contact preference validation and persistence for phone, Viber, WhatsApp, and email.
 - Search API overlays translation ledger state before card display/indexability.
 - Search API returns reviewed translation cards for admin-added approved locales.
-- Search engine sync worker path for Typesense and Meilisearch imports from the same reviewed 167-document fixture.
-- Search engine query smoke path that verifies both engines can return the reviewed BG listing document without draft locales.
+- Canonical production search sync verifies the reviewed Payload projection against the Postgres public-search view.
+- Canonical production query smoke proves that same Postgres target returns the reviewed BG listing without draft locales; Typesense/Meilisearch remain local compatibility tooling only.
 - Language request intake for unavailable public locales.
 - Authenticated admin locale creation for non-indexable website locales.
 - Locale rollout report that turns requested disabled locales into approval tasks and Hermes draft queue summaries.
@@ -176,8 +176,8 @@ SEO export status without clearing the launch gate, and `seo:preflight` still ex
 non-zero until real external SEO exports are complete. `listing:preflight:report` writes the current
 listing review status without clearing the launch gate, and `listing:preflight` still exits non-zero until
 the reviewed listing-quality CSV is present. `listing:review-pack` writes a complete draft review packet
-for editors, but it is not launch evidence until reviewer fields are filled. `launch:preflight` also requires live Typesense/Meilisearch
-reports from `npm run search:sync && npm run search:query`, a Hermes draft-worker report from
+for editors, but it is not launch evidence until reviewer fields are filled. `launch:preflight` also requires live Postgres search
+reports from `npm run search:sync && npm run search:query`, a separate Hermes draft-worker report from
 `npm run hermes:worker`, and a configured Payload runtime app; `live:preflight` checks those report files directly.
 `live:provisioning` writes redacted endpoint and missing-env evidence before live capture, and
 `live:provisioning:preflight` must pass before treating `live:capture` output as launch evidence.
@@ -238,9 +238,115 @@ npm run docker:restore -- .local-backups/backup-<timestamp>-<id> --confirm-repla
 
 This is tested local recovery machinery, not proof of an encrypted off-site production
 backup policy, retention schedule, or successful production disaster-recovery drill.
-Production launch stays blocked until a named operator and reviewer supply a valid private
-`production/data/production-recovery-report.json` using the committed `.json.example` contract;
+Production launch stays blocked until the governed operator workflow produces a valid Ed25519-signed
+`production/data/production-recovery-report.json`; the committed `.json.example` is shape documentation only;
 `MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH` may mount that evidence outside the repository.
+
+### Neon to private EU R2 production recovery
+
+The production operator workflow uses the installed Docker, `age`, and AWS CLIs without an
+additional application dependency. It runs PostgreSQL 18 clients in `postgres:18-alpine`,
+creates a custom-format Neon dump, encrypts it before upload, and writes staged ciphertext plus
+a final SHA-256 manifest commit marker to the private `ms-realty-production-backups-eu` bucket through its
+jurisdiction-specific EU endpoint. Database URLs and R2 secrets are never written to reports
+or command output. Plaintext dumps are mode-private and removed after each command.
+The manifest is bound to the canonical committed component map and cannot define its own table
+or coverage requirements. Production component-map overrides are disabled.
+
+Before the separately approved backup upload, provide a bucket-scoped R2 object Read & Write
+credential and the age recipient through the environment:
+
+```bash
+export DATABASE_URL_DIRECT='<Neon direct PostgreSQL URL>'
+export CLOUDFLARE_ACCOUNT_ID='<MS Realty Cloudflare account ID>'
+export AWS_ACCESS_KEY_ID='<bucket-scoped R2 access key ID>'
+export AWS_SECRET_ACCESS_KEY='<bucket-scoped R2 secret access key>'
+export MS_REALTY_RECOVERY_AGE_RECIPIENT='<age1... public recipient>'
+export MS_REALTY_RELEASE_ID='<exact-40-character-source-SHA>'
+npm run recovery:r2:backup -- --confirm-upload-encrypted-production-backup
+```
+
+The command prints the generated backup ID and leaves a private `r2-upload-plan.json`. The R2
+bucket's object lock prevents destructive failure cleanup, so an interrupted upload remains an
+uncommitted staged object covered by the bucket lifecycle rather than being silently deleted.
+
+After the approved exact-release rollback exercise, use the read-only schema-v2 monitoring report
+produced by `.github/workflows/monitoring-drill.yml`. The existing monitoring validator requires
+the exact 40-character source SHA, GitHub run and attempt, Cloudflare baseline/fault/restored
+version IDs, the restored build marker, and the production-journey probe. A hand-written rollback
+receipt or symbolic release labels cannot satisfy recovery evidence.
+
+After separate approval for the isolated restore drill, make both the private age identity and
+machine monitoring report owner-only, then run:
+
+```bash
+chmod 600 '<path-to-ms-realty-recovery-age-identity>'
+chmod 400 '<path-to-monitoring-rollback-report.json>'
+export MS_REALTY_RECOVERY_AGE_IDENTITY_FILE='<path-to-ms-realty-recovery-age-identity>'
+export MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH='<path-to-monitoring-rollback-report.json>'
+export MS_REALTY_RECOVERY_OPERATOR='<named restore operator>'
+npm run recovery:r2:restore -- '<backup-id>' --confirm-isolated-restore-drill
+```
+
+Restore downloads and checksum-verifies the R2 objects, decrypts locally, and restores into a
+uniquely named `postgres:18-alpine` container on an internal Docker network. The target has no
+published ports or volumes. Migration identity and mapped table counts must exactly match the
+source; container and network cleanup is also part of the pass condition. Cleanup is recorded
+separately and never treated as proof that the production rollback procedure passed.
+
+`production/data/production-recovery-component-map.json` is deliberately fail-closed. It lists
+the runtime-data and runtime-evidence authorities that still exist only as container files.
+A successful Neon restore therefore remains `blocked` until every listed source is moved to a
+mapped PostgreSQL table (or a separately implemented, encrypted and restorable component).
+Never remove an uncovered source merely to clear readiness.
+
+Only after the restore result is `pass` may a distinct named human reviewer provide a read-only
+approval artifact. It must bind the exact ciphertext, manifest, restore result, monitoring report
+digest, and exact release SHA; explicitly confirm reviewing all evidence records; and name an operator
+and reviewer that differ case-insensitively:
+
+```json
+{
+  "schema_version": 1,
+  "environment": "production",
+  "decision": "approved",
+  "approval_id": "recovery-approval-<unique-id>",
+  "backup_id": "<backup-id>",
+  "ciphertext_sha256": "<artifact.sha256 from manifest.json>",
+  "manifest_sha256": "<sha256-of-manifest.json>",
+  "restore_drill_sha256": "<sha256-of-restore-drill-result.json>",
+  "release_id": "<exact-40-character-source-SHA>",
+  "monitoring_rollback_report_sha256": "<sha256-of-monitoring-rollback-report.json>",
+  "operator": "<exact restore operator>",
+  "reviewer": "<distinct named human reviewer>",
+  "approved_at": "<ISO-8601 timestamp after restore>",
+  "manifest_reviewed": true,
+  "restore_drill_reviewed": true,
+  "monitoring_rollback_report_reviewed": true
+}
+```
+
+The approval command consumes that artifact and emits the redacted report used by the existing
+launch-readiness validator:
+
+```bash
+chmod 400 '<path-to-recovery-approval.json>'
+chmod 600 '<path-to-recovery-ed25519-private-key.pem>'
+export MS_REALTY_RECOVERY_APPROVAL_FILE='<path-to-recovery-approval.json>'
+export MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH='<path-to-monitoring-rollback-report.json>'
+export MS_REALTY_RECOVERY_SIGNING_PRIVATE_KEY_FILE='<path-to-recovery-ed25519-private-key.pem>'
+export MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY='<base64-SPKI-public-key>'
+npm run recovery:r2:approve -- '<backup-id>' --confirm-reviewed-recovery-evidence
+```
+
+The approval command signs the canonical schema-v2 report with Ed25519. The report persists only
+the detached signature and the SHA-256 key ID; runtime/import/readiness receive the public SPKI
+through `MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY`, never the private key. Unsigned, tampered, or
+unknown-key reports remain blocked even when every JSON claim and digest is internally consistent.
+
+The ignored `.recovery-work/` directory contains local ciphertext, manifests, and drill receipts.
+These commands do not create Cloudflare credentials, change production data, deploy code, access
+Mindburn infrastructure, or delete any DigitalOcean resource.
 
 After `docker:up` or `docker:seed`, the app atomically materializes schema-valid runtime reports
 that are no older than 15 minutes into `/runtime-evidence/local-launch-readiness.json`. It preserves
@@ -349,7 +455,7 @@ Set these path overrides when operator evidence is mounted outside the repo:
 `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`,
 `MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH`,
 `MS_REALTY_LISTING_QUALITY_REVIEW_PATH`, `MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH`,
-`MS_REALTY_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_SEARCH_QUERY_REPORT_PATH`, and
+`MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH`, and
 `MS_REALTY_HERMES_WORKER_REPORT_PATH`.
 
 Generated production data:

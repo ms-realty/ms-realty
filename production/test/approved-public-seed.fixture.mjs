@@ -89,6 +89,7 @@ export function durableLeadStoreFixtureEnv() {
     PAYLOAD_SECRET: "test-only-payload-secret-32-characters-minimum",
     DATABASE_URL: "postgresql://fixture:fixture@127.0.0.1:5432/ms_realty_fixture",
     MS_REALTY_LEAD_CONTACT_KEY: "test-only-lead-contact-key-32-characters-minimum",
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
   };
 }
 

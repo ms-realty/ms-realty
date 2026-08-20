@@ -909,36 +909,43 @@ const SELLER_COPY = {
     title: "Продайте имота си с MS Realty",
     description: "Заявете брокерска оценка и обратна връзка от екипа на MS Realty.",
     h1: "Продайте имота си",
+    form_unavailable: "Формата е временно недостъпна. Обадете се или ни пишете — отговаряме бързо.",
   },
   en: {
     title: "Sell your property with MS Realty",
     description: "Request a broker valuation and follow-up from the MS Realty team.",
     h1: "Sell your property",
+    form_unavailable: "The form is temporarily unavailable. Call or message us instead — we reply quickly.",
   },
   de: {
     title: "Verkaufen Sie Ihre Immobilie mit MS Realty",
     description: "Fordern Sie eine Maklerbewertung und Rückmeldung vom MS Realty Team an.",
     h1: "Immobilie verkaufen",
+    form_unavailable: "Das Formular ist vorübergehend nicht verfügbar. Rufen Sie uns an oder schreiben Sie uns.",
   },
   nl: {
     title: "Verkoop uw vastgoed met MS Realty",
     description: "Vraag een makelaarswaardering en opvolging van het MS Realty team aan.",
     h1: "Vastgoed verkopen",
+    form_unavailable: "Het formulier is tijdelijk niet beschikbaar. Bel of stuur ons een bericht.",
   },
   ru: {
     title: "Продайте недвижимость с MS Realty",
     description: "Запросите брокерскую оценку и обратную связь от команды MS Realty.",
     h1: "Продайте недвижимость",
+    form_unavailable: "Форма временно недоступна. Позвоните или напишите нам — мы быстро отвечаем.",
   },
   el: {
     title: "Πουλήστε το ακίνητό σας με τη MS Realty",
     description: "Ζητήστε εκτίμηση από μεσίτη και επικοινωνία από την ομάδα της MS Realty.",
     h1: "Πουλήστε το ακίνητό σας",
+    form_unavailable: "Η φόρμα δεν είναι προσωρινά διαθέσιμη. Καλέστε μας ή στείλτε μήνυμα.",
   },
   he: {
     title: "מכירת נכס עם MS Realty",
     description: "בקשו הערכת מתווך וחזרה מצוות MS Realty.",
     h1: "מכירת נכס",
+    form_unavailable: "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
   },
 };
 
@@ -1349,6 +1356,12 @@ function translationsForSearchListing(registry, listing) {
 
 const ACTIVE_LISTING_STATUSES = new Set(["available", "reserved"]);
 
+function searchListingPath(registry, localeCode, listing) {
+  const projected = String(listing.locale_path || "").trim();
+  if (projected.startsWith("/") && !projected.startsWith("//") && !/[\\?#\u0000-\u001f]/u.test(projected)) return projected;
+  return listingPath(registry, localeCode, listing.id);
+}
+
 export function isActiveListing(listing) {
   return ACTIVE_LISTING_STATUSES.has(listingToPublicViewModel(listing).listing_status || "available");
 }
@@ -1385,10 +1398,11 @@ function listingCard(registry, listing, locale) {
       : null,
   });
   const thumbnail = publicMedia.gallery[0] || null;
+  const path = searchListingPath(registry, locale.code, listing);
   return {
     id: listing.id,
     title: copy.title,
-    path: listingPath(registry, locale.code, listing.id),
+    path,
     review_badge: reviewedTranslation ? "reviewed_translation" : null,
     translation_display: state.display,
     translation_locale: state.translation?.locale || locale.code,
@@ -1415,7 +1429,7 @@ function listingCard(registry, listing, locale) {
     legacy_image_count: Number(view.image_count || listing.image_count || 0),
     thumbnail,
     actions: {
-      detail: { label: ui.details, href: listingPath(registry, locale.code, listing.id) },
+      detail: { label: ui.details, href: path },
       inquiry: {
         label: labelsFor(locale.code).inquiry,
         endpoint: "/api/leads",
@@ -1878,6 +1892,8 @@ export function renderSearchPage({
   pageSize = 12,
   savedView = false,
   view = "list",
+  databasePage = false,
+  totalMatches = null,
 }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -1977,22 +1993,26 @@ export function renderSearchPage({
     }[field];
     return !fact || applicable(fact);
   });
-  const matchedListings = searchableListings.filter((listing) =>
-    matchesSearch(listingToPublicViewModel(listing), searchIntent.text_query, intentFilters),
-  );
+  if (databasePage && (!Number.isSafeInteger(totalMatches) || totalMatches < 0)) {
+    throw new Error("Database search page requires a non-negative integer total");
+  }
+  const matchedListings = databasePage
+    ? searchableListings
+    : searchableListings.filter((listing) => matchesSearch(listingToPublicViewModel(listing), searchIntent.text_query, intentFilters));
   const selectedSort = publicSearchSort(searchIntent.sort);
   const selectedView = !savedView && view === "map" ? "map" : "list";
-  const sortedListings = sortListingsForPublicSearch(matchedListings, selectedSort);
+  const sortedListings = databasePage ? matchedListings : sortListingsForPublicSearch(matchedListings, selectedSort);
   const requestedPage = Number(page);
   const normalizedPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const requestedPageSize = savedView || pageSize === null ? Math.max(sortedListings.length, 1) : Number(pageSize);
   const normalizedPageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0 ? Math.min(requestedPageSize, 1000) : 12;
-  const totalPages = Math.max(1, Math.ceil(sortedListings.length / normalizedPageSize));
-  const currentPage = Math.min(normalizedPage, totalPages);
+  const matchedTotal = databasePage ? totalMatches : sortedListings.length;
+  const totalPages = Math.max(1, Math.ceil(matchedTotal / normalizedPageSize));
+  const currentPage = databasePage ? normalizedPage : Math.min(normalizedPage, totalPages);
   const offset = (currentPage - 1) * normalizedPageSize;
-  const cards = sortedListings
-    .slice(offset, offset + normalizedPageSize)
-    .map((listing) => listingCard(registry, listing, locale));
+  const cards = (databasePage ? sortedListings : sortedListings.slice(offset, offset + normalizedPageSize)).map((listing) =>
+    listingCard(registry, listing, locale),
+  );
   const activeFilterChips = [
     "exact_reference",
     "location",
@@ -2063,7 +2083,7 @@ export function renderSearchPage({
         indexable: true,
         ...intentFilters,
       },
-      total_matches: matchedListings.length,
+      total_matches: matchedTotal,
       returned: cards.length,
       pagination: {
         page: currentPage,
@@ -2378,6 +2398,71 @@ export function renderLegacyArchivePage({ registry, entry, path }) {
   };
 }
 
+const LISTING_PRESERVATION_COPY = {
+  bg: {
+    archived: {
+      title: "Архивирана обява | MS Realty",
+      h1: "Тази обява вече не е активна",
+      notice: "Запазваме този адрес за коректна история на сайта. Обявата е архивирана и не участва в активното търсене.",
+    },
+    active: {
+      title: "Обява в проверка | MS Realty",
+      h1: "Тази обява се проверява",
+      notice: "Обявата е била активна при фиксирането на каталога, но фактите и публикуването ѝ още не са одобрени.",
+    },
+    reference: "Референция",
+    checked: "Проверено на",
+    contact: "Свържете се с брокер",
+  },
+  ru: {
+    archived: {
+      title: "Архивное объявление | MS Realty",
+      h1: "Это объявление больше не активно",
+      notice: "Мы сохраняем этот адрес для корректной истории сайта. Объявление архивировано и не участвует в активном поиске.",
+    },
+    active: {
+      title: "Объявление на проверке | MS Realty",
+      h1: "Это объявление проверяется",
+      notice: "Объявление было активно на момент фиксации каталога, но его факты и публикация ещё не одобрены.",
+    },
+    reference: "Референция",
+    checked: "Проверено",
+    contact: "Связаться с брокером",
+  },
+};
+
+export function renderListingPreservationPage({ registry, entry, path }) {
+  const locale = resolvePublicLocale(registry, entry.source_locale).locale;
+  const copy = LISTING_PRESERVATION_COPY[locale.code] || LISTING_PRESERVATION_COPY.bg;
+  const stateCopy = copy[entry.catalog_state] || copy.archived;
+  return {
+    kind: "listing_preservation",
+    status: 200,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: false,
+    metadata: {
+      title: stateCopy.title,
+      description: stateCopy.notice,
+      robots: "noindex,follow",
+    },
+    hreflang: [],
+    schema: null,
+    chrome: publicChrome(registry, locale, { active: null, currentPath: path }),
+    body: {
+      h1: stateCopy.h1,
+      notice: stateCopy.notice,
+      reference: { label: copy.reference, value: entry.id },
+      checked_at: { label: copy.checked, value: entry.checked_at },
+      catalog_state: entry.catalog_state,
+      contact: { label: copy.contact, path: contactPath(registry, locale.code) },
+    },
+  };
+}
+
 function locationPageCopy(localeCode, location) {
   const bgDescriptions = {
     Сандански: "Проверени обяви на MS Realty в Сандански и официални източници за кадастър, Имотен регистър и удостоверения.",
@@ -2491,7 +2576,14 @@ export function renderLocationPage({ registry, localeCode, location, listings })
   };
 }
 
-export function renderSellerPage({ registry, localeCode }) {
+export function renderSellerPage({
+  registry,
+  localeCode,
+  // Same durable-store readiness predicate the contact page, API, and Worker
+  // edge use. Without it the seller page renders a live POST form that the
+  // edge rejects, so the highest-intent seller lead ends on a generic error.
+  leadWritesDisabled = leadWritesDisabledFromEnv(),
+} = {}) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const path = sellerPath(registry, locale.code);
@@ -2514,35 +2606,50 @@ export function renderSellerPage({ registry, localeCode }) {
       robots: resolved.available ? "index,follow" : "noindex,follow",
     },
     hreflang: resolved.available ? hreflangForSeller(registry) : [],
-    chrome: publicChrome(registry, locale, { hreflang: resolved.available ? hreflangForSeller(registry) : [], active: "seller" }),
+    chrome: publicChrome(registry, locale, {
+      hreflang: resolved.available ? hreflangForSeller(registry) : [],
+      active: "seller",
+      leadWritesDisabled,
+    }),
     body: {
       h1: copy.h1,
       intro: copy.description,
-      valuation: {
-        endpoint: "/api/leads",
-        method: "POST",
-        minimum_tap_target_px: 44,
-        required_fields: ["contact.name", "contact.phone", "property.location", "property.type", "message"],
-        payload: {
-          source: "website_seller_valuation",
-          intent: "valuation",
-          leadType: "seller",
-          language: locale.code,
-          contact_preference: "phone",
-        },
-        label: labels.valuation,
+      contact_channels: {
+        phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
+        whatsapp: { href: BRAND_CONTACT.whatsapp, label: "WhatsApp" },
+        viber: { href: BRAND_CONTACT.viber, label: "Viber" },
+        email: { href: `mailto:${BRAND_CONTACT.email}`, label: BRAND_CONTACT.email },
       },
-      callback: {
-        endpoint: "/api/leads",
-        method: "POST",
-        payload: {
-          source: "website_seller_callback",
-          leadType: "seller",
-          language: locale.code,
-          contact_preference: "phone",
-        },
-        label: labels.callback,
-      },
+      form_unavailable: leadWritesDisabled ? copy.form_unavailable : null,
+      valuation: leadWritesDisabled
+        ? null
+        : {
+            endpoint: "/api/leads",
+            method: "POST",
+            minimum_tap_target_px: 44,
+            required_fields: ["contact.name", "contact.phone", "property.location", "property.type", "message"],
+            payload: {
+              source: "website_seller_valuation",
+              intent: "valuation",
+              leadType: "seller",
+              language: locale.code,
+              contact_preference: "phone",
+            },
+            label: labels.valuation,
+          },
+      callback: leadWritesDisabled
+        ? null
+        : {
+            endpoint: "/api/leads",
+            method: "POST",
+            payload: {
+              source: "website_seller_callback",
+              leadType: "seller",
+              language: locale.code,
+              contact_preference: "phone",
+            },
+            label: labels.callback,
+          },
     },
   };
 }

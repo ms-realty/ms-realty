@@ -7,6 +7,11 @@ import { en } from "@payloadcms/translations/languages/en";
 import { ru } from "@payloadcms/translations/languages/ru";
 import { buildConfig } from "payload";
 import { LEAD_COLLECTIONS } from "./production/lib/lead-collections.mjs";
+import { FUNNEL_EVENT_COLLECTION } from "./production/lib/event-durable-store.mjs";
+import { PROVIDER_CONNECTION_COLLECTION } from "./production/lib/provider-connections.mjs";
+import { PROVIDER_DELIVERY_RECEIPT_COLLECTION } from "./production/lib/provider-delivery.mjs";
+import { PROVIDER_WEBHOOK_EVENT_COLLECTION } from "./production/lib/provider-webhooks.mjs";
+import { VIEWING_COLLECTION } from "./production/lib/viewing-durable-store.mjs";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 import { payloadCmsImportContextEnabled } from "./production/lib/payload-cms-import.mjs";
@@ -279,15 +284,66 @@ const caseCollectionsWithAccess = REALTY_CASE_COLLECTIONS.map((collection) => ({
   },
 }));
 
-// Lead intake is append-only server-owned state written through overrideAccess.
-// Brokers may read the privacy-safe ledger; contact envelopes stay admin-only.
+// Lead intake is append-only server-owned state. Human reads are always
+// workspace-scoped; the application opens contact envelopes only after this
+// collection-level boundary has been applied.
 const leadCollectionsWithAccess = LEAD_COLLECTIONS.map((collection) => ({
   ...collection,
   access: {
     ...serverOwnedCollectionAccess,
-    read: collection.slug === "lead_contacts" ? isAdmin : hasRole("admin", "broker"),
+    read: caseCollectionAccess.read,
   },
 }));
+
+const funnelEventCollectionWithAccess = {
+  ...FUNNEL_EVENT_COLLECTION,
+  access: serverOwnedCollectionAccess,
+};
+
+const providerConnectionCollectionWithAccess = {
+  ...PROVIDER_CONNECTION_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
+const providerWebhookEventCollectionWithAccess = {
+  ...PROVIDER_WEBHOOK_EVENT_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
+const providerDeliveryReceiptCollectionWithAccess = {
+  ...PROVIDER_DELIVERY_RECEIPT_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
+// Request-time lead side effects share the lead transaction. They remain
+// append-only, server-owned event records; brokers can inspect their
+// privacy-safe payloads but cannot forge or rewrite them.
+const durableLeadSideEffectCollections = [
+  {
+    slug: "consent_events",
+    admin: { useAsTitle: "event_id", defaultColumns: ["workspace_id", "lead_id", "recorded_at"] },
+    access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
+    fields: [
+      { name: "event_id", type: "text", required: true, unique: true, index: true, maxLength: 160 },
+      { name: "workspace_id", type: "text", required: true, index: true, maxLength: 160 },
+      { name: "lead_id", type: "text", required: true, index: true, maxLength: 160 },
+      { name: "recorded_at", type: "date", required: true },
+      { name: "payload", type: "json", required: true },
+    ],
+  },
+  {
+    slug: "seller_pipeline_events",
+    admin: { useAsTitle: "event_id", defaultColumns: ["workspace_id", "lead_id", "recorded_at"] },
+    access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
+    fields: [
+      { name: "event_id", type: "text", required: true, unique: true, index: true, maxLength: 160 },
+      { name: "workspace_id", type: "text", required: true, index: true, maxLength: 160 },
+      { name: "lead_id", type: "text", required: true, index: true, maxLength: 160 },
+      { name: "recorded_at", type: "date", required: true },
+      { name: "payload", type: "json", required: true },
+    ],
+  },
+];
 
 export default buildConfig({
   admin: { user: "admins" },
@@ -306,5 +362,17 @@ export default buildConfig({
       connectionString: runtimeConfig.databaseUrl,
     },
   }),
-  collections: [admins, locales, ...collections, ...caseCollectionsWithAccess, ...leadCollectionsWithAccess],
+  collections: [
+    admins,
+    locales,
+    ...collections,
+    ...caseCollectionsWithAccess,
+    ...leadCollectionsWithAccess,
+    funnelEventCollectionWithAccess,
+    providerConnectionCollectionWithAccess,
+    providerWebhookEventCollectionWithAccess,
+    providerDeliveryReceiptCollectionWithAccess,
+    VIEWING_COLLECTION,
+    ...durableLeadSideEffectCollections,
+  ],
 });

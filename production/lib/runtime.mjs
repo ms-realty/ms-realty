@@ -11,6 +11,7 @@ import {
   renderHomePage,
   renderGuidePage,
   renderLegacyArchivePage,
+  renderListingPreservationPage,
   renderLanguageFallback,
   renderListingPage,
   renderLocationPage,
@@ -155,11 +156,73 @@ function locationNames(seed) {
   return publicLocationNames(listingRecords(seed).map((record) => listingFromCmsRecord(record)));
 }
 
+function optionalFiniteNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function listingFromPostgresSearchDocument(record, listing) {
+  const document = record.public_search_document;
+  if (!document) return listing;
+  const latitude = optionalFiniteNumber(document.public_latitude);
+  const longitude = optionalFiniteNumber(document.public_longitude);
+  const publicCoordinates =
+    latitude !== null && longitude !== null && latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180
+      ? { latitude, longitude }
+      : null;
+  const priceAmount = optionalFiniteNumber(document.price_amount);
+  const area = optionalFiniteNumber(document.primary_area_sqm);
+  const bedrooms = optionalFiniteNumber(document.bedrooms_count);
+  const location = document.location_label || document.municipality || document.district || "";
+  return {
+    ...listing,
+    id: document.source_listing_id,
+    locale: document.locale,
+    language: document.locale,
+    locale_path: document.locale_path,
+    translation_status: "published",
+    title: document.title,
+    h1: document.title,
+    description: document.description || document.title,
+    location,
+    location_native: location,
+    location_legacy: location,
+    municipality: document.municipality || "",
+    district: document.district || "",
+    region_id: document.region_id || "",
+    country_code: document.country_code || "",
+    geography_id: document.geography_id || "",
+    geography_path: Array.isArray(document.geography_path) ? document.geography_path : [],
+    location_review_status: document.geography_id ? "confirmed_settlement" : "verified_area",
+    property_type: document.property_family || document.property_subtype || "property",
+    property_family: document.property_family || null,
+    property_subtype: document.property_subtype || null,
+    offer_type: document.offer_type || "sale",
+    listing_status: document.listing_status || "available",
+    bedrooms,
+    bedrooms_count: bedrooms,
+    bedrooms_not_applicable: false,
+    area_sqm: area,
+    primary_area_sqm: area,
+    condition: document.condition || "",
+    price_eur:
+      document.price_currency === "EUR" && document.price_on_request !== true ? priceAmount : null,
+    price_on_request: document.price_on_request === true,
+    location_precision: document.public_location_precision || null,
+    public_location_precision: document.public_location_precision || null,
+    public_coordinates: publicCoordinates,
+  };
+}
+
 function runtimeListings(seed, translationTasks = []) {
-  return listingRecords(seed).map((record) => ({
-    ...listingFromCmsRecord(record, null, propertyForRecord(seed, record)),
-    translations: mergeRuntimeTranslations(record, translationTasks),
-  }));
+  return listingRecords(seed).map((record) => {
+    const listing = listingFromCmsRecord(record, null, propertyForRecord(seed, record));
+    return {
+      ...listingFromPostgresSearchDocument(record, listing),
+      translations: mergeRuntimeTranslations(record, translationTasks),
+    };
+  });
 }
 
 export function resolveRuntimePath(registry, seed, pathname, translationTasks = [], tourApprovals = []) {
@@ -233,7 +296,15 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   return { type: "not_found", status: 404 };
 }
 
-export function renderRuntimePath(registry, seed, pathname, translationTasks = [], brokerContacts = [], tourApprovals = []) {
+export function renderRuntimePath(
+  registry,
+  seed,
+  pathname,
+  translationTasks = [],
+  brokerContacts = [],
+  tourApprovals = [],
+  preservationCatalog = [],
+) {
   const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks, tourApprovals);
   const listings = () => runtimeListings(seed, translationTasks);
   if (resolved.type === "listing") {
@@ -285,13 +356,30 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
       listings: listings(),
     });
   }
+  if (resolved.type === "not_found") {
+    const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+    const preserved = preservationCatalog.find((entry) => entry.target_path === normalized);
+    if (preserved) return renderListingPreservationPage({ registry, entry: preserved, path: normalized });
+  }
   return { kind: "not_found", status: 404, path: pathname, indexable: false };
 }
 
 export function searchRuntimeListings(
   registry,
   seed,
-  { localeCode, query = "", filters = {}, sort = "recommended", page = 1, pageSize = 12, savedView = false, view = "list", translationTasks = [] },
+  {
+    localeCode,
+    query = "",
+    filters = {},
+    sort = "recommended",
+    page = 1,
+    pageSize = 12,
+    savedView = false,
+    view = "list",
+    translationTasks = [],
+    databasePage = false,
+    totalMatches = null,
+  },
 ) {
   return renderSearchPage({
     registry,
@@ -304,6 +392,8 @@ export function searchRuntimeListings(
     pageSize,
     savedView,
     view,
+    databasePage,
+    totalMatches,
   });
 }
 
@@ -392,6 +482,16 @@ export function assertRuntimeSmoke(smoke) {
     ? smoke.contact_he?.body?.callback === null && Boolean(smoke.contact_he?.body?.form_unavailable)
     : smoke.contact_he?.body?.callback?.payload?.source === "website_contact_callback" &&
       smoke.contact_he?.body?.callback?.payload?.leadType === "general";
+  // The seller valuation page follows the same durable-store readiness rule as
+  // the contact page: either a submittable intake, or an explicit unavailable
+  // notice — never a form the edge will reject.
+  const sellerLeadUiDisabled = smoke.seller_he?.chrome?.lead_writes_disabled === true;
+  const sellerLeadUiValid = sellerLeadUiDisabled
+    ? smoke.seller_he?.body?.valuation === null &&
+      smoke.seller_he?.body?.callback === null &&
+      Boolean(smoke.seller_he?.body?.form_unavailable) &&
+      Boolean(smoke.seller_he?.body?.contact_channels?.phone?.href)
+    : smoke.seller_he?.body?.valuation?.payload?.source === "website_seller_valuation";
   if (smoke.listing_he.status !== 200 || smoke.listing_he.dir !== "rtl") {
     throw new Error("Runtime Hebrew listing must render as RTL 200");
   }
@@ -425,8 +525,8 @@ export function assertRuntimeSmoke(smoke) {
   }
   if (smoke.home_he.body.seller.path !== "/he/sell") throw new Error("Runtime Hebrew home must expose seller path");
   if (smoke.fallback_fr.indexable !== false) throw new Error("Runtime French fallback must not be indexable");
-  if (smoke.seller_he.status !== 200 || smoke.seller_he.body.valuation.payload.source !== "website_seller_valuation") {
-    throw new Error("Runtime seller page must expose seller valuation lead action");
+  if (smoke.seller_he.status !== 200 || !sellerLeadUiValid) {
+    throw new Error("Runtime seller page must match durable lead-store readiness");
   }
   if (
     smoke.contact_he.status !== 200 ||

@@ -33,24 +33,26 @@ function element(attributes = {}) {
   };
 }
 
-function bootClient({ failStorage = false, includeMain = false } = {}) {
+function bootClient({ failStorage = false, includeMain = false, mainKind = null } = {}) {
   const handlers = {};
   const stored = new Map();
   const toasts = [];
+  const fetchCalls = [];
   const button = element({
     "data-client-save-listing": "MS-CRAWL-0001",
     "data-save-label": "Save",
     "data-saved-label": "Saved",
   });
   button.label = element();
-  const main = element({ id: "main" });
+  const main = element({ id: "main", ...(mainKind ? { "data-kind": mainKind } : {}) });
   const script = { getAttribute: (name) => (name === "data-request-failed" ? "Could not save" : "") };
   const document = {
     currentScript: script,
-    documentElement: { classList: { toggle() {} } },
+    documentElement: { lang: "en", classList: { toggle() {} } },
     head: { appendChild() {} },
     body: { appendChild: (node) => toasts.push(node) },
     querySelector(selector) {
+      if (selector === "main[data-kind]") return mainKind ? main : null;
       return selector === "[data-public-toast]" ? toasts[0] || null : null;
     },
     getElementById(id) {
@@ -79,7 +81,7 @@ function bootClient({ failStorage = false, includeMain = false } = {}) {
       return { matches: false };
     },
     history: { length: 0, back() {} },
-    location: { href: "https://example.test/he/search", origin: "https://example.test" },
+    location: { href: "https://example.test/en/search?q=Sandanski&type=apartment&min_price=100000&visitor_id=ignored", origin: "https://example.test", pathname: "/en/search", search: "?q=Sandanski&type=apartment&min_price=100000&visitor_id=ignored" },
   };
   const localStorage = {
     getItem(key) {
@@ -113,7 +115,10 @@ function bootClient({ failStorage = false, includeMain = false } = {}) {
     { getEntriesByType() { return []; } },
     function FormData() {},
     function HTMLFormElement() {},
-    () => Promise.resolve(),
+    (url, options) => {
+      fetchCalls.push({ url, options });
+      return Promise.resolve();
+    },
   );
   return {
     button,
@@ -137,6 +142,7 @@ function bootClient({ failStorage = false, includeMain = false } = {}) {
     },
     stored,
     toasts,
+    fetchCalls,
   };
 }
 
@@ -168,4 +174,27 @@ test("skip link preserves hash navigation and moves keyboard focus to main", () 
 
   assert.equal(client.click(skipTarget), false);
   assert.deepEqual(client.main.focusCalls, [[{ preventScroll: true }]]);
+});
+
+test("public client records privacy-safe page, search, and CTA events without a visitor identifier", () => {
+  const client = bootClient({ mainKind: "search" });
+  assert.equal(client.fetchCalls.length, 2);
+  const initial = client.fetchCalls.map((call) => JSON.parse(call.options.body));
+  assert.deepEqual(initial.map((event) => event.type), ["page_view", "search"]);
+  assert.equal(initial[1].query, "Sandanski");
+  assert.deepEqual(initial[1].filters, { property_type: "apartment", price_min: "100000" });
+  assert.equal(JSON.stringify(initial).includes("visitor"), false);
+
+  const action = element({ "data-card-action": "detail", "data-listing-reference": "MS-CRAWL-0001" });
+  action.closest = (selector) => selector.includes("[data-card-action]") ? action : null;
+  client.click(action);
+  const click = JSON.parse(client.fetchCalls[2].options.body);
+  assert.equal(click.type, "cta_click");
+  assert.equal(click.action, "detail");
+  assert.equal(click.listingReference, "MS-CRAWL-0001");
+
+  const utility = element({ "data-card-action": "save", "data-listing-reference": "MS-CRAWL-0001" });
+  utility.closest = (selector) => selector.includes("[data-card-action]") ? utility : null;
+  client.click(utility);
+  assert.equal(client.fetchCalls.length, 3);
 });

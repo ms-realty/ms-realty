@@ -34,44 +34,55 @@ async function withEnv(env, fn) {
   }
 }
 
-test("API search preserves complete municipality results when engine hits are truncated", async () => {
-  const calls = [];
+test("API search preserves Postgres totals, pagination, and structured municipality intent", async () => {
+  const intents = [];
   const config = appApiConfigFromEnv({
     ...process.env,
     ...approvedPublicSeedFixtureEnv(),
-    TYPESENSE_URL: "https://search.makler-realty.com",
-    TYPESENSE_API_KEY: "typesense-key",
     MS_REALTY_EVENT_LEDGER_PATH: tempLedger("app-api-search-events", resetEventLedger),
   });
-  config.search.typesense.lookupImpl = async () => [{ address: "1.1.1.1", family: 4 }];
-  config.search.fetchImpl = async (url) => {
-    calls.push(String(url));
-    return new Response(
-      JSON.stringify({
-        found: 999,
-        hits: [{ document: { source_listing_id: "MS-CRAWL-0033", locale: "bg", title: "Reviewed listing" } }],
-      }),
-      { status: 200, headers: { "content-type": "application/json" } },
-    );
+  config.search.postgres.queryImpl = async ({ intent, target }) => {
+    intents.push(intent);
+    return {
+      engine: "postgres",
+      total: 999,
+      hits: [
+        {
+          id: "MS-CRAWL-0033:bg",
+          source_listing_id: "MS-CRAWL-0033",
+          locale: "bg",
+          locale_path: "/bg/imoti/MS-CRAWL-0033",
+          title: "Reviewed listing",
+        },
+      ],
+      page: intent.page,
+      page_size: intent.page_size,
+      target,
+    };
   };
 
   const response = await renderAppApiResponse(
-    new Request("https://example.test/api/search?locale=bg&municipality=Sandanski&district=Blagoevgrad", {
+    new Request("https://example.test/api/search?locale=bg&municipality=Sandanski&district=Blagoevgrad&page=3&page_size=7", {
       headers: { "x-ms-realty-preview": "search-count" },
     }),
     { config },
   );
   const payload = await response.json();
-  const request = new URL(calls[0]);
 
   assert.equal(response.status, 200);
   assert.equal(payload.search.filters.municipality, "Sandanski");
   assert.equal(payload.search.filters.district, "Blagoevgrad");
-  assert.ok(payload.search.total_matches > 1);
+  assert.equal(payload.search.total_matches, 999);
+  assert.equal(payload.search.pagination.page, 3);
+  assert.equal(payload.search.pagination.per_page, 7);
+  assert.equal(payload.search.pagination.total_pages, 143);
   assert.equal(payload.search.backend.indexed_matches, 999);
-  assert.match(request.searchParams.get("filter_by"), /municipality:=`Sandanski`/);
-  assert.match(request.searchParams.get("filter_by"), /district:=`Blagoevgrad`/);
-  assert.doesNotMatch(request.searchParams.get("filter_by"), /location_review_status/);
+  assert.equal(payload.search.backend.engine, "postgres");
+  assert.equal(intents.length, 1);
+  assert.equal(intents[0].municipality, "Sandanski");
+  assert.equal(intents[0].district, "Blagoevgrad");
+  assert.equal(intents[0].page, 3);
+  assert.equal(intents[0].page_size, 7);
   assert.equal(readEventLedger(config.eventLedgerPath).length, 0);
 });
 
@@ -235,7 +246,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       const event = await eventRoute.POST(
         new Request("https://example.test/api/events", {
           method: "POST",
-          headers: { "content-type": "application/x-www-form-urlencoded" },
+          headers: { "content-type": "application/x-www-form-urlencoded", origin: "https://example.test" },
           body: new URLSearchParams({ type: "cta_click", path: "/he/properties/MS-CRAWL-0001", locale: "he", action: "call" }),
         }),
       );

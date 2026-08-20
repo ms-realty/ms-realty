@@ -38,6 +38,26 @@ import {
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
+import {
+  ProviderConnectionUnavailableError,
+  completeGoogleOAuth,
+  completeViberConnection,
+  completeWhatsAppEmbeddedSignup,
+  googleAuthorizationUrl,
+  providerConnectionAvailability,
+  providerConnectionConfigFromEnv,
+  readProviderConnections,
+  readProviderCredentials,
+  registerViberWebhook,
+  registerWhatsAppWebhook,
+  saveProviderConnection,
+  syncViewingToGoogleCalendar as syncViewingToGoogleCalendarProvider,
+} from "./provider-connections.mjs";
+import {
+  ProviderDeliveryError,
+  deliverApprovedProviderMessage as deliverProviderMessage,
+} from "./provider-delivery.mjs";
+import { renderProviderWebhookResponse } from "./provider-webhooks.mjs";
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import {
   LISTING_EDIT_FIELDS,
@@ -72,11 +92,16 @@ import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
+import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
+import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
 import {
   LeadStoreUnavailableError,
   isLeadDurableStoreEnabled,
+  leadReadScopeForPrincipal,
   leadDurableStoreConfigFromEnv,
+  payloadUserForLeadRead,
   persistLeadIntakeDurably,
+  readLeadIntakesDurably as readLeadIntakesDurablyStore,
 } from "./lead-durable-store.mjs";
 import {
   appendLeadAssignment,
@@ -116,14 +141,15 @@ import {
   buildRedirectApprovalWorkbook,
   buildDeployableRedirects,
   buildLegacyRouteDecisions,
+  approvedLaunchFreezeRouteArtifact,
   importRedirectApprovalsCsv,
-  loadLegacyRouteDecisions,
   readRedirectApprovals,
   renderRedirectApprovalWorkbook,
   summarizeDeployableRedirects,
   summarizeLegacyRouteDecisions,
   writeDeployableRedirects,
 } from "./redirect-approvals.mjs";
+import { DEFAULT_LAUNCH_FREEZE_PATH, loadApprovedLaunchFreeze } from "./launch-freeze.mjs";
 import {
   appendLanguageRequest,
   createLanguageRequest,
@@ -138,11 +164,7 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
-import {
-  projectListingDraftSeed,
-  saveBulkListingStatusDrafts,
-  saveListingDraft,
-} from "./listing-draft-service.mjs";
+import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
   appendListingPublicationSchedule,
@@ -152,8 +174,17 @@ import {
   listingPublicationExecutionAuditRecords,
   readListingPublicationSchedules,
 } from "./listing-publication-schedules.mjs";
-import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
+import { appendViewing, createViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendViewingFollowUp, buildViewingFollowUpQueue, readViewingFollowUps } from "./viewing-follow-ups.mjs";
+import {
+  ViewingConflictError,
+  ViewingStoreUnavailableError,
+  isViewingDurableStoreEnabled,
+  persistViewingDurably as persistViewingDurablyStore,
+  readViewingsDurably as readViewingsDurablyStore,
+  recordViewingCalendarSync as recordViewingCalendarSyncStore,
+  viewingDurableStoreConfigFromEnv,
+} from "./viewing-durable-store.mjs";
 import {
   appendSavedSearch,
   createSavedSearch,
@@ -263,6 +294,7 @@ import {
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { fromRoot } from "./paths.mjs";
+import { seedForPostgresSearchHits } from "./public-search.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
@@ -278,6 +310,26 @@ const PRIVATE_HEADERS = { "cache-control": "no-store" };
 
 // Public (unauthenticated) write endpoints protected by the rate limiter.
 const PUBLIC_WRITE_PATHS = new Set(["/api/leads", "/api/events", "/api/language-requests", "/api/saved-searches"]);
+const LEAD_BACKED_ADMIN_READ_PATHS = new Set([
+  "/api/admin/leads",
+  "/admin/leads",
+  "/api/admin/today",
+  "/admin/today",
+  "/api/admin/pipeline",
+  "/admin/pipeline",
+  "/api/admin/requests",
+  "/admin/requests",
+  "/api/admin/viewings",
+  "/admin/viewings",
+  "/api/admin/contacts",
+  "/admin/contacts",
+  "/api/admin/documents",
+  "/admin/documents",
+  "/api/admin/reports",
+  "/admin/reports",
+  "/api/admin/reports/export",
+  "/api/admin/viewings.ics",
+]);
 
 function response(status, body, contentType, headers = {}) {
   const csp = contentType.startsWith("text/html") ? { "content-security-policy": CONTENT_SECURITY_POLICY } : {};
@@ -384,6 +436,10 @@ function withSearchBackend(result, engineResult) {
   };
 }
 
+function searchEngineResultIsComplete(engineResult) {
+  return !Number.isFinite(engineResult.total) || engineResult.total <= engineResult.hits.length;
+}
+
 function adminHtml(page) {
   return renderHtmlPage(page, { bodyHtml: renderReactAdminBody(page) });
 }
@@ -432,6 +488,37 @@ function parseBody(request) {
     return output;
   }
   return parseJsonBody(request);
+}
+
+function providerDeliveryChannel(provider) {
+  if (provider === "google") return "email";
+  if (provider === "whatsapp" || provider === "viber") return provider;
+  throw new Error("Provider delivery requires google, whatsapp, or viber");
+}
+
+function providerDeliveryRecipient(lead, provider) {
+  const contact = lead?.contact || {};
+  const recipientValue =
+    provider === "google"
+      ? contact.email
+      : provider === "whatsapp"
+        ? contact.whatsapp || contact.phone
+        : provider === "viber"
+          ? contact.viber_user_id
+          : "";
+  const recipient = String(recipientValue || "").trim();
+  if (recipient) return recipient;
+  const label = provider === "google" ? "email" : provider === "whatsapp" ? "WhatsApp" : "Viber";
+  throw new Error(`Lead has no ${label} recipient for provider delivery`);
+}
+
+function googleReplySubject(lead) {
+  const prefix = "MS Realty reply regarding ";
+  const reference = String(lead?.listing_reference || lead?.lead_id || "your enquiry")
+    .replace(/[\u0000-\u001f\u007f]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return `${prefix}${reference || "your enquiry"}`.slice(0, 200).trim();
 }
 
 function realtyCaseInput(input) {
@@ -685,7 +772,10 @@ export function createHttpApp({
   leadContactVaultPath = null,
   leadContactKey = null,
   leadDurableStore = leadDurableStoreConfigFromEnv(),
+  leadDurablePayload = null,
   persistLeadIntake = persistLeadIntakeDurably,
+  readLeadIntakes = null,
+  readLeadIntakesDurably = readLeadIntakesDurablyStore,
   publicContactVaultPath = null,
   publicContactKey = null,
   replyOutboxPath = null,
@@ -719,6 +809,7 @@ export function createHttpApp({
   slugHistoryPath = null,
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
+  launchFreezePath = DEFAULT_LAUNCH_FREEZE_PATH,
   launchReadinessOutputPath = null,
   listingQualityReviewPath = null,
   searchSyncReportPath = null,
@@ -728,6 +819,7 @@ export function createHttpApp({
   monitoringRollbackReportPath = null,
   payloadRuntimeReportPath = null,
   productionRecoveryReportPath = null,
+  productionRecoverySigningPublicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
@@ -756,11 +848,29 @@ export function createHttpApp({
   trustProxy = process.env.MS_REALTY_TRUST_PROXY === "1",
   naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
   payloadAdminAuth = getPayloadAdminAuthService,
+  providerConnection = providerConnectionConfigFromEnv(),
+  providerConnectionPayload = null,
+  providerWebhookPayload = providerConnectionPayload,
+  providerWebhookReceivedAt,
+  providerFetch = fetch,
+  deliverApprovedProviderMessage = deliverProviderMessage,
+  viewingDurableStore = viewingDurableStoreConfigFromEnv(),
+  viewingDurablePayload = null,
+  readViewingsDurably = readViewingsDurablyStore,
+  persistViewingDurably = persistViewingDurablyStore,
+  recordViewingCalendarSync = recordViewingCalendarSyncStore,
+  syncViewingToGoogleCalendar = syncViewingToGoogleCalendarProvider,
   nowSeconds = () => Math.floor(Date.now() / 1000),
   search = {},
+  runtimeDataDurableOnly =
+    process.env.NODE_ENV === "production" && process.env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload",
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
-  const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
+  const activeRouteContract = redirects
+    ? { decisions: redirects, catalog: [] }
+    : approvedLaunchFreezeRouteArtifact(loadApprovedLaunchFreeze(launchFreezePath));
+  const activeLegacyDecisions = activeRouteContract.decisions;
+  const preservationCatalog = activeRouteContract.catalog;
   const activeLegacyDecisionByUrl = new Map(activeLegacyDecisions.map((row) => [row.old_url, row]));
   const publicWriteLimiter = rateLimit ? createRateLimiter(rateLimit) : null;
   let payloadAdminAuthPromise;
@@ -776,33 +886,74 @@ export function createHttpApp({
     }
   };
   const currentSeed = () =>
-    applyMediaReviews(
+    runtimeDataDurableOnly
+      ? seed
+      : applyMediaReviews(
       applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined)),
       readMediaReviews(mediaReviewLedgerPath || undefined),
     );
-  const currentPublicSeed = () => publicSeedFor(currentSeed());
+  const currentPublicSeed = () => {
+    if (runtimeDataDurableOnly) throw Object.assign(new Error("Payload public listing authority is required"), { status: 503 });
+    return publicSeedFor(currentSeed());
+  };
+  const currentPublicContext = async () => {
+    if (!runtimeDataDurableOnly) {
+      return { registry: activeRegistry, seed: currentPublicSeed(), translationTasks: currentTranslationTasks() };
+    }
+    const projected = await projectListingDraftSeed(seed, {
+      payload: payloadListingRuntime,
+      env: payloadListingEnv,
+      requirePayload: true,
+    });
+    return { registry: activeRegistry, seed: publicSeedFor(projected), translationTasks: [] };
+  };
   const currentTranslationTasks = () =>
-    readThroughCached(translationLedgerPath || DEFAULT_TRANSLATION_LEDGER_PATH, () =>
-      readTranslationLedger(translationLedgerPath || undefined),
-    );
+    runtimeDataDurableOnly
+      ? []
+      : readThroughCached(translationLedgerPath || DEFAULT_TRANSLATION_LEDGER_PATH, () =>
+          readTranslationLedger(translationLedgerPath || undefined),
+        );
   const currentBrokerContacts = () =>
-    readThroughCached(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH, () =>
-      readBrokerContacts(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH),
-    );
+    runtimeDataDurableOnly
+      ? []
+      : readThroughCached(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH, () =>
+          readBrokerContacts(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH),
+        );
   const currentTourApprovals = () =>
-    readThroughCached(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH, () =>
-      readTourApprovals(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH),
-    );
+    runtimeDataDurableOnly
+      ? []
+      : readThroughCached(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH, () =>
+          readTourApprovals(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH),
+        );
   const currentSlugHistory = () =>
-    readThroughCached(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH, () => readSlugHistory(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH));
+    runtimeDataDurableOnly
+      ? []
+      : readThroughCached(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH, () =>
+          readSlugHistory(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH),
+        );
   const currentLeads = () =>
-    applyLeadAssignments(
+    runtimeDataDurableOnly
+      ? []
+      : applyLeadAssignments(
       withLeadContacts(readLeadLedger(leadLedgerPath || undefined), {
         filePath: leadContactVaultPath,
         secret: leadContactKey,
       }),
       readLeadAssignments(leadAssignmentLedgerPath || undefined),
     );
+  const currentDurableLeads = async (principal, payloadSession = null) => {
+    if (!isLeadDurableStoreEnabled(leadDurableStore)) {
+      throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
+    }
+    const scope = leadReadScopeForPrincipal(principal, leadDurableStore.workspaceId);
+    return (readLeadIntakes || readLeadIntakesDurably)({
+      admin: scope.admin,
+      contactSecret: leadDurableStore.contactSecret,
+      payload: leadDurablePayload,
+      user: payloadUserForLeadRead(principal, payloadSession?.user || null),
+      workspaceIds: scope.workspaceIds,
+    });
+  };
   const currentListingQualityReport = (options = {}) =>
     buildListingQualityReport({
       seed: currentSeed(),
@@ -882,22 +1033,87 @@ export function createHttpApp({
       replyDeliveryQueue: buildReplyDeliveryQueue(replies, outcomes),
     };
   };
-  const currentLeadJourneyContext = () => ({
-    leads: currentLeads(),
-    outcomes: readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined),
-    viewings: readViewings(viewingLedgerPath || undefined),
-    viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
-    deals: readDeals(dealLedgerPath || undefined),
-    sellerPipelines: readSellerPipeline(sellerPipelinePath || undefined),
-    sellerPipelineOutcomes: readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined),
-  });
-  const currentLeadPipelineQueue = () =>
-    buildLeadPipelineQueue(currentLeadJourneyContext(), {
+  const rowsForLeadIds = (rows, leadIds) => rows.filter((row) => row?.lead_id && leadIds.has(row.lead_id));
+  const leadScopedRows = (source) => {
+    if (!source?.durable) return (rows) => rows;
+    const leadIds = new Set(source.leads.map((lead) => lead.lead_id));
+    return (rows) => rowsForLeadIds(rows, leadIds);
+  };
+  const currentDurableLeadSource = async (principal = null, payloadSession = null, leads = null) => {
+    if (!leadDurableStore?.leadDurableStoreEnabled) return { durable: false, leads: leads || currentLeads() };
+    try {
+      const durableLeads = leads || (await currentDurableLeads(principal, payloadSession));
+      if (!Array.isArray(durableLeads) || durableLeads.some((lead) => !lead?.lead_id)) {
+        throw new Error("Durable lead readback returned invalid rows");
+      }
+      return { durable: true, leads: durableLeads };
+    } catch (error) {
+      if (error instanceof LeadStoreUnavailableError) throw error;
+      throw new LeadStoreUnavailableError("Durable lead store read failed", error);
+    }
+  };
+  const currentDurableViewingSource = async () => {
+    if (!viewingDurableStore?.viewingDurableStoreEnabled) {
+      return { durable: false, viewings: readViewings(viewingLedgerPath || undefined) };
+    }
+    if (!isViewingDurableStoreEnabled(viewingDurableStore)) {
+      throw new ViewingStoreUnavailableError("Durable viewing store is enabled but not fully configured");
+    }
+    const viewings = await readViewingsDurably({ payload: viewingDurablePayload || null });
+    if (!Array.isArray(viewings)) throw new ViewingStoreUnavailableError("Durable viewing readback returned invalid rows");
+    return { durable: true, viewings };
+  };
+  const currentLeadJourneyContext = (leads = currentLeads()) => {
+    const filterRows = leadScopedRows({ durable: leadDurableStore?.leadDurableStoreEnabled === true, leads });
+    return {
+      leads,
+      outcomes: filterRows(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined)),
+      viewings: filterRows(readViewings(viewingLedgerPath || undefined)),
+      viewingFollowUps: filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined)),
+      deals: filterRows(readDeals(dealLedgerPath || undefined)),
+      sellerPipelines: filterRows(readSellerPipeline(sellerPipelinePath || undefined)),
+      sellerPipelineOutcomes: filterRows(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined)),
+    };
+  };
+  const currentLeadPipelineQueue = (leads = currentLeads()) =>
+    buildLeadPipelineQueue(currentLeadJourneyContext(leads), {
       now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
     });
-  const currentAdminLeadPayload = (requestedLocale, operatorId = null) => {
-    const leads = currentLeads();
-    const leadPipelineQueue = currentLeadPipelineQueue();
+  const currentAdminLeadPayload = (requestedLocale, operatorId = null, leads = currentLeads()) => {
+    if (runtimeDataDurableOnly) {
+      const generatedAt = reviewedAt || receivedAt || new Date().toISOString();
+      return {
+        ...renderAdminLeadsPayload(activeRegistry, requestedLocale, {
+          leads,
+          replies: [],
+          communicationThreads: [],
+          communicationTemplates: {},
+          languageRequests: [],
+          translationTasks: [],
+          listingEdits: [],
+          leadMatching: {
+            generated_at: generatedAt,
+            summary: {
+              matchable_leads_with_listing_reference: 0,
+              active_matchable_leads: 0,
+              qualified_leads: 0,
+              leads_with_matches: 0,
+              open_broker_tasks: 0,
+            },
+            rows: [],
+          },
+          operatorId,
+          viewings: [],
+          savedSearches: [],
+          sellerPipeline: [],
+          deals: [],
+          brokerContacts: [],
+          brokerProfiles: [],
+        }),
+        runtime_data_mode: "durable_only",
+      };
+    }
+    const leadPipelineQueue = currentLeadPipelineQueue(leads);
     const replyData = currentReplyData();
     return renderAdminLeadsPayload(activeRegistry, requestedLocale, {
       leads,
@@ -921,6 +1137,7 @@ export function createHttpApp({
       leadSlaGeneratedAt,
       operatorId,
       ...currentViewingData(),
+      viewingFollowUpWritable: !viewingDurableStore?.viewingDurableStoreEnabled,
       savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
       publicRequestQueue: currentPublicRequestQueue(),
       ...currentSellerPipelineData(),
@@ -928,8 +1145,63 @@ export function createHttpApp({
       brokerContacts: currentBrokerContacts(),
     });
   };
-  const currentContactPayload = (requestedLocale, operatorId = null) => {
-    const leads = currentLeads();
+  const currentAdminViewingsPayload = async (requestedLocale, operatorId = null, scopedLeads = null, payloadSession = null) => {
+    const [leadSource, viewingSource] = await Promise.all([
+      currentDurableLeadSource(operatorId, payloadSession, scopedLeads),
+      currentDurableViewingSource(),
+    ]);
+    const filterRows = leadScopedRows(leadSource);
+    const leads = applyLeadAssignments(leadSource.leads, filterRows(readLeadAssignments(leadAssignmentLedgerPath || undefined)));
+    const outcomes = filterRows(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined));
+    const viewings = filterRows(viewingSource.viewings);
+    const viewingFollowUps = viewingSource.durable
+      ? []
+      : filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined));
+    const deals = filterRows(readDeals(dealLedgerPath || undefined));
+    const sellerPipelines = filterRows(readSellerPipeline(sellerPipelinePath || undefined));
+    const sellerPipelineOutcomes = filterRows(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined));
+    const leadPipelineQueue = buildLeadPipelineQueue(
+      { leads, outcomes, viewings, viewingFollowUps, deals, sellerPipelines, sellerPipelineOutcomes },
+      { now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString() },
+    );
+    const replyData = currentReplyData();
+    const replies = filterRows(replyData.replies);
+    const replyOutcomes = filterRows(replyData.outcomes);
+    return renderAdminLeadsPayload(activeRegistry, requestedLocale, {
+      leads,
+      leadPipelineQueue,
+      leadMatching: buildLeadMatchingReport({
+        registry: activeRegistry,
+        seed: currentSeed(),
+        leads,
+        leadPipelineStates: leadPipelineQueue.states,
+        generatedAt: reviewedAt || leadPipelineOutcomeAt || receivedAt || new Date().toISOString(),
+      }),
+      replies,
+      replyDeliveryQueue: buildReplyDeliveryQueue(replies, replyOutcomes),
+      communicationThreads: buildCommunicationThreads({ leads, replies, outcomes: replyOutcomes }),
+      communicationTemplates: Object.fromEntries(leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)])),
+      languageRequests: readLanguageRequests(languageRequestPath || undefined),
+      translationTasks: latestTranslationTasks(currentTranslationTasks()),
+      listingEdits: readListingEdits(listingEditLedgerPath || undefined),
+      leadSlaGeneratedAt,
+      operatorId,
+      viewings,
+      viewingFollowUpWritable: !viewingSource.durable,
+      viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, viewingFollowUps, {
+        now: viewingFollowUpAt || bookedAt || reviewedAt || receivedAt || new Date().toISOString(),
+      }),
+      savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
+      publicRequestQueue: currentPublicRequestQueue(),
+      sellerPipeline: sellerPipelines,
+      sellerPipelineQueue: buildSellerPipelineQueue(sellerPipelines, sellerPipelineOutcomes, {
+        now: sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
+      }),
+      deals,
+      brokerContacts: currentBrokerContacts(),
+    });
+  };
+  const currentContactPayload = (requestedLocale, operatorId = null, leads = currentLeads()) => {
     const replies = readReplyOutbox(replyOutboxPath || undefined);
     const outcomes = readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined);
     const communicationThreads = buildCommunicationThreads({ leads, replies, outcomes });
@@ -940,11 +1212,11 @@ export function createHttpApp({
       operatorId,
     });
   };
-  const currentDocumentChecklistPayload = (requestedLocale, operatorId = null) =>
+  const currentDocumentChecklistPayload = (requestedLocale, operatorId = null, leads = currentLeads()) =>
     renderAdminDocumentChecklistPayload(
       activeRegistry,
       requestedLocale,
-      buildDocumentChecklistQueue(currentLeads(), readDocumentChecklistOutcomes(documentChecklistLedgerPath || undefined), {
+      buildDocumentChecklistQueue(leads, readDocumentChecklistOutcomes(documentChecklistLedgerPath || undefined), {
         locale: requestedLocale,
       }),
       operatorId,
@@ -965,8 +1237,8 @@ export function createHttpApp({
     realtyCasePayloadAuthorityActive()
       ? readRealtyCaseConditionEventsFromPayload({ payload: realtyCasePayload, workspaceId: realtyCaseWorkspaceId })
       : readRealtyCaseConditionEvents(realtyCaseConditionLedgerPath || undefined);
-  const currentRealtyCasePayload = async (requestedLocale, operatorId = null) =>
-    renderAdminRealtyCasesPayload(
+  const currentRealtyCasePayload = async (requestedLocale, operatorId = null) => {
+    const payload = renderAdminRealtyCasesPayload(
       activeRegistry,
       requestedLocale,
       buildRealtyCaseQueue(await currentRealtyCaseEvents(), {
@@ -974,6 +1246,8 @@ export function createHttpApp({
       }),
       operatorId,
     );
+    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  };
   const currentAutonomousRealtyCaseIntents = async () =>
     buildAutonomousRealtyCaseIntents(await currentRealtyCaseEvents(), {
       now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
@@ -1009,19 +1283,22 @@ export function createHttpApp({
       latestConsentStates(readConsentLedger(consentLedgerPath || undefined)),
       operatorId,
     );
-  const currentOperationsReport = () => {
+  const currentOperationsReport = async (leads = null, principal = null, payloadSession = null) => {
     const generatedAt = reviewedAt || editedAt || receivedAt || new Date().toISOString();
     const reportSeed = currentSeed();
+    const leadSource = await currentDurableLeadSource(principal, payloadSession, leads);
+    const viewingSource = await currentDurableViewingSource();
+    const filterRows = leadScopedRows(leadSource);
     return buildOperationsReport({
-      leads: readLeadLedger(leadLedgerPath || undefined),
-      replies: readReplyOutbox(replyOutboxPath || undefined),
-      replyDeliveryOutcomes: readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined),
-      leadPipelineOutcomes: readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined),
-      viewings: readViewings(viewingLedgerPath || undefined),
-      viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
-      deals: readDeals(dealLedgerPath || undefined),
-      sellerPipelines: readSellerPipeline(sellerPipelinePath || undefined),
-      sellerPipelineOutcomes: readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined),
+      leads: leadSource.leads,
+      replies: filterRows(readReplyOutbox(replyOutboxPath || undefined)),
+      replyDeliveryOutcomes: filterRows(readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined)),
+      leadPipelineOutcomes: filterRows(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined)),
+      viewings: filterRows(viewingSource.viewings),
+      viewingFollowUps: filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined)),
+      deals: filterRows(readDeals(dealLedgerPath || undefined)),
+      sellerPipelines: filterRows(readSellerPipeline(sellerPipelinePath || undefined)),
+      sellerPipelineOutcomes: filterRows(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined)),
       savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
       languageRequests: readLanguageRequests(languageRequestPath || undefined),
       publicRequestOutcomes: readPublicRequestOutcomes(publicRequestOutcomeLedgerPath || undefined),
@@ -1036,38 +1313,46 @@ export function createHttpApp({
       generatedAt,
     });
   };
-  const currentReportsPayload = (requestedLocale, operatorId = null) =>
-    renderAdminOperationsReportPayload(activeRegistry, requestedLocale, currentOperationsReport(), operatorId);
-  const currentRequestsPayload = (requestedLocale, operatorId = null) => {
-    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
+  const currentReportsPayload = async (requestedLocale, operatorId = null, leads = null, payloadSession = null) =>
+    renderAdminOperationsReportPayload(
+      activeRegistry,
+      requestedLocale,
+      await currentOperationsReport(leads, operatorId, payloadSession),
+      operatorId,
+    );
+  const currentRequestsPayload = (requestedLocale, operatorId = null, leads) => {
+    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId, leads), {
       kind: "admin_requests",
       path: "/admin/requests",
       titleKey: "requestsWorkspace",
       descriptionKey: "requestsDescription",
     });
   };
-  const currentPipelinePayload = (requestedLocale, operatorId = null) => {
-    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
+  const currentPipelinePayload = (requestedLocale, operatorId = null, leads) => {
+    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId, leads), {
       kind: "admin_lead_pipeline",
       path: "/admin/pipeline",
       titleKey: "pipelineWorkspace",
       descriptionKey: "pipelineDescription",
     });
   };
-  const currentTodayPayload = (requestedLocale, operatorId = null) =>
-    renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
+  const currentTodayPayload = (requestedLocale, operatorId = null, leads) =>
+    renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId, leads), {
       kind: "admin_today",
       path: "/admin/today",
       titleKey: "today",
       descriptionKey: "todayDescription",
     });
-  const currentViewingsPayload = (requestedLocale, operatorId = null) =>
-    renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
+  const currentViewingsPayload = async (requestedLocale, operatorId = null, leads = null, payloadSession = null) =>
+    renderAdminOperationalQueuePayload(
+      await currentAdminViewingsPayload(requestedLocale, operatorId, leads, payloadSession),
+      {
       kind: "admin_viewings",
       path: "/admin/viewings",
       titleKey: "viewingsWorkspace",
       descriptionKey: "viewingsDescription",
-    });
+      },
+    );
   const currentActivityPayload = (url, operatorId = null) =>
     renderAdminActivityPayload(
       activeRegistry,
@@ -1082,9 +1367,13 @@ export function createHttpApp({
         page: url.searchParams.get("page"),
       },
     );
-  const currentListingManagerPayload = async (url, operatorId = null) =>
-    renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
+  const currentListingManagerPayload = async (url, operatorId = null) => {
+    const payload = renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
+      seed: await projectListingDraftSeed(currentSeed(), {
+        payload: payloadListingRuntime,
+        env: payloadListingEnv,
+        requirePayload: runtimeDataDurableOnly,
+      }),
       translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       status: url.searchParams.get("status") || "",
@@ -1093,25 +1382,37 @@ export function createHttpApp({
       generatedAt: reviewedAt || new Date().toISOString(),
       operatorId,
       publicationScheduleQueue: buildListingPublicationScheduleQueue(
-        readListingPublicationSchedules(listingPublicationSchedulePath || undefined),
+        runtimeDataDurableOnly ? [] : readListingPublicationSchedules(listingPublicationSchedulePath || undefined),
         { now: listingPublicationAt || reviewedAt || editedAt || new Date().toISOString() },
       ),
     });
-  const currentListingEditorPayload = async (url, operatorId = null) =>
-    renderAdminListingEditorPayload(
+    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  };
+  const currentListingEditorPayload = async (url, operatorId = null) => {
+    const payload = renderAdminListingEditorPayload(
       activeRegistry,
       url.searchParams.get("locale") || "en",
-      await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
+      await projectListingDraftSeed(currentSeed(), {
+        payload: payloadListingRuntime,
+        env: payloadListingEnv,
+        requirePayload: runtimeDataDurableOnly,
+      }),
       url.searchParams.get("listingId"),
-      readListingEdits(listingEditLedgerPath || undefined),
-      latestTranslationTasks(currentTranslationTasks()),
-      currentTourApprovals(),
+      runtimeDataDurableOnly ? [] : readListingEdits(listingEditLedgerPath || undefined),
+      runtimeDataDurableOnly ? [] : latestTranslationTasks(currentTranslationTasks()),
+      runtimeDataDurableOnly ? [] : currentTourApprovals(),
       operatorId,
     );
-  const currentTranslationQueuePayload = async (url, operatorId = null) =>
-    renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
-      seed: await projectListingDraftSeed(currentSeed(), { payload: payloadListingRuntime, env: payloadListingEnv }),
-      translationTasks: latestTranslationTasks(currentTranslationTasks()),
+    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  };
+  const currentTranslationQueuePayload = async (url, operatorId = null) => {
+    const payload = renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
+      seed: await projectListingDraftSeed(currentSeed(), {
+        payload: payloadListingRuntime,
+        env: payloadListingEnv,
+        requirePayload: runtimeDataDurableOnly,
+      }),
+      translationTasks: runtimeDataDurableOnly ? [] : latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       targetLocale: url.searchParams.get("targetLocale") || "",
       taskType: url.searchParams.get("taskType") || "",
@@ -1119,6 +1420,8 @@ export function createHttpApp({
       generatedAt: reviewedAt || new Date().toISOString(),
       operatorId,
     });
+    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  };
   const currentSeoEvidence = () =>
     buildSeoEvidence({
       inputDir: seoEvidenceInputDir || undefined,
@@ -1128,6 +1431,7 @@ export function createHttpApp({
   const currentLegacyRouteDecisions = () =>
     buildLegacyRouteDecisions(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
   const currentDeployedRedirectArtifact = () => {
+    if (activeRouteContract.preservation_contract) return activeRouteContract;
     const decisions = activeLegacyDecisions;
     const redirects = decisions.filter((decision) => decision.status === 301).map((decision) => ({
       old_url: decision.old_url,
@@ -1166,7 +1470,10 @@ export function createHttpApp({
       liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
       monitoringRollback: monitoringRollbackState(monitoringRollbackReportPath || undefined),
       payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
-      productionRecovery: productionRecoveryState(productionRecoveryReportPath || undefined),
+      productionRecovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
+        publicKey: productionRecoverySigningPublicKey,
+      }),
+      productionRecoveryPublicKey: productionRecoverySigningPublicKey,
     });
   };
   const currentLaunchInputChecklist = () =>
@@ -1218,18 +1525,22 @@ export function createHttpApp({
         }),
         live_service_provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
         payload_runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
-        production_recovery: productionRecoveryState(productionRecoveryReportPath || undefined),
+        production_recovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
+          publicKey: productionRecoverySigningPublicKey,
+        }),
       },
     };
   };
   const recordEvent = (input) =>
-    eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
+    !runtimeDataDurableOnly && eventLedgerPath
+      ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath })
+      : null;
   const recordConsent = (input) =>
-    consentLedgerPath
+    !runtimeDataDurableOnly && consentLedgerPath
       ? appendConsentRecord(createConsentRecord(input, receivedAt || new Date().toISOString()), { filePath: consentLedgerPath })
       : null;
   const writeAudit = (input, recordedAt = reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()) =>
-    auditLogPath
+    !runtimeDataDurableOnly && auditLogPath
       ? appendAuditLog(createAuditLogEntry(input, recordedAt), {
           filePath: auditLogPath,
         })
@@ -1237,34 +1548,51 @@ export function createHttpApp({
   const productionSearch = String(search.environment ?? process.env.NODE_ENV ?? "").trim().toLowerCase() === "production";
   const currentSearchResult = async (searchRequest, options = {}) => {
     const { intent, query, filters, sort, page } = searchRequest;
-    const seedForRequest = currentPublicSeed();
-    const translationTasks = currentTranslationTasks();
-    const searchOptions = { localeCode: intent.locale, query, filters, sort, page, translationTasks, ...options };
-    const localResult = searchRuntimeListings(activeRegistry, seedForRequest, searchOptions);
+    const context = await currentPublicContext();
+    const seedForRequest = context.seed;
+    const translationTasks = context.translationTasks;
+    const registryForRequest = context.registry;
+    const searchOptions = { localeCode: intent.locale, query, filters, sort, page, pageSize: intent.page_size, translationTasks, ...options };
+    const localResult = searchRuntimeListings(registryForRequest, seedForRequest, searchOptions);
     const engineResult = await queryPublicSearch({
       ...search,
       q: query,
       intent,
-      localeCodes: engineLocaleCodes(seedForRequest, activeRegistry, localResult),
+      localeCodes: engineLocaleCodes(seedForRequest, registryForRequest, localResult),
     });
-    if (productionSearch && engineResult.engine === "seed_fallback") {
-      throw new Error("Production search requires a selected configured engine");
-    }
+    const databasePage = engineResult.engine === "postgres";
     const result =
-      engineResult.engine === "seed_fallback"
+      engineResult.engine === "seed_fallback" || (!databasePage && !searchEngineResultIsComplete(engineResult))
         ? localResult
-        : searchRuntimeListings(activeRegistry, seedForSearchHits(seedForRequest, engineResult.hits), searchOptions);
+        : searchRuntimeListings(
+            registryForRequest,
+            databasePage ? seedForPostgresSearchHits(seedForRequest, engineResult.hits) : seedForSearchHits(seedForRequest, engineResult.hits),
+            {
+            ...searchOptions,
+            query: "",
+            ...(databasePage
+              ? {
+                  databasePage: true,
+                  pageSize: engineResult.page_size,
+                  totalMatches: engineResult.total,
+                }
+              : {}),
+            },
+          );
     return withSearchBackend(result, engineResult);
   };
   const searchResultOrUnavailable = async (searchRequest, options) => {
     try {
       return { result: await currentSearchResult(searchRequest, options) };
     } catch (error) {
+      if (error?.status === 503) {
+        return { response: json(503, { kind: error.code || "payload_draft_unavailable", message: error.message }) };
+      }
       if (!productionSearch) throw error;
       return { response: json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" }) };
     }
   };
- return async function handle(request) {
+  return async function handle(request) {
    const url = new URL(request.url, "http://localhost");
    const mcpMetadataRoute =
      url.pathname === "/.well-known/oauth-protected-resource" ||
@@ -1288,6 +1616,41 @@ export function createHttpApp({
        body: await mcpResponse.text(),
      };
    }
+    const webhookProvider =
+      url.pathname === "/api/webhooks/whatsapp"
+        ? "whatsapp"
+        : url.pathname === "/api/webhooks/viber"
+          ? "viber"
+          : null;
+    if (webhookProvider) {
+      const headers = new Headers();
+      for (const [name, value] of Object.entries(request.headers || {})) {
+        if (value !== undefined) headers.set(name, Array.isArray(value) ? value.join(", ") : String(value));
+      }
+      const method = String(request.method || "GET").toUpperCase();
+      const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
+      const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : "http";
+      const webhookResponse = await renderProviderWebhookResponse(
+        new Request(new URL(request.url, `${protocol}://${requestHost(request.headers) || "localhost"}`), {
+          method,
+          headers,
+          ...(!["GET", "HEAD"].includes(method) ? { body: request.body || "" } : {}),
+        }),
+        {
+          provider: webhookProvider,
+          config: providerConnection,
+          payload: providerWebhookPayload,
+          receivedAt: providerWebhookReceivedAt,
+        },
+      );
+      const responseHeaders = Object.fromEntries(webhookResponse.headers.entries());
+      const responseBody = await webhookResponse.text();
+      return {
+        status: webhookResponse.status,
+        headers: { ...SECURITY_HEADERS, ...responseHeaders },
+        body: String(responseHeaders["content-type"] || "").includes("application/json") ? JSON.parse(responseBody) : responseBody,
+      };
+    }
     if (url.pathname === "/api/hermes/chat") return privateJson(404, { kind: "not_found" });
     if (request.method === "POST" && url.pathname === "/api/leads") {
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
@@ -1300,6 +1663,15 @@ export function createHttpApp({
     // because connector clients are legitimately cross-origin.
     const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
     if (crossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
+    const runtimeDataAdminRequest =
+      url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
+    if (!runtimeDataAdminRequest && productionRuntimeDataUnavailable({
+      durableOnly: runtimeDataDurableOnly,
+      method: request.method,
+      pathname: url.pathname,
+    })) {
+      return adminJson(503, runtimeDataUnavailablePayload(url.pathname));
+    }
    let auth = request.headers?.authorization || request.headers?.Authorization || "";
     const sessionToken = auth ? "" : adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
 
@@ -1382,12 +1754,67 @@ export function createHttpApp({
     if (adminRequest && request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
     const requiredCapability = adminRequest ? requiredAdminCapability(request.method, url.pathname) : null;
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
+    let durableProviderDelivery = false;
+    if (request.method === "POST" && url.pathname === "/api/admin/replies/delivery") {
+      try {
+        const delivery = parseBody(request);
+        durableProviderDelivery = Boolean(delivery?.provider && !delivery?.action);
+      } catch {
+        // The route handler returns the normal bad-request response.
+      }
+    }
+    if (productionRuntimeDataUnavailable({
+      durableProviderDelivery,
+      durableOnly: runtimeDataDurableOnly,
+      durableViewing: viewingDurableStore?.viewingDurableStoreEnabled === true,
+      method: request.method,
+      pathname: url.pathname,
+    })) {
+      return adminJson(503, runtimeDataUnavailablePayload(url.pathname));
+    }
+    if (
+      isFileBackedLeadMutationBlocked({
+        durableProviderDelivery,
+        durableStore: leadDurableStore,
+        durableViewing: viewingDurableStore?.viewingDurableStoreEnabled === true,
+        method: request.method,
+        pathname: url.pathname,
+      })
+    ) {
+      return adminJson(503, {
+        kind: "lead_store_read_only",
+        message: "This lead operation is disabled until it has durable persistence.",
+      });
+    }
+    if (
+      runtimeDataDurableOnly &&
+      ["/admin/cases", "/api/admin/cases", "/api/admin/cases/intents", "/api/admin/cases/conditions"].includes(url.pathname) &&
+      !realtyCasePayloadAuthorityActive()
+    ) {
+      return adminJson(503, realtyCasePayloadAuthorityFailure());
+    }
     if (
       principal?.source === "payload_session" &&
       ["cases:read", "cases:write"].includes(requiredCapability) &&
       !canAdminAccessWorkspace(principal, realtyCaseWorkspaceId)
     ) {
       return adminForbidden("workspace:access");
+    }
+    let requestLeadRows;
+    if (request.method === "GET" && LEAD_BACKED_ADMIN_READ_PATHS.has(url.pathname)) {
+      if (runtimeDataDurableOnly && !isLeadDurableStoreEnabled(leadDurableStore)) {
+        return adminJson(503, { kind: "lead_store_unavailable", message: "Lead storage is temporarily unavailable" });
+      }
+      if (leadDurableStore.leadDurableStoreEnabled !== true) {
+        requestLeadRows = undefined;
+      } else {
+      try {
+        requestLeadRows = await currentDurableLeads(principal, payloadSession);
+      } catch (error) {
+        if (error?.status === 403) return adminForbidden(error.capability || "workspace:access");
+        return adminJson(503, { kind: "lead_store_unavailable", message: "Lead storage is temporarily unavailable" });
+      }
+      }
     }
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
       const service = await configuredPayloadAdminAuth();
@@ -1425,6 +1852,128 @@ export function createHttpApp({
       return adminJson(405, { kind: "method_not_allowed" });
     }
     const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
+    const recordProviderConnectionFailure = (provider, phase, error) =>
+      recordAudit({
+        action: "provider_connection_failed",
+        objectType: "provider_connection",
+        objectId: String(provider || "unknown"),
+        metadata: {
+          phase: String(phase || "unknown"),
+          error_code: String(error?.code || error?.name || "provider_rejected").slice(0, 80),
+        },
+      });
+    const viewingStoreErrorResponse = (error) => {
+      if (error instanceof LeadStoreUnavailableError || error?.code === "lead_store_unavailable") {
+        return adminJson(503, { kind: "lead_store_unavailable", message: "Lead storage is temporarily unavailable" });
+      }
+      if (error instanceof ViewingStoreUnavailableError || error?.code === "viewing_store_unavailable") {
+        return adminJson(503, { kind: "viewing_store_unavailable", message: "Viewing storage is temporarily unavailable" });
+      }
+      if (error instanceof ViewingConflictError || error?.code === "viewing_conflict") {
+        return adminJson(error.status || 409, { kind: "viewing_conflict", message: error.message });
+      }
+      return null;
+    };
+    const syncViewingBookingCalendar = async (viewing) => {
+      try {
+        const result = await syncViewingToGoogleCalendar(viewing, {
+          config: providerConnection,
+          payload: providerConnectionPayload || null,
+          fetchImpl: providerFetch,
+        });
+        if (result.status === "synced") {
+          recordAudit({
+            action: "provider_calendar_synced",
+            actor: viewing.broker,
+            objectType: "provider_connection",
+            objectId: "google",
+            locale: viewing.original_language,
+            metadata: {
+              viewing_id: viewing.id,
+              lead_id: viewing.lead_id,
+              listing_reference: viewing.listing_reference,
+              calendar_event_id: result.calendar_event_id,
+            },
+          });
+        }
+        return result;
+      } catch (error) {
+        const message =
+          error instanceof ProviderConnectionUnavailableError
+            ? "Provider connection store is unavailable"
+            : String(error?.message || "Google Calendar sync failed");
+        recordAudit({
+          action: "provider_calendar_sync_failed",
+          actor: viewing.broker,
+          objectType: "provider_connection",
+          objectId: "google",
+          locale: viewing.original_language,
+          metadata: {
+            viewing_id: viewing.id,
+            lead_id: viewing.lead_id,
+            listing_reference: viewing.listing_reference,
+            reason: message,
+          },
+        });
+        return { status: "failed", provider: "google", message };
+      }
+    };
+    const appendViewingBooking = async (input) => {
+      const [leadSource, viewingSource] = await Promise.all([
+        currentDurableLeadSource(principal, payloadSession),
+        currentDurableViewingSource(),
+      ]);
+      const filterRows = leadScopedRows(leadSource);
+      const context = {
+        leads: applyLeadAssignments(leadSource.leads, filterRows(readLeadAssignments(leadAssignmentLedgerPath || undefined))),
+        outcomes: filterRows(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined)),
+        viewings: filterRows(viewingSource.viewings),
+        viewingFollowUps: filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined)),
+        deals: filterRows(readDeals(dealLedgerPath || undefined)),
+        sellerPipelines: filterRows(readSellerPipeline(sellerPipelinePath || undefined)),
+        sellerPipelineOutcomes: filterRows(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined)),
+      };
+      const boundInput = bindAuthenticatedOperator(input, principal, ["broker"]);
+      let viewing;
+      if (viewingSource.durable) {
+        const candidate = createViewing(context, boundInput, { rows: context.viewings, bookedAt });
+        viewing = candidate.idempotent
+          ? { ...candidate, durable: true }
+          : await persistViewingDurably(candidate, { payload: viewingDurablePayload || null });
+      } else {
+        viewing = appendViewing(context, boundInput, { filePath: viewingLedgerPath || undefined, bookedAt });
+      }
+      if (!viewing.idempotent) {
+        recordAudit({
+          action: "viewing_booked",
+          actor: viewing.broker,
+          objectType: "viewing",
+          objectId: viewing.id,
+          locale: viewing.original_language,
+          metadata: { lead_id: viewing.lead_id, listing_reference: viewing.listing_reference, status: viewing.status },
+        });
+      }
+      if (!viewingSource.durable) return viewing;
+      let calendarSync = await syncViewingBookingCalendar(viewing);
+      calendarSync = await recordViewingCalendarSync(viewing.id, calendarSync, {
+        payload: viewingDurablePayload || null,
+        recordedAt: bookedAt || new Date().toISOString(),
+      });
+      if (calendarSync.status === "synced") {
+        return { ...viewing, calendar_sync: calendarSync, message: "Viewing booked and added to Google Calendar." };
+      }
+      if (calendarSync.status === "failed") {
+        return { ...viewing, calendar_sync: calendarSync, message: "Viewing booked, but Google Calendar sync failed." };
+      }
+      if (["not_configured", "not_connected"].includes(calendarSync.status)) {
+        return {
+          ...viewing,
+          calendar_sync: calendarSync,
+          message: "Viewing booked. Connect Google Calendar to sync it automatically.",
+        };
+      }
+      return { ...viewing, calendar_sync: calendarSync };
+    };
     if (publicWriteLimiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
       const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
       if (!verdict.allowed) {
@@ -1454,14 +2003,21 @@ export function createHttpApp({
       return response(410, { kind: "legacy_gone", old_url: legacyDecision.old_url }, "application/json; charset=utf-8");
     }
     if (legacyDecision?.status === 200) {
-      const retained = renderRuntimePath(
-        activeRegistry,
-        currentPublicSeed(),
-        legacyDecision.target_path,
-        currentTranslationTasks(),
-        currentBrokerContacts(),
-        currentTourApprovals(),
-      );
+      let retained;
+      try {
+        const context = await currentPublicContext();
+        retained = renderRuntimePath(
+          context.registry,
+          context.seed,
+          legacyDecision.target_path,
+          context.translationTasks,
+          currentBrokerContacts(),
+          currentTourApprovals(),
+          preservationCatalog,
+        );
+      } catch (error) {
+        return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
       if ((retained.status || 200) >= 400) {
         return response(503, { kind: "legacy_retain_unavailable", old_url: legacyDecision.old_url }, "application/json; charset=utf-8", {
           "cache-control": "no-store",
@@ -1482,11 +2038,16 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
-      return response(
-        200,
-        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentPublicSeed(), currentTranslationTasks())),
-        "application/xml; charset=utf-8",
-      );
+      try {
+        const context = await currentPublicContext();
+        return response(
+          200,
+          renderSitemapXml(buildRuntimeLocalizedSitemap(context.registry, context.seed, context.translationTasks)),
+          "application/xml; charset=utf-8",
+        );
+      } catch (error) {
+        return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/") {
@@ -1618,7 +2179,11 @@ export function createHttpApp({
         const { intent, query, filters, sort, page } = searchRequest;
         const savedView = url.searchParams.get("saved") === "1";
         const view = url.searchParams.get("view") || "list";
-        const outcome = await searchResultOrUnavailable(searchRequest, { pageSize: savedView ? null : 12, savedView, view });
+        const outcome = await searchResultOrUnavailable(searchRequest, {
+          pageSize: savedView ? null : intent.page_size,
+          savedView,
+          view,
+        });
         if (outcome.response) {
           // The API keeps its JSON contract, but a person on the search PAGE
           // gets a branded page with working contact channels, not raw JSON.
@@ -1632,40 +2197,194 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
-      const payload = currentAdminLeadPayload(requestedLocale, principal);
+      const payload = currentAdminLeadPayload(requestedLocale, principal, requestLeadRows);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
 
     if (request.method === "GET" && url.pathname === "/admin/connect") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      if (principal?.source === "payload_session") {
-        return adminJson(403, {
-          kind: "mcp_credential_required",
-          message: "Use a named MCP operator credential; browser sessions are never exported as bearer tokens.",
-        });
+      let availability = providerConnectionAvailability(providerConnection);
+      let connections = [];
+      let storeError = !availability.store.ready;
+      try {
+        if (availability.store.ready) connections = await readProviderConnections({ payload: providerConnectionPayload });
+      } catch {
+        storeError = true;
       }
-      const token = String(auth).replace(/^Bearer\s+/i, "").trim();
-      const base = String(process.env.MS_REALTY_PUBLIC_ORIGIN || "").trim() || `https://${host}`;
+      if (storeError) {
+        availability = Object.fromEntries(
+          Object.entries(availability).map(([key, value]) => [key, { ...value, ready: false }]),
+        );
+      }
+      const token = principal?.source === "payload_session" ? "" : String(auth).replace(/^Bearer\s+/i, "").trim();
+      const base =
+        String(providerConnection.publicOrigin || "").trim() ||
+        new URL(request.url, `http://${requestHost(request.headers) || "localhost"}`).origin;
+      const connected = url.searchParams.get("connected");
+      const result = connected
+        ? `${connected === "google" ? "Google" : connected === "whatsapp" ? "WhatsApp" : "Viber"} подтверждён и подключён.`
+        : url.searchParams.get("error")
+          ? "Провайдер не подтвердил подключение. Проверь настройки и повтори."
+          : storeError
+            ? "Хранилище подключений сейчас недоступно; новые credentials не будут приняты."
+            : "";
       return adminResponse(
         200,
-        renderOperatorConnectPage({ baseUrl: base, token, operatorId: principal?.id || "operator" }),
+        renderOperatorConnectPage({
+          baseUrl: base,
+          token,
+          operatorId: principal?.id || "operator",
+          connections,
+          availability,
+          result,
+        }),
         "text/html; charset=utf-8",
+        { "x-robots-tag": "noindex, nofollow" },
       );
+    }
+
+    if (url.pathname === "/api/admin/connections") {
+      const availability = providerConnectionAvailability(providerConnection);
+      const storeOptions = {
+        credentialSecret: providerConnection.credentialSecret,
+        payload: providerConnectionPayload,
+      };
+      try {
+        if (request.method === "GET" && !url.searchParams.get("action")) {
+          return adminJson(200, {
+            kind: "provider_connections",
+            availability,
+            connections: await readProviderConnections({ payload: providerConnectionPayload }),
+          });
+        }
+        if (!payloadSession || principal?.source !== "payload_session" || !principal.roles?.includes("admin")) {
+          return adminForbidden("payload_admin_session");
+        }
+        if (request.method === "GET" && url.searchParams.get("provider") === "google") {
+          const action = url.searchParams.get("action");
+          if (action === "start") {
+            return adminResponse(303, "", "text/plain; charset=utf-8", {
+              location: googleAuthorizationUrl({ config: providerConnection, operatorId: principal.id }),
+            });
+          }
+          if (action === "callback") {
+            if (url.searchParams.get("error")) {
+              recordProviderConnectionFailure("google", "oauth_callback", new Error("provider_rejected"));
+              return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/connect?error=google" });
+            }
+            try {
+              const prior = await readProviderCredentials("google", storeOptions);
+              const connection = await completeGoogleOAuth(
+                {
+                  code: url.searchParams.get("code"),
+                  state: url.searchParams.get("state"),
+                  operatorId: principal.id,
+                  existingRefreshToken: prior?.refresh_token || "",
+                },
+                { config: providerConnection, fetchImpl: providerFetch },
+              );
+              const saved = await saveProviderConnection(connection, { ...storeOptions, connectedBy: principal.id });
+              recordAudit({
+                action: "provider_connected",
+                actor: principal.id,
+                objectType: "provider_connection",
+                objectId: saved.provider,
+                metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
+              });
+              return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/connect?connected=google" });
+            } catch (error) {
+              recordProviderConnectionFailure("google", "oauth_callback", error);
+              return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/connect?error=google" });
+            }
+          }
+        }
+        if (request.method === "POST") {
+          const formEncoded = String(request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes(
+            "application/x-www-form-urlencoded",
+          );
+          const input = parseBody(request);
+          const provider = String(input.provider || "").trim().toLowerCase();
+          try {
+            let connection;
+            if (provider === "whatsapp") {
+              const verified = await completeWhatsAppEmbeddedSignup(
+                { code: input.code, wabaId: input.waba_id, phoneNumberId: input.phone_number_id },
+                { config: providerConnection, fetchImpl: providerFetch },
+              );
+              await saveProviderConnection(verified, { ...storeOptions, connectedBy: principal.id });
+              connection = await registerWhatsAppWebhook(verified, {
+                config: providerConnection,
+                fetchImpl: providerFetch,
+              });
+            } else if (provider === "viber") {
+              const verified = await completeViberConnection(
+                { token: input.token },
+                { config: providerConnection, fetchImpl: providerFetch },
+              );
+              await saveProviderConnection(verified, { ...storeOptions, connectedBy: principal.id });
+              connection = await registerViberWebhook(verified, {
+                config: providerConnection,
+                fetchImpl: providerFetch,
+              });
+            } else {
+              throw new Error("Unsupported provider connection");
+            }
+            const saved = await saveProviderConnection(connection, { ...storeOptions, connectedBy: principal.id });
+            recordAudit({
+              action: "provider_connected",
+              actor: principal.id,
+              objectType: "provider_connection",
+              objectId: saved.provider,
+              metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
+            });
+            if (formEncoded) {
+              return adminResponse(303, "", "text/plain; charset=utf-8", {
+                location: `/admin/connect?connected=${encodeURIComponent(provider)}`,
+              });
+            }
+            return adminJson(201, { kind: "provider_connection", connection: saved });
+          } catch (error) {
+            recordProviderConnectionFailure(
+              provider,
+              provider === "viber" ? "account_or_webhook" : "embedded_signup",
+              error,
+            );
+            if (formEncoded) {
+              return adminResponse(303, "", "text/plain; charset=utf-8", {
+                location: `/admin/connect?error=${encodeURIComponent(provider || "provider")}`,
+              });
+            }
+            return adminJson(400, {
+              kind: "provider_connection_rejected",
+              message: "The provider did not confirm the connection",
+            });
+          }
+        }
+        return adminJson(405, { kind: "method_not_allowed" });
+      } catch (error) {
+        if (error instanceof ProviderConnectionUnavailableError || error?.code === "provider_connection_unavailable") {
+          return adminJson(503, {
+            kind: "provider_connection_unavailable",
+            message: "Provider connection storage is unavailable",
+          });
+        }
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal)),
+        adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows)),
         "text/html; charset=utf-8",
       );
     }
 
     if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentContactPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentContactPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/contacts" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -1674,7 +2393,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/documents", "/admin/documents"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentDocumentChecklistPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentDocumentChecklistPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/documents" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -1735,7 +2454,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/today", "/admin/today"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentTodayPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentTodayPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/today" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -1744,7 +2463,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/pipeline" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -1753,7 +2472,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/requests", "/admin/requests"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
       if (url.pathname === "/admin/requests" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -1762,11 +2481,20 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/viewings", "/admin/viewings"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentViewingsPayload(url.searchParams.get("locale") || "en", principal);
-      if (url.pathname === "/admin/viewings" || wantsHtml(request, url)) {
-        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      try {
+        const payload = await currentViewingsPayload(
+          url.searchParams.get("locale") || "en",
+          principal,
+          requestLeadRows,
+          payloadSession,
+        );
+        if (url.pathname === "/admin/viewings" || wantsHtml(request, url)) {
+          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        }
+        return adminJson(200, payload);
+      } catch (error) {
+        return viewingStoreErrorResponse(error) || adminJson(400, { kind: "bad_request", message: error.message });
       }
-      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && ["/api/admin/activity", "/admin/activity"].includes(url.pathname)) {
@@ -1780,46 +2508,78 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/listings", "/admin/listings"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = await currentListingManagerPayload(url, principal);
-      if (url.pathname === "/admin/listings" || wantsHtml(request, url)) {
-        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      try {
+        const payload = await currentListingManagerPayload(url, principal);
+        if (url.pathname === "/admin/listings" || wantsHtml(request, url)) {
+          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        }
+        return adminJson(200, payload);
+      } catch (error) {
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
-      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && ["/api/admin/translations", "/admin/translations"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = await currentTranslationQueuePayload(url, principal);
-      if (url.pathname === "/admin/translations" || wantsHtml(request, url)) {
-        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      try {
+        const payload = await currentTranslationQueuePayload(url, principal);
+        if (url.pathname === "/admin/translations" || wantsHtml(request, url)) {
+          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        }
+        return adminJson(200, payload);
+      } catch (error) {
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
-      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && ["/api/admin/reports", "/admin/reports"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentReportsPayload(url.searchParams.get("locale") || "en", principal);
-      if (url.pathname === "/admin/reports" || wantsHtml(request, url)) {
-        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      try {
+        const payload = await currentReportsPayload(
+          url.searchParams.get("locale") || "en",
+          principal,
+          requestLeadRows,
+          payloadSession,
+        );
+        if (url.pathname === "/admin/reports" || wantsHtml(request, url)) {
+          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        }
+        return adminJson(200, payload);
+      } catch (error) {
+        return viewingStoreErrorResponse(error) || adminJson(400, { kind: "bad_request", message: error.message });
       }
-      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/reports/export") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return adminResponse(200, renderOperationsReportCsv(currentOperationsReport()), "text/csv; charset=utf-8", {
-        "content-disposition": 'attachment; filename="ms-realty-source-quality.csv"',
-      });
+      try {
+        return adminResponse(
+          200,
+          renderOperationsReportCsv(await currentOperationsReport(requestLeadRows, principal, payloadSession)),
+          "text/csv; charset=utf-8",
+          {
+          "content-disposition": 'attachment; filename="ms-realty-source-quality.csv"',
+          },
+        );
+      } catch (error) {
+        return viewingStoreErrorResponse(error) || adminJson(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return adminResponse(
-        200,
-        renderViewingCalendar(readViewings(viewingLedgerPath || undefined), { now: bookedAt || receivedAt }),
-        "text/calendar; charset=utf-8",
-        { "content-disposition": "attachment; filename=\"ms-realty-viewings.ics\"" },
-      );
+      try {
+        const leadSource = await currentDurableLeadSource(principal, payloadSession, requestLeadRows);
+        const source = await currentDurableViewingSource();
+        return adminResponse(
+          200,
+          renderViewingCalendar(leadScopedRows(leadSource)(source.viewings), { now: bookedAt || receivedAt }),
+          "text/calendar; charset=utf-8",
+          { "content-disposition": "attachment; filename=\"ms-realty-viewings.ics\"" },
+        );
+      } catch (error) {
+        return viewingStoreErrorResponse(error) || adminJson(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
@@ -1828,6 +2588,7 @@ export function createHttpApp({
       return adminJson(200, {
         workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
         locales: activeRegistry.locales,
+        ...(runtimeDataDurableOnly ? { runtime_data_mode: "durable_only" } : {}),
       });
     }
 
@@ -1991,7 +2752,9 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminJson(200, {
         kind: "admin_production_recovery",
-        recovery: productionRecoveryState(productionRecoveryReportPath || undefined),
+        recovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
+          publicKey: productionRecoverySigningPublicKey,
+        }),
       });
     }
 
@@ -2077,8 +2840,12 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const report = reportJsonInput(parseJsonBody(request));
-        const outPath = writeProductionRecoveryReport(report, productionRecoveryReportPath || undefined);
-        const recovery = productionRecoveryState(productionRecoveryReportPath || undefined);
+        const outPath = writeProductionRecoveryReport(report, productionRecoveryReportPath || undefined, {
+          publicKey: productionRecoverySigningPublicKey,
+        });
+        const recovery = productionRecoveryState(productionRecoveryReportPath || undefined, {
+          publicKey: productionRecoverySigningPublicKey,
+        });
         recordAudit({
           action: "production_recovery_report_imported",
           actor: "operations",
@@ -2101,7 +2868,9 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const report = currentLaunchReadiness();
-      const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined);
+      const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined, {
+        productionRecoveryPublicKey: productionRecoverySigningPublicKey,
+      });
       recordAudit({
         action: "launch_readiness_exported",
         actor: "operations",
@@ -2524,7 +3293,7 @@ export function createHttpApp({
         }
         return adminJson(persisted.idempotent ? 200 : 201, persisted);
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
@@ -2714,10 +3483,126 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/replies/delivery") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
+        const input = parseBody(request);
+        if (input.provider && !input.action) {
+          if (!principal?.id) throw new Error("Provider delivery requires a named authenticated operator");
+          const authorizedInput = bindAuthenticatedOperator(input, principal, ["actor", "approvedBy"]);
+          const replies = readReplyOutbox(replyOutboxPath || undefined);
+          const replyId = String(authorizedInput.replyId || authorizedInput.reply_id || "").trim();
+          const reply = replyId ? replies.find((row) => row.id === replyId) : null;
+          if (replyId && !reply) throw new Error("Approved reply was not found");
+          if (reply && reply.broker_approved !== true) throw new Error("Broker approval is required before provider delivery");
+          const leadId = String(reply?.lead_id || authorizedInput.leadId || authorizedInput.lead_id || "").trim();
+          if (!leadId) throw new Error("Lead id is required for provider delivery");
+          const lead = currentLeads().find((row) => row.lead_id === leadId);
+          if (!lead) throw new Error("Lead was not found for provider delivery");
+          const provider = String(authorizedInput.provider || "").trim().toLowerCase();
+          const channel = providerDeliveryChannel(provider);
+          const message = String(reply?.reviewed_reply || authorizedInput.reviewedReply || authorizedInput.message || "").trim();
+          if (!message) throw new Error("Provider delivery message is required");
+          const idempotencyKey = String(
+            authorizedInput.idempotencyKey || authorizedInput.idempotency_key || (reply ? `reply:${reply.id}:${provider}` : ""),
+          ).trim();
+          if (!idempotencyKey) throw new Error("idempotencyKey is required for direct provider delivery");
+          const approvedAt = replyDeliveredAt || new Date().toISOString();
+          const providerDelivery = await deliverApprovedProviderMessage(
+            {
+              provider,
+              leadId,
+              idempotencyKey,
+              recipient: providerDeliveryRecipient(lead, provider),
+              message,
+              ...(provider === "google" ? { subject: googleReplySubject(lead) } : {}),
+              approved: true,
+              approvedBy: authorizedInput.approvedBy,
+              approvedAt,
+            },
+            {
+              config: providerConnection,
+              payload: providerConnectionPayload,
+              fetchImpl: providerFetch,
+            },
+          );
+          if (providerDelivery.status !== "sent") throw new Error("Provider did not confirm message delivery");
+          const sentAt = providerDelivery.completed_at || approvedAt;
+          const result = reply
+            ? appendReplyDeliveryOutcome(
+                replies,
+                {
+                  replyId: reply.id,
+                  actor: authorizedInput.actor,
+                  action: "sent",
+                  channel,
+                  sentAt,
+                },
+                { filePath: replyDeliveryOutcomeLedgerPath || undefined, recordedAt: sentAt },
+              )
+            : {
+                idempotent: providerDelivery.idempotent === true,
+                delivery: {
+                  lead_id: leadId,
+                  status: "sent",
+                  delivery_channel: channel,
+                  sent_at: sentAt,
+                },
+              };
+          const existingDeliveryAudit =
+            reply && auditLogPath
+              ? readAuditLog(auditLogPath).some(
+                  (row) => row.action === "reply_delivery_recorded" && row.object_id === result.outcome.id,
+                )
+              : false;
+          if (reply && !existingDeliveryAudit) {
+            recordAudit(
+              {
+                action: "reply_delivery_recorded",
+                actor: result.outcome.actor,
+                objectType: "reply_delivery_outcome",
+                objectId: result.outcome.id,
+                locale: result.delivery.reply_language,
+                metadata: {
+                  reply_id: result.delivery.reply_id,
+                  lead_id: result.delivery.lead_id,
+                  action: result.outcome.action,
+                  channel: result.outcome.channel,
+                  status: result.delivery.status,
+                  sent_at: result.delivery.sent_at,
+                },
+              },
+              sentAt,
+            );
+          }
+          const existingProviderAudit = auditLogPath
+            ? readAuditLog(auditLogPath).some(
+                (row) =>
+                  row.action === "provider_reply_sent" &&
+                  row.metadata?.receipt_id === providerDelivery.idempotency_key,
+              )
+            : false;
+          if (!existingProviderAudit) {
+            recordAudit(
+              {
+                action: "provider_reply_sent",
+                actor: authorizedInput.actor,
+                objectType: "provider_connection",
+                objectId: provider,
+                locale: reply?.reply_language || lead.original_language || lead.admin_locale || "en",
+                metadata: {
+                  ...(reply ? { reply_id: reply.id } : {}),
+                  lead_id: leadId,
+                  receipt_id: providerDelivery.idempotency_key,
+                  external_message_id: providerDelivery.external_message_id,
+                },
+              },
+              sentAt,
+            );
+          }
+          return adminJson(result.idempotent ? 200 : 201, { ...result, provider_delivery: providerDelivery });
+        }
         const recordedAt = replyDeliveredAt || reviewedAt || receivedAt || new Date().toISOString();
         const result = appendReplyDeliveryOutcome(
           readReplyOutbox(replyOutboxPath || undefined),
-          bindAuthenticatedOperator(parseBody(request), principal),
+          bindAuthenticatedOperator(input, principal),
           { filePath: replyDeliveryOutcomeLedgerPath || undefined, recordedAt },
         );
         const existingAudit = auditLogPath
@@ -2747,6 +3632,19 @@ export function createHttpApp({
         }
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
+        if (error instanceof ProviderDeliveryError) {
+          const status =
+            error.code === "provider_delivery_unavailable"
+              ? 503
+              : ["provider_delivery_uncertain", "provider_delivery_conflict"].includes(error.code)
+                ? 409
+                : 400;
+          return adminJson(status, {
+            kind: error.code,
+            message: error.message,
+            ...(error.receipt ? { receipt: error.receipt } : {}),
+          });
+        }
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
@@ -3267,29 +4165,23 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["broker"]);
-        const viewing = appendViewing(currentLeadJourneyContext(), input, {
-          filePath: viewingLedgerPath || undefined,
-          bookedAt,
-        });
-        if (!viewing.idempotent) {
-          recordAudit({
-            action: "viewing_booked",
-            actor: viewing.broker,
-            objectType: "viewing",
-            objectId: viewing.id,
-            locale: viewing.original_language,
-            metadata: { lead_id: viewing.lead_id, listing_reference: viewing.listing_reference, status: viewing.status },
-          });
-        }
+        const viewing = await appendViewingBooking(parseJsonBody(request));
         return adminJson(viewing.idempotent ? 200 : 201, viewing);
       } catch (error) {
+        const failure = viewingStoreErrorResponse(error);
+        if (failure) return failure;
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (viewingDurableStore?.viewingDurableStoreEnabled) {
+        return adminJson(503, {
+          kind: "viewing_follow_up_read_only",
+          message: "Durable viewing follow-up storage is not available",
+        });
+      }
       try {
         const recordedAt = viewingFollowUpAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
         const result = appendViewingFollowUp(readViewings(viewingLedgerPath || undefined), bindAuthenticatedOperator(parseBody(request), principal), {
@@ -3461,20 +4353,31 @@ export function createHttpApp({
         });
         return adminJson(201, tour);
       } catch (error) {
-        return adminJson(400, { kind: "bad_request", message: error.message });
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
         const input = parseBody(request);
-        const lead = submitRuntimeLead(activeRegistry, currentPublicSeed(), input);
+        const context = await currentPublicContext();
+        const lead = submitRuntimeLead(context.registry, context.seed, input);
         const durableRequested = leadDurableStore.leadDurableStoreEnabled === true;
+        if (runtimeDataDurableOnly && !durableRequested) {
+          throw new LeadStoreUnavailableError("Production lead intake requires the durable store");
+        }
         if (durableRequested && !isLeadDurableStoreEnabled(leadDurableStore)) {
           throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
         }
         const durable = durableRequested
-          ? await persistLeadIntake({ lead, contactSecret: leadDurableStore.contactSecret, receivedAt })
+          ? await persistLeadIntake({
+              lead,
+              contactSecret: leadDurableStore.contactSecret,
+              marketingOptIn: input.marketingOptIn === true,
+              receivedAt,
+              sellerPipelineCreatedAt,
+              workspaceId: leadDurableStore.workspaceId,
+            })
           : null;
         const contactVault = durable
           ? durable.contactVault
@@ -3484,33 +4387,38 @@ export function createHttpApp({
         const ledger =
           durable?.lead ||
           (leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt, contactSecret: leadContactKey }) : null);
-        const consent = recordConsent({
-          consentType: "inquiry_follow_up",
-          source: lead.lead?.source,
-          subjectId: lead.lead?.id,
-          locale: lead.original_language,
-          contact: lead.lead?.contact,
-          marketingOptIn: input.marketingOptIn === true,
-        });
-        const sellerPipeline =
-          sellerPipelinePath && lead.lead?.leadType === "seller"
+        const consent = durable
+          ? durable.consent
+          : recordConsent({
+              consentType: "inquiry_follow_up",
+              source: lead.lead?.source,
+              subjectId: lead.lead?.id,
+              locale: lead.original_language,
+              contact: lead.lead?.contact,
+              marketingOptIn: input.marketingOptIn === true,
+            });
+        const sellerPipeline = durable
+          ? durable.sellerPipeline
+          : sellerPipelinePath && lead.lead?.leadType === "seller"
             ? appendSellerPipeline(createSellerPipelineItem(lead, { createdAt: sellerPipelineCreatedAt }), {
                 filePath: sellerPipelinePath,
               })
             : null;
-        recordEvent({
-          type: "lead_submitted",
-          path: "/api/leads",
-          locale: lead.original_language,
-          listingReference: lead.lead?.listingReference,
-          action: lead.lead?.source,
-        });
+        if (!durable) {
+          recordEvent({
+            type: "lead_submitted",
+            path: "/api/leads",
+            locale: lead.original_language,
+            listingReference: lead.lead?.listingReference,
+            action: lead.lead?.source,
+          });
+        }
         return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline });
       } catch (error) {
         if (error instanceof LeadStoreUnavailableError) {
           return privateJson(503, { kind: error.code, message: "Lead storage is temporarily unavailable" });
         }
-        return privateJson(400, { kind: "bad_request", message: error.message });
+        return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
@@ -3575,20 +4483,21 @@ export function createHttpApp({
         const filters = Object.fromEntries(
           Object.entries(searchIntentToQueryFilters(intent)).filter(([, value]) => value !== "" && value !== null && value !== undefined),
         );
-        const search = searchRuntimeListings(activeRegistry, currentPublicSeed(), {
+        const context = await currentPublicContext();
+        const search = searchRuntimeListings(context.registry, context.seed, {
           localeCode: intent.locale,
           query: intent.text_query,
           filters,
           sort: intent.sort,
           page: intent.page,
           pageSize: null,
-          translationTasks: currentTranslationTasks(),
+          translationTasks: context.translationTasks,
         });
         const priceSnapshot = Object.fromEntries(
           search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
         );
         const savedSearch = createSavedSearch(
-          activeRegistry,
+          context.registry,
           { ...input, search_intent: intent, priceSnapshot },
           { matchCount: search.search.total_matches, savedAt },
         );
@@ -3618,20 +4527,27 @@ export function createHttpApp({
         });
         return privateJson(201, { ...safeSearch, ledger, contactVault, consent });
       } catch (error) {
-        return privateJson(400, { kind: "bad_request", message: error.message });
+        return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
     if (request.method !== "GET") return json(405, { kind: "method_not_allowed" });
 
-    const rendered = renderRuntimePath(
-      activeRegistry,
-      currentPublicSeed(),
-      url.pathname,
-      currentTranslationTasks(),
-      currentBrokerContacts(),
-      currentTourApprovals(),
-    );
+    let rendered;
+    try {
+      const context = await currentPublicContext();
+      rendered = renderRuntimePath(
+        context.registry,
+        context.seed,
+        url.pathname,
+        context.translationTasks,
+        currentBrokerContacts(),
+        currentTourApprovals(),
+        preservationCatalog,
+      );
+    } catch (error) {
+      return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+    }
     if (rendered.status === 200) {
       recordEvent({
         type: "page_view",
@@ -3653,8 +4569,13 @@ export function assertHttpSmoke(smoke) {
   const contactLeadUiValid = contactLeadUiDisabled
     ? smoke.contact?.body?.body?.callback === null && Boolean(smoke.contact?.body?.body?.form_unavailable)
     : smoke.contact?.body?.body?.callback?.payload?.source === "website_contact_callback";
+  // Same durable-store readiness rule for the seller valuation intake.
+  const sellerLeadUiDisabled = smoke.sellerPage?.body?.chrome?.lead_writes_disabled === true;
+  const sellerLeadUiValid = sellerLeadUiDisabled
+    ? smoke.sellerPage?.body?.body?.valuation === null &&
+      Boolean(smoke.sellerPage?.body?.body?.form_unavailable)
+    : smoke.sellerPage?.body?.body?.valuation?.payload?.source === "website_seller_valuation";
   const expectedBlockers = [
-    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -3935,15 +4856,17 @@ export function assertHttpSmoke(smoke) {
   if (smoke.locationHtml?.status !== 200 || !smoke.locationHtml.body.includes("data-kind=\"location\"")) {
     throw new Error("HTTP smoke must serve rendered location HTML");
   }
-  if (
-    smoke.sellerPage?.status !== 200 ||
-    smoke.sellerPage.body.body.valuation.payload.source !== "website_seller_valuation" ||
-    smoke.sellerPage.body.dir !== "rtl"
-  ) {
-    throw new Error("HTTP smoke must serve seller valuation page");
+  if (smoke.sellerPage?.status !== 200 || !sellerLeadUiValid || smoke.sellerPage.body.dir !== "rtl") {
+    throw new Error("HTTP smoke seller valuation page must match durable lead-store readiness");
   }
-  if (smoke.sellerHtml?.status !== 200 || !smoke.sellerHtml.body.includes("data-lead-type=\"seller\"")) {
-    throw new Error("HTTP smoke must serve rendered seller valuation HTML");
+  if (
+    smoke.sellerHtml?.status !== 200 ||
+    (sellerLeadUiDisabled
+      ? !smoke.sellerHtml.body.includes("data-form-unavailable=\"true\"") ||
+        smoke.sellerHtml.body.includes("data-lead-type=\"seller\"")
+      : !smoke.sellerHtml.body.includes("data-lead-type=\"seller\""))
+  ) {
+    throw new Error("HTTP smoke rendered seller page must match durable lead-store readiness");
   }
   if (
     smoke.contactHtml?.status !== 200 ||

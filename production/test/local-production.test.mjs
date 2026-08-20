@@ -29,7 +29,9 @@ test("local Docker compose persists preview CRM and CMS state in a named local-o
     "MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: /runtime-evidence/seo-evidence-report.json",
   ];
   for (const line of requiredPaths) assert.ok(compose.includes(line), `missing ${line}`);
-  assert.match(compose, /MS_REALTY_SEARCH_ENGINE: \$\{MS_REALTY_SEARCH_ENGINE:-typesense\}/);
+  assert.match(compose, /MS_REALTY_SEARCH_ENGINE: postgres/);
+  assert.match(compose, /image: ms-realty-local-app:\$\{MS_REALTY_BUILD_MARKER:-latest\}/);
+  assert.doesNotMatch(compose.split("services:")[0], /TYPESENSE_URL|TYPESENSE_API_KEY|MEILI_URL|MEILI_API_KEY/);
   assert.match(compose, /- local-dev-app-data:\/runtime-data/);
   assert.match(compose, /seed_runtime_file\(\)/);
   const committedBaselines = [
@@ -70,7 +72,8 @@ test("production review reuses the tested stack with durable volumes and an auth
   assert.match(compose, /- "443:443"/);
   assert.match(caddy, /basic_auth \{/);
   assert.match(caddy, /X-Robots-Tag "noindex, nofollow, noarchive"/);
-  assert.match(caddy, /redir @review_root \/admin\/migration\/review\?locale=bg 302/);
+  assert.match(caddy, /\{\$MS_REALTY_REVIEW_HOST\}[\s\S]*import app_proxy/);
+  assert.doesNotMatch(caddy, /redir @review_root/);
   assert.match(caddy, /header_up Authorization "Bearer \{\$MS_REALTY_ADMIN_TOKEN\}"/);
   assert.match(script, /MS_REALTY_COMPOSE_OVERRIDE/);
   assert.match(script, /MS_REALTY_ENV_FILE/);

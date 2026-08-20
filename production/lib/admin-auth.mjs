@@ -87,6 +87,11 @@ function timingSafeMatch(actual, expected) {
   return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 }
 
+function workspaceIds(value) {
+  const values = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
+  return [...new Set(values.map((workspaceId) => String(workspaceId || "").trim()).filter(Boolean))].sort();
+}
+
 export function operatorId(value, label) {
   const id = String(value || "").trim();
   if (!OPERATOR_ID.test(id)) throw new Error(`${label} must be a stable operator ID`);
@@ -198,6 +203,7 @@ export function adminCredentials(env = process.env) {
 
   const tokens = new Set();
   const rolesByOperator = new Map();
+  const workspacesByOperator = new Map();
   return parsed.map((row, index) => {
     if (!row || typeof row !== "object" || Array.isArray(row)) {
       throw new Error(`${CREDENTIALS_ENV} entry ${index + 1} must be an object`);
@@ -210,12 +216,18 @@ export function adminCredentials(env = process.env) {
     if (tokens.has(token)) throw new Error(`${CREDENTIALS_ENV} entries must use unique bearer tokens`);
     tokens.add(token);
     const roles = normalizedRoles(row.roles, `${CREDENTIALS_ENV} entry ${index + 1} roles`);
+    const assignedWorkspaces = workspaceIds(row.workspace_ids);
     const priorRoles = rolesByOperator.get(id);
     if (priorRoles && priorRoles.join(",") !== roles.join(",")) {
       throw new Error(`${CREDENTIALS_ENV} entries for ${id} must use the same roles`);
     }
+    const priorWorkspaces = workspacesByOperator.get(id);
+    if (priorWorkspaces && priorWorkspaces.join(",") !== assignedWorkspaces.join(",")) {
+      throw new Error(`${CREDENTIALS_ENV} entries for ${id} must use the same workspace_ids`);
+    }
     rolesByOperator.set(id, roles);
-    return { id, token, roles };
+    workspacesByOperator.set(id, assignedWorkspaces);
+    return { id, token, roles, workspace_ids: assignedWorkspaces };
   });
 }
 
@@ -233,7 +245,13 @@ export function resolveAdminPrincipal(auth, env = process.env) {
   }
   for (const credential of credentials) {
     if (timingSafeMatch(auth, `Bearer ${credential.token}`)) {
-      return { id: credential.id, source: "credential_registry", can_mutate: true, roles: credential.roles };
+      return {
+        id: credential.id,
+        source: "credential_registry",
+        can_mutate: true,
+        roles: credential.roles,
+        workspace_ids: credential.workspace_ids,
+      };
     }
   }
   // Once individual credentials are configured, do not leave the shared token as a second path.

@@ -74,7 +74,12 @@ export function buildMobileElderlyQaReport({
     home: renderReactPage(renderHomePage({ registry, listings, localeCode: "he" })),
     listing: renderReactPage(renderListingPage({ registry, listing, localeCode: "he" })),
     search: renderReactPage(renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" })),
-    seller: renderReactPage(renderSellerPage({ registry, localeCode: "he" })),
+    // The seller intake is rendered with lead writes explicitly enabled so this
+    // gate always exercises the real phone-first form. Binding it to the
+    // ambient durable-store state would make the intake checks vacuous exactly
+    // when the store is unavailable. The unavailable variant is checked
+    // separately via `sellerUnavailableHtml` below.
+    seller: renderReactPage(renderSellerPage({ registry, localeCode: "he", leadWritesDisabled: false })),
     contact: renderReactPage(renderContactPage({ registry, localeCode: "he" })),
     fallback: renderReactPage(renderLanguageFallback({ registry, requestedLocale: "fr" })),
   };
@@ -96,6 +101,11 @@ export function buildMobileElderlyQaReport({
   );
   const approvedTourHtml = renderReactPage(renderListingPage({ registry, listing: tourListing, localeCode: "he" }));
   const galleryListingHtml = renderReactPage(renderListingPage({ registry, listing: galleryQaListing, localeCode: "ru" }));
+  // Rendered separately from `pages` because it is the same page kind as
+  // `seller`; it only differs in durable-store readiness.
+  const sellerUnavailableHtml = renderReactPage(
+    renderSellerPage({ registry, localeCode: "he", leadWritesDisabled: true }),
+  );
   const gallerySlideCount = (galleryListingHtml.match(/data-mobile-gallery-slide=/g) || []).length;
   const publicAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-public.css"), "utf8");
   const adminAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-admin.css"), "utf8");
@@ -302,6 +312,16 @@ export function buildMobileElderlyQaReport({
         includes(pages.seller, "name=\"property.area\"") &&
         includes(pages.seller, "name=\"property.bedrooms\""),
     ),
+    // When the durable lead store is unavailable the seller page must still
+    // leave an elderly, phone-first visitor a working way to reach the agency
+    // — never a form that silently fails on submit.
+    check(
+      "seller_unavailable_keeps_phone_path",
+      includes(sellerUnavailableHtml, "data-form-unavailable=\"true\"") &&
+        !includes(sellerUnavailableHtml, "data-seller-intake=\"true\"") &&
+        !includes(sellerUnavailableHtml, "action=\"/api/leads\"") &&
+        includes(sellerUnavailableHtml, "href=\"tel:+359879696870\""),
+    ),
     check(
       "source_backed_search_filters",
       includes(pages.search, "name=\"property_family\"") &&
@@ -356,6 +376,7 @@ export function assertMobileElderlyQaReport(report) {
     "approved_360_tour_accessibility",
     "seller_valuation_broker_review",
     "seller_property_intake",
+    "seller_unavailable_keeps_phone_path",
     "source_backed_search_filters",
     "react_public_bodies",
     "admin_and_market_languages",

@@ -448,7 +448,7 @@
       if (!(select instanceof HTMLSelectElement) || !select.hasAttribute("data-communication-template-select")) return;
       var option = select.options[select.selectedIndex];
       if (!option || !option.value) return;
-      var form = select.closest("form[data-reply-approval-required]");
+      var form = select.closest("form[data-reply-approval-required], form[data-reply-delivery-form]");
       if (!form || !form.elements.reviewedReply) return;
       var body = option.getAttribute("data-template-body") || "";
       var locale = option.getAttribute("data-template-locale") || "";

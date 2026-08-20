@@ -8,11 +8,14 @@ node_modules/
 dist/
 coverage/
 .local-backups/
+.recovery-work/
 migration/external/seo/*.csv
 migration/external/seo/*.provenance.json
 !migration/external/seo/*.csv.example
 production/data/search-engine-sync-report.json
 production/data/search-engine-query-report.json
+production/data/postgres-search-sync-report.json
+production/data/postgres-search-query-report.json
 production/data/hermes-draft-worker-report.json
 production/data/hermes-agent-runtime-report.json
 production/data/hermes-backend.json

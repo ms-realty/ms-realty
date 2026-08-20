@@ -22,6 +22,22 @@ import {
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
+import {
+  ProviderConnectionUnavailableError,
+  completeGoogleOAuth,
+  completeViberConnection,
+  completeWhatsAppEmbeddedSignup,
+  googleAuthorizationUrl,
+  providerConnectionAvailability,
+  providerConnectionConfigFromEnv,
+  readProviderConnections,
+  readProviderCredentials,
+  registerWhatsAppWebhook,
+  registerViberWebhook,
+  saveProviderConnection,
+  syncViewingToGoogleCalendar,
+} from "./provider-connections.mjs";
+import { ProviderDeliveryError, deliverApprovedProviderMessage } from "./provider-delivery.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
@@ -63,6 +79,12 @@ import { loadMigrationRecords } from "./content.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, readEventLedger } from "./events.mjs";
+import {
+  EventStoreUnavailableError,
+  eventDurableStoreConfigFromEnv,
+  isEventDurableStoreEnabled,
+  readEventsDurably,
+} from "./event-durable-store.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
@@ -90,15 +112,13 @@ import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, withLeadContacts } 
 import {
   LeadStoreUnavailableError,
   isLeadDurableStoreEnabled,
+  leadReadScopeForPrincipal,
   leadDurableStoreConfigFromEnv,
+  payloadUserForLeadRead,
   readLeadIntakesDurably,
 } from "./lead-durable-store.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
-import {
-  projectListingDraftSeed,
-  saveBulkListingStatusDrafts,
-  saveListingDraft,
-} from "./listing-draft-service.mjs";
+import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import {
   DEFAULT_CONSENT_LEDGER_PATH,
   appendConsentRecord,
@@ -223,6 +243,7 @@ import { fromRoot } from "./paths.mjs";
 import {
   DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
   DEFAULT_REDIRECT_APPROVALS_PATH,
+  approvedLaunchFreezeRouteArtifact,
   appendRedirectApproval,
   buildDeployableRedirects,
   buildLegacyRouteDecisions,
@@ -235,6 +256,7 @@ import {
   summarizeLegacyRouteDecisions,
   writeDeployableRedirects,
 } from "./redirect-approvals.mjs";
+import { DEFAULT_LAUNCH_FREEZE_PATH, loadApprovedLaunchFreeze } from "./launch-freeze.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
@@ -252,6 +274,8 @@ import {
   readTourApprovals,
 } from "./tours.mjs";
 import { crossOriginWriteRejection } from "./request-guard.mjs";
+import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
+import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import {
   DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -259,7 +283,16 @@ import {
   latestTranslationTasks,
   readTranslationLedger,
 } from "./translation-ledger.mjs";
-import { DEFAULT_VIEWING_LEDGER_PATH, appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
+import { DEFAULT_VIEWING_LEDGER_PATH, appendViewing, createViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
+import {
+  ViewingConflictError,
+  ViewingStoreUnavailableError,
+  isViewingDurableStoreEnabled,
+  persistViewingDurably,
+  readViewingsDurably,
+  recordViewingCalendarSync,
+  viewingDurableStoreConfigFromEnv,
+} from "./viewing-durable-store.mjs";
 import {
   DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
   appendViewingFollowUp,
@@ -282,23 +315,6 @@ const PRIVATE_JSON_HEADERS = {
 const PRIVATE_MARKDOWN_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/markdown; charset=utf-8", "cache-control": "no-store" };
 const PRIVATE_CSV_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/csv; charset=utf-8", "cache-control": "no-store" };
 const PRIVATE_DOWNLOAD_JSON_HEADERS = { ...SECURITY_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
-const FILE_BACKED_LEAD_MUTATION_PATHS = new Set([
-  "/api/admin/replies",
-  "/api/admin/replies/delivery",
-  "/api/admin/lead-pipeline/outcome",
-  "/api/admin/leads",
-  "/api/admin/leads/assign",
-  "/api/admin/accounts",
-  "/api/admin/accounts/link",
-  "/api/admin/documents/outcome",
-  "/api/admin/consents/withdraw",
-  "/api/admin/replies/draft",
-  "/api/admin/viewings",
-  "/api/admin/viewings/follow-up",
-  "/api/admin/seller-pipeline/outcome",
-  "/api/admin/deals/close",
-]);
-
 function bytesFrom(value) {
   const raw = value === undefined || value === "" ? String(10 * 1024 * 1024) : String(value);
   if (!/^\d+$/.test(raw)) throw new Error("MS_REALTY_MAX_BODY_BYTES must be a positive integer");
@@ -308,9 +324,12 @@ function bytesFrom(value) {
 }
 
 export function appAdminConfigFromEnv(env = process.env) {
+  const durableOnly = env.NODE_ENV === "production" && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload";
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
+    durableListingAuditToFile: env.NODE_ENV !== "production",
+    runtimeDataDurableOnly: durableOnly,
     accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
@@ -323,7 +342,9 @@ export function appAdminConfigFromEnv(env = process.env) {
     documentChecklistLedgerPath:
       env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
+    eventDurableStore: eventDurableStoreConfigFromEnv(env),
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
+    launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
@@ -340,13 +361,14 @@ export function appAdminConfigFromEnv(env = process.env) {
     publicRequestOutcomeLedgerPath:
       env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH || DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
     listingQualityReviewPath: env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH,
-    searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
-    searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
+    searchSyncReportPath: env.MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH || env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
+    searchQueryReportPath: env.MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH || env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
     hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
     liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
     monitoringRollbackReportPath: env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     productionRecoveryReportPath: env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH,
+    productionRecoverySigningPublicKey: env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
@@ -368,6 +390,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
+    viewingDurableStore: viewingDurableStoreConfigFromEnv(env),
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
     bookedAt: env.MS_REALTY_BOOKED_AT,
     viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
@@ -381,6 +404,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
     listingPublicationAt: env.MS_REALTY_LISTING_PUBLICATION_AT,
     payloadAdminAuth: getPayloadAdminAuthService,
+    providerConnection: providerConnectionConfigFromEnv(env),
   };
 }
 
@@ -406,8 +430,8 @@ function adminForbidden(capability) {
 }
 
 function adminBadRequest(error) {
-  return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
-    status: 400,
+  return new Response(JSON.stringify({ kind: error?.code || "bad_request", message: error.message }), {
+    status: error?.status || 400,
     headers: PRIVATE_JSON_HEADERS,
   });
 }
@@ -692,6 +716,7 @@ function bindRealtyCaseConditionExecutor(input, principal, action) {
 }
 
 function currentSeed(config) {
+  if (config.runtimeDataDurableOnly) return loadCmsSeed();
   return applyMediaReviews(
     applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
     readMediaReviews(config.mediaReviewLedgerPath),
@@ -736,8 +761,48 @@ function recordAudit(input, config, recordedAt = auditRecordedAt(config)) {
   });
 }
 
+function recordProviderConnectionFailure(provider, phase, error, config) {
+  recordAudit(
+    {
+      action: "provider_connection_failed",
+      actor: config.adminPrincipal?.id,
+      objectType: "provider_connection",
+      objectId: String(provider || "unknown"),
+      metadata: {
+        phase: String(phase || "unknown"),
+        error_code: String(error?.code || error?.name || "provider_rejected").slice(0, 80),
+      },
+    },
+    config,
+  );
+}
+
+function recordDurableListingAudit(input, config, recordedAt = auditRecordedAt(config)) {
+  try {
+    const entry = createAuditLogEntry(withAuthenticatedAuditActor(input, config.adminPrincipal), recordedAt);
+    if (config.durableListingAuditToFile !== false) {
+      appendAuditLog(entry, { filePath: config.auditLogPath });
+    } else {
+      (config.durableListingAuditLogger || console.info)(
+        JSON.stringify({
+          kind: "durable_listing_mutation",
+          authority: "payload_postgres",
+          receipt: "listing.workflow.last_edit_event",
+          ...entry,
+        }),
+      );
+    }
+    return entry;
+  } catch {
+    // Payload's listing version is authoritative. A replica/telemetry failure
+    // must never turn an already committed durable mutation into an API error.
+    return null;
+  }
+}
+
 function recordAuditReplica(input, config, recordedAt, alreadyRecorded, bestEffort) {
   try {
+    if (bestEffort && config.runtimeDataDurableOnly) return true;
     if (!readAuditLog(config.auditLogPath).some(alreadyRecorded)) recordAudit(input, config, recordedAt);
     return false;
   } catch (error) {
@@ -775,6 +840,9 @@ function currentPublicRequestQueue(config) {
 async function adminLeadSource(config) {
   const durableStore = config.leadDurableStore || {};
   if (!durableStore.leadDurableStoreEnabled) {
+    if (config.runtimeDataDurableOnly) {
+      throw new LeadStoreUnavailableError("Production admin leads require the durable store");
+    }
     return {
       durable: false,
       leads: withLeadContacts(readLeadLedger(config.leadLedgerPath), {
@@ -786,10 +854,14 @@ async function adminLeadSource(config) {
   if (!isLeadDurableStoreEnabled(durableStore)) {
     throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
   }
+  const scope = leadReadScopeForPrincipal(config.adminPrincipal, durableStore.workspaceId);
   try {
     const leads = await (config.readLeadIntakesDurably || readLeadIntakesDurably)({
+      admin: scope.admin,
       contactSecret: durableStore.contactSecret,
       payload: config.leadDurablePayload || null,
+      user: payloadUserForLeadRead(config.adminPrincipal, config.payloadAdminSession?.user || null),
+      workspaceIds: scope.workspaceIds,
     });
     if (!Array.isArray(leads) || leads.some((lead) => !lead?.lead_id)) {
       throw new Error("Durable lead readback returned invalid rows");
@@ -799,6 +871,37 @@ async function adminLeadSource(config) {
     if (error instanceof LeadStoreUnavailableError) throw error;
     throw new LeadStoreUnavailableError("Durable lead store read failed", error);
   }
+}
+
+async function adminEventSource(config) {
+  const durableStore = config.eventDurableStore || {};
+  if (!durableStore.eventDurableStoreEnabled) return readEventLedger(config.eventLedgerPath);
+  if (!isEventDurableStoreEnabled(durableStore)) {
+    throw new EventStoreUnavailableError("Durable funnel event store is enabled but not fully configured");
+  }
+  try {
+    const events = await (config.readEventsDurably || readEventsDurably)({ payload: config.eventDurablePayload || null });
+    if (!Array.isArray(events)) throw new Error("Durable funnel event readback returned invalid rows");
+    return events;
+  } catch (error) {
+    if (error instanceof EventStoreUnavailableError) throw error;
+    throw new EventStoreUnavailableError("Durable funnel event read failed", error);
+  }
+}
+
+async function adminViewingSource(config) {
+  const durableStore = config.viewingDurableStore || {};
+  if (!durableStore.viewingDurableStoreEnabled) {
+    return { durable: false, viewings: readViewings(config.viewingLedgerPath) };
+  }
+  if (!isViewingDurableStoreEnabled(durableStore)) {
+    throw new ViewingStoreUnavailableError("Durable viewing store is enabled but not fully configured");
+  }
+  const viewings = await (config.readViewingsDurably || readViewingsDurably)({
+    payload: config.viewingDurablePayload || null,
+  });
+  if (!Array.isArray(viewings)) throw new ViewingStoreUnavailableError("Durable viewing readback returned invalid rows");
+  return { durable: true, viewings };
 }
 
 function rowsForLeadIds(rows, leadIds) {
@@ -814,10 +917,76 @@ function leadScopedRows(source) {
 async function leadInboxPayload(registry, url, config) {
   const source = await adminLeadSource(config);
   const filterRows = leadScopedRows(source);
+  let providerConnections = {};
+  const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+  const providerAvailability = providerConnectionAvailability(providerConfig);
+  if (providerAvailability.store.ready) {
+    try {
+      const connections = await (config.readProviderConnections || readProviderConnections)({
+        payload: config.providerConnectionPayload || null,
+      });
+      providerConnections = Object.fromEntries(
+        connections.map((connection) => [
+          connection.provider,
+          {
+            connected: connection.status === "connected",
+            status: connection.status,
+            account_label: connection.account_label || "",
+          },
+        ]),
+      );
+    } catch {
+      providerConnections = {};
+    }
+  }
+  if (source.durable && config.runtimeDataDurableOnly) {
+    const seed = await projectListingDraftSeed(loadCmsSeed(), {
+      env: config.authEnv || process.env,
+      payload: config.payloadListingRuntime || null,
+      requirePayload: true,
+    });
+    const viewingSource = await adminViewingSource(config);
+    const viewings = filterRows(viewingSource.viewings);
+    return {
+      ...renderAdminLeadsPayload(registry, url.searchParams.get("locale") || "en", {
+        leads: source.leads,
+        replies: [],
+        communicationThreads: [],
+        communicationTemplates: Object.fromEntries(
+          source.leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
+        ),
+        languageRequests: [],
+        translationTasks: [],
+        listingEdits: [],
+        leadMatching: buildLeadMatchingReport({
+          registry,
+          seed,
+          leads: source.leads,
+          leadPipelineStates: [],
+          generatedAt: config.reviewedAt || new Date().toISOString(),
+        }),
+        operatorId: config.adminPrincipal || null,
+        leadSourceDurable: true,
+        providerConnections,
+        viewings,
+        viewingFollowUpWritable: false,
+        viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, [], {
+          now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
+        }),
+        savedSearches: [],
+        sellerPipeline: [],
+        deals: [],
+        brokerContacts: [],
+        brokerProfiles: [],
+      }),
+      runtime_data_mode: "durable_only",
+    };
+  }
   const leads = applyLeadAssignments(source.leads, filterRows(readLeadAssignments(config.leadAssignmentLedgerPath)));
   const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
   const replyDeliveryOutcomes = filterRows(readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath));
-  const viewings = filterRows(readViewings(config.viewingLedgerPath));
+  const viewingSource = await adminViewingSource(config);
+  const viewings = filterRows(viewingSource.viewings);
   const viewingFollowUps = filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath));
   const deals = filterRows(readDeals(config.dealLedgerPath));
   const sellerPipeline = filterRows(readSellerPipeline(config.sellerPipelinePath));
@@ -853,7 +1022,10 @@ async function leadInboxPayload(registry, url, config) {
     listingEdits: readListingEdits(config.listingEditLedgerPath),
     leadSlaGeneratedAt: config.reviewedAt,
     operatorId: config.adminPrincipal || null,
+    leadSourceDurable: source.durable,
+    providerConnections,
     viewings,
+    viewingFollowUpWritable: !viewingSource.durable,
     viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, viewingFollowUps, {
       now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
     }),
@@ -993,6 +1165,7 @@ async function realtyCasesPayload(registry, url, config) {
     realtyCaseConditionQueue: buildRealtyCaseConditionQueue(conditionEvents, {
       now,
     }),
+    ...(config.runtimeDataDurableOnly ? { runtime_data_mode: "durable_only" } : {}),
   };
 }
 
@@ -1058,10 +1231,11 @@ async function operationsReport(registry, config) {
   const filterRows = leadScopedRows(source);
   const leads = source.leads;
   const replies = filterRows(readReplyOutbox(config.replyOutboxPath));
-  const viewings = filterRows(readViewings(config.viewingLedgerPath));
+  const viewings = filterRows((await adminViewingSource(config)).viewings);
   const viewingFollowUps = filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath));
   const deals = filterRows(readDeals(config.dealLedgerPath));
   const translationTasks = readTranslationLedger(config.translationLedgerPath);
+  const funnelEvents = await adminEventSource(config);
   return buildOperationsReport({
     leads,
     replies,
@@ -1080,9 +1254,10 @@ async function operationsReport(registry, config) {
     searchAnalytics: buildSearchAnalyticsReport({
       registry,
       seed,
-      events: readEventLedger(config.eventLedgerPath),
+      events: funnelEvents,
       generatedAt,
     }),
+    funnelEvents,
     generatedAt,
   });
 }
@@ -1100,15 +1275,18 @@ async function listingManagerPayload(registry, url, config) {
   const seed = await projectListingDraftSeed(currentSeed(config), {
     env: config.authEnv || process.env,
     payload: config.payloadListingRuntime || null,
+    requirePayload: config.runtimeDataDurableOnly,
   });
-  const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
-  return renderAdminListingManagerPayload(registry, url.searchParams.get("locale") || "en", {
+  const translationTasks = config.runtimeDataDurableOnly
+    ? []
+    : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
+  const payload = renderAdminListingManagerPayload(registry, url.searchParams.get("locale") || "en", {
     seed,
     translationTasks,
     generatedAt: config.reviewedAt || new Date().toISOString(),
     operatorId: config.adminPrincipal || null,
     publicationScheduleQueue: buildListingPublicationScheduleQueue(
-      readListingPublicationSchedules(config.listingPublicationSchedulePath),
+      config.runtimeDataDurableOnly ? [] : readListingPublicationSchedules(config.listingPublicationSchedulePath),
       { now: config.listingPublicationAt || config.reviewedAt || new Date().toISOString() },
     ),
     query: url.searchParams.get("q") || "",
@@ -1116,32 +1294,38 @@ async function listingManagerPayload(registry, url, config) {
     sourceLocale: url.searchParams.get("sourceLocale") || "",
     page: url.searchParams.get("page") || 1,
   });
+  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
 }
 
 async function listingEditorPayload(registry, url, config) {
   const seed = await projectListingDraftSeed(currentSeed(config), {
     env: config.authEnv || process.env,
     payload: config.payloadListingRuntime || null,
+    requirePayload: config.runtimeDataDurableOnly,
   });
-  return renderAdminListingEditorPayload(
+  const payload = renderAdminListingEditorPayload(
     registry,
     url.searchParams.get("locale") || "en",
     seed,
     url.searchParams.get("listingId"),
-    readListingEdits(config.listingEditLedgerPath),
-    latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
-    readTourApprovals(config.tourApprovalLedgerPath),
+    config.runtimeDataDurableOnly ? [] : readListingEdits(config.listingEditLedgerPath),
+    config.runtimeDataDurableOnly ? [] : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
+    config.runtimeDataDurableOnly ? [] : readTourApprovals(config.tourApprovalLedgerPath),
     config.adminPrincipal || null,
   );
+  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
 }
 
 async function translationQueuePayload(registry, url, config) {
   const seed = await projectListingDraftSeed(currentSeed(config), {
-    payload: config.payloadListingRuntime,
-    env: process.env,
+    payload: config.payloadListingRuntime || null,
+    env: config.authEnv || process.env,
+    requirePayload: config.runtimeDataDurableOnly,
   });
-  const tasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
-  return renderAdminTranslationQueuePayload(registry, url.searchParams.get("locale") || "en", {
+  const tasks = config.runtimeDataDurableOnly
+    ? []
+    : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
+  const payload = renderAdminTranslationQueuePayload(registry, url.searchParams.get("locale") || "en", {
     seed,
     translationTasks: tasks,
     generatedAt: config.reviewedAt || new Date().toISOString(),
@@ -1151,6 +1335,7 @@ async function translationQueuePayload(registry, url, config) {
     taskType: url.searchParams.get("taskType") || "",
     page: url.searchParams.get("page") || 1,
   });
+  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
 }
 
 function readJsonData(filename) {
@@ -1219,11 +1404,15 @@ function currentSeoEvidence(config) {
   return readAppSeoEvidence(config);
 }
 
+function approvedRouteArtifact(config) {
+  return approvedLaunchFreezeRouteArtifact(loadApprovedLaunchFreeze(config.launchFreezePath));
+}
+
 function launchReadiness(config) {
   return buildLaunchReadinessReport({
     generatedAt: config.reviewedAt || new Date().toISOString(),
     routeMap: routeMapSummary(routeMapRows()),
-    deployableRedirects: deployableRedirectsForLaunch(config),
+    deployableRedirects: approvedRouteArtifact(config),
     listingQuality: currentListingQualityReport(config, { generatedAt: config.reviewedAt || new Date().toISOString() }),
     listingQualityReviewPath: config.listingQualityReviewPath || undefined,
     seoEvidence: currentSeoEvidence(config),
@@ -1235,13 +1424,16 @@ function launchReadiness(config) {
     liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
     monitoringRollback: monitoringRollbackState(config.monitoringRollbackReportPath || undefined),
     payloadRuntime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
-    productionRecovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
+    productionRecovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+      publicKey: config.productionRecoverySigningPublicKey,
+    }),
+    productionRecoveryPublicKey: config.productionRecoverySigningPublicKey,
   });
 }
 
 function launchInputChecklist(config) {
   const routes = routeMapRows();
-  const artifact = deployableRedirectsForLaunch(config);
+  const artifact = approvedRouteArtifact(config);
   const generatedAt = config.reviewedAt || new Date().toISOString();
   return renderLaunchInputChecklist({
     generatedAt,
@@ -1288,7 +1480,9 @@ function preflightReports(config) {
       }),
       live_service_provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
       payload_runtime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
-      production_recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
+      production_recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+        publicKey: config.productionRecoverySigningPublicKey,
+      }),
     },
   };
 }
@@ -1553,7 +1747,7 @@ async function appendBulkListingStatusChanges(input, config) {
   });
   const changes = result.edits.filter((edit) => !edit.idempotent);
   for (const edit of changes) {
-    recordAudit(
+    recordDurableListingAudit(
       {
         action: "listing_edited",
         actor: edit.editor,
@@ -1663,11 +1857,83 @@ function runDueListingPublications(config) {
   return result;
 }
 
-function appendViewingBooking(input, config) {
-  const viewing = appendViewing(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
-    filePath: config.viewingLedgerPath,
-    bookedAt: config.bookedAt,
-  });
+async function syncViewingBookingCalendar(viewing, config) {
+  const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+  try {
+    const result = await (config.syncViewingToGoogleCalendar || syncViewingToGoogleCalendar)(viewing, {
+      config: providerConfig,
+      payload: config.providerConnectionPayload || null,
+      fetchImpl: config.providerFetch || fetch,
+    });
+    if (result.status === "synced") {
+      recordAudit(
+        {
+          action: "provider_calendar_synced",
+          actor: viewing.broker,
+          objectType: "provider_connection",
+          objectId: "google",
+          locale: viewing.original_language,
+          metadata: {
+            viewing_id: viewing.id,
+            lead_id: viewing.lead_id,
+            listing_reference: viewing.listing_reference,
+            calendar_event_id: result.calendar_event_id,
+          },
+        },
+        config,
+      );
+    }
+    return result;
+  } catch (error) {
+    const message =
+      error instanceof ProviderConnectionUnavailableError
+        ? "Provider connection store is unavailable"
+        : String(error?.message || "Google Calendar sync failed");
+    recordAudit(
+      {
+        action: "provider_calendar_sync_failed",
+        actor: viewing.broker,
+        objectType: "provider_connection",
+        objectId: "google",
+        locale: viewing.original_language,
+        metadata: {
+          viewing_id: viewing.id,
+          lead_id: viewing.lead_id,
+          listing_reference: viewing.listing_reference,
+          reason: message,
+        },
+      },
+      config,
+    );
+    return { status: "failed", provider: "google", message };
+  }
+}
+
+async function appendViewingBooking(input, config) {
+  const [leadSource, viewingSource] = await Promise.all([adminLeadSource(config), adminViewingSource(config)]);
+  const filterRows = leadScopedRows(leadSource);
+  const rows = filterRows(viewingSource.viewings);
+  const context = {
+    leads: applyLeadAssignments(leadSource.leads, filterRows(readLeadAssignments(config.leadAssignmentLedgerPath))),
+    outcomes: filterRows(readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath)),
+    viewings: rows,
+    viewingFollowUps: filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath)),
+    deals: filterRows(readDeals(config.dealLedgerPath)),
+    sellerPipelines: filterRows(readSellerPipeline(config.sellerPipelinePath)),
+    sellerPipelineOutcomes: filterRows(readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath)),
+  };
+  const boundInput = bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]);
+  let viewing;
+  if (viewingSource.durable) {
+    const candidate = createViewing(context, boundInput, { rows, bookedAt: config.bookedAt });
+    viewing = candidate.idempotent
+      ? { ...candidate, durable: true }
+      : await (config.persistViewingDurably || persistViewingDurably)(candidate, {
+          payload: config.viewingDurablePayload || null,
+        });
+  } else {
+    viewing = appendViewing(context, boundInput, { filePath: config.viewingLedgerPath, bookedAt: config.bookedAt });
+  }
   if (!viewing.idempotent) {
     recordAudit(
       {
@@ -1681,7 +1947,38 @@ function appendViewingBooking(input, config) {
       config,
     );
   }
-  return viewing;
+  let calendarSync = await syncViewingBookingCalendar(viewing, config);
+  if (viewingSource.durable) {
+    calendarSync = await (config.recordViewingCalendarSync || recordViewingCalendarSync)(viewing.id, calendarSync, {
+      payload: config.viewingDurablePayload || null,
+      recordedAt: config.bookedAt || new Date().toISOString(),
+    });
+  }
+  if (calendarSync.status === "synced") {
+    return {
+      ...viewing,
+      calendar_sync: calendarSync,
+      message: "Viewing booked and added to Google Calendar.",
+    };
+  }
+  if (calendarSync.status === "failed") {
+    return {
+      ...viewing,
+      calendar_sync: calendarSync,
+      message: "Viewing booked, but Google Calendar sync failed.",
+    };
+  }
+  if (["not_configured", "not_connected"].includes(calendarSync.status)) {
+    return {
+      ...viewing,
+      calendar_sync: calendarSync,
+      message: "Viewing booked. Connect Google Calendar to sync it automatically.",
+    };
+  }
+  return {
+    ...viewing,
+    calendar_sync: calendarSync,
+  };
 }
 
 function appendViewingFollowUpEntry(input, config) {
@@ -1821,6 +2118,88 @@ function appendReplyDeliveryOutcomeEntry(input, config) {
     );
   }
   return result;
+}
+
+async function sendQueuedReplyViaProvider(input, config) {
+  const replyId = String(input?.replyId || "").trim();
+  const reply = replyId ? readReplyOutbox(config.replyOutboxPath).find((row) => row.id === replyId) : null;
+  if (replyId && !reply) throw new Error("Approved reply was not found");
+  const source = await adminLeadSource(config);
+  const leadId = String(reply?.lead_id || input?.leadId || "").trim();
+  if (!leadId) throw new Error("Lead id is required");
+  const lead = source.leads.find((row) => row.lead_id === leadId);
+  if (!lead) throw new Error("Lead was not found for the approved reply");
+  const provider = String(input.provider || input.channel || "google").trim().toLowerCase();
+  const channel = provider === "google" ? "email" : provider;
+  const recipient = String(
+    provider === "google"
+      ? lead.contact?.email
+      : provider === "whatsapp"
+        ? lead.contact?.whatsapp || lead.contact?.phone
+        : lead.contact?.viber_user_id,
+  ).trim();
+  if (!recipient) throw new Error(`Lead has no ${channel} recipient for provider delivery`);
+  const directApproval = !reply;
+  if (directApproval && String(input.approved || "").trim().toLowerCase() !== "true") {
+    throw new Error("Human approval is required before provider delivery");
+  }
+  const approvedAt = directApproval
+    ? config.replyDeliveredAt || config.reviewedAt || new Date().toISOString()
+    : reply.reviewed_at;
+  const approvedBy = directApproval ? config.adminPrincipal?.id : reply.reviewer;
+  const message = directApproval ? String(input.message || input.reviewedReply || "") : reply.reviewed_reply;
+  const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+  const providerDelivery = await (config.deliverApprovedProviderMessage || deliverApprovedProviderMessage)(
+    {
+      provider,
+      leadId,
+      idempotencyKey: String(input.idempotencyKey || (reply ? `reply:${reply.id}:${provider}` : "")),
+      recipient,
+      message,
+      ...(provider === "google"
+        ? { subject: `MS Realty reply regarding ${String(lead.listing_reference || lead.lead_id || "your enquiry").trim()}` }
+        : {}),
+      approved: directApproval ? true : reply.broker_approved === true,
+      approvedBy,
+      approvedAt,
+    },
+    {
+      config: providerConfig,
+      payload: config.providerDeliveryPayload || config.providerConnectionPayload || null,
+      fetchImpl: config.providerFetch || fetch,
+    },
+  );
+  if (providerDelivery.status !== "sent") throw new Error("Provider did not confirm message delivery");
+  const result =
+    reply && !source.durable
+      ? appendReplyDeliveryOutcomeEntry({ ...input, action: "sent", channel }, config)
+      : {
+          idempotent: providerDelivery.idempotent,
+          delivery: {
+            lead_id: leadId,
+            status: "sent",
+            delivery_channel: channel,
+            sent_at: providerDelivery.completed_at,
+          },
+        };
+  recordAudit(
+    {
+      action: "provider_reply_sent",
+      actor: config.adminPrincipal?.id || approvedBy,
+      objectType: "provider_connection",
+      objectId: provider,
+      locale: reply?.reply_language || lead.original_language || lead.admin_locale || "en",
+      metadata: {
+        ...(reply ? { reply_id: reply.id } : {}),
+        lead_id: leadId,
+        receipt_id: providerDelivery.idempotency_key,
+        external_message_id: providerDelivery.external_message_id,
+      },
+    },
+    config,
+    result.delivery.sent_at || approvedAt,
+  );
+  return { ...result, provider_delivery: providerDelivery };
 }
 
 function appendLeadPipelineOutcomeEntry(input, config) {
@@ -2414,7 +2793,9 @@ function exportDeployableRedirectRows(config) {
 
 function exportLaunchReadiness(config) {
   const report = launchReadiness(config);
-  const outPath = writeLaunchReadinessReport(report, config.launchReadinessOutputPath || undefined);
+  const outPath = writeLaunchReadinessReport(report, config.launchReadinessOutputPath || undefined, {
+    productionRecoveryPublicKey: config.productionRecoverySigningPublicKey,
+  });
   recordAudit(
     {
       action: "launch_readiness_exported",
@@ -2502,8 +2883,12 @@ function importLiveServiceProvisioningReport(report, config) {
 }
 
 function importProductionRecoveryReport(report, config) {
-  const outPath = writeProductionRecoveryReport(report, config.productionRecoveryReportPath || undefined);
-  const recovery = productionRecoveryState(config.productionRecoveryReportPath || undefined);
+  const outPath = writeProductionRecoveryReport(report, config.productionRecoveryReportPath || undefined, {
+    publicKey: config.productionRecoverySigningPublicKey,
+  });
+  const recovery = productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+    publicKey: config.productionRecoverySigningPublicKey,
+  });
   recordAudit(
     {
       action: "production_recovery_report_imported",
@@ -2756,12 +3141,36 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     const url = new URL(request.url, "http://localhost");
     const requiredCapability = requiredAdminCapability(request.method, url.pathname);
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
+    const parsedDeliveryBody =
+      request.method === "POST" && url.pathname === "/api/admin/replies/delivery"
+        ? parseBody(request, await readRequestBody(request, config.maxBodyBytes))
+        : null;
     if (
-      request.method !== "GET" &&
-      config.leadDurableStore?.leadDurableStoreEnabled === true &&
-      FILE_BACKED_LEAD_MUTATION_PATHS.has(url.pathname)
+      isFileBackedLeadMutationBlocked({
+        durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
+        durableStore: config.leadDurableStore,
+        durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
+        method: request.method,
+        pathname: url.pathname,
+      })
     ) {
       return leadStoreUnavailable("lead_store_read_only");
+    }
+    if (productionRuntimeDataUnavailable({
+      durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
+      durableOnly: config.runtimeDataDurableOnly,
+      durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
+      method: request.method,
+      pathname: url.pathname,
+    })) {
+      return jsonResponse(503, runtimeDataUnavailablePayload(url.pathname));
+    }
+    if (
+      config.runtimeDataDurableOnly &&
+      ["/admin/cases", "/api/admin/cases", "/api/admin/cases/intents", "/api/admin/cases/conditions"].includes(url.pathname) &&
+      !realtyCasePayloadAuthorityActive(config)
+    ) {
+      return jsonResponse(503, realtyCasePayloadAuthorityFailure());
     }
     if (
       principal.source === "payload_session" &&
@@ -2821,23 +3230,175 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/connect") {
-      if (!authHeader || principal.source === "payload_session") {
-        return jsonResponse(403, {
-          kind: "mcp_credential_required",
-          message: "Use a named MCP operator credential; browser sessions are never exported as bearer tokens.",
-        });
+      const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+      let availability = providerConnectionAvailability(providerConfig);
+      let connections = [];
+      let storeError = !availability.store.ready;
+      try {
+        if (availability.store.ready) {
+          connections = await (config.readProviderConnections || readProviderConnections)({
+            payload: config.providerConnectionPayload || null,
+          });
+        }
+      } catch {
+        storeError = true;
       }
-      const token = String(authHeader).replace(/^Bearer\s+/i, "").trim();
+      if (storeError) {
+        availability = Object.fromEntries(
+          Object.entries(availability).map(([key, value]) => [key, { ...value, ready: false }]),
+        );
+      }
+      const token = principal.source === "payload_session" ? "" : String(authHeader).replace(/^Bearer\s+/i, "").trim();
       const base =
         String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
-      return new Response(renderOperatorConnectPage({ baseUrl: base, token, operatorId: principal?.id || "operator" }), {
-        status: 200,
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "cache-control": "no-store",
-          "x-robots-tag": "noindex, nofollow",
+      const connected = url.searchParams.get("connected");
+      const result = connected
+        ? `${connected === "google" ? "Google" : connected === "whatsapp" ? "WhatsApp" : "Viber"} подтверждён и подключён.`
+        : url.searchParams.get("error")
+          ? "Провайдер не подтвердил подключение. Проверь настройки и повтори."
+          : storeError
+            ? "Хранилище подключений сейчас недоступно; новые credentials не будут приняты."
+            : "";
+      return new Response(
+        renderOperatorConnectPage({
+          baseUrl: base,
+          token,
+          operatorId: principal?.id || "operator",
+          connections,
+          availability,
+          result,
+        }),
+        {
+          status: 200,
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "cache-control": "no-store",
+            "x-robots-tag": "noindex, nofollow",
+          },
         },
-      });
+      );
+    }
+    if (url.pathname === "/api/admin/connections") {
+      const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+      const availability = providerConnectionAvailability(providerConfig);
+      const storeOptions = {
+        credentialSecret: providerConfig.credentialSecret,
+        payload: config.providerConnectionPayload || null,
+      };
+      const readConnections = config.readProviderConnections || readProviderConnections;
+      const readCredentials = config.readProviderCredentials || readProviderCredentials;
+      const saveConnection = config.saveProviderConnection || saveProviderConnection;
+      if (request.method === "GET" && !url.searchParams.get("action")) {
+        return jsonResponse(200, {
+          kind: "provider_connections",
+          availability,
+          connections: await readConnections({ payload: storeOptions.payload }),
+        });
+      }
+      if (!payloadSession || principal.source !== "payload_session" || !principal.roles?.includes("admin")) {
+        return adminForbidden("payload_admin_session");
+      }
+      if (request.method === "GET" && url.searchParams.get("provider") === "google") {
+        const action = url.searchParams.get("action");
+        if (action === "start") {
+          return new Response(null, {
+            status: 303,
+            headers: { location: googleAuthorizationUrl({ config: providerConfig, operatorId: principal.id }), "cache-control": "no-store" },
+          });
+        }
+        if (action === "callback") {
+          if (url.searchParams.get("error")) {
+            recordProviderConnectionFailure("google", "oauth_callback", new Error("provider_rejected"), config);
+            return new Response(null, { status: 303, headers: { location: "/admin/connect?error=google", "cache-control": "no-store" } });
+          }
+          try {
+            const prior = await readCredentials("google", storeOptions);
+            const connection = await (config.completeGoogleOAuth || completeGoogleOAuth)(
+              {
+                code: url.searchParams.get("code"),
+                state: url.searchParams.get("state"),
+                operatorId: principal.id,
+                existingRefreshToken: prior?.refresh_token || "",
+              },
+              { config: providerConfig, fetchImpl: config.providerFetch || fetch },
+            );
+            const saved = await saveConnection(connection, { ...storeOptions, connectedBy: principal.id });
+            recordAudit(
+              {
+                action: "provider_connected",
+                actor: principal.id,
+                objectType: "provider_connection",
+                objectId: saved.provider,
+                metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
+              },
+              config,
+            );
+            return new Response(null, { status: 303, headers: { location: "/admin/connect?connected=google", "cache-control": "no-store" } });
+          } catch (error) {
+            recordProviderConnectionFailure("google", "oauth_callback", error, config);
+            return new Response(null, { status: 303, headers: { location: "/admin/connect?error=google", "cache-control": "no-store" } });
+          }
+        }
+      }
+      if (request.method === "POST") {
+        const formEncoded = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        const provider = String(input.provider || "").trim().toLowerCase();
+        try {
+          let connection;
+          if (provider === "whatsapp") {
+            const verified = await (config.completeWhatsAppEmbeddedSignup || completeWhatsAppEmbeddedSignup)(
+              { code: input.code, wabaId: input.waba_id, phoneNumberId: input.phone_number_id },
+              { config: providerConfig, fetchImpl: config.providerFetch || fetch },
+            );
+            await saveConnection(verified, { ...storeOptions, connectedBy: principal.id });
+            connection = await (config.registerWhatsAppWebhook || registerWhatsAppWebhook)(verified, {
+              config: providerConfig,
+              fetchImpl: config.providerFetch || fetch,
+            });
+          } else if (provider === "viber") {
+            const verified = await (config.completeViberConnection || completeViberConnection)(
+              { token: input.token },
+              { config: providerConfig, fetchImpl: config.providerFetch || fetch },
+            );
+            await saveConnection(verified, { ...storeOptions, connectedBy: principal.id });
+            connection = await (config.registerViberWebhook || registerViberWebhook)(verified, {
+              config: providerConfig,
+              fetchImpl: config.providerFetch || fetch,
+            });
+          } else {
+            throw new Error("Unsupported provider connection");
+          }
+          const saved = await saveConnection(connection, { ...storeOptions, connectedBy: principal.id });
+          recordAudit(
+            {
+              action: "provider_connected",
+              actor: principal.id,
+              objectType: "provider_connection",
+              objectId: saved.provider,
+              metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
+            },
+            config,
+          );
+          if (formEncoded) {
+            return new Response(null, {
+              status: 303,
+              headers: { location: `/admin/connect?connected=${encodeURIComponent(provider)}`, "cache-control": "no-store" },
+            });
+          }
+          return jsonResponse(201, { kind: "provider_connection", connection: saved });
+        } catch (error) {
+          recordProviderConnectionFailure(provider, provider === "viber" ? "account_or_webhook" : "embedded_signup", error, config);
+          if (formEncoded) {
+            return new Response(null, {
+              status: 303,
+              headers: { location: `/admin/connect?error=${encodeURIComponent(provider || "provider")}`, "cache-control": "no-store" },
+            });
+          }
+          return jsonResponse(400, { kind: "provider_connection_rejected", message: "The provider did not confirm the connection" });
+        }
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
     }
     if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(await todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, await todayPayload(registry, url, config));
@@ -2977,7 +3538,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/production-recovery") {
       return jsonResponse(200, {
         kind: "admin_production_recovery",
-        recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
+        recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+          publicKey: config.productionRecoverySigningPublicKey,
+        }),
       });
     }
     if (request.method === "GET" && url.pathname === "/api/admin/production-recovery-template") {
@@ -3064,7 +3627,11 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(reply.idempotent ? 200 : 201, reply);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/delivery") {
-      const result = appendReplyDeliveryOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const input = parsedDeliveryBody;
+      const result =
+        String(input.deliveryMode || "").trim() === "provider_send" || (input.provider && !input.action)
+          ? await sendQueuedReplyViaProvider(input, config)
+          : appendReplyDeliveryOutcomeEntry(input, config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
@@ -3216,7 +3783,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           requestChannel: config.requestChannel || "admin",
         });
         if (!result.idempotent) {
-          recordAudit(
+          recordDurableListingAudit(
             {
               action: "listing_edited",
               actor: config.adminPrincipal?.id,
@@ -3272,7 +3839,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, appendListingSlugChange(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
-      const viewing = appendViewingBooking(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const viewing = await appendViewingBooking(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(viewing.idempotent ? 200 : 201, viewing);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
@@ -3288,7 +3855,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
-      return calendarResponse(renderViewingCalendar(readViewings(config.viewingLedgerPath), { now: config.bookedAt }));
+      const source = await adminLeadSource(config);
+      const viewings = leadScopedRows(source)((await adminViewingSource(config)).viewings);
+      return calendarResponse(renderViewingCalendar(viewings, { now: config.bookedAt }));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
       const deal = appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
@@ -3304,6 +3873,27 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
   } catch (error) {
     if (error instanceof LeadStoreUnavailableError || error?.code === "lead_store_unavailable") {
       return leadStoreUnavailable();
+    }
+    if (error instanceof EventStoreUnavailableError || error?.code === "event_store_unavailable") {
+      return jsonResponse(503, { kind: "event_store_unavailable", message: "Analytics storage is temporarily unavailable" });
+    }
+    if (error instanceof ViewingStoreUnavailableError || error?.code === "viewing_store_unavailable") {
+      return jsonResponse(503, { kind: "viewing_store_unavailable", message: "Viewing storage is temporarily unavailable" });
+    }
+    if (error instanceof ViewingConflictError || error?.code === "viewing_conflict") {
+      return jsonResponse(409, { kind: "viewing_conflict", message: error.message });
+    }
+    if (error instanceof ProviderConnectionUnavailableError || error?.code === "provider_connection_unavailable") {
+      return jsonResponse(503, { kind: "provider_connection_unavailable", message: "Provider connection storage is unavailable" });
+    }
+    if (error instanceof ProviderDeliveryError) {
+      const status =
+        error.code === "provider_delivery_unavailable" || error.code === "provider_delivery_not_connected"
+          ? 503
+          : ["provider_delivery_uncertain", "provider_delivery_conflict"].includes(error.code)
+            ? 409
+            : 502;
+      return jsonResponse(status, { kind: error.code, message: error.message, receipt: error.receipt || null });
     }
     if (error.status === 413) return jsonResponse(413, { kind: "request_too_large" });
     if (error.status === 403) return adminForbidden(error.capability || "administration:write");

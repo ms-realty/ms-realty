@@ -11,23 +11,50 @@ const store = createLedgerStore({
 
 const EVENT_TYPES = new Set(["page_view", "search", "lead_submitted", "cta_click"]);
 const FORBIDDEN_KEYS = new Set(["contact", "message", "email", "phone", "name"]);
+const PUBLIC_FILTER_KEYS = new Set([
+  "location",
+  "country_code",
+  "geography_id",
+  "region_id",
+  "municipality",
+  "district",
+  "property_family",
+  "property_type",
+  "offer_type",
+  "status",
+  "price_min",
+  "price_max",
+  "bedrooms_min",
+  "bedrooms_max",
+  "premises_min",
+  "hotel_rooms_min",
+  "area_min",
+  "area_max",
+  "land_area_min",
+  "land_area_max",
+  "floor_min",
+  "floor_max",
+  "storeys_min",
+  "storeys_max",
+  "exact_reference",
+]);
 
-function scrubText(value) {
+function scrubText(value, maxLength = 120) {
   return String(value || "")
-    .slice(0, 120)
+    .slice(0, maxLength)
     .replace(/[^\s@]+@[^\s@]+/g, "[redacted-email]")
     .replace(/\+?\d[\d\s().-]{6,}\d/g, "[redacted-phone]");
 }
 
 function hasForbiddenKey(value) {
   if (!value || typeof value !== "object") return false;
-  return Object.entries(value).some(([key, child]) => FORBIDDEN_KEYS.has(key) || hasForbiddenKey(child));
+  return Object.entries(value).some(([key, child]) => FORBIDDEN_KEYS.has(key.toLowerCase()) || hasForbiddenKey(child));
 }
 
 function safeFilters(filters = {}) {
   return Object.fromEntries(
     Object.entries(filters)
-      .filter(([key, value]) => !FORBIDDEN_KEYS.has(key) && ["string", "number", "boolean"].includes(typeof value))
+      .filter(([key, value]) => PUBLIC_FILTER_KEYS.has(key) && ["string", "number", "boolean"].includes(typeof value))
       .map(([key, value]) => [key, scrubText(value)]),
   );
 }
@@ -46,14 +73,17 @@ export function createEvent(input, recordedAt = new Date().toISOString()) {
   if (!EVENT_TYPES.has(type)) throw new Error(`Unsupported analytics event type: ${type}`);
   const eventPath = String(input.path || "/").trim();
   if (!eventPath.startsWith("/") || eventPath.startsWith("//")) throw new Error("Analytics event path must be local");
+  if (eventPath.length > 500) throw new Error("Analytics event path is too long");
   if (type === "cta_click" && !input.action) throw new Error("CTA click events require an action");
+  const locale = String(input.locale || "bg").trim();
+  if (!locale || locale.length > 12) throw new Error("Analytics event locale is invalid");
   return {
     recorded_at: recordedAt,
     type,
     path: eventPath,
-    locale: String(input.locale || "bg").trim(),
-    listing_reference: input.listingReference || input.listing_reference || null,
-    action: input.action || null,
+    locale,
+    listing_reference: input.listingReference || input.listing_reference ? scrubText(input.listingReference || input.listing_reference, 160) : null,
+    action: input.action === undefined ? null : scrubText(input.action),
     query: input.query === undefined ? null : scrubText(input.query),
     filters: safeFilters(input.filters),
     sort: input.sort === undefined ? null : scrubText(input.sort),

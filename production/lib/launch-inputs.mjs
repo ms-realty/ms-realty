@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { parseCsv } from "./csv.mjs";
 import { launchBlockerSummary } from "./launch-readiness.mjs";
+import { HERMES_LAUNCH_REQUIRED } from "./launch-service-contract.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -28,6 +29,40 @@ function rowCount(csvText) {
 
 function defaultListingVerification() {
   return JSON.parse(fs.readFileSync(fromRoot("production", "data", "listing-verification-report.json"), "utf8"));
+}
+
+function manualListingAuditState() {
+  const auditPath = fromRoot("production", "data", "manual-listing-audit.json");
+  const packetPath = fromRoot("production", "data", "launch-candidate30-broker-packet.json");
+  try {
+    const audit = JSON.parse(fs.readFileSync(auditPath, "utf8"));
+    const packet = JSON.parse(fs.readFileSync(packetPath, "utf8"));
+    const listings = Array.isArray(audit.listings) ? audit.listings : [];
+    const candidates = Array.isArray(packet.listings) ? packet.listings : [];
+    const statusCounts = audit.summary?.review_status_counts || {};
+    const valid =
+      audit.schema_version === 1 &&
+      audit.broker_approval_granted === false &&
+      listings.length === 165 &&
+      packet.schema_version === 1 &&
+      candidates.length === 30 &&
+      packet.candidate_count === 30 &&
+      packet.publish_ready_count === 0 &&
+      packet.candidate_count === candidates.length;
+    return {
+      status: valid ? "complete_non_approval_evidence" : "invalid",
+      listing_count: listings.length,
+      review_status_counts: statusCounts,
+      broker_approval_granted: audit.broker_approval_granted === true,
+      broker_confirmation_required: audit.summary?.broker_confirmation_required || 0,
+      candidate_count: packet.candidate_count || candidates.length,
+      publish_ready_count: packet.publish_ready_count || 0,
+      selection_basis: packet.selection_basis || "unknown",
+      previous_launch_candidate_overlap: packet.previous_launch_candidate_overlap || 0,
+    };
+  } catch (error) {
+    return { status: "missing_or_invalid", error: error.message };
+  }
 }
 
 function sourceLine(source, summary) {
@@ -85,6 +120,18 @@ function liveServiceProvisioningLine(provisioning) {
       : "",
   ].filter(Boolean);
   return `- ${provisioning.status || "unknown"}${details.length ? ` (${details.join("; ")})` : ""}`;
+}
+
+function hermesLaunchChecklistLines() {
+  if (!HERMES_LAUNCH_REQUIRED) {
+    return "- Hermes Agent is an optional draft-only capability and does not block launch.";
+  }
+  return [
+    "- Hermes Agent: set `HERMES_CHAT_COMPLETIONS_URL` to its internal `/v1/chat/completions` API and set `HERMES_API_KEY`; production Hermes evidence must be authenticated.",
+    "- Hermes runtime: `npm run hermes:runtime` verifies its `/health` endpoint and authenticated `/v1/capabilities` response before any draft-worker evidence is accepted.",
+    "- Managed local profile: set `HERMES_AGENT_MODEL`, `HERMES_AGENT_LLM_BASE_URL`, and `HERMES_AGENT_LLM_API_KEY`, then run `npm run docker:hermes:up`. The Agent only forwards to a private OpenAI-compatible model provider; its tools and persistent memory are disabled.",
+    "- Hermes provider report: `npm run hermes:provisioning` writes `production/data/hermes-provider-provisioning-report.json` without persisting API keys.",
+  ].join("\n");
 }
 
 function monitoringRollbackEvidenceLine(evidence) {
@@ -154,6 +201,7 @@ export function renderLaunchInputChecklist({
   routeMap,
   listingVerification = defaultListingVerification(),
   liveServiceProvisioning = liveServiceProvisioningState(),
+  manualListingAudit = manualListingAuditState(),
 }) {
   const redirectEvidence = launchReadiness.gates.find((gate) => gate.id === "redirect_reviews")?.evidence || {};
   const totalLegacyUrls = redirectEvidence.total_legacy_urls ?? routeMap.summary.total ?? 0;
@@ -190,6 +238,7 @@ export function renderLaunchInputChecklist({
   const recoveryEvidence = recoveryGate?.evidence || {};
   const monitoringGate = launchReadiness.gates.find((gate) => gate.id === "monitoring_rollback");
   const monitoringEvidence = monitoringGate?.evidence?.machine_evidence || {};
+  const manualAuditCounts = manualListingAudit.review_status_counts || {};
 
   return `# Launch Input Checklist
 
@@ -217,7 +266,7 @@ ${blockedGateActionLines(launchReadiness)}
 - Production adapter path overrides: \`MS_REALTY_REDIRECT_APPROVALS_PATH\`, \`MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH\`
 - Review helper columns: \`decision\`, \`target_path\`, \`target_listing_id\`, \`review_status\`, \`same_content_checklist\`
 - Approval import columns: \`old_url\`, \`decision\`, \`target_path\`, \`equivalent_content\`, \`reviewer\`, optional \`approved_at\`, \`reason\`
-- Launch rule: each of all ${totalLegacyUrls} legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set \`equivalent_content=true\` only after same-content human review; homepage and search targets stay blocked.
+- Launch rule: each of all ${totalLegacyUrls} legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set \`equivalent_content=true\` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
 
 ## External SEO Exports
 
@@ -243,27 +292,24 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 ${liveServiceReportLines(liveServiceEvidence).join("\n")}
 - Current provisioning evidence:
 ${liveServiceProvisioningLine(liveServiceProvisioning)}
-- Search engines: set \`TYPESENSE_URL\`, \`TYPESENSE_API_KEY\`, \`MEILI_URL\`, and \`MEILI_API_KEY\`.
-- Hermes Agent: set \`HERMES_CHAT_COMPLETIONS_URL\` to its internal \`/v1/chat/completions\` API and set \`HERMES_API_KEY\`; production Hermes evidence must be authenticated.
-- Hermes runtime: \`npm run hermes:runtime\` verifies its \`/health\` endpoint and authenticated \`/v1/capabilities\` response before any draft-worker evidence is accepted.
-- Managed local profile: set \`HERMES_AGENT_MODEL\`, \`HERMES_AGENT_LLM_BASE_URL\`, and \`HERMES_AGENT_LLM_API_KEY\`, then run \`npm run docker:hermes:up\`. The Agent only forwards to a private OpenAI-compatible model provider; its tools and persistent memory are disabled.
-- Hermes provider report: \`npm run hermes:provisioning\` writes \`production/data/hermes-provider-provisioning-report.json\` without persisting API keys.
-- Live service provisioning report: \`npm run live:provisioning\` writes \`production/data/live-service-provisioning-report.json\` with redacted endpoint health and missing-env evidence.
+- Postgres search: set \`MS_REALTY_SEARCH_ENGINE=postgres\`, \`DATABASE_URL\`, and \`PAYLOAD_SECRET\`; apply the public-search migration before capture so sync and query evidence use the same authoritative Neon target.
+${hermesLaunchChecklistLines()}
+- Live service provisioning report: \`npm run live:provisioning\` writes \`production/data/live-service-provisioning-report.json\` with the redacted Postgres target${HERMES_LAUNCH_REQUIRED ? ", Hermes endpoint health," : ""} and missing-env evidence.
 - Admin provisioning status endpoint: \`GET /api/admin/live-service-provisioning\`.
 - Admin provisioning import endpoint: \`POST /api/admin/live-service-provisioning/import\` accepts the redacted JSON from \`npm run live:provisioning\`.
 - Provisioning preflight: \`npm run live:provisioning:preflight\` must pass before live evidence capture.
-- Live evidence capture: \`npm run live:capture\` runs search sync, search query, Hermes draft worker, and validates the three report outputs.
-- Individual debug commands: \`npm run search:sync\`, \`npm run search:query\`, \`npm run hermes:worker\`.
+- Live evidence capture: \`npm run live:capture\` verifies the Postgres search projection, queries that same Postgres target${HERMES_LAUNCH_REQUIRED ? ", runs the Hermes draft worker," : ""} and validates every required report output.
+- Individual debug commands: \`npm run search:sync\`, \`npm run search:query\`${HERMES_LAUNCH_REQUIRED ? ", `npm run hermes:worker`" : ""}.
 - Status report: \`npm run live:report\` writes current missing/invalid live-service report state without clearing the launch gate.
 - Admin live-services status endpoint: \`GET /api/admin/live-services\`.
 - Report preflight: \`npm run live:preflight\`.
-- Report examples: \`production/data/search-engine-sync-report.json.example\`, \`production/data/search-engine-query-report.json.example\`, \`production/data/hermes-draft-worker-report.json.example\`.
-- Admin template endpoint: \`GET /api/admin/live-service-report-template?source=typesense_meilisearch_sync\`, \`?source=typesense_meilisearch_query\`, \`?source=hermes_draft_worker\`.
-- Admin import endpoint: \`POST /api/admin/live-service-reports/import?source=typesense_meilisearch_sync\`, \`?source=typesense_meilisearch_query\`, \`?source=hermes_draft_worker\`.
-- Production/CLI report path overrides: \`MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH\`, \`MS_REALTY_SEARCH_SYNC_REPORT_PATH\`, \`MS_REALTY_SEARCH_QUERY_REPORT_PATH\`, \`MS_REALTY_HERMES_WORKER_REPORT_PATH\`, \`MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH\`.
+- Report examples: \`production/data/postgres-search-sync-report.json.example\`, \`production/data/postgres-search-query-report.json.example\`, \`production/data/hermes-draft-worker-report.json.example\`.
+- Admin template endpoint: \`GET /api/admin/live-service-report-template?source=postgres_search_sync\`, \`?source=postgres_search_query\`, \`?source=hermes_draft_worker\`.
+- Admin import endpoint: \`POST /api/admin/live-service-reports/import?source=postgres_search_sync\`, \`?source=postgres_search_query\`, \`?source=hermes_draft_worker\`.
+- Production/CLI report path overrides: \`MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH\`, \`MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH\`, \`MS_REALTY_POSTGRES_SEARCH_QUERY_REPORT_PATH\`, \`MS_REALTY_HERMES_WORKER_REPORT_PATH\`, \`MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH\`.
 - Hermes ledger path overrides: \`MS_REALTY_TRANSLATION_LEDGER_PATH\`, \`MS_REALTY_HERMES_AUDIT_PATH\`, \`MS_REALTY_AUDIT_LOG_PATH\`.
 - Real report outputs stay local and ignored; examples do not count as launch evidence.
-- Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
+- Launch rule: run live search${HERMES_LAUNCH_REQUIRED ? " and Hermes" : ""} commands after provisioning; the checked-in smoke commands remain local contract tests only.
 
 ## Payload Runtime
 
@@ -295,11 +341,12 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 - Current gate: ${recoveryGate?.status || "unknown"}
 - Current evidence: ${recoveryEvidence.status || "unknown"}${recoveryEvidence.path ? ` (${recoveryEvidence.path})` : ""}${recoveryEvidence.error ? ` — ${recoveryEvidence.error}` : ""}
 - Private report: \`production/data/production-recovery-report.json\` (ignored)
-- Report example: \`production/data/production-recovery-report.json.example\`
+- Report example: \`production/data/production-recovery-report.json.example\` (shape reference only; it cannot clear readiness)
 - Admin template endpoint: \`GET /api/admin/production-recovery-template\`
 - Admin status endpoint: \`GET /api/admin/production-recovery\`
-- Admin import endpoint: \`POST /api/admin/production-recovery/import\` accepts only validated, redacted production evidence.
+- Admin import endpoint: \`POST /api/admin/production-recovery/import\` accepts only redacted Ed25519-signed production evidence from the governed recovery workflow.
 - Path override: \`MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH\`
+- Verification key: \`MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY\` contains public SPKI only; the private key is operator-only.
 - Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
 - Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.
 - Launch rule: the tested local \`docker:backup\` path is not production disaster-recovery evidence.
@@ -331,6 +378,14 @@ ${listingPendingReviewLines(listingReviewEvidence)}
 - Review pack command: \`npm run listing:review-pack\`.
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
 ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`).join("\n")}
+
+## Manual Source Audit (Non-Approval Evidence)
+
+- Artifact: \`production/data/manual-listing-audit.json\`: ${manualListingAudit.status}
+- Coverage: ${manualListingAudit.listing_count || 0}/165 source rows (pass: ${manualAuditCounts.pass || 0}, review: ${manualAuditCounts.review || 0}, hold: ${manualAuditCounts.hold || 0}, source unavailable: ${manualAuditCounts.source_unavailable || 0}).
+- Broker approvals in this artifact: ${manualListingAudit.broker_approval_granted ? "present (invalid)" : "0"}; broker confirmations still required: ${manualListingAudit.broker_confirmation_required || 0}.
+- Broker packet: \`production/data/launch-candidate30-broker-packet.json\` — ${manualListingAudit.candidate_count || 0} candidates, ${manualListingAudit.publish_ready_count || 0} publish-ready; selection: ${manualListingAudit.selection_basis || "unknown"}; overlap with prior automatic shortlist: ${manualListingAudit.previous_launch_candidate_overlap || 0}.
+- This evidence does not clear \`listing_quality_review\`; use the packet to prioritize human fact, media, availability, and publication review.${manualListingAudit.error ? ` Error: ${manualListingAudit.error}` : ""}
 
 ## Broker Verification
 
