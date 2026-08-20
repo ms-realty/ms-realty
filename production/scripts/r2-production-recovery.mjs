@@ -14,6 +14,7 @@ import {
   buildRuntimeAuthorityEvidence,
   createR2RecoveryManifest,
   mappedTableNames,
+  optionalDockerNetwork,
   readImmutableJson,
   readRecoveryComponentMap,
   recoveryCommandEnvironment,
@@ -118,6 +119,7 @@ function createPgpass(directory, config) {
 function sourceClientArgs(config, postgresCommand, commandArgs) {
   return [
     "run", "--rm",
+    ...(config.dockerNetwork ? ["--network", config.dockerNetwork] : []),
     "--volume", `${config.secretDirectory}:/run/ms-realty-recovery:ro`,
     "--env", "PGPASSFILE=/run/ms-realty-recovery/.pgpass",
     "--env", `PGSSLMODE=${config.sslmode}`,
@@ -189,6 +191,7 @@ async function exportedSnapshot(config, secrets) {
   const container = `msr-recovery-snapshot-${crypto.randomBytes(6).toString("hex")}`;
   await run("docker", [
     "run", "--detach", "--rm", "--name", container,
+    ...(config.dockerNetwork ? ["--network", config.dockerNetwork] : []),
     "--volume", `${config.secretDirectory}:/run/ms-realty-recovery:rw`,
     "--env", "PGPASSFILE=/run/ms-realty-recovery/.pgpass",
     "--env", `PGSSLMODE=${config.sslmode}`,
@@ -295,7 +298,11 @@ async function captureBackup(env) {
   const uploadPlanPath = path.join(directory, "r2-upload-plan.json");
   const componentMap = readRecoveryComponentMap(DEFAULT_COMPONENT_MAP);
   const tables = mappedTableNames(componentMap);
-  const config = { ...connectionConfig(databaseUrl), secretDirectory };
+  const config = {
+    ...connectionConfig(databaseUrl),
+    secretDirectory,
+    dockerNetwork: optionalDockerNetwork(env.MS_REALTY_RECOVERY_SOURCE_DOCKER_NETWORK),
+  };
   createPgpass(secretDirectory, config);
 
   let completed = false;

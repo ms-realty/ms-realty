@@ -19,6 +19,7 @@ import {
   componentMapDigest,
   createR2RecoveryManifest,
   mappedTableNames,
+  optionalDockerNetwork,
   readImmutableJson,
   readRecoveryComponentMap,
   recoveryCommandEnvironment,
@@ -464,6 +465,16 @@ test("recovery subprocesses receive operational environment only, not applicatio
     HOME: "/tmp/operator",
     DOCKER_CONTEXT: "desktop-linux",
   });
+});
+
+test("source recovery Docker network is optional and rejects unsafe names", () => {
+  assert.equal(optionalDockerNetwork(), null);
+  assert.equal(
+    optionalDockerNetwork("ms-realty-production-review_backend"),
+    "ms-realty-production-review_backend",
+  );
+  assert.throws(() => optionalDockerNetwork("backend --privileged"), /unsafe/i);
+  assert.throws(() => optionalDockerNetwork("/var/run/docker.sock"), /unsafe/i);
 });
 
 test("plaintext is removed when an injected post-decryption check fails", async (t) => {

@@ -59,6 +59,7 @@ const REQUIRED_RUNTIME_DATA_AUTHORITIES = Object.freeze({
 });
 
 const SAFE_BACKUP_ID = /^[a-z0-9][a-z0-9._-]{7,95}$/i;
+const SAFE_DOCKER_NETWORK = /^[a-z0-9][a-z0-9._-]{0,127}$/i;
 const SAFE_TABLE = /^(?:[a-z_][a-z0-9_]*\.)?[a-z_][a-z0-9_]*$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 const RELEASE_SHA = /^[a-f0-9]{40}$/;
@@ -90,6 +91,13 @@ export function assertSafeTableName(value) {
   const table = requiredText(value, "table name");
   if (!SAFE_TABLE.test(table)) throw new Error(`Unsafe PostgreSQL table name: ${table}`);
   return table.includes(".") ? table : `public.${table}`;
+}
+
+export function optionalDockerNetwork(value) {
+  const network = String(value || "").trim();
+  if (!network) return null;
+  if (!SAFE_DOCKER_NETWORK.test(network)) throw new Error("Docker network name is unsafe");
+  return network;
 }
 
 export function assertRecoveryReleaseId(value) {
