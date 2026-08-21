@@ -7,6 +7,7 @@ import { spawn, spawnSync } from "node:child_process";
 import {
   assertHermesDraftWorkerReport,
   openAiCompatibleHermesProvider,
+  readReusableHermesDraftWorkerReport,
   runHermesDraftWorker,
   taskFromHermesDraft,
 } from "../lib/hermes-draft-worker.mjs";
@@ -163,6 +164,36 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   assert.equal(auditRows[0].metadata.tool_call_parser, "hermes");
   assert.equal(auditRows[0].metadata.sensitive_data, true);
   assert.equal(JSON.stringify(auditRows).includes("Sandanski apartment"), false);
+});
+
+test("live capture reuses only validated desktop subscription reports", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-reuse-`);
+  const reportPath = `${dir}/hermes-draft-worker-report.json`;
+  const report = await runHermesDraftWorker({
+    dispatch: { rows: [dispatchRow()] },
+    provider: async () => validDraft(),
+    filePath: `${dir}/translations.jsonl`,
+    auditPath: `${dir}/audit.jsonl`,
+    auditLogPath: `${dir}/audit-log.jsonl`,
+    providerMetadata: {
+      mode: "desktop_subscription",
+      model: "ChatGPT subscription",
+      toolCallParser: "hermes",
+      sensitiveDataAllowed: false,
+    },
+  });
+
+  fs.writeFileSync(reportPath, `${JSON.stringify(report)}\n`);
+  assert.deepEqual(readReusableHermesDraftWorkerReport(reportPath), report);
+
+  fs.writeFileSync(
+    reportPath,
+    `${JSON.stringify({ ...report, provider: { ...report.provider, mode: "self_hosted", sensitive_data_allowed: true } })}\n`,
+  );
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath), null);
+
+  fs.writeFileSync(reportPath, `${JSON.stringify({ ...report, summary: { attempted: 0, persisted: 0, rejected: 0 } })}\n`);
+  assert.throws(() => readReusableHermesDraftWorkerReport(reportPath), /attempt at least one draft/);
 });
 
 test("Hermes draft worker report rejects no-op launch evidence", () => {
