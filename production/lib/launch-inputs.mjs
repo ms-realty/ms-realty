@@ -385,7 +385,7 @@ ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`)
 - Coverage: ${manualListingAudit.listing_count || 0}/165 source rows (pass: ${manualAuditCounts.pass || 0}, review: ${manualAuditCounts.review || 0}, hold: ${manualAuditCounts.hold || 0}, source unavailable: ${manualAuditCounts.source_unavailable || 0}).
 - Broker approvals in this artifact: ${manualListingAudit.broker_approval_granted ? "present (invalid)" : "0"}; broker confirmations still required: ${manualListingAudit.broker_confirmation_required || 0}.
 - Broker packet: \`production/data/launch-candidate30-broker-packet.json\` — ${manualListingAudit.candidate_count || 0} candidates, ${manualListingAudit.publish_ready_count || 0} publish-ready; selection: ${manualListingAudit.selection_basis || "unknown"}; overlap with prior automatic shortlist: ${manualListingAudit.previous_launch_candidate_overlap || 0}.
-- This evidence grants no publication approval. The exact \`MSR-LAUNCH-FREEZE-1\` approval clears only the 165-row preservation gate with 0 publish-ready listings; use the packet for later fact, media, availability, and publication review.${manualListingAudit.error ? ` Error: ${manualListingAudit.error}` : ""}
+- This evidence classifies the freeze catalog only. \`MSR-LISTING-PUBLICATION-1\` publishes the 30 freeze-active listings as source-locale inventory; archived freeze rows stay out of active search.${manualListingAudit.error ? ` Error: ${manualListingAudit.error}` : ""}
 
 ## Broker Verification
 

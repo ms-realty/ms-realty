@@ -60,6 +60,10 @@ import {
   DEFAULT_LAUNCH_FREEZE_PATH,
   loadApprovedLaunchFreeze,
 } from "./launch-freeze.mjs";
+import {
+  hasOperatorPublicationListingEvidence,
+  operatorPublicationListingEvidence,
+} from "./listing-publication-approval.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -597,6 +601,7 @@ function hasCompleteListingQualityEvidence(evidence) {
   return (
     evidence?.status === "pass" &&
     evidence?.mode !== "approved_launch_freeze_preservation" &&
+    evidence?.mode !== "operator_publication_of_freeze_active" &&
     Boolean(evidence?.path) &&
     !evidence.path.endsWith(".example") &&
     countKeys.every((key) => Number.isInteger(summary?.[key]) && summary[key] >= 0) &&
@@ -672,8 +677,14 @@ function hasApprovedLaunchFreezeListingEvidence(evidence) {
 function assertPassListingQualityEvidence(report) {
   const review = gateById(report, "listing_quality_review");
   if (review?.status !== "pass") return;
-  if (!hasCompleteListingQualityEvidence(review.evidence) && !hasApprovedLaunchFreezeListingEvidence(review.evidence)) {
-    throw new Error("Launch readiness listing quality requires complete review or approved launch-freeze preservation evidence");
+  if (
+    !hasCompleteListingQualityEvidence(review.evidence) &&
+    !hasOperatorPublicationListingEvidence(review.evidence) &&
+    !hasApprovedLaunchFreezeListingEvidence(review.evidence)
+  ) {
+    throw new Error(
+      "Launch readiness listing quality requires complete review, operator publication of the freeze-active catalog, or approved launch-freeze preservation evidence",
+    );
   }
 }
 
@@ -1412,11 +1423,15 @@ export function buildLaunchReadinessReport({
     routeReview.decisionSummary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const launchFreezeListingEvidence = approvedLaunchFreezeListingEvidence(launchFreeze, sitemap);
+  const operatorPublicationEvidence = operatorPublicationListingEvidence(launchFreeze);
   const listingQualityEvidence = hasCompleteListingQualityEvidence(listingQualityReview)
     ? listingQualityReview
-    : launchFreezeListingEvidence;
+    : hasOperatorPublicationListingEvidence(operatorPublicationEvidence)
+      ? operatorPublicationEvidence
+      : launchFreezeListingEvidence;
   const listingQualityReady =
     hasCompleteListingQualityEvidence(listingQualityEvidence) ||
+    hasOperatorPublicationListingEvidence(listingQualityEvidence) ||
     hasApprovedLaunchFreezeListingEvidence(listingQualityEvidence);
   const liveServicesReady =
     requiredLiveServiceReportsPass(
@@ -1537,10 +1552,12 @@ export function buildLaunchReadinessReport({
       listingQualityReady ? "pass" : "blocked",
       listingQualityEvidence,
       listingQualityReady
-        ? listingQualityEvidence.mode === "approved_launch_freeze_preservation"
-          ? "MSR-LAUNCH-FREEZE-1 preserves all 165 accepted listings while publication remains review-gated."
-          : "Complete human listing review evidence passed."
-        : "Human listing quality review or approved non-public preservation evidence is required before launch.",
+        ? listingQualityEvidence.mode === "operator_publication_of_freeze_active"
+          ? "MSR-LISTING-PUBLICATION-1 publishes the 30 freeze-active listings as source-locale inventory."
+          : listingQualityEvidence.mode === "approved_launch_freeze_preservation"
+            ? "MSR-LAUNCH-FREEZE-1 preserves all 165 accepted listings while publication remains review-gated."
+            : "Complete human listing review evidence passed."
+        : "Human listing quality review, operator publication of the freeze-active catalog, or approved non-public preservation evidence is required before launch.",
     ),
     gate(
       "runtime_smoke",

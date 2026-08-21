@@ -844,8 +844,9 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(seoGate.status, "deferred");
   assert.match(seoGate.message, /Production-Live, not Production-Ready/);
   assert.equal(listingGate.status, "pass");
-  assert.equal(listingGate.evidence.mode, "approved_launch_freeze_preservation");
-  assert.equal(listingGate.evidence.approval_id, "MSR-LAUNCH-FREEZE-1");
+  assert.equal(listingGate.evidence.mode, "operator_publication_of_freeze_active");
+  assert.equal(listingGate.evidence.approval_id, "MSR-LISTING-PUBLICATION-1");
+  assert.equal(listingGate.evidence.freeze_approval_id, "MSR-LAUNCH-FREEZE-1");
   assert.deepEqual(listingGate.evidence.summary, {
     expected_review_rows: 165,
     review_rows: 165,
@@ -854,9 +855,8 @@ test("launch readiness stays blocked until production launch blockers are cleare
     media_review_rows: 0,
     active_listings: 30,
     archived_listings: 135,
-    publish_ready: 0,
-    publication_approvals: 0,
-    public_listing_entries: 0,
+    published_listing_ids: 30,
+    source_locales_only: true,
   });
   assert.equal(liveGate.status, "blocked");
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
@@ -1650,9 +1650,9 @@ test("launch readiness validator binds listing preservation to the exact approve
 
   const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
   assert.equal(listingGate.status, "pass");
-  assert.equal(listingGate.evidence.mode, "approved_launch_freeze_preservation");
-  listingGate.evidence.artifact_sha256 = "0".repeat(64);
-  assert.throws(() => assertLaunchReadinessReport(report), /approved launch-freeze preservation evidence/);
+  assert.equal(listingGate.evidence.mode, "operator_publication_of_freeze_active");
+  listingGate.evidence.freeze_sha256 = "0".repeat(64);
+  assert.throws(() => assertLaunchReadinessReport(report), /operator publication of the freeze-active catalog/);
 });
 
 test("launch readiness accepts reviewed location page growth", () => {
@@ -2539,7 +2539,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /production_recovery: Complete an encrypted off-site backup.*durable Payload\/Postgres and CRM\/CMS data/);
   assert.match(markdown, /MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH/);
   assert.match(markdown, /runtime evidence is deterministically regenerated and revalidated after restore/);
-  assert.match(markdown, /MSR-LAUNCH-FREEZE-1.*0 publish-ready listings/);
+  assert.match(markdown, /MSR-LISTING-PUBLICATION-1. publishes the 30 freeze-active listings/);
   assert.match(markdown, /Reviewed one-hop 301 redirects: 179/);
   assert.match(markdown, /Terminal route decisions: 457\/457 \(200: 10, 301: 179, 410: 268\)/);
   assert.match(markdown, /Remaining terminal route decisions: 0/);
@@ -2634,7 +2634,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /hidden Payload Admin UI is not a launch requirement/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /Current review evidence/);
-  assert.match(markdown, /pass .*production\/data\/launch-freeze\.json.*expected 165.*reviewed 165.*missing 0/);
+  assert.match(markdown, /pass .*production\/data\/listing-publication-approval\.json.*expected 165.*reviewed 165.*missing 0/);
   assert.match(markdown, /Pending review sample:\n- none/);
   assert.match(markdown, /production\/data\/listing-quality-review-packet\.json/);
   assert.match(markdown, /production\/data\/listing-quality-review-draft\.csv/);
@@ -2660,7 +2660,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /Coverage: 165\/165 source rows \(pass: 30, review: 75, hold: 52, source unavailable: 8\)/);
   assert.match(markdown, /Broker approvals in this artifact: 0; broker confirmations still required: 165/);
   assert.match(markdown, /30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6/);
-  assert.match(markdown, /grants no publication approval/);
+  assert.match(markdown, /classifies the freeze catalog only/);
   assert.match(markdown, /Broker Verification/);
   assert.match(markdown, /production\/data\/listing-verification-report\.json/);
   assert.match(markdown, /Broker verification tasks: 165/);
