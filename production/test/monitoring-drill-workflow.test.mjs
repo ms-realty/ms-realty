@@ -10,6 +10,7 @@ test("monitoring drill gates intentional failure behind an auditable typed dispa
   assert.doesNotMatch(workflow, /environment:\n\s+name: monitoring-alert-drill/);
   assert.match(workflow, /test "\$CONFIRM_ALERT_DRILL" = "true"/);
   assert.match(workflow, /test "\$\{#MS_REALTY_ORIGIN_TOKEN\}" -ge 32/);
+  assert.match(workflow, /MS_REALTY_EXPECTED_BUILD_MARKER: \$\{\{ inputs\.release_sha \}\}/);
   assert.match(workflow, /mechanism: "workflow_dispatch_typed_confirmation"/);
   assert.match(workflow, /actor: process\.env\.GITHUB_ACTOR/);
   assert.match(workflow, /triggering_actor: process\.env\.GITHUB_TRIGGERING_ACTOR/);
@@ -39,6 +40,8 @@ test("monitoring drill deploys and rolls back the real MS Realty Container artif
   assert.match(workflow, /\.replaceAll\(placeholder, marker\)/);
   assert.match(workflow, /config\.split\(process\.env\.RELEASE_SHA\)\.length !== 3/);
   assert.match(workflow, /config\.replaceAll\(process\.env\.RELEASE_SHA, process\.env\.FAULT_MARKER\)/);
+  assert.match(workflow, /createHash\("sha1"\)/);
+  assert.match(workflow, /test "\$fault_marker" != "\$RELEASE_SHA"/);
   assert.doesNotMatch(workflow, /worker\.mjs/);
   assert.doesNotMatch(workflow, /return Response\.json\(\{ marker:/);
   assert.match(workflow, /wrangler@4\.117\.0 rollback "\$baseline_version" --name "\$DRILL_WORKER"/);
