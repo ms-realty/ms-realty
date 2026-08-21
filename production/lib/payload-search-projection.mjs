@@ -111,7 +111,7 @@ async function approvedListings(payload, pageSize) {
   for (let page = 1; ; page += 1) {
     const result = await payload.find({
       collection: "listings",
-      depth: 2,
+      depth: 3,
       draft: true,
       limit: pageSize,
       overrideAccess: true,

@@ -97,6 +97,7 @@ test("Payload projection treats zero approved listings as a valid authoritative 
   assert.match(projection.source.digest, /^[a-f0-9]{64}$/);
   assert.equal(calls.length, 1);
   assert.equal(calls[0].collection, "listings");
+  assert.equal(calls[0].depth, 3);
   assert.equal(calls[0].draft, true);
   assert.equal(calls[0].overrideAccess, true);
   assert.deepEqual(calls[0].where, {

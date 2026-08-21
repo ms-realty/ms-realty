@@ -306,6 +306,50 @@ function validPublicCoordinates(latitude, longitude) {
   );
 }
 
+const TAXONOMY_SEARCH_FIELDS = Object.freeze(["property_family", "property_subtype"]);
+const NUMERIC_VIEW_COLUMNS = Object.freeze([
+  "price_amount",
+  "bedrooms_count",
+  "premises_count",
+  "hotel_room_count",
+  "floor_number",
+  "total_floors",
+  "storeys_count",
+  "living_area_sqm",
+  "built_area_sqm",
+  "usable_area_sqm",
+  "gross_floor_area_sqm",
+  "land_area_sqm",
+  "primary_area_sqm",
+  "public_latitude",
+  "public_longitude",
+]);
+
+function lexicalSearchText(document, title, description) {
+  return [
+    title,
+    description || "",
+    document.location_label || "",
+    document.municipality || "",
+    document.district || "",
+    document.country_code || "",
+    document.offer_type || "",
+  ].join(" ").trim();
+}
+
+function geographyPathValue(value) {
+  if (Array.isArray(value)) return value.map((entry) => String(entry));
+  if (typeof value === "string" && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.map((entry) => String(entry)) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 export function projectApprovedSearchDocument({ listing = {}, approval = {} } = {}) {
   if (!plainObject(listing) || !plainObject(approval)) throw new Error("Search projection requires listing and approval objects");
   if (!approvalAllowsSearch(approval)) return null;
@@ -334,7 +378,6 @@ export function projectApprovedSearchDocument({ listing = {}, approval = {} } = 
     translation_human_approved: true,
     locale_indexable: true,
     translation_indexable: true,
-    search_text: [title, description].filter(Boolean).join(" "),
   };
   if (description) document.description = description;
   if (approval.has_approved_tour === true) document.has_approved_tour = true;
@@ -343,6 +386,12 @@ export function projectApprovedSearchDocument({ listing = {}, approval = {} } = 
     const value = verifiedFact(facts[field], field, verified);
     if (value !== undefined) document[field] = value;
   }
+  for (const field of TAXONOMY_SEARCH_FIELDS) {
+    const value = optionalText(facts[field]);
+    if (value) document[field] = value;
+  }
+  document.geography_path = geographyPathValue(document.geography_path);
+  document.search_text = lexicalSearchText(document, title, description);
 
   const directPrimaryArea = verifiedFact(facts.primary_area_sqm, "primary_area_sqm", verified);
   if (directPrimaryArea !== undefined && finiteNumber(directPrimaryArea) !== null && finiteNumber(directPrimaryArea) > 0) {
@@ -362,7 +411,22 @@ export function projectApprovedSearchDocument({ listing = {}, approval = {} } = 
     const precision = verifiedFact(facts.public_location_precision, "public_location_precision", verified);
     if (precision !== undefined) document.public_location_precision = precision;
   }
-  return document;
+  return canonicalPublicSearchDocument(document);
+}
+
+function canonicalPublicSearchDocument(document = {}) {
+  return Object.fromEntries(
+    POSTGRES_VIEW_COLUMNS.flatMap((column) => {
+      const value = document[column];
+      if (value === null || value === undefined) return [];
+      if (column === "geography_path") return [[column, geographyPathValue(value)]];
+      if (NUMERIC_VIEW_COLUMNS.includes(column)) {
+        const number = finiteNumber(value);
+        return number === null ? [] : [[column, number]];
+      }
+      return [[column, value]];
+    }),
+  );
 }
 
 export function buildApprovedSearchProjection(rows = []) {
@@ -1758,7 +1822,7 @@ async function postgresProjectionSnapshot({ postgres = {}, projection = null } =
 }
 
 function postgresProjectionDocument(row = {}) {
-  return Object.fromEntries(POSTGRES_VIEW_COLUMNS.map((column) => [column, row[column] ?? null]).filter(([, value]) => value !== null));
+  return canonicalPublicSearchDocument(row);
 }
 
 async function readPostgresProjectionDocuments({ postgres = {} } = {}) {

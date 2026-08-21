@@ -619,6 +619,41 @@ test("Postgres search migration keeps locale routing and index operators aligned
   assert.match(migration, /ms_realty_search_fold"\(\$\{sql\.raw\(SEARCH_TEXT_SQL\(""\)\)\}\) gin_trgm_ops/);
 });
 
+test("approved search projection matches the Postgres view lexical and taxonomy fields", () => {
+  const listing = {
+    id: "MS-CRAWL-0004",
+    listing_reference: "MS-CRAWL-0004",
+    locale: "bg",
+    locale_path: "/bg/imoti/MS-CRAWL-0004",
+    title: "Apartment for rent in Sandanski",
+    description: "Long-term rental in the centre.",
+    property_family: "apartment",
+    property_subtype: "apartment",
+    offer_type: "rent",
+    listing_status: "available",
+  };
+  const document = projectApprovedSearchDocument({
+    listing,
+    approval: {
+      publication_state: "published",
+      translation_human_approved: true,
+      locale_indexable: true,
+      fact_verification: [
+        { field: "offer_type", state: "broker_verified" },
+        { field: "listing_status", state: "broker_verified" },
+      ],
+    },
+  });
+
+  assert.equal(document.search_text, "Apartment for rent in Sandanski Long-term rental in the centre.     rent");
+  assert.equal(document.property_family, "apartment");
+  assert.equal(document.property_subtype, "apartment");
+  assert.deepEqual(document.geography_path, []);
+  assert.equal(document.offer_type, "rent");
+  assert.equal(document.listing_status, "available");
+  assert.equal(document.location_label, undefined);
+});
+
 test("approved search projection omits pending and private facts", () => {
   const listing = {
     id: "MS-2026-0001",
