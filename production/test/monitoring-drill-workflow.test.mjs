@@ -21,6 +21,7 @@ test("monitoring drill gates intentional failure behind an auditable typed dispa
   );
   assert.match(failureStep, /inputs\.confirm_alert_drill/);
   assert.match(failureStep, /node production\/scripts\/probe-production-journeys\.mjs/);
+  assert.match(failureStep, /set -o pipefail/);
   assert.doesNotMatch(failureStep, /exit 1/);
 });
 
