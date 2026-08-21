@@ -1974,7 +1974,11 @@ export function renderSearchPage({
   };
   const selectedFamilies = searchIntent.property_families;
   const selectedSubtype = searchIntent.property_subtypes[0] || null;
-  const applicable = (field) => !selectedFamilies.length || selectedFamilies.every((family) => isFactApplicable(family, field, selectedSubtype));
+  const familyScopedFacts = new Set(["premises_count", "hotel_room_count", "land_area_sqm", "floor_number", "storeys_count"]);
+  const applicable = (field) => {
+    if (!selectedFamilies.length) return !familyScopedFacts.has(field);
+    return selectedFamilies.every((family) => isFactApplicable(family, field, selectedSubtype));
+  };
   const applicableFilterFields = [
     "property_subtype",
     "bedrooms_min",
@@ -1989,6 +1993,7 @@ export function renderSearchPage({
     "storeys_min",
     "storeys_max",
   ].filter((field) => {
+    if (!selectedFamilies.length && field === "property_subtype") return false;
     const fact = {
       bedrooms_min: "bedrooms_count",
       premises_min: "premises_count",

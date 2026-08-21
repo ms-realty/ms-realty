@@ -695,7 +695,9 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
         card.land_area_sqm ? h("span", { "data-card-spec": "land" }, h(Icon, { name: "map", size: 16 }), ` ${card.land_area_sqm} m²`) : null,
         card.area_sqm ? h("span", { "data-card-spec": "area" }, h(Icon, { name: "ruler", size: 16 }), ` ${card.area_sqm} m²`) : null,
         h("span", { "data-card-spec": "photos" }, h(Icon, { name: "camera", size: 16 }), ` ${card.image_count || 0}`),
-        h("span", { className: "mk-pcard__ref", "data-card-spec": "reference" }, card.id),
+        /^MS-CRAWL-/i.test(card.id)
+          ? null
+          : h("span", { className: "mk-pcard__ref", "data-card-spec": "reference" }, card.id),
       ),
       h(
         "nav",

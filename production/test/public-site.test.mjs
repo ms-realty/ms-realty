@@ -474,7 +474,9 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-card-action="detail"/);
   assert.match(html, /data-card-action="inquiry"/);
   assert.match(html, /data-card-action="save"/);
-  assert.match(html, /data-card-spec="reference"/);
+  assert.match(html, /data-listing-id="MS-CRAWL-/);
+  assert.doesNotMatch(html, /data-card-spec="reference"/);
+  assert.doesNotMatch(html, /name="hotel_rooms_min"|name="premises_min"|name="storeys_min"|name="land_area_min"|name="property_subtype"/);
   assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*loading="eager"/);
   const thumbnailLink = html.match(/<a[^>]*data-card-thumbnail="true"[^>]*>/)?.[0] || "";
   assert.match(thumbnailLink, /aria-label="[^"]+; \d+ photos?"/);
@@ -507,6 +509,8 @@ test("search exposes reviewed crawlable suggestions and localized recent-search 
   assert.match(hebrew, /data-guided-search-path="\/he\/search" data-guided-search-success="true"/);
   assert.match(hebrew, /חיפושים אחרונים/);
   assert.match(hebrew, /href="\/he\/search\?property_family=apartment"/);
+  assert.match(hebrew, /name="bedrooms_min"/);
+  assert.doesNotMatch(hebrew, /name="hotel_rooms_min"|name="premises_min"/);
   assert.match(english, /data-guided-search-value="plot">Plot<\/a>/);
   assert.match(english, /data-guided-search-value="agricultural_land">Agricultural land<\/a>/);
   assert.match(english, /data-guided-search-value="hotel">Hotel<\/a>/);
