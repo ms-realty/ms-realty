@@ -113,5 +113,8 @@ test("local recovery is explicit, checksummed, and takes a rollback snapshot", (
   assert.match(script, /prefix: "pre-restore"/);
   assert.match(script, /keepQuiesced: true/);
   assert.match(script, /validateArchiveInApp/);
+  assert.match(script, /chown -R 1001:1001 \$\{targetDirectory\}/);
+  assert.match(script, /releaseBuildMarkerPath = path\.join\(root, "\.ms-realty-release-sha"\)/);
+  assert.match(script, /MS_REALTY_BUILD_MARKER: releaseBuildMarker/);
   assert.match(script, /materializeLocalReadinessInApp\(\)/);
 });

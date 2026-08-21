@@ -23,6 +23,13 @@ const composeOverride = String(process.env.MS_REALTY_COMPOSE_OVERRIDE || "").tri
 const composeFiles = [composeFile, ...(composeOverride ? [path.resolve(root, composeOverride)] : [])];
 const composeFileArgs = composeFiles.flatMap((file) => ["-f", file]);
 const envFile = path.resolve(root, process.env.MS_REALTY_ENV_FILE || ".env.local-production");
+const releaseBuildMarkerPath = path.join(root, ".ms-realty-release-sha");
+const releaseBuildMarker = fs.existsSync(releaseBuildMarkerPath)
+  ? fs.readFileSync(releaseBuildMarkerPath, "utf8").trim()
+  : "";
+if (releaseBuildMarker && !/^[0-9a-f]{40}$/.test(releaseBuildMarker)) {
+  throw new Error("Release build marker must be an exact lowercase Git SHA");
+}
 const command = process.argv[2] || "status";
 const commandArgs = process.argv.slice(3);
 const HERMES_AGENT_ENV_KEYS = ["HERMES_AGENT_API_SERVER_KEY", "HERMES_AGENT_MODEL", "HERMES_AGENT_LLM_BASE_URL", "HERMES_AGENT_LLM_API_KEY"];
@@ -84,11 +91,19 @@ function parseEnv(contents) {
   );
 }
 
+function composeEnvironment(envOverrides = {}) {
+  return {
+    ...process.env,
+    ...envOverrides,
+    ...(releaseBuildMarker ? { MS_REALTY_BUILD_MARKER: releaseBuildMarker } : {}),
+  };
+}
+
 function compose(args, { allowFailure = false, envOverrides = {} } = {}) {
   const result = spawnSync(
     "docker",
     ["compose", "--env-file", envFile, ...composeFileArgs, ...args],
-    { cwd: root, stdio: "inherit", env: { ...process.env, ...envOverrides } },
+    { cwd: root, stdio: "inherit", env: composeEnvironment(envOverrides) },
   );
   if (result.error) throw result.error;
   if (!allowFailure && result.status !== 0) process.exit(result.status ?? 1);
@@ -101,7 +116,7 @@ function composeCapture(args, { input, encoding = "utf8", envOverrides = {} } = 
     ["compose", "--env-file", envFile, ...composeFileArgs, ...args],
     {
       cwd: root,
-      env: { ...process.env, ...envOverrides },
+      env: composeEnvironment(envOverrides),
       input,
       encoding,
       maxBuffer: 512 * 1024 * 1024,
@@ -323,7 +338,7 @@ function restoreRuntimeVolume(backupDir, targetDirectory, component) {
     "sh",
     "runtime-init",
     "-ec",
-    `find ${targetDirectory} -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; tar -xzf /backup/${component.file} -C ${targetDirectory}`,
+    `find ${targetDirectory} -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; tar -xzf /backup/${component.file} -C ${targetDirectory}; chown -R 1001:1001 ${targetDirectory}`,
   ]);
 }
 
