@@ -10,6 +10,7 @@ import { applyListingEdits } from "../lib/listing-edits.mjs";
 import { listingFromCmsRecord, loadCmsSeed } from "../lib/runtime.mjs";
 import { PUBLIC_APP_JS } from "../lib/ui/client.mjs";
 import {
+  localizedListingValue,
   renderAdminShell,
   renderContactPage,
   renderGuidePage,
@@ -20,6 +21,7 @@ import {
   renderSearchPage,
   renderSellerPage,
 } from "../lib/public-site.mjs";
+import { CANONICAL_PROPERTY_FAMILIES } from "../lib/listing-facts.mjs";
 
 Object.assign(process.env, {
   MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
@@ -325,6 +327,8 @@ test("search route is locale-scoped and list-first on mobile", () => {
     ["recommended", "price_asc", "price_desc"],
   );
   assert.ok(search.search.controls.filter_options.locations.includes("Sandanski"));
+  assert.deepEqual(search.search.controls.filter_options.property_families, [...CANONICAL_PROPERTY_FAMILIES]);
+  assert.deepEqual(search.search.controls.filter_options.property_types, [...CANONICAL_PROPERTY_FAMILIES]);
   assert.ok(search.search.controls.filter_options.property_types.includes("apartment"));
   assert.ok(search.search.controls.filter_options.offer_types.includes("sale"));
   assert.ok(search.search.controls.filter_options.bedrooms.includes(2));
@@ -503,6 +507,17 @@ test("search exposes reviewed crawlable suggestions and localized recent-search 
   assert.match(hebrew, /data-guided-search-path="\/he\/search" data-guided-search-success="true"/);
   assert.match(hebrew, /חיפושים אחרונים/);
   assert.match(hebrew, /href="\/he\/search\?property_family=apartment"/);
+  assert.match(english, /data-guided-search-value="plot">Plot<\/a>/);
+  assert.match(english, /data-guided-search-value="agricultural_land">Agricultural land<\/a>/);
+  assert.match(english, /data-guided-search-value="hotel">Hotel<\/a>/);
+});
+
+test("canonical property families have human labels instead of raw taxonomy keys", () => {
+  assert.equal(localizedListingValue("en", "property_type", "plot"), "Plot");
+  assert.equal(localizedListingValue("en", "property_type", "agricultural_land"), "Agricultural land");
+  assert.equal(localizedListingValue("bg", "property_type", "plot"), "Парцел");
+  assert.equal(localizedListingValue("bg", "property_type", "agricultural_land"), "Земеделска земя");
+  assert.equal(localizedListingValue("en", "property_type", "land"), "Land");
 });
 
 test("zero-result searches render a useful mobile recovery state", () => {

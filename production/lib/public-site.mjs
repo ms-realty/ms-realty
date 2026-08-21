@@ -40,7 +40,7 @@ import { publicMediaLibrary } from "./media.mjs";
 import { isPublicBrokerContact } from "./broker-contacts.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
-import { isFactApplicable } from "./listing-facts.mjs";
+import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable } from "./listing-facts.mjs";
 import { normalizeSearchIntent, searchIntentToQueryFilters } from "./search-intent.mjs";
 
 const APPROVED_GUIDE_GROUPS = approvedContentGuideGroups(readApprovedCmsContent());
@@ -86,6 +86,7 @@ const ACTION_LABELS = {
     municipality: "Община",
     district: "Област",
     propertyType: "Тип",
+    propertySubtype: "Подтип",
     area: "Площ (m²)",
     areaMin: "Мин. площ (m²)",
     areaMax: "Макс. площ (m²)",
@@ -143,7 +144,7 @@ const ACTION_LABELS = {
     sellerValuation: "Оценка за продавач",
     requestLanguage: "Заяви този език",
     guideActions: "Действия за ръководството",
-    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Оферта", bedrooms: "Спални", floor: "Етаж", land_area_sqm: "Площ на парцела", condition: "Състояние", location_precision: "Локация" },
+    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Оферта", bedrooms: "Спални", premises: "Помещения", hotel_rooms: "Хотелски стаи", storeys: "Етажи", floor: "Етаж", land_area_sqm: "Площ на парцела", condition: "Състояние", location_precision: "Локация" },
   },
   en: {
     inquiry: "Inquiry",
@@ -177,6 +178,7 @@ const ACTION_LABELS = {
     municipality: "Municipality",
     district: "District",
     propertyType: "Type",
+    propertySubtype: "Subtype",
     area: "Area (m²)",
     areaMin: "Min. area (m²)",
     areaMax: "Max. area (m²)",
@@ -234,7 +236,7 @@ const ACTION_LABELS = {
     sellerValuation: "Seller valuation",
     requestLanguage: "Request this language",
     guideActions: "Guide actions",
-    factLabels: { location: "Location", property_type: "Type", offer_type: "Offer", bedrooms: "Bedrooms", floor: "Floor", land_area_sqm: "Land area", condition: "Condition", location_precision: "Location" },
+    factLabels: { location: "Location", property_type: "Type", offer_type: "Offer", bedrooms: "Bedrooms", premises: "Premises", hotel_rooms: "Hotel rooms", storeys: "Storeys", floor: "Floor", land_area_sqm: "Land area", condition: "Condition", location_precision: "Location" },
   },
   de: {
     inquiry: "Anfrage",
@@ -268,6 +270,7 @@ const ACTION_LABELS = {
     municipality: "Gemeinde",
     district: "Verwaltungsbezirk",
     propertyType: "Typ",
+    propertySubtype: "Untertyp",
     area: "Fläche (m²)",
     areaMin: "Mindestfläche (m²)",
     areaMax: "Höchstfläche (m²)",
@@ -325,7 +328,7 @@ const ACTION_LABELS = {
     sellerValuation: "Verkaufsbewertung",
     requestLanguage: "Diese Sprache anfragen",
     guideActions: "Ratgeberaktionen",
-    factLabels: { location: "Ort", property_type: "Typ", offer_type: "Angebot", bedrooms: "Schlafzimmer", floor: "Etage", land_area_sqm: "Grundstücksfläche", condition: "Zustand", location_precision: "Standort" },
+    factLabels: { location: "Ort", property_type: "Typ", offer_type: "Angebot", bedrooms: "Schlafzimmer", premises: "Räume", hotel_rooms: "Hotelzimmer", storeys: "Stockwerke", floor: "Etage", land_area_sqm: "Grundstücksfläche", condition: "Zustand", location_precision: "Standort" },
   },
   nl: {
     inquiry: "Aanvraag",
@@ -359,6 +362,7 @@ const ACTION_LABELS = {
     municipality: "Gemeente",
     district: "Bestuurlijk district",
     propertyType: "Type",
+    propertySubtype: "Subtype",
     area: "Oppervlakte (m²)",
     areaMin: "Min. oppervlakte (m²)",
     areaMax: "Max. oppervlakte (m²)",
@@ -416,7 +420,7 @@ const ACTION_LABELS = {
     sellerValuation: "Verkoopwaardering",
     requestLanguage: "Vraag deze taal aan",
     guideActions: "Gidsacties",
-    factLabels: { location: "Locatie", property_type: "Type", offer_type: "Aanbod", bedrooms: "Slaapkamers", floor: "Verdieping", land_area_sqm: "Perceeloppervlakte", condition: "Staat", location_precision: "Locatie" },
+    factLabels: { location: "Locatie", property_type: "Type", offer_type: "Aanbod", bedrooms: "Slaapkamers", premises: "Ruimtes", hotel_rooms: "Hotelkamers", storeys: "Verdiepingen", floor: "Verdieping", land_area_sqm: "Perceeloppervlakte", condition: "Staat", location_precision: "Locatie" },
   },
   ru: {
     inquiry: "Запрос",
@@ -450,6 +454,7 @@ const ACTION_LABELS = {
     municipality: "Муниципалитет",
     district: "Область",
     propertyType: "Тип",
+    propertySubtype: "Подтип",
     area: "Площадь (м²)",
     areaMin: "Мин. площадь (м²)",
     areaMax: "Макс. площадь (м²)",
@@ -507,7 +512,7 @@ const ACTION_LABELS = {
     sellerValuation: "Оценка для продавца",
     requestLanguage: "Запросить этот язык",
     guideActions: "Действия руководства",
-    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Предложение", bedrooms: "Спальни", floor: "Этаж", land_area_sqm: "Площадь участка", condition: "Состояние", location_precision: "Локация" },
+    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Предложение", bedrooms: "Спальни", premises: "Помещения", hotel_rooms: "Номера", storeys: "Этажи", floor: "Этаж", land_area_sqm: "Площадь участка", condition: "Состояние", location_precision: "Локация" },
   },
   el: {
     inquiry: "Ερώτηση",
@@ -541,6 +546,7 @@ const ACTION_LABELS = {
     municipality: "Δήμος",
     district: "Διοικητική περιφέρεια",
     propertyType: "Τύπος",
+    propertySubtype: "Υποτύπος",
     area: "Εμβαδόν (m²)",
     areaMin: "Ελάχ. εμβαδόν (m²)",
     areaMax: "Μέγ. εμβαδόν (m²)",
@@ -598,7 +604,7 @@ const ACTION_LABELS = {
     sellerValuation: "Εκτίμηση πωλητή",
     requestLanguage: "Ζητήστε αυτή τη γλώσσα",
     guideActions: "Ενέργειες οδηγού",
-    factLabels: { location: "Τοποθεσία", property_type: "Τύπος", offer_type: "Προσφορά", bedrooms: "Υπνοδωμάτια", floor: "Όροφος", land_area_sqm: "Εμβαδόν οικοπέδου", condition: "Κατάσταση", location_precision: "Τοποθεσία" },
+    factLabels: { location: "Τοποθεσία", property_type: "Τύπος", offer_type: "Προσφορά", bedrooms: "Υπνοδωμάτια", premises: "Χώροι", hotel_rooms: "Δωμάτια ξενοδοχείου", storeys: "Όροφοι", floor: "Όροφος", land_area_sqm: "Εμβαδόν οικοπέδου", condition: "Κατάσταση", location_precision: "Τοποθεσία" },
   },
   he: {
     inquiry: "פנייה",
@@ -632,6 +638,7 @@ const ACTION_LABELS = {
     municipality: "רשות מקומית",
     district: "מחוז",
     propertyType: "סוג",
+    propertySubtype: "תת-סוג",
     area: "שטח (מ״ר)",
     areaMin: "שטח מינימלי (מ״ר)",
     areaMax: "שטח מרבי (מ״ר)",
@@ -689,7 +696,7 @@ const ACTION_LABELS = {
     sellerValuation: "הערכת מוכר",
     requestLanguage: "בקשת שפה זו",
     guideActions: "פעולות מדריך",
-    factLabels: { location: "מיקום", property_type: "סוג", offer_type: "הצעה", bedrooms: "חדרי שינה", floor: "קומה", land_area_sqm: "שטח מגרש", condition: "מצב", location_precision: "מיקום" },
+    factLabels: { location: "מיקום", property_type: "סוג", offer_type: "הצעה", bedrooms: "חדרי שינה", premises: "חללים", hotel_rooms: "חדרי מלון", storeys: "קומות", floor: "קומה", land_area_sqm: "שטח מגרש", condition: "מצב", location_precision: "מיקום" },
   },
 };
 
@@ -711,7 +718,7 @@ const UI_COPY = {
     locationPrecisions: { area_only: "само район", approximate: "приблизителна локация", exact: "точна локация" },
     sourceFallback: "Версия на изходния език",
     breadcrumb: "Навигационна пътека",
-    propertyTypes: { commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", land: "Парцел", property: "Имот" },
+    propertyTypes: { commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", plot: "Парцел", agricultural_land: "Земеделска земя", land: "Парцел", property: "Имот" },
     offerTypes: { sale: "За продажба", rent: "Под наем" },
   },
   en: {
@@ -728,7 +735,7 @@ const UI_COPY = {
     locationPrecisions: { area_only: "area only", approximate: "approximate location", exact: "exact location" },
     sourceFallback: "Source-language version",
     breadcrumb: "Breadcrumb",
-    propertyTypes: { commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", land: "Land", property: "Property" },
+    propertyTypes: { commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", plot: "Plot", agricultural_land: "Agricultural land", land: "Land", property: "Property" },
     offerTypes: { sale: "For sale", rent: "For rent" },
   },
   de: {
@@ -745,7 +752,7 @@ const UI_COPY = {
     locationPrecisions: { area_only: "nur Gebiet", approximate: "ungefährer Standort", exact: "genauer Standort" },
     sourceFallback: "Version in Ausgangssprache",
     breadcrumb: "Brotkrümelnavigation",
-    propertyTypes: { commercial: "Gewerbeimmobilie", multi_unit: "Apartments", apartment: "Wohnung", hotel: "Hotel", house: "Haus", land: "Grundstück", property: "Immobilie" },
+    propertyTypes: { commercial: "Gewerbeimmobilie", multi_unit: "Apartments", apartment: "Wohnung", hotel: "Hotel", house: "Haus", plot: "Grundstück", agricultural_land: "Landwirtschaftsfläche", land: "Grundstück", property: "Immobilie" },
     offerTypes: { sale: "Zum Kauf", rent: "Zur Miete" },
   },
   nl: {
@@ -762,7 +769,7 @@ const UI_COPY = {
     locationPrecisions: { area_only: "alleen gebied", approximate: "benaderde locatie", exact: "exacte locatie" },
     sourceFallback: "Versie in brontaal",
     breadcrumb: "Kruimelpad",
-    propertyTypes: { commercial: "Commercieel vastgoed", multi_unit: "Appartementen", apartment: "Appartement", hotel: "Hotel", house: "Huis", land: "Grond", property: "Object" },
+    propertyTypes: { commercial: "Commercieel vastgoed", multi_unit: "Appartementen", apartment: "Appartement", hotel: "Hotel", house: "Huis", plot: "Kavel", agricultural_land: "Landbouwgrond", land: "Grond", property: "Object" },
     offerTypes: { sale: "Te koop", rent: "Te huur" },
   },
   ru: {
@@ -779,7 +786,7 @@ const UI_COPY = {
     locationPrecisions: { area_only: "только район", approximate: "приблизительная локация", exact: "точная локация" },
     sourceFallback: "Версия на исходном языке",
     breadcrumb: "Навигационная цепочка",
-    propertyTypes: { commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", land: "Участок", property: "Объект" },
+    propertyTypes: { commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", plot: "Участок", agricultural_land: "Сельхозземля", land: "Участок", property: "Объект" },
     offerTypes: { sale: "Продажа", rent: "Аренда" },
   },
   el: {
@@ -796,7 +803,7 @@ const UI_COPY = {
     locationPrecisions: { area_only: "μόνο περιοχή", approximate: "κατά προσέγγιση τοποθεσία", exact: "ακριβής τοποθεσία" },
     sourceFallback: "Έκδοση στη γλώσσα προέλευσης",
     breadcrumb: "Διαδρομή πλοήγησης",
-    propertyTypes: { commercial: "Επαγγελματικό ακίνητο", multi_unit: "Διαμερίσματα", apartment: "Διαμέρισμα", hotel: "Ξενοδοχείο", house: "Κατοικία", land: "Οικόπεδο", property: "Ακίνητο" },
+    propertyTypes: { commercial: "Επαγγελματικό ακίνητο", multi_unit: "Διαμερίσματα", apartment: "Διαμέρισμα", hotel: "Ξενοδοχείο", house: "Κατοικία", plot: "Οικόπεδο", agricultural_land: "Αγροτική γη", land: "Οικόπεδο", property: "Ακίνητο" },
     offerTypes: { sale: "Προς πώληση", rent: "Προς ενοικίαση" },
   },
   he: {
@@ -813,7 +820,7 @@ const UI_COPY = {
     locationPrecisions: { area_only: "אזור בלבד", approximate: "מיקום משוער", exact: "מיקום מדויק" },
     sourceFallback: "גרסה בשפת המקור",
     breadcrumb: "נתיב ניווט",
-    propertyTypes: { commercial: "נכס מסחרי", multi_unit: "דירות", apartment: "דירה", hotel: "מלון", house: "בית", land: "מגרש", property: "נכס" },
+    propertyTypes: { commercial: "נכס מסחרי", multi_unit: "דירות", apartment: "דירה", hotel: "מלון", house: "בית", plot: "מגרש", agricultural_land: "קרקע חקלאית", land: "מגרש", property: "נכס" },
     offerTypes: { sale: "למכירה", rent: "להשכרה" },
   },
 };
@@ -1413,12 +1420,13 @@ function listingCard(registry, listing, locale) {
     content_locale: copyLocale,
     location: localizedLocationForView(locale.code, view),
     property_type: view.property_type,
-    property_type_label: localizedListingValue(locale.code, "property_type", view.property_type),
+    property_type_label: localizedListingValue(locale.code, "property_type", view.property_family || view.property_type),
     offer_type: view.offer_type,
     offer_type_label: localizedListingValue(locale.code, "offer_type", view.offer_type),
     bedrooms: view.bedrooms,
     bedrooms_not_applicable: view.bedrooms_not_applicable,
     area_sqm: view.area_sqm,
+    land_area_sqm: view.land_area_sqm,
     price_eur: view.price_eur,
     price_on_request: view.price_on_request,
     listing_status: view.listing_status,
@@ -1830,9 +1838,11 @@ export function renderListingPage({ registry, listing, localeCode, translations,
       facts: {
         id: view.id,
         location: localizedLocationForView(locale.code, view),
-        property_type: view.property_type,
+        property_type: view.property_family || view.property_type,
+        property_family: view.property_family || view.property_type,
         offer_type: view.offer_type,
         bedrooms: view.bedrooms,
+        bedrooms_not_applicable: view.bedrooms_not_applicable === true,
         area_sqm: view.area_sqm,
         floor: view.floor,
         total_floors: view.total_floors,
@@ -1923,7 +1933,6 @@ export function renderSearchPage({
   const catalogDistricts = GEOGRAPHY_CATALOG.areas
     .filter((area) => area.country_code === "BG" && area.level === "district")
     .map((area) => area.names.en);
-  const familyFor = (listing) => listing.property_family || listing.property_type;
   const filterOptions = {
     countries: GEOGRAPHY_CATALOG.countries.map((country) => ({
       code: country.code,
@@ -1955,8 +1964,8 @@ export function renderSearchPage({
     districts: [...new Set([...catalogDistricts, ...filterViews.filter((listing) => listing.country_code === "BG").map((listing) => listing.district).filter(Boolean)])].sort(
       (left, right) => localizedSearchFilterValue(locale.code, "district", left).localeCompare(localizedSearchFilterValue(locale.code, "district", right)),
     ),
-    property_families: [...new Set(filterViews.map(familyFor).filter(Boolean))].sort(),
-    property_types: [...new Set(filterViews.map(familyFor).filter(Boolean))].sort(),
+    property_families: [...CANONICAL_PROPERTY_FAMILIES],
+    property_types: [...CANONICAL_PROPERTY_FAMILIES],
     property_subtypes: [...new Set(filterViews.map((listing) => listing.property_subtype).filter(Boolean))].sort(),
     offer_types: [...new Set(filterViews.map((listing) => listing.offer_type).filter(Boolean))].sort(),
     bedrooms: [...new Set(filterViews.map((listing) => listing.bedrooms ?? listing.bedrooms_count).filter((value) => Number.isInteger(value) && value >= 0))].sort((left, right) => left - right),

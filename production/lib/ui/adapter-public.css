@@ -410,7 +410,7 @@ a.mk-btn:hover { text-decoration: none; }
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 52px var(--hero-search-action-width);
-  grid-template-rows: 52px auto;
+  grid-template-rows: 52px auto auto;
   align-items: center;
   gap: 0;
   min-height: 64px;
@@ -434,15 +434,104 @@ a.mk-btn:hover { text-decoration: none; }
   align-items: center;
   min-height: 52px;
 }
-.hp-hero__search .mk-search__field input {
-  border: none;
+.hp-hero__search .mk-search__field input,
+.hp-hero__search .mk-search__field input.mk-searchbar__input {
+  border: 0;
+  border-radius: 0;
   background: transparent;
   padding: 0;
   min-height: 52px;
   box-shadow: none;
+  outline: none;
+  caret-color: var(--brand);
+  -webkit-appearance: none;
+  appearance: none;
 }
-.hp-hero__search .mk-search__field input:focus-visible { box-shadow: none; outline: none; }
-.hp-hero__search .mk-search__seg:focus-within { background: var(--surface-hover); box-shadow: inset 0 0 0 2px var(--brand); }
+.hp-hero__search .mk-search__field input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+.hp-hero__search .mk-search__field input:focus,
+.hp-hero__search .mk-search__field input:focus-visible {
+  border: 0;
+  box-shadow: none;
+  outline: none;
+}
+.hp-hero__search .mk-search__field input::-webkit-search-decoration,
+.hp-hero__search .mk-search__field input::-webkit-search-cancel-button,
+.hp-hero__search .mk-search__field input::-webkit-search-results-button,
+.hp-hero__search .mk-search__field input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+.hp-hero__search-form:has(.mk-search__field input:focus-visible) {
+  box-shadow: var(--shadow-lg), 0 0 0 2px var(--brand);
+}
+.hp-hero__search .mk-search__seg:focus-within { background: transparent; box-shadow: none; }
+.hp-hero__families {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 8px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.hp-hero__family {
+  position: relative;
+  display: inline-flex;
+  margin: 0;
+  cursor: pointer;
+}
+main form label.hp-hero__family {
+  display: inline-flex;
+  gap: 0;
+  font-weight: var(--fw-medium);
+}
+.hp-hero__family input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  appearance: none;
+}
+.hp-hero__family span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--surface) 55%, transparent);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  box-shadow: var(--shadow-xs);
+  transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard);
+}
+.hp-hero__family:hover span { background: var(--surface); }
+.hp-hero__family:has(input:checked) span {
+  background: var(--surface);
+  color: var(--brand);
+  font-weight: var(--fw-semibold);
+}
+.hp-hero__family:has(input:focus-visible) span { box-shadow: var(--shadow-focus); }
+.hp-hero__search-form:has(.hp-hero__family input[value="plot"]:checked) .hp-hero__advanced-field--bedrooms,
+.hp-hero__search-form:has(.hp-hero__family input[value="agricultural_land"]:checked) .hp-hero__advanced-field--bedrooms,
+.hp-hero__search-form:has(.hp-hero__family input[value="commercial"]:checked) .hp-hero__advanced-field--bedrooms,
+.hp-hero__search-form:has(.hp-hero__family input[value="hotel"]:checked) .hp-hero__advanced-field--bedrooms {
+  display: none;
+}
 .hp-hero__location-options {
   position: absolute;
   z-index: 20;
@@ -529,7 +618,7 @@ a.mk-btn:hover { text-decoration: none; }
 .hp-hero__advanced-trigger[aria-expanded="true"] { color: var(--text-strong); background: var(--surface-sunken); }
 .hp-hero__advanced-panel {
   grid-column: 1 / 4;
-  grid-row: 2;
+  grid-row: 3;
   position: static;
   width: 100%;
   margin-top: 0;
@@ -688,7 +777,7 @@ a.mk-btn:hover { text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   .hp-hero__advanced-trigger { scroll-behavior: auto; }
 }
-/* ---- Property cards: real <img> thumbnails + action row ---- */
+/* ---- Property cards: real photo thumbnails + action row ---- */
 .mk-pcard { height: 100%; }
 .mk-pcard__media { display: block; }
 .mk-pcard__media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }

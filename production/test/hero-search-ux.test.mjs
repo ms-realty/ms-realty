@@ -34,7 +34,7 @@ test("home hero has responsive local imagery and an accessible full filter contr
   const form = html.slice(html.indexOf('id="home-hero-search-form"'), html.indexOf("</form>", html.indexOf('id="home-hero-search-form"')));
   assert.match(form, /data-geography-combobox="true"[^>]*data-geography-endpoint="\/api\/geography"[^>]*data-geography-locale="en"/);
   assert.match(form, /<label class="mk-sr-only" for="home-search-q">Location<\/label>/);
-  assert.match(form, /id="home-search-q" name="location" type="search" autocomplete="off" placeholder="City, town, municipality or region" role="combobox"/);
+  assert.match(form, /id="home-search-q" name="location" type="search" class="mk-searchbar__input" autocomplete="off" placeholder="City, town, municipality or region" role="combobox"/);
   assert.match(form, /aria-autocomplete="list" aria-haspopup="listbox" aria-controls="home-search-location-options" aria-expanded="false"/);
   assert.match(form, /type="hidden" name="geography_id" value="" data-geography-id="true"/);
   assert.match(form, /id="home-search-location-options" class="hp-hero__location-options" role="listbox" aria-label="Location suggestions"[^>]*hidden/);
@@ -45,8 +45,16 @@ test("home hero has responsive local imagery and an accessible full filter contr
   assert.match(filterTrigger, /<svg[^>]*>/);
   assert.match(filterTrigger, /<span class="mk-sr-only">Filters<\/span>/);
   assert.doesNotMatch(filterTrigger, /chevron-down/);
-  for (const name of ["country_code", "region_id", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max"]) {
-    assert.match(form, new RegExp(`name="${name}" form="home-hero-search-form"`));
+  assert.match(form, /class="hp-hero__families"[^>]*aria-label="Type"/);
+  for (const family of ["apartment", "house", "plot", "agricultural_land", "commercial", "hotel"]) {
+    assert.match(form, new RegExp(`name="property_family" value="${family}" form="home-hero-search-form"`));
+  }
+  assert.match(form, />Plot<\/span>/);
+  assert.match(form, />Agricultural land<\/span>/);
+  assert.doesNotMatch(form, />plot<\/span>/);
+  assert.doesNotMatch(form, /name="property_type"/);
+  for (const name of ["country_code", "region_id", "property_family", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max"]) {
+    assert.match(form, new RegExp(`name="${name}"[^>]*form="home-hero-search-form"`));
   }
   assert.doesNotMatch(form, /name="q"/);
   assert.doesNotMatch(form, /name="municipality"/);
@@ -80,6 +88,7 @@ test("home hero has responsive local imagery and an accessible full filter contr
 
 test("hero enhancement pauses for motion preference, hover, and focus while the inline filter panel remains usable", () => {
   const css = readFileSync(new URL("../lib/ui/adapter-public.css", import.meta.url), "utf8");
+  const adapterCss = readFileSync(new URL("../lib/ui/adapter.css", import.meta.url), "utf8");
 
   assert.match(PUBLIC_APP_JS, /function initHeroGallery\(\)/);
   assert.match(PUBLIC_APP_JS, /prefers-reduced-motion: reduce/);
@@ -112,12 +121,16 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(css, /object-position: var\(--hero-object-position, 50% 50%\)/);
   assert.match(css, /@media \(max-width: 679px\)/);
   assert.match(css, /@media \(min-width: 680px\) \{[\s\S]*?\.hp-hero \{ align-items: flex-start; \}[\s\S]*?\.hp-hero__in \{ padding-block: clamp\(6rem, 8vw, 7rem\) var\(--space-8\); \}[\s\S]*?data-hero-mobile-only/);
-  assert.match(css, /\.hp-hero__search-form \{[\s\S]*?--hero-search-action-width: 126px;[\s\S]*?grid-template-columns: minmax\(0, 1fr\) 52px var\(--hero-search-action-width\);[\s\S]*?grid-template-rows: 52px auto;[\s\S]*?min-height: 64px;[\s\S]*?overflow: visible;/);
+  assert.match(css, /\.hp-hero__search-form \{[\s\S]*?--hero-search-action-width: 126px;[\s\S]*?grid-template-columns: minmax\(0, 1fr\) 52px var\(--hero-search-action-width\);[\s\S]*?grid-template-rows: 52px auto auto;[\s\S]*?min-height: 64px;[\s\S]*?overflow: visible;/);
   assert.match(css, /\.hp-hero__search \.mk-search__seg \{[\s\S]*?align-items: center;[\s\S]*?min-height: 52px;/);
   assert.match(css, /\.hp-hero__location-options \{[\s\S]*?inset-inline: 6px;[\s\S]*?top: 64px;[\s\S]*?max-height: min\(360px, 52svh\);/);
   assert.match(css, /\.hp-hero__location-option \{[\s\S]*?min-height: 52px;/);
   assert.match(css, /\.hp-hero__advanced-trigger \{[\s\S]*?grid-column: 2;[\s\S]*?width: 52px;[\s\S]*?min-height: 52px;/);
-  assert.match(css, /\.hp-hero__advanced-panel \{[\s\S]*?grid-column: 1 \/ 4;[\s\S]*?position: static;[\s\S]*?border-top:/);
+  assert.match(css, /\.hp-hero__families \{[\s\S]*?grid-column: 1 \/ -1;[\s\S]*?grid-row: 2;/);
+  assert.match(css, /\.hp-hero__search-form:has\(\.mk-search__field input:focus-visible\) \{[\s\S]*?box-shadow:/);
+  assert.match(css, /\.hp-hero__search \.mk-search__field input::-webkit-search-cancel-button/);
+  assert.match(adapterCss, /main input:focus-visible:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\):not\(\.mk-input__field\):not\(\.mk-searchbar__input\)/);
+  assert.match(css, /\.hp-hero__advanced-panel \{[\s\S]*?grid-column: 1 \/ 4;[\s\S]*?grid-row: 3;[\s\S]*?position: static;[\s\S]*?border-top:/);
   assert.match(css, /\.hp-hero__advanced-panel\[hidden\] \{ display: none; \}/);
   assert.doesNotMatch(css.match(/\.hp-hero__advanced-panel \{[^}]*\}/)?.[0] || "", /position:\s*absolute/);
   assert.match(css, /\.hp-hero__advanced-grid \{[\s\S]*?grid-template-columns: repeat\(12, minmax\(0, 1fr\)\);[\s\S]*?border: 0;[\s\S]*?box-shadow: none;/);

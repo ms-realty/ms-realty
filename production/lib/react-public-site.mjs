@@ -689,7 +689,10 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       h(
         "div",
         { className: "mk-pcard__specs" },
-        card.bedrooms ? h("span", { "data-card-spec": "bedrooms" }, h(Icon, { name: "bed", size: 16 }), ` ${card.bedrooms}`) : null,
+        card.bedrooms && !card.bedrooms_not_applicable
+          ? h("span", { "data-card-spec": "bedrooms" }, h(Icon, { name: "bed", size: 16 }), ` ${card.bedrooms}`)
+          : null,
+        card.land_area_sqm ? h("span", { "data-card-spec": "land" }, h(Icon, { name: "map", size: 16 }), ` ${card.land_area_sqm} m²`) : null,
         card.area_sqm ? h("span", { "data-card-spec": "area" }, h(Icon, { name: "ruler", size: 16 }), ` ${card.area_sqm} m²`) : null,
         h("span", { "data-card-spec": "photos" }, h(Icon, { name: "camera", size: 16 }), ` ${card.image_count || 0}`),
         h("span", { className: "mk-pcard__ref", "data-card-spec": "reference" }, card.id),
@@ -745,7 +748,10 @@ function factsList(facts = {}, labels = labelsFor("en"), localeCode = "en") {
     { "data-listing-facts": "true" },
     ...["property_type", "offer_type", "bedrooms", "area_sqm", "floor", "land_area_sqm", "condition", "location_precision"]
       .map((key) => [key, facts[key]])
-      .filter(([, value]) => value !== null && value !== undefined && value !== "")
+      .filter(([key, value]) => {
+        if (key === "bedrooms" && facts.bedrooms_not_applicable) return false;
+        return value !== null && value !== undefined && value !== "";
+      })
       .flatMap(([key, value]) => [
         h("dt", { key: `${key}-term` }, key === "area_sqm" ? labels.area : labels.factLabels?.[key] || key.replaceAll("_", " ")),
         h(
@@ -883,6 +889,7 @@ function HeroAdvancedSearch({ page, labels, chrome }) {
           id: "home-search-q",
           name: "location",
           type: "search",
+          className: "mk-searchbar__input",
           autoComplete: "off",
           placeholder: labels.locationSearchHint,
           role: "combobox",
@@ -936,6 +943,25 @@ function HeroAdvancedSearch({ page, labels, chrome }) {
       h("span", null, labels.search),
     ),
     h(
+      "fieldset",
+      { className: "hp-hero__families", "aria-label": labels.propertyType },
+      h("legend", { className: "mk-sr-only" }, labels.propertyType),
+      h(
+        "label",
+        { className: "hp-hero__family" },
+        h("input", { type: "radio", name: "property_family", value: "", form: formId, defaultChecked: true }),
+        h("span", null, labels.any),
+      ),
+      ...(filterOptions.property_families || filterOptions.property_types || []).map((family) =>
+        h(
+          "label",
+          { key: family, className: "hp-hero__family" },
+          h("input", { type: "radio", name: "property_family", value: family, form: formId }),
+          h("span", null, localizedListingValue(page.locale, "property_type", family)),
+        ),
+      ),
+    ),
+    h(
       "div",
       { id: advancedId, className: "hp-hero__advanced-panel", hidden: true },
       h(
@@ -974,15 +1000,6 @@ function HeroAdvancedSearch({ page, labels, chrome }) {
           className: "hp-hero__advanced-field--offer",
           values: filterOptions.offer_types || [],
           optionLabel: (value) => localizedListingValue(page.locale, "offer_type", value),
-        }),
-        heroSearchSelect({
-          ...selectProps,
-          id: "home-search-property-type",
-          name: "property_type",
-          label: labels.propertyType,
-          className: "hp-hero__advanced-field--property",
-          values: filterOptions.property_types || [],
-          optionLabel: (value) => localizedListingValue(page.locale, "property_type", value),
         }),
         heroSearchSelect({
           ...selectProps,
@@ -1616,7 +1633,7 @@ function SearchBody({ page }) {
         (value) => localizedListingValue(page.locale, "property_type", value),
       ),
       applicableFilterFields.has("property_subtype")
-        ? filterSelect(idPrefix, "property_subtype", labels.propertyType, filterOptions.property_subtypes || [])
+        ? filterSelect(idPrefix, "property_subtype", labels.propertySubtype || labels.propertyType, filterOptions.property_subtypes || [])
         : null,
       filterSelect(
         idPrefix,
@@ -1656,10 +1673,10 @@ function SearchBody({ page }) {
           )
         : null,
       applicableFilterFields.has("premises_min")
-        ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || "Premises", filterOptions.premises || [], (value) => `${value}+`)
+        ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || labels.propertyType, filterOptions.premises || [], (value) => `${value}+`)
         : null,
       applicableFilterFields.has("hotel_rooms_min")
-        ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || "Hotel rooms", filterOptions.hotel_rooms || [], (value) => `${value}+`)
+        ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
         : null,
       h(
         "fieldset",
@@ -1712,7 +1729,7 @@ function SearchBody({ page }) {
         ? h(
             "div",
             { className: "sr-fg" },
-            h("label", { className: "hdr", htmlFor: `${idPrefix}-storeys_min` }, labels.factLabels?.storeys || "Storeys"),
+            h("label", { className: "hdr", htmlFor: `${idPrefix}-storeys_min` }, labels.factLabels?.storeys || labels.propertyType),
             h("input", { id: `${idPrefix}-storeys_min`, name: "storeys_min", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.storeys_min || "" }),
           )
         : null,
@@ -2168,11 +2185,19 @@ function ListingBody({ page }) {
     );
   });
 
-  const specIcons = { bedrooms: "bed", property_type: "house", offer_type: "key", location: "map-pin" };
-  const specs = ["bedrooms", "property_type", "offer_type", "location"]
-    .filter((key) => facts[key])
+  const specIcons = { bedrooms: "bed", land_area_sqm: "map", area_sqm: "ruler", property_type: "house", offer_type: "key", location: "map-pin" };
+  const specs = ["bedrooms", "land_area_sqm", "area_sqm", "property_type", "offer_type", "location"]
+    .filter((key) => {
+      if (key === "bedrooms" && facts.bedrooms_not_applicable) return false;
+      return facts[key];
+    })
     .map((key) => {
-      const value = key === "property_type" || key === "offer_type" ? localizedListingValue(page.locale, key, facts[key]) : facts[key];
+      const value =
+        key === "property_type" || key === "offer_type"
+          ? localizedListingValue(page.locale, key, facts[key])
+          : key === "land_area_sqm" || key === "area_sqm"
+            ? `${facts[key]} m²`
+            : facts[key];
       return h(
         "div",
         { key, className: "ld-spec" },
@@ -2334,10 +2359,18 @@ function ListingBody({ page }) {
           h(
             "ul",
             { className: "ld-feats", "data-listing-highlights": "true" },
-            ...["location", "property_type", "offer_type", "bedrooms"]
-              .filter((key) => facts[key])
+            ...["location", "property_type", "offer_type", "bedrooms", "land_area_sqm"]
+              .filter((key) => {
+                if (key === "bedrooms" && facts.bedrooms_not_applicable) return false;
+                return facts[key];
+              })
               .map((key) => {
-                const value = key === "property_type" || key === "offer_type" ? localizedListingValue(page.locale, key, facts[key]) : facts[key];
+                const value =
+                  key === "property_type" || key === "offer_type"
+                    ? localizedListingValue(page.locale, key, facts[key])
+                    : key === "land_area_sqm"
+                      ? `${facts[key]} m²`
+                      : facts[key];
                 return h("li", { key, className: "mk-tag mk-tag--neutral mk-tag--md" }, h(Icon, { name: "check", size: 15 }), `${labels.factLabels?.[key] || key}: ${value}`);
               }),
           ),

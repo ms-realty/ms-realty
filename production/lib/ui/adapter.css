@@ -68,7 +68,9 @@ main textarea:not(.mk-textarea__field) {
   font-size: var(--text-base);
   transition: var(--transition-color), box-shadow var(--dur-fast) var(--ease-standard);
 }
-main input:focus-visible, main select:focus-visible, main textarea:focus-visible {
+main input:focus-visible:not([type="checkbox"]):not([type="radio"]):not(.mk-input__field):not(.mk-searchbar__input),
+main select:focus-visible:not(.mk-select__field),
+main textarea:focus-visible:not(.mk-textarea__field) {
   border-color: var(--ink-500);
   box-shadow: var(--shadow-focus);
   outline: none;
