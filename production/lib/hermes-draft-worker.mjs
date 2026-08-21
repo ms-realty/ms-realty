@@ -1,8 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
-import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
+import {
+  DEFAULT_AUDIT_LOG_PATH,
+  appendAuditLog,
+  createAuditLogEntry,
+} from "./audit-log.mjs";
 import { validateHermesTranslationDraft } from "./hermes.mjs";
-import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH, HERMES_NON_SENSITIVE_LISTING_TRANSLATION } from "./hermes-draft-dispatch.mjs";
+import {
+  DEFAULT_HERMES_DRAFT_DISPATCH_PATH,
+  HERMES_NON_SENSITIVE_LISTING_TRANSLATION,
+} from "./hermes-draft-dispatch.mjs";
 import {
   HERMES_AGENT_TERMINAL_BACKENDS,
   HERMES_AGENT_MESSAGING_PLATFORMS,
@@ -12,14 +19,38 @@ import {
   assertHermesChatCompletionsEndpoint,
   hermesProviderConfigFromEnv,
 } from "./hermes-provider-provisioning.mjs";
-import { appendTranslationTask, auditPathFor, DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
+import {
+  appendTranslationTask,
+  auditPathFor,
+  DEFAULT_TRANSLATION_LEDGER_PATH,
+} from "./translation-ledger.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
 
-export const DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH = fromRoot("production", "data", "hermes-draft-worker-report.json");
-export const DEFAULT_HERMES_WORKER_SMOKE_REPORT_PATH = fromRoot("production", "data", "hermes-draft-worker-smoke.json");
-export const DEFAULT_HERMES_WORKER_SMOKE_LEDGER_PATH = fromRoot("production", "data", "hermes-worker-smoke-translations.jsonl");
-export const DEFAULT_HERMES_WORKER_SMOKE_AUDIT_PATH = fromRoot("production", "data", "hermes-worker-smoke-audit.jsonl");
-export const DEFAULT_HERMES_WORKER_SMOKE_AUDIT_LOG_PATH = fromRoot("production", "data", "hermes-worker-smoke-audit-log.jsonl");
+export const DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH = fromRoot(
+  "production",
+  "data",
+  "hermes-draft-worker-report.json",
+);
+export const DEFAULT_HERMES_WORKER_SMOKE_REPORT_PATH = fromRoot(
+  "production",
+  "data",
+  "hermes-draft-worker-smoke.json",
+);
+export const DEFAULT_HERMES_WORKER_SMOKE_LEDGER_PATH = fromRoot(
+  "production",
+  "data",
+  "hermes-worker-smoke-translations.jsonl",
+);
+export const DEFAULT_HERMES_WORKER_SMOKE_AUDIT_PATH = fromRoot(
+  "production",
+  "data",
+  "hermes-worker-smoke-audit.jsonl",
+);
+export const DEFAULT_HERMES_WORKER_SMOKE_AUDIT_LOG_PATH = fromRoot(
+  "production",
+  "data",
+  "hermes-worker-smoke-audit-log.jsonl",
+);
 
 function parseJsonObject(value) {
   if (value && typeof value === "object" && !Array.isArray(value)) return value;
@@ -50,7 +81,8 @@ export function providerRequestBody(row, model) {
 
 function contentPayload(content) {
   if (typeof content === "string" && content.trim()) return content;
-  if (content && typeof content === "object" && !Array.isArray(content)) return content;
+  if (content && typeof content === "object" && !Array.isArray(content))
+    return content;
   if (Array.isArray(content)) {
     const text = content
       .map((part) => (typeof part === "string" ? part : part?.text || ""))
@@ -62,14 +94,20 @@ function contentPayload(content) {
 }
 
 function nonEmptyInvocation(value) {
-  if (Array.isArray(value)) return value.some((entry) => nonEmptyInvocation(entry));
+  if (Array.isArray(value))
+    return value.some((entry) => nonEmptyInvocation(entry));
   if (value && typeof value === "object") return Object.keys(value).length > 0;
   return Boolean(String(value || "").trim());
 }
 
 function assertNoProviderToolCalls(message) {
-  if (nonEmptyInvocation(message?.tool_calls) || nonEmptyInvocation(message?.function_call)) {
-    throw new Error("Hermes provider returned a tool call despite tool_choice none");
+  if (
+    nonEmptyInvocation(message?.tool_calls) ||
+    nonEmptyInvocation(message?.function_call)
+  ) {
+    throw new Error(
+      "Hermes provider returned a tool call despite tool_choice none",
+    );
   }
 }
 
@@ -126,10 +164,29 @@ const HOSTED_PROPERTY_FACT_FIELDS = new Set([
   "bedrooms",
   "listing_status",
 ]);
-const HOSTED_SOURCE_SNAPSHOT_FIELDS = new Set(["object_type", "object_id", "source_locale", "source_hash", "approved_legal_content"]);
-const HOSTED_SEO_TARGET_FIELDS = new Set(["title_max_chars", "meta_description_min_chars", "meta_description_max_chars"]);
-const HOSTED_CAPABILITY_FIELDS = new Set(["can_publish", "can_mark_indexable", "requires_human_approval"]);
-const HOSTED_CITATION_FIELDS = new Set(["source", "object_id", "task_id", "fields"]);
+const HOSTED_SOURCE_SNAPSHOT_FIELDS = new Set([
+  "object_type",
+  "object_id",
+  "source_locale",
+  "source_hash",
+  "approved_legal_content",
+]);
+const HOSTED_SEO_TARGET_FIELDS = new Set([
+  "title_max_chars",
+  "meta_description_min_chars",
+  "meta_description_max_chars",
+]);
+const HOSTED_CAPABILITY_FIELDS = new Set([
+  "can_publish",
+  "can_mark_indexable",
+  "requires_human_approval",
+]);
+const HOSTED_CITATION_FIELDS = new Set([
+  "source",
+  "object_id",
+  "task_id",
+  "fields",
+]);
 const HOSTED_CMS_CITATION_FIELDS = new Set([
   "facts.title",
   "facts.description",
@@ -142,9 +199,11 @@ const HOSTED_CMS_CITATION_FIELDS = new Set([
   "facts.listing_status",
 ]);
 const HASH_FIELDS = new Set(["source_hash", "draft_hash"]);
-const SENSITIVE_FIELD_NAME = /(^|_)(contact|email|phone|mobile|whatsapp|viber|telegram|signal|sms|message|lead|buyer|seller|owner|customer|client|person|name)(_|$)/;
+const SENSITIVE_FIELD_NAME =
+  /(^|_)(contact|email|phone|mobile|whatsapp|viber|telegram|signal|sms|message|lead|buyer|seller|owner|customer|client|person|name)(_|$)/;
 const EMAIL_ADDRESS = /[^\s@]+@[^\s@]+\.[^\s@]+/;
-const PHONE_NUMBER = /(?:\+|00)\s*\d(?:[\s().-]*\d){6,}|\b(?:\d[\s().-]*){7,}\d\b/;
+const PHONE_NUMBER =
+  /(?:\+|00)\s*\d(?:[\s().-]*\d){6,}|\b(?:\d[\s().-]*){7,}\d\b/;
 
 function normalizedFieldName(key) {
   return String(key || "")
@@ -154,20 +213,25 @@ function normalizedFieldName(key) {
 }
 
 function assertAllowedFields(value, allowed, label) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${label} must be an object`);
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new Error(`${label} must be an object`);
   for (const key of Object.keys(value)) {
-    if (!allowed.has(key)) throw new Error(`${label} contains a non-allowlisted field: ${key}`);
+    if (!allowed.has(key))
+      throw new Error(`${label} contains a non-allowlisted field: ${key}`);
   }
 }
 
 function assertNoPii(value, label = "dispatch", field = null) {
   if (typeof value === "string") {
     if (HASH_FIELDS.has(field) && /^[a-f\d]{64}$/i.test(value)) return;
-    if (EMAIL_ADDRESS.test(value) || PHONE_NUMBER.test(value)) throw new Error(`${label} contains PII-like contact data`);
+    if (EMAIL_ADDRESS.test(value) || PHONE_NUMBER.test(value))
+      throw new Error(`${label} contains PII-like contact data`);
     return;
   }
   if (Array.isArray(value)) {
-    value.forEach((entry, index) => assertNoPii(entry, `${label}[${index}]`, field));
+    value.forEach((entry, index) =>
+      assertNoPii(entry, `${label}[${index}]`, field),
+    );
     return;
   }
   if (!value || typeof value !== "object") return;
@@ -180,9 +244,16 @@ function assertNoPii(value, label = "dispatch", field = null) {
 }
 
 function assertHostedCitations(citations) {
-  if (!Array.isArray(citations) || !citations.length) throw new Error("Hosted Hermes fallback requires canonical source citations");
+  if (!Array.isArray(citations) || !citations.length)
+    throw new Error(
+      "Hosted Hermes fallback requires canonical source citations",
+    );
   for (const citation of citations) {
-    assertAllowedFields(citation, HOSTED_CITATION_FIELDS, "Hosted Hermes dispatch citation");
+    assertAllowedFields(
+      citation,
+      HOSTED_CITATION_FIELDS,
+      "Hosted Hermes dispatch citation",
+    );
     if (citation.source === "cms_seed") {
       if (
         !citation.object_id ||
@@ -193,30 +264,63 @@ function assertHostedCitations(citations) {
       }
       continue;
     }
-    if (citation.source === "translation_coverage" && citation.task_id) continue;
-    throw new Error("Hosted Hermes fallback only accepts CMS and translation coverage citations");
+    if (citation.source === "translation_coverage" && citation.task_id)
+      continue;
+    throw new Error(
+      "Hosted Hermes fallback only accepts CMS and translation coverage citations",
+    );
   }
 }
 
 function assertHostedFallbackDispatch(row) {
   if (row?.data_classification !== HERMES_NON_SENSITIVE_LISTING_TRANSLATION) {
-    throw new Error("Hosted Hermes fallback requires an explicitly classified non-sensitive listing translation dispatch");
+    throw new Error(
+      "Hosted Hermes fallback requires an explicitly classified non-sensitive listing translation dispatch",
+    );
   }
-  if (row.object_type !== "listing" || row.status !== "ready_for_hermes" || row.provider_mode !== "hermes_draft") {
-    throw new Error("Hosted Hermes fallback only accepts model-ready listing translation dispatches");
+  if (
+    row.object_type !== "listing" ||
+    row.status !== "ready_for_hermes" ||
+    row.provider_mode !== "hermes_draft"
+  ) {
+    throw new Error(
+      "Hosted Hermes fallback only accepts model-ready listing translation dispatches",
+    );
   }
   assertAllowedFields(row, HOSTED_ROW_FIELDS, "Hosted Hermes dispatch");
-  assertAllowedFields(row.prompt, HOSTED_PROMPT_FIELDS, "Hosted Hermes dispatch prompt");
-  assertAllowedFields(row.prompt.propertyFacts || {}, HOSTED_PROPERTY_FACT_FIELDS, "Hosted Hermes dispatch property facts");
-  assertAllowedFields(row.source_snapshot, HOSTED_SOURCE_SNAPSHOT_FIELDS, "Hosted Hermes dispatch source snapshot");
+  assertAllowedFields(
+    row.prompt,
+    HOSTED_PROMPT_FIELDS,
+    "Hosted Hermes dispatch prompt",
+  );
+  assertAllowedFields(
+    row.prompt.propertyFacts || {},
+    HOSTED_PROPERTY_FACT_FIELDS,
+    "Hosted Hermes dispatch property facts",
+  );
+  assertAllowedFields(
+    row.source_snapshot,
+    HOSTED_SOURCE_SNAPSHOT_FIELDS,
+    "Hosted Hermes dispatch source snapshot",
+  );
   if (row.prompt.seoTargets !== undefined) {
-    assertAllowedFields(row.prompt.seoTargets, HOSTED_SEO_TARGET_FIELDS, "Hosted Hermes dispatch SEO targets");
+    assertAllowedFields(
+      row.prompt.seoTargets,
+      HOSTED_SEO_TARGET_FIELDS,
+      "Hosted Hermes dispatch SEO targets",
+    );
   }
   if (row.prompt.capabilities !== undefined) {
-    assertAllowedFields(row.prompt.capabilities, HOSTED_CAPABILITY_FIELDS, "Hosted Hermes dispatch capabilities");
+    assertAllowedFields(
+      row.prompt.capabilities,
+      HOSTED_CAPABILITY_FIELDS,
+      "Hosted Hermes dispatch capabilities",
+    );
   }
   if (row.prompt.glossary && Object.keys(row.prompt.glossary).length) {
-    throw new Error("Hosted Hermes fallback requires an empty allowlisted glossary");
+    throw new Error(
+      "Hosted Hermes fallback requires an empty allowlisted glossary",
+    );
   }
   assertHostedCitations(row.citations);
   if (
@@ -227,17 +331,25 @@ function assertHostedFallbackDispatch(row) {
     row.source_snapshot?.object_id !== row.object_id ||
     row.source_snapshot?.source_hash !== row.source_hash
   ) {
-    throw new Error("Hosted Hermes fallback requires a canonical listing translation prompt and source snapshot");
+    throw new Error(
+      "Hosted Hermes fallback requires a canonical listing translation prompt and source snapshot",
+    );
   }
   assertNoPii(row);
 }
 
 export function assertProviderMayReceiveDispatch(row, providerMetadata) {
-  if (providerMetadata?.mode === "self_hosted" && providerMetadata.sensitiveDataAllowed === true) return;
+  if (
+    providerMetadata?.mode === "self_hosted" &&
+    providerMetadata.sensitiveDataAllowed === true
+  )
+    return;
   assertHostedFallbackDispatch(row);
 }
 
-export function readHermesDraftDispatch(filePath = DEFAULT_HERMES_DRAFT_DISPATCH_PATH) {
+export function readHermesDraftDispatch(
+  filePath = DEFAULT_HERMES_DRAFT_DISPATCH_PATH,
+) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
@@ -250,7 +362,8 @@ export function openAiCompatibleHermesProvider({
   if (!endpoint) throw new Error("HERMES_CHAT_COMPLETIONS_URL is required");
   assertHermesChatCompletionsEndpoint(endpoint);
   if (!apiKey) throw new Error("HERMES_API_KEY is required");
-  if (typeof fetchImpl !== "function") throw new Error("fetch is required for Hermes provider");
+  if (typeof fetchImpl !== "function")
+    throw new Error("fetch is required for Hermes provider");
 
   return async function callHermes(row) {
     const response = await fetchImpl(endpoint, {
@@ -262,7 +375,8 @@ export function openAiCompatibleHermesProvider({
       },
       body: JSON.stringify(providerRequestBody(row, model)),
     });
-    if (!response.ok) throw new Error(`Hermes provider failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Hermes provider failed: ${response.status}`);
     const payload = await response.json();
     const message = payload.choices?.[0]?.message;
     if (!message) throw new Error("Hermes provider returned no message");
@@ -327,7 +441,14 @@ function agentRuntimeMetadata() {
   };
 }
 
-function recordHermesAuditLog({ row, auditLogPath, providerMetadata, result, error, recordedAt }) {
+function recordHermesAuditLog({
+  row,
+  auditLogPath,
+  providerMetadata,
+  result,
+  error,
+  recordedAt,
+}) {
   if (!auditLogPath) return null;
   return appendAuditLog(
     createAuditLogEntry(
@@ -344,7 +465,8 @@ function recordHermesAuditLog({ row, auditLogPath, providerMetadata, result, err
           provider_mode: row.provider_mode,
           provider: providerMetadata.mode,
           model: providerMetadata.model,
-          prompt_version: row.prompt?.version || row.prompt?.role || "translation_draft",
+          prompt_version:
+            row.prompt?.version || row.prompt?.role || "translation_draft",
           tool_call_parser: providerMetadata.toolCallParser || "hermes",
           tool_calls: providerMetadata.toolCalls ?? 0,
           input_tokens: providerMetadata.inputTokens ?? null,
@@ -383,12 +505,34 @@ export async function runHermesDraftWorker({
       const draft = await provider(row);
       const task = taskFromHermesDraft(row, draft);
       appendTranslationTask(task, { filePath, auditPath, recordedAt });
-      persisted.push({ id: task.id, target_locale: task.target_locale, status: task.status, public_indexable: false });
-      const auditLogRow = recordHermesAuditLog({ row, auditLogPath, providerMetadata, result: "persisted", recordedAt });
+      persisted.push({
+        id: task.id,
+        target_locale: task.target_locale,
+        status: task.status,
+        public_indexable: false,
+      });
+      const auditLogRow = recordHermesAuditLog({
+        row,
+        auditLogPath,
+        providerMetadata,
+        result: "persisted",
+        recordedAt,
+      });
       if (auditLogRow) auditLogRows.push(auditLogRow);
     } catch (error) {
-      rejected.push({ id: row.id, target_locale: row.target_locale, error: error.message });
-      const auditLogRow = recordHermesAuditLog({ row, auditLogPath, providerMetadata, result: "rejected", error, recordedAt });
+      rejected.push({
+        id: row.id,
+        target_locale: row.target_locale,
+        error: error.message,
+      });
+      const auditLogRow = recordHermesAuditLog({
+        row,
+        auditLogPath,
+        providerMetadata,
+        result: "rejected",
+        error,
+        recordedAt,
+      });
       if (auditLogRow) auditLogRows.push(auditLogRow);
     }
   }
@@ -421,67 +565,132 @@ export function assertHermesDraftWorkerReport(report) {
   if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
     throw new Error("Hermes worker report must include valid generated_at");
   }
-  if (report.agent_runtime?.product !== "Nous Hermes Agent") throw new Error("Hermes worker report must target Nous Hermes Agent");
-  if (report.agent_runtime?.license !== "MIT") throw new Error("Hermes worker report must record the Hermes Agent MIT license");
+  if (report.agent_runtime?.product !== "Nous Hermes Agent")
+    throw new Error("Hermes worker report must target Nous Hermes Agent");
+  if (report.agent_runtime?.license !== "MIT")
+    throw new Error(
+      "Hermes worker report must record the Hermes Agent MIT license",
+    );
   if (report.agent_runtime?.official_url !== HERMES_AGENT_OFFICIAL_URL) {
-    throw new Error("Hermes worker report must link the official Hermes Agent runtime");
+    throw new Error(
+      "Hermes worker report must link the official Hermes Agent runtime",
+    );
   }
   if (report.agent_runtime?.project_context_file !== "AGENTS.md") {
-    throw new Error("Hermes worker report must include AGENTS.md project context evidence");
+    throw new Error(
+      "Hermes worker report must include AGENTS.md project context evidence",
+    );
   }
   for (const capability of HERMES_AGENT_REQUIRED_CAPABILITIES) {
     if (!report.agent_runtime?.required_capabilities?.includes(capability)) {
-      throw new Error("Hermes worker report must include official Hermes Agent capabilities");
+      throw new Error(
+        "Hermes worker report must include official Hermes Agent capabilities",
+      );
     }
   }
   for (const platform of HERMES_AGENT_MESSAGING_PLATFORMS) {
     if (!report.agent_runtime?.messaging_platforms?.includes(platform)) {
-      throw new Error("Hermes worker report must include official Hermes Agent messaging platforms");
+      throw new Error(
+        "Hermes worker report must include official Hermes Agent messaging platforms",
+      );
     }
   }
   for (const tool of HERMES_AGENT_TOOL_GATEWAY_TOOLS) {
     if (!report.agent_runtime?.tool_gateway?.required_tools?.includes(tool)) {
-      throw new Error("Hermes worker report must include Hermes tool gateway tools");
+      throw new Error(
+        "Hermes worker report must include Hermes tool gateway tools",
+      );
     }
   }
   for (const backend of HERMES_AGENT_TERMINAL_BACKENDS) {
     if (!report.agent_runtime?.terminal_backends?.includes(backend)) {
-      throw new Error("Hermes worker report must include Hermes sandbox backends");
+      throw new Error(
+        "Hermes worker report must include Hermes sandbox backends",
+      );
     }
   }
-  if (report.provider?.tool_call_parser !== "hermes") throw new Error("Hermes worker report must use Hermes tool parser");
-  if (!String(report.provider?.mode || "").trim()) throw new Error("Hermes worker report must include provider mode");
-  if (!String(report.provider?.model || "").trim()) throw new Error("Hermes worker report must include provider model");
-  if (report.provider?.endpoint) assertHermesChatCompletionsEndpoint(report.provider.endpoint, "Hermes worker endpoint");
-  if (report.provider?.mode === "self_hosted" && report.provider.sensitive_data_allowed !== true) {
-    throw new Error("Self-hosted Hermes worker reports must allow sensitive data");
+  if (report.provider?.tool_call_parser !== "hermes")
+    throw new Error("Hermes worker report must use Hermes tool parser");
+  if (!String(report.provider?.mode || "").trim())
+    throw new Error("Hermes worker report must include provider mode");
+  if (!String(report.provider?.model || "").trim())
+    throw new Error("Hermes worker report must include provider model");
+  if (report.provider?.endpoint)
+    assertHermesChatCompletionsEndpoint(
+      report.provider.endpoint,
+      "Hermes worker endpoint",
+    );
+  if (
+    report.provider?.mode === "self_hosted" &&
+    report.provider.sensitive_data_allowed !== true
+  ) {
+    throw new Error(
+      "Self-hosted Hermes worker reports must allow sensitive data",
+    );
   }
-  if (report.provider?.mode === "openrouter" && report.provider.sensitive_data_allowed !== false) {
-    throw new Error("Hosted Hermes worker reports must be marked non-sensitive only");
+  if (
+    report.provider?.mode === "openrouter" &&
+    report.provider.sensitive_data_allowed !== false
+  ) {
+    throw new Error(
+      "Hosted Hermes worker reports must be marked non-sensitive only",
+    );
   }
-  if (report.summary.attempted < 1) throw new Error("Hermes worker must attempt at least one draft");
-  if (report.summary.persisted < 1) throw new Error("Hermes worker must persist at least one draft");
-  if (report.summary.attempted !== report.summary.persisted + report.summary.rejected) {
-    throw new Error("Hermes worker summary must match persisted and rejected rows");
+  if (report.summary.attempted < 1)
+    throw new Error("Hermes worker must attempt at least one draft");
+  if (report.summary.persisted < 1)
+    throw new Error("Hermes worker must persist at least one draft");
+  if (
+    report.summary.attempted !==
+    report.summary.persisted + report.summary.rejected
+  ) {
+    throw new Error(
+      "Hermes worker summary must match persisted and rejected rows",
+    );
   }
   if (!Array.isArray(report.persisted) || !Array.isArray(report.rejected)) {
-    throw new Error("Hermes worker report must include persisted and rejected rows");
+    throw new Error(
+      "Hermes worker report must include persisted and rejected rows",
+    );
   }
-  if (report.persisted.length !== report.summary.persisted || report.rejected.length !== report.summary.rejected) {
+  if (
+    report.persisted.length !== report.summary.persisted ||
+    report.rejected.length !== report.summary.rejected
+  ) {
     throw new Error("Hermes worker row counts must match summary");
   }
-  if (!report.audit_log_path || report.audit_log_rows !== report.summary.attempted) {
-    throw new Error("Hermes worker audit log must cover every attempted model call");
+  if (
+    !report.audit_log_path ||
+    report.audit_log_rows !== report.summary.attempted
+  ) {
+    throw new Error(
+      "Hermes worker audit log must cover every attempted model call",
+    );
   }
   for (const row of report.persisted) {
     if (row.status !== "hermes_drafted" || row.public_indexable !== false) {
-      throw new Error("Hermes worker must persist non-indexable draft tasks only");
+      throw new Error(
+        "Hermes worker must persist non-indexable draft tasks only",
+      );
     }
   }
   return true;
 }
 
-export function writeHermesDraftWorkerReport(report, filePath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH) {
+export function readReusableHermesDraftWorkerReport(
+  filePath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
+) {
+  if (!fs.existsSync(filePath)) return null;
+  const report = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  if (report.provider?.mode !== "desktop_subscription") return null;
+  assertHermesDraftWorkerReport(report);
+  return report;
+}
+
+export function writeHermesDraftWorkerReport(
+  report,
+  filePath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
+) {
   assertHermesDraftWorkerReport(report);
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(report, null, 2)}\n`);
