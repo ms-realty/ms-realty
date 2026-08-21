@@ -27,6 +27,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CONFIRM_ALERT_DRILL: ${{ inputs.confirm_alert_drill }}
+      MS_REALTY_ORIGIN_TOKEN: ${{ secrets.MS_REALTY_ORIGIN_TOKEN }}
       RELEASE_SHA: ${{ inputs.release_sha }}
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +48,7 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
           test "$CONFIRM_ALERT_DRILL" = "true"
+          test "${#MS_REALTY_ORIGIN_TOKEN}" -ge 32
           test -f Dockerfile
           test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
           node -e 'if (!/^[0-9a-f]{40}$/i.test(process.argv[1])) process.exit(1)' "$RELEASE_SHA"
@@ -127,6 +129,8 @@ jobs:
             --var 'PAYLOAD_SECRET:monitoring-drill-only-secret-not-for-production-0123456789' \
             --var 'DATABASE_URL:postgresql://monitoring:monitoring@db-monitoring.invalid:5432/monitoring' \
             --var "MS_REALTY_PUBLIC_ORIGIN:$DRILL_URL"
+          printf '%s' "$MS_REALTY_ORIGIN_TOKEN" |
+            npx --yes wrangler@4.117.0 secret put MS_REALTY_ORIGIN_TOKEN --name "$DRILL_WORKER"
           status="$(npx --yes wrangler@4.117.0 deployments status --name "$DRILL_WORKER" --json)"
           baseline_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v?.version_id) process.exit(1); process.stdout.write(v.version_id)' "$status")"
           echo "version=$baseline_version" >> "$GITHUB_OUTPUT"

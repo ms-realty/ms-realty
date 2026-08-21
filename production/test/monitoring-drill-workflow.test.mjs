@@ -9,6 +9,7 @@ test("monitoring drill gates intentional failure behind an auditable typed dispa
   assert.match(workflow, /permissions:\n\s+actions: read\n\s+contents: read/);
   assert.doesNotMatch(workflow, /environment:\n\s+name: monitoring-alert-drill/);
   assert.match(workflow, /test "\$CONFIRM_ALERT_DRILL" = "true"/);
+  assert.match(workflow, /test "\$\{#MS_REALTY_ORIGIN_TOKEN\}" -ge 32/);
   assert.match(workflow, /mechanism: "workflow_dispatch_typed_confirmation"/);
   assert.match(workflow, /actor: process\.env\.GITHUB_ACTOR/);
   assert.match(workflow, /triggering_actor: process\.env\.GITHUB_TRIGGERING_ACTOR/);
@@ -29,6 +30,8 @@ test("monitoring drill deploys and rolls back the real MS Realty Container artif
   assert.match(workflow, /--config wrangler\.jsonc/);
   assert.match(workflow, /--strict/);
   assert.match(workflow, /--containers-rollout immediate/);
+  assert.match(workflow, /wrangler@4\.117\.0 secret put MS_REALTY_ORIGIN_TOKEN --name "\$DRILL_WORKER"/);
+  assert.doesNotMatch(workflow, /--var [^\n]*MS_REALTY_ORIGIN_TOKEN/);
   assert.match(workflow, /Dockerfile/);
   assert.match(workflow, /config\.split\(placeholder\)\.length !== 3/);
   assert.match(workflow, /config\.split\(productionWorkerName\)\.length !== 2/);
