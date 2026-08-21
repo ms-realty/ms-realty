@@ -27,6 +27,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CONFIRM_ALERT_DRILL: ${{ inputs.confirm_alert_drill }}
+      MS_REALTY_EXPECTED_BUILD_MARKER: ${{ inputs.release_sha }}
       MS_REALTY_ORIGIN_TOKEN: ${{ secrets.MS_REALTY_ORIGIN_TOKEN }}
       RELEASE_SHA: ${{ inputs.release_sha }}
     steps:
@@ -60,7 +61,8 @@ jobs:
           suffix="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           worker="msr-monitoring-drill-${suffix}"
           correlation_id="${GITHUB_REPOSITORY}:monitoring-drill:${GITHUB_RUN_ID}:${GITHUB_RUN_ATTEMPT}"
-          fault_marker="monitoring-drill-failure-${suffix}"
+          fault_marker="$(node -e 'const { createHash } = require("node:crypto"); process.stdout.write(createHash("sha1").update(process.argv[1]).digest("hex"))' "$correlation_id")"
+          test "$fault_marker" != "$RELEASE_SHA"
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}"
           {
             echo "worker=$worker"
@@ -210,7 +212,7 @@ jobs:
           set -e
           cat "$RUNNER_TEMP/fault-probe-validation.json"
           test "$probe_status" -eq 1
-          node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const failed=d.checks?.filter(({ status }) => status === "fail") || []; if (d.failed !== 1 || failed.length !== 1 || failed[0].id !== "health" || !/commit build marker/.test(failed[0].error || "")) process.exit(1)' "$RUNNER_TEMP/fault-probe-validation.json"
+          node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const failed=d.checks?.filter(({ status }) => status === "fail") || []; if (d.failed !== 1 || failed.length !== 1 || failed[0].id !== "health" || !/expected build marker/.test(failed[0].error || "")) process.exit(1)' "$RUNNER_TEMP/fault-probe-validation.json"
 
       - name: Record alert drill correlation
         id: alert-correlation

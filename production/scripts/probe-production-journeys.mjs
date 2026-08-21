@@ -12,6 +12,13 @@ if (!baseUrl) {
   process.exit(2);
 }
 
+const SHA_PATTERN = /^[0-9a-f]{40}$/i;
+const expectedBuildMarker = String(process.env.MS_REALTY_EXPECTED_BUILD_MARKER || "").trim();
+if (expectedBuildMarker && !SHA_PATTERN.test(expectedBuildMarker)) {
+  console.error("MS_REALTY_EXPECTED_BUILD_MARKER must be an exact commit SHA");
+  process.exit(2);
+}
+
 const TIMEOUT_MS = 25_000;
 
 async function fetchPath(path, { method = "GET", headers = {} } = {}) {
@@ -37,7 +44,8 @@ const checks = [
       const { status, text } = await fetchPath("/api/health");
       const body = JSON.parse(text);
       if (status !== 200 || body.service !== "ms-realty" || body.status !== "ok") throw new Error(`unhealthy: ${status}`);
-      if (!/^[0-9a-f]{40}$/i.test(String(body.build_marker || ""))) throw new Error("health must report a commit build marker");
+      if (!SHA_PATTERN.test(String(body.build_marker || ""))) throw new Error("health must report a commit build marker");
+      if (expectedBuildMarker && body.build_marker !== expectedBuildMarker) throw new Error("health must report expected build marker");
       return { build_marker: body.build_marker };
     },
   },
