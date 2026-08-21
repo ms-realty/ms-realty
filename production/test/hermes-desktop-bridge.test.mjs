@@ -10,7 +10,7 @@ import {
   bridgeStatus,
   bridgeSubmitDraft,
 } from "../lib/hermes-desktop-bridge.mjs";
-import { readHermesDraftDispatch } from "../lib/hermes-draft-worker.mjs";
+import { assertHermesDraftWorkerReport, readHermesDraftDispatch } from "../lib/hermes-draft-worker.mjs";
 
 const dispatch = readHermesDraftDispatch();
 
@@ -32,6 +32,7 @@ function scratchPaths() {
     filePath: path.join(dir, "translations.jsonl"),
     auditPath: path.join(dir, "translations-audit.jsonl"),
     auditLogPath: path.join(dir, "audit-log.jsonl"),
+    reportPath: path.join(dir, "hermes-worker-report.json"),
   };
 }
 
@@ -58,10 +59,10 @@ test("next tasks carry the hosted worker's exact model messages", () => {
   }
 });
 
-test("submit validates, persists draft-only, and audits the desktop provider", () => {
-  const { filePath, auditPath, auditLogPath } = scratchPaths();
+test("submit validates, persists draft-only, audits, and writes launch evidence", async () => {
+  const { filePath, auditPath, auditLogPath, reportPath } = scratchPaths();
   const row = dispatch.rows.find((candidate) => candidate.data_classification === "non_sensitive_listing_translation");
-  const result = bridgeSubmitDraft({
+  const result = await bridgeSubmitDraft({
     dispatch,
     id: row.id,
     draft: draftFor(row),
@@ -69,6 +70,7 @@ test("submit validates, persists draft-only, and audits the desktop provider", (
     filePath,
     auditPath,
     auditLogPath,
+    reportPath,
     recordedAt: "2026-08-09T00:00:00Z",
   });
   assert.equal(result.persisted.status, "hermes_drafted");
@@ -80,29 +82,35 @@ test("submit validates, persists draft-only, and audits the desktop provider", (
   const auditRows = fs.readFileSync(auditLogPath, "utf8").trim().split("\n").map((line) => JSON.parse(line));
   const entry = auditRows.at(-1);
   assert.equal(entry.action, "hermes_model_call");
-  assert.equal(entry.actor, "hermes_desktop_bridge");
+  assert.equal(entry.actor, "hermes_worker");
   assert.equal(entry.metadata.provider, "desktop_subscription");
   assert.equal(entry.metadata.model, "claude-test");
   assert.equal(entry.metadata.sensitive_data, false);
+
+  const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+  assert.equal(assertHermesDraftWorkerReport(report), true);
+  assert.equal(report.provider.mode, "desktop_subscription");
+  assert.equal(report.summary.persisted, 1);
+  assert.equal(result.report.path, reportPath);
 });
 
-test("submit rejects unknown rows, fact drift, and sensitive classifications", () => {
+test("submit rejects unknown rows, fact drift, and sensitive classifications", async () => {
   const { filePath, auditPath, auditLogPath } = scratchPaths();
   const row = dispatch.rows[0];
 
-  assert.throws(
+  await assert.rejects(
     () => bridgeSubmitDraft({ dispatch, id: "missing-row", draft: draftFor(row), filePath, auditPath, auditLogPath }),
     /Unknown dispatch row/,
   );
 
   const drifted = { ...draftFor(row), body: "no facts here", meta_description: "no facts here" };
-  assert.throws(() => bridgeSubmitDraft({ dispatch, id: row.id, draft: drifted, filePath, auditPath, auditLogPath }));
+  await assert.rejects(() => bridgeSubmitDraft({ dispatch, id: row.id, draft: drifted, filePath, auditPath, auditLogPath }));
 
   const sensitiveRow = JSON.parse(JSON.stringify(row));
   sensitiveRow.id = "sensitive-fixture";
   sensitiveRow.data_classification = "sensitive_lead_reply";
   const sensitiveDispatch = { ...dispatch, rows: [sensitiveRow] };
-  assert.throws(() =>
+  await assert.rejects(() =>
     bridgeSubmitDraft({
       dispatch: sensitiveDispatch,
       id: sensitiveRow.id,

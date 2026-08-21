@@ -72,7 +72,7 @@ server.registerTool(
   },
   async ({ id, draft, model }) => {
     try {
-      return text(bridgeSubmitDraft({ id, draft, model }));
+      return text(await bridgeSubmitDraft({ id, draft, model }));
     } catch (error) {
       return {
         isError: true,

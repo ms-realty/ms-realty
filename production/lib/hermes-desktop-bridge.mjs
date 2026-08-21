@@ -9,14 +9,16 @@
 // (sensitive_data_allowed=false), so assertProviderMayReceiveDispatch refuses
 // any dispatch row that is not classified as safe for hosted fallback. Lead
 // replies and other sensitive drafts never flow through third-party AI.
-import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
+import { DEFAULT_AUDIT_LOG_PATH } from "./audit-log.mjs";
 import {
+  DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
   assertProviderMayReceiveDispatch,
   providerRequestBody,
   readHermesDraftDispatch,
-  taskFromHermesDraft,
+  runHermesDraftWorker,
+  writeHermesDraftWorkerReport,
 } from "./hermes-draft-worker.mjs";
-import { DEFAULT_TRANSLATION_LEDGER_PATH, appendTranslationTask } from "./translation-ledger.mjs";
+import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 
 export const DESKTOP_BRIDGE_PROVIDER = Object.freeze({
   mode: "desktop_subscription",
@@ -84,7 +86,7 @@ export function bridgeNextTasks({ dispatch = readHermesDraftDispatch(), limit = 
   }));
 }
 
-export function bridgeSubmitDraft({
+export async function bridgeSubmitDraft({
   dispatch = readHermesDraftDispatch(),
   id,
   draft,
@@ -92,6 +94,7 @@ export function bridgeSubmitDraft({
   filePath = DEFAULT_TRANSLATION_LEDGER_PATH,
   auditPath,
   auditLogPath = DEFAULT_AUDIT_LOG_PATH,
+  reportPath = process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH || DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
   recordedAt = new Date().toISOString(),
 } = {}) {
   if (!id || typeof id !== "string") throw new Error("A dispatch row id is required");
@@ -100,44 +103,32 @@ export function bridgeSubmitDraft({
   if (!row) throw new Error(`Unknown dispatch row: ${id}`);
   assertProviderMayReceiveDispatch(row, DESKTOP_BRIDGE_PROVIDER);
 
-  const task = taskFromHermesDraft(row, draft);
-  appendTranslationTask(task, { filePath, auditPath, recordedAt });
-  appendAuditLog(
-    createAuditLogEntry(
-      {
-        action: "hermes_model_call",
-        actor: "hermes_desktop_bridge",
-        objectType: "translation_task",
-        objectId: row.id,
-        locale: row.target_locale,
-        status: "persisted",
-        metadata: {
-          object_id: row.object_id,
-          object_type: row.object_type,
-          provider_mode: row.provider_mode,
-          provider: DESKTOP_BRIDGE_PROVIDER.mode,
-          model,
-          prompt_version: row.prompt?.version || row.prompt?.role || "translation_draft",
-          tool_call_parser: DESKTOP_BRIDGE_PROVIDER.toolCallParser,
-          sensitive_data: false,
-          result: "persisted",
-          error: null,
-        },
-      },
-      recordedAt,
-    ),
-    { filePath: auditLogPath },
-  );
+  const report = await runHermesDraftWorker({
+    dispatch: { ...dispatch, rows: [row] },
+    provider: async () => draft,
+    providerMetadata: { ...DESKTOP_BRIDGE_PROVIDER, model },
+    filePath,
+    auditPath,
+    auditLogPath,
+    limit: 1,
+    recordedAt,
+    generatedAt: recordedAt,
+  });
+  if (!report.persisted[0]) throw new Error(report.rejected[0]?.error || "Desktop draft was rejected");
+  writeHermesDraftWorkerReport(report, reportPath);
+
   return {
     persisted: {
-      id: task.id,
-      object_id: task.object_id,
-      target_locale: task.target_locale,
-      status: task.status,
-      requires_human_approval: task.requires_human_approval,
-      reviewer_role: task.reviewer_role,
-      public_indexable: task.public_indexable,
+      ...report.persisted[0],
+      object_id: row.object_id,
+      requires_human_approval: true,
+      reviewer_role: row.reviewer_role,
     },
-    next_step: `A ${task.reviewer_role} reviews and approves the draft in the admin translations workbench before anything publishes.`,
+    report: {
+      generated_at: report.generated_at,
+      path: reportPath,
+      provider: report.provider,
+    },
+    next_step: `A ${row.reviewer_role} reviews and approves the draft in the admin translations workbench before anything publishes.`,
   };
 }
