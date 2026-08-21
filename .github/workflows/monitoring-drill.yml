@@ -232,6 +232,7 @@ jobs:
           MS_REALTY_PRODUCTION_URL: ${{ steps.workers-dev.outputs.url }}
         run: |
           echo "Expected production journey failure correlation: $CORRELATION_ID"
+          set -o pipefail
           node production/scripts/probe-production-journeys.mjs | tee "$RUNNER_TEMP/alert-failure-probe.json"
 
       - name: Roll back the isolated MS Realty artifact
