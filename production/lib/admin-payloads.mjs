@@ -8,6 +8,7 @@ import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
 import { buildLeadBriefs } from "./lead-briefs.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingQualityReport } from "./listing-quality.mjs";
+import { CANONICAL_PROPERTY_FAMILIES, propertyFamilyFor } from "./listing-facts.mjs";
 export { DURABLE_LISTING_EDIT_FIELDS as LISTING_EDIT_FIELDS } from "./listing-draft-service.mjs";
 import { DURABLE_LISTING_EDIT_FIELDS as LISTING_EDIT_FIELDS } from "./listing-draft-service.mjs";
 
@@ -216,6 +217,7 @@ export function renderAdminListingManagerPayload(
     query = "",
     status = "",
     sourceLocale = "",
+    propertyFamily = "",
     page = 1,
     generatedAt = new Date().toISOString(),
     operatorId = null,
@@ -235,10 +237,13 @@ export function renderAdminListingManagerPayload(
   const normalizedQuery = String(query).trim().toLocaleLowerCase();
   const normalizedStatus = String(status).trim();
   const normalizedSourceLocale = String(sourceLocale).trim();
+  const normalizedFamily = String(propertyFamily).trim();
+  const propertiesById = new Map((seed.properties || []).map((property) => [property.id, property]));
   const allRows = seed.records
     .filter((record) => record.collection === "listings")
     .map((record) => {
       const facts = record.facts || {};
+      const property = propertiesById.get(record.property);
       const translations = [
         ...(record.translations || []),
         ...translationTasks.filter((task) => task.object_type === "listing" && task.object_id === record.id),
@@ -249,6 +254,11 @@ export function renderAdminListingManagerPayload(
         id: record.id,
         title: facts.title || record.seo?.title || record.id,
         location: facts.location || "",
+        property_family: propertyFamilyFor({
+          ...facts,
+          property_family: property?.property_family || facts.property_family,
+          property_subtype: property?.property_subtype || facts.property_subtype,
+        }) || "",
         source_locale: record.source_locale,
         source_domain: record.source_domain,
         listing_status: facts.listing_status || "unverified",
@@ -266,6 +276,7 @@ export function renderAdminListingManagerPayload(
   const filtered = allRows.filter((row) => {
     if (normalizedStatus && row.listing_status !== normalizedStatus && row.cms_status !== normalizedStatus) return false;
     if (normalizedSourceLocale && row.source_locale !== normalizedSourceLocale) return false;
+    if (normalizedFamily && row.property_family !== normalizedFamily) return false;
     if (!normalizedQuery) return true;
     return [row.id, row.title, row.location, row.source_domain].some((value) =>
       String(value || "").toLocaleLowerCase().includes(normalizedQuery),
@@ -294,10 +305,11 @@ export function renderAdminListingManagerPayload(
     },
     workspace: workspaceWithOperator(workspace, operatorId),
     listings: paged.rows,
-    filters: { q: normalizedQuery, status: normalizedStatus, sourceLocale: normalizedSourceLocale },
+    filters: { q: normalizedQuery, status: normalizedStatus, sourceLocale: normalizedSourceLocale, propertyFamily: normalizedFamily },
     filterOptions: {
       statuses: [...new Set(allRows.flatMap((row) => [row.listing_status, row.cms_status]))].filter(Boolean).sort(),
       sourceLocales: [...new Set(allRows.map((row) => row.source_locale))].filter(Boolean).sort(),
+      propertyFamilies: [...CANONICAL_PROPERTY_FAMILIES],
     },
     pagination: paged.pagination,
     publicationSchedules,

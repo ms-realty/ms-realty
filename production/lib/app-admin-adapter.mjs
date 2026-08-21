@@ -1292,6 +1292,7 @@ async function listingManagerPayload(registry, url, config) {
     query: url.searchParams.get("q") || "",
     status: url.searchParams.get("status") || "",
     sourceLocale: url.searchParams.get("sourceLocale") || "",
+    propertyFamily: url.searchParams.get("propertyFamily") || "",
     page: url.searchParams.get("page") || 1,
   });
   return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;

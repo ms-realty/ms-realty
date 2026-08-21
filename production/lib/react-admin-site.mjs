@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable, propertyFamilyFor } from "./listing-facts.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
@@ -183,6 +184,7 @@ const ADMIN_UI_COPY = {
     issues: "Проблеми",
     listing: "Обява",
     location: "Локация",
+    propertyFamily: "Тип имот",
     publicPhoto: "Публична снимка",
     publicPhotos: "Публични снимки",
     selectListings: "Избери обяви",
@@ -343,7 +345,7 @@ const ADMIN_UI_COPY = {
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
       unverified: "Непроверена", available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", offer_received: "Получена оферта", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", listing_publish: "Публикуване на обявата", listing_offer: "Оферта за обявата", seller_close: "Приключване на продажбата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
-      commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", land: "Парцел", property: "Имот", sale: "Продажба", rent: "Наем",
+      commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", plot: "Парцел", agricultural_land: "Земеделска земя", land: "Парцел", property: "Имот", sale: "Продажба", rent: "Наем",
       instant: "Веднага", daily: "Ежедневно", weekly: "Седмично",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
@@ -483,6 +485,7 @@ const ADMIN_UI_COPY = {
     issues: "Проблемы",
     listing: "Объект",
     location: "Локация",
+    propertyFamily: "Тип объекта",
     publicPhoto: "Публичное фото",
     publicPhotos: "Публичные фото",
     selectListings: "Выбрать объекты",
@@ -643,7 +646,7 @@ const ADMIN_UI_COPY = {
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
       unverified: "Не проверено", available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", offer_received: "Предложение получено", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", listing_publish: "Публикация объекта", listing_offer: "Предложение по объекту", seller_close: "Завершение продажи", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
-      commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", land: "Участок", property: "Объект", sale: "Продажа", rent: "Аренда",
+      commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", plot: "Участок", agricultural_land: "Сельхозземля", land: "Участок", property: "Объект", sale: "Продажа", rent: "Аренда",
       instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
@@ -767,6 +770,7 @@ const ADMIN_UI_COPY = {
     issues: "Issues",
     listing: "Listing",
     location: "Location",
+    propertyFamily: "Property type",
     publicPhoto: "Public photo",
     publicPhotos: "Public photos",
     selectListings: "Select listings",
@@ -927,7 +931,7 @@ const ADMIN_UI_COPY = {
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
       unverified: "Unverified", available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", offer_received: "Offer received", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", listing_publish: "Listing publication", listing_offer: "Listing offer", seller_close: "Sale completion", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
-      commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
+      commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", plot: "Plot", agricultural_land: "Agricultural land", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
       instant: "As soon as possible", daily: "Daily", weekly: "Weekly",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
     },
@@ -941,6 +945,50 @@ function workbenchCopy(page) {
 
 function statusText(copy, value) {
   return copy.statuses[value] || valueText(copy, value);
+}
+
+const LISTING_EDITOR_FACT_FIELDS = Object.freeze({
+  bedrooms: "bedrooms_count",
+  bedrooms_not_applicable: "bedrooms_count",
+  floor: "floor_number",
+  total_floors: ["total_floors", "storeys_count"],
+  land_area_sqm: "land_area_sqm",
+});
+
+function listingEditorFieldApplicable(family, field) {
+  const mapped = LISTING_EDITOR_FACT_FIELDS[field];
+  if (!mapped) return true;
+  return (Array.isArray(mapped) ? mapped : [mapped]).some((key) => isFactApplicable(family, key));
+}
+
+function propertyTypeSelectOptions(value) {
+  const current = String(value || "").trim();
+  const family = propertyFamilyFor({ property_type: current, property_family: current });
+  const selected = family || current || "apartment";
+  const values = [...CANONICAL_PROPERTY_FAMILIES];
+  if (selected && !values.includes(selected)) values.push(selected);
+  return { selected, values };
+}
+
+function PropertyFamilyChecks({ ui, name, selected = [], legend }) {
+  const chosen = new Set(
+    (Array.isArray(selected) ? selected : String(selected || "").split(","))
+      .map((value) => String(value).trim())
+      .filter(Boolean),
+  );
+  return h(
+    "fieldset",
+    { className: "adm-family-checks", "data-property-family-options": "true" },
+    legend ? h("legend", null, legend) : null,
+    ...CANONICAL_PROPERTY_FAMILIES.map((family) =>
+      h(
+        "label",
+        { key: family, className: "adm-check" },
+        h("input", { type: "checkbox", name, value: family, defaultChecked: chosen.has(family) }),
+        h("span", null, statusText(ui, family)),
+      ),
+    ),
+  );
 }
 
 function valueText(copy, value) {
@@ -2401,7 +2449,7 @@ function PipelinePrimaryAction({ page, state }) {
           h("label", null, label(copy, "budgetMin", "Minimum budget (€)"), h("input", { name: "budgetMinEur", type: "number", min: "0", step: "1", defaultValue: intake.budget_min_eur ?? "" })),
           h("label", null, label(copy, "budgetMax", "Maximum budget (€)"), h("input", { name: "budgetMaxEur", type: "number", min: "1", step: "1", required: true, defaultValue: intake.budget_max_eur ?? "" })),
           h("label", null, label(copy, "locations", "Locations"), h("input", { name: "locations", required: true, placeholder: "Sandanski", defaultValue: (intake.locations || []).join(", ") })),
-          h("label", null, label(copy, "propertyTypes", "Property types"), h("input", { name: "propertyTypes", placeholder: "apartment, house", defaultValue: (intake.property_types || []).join(", ") })),
+          h(PropertyFamilyChecks, { ui, name: "propertyTypes", selected: intake.property_types, legend: label(copy, "propertyTypes", "Property types") }),
           h("label", null, label(copy, "bedroomsMin", "Minimum bedrooms"), h("input", { name: "bedroomsMin", type: "number", min: "0", max: "20", step: "1", defaultValue: intake.bedrooms_min ?? "" })),
           h(
             "label",
@@ -3829,7 +3877,7 @@ function ManualLeadForm({ page }) {
         ),
         h("label", null, label(copy, "listingReference", "Listing reference"), h("input", { name: "listingReference", maxLength: 120 })),
         h("label", null, label(copy, "locations", "Locations"), h("input", { name: "requirements.locations", placeholder: "Sandanski", maxLength: 600 })),
-        h("label", null, label(copy, "propertyTypes", "Property types"), h("input", { name: "requirements.property_types", placeholder: "apartment, house", maxLength: 600 })),
+        h(PropertyFamilyChecks, { ui, name: "requirements.property_types", legend: label(copy, "propertyTypes", "Property types") }),
         h("label", null, label(copy, "budgetMax", "Maximum budget (€)"), h("input", { name: "requirements.budget_max_eur", type: "number", min: 0, step: 1 })),
         h("label", null, label(copy, "timeline", "Decision timeline"), h("input", { name: "requirements.timeline", maxLength: 200 })),
         h("label", null, label(copy, "message", "Message"), h("textarea", { name: "message", maxLength: 2000, rows: 3 })),
@@ -4656,6 +4704,7 @@ function ListingManagerBody({ page }) {
   const activeFilters = [
     page.filters.q ? `${label(copy, "searchListings", "Search listings")}: ${page.filters.q}` : null,
     page.filters.status ? `${label(copy, "qualityStatus", "Status")}: ${statusText(ui, page.filters.status)}` : null,
+    page.filters.propertyFamily ? `${ui.propertyFamily}: ${statusText(ui, page.filters.propertyFamily)}` : null,
     page.filters.sourceLocale ? `${label(copy, "language", "Language")}: ${String(page.filters.sourceLocale).toUpperCase()}` : null,
   ].filter(Boolean);
   const title = label(copy, "listingManager", "Listings");
@@ -4669,6 +4718,7 @@ function ListingManagerBody({ page }) {
     select: ui.selectListings,
     listing: ui.listing,
     location: ui.location,
+    propertyFamily: ui.propertyFamily,
     status: label(copy, "qualityStatus", "Status"),
     locale: label(copy, "language", "Language"),
     quality: label(copy, "quality", "Quality"),
@@ -4704,6 +4754,12 @@ function ListingManagerBody({ page }) {
           null,
           label(copy, "qualityStatus", "Status"),
           h("select", { name: "status" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.statuses || []).map((value) => h("option", { key: value, value, selected: page.filters.status === value }, statusText(ui, value)))),
+        ),
+        h(
+          "label",
+          null,
+          ui.propertyFamily,
+          h("select", { name: "propertyFamily" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.propertyFamilies || CANONICAL_PROPERTY_FAMILIES).map((value) => h("option", { key: value, value, selected: page.filters.propertyFamily === value }, statusText(ui, value)))),
         ),
         h(
           "label",
@@ -4785,6 +4841,7 @@ function ListingManagerBody({ page }) {
                       ),
                       h("td", { "data-label": columns.listing, "data-listing-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : "—"))),
                       h("td", { "data-label": columns.location, "data-listing-column": "location" }, row.location || "—"),
+                      h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : "—"),
                       h("td", { "data-label": columns.status, "data-listing-column": "status" }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
                       h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, row.translation_locales.map((locale) => locale.toUpperCase()).join(" · "))),
                       h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
@@ -4984,7 +5041,8 @@ function editorInputFor(ui, field, value, disabled = false) {
     return editorSelect(field, value || "available", disabled, ["available", "reserved", "sold", "rented", "archived"].map((status) => [status, statusText(ui, status)]));
   }
   if (field === "property_type") {
-    return editorSelect(field, value || "property", disabled, ["commercial", "multi_unit", "apartment", "hotel", "house", "land", "property"].map((type) => [type, statusText(ui, type)]));
+    const options = propertyTypeSelectOptions(value);
+    return editorSelect(field, options.selected, disabled, options.values.map((type) => [type, statusText(ui, type)]));
   }
   if (field === "offer_type") {
     return editorSelect(field, value || "sale", disabled, ["sale", "rent"].map((type) => [type, statusText(ui, type)]));
@@ -5059,12 +5117,18 @@ function ListingEditorBody({ page }) {
     .slice(0, 50);
   const staleTranslations = page.translationTasks.filter((task) => task.status === "stale");
   const title = label(copy, "propertyEditor", "Property editor");
+  const family = propertyFamilyFor(facts);
   const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
   const termsFields = page.editableFields.filter((field) => ["price_eur", "price_on_request"].includes(field));
   const workflowFields = page.editableFields.filter((field) => ["availability_verified_at"].includes(field));
   const seoFields = page.editableFields.filter((field) => field.startsWith("seo_"));
   const detailFields = page.editableFields.filter(
-    (field) => !contentFields.includes(field) && !termsFields.includes(field) && !workflowFields.includes(field) && !seoFields.includes(field),
+    (field) =>
+      !contentFields.includes(field) &&
+      !termsFields.includes(field) &&
+      !workflowFields.includes(field) &&
+      !seoFields.includes(field) &&
+      listingEditorFieldApplicable(family, field),
   );
   const canEditContent = pageCan(page, "content:write");
   return adminShell(page, {

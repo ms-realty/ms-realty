@@ -1,3 +1,5 @@
+import { LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
+
 // Browser session transport for the custom admin workbench. The cookie carries
 // a short-lived Payload JWT whose session id is also recorded in Postgres. It
 // never carries a long-lived MCP/operator credential.
@@ -42,18 +44,24 @@ export function renderAdminLoginPage({ error = false } = {}) {
 <meta name="robots" content="noindex, nofollow">
 <title>MS Realty — вход за екипа</title>
 <style>
-  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 24px; background: #f6f4ef; color: #1f2933; display: grid; place-items: center; min-height: 100vh; box-sizing: border-box; }
-  main { width: 100%; max-width: 420px; background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 8px 30px rgba(31,41,51,.08); }
-  h1 { font-size: 1.4rem; margin: 0 0 6px; }
-  p.hint { color: #52606d; margin: 0 0 20px; }
+  body { font-family: Commissioner, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 24px; background: #F4F4F3; color: #181818; display: grid; place-items: center; min-height: 100vh; box-sizing: border-box; }
+  main { width: 100%; max-width: 420px; background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 8px 30px rgba(14,14,14,.08); }
+  .brand { display: flex; justify-content: center; margin: 0 0 20px; }
+  .brand img { display: block; height: 40px; width: auto; }
+  h1 { font-size: 1.35rem; margin: 0 0 6px; }
+  p.hint { color: #545453; margin: 0 0 20px; }
   label { display: block; font-weight: 600; margin-bottom: 8px; }
-  input { width: 100%; font-size: 1.1rem; padding: 14px; border-radius: 10px; border: 1px solid #cbd5e1; box-sizing: border-box; margin-bottom: 16px; }
-  button { width: 100%; font-size: 1.2rem; padding: 14px; border-radius: 12px; border: 0; background: #1d4ed8; color: #fff; cursor: pointer; }
-  .error { color: #b91c1c; font-weight: 600; }
+  input { width: 100%; font-size: 1.1rem; padding: 14px; border-radius: 10px; border: 1px solid #C9C9C7; box-sizing: border-box; margin-bottom: 16px; background: #fff; }
+  input:focus-visible { outline: 2px solid #C42D2D; outline-offset: 2px; border-color: #C42D2D; }
+  button { width: 100%; font-size: 1.15rem; padding: 14px; border-radius: 12px; border: 0; background: #C42D2D; color: #fff; cursor: pointer; font-weight: 600; }
+  button:hover { background: #A32323; }
+  button:focus-visible { outline: 2px solid #C42D2D; outline-offset: 3px; }
+  .error { color: #A32323; font-weight: 600; }
 </style>
 </head>
 <body>
 <main>
+  <p class="brand"><img src="${LOGO_URL}" alt="MS Realty" height="40" width="${Math.round(40 * LOGO_ASPECT)}"></p>
   <h1>Вход за екипа на MS Realty</h1>
   <p class="hint">Използвай служебния си имейл и парола.</p>
   ${errorBanner}

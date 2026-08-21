@@ -84,6 +84,9 @@ test("session cookie helpers round-trip and cap the Payload session token", () =
   assert.match(login, /role="alert"/);
   assert.match(login, /name="email"/);
   assert.match(login, /name="password"/);
+  assert.match(login, /ms-realty-logo-/);
+  assert.match(login, /#C42D2D/);
+  assert.doesNotMatch(login, /#1d4ed8/);
   assert.doesNotMatch(login, /name="token"|Операторски ключ/);
 });
 

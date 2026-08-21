@@ -1378,6 +1378,7 @@ export function createHttpApp({
       query: url.searchParams.get("q") || "",
       status: url.searchParams.get("status") || "",
       sourceLocale: url.searchParams.get("sourceLocale") || "",
+      propertyFamily: url.searchParams.get("propertyFamily") || "",
       page: url.searchParams.get("page") || 1,
       generatedAt: reviewedAt || new Date().toISOString(),
       operatorId,
