@@ -98,8 +98,8 @@ jobs:
           const placeholder = "__MS_REALTY_BUILD_MARKER__";
           const configPath = "wrangler.jsonc";
           const config = fs.readFileSync(configPath, "utf8");
-          if (config.split(placeholder).length !== 2) throw new Error("Expected exactly one Container image marker placeholder");
-          fs.writeFileSync(configPath, config.replace(placeholder, marker));
+          if (config.split(placeholder).length !== 3) throw new Error("Expected edge and Container image marker placeholders");
+          fs.writeFileSync(configPath, config.replaceAll(placeholder, marker));
           NODE
 
       - name: Deploy exact-release MS Realty artifact to the isolated Worker
@@ -156,8 +156,8 @@ jobs:
 
           const configPath = "wrangler.jsonc";
           const config = fs.readFileSync(configPath, "utf8");
-          if (config.split(process.env.RELEASE_SHA).length !== 2) throw new Error("Expected exactly one exact-release image marker");
-          fs.writeFileSync(configPath, config.replace(process.env.RELEASE_SHA, process.env.FAULT_MARKER));
+          if (config.split(process.env.RELEASE_SHA).length !== 3) throw new Error("Expected edge and Container exact-release image markers");
+          fs.writeFileSync(configPath, config.replaceAll(process.env.RELEASE_SHA, process.env.FAULT_MARKER));
           NODE
           npx --yes wrangler@4.117.0 deploy \
             --config wrangler.jsonc \
@@ -335,7 +335,7 @@ jobs:
           NODE
 
       - name: Delete only the isolated drill Worker
-        if: always()
+        if: always() && steps.baseline.outputs.version != ''
         env:
           DRILL_WORKER: ${{ steps.identity.outputs.worker }}
         run: |

@@ -30,6 +30,10 @@ test("monitoring drill deploys and rolls back the real MS Realty Container artif
   assert.match(workflow, /--strict/);
   assert.match(workflow, /--containers-rollout immediate/);
   assert.match(workflow, /Dockerfile/);
+  assert.match(workflow, /config\.split\(placeholder\)\.length !== 3/);
+  assert.match(workflow, /config\.replaceAll\(placeholder, marker\)/);
+  assert.match(workflow, /config\.split\(process\.env\.RELEASE_SHA\)\.length !== 3/);
+  assert.match(workflow, /config\.replaceAll\(process\.env\.RELEASE_SHA, process\.env\.FAULT_MARKER\)/);
   assert.doesNotMatch(workflow, /worker\.mjs/);
   assert.doesNotMatch(workflow, /return Response\.json\(\{ marker:/);
   assert.match(workflow, /wrangler@4\.117\.0 rollback "\$baseline_version" --name "\$DRILL_WORKER"/);
@@ -47,6 +51,6 @@ test("monitoring drill records durable runtime, failure, and exact restoration e
   assert.match(workflow, /restored_build_marker/);
   assert.match(workflow, /worker: process\.env\.DRILL_WORKER/);
   assert.match(workflow, /url: process\.env\.DRILL_URL/);
-  assert.match(workflow, /Delete only the isolated drill Worker\n\s+if: always\(\)/);
+  assert.match(workflow, /Delete only the isolated drill Worker\n\s+if: always\(\) && steps\.baseline\.outputs\.version != ''/);
   assert.match(workflow, /wrangler@4\.117\.0 delete "\$DRILL_WORKER" --force/);
 });
