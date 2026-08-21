@@ -13,12 +13,13 @@ import {
   bridgeSubmitDraft,
 } from "../lib/hermes-desktop-bridge.mjs";
 
-const server = new McpServer({ name: "ms-realty-hermes", version: "1.0.0" });
+function createServer() {
+  const server = new McpServer({ name: "ms-realty-hermes", version: "1.0.0" });
 
-const text = (value) => ({
-  content: [{ type: "text", text: JSON.stringify(value, null, 2) }],
-  structuredContent: value,
-});
+  const text = (value) => ({
+    content: [{ type: "text", text: JSON.stringify(value, null, 2) }],
+    structuredContent: value,
+  });
 
 server.registerTool(
   "hermes_status",
@@ -86,4 +87,7 @@ server.registerTool(
   },
 );
 
-await serveStdio(server);
+  return server;
+}
+
+serveStdio(createServer);
