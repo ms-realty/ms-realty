@@ -481,6 +481,14 @@ export function assertHermesDraftWorkerReport(report) {
   return true;
 }
 
+export function readReusableHermesDraftWorkerReport(filePath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH) {
+  if (!fs.existsSync(filePath)) return null;
+  const report = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  if (report.provider?.mode !== "desktop_subscription") return null;
+  assertHermesDraftWorkerReport(report);
+  return report;
+}
+
 export function writeHermesDraftWorkerReport(report, filePath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH) {
   assertHermesDraftWorkerReport(report);
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
