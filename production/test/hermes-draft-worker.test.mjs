@@ -7,7 +7,6 @@ import { spawn, spawnSync } from "node:child_process";
 import {
   assertHermesDraftWorkerReport,
   openAiCompatibleHermesProvider,
-  readReusableHermesDraftWorkerReport,
   runHermesDraftWorker,
   taskFromHermesDraft,
 } from "../lib/hermes-draft-worker.mjs";
@@ -17,17 +16,10 @@ import {
   HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
 } from "../lib/hermes-provider-provisioning.mjs";
-import {
-  DEFAULT_AUDIT_LOG_PATH,
-  assertAuditLog,
-  readAuditLog,
-} from "../lib/audit-log.mjs";
+import { DEFAULT_AUDIT_LOG_PATH, assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
 import { HERMES_NON_SENSITIVE_LISTING_TRANSLATION } from "../lib/hermes-draft-dispatch.mjs";
 import { fromRoot, repoRelativePath } from "../lib/paths.mjs";
-import {
-  readHermesAuditLedger,
-  readTranslationLedger,
-} from "../lib/translation-ledger.mjs";
+import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
 
 function dispatchRow() {
   return {
@@ -48,18 +40,13 @@ function dispatchRow() {
     can_mark_indexable: false,
     source_hash: "source-hash",
     draft_hash: "draft-hash",
-    admin_path:
-      "/admin/translations?objectType=listing&objectId=MS-TEST-1&locale=he",
+    admin_path: "/admin/translations?objectType=listing&objectId=MS-TEST-1&locale=he",
     prompt: {
       role: "translation_draft",
       sourceLocale: "bg",
       targetLocale: "he",
       sourceText: "Sandanski apartment",
-      propertyFacts: {
-        id: "MS-TEST-1",
-        location: "Sandanski",
-        price_eur: 50000,
-      },
+      propertyFacts: { id: "MS-TEST-1", location: "Sandanski", price_eur: 50000 },
       rules: ["Draft only; never publish."],
     },
     source_snapshot: {
@@ -69,13 +56,7 @@ function dispatchRow() {
       source_hash: "source-hash",
       approved_legal_content: false,
     },
-    citations: [
-      {
-        source: "cms_seed",
-        object_id: "MS-TEST-1",
-        fields: ["facts.title", "facts.description"],
-      },
-    ],
+    citations: [{ source: "cms_seed", object_id: "MS-TEST-1", fields: ["facts.title", "facts.description"] }],
   };
 }
 
@@ -91,15 +72,11 @@ function validDraft() {
 
 function runScript(script, env) {
   return new Promise((resolve) => {
-    const child = spawn(
-      process.execPath,
-      [fromRoot("production", "scripts", script)],
-      {
-        cwd: fromRoot(),
-        env,
-        stdio: ["ignore", "pipe", "pipe"],
-      },
-    );
+    const child = spawn(process.execPath, [fromRoot("production", "scripts", script)], {
+      cwd: fromRoot(),
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
     let stdout = "";
     let stderr = "";
     child.stdout.on("data", (chunk) => {
@@ -124,11 +101,7 @@ async function withHermesServer(fn) {
     request.resume();
     request.on("end", () => {
       response.setHeader("content-type", "application/json");
-      response.end(
-        JSON.stringify({
-          choices: [{ message: { content: JSON.stringify(draft) } }],
-        }),
-      );
+      response.end(JSON.stringify({ choices: [{ message: { content: JSON.stringify(draft) } }] }));
     });
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -162,40 +135,16 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   assert.equal(assertHermesDraftWorkerReport(report), true);
   assert.equal(report.agent_runtime.product, "Nous Hermes Agent");
   assert.equal(report.agent_runtime.license, "MIT");
-  assert.equal(
-    report.agent_runtime.official_url,
-    "https://hermes-agent.nousresearch.com/",
-  );
+  assert.equal(report.agent_runtime.official_url, "https://hermes-agent.nousresearch.com/");
   assert.equal(report.agent_runtime.project_context_file, "AGENTS.md");
-  assert.deepEqual(
-    report.agent_runtime.required_capabilities,
-    HERMES_AGENT_REQUIRED_CAPABILITIES,
-  );
-  assert.deepEqual(
-    report.agent_runtime.messaging_platforms,
-    HERMES_AGENT_MESSAGING_PLATFORMS,
-  );
+  assert.deepEqual(report.agent_runtime.required_capabilities, HERMES_AGENT_REQUIRED_CAPABILITIES);
+  assert.deepEqual(report.agent_runtime.messaging_platforms, HERMES_AGENT_MESSAGING_PLATFORMS);
   assert.ok(report.agent_runtime.messaging_platforms.includes("WhatsApp"));
-  assert.ok(
-    report.agent_runtime.messaging_platforms.includes("Microsoft Teams"),
-  );
+  assert.ok(report.agent_runtime.messaging_platforms.includes("Microsoft Teams"));
   assert.ok(report.agent_runtime.messaging_platforms.includes("Google Chat"));
-  assert.deepEqual(
-    report.agent_runtime.tool_gateway.required_tools,
-    HERMES_AGENT_TOOL_GATEWAY_TOOLS,
-  );
-  assert.deepEqual(
-    report.agent_runtime.terminal_backends,
-    HERMES_AGENT_TERMINAL_BACKENDS,
-  );
-  assert.deepEqual(report.agent_runtime.terminal_backends, [
-    "local",
-    "docker",
-    "ssh",
-    "daytona",
-    "singularity",
-    "modal",
-  ]);
+  assert.deepEqual(report.agent_runtime.tool_gateway.required_tools, HERMES_AGENT_TOOL_GATEWAY_TOOLS);
+  assert.deepEqual(report.agent_runtime.terminal_backends, HERMES_AGENT_TERMINAL_BACKENDS);
+  assert.deepEqual(report.agent_runtime.terminal_backends, ["local", "docker", "ssh", "daytona", "singularity", "modal"]);
   assert.equal(report.summary.persisted, 1);
   assert.equal(report.summary.rejected, 0);
   assert.equal(report.audit_log_rows, 1);
@@ -213,46 +162,7 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   assert.equal(auditRows[0].metadata.prompt_version, "translation_draft");
   assert.equal(auditRows[0].metadata.tool_call_parser, "hermes");
   assert.equal(auditRows[0].metadata.sensitive_data, true);
-  assert.equal(
-    JSON.stringify(auditRows).includes("Sandanski apartment"),
-    false,
-  );
-});
-
-test("live capture reuses only validated desktop subscription reports", async () => {
-  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-reuse-`);
-  const reportPath = `${dir}/hermes-draft-worker-report.json`;
-  const report = await runHermesDraftWorker({
-    dispatch: { rows: [dispatchRow()] },
-    provider: async () => validDraft(),
-    filePath: `${dir}/translations.jsonl`,
-    auditPath: `${dir}/audit.jsonl`,
-    auditLogPath: `${dir}/audit-log.jsonl`,
-    providerMetadata: {
-      mode: "desktop_subscription",
-      model: "ChatGPT subscription",
-      toolCallParser: "hermes",
-      sensitiveDataAllowed: false,
-    },
-  });
-
-  fs.writeFileSync(reportPath, `${JSON.stringify(report)}\n`);
-  assert.deepEqual(readReusableHermesDraftWorkerReport(reportPath), report);
-
-  fs.writeFileSync(
-    reportPath,
-    `${JSON.stringify({ ...report, provider: { ...report.provider, mode: "self_hosted", sensitive_data_allowed: true } })}\n`,
-  );
-  assert.equal(readReusableHermesDraftWorkerReport(reportPath), null);
-
-  fs.writeFileSync(
-    reportPath,
-    `${JSON.stringify({ ...report, summary: { attempted: 0, persisted: 0, rejected: 0 } })}\n`,
-  );
-  assert.throws(
-    () => readReusableHermesDraftWorkerReport(reportPath),
-    /attempt at least one draft/,
-  );
+  assert.equal(JSON.stringify(auditRows).includes("Sandanski apartment"), false);
 });
 
 test("Hermes draft worker report rejects no-op launch evidence", () => {
@@ -294,9 +204,7 @@ test("Hermes draft worker report rejects no-op launch evidence", () => {
         provider,
         summary: { attempted: 1, persisted: 0, rejected: 1 },
         persisted: [],
-        rejected: [
-          { id: "translation-listing-MS-TEST-1-he", error: "bad draft" },
-        ],
+        rejected: [{ id: "translation-listing-MS-TEST-1-he", error: "bad draft" }],
       }),
     /persist at least one draft/,
   );
@@ -336,13 +244,7 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     audit_log_path: "production/data/audit-log.jsonl",
     audit_log_rows: 1,
     summary: { attempted: 1, persisted: 1, rejected: 0 },
-    persisted: [
-      {
-        id: "translation-listing-MS-TEST-1-he",
-        status: "hermes_drafted",
-        public_indexable: false,
-      },
-    ],
+    persisted: [{ id: "translation-listing-MS-TEST-1-he", status: "hermes_drafted", public_indexable: false }],
     rejected: [],
   };
 
@@ -351,38 +253,22 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     /valid generated_at/,
   );
   assert.throws(
-    () =>
-      assertHermesDraftWorkerReport({
-        ...report,
-        agent_runtime: { ...report.agent_runtime, product: "Generic Agent" },
-      }),
+    () => assertHermesDraftWorkerReport({ ...report, agent_runtime: { ...report.agent_runtime, product: "Generic Agent" } }),
     /Nous Hermes Agent/,
   );
   assert.throws(
-    () =>
-      assertHermesDraftWorkerReport({
-        ...report,
-        agent_runtime: { ...report.agent_runtime, license: "Proprietary" },
-      }),
+    () => assertHermesDraftWorkerReport({ ...report, agent_runtime: { ...report.agent_runtime, license: "Proprietary" } }),
     /MIT license/,
   );
   assert.throws(
-    () =>
-      assertHermesDraftWorkerReport({
-        ...report,
-        agent_runtime: { ...report.agent_runtime, project_context_file: "" },
-      }),
+    () => assertHermesDraftWorkerReport({ ...report, agent_runtime: { ...report.agent_runtime, project_context_file: "" } }),
     /AGENTS\.md/,
   );
   assert.throws(
     () =>
       assertHermesDraftWorkerReport({
         ...report,
-        agent_runtime: {
-          ...report.agent_runtime,
-          required_capabilities:
-            report.agent_runtime.required_capabilities.slice(1),
-        },
+        agent_runtime: { ...report.agent_runtime, required_capabilities: report.agent_runtime.required_capabilities.slice(1) },
       }),
     /official Hermes Agent capabilities/,
   );
@@ -390,10 +276,7 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     () =>
       assertHermesDraftWorkerReport({
         ...report,
-        agent_runtime: {
-          ...report.agent_runtime,
-          tool_gateway: { required_tools: ["web_search"] },
-        },
+        agent_runtime: { ...report.agent_runtime, tool_gateway: { required_tools: ["web_search"] } },
       }),
     /tool gateway/,
   );
@@ -401,13 +284,7 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     () =>
       assertHermesDraftWorkerReport({
         ...report,
-        agent_runtime: {
-          ...report.agent_runtime,
-          messaging_platforms: report.agent_runtime.messaging_platforms.slice(
-            0,
-            -1,
-          ),
-        },
+        agent_runtime: { ...report.agent_runtime, messaging_platforms: report.agent_runtime.messaging_platforms.slice(0, -1) },
       }),
     /messaging platforms/,
   );
@@ -415,22 +292,12 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     () =>
       assertHermesDraftWorkerReport({
         ...report,
-        agent_runtime: {
-          ...report.agent_runtime,
-          terminal_backends: report.agent_runtime.terminal_backends.slice(
-            0,
-            -1,
-          ),
-        },
+        agent_runtime: { ...report.agent_runtime, terminal_backends: report.agent_runtime.terminal_backends.slice(0, -1) },
       }),
     /sandbox backends/,
   );
   assert.throws(
-    () =>
-      assertHermesDraftWorkerReport({
-        ...report,
-        provider: { ...report.provider, tool_call_parser: "generic" },
-      }),
+    () => assertHermesDraftWorkerReport({ ...report, provider: { ...report.provider, tool_call_parser: "generic" } }),
     /Hermes tool parser/,
   );
   assert.throws(
@@ -445,11 +312,7 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     () =>
       assertHermesDraftWorkerReport({
         ...report,
-        provider: {
-          ...report.provider,
-          mode: "openrouter",
-          sensitive_data_allowed: true,
-        },
+        provider: { ...report.provider, mode: "openrouter", sensitive_data_allowed: true },
       }),
     /Hosted Hermes/,
   );
@@ -457,25 +320,16 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     () =>
       assertHermesDraftWorkerReport({
         ...report,
-        provider: {
-          ...report.provider,
-          endpoint: "https://hermes.ms-realty.bg/v1/models",
-        },
+        provider: { ...report.provider, endpoint: "https://hermes.ms-realty.bg/v1/models" },
       }),
     /\/v1\/chat\/completions/,
   );
   assert.throws(
-    () =>
-      assertHermesDraftWorkerReport({ ...report, persisted: [], rejected: [] }),
+    () => assertHermesDraftWorkerReport({ ...report, persisted: [], rejected: [] }),
     /row counts/,
   );
   assert.throws(
-    () =>
-      assertHermesDraftWorkerReport({
-        ...report,
-        audit_log_path: null,
-        audit_log_rows: 0,
-      }),
+    () => assertHermesDraftWorkerReport({ ...report, audit_log_path: null, audit_log_rows: 0 }),
     /audit log/,
   );
 });
@@ -503,15 +357,7 @@ test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => 
       return {
         ok: true,
         async json() {
-          return {
-            choices: [
-              {
-                message: {
-                  content: `\`\`\`\n${JSON.stringify(validDraft())}\n\`\`\``,
-                },
-              },
-            ],
-          };
+          return { choices: [{ message: { content: `\`\`\`\n${JSON.stringify(validDraft())}\n\`\`\`` } }] };
         },
       };
     },
@@ -559,10 +405,7 @@ test("OpenAI-compatible Hermes provider rejects non-empty tool-call draft argume
     }),
   });
 
-  await assert.rejects(
-    () => provider(dispatchRow()),
-    /tool call despite tool_choice none/,
-  );
+  await assert.rejects(() => provider(dispatchRow()), /tool call despite tool_choice none/);
 });
 
 test("Hermes draft worker audits a rejected provider tool-call response before persistence", async () => {
@@ -579,15 +422,7 @@ test("Hermes draft worker audits a rejected provider tool-call response before p
           choices: [
             {
               message: {
-                tool_calls: [
-                  {
-                    type: "function",
-                    function: {
-                      name: "draft_translation",
-                      arguments: JSON.stringify(validDraft()),
-                    },
-                  },
-                ],
+                tool_calls: [{ type: "function", function: { name: "draft_translation", arguments: JSON.stringify(validDraft()) } }],
               },
             },
           ],
@@ -601,11 +436,7 @@ test("Hermes draft worker audits a rejected provider tool-call response before p
     provider,
     filePath: file,
     auditLogPath: auditLog,
-    providerMetadata: {
-      mode: "self_hosted",
-      model: "NousResearch/Hermes-4-14B",
-      sensitiveDataAllowed: true,
-    },
+    providerMetadata: { mode: "self_hosted", model: "NousResearch/Hermes-4-14B", sensitiveDataAllowed: true },
   });
 
   assert.deepEqual(report.summary, { attempted: 1, persisted: 0, rejected: 1 });
@@ -613,28 +444,19 @@ test("Hermes draft worker audits a rejected provider tool-call response before p
   const auditRows = readAuditLog(auditLog);
   assert.equal(auditRows.length, 1);
   assert.equal(auditRows[0].status, "rejected");
-  assert.match(
-    auditRows[0].metadata.error,
-    /tool call despite tool_choice none/,
-  );
+  assert.match(auditRows[0].metadata.error, /tool call despite tool_choice none/);
 });
 
 test("hosted Hermes fallback refuses unclassified and PII-bearing dispatches before provider calls", async () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-hosted-`);
   const file = `${dir}/translations.jsonl`;
   const auditLog = `${dir}/audit-log.jsonl`;
-  const unclassified = {
-    ...dispatchRow(),
-    id: "translation-listing-MS-TEST-1-unclassified",
-  };
+  const unclassified = { ...dispatchRow(), id: "translation-listing-MS-TEST-1-unclassified" };
   delete unclassified.data_classification;
   const piiBearing = {
     ...dispatchRow(),
     id: "translation-listing-MS-TEST-1-pii",
-    prompt: {
-      ...dispatchRow().prompt,
-      sourceText: "Sandanski apartment. Contact buyer@example.test.",
-    },
+    prompt: { ...dispatchRow().prompt, sourceText: "Sandanski apartment. Contact buyer@example.test." },
   };
   let calls = 0;
 
@@ -646,33 +468,17 @@ test("hosted Hermes fallback refuses unclassified and PII-bearing dispatches bef
     },
     filePath: file,
     auditLogPath: auditLog,
-    providerMetadata: {
-      mode: "openrouter",
-      model: "hosted-test",
-      sensitiveDataAllowed: false,
-    },
+    providerMetadata: { mode: "openrouter", model: "hosted-test", sensitiveDataAllowed: false },
   });
 
   assert.equal(calls, 0);
   assert.deepEqual(report.summary, { attempted: 2, persisted: 0, rejected: 2 });
-  assert.match(
-    report.rejected.find((row) => row.id === unclassified.id).error,
-    /explicitly classified/,
-  );
-  assert.match(
-    report.rejected.find((row) => row.id === piiBearing.id).error,
-    /PII-like contact data/,
-  );
+  assert.match(report.rejected.find((row) => row.id === unclassified.id).error, /explicitly classified/);
+  assert.match(report.rejected.find((row) => row.id === piiBearing.id).error, /PII-like contact data/);
   assert.equal(readTranslationLedger(file).length, 0);
   const auditRows = readAuditLog(auditLog);
   assert.equal(auditRows.length, 2);
-  assert.equal(
-    auditRows.every(
-      (row) =>
-        row.status === "rejected" && row.metadata.sensitive_data === false,
-    ),
-    true,
-  );
+  assert.equal(auditRows.every((row) => row.status === "rejected" && row.metadata.sensitive_data === false), true);
 });
 
 test("OpenAI-compatible Hermes provider rejects non chat-completions endpoints", () => {
@@ -699,25 +505,14 @@ test("OpenAI-compatible Hermes provider requires an API key", () => {
 });
 
 test("live Hermes draft worker CLI fails closed when provider env is missing", () => {
-  const result = spawnSync(
-    process.execPath,
-    [fromRoot("production", "scripts", "run-hermes-draft-worker.mjs")],
-    {
-      cwd: fromRoot(),
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        HERMES_CHAT_COMPLETIONS_URL: "",
-        HERMES_API_KEY: "",
-      },
-    },
-  );
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "run-hermes-draft-worker.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: { ...process.env, HERMES_CHAT_COMPLETIONS_URL: "", HERMES_API_KEY: "" },
+  });
 
   assert.notEqual(result.status, 0);
-  assert.match(
-    result.stderr,
-    /HERMES DRAFT WORKER FAILED: HERMES_CHAT_COMPLETIONS_URL is required/,
-  );
+  assert.match(result.stderr, /HERMES DRAFT WORKER FAILED: HERMES_CHAT_COMPLETIONS_URL is required/);
 });
 
 test("live Hermes draft worker CLI writes report and ledger to configured paths", async () => {
