@@ -1438,6 +1438,34 @@ test("launch readiness validator rejects weak live service operation evidence", 
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
   });
+  const desktopHermesProvider = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices.map((item) =>
+      item.source === "hermes_draft_worker"
+        ? {
+            ...item,
+            evidence: {
+              ...item.evidence,
+              provider: {
+                ...item.evidence.provider,
+                mode: "desktop_subscription",
+                model: "operator-desktop-ai",
+                endpoint: null,
+                sensitive_data_allowed: false,
+              },
+            },
+          }
+        : item,
+    ),
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
+  });
   const weakSyncOperation = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
     routeMap,
@@ -1497,8 +1525,9 @@ test("launch readiness validator rejects weak live service operation evidence", 
   });
 
   assert.throws(() => assertLaunchReadinessReport(withoutQueryOperation), /search query operation evidence/);
-  assert.throws(() => assertLaunchReadinessReport(weakHermesProvider), /self-hosted Hermes provider evidence/);
+  assert.throws(() => assertLaunchReadinessReport(weakHermesProvider), /self-hosted sensitive-data or desktop-subscription/);
   assert.throws(() => assertLaunchReadinessReport(weakHermesAudit), /Hermes audit coverage evidence/);
+  assert.doesNotThrow(() => assertLaunchReadinessReport(desktopHermesProvider));
   assert.throws(() => assertLaunchReadinessReport(weakSyncOperation), /search sync operation evidence/);
   assert.throws(() => assertLaunchReadinessReport(wrongSyncPath), /search sync operation evidence/);
 });
@@ -2028,6 +2057,28 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.equal(result.ready, true);
   assert.equal(result.reports.every((report) => report.status === "pass"), true);
 
+  const desktopHermesDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-desktop-hermes-live-reports-`);
+  const desktopHermesPaths = writeLiveReportFixtures(desktopHermesDir, generatedAt);
+  const desktopHermes = JSON.parse(fs.readFileSync(desktopHermesPaths.hermesReportPath, "utf8"));
+  desktopHermes.provider = {
+    ...desktopHermes.provider,
+    mode: "desktop_subscription",
+    model: "operator-desktop-ai",
+    endpoint: null,
+    sensitive_data_allowed: false,
+  };
+  fs.writeFileSync(desktopHermesPaths.hermesReportPath, `${JSON.stringify(desktopHermes)}\n`);
+  assert.equal(validateLiveServiceReports(desktopHermesPaths).ready, true);
+
+  desktopHermes.provider.sensitive_data_allowed = true;
+  fs.writeFileSync(desktopHermesPaths.hermesReportPath, `${JSON.stringify(desktopHermes)}\n`);
+  const unsafeDesktopHermes = validateLiveServiceReports(desktopHermesPaths);
+  assert.equal(unsafeDesktopHermes.ready, false);
+  assert.match(
+    unsafeDesktopHermes.reports.find((report) => report.source === "hermes_draft_worker").error,
+    /desktop-subscription non-sensitive provider evidence/,
+  );
+
   const mismatchedDatabaseDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-mismatched-database-live-reports-`);
   const mismatchedDatabasePaths = writeLiveReportFixtures(mismatchedDatabaseDir, generatedAt);
   const mismatchedDatabaseQuery = JSON.parse(fs.readFileSync(mismatchedDatabasePaths.queryReportPath, "utf8"));
@@ -2202,7 +2253,7 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.equal(hostedHermesResult.reports.find((report) => report.source === "hermes_draft_worker").status, "invalid_report");
   assert.match(
     hostedHermesResult.reports.find((report) => report.source === "hermes_draft_worker").error,
-    /self-hosted sensitive-data provider/,
+    /self-hosted sensitive-data or desktop-subscription/,
   );
 });
 

@@ -231,6 +231,19 @@ function requiredLiveServiceReportsPass(reports, predicate = (report) => report.
   return required.length === REQUIRED_LIVE_SERVICE_REPORT_SOURCES.length && required.every(predicate);
 }
 
+function assertHermesLaunchProvider(provider, label) {
+  if (!String(provider?.model || "").trim() || provider?.tool_call_parser !== "hermes") {
+    throw new Error(`${label} must include the Hermes model and tool parser`);
+  }
+  if (provider.mode === "self_hosted") {
+    assertLaunchServiceUrl(provider.endpoint, label);
+    assertHermesChatCompletionsEndpoint(provider.endpoint, `${label} endpoint`);
+    if (provider.sensitive_data_allowed === true) return;
+  }
+  if (provider.mode === "desktop_subscription" && provider.endpoint === null && provider.sensitive_data_allowed === false) return;
+  throw new Error(`${label} must use self-hosted sensitive-data or desktop-subscription non-sensitive provider evidence`);
+}
+
 function assertLaunchLiveServiceEvidence(source, report) {
   if (source === POSTGRES_SEARCH_SYNC_SOURCE) {
     if (report.evidence_scope !== "live" || report.source?.kind !== "payload_postgres" || report.source?.authoritative !== true) {
@@ -262,11 +275,7 @@ function assertLaunchLiveServiceEvidence(source, report) {
     return;
   }
   if (source === HERMES_DRAFT_WORKER_SOURCE) {
-    assertLaunchServiceUrl(report.provider?.endpoint, "Hermes worker report");
-    assertHermesChatCompletionsEndpoint(report.provider.endpoint, "Hermes worker report endpoint");
-    if (report.provider?.mode !== "self_hosted" || report.provider?.sensitive_data_allowed !== true) {
-      throw new Error("Hermes worker launch evidence must use the self-hosted sensitive-data provider");
-    }
+    assertHermesLaunchProvider(report.provider, "Hermes worker launch evidence");
     if (!report.audit_log_path || report.audit_log_rows !== report.summary?.attempted) {
       throw new Error("Hermes worker launch evidence audit log must cover every attempted model call");
     }
@@ -826,15 +835,7 @@ function assertLiveServiceQueryOperationEvidence(item) {
 
 function assertLiveServiceHermesProviderEvidence(item) {
   const provider = item.evidence?.provider || {};
-  assertLaunchServiceUrl(provider.endpoint, "Hermes worker launch evidence");
-  assertHermesChatCompletionsEndpoint(provider.endpoint, "Hermes worker launch evidence endpoint");
-  if (
-    provider.mode !== "self_hosted" ||
-    provider.tool_call_parser !== "hermes" ||
-    provider.sensitive_data_allowed !== true
-  ) {
-    throw new Error("Launch readiness live services require self-hosted Hermes provider evidence");
-  }
+  assertHermesLaunchProvider(provider, "Launch readiness live services Hermes provider evidence");
   if (item.evidence?.audit_log_rows !== item.summary?.attempted) {
     throw new Error("Launch readiness live services require Hermes audit coverage evidence");
   }
