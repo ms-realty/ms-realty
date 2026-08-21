@@ -90,16 +90,25 @@ jobs:
           echo "checked_at=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> "$GITHUB_OUTPUT"
 
       - name: Stamp the exact release marker into the deploy artifact
+        env:
+          DRILL_WORKER: ${{ steps.identity.outputs.worker }}
         run: |
           node --input-type=module <<'NODE'
           import fs from "node:fs";
 
           const marker = process.env.RELEASE_SHA;
           const placeholder = "__MS_REALTY_BUILD_MARKER__";
+          const productionWorkerName = '"name": "ms-realty"';
           const configPath = "wrangler.jsonc";
           const config = fs.readFileSync(configPath, "utf8");
           if (config.split(placeholder).length !== 3) throw new Error("Expected edge and Container image marker placeholders");
-          fs.writeFileSync(configPath, config.replaceAll(placeholder, marker));
+          if (config.split(productionWorkerName).length !== 2) throw new Error("Expected the production Worker name exactly once");
+          fs.writeFileSync(
+            configPath,
+            config
+              .replace(productionWorkerName, `"name": "${process.env.DRILL_WORKER}"`)
+              .replaceAll(placeholder, marker),
+          );
           NODE
 
       - name: Deploy exact-release MS Realty artifact to the isolated Worker
@@ -335,7 +344,7 @@ jobs:
           NODE
 
       - name: Delete only the isolated drill Worker
-        if: always() && steps.baseline.outputs.version != ''
+        if: always() && steps.identity.outputs.worker != ''
         env:
           DRILL_WORKER: ${{ steps.identity.outputs.worker }}
         run: |
