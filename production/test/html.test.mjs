@@ -112,6 +112,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   const contactHtml = renderHtmlPage(renderContactPage({ registry, localeCode: "he" }));
   const guideHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/en/guides/foreign-buyers"));
   const fallbackHtml = renderHtmlPage(renderLanguageFallback({ registry, requestedLocale: "fr" }));
+  const notFoundHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/missing"));
 
   assert.equal(assertHtmlPage(homeHtml, { lang: "he", dir: "rtl", kind: "home" }), true);
   assert.match(homeHtml, /content="width=device-width, initial-scale=1, viewport-fit=cover"/);
@@ -123,6 +124,11 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(homeHtml, /data-location-media="approved"/);
   assert.match(homeHtml, /aria-label="נכסים מובילים"/);
   assert.match(homeHtml, /data-card-thumbnail="true"/);
+  assert.equal(assertHtmlPage(notFoundHtml, { lang: "he", dir: "rtl", kind: "not_found" }), true);
+  assert.match(notFoundHtml, /data-react-public-ui="not-found"/);
+  assert.match(notFoundHtml, /class="site-hd"/);
+  assert.match(notFoundHtml, /class="site-ft"/);
+  assert.match(notFoundHtml, /<h1 id="not-found-title">העמוד הזה לא נמצא<\/h1>/);
   assert.equal(assertHtmlPage(listingHtml, { lang: "he", dir: "rtl", kind: "listing" }), true);
   assert.match(listingHtml, /application\/ld\+json/);
   assert.match(listingHtml, /property="og:type" content="article"/);
@@ -132,7 +138,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /data-listing-contact-panel="true"/);
   assert.match(listingHtml, /data-listing-facts="true"/);
   assert.match(listingHtml, /data-listing-price="true"/);
-  assert.match(listingHtml, /data-photo-carousel="true"/);
+  assert.match(listingHtml, /data-listing-gallery-sources="true"/);
   assert.doesNotMatch(listingHtml, /data-photo-sphere-viewer="review_required"|needs_panorama_upload|review required/);
   assert.match(listingHtml, /data-listing-action="back_to_results"/);
   assert.match(listingHtml, /href="\/he\/search"/);
@@ -287,6 +293,44 @@ test("admin lead values are localized without exposing raw workflow codes", () =
   assert.doesNotMatch(ADMIN_APP_JS, /window\.location\.reload/);
   assert.doesNotMatch(html, />website_listing_detail</);
   assert.doesNotMatch(html, />manager escalation required</);
+});
+
+test("admin viewing follow-up queue formats due dates and keeps action header distinct", () => {
+  const page = renderAdminLeadsPayload(registry, "bg", {
+    leads: [],
+    replies: [],
+    languageRequests: [],
+    viewings: [],
+    savedSearches: [],
+    sellerPipeline: [],
+    deals: [],
+    leadSla: { rows: [], summary: { manager_escalation_required: 0, reminder_required: 0 } },
+    viewingFollowUpQueue: {
+      rows: [
+        {
+          viewing_id: "viewing-html-1",
+          listing_reference: "MS-VIEW-1",
+          lead_id: "lead-1",
+          task: "feedback",
+          viewing_status: "completed",
+          task_status: "open",
+          due_at: "2026-07-06T12:00:00.000Z",
+          starts_at: "2026-07-06T10:00:00.000Z",
+          broker: "broker_bg",
+          overdue: false,
+        },
+      ],
+      summary: { total_viewings: 1, open: 1, overdue: 0, booked: 0, completed: 0, rescheduled: 0, no_show: 0 },
+    },
+  });
+  const html = renderHtmlPage(page);
+  const dueCell = html.match(/data-viewing-column="due_at"[^>]*>([\s\S]*?)<\/td>/)?.[1] || "";
+  assert.match(dueCell, /<time dateTime="2026-07-06T12:00:00.000Z"/);
+  assert.doesNotMatch(dueCell.replace(/dateTime="[^"]+"|title="[^"]+"/g, ""), /2026-07-06T12:00:00/);
+  assert.match(html, /<th scope="col">Статус<\/th>/);
+  assert.match(html, /<th scope="col">Действие<\/th>/);
+  assert.doesNotMatch(html, /<th scope="col">Статус на огледа<\/th>/);
+  assert.doesNotMatch(html, /<th scope="col">Запиши<\/th>/);
 });
 
 test("admin seller valuation queue renders native broker outcome controls", () => {

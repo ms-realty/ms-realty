@@ -70,10 +70,11 @@ export function buildMobileElderlyQaReport({
       ],
     }),
   };
+  const searchPage = renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" });
   const pages = {
     home: renderReactPage(renderHomePage({ registry, listings, localeCode: "he" })),
     listing: renderReactPage(renderListingPage({ registry, listing, localeCode: "he" })),
-    search: renderReactPage(renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" })),
+    search: renderReactPage(searchPage),
     // The seller intake is rendered with lead writes explicitly enabled so this
     // gate always exercises the real phone-first form. Binding it to the
     // ambient durable-store state would make the intake checks vacuous exactly
@@ -227,10 +228,10 @@ export function buildMobileElderlyQaReport({
         adminAdapterCss,
         ".adm-editor-tabs .mk-tab { flex: 1 1 0; justify-content: center; min-width: 44px; min-height: 44px; }",
       ) &&
-        includes(adminAdapterCss, "@media (max-width: 1439px)") &&
+        includes(adminAdapterCss, "@media (max-width: 1023px)") &&
         includes(
           DESIGN_CSS,
-          "@media (max-width:1439px){.crm-app{grid-template-columns:1fr}.crm-sb{display:none}}",
+          "@media (max-width:1023px){.crm-app{grid-template-columns:minmax(0,1fr)}",
         ) &&
         includes(adminAdapterCss, '.adm-editor-tabs .mk-tab[aria-current="location"]') &&
         includes(adminAdapterCss, "#listing-seo") &&
@@ -325,7 +326,9 @@ export function buildMobileElderlyQaReport({
     check(
       "source_backed_search_filters",
       includes(pages.search, "name=\"property_family\"") &&
-        includes(pages.search, "name=\"property_subtype\"") &&
+        (searchPage.search.controls.filter_options.property_subtypes.length
+          ? includes(pages.search, "name=\"property_subtype\"")
+          : !includes(pages.search, "name=\"property_subtype\"")) &&
         includes(pages.search, "name=\"offer_type\"") &&
         includes(pages.search, "name=\"price_min\"") &&
         includes(pages.search, "name=\"price_max\"") &&

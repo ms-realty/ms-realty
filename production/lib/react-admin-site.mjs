@@ -123,7 +123,7 @@ const ADMIN_UI_COPY = {
     },
     reviewedDecisions: "Прегледани решения",
     pendingLegacyDecisions: "Чакащи решения за стари URL адреси",
-    pendingLegacyHint: "Всеки стар URL трябва да има отделно човешко решение. Целите трябва да са публикувани, еквивалентни страници — никога начална страница или общо търсене.",
+    pendingLegacyHint: "Всеки стар URL трябва да има отделно човешко решение. Целите трябва да са публикувани, еквивалентни страници, никога начална страница или общо търсене.",
     sourceEvidence: "Данни от стария сайт",
     sourceTitle: "Заглавие",
     sourceHeading: "H1 заглавие",
@@ -336,6 +336,7 @@ const ADMIN_UI_COPY = {
     values: {
       website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане", broker_phone: "Телефонно обаждане", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Имейл", broker_walk_in: "Посещение в офис", partner_referral: "Партньорска препоръка", lead_response_sla: "SLA за отговор", buyer_renter_pipeline: "Купувачи и наематели", reply_delivery: "Изпращане на отговори", viewing_follow_up: "След оглед", seller_pipeline: "Продавачи", website_requests: "Заявки от сайта", translation_review: "Преглед на преводи", deal_aftercare: "След сделка",
       email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Друг канал", acknowledgement: "Потвърждение", viewing: "Оглед", callback: "Обратно обаждане", valuation: "Оценка",
+      public_enabled: "Публично включен", indexable: "Индексируем", fallback_locale: "Резервен език", object_id: "Идентификатор на обект", public_indexable: "Публично индексируем", can_mark_indexable: "Може да се маркира за индекс", lead_id: "Номер на запитване", listing_id: "Референция на обява",
     },
     statuses: {
       buyer: "Купувач", foreign_buyer: "Чуждестранен купувач", investor: "Инвеститор", renter: "Наемател", seller: "Продавач", landlord: "Наемодател", partner_referral: "Партньор / препоръка", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
@@ -346,10 +347,10 @@ const ADMIN_UI_COPY = {
       unverified: "Непроверена", available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", offer_received: "Получена оферта", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", listing_publish: "Публикуване на обявата", listing_offer: "Оферта за обявата", seller_close: "Приключване на продажбата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
       commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", plot: "Парцел", agricultural_land: "Земеделска земя", land: "Парцел", property: "Имот", sale: "Продажба", rent: "Наем",
-      instant: "Веднага", daily: "Ежедневно", weekly: "Седмично",
+      instant: "Веднага", daily: "Ежедневно", weekly: "Седмично", "Within six months": "До шест месеца", broker_international: "Международен брокер",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
-    fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
+    fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", location_verified_at: "Локацията е проверена на", price_verified_at: "Цената е проверена на", price_on_request_verified_at: "Цена при запитване е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
   },
   ru: {
     urls: "URL-адреса",
@@ -424,7 +425,7 @@ const ADMIN_UI_COPY = {
     },
     reviewedDecisions: "Проверенные решения",
     pendingLegacyDecisions: "Ожидающие решения по старым URL",
-    pendingLegacyHint: "Для каждого старого URL нужно отдельное решение человека. Целью может быть только опубликованная эквивалентная страница — не главная и не общий поиск.",
+    pendingLegacyHint: "Для каждого старого URL нужно отдельное решение человека. Целью может быть только опубликованная эквивалентная страница, не главная и не общий поиск.",
     sourceEvidence: "Данные со старого сайта",
     sourceTitle: "Заголовок",
     sourceHeading: "Заголовок H1",
@@ -575,7 +576,7 @@ const ADMIN_UI_COPY = {
     noMessageBody: "Текст не указан.",
     replyTemplate: "Шаблон ответа",
     chooseReplyTemplate: "Выберите проверяемый начальный шаблон",
-    templateReviewNotice: "Шаблон — только отправная точка. Проверьте факты и отредактируйте текст перед одобрением.",
+    templateReviewNotice: "Шаблон служит только отправной точкой. Проверьте факты и отредактируйте текст перед одобрением.",
     skipToContent: "К содержанию",
     workspaceNavigation: "Навигация по рабочему пространству",
     operationsReports: "Операционные отчеты",
@@ -637,6 +638,7 @@ const ADMIN_UI_COPY = {
     values: {
       website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок", broker_phone: "Телефонный звонок", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Эл. почта", broker_walk_in: "Визит в офис", partner_referral: "Партнерская рекомендация", lead_response_sla: "SLA ответа", buyer_renter_pipeline: "Покупатели и арендаторы", reply_delivery: "Отправка ответов", viewing_follow_up: "После просмотра", seller_pipeline: "Продавцы", website_requests: "Заявки с сайта", translation_review: "Проверка переводов", deal_aftercare: "После сделки",
       email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Другой канал", acknowledgement: "Подтверждение", viewing: "Просмотр", callback: "Обратный звонок", valuation: "Оценка",
+      public_enabled: "Публично включено", indexable: "Индексируемый", fallback_locale: "Резервный язык", object_id: "Идентификатор объекта", public_indexable: "Публично индексируемый", can_mark_indexable: "Можно отметить для индекса", lead_id: "Номер заявки", listing_id: "Ссылка объекта",
     },
     statuses: {
       buyer: "Покупатель", foreign_buyer: "Иностранный покупатель", investor: "Инвестор", renter: "Арендатор", seller: "Продавец", landlord: "Арендодатель", partner_referral: "Партнер / рекомендация", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
@@ -647,10 +649,10 @@ const ADMIN_UI_COPY = {
       unverified: "Не проверено", available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", offer_received: "Предложение получено", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", listing_publish: "Публикация объекта", listing_offer: "Предложение по объекту", seller_close: "Завершение продажи", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
       commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", plot: "Участок", agricultural_land: "Сельхозземля", land: "Участок", property: "Объект", sale: "Продажа", rent: "Аренда",
-      instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно",
+      instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно", "Within six months": "В течение шести месяцев", broker_international: "Международный брокер",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
-    fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
+    fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", location_verified_at: "Локация проверена", price_verified_at: "Цена проверена", price_on_request_verified_at: "Цена по запросу проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
   },
   en: {
     urls: "URLs",
@@ -709,7 +711,7 @@ const ADMIN_UI_COPY = {
     },
     reviewedDecisions: "Reviewed decisions",
     pendingLegacyDecisions: "Pending legacy URL decisions",
-    pendingLegacyHint: "Every legacy URL needs a separate human decision. Targets must be published equivalent pages—never a homepage or generic search fallback.",
+    pendingLegacyHint: "Every legacy URL needs a separate human decision. Targets must be published equivalent pages, never a homepage or generic search fallback.",
     sourceEvidence: "Legacy source evidence",
     sourceTitle: "Title",
     sourceHeading: "H1 heading",
@@ -922,6 +924,7 @@ const ADMIN_UI_COPY = {
     values: {
       website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request", broker_phone: "Phone call", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Email", broker_walk_in: "Office walk-in", partner_referral: "Partner referral", lead_response_sla: "Response SLA", buyer_renter_pipeline: "Buyers and renters", reply_delivery: "Reply delivery", viewing_follow_up: "Post-viewing", seller_pipeline: "Sellers", website_requests: "Website requests", translation_review: "Translation review", deal_aftercare: "Deal aftercare",
       email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Other channel", acknowledgement: "Acknowledgement", viewing: "Viewing", callback: "Callback", valuation: "Valuation",
+      public_enabled: "Publicly enabled", indexable: "Indexable", fallback_locale: "Fallback locale", object_id: "Object ID", public_indexable: "Publicly indexable", can_mark_indexable: "Can mark indexable", lead_id: "Enquiry ID", listing_id: "Listing reference",
     },
     statuses: {
       buyer: "Buyer", foreign_buyer: "Foreign buyer", investor: "Investor", renter: "Renter", seller: "Seller", landlord: "Landlord", partner_referral: "Partner / referral", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
@@ -932,10 +935,10 @@ const ADMIN_UI_COPY = {
       unverified: "Unverified", available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", offer_received: "Offer received", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", listing_publish: "Listing publication", listing_offer: "Listing offer", seller_close: "Sale completion", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
       commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", plot: "Plot", agricultural_land: "Agricultural land", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
-      instant: "As soon as possible", daily: "Daily", weekly: "Weekly",
+      instant: "As soon as possible", daily: "Daily", weekly: "Weekly", "Within six months": "Within six months", broker_international: "International broker",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
     },
-    fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location", media_kind_photo: "Photo", media_kind_floor_plan: "Floor plan", media_kind_video: "Video" },
+    fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", location_verified_at: "Location verified at", price_verified_at: "Price verified at", price_on_request_verified_at: "Price on request verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location", media_kind_photo: "Photo", media_kind_floor_plan: "Floor plan", media_kind_video: "Video" },
   },
 };
 
@@ -1007,7 +1010,7 @@ function listingQualityIssueText(ui, issue) {
     missing_location: "location",
     missing_description: "description",
   };
-  if (fieldByIssue[issue]) return fieldText(ui, fieldByIssue[issue]);
+  if (fieldByIssue[issue]) return `${statusText(ui, "missing")} ${fieldText(ui, fieldByIssue[issue]).toLocaleLowerCase()}`;
   if (issue === "missing_alt_text") return ui.missingAlt;
   if (issue === "thin_public_gallery") return ui.publicPhotos;
   if (issue === "media_review_pending") return ui.reviewGatedMedia;
@@ -1039,6 +1042,43 @@ function payloadAdminListingHref(listingId, page) {
 
 function currentOperatorId(page, fallback) {
   return page.workspace?.operator_id || fallback;
+}
+
+function looksLikeRawId(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(value || "").trim());
+}
+
+function looksLikeGeneratedContactId(value) {
+  const text = String(value || "").trim();
+  return looksLikeRawId(text) || /^(contact|lead|account)[-_]/i.test(text);
+}
+
+function reviewerRoleText(copy, ui, value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "-";
+  if (ui.statuses?.[raw]) return ui.statuses[raw];
+  const match = raw.match(/^(editor|translator|reviewer)_([a-z]{2,3}(?:_[a-z]+)?)$/i);
+  if (match) {
+    const role = label(copy, match[1].toLowerCase(), statusText(ui, match[1].toLowerCase()));
+    return `${role} · ${match[2].replaceAll("_", "-").toUpperCase()}`;
+  }
+  return statusText(ui, raw);
+}
+
+function contactCardTitle(copy, contact) {
+  const display = String(contact.display_name || "").trim();
+  const person = String(contact.contact?.name || "").trim();
+  const email = String(contact.contact?.email || "").trim();
+  const title = (!looksLikeGeneratedContactId(display) && display) || (!looksLikeGeneratedContactId(person) && person) || email || label(copy, "contact", "Contact");
+  return { title, caption: contact.id || display };
+}
+
+function pipelineCardTitle(copy, state, lead) {
+  const contactName = String(lead?.contact?.name || "").trim();
+  if (contactName && !looksLikeRawId(contactName)) return contactName;
+  const listingRef = String(state.listing_reference || "").trim();
+  if (listingRef && !looksLikeRawId(listingRef)) return listingRef;
+  return label(copy, "newLead", "Enquiry");
 }
 
 function formatAdminDateTime(value, locale) {
@@ -1088,7 +1128,7 @@ function requestDetailsText(lead) {
 const STAT_TONES = {
   ink: { bg: "var(--ink-50)", fg: "var(--ink-800)" },
   sea: { bg: "var(--sea-50)", fg: "var(--sea-600)" },
-  sun: { bg: "var(--sun-100)", fg: "var(--sun-600)" },
+  sun: { bg: "var(--sun-100)", fg: "var(--stone-600)" },
   brick: { bg: "var(--brick-50)", fg: "var(--brick-600)" },
   success: { bg: "var(--success-50)", fg: "var(--success-500)" },
   sand: { bg: "var(--stone-100)", fg: "var(--stone-500)" },
@@ -1140,20 +1180,26 @@ function WorkbenchDisclosure({ summary, children, ...attrs }) {
 }
 
 // Metric tiles that stay a real <dl> so the markup remains data-legible.
-function StatGrid({ metrics }) {
+function StatGrid({ metrics, layout = "tiles" }) {
+  const className = layout === "list" ? "adm-status-list" : layout === "inline" ? "adm-kpis adm-kpis--inline" : "adm-kpis";
   return h(
     "dl",
-    { className: "adm-kpis" },
+    { className },
     ...metrics.map(([metricLabel, value, icon = "trending-up", tone = "ink"]) => {
+      if (layout === "list") {
+        return h("div", { key: metricLabel }, h("dt", null, metricLabel), h("dd", null, value));
+      }
       const palette = STAT_TONES[tone] || STAT_TONES.ink;
       return h(
         "div",
         { key: metricLabel, className: "crm-stat" },
         h(
-          "div",
-          { className: "crm-stat__top" },
-          h("dt", { className: "crm-stat__label" }, metricLabel),
-          h("span", { className: "crm-stat__ic", style: `background:${palette.bg};color:${palette.fg}` }, h(Icon, { name: icon, size: 19 })),
+          "dt",
+          { className: "crm-stat__top crm-stat__label" },
+          metricLabel,
+          layout === "inline"
+            ? null
+            : h("span", { className: "crm-stat__ic", style: `color:${palette.fg}` }, h(Icon, { name: icon, size: 16 })),
         ),
         h("dd", { className: "crm-stat__val" }, value),
       );
@@ -1164,7 +1210,7 @@ function StatGrid({ metrics }) {
 function PageHeader({ title, subtitle, children }) {
   return h(
     "div",
-    { className: "crm-ph" },
+    { className: "crm-ph crm-ph--compact" },
     h("div", null, h("h1", null, title), subtitle ? h("p", null, subtitle) : null),
     children ? h("div", { className: "crm-ph__actions" }, children) : null,
   );
@@ -1281,6 +1327,7 @@ function Sidebar({ page }) {
               className: `crm-nav${page.kind === item.kind ? " crm-nav--on" : ""}`,
               href: adminHref(item.path, page),
               "aria-current": page.kind === item.kind ? "page" : undefined,
+              title: item.label,
             },
             h(Icon, { name: item.icon, size: 18 }),
             h("span", null, item.label),
@@ -1482,17 +1529,15 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
   return h(
     "aside",
     { className: "adm-workbench-rail", "data-readiness-rail": "true" },
-    h(Panel, { title: label(copy, "today", "Today"), "data-today-snapshot": "true" }, h(StatGrid, {
-      metrics: [
-        [label(copy, "needsReply", "Needs reply"), queue.pending.length, "messages-square", "sea"],
-        [label(copy, "managerEscalations", "Manager escalations"), page.summary?.leadSlaManagerEscalations || 0, "triangle-alert", "brick"],
-        [label(copy, "overdueFollowUps", "Overdue follow-ups"), overdueTasks, "bell", "sun"],
-        [label(copy, "openTasks", "Open tasks"), openTasks, "check-circle-2", "success"],
-      ],
-    })),
     h(
-      Panel,
-      { title: ui.launchReadiness, "data-readiness-work": "true" },
+      "section",
+      { className: "adm-rail-summary", "data-readiness-work": "true" },
+      h(
+        "header",
+        { className: "adm-rail-summary__header" },
+        h("p", null, label(copy, "today", "Today")),
+        h("h2", null, label(copy, "workOverview", "Work overview")),
+      ),
       h(
         "ul",
         { className: "adm-readiness-list" },
@@ -1504,25 +1549,18 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
               "a",
               { className: "adm-readiness-link", href: item.href },
               h("span", { className: "adm-readiness-copy" }, h("strong", null, item.label), h("small", null, item.note)),
-              h("span", { className: "adm-readiness-value" }, h(StatusPill, { tone: item.tone }, item.value)),
+              h("strong", { className: "adm-readiness-value", "data-tone": item.tone }, item.value),
             ),
           ),
         ),
       ),
     ),
     h(
-      Panel,
-      {
-        title: label(copy, "activity", "Activity"),
-        action: h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/activity", page) }, label(copy, "viewHistory", "History")),
-        "data-today-activity-link": "true",
-      },
-      h(
-        "div",
-        { className: "adm-rail-actions" },
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/leads", page) }, h(Icon, { name: "inbox", size: 16 }), label(copy, "viewLeadInbox", "Open lead inbox")),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/reports", page) }, h(Icon, { name: "bar-chart-3", size: 16 }), ui.operationsReports),
-      ),
+      "nav",
+      { className: "adm-rail-actions", "aria-label": label(copy, "activity", "Activity"), "data-today-activity-link": "true" },
+      h("a", { href: adminHref("/admin/leads", page) }, h(Icon, { name: "inbox", size: 16 }), label(copy, "viewLeadInbox", "Open lead inbox")),
+      h("a", { href: adminHref("/admin/reports", page) }, h(Icon, { name: "bar-chart-3", size: 16 }), ui.operationsReports),
+      h("a", { href: adminHref("/admin/activity", page) }, h(Icon, { name: "list", size: 16 }), label(copy, "viewHistory", "History")),
     ),
   );
 }
@@ -1544,6 +1582,7 @@ function TodayBody({ page }) {
     (page.summary?.leadPipelineOverdue || 0);
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
+  const leads = new Map((page.leads || []).map((lead) => [lead.lead_id, lead]));
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -1572,7 +1611,7 @@ function TodayBody({ page }) {
               ? h(
                   "ul",
                   { className: "adm-task-list" },
-                  ...queue.pending.map((lead) => {
+                  ...queue.pending.slice(0, 3).map((lead) => {
                     const sla = queue.leadSlaById.get(lead.lead_id);
                     const status = sla?.status || "pending";
                     return h(
@@ -1594,74 +1633,87 @@ function TodayBody({ page }) {
                       ),
                     );
                   }),
+                  queue.pending.length > 3
+                    ? h(
+                        "li",
+                        { className: "adm-task-list__more" },
+                        h("a", { href: inboxHref }, label(copy, "viewAllPriorityLeads", "View all priority leads")),
+                      )
+                    : null,
                 )
               : h("p", { className: "adm-empty" }, label(copy, "noPriorityLeads", "No leads are waiting for a reply.")),
           ),
           h(
-            Panel,
-            {
-              title: label(copy, "pipelineWorkspace", "Buyers and renters"),
-              action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "openPipeline", "Open opportunities")),
-              "data-lead-pipeline-preview": "true",
-            },
-            page.leadPipelineQueue?.rows?.length
-              ? h(
-                  "ul",
-                  { className: "adm-task-list" },
-                  ...page.leadPipelineQueue.rows.slice(0, 3).map((state) =>
-                    h(
-                      "li",
-                      { key: state.lead_id, "data-pipeline-preview-row": state.lead_id },
+            WorkbenchDisclosure,
+            { summary: label(copy, "nextActions", "Next actions"), "data-today-secondary": "true" },
+            h(
+              Panel,
+              {
+                title: label(copy, "pipelineWorkspace", "Buyers and renters"),
+                action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "openPipeline", "Open opportunities")),
+                "data-lead-pipeline-preview": "true",
+              },
+              page.leadPipelineQueue?.rows?.length
+                ? h(
+                    "ul",
+                    { className: "adm-task-list" },
+                    ...page.leadPipelineQueue.rows.slice(0, 3).map((state) =>
                       h(
-                        "div",
-                        { className: "adm-task-list__body" },
-                        h("code", { className: "crm-mono" }, state.lead_id),
-                        h("strong", null, `${statusText(ui, state.lead_type)} · ${statusText(ui, state.stage)}`),
-                        h("small", { className: "adm-lead-context" }, state.next_action ? statusText(ui, state.next_action) : ""),
-                      ),
-                      h(
-                        "div",
-                        { className: "adm-task-list__actions" },
-                        h(StatusPill, { tone: state.overdue ? "brick" : "sea" }, state.overdue ? statusText(ui, "overdue") : statusText(ui, state.status)),
-                        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, statusText(ui, "open")),
-                      ),
-                    ),
-                  ),
-                )
-              : h("p", { className: "adm-empty" }, label(copy, "noOpenPipeline", "No open buyer or renter opportunities.")),
-          ),
-          h(ViewingFollowUpQueue, { page, copy, ui }),
-          h(SellerPipelineQueue, { page, copy, ui }),
-          h(
-            Panel,
-            {
-              title: label(copy, "publicRequests", "Website requests"),
-              action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page) }, label(copy, "requestsWorkspace", "Requests and alerts")),
-              "data-public-request-preview": "true",
-            },
-            page.publicRequestQueue?.rows?.length
-              ? h(
-                  "ul",
-                  { className: "adm-task-list" },
-                  ...page.publicRequestQueue.rows.slice(0, 3).map((row) =>
-                    h(
-                      "li",
-                      { key: `${row.request_type}:${row.request_id}` },
-                      h(
-                        "div",
-                        { className: "adm-task-list__body" },
-                        h("code", { className: "crm-mono" }, row.request_id),
-                        h("strong", null, row.request_type === "saved_search" ? label(copy, "savedSearchRequest", "Saved search") : label(copy, "languageRequest", "Language request")),
-                      ),
-                      h(
-                        "div",
-                        { className: "adm-task-list__actions" },
-                        h(StatusPill, { tone: row.overdue ? "brick" : "sea" }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
+                        "li",
+                        { key: state.lead_id, "data-pipeline-preview-row": state.lead_id },
+                        h(
+                          "div",
+                          { className: "adm-task-list__body" },
+                          h("strong", null, pipelineCardTitle(copy, state, leads.get(state.lead_id))),
+                          h("small", { className: "adm-lead-context" }, `${statusText(ui, state.lead_type)} · ${statusText(ui, state.stage)}`),
+                          h("small", { className: "adm-lead-context" }, state.next_action ? statusText(ui, state.next_action) : ""),
+                          h("code", { className: "crm-mono adm-task-list__reference" }, state.lead_id),
+                        ),
+                        h(
+                          "div",
+                          { className: "adm-task-list__actions" },
+                          h(StatusPill, { tone: state.overdue ? "brick" : "sea" }, state.overdue ? statusText(ui, "overdue") : statusText(ui, state.status)),
+                          h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "viewRecord", "Open")),
+                        ),
                       ),
                     ),
-                  ),
-                )
-              : h("p", { className: "adm-empty" }, label(copy, "noOpenRequests", "No open website requests.")),
+                  )
+                : h("p", { className: "adm-empty" }, label(copy, "noOpenPipeline", "No open buyer or renter opportunities.")),
+            ),
+            h(ViewingFollowUpQueue, { page, copy, ui }),
+            h(SellerPipelineQueue, { page, copy, ui }),
+            h(
+              Panel,
+              {
+                title: label(copy, "publicRequests", "Website requests"),
+                action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page) }, label(copy, "requestsWorkspace", "Requests and alerts")),
+                "data-public-request-preview": "true",
+              },
+              page.publicRequestQueue?.rows?.length
+                ? h(
+                    "ul",
+                    { className: "adm-task-list" },
+                    ...page.publicRequestQueue.rows.slice(0, 3).map((row) =>
+                      h(
+                        "li",
+                        { key: `${row.request_type}:${row.request_id}` },
+                        h(
+                          "div",
+                          { className: "adm-task-list__body" },
+                          h("strong", null, row.request_type === "saved_search" ? label(copy, "savedSearchRequest", "Saved search") : label(copy, "languageRequest", "Language request")),
+                          h("small", { className: "adm-lead-context" }, row.request_type === "saved_search" ? publicRequestCriteria(row) : row.requested_path || "-"),
+                          h("code", { className: "crm-mono adm-task-list__reference" }, row.request_id),
+                        ),
+                        h(
+                          "div",
+                          { className: "adm-task-list__actions" },
+                          h(StatusPill, { tone: row.overdue ? "brick" : "sea" }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
+                        ),
+                      ),
+                    ),
+                  )
+                : h("p", { className: "adm-empty" }, label(copy, "noOpenRequests", "No open website requests.")),
+            ),
           ),
         ),
         h(TodayReadinessRail, { page, copy, ui, queue, openTasks, overdueTasks, inboxHref }),
@@ -1734,7 +1786,7 @@ function publicRequestCriteria(row) {
   const filters = Object.entries(row.filters || {})
     .filter(([, value]) => value !== null && value !== undefined && value !== "" && value !== false)
     .map(([key, value]) => `${key.replaceAll("_", " ")}: ${Array.isArray(value) ? value.join(", ") : value}`);
-  return [row.query ? `“${row.query}”` : null, ...filters].filter(Boolean).join(" · ") || "—";
+  return [row.query ? `“${row.query}”` : null, ...filters].filter(Boolean).join(" · ") || "-";
 }
 
 function publicRequestTone(row) {
@@ -1822,12 +1874,12 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false }) {
       h(
         "dl",
         { className: "adm-public-request__facts" },
-        h("div", null, h("dt", null, label(copy, "requestedLocale", "Requested locale")), h("dd", null, String(row.requested_locale || row.locale || "—").toUpperCase())),
+        h("div", null, h("dt", null, label(copy, "requestedLocale", "Requested locale")), h("dd", null, String(row.requested_locale || row.locale || "-").toUpperCase())),
         row.request_type === "saved_search"
           ? h("div", null, h("dt", null, label(copy, "searchCriteria", "Search criteria")), h("dd", null, publicRequestCriteria(row)))
-          : h("div", null, h("dt", null, label(copy, "requestedPath", "Requested page")), h("dd", { className: "crm-mono" }, row.requested_path || "—")),
+          : h("div", null, h("dt", null, label(copy, "requestedPath", "Requested page")), h("dd", { className: "crm-mono" }, row.requested_path || "-")),
         row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "alertFrequency", "Alert frequency")), h("dd", null, row.alert_frequency ? statusText(ui, row.alert_frequency) : "—"))
+          ? h("div", null, h("dt", null, label(copy, "alertFrequency", "Alert frequency")), h("dd", null, row.alert_frequency ? statusText(ui, row.alert_frequency) : "-"))
           : null,
         row.request_type === "saved_search"
           ? h("div", null, h("dt", null, label(copy, "matches", "Matches")), h("dd", null, row.match_count ?? 0))
@@ -1836,7 +1888,7 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false }) {
           "div",
           null,
           h("dt", null, label(copy, "nextFollowUp", "Next follow-up")),
-          h("dd", null, row.next_follow_up_at ? h("time", { dateTime: row.next_follow_up_at }, formatAdminDateTime(row.next_follow_up_at, page.workspace.locale)) : "—"),
+          h("dd", null, row.next_follow_up_at ? h("time", { dateTime: row.next_follow_up_at }, formatAdminDateTime(row.next_follow_up_at, page.workspace.locale)) : "-"),
         ),
       ),
       h(
@@ -1905,7 +1957,7 @@ function PublicRequestsBody({ page }) {
 }
 
 function auditMetadataValue(value) {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") return "-";
   if (Array.isArray(value)) return value.join(", ");
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
@@ -1933,15 +1985,19 @@ function ActivityBody({ page }) {
       h(PageHeader, { title, subtitle: page.metadata?.description }),
       h(StatGrid, { metrics }),
       h(
-        "form",
-        { method: "get", action: "/admin/activity", className: "adm-filterbar", role: "search", "data-activity-filters": "true" },
-        filterLocaleInput(page),
-        h("label", null, label(copy, "leadReference", "Lead ID"), h("input", { name: "leadId", defaultValue: page.filters?.leadId, placeholder: "lead-…" })),
-        h("label", null, label(copy, "listingReference", "Listing ID"), h("input", { name: "listingId", defaultValue: page.filters?.listingId, placeholder: "MS-CRAWL-0001" })),
-        h("label", null, label(copy, "actor", "Operator"), h("input", { name: "actor", defaultValue: page.filters?.actor })),
-        h("label", null, label(copy, "action", "Action"), h("input", { name: "action", defaultValue: page.filters?.action })),
-        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/activity", page) }, label(copy, "resetFilters", "Reset filters")),
+        WorkbenchDisclosure,
+        { summary: label(copy, "filter", "Filter"), "data-filter-disclosure": "true", "data-activity-filter-disclosure": "true" },
+        h(
+          "form",
+          { method: "get", action: "/admin/activity", className: "adm-filterbar", role: "search", "data-activity-filters": "true" },
+          filterLocaleInput(page),
+          h("label", null, label(copy, "leadReference", "Lead ID"), h("input", { name: "leadId", defaultValue: page.filters?.leadId, placeholder: label(copy, "leadIdExample", "e.g. enquiry number") })),
+          h("label", null, label(copy, "listingReference", "Listing ID"), h("input", { name: "listingId", defaultValue: page.filters?.listingId, placeholder: label(copy, "listingIdExample", "e.g. listing reference") })),
+          h("label", null, label(copy, "actor", "Operator"), h("input", { name: "actor", defaultValue: page.filters?.actor })),
+          h("label", null, label(copy, "action", "Action"), h("input", { name: "action", defaultValue: page.filters?.action })),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+          h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/activity", page) }, label(copy, "resetFilters", "Reset filters")),
+        ),
       ),
       h(
         Panel,
@@ -2035,7 +2091,7 @@ function OperationsReportsBody({ page }) {
   const ui = workbenchCopy(page);
   const report = page.report;
   const title = label(copy, "operationsReports", ui.operationsReports);
-  const minuteValue = (value) => (value === null || value === undefined ? "—" : `${value} ${ui.minutesShort}`);
+  const minuteValue = (value) => (value === null || value === undefined ? "-" : `${value} ${ui.minutesShort}`);
   const metrics = [
     [label(copy, "leads", "Leads"), report.summary.leads, "users", "ink"],
     [ui.responseRate, `${report.summary.response_rate_pct}%`, "send", "sea"],
@@ -2143,7 +2199,7 @@ function OperationsReportsBody({ page }) {
             { className: "adm-report-facts" },
             h("div", null, h("dt", null, ui.searchEvents), h("dd", null, report.search.search_events || 0)),
             h("div", null, h("dt", null, ui.zeroResults), h("dd", null, report.search.zero_result_events || 0)),
-            h("div", null, h("dt", null, ui.popularFilters), h("dd", null, (report.search.popular_filters || []).slice(0, 3).map((row) => `${row.key} (${row.count})`).join(" · ") || "—")),
+            h("div", null, h("dt", null, ui.popularFilters), h("dd", null, (report.search.popular_filters || []).slice(0, 3).map((row) => `${row.key} (${row.count})`).join(" · ") || "-")),
           ),
         ),
       ),
@@ -2251,7 +2307,7 @@ function ReplyDeliveryForm({ page, lead, reply, delivery, copy, ui }) {
         h(
           "select",
           { name: "channel", required: !failed },
-          h("option", { value: "" }, "—"),
+          h("option", { value: "" }, "-"),
           ...["email", "phone", "whatsapp", "viber", "sms", "other"].map((channel) =>
             h("option", { key: channel, value: channel, selected: delivery?.delivery_channel === channel }, valueText(ui, channel)),
           ),
@@ -2438,7 +2494,7 @@ function PipelinePrimaryAction({ page, state }) {
   if (next === "qualify") {
     return h(
       "details",
-      { className: "adm-pipeline-action", open: true },
+      { className: "adm-pipeline-action" },
       h("summary", null, label(copy, "qualification", "Qualification")),
       h(
         PipelineOutcomeForm,
@@ -2567,6 +2623,9 @@ function PipelineCard({ page, state, lead }) {
   const intake = state.intake_requirements;
   const inventoryMatch = (page.leadMatching?.rows || []).find((row) => row.lead_id === state.lead_id);
   const stageTone = state.status === "lost" ? "brick" : state.status === "closed" ? "success" : state.overdue ? "brick" : "sea";
+  const cardTitle = pipelineCardTitle(copy, state, lead);
+  const listingRef = String(state.listing_reference || "").trim();
+  const listingFact = listingRef && listingRef !== cardTitle && listingRef !== state.lead_id ? listingRef : "-";
   return h(
     "article",
     {
@@ -2582,9 +2641,8 @@ function PipelineCard({ page, state, lead }) {
       h(
         "div",
         null,
-        h("small", { className: "t-eyebrow" }, statusText(ui, state.lead_type)),
-        h("h2", null, lead?.contact?.name || state.lead_id),
-        h("code", { className: "crm-mono" }, state.lead_id),
+        h("h2", null, cardTitle),
+        h("code", { className: "crm-mono adm-id-caption" }, state.lead_id),
       ),
       h(
         "div",
@@ -2597,21 +2655,21 @@ function PipelineCard({ page, state, lead }) {
     h(
       "dl",
       { className: "adm-pipeline-facts" },
-      h("div", null, h("dt", null, label(copy, "listing", "Listing")), h("dd", null, state.listing_reference || "—")),
-      h("div", null, h("dt", null, label(copy, "nextAction", "Next action")), h("dd", null, state.next_action ? statusText(ui, state.next_action) : "—")),
-      h("div", null, h("dt", null, label(copy, "nextFollowUp", "Next follow-up")), h("dd", null, formatAdminDateTime(state.next_follow_up_at, page.workspace.locale) || "—")),
-      h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, state.assigned_broker || "—")),
+      h("div", null, h("dt", null, label(copy, "listing", "Listing")), h("dd", null, listingFact)),
+      h("div", null, h("dt", null, label(copy, "nextAction", "Next action")), h("dd", null, state.next_action ? statusText(ui, state.next_action) : "-")),
+      h("div", null, h("dt", null, label(copy, "nextFollowUp", "Next follow-up")), h("dd", null, formatAdminDateTime(state.next_follow_up_at, page.workspace.locale) || "-")),
+      h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, state.assigned_broker ? statusText(ui, state.assigned_broker) : "-")),
     ),
     requirements
       ? h(
           "div",
           { className: "adm-pipeline-requirements" },
           h("strong", null, label(copy, "qualification", "Qualification")),
-          h("span", null, `€${requirements.budget_min_eur || 0}–€${requirements.budget_max_eur}`),
+          h("span", null, `€${requirements.budget_min_eur || 0} to €${requirements.budget_max_eur}`),
           h("span", null, requirements.locations.join(", ")),
           requirements.property_types.length ? h("span", null, requirements.property_types.map((value) => statusText(ui, value)).join(", ")) : null,
           requirements.bedrooms_min !== null ? h("span", null, `${label(copy, "bedroomsMin", "Minimum bedrooms")}: ${requirements.bedrooms_min}`) : null,
-          h("span", null, requirements.timeline),
+          h("span", null, requirements.timeline ? statusText(ui, requirements.timeline) : null),
           h("span", null, statusText(ui, requirements.finance_status)),
         )
       : null,
@@ -2623,7 +2681,7 @@ function PipelineCard({ page, state, lead }) {
           intake.budget_max_eur !== null && intake.budget_max_eur !== undefined ? h("span", null, `≤ €${intake.budget_max_eur}`) : null,
           intake.locations?.length ? h("span", null, intake.locations.join(", ")) : null,
           intake.property_types?.length ? h("span", null, intake.property_types.map((value) => statusText(ui, value)).join(", ")) : null,
-          intake.timeline ? h("span", null, intake.timeline) : null,
+          intake.timeline ? h("span", null, statusText(ui, intake.timeline)) : null,
         )
       : null,
     inventoryMatch
@@ -3228,7 +3286,7 @@ function LeadPipelineBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
-      h(StatGrid, { metrics }),
+      h(StatGrid, { metrics, layout: "inline" }),
       h(
         "nav",
         { className: "crm-seg adm-pipeline-tabs", "aria-label": title, "data-pipeline-tabs": "true" },
@@ -3259,7 +3317,7 @@ function LeadAssignmentControl({ page, lead, copy }) {
       "summary",
       null,
       h(Icon, { name: "users", size: 15 }),
-      h("span", null, `${label(copy, "assignedBroker", "Assigned broker")}: ${brokerId || "—"}`),
+      h("span", null, `${label(copy, "assignedBroker", "Assigned broker")}: ${brokerId || "-"}`),
     ),
     canAssign
       ? h(
@@ -3448,7 +3506,7 @@ function AccountLinkForm({ page, contact, copy }) {
         h(
           "select",
           { name: "accountId", required: true },
-          h("option", { value: "" }, "—"),
+          h("option", { value: "" }, "-"),
           ...page.accounts.map((account) => h("option", { key: account.id, value: account.id }, `${account.label} · ${label(copy, account.type, account.type)}`)),
         ),
       ),
@@ -3641,7 +3699,7 @@ function ConsentsBody({ page }) {
                         "data-consent-row": "true",
                         "data-consent-state": row.granted ? "granted" : "withdrawn",
                       },
-                      h("td", { "data-consent-column": "subject", "data-label": columns.subject }, h("code", { className: "crm-mono" }, row.subject_id || row.contact_reference || "—"), h("small", { className: "adm-lead-context" }, row.locale.toUpperCase())),
+                      h("td", { "data-consent-column": "subject", "data-label": columns.subject }, h("code", { className: "crm-mono" }, row.subject_id || row.contact_reference || "-"), h("small", { className: "adm-lead-context" }, row.locale.toUpperCase())),
                       h("td", { "data-consent-column": "purpose", "data-label": columns.purpose }, h("strong", null, label(copy, row.consent_type, row.consent_type)), h("small", { className: "adm-lead-context" }, label(copy, row.legal_basis, row.legal_basis))),
                       h("td", { "data-consent-column": "state", "data-label": columns.state }, h(StatusPill, { tone: row.granted ? "success" : "brick" }, row.granted ? label(copy, "consentActive", "Active") : label(copy, "consentStopped", "Withdrawn"))),
                       h("td", { className: "crm-tbl__muted crm-mono", "data-consent-column": "recorded_at", "data-label": columns.recordedAt }, formatAdminDateTime(row.recorded_at, page.workspace?.locale)),
@@ -3785,14 +3843,15 @@ function ContactsBody({ page }) {
           h(
             "div",
             { className: "adm-contact-grid" },
-            ...page.contacts.map((contact) =>
-              h(
+            ...page.contacts.map((contact) => {
+              const identity = contactCardTitle(copy, contact);
+              return h(
                 "article",
                 { key: contact.id, className: "adm-contact-card", "data-contact-record": contact.id },
                 h(
                   "header",
                   null,
-                  h("div", null, h("h3", null, contact.display_name), h("code", { className: "crm-mono" }, contact.id)),
+                  h("div", null, h("h3", null, identity.title), h("code", { className: "crm-mono adm-id-caption" }, identity.caption)),
                   contact.account_id
                     ? h(StatusPill, { tone: "sand" }, `${contact.account_label} · ${label(copy, contact.account_type, contact.account_type)}`)
                     : h(StatusPill, { tone: "sun" }, label(copy, "ungroupedContacts", "No account")),
@@ -3803,10 +3862,10 @@ function ContactsBody({ page }) {
                   { className: "adm-contact-facts" },
                   h("div", null, h("dt", null, label(copy, "leads", "Enquiries")), h("dd", null, contact.lead_count)),
                   h("div", null, h("dt", null, label(copy, "duplicateEnquiries", "Linked repeats")), h("dd", null, contact.duplicate_leads)),
-                  h("div", null, h("dt", null, label(copy, "owners", "Owners")), h("dd", null, contact.assigned_brokers.join(", ") || "—")),
-                  h("div", null, h("dt", null, label(copy, "language", "Language")), h("dd", null, contact.languages.join(", ").toUpperCase() || "—")),
+                  h("div", null, h("dt", null, label(copy, "owners", "Owners")), h("dd", null, contact.assigned_brokers.map((broker) => statusText(ui, broker)).join(", ") || "-")),
+                  h("div", null, h("dt", null, label(copy, "language", "Language")), h("dd", null, contact.languages.join(", ").toUpperCase() || "-")),
                   h("div", null, h("dt", null, label(copy, "communicationEvents", "Communication events")), h("dd", null, contact.communication_event_count)),
-                  h("div", null, h("dt", null, label(copy, "latestEnquiry", "Latest enquiry")), h("dd", null, contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, page.workspace?.locale) : "—")),
+                  h("div", null, h("dt", null, label(copy, "latestEnquiry", "Latest enquiry")), h("dd", null, contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, page.workspace?.locale) : "-")),
                 ),
                 h(
                   "div",
@@ -3814,8 +3873,8 @@ function ContactsBody({ page }) {
                   ...contact.lead_ids.map((leadId) => h("a", { key: leadId, href: adminHref(`/admin/leads?locale=${page.workspace.locale}#lead-${encodeURIComponent(leadId)}`, page) }, leadId)),
                 ),
                 h(AccountLinkForm, { page, contact, copy }),
-              ),
-            ),
+              );
+            }),
           ),
         ),
       ),
@@ -3876,7 +3935,7 @@ function ManualLeadForm({ page }) {
           h("select", { name: "contact_preference", defaultValue: "phone" }, ...["phone", "viber", "whatsapp", "email"].map((channel) => h("option", { key: channel, value: channel }, valueText(ui, channel)))),
         ),
         h("label", null, label(copy, "listingReference", "Listing reference"), h("input", { name: "listingReference", maxLength: 120 })),
-        h("label", null, label(copy, "locations", "Locations"), h("input", { name: "requirements.locations", placeholder: "Sandanski", maxLength: 600 })),
+        h("label", null, label(copy, "locations", "Locations"), h("input", { name: "requirements.locations", placeholder: label(copy, "searchExample", "e.g. Sandanski"), maxLength: 600 })),
         h(PropertyFamilyChecks, { ui, name: "requirements.property_types", legend: label(copy, "propertyTypes", "Property types") }),
         h("label", null, label(copy, "budgetMax", "Maximum budget (€)"), h("input", { name: "requirements.budget_max_eur", type: "number", min: 0, step: 1 })),
         h("label", null, label(copy, "timeline", "Decision timeline"), h("input", { name: "requirements.timeline", maxLength: 200 })),
@@ -4016,17 +4075,17 @@ function LeadInboxBody({ page }) {
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
       h(ManualLeadForm, { page }),
-      h(StatGrid, { metrics }),
       h(
-        "nav",
-        { className: "crm-seg adm-lead-tabs", "aria-label": label(copy, "leadQueues", "Lead queues"), "data-lead-queue-tabs": "true" },
-        h("button", { type: "button", "data-lead-filter": "all", "data-on": "0" }, label(copy, "all", "All")),
-        h("button", { type: "button", "data-lead-filter": "needs_reply", "data-on": "1" }, label(copy, "needsReply", "Needs reply")),
-        h("button", { type: "button", "data-lead-filter": "sla", "data-on": "0" }, label(copy, "sla", "SLA")),
-      ),
-      h(
-        Panel,
-        { title: label(copy, "crmLeads", "CRM leads"), "aria-label": label(copy, "crmLeads", "CRM leads") },
+        "section",
+        { className: "adm-lead-inbox", "data-lead-inbox": "true", "aria-label": label(copy, "crmLeads", "CRM leads") },
+        h(StatGrid, { metrics, layout: "inline" }),
+        h(
+          "nav",
+          { className: "crm-seg adm-lead-tabs", "aria-label": label(copy, "leadQueues", "Lead queues"), "data-lead-queue-tabs": "true" },
+          h("button", { type: "button", "data-lead-filter": "all", "data-on": "0" }, label(copy, "all", "All")),
+          h("button", { type: "button", "data-lead-filter": "needs_reply", "data-on": "1" }, label(copy, "needsReply", "Needs reply")),
+          h("button", { type: "button", "data-lead-filter": "sla", "data-on": "0" }, label(copy, "sla", "SLA")),
+        ),
         h(
           "div",
           { className: "adm-scroll-x" },
@@ -4083,7 +4142,6 @@ function LeadInboxBody({ page }) {
                       leadContactActions(lead, ui),
                       leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
                       requestDetails ? h("small", { className: "adm-lead-context", "data-lead-request-details": "true" }, requestDetails) : null,
-                      h(LeadBrief, { brief: briefByLeadId.get(lead.lead_id), intake, copy, ui, locale: page.workspace?.locale }),
                       lead.duplicate_status === "possible_duplicate"
                         ? h(
                             "a",
@@ -4095,10 +4153,16 @@ function LeadInboxBody({ page }) {
                       h(
                         "details",
                         { className: "adm-lead-more" },
-                        h("summary", null, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "leadDetails", "Lead details"))),
+                        h(
+                          "summary",
+                          { "aria-label": label(copy, "leadDetails", "Lead details") },
+                          h(Icon, { name: "list", size: 16 }),
+                          h("span", { className: "adm-lead-more__label" }, label(copy, "leadDetails", "Lead details")),
+                        ),
                         h(
                           "div",
                           { className: "adm-lead-more__body" },
+                          h(LeadBrief, { brief: briefByLeadId.get(lead.lead_id), intake, copy, ui, locale: page.workspace?.locale }),
                           h(
                             "div",
                             { className: "adm-lead-reference" },
@@ -4144,7 +4208,7 @@ function LeadInboxBody({ page }) {
                       {
                         method: "post",
                         action: "/api/admin/replies/draft",
-                        className: "adm-draft-form",
+                        className: "adm-draft-form adm-reply-secondary",
                         "data-hermes-draft-request": "true",
                         "data-hermes-draft-endpoint": "/api/admin/replies/draft",
                         "data-original-language": lead.original_language,
@@ -4162,14 +4226,13 @@ function LeadInboxBody({ page }) {
                       h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
                       h(
                         "button",
-                        { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" },
-                        h(Icon, { name: "sparkles", size: 16 }),
-                        h("span", null, label(copy, "draftWithHermes", "Draft with Hermes")),
+                        { type: "submit", className: "adm-reply-secondary__summary" },
+                        label(copy, "draftWithHermes", "Draft with Hermes"),
                       ),
                     ),
                     h(
                       "details",
-                      { className: "adm-reply", hidden: page.leadSourceDurable || undefined },
+                      { className: "adm-reply adm-reply-primary", hidden: page.leadSourceDurable || undefined },
                       h("summary", { className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "send", size: 16 }), h("span", null, label(copy, "queueReply", "Queue reply"))),
                       h(
                         "form",
@@ -4247,9 +4310,9 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
   const columns = {
     viewing: label(copy, "viewings", "Viewings"),
     task: label(copy, "task", "Task"),
-    status: label(copy, "viewingStatus", "Viewing status"),
+    status: label(copy, "status", "Status"),
     dueAt: label(copy, "dueAt", "Due at"),
-    action: label(copy, "recordOutcome", "Record"),
+    action: label(copy, "action", "Action"),
   };
   return h(
     Panel,
@@ -4300,8 +4363,10 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                   ),
                   h(
                     "td",
-                    { className: "crm-tbl__muted crm-mono", "data-viewing-column": "due_at", "data-label": columns.dueAt },
-                    row.due_at || "",
+                    { className: "crm-tbl__muted", "data-viewing-column": "due_at", "data-label": columns.dueAt },
+                    row.due_at
+                      ? h("time", { dateTime: row.due_at, title: row.due_at }, formatAdminDateTime(row.due_at, page.workspace.locale) || row.due_at)
+                      : "-",
                     row.overdue ? h("small", { className: "adm-lead-context", "data-viewing-overdue": "true" }, statusText(ui, "overdue")) : null,
                   ),
                   h(
@@ -4458,8 +4523,10 @@ function SellerPipelineQueue({ page, copy, ui }) {
                   ),
                   h(
                     "td",
-                    { className: "crm-tbl__muted crm-mono", "data-seller-pipeline-column": "due_at", "data-label": columns.dueAt },
-                    row.due_at || "",
+                    { className: "crm-tbl__muted", "data-seller-pipeline-column": "due_at", "data-label": columns.dueAt },
+                    row.due_at
+                      ? h("time", { dateTime: row.due_at, title: row.due_at }, formatAdminDateTime(row.due_at, page.workspace.locale) || row.due_at)
+                      : "",
                     row.overdue ? h("small", { className: "adm-lead-context", "data-seller-pipeline-overdue": "true" }, statusText(ui, "overdue")) : null,
                   ),
                   h(
@@ -4721,8 +4788,8 @@ function ListingManagerBody({ page }) {
     propertyFamily: ui.propertyFamily,
     status: label(copy, "qualityStatus", "Status"),
     locale: label(copy, "language", "Language"),
-    quality: label(copy, "quality", "Quality"),
-    action: label(copy, "openEditor", "Open editor"),
+    quality: ui.issues,
+    action: label(copy, "action", "Action"),
   };
   return adminShell(page, {
     title,
@@ -4735,44 +4802,56 @@ function ListingManagerBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
-      h(StatGrid, { metrics }),
       h(
-        "form",
-        { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },
-        filterLocaleInput(page),
+        "section",
+        { className: "adm-listing-workbench", "data-listing-workbench": "true", "data-listing-manager": "true" },
+        h(StatGrid, { metrics, layout: "inline" }),
         h(
-          "div",
-          { className: "adm-filterbar__summary", "data-listing-filter-summary": "true" },
-          h("strong", null, `${page.summary.visible} / ${page.summary.total}`),
-          activeFilters.length
-            ? h("div", { className: "adm-filterbar__chips" }, ...activeFilters.map((value) => h("span", { key: value, className: "adm-filter-chip" }, value)))
-            : h("small", null, `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`),
+          WorkbenchDisclosure,
+          { summary: label(copy, "filter", "Filter"), "data-filter-disclosure": "true", "data-listing-filter-disclosure": "true" },
+          h(
+            "form",
+            { method: "get", action: "/admin/listings", className: "adm-filterbar adm-filterbar--toolbar", role: "search", "data-listing-filters": "true" },
+            filterLocaleInput(page),
+            h("label", null, h("span", { className: "adm-filterbar__label" }, label(copy, "searchListings", "Search listings")), h("input", { type: "search", name: "q", defaultValue: page.filters.q, placeholder: label(copy, "searchExample", "e.g. Sandanski") })),
+            h(
+              "label",
+              null,
+              h("span", { className: "adm-filterbar__label" }, label(copy, "qualityStatus", "Status")),
+              h("select", { name: "status" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.statuses || []).map((value) => h("option", { key: value, value, selected: page.filters.status === value }, statusText(ui, value)))),
+            ),
+            h(
+              "label",
+              null,
+              h("span", { className: "adm-filterbar__label" }, ui.propertyFamily),
+              h("select", { name: "propertyFamily" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.propertyFamilies || CANONICAL_PROPERTY_FAMILIES).map((value) => h("option", { key: value, value, selected: page.filters.propertyFamily === value }, statusText(ui, value)))),
+            ),
+            h(
+              "label",
+              null,
+              h("span", { className: "adm-filterbar__label" }, label(copy, "language", "Language")),
+              h("select", { name: "sourceLocale" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.sourceLocales || []).map((value) => h("option", { key: value, value, selected: page.filters.sourceLocale === value }, value.toUpperCase()))),
+            ),
+            h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+            h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
+            h(
+              "div",
+              { className: "adm-filterbar__summary", "data-listing-filter-summary": "true" },
+              h(
+                "strong",
+                null,
+                activeFilters.length || page.summary.visible !== page.summary.total
+                  ? `${page.summary.visible} / ${page.summary.total}`
+                  : String(page.summary.total),
+              ),
+              activeFilters.length
+                ? h("div", { className: "adm-filterbar__chips" }, ...activeFilters.map((value) => h("span", { key: value, className: "adm-filter-chip" }, value)))
+                : page.summary.visible === page.summary.total
+                  ? h("small", null, label(copy, "results", "Results"))
+                  : null,
+            ),
+          ),
         ),
-        h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "q", defaultValue: page.filters.q, placeholder: "MS-CRAWL-0114" })),
-        h(
-          "label",
-          null,
-          label(copy, "qualityStatus", "Status"),
-          h("select", { name: "status" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.statuses || []).map((value) => h("option", { key: value, value, selected: page.filters.status === value }, statusText(ui, value)))),
-        ),
-        h(
-          "label",
-          null,
-          ui.propertyFamily,
-          h("select", { name: "propertyFamily" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.propertyFamilies || CANONICAL_PROPERTY_FAMILIES).map((value) => h("option", { key: value, value, selected: page.filters.propertyFamily === value }, statusText(ui, value)))),
-        ),
-        h(
-          "label",
-          null,
-          label(copy, "language", "Language"),
-          h("select", { name: "sourceLocale" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.sourceLocales || []).map((value) => h("option", { key: value, value, selected: page.filters.sourceLocale === value }, value.toUpperCase()))),
-        ),
-        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
-      ),
-      h(
-        Panel,
-        { title: `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`, "data-listing-manager": "true" },
         page.listings.length
           ? h(
               "form",
@@ -4781,6 +4860,8 @@ function ListingManagerBody({ page }) {
                 action: "/api/admin/listings/status",
                 className: "adm-listing-bulk",
                 "data-listing-bulk-form": "true",
+                "data-listing-can-edit": canEditContent ? "true" : "false",
+                "data-has-selection": "false",
                 "data-admin-mutation-form": canEditContent ? "listing-status" : undefined,
                 "data-admin-mutation-saving": ui.bulkStatusSaving,
                 "data-admin-mutation-success": ui.bulkStatusSaved,
@@ -4792,27 +4873,22 @@ function ListingManagerBody({ page }) {
               h("input", { type: "hidden", name: "editor", value: currentOperatorId(page, "listing_manager_editor") }),
               h(
                 "div",
-                { className: "adm-listing-bulk__bar", "data-listing-bulk-bar": "true" },
-                h(
-                  "div",
-                  { className: "adm-listing-bulk__summary" },
-                  h("strong", null, ui.bulkStatus),
-                  h("small", null, ui.bulkStatusHint),
-                ),
+                { className: "adm-listing-bulk__bar", "data-listing-bulk-bar": "true", title: ui.bulkStatusHint },
+                h("span", { className: "adm-sr-only" }, ui.bulkStatusHint),
                 h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--sm", disabled: !canEditContent, "data-listing-select-all": "true" }, ui.selectAllVisible),
                 h("span", { className: "adm-listing-bulk__count", "data-listing-selection-count": "true", "aria-live": "polite" }, ui.selectedListings.replace("{count}", "0")),
                 h(
                   "label",
                   null,
-                  ui.bulkStatus,
+                  h("span", { className: "adm-sr-only" }, ui.bulkStatus),
                   h(
                     "select",
-                    { name: "targetStatus", required: true, disabled: !canEditContent },
-                    h("option", { value: "" }, "—"),
+                    { name: "targetStatus", required: true, disabled: true, "aria-label": ui.bulkStatus },
+                    h("option", { value: "" }, "-"),
                     ...["available", "reserved", "sold", "rented", "archived"].map((status) => h("option", { key: status, value: status }, statusText(ui, status))),
                   ),
                 ),
-                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm", disabled: !canEditContent }, h(Icon, { name: "check", size: 16 }), ui.updateSelected),
+                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm", disabled: true }, h(Icon, { name: "check", size: 16 }), ui.updateSelected),
                 !canEditContent ? h("small", { className: "adm-note", "data-read-only-role": "true" }, ui.readOnlyAccess) : null,
                 h("p", { className: "adm-listing-bulk__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
               ),
@@ -4822,7 +4898,18 @@ function ListingManagerBody({ page }) {
               h(
                 "table",
                 { className: "crm-tbl crm-tbl--dense adm-listing-table" },
-                h("thead", null, h("tr", null, ...Object.values(columns).map((column) => h("th", { key: column, scope: "col" }, column)))),
+                h(
+                  "thead",
+                  null,
+                  h(
+                    "tr",
+                    null,
+                    h("th", { key: "select", scope: "col" }, h("span", { className: "adm-sr-only" }, columns.select)),
+                    ...Object.entries(columns)
+                      .filter(([key]) => key !== "select")
+                      .map(([key, column]) => h("th", { key, scope: "col" }, column)),
+                  ),
+                ),
                 h(
                   "tbody",
                   null,
@@ -4839,9 +4926,9 @@ function ListingManagerBody({ page }) {
                           h("input", { type: "checkbox", name: "listingIds", value: row.id, disabled: !canEditContent, "aria-label": `${ui.selectListings}: ${row.id}`, "data-listing-select": "true" }),
                         ),
                       ),
-                      h("td", { "data-label": columns.listing, "data-listing-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : "—"))),
-                      h("td", { "data-label": columns.location, "data-listing-column": "location" }, row.location || "—"),
-                      h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : "—"),
+                      h("td", { "data-label": columns.listing, "data-listing-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : "-"))),
+                      h("td", { "data-label": columns.location, "data-listing-column": "location" }, row.location || "-"),
+                      h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : "-"),
                       h("td", { "data-label": columns.status, "data-listing-column": "status" }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
                       h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, row.translation_locales.map((locale) => locale.toUpperCase()).join(" · "))),
                       h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
@@ -4850,11 +4937,20 @@ function ListingManagerBody({ page }) {
                         { "data-label": columns.action, "data-listing-column": "action" },
                         h(
                           "div",
-                          { className: "adm-task-list__actions" },
+                          { className: "adm-listing-actions" },
                           h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: payloadAdminListingHref(row.id, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
                           page.runtime_data_mode === "durable_only"
                             ? null
-                            : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+                            : h(
+                                "a",
+                                {
+                                  className: "mk-btn mk-btn--ghost mk-btn--sm",
+                                  href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page),
+                                  "aria-label": label(copy, "viewHistory", "History"),
+                                  title: label(copy, "viewHistory", "History"),
+                                },
+                                h(Icon, { name: "list", size: 15 }),
+                              ),
                         ),
                       ),
                     ),
@@ -4881,7 +4977,6 @@ function TranslationQueueBody({ page }) {
     [label(copy, "openTasks", "Open tasks"), page.summary.open_translation_tasks, "languages", "ink"],
     [label(copy, "missingTranslations", "Missing translations"), page.summary.missing_translation_tasks, "circle-alert", "brick"],
     [label(copy, "staleTranslations", "Stale translations"), page.summary.stale_translation_tasks, "clock", "sun"],
-    [label(copy, "results", "Results"), page.pagination.totalRows, "filter", "sea"],
   ];
   const columns = {
     listing: ui.listing,
@@ -4903,14 +4998,18 @@ function TranslationQueueBody({ page }) {
       h(PageHeader, { title, subtitle: page.metadata?.description }),
       h(StatGrid, { metrics }),
       h(
-        "form",
-        { method: "get", action: "/admin/translations", className: "adm-filterbar", role: "search", "data-translation-filters": "true" },
-        filterLocaleInput(page),
-        h("label", null, label(copy, "searchTranslations", "Search translations"), h("input", { type: "search", name: "q", defaultValue: page.filters.q })),
-        h("label", null, label(copy, "targetLocale", "Target locale"), h("select", { name: "targetLocale" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.targetLocales || []).map((value) => h("option", { key: value, value, selected: page.filters.targetLocale === value }, value.toUpperCase())))),
-        h("label", null, label(copy, "taskType", "Task type"), h("select", { name: "taskType" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.taskTypes || []).map((value) => h("option", { key: value, value, selected: page.filters.taskType === value }, statusText(ui, value))))),
-        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/translations", page) }, label(copy, "resetFilters", "Reset filters")),
+        WorkbenchDisclosure,
+        { summary: label(copy, "filter", "Filter"), "data-filter-disclosure": "true", "data-translation-filter-disclosure": "true" },
+        h(
+          "form",
+          { method: "get", action: "/admin/translations", className: "adm-filterbar", role: "search", "data-translation-filters": "true" },
+          filterLocaleInput(page),
+          h("label", null, label(copy, "searchTranslations", "Search translations"), h("input", { type: "search", name: "q", defaultValue: page.filters.q })),
+          h("label", null, label(copy, "targetLocale", "Target locale"), h("select", { name: "targetLocale" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.targetLocales || []).map((value) => h("option", { key: value, value, selected: page.filters.targetLocale === value }, value.toUpperCase())))),
+          h("label", null, label(copy, "taskType", "Task type"), h("select", { name: "taskType" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.taskTypes || []).map((value) => h("option", { key: value, value, selected: page.filters.taskType === value }, statusText(ui, value))))),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+          h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/translations", page) }, label(copy, "resetFilters", "Reset filters")),
+        ),
       ),
       h(
         Panel,
@@ -4941,7 +5040,7 @@ function TranslationQueueBody({ page }) {
                   h("td", { "data-label": columns.listing, "data-translation-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.listing_id), h("strong", null, row.listing_title), h("small", { className: "adm-lead-context" }, row.listing_location))),
                   h("td", { "data-label": columns.target, "data-translation-column": "target" }, h("span", { className: "crm-lang" }, `${row.source_locale.toUpperCase()} → ${row.target_locale.toUpperCase()}`)),
                   h("td", { "data-label": columns.status, "data-translation-column": "status" }, h(StatusPill, { tone: row.current_status === "stale" ? "brick" : task ? "sun" : "sand" }, statusText(ui, task?.status || row.current_status)), h("small", { className: "adm-lead-context" }, statusText(ui, row.task_type))),
-                  h("td", { "data-label": columns.owner, "data-translation-column": "owner" }, row.reviewer_role),
+                  h("td", { "data-label": columns.owner, "data-translation-column": "owner" }, reviewerRoleText(copy, ui, row.reviewer_role)),
                   h(
                     "td",
                     { "data-label": columns.action, "data-translation-column": "action", className: "adm-translation-actions" },
@@ -5084,7 +5183,7 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
       "summary",
       { className: "adm-editor-section__summary" },
       h("span", null, title),
-      h("small", null, `${fields.length}`),
+      h("small", { className: "adm-editor-section__count" }, `${fields.length}`),
     ),
     editorFieldGroup(copy, ui, title, fields, facts, disabled),
   );
@@ -5131,6 +5230,7 @@ function ListingEditorBody({ page }) {
       listingEditorFieldApplicable(family, field),
   );
   const canEditContent = pageCan(page, "content:write");
+  const operatorId = String(currentOperatorId(page, "") || "").trim();
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -5164,7 +5264,7 @@ function ListingEditorBody({ page }) {
         h("a", { className: "mk-tab", href: "#listing-facts", "data-editor-tab": "facts", "aria-label": label(copy, "facts", "Facts"), title: label(copy, "facts", "Facts") }, h(Icon, { name: "pencil", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "facts", "Facts"))),
         h("a", { className: "mk-tab", href: "#listing-translations", "data-editor-tab": "translations", "aria-label": label(copy, "translations", "Translations"), title: label(copy, "translations", "Translations") }, h(Icon, { name: "languages", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "translations", "Translations"))),
         h("a", { className: "mk-tab", href: "#listing-media", "data-editor-tab": "media", "aria-label": label(copy, "media", "Media"), title: label(copy, "media", "Media") }, h(Icon, { name: "camera", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "media", "Media"))),
-        h("a", { className: "mk-tab", href: "#listing-seo", "data-editor-tab": "seo", "aria-label": ui.seoSettings, title: ui.seoSettings }, h(Icon, { name: "search", size: 16 }), h("span", { className: "adm-editor-tab__label" }, ui.seoSettings)),
+        h("a", { className: "mk-tab", href: "#listing-seo", "data-editor-tab": "seo", "aria-label": ui.seoSettings, title: ui.seoSettings }, h(Icon, { name: "search", size: 16 }), h("span", { className: "adm-editor-tab__label" }, "SEO")),
         h("a", { className: "mk-tab", href: "#listing-quality", "data-editor-tab": "quality", "aria-label": label(copy, "quality", "Quality"), title: label(copy, "quality", "Quality") }, h(Icon, { name: "shield-check", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "quality", "Quality"))),
       ),
       h(
@@ -5190,24 +5290,36 @@ function ListingEditorBody({ page }) {
                 "data-editor-dirty-message": label(copy, "unsavedChanges", "Unsaved changes"),
               },
               h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
-              h(
-                "fieldset",
-                { className: "adm-form__group adm-form__group--editor" },
-                h("legend", null, label(copy, "editor", "Editor")),
-                h(
-                  "label",
-                  null,
-                  label(copy, "editor", "Editor"),
-                  h("input", {
-                    name: "editor",
-                    required: true,
-                    readOnly: true,
-                    defaultValue: currentOperatorId(page, ""),
-                    autoComplete: "off",
-                    "data-editor-name": "true",
-                  }),
-                ),
-              ),
+              operatorId
+                ? h(
+                    "div",
+                    { className: "adm-editor-operator" },
+                    h("input", {
+                      type: "hidden",
+                      name: "editor",
+                      value: operatorId,
+                      "data-editor-name": "true",
+                    }),
+                    h(
+                      "p",
+                      { className: "adm-id-caption" },
+                      h("span", { className: "adm-sr-only" }, label(copy, "editor", "Editor")),
+                      h("code", { className: "crm-mono" }, operatorId),
+                    ),
+                  )
+                : h(
+                    "label",
+                    { className: "adm-editor-operator" },
+                    h("span", { className: "adm-sr-only" }, label(copy, "editor", "Editor")),
+                    h("input", {
+                      name: "editor",
+                      required: true,
+                      defaultValue: "",
+                      autoComplete: "off",
+                      "data-editor-name": "true",
+                      placeholder: label(copy, "editorNamePlaceholder", "Editor name"),
+                    }),
+                  ),
               editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content" }),
               editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: detailFields.length <= 4, section: "details" }),
               editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms" }),
@@ -5234,7 +5346,7 @@ function ListingEditorBody({ page }) {
                     h(
                       "div",
                       { className: "adm-editor-savebar__controls" },
-                      h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--md", "data-editor-reset": "true", disabled: true }, label(copy, "resetFilters", "Reset")),
+                      h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--md", "data-editor-reset": "true", disabled: true }, label(copy, "discardChanges", "Discard changes")),
                       h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md", disabled: true }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
                     ),
                   )
@@ -5248,9 +5360,9 @@ function ListingEditorBody({ page }) {
           h(
             Panel,
             {
-              title: label(copy, "qualityStatus", "Quality"),
+              title: label(copy, "quality", "Quality"),
               id: "listing-quality",
-              "aria-label": label(copy, "qualityStatus", "Quality"),
+              "aria-label": label(copy, "quality", "Quality"),
               "data-quality-panel": "true",
             },
             qualityReview
@@ -5274,6 +5386,7 @@ function ListingEditorBody({ page }) {
                 )
               : null,
             h(StatGrid, {
+              layout: "list",
               metrics: [
                 [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), "file-check", PILL_TONES[page.listing.cms_status] || "ink"],
                 [ui.schema, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), "check-circle-2", page.listing.seo?.schema_present ? "success" : "brick"],
@@ -5317,6 +5430,7 @@ function ListingEditorBody({ page }) {
               "data-tour-review-status": tourPublished ? "available" : tourStatus,
             },
             h(StatGrid, {
+              layout: "list",
               metrics: [
                 [label(copy, "media", "Media"), (page.listing.media || []).length, "camera", "ink"],
                 [
@@ -6201,43 +6315,47 @@ function MigrationReviewBody({ page }) {
         },
         h("p", { className: "adm-note" }, ui.pendingLegacyHint),
         h(
-          "form",
-          { method: "get", action: "/admin/migration/review", className: "adm-filterbar", role: "search", "data-route-filters": "true" },
-          filterLocaleInput(page),
+          WorkbenchDisclosure,
+          { summary: label(copy, "filter", "Filter"), "data-filter-disclosure": "true", "data-route-filter-disclosure": "true" },
           h(
-            "label",
-            null,
-            ui.search,
-            h("input", { type: "search", name: "q", defaultValue: page.routeMap.filters?.q || "", autoComplete: "off" }),
-          ),
-          h(
-            "label",
-            null,
-            ui.routeType,
+            "form",
+            { method: "get", action: "/admin/migration/review", className: "adm-filterbar", role: "search", "data-route-filters": "true" },
+            filterLocaleInput(page),
             h(
-              "select",
-              { name: "routeType" },
-              h("option", { value: "" }, label(copy, "all", "All")),
-              ...(page.routeMap.filterOptions?.types || []).map((value) =>
-                h("option", { key: value, value, selected: page.routeMap.filters?.type === value }, statusText(ui, value)),
+              "label",
+              null,
+              ui.search,
+              h("input", { type: "search", name: "q", defaultValue: page.routeMap.filters?.q || "", autoComplete: "off" }),
+            ),
+            h(
+              "label",
+              null,
+              ui.routeType,
+              h(
+                "select",
+                { name: "routeType" },
+                h("option", { value: "" }, label(copy, "all", "All")),
+                ...(page.routeMap.filterOptions?.types || []).map((value) =>
+                  h("option", { key: value, value, selected: page.routeMap.filters?.type === value }, statusText(ui, value)),
+                ),
               ),
             ),
-          ),
-          h(
-            "label",
-            null,
-            label(copy, "source", "Source"),
             h(
-              "select",
-              { name: "routeDomain" },
-              h("option", { value: "" }, label(copy, "all", "All")),
-              ...(page.routeMap.filterOptions?.domains || []).map((value) =>
-                h("option", { key: value, value, selected: page.routeMap.filters?.domain === value }, value),
+              "label",
+              null,
+              label(copy, "source", "Source"),
+              h(
+                "select",
+                { name: "routeDomain" },
+                h("option", { value: "" }, label(copy, "all", "All")),
+                ...(page.routeMap.filterOptions?.domains || []).map((value) =>
+                  h("option", { key: value, value, selected: page.routeMap.filters?.domain === value }, value),
+                ),
               ),
             ),
+            h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+            h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/migration/review", page) }, label(copy, "resetFilters", "Reset filters")),
           ),
-          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
-          h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/migration/review", page) }, label(copy, "resetFilters", "Reset filters")),
         ),
         (page.routeMap.pendingSample || []).length
           ? h(

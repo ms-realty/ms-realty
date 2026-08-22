@@ -493,13 +493,19 @@
         var boxes = form.querySelectorAll("[data-listing-select]");
         var toggle = form.querySelector("[data-listing-select-all]");
         var count = form.querySelector("[data-listing-selection-count]");
+        var targetStatus = form.querySelector('select[name="targetStatus"]');
+        var submit = form.querySelector('button[type="submit"]');
+        var canEdit = form.getAttribute("data-listing-can-edit") === "true";
         var selectedLabel = form.getAttribute("data-listing-selected-label") || "{count} selected";
         var selectAllLabel = form.getAttribute("data-listing-select-all-label") || "Select all on this page";
         var clearLabel = form.getAttribute("data-listing-clear-label") || "Clear selection";
         function refresh() {
           var selected = 0;
           for (var j = 0; j < boxes.length; j += 1) if (boxes[j].checked) selected += 1;
+          form.setAttribute("data-has-selection", selected > 0 ? "true" : "false");
           if (count) count.textContent = selectedLabel.replace("{count}", String(selected));
+          if (targetStatus) targetStatus.disabled = !canEdit || selected === 0;
+          if (submit) submit.disabled = !canEdit || selected === 0;
           if (toggle) {
             var allSelected = boxes.length > 0 && selected === boxes.length;
             toggle.textContent = allSelected ? clearLabel : selectAllLabel;
@@ -711,7 +717,7 @@
       var href = tabNodes[i].getAttribute("href") || "";
       var sectionId = href.slice(1);
       var section = sectionId ? document.getElementById(sectionId) : null;
-      if (section) entries.push({ tab: tabNodes[i], section: section });
+      if (section && !section.closest(".adm-editor-rail")) entries.push({ tab: tabNodes[i], section: section });
     }
     if (!entries.length) return;
     var frame = 0;
@@ -737,6 +743,13 @@
     function syncFromScroll() {
       frame = 0;
       syncAdminShellOffsets();
+      var hashId = window.location.hash ? window.location.hash.slice(1) : "";
+      var hashSection = hashId ? document.getElementById(hashId) : null;
+      if (hashSection && hashSection.closest(".adm-editor-rail")) {
+        setActive(hashId);
+        return;
+      }
+      if (!entries.length) return;
       var anchorLine = nav.getBoundingClientRect().bottom + 24;
       var activeSection = entries[0].section;
       var activeTop = -Infinity;

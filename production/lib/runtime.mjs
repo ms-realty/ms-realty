@@ -13,6 +13,7 @@ import {
   renderLegacyArchivePage,
   renderListingPreservationPage,
   renderLanguageFallback,
+  renderNotFoundPage,
   renderListingPage,
   renderLocationPage,
   renderSearchPage,
@@ -361,7 +362,7 @@ export function renderRuntimePath(
     const preserved = preservationCatalog.find((entry) => entry.target_path === normalized);
     if (preserved) return renderListingPreservationPage({ registry, entry: preserved, path: normalized });
   }
-  return { kind: "not_found", status: 404, path: pathname, indexable: false };
+  return renderNotFoundPage({ registry, pathname });
 }
 
 export function searchRuntimeListings(

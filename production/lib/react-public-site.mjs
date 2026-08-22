@@ -57,7 +57,7 @@ function LanguageMenu({ languages, label }) {
     { className: "site-language", "data-language-switcher": "desktop" },
     h(
       "summary",
-      { "aria-label": `${active.code.toUpperCase()} — ${label}: ${active.label}`, title: `${label}: ${active.label}` },
+      { "aria-label": `${active.code.toUpperCase()}, ${label}: ${active.label}`, title: `${label}: ${active.label}` },
       h(Icon, { name: "globe", size: 17 }),
       h("span", { className: "site-language__current", lang: active.code }, active.code.toUpperCase()),
       h(Icon, { name: "chevron-down", size: 14, "aria-hidden": "true" }),
@@ -180,7 +180,12 @@ function SiteHeader({ chrome }) {
       h(
         "a",
         { href: chrome.home.href, className: "site-hd__logo", "aria-label": chrome.home.label },
-        h("img", { src: LOGO_URL, alt: chrome.home.label, height: 40, width: Math.round(40 * LOGO_ASPECT) }),
+        h(
+          "picture",
+          null,
+          h("source", { media: "(prefers-color-scheme: dark)", srcSet: LOGO_URL_REVERSED }),
+          h("img", { src: LOGO_URL, alt: chrome.home.label, height: 40, width: Math.round(40 * LOGO_ASPECT) }),
+        ),
       ),
       h(
         "nav",
@@ -945,25 +950,6 @@ function HeroAdvancedSearch({ page, labels, chrome }) {
       h("span", null, labels.search),
     ),
     h(
-      "fieldset",
-      { className: "hp-hero__families", "aria-label": labels.propertyType },
-      h("legend", { className: "mk-sr-only" }, labels.propertyType),
-      h(
-        "label",
-        { className: "hp-hero__family" },
-        h("input", { type: "radio", name: "property_family", value: "", form: formId, defaultChecked: true }),
-        h("span", null, labels.any),
-      ),
-      ...(filterOptions.property_families || filterOptions.property_types || []).map((family) =>
-        h(
-          "label",
-          { key: family, className: "hp-hero__family" },
-          h("input", { type: "radio", name: "property_family", value: family, form: formId }),
-          h("span", null, localizedListingValue(page.locale, "property_type", family)),
-        ),
-      ),
-    ),
-    h(
       "div",
       { id: advancedId, className: "hp-hero__advanced-panel", hidden: true },
       h(
@@ -971,6 +957,25 @@ function HeroAdvancedSearch({ page, labels, chrome }) {
         { className: "hp-hero__advanced-grid" },
         h("legend", { className: "mk-sr-only" }, filtersLabel),
         h("p", { className: "hp-hero__advanced-intro" }, labels.locationSearchHint),
+        h(
+          "fieldset",
+          { className: "hp-hero__families", "aria-label": labels.propertyType },
+          h("legend", { className: "mk-sr-only" }, labels.propertyType),
+          h(
+            "label",
+            { className: "hp-hero__family" },
+            h("input", { type: "radio", name: "property_family", value: "", form: formId, defaultChecked: true }),
+            h("span", null, labels.any),
+          ),
+          ...(filterOptions.property_families || filterOptions.property_types || []).map((family) =>
+            h(
+              "label",
+              { key: family, className: "hp-hero__family" },
+              h("input", { type: "radio", name: "property_family", value: family, form: formId }),
+              h("span", null, localizedListingValue(page.locale, "property_type", family)),
+            ),
+          ),
+        ),
         heroSearchSelect({
           ...selectProps,
           id: "home-search-country",
@@ -1202,9 +1207,13 @@ function HomeBody({ page }) {
         : h(
             "div",
             { className: "mk-empty", "data-featured-empty": "true", "aria-live": "polite" },
-            h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "shield-check", size: 24 })),
-            h("h3", { className: "mk-empty__title" }, labels.reviewRequired),
-            h("p", { className: "mk-empty__text" }, `0 ${labels.reviewedListings}`),
+            h("strong", { className: "mk-empty__value" }, "0"),
+            h(
+              "div",
+              { className: "mk-empty__copy" },
+              h("h3", { className: "mk-empty__title" }, labels.reviewRequired),
+              h("p", { className: "mk-empty__text" }, labels.reviewedListings),
+            ),
           ),
     ),
     h(
@@ -1888,45 +1897,47 @@ function SearchBody({ page }) {
       savedView
         ? null
         : h(
-        "details",
-        { className: "sr-mobile-filters", "data-mobile-search-filters": "true", "data-mobile-filter-count": activeFilterCount },
-        h(
-          "summary",
-          {
-            className: "sr-mobile-filters__summary",
-            "aria-controls": mobileFilterPanelId,
-          },
-          h(Icon, { name: "search", size: 18 }),
-          h(
-            "span",
-            { className: "sr-mobile-filters__copy" },
-            h("strong", { className: "sr-mobile-filters__label" }, mobileSearchContext),
-            h("small", null, mobileSearchMeta),
+            "details",
+            {
+              className: "sr-mobile-filters",
+              "data-mobile-search-filters": "true",
+              "data-search-filters": "true",
+              "data-mobile-filter-count": activeFilterCount,
+            },
+            h(
+              "summary",
+              {
+                className: "sr-mobile-filters__summary",
+                "aria-controls": mobileFilterPanelId,
+              },
+              h(Icon, { name: "search", size: 18 }),
+              h(
+                "span",
+                { className: "sr-mobile-filters__copy" },
+                h("strong", { className: "sr-mobile-filters__label" }, mobileSearchContext),
+                h("small", null, mobileSearchMeta),
+              ),
+              h(
+                "span",
+                { className: "sr-mobile-filters__control", "aria-hidden": "true" },
+                h(Icon, { name: "sliders-horizontal", size: 18 }),
+                activeFilterCount ? h("span", { className: "sr-mobile-filters__count" }, String(activeFilterCount)) : null,
+              ),
+            ),
+            h(
+              "div",
+              {
+                id: mobileFilterPanelId,
+                className: "sr-mobile-filters__panel",
+              },
+              h(
+                "div",
+                { className: "sr-mobile-filters__sheet-body" },
+                h("span", { id: "sr-geography-options", hidden: true, "aria-hidden": "true" }),
+                ...filterForms("sr-mobile"),
+              ),
+            ),
           ),
-          h(
-            "span",
-            { className: "sr-mobile-filters__control", "aria-hidden": "true" },
-            h(Icon, { name: "sliders-horizontal", size: 18 }),
-            activeFilterCount ? h("span", { className: "sr-mobile-filters__count" }, String(activeFilterCount)) : null,
-          ),
-        ),
-        h(
-          "div",
-          {
-            id: mobileFilterPanelId,
-            className: "sr-mobile-filters__panel",
-          },
-          h("div", { className: "sr-mobile-filters__sheet-body" }, ...filterForms("sr-mobile")),
-        ),
-      ),
-      savedView
-        ? null
-        : h(
-        "aside",
-        { className: "sr-filters sr-filters--desktop", "aria-label": chrome.copy.filters || labels.activeFilters },
-        h("h3", null, chrome.copy.filters || labels.activeFilters),
-        ...filterForms("sr"),
-      ),
       h(
         "section",
         { className: `sr-results${savedView ? " sr-results--saved" : ""}`, "data-search-view": "list" },
@@ -1995,9 +2006,9 @@ function SearchBody({ page }) {
                 "data-search-empty": "true",
                 "aria-label": labels.searchResults,
               },
-              h("span", { className: "sr-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "search", size: 28 })),
+              h("strong", { className: "sr-empty__value" }, String(page.search.total_matches)),
               h("h2", null, labels.searchResults),
-              h("p", null, `${page.search.total_matches} ${labels.matches}`),
+              h("p", null, labels.matches),
               h(
                 "div",
                 { className: "sr-empty__actions" },
@@ -2064,9 +2075,9 @@ function LocationBody({ page }) {
       context
         ? h(
             "aside",
-            { className: "mk-card mk-card--pad-md", "data-location-context": "true" },
-            h("p", null, context.summary),
-            h("a", { href: context.href }, context.title),
+            { className: "mk-card mk-card--pad-md loc-context", "data-location-context": "true" },
+            h("span", { className: "loc-context__icon", "aria-hidden": "true" }, h(Icon, { name: "shield-check", size: 20 })),
+            h("div", null, h("p", null, context.summary), h("a", { href: context.href }, context.title)),
           )
         : null,
       cards.length
@@ -2390,6 +2401,7 @@ function ListingBody({ page }) {
             "aria-label": labels.gallery,
             "data-mobile-gallery-label": labels.gallery,
             "data-mobile-gallery": "true",
+            "data-photo-carousel": "true",
             "data-mobile-gallery-index": "1",
       tabIndex: gallerySlides.length > 1 ? 0 : undefined,
           },
@@ -2542,8 +2554,8 @@ function ListingBody({ page }) {
                 },
                 gallery.length
                   ? h(
-                      "a",
-                      { className: "mk-tab", href: "#listing-gallery" },
+                      "button",
+                      { type: "button", className: "mk-tab", "data-listing-gallery-open": "0" },
                       h(Icon, { name: "camera", size: 16 }),
                       labels.gallery,
                     )
@@ -2554,8 +2566,8 @@ function ListingBody({ page }) {
               )
             : null,
          h(
-           "section",
-           { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
+           "div",
+           { hidden: true, "aria-hidden": "true", "data-listing-gallery-sources": "true" },
            ...gallery.map((image, index) =>
              h(
                "button",
@@ -2632,7 +2644,7 @@ function ListingBody({ page }) {
                         tour.fallback_gallery?.[0]
                           ? h("img", { ...publicImageProps(tour.fallback_gallery[0], page.body.h1, "lazy") })
                           : null,
-                        h("a", { className: "mk-btn mk-btn--secondary mk-btn--md", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${labels.gallery}`),
+                        h("button", { type: "button", className: "mk-btn mk-btn--secondary mk-btn--md", "data-listing-gallery-open": "0" }, h(Icon, { name: "camera", size: 18 }), ` ${labels.gallery}`),
                       ),
                     )
                   : h(
@@ -2641,7 +2653,7 @@ function ListingBody({ page }) {
                       tour.fallback_gallery?.[0]
                         ? h("img", { ...publicImageProps(tour.fallback_gallery[0], page.body.h1, "lazy") })
                         : null,
-                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--md", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${labels.gallery}`),
+                      h("button", { type: "button", className: "mk-btn mk-btn--secondary mk-btn--md", "data-listing-gallery-open": "0" }, h(Icon, { name: "camera", size: 18 }), ` ${labels.gallery}`),
                     ),
               )
             : null,
@@ -2662,18 +2674,20 @@ function ListingBody({ page }) {
         ),
       ),
     ),
-    h(
-      "section",
-      { className: "ld-similar", "aria-label": labels.relatedListings, "data-related-listings": "true" },
-      h("h2", null, labels.relatedListings),
-      h(
-        "div",
-        { className: "ld-similar__grid" },
-        ...(page.body.related_listings || []).map((card) =>
-          h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, rootAttrs: { "data-related-listing": "true" } }),
-        ),
-      ),
-    ),
+    page.body.related_listings?.length
+      ? h(
+          "section",
+          { className: "ld-similar", "aria-label": labels.relatedListings, "data-related-listings": "true" },
+          h("h2", null, labels.relatedListings),
+          h(
+            "div",
+            { className: "ld-similar__grid" },
+            ...page.body.related_listings.map((card) =>
+              h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, rootAttrs: { "data-related-listing": "true" } }),
+            ),
+          ),
+        )
+      : null,
     mobileContactOptions,
   );
   return shell(page, main);
@@ -2948,13 +2962,6 @@ function ContactBody({ page }) {
             { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
             h("h2", { className: "ct-form__title" }, labels.message),
             h("p", null, page.body.form_unavailable),
-            page.body.contact_channels
-              ? h(
-                  Btn,
-                  { tag: "a", variant: "accent", size: "lg", full: true, iconStart: "phone", href: page.body.contact_channels.phone.href },
-                  page.body.contact_channels.phone.label,
-                )
-              : null,
           ),
     ),
   );
@@ -2985,6 +2992,29 @@ function SearchUnavailableBody({ page }) {
           : null,
         h(Btn, { tag: "a", variant: "secondary", iconStart: "message-circle", href: page.body.ctas.contact.path }, labels.contactActions),
         h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
+      ),
+    ),
+  );
+  return shell(page, main);
+}
+
+function NotFoundBody({ page }) {
+  const labels = uiLabels(page);
+  const main = h(
+    "main",
+    { id: "main", tabIndex: -1, "data-kind": "not_found", "data-react-public-ui": "not-found", className: "nf-page" },
+    h("div", { className: "nf-page__media", "aria-hidden": "true" }, h("span", null, "404")),
+    h(
+      "section",
+      { className: "nf-page__content", "aria-labelledby": "not-found-title" },
+      h("p", { className: "nf-page__eyebrow" }, page.body.error),
+      h("h1", { id: "not-found-title" }, page.body.h1),
+      h("p", { className: "nf-page__intro" }, page.body.intro),
+      h(
+        "nav",
+        { className: "nf-page__actions", "aria-label": labels.primaryActions },
+        h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "search", href: page.body.search.path }, page.body.search.label),
+        h(Btn, { tag: "a", variant: "secondary", size: "lg", href: page.body.home.path }, page.body.home.label),
       ),
     ),
   );
@@ -3205,6 +3235,7 @@ export function renderReactPublicBody(page) {
   if (page.kind === "seller") return renderStaticElement(h(SellerBody, { page }));
   if (page.kind === "contact") return renderStaticElement(h(ContactBody, { page }));
   if (page.kind === "search_unavailable") return renderStaticElement(h(SearchUnavailableBody, { page }));
+  if (page.kind === "not_found") return renderStaticElement(h(NotFoundBody, { page }));
   if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));
   if (page.kind === "guide") return renderStaticElement(h(GuideBody, { page }));
   if (page.kind === "legacy_archive") return renderStaticElement(h(LegacyArchiveBody, { page }));

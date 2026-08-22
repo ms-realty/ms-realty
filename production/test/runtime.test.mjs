@@ -90,6 +90,10 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
   assert.equal(missing.status, 404);
+  assert.equal(missing.kind, "not_found");
+  assert.equal(missing.locale, "he");
+  assert.equal(missing.chrome.home.href, "/he");
+  assert.equal(missing.metadata.robots, "noindex,follow");
   assert.equal(sourceLanguageRepair.metadata.title, "Дава под наем промишлена сграда в Сандански");
   assert.equal(sourceLanguageRepair.body.description, sourceLanguageRecord.facts.description);
 });
