@@ -1818,7 +1818,10 @@ export function createHttpApp({
       }
     }
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
-      const service = await configuredPayloadAdminAuth();
+      // Team management needs the Payload runtime. When it cannot start (no
+      // database locally, or an outage), answer like a missing session instead
+      // of surfacing a 500 from the runtime bootstrap.
+      const service = await configuredPayloadAdminAuth().catch(() => null);
       if (!payloadSession || !service) return adminForbidden("payload_session");
       if (request.method === "GET") {
         const operators = await service.listOperators(payloadSession);

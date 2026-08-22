@@ -79,7 +79,7 @@
         "navContact": "צור קשר",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -807,27 +807,47 @@
             ],
             "property_families": [
               "apartment",
-              "commercial",
-              "hotel",
               "house",
-              "land",
-              "multi_unit",
-              "property"
+              "plot",
+              "agricultural_land",
+              "commercial",
+              "hotel"
             ],
             "property_types": [
               "apartment",
-              "commercial",
-              "hotel",
               "house",
-              "land",
-              "multi_unit",
-              "property"
+              "plot",
+              "agricultural_land",
+              "commercial",
+              "hotel"
             ],
             "property_subtypes": [],
             "offer_types": [
               "rent",
               "sale"
             ],
+            "price_presets": {
+              "sale": [
+                50000,
+                75000,
+                100000,
+                150000,
+                200000,
+                300000,
+                500000,
+                750000,
+                1000000
+              ],
+              "rent": [
+                300,
+                400,
+                500,
+                700,
+                1000,
+                1500,
+                2000
+              ]
+            },
             "bedrooms": [
               0,
               1,
@@ -851,18 +871,9 @@
             "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
           },
           "applicable_filter_fields": [
-            "property_subtype",
             "bedrooms_min",
-            "premises_min",
-            "hotel_rooms_min",
             "area_min",
-            "area_max",
-            "land_area_min",
-            "land_area_max",
-            "floor_min",
-            "floor_max",
-            "storeys_min",
-            "storeys_max"
+            "area_max"
           ]
         }
       },
@@ -934,6 +945,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -989,6 +1001,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -1044,6 +1057,7 @@
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 600,
         "price_on_request": false,
         "listing_status": "available",
@@ -1099,6 +1113,7 @@
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 355,
         "price_on_request": false,
         "listing_status": "available",
@@ -1154,6 +1169,7 @@
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -1209,6 +1225,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
         "listing_status": "available",
@@ -1295,7 +1312,7 @@
         "buyerGuides": "Ръководства за купувачи",
         "explore": "Разгледайте",
         "getInTouch": "Свържете се",
-        "tagline": "Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция — с местни офиси и брокери, които говорят вашия език.",
+        "tagline": "Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция, с местни офиси и брокери, които говорят вашия език.",
         "copyright": "Всички права запазени.",
         "requestSent": "Запитването е изпратено. Брокер ще се свърже с вас.",
         "requestFailed": "Изпращането не бе успешно. Опитайте отново.",
@@ -1445,8 +1462,10 @@
         "id": "MS-CRAWL-0001",
         "location": "Сандански",
         "property_type": "commercial",
+        "property_family": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "area_sqm": null,
         "floor": null,
         "total_floors": null,
@@ -1662,7 +1681,7 @@
         "navContact": "Επικοινωνία",
         "explore": "Εξερευνήστε",
         "getInTouch": "Επικοινωνήστε",
-        "tagline": "Ακίνητα προς πώληση και ενοικίαση στο Σαντάνσκι και τον Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη γειτονική Ελλάδα — με τοπικά γραφεία και μεσίτες που μιλούν τη γλώσσα σας.",
+        "tagline": "Ακίνητα προς πώληση και ενοικίαση στο Σαντάνσκι και τον Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη γειτονική Ελλάδα, με τοπικά γραφεία και μεσίτες που μιλούν τη γλώσσα σας.",
         "copyright": "Με την επιφύλαξη παντός δικαιώματος.",
         "requestSent": "Το αίτημά σας εστάλη. Ένας μεσίτης θα επικοινωνήσει μαζί σας.",
         "requestFailed": "Δεν ήταν δυνατή η αποστολή του αιτήματος. Προσπαθήστε ξανά.",
@@ -1784,8 +1803,10 @@
         "id": "MS-CRAWL-0001",
         "location": "Σαντάνσκι",
         "property_type": "commercial",
+        "property_family": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "area_sqm": null,
         "floor": null,
         "total_floors": null,
@@ -2001,7 +2022,7 @@
         "navContact": "צור קשר",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -2123,8 +2144,10 @@
         "id": "MS-CRAWL-0001",
         "location": "סנדנסקי",
         "property_type": "commercial",
+        "property_family": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "area_sqm": null,
         "floor": null,
         "total_floors": null,
@@ -2324,7 +2347,7 @@
         "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
-        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
@@ -2368,7 +2391,57 @@
           "active": false
         }
       ],
-      "languages": [],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en",
+          "active": true,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he",
+          "active": false,
+          "dir": "rtl"
+        }
+      ],
       "contact": {
         "email": "office@makler-realty.com",
         "phone": "+359879696870",
@@ -2444,8 +2517,10 @@
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
         "property_type": "commercial",
+        "property_family": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "area_sqm": null,
         "floor": null,
         "total_floors": null,
@@ -2616,6 +2691,11 @@
   "fallback_fr": {
     "kind": "language_fallback",
     "status": 200,
+    "body": {
+      "h1": "This language is not available yet",
+      "intro": "MS Realty is available in Bulgarian, English, German, Dutch, Russian, Greek and Hebrew. Pick one of them above, or request this language and we will tell you when it is ready.",
+      "success": "Thank you. We will let you know when this language is ready."
+    },
     "chrome": {
       "copy": {
         "navBuy": "Buy",
@@ -2625,7 +2705,7 @@
         "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
-        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
@@ -2802,7 +2882,7 @@
         "navContact": "צור קשר",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -3572,27 +3652,47 @@
           ],
           "property_families": [
             "apartment",
-            "commercial",
-            "hotel",
             "house",
-            "land",
-            "multi_unit",
-            "property"
+            "plot",
+            "agricultural_land",
+            "commercial",
+            "hotel"
           ],
           "property_types": [
             "apartment",
-            "commercial",
-            "hotel",
             "house",
-            "land",
-            "multi_unit",
-            "property"
+            "plot",
+            "agricultural_land",
+            "commercial",
+            "hotel"
           ],
           "property_subtypes": [],
           "offer_types": [
             "rent",
             "sale"
           ],
+          "price_presets": {
+            "sale": [
+              50000,
+              75000,
+              100000,
+              150000,
+              200000,
+              300000,
+              500000,
+              750000,
+              1000000
+            ],
+            "rent": [
+              300,
+              400,
+              500,
+              700,
+              1000,
+              1500,
+              2000
+            ]
+          },
           "bedrooms": [
             0,
             1,
@@ -3616,18 +3716,9 @@
           "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
         },
         "applicable_filter_fields": [
-          "property_subtype",
           "bedrooms_min",
-          "premises_min",
-          "hotel_rooms_min",
           "area_min",
-          "area_max",
-          "land_area_min",
-          "land_area_max",
-          "floor_min",
-          "floor_max",
-          "storeys_min",
-          "storeys_max"
+          "area_max"
         ]
       },
       "fallback": {
@@ -3657,6 +3748,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -3712,6 +3804,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -3767,6 +3860,7 @@
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 600,
         "price_on_request": false,
         "listing_status": "available",
@@ -3822,6 +3916,7 @@
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 355,
         "price_on_request": false,
         "listing_status": "available",
@@ -3877,6 +3972,7 @@
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -3932,6 +4028,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
         "listing_status": "available",
@@ -3987,6 +4084,7 @@
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 53289,
         "price_on_request": false,
         "listing_status": "available",
@@ -4042,6 +4140,7 @@
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 350,
         "price_on_request": false,
         "listing_status": "available",
@@ -4097,6 +4196,7 @@
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 400,
         "price_on_request": false,
         "listing_status": "available",
@@ -4152,6 +4252,7 @@
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 130000,
         "price_on_request": false,
         "listing_status": "available",
@@ -4207,6 +4308,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -4262,6 +4364,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,
         "listing_status": "available",
@@ -4344,7 +4447,7 @@
         "navContact": "צור קשר",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -4482,6 +4585,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -4576,7 +4680,7 @@
         "navContact": "צור קשר",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -4771,7 +4875,7 @@
         "navContact": "צור קשר",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -4948,7 +5052,7 @@
         "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
-        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
@@ -5256,7 +5360,7 @@
         "budgetMin": "Минимальный бюджет (€)",
         "budgetMax": "Максимальный бюджет (€)",
         "locations": "Локации (через запятую)",
-        "propertyTypes": "Типы объектов (через запятую)",
+        "propertyTypes": "Типы объектов",
         "bedroomsMin": "Минимум спален",
         "timeline": "Срок решения",
         "financeStatus": "Финансирование",
@@ -5860,7 +5964,7 @@
         "budgetMin": "Minimum budget (€)",
         "budgetMax": "Maximum budget (€)",
         "locations": "Locations (comma separated)",
-        "propertyTypes": "Property types (comma separated)",
+        "propertyTypes": "Property types",
         "bedroomsMin": "Minimum bedrooms",
         "timeline": "Decision timeline",
         "financeStatus": "Finance status",

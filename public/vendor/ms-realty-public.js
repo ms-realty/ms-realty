@@ -703,26 +703,123 @@
     syncRegionOptions();
     setFreeTextEnabled(!geographyId || !geographyId.value);
   }
-  function initHeroAdvancedSearch() {
-    var form = document.querySelector("[data-hero-advanced-search]");
-    if (!form) return;
-    var trigger = form.querySelector("[data-hero-advanced-trigger]");
-    var panel = form.querySelector(".hp-hero__advanced-panel");
-    if (!trigger || !panel) return;
-    function setExpanded(expanded) {
-      trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-      panel.hidden = !expanded;
+  var NON_RESIDENTIAL_FAMILIES = ["plot", "agricultural_land", "commercial", "hotel"];
+  // Empty filter controls stay out of the results URL: they are disabled for the
+  // submission only, and a bfcache return re-enables them so the form is still
+  // editable. Checked radios with an empty value ("All", "Any") carry no filter.
+  function emptyFormControls(form) {
+    var controls = form.querySelectorAll("input, select");
+    var empty = [];
+    for (var i = 0; i < controls.length; i += 1) {
+      var control = controls[i];
+      if (control.disabled || control.type === "checkbox" || control.type === "submit" || control.type === "button") continue;
+      if (control.type === "radio") {
+        if (control.checked && String(control.value || "") === "") empty.push(control);
+        continue;
+      }
+      if (String(control.value || "").trim() === "") empty.push(control);
     }
-    trigger.addEventListener("click", function () {
-      setExpanded(trigger.getAttribute("aria-expanded") !== "true");
+    return empty;
+  }
+  function stripEmptyControlsOnSubmit(form) {
+    var skipped = [];
+    form.addEventListener("submit", function () {
+      skipped = emptyFormControls(form);
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = true;
     });
-    form.addEventListener("keydown", function (event) {
-      if (event.key !== "Escape" || trigger.getAttribute("aria-expanded") !== "true") return;
-      event.preventDefault();
-      setExpanded(false);
-      trigger.focus();
+    window.addEventListener("pageshow", function () {
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = false;
+      skipped = [];
     });
-    setExpanded(false);
+  }
+  function initSearchFilterForms() {
+    var forms = document.querySelectorAll("[data-search-filter-form]");
+    for (var i = 0; i < forms.length; i += 1) stripEmptyControlsOnSubmit(forms[i]);
+  }
+  function initHeroSearch() {
+    var form = document.querySelector("[data-hero-search]");
+    if (!form) return;
+    var priceSelects = form.querySelectorAll("[data-price-presets]");
+    var family = form.querySelector("[data-hero-family]");
+    var bedrooms = form.querySelector("[data-hero-bedrooms]");
+    var more = form.querySelector("[data-hero-more-filters]");
+    function offerType() {
+      var checked = form.querySelector('input[name="offer_type"]:checked');
+      return checked && checked.value === "rent" ? "rent" : "sale";
+    }
+    // Rent budgets are monthly, so the preset list follows the Buy/Rent tab.
+    function applyPricePresets() {
+      var source = offerType() === "rent" ? "data-price-rent" : "data-price-sale";
+      for (var i = 0; i < priceSelects.length; i += 1) {
+        var select = priceSelects[i];
+        var current = select.value;
+        var entries = (select.getAttribute(source) || "").split(";");
+        select.textContent = "";
+        var any = document.createElement("option");
+        any.value = "";
+        any.textContent = select.getAttribute("data-price-any") || "";
+        select.appendChild(any);
+        for (var j = 0; j < entries.length; j += 1) {
+          if (!entries[j]) continue;
+          var parts = entries[j].split("|");
+          var option = document.createElement("option");
+          option.value = parts[0];
+          option.textContent = parts[1] || parts[0];
+          if (parts[0] === current) option.selected = true;
+          select.appendChild(option);
+        }
+      }
+    }
+    // Plots, land, commercial space and hotels carry no bedroom count.
+    function syncBedrooms() {
+      if (!family || !bedrooms) return;
+      var nonResidential = NON_RESIDENTIAL_FAMILIES.indexOf(family.value) >= 0;
+      bedrooms.disabled = nonResidential;
+      if (nonResidential) bedrooms.value = "";
+    }
+    form.addEventListener("change", function (event) {
+      if (event.target && event.target.name === "offer_type") applyPricePresets();
+      if (event.target === family) syncBedrooms();
+    });
+    form.addEventListener("reset", function () {
+      window.setTimeout(function () {
+        applyPricePresets();
+        syncBedrooms();
+      });
+    });
+    if (more) {
+      var label = more.querySelector("[data-more-label]");
+      more.addEventListener("toggle", function () {
+        if (label) label.textContent = more.open ? label.getAttribute("data-fewer-label") : label.getAttribute("data-more-label");
+      });
+    }
+    // Empty controls stay out of the results URL; pageshow restores them for bfcache returns.
+    function emptyControls() {
+      return emptyFormControls(form);
+    }
+    var skipped = [];
+    form.addEventListener("submit", function () {
+      skipped = emptyControls();
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = true;
+    });
+    window.addEventListener("pageshow", function () {
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = false;
+      skipped = [];
+      syncBedrooms();
+    });
+    applyPricePresets();
+    syncBedrooms();
+  }
+  function initSearchToolbar() {
+    var form = document.querySelector("[data-search-toolbar-form]");
+    if (!form) return;
+    var sort = form.querySelector('select[name="sort"]');
+    if (!sort) return;
+    sort.addEventListener("change", function () {
+      var view = form.querySelector('[data-view-mode][aria-pressed="true"]');
+      if (typeof form.requestSubmit === "function") form.requestSubmit(view && view.value === "map" ? view : undefined);
+      else form.submit();
+    });
   }
   function initHeroGallery() {
     var gallery = document.querySelector("[data-hero-gallery]");
@@ -1289,6 +1386,32 @@
      var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
      document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
    }
+  // The desktop language menu is a native <details>; it still needs to close
+  // on an outside click, on Escape (returning focus to its button), and when
+  // keyboard focus leaves it.
+  function initLanguageMenu() {
+    var menu = document.querySelector('details[data-language-switcher="desktop"]');
+    if (!menu) return;
+    var summary = menu.querySelector(":scope > summary");
+    if (!summary) return;
+    function closeMenu(returnFocus) {
+      if (!menu.open) return;
+      menu.open = false;
+      if (returnFocus) summary.focus();
+    }
+    document.addEventListener("click", function (event) {
+      if (menu.open && !menu.contains(event.target)) closeMenu(false);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && menu.open) {
+        event.preventDefault();
+        closeMenu(true);
+      }
+    });
+    menu.addEventListener("focusout", function (event) {
+      if (event.relatedTarget && !menu.contains(event.relatedTarget)) closeMenu(false);
+    });
+  }
   function initPublicMobileNavigation() {
     var mobileMenu = document.querySelector("[data-mobile-menu]");
     if (!mobileMenu) return;
@@ -1510,9 +1633,12 @@
   initSearchScrollRestoration();
   initDialogFocusReturn();
   initPublicMobileNavigation();
+  initLanguageMenu();
   initSavedSearchContacts();
+  initSearchFilterForms();
   initGeographyComboboxes();
-  initHeroAdvancedSearch();
+  initHeroSearch();
+  initSearchToolbar();
   initHeroGallery();
   initHorizontalFocusRails();
   initImageFallbacks();

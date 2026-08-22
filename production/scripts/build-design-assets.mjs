@@ -128,7 +128,13 @@ function collectCss() {
   // Production-only adaptations, concatenated last so they can override kit rules.
   // adapter.css = shared shell/RTL/print; adapter-public.css / adapter-admin.css
   // belong to the public-site and admin rebuilds respectively.
-  for (const file of ["adapter.css", "adapter-public.css", "adapter-admin.css"]) {
+  // Per-surface extension sheets (adapter-public-*.css, adapter-admin-*.css)
+  // follow their base sheet so each screen family can own its own file.
+  const extensions = (prefix) =>
+    readdirSync(OUT_DIR)
+      .filter((name) => name.startsWith(`${prefix}-`) && name.endsWith(".css"))
+      .sort();
+  for (const file of ["adapter.css", "adapter-public.css", ...extensions("adapter-public"), "adapter-admin.css", ...extensions("adapter-admin")]) {
     sections.push(read(path.join(OUT_DIR, file)));
   }
   return sections.map(minifyCss).filter(Boolean).join("\n");

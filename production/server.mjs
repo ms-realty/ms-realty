@@ -296,6 +296,19 @@ export async function startProductionServer(config = productionServerConfig()) {
   };
   process.once("SIGTERM", shutdown);
   process.once("SIGINT", shutdown);
+  // Payload's Postgres bootstrap leaves a rejected promise unobserved when the
+  // database is unreachable (seen on /admin/team without a local database).
+  // A long-running origin logs that and keeps serving instead of exiting.
+  process.on("unhandledRejection", (reason) => {
+    console.error(
+      JSON.stringify({
+        kind: "unhandled_rejection",
+        message: reason?.message || String(reason),
+        code: reason?.code,
+        stack: typeof reason?.stack === "string" ? reason.stack.split("\n").slice(0, 6).join("\n") : undefined,
+      }),
+    );
+  });
   return { server, address };
 }
 

@@ -421,7 +421,9 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.match(html, /data-mobile-menu-close="true"/);
   assert.match(html, /role="dialog" aria-modal="true" aria-label="Primary navigation"/);
   assert.match(html, /data-language-switcher="desktop"/);
-  assert.match(html, /aria-label="EN — Language: English"/);
+  // The menu button's accessible name carries no dash (house copy rule).
+  assert.match(html, /aria-label="Language: English"/);
+  assert.doesNotMatch(html.slice(html.indexOf("<header"), html.indexOf("</header>")), /[—–]/);
   assert.doesNotMatch(html, /<h4>/);
   assert.match(html, /data-language-switcher="mobile"/);
   assert.match(html, /data-mobile-task-navigation="true"/);
@@ -429,7 +431,7 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.equal((html.match(/data-mobile-task="/g) || []).length, 5);
   assert.match(html, /data-mobile-secondary-navigation="true"/);
   assert.match(html, /aria-label="Buyer guides"/);
-  assert.match(html, /class="mk-search__go" type="submit" aria-label="Search" title="Search"/);
+  assert.match(html, /class="hp-search__go mk-search__go" type="submit">[\s\S]*?<span>Search<\/span><\/button>/);
   assert.equal((html.match(/data-mobile-footer-group="/g) || []).length, 3);
 });
 
@@ -607,7 +609,8 @@ test("municipality search exposes reviewed Bulgarian municipality scope at every
   assert.deepEqual(sandanski.search.controls.active_filter_chips, [{ key: "municipality", value: "Sandanski", active: true }]);
   assert.match(html, /data-geography-combobox="true"[^>]*data-geography-endpoint="\/api\/geography"/);
   assert.match(html, /name="region_id"/);
-  assert.doesNotMatch(html, /name="municipality"/);
+  assert.doesNotMatch(html, /<(?:select|input(?![^>]*type="hidden"))[^>]*name="municipality"/);
+  assert.match(html, /<input type="hidden" name="municipality" value="Sandanski">/);
 });
 
 test("district search exposes official Bulgarian administrative areas without inventing neighbourhoods", () => {
@@ -628,7 +631,8 @@ test("district search exposes official Bulgarian administrative areas without in
   assert.equal(blagoevgrad.cards.some((card) => card.id === "MS-CRAWL-0072"), false);
   assert.deepEqual(blagoevgrad.search.controls.active_filter_chips, [{ key: "district", value: "Blagoevgrad", active: true }]);
   assert.match(html, /<option value="BG:district:BLG" data-country="BG">Blagoevgrad<\/option>/);
-  assert.doesNotMatch(html, /name="district"/);
+  assert.doesNotMatch(html, /<(?:select|input(?![^>]*type="hidden"))[^>]*name="district"/);
+  assert.match(html, /<input type="hidden" name="district" value="Blagoevgrad">/);
 });
 
 test("search matches Cyrillic listings across Latin and Cyrillic keyboard input", () => {

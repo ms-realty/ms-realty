@@ -7,9 +7,9 @@ function uiLabels(page) {
   return labelsFor(page.locale || page.lang || "en");
 }
 
-function price(value, labels = labelsFor("en")) {
+function price(value, labels = labelsFor("en"), localeCode = "en") {
   const amount = Number(value);
-  return Number.isFinite(amount) && amount > 1 ? `EUR ${amount.toLocaleString("en-US")}` : labels.priceOnRequest;
+  return Number.isFinite(amount) && amount > 1 ? formatEuro(amount, localeCode) : labels.priceOnRequest;
 }
 
 function cardSummary(card) {
@@ -57,7 +57,7 @@ function LanguageMenu({ languages, label }) {
     { className: "site-language", "data-language-switcher": "desktop" },
     h(
       "summary",
-      { "aria-label": `${active.code.toUpperCase()} — ${label}: ${active.label}`, title: `${label}: ${active.label}` },
+      { "aria-label": `${label}: ${active.label}`, title: `${label}: ${active.label}` },
       h(Icon, { name: "globe", size: 17 }),
       h("span", { className: "site-language__current", lang: active.code }, active.code.toUpperCase()),
       h(Icon, { name: "chevron-down", size: 14, "aria-hidden": "true" }),
@@ -100,7 +100,8 @@ function SiteHeader({ chrome }) {
         "aria-expanded": "false",
         title: copy.menuLabel,
       },
-      h(Icon, { name: "menu", size: 22 }),
+      h(Icon, { name: "menu", size: 22, className: "site-hd__mobile-icon-open" }),
+      h(Icon, { name: "x", size: 22, className: "site-hd__mobile-icon-close" }),
       h("span", { className: "site-hd__mobile-label" }, copy.menuLabel),
     ),
     h("button", {
@@ -447,7 +448,7 @@ function EnquiryDialog({ page, labels, copy }) {
     const contact = page.chrome?.contact || {};
     return h(
       "dialog",
-      { id: "mk-enquiry", className: "ct-modal mk-enquiry", "aria-label": labels.inquiry, "data-enquiry-intent": "inquiry", "data-form-unavailable": "true" },
+      { id: "mk-enquiry", className: "ct-modal mk-enquiry", "aria-modal": "true", "aria-label": labels.inquiry, "data-enquiry-intent": "inquiry", "data-form-unavailable": "true" },
       h("div", { className: "mk-enquiry__heading" }, h("h2", null, labels.inquiry)),
       contact.phone
         ? h(
@@ -462,10 +463,10 @@ function EnquiryDialog({ page, labels, copy }) {
   const intentCopy = INTENT_DIALOG_COPY[page.locale] || INTENT_DIALOG_COPY.en;
   const facts = page.kind === "listing" ? page.body?.facts || {} : {};
   const propertyTitle = page.kind === "listing" ? page.body?.h1 || "" : "";
-  const propertyMeta = [facts.location, price(facts.price_eur, labels)].filter(Boolean).join(" · ");
+  const propertyMeta = [facts.location, price(facts.price_eur, labels, page.locale)].filter(Boolean).join(" · ");
   return h(
     "dialog",
-    { id: "mk-enquiry", className: "ct-modal mk-enquiry", "aria-label": labels.inquiry, "data-enquiry-intent": "inquiry" },
+    { id: "mk-enquiry", className: "ct-modal mk-enquiry", "aria-modal": "true", "aria-label": labels.inquiry, "data-enquiry-intent": "inquiry" },
     h(
       "form",
       {
@@ -678,7 +679,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
     h(
       "div",
       { className: "mk-pcard__body" },
-      h("div", { className: "mk-pcard__pricerow" }, h("span", { className: "mk-pcard__price", "data-card-price": "true" }, price(card.price_eur, labels))),
+      h("div", { className: "mk-pcard__pricerow" }, h("span", { className: "mk-pcard__price", "data-card-price": "true" }, price(card.price_eur, labels, localeCode))),
       h("h2", { className: "mk-pcard__title", lang: card.content_locale || undefined }, h("a", { href: card.path }, card.title)),
       h(
         "div",
@@ -827,233 +828,221 @@ const HERO_GALLERY_SLIDES = [
   },
 ];
 
-function heroSearchSelect({
-  formId,
-  id,
-  name,
-  label,
-  labels,
-  className = "",
-  values = [],
-  optionLabel = (value) => value,
-  optionValue = (value) => value,
-  optionAttributes = () => ({}),
-  data = {},
-}) {
-  return h(
-    "label",
-    { className: `hp-hero__advanced-field ${className}`.trim(), htmlFor: id },
-    h("span", null, label),
-    h(
-      "select",
-      { id, name, form: formId, ...data },
-      h("option", { value: "" }, labels.any),
-      ...values.map((value) =>
-        h("option", { key: optionValue(value), value: optionValue(value), ...optionAttributes(value) }, optionLabel(value)),
+const PRICE_PRESETS = Object.freeze({
+  sale: [50000, 75000, 100000, 150000, 200000, 300000, 500000, 750000, 1000000],
+  rent: [300, 400, 500, 700, 1000, 1500, 2000],
+});
+
+// Families whose listings carry no bedroom count; the bedroom filter hides
+// for them (CSS) and is disabled on submit (client.mjs) so a plot search is
+// never narrowed by a bedroom value.
+const NON_RESIDENTIAL_FAMILIES = Object.freeze(["plot", "agricultural_land", "commercial", "hotel"]);
+
+function formatEuro(value, localeCode = "en") {
+  try {
+    return new Intl.NumberFormat(localeCode, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(value));
+  } catch {
+    return `€${Number(value).toLocaleString("en-US")}`;
+  }
+}
+
+function pricePresetOptions({ values, localeCode, labels, suffix = "", selected = "" }) {
+  return [
+    h("option", { key: "any", value: "" }, labels.any),
+    ...values.map((value) =>
+      h(
+        "option",
+        { key: value, value: String(value), selected: String(selected) === String(value) ? true : undefined },
+        `${formatEuro(value, localeCode)}${suffix}`,
       ),
+    ),
+  ];
+}
+
+function pricePresetData(presets, localeCode, labels) {
+  return {
+    "data-price-presets": "true",
+    "data-price-any": labels.any,
+    "data-price-sale": presets.sale.map((value) => `${value}|${formatEuro(value, localeCode)}`).join(";"),
+    "data-price-rent": presets.rent.map((value) => `${value}|${formatEuro(value, localeCode)} ${labels.perMonth}`).join(";"),
+  };
+}
+
+function SelectField({ id, name, label, className = "", children, ...attrs }) {
+  return h(
+    "div",
+    { className: `hp-search__seg ${className}`.trim() },
+    h("label", { className: "hp-search__label", htmlFor: id }, label),
+    h(
+      "div",
+      { className: "hp-search__select" },
+      h("select", { id, name, className: "hp-search__input", ...attrs }, ...children),
+      h(Icon, { name: "chevron-down", size: 16, className: "hp-search__chevron" }),
     ),
   );
 }
 
-function HeroAdvancedSearch({ page, labels, chrome }) {
+function HeroSearch({ page, labels, chrome }) {
   const formId = "home-hero-search-form";
   const controls = page.body.search?.controls || {};
   const filterOptions = controls.filter_options || {};
-  const advancedId = `home-advanced-search-${page.locale}`;
-  const filtersLabel = chrome.copy.filters || labels.activeFilters;
-  const selectProps = { formId, labels };
+  const presets = filterOptions.price_presets || PRICE_PRESETS;
+  const families = filterOptions.property_families || filterOptions.property_types || [];
+  const buyLabel = chrome.nav?.find((item) => item.id === "buy")?.label || "Buy";
+  const rentLabel = chrome.nav?.find((item) => item.id === "rent")?.label || "Rent";
+  const offerLabel = labels.factLabels?.offer_type || "Offer";
+  const presetData = pricePresetData(presets, page.locale, labels);
 
   return h(
     "form",
     {
       id: formId,
-      className: "hp-hero__search-form mk-search__bar",
+      className: "hp-search",
       action: page.body.search.path,
       method: "get",
       role: "search",
-      "data-hero-advanced-search": "true",
+      "aria-label": labels.search,
+      "data-hero-search": "true",
     },
     h(
-      "div",
-      { className: "mk-search__seg mk-search__seg--grow" },
-      h(Icon, { name: "map-pin", size: 20 }),
-      h(
-        "div",
-        {
-          className: "mk-search__field hp-hero__location-combobox",
-          "data-geography-combobox": "true",
-          "data-geography-endpoint": "/api/geography",
-          "data-geography-locale": page.locale,
-          "data-geography-empty-label": labels.noLocations,
-        },
-        h("label", { className: "mk-sr-only", htmlFor: "home-search-q" }, labels.location),
-        h("input", {
-          id: "home-search-q",
-          name: "location",
-          type: "search",
-          className: "mk-searchbar__input",
-          autoComplete: "off",
-          placeholder: labels.locationSearchHint,
-          role: "combobox",
-          "aria-autocomplete": "list",
-          "aria-haspopup": "listbox",
-          "aria-controls": "home-search-location-options",
-          "aria-expanded": "false",
-          "aria-describedby": "home-search-location-status",
-          "data-geography-input": "true",
-        }),
-        h("input", { type: "hidden", name: "geography_id", value: "", "data-geography-id": "true" }),
-        h(
-          "div",
-          {
-            id: "home-search-location-options",
-            className: "hp-hero__location-options",
-            role: "listbox",
-            "aria-label": labels.locationSuggestions,
-            "data-geography-options": "true",
-            hidden: true,
-          },
-        ),
-        h("span", {
-          id: "home-search-location-status",
-          className: "mk-sr-only",
-          role: "status",
-          "aria-live": "polite",
-          "aria-atomic": "true",
-          "data-geography-status": "true",
-        }),
-      ),
-    ),
-    h(
-      "button",
-      {
-        type: "button",
-        className: "hp-hero__advanced-trigger",
-        "data-hero-advanced-trigger": "true",
-        "aria-controls": advancedId,
-        "aria-expanded": "false",
-        "aria-label": filtersLabel,
-        title: filtersLabel,
-      },
-      h(Icon, { name: "sliders-horizontal", size: 17, "aria-hidden": "true" }),
-      h("span", { className: "mk-sr-only" }, filtersLabel),
-    ),
-    h(
-      "button",
-      { className: "mk-search__go", type: "submit", "aria-label": labels.search, title: labels.search },
-      h(Icon, { name: "search", size: 20, strokeWidth: 2.25 }),
-      h("span", null, labels.search),
-    ),
-    h(
       "fieldset",
-      { className: "hp-hero__families", "aria-label": labels.propertyType },
-      h("legend", { className: "mk-sr-only" }, labels.propertyType),
+      { className: "hp-search__intent", "data-search-intent": "true" },
+      h("legend", { className: "mk-sr-only" }, offerLabel),
       h(
         "label",
-        { className: "hp-hero__family" },
-        h("input", { type: "radio", name: "property_family", value: "", form: formId, defaultChecked: true }),
-        h("span", null, labels.any),
+        { className: "hp-search__tab" },
+        h("input", { type: "radio", name: "offer_type", value: "sale", defaultChecked: true }),
+        h("span", null, buyLabel),
       ),
-      ...(filterOptions.property_families || filterOptions.property_types || []).map((family) =>
-        h(
-          "label",
-          { key: family, className: "hp-hero__family" },
-          h("input", { type: "radio", name: "property_family", value: family, form: formId }),
-          h("span", null, localizedListingValue(page.locale, "property_type", family)),
-        ),
+      h(
+        "label",
+        { className: "hp-search__tab" },
+        h("input", { type: "radio", name: "offer_type", value: "rent" }),
+        h("span", null, rentLabel),
       ),
     ),
     h(
       "div",
-      { id: advancedId, className: "hp-hero__advanced-panel", hidden: true },
+      { className: "hp-search__card" },
       h(
-        "fieldset",
-        { className: "hp-hero__advanced-grid" },
-        h("legend", { className: "mk-sr-only" }, filtersLabel),
-        h("p", { className: "hp-hero__advanced-intro" }, labels.locationSearchHint),
-        heroSearchSelect({
-          ...selectProps,
-          id: "home-search-country",
-          name: "country_code",
-          label: labels.country,
-          className: "hp-hero__advanced-field--country",
-          values: filterOptions.countries || [],
-          optionLabel: (country) => localizedSearchFilterValue(page.locale, "country_code", country.code),
-          optionValue: (country) => country.code,
-          data: { "data-geography-country": "true" },
-        }),
-        heroSearchSelect({
-          ...selectProps,
-          id: "home-search-region",
-          name: "region_id",
-          label: labels.region,
-          className: "hp-hero__advanced-field--region",
-          values: filterOptions.regions || [],
-          optionLabel: (area) => localizedSearchFilterValue(page.locale, "region_id", area.id),
-          optionValue: (area) => area.id,
-          optionAttributes: (area) => ({ "data-country": area.country_code }),
-          data: { "data-geography-region": "true" },
-        }),
-        heroSearchSelect({
-          ...selectProps,
-          id: "home-search-offer-type",
-          name: "offer_type",
-          label: labels.factLabels?.offer_type || "Offer",
-          className: "hp-hero__advanced-field--offer",
-          values: filterOptions.offer_types || [],
-          optionLabel: (value) => localizedListingValue(page.locale, "offer_type", value),
-        }),
-        heroSearchSelect({
-          ...selectProps,
-          id: "home-search-bedrooms-min",
-          name: "bedrooms_min",
-          label: labels.factLabels?.bedrooms || "Bedrooms",
-          className: "hp-hero__advanced-field--bedrooms",
-          values: filterOptions.bedrooms || [],
-          optionLabel: (value) => `${value}+`,
-        }),
+        "div",
+        { className: "hp-search__bar" },
         h(
-          "fieldset",
-          { className: "hp-hero__advanced-field hp-hero__advanced-field--pair hp-hero__advanced-field--price" },
-          h("legend", null, `${labels.price || "Price"} (EUR)`),
+          "div",
+          { className: "hp-search__seg hp-search__seg--location" },
+          h(Icon, { name: "map-pin", size: 20, className: "hp-search__seg-icon" }),
           h(
             "div",
-            null,
-            h("label", { htmlFor: "home-search-price-min" }, labels.priceMin),
-            h("input", { id: "home-search-price-min", name: "price_min", form: formId, type: "number", min: "0", inputMode: "numeric" }),
-          ),
-          h(
-            "div",
-            null,
-            h("label", { htmlFor: "home-search-price-max" }, labels.priceMax),
-            h("input", { id: "home-search-price-max", name: "price_max", form: formId, type: "number", min: "0", inputMode: "numeric" }),
+            {
+              className: "hp-search__field hp-hero__location-combobox",
+              "data-geography-combobox": "true",
+              "data-geography-endpoint": "/api/geography",
+              "data-geography-locale": page.locale,
+              "data-geography-empty-label": labels.noLocations,
+            },
+            h("label", { className: "hp-search__label", htmlFor: "home-search-q" }, labels.location),
+            h("input", {
+              id: "home-search-q",
+              name: "location",
+              type: "search",
+              className: "hp-search__input mk-searchbar__input",
+              autoComplete: "off",
+              placeholder: labels.locationPlaceholder,
+              role: "combobox",
+              "aria-autocomplete": "list",
+              "aria-haspopup": "listbox",
+              "aria-controls": "home-search-location-options",
+              "aria-expanded": "false",
+              "aria-describedby": "home-search-location-status",
+              "data-geography-input": "true",
+            }),
+            h("input", { type: "hidden", name: "geography_id", value: "", "data-geography-id": "true" }),
+            h("div", {
+              id: "home-search-location-options",
+              className: "hp-hero__location-options",
+              role: "listbox",
+              "aria-label": labels.locationSuggestions,
+              "data-geography-options": "true",
+              hidden: true,
+            }),
+            h("span", {
+              id: "home-search-location-status",
+              className: "mk-sr-only",
+              role: "status",
+              "aria-live": "polite",
+              "aria-atomic": "true",
+              "data-geography-status": "true",
+            }),
           ),
         ),
         h(
-          "fieldset",
-          { className: "hp-hero__advanced-field hp-hero__advanced-field--pair hp-hero__advanced-field--area" },
-          h("legend", null, labels.area),
-          h(
-            "div",
-            null,
-            h("label", { htmlFor: "home-search-area-min" }, labels.areaMin),
-            h("input", { id: "home-search-area-min", name: "area_min", form: formId, type: "number", min: "0", step: "any", inputMode: "decimal" }),
-          ),
-          h(
-            "div",
-            null,
-            h("label", { htmlFor: "home-search-area-max" }, labels.areaMax),
-            h("input", { id: "home-search-area-max", name: "area_max", form: formId, type: "number", min: "0", step: "any", inputMode: "decimal" }),
-          ),
+          SelectField,
+          { id: "home-search-type", name: "property_family", label: labels.propertyType, className: "hp-search__seg--type", "data-hero-family": "true" },
+          h("option", { key: "any", value: "" }, labels.any),
+          ...families.map((family) => h("option", { key: family, value: family }, localizedListingValue(page.locale, "property_type", family))),
+        ),
+        h(
+          SelectField,
+          { id: "home-search-price-max", name: "price_max", label: labels.maxPrice, className: "hp-search__seg--price", ...presetData },
+          ...pricePresetOptions({ values: presets.sale, localeCode: page.locale, labels }),
+        ),
+        h(
+          "button",
+          { className: "hp-search__go mk-search__go", type: "submit" },
+          h(Icon, { name: "search", size: 20, strokeWidth: 2.25 }),
+          h("span", null, labels.search),
+        ),
+      ),
+      h(
+        "details",
+        { className: "hp-search__more", "data-hero-more-filters": "true" },
+        h(
+          "summary",
+          { className: "hp-search__more-summary" },
+          h(Icon, { name: "sliders-horizontal", size: 16 }),
+          h("span", { "data-more-label": labels.moreFilters, "data-fewer-label": labels.fewerFilters }, labels.moreFilters),
+          h(Icon, { name: "chevron-down", size: 16, className: "hp-search__more-chevron" }),
         ),
         h(
           "div",
-          { className: "hp-hero__advanced-actions" },
+          { className: "hp-search__more-grid" },
           h(
-            "button",
-            { type: "reset", className: "mk-btn mk-btn--ghost mk-btn--sm" },
-            h(Icon, { name: "x", size: 15 }),
-            h("span", null, labels.clearFilters),
+            "div",
+            { className: "hp-search__more-field hp-search__more-field--bedrooms" },
+            h("label", { htmlFor: "home-search-bedrooms-min" }, labels.factLabels?.bedrooms || "Bedrooms"),
+            h(
+              "select",
+              { id: "home-search-bedrooms-min", name: "bedrooms_min", "data-hero-bedrooms": "true" },
+              h("option", { value: "" }, labels.any),
+              ...[1, 2, 3, 4].map((count) => h("option", { key: count, value: String(count) }, `${count}+`)),
+            ),
+          ),
+          h(
+            "div",
+            { className: "hp-search__more-field" },
+            h("label", { htmlFor: "home-search-price-min" }, labels.minPrice),
+            h(
+              "select",
+              { id: "home-search-price-min", name: "price_min", ...presetData },
+              ...pricePresetOptions({ values: presets.sale, localeCode: page.locale, labels }),
+            ),
+          ),
+          h(
+            "div",
+            { className: "hp-search__more-field" },
+            h("label", { htmlFor: "home-search-area-min" }, labels.areaMin),
+            h("input", { id: "home-search-area-min", name: "area_min", type: "number", min: "0", step: "any", inputMode: "decimal" }),
+          ),
+          h(
+            "div",
+            { className: "hp-search__more-field" },
+            h("label", { htmlFor: "home-search-area-max" }, labels.areaMax),
+            h("input", { id: "home-search-area-max", name: "area_max", type: "number", min: "0", step: "any", inputMode: "decimal" }),
+          ),
+          h(
+            "div",
+            { className: "hp-search__more-actions" },
+            h(Btn, { type: "reset", variant: "ghost", size: "sm", iconStart: "x" }, labels.clearFilters),
           ),
         ),
       ),
@@ -1116,14 +1105,13 @@ function HomeBody({ page }) {
         h(
           "div",
           { className: "hp-hero__copy" },
-          h("span", { className: "hp-hero__eyebrow" }, h(Icon, { name: "compass", size: 15 }), chrome.copy.offices || ""),
           h("h1", null, page.body.h1),
           h("p", null, page.body.intro),
         ),
         h(
           "div",
-          { className: "hp-hero__search mk-search mk-search--lg" },
-          h(HeroAdvancedSearch, { page, labels, chrome }),
+          { className: "hp-hero__search" },
+          h(HeroSearch, { page, labels, chrome }),
         ),
       ),
       h("span", { className: "mk-sr-only", role: "status", "aria-live": "off", "aria-atomic": "true", "data-hero-gallery-status": "true" }, `${labels.gallery} 1 / ${HERO_GALLERY_SLIDES.length}`),
@@ -1355,7 +1343,12 @@ function OfficialAreaMaps({ page, labels }) {
           h(
             "details",
             { className: "sr-area-map__directory" },
-            h("summary", null, `${labels.region} · ${country.areas.length}`),
+            h(
+              "summary",
+              { className: "sr-area-map__directory-summary" },
+              h("span", null, `${labels.region} · ${country.areas.length}`),
+              h(Icon, { name: "chevron-down", size: 16, className: "sr-area-map__directory-chevron", "aria-hidden": "true" }),
+            ),
             h(
               "ul",
               null,
@@ -1408,62 +1401,87 @@ function SearchBody({ page }) {
   const controls = page.search.controls || {};
   const viewModes = controls.view_modes || [];
   const filterOptions = controls.filter_options || {};
+  const filters = page.search.filters || {};
+  const presets = filterOptions.price_presets || PRICE_PRESETS;
   const allReviewedLocations = [...new Set(filterOptions.locations || [])].filter(Boolean);
-  const activeReviewedLocation = allReviewedLocations.includes(page.search.filters?.location) ? page.search.filters.location : "";
+  const activeReviewedLocation = allReviewedLocations.includes(filters.location) ? filters.location : "";
   const reviewedLocations = [...new Set([activeReviewedLocation, ...allReviewedLocations])].filter(Boolean).slice(0, 6);
   const reviewedPropertyFamilies = [...new Set(filterOptions.property_families || filterOptions.property_types || [])].filter(Boolean).slice(0, 6);
   const activeFilterCount = (controls.active_filter_chips || []).length;
   const applicableFilterFields = new Set(controls.applicable_filter_fields || []);
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
   const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
+  const filtersLabel = chrome.copy.filters || labels.activeFilters;
+  const offerLabel = labels.factLabels?.offer_type || "Offer";
+  const secondaryFilterKeys = ["country_code", "region_id", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min"];
+  const secondaryFiltersActive = Boolean(String(page.search.query || "").trim()) || secondaryFilterKeys.some((key) => filters[key]);
   const mobileSearchContext = String(
     page.search.query ||
-      page.search.filters?.location ||
-      (page.search.filters?.offer_type
-        ? localizedListingValue(page.locale, "offer_type", page.search.filters.offer_type)
-        : "") ||
+      filters.location ||
+      (filters.offer_type ? localizedListingValue(page.locale, "offer_type", filters.offer_type) : "") ||
       labels.search,
   ).trim();
-  const mobileSearchMeta = `${page.search.total_matches} ${labels.matches} · ${chrome.copy.filters || labels.activeFilters}`;
-  const filterSelect = (
-    idPrefix,
-    name,
-    label,
-    values,
-    optionLabel = (value) => value,
-    optionValue = (value) => value,
-    optionAttributes = () => ({}),
-    className = "",
-  ) =>
+  const mobileSearchMeta = `${page.search.total_matches} ${labels.matches}`;
+  const filterValue = (name) => String(filters[name] ?? "");
+  const filterSelect = (idPrefix, name, label, values, optionLabel = (value) => value, optionValue = (value) => value, optionAttributes = () => ({}), className = "") =>
     h(
       "div",
       { key: name, className: `sr-fg ${className}`.trim() },
-      h("label", { className: "hdr", htmlFor: `${idPrefix}-${name}` }, label),
+      h("label", { className: "sr-label", htmlFor: `${idPrefix}-${name}` }, label),
       h(
-        "select",
-        { id: `${idPrefix}-${name}`, name },
-        h("option", { value: "" }, labels.any),
-        ...values.map((value) =>
-          h("option", {
-            key: optionValue(value),
-            value: optionValue(value),
-            selected: String(page.search.filters?.[name] ?? "") === String(optionValue(value)) ? true : undefined,
-            ...optionAttributes(value),
-          }, optionLabel(value)),
+        "div",
+        { className: "sr-select" },
+        h(
+          "select",
+          { id: `${idPrefix}-${name}`, name },
+          h("option", { value: "" }, labels.any),
+          ...values.map((value) =>
+            h(
+              "option",
+              {
+                key: optionValue(value),
+                value: optionValue(value),
+                selected: filterValue(name) === String(optionValue(value)) ? true : undefined,
+                ...optionAttributes(value),
+              },
+              optionLabel(value),
+            ),
+          ),
+        ),
+        h(Icon, { name: "chevron-down", size: 16, className: "sr-select__chevron" }),
+      ),
+    );
+  const rangePair = (idPrefix, legend, minName, maxName, { step = "1", inputMode = "numeric", className = "" } = {}) =>
+    h(
+      "fieldset",
+      { key: minName, className: `sr-fg sr-fg--range ${className}`.trim() },
+      h("legend", { className: "sr-label" }, legend),
+      h(
+        "div",
+        { className: "sr-fg__pair" },
+        h(
+          "label",
+          { htmlFor: `${idPrefix}-${minName}` },
+          h("span", null, labels.min),
+          h("input", { id: `${idPrefix}-${minName}`, name: minName, type: "number", min: "0", step, inputMode, defaultValue: filters[minName] || "" }),
+        ),
+        h(
+          "label",
+          { htmlFor: `${idPrefix}-${maxName}` },
+          h("span", null, labels.max),
+          h("input", { id: `${idPrefix}-${maxName}`, name: maxName, type: "number", min: "0", step, inputMode, defaultValue: filters[maxName] || "" }),
         ),
       ),
     );
   const geographyField = (idPrefix) => {
     const optionsId = `${idPrefix}-geography-options`;
     const statusId = `${idPrefix}-geography-status`;
-    const selectedGeographyId = page.search.filters?.geography_id || "";
-    const selectedLabel =
-      page.search.filters?.location ||
-      (selectedGeographyId ? localizedSearchFilterValue(page.locale, "geography_id", selectedGeographyId) : "");
+    const selectedGeographyId = filters.geography_id || "";
+    const selectedLabel = filters.location || (selectedGeographyId ? localizedSearchFilterValue(page.locale, "geography_id", selectedGeographyId) : "");
     return h(
       "div",
-      { className: "sr-fg sr-fg--location sr-fg--wide" },
-      h("label", { className: "hdr", htmlFor: `${idPrefix}-location` }, labels.location),
+      { className: "sr-fg sr-fg--location" },
+      h("label", { className: "sr-label", htmlFor: `${idPrefix}-location` }, labels.location),
       h(
         "div",
         {
@@ -1474,13 +1492,14 @@ function SearchBody({ page }) {
           "data-geography-empty-label": labels.noLocations,
           "data-geography-query-name": "location",
         },
+        h(Icon, { name: "map-pin", size: 18, className: "sr-geography-combobox__icon" }),
         h("input", {
           id: `${idPrefix}-location`,
           name: selectedGeographyId ? undefined : "location",
           type: "search",
           defaultValue: selectedLabel,
           autoComplete: "off",
-          placeholder: labels.locationSearchHint,
+          placeholder: labels.locationPlaceholder,
           role: "combobox",
           "aria-autocomplete": "list",
           "aria-haspopup": "listbox",
@@ -1489,12 +1508,7 @@ function SearchBody({ page }) {
           "aria-describedby": statusId,
           "data-geography-input": "true",
         }),
-        h("input", {
-          type: "hidden",
-          name: "geography_id",
-          defaultValue: selectedGeographyId,
-          "data-geography-id": "true",
-        }),
+        h("input", { type: "hidden", name: "geography_id", defaultValue: selectedGeographyId, "data-geography-id": "true" }),
         h("div", {
           id: optionsId,
           className: "hp-hero__location-options sr-geography-options",
@@ -1503,14 +1517,53 @@ function SearchBody({ page }) {
           "data-geography-options": "true",
           hidden: true,
         }),
-        h("span", {
-          id: statusId,
-          className: "mk-sr-only",
-          role: "status",
-          "aria-live": "polite",
-          "aria-atomic": "true",
-          "data-geography-status": "true",
-        }),
+        h("span", { id: statusId, className: "mk-sr-only", role: "status", "aria-live": "polite", "aria-atomic": "true", "data-geography-status": "true" }),
+      ),
+    );
+  };
+  const offerSegments = (idPrefix) =>
+    h(
+      "fieldset",
+      { className: "sr-fg sr-fg--offer" },
+      h("legend", { className: "sr-label" }, offerLabel),
+      h(
+        "div",
+        { className: "sr-seg", role: "group" },
+        ...[["", labels.allOffers], ...["sale", "rent"].filter((value) => (filterOptions.offer_types || []).includes(value)).map((value) => [value, localizedListingValue(page.locale, "offer_type", value)])].map(
+          ([value, text]) =>
+            h(
+              "label",
+              { key: value || "all", className: "sr-seg__option" },
+              h("input", {
+                type: "radio",
+                name: "offer_type",
+                value,
+                id: `${idPrefix}-offer-${value || "all"}`,
+                defaultChecked: filterValue("offer_type") === value ? true : undefined,
+              }),
+              h("span", null, text),
+            ),
+        ),
+      ),
+    );
+  const bedroomPills = (idPrefix) => {
+    const counts = [1, 2, 3, 4, 5].filter((count) => (filterOptions.bedrooms || []).some((value) => value >= count));
+    if (!counts.length) return null;
+    return h(
+      "fieldset",
+      { className: "sr-fg sr-fg--bedrooms" },
+      h("legend", { className: "sr-label" }, labels.factLabels?.bedrooms || "Bedrooms"),
+      h(
+        "div",
+        { className: "sr-pills" },
+        ...[["", labels.any], ...counts.map((count) => [String(count), `${count}+`])].map(([value, text]) =>
+          h(
+            "label",
+            { key: value || "any", className: "sr-pill" },
+            h("input", { type: "radio", name: "bedrooms_min", value, id: `${idPrefix}-bedrooms-${value || "any"}`, defaultChecked: filterValue("bedrooms_min") === value ? true : undefined }),
+            h("span", null, text),
+          ),
+        ),
       ),
     );
   };
@@ -1519,8 +1572,8 @@ function SearchBody({ page }) {
       ? null
       : h(
           "section",
-          { className: "sr-guided", "data-guided-search": "true", "aria-label": labels.reviewedListings },
-          h("p", { className: "sr-guided__title" }, labels.reviewedListings),
+          { className: "sr-guided", "data-guided-search": "true", "aria-label": labels.browse },
+          h("p", { className: "sr-guided__title" }, labels.browse),
           reviewedLocations.length
             ? h(
                 "section",
@@ -1583,12 +1636,7 @@ function SearchBody({ page }) {
               h("p", { id: `${idPrefix}-recent-searches-title`, className: "sr-guided__label" }, guidedCopy.recentSearches),
               h(
                 "button",
-                {
-                  type: "button",
-                  className: "sr-guided__clear",
-                  "data-clear-recent-searches": "true",
-                  "aria-label": guidedCopy.clearRecentSearches,
-                },
+                { type: "button", className: "sr-guided__clear", "data-clear-recent-searches": "true", "aria-label": guidedCopy.clearRecentSearches },
                 guidedCopy.clearRecentSearches,
               ),
             ),
@@ -1598,181 +1646,81 @@ function SearchBody({ page }) {
   const filterForm = (idPrefix) =>
     h(
       "form",
-      { id: `${idPrefix}-filter-form`, action: page.path, method: "get", role: "search", "data-search-filter-form": "true", "data-filter-form-id": idPrefix },
-      h(
-        "div",
-        { className: "sr-fg sr-fg--wide" },
-        h("label", { className: "hdr", htmlFor: `${idPrefix}-q` }, labels.keywordSearch || labels.search),
-        h("input", { id: `${idPrefix}-q`, name: "q", type: "search", defaultValue: page.search.query || "", autoComplete: "off" }),
-      ),
-      guidedSearch(idPrefix),
-      filterSelect(
-        idPrefix,
-        "country_code",
-        labels.country,
-        filterOptions.countries || [],
-        (country) => localizedSearchFilterValue(page.locale, "country_code", country.code),
-        (country) => country.code,
-        () => ({ "data-geography-country-option": "true" }),
-        "sr-fg--country",
-      ),
-      filterSelect(
-        idPrefix,
-        "region_id",
-        labels.region,
-        filterOptions.regions || [],
-        (area) => localizedSearchFilterValue(page.locale, "region_id", area.id),
-        (area) => area.id,
-        (area) => ({ "data-country": area.country_code }),
-        "sr-fg--region",
-      ),
+      { id: `${idPrefix}-filter-form`, className: "sr-form", action: page.path, method: "get", role: "search", "data-search-filter-form": "true", "data-filter-form-id": idPrefix },
+      offerSegments(idPrefix),
       geographyField(idPrefix),
-      filterSelect(
-        idPrefix,
-        "property_family",
-        labels.propertyType,
-        filterOptions.property_families || filterOptions.property_types || [],
-        (value) => localizedListingValue(page.locale, "property_type", value),
+      filterSelect(idPrefix, "property_family", labels.propertyType, filterOptions.property_families || filterOptions.property_types || [], (value) =>
+        localizedListingValue(page.locale, "property_type", value),
       ),
-      applicableFilterFields.has("property_subtype")
+      applicableFilterFields.has("property_subtype") && (filterOptions.property_subtypes || []).length
         ? filterSelect(idPrefix, "property_subtype", labels.propertySubtype || labels.propertyType, filterOptions.property_subtypes || [])
         : null,
-      filterSelect(
-        idPrefix,
-        "offer_type",
-        labels.factLabels?.offer_type || "Offer",
-        filterOptions.offer_types || [],
-        (value) => localizedListingValue(page.locale, "offer_type", value),
-      ),
-      h(
-        "fieldset",
-        { className: "sr-fg sr-fg--price" },
-        h("legend", { className: "hdr" }, "EUR"),
-        h(
-          "div",
-          { className: "sr-fg__pair" },
-          h(
-            "label",
-            { htmlFor: `${idPrefix}-price_min` },
-            labels.priceMin,
-            h("input", { id: `${idPrefix}-price_min`, name: "price_min", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.price_min || "" }),
-          ),
-          h(
-            "label",
-            { htmlFor: `${idPrefix}-price_max` },
-            labels.priceMax,
-            h("input", { id: `${idPrefix}-price_max`, name: "price_max", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.price_max || "" }),
-          ),
-        ),
-      ),
-      applicableFilterFields.has("bedrooms_min")
-        ? filterSelect(
-            idPrefix,
-            "bedrooms_min",
-            labels.factLabels?.bedrooms || "Bedrooms",
-            filterOptions.bedrooms || [],
-            (value) => `${value}+`,
-          )
-        : null,
+      rangePair(idPrefix, `${labels.price} (EUR)`, "price_min", "price_max", { className: "sr-fg--price" }),
+      applicableFilterFields.has("bedrooms_min") ? bedroomPills(idPrefix) : null,
       applicableFilterFields.has("premises_min")
         ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || labels.propertyType, filterOptions.premises || [], (value) => `${value}+`)
         : null,
       applicableFilterFields.has("hotel_rooms_min")
         ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
         : null,
+      rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" }),
       h(
-        "fieldset",
-        { className: "sr-fg sr-fg--area" },
-        h("legend", { className: "hdr" }, labels.area),
+        "details",
+        { className: "sr-more", "data-search-more-filters": "true", open: secondaryFiltersActive ? true : undefined },
+        h(
+          "summary",
+          { className: "sr-more__summary" },
+          h(Icon, { name: "sliders-horizontal", size: 16 }),
+          h("span", null, labels.moreFilters),
+          h(Icon, { name: "chevron-down", size: 16, className: "sr-more__chevron" }),
+        ),
         h(
           "div",
-          { className: "sr-fg__pair" },
+          { className: "sr-more__body" },
           h(
-            "label",
-            { htmlFor: `${idPrefix}-area_min` },
-            labels.areaMin,
-            h("input", { id: `${idPrefix}-area_min`, name: "area_min", type: "number", min: "0", step: "any", inputMode: "decimal", defaultValue: page.search.filters?.area_min || "" }),
-          ),
-          h(
-            "label",
-            { htmlFor: `${idPrefix}-area_max` },
-            labels.areaMax,
-            h("input", { id: `${idPrefix}-area_max`, name: "area_max", type: "number", min: "0", step: "any", inputMode: "decimal", defaultValue: page.search.filters?.area_max || "" }),
-          ),
-        ),
-      ),
-      applicableFilterFields.has("land_area_min")
-        ? h(
-            "fieldset",
-            { className: "sr-fg sr-fg--area" },
-            h("legend", { className: "hdr" }, labels.factLabels?.land_area_sqm || "Land area (m²)"),
-            h(
-              "div",
-              { className: "sr-fg__pair" },
-              h("label", { htmlFor: `${idPrefix}-land_area_min` }, labels.areaMin, h("input", { id: `${idPrefix}-land_area_min`, name: "land_area_min", type: "number", min: "0", step: "any", inputMode: "decimal", defaultValue: page.search.filters?.land_area_min || "" })),
-              h("label", { htmlFor: `${idPrefix}-land_area_max` }, labels.areaMax, h("input", { id: `${idPrefix}-land_area_max`, name: "land_area_max", type: "number", min: "0", step: "any", inputMode: "decimal", defaultValue: page.search.filters?.land_area_max || "" })),
-            ),
-          )
-        : null,
-      applicableFilterFields.has("floor_min")
-        ? h(
-            "fieldset",
-            { className: "sr-fg sr-fg--area" },
-            h("legend", { className: "hdr" }, labels.factLabels?.floor || "Floor"),
-            h(
-              "div",
-              { className: "sr-fg__pair" },
-              h("label", { htmlFor: `${idPrefix}-floor_min` }, labels.areaMin, h("input", { id: `${idPrefix}-floor_min`, name: "floor_min", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.floor_min || "" })),
-              h("label", { htmlFor: `${idPrefix}-floor_max` }, labels.areaMax, h("input", { id: `${idPrefix}-floor_max`, name: "floor_max", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.floor_max || "" })),
-            ),
-          )
-        : null,
-      applicableFilterFields.has("storeys_min")
-        ? h(
             "div",
-            { className: "sr-fg" },
-            h("label", { className: "hdr", htmlFor: `${idPrefix}-storeys_min` }, labels.factLabels?.storeys || labels.propertyType),
-            h("input", { id: `${idPrefix}-storeys_min`, name: "storeys_min", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.storeys_min || "" }),
-          )
-        : null,
-      h(
-        "div",
-        { className: "sr-fg" },
-        h(
-          "label",
-          null,
-          h("span", { className: "hdr" }, labels.sort),
-          h(
-            "select",
-            { name: "sort" },
-            ...(controls.sort_options || []).map((option) =>
-              h("option", { key: option.id, value: option.id, selected: page.search.sort === option.id ? true : undefined }, option.label),
-            ),
+            { className: "sr-fg sr-fg--keyword" },
+            h("label", { className: "sr-label", htmlFor: `${idPrefix}-q` }, labels.keywordSearch || labels.search),
+            h("input", { id: `${idPrefix}-q`, name: "q", type: "search", defaultValue: page.search.query || "", autoComplete: "off" }),
           ),
+          filterSelect(
+            idPrefix,
+            "country_code",
+            labels.country,
+            filterOptions.countries || [],
+            (country) => localizedSearchFilterValue(page.locale, "country_code", country.code),
+            (country) => country.code,
+            () => ({ "data-geography-country-option": "true" }),
+            "sr-fg--country",
+          ),
+          filterSelect(
+            idPrefix,
+            "region_id",
+            labels.region,
+            filterOptions.regions || [],
+            (area) => localizedSearchFilterValue(page.locale, "region_id", area.id),
+            (area) => area.id,
+            (area) => ({ "data-country": area.country_code }),
+            "sr-fg--region",
+          ),
+          applicableFilterFields.has("land_area_min")
+            ? rangePair(idPrefix, labels.factLabels?.land_area_sqm || "Land area (m²)", "land_area_min", "land_area_max", { step: "any", inputMode: "decimal" })
+            : null,
+          applicableFilterFields.has("floor_min") ? rangePair(idPrefix, labels.factLabels?.floor || "Floor", "floor_min", "floor_max") : null,
+          applicableFilterFields.has("storeys_min")
+            ? h(
+                "div",
+                { className: "sr-fg" },
+                h("label", { className: "sr-label", htmlFor: `${idPrefix}-storeys_min` }, labels.factLabels?.storeys || labels.propertyType),
+                h("input", { id: `${idPrefix}-storeys_min`, name: "storeys_min", type: "number", min: "0", inputMode: "numeric", defaultValue: filters.storeys_min || "" }),
+              )
+            : null,
         ),
       ),
-      viewModes.length > 1
-        ? h(
-            "fieldset",
-            { className: "sr-fg sr-view", "data-view-mode-control": "true", "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false" },
-            h("legend", null, labels.view),
-            h(
-              "div",
-              { className: "sr-beds" },
-              ...viewModes.map((mode) =>
-                h(
-                  "button",
-                  { key: mode.id, type: "submit", name: "view", value: mode.id, "aria-pressed": mode.default ? "true" : "false", "data-view-mode": mode.id },
-                  mode.label,
-                ),
-              ),
-            ),
-          )
-        : null,
       h(
         "div",
         { className: "sr-filter-actions" },
-        h(Btn, { type: "submit", variant: "primary", full: true }, labels.search),
+        h(Btn, { type: "submit", variant: "primary", full: true }, labels.applyFilters),
         activeFilterCount ? h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "x", href: searchHref(page, "*") }, labels.clearFilters) : null,
       ),
     );
@@ -1794,18 +1742,23 @@ function SearchBody({ page }) {
       h(
         "div",
         { className: "sr-fg" },
-        h("label", { className: "hdr", htmlFor: `${idPrefix}-save-search-name` }, labels.name),
+        h("label", { className: "sr-label", htmlFor: `${idPrefix}-save-search-name` }, labels.name),
         h("input", { id: `${idPrefix}-save-search-name`, name: "contact.name", required: true, autoComplete: "name" }),
       ),
       h(
         "div",
         { className: "sr-fg" },
-        h("label", { className: "hdr", htmlFor: `${idPrefix}-save-search-channel` }, labels.alertDelivery),
+        h("label", { className: "sr-label", htmlFor: `${idPrefix}-save-search-channel` }, labels.alertDelivery),
         h(
-          "select",
-          { id: `${idPrefix}-save-search-channel`, name: "contact_preference", "data-save-search-channel": "true" },
-          h("option", { value: "email" }, labels.email),
-          h("option", { value: "whatsapp" }, "WhatsApp"),
+          "div",
+          { className: "sr-select" },
+          h(
+            "select",
+            { id: `${idPrefix}-save-search-channel`, name: "contact_preference", "data-save-search-channel": "true" },
+            h("option", { value: "email" }, labels.email),
+            h("option", { value: "whatsapp" }, "WhatsApp"),
+          ),
+          h(Icon, { name: "chevron-down", size: 16, className: "sr-select__chevron" }),
         ),
       ),
       h(
@@ -1814,7 +1767,7 @@ function SearchBody({ page }) {
         h(
           "label",
           {
-            className: "hdr",
+            className: "sr-label",
             htmlFor: `${idPrefix}-save-search-contact`,
             "data-save-search-contact-label": "true",
             "data-email-label": labels.email,
@@ -1835,13 +1788,18 @@ function SearchBody({ page }) {
       h(
         "div",
         { className: "sr-fg" },
-        h("label", { className: "hdr", htmlFor: `${idPrefix}-save-search-frequency` }, labels.alertFrequency),
+        h("label", { className: "sr-label", htmlFor: `${idPrefix}-save-search-frequency` }, labels.alertFrequency),
         h(
-          "select",
-          { id: `${idPrefix}-save-search-frequency`, name: "alertFrequency" },
-          h("option", { value: "weekly" }, labels.alertWeekly),
-          h("option", { value: "daily" }, labels.alertDaily),
-          h("option", { value: "instant" }, labels.alertInstant),
+          "div",
+          { className: "sr-select" },
+          h(
+            "select",
+            { id: `${idPrefix}-save-search-frequency`, name: "alertFrequency" },
+            h("option", { value: "weekly" }, labels.alertWeekly),
+            h("option", { value: "daily" }, labels.alertDaily),
+            h("option", { value: "instant" }, labels.alertInstant),
+          ),
+          h(Icon, { name: "chevron-down", size: 16, className: "sr-select__chevron" }),
         ),
       ),
       h(
@@ -1865,7 +1823,52 @@ function SearchBody({ page }) {
       ),
       h("div", { className: "sr-save-disclosure__body" }, saveSearchForm(idPrefix)),
     );
-  const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchDisclosure(idPrefix)];
+  const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchDisclosure(idPrefix), guidedSearch(idPrefix)];
+  const toolbarForm = () => {
+    const hiddenFields = [];
+    if (page.search.query) hiddenFields.push(["q", page.search.query]);
+    for (const key of SEARCH_FILTER_QUERY_KEYS) {
+      const value = filters[key];
+      if (value !== "" && value !== null && value !== undefined) hiddenFields.push([key, String(value)]);
+    }
+    return h(
+      "form",
+      { className: "sr-toolbar__form", action: page.path, method: "get", "data-search-toolbar-form": "true" },
+      ...hiddenFields.map(([name, value]) => h("input", { key: name, type: "hidden", name, defaultValue: value })),
+      h(
+        "label",
+        { className: "sr-toolbar__sort" },
+        h("span", null, labels.sort),
+        h(
+          "div",
+          { className: "sr-select sr-select--compact" },
+          h(
+            "select",
+            { name: "sort" },
+            ...(controls.sort_options || []).map((option) =>
+              h("option", { key: option.id, value: option.id, selected: page.search.sort === option.id ? true : undefined }, option.label),
+            ),
+          ),
+          h(Icon, { name: "chevron-down", size: 16, className: "sr-select__chevron" }),
+        ),
+      ),
+      h("noscript", null, h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, labels.applyFilters)),
+      viewModes.length > 1
+        ? h(
+            "div",
+            { className: "sr-toolbar__view", role: "group", "aria-label": labels.view, "data-view-mode-control": "true", "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false" },
+            ...viewModes.map((mode) =>
+              h(
+                "button",
+                { key: mode.id, type: "submit", name: "view", value: mode.id, "aria-pressed": mode.default ? "true" : "false", "data-view-mode": mode.id },
+                h(Icon, { name: mode.id === "map" ? "map" : "list", size: 16 }),
+                h("span", null, mode.label),
+              ),
+            ),
+          )
+        : null,
+    );
+  };
   const mobileFilterPanelId = `mobile-search-filters-panel-${page.locale}`;
   const main = h(
     "main",
@@ -1888,113 +1891,105 @@ function SearchBody({ page }) {
       savedView
         ? null
         : h(
-        "details",
-        { className: "sr-mobile-filters", "data-mobile-search-filters": "true", "data-mobile-filter-count": activeFilterCount },
-        h(
-          "summary",
-          {
-            className: "sr-mobile-filters__summary",
-            "aria-controls": mobileFilterPanelId,
-          },
-          h(Icon, { name: "search", size: 18 }),
-          h(
-            "span",
-            { className: "sr-mobile-filters__copy" },
-            h("strong", { className: "sr-mobile-filters__label" }, mobileSearchContext),
-            h("small", null, mobileSearchMeta),
+            "details",
+            { className: "sr-mobile-filters", "data-mobile-search-filters": "true", "data-mobile-filter-count": activeFilterCount },
+            h(
+              "summary",
+              { className: "sr-mobile-filters__summary", "aria-controls": mobileFilterPanelId },
+              h(Icon, { name: "search", size: 18 }),
+              h(
+                "span",
+                { className: "sr-mobile-filters__copy" },
+                h("strong", { className: "sr-mobile-filters__label" }, mobileSearchContext),
+                h("small", null, mobileSearchMeta),
+              ),
+              h(
+                "span",
+                { className: "sr-mobile-filters__control", "aria-hidden": "true" },
+                h(Icon, { name: "sliders-horizontal", size: 16 }),
+                h("span", null, filtersLabel),
+                activeFilterCount ? h("span", { className: "sr-mobile-filters__count" }, String(activeFilterCount)) : null,
+                h(Icon, { name: "chevron-down", size: 14, className: "sr-mobile-filters__chevron" }),
+              ),
+            ),
+            h(
+              "div",
+              { id: mobileFilterPanelId, className: "sr-mobile-filters__panel" },
+              h("div", { className: "sr-mobile-filters__sheet-body" }, ...filterForms("sr-mobile")),
+            ),
           ),
-          h(
-            "span",
-            { className: "sr-mobile-filters__control", "aria-hidden": "true" },
-            h(Icon, { name: "sliders-horizontal", size: 18 }),
-            activeFilterCount ? h("span", { className: "sr-mobile-filters__count" }, String(activeFilterCount)) : null,
-          ),
-        ),
-        h(
-          "div",
-          {
-            id: mobileFilterPanelId,
-            className: "sr-mobile-filters__panel",
-          },
-          h("div", { className: "sr-mobile-filters__sheet-body" }, ...filterForms("sr-mobile")),
-        ),
-      ),
       savedView
         ? null
         : h(
-        "aside",
-        { className: "sr-filters sr-filters--desktop", "aria-label": chrome.copy.filters || labels.activeFilters },
-        h("h3", null, chrome.copy.filters || labels.activeFilters),
-        ...filterForms("sr"),
-      ),
+            "aside",
+            { className: "sr-filters sr-filters--desktop", "aria-label": filtersLabel },
+            h("h3", null, filtersLabel),
+            ...filterForms("sr"),
+          ),
       h(
         "section",
         { className: `sr-results${savedView ? " sr-results--saved" : ""}`, "data-search-view": "list" },
         h(
           "div",
-          { className: "sr-results__head" },
-          h("h1", null, savedView ? labels.savedListings : page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
+          { className: "sr-toolbar" },
           h(
-            "p",
-            {
-              className: "sr-results__count",
-              role: "status",
-              "aria-live": "polite",
-              "data-saved-listings-count": savedView ? "true" : undefined,
-              "data-saved-count-label": savedView ? labels.savedListings : undefined,
-              hidden: savedView ? true : undefined,
-            },
-            savedView ? "" : `${page.search.total_matches} ${labels.matches}`,
+            "div",
+            { className: "sr-results__head" },
+            h("h1", null, savedView ? labels.savedListings : page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
+            h(
+              "p",
+              {
+                className: "sr-results__count",
+                role: "status",
+                "aria-live": "polite",
+                "data-saved-listings-count": savedView ? "true" : undefined,
+                "data-saved-count-label": savedView ? labels.savedListings : undefined,
+                hidden: savedView ? true : undefined,
+              },
+              savedView ? "" : `${page.search.total_matches} ${labels.matches}`,
+            ),
           ),
+          savedView ? null : toolbarForm(),
         ),
         savedView
           ? null
           : h(
-          "section",
-          {
-            className: "sr-active",
-            "aria-label": labels.activeFilters,
-            "data-active-filters": "true",
-            "data-active-filter-count": (controls.active_filter_chips || []).length,
-          },
-          ...(controls.active_filter_chips || []).map((chip) =>
-            h(
-              "a",
+              "section",
               {
-                key: chip.key,
-                className: "mk-tag mk-tag--outline mk-tag--md",
-                href: searchHref(page, chip.key),
-                "data-filter-chip": chip.key,
-                "aria-label": `${labels.clearFilters}: ${localizedSearchFilterValue(page.locale, chip.key, chip.value)}`,
+                className: "sr-active",
+                "aria-label": labels.activeFilters,
+                "data-active-filters": "true",
+                "data-active-filter-count": (controls.active_filter_chips || []).length,
               },
-              localizedSearchFilterValue(page.locale, chip.key, chip.value),
-              h(Icon, { name: "x", size: 14 }),
+              ...(controls.active_filter_chips || []).map((chip) =>
+                h(
+                  "a",
+                  {
+                    key: chip.key,
+                    className: "mk-tag mk-tag--outline mk-tag--md",
+                    href: searchHref(page, chip.key),
+                    "data-filter-chip": chip.key,
+                    "aria-label": `${labels.clearFilters}: ${localizedSearchFilterValue(page.locale, chip.key, chip.value)}`,
+                  },
+                  localizedSearchFilterValue(page.locale, chip.key, chip.value),
+                  h(Icon, { name: "x", size: 14 }),
+                ),
+              ),
             ),
-          ),
-        ),
         h(OfficialAreaMaps, { page, labels }),
         savedView
           ? h(
-          "section",
-          {
-            className: "sr-saved-empty",
-            "data-saved-listings-empty": "true",
-            "aria-live": "polite",
-            hidden: true,
-          },
-          h("span", { className: "sr-saved-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "heart", size: 30 })),
-          h("p", null, labels.savedEmpty),
-          h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "search", href: page.path }, labels.browseListings),
-        )
+              "section",
+              { className: "sr-saved-empty", "data-saved-listings-empty": "true", "aria-live": "polite", hidden: true },
+              h("span", { className: "sr-saved-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "heart", size: 30 })),
+              h("p", null, labels.savedEmpty),
+              h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "search", href: page.path }, labels.browseListings),
+            )
           : null,
         !savedView && !(page.cards || []).length
           ? h(
               "section",
-              {
-                className: "sr-empty",
-                "data-search-empty": "true",
-                "aria-label": labels.searchResults,
-              },
+              { className: "sr-empty", "data-search-empty": "true", "aria-label": labels.searchResults },
               h("span", { className: "sr-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "search", size: 28 })),
               h("h2", null, labels.searchResults),
               h("p", null, `${page.search.total_matches} ${labels.matches}`),
@@ -2243,7 +2238,7 @@ function ListingBody({ page }) {
     h(
       "span",
       { className: "ld-mobile-price", "aria-hidden": "true" },
-      h("strong", null, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels)),
+      h("strong", null, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels, page.locale)),
       h("small", null, localizedListingValue(page.locale, "offer_type", facts.offer_type)),
     ),
     ...primaryActionList.map((action, index) => leadButton(action, { variant: index === 0 ? "accent" : "secondary", keySuffix: `-${index}` })),
@@ -2262,7 +2257,7 @@ function ListingBody({ page }) {
 
   const mobileContactOptions = h(
     "dialog",
-    { id: "mk-contact-options", className: "ld-contact-options", "aria-label": labels.contactBroker, "data-mobile-contact-options": "true" },
+    { id: "mk-contact-options", className: "ld-contact-options", "aria-modal": "true", "aria-label": labels.contactBroker, "data-mobile-contact-options": "true" },
     h(
       "header",
       { className: "ld-contact-options__head" },
@@ -2357,7 +2352,7 @@ function ListingBody({ page }) {
             h(Icon, { name: "map-pin", size: 17 }),
             ` ${[facts.location, locationPrecision, localizedListingValue(page.locale, "property_type", facts.property_type)].filter(Boolean).join(" · ")}`,
           ),
-          h("div", { className: "ld-top__price", "data-listing-price-summary": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels)),
+          h("div", { className: "ld-top__price", "data-listing-price-summary": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels, page.locale)),
           h(
             "ul",
             { className: "ld-feats", "data-listing-highlights": "true" },
@@ -2461,7 +2456,7 @@ function ListingBody({ page }) {
       gallery.length
         ? h(
             "dialog",
-            { className: "ld-photo-viewer", "data-listing-gallery-dialog": "true", "aria-label": labels.gallery },
+            { className: "ld-photo-viewer", "aria-modal": "true", "data-listing-gallery-dialog": "true", "aria-label": labels.gallery },
             h(
               "header",
               { className: "ld-photo-viewer__head" },
@@ -2652,7 +2647,7 @@ function ListingBody({ page }) {
           h(
             "div",
             { className: "mk-card mk-card--elevated mk-card--pad-lg ld-aside__card" },
-            h("div", { className: "ld-price", "data-listing-price": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels)),
+            h("div", { className: "ld-price", "data-listing-price": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels, page.locale)),
             primaryActions,
             brokerChannels.length ? brokerContact : null,
             translationLabel ? h("div", { className: "ld-trust" }, h(Icon, { name: "shield-check", size: 16 }), ` ${translationLabel}`) : null,
@@ -3011,14 +3006,14 @@ function LanguageFallbackBody({ page }) {
       "div",
       { className: "mk-empty" },
       h("span", { className: "mk-empty__icon" }, h(Icon, { name: "languages", size: 24 })),
-      h("h1", { className: "mk-empty__title" }, page.metadata.title),
-      h("p", { className: "mk-empty__text" }, page.metadata.description),
+      h("h1", { className: "mk-empty__title" }, page.body?.h1 || page.metadata.title),
+      h("p", { className: "mk-empty__text" }, page.body?.intro || page.metadata.description),
       h(
         "div",
         { className: "mk-empty__actions" },
         h(
           "form",
-          { method: "POST", action: "/api/language-requests", "data-request-language": "true" },
+          { method: "POST", action: "/api/language-requests", "data-request-language": "true", "data-success-message": page.body?.success || undefined },
           h("input", { type: "hidden", name: "requestedLocale", defaultValue: page.requested_locale }),
           h("input", { type: "hidden", name: "requestedPath", defaultValue: page.requested_path }),
           h(Btn, { type: "submit", variant: "primary", iconStart: "languages" }, labels.requestLanguage),

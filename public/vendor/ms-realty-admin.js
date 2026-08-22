@@ -19,6 +19,7 @@
       buttons[i].setAttribute("aria-pressed", on ? "true" : "false");
     }
     var rows = document.querySelectorAll("[data-lead-row]");
+    var visible = 0;
     for (var j = 0; j < rows.length; j += 1) {
       var row = rows[j];
       var slaCell = row.querySelector("[data-sla-status]");
@@ -28,7 +29,11 @@
       if (filter === "needs_reply") show = !replied;
       if (filter === "sla") show = sla === "reminder_required" || sla === "manager_escalation_required";
       row.hidden = !show;
+      if (show) visible += 1;
     }
+    // An empty queue says so instead of leaving a bare table header.
+    var empty = document.querySelector("[data-lead-queue-empty]");
+    if (empty) empty.hidden = visible > 0 || rows.length === 0;
   }
   function initLeadQueueFilters() {
     var tabs = document.querySelector("[data-lead-queue-tabs]");
@@ -464,7 +469,9 @@
     if (!tabs || !grid) return;
     var buttons = tabs.querySelectorAll("[data-pipeline-filter]");
     var cards = grid.querySelectorAll("[data-pipeline-card]");
+    var empty = document.querySelector("[data-pipeline-empty]");
     function applyFilter(filter) {
+      var visible = 0;
       for (var i = 0; i < cards.length; i += 1) {
         var card = cards[i];
         var matches =
@@ -472,12 +479,16 @@
             ? card.getAttribute("data-pipeline-status") === "open"
             : card.getAttribute("data-pipeline-kind") === filter || card.getAttribute("data-pipeline-status") === filter;
         card.hidden = !matches;
+        if (matches) visible += 1;
       }
       for (var j = 0; j < buttons.length; j += 1) {
         var on = buttons[j].getAttribute("data-pipeline-filter") === filter;
         buttons[j].setAttribute("data-on", on ? "1" : "0");
         buttons[j].setAttribute("aria-pressed", on ? "true" : "false");
       }
+      // The grid collapses when nothing matches, so the empty note takes its place.
+      grid.hidden = visible === 0;
+      if (empty) empty.hidden = visible > 0;
     }
     tabs.addEventListener("click", function (event) {
       var button = event.target.closest("[data-pipeline-filter]");
@@ -714,7 +725,29 @@
       if (section) entries.push({ tab: tabNodes[i], section: section });
     }
     if (!entries.length) return;
+    var rail = document.querySelector("[data-editor-readiness-rail]");
     var frame = 0;
+    // A clicked tab stays active while its section scrolls into place and,
+    // because the rail panels are sticky and always in view, until the
+    // operator scrolls away from that position.
+    var pinnedId = null;
+    var pinUntil = 0;
+    var pinnedScrollY = null;
+    function pin(sectionId, settledY) {
+      pinnedId = sectionId;
+      pinUntil = Date.now() + 1000;
+      pinnedScrollY = typeof settledY === "number" ? settledY : null;
+      if (pinnedScrollY === null) {
+        // Browser-driven anchor scrolls settle on their own; sample the
+        // position once the scroll has had time to finish.
+        window.setTimeout(function () {
+          if (pinnedId === sectionId && pinnedScrollY === null) pinnedScrollY = window.scrollY;
+        }, 1000);
+      }
+    }
+    function inStickyRail(section) {
+      return Boolean(rail) && rail.contains(section) && getComputedStyle(rail).position === "sticky";
+    }
     function setActive(sectionId) {
       for (var j = 0; j < entries.length; j += 1) {
         var active = entries[j].section.id === sectionId;
@@ -731,23 +764,48 @@
       syncAdminShellOffsets();
       var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       var offset = Number((document.documentElement.style.getPropertyValue("--adm-editor-anchor-offset") || "124").replace("px", "")) || 124;
-      var nextTop = window.scrollY + section.getBoundingClientRect().top - offset;
-      window.scrollTo({ top: Math.max(0, nextTop), behavior: reduceMotion ? "auto" : "smooth" });
+      var maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      var nextTop = Math.min(maxTop, Math.max(0, window.scrollY + section.getBoundingClientRect().top - offset));
+      window.scrollTo({ top: nextTop, behavior: reduceMotion ? "auto" : "smooth" });
+      return nextTop;
     }
     function syncFromScroll() {
       frame = 0;
       syncAdminShellOffsets();
+      if (pinnedId) {
+        if (Date.now() < pinUntil) {
+          setActive(pinnedId);
+          return;
+        }
+        if (pinnedScrollY === null) pinnedScrollY = window.scrollY;
+        if (Math.abs(window.scrollY - pinnedScrollY) < 120) {
+          setActive(pinnedId);
+          return;
+        }
+        pinnedId = null;
+      }
       var anchorLine = nav.getBoundingClientRect().bottom + 24;
-      var activeSection = entries[0].section;
+      var activeSection = null;
       var activeTop = -Infinity;
       for (var j = 0; j < entries.length; j += 1) {
-        var sectionTop = entries[j].section.getBoundingClientRect().top;
+        var section = entries[j].section;
+        // Sticky rail panels never scroll, so they cannot drive the scroll-spy.
+        if (inStickyRail(section)) continue;
+        var sectionTop = section.getBoundingClientRect().top;
         if (sectionTop <= anchorLine && sectionTop > activeTop) {
-          activeSection = entries[j].section;
+          activeSection = section;
           activeTop = sectionTop;
         }
       }
-      setActive(activeSection.id);
+      if (!activeSection) {
+        for (var k = 0; k < entries.length; k += 1) {
+          if (!inStickyRail(entries[k].section)) {
+            activeSection = entries[k].section;
+            break;
+          }
+        }
+      }
+      setActive((activeSection || entries[0].section).id);
     }
     function scheduleSync() {
       if (!frame) frame = window.requestAnimationFrame(syncFromScroll);
@@ -763,7 +821,7 @@
       setActive(targetId);
       if (window.history && window.history.pushState) window.history.pushState(null, "", "#" + targetId);
       else window.location.hash = targetId;
-      scrollToSection(section);
+      pin(targetId, scrollToSection(section));
     });
     window.addEventListener("scroll", scheduleSync, { passive: true });
     window.addEventListener("resize", function () {
@@ -773,12 +831,16 @@
     window.addEventListener("hashchange", function () {
       var targetId = window.location.hash ? window.location.hash.slice(1) : "";
       var section = targetId ? document.getElementById(targetId) : null;
-      if (section) expandSection(section);
+      if (section) {
+        expandSection(section);
+        pin(targetId);
+      }
       scheduleSync();
     });
     var initialId = window.location.hash ? window.location.hash.slice(1) : entries[0].section.id;
     var initialSection = document.getElementById(initialId) ? document.getElementById(initialId) : entries[0].section;
     if (initialSection) expandSection(initialSection);
+    if (window.location.hash && initialSection) pin(initialSection.id);
     setActive(initialSection ? initialSection.id : entries[0].section.id);
     syncAdminShellOffsets();
     scheduleSync();

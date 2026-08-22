@@ -123,7 +123,7 @@ const ADMIN_UI_COPY = {
     },
     reviewedDecisions: "Прегледани решения",
     pendingLegacyDecisions: "Чакащи решения за стари URL адреси",
-    pendingLegacyHint: "Всеки стар URL трябва да има отделно човешко решение. Целите трябва да са публикувани, еквивалентни страници — никога начална страница или общо търсене.",
+    pendingLegacyHint: "Всеки стар URL трябва да има отделно човешко решение. Целите трябва да са публикувани, еквивалентни страници, никога начална страница или общо търсене.",
     sourceEvidence: "Данни от стария сайт",
     sourceTitle: "Заглавие",
     sourceHeading: "H1 заглавие",
@@ -194,6 +194,18 @@ const ADMIN_UI_COPY = {
     bulkStatus: "Статус за избраните",
     bulkStatusHint: "Промяната важи само за изрично избраните обяви на тази страница и се записва в одита.",
     updateSelected: "Промени избраните",
+    chooseOption: "Избери",
+    notSet: "Не е зададено",
+    noData: "Няма данни",
+    discardChanges: "Отмени промените",
+    rangeTo: "до",
+    listingChecks: "Пропуски и снимки",
+    noLeads: "Все още няма запитвания.",
+    noQueueMatches: "Няма запитвания в тази опашка.",
+    noPipelineMatches: "Няма възможности в този изглед.",
+    noTranslationTasks: "Няма задачи за превод за тези филтри.",
+    noContacts: "Все още няма клиентски контакти.",
+    noChecklists: "Все още няма процесни чеклисти.",
     bulkStatusSaving: "Промяна на избраните обяви…",
     bulkStatusSaved: "Статусът на избраните обяви е променен.",
     bulkStatusFailed: "Статусът на избраните обяви не беше променен.",
@@ -424,7 +436,7 @@ const ADMIN_UI_COPY = {
     },
     reviewedDecisions: "Проверенные решения",
     pendingLegacyDecisions: "Ожидающие решения по старым URL",
-    pendingLegacyHint: "Для каждого старого URL нужно отдельное решение человека. Целью может быть только опубликованная эквивалентная страница — не главная и не общий поиск.",
+    pendingLegacyHint: "Для каждого старого URL нужно отдельное решение человека. Целью может быть только опубликованная эквивалентная страница, а не главная и не общий поиск.",
     sourceEvidence: "Данные со старого сайта",
     sourceTitle: "Заголовок",
     sourceHeading: "Заголовок H1",
@@ -495,6 +507,18 @@ const ADMIN_UI_COPY = {
     bulkStatus: "Статус выбранных",
     bulkStatusHint: "Изменение применяется только к явно выбранным объектам на этой странице и записывается в аудит.",
     updateSelected: "Изменить выбранные",
+    chooseOption: "Выберите",
+    notSet: "Не указано",
+    noData: "Нет данных",
+    discardChanges: "Отменить изменения",
+    rangeTo: "до",
+    listingChecks: "Пробелы и фото",
+    noLeads: "Запросов пока нет.",
+    noQueueMatches: "В этой очереди нет запросов.",
+    noPipelineMatches: "В этом представлении нет возможностей.",
+    noTranslationTasks: "Нет задач перевода для этих фильтров.",
+    noContacts: "Клиентских контактов пока нет.",
+    noChecklists: "Процессных чек-листов пока нет.",
     bulkStatusSaving: "Изменяем выбранные объекты…",
     bulkStatusSaved: "Статус выбранных объектов изменен.",
     bulkStatusFailed: "Не удалось изменить статус выбранных объектов.",
@@ -575,7 +599,7 @@ const ADMIN_UI_COPY = {
     noMessageBody: "Текст не указан.",
     replyTemplate: "Шаблон ответа",
     chooseReplyTemplate: "Выберите проверяемый начальный шаблон",
-    templateReviewNotice: "Шаблон — только отправная точка. Проверьте факты и отредактируйте текст перед одобрением.",
+    templateReviewNotice: "Шаблон: только отправная точка. Проверьте факты и отредактируйте текст перед одобрением.",
     skipToContent: "К содержанию",
     workspaceNavigation: "Навигация по рабочему пространству",
     operationsReports: "Операционные отчеты",
@@ -709,7 +733,7 @@ const ADMIN_UI_COPY = {
     },
     reviewedDecisions: "Reviewed decisions",
     pendingLegacyDecisions: "Pending legacy URL decisions",
-    pendingLegacyHint: "Every legacy URL needs a separate human decision. Targets must be published equivalent pages—never a homepage or generic search fallback.",
+    pendingLegacyHint: "Every legacy URL needs a separate human decision. Targets must be published equivalent pages, never a homepage or generic search fallback.",
     sourceEvidence: "Legacy source evidence",
     sourceTitle: "Title",
     sourceHeading: "H1 heading",
@@ -780,6 +804,18 @@ const ADMIN_UI_COPY = {
     bulkStatus: "Status for selected",
     bulkStatusHint: "The change applies only to explicitly selected listings on this page and is recorded in the audit log.",
     updateSelected: "Update selected",
+    chooseOption: "Choose",
+    notSet: "Not set",
+    noData: "No data",
+    discardChanges: "Discard changes",
+    rangeTo: "to",
+    listingChecks: "Gaps and photos",
+    noLeads: "No enquiries yet.",
+    noQueueMatches: "No enquiries in this queue.",
+    noPipelineMatches: "No opportunities in this view.",
+    noTranslationTasks: "No translation tasks match these filters.",
+    noContacts: "No customer contacts yet.",
+    noChecklists: "No process checklists yet.",
     bulkStatusSaving: "Updating selected listings…",
     bulkStatusSaved: "Selected listing statuses updated.",
     bulkStatusFailed: "Could not update selected listing statuses.",
@@ -1139,25 +1175,21 @@ function WorkbenchDisclosure({ summary, children, ...attrs }) {
   );
 }
 
-// Metric tiles that stay a real <dl> so the markup remains data-legible.
+// Compact stat strip that stays a real <dl> so the markup remains data-legible.
+// Metric tuples may still carry an icon and tone; the strip renders value and
+// label only, so the icon box never competes with the number.
 function StatGrid({ metrics }) {
   return h(
     "dl",
     { className: "adm-kpis" },
-    ...metrics.map(([metricLabel, value, icon = "trending-up", tone = "ink"]) => {
-      const palette = STAT_TONES[tone] || STAT_TONES.ink;
-      return h(
+    ...metrics.map(([metricLabel, value]) =>
+      h(
         "div",
-        { key: metricLabel, className: "crm-stat" },
-        h(
-          "div",
-          { className: "crm-stat__top" },
-          h("dt", { className: "crm-stat__label" }, metricLabel),
-          h("span", { className: "crm-stat__ic", style: `background:${palette.bg};color:${palette.fg}` }, h(Icon, { name: icon, size: 19 })),
-        ),
+        { key: metricLabel, className: "crm-stat", "data-stat": /\p{L}/u.test(String(value ?? "")) ? "text" : "number" },
+        h("dt", { className: "crm-stat__label" }, metricLabel),
         h("dd", { className: "crm-stat__val" }, value),
-      );
-    }),
+      ),
+    ),
   );
 }
 
@@ -1734,7 +1766,7 @@ function publicRequestCriteria(row) {
   const filters = Object.entries(row.filters || {})
     .filter(([, value]) => value !== null && value !== undefined && value !== "" && value !== false)
     .map(([key, value]) => `${key.replaceAll("_", " ")}: ${Array.isArray(value) ? value.join(", ") : value}`);
-  return [row.query ? `“${row.query}”` : null, ...filters].filter(Boolean).join(" · ") || "—";
+  return [row.query ? `“${row.query}”` : null, ...filters].filter(Boolean).join(" · ");
 }
 
 function publicRequestTone(row) {
@@ -1822,12 +1854,12 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false }) {
       h(
         "dl",
         { className: "adm-public-request__facts" },
-        h("div", null, h("dt", null, label(copy, "requestedLocale", "Requested locale")), h("dd", null, String(row.requested_locale || row.locale || "—").toUpperCase())),
+        h("div", null, h("dt", null, label(copy, "requestedLocale", "Requested locale")), h("dd", null, row.requested_locale || row.locale ? String(row.requested_locale || row.locale).toUpperCase() : ui.notSet)),
         row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "searchCriteria", "Search criteria")), h("dd", null, publicRequestCriteria(row)))
-          : h("div", null, h("dt", null, label(copy, "requestedPath", "Requested page")), h("dd", { className: "crm-mono" }, row.requested_path || "—")),
+          ? h("div", null, h("dt", null, label(copy, "searchCriteria", "Search criteria")), h("dd", null, publicRequestCriteria(row) || ui.notSet))
+          : h("div", null, h("dt", null, label(copy, "requestedPath", "Requested page")), h("dd", { className: "crm-mono" }, row.requested_path || ui.notSet)),
         row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "alertFrequency", "Alert frequency")), h("dd", null, row.alert_frequency ? statusText(ui, row.alert_frequency) : "—"))
+          ? h("div", null, h("dt", null, label(copy, "alertFrequency", "Alert frequency")), h("dd", null, row.alert_frequency ? statusText(ui, row.alert_frequency) : ui.notSet))
           : null,
         row.request_type === "saved_search"
           ? h("div", null, h("dt", null, label(copy, "matches", "Matches")), h("dd", null, row.match_count ?? 0))
@@ -1836,7 +1868,7 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false }) {
           "div",
           null,
           h("dt", null, label(copy, "nextFollowUp", "Next follow-up")),
-          h("dd", null, row.next_follow_up_at ? h("time", { dateTime: row.next_follow_up_at }, formatAdminDateTime(row.next_follow_up_at, page.workspace.locale)) : "—"),
+          h("dd", null, row.next_follow_up_at ? h("time", { dateTime: row.next_follow_up_at }, formatAdminDateTime(row.next_follow_up_at, page.workspace.locale)) : ui.notSet),
         ),
       ),
       h(
@@ -1904,8 +1936,8 @@ function PublicRequestsBody({ page }) {
   });
 }
 
-function auditMetadataValue(value) {
-  if (value === null || value === undefined || value === "") return "—";
+function auditMetadataValue(value, ui) {
+  if (value === null || value === undefined || value === "") return ui.notSet;
   if (Array.isArray(value)) return value.join(", ");
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
@@ -1977,7 +2009,7 @@ function ActivityBody({ page }) {
                             null,
                             ...Object.entries(row.metadata).flatMap(([key, value]) => [
                               h("dt", { key: `${key}-term` }, valueText(ui, key)),
-                              h("dd", { key: `${key}-value` }, auditMetadataValue(value)),
+                              h("dd", { key: `${key}-value` }, auditMetadataValue(value, ui)),
                             ]),
                           ),
                         )
@@ -2035,7 +2067,7 @@ function OperationsReportsBody({ page }) {
   const ui = workbenchCopy(page);
   const report = page.report;
   const title = label(copy, "operationsReports", ui.operationsReports);
-  const minuteValue = (value) => (value === null || value === undefined ? "—" : `${value} ${ui.minutesShort}`);
+  const minuteValue = (value) => (value === null || value === undefined ? ui.noData : `${value} ${ui.minutesShort}`);
   const metrics = [
     [label(copy, "leads", "Leads"), report.summary.leads, "users", "ink"],
     [ui.responseRate, `${report.summary.response_rate_pct}%`, "send", "sea"],
@@ -2143,7 +2175,7 @@ function OperationsReportsBody({ page }) {
             { className: "adm-report-facts" },
             h("div", null, h("dt", null, ui.searchEvents), h("dd", null, report.search.search_events || 0)),
             h("div", null, h("dt", null, ui.zeroResults), h("dd", null, report.search.zero_result_events || 0)),
-            h("div", null, h("dt", null, ui.popularFilters), h("dd", null, (report.search.popular_filters || []).slice(0, 3).map((row) => `${row.key} (${row.count})`).join(" · ") || "—")),
+            h("div", null, h("dt", null, ui.popularFilters), h("dd", null, (report.search.popular_filters || []).slice(0, 3).map((row) => `${row.key} (${row.count})`).join(" · ") || ui.noData)),
           ),
         ),
       ),
@@ -2251,7 +2283,7 @@ function ReplyDeliveryForm({ page, lead, reply, delivery, copy, ui }) {
         h(
           "select",
           { name: "channel", required: !failed },
-          h("option", { value: "" }, "—"),
+          h("option", { value: "" }, ui.chooseOption),
           ...["email", "phone", "whatsapp", "viber", "sms", "other"].map((channel) =>
             h("option", { key: channel, value: channel, selected: delivery?.delivery_channel === channel }, valueText(ui, channel)),
           ),
@@ -2584,7 +2616,7 @@ function PipelineCard({ page, state, lead }) {
         null,
         h("small", { className: "t-eyebrow" }, statusText(ui, state.lead_type)),
         h("h2", null, lead?.contact?.name || state.lead_id),
-        h("code", { className: "crm-mono" }, state.lead_id),
+        lead?.contact?.name ? h("code", { className: "crm-mono" }, state.lead_id) : null,
       ),
       h(
         "div",
@@ -2597,17 +2629,17 @@ function PipelineCard({ page, state, lead }) {
     h(
       "dl",
       { className: "adm-pipeline-facts" },
-      h("div", null, h("dt", null, label(copy, "listing", "Listing")), h("dd", null, state.listing_reference || "—")),
-      h("div", null, h("dt", null, label(copy, "nextAction", "Next action")), h("dd", null, state.next_action ? statusText(ui, state.next_action) : "—")),
-      h("div", null, h("dt", null, label(copy, "nextFollowUp", "Next follow-up")), h("dd", null, formatAdminDateTime(state.next_follow_up_at, page.workspace.locale) || "—")),
-      h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, state.assigned_broker || "—")),
+      h("div", null, h("dt", null, label(copy, "listing", "Listing")), h("dd", null, state.listing_reference || ui.notSet)),
+      h("div", null, h("dt", null, label(copy, "nextAction", "Next action")), h("dd", null, state.next_action ? statusText(ui, state.next_action) : ui.notSet)),
+      h("div", null, h("dt", null, label(copy, "nextFollowUp", "Next follow-up")), h("dd", null, formatAdminDateTime(state.next_follow_up_at, page.workspace.locale) || ui.notSet)),
+      h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, state.assigned_broker || ui.notSet)),
     ),
     requirements
       ? h(
           "div",
           { className: "adm-pipeline-requirements" },
           h("strong", null, label(copy, "qualification", "Qualification")),
-          h("span", null, `€${requirements.budget_min_eur || 0}–€${requirements.budget_max_eur}`),
+          h("span", null, `€${Number(requirements.budget_min_eur || 0).toLocaleString("en")} ${ui.rangeTo} €${Number(requirements.budget_max_eur || 0).toLocaleString("en")}`),
           h("span", null, requirements.locations.join(", ")),
           requirements.property_types.length ? h("span", null, requirements.property_types.map((value) => statusText(ui, value)).join(", ")) : null,
           requirements.bedrooms_min !== null ? h("span", null, `${label(copy, "bedroomsMin", "Minimum bedrooms")}: ${requirements.bedrooms_min}`) : null,
@@ -2712,6 +2744,40 @@ const REALTY_CASE_COPY = Object.freeze({
     waive: "Отмени условието",
     reopen: "Отвори отново",
     conditionsEmpty: "Няма активни условия.",
+    caseId: "Идентификатор на сделката",
+    clientRef: "Референция на клиента",
+    propertyRef: "Референция на имота",
+    jurisdiction: "Юрисдикция",
+    caseType: "Тип сделка",
+    assetKind: "Вид актив",
+    executionMode: "Режим на изпълнение",
+    mandateRef: "Референция на пълномощното",
+    mandateGrantor: "Референция на упълномощителя",
+    mandateSignedAt: "Пълномощното е подписано на",
+    mandateEvidence: "Референция към подписаното пълномощно",
+    assuranceRef: "Референция за гаранция на агента (автономен режим)",
+    jurisdictions: { BG: "България", GR: "Гърция" },
+    caseTypes: {
+      buyer_purchase: "Покупка",
+      seller_sale: "Продажба",
+      tenant_rental: "Наемане",
+      landlord_rental: "Отдаване под наем",
+      short_term_rental: "Краткосрочен наем",
+      property_management: "Управление на имот",
+    },
+    assetKinds: { residential: "Жилищен", commercial: "Търговски", land: "Земя", new_build: "Ново строителство", mixed_use: "Смесено предназначение" },
+    allStepsResolved: "Всички стъпки са приключени.",
+    saving: "Записване на сделката…",
+    failed: "Действието по сделката не беше записано.",
+    opened: "Сделката е отворена. Презареди страницата, за да я видиш в опашката.",
+    stepCompleted: "Стъпката е завършена. Презареди страницата за новото състояние.",
+    stepNotApplicable: "Стъпката е отбелязана като неприложима. Презареди страницата за новото състояние.",
+    statusUpdated: "Статусът на сделката е променен. Презареди страницата за новото състояние.",
+    closed: "Сделката е затворена.",
+    conditionSaving: "Записване на условието…",
+    conditionFailed: "Действието по условието не беше записано.",
+    conditionOpened: "Условието е отворено. Презареди страницата за новото състояние.",
+    conditionUpdated: "Условието е обновено. Презареди страницата за новото състояние.",
   },
   ru: {
     title: "Сделки",
@@ -2745,6 +2811,40 @@ const REALTY_CASE_COPY = Object.freeze({
     waive: "Отменить условие",
     reopen: "Открыть снова",
     conditionsEmpty: "Нет активных условий.",
+    caseId: "Идентификатор сделки",
+    clientRef: "Ссылка на клиента",
+    propertyRef: "Ссылка на объект",
+    jurisdiction: "Юрисдикция",
+    caseType: "Тип сделки",
+    assetKind: "Вид актива",
+    executionMode: "Режим исполнения",
+    mandateRef: "Ссылка на доверенность",
+    mandateGrantor: "Ссылка на доверителя",
+    mandateSignedAt: "Доверенность подписана",
+    mandateEvidence: "Ссылка на подписанную доверенность",
+    assuranceRef: "Ссылка на гарантию агента (автономный режим)",
+    jurisdictions: { BG: "Болгария", GR: "Греция" },
+    caseTypes: {
+      buyer_purchase: "Покупка",
+      seller_sale: "Продажа",
+      tenant_rental: "Аренда для арендатора",
+      landlord_rental: "Сдача в аренду",
+      short_term_rental: "Краткосрочная аренда",
+      property_management: "Управление недвижимостью",
+    },
+    assetKinds: { residential: "Жилая", commercial: "Коммерческая", land: "Земля", new_build: "Новостройка", mixed_use: "Смешанное назначение" },
+    allStepsResolved: "Все шаги завершены.",
+    saving: "Сохраняем сделку…",
+    failed: "Действие по сделке не сохранено.",
+    opened: "Сделка открыта. Обновите страницу, чтобы увидеть её в очереди.",
+    stepCompleted: "Шаг завершён. Обновите страницу, чтобы увидеть новое состояние.",
+    stepNotApplicable: "Шаг отмечен как неприменимый. Обновите страницу, чтобы увидеть новое состояние.",
+    statusUpdated: "Статус сделки изменён. Обновите страницу, чтобы увидеть новое состояние.",
+    closed: "Сделка закрыта.",
+    conditionSaving: "Сохраняем условие…",
+    conditionFailed: "Действие по условию не сохранено.",
+    conditionOpened: "Условие открыто. Обновите страницу, чтобы увидеть новое состояние.",
+    conditionUpdated: "Условие обновлено. Обновите страницу, чтобы увидеть новое состояние.",
   },
   en: {
     title: "Transaction cases",
@@ -2778,6 +2878,40 @@ const REALTY_CASE_COPY = Object.freeze({
     waive: "Waive condition",
     reopen: "Reopen",
     conditionsEmpty: "No open, blocked, or expired conditions.",
+    caseId: "Case ID",
+    clientRef: "Client reference",
+    propertyRef: "Property reference",
+    jurisdiction: "Jurisdiction",
+    caseType: "Case type",
+    assetKind: "Asset kind",
+    executionMode: "Execution mode",
+    mandateRef: "Mandate reference",
+    mandateGrantor: "Mandate grantor reference",
+    mandateSignedAt: "Mandate signed at",
+    mandateEvidence: "Signed mandate evidence reference",
+    assuranceRef: "Agent assurance reference (autonomous mode)",
+    jurisdictions: { BG: "Bulgaria", GR: "Greece" },
+    caseTypes: {
+      buyer_purchase: "Buyer purchase",
+      seller_sale: "Seller sale",
+      tenant_rental: "Tenant rental",
+      landlord_rental: "Landlord rental",
+      short_term_rental: "Short-term rental",
+      property_management: "Property management",
+    },
+    assetKinds: { residential: "Residential", commercial: "Commercial", land: "Land", new_build: "New build", mixed_use: "Mixed use" },
+    allStepsResolved: "All workflow steps are resolved.",
+    saving: "Saving transaction case…",
+    failed: "The transaction case action failed.",
+    opened: "Transaction case opened. Reload the page to see it in the queue.",
+    stepCompleted: "Step completed. Reload the page to see the new case state.",
+    stepNotApplicable: "Step marked not applicable. Reload the page to see the new case state.",
+    statusUpdated: "Case status updated. Reload the page to see the new case state.",
+    closed: "Case closed.",
+    conditionSaving: "Saving condition…",
+    conditionFailed: "The condition action failed.",
+    conditionOpened: "Condition opened. Reload the page to see the new case state.",
+    conditionUpdated: "Condition updated. Reload the page to see the new case state.",
   },
 });
 
@@ -2785,16 +2919,27 @@ function caseCopy(page) {
   return REALTY_CASE_COPY[page?.workspace?.locale] || REALTY_CASE_COPY.en;
 }
 
-function caseMutationAttrs(kind, success) {
+function caseMutationAttrs(page, kind, successKey) {
+  const copy = caseCopy(page);
   return {
     method: "post",
     action: kind === "open" ? "/api/admin/cases" : "/api/admin/cases/actions",
     className: "adm-form",
     "data-admin-mutation-form": `realty-case-${kind}`,
-    "data-admin-mutation-saving": "Saving transaction case…",
-    "data-admin-mutation-success": success,
-    "data-admin-mutation-failure": "The transaction case action failed.",
+    "data-admin-mutation-saving": copy.saving,
+    "data-admin-mutation-success": copy[successKey],
+    "data-admin-mutation-failure": copy.failed,
   };
+}
+
+// Every case and condition form reports its own saving, success, and failure
+// state on one live status line next to its submit control.
+function caseMutationStatus() {
+  return h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" });
+}
+
+function caseVocabulary(copy, group, value) {
+  return copy[group]?.[value] || String(value || "").replaceAll("_", " ");
 }
 
 function caseActionEventId(caseRecord, action, stepKey = "") {
@@ -2802,15 +2947,16 @@ function caseActionEventId(caseRecord, action, stepKey = "") {
   return `realty-case-action-${createHash("sha256").update(source).digest("hex").slice(0, 48)}`;
 }
 
-function conditionMutationAttrs(action, success) {
+function conditionMutationAttrs(page, action, successKey) {
+  const copy = caseCopy(page);
   return {
     method: "post",
     action: action === "condition_opened" ? "/api/admin/cases/conditions" : "/api/admin/cases/conditions/actions",
     className: "adm-form",
     "data-admin-mutation-form": `realty-case-condition-${action}`,
-    "data-admin-mutation-saving": "Saving condition…",
-    "data-admin-mutation-success": success,
-    "data-admin-mutation-failure": "The condition action failed.",
+    "data-admin-mutation-saving": copy.conditionSaving,
+    "data-admin-mutation-success": copy[successKey],
+    "data-admin-mutation-failure": copy.conditionFailed,
   };
 }
 
@@ -2836,7 +2982,7 @@ function RealtyCaseConditionAction({ page, condition, action, submit, children =
     h("summary", null, submit),
     h(
       "form",
-      conditionMutationAttrs(action, "Condition updated. Refreshing case state."),
+      conditionMutationAttrs(page, action, "conditionUpdated"),
       h("input", { type: "hidden", name: "caseId", value: condition.case_id }),
       h("input", { type: "hidden", name: "conditionId", value: condition.id }),
       h("input", { type: "hidden", name: "action", value: action }),
@@ -2844,6 +2990,7 @@ function RealtyCaseConditionAction({ page, condition, action, submit, children =
       h("input", { type: "hidden", name: "actor", value: actor }),
       ...fields,
       h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, submit),
+      caseMutationStatus(),
     ),
   );
 }
@@ -2867,8 +3014,8 @@ function RealtyCaseConditionCard({ page, condition, caseIsActive }) {
     h(
       "header",
       { className: "adm-pipeline-card__header" },
-      h("div", null, h("h2", null, condition.id), h("small", null, `${condition.case_id} · ${condition.type}`)),
-      h(StatusPill, { tone: conditionTone(condition) }, condition.status),
+      h("div", null, h("h2", null, condition.id), h("small", null, `${condition.case_id} · ${valueText(workbenchCopy(page), condition.type)}`)),
+      h(StatusPill, { tone: conditionTone(condition) }, statusText(workbenchCopy(page), condition.status)),
     ),
     h(
       "div",
@@ -2955,12 +3102,12 @@ function RealtyCaseConditionCreateForm({ page, cases }) {
     { summary: copy.addCondition, "data-realty-case-condition-create": "true" },
     h(
       "form",
-      conditionMutationAttrs("condition_opened", "Condition opened. Refreshing case state."),
+      conditionMutationAttrs(page, "condition_opened", "conditionOpened"),
       h("input", { type: "hidden", name: "actor", value: actor }),
       h(
         "label",
         null,
-        "Case ID",
+        copy.caseId,
         h(
           "select",
           { name: "caseId", required: true },
@@ -2976,7 +3123,12 @@ function RealtyCaseConditionCreateForm({ page, cases }) {
         copy.requiredEvidence,
         h("textarea", { name: "requiredEvidenceProducerRefsJson", required: true, rows: 2, maxLength: 6000, placeholder: '["lawyer://title-review"]' }),
       ),
-      h("button", { type: "submit", className: "mk-btn mk-btn--primary" }, copy.addCondition),
+      h(
+        "div",
+        { className: "adm-form__actions" },
+        caseMutationStatus(),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, copy.addCondition),
+      ),
     ),
   );
 }
@@ -3009,6 +3161,7 @@ function RealtyCaseConditions({ page, caseQueue }) {
 
 function RealtyCaseStep({ page, caseRecord, step }) {
   const copy = caseCopy(page);
+  const ui = workbenchCopy(page);
   const actor = page.workspace?.operator_id || "admin";
   const producer = step.evidence_producers[0];
   const agent = page.workspace?.operator_roles?.includes("agent");
@@ -3019,7 +3172,7 @@ function RealtyCaseStep({ page, caseRecord, step }) {
       "div",
       null,
       h("strong", null, step.label),
-      h("small", null, `${step.phase} · ${step.optional ? copy.notApplicable : step.status}`),
+      h("small", null, `${valueText(ui, step.phase)} · ${step.optional ? copy.notApplicable : statusText(ui, step.status)}`),
     ),
     pageCan(page, "cases:write") && caseRecord.status === "active"
       ? h(
@@ -3027,7 +3180,7 @@ function RealtyCaseStep({ page, caseRecord, step }) {
           { className: "adm-task-list__actions" },
           h(
             "form",
-            caseMutationAttrs("step", "Step completed. Refreshing case state."),
+            caseMutationAttrs(page, "step", "stepCompleted"),
             h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
             h("input", { type: "hidden", name: "action", value: "step_completed" }),
             h("input", { type: "hidden", name: "stepKey", value: step.key }),
@@ -3037,11 +3190,12 @@ function RealtyCaseStep({ page, caseRecord, step }) {
             h("input", { type: "hidden", name: "evidenceProducerKind", value: producer }),
             h("label", null, copy.evidence, h("input", { name: "evidenceRef", required: true, maxLength: 240 })),
             h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.complete),
+            caseMutationStatus(),
           ),
           step.optional && !agent
             ? h(
                 "form",
-                caseMutationAttrs("not-applicable", "Step marked not applicable. Refreshing case state."),
+                caseMutationAttrs(page, "not-applicable", "stepNotApplicable"),
                 h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
                 h("input", { type: "hidden", name: "action", value: "step_not_applicable" }),
                 h("input", { type: "hidden", name: "stepKey", value: step.key }),
@@ -3050,6 +3204,7 @@ function RealtyCaseStep({ page, caseRecord, step }) {
                 h("label", null, copy.authority, h("input", { name: "authorityRef", required: true, maxLength: 240 })),
                 h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120 })),
                 h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, copy.notApplicable),
+                caseMutationStatus(),
               )
             : null,
         )
@@ -3059,8 +3214,9 @@ function RealtyCaseStep({ page, caseRecord, step }) {
 
 function RealtyCaseCard({ page, caseRecord }) {
   const copy = caseCopy(page);
+  const ui = workbenchCopy(page);
   const actor = page.workspace?.operator_id || "admin";
-  const modeTone = caseRecord.execution_mode === "autonomous" ? "success" : "neutral";
+  const modeTone = caseRecord.execution_mode === "autonomous" ? "success" : "ink";
   const statusAction = caseRecord.status === "frozen" ? "case_resumed" : "case_frozen";
   const agent = page.workspace?.operator_roles?.includes("agent");
   return h(
@@ -3074,14 +3230,23 @@ function RealtyCaseCard({ page, caseRecord }) {
     h(
       "header",
       { className: "adm-pipeline-card__header" },
-      h("div", null, h("h2", null, caseRecord.id), h("small", null, `${caseRecord.jurisdiction} · ${caseRecord.case_type} · ${caseRecord.asset_kind}`)),
-      h(StatusPill, { tone: modeTone }, caseRecord.execution_mode),
+      h(
+        "div",
+        null,
+        h("h2", null, caseRecord.id),
+        h(
+          "small",
+          null,
+          `${caseVocabulary(copy, "jurisdictions", caseRecord.jurisdiction)} · ${caseVocabulary(copy, "caseTypes", caseRecord.case_type)} · ${caseVocabulary(copy, "assetKinds", caseRecord.asset_kind)}`,
+        ),
+      ),
+      h(StatusPill, { tone: modeTone }, caseRecord.execution_mode === "autonomous" ? copy.autonomous : copy.manual),
     ),
     h(
       "div",
       { className: "adm-pipeline-requirements" },
       h("strong", null, `${copy.progress}: ${caseRecord.progress_percent}%`),
-      h("span", null, caseRecord.current_phase),
+      h("span", null, valueText(ui, caseRecord.current_phase)),
       h("span", null, `${copy.blocked}: ${caseRecord.blockers.length}`),
     ),
     h(
@@ -3089,7 +3254,7 @@ function RealtyCaseCard({ page, caseRecord }) {
       { title: copy.next },
       caseRecord.next_steps.length
         ? h("ul", { className: "adm-task-list" }, ...caseRecord.next_steps.map((step) => h(RealtyCaseStep, { page, caseRecord, step })))
-        : h("p", { className: "adm-empty" }, "All workflow steps are resolved."),
+        : h("p", { className: "adm-empty" }, copy.allStepsResolved),
     ),
     pageCan(page, "cases:write") && !agent
       ? h(
@@ -3098,7 +3263,7 @@ function RealtyCaseCard({ page, caseRecord }) {
           h("summary", null, caseRecord.status === "frozen" ? copy.resume : copy.freeze),
           h(
             "form",
-            caseMutationAttrs("status", "Case status updated. Refreshing case state."),
+            caseMutationAttrs(page, "status", "statusUpdated"),
             h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
             h("input", { type: "hidden", name: "action", value: statusAction }),
             h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, statusAction) }),
@@ -3108,18 +3273,20 @@ function RealtyCaseCard({ page, caseRecord }) {
               ? h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120 }))
               : null,
             h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, caseRecord.status === "frozen" ? copy.resume : copy.freeze),
+            caseMutationStatus(),
           ),
         )
       : null,
     pageCan(page, "cases:write") && !agent && caseRecord.progress_percent === 100 && caseRecord.status === "active"
       ? h(
           "form",
-          caseMutationAttrs("close", "Case closed."),
+          caseMutationAttrs(page, "close", "closed"),
           h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
           h("input", { type: "hidden", name: "action", value: "case_closed" }),
           h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, "case_closed") }),
           h("input", { type: "hidden", name: "actor", value: actor }),
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.close),
+          caseMutationStatus(),
         )
       : null,
   );
@@ -3134,42 +3301,56 @@ function RealtyCaseCreateForm({ page }) {
     { summary: copy.create, "data-realty-case-create": "true" },
     h(
       "form",
-      caseMutationAttrs("open", "Transaction case opened. Refreshing case queue."),
+      caseMutationAttrs(page, "open", "opened"),
       h("input", { type: "hidden", name: "actor", value: actor }),
-      h("label", null, "Case ID", h("input", { name: "id", required: true, maxLength: 160 })),
-      h("label", null, "Client reference", h("input", { name: "clientRef", required: true, maxLength: 160 })),
-      h("label", null, "Property reference", h("input", { name: "propertyRef", maxLength: 160 })),
-      h("label", null, "Jurisdiction", h("select", { name: "jurisdiction", required: true }, h("option", { value: "BG" }, "Bulgaria"), h("option", { value: "GR" }, "Greece"))),
+      h("label", null, copy.caseId, h("input", { name: "id", required: true, maxLength: 160 })),
+      h("label", null, copy.clientRef, h("input", { name: "clientRef", required: true, maxLength: 160 })),
+      h("label", null, copy.propertyRef, h("input", { name: "propertyRef", maxLength: 160 })),
       h(
         "label",
         null,
-        "Case type",
+        copy.jurisdiction,
+        h(
+          "select",
+          { name: "jurisdiction", required: true },
+          ...["BG", "GR"].map((value) => h("option", { key: value, value }, caseVocabulary(copy, "jurisdictions", value))),
+        ),
+      ),
+      h(
+        "label",
+        null,
+        copy.caseType,
         h(
           "select",
           { name: "caseType", required: true },
           ...["buyer_purchase", "seller_sale", "tenant_rental", "landlord_rental", "short_term_rental", "property_management"].map((value) =>
-            h("option", { key: value, value }, value.replaceAll("_", " ")),
+            h("option", { key: value, value }, caseVocabulary(copy, "caseTypes", value)),
           ),
         ),
       ),
       h(
         "label",
         null,
-        "Asset kind",
+        copy.assetKind,
         h(
           "select",
           { name: "assetKind", required: true },
-          ...["residential", "commercial", "land", "new_build", "mixed_use"].map((value) => h("option", { key: value, value }, value.replaceAll("_", " "))),
+          ...["residential", "commercial", "land", "new_build", "mixed_use"].map((value) => h("option", { key: value, value }, caseVocabulary(copy, "assetKinds", value))),
         ),
       ),
-      h("label", null, "Execution mode", h("select", { name: "executionMode", required: true }, h("option", { value: "manual" }, copy.manual), h("option", { value: "autonomous" }, copy.autonomous))),
-      h("label", null, "Mandate reference", h("input", { name: "mandateRef", required: true, maxLength: 160 })),
-      h("label", null, "Mandate grantor reference", h("input", { name: "mandateGrantedByRef", required: true, maxLength: 160 })),
-      h("label", null, "Mandate signed at (ISO)", h("input", { name: "mandateSignedAt", required: true, placeholder: "2026-07-30T08:00:00Z", maxLength: 80 })),
-      h("label", null, "Signed mandate evidence reference", h("input", { name: "mandateSignedEvidenceRef", required: true, maxLength: 240 })),
+      h("label", null, copy.executionMode, h("select", { name: "executionMode", required: true }, h("option", { value: "manual" }, copy.manual), h("option", { value: "autonomous" }, copy.autonomous))),
+      h("label", null, copy.mandateRef, h("input", { name: "mandateRef", required: true, maxLength: 160 })),
+      h("label", null, copy.mandateGrantor, h("input", { name: "mandateGrantedByRef", required: true, maxLength: 160 })),
+      h("label", null, copy.mandateSignedAt, h("input", { name: "mandateSignedAt", type: "datetime-local", required: true })),
+      h("label", null, copy.mandateEvidence, h("input", { name: "mandateSignedEvidenceRef", required: true, maxLength: 240 })),
       h("input", { type: "hidden", name: "mandateCapabilities", value: "case:*" }),
-      h("label", null, "Agent assurance reference (autonomous mode)", h("input", { name: "assuranceRef", maxLength: 240 })),
-      h("button", { type: "submit", className: "mk-btn mk-btn--primary" }, copy.create),
+      h("label", null, copy.assuranceRef, h("input", { name: "assuranceRef", maxLength: 240 })),
+      h(
+        "div",
+        { className: "adm-form__actions" },
+        caseMutationStatus(),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, copy.create),
+      ),
     ),
   );
 }
@@ -3245,6 +3426,13 @@ function LeadPipelineBody({ page }) {
             ...states.map((state) => h(PipelineCard, { key: state.lead_id, page, state, lead: leads.get(state.lead_id) })),
           )
         : h(Panel, { title: label(copy, "openPipeline", "Open opportunities") }, h("p", { className: "adm-empty" }, label(copy, "noOpenPipeline", "No open buyer or renter opportunities."))),
+      states.length
+        ? h(
+            "div",
+            { className: "crm-panel", "data-pipeline-empty": "true", hidden: true },
+            h("p", { className: "adm-empty", role: "status" }, workbenchCopy(page).noPipelineMatches),
+          )
+        : null,
     ],
   });
 }
@@ -3259,7 +3447,7 @@ function LeadAssignmentControl({ page, lead, copy }) {
       "summary",
       null,
       h(Icon, { name: "users", size: 15 }),
-      h("span", null, `${label(copy, "assignedBroker", "Assigned broker")}: ${brokerId || "—"}`),
+      h("span", null, `${label(copy, "assignedBroker", "Assigned broker")}: ${brokerId || workbenchCopy(page).notSet}`),
     ),
     canAssign
       ? h(
@@ -3448,7 +3636,7 @@ function AccountLinkForm({ page, contact, copy }) {
         h(
           "select",
           { name: "accountId", required: true },
-          h("option", { value: "" }, "—"),
+          h("option", { value: "" }, workbenchCopy(page).chooseOption),
           ...page.accounts.map((account) => h("option", { key: account.id, value: account.id }, `${account.label} · ${label(copy, account.type, account.type)}`)),
         ),
       ),
@@ -3583,6 +3771,7 @@ function ConsentWithdrawalForm({ page, row, copy }) {
 
 function ConsentsBody({ page }) {
   const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
   const columns = {
     subject: label(copy, "consentSubject", "Enquiry or subscription"),
     purpose: label(copy, "consentPurpose", "Purpose"),
@@ -3641,7 +3830,7 @@ function ConsentsBody({ page }) {
                         "data-consent-row": "true",
                         "data-consent-state": row.granted ? "granted" : "withdrawn",
                       },
-                      h("td", { "data-consent-column": "subject", "data-label": columns.subject }, h("code", { className: "crm-mono" }, row.subject_id || row.contact_reference || "—"), h("small", { className: "adm-lead-context" }, row.locale.toUpperCase())),
+                      h("td", { "data-consent-column": "subject", "data-label": columns.subject }, h("code", { className: "crm-mono" }, row.subject_id || row.contact_reference || ui.notSet), h("small", { className: "adm-lead-context" }, row.locale.toUpperCase())),
                       h("td", { "data-consent-column": "purpose", "data-label": columns.purpose }, h("strong", null, label(copy, row.consent_type, row.consent_type)), h("small", { className: "adm-lead-context" }, label(copy, row.legal_basis, row.legal_basis))),
                       h("td", { "data-consent-column": "state", "data-label": columns.state }, h(StatusPill, { tone: row.granted ? "success" : "brick" }, row.granted ? label(copy, "consentActive", "Active") : label(copy, "consentStopped", "Withdrawn"))),
                       h("td", { className: "crm-tbl__muted crm-mono", "data-consent-column": "recorded_at", "data-label": columns.recordedAt }, formatAdminDateTime(row.recorded_at, page.workspace?.locale)),
@@ -3678,9 +3867,12 @@ function DocumentChecklistsBody({ page }) {
       h(PageHeader, { title: label(copy, "documentsWorkspace", "Documents and process"), subtitle: page.metadata.description }),
       h("p", { className: "adm-inline-alert", "data-process-guardrail": "true" }, label(copy, "processGuardrail", "The checklist tracks responsibility and evidence. It does not replace professional review.")),
       h(StatGrid, { metrics }),
+      queue.rows.length
+        ? null
+        : h(Panel, { title: label(copy, "documentsWorkspace", "Documents and process") }, h("p", { className: "adm-empty", "data-empty-checklists": "true" }, workbenchCopy(page).noChecklists)),
       h(
         "div",
-        { className: "adm-checklist-grid" },
+        { className: "adm-checklist-grid", hidden: queue.rows.length ? undefined : true },
         ...queue.rows.map((checklist) => {
           const nextItem = checklist.next_item
             ? checklist.items.find((item) => item.id === checklist.next_item.id || item.key === checklist.next_item.key)
@@ -3782,9 +3974,10 @@ function ContactsBody({ page }) {
         h(
           Panel,
           { title: label(copy, "contactRecords", "Customer contacts") },
+          page.contacts.length ? null : h("p", { className: "adm-empty", "data-empty-contacts": "true" }, ui.noContacts),
           h(
             "div",
-            { className: "adm-contact-grid" },
+            { className: "adm-contact-grid", hidden: page.contacts.length ? undefined : true },
             ...page.contacts.map((contact) =>
               h(
                 "article",
@@ -3792,7 +3985,7 @@ function ContactsBody({ page }) {
                 h(
                   "header",
                   null,
-                  h("div", null, h("h3", null, contact.display_name), h("code", { className: "crm-mono" }, contact.id)),
+                  h("div", null, h("h3", null, contact.display_name), contact.display_name !== contact.id ? h("code", { className: "crm-mono" }, contact.id) : null),
                   contact.account_id
                     ? h(StatusPill, { tone: "sand" }, `${contact.account_label} · ${label(copy, contact.account_type, contact.account_type)}`)
                     : h(StatusPill, { tone: "sun" }, label(copy, "ungroupedContacts", "No account")),
@@ -3803,10 +3996,10 @@ function ContactsBody({ page }) {
                   { className: "adm-contact-facts" },
                   h("div", null, h("dt", null, label(copy, "leads", "Enquiries")), h("dd", null, contact.lead_count)),
                   h("div", null, h("dt", null, label(copy, "duplicateEnquiries", "Linked repeats")), h("dd", null, contact.duplicate_leads)),
-                  h("div", null, h("dt", null, label(copy, "owners", "Owners")), h("dd", null, contact.assigned_brokers.join(", ") || "—")),
-                  h("div", null, h("dt", null, label(copy, "language", "Language")), h("dd", null, contact.languages.join(", ").toUpperCase() || "—")),
+                  h("div", null, h("dt", null, label(copy, "owners", "Owners")), h("dd", null, contact.assigned_brokers.join(", ") || ui.notSet)),
+                  h("div", null, h("dt", null, label(copy, "language", "Language")), h("dd", null, contact.languages.join(", ").toUpperCase() || ui.notSet)),
                   h("div", null, h("dt", null, label(copy, "communicationEvents", "Communication events")), h("dd", null, contact.communication_event_count)),
-                  h("div", null, h("dt", null, label(copy, "latestEnquiry", "Latest enquiry")), h("dd", null, contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, page.workspace?.locale) : "—")),
+                  h("div", null, h("dt", null, label(copy, "latestEnquiry", "Latest enquiry")), h("dd", null, contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, page.workspace?.locale) : ui.notSet)),
                 ),
                 h(
                   "div",
@@ -4027,9 +4220,11 @@ function LeadInboxBody({ page }) {
       h(
         Panel,
         { title: label(copy, "crmLeads", "CRM leads"), "aria-label": label(copy, "crmLeads", "CRM leads") },
+        leads.length ? null : h("p", { className: "adm-empty", "data-empty-leads": "true" }, ui.noLeads),
+        leads.length ? h("p", { className: "adm-empty", "data-lead-queue-empty": "true", role: "status", hidden: true }, ui.noQueueMatches) : null,
         h(
           "div",
-          { className: "adm-scroll-x" },
+          { className: "adm-scroll-x", hidden: leads.length ? undefined : true },
           h(
             "table",
             { className: "crm-tbl" },
@@ -4107,13 +4302,18 @@ function LeadInboxBody({ page }) {
                           ),
                           h(LeadAssignmentControl, { page, lead, copy }),
                           h(CommunicationThread, { page, thread: communicationByLeadId.get(lead.lead_id), copy, ui }),
-                          h("a", { className: "adm-lead-context", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(lead.lead_id)}`, page), "data-lead-history": lead.lead_id }, label(copy, "viewHistory", "History")),
+                          h(
+                            "a",
+                            { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(lead.lead_id)}`, page), "data-lead-history": lead.lead_id },
+                            h(Icon, { name: "list", size: 15 }),
+                            h("span", null, label(copy, "viewHistory", "History")),
+                          ),
                           h(
                             "div",
                             { className: "adm-lead-meta" },
                             h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type)),
                             h("span", { className: "adm-lead-meta__source" }, valueText(ui, lead.source)),
-                            h("span", { className: "crm-lang" }, `${lead.original_language} -> ${lead.admin_locale}`),
+                            h("span", { className: "crm-lang" }, `${lead.original_language} → ${lead.admin_locale}`),
                             h("span", { className: "adm-lead-meta__contact" }, valueText(ui, lead.contact_preference)),
                           ),
                         ),
@@ -4300,8 +4500,8 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                   ),
                   h(
                     "td",
-                    { className: "crm-tbl__muted crm-mono", "data-viewing-column": "due_at", "data-label": columns.dueAt },
-                    row.due_at || "",
+                    { className: "crm-tbl__muted", "data-viewing-column": "due_at", "data-label": columns.dueAt },
+                    row.due_at ? h("time", { dateTime: row.due_at, title: row.due_at }, formatAdminDateTime(row.due_at, page.workspace?.locale)) : ui.notSet,
                     row.overdue ? h("small", { className: "adm-lead-context", "data-viewing-overdue": "true" }, statusText(ui, "overdue")) : null,
                   ),
                   h(
@@ -4458,8 +4658,8 @@ function SellerPipelineQueue({ page, copy, ui }) {
                   ),
                   h(
                     "td",
-                    { className: "crm-tbl__muted crm-mono", "data-seller-pipeline-column": "due_at", "data-label": columns.dueAt },
-                    row.due_at || "",
+                    { className: "crm-tbl__muted", "data-seller-pipeline-column": "due_at", "data-label": columns.dueAt },
+                    row.due_at ? h("time", { dateTime: row.due_at, title: row.due_at }, formatAdminDateTime(row.due_at, page.workspace?.locale)) : ui.notSet,
                     row.overdue ? h("small", { className: "adm-lead-context", "data-seller-pipeline-overdue": "true" }, statusText(ui, "overdue")) : null,
                   ),
                   h(
@@ -4721,7 +4921,7 @@ function ListingManagerBody({ page }) {
     propertyFamily: ui.propertyFamily,
     status: label(copy, "qualityStatus", "Status"),
     locale: label(copy, "language", "Language"),
-    quality: label(copy, "quality", "Quality"),
+    quality: ui.listingChecks,
     action: label(copy, "openEditor", "Open editor"),
   };
   return adminShell(page, {
@@ -4804,11 +5004,11 @@ function ListingManagerBody({ page }) {
                 h(
                   "label",
                   null,
-                  ui.bulkStatus,
+                  h("span", { className: "adm-visually-hidden" }, ui.bulkStatus),
                   h(
                     "select",
                     { name: "targetStatus", required: true, disabled: !canEditContent },
-                    h("option", { value: "" }, "—"),
+                    h("option", { value: "" }, ui.chooseOption),
                     ...["available", "reserved", "sold", "rented", "archived"].map((status) => h("option", { key: status, value: status }, statusText(ui, status))),
                   ),
                 ),
@@ -4839,9 +5039,9 @@ function ListingManagerBody({ page }) {
                           h("input", { type: "checkbox", name: "listingIds", value: row.id, disabled: !canEditContent, "aria-label": `${ui.selectListings}: ${row.id}`, "data-listing-select": "true" }),
                         ),
                       ),
-                      h("td", { "data-label": columns.listing, "data-listing-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : "—"))),
-                      h("td", { "data-label": columns.location, "data-listing-column": "location" }, row.location || "—"),
-                      h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : "—"),
+                      h("td", { "data-label": columns.listing, "data-listing-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : ui.notSet))),
+                      h("td", { "data-label": columns.location, "data-listing-column": "location" }, row.location || ui.notSet),
+                      h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : ui.notSet),
                       h("td", { "data-label": columns.status, "data-listing-column": "status" }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
                       h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, row.translation_locales.map((locale) => locale.toUpperCase()).join(" · "))),
                       h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
@@ -4915,9 +5115,10 @@ function TranslationQueueBody({ page }) {
       h(
         Panel,
         { title: `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`, "data-translation-queue": "true" },
+        page.translationTasks.length ? null : h("p", { className: "adm-empty", "data-empty-translation-tasks": "true" }, ui.noTranslationTasks),
         h(
           "div",
-          { className: "adm-scroll-x" },
+          { className: "adm-scroll-x", hidden: page.translationTasks.length ? undefined : true },
           h(
             "table",
             { className: "crm-tbl" },
@@ -5234,7 +5435,7 @@ function ListingEditorBody({ page }) {
                     h(
                       "div",
                       { className: "adm-editor-savebar__controls" },
-                      h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--md", "data-editor-reset": "true", disabled: true }, label(copy, "resetFilters", "Reset")),
+                      h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--md", "data-editor-reset": "true", disabled: true }, label(copy, "discardChanges", ui.discardChanges)),
                       h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md", disabled: true }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
                     ),
                   )
@@ -6314,7 +6515,12 @@ function MigrationReviewBody({ page }) {
         h(
           "p",
           { className: "adm-note" },
-          h("a", { href: page.redirectApprovalImport.pendingWorkbookEndpoint }, ui.downloadPendingWorkbook),
+          h(
+            "a",
+            { className: "mk-btn mk-btn--subtle mk-btn--sm", href: page.redirectApprovalImport.pendingWorkbookEndpoint },
+            h(Icon, { name: "download", size: 16 }),
+            h("span", null, ui.downloadPendingWorkbook),
+          ),
         ),
         h("p", { className: "adm-note" }, ui.redirectWorkbookHint),
         h(
@@ -6354,8 +6560,13 @@ function MigrationReviewBody({ page }) {
               "li",
               { key: source },
               h(StatusPill, { tone: status.status === "imported" ? "success" : "sun" }, source),
-              ` ${status.status} · ${status.matched_rows} / ${status.row_count} `,
-              h("a", { href: `${page.seoEvidence.templateEndpoint}?source=${source}` }, ui.csvTemplate),
+              ` ${statusText(ui, status.status)} · ${status.matched_rows} / ${status.row_count} `,
+              h(
+                "a",
+                { className: "mk-btn mk-btn--subtle mk-btn--sm", href: `${page.seoEvidence.templateEndpoint}?source=${source}` },
+                h(Icon, { name: "download", size: 15 }),
+                h("span", null, ui.csvTemplate),
+              ),
             );
           }),
         ),

@@ -1,4 +1,4 @@
-import { LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
+import { DS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
 
 // Browser session transport for the custom admin workbench. The cookie carries
 // a short-lived Payload JWT whose session id is also recorded in Postgres. It
@@ -32,9 +32,120 @@ export function adminSessionClearCookie() {
   return `${ADMIN_SESSION_COOKIE}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`;
 }
 
+// The login page is a standalone document: it loads the same webfonts and
+// design-system bundle as the workbench, and the inline rules below only lay
+// out the card. Token values carry literal fallbacks so the page still reads
+// correctly if the stylesheet is blocked.
+const LOGIN_STYLE = `
+  .login-page {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    box-sizing: border-box;
+    background: var(--ink-50, #F4F4F3);
+    color: var(--text-strong, #241F18);
+    font-family: var(--font-sans, Commissioner, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .login {
+    width: 100%;
+    max-width: 420px;
+    padding: 32px;
+    box-sizing: border-box;
+    background: #FFFFFF;
+    border: 1px solid var(--ink-100, #E6E6E5);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md, 0 2px 4px rgba(22, 19, 14, 0.05), 0 6px 16px rgba(22, 19, 14, 0.08));
+  }
+  .login__brand { display: flex; justify-content: center; margin: 0 0 24px; }
+  .login__brand img { display: block; height: 40px; width: auto; }
+  .login__title {
+    margin: 0 0 4px;
+    font-family: inherit;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    color: var(--text-strong, #241F18);
+  }
+  .login__hint { margin: 0 0 20px; color: var(--text-muted, #948263); }
+  .login__error {
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--danger-50, #F9E7EA);
+    color: var(--danger-600, #9E2334);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .login__form { display: grid; gap: 0; }
+  .login__form label {
+    display: block;
+    margin: 0 0 6px;
+    color: var(--text-strong, #241F18);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .login #admin-email,
+  .login #admin-password {
+    display: block;
+    width: 100%;
+    height: 48px;
+    min-height: 48px;
+    margin: 0 0 16px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    border: 1px solid var(--ink-200, #C9C9C7);
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: var(--text-strong, #241F18);
+    font: inherit;
+    font-size: 16px;
+    line-height: 1.25;
+  }
+  .login #admin-email:focus-visible,
+  .login #admin-password:focus-visible {
+    outline: none;
+    border-color: var(--ink-500, #545453);
+    box-shadow: var(--shadow-focus, 0 0 0 3px rgba(219, 62, 62, 0.45));
+  }
+  .login__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 48px;
+    min-height: 48px;
+    margin: 4px 0 0;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent, #C42D2D);
+    color: #FFFFFF;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .login__submit:hover { background: var(--accent-hover, #A32323); }
+  .login__submit:active { transform: translateY(1px); }
+  .login__submit:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus-accent, 0 0 0 3px rgba(34, 34, 34, 0.45));
+  }
+`;
+
 export function renderAdminLoginPage({ error = false } = {}) {
   const errorBanner = error
-    ? `<p class="error" role="alert">Данните не бяха приети. Опитай отново. / Sign-in details were not accepted. Try again.</p>`
+    ? `<p class="login__error" role="alert">Данните не бяха приети. Опитай отново. / Sign-in details were not accepted. Try again.</p>`
     : "";
   return `<!doctype html>
 <html lang="bg">
@@ -42,35 +153,25 @@ export function renderAdminLoginPage({ error = false } = {}) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>MS Realty — вход за екипа</title>
-<style>
-  body { font-family: Commissioner, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 24px; background: #F4F4F3; color: #181818; display: grid; place-items: center; min-height: 100vh; box-sizing: border-box; }
-  main { width: 100%; max-width: 420px; background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 8px 30px rgba(14,14,14,.08); }
-  .brand { display: flex; justify-content: center; margin: 0 0 20px; }
-  .brand img { display: block; height: 40px; width: auto; }
-  h1 { font-size: 1.35rem; margin: 0 0 6px; }
-  p.hint { color: #545453; margin: 0 0 20px; }
-  label { display: block; font-weight: 600; margin-bottom: 8px; }
-  input { width: 100%; font-size: 1.1rem; padding: 14px; border-radius: 10px; border: 1px solid #C9C9C7; box-sizing: border-box; margin-bottom: 16px; background: #fff; }
-  input:focus-visible { outline: 2px solid #C42D2D; outline-offset: 2px; border-color: #C42D2D; }
-  button { width: 100%; font-size: 1.15rem; padding: 14px; border-radius: 12px; border: 0; background: #C42D2D; color: #fff; cursor: pointer; font-weight: 600; }
-  button:hover { background: #A32323; }
-  button:focus-visible { outline: 2px solid #C42D2D; outline-offset: 3px; }
-  .error { color: #A32323; font-weight: 600; }
-</style>
+<title>Вход за екипа · MS Realty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="${FONTS_URL}">
+<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">
+<style>${LOGIN_STYLE}</style>
 </head>
-<body>
-<main>
-  <p class="brand"><img src="${LOGO_URL}" alt="MS Realty" height="40" width="${Math.round(40 * LOGO_ASPECT)}"></p>
-  <h1>Вход за екипа на MS Realty</h1>
-  <p class="hint">Използвай служебния си имейл и парола.</p>
+<body class="login-page">
+<main class="login" aria-labelledby="admin-login-title">
+  <p class="login__brand"><img src="${LOGO_URL}" alt="MS Realty" height="40" width="${Math.round(40 * LOGO_ASPECT)}"></p>
+  <h1 id="admin-login-title" class="login__title">Вход за екипа на MS Realty</h1>
+  <p class="login__hint">Използвай служебния си имейл и парола.</p>
   ${errorBanner}
-  <form method="POST" action="/admin/login">
+  <form method="POST" action="/admin/login" class="login__form">
     <label for="admin-email">Имейл</label>
     <input id="admin-email" name="email" type="email" autocomplete="username" inputmode="email" required autofocus>
     <label for="admin-password">Парола</label>
     <input id="admin-password" name="password" type="password" autocomplete="current-password" required>
-    <button type="submit">Влез</button>
+    <button type="submit" class="login__submit">Влез</button>
   </form>
 </main>
 </body>

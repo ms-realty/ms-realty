@@ -70,6 +70,8 @@ export function buildMobileElderlyQaReport({
       ],
     }),
   };
+  const familySearchPage = renderSearchPage({ registry, listings, localeCode: "he", filters: { property_family: "apartment" } });
+  const familySearchHtml = renderReactPage(familySearchPage);
   const pages = {
     home: renderReactPage(renderHomePage({ registry, listings, localeCode: "he" })),
     listing: renderReactPage(renderListingPage({ registry, listing, localeCode: "he" })),
@@ -238,11 +240,12 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "narrow_mobile_search_action",
-      includes(englishHome, "class=\"mk-search__go\" type=\"submit\" aria-label=\"Search\" title=\"Search\"") &&
+      // The hero search card stacks on phones: full-width Buy/Rent tabs and a
+      // full-width Search action under the Location / Type / Max price fields.
+      includes(englishHome, "class=\"hp-search__go mk-search__go\" type=\"submit\"") &&
         includes(publicAdapterCss, "@media (max-width: 679px)") &&
-        includes(publicAdapterCss, ".hp-hero__search-form { --hero-search-action-width: 52px; }") &&
-        includes(publicAdapterCss, ".hp-hero__search .mk-search__go { padding-inline: 0; }") &&
-        includes(publicAdapterCss, ".hp-hero__search .mk-search__go span { display: none; }"),
+        includes(publicAdapterCss, ".hp-search__intent { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }") &&
+        includes(publicAdapterCss, ".hp-search__go { grid-column: 1 / -1; width: 100%; margin: 4px 0 0; }"),
     ),
     check(
       "listing_sticky_actions",
@@ -324,8 +327,13 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "source_backed_search_filters",
+      // Subtype is scoped to a chosen family and only offered when the source
+      // data carries subtypes, so the bare search page must not show it.
       includes(pages.search, "name=\"property_family\"") &&
-        includes(pages.search, "name=\"property_subtype\"") &&
+        !includes(pages.search, "name=\"property_subtype\"") &&
+        (familySearchPage.search.controls.filter_options.property_subtypes?.length
+          ? includes(familySearchHtml, "name=\"property_subtype\"")
+          : !includes(familySearchHtml, "name=\"property_subtype\"")) &&
         includes(pages.search, "name=\"offer_type\"") &&
         includes(pages.search, "name=\"price_min\"") &&
         includes(pages.search, "name=\"price_max\"") &&

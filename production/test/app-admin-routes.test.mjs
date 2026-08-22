@@ -471,7 +471,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /Подтверждение · HE · WhatsApp/);
       assert.match(inboxHtml, /action="\/api\/admin\/leads\/assign"/);
       assert.match(inboxHtml, /name="assignmentConfirmed"/);
-      assert.match(inboxHtml, /he -&gt; en/);
+      assert.match(inboxHtml, /he → en/);
       assert.match(inboxHtml, /Входящие заявки/);
       assert.match(inboxHtml, /Входящие заявки CRM с ответами, проверенными брокером\./);
       assert.match(inboxHtml, /Арендатор/);

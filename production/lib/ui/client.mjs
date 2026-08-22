@@ -704,26 +704,123 @@ export const PUBLIC_APP_JS = `(function () {
     syncRegionOptions();
     setFreeTextEnabled(!geographyId || !geographyId.value);
   }
-  function initHeroAdvancedSearch() {
-    var form = document.querySelector("[data-hero-advanced-search]");
-    if (!form) return;
-    var trigger = form.querySelector("[data-hero-advanced-trigger]");
-    var panel = form.querySelector(".hp-hero__advanced-panel");
-    if (!trigger || !panel) return;
-    function setExpanded(expanded) {
-      trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-      panel.hidden = !expanded;
+  var NON_RESIDENTIAL_FAMILIES = ["plot", "agricultural_land", "commercial", "hotel"];
+  // Empty filter controls stay out of the results URL: they are disabled for the
+  // submission only, and a bfcache return re-enables them so the form is still
+  // editable. Checked radios with an empty value ("All", "Any") carry no filter.
+  function emptyFormControls(form) {
+    var controls = form.querySelectorAll("input, select");
+    var empty = [];
+    for (var i = 0; i < controls.length; i += 1) {
+      var control = controls[i];
+      if (control.disabled || control.type === "checkbox" || control.type === "submit" || control.type === "button") continue;
+      if (control.type === "radio") {
+        if (control.checked && String(control.value || "") === "") empty.push(control);
+        continue;
+      }
+      if (String(control.value || "").trim() === "") empty.push(control);
     }
-    trigger.addEventListener("click", function () {
-      setExpanded(trigger.getAttribute("aria-expanded") !== "true");
+    return empty;
+  }
+  function stripEmptyControlsOnSubmit(form) {
+    var skipped = [];
+    form.addEventListener("submit", function () {
+      skipped = emptyFormControls(form);
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = true;
     });
-    form.addEventListener("keydown", function (event) {
-      if (event.key !== "Escape" || trigger.getAttribute("aria-expanded") !== "true") return;
-      event.preventDefault();
-      setExpanded(false);
-      trigger.focus();
+    window.addEventListener("pageshow", function () {
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = false;
+      skipped = [];
     });
-    setExpanded(false);
+  }
+  function initSearchFilterForms() {
+    var forms = document.querySelectorAll("[data-search-filter-form]");
+    for (var i = 0; i < forms.length; i += 1) stripEmptyControlsOnSubmit(forms[i]);
+  }
+  function initHeroSearch() {
+    var form = document.querySelector("[data-hero-search]");
+    if (!form) return;
+    var priceSelects = form.querySelectorAll("[data-price-presets]");
+    var family = form.querySelector("[data-hero-family]");
+    var bedrooms = form.querySelector("[data-hero-bedrooms]");
+    var more = form.querySelector("[data-hero-more-filters]");
+    function offerType() {
+      var checked = form.querySelector('input[name="offer_type"]:checked');
+      return checked && checked.value === "rent" ? "rent" : "sale";
+    }
+    // Rent budgets are monthly, so the preset list follows the Buy/Rent tab.
+    function applyPricePresets() {
+      var source = offerType() === "rent" ? "data-price-rent" : "data-price-sale";
+      for (var i = 0; i < priceSelects.length; i += 1) {
+        var select = priceSelects[i];
+        var current = select.value;
+        var entries = (select.getAttribute(source) || "").split(";");
+        select.textContent = "";
+        var any = document.createElement("option");
+        any.value = "";
+        any.textContent = select.getAttribute("data-price-any") || "";
+        select.appendChild(any);
+        for (var j = 0; j < entries.length; j += 1) {
+          if (!entries[j]) continue;
+          var parts = entries[j].split("|");
+          var option = document.createElement("option");
+          option.value = parts[0];
+          option.textContent = parts[1] || parts[0];
+          if (parts[0] === current) option.selected = true;
+          select.appendChild(option);
+        }
+      }
+    }
+    // Plots, land, commercial space and hotels carry no bedroom count.
+    function syncBedrooms() {
+      if (!family || !bedrooms) return;
+      var nonResidential = NON_RESIDENTIAL_FAMILIES.indexOf(family.value) >= 0;
+      bedrooms.disabled = nonResidential;
+      if (nonResidential) bedrooms.value = "";
+    }
+    form.addEventListener("change", function (event) {
+      if (event.target && event.target.name === "offer_type") applyPricePresets();
+      if (event.target === family) syncBedrooms();
+    });
+    form.addEventListener("reset", function () {
+      window.setTimeout(function () {
+        applyPricePresets();
+        syncBedrooms();
+      });
+    });
+    if (more) {
+      var label = more.querySelector("[data-more-label]");
+      more.addEventListener("toggle", function () {
+        if (label) label.textContent = more.open ? label.getAttribute("data-fewer-label") : label.getAttribute("data-more-label");
+      });
+    }
+    // Empty controls stay out of the results URL; pageshow restores them for bfcache returns.
+    function emptyControls() {
+      return emptyFormControls(form);
+    }
+    var skipped = [];
+    form.addEventListener("submit", function () {
+      skipped = emptyControls();
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = true;
+    });
+    window.addEventListener("pageshow", function () {
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = false;
+      skipped = [];
+      syncBedrooms();
+    });
+    applyPricePresets();
+    syncBedrooms();
+  }
+  function initSearchToolbar() {
+    var form = document.querySelector("[data-search-toolbar-form]");
+    if (!form) return;
+    var sort = form.querySelector('select[name="sort"]');
+    if (!sort) return;
+    sort.addEventListener("change", function () {
+      var view = form.querySelector('[data-view-mode][aria-pressed="true"]');
+      if (typeof form.requestSubmit === "function") form.requestSubmit(view && view.value === "map" ? view : undefined);
+      else form.submit();
+    });
   }
   function initHeroGallery() {
     var gallery = document.querySelector("[data-hero-gallery]");
@@ -1290,6 +1387,32 @@ export const PUBLIC_APP_JS = `(function () {
      var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
      document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
    }
+  // The desktop language menu is a native <details>; it still needs to close
+  // on an outside click, on Escape (returning focus to its button), and when
+  // keyboard focus leaves it.
+  function initLanguageMenu() {
+    var menu = document.querySelector('details[data-language-switcher="desktop"]');
+    if (!menu) return;
+    var summary = menu.querySelector(":scope > summary");
+    if (!summary) return;
+    function closeMenu(returnFocus) {
+      if (!menu.open) return;
+      menu.open = false;
+      if (returnFocus) summary.focus();
+    }
+    document.addEventListener("click", function (event) {
+      if (menu.open && !menu.contains(event.target)) closeMenu(false);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && menu.open) {
+        event.preventDefault();
+        closeMenu(true);
+      }
+    });
+    menu.addEventListener("focusout", function (event) {
+      if (event.relatedTarget && !menu.contains(event.relatedTarget)) closeMenu(false);
+    });
+  }
   function initPublicMobileNavigation() {
     var mobileMenu = document.querySelector("[data-mobile-menu]");
     if (!mobileMenu) return;
@@ -1511,9 +1634,12 @@ export const PUBLIC_APP_JS = `(function () {
   initSearchScrollRestoration();
   initDialogFocusReturn();
   initPublicMobileNavigation();
+  initLanguageMenu();
   initSavedSearchContacts();
+  initSearchFilterForms();
   initGeographyComboboxes();
-  initHeroAdvancedSearch();
+  initHeroSearch();
+  initSearchToolbar();
   initHeroGallery();
   initHorizontalFocusRails();
   initImageFallbacks();
@@ -1542,6 +1668,7 @@ export const ADMIN_APP_JS = `(function () {
       buttons[i].setAttribute("aria-pressed", on ? "true" : "false");
     }
     var rows = document.querySelectorAll("[data-lead-row]");
+    var visible = 0;
     for (var j = 0; j < rows.length; j += 1) {
       var row = rows[j];
       var slaCell = row.querySelector("[data-sla-status]");
@@ -1551,7 +1678,11 @@ export const ADMIN_APP_JS = `(function () {
       if (filter === "needs_reply") show = !replied;
       if (filter === "sla") show = sla === "reminder_required" || sla === "manager_escalation_required";
       row.hidden = !show;
+      if (show) visible += 1;
     }
+    // An empty queue says so instead of leaving a bare table header.
+    var empty = document.querySelector("[data-lead-queue-empty]");
+    if (empty) empty.hidden = visible > 0 || rows.length === 0;
   }
   function initLeadQueueFilters() {
     var tabs = document.querySelector("[data-lead-queue-tabs]");
@@ -1987,7 +2118,9 @@ export const ADMIN_APP_JS = `(function () {
     if (!tabs || !grid) return;
     var buttons = tabs.querySelectorAll("[data-pipeline-filter]");
     var cards = grid.querySelectorAll("[data-pipeline-card]");
+    var empty = document.querySelector("[data-pipeline-empty]");
     function applyFilter(filter) {
+      var visible = 0;
       for (var i = 0; i < cards.length; i += 1) {
         var card = cards[i];
         var matches =
@@ -1995,12 +2128,16 @@ export const ADMIN_APP_JS = `(function () {
             ? card.getAttribute("data-pipeline-status") === "open"
             : card.getAttribute("data-pipeline-kind") === filter || card.getAttribute("data-pipeline-status") === filter;
         card.hidden = !matches;
+        if (matches) visible += 1;
       }
       for (var j = 0; j < buttons.length; j += 1) {
         var on = buttons[j].getAttribute("data-pipeline-filter") === filter;
         buttons[j].setAttribute("data-on", on ? "1" : "0");
         buttons[j].setAttribute("aria-pressed", on ? "true" : "false");
       }
+      // The grid collapses when nothing matches, so the empty note takes its place.
+      grid.hidden = visible === 0;
+      if (empty) empty.hidden = visible > 0;
     }
     tabs.addEventListener("click", function (event) {
       var button = event.target.closest("[data-pipeline-filter]");
@@ -2237,7 +2374,29 @@ export const ADMIN_APP_JS = `(function () {
       if (section) entries.push({ tab: tabNodes[i], section: section });
     }
     if (!entries.length) return;
+    var rail = document.querySelector("[data-editor-readiness-rail]");
     var frame = 0;
+    // A clicked tab stays active while its section scrolls into place and,
+    // because the rail panels are sticky and always in view, until the
+    // operator scrolls away from that position.
+    var pinnedId = null;
+    var pinUntil = 0;
+    var pinnedScrollY = null;
+    function pin(sectionId, settledY) {
+      pinnedId = sectionId;
+      pinUntil = Date.now() + 1000;
+      pinnedScrollY = typeof settledY === "number" ? settledY : null;
+      if (pinnedScrollY === null) {
+        // Browser-driven anchor scrolls settle on their own; sample the
+        // position once the scroll has had time to finish.
+        window.setTimeout(function () {
+          if (pinnedId === sectionId && pinnedScrollY === null) pinnedScrollY = window.scrollY;
+        }, 1000);
+      }
+    }
+    function inStickyRail(section) {
+      return Boolean(rail) && rail.contains(section) && getComputedStyle(rail).position === "sticky";
+    }
     function setActive(sectionId) {
       for (var j = 0; j < entries.length; j += 1) {
         var active = entries[j].section.id === sectionId;
@@ -2254,23 +2413,48 @@ export const ADMIN_APP_JS = `(function () {
       syncAdminShellOffsets();
       var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       var offset = Number((document.documentElement.style.getPropertyValue("--adm-editor-anchor-offset") || "124").replace("px", "")) || 124;
-      var nextTop = window.scrollY + section.getBoundingClientRect().top - offset;
-      window.scrollTo({ top: Math.max(0, nextTop), behavior: reduceMotion ? "auto" : "smooth" });
+      var maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      var nextTop = Math.min(maxTop, Math.max(0, window.scrollY + section.getBoundingClientRect().top - offset));
+      window.scrollTo({ top: nextTop, behavior: reduceMotion ? "auto" : "smooth" });
+      return nextTop;
     }
     function syncFromScroll() {
       frame = 0;
       syncAdminShellOffsets();
+      if (pinnedId) {
+        if (Date.now() < pinUntil) {
+          setActive(pinnedId);
+          return;
+        }
+        if (pinnedScrollY === null) pinnedScrollY = window.scrollY;
+        if (Math.abs(window.scrollY - pinnedScrollY) < 120) {
+          setActive(pinnedId);
+          return;
+        }
+        pinnedId = null;
+      }
       var anchorLine = nav.getBoundingClientRect().bottom + 24;
-      var activeSection = entries[0].section;
+      var activeSection = null;
       var activeTop = -Infinity;
       for (var j = 0; j < entries.length; j += 1) {
-        var sectionTop = entries[j].section.getBoundingClientRect().top;
+        var section = entries[j].section;
+        // Sticky rail panels never scroll, so they cannot drive the scroll-spy.
+        if (inStickyRail(section)) continue;
+        var sectionTop = section.getBoundingClientRect().top;
         if (sectionTop <= anchorLine && sectionTop > activeTop) {
-          activeSection = entries[j].section;
+          activeSection = section;
           activeTop = sectionTop;
         }
       }
-      setActive(activeSection.id);
+      if (!activeSection) {
+        for (var k = 0; k < entries.length; k += 1) {
+          if (!inStickyRail(entries[k].section)) {
+            activeSection = entries[k].section;
+            break;
+          }
+        }
+      }
+      setActive((activeSection || entries[0].section).id);
     }
     function scheduleSync() {
       if (!frame) frame = window.requestAnimationFrame(syncFromScroll);
@@ -2286,7 +2470,7 @@ export const ADMIN_APP_JS = `(function () {
       setActive(targetId);
       if (window.history && window.history.pushState) window.history.pushState(null, "", "#" + targetId);
       else window.location.hash = targetId;
-      scrollToSection(section);
+      pin(targetId, scrollToSection(section));
     });
     window.addEventListener("scroll", scheduleSync, { passive: true });
     window.addEventListener("resize", function () {
@@ -2296,12 +2480,16 @@ export const ADMIN_APP_JS = `(function () {
     window.addEventListener("hashchange", function () {
       var targetId = window.location.hash ? window.location.hash.slice(1) : "";
       var section = targetId ? document.getElementById(targetId) : null;
-      if (section) expandSection(section);
+      if (section) {
+        expandSection(section);
+        pin(targetId);
+      }
       scheduleSync();
     });
     var initialId = window.location.hash ? window.location.hash.slice(1) : entries[0].section.id;
     var initialSection = document.getElementById(initialId) ? document.getElementById(initialId) : entries[0].section;
     if (initialSection) expandSection(initialSection);
+    if (window.location.hash && initialSection) pin(initialSection.id);
     setActive(initialSection ? initialSection.id : entries[0].section.id);
     syncAdminShellOffsets();
     scheduleSync();

@@ -6,7 +6,12 @@
 // verifies everything, and reports back in the operator's language.
 //
 // The page deliberately avoids the React admin shell: its entire job is one
-// textarea and one copy button that an eighty-year-old can use.
+// textarea and one copy button that an eighty-year-old can use. Like the
+// login and team pages it loads the workbench webfonts and design-system
+// bundle and lays itself out with the same tokens (literal fallbacks keep it
+// readable if the stylesheet is blocked).
+
+import { DS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
 
 const PROMPT_TEMPLATE = `You are now the operations copilot for MS Realty, a family real-estate agency in Sandanski, Bulgaria (legacy sites makler-realty.com and makler-realty.ru; new platform runs at __BASE_URL__, currently noindex preview without the custom domains).
 
@@ -83,11 +88,140 @@ function connectionCard({ provider, title, description, connection, action }) {
     ${
       connected
         ? `<p class="account">${escapeHtml(connection.account_label || connection.external_account_id || "Провайдер подтвердил аккаунт")}</p>
-           <p class="verified">Проверено: ${escapeHtml(connection.last_verified_at || "—")}</p>`
+           <p class="verified">Проверено: ${escapeHtml(connection.last_verified_at || "дата не указана")}</p>`
         : action
     }
   </section>`;
 }
+
+const CONNECT_STYLE = `
+  :root { color-scheme: light; }
+  .connect-page {
+    margin: 0;
+    min-height: 100vh;
+    padding: 24px;
+    box-sizing: border-box;
+    background: var(--ink-50, #F4F4F3);
+    color: var(--text-strong, #241F18);
+    font-family: var(--font-sans, Commissioner, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .connect { width: 100%; max-width: 860px; margin: 0 auto; display: grid; gap: 16px; }
+  .connect__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .connect__brand { display: inline-flex; }
+  .connect__brand img { display: block; height: 32px; width: auto; }
+  .connect__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--ink-200, #C9C9C7);
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: var(--text-strong, #241F18);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .connect__back:hover { border-color: var(--ink-500, #545453); text-decoration: none; }
+  .connect h1 { margin: 0; font-family: inherit; font-size: 22px; font-weight: 600; line-height: 1.25; letter-spacing: -0.015em; color: var(--text-strong, #241F18); }
+  .connect h2 { margin: 0 0 4px; font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1.25; color: var(--text-strong, #241F18); }
+  .intro, .card p { margin: 0; color: var(--text-muted, #948263); font-size: 15px; line-height: 1.5; }
+  .notice { margin: 0; padding: 10px 12px; border: 1px solid var(--sea-100, #D2E3E1); border-radius: 8px; background: var(--sea-50, #ECF3F2); color: var(--sea-800, #122C2B); font-size: 13px; font-weight: 600; line-height: 1.4; }
+  .grid { display: grid; gap: 12px; margin: 0; }
+  .card { padding: 16px 20px; border: 1px solid var(--ink-100, #E6E6E5); border-radius: 8px; background: #FFFFFF; }
+  .card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .status {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: var(--stone-100, #F2ECE1);
+    color: var(--text-muted, #948263);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .status--ok { background: var(--success-50, #E7F3EC); color: var(--success-600, #256345); }
+  .card .account { margin-top: 12px; color: var(--text-strong, #241F18); font-weight: 600; }
+  .card .verified { margin: 4px 0 0; font-size: 13px; }
+  .card .blocked { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--sun-100, #FBEECF); color: var(--sun-600, #AE7420); font-size: 13px; line-height: 1.4; }
+  .card .blocked + p { margin-top: 8px; }
+  .link { display: inline-flex; align-items: center; min-height: 44px; color: var(--text-link, #3F3F3F); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: 12px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--brand, #222222);
+    color: #FFFFFF;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .button:hover { background: var(--brand-hover, #181818); text-decoration: none; }
+  .button:active { transform: translateY(1px); }
+  .button:disabled { cursor: wait; opacity: 0.6; }
+  .button:focus-visible, .link:focus-visible, .connect__back:focus-visible, .connect-page main input:focus-visible, .connect-page main textarea:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus, 0 0 0 3px rgba(219, 62, 62, 0.45));
+  }
+  .ai { padding-top: 20px; border-top: 1px solid var(--ink-100, #E6E6E5); }
+  ol.steps { margin: 8px 0 0; padding-left: 1.3rem; font-size: 15px; line-height: 1.7; }
+  .ai p { margin: 0; }
+  .ai .button { margin-top: 16px; }
+  #done { display: none; margin-left: 12px; color: var(--success-600, #256345); font-weight: 600; }
+  .hint { margin: 12px 0 0; color: var(--text-muted, #948263); font-size: 13px; line-height: 1.4; }
+  .connect-page main label { display: block; font-size: 13px; font-weight: 600; color: var(--text-strong, #241F18); }
+  .connect-page main textarea {
+    width: 100%;
+    height: 260px;
+    margin-top: 6px;
+    padding: 12px;
+    box-sizing: border-box;
+    border: 1px solid var(--ink-200, #C9C9C7);
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: var(--text-strong, #241F18);
+    font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  form { display: grid; gap: 8px; max-width: 520px; margin-top: 12px; }
+  form .button { margin-top: 4px; justify-self: start; }
+  .connect-page main input {
+    min-height: 44px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    border: 1px solid var(--ink-200, #C9C9C7);
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: var(--text-strong, #241F18);
+    font: inherit;
+    font-size: 15px;
+  }
+  @media (max-width: 580px) {
+    .connect-page { padding: 16px; }
+    .connect__back { min-height: 44px; }
+    .card { padding: 16px; }
+    .card__head { display: block; }
+    .status { margin-top: 12px; }
+    .button, form .button { width: 100%; box-sizing: border-box; }
+    #done { display: none; margin: 8px 0 0; }
+  }
+`;
 
 const inlineJson = (value) => JSON.stringify(value).replaceAll("<", "\\u003c");
 
@@ -116,48 +250,27 @@ export function renderOperatorConnectPage({
          <input id="viber-token" name="token" type="password" required autocomplete="off" minlength="20">
          <button class="button" type="submit">Проверить и подключить Viber</button>
        </form>`
-    : '<p class="blocked">Сначала нужен коммерческий Viber-бот и живой webhook runtime. Самостоятельное создание новых ботов недоступно.</p><p><a href="https://help.viber.com/hc/en-us/articles/15247629658525-Bot-commercial-model" rel="noreferrer noopener">Условия Viber</a></p>';
+    : '<p class="blocked">Сначала нужен коммерческий Viber-бот и живой webhook runtime. Самостоятельное создание новых ботов недоступно.</p><p><a class="link" href="https://help.viber.com/hc/en-us/articles/15247629658525-Bot-commercial-model" rel="noreferrer noopener">Условия Viber</a></p>';
   return `<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>MS Realty — подключения</title>
-<style>
-  :root { color-scheme: light; }
-  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 24px; background: #f6f4ef; color: #1f2933; }
-  main { max-width: 860px; margin: 0 auto; }
-  h1 { font-size: clamp(1.6rem, 5vw, 2.3rem); margin-bottom: 8px; }
-  h2 { margin: 0 0 6px; font-size: 1.15rem; }
-  .intro, .card p { color: #52606d; line-height: 1.5; }
-  .grid { display: grid; gap: 14px; margin: 24px 0; }
-  .card { background: #fff; border: 1px solid #d9d4c8; border-radius: 16px; padding: 18px; box-shadow: 0 4px 18px rgb(55 48 37 / 6%); }
-  .card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-  .card__head p { margin: 0; }
-  .status { flex: 0 0 auto; border-radius: 999px; padding: 6px 10px; background: #ece9e1; color: #52606d; font-size: .8rem; }
-  .status--ok { background: #dff7e8; color: #047857; }
-  .account { color: #1f2933 !important; font-weight: 650; margin-bottom: 4px; }
-  .verified { font-size: .85rem; margin: 4px 0 0; }
-  .blocked { background: #fff7d6; border-radius: 10px; padding: 10px 12px; color: #6b5315 !important; }
-  .notice { border-radius: 12px; padding: 12px 14px; background: #e8f4ff; color: #17466e; }
-  ol.steps { font-size: 1.15rem; line-height: 1.7; padding-left: 1.4rem; }
-  .button { display: inline-block; font: inherit; font-weight: 650; padding: 11px 16px; border-radius: 10px; border: 0; background: #1d4ed8; color: #fff; cursor: pointer; text-decoration: none; }
-  .button:active { background: #1e40af; }
-  .button:disabled { cursor: wait; opacity: .65; }
-  .button:focus-visible, input:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
-  #done { display: none; font-size: 1.1rem; color: #047857; margin-left: 12px; }
-  textarea { width: 100%; height: 260px; margin-top: 16px; font-family: ui-monospace, monospace; font-size: 0.78rem; border-radius: 8px; border: 1px solid #cbd5e1; padding: 12px; box-sizing: border-box; }
-  form { display: grid; gap: 10px; max-width: 520px; }
-  input { min-height: 44px; box-sizing: border-box; border: 1px solid #9aa5b1; border-radius: 9px; padding: 9px 11px; font: inherit; }
-  .hint { color: #52606d; font-size: 0.95rem; }
-  .ai { margin-top: 34px; border-top: 1px solid #d9d4c8; padding-top: 20px; }
-  @media (max-width: 580px) { body { padding: 16px; } .card__head { display: block; } .status { display: inline-block; margin-top: 12px; } .button { width: 100%; box-sizing: border-box; text-align: center; } }
-</style>
+<title>Подключения · MS Realty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="${FONTS_URL}">
+<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">
+<style>${CONNECT_STYLE}</style>
 </head>
-<body>
-<main>
-  <h1>Подключения MS Realty</h1>
+<body class="connect-page">
+<main class="connect" aria-labelledby="admin-connect-title">
+  <div class="connect__top">
+    <a class="connect__brand" href="/admin" aria-label="MS Realty"><img src="${LOGO_URL}" alt="MS Realty" height="32" width="${Math.round(32 * LOGO_ASPECT)}"></a>
+    <a class="connect__back" href="/admin">&larr; Рабочее место</a>
+  </div>
+  <h1 id="admin-connect-title">Подключения MS Realty</h1>
   <p class="intro">Один экран для каналов агентства. Зелёный статус появляется только после ответа самого провайдера.</p>
   ${result ? `<p class="notice" role="status">${escapeHtml(result)}</p>` : ""}
   <div class="grid">
@@ -175,7 +288,7 @@ export function renderOperatorConnectPage({
          <p><button class="button" id="copy" type="button">Скопировать текст для помощника</button><span id="done" role="status" aria-live="polite" aria-atomic="true">Скопировано ✓</span></p>
          <label class="hint" for="prompt">Текст подключения для ИИ-помощника</label>
          <textarea id="prompt" readonly spellcheck="false">${escapeHtml(prompt)}</textarea>
-         <p class="hint">Текст содержит личный ключ оператора — не пересылай его. Аккаунт: ${escapeHtml(operatorId || "operator")}.</p>
+         <p class="hint">Текст содержит личный ключ оператора, не пересылай его. Аккаунт: ${escapeHtml(operatorId || "operator")}.</p>
        </section>`
       : '<p class="hint">MCP-ключи не показываются в браузерной сессии. Для них используются отдельные именованные credentials.</p>'
   }

@@ -12,6 +12,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { leadWritesDisabledFromEnv, renderContactPage, renderSearchUnavailablePage } from "../lib/public-site.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { DS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 const OPERATOR_TOKEN = "login-operator-token-0123456789ab";
 const PAYLOAD_SESSION = "payload.browser.session";
@@ -81,11 +82,27 @@ test("session cookie helpers round-trip and cap the Payload session token", () =
   assert.equal(adminTokenFromCookie(""), "");
   assert.match(adminSessionSetCookie("token", { maxAgeSeconds: 30 * 24 * 60 * 60 }), /Max-Age=7200/);
   const login = renderAdminLoginPage({ error: true });
+  assert.match(login, /<html lang="bg">/);
   assert.match(login, /role="alert"/);
   assert.match(login, /name="email"/);
   assert.match(login, /name="password"/);
+  assert.match(login, /<label for="admin-email">/);
+  assert.match(login, /<label for="admin-password">/);
   assert.match(login, /ms-realty-logo-/);
-  assert.match(login, /#C42D2D/);
+  // The standalone page loads the workbench webfonts and design-system bundle,
+  // then lays out a 420px card on the admin canvas: Commissioner 22px/600
+  // title, 48px inputs with an 8px radius and the focus ring, and a 48px
+  // accent submit. No em-dashes anywhere in the copy.
+  assert.ok(login.includes(`<link rel="stylesheet" href="${FONTS_URL}">`));
+  assert.ok(login.includes(`<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}"`));
+  assert.match(login, /\.login-page \{[^}]*background: var\(--ink-50, #F4F4F3\)/);
+  assert.match(login, /\.login \{[^}]*max-width: 420px;[^}]*border-radius: 14px/);
+  assert.match(login, /\.login__title \{[^}]*font-size: 22px;\s*font-weight: 600/);
+  assert.match(login, /\.login #admin-email,\s*\.login #admin-password \{[^}]*height: 48px;[^}]*border: 1px solid var\(--ink-200, #C9C9C7\);\s*border-radius: 8px/);
+  assert.match(login, /#admin-password:focus-visible \{[^}]*box-shadow: var\(--shadow-focus,/);
+  assert.match(login, /\.login__submit \{[^}]*height: 48px;[^}]*border-radius: 8px;\s*background: var\(--accent, #C42D2D\)/);
+  assert.match(login, /class="login__submit">Влез</);
+  assert.doesNotMatch(login, /[—–]/);
   assert.doesNotMatch(login, /#1d4ed8/);
   assert.doesNotMatch(login, /name="token"|Операторски ключ/);
 });
