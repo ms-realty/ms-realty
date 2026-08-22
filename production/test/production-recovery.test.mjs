@@ -251,7 +251,7 @@ test("production recovery import validates before persisting and exposes the saf
   );
   assert.equal(fs.existsSync(reportPath), false);
   assert.equal(writeProductionRecoveryReport(signedReport(), reportPath, { publicKey: RECOVERY_PUBLIC_KEY }), reportPath);
-  assert.equal(productionRecoveryState(reportPath, { publicKey: RECOVERY_PUBLIC_KEY }).status, "pass");
+  assert.equal(productionRecoveryState(reportPath, { now: "2026-07-23T01:00:00.000Z", publicKey: RECOVERY_PUBLIC_KEY }).status, "pass");
   const template = JSON.parse(readProductionRecoveryTemplate());
   assert.equal(template.example, true);
   assert.equal(template.schema_version, 2);

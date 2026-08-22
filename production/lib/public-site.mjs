@@ -916,13 +916,13 @@ const SELLER_COPY = {
     title: "Продайте имота си с MS Realty",
     description: "Заявете брокерска оценка и обратна връзка от екипа на MS Realty.",
     h1: "Продайте имота си",
-    form_unavailable: "Формата е временно недостъпна. Обадете се или ни пишете — отговаряме бързо.",
+    form_unavailable: "Формата е временно недостъпна. Обадете се или ни пишете. Отговаряме бързо.",
   },
   en: {
     title: "Sell your property with MS Realty",
     description: "Request a broker valuation and follow-up from the MS Realty team.",
     h1: "Sell your property",
-    form_unavailable: "The form is temporarily unavailable. Call or message us instead — we reply quickly.",
+    form_unavailable: "The form is temporarily unavailable. Call or message us instead. We reply quickly.",
   },
   de: {
     title: "Verkaufen Sie Ihre Immobilie mit MS Realty",
@@ -940,7 +940,7 @@ const SELLER_COPY = {
     title: "Продайте недвижимость с MS Realty",
     description: "Запросите брокерскую оценку и обратную связь от команды MS Realty.",
     h1: "Продайте недвижимость",
-    form_unavailable: "Форма временно недоступна. Позвоните или напишите нам — мы быстро отвечаем.",
+    form_unavailable: "Форма временно недоступна. Позвоните или напишите нам. Мы быстро отвечаем.",
   },
   el: {
     title: "Πουλήστε το ακίνητό σας με τη MS Realty",
@@ -999,17 +999,17 @@ const CONTACT_COPY = {
     title: "Свържете се с MS Realty",
     h1: "Свържете се с брокер",
     description: "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty. За обратно обаждане посочете име, телефон и предпочитано време.",
-    form_unavailable: "Формата е временно недостъпна. Обадете се или ни пишете — отговаряме бързо.",
+    form_unavailable: "Формата е временно недостъпна. Обадете се или ни пишете. Отговаряме бързо.",
     search_unavailable_title: "Търсенето е временно недостъпно",
-    search_unavailable_description: "Работим по него. Обадете се или разгледайте страниците ни — брокерът ще помогне веднага.",
+    search_unavailable_description: "Работим по него. Обадете се или разгледайте страниците ни. Брокерът ще помогне веднага.",
   },
   en: {
     title: "Contact MS Realty",
     h1: "Contact a broker",
     description: "Send a question or callback request to the MS Realty team.",
-    form_unavailable: "The form is temporarily unavailable. Call or message us instead — we reply quickly.",
+    form_unavailable: "The form is temporarily unavailable. Call or message us instead. We reply quickly.",
     search_unavailable_title: "Search is temporarily unavailable",
-    search_unavailable_description: "We are working on it. Call us or browse our pages — a broker will help right away.",
+    search_unavailable_description: "We are working on it. Call us or browse our pages. A broker will help right away.",
   },
   de: {
     title: "MS Realty kontaktieren",
@@ -1017,7 +1017,7 @@ const CONTACT_COPY = {
     description: "Senden Sie eine Frage oder Rückrufanfrage an das MS Realty Team.",
     form_unavailable: "Das Formular ist vorübergehend nicht verfügbar. Rufen Sie uns an oder schreiben Sie uns.",
     search_unavailable_title: "Die Suche ist vorübergehend nicht verfügbar",
-    search_unavailable_description: "Wir arbeiten daran. Rufen Sie uns an — ein Makler hilft sofort.",
+    search_unavailable_description: "Wir arbeiten daran. Rufen Sie uns an. Ein Makler hilft sofort.",
   },
   nl: {
     title: "Neem contact op met MS Realty",
@@ -1025,15 +1025,15 @@ const CONTACT_COPY = {
     description: "Stuur een vraag of terugbelverzoek naar het MS Realty team.",
     form_unavailable: "Het formulier is tijdelijk niet beschikbaar. Bel of stuur ons een bericht.",
     search_unavailable_title: "Zoeken is tijdelijk niet beschikbaar",
-    search_unavailable_description: "We werken eraan. Bel ons — een makelaar helpt direct.",
+    search_unavailable_description: "We werken eraan. Bel ons. Een makelaar helpt direct.",
   },
   ru: {
     title: "Связаться с MS Realty",
     h1: "Связаться с брокером",
     description: "Отправьте вопрос или запрос на обратный звонок команде MS Realty.",
-    form_unavailable: "Форма временно недоступна. Позвоните или напишите нам — мы быстро отвечаем.",
+    form_unavailable: "Форма временно недоступна. Позвоните или напишите нам. Мы быстро отвечаем.",
     search_unavailable_title: "Поиск временно недоступен",
-    search_unavailable_description: "Мы работаем над этим. Позвоните нам — брокер поможет сразу.",
+    search_unavailable_description: "Мы работаем над этим. Позвоните нам. Брокер поможет сразу.",
   },
   el: {
     title: "Επικοινωνία με τη MS Realty",
@@ -1041,7 +1041,7 @@ const CONTACT_COPY = {
     description: "Στείλτε ερώτηση ή αίτημα επανάκλησης στην ομάδα της MS Realty.",
     form_unavailable: "Η φόρμα δεν είναι προσωρινά διαθέσιμη. Καλέστε μας ή στείλτε μήνυμα.",
     search_unavailable_title: "Η αναζήτηση δεν είναι προσωρινά διαθέσιμη",
-    search_unavailable_description: "Εργαζόμαστε πάνω σε αυτό. Καλέστε μας — ένας μεσίτης θα βοηθήσει άμεσα.",
+    search_unavailable_description: "Εργαζόμαστε πάνω σε αυτό. Καλέστε μας. Ένας μεσίτης θα βοηθήσει άμεσα.",
   },
   he: {
     title: "יצירת קשר עם MS Realty",
@@ -1049,7 +1049,59 @@ const CONTACT_COPY = {
     description: "שלחו שאלה או בקשה לשיחה חוזרת לצוות MS Realty.",
     form_unavailable: "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
     search_unavailable_title: "החיפוש אינו זמין זמנית",
-    search_unavailable_description: "אנחנו עובדים על זה. התקשרו אלינו — מתווך יעזור מיד.",
+    search_unavailable_description: "אנחנו עובדים על זה. התקשרו אלינו. מתווך יעזור מיד.",
+  },
+};
+
+const NOT_FOUND_COPY = {
+  bg: {
+    title: "Страницата не е намерена | MS Realty",
+    h1: "Тази страница не е намерена",
+    description: "Адресът може да е променен или имотът вече да не е публично достъпен.",
+    error: "Грешка 404",
+    home: "Към началната страница",
+  },
+  en: {
+    title: "Page not found | MS Realty",
+    h1: "This page could not be found",
+    description: "The address may have changed, or the property may no longer be publicly available.",
+    error: "Error 404",
+    home: "Return home",
+  },
+  de: {
+    title: "Seite nicht gefunden | MS Realty",
+    h1: "Diese Seite wurde nicht gefunden",
+    description: "Die Adresse wurde möglicherweise geändert oder die Immobilie ist nicht mehr öffentlich verfügbar.",
+    error: "Fehler 404",
+    home: "Zur Startseite",
+  },
+  nl: {
+    title: "Pagina niet gevonden | MS Realty",
+    h1: "Deze pagina is niet gevonden",
+    description: "Het adres kan zijn gewijzigd of de woning is niet langer openbaar beschikbaar.",
+    error: "Fout 404",
+    home: "Terug naar home",
+  },
+  ru: {
+    title: "Страница не найдена | MS Realty",
+    h1: "Эта страница не найдена",
+    description: "Адрес мог измениться, или объект больше не доступен для публичного просмотра.",
+    error: "Ошибка 404",
+    home: "На главную",
+  },
+  el: {
+    title: "Η σελίδα δεν βρέθηκε | MS Realty",
+    h1: "Αυτή η σελίδα δεν βρέθηκε",
+    description: "Η διεύθυνση μπορεί να έχει αλλάξει ή το ακίνητο να μην είναι πλέον δημόσια διαθέσιμο.",
+    error: "Σφάλμα 404",
+    home: "Επιστροφή στην αρχική",
+  },
+  he: {
+    title: "העמוד לא נמצא | MS Realty",
+    h1: "העמוד הזה לא נמצא",
+    description: "ייתכן שהכתובת השתנתה או שהנכס אינו זמין עוד לצפייה ציבורית.",
+    error: "שגיאה 404",
+    home: "חזרה לעמוד הבית",
   },
 };
 
@@ -1065,7 +1117,7 @@ const CHROME_COPY = {
     explore: "Разгледайте",
     getInTouch: "Свържете се",
     tagline:
-      "Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция — с местни офиси и брокери, които говорят вашия език.",
+      "Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция, с местни офиси и брокери, които говорят вашия език.",
     copyright: "Всички права запазени.",
     requestSent: "Запитването е изпратено. Брокер ще се свърже с вас.",
     requestFailed: "Изпращането не бе успешно. Опитайте отново.",
@@ -1087,7 +1139,7 @@ const CHROME_COPY = {
     explore: "Explore",
     getInTouch: "Get in touch",
     tagline:
-      "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+      "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
     copyright: "All rights reserved.",
     requestSent: "Your inquiry was sent. A broker will contact you.",
     requestFailed: "The request could not be sent. Please try again.",
@@ -1108,7 +1160,7 @@ const CHROME_COPY = {
     explore: "Entdecken",
     getInTouch: "Kontakt aufnehmen",
     tagline:
-      "Immobilien zum Kauf und zur Miete in Sandanski und im Pirin-Gebirge, an der Schwarzmeerküste und im benachbarten Griechenland — mit lokalen Büros und Maklern, die Ihre Sprache sprechen.",
+      "Immobilien zum Kauf und zur Miete in Sandanski und im Pirin-Gebirge, an der Schwarzmeerküste und im benachbarten Griechenland, mit lokalen Büros und Maklern, die Ihre Sprache sprechen.",
     copyright: "Alle Rechte vorbehalten.",
     requestSent: "Ihre Anfrage wurde gesendet. Ein Makler meldet sich bei Ihnen.",
     requestFailed: "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
@@ -1129,7 +1181,7 @@ const CHROME_COPY = {
     explore: "Ontdekken",
     getInTouch: "Neem contact op",
     tagline:
-      "Vastgoed te koop en te huur in Sandanski en het Pirin-gebergte, aan de Zwarte Zeekust en in buurland Griekenland — met lokale kantoren en makelaars die uw taal spreken.",
+      "Vastgoed te koop en te huur in Sandanski en het Pirin-gebergte, aan de Zwarte Zeekust en in buurland Griekenland, met lokale kantoren en makelaars die uw taal spreken.",
     copyright: "Alle rechten voorbehouden.",
     requestSent: "Uw aanvraag is verzonden. Een makelaar neemt contact met u op.",
     requestFailed: "De aanvraag kon niet worden verzonden. Probeer het opnieuw.",
@@ -1150,7 +1202,7 @@ const CHROME_COPY = {
     explore: "Обзор",
     getInTouch: "Связаться с нами",
     tagline:
-      "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции — с местными офисами и брокерами, говорящими на вашем языке.",
+      "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции, с местными офисами и брокерами, говорящими на вашем языке.",
     copyright: "Все права защищены.",
     requestSent: "Запрос отправлен. Брокер свяжется с вами.",
     requestFailed: "Не удалось отправить запрос. Попробуйте ещё раз.",
@@ -1171,7 +1223,7 @@ const CHROME_COPY = {
     explore: "Εξερευνήστε",
     getInTouch: "Επικοινωνήστε",
     tagline:
-      "Ακίνητα προς πώληση και ενοικίαση στο Σαντάνσκι και τον Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη γειτονική Ελλάδα — με τοπικά γραφεία και μεσίτες που μιλούν τη γλώσσα σας.",
+      "Ακίνητα προς πώληση και ενοικίαση στο Σαντάνσκι και τον Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη γειτονική Ελλάδα, με τοπικά γραφεία και μεσίτες που μιλούν τη γλώσσα σας.",
     copyright: "Με την επιφύλαξη παντός δικαιώματος.",
     requestSent: "Το αίτημά σας εστάλη. Ένας μεσίτης θα επικοινωνήσει μαζί σας.",
     requestFailed: "Δεν ήταν δυνατή η αποστολή του αιτήματος. Προσπαθήστε ξανά.",
@@ -1192,7 +1244,7 @@ const CHROME_COPY = {
     explore: "גלו עוד",
     getInTouch: "יצירת קשר",
     tagline:
-      "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+      "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
     copyright: "כל הזכויות שמורות.",
     requestSent: "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
     requestFailed: "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -1355,6 +1407,10 @@ function homeCopy(localeCode) {
 
 function contactCopy(localeCode) {
   return CONTACT_COPY[localeCode] || CONTACT_COPY.en;
+}
+
+function notFoundCopy(localeCode) {
+  return NOT_FOUND_COPY[localeCode] || NOT_FOUND_COPY.en;
 }
 
 function translationsForSearchListing(registry, listing) {
@@ -2689,6 +2745,45 @@ export function renderLanguageFallback({ registry, requestedLocale }) {
     },
     request_language_available: true,
     public_translation_available: resolved.available,
+  };
+}
+
+export function renderNotFoundPage({ registry, pathname = "/" }) {
+  const path = String(pathname || "/");
+  const requestedLocale = path.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/)?.[1] || registry.source_locale;
+  const resolved = resolvePublicLocale(registry, requestedLocale);
+  const locale = resolved.locale;
+  const copy = notFoundCopy(locale.code);
+  const chrome = publicChrome(registry, locale, { active: null });
+
+  return {
+    kind: "not_found",
+    status: 404,
+    requested_locale: requestedLocale,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: false,
+    metadata: {
+      title: copy.title,
+      description: copy.description,
+      robots: "noindex,follow",
+    },
+    hreflang: [],
+    schema: null,
+    chrome,
+    body: {
+      h1: copy.h1,
+      intro: copy.description,
+      error: copy.error,
+      search: {
+        path: chrome.nav.find((item) => item.id === "buy")?.href || chrome.home.href,
+        label: labelsFor(locale.code).browseListings,
+      },
+      home: { path: chrome.home.href, label: copy.home },
+    },
   };
 }
 

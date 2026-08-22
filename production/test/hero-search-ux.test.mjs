@@ -28,6 +28,7 @@ test("home hero has responsive local imagery and an accessible full filter contr
   assert.equal(existsSync(new URL(`../../public${LOGO_URL}`, import.meta.url)), true);
   assert.equal(existsSync(new URL(`../../public${LOGO_URL_REVERSED}`, import.meta.url)), true);
   assert.doesNotMatch(html, /data:image\/png;base64/);
+  assert.match(html, /<picture><source media="\(prefers-color-scheme: dark\)" srcSet="\/vendor\/ms-realty-logo-reversed-[a-f0-9]{12}\.png"><img src="\/vendor\/ms-realty-logo-[a-f0-9]{12}\.png"/);
   assert.match(html, /class="site-ft__logo"[^>]*><img[^>]*loading="lazy" decoding="async"/);
 
   assert.match(html, /id="home-hero-search-form" class="hp-hero__search-form mk-search__bar"[^>]*action="\/en\/search"[^>]*role="search"[^>]*data-hero-advanced-search="true"/);
@@ -138,4 +139,18 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(css, /@media \(max-width: 900px\) \{[\s\S]*?\.hp-hero__advanced-grid \{ grid-template-columns: repeat\(6, minmax\(0, 1fr\)\); \}/);
   assert.match(css, /@media \(max-width: 679px\) \{[\s\S]*?\.hp-hero \{ align-items: flex-start; \}[\s\S]*?\.hp-hero__in \{ padding-block: clamp\(7rem, 22svh, 11\.375rem\) var\(--space-8\); \}[\s\S]*?\.hp-hero__search-form \{ --hero-search-action-width: 52px; \}[\s\S]*?\.hp-hero__search \.mk-search__go span \{ display: none; \}[\s\S]*?\.hp-hero__advanced-grid \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\); \}/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /@media \(prefers-color-scheme: dark\) \{[\s\S]*?html:has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;/);
+  assert.match(css, /@media \(min-width: 901px\) \{\s*\.hp-guides__rail \{ grid-template-columns: repeat\(3, minmax\(0, 1fr\)\); \}/);
+  assert.match(css, /\[data-featured-listings\]:has\(\[data-featured-empty\]\) \{ padding-bottom: var\(--space-8\); \}/);
+  assert.match(css, /@media \(min-width: 1081px\) \{[\s\S]*?\.sr-filters--desktop \{[\s\S]*?max-height: calc\(100svh - 73px - var\(--space-12\)\);[\s\S]*?overflow-y: auto;/);
+  assert.match(css, /main\.ct-page\.pg-narrow\[data-react-public-ui="seller"\] \{[\s\S]*?grid-template-columns: minmax\(0, 0\.9fr\) minmax\(0, 1\.1fr\);/);
+  assert.match(css, /main\[data-react-public-ui="seller"\] \.ct-page__head \{[\s\S]*?url\("\/hero\/sandanski-town-1920\.webp"\) center \/ cover;/);
+  assert.match(css, /main\[data-kind="location"\]\[data-total-matches="1"\] \.mk-pcard \{[\s\S]*?grid-template-columns: minmax\(320px, 44%\) minmax\(0, 1fr\);/);
+  assert.match(css, /\.nf-page \{[\s\S]*?grid-template-columns: minmax\(0, 1\.06fr\) minmax\(340px, 0\.94fr\);[\s\S]*?min-height: calc\(100svh - 73px\);/);
+  assert.match(css, /\.site-mobile-tabs a \{[\s\S]*?color: var\(--text-body\);/);
+  assert.match(css, /\.hp-guide \.mk-badge--neutral \{ color: var\(--text-body\); \}/);
+  assert.match(css, /\[data-featured-empty\] \.mk-empty__text \{ color: var\(--text-body\); \}/);
+  assert.match(css, /dl\[data-listing-facts="true"\] dt \{ color: var\(--text-body\);/);
+  assert.match(css, /\.ld-aside__ref \{[^}]*color: var\(--text-body\);/);
+  assert.match(css, /\.ld-trust \{[^}]*color: var\(--text-body\);/);
 });

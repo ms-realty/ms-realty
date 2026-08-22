@@ -116,6 +116,7 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.match(html, /data-mobile-contact-options="true"/);
   assert.match(html, /data-mobile-contact-options-open="true"/);
   assert.match(html, /data-listing-action="back_to_results" data-history-back="same-origin"/);
+  assert.doesNotMatch(html, /data-related-listings="true"/);
   assert.doesNotMatch(html, /\/api\/admin\/(viewings|replies)/);
 });
 
@@ -164,7 +165,7 @@ test("approved 360 tours retain a public gallery fallback when the viewer cannot
 
  assert.match(html, /id="listing-tour"/);
  assert.match(html, /data-photo-sphere-fallback="true"/);
- assert.match(html, /href="#listing-gallery"/);
+ assert.match(html, /data-photo-sphere-fallback="true"[\s\S]*?data-listing-gallery-open="0"/);
  assert.match(html, /ld-tour__fallback/);
 });
 
@@ -182,7 +183,7 @@ test("approved Supersplat tours link to the self-hosted viewer without loading t
   assert.match(html, /data-tour-provider="supersplat-viewer"/);
   assert.match(html, /href="https:\/\/makler-realty\.com\/tours\/MS-CRAWL-0001\/index\.html" target="_blank" rel="noopener" data-supersplat-viewer-link="true"/);
   assert.match(html, /data-tour-gallery-fallback="true"/);
-  assert.match(html, /href="#listing-gallery"/);
+  assert.match(html, /data-tour-gallery-fallback="true"[\s\S]*?data-listing-gallery-open="0"/);
   assert.doesNotMatch(html, /data-photo-sphere-viewer=/);
   assert.doesNotMatch(html, /data-panorama-url=/);
 });
@@ -421,7 +422,7 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.match(html, /data-mobile-menu-close="true"/);
   assert.match(html, /role="dialog" aria-modal="true" aria-label="Primary navigation"/);
   assert.match(html, /data-language-switcher="desktop"/);
-  assert.match(html, /aria-label="EN — Language: English"/);
+  assert.match(html, /aria-label="EN, Language: English"/);
   assert.doesNotMatch(html, /<h4>/);
   assert.match(html, /data-language-switcher="mobile"/);
   assert.match(html, /data-mobile-task-navigation="true"/);
@@ -532,7 +533,8 @@ test("zero-result searches render a useful mobile recovery state", () => {
   assert.equal(page.cards.length, 0);
   assert.match(html, /data-search-empty="true"/);
   assert.match(html, /<h2>Результаты поиска<\/h2>/);
-  assert.match(html, /<p>0 совпадений<\/p>/);
+  assert.match(html, /class="sr-empty__value">0<\/strong>/);
+  assert.match(html, /<p>совпадений<\/p>/);
   assert.match(html, /href="\/ru\/search"[^>]*>.*Очистить фильтры/s);
   assert.doesNotMatch(html, /class="sr-list"/);
 });
@@ -717,7 +719,8 @@ test("home page explains an empty reviewed catalog without inventing featured ca
 
   assert.equal(page.cards.length, 0);
   assert.match(html, /data-featured-empty="true"/);
-  assert.match(html, />0 проверени обяви</);
+  assert.match(html, /class="mk-empty__value">0</);
+  assert.match(html, /class="mk-empty__text">проверени обяви</);
 });
 
 test("English home makes every approved buyer guide discoverable without expanding the mobile task dock", () => {
@@ -871,7 +874,7 @@ test("seller valuation page degrades to a phone CTA when lead writes are disable
   assert.equal(disabled.body.callback, null);
   assert.equal(
     disabled.body.form_unavailable,
-    "Формата е временно недостъпна. Обадете се или ни пишете — отговаряме бързо.",
+    "Формата е временно недостъпна. Обадете се или ни пишете. Отговаряме бързо.",
   );
   assert.equal(disabled.body.contact_channels.phone.href, "tel:+359879696870");
 
