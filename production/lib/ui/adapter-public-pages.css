@@ -416,9 +416,8 @@ form[data-seller-stepper] .sell-form__section { padding-top: 0; border-top: 0; }
   display: grid;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-5);
-  border-inline-start: 3px solid var(--border-strong);
-  border-start-end-radius: var(--radius-md);
-  border-end-end-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 .guide-sources__label { margin: 0; color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--fw-semibold); }

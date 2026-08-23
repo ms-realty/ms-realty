@@ -123,14 +123,15 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
   row-gap: 3px;
   min-height: 64px;
   padding: var(--space-3) var(--space-4);
-  padding-inline-start: calc(var(--space-4) - 3px);
-  border-inline-start: 3px solid transparent;
   color: inherit;
   text-decoration: none;
 }
 .adm-inbox__row:hover { background: var(--ink-50); text-decoration: none; }
 .adm-inbox__row:focus-visible { outline: none; box-shadow: inset var(--shadow-focus); }
-.adm-inbox__row[aria-current="true"] { background: var(--ink-50); border-inline-start-color: var(--brand); }
+/* Selection uses the workbench's own raised-surface language (as on the
+   segmented controls), not a coloured edge bar. */
+.adm-inbox__row[aria-current="true"] { background: var(--surface); box-shadow: var(--shadow-xs); }
+.adm-inbox__row[aria-current="true"] .adm-inbox__title { color: var(--text-strong); font-weight: var(--fw-semibold); }
 .adm-inbox__title {
   display: block;
   min-width: 0;
