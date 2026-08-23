@@ -1277,8 +1277,8 @@
           if (status) { status.textContent = remove.getAttribute("data-delete-failed-label") || "Could not delete the view."; status.setAttribute("data-state", "error"); }
         })
         .then(function () { remove.disabled = false; });
-    }
-    }
+    });
+  }
 
   // Listing photo upload inside the media manager. Without JavaScript the same
   // form posts multipart and the server redirects back to this panel; here it
