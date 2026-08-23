@@ -40,6 +40,13 @@ export function contactPath(registry, localeCode) {
   return `/${locale.code}/${locale.route_segments.contact}`;
 }
 
+// Buyer onboarding ("Start your search"). Older registries without the segment
+// still resolve to /{locale}/start so the route never disappears.
+export function startPath(registry, localeCode) {
+  const locale = getLocale(registry, localeCode);
+  return `/${locale.code}/${locale.route_segments.start || "start"}`;
+}
+
 export function homePath(registry, localeCode) {
   const locale = getLocale(registry, localeCode);
   return `/${locale.code}`;
@@ -67,6 +74,16 @@ export function hreflangForSeller(registry) {
       href: sellerPath(registry, locale.code),
     })),
     { hreflang: "x-default", href: sellerPath(registry, registry.source_locale) },
+  ];
+}
+
+export function hreflangForStart(registry) {
+  return [
+    ...publicIndexableLocales(registry).map((locale) => ({
+      hreflang: locale.code,
+      href: startPath(registry, locale.code),
+    })),
+    { hreflang: "x-default", href: startPath(registry, registry.source_locale) },
   ];
 }
 

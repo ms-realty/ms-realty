@@ -64,6 +64,7 @@ def main() -> int:
             or not segments.get("location")
             or not segments.get("contact")
             or not segments.get("seller")
+            or not segments.get("start")
         ):
             fail(f"missing route segments for {code}")
 
@@ -98,6 +99,7 @@ def main() -> int:
     print("PASS: locale registry supports dynamic approved public locales")
     print("PASS: admin CMS/CRM locales are bg, ru, en")
     print("PASS: Greek and Israel Hebrew website language coverage is seeded")
+    print("PASS: every locale carries the buyer onboarding start segment")
     return 0
 
 

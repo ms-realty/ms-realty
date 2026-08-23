@@ -102,7 +102,11 @@ export function assertLocaleRegistry(registry) {
       !ROUTE_SEGMENT.test(locale.route_segments.search) ||
       !ROUTE_SEGMENT.test(locale.route_segments.location) ||
       !ROUTE_SEGMENT.test(locale.route_segments.contact) ||
-      !ROUTE_SEGMENT.test(locale.route_segments.seller)
+      !ROUTE_SEGMENT.test(locale.route_segments.seller) ||
+      // The buyer onboarding segment is optional for registries written before
+      // it existed (startPath falls back to "start"), but when present it must
+      // be a valid URL segment like every other route.
+      (locale.route_segments.start !== undefined && !ROUTE_SEGMENT.test(locale.route_segments.start))
     ) {
       throw new Error(`Invalid route segment for ${locale.code}`);
     }
@@ -158,6 +162,7 @@ export function addLocaleToRegistry(registry, input) {
       location: input.route_segments?.location || "locations",
       contact: input.route_segments?.contact || "contact",
       seller: input.route_segments?.seller || "sell",
+      start: input.route_segments?.start || "start",
     },
   };
   const next = { ...registry, locales: [...registry.locales, locale] };

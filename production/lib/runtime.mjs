@@ -19,11 +19,12 @@ import {
   renderSearchUnavailablePage,
   renderContactPage,
   renderSellerPage,
+  renderStartPage,
   isActiveListing,
 } from "./public-site.mjs";
 
 export { renderSearchUnavailablePage };
-import { contactPath, locationPath, listingPath, publicLocationNames, sellerPath } from "./seo.mjs";
+import { contactPath, locationPath, listingPath, publicLocationNames, sellerPath, startPath } from "./seo.mjs";
 import { publicFactValue } from "./listing-facts.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
 import { latestTourForListing } from "./tours.mjs";
@@ -262,6 +263,15 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   });
   if (sellerLocale) return { type: "seller", localeCode: sellerLocale.code };
 
+  const startLocale = registry.locales.find((locale) => {
+    try {
+      return startPath(registry, locale.code) === normalized;
+    } catch {
+      return false;
+    }
+  });
+  if (startLocale) return { type: "start", localeCode: startLocale.code };
+
   const contactLocale = registry.locales.find((locale) => {
     try {
       return contactPath(registry, locale.code) === normalized;
@@ -304,6 +314,9 @@ export function renderRuntimePath(
   brokerContacts = [],
   tourApprovals = [],
   preservationCatalog = [],
+  // `searchParams` (URLSearchParams or a plain object) lets query-driven pages
+  // such as the buyer onboarding finish step render without JavaScript.
+  { searchParams = null } = {},
 ) {
   const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks, tourApprovals);
   const listings = () => runtimeListings(seed, translationTasks);
@@ -333,6 +346,9 @@ export function renderRuntimePath(
   }
   if (resolved.type === "seller") {
     return renderSellerPage({ registry, localeCode: resolved.localeCode });
+  }
+  if (resolved.type === "start") {
+    return renderStartPage({ registry, localeCode: resolved.localeCode, listings: listings(), searchParams });
   }
   if (resolved.type === "contact") {
     return renderContactPage({ registry, localeCode: resolved.localeCode });

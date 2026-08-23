@@ -30,6 +30,14 @@ const PUBLIC_LEAD_SOURCE_CONTRACTS = Object.freeze({
     intent: "consultation",
     reachableContact: true,
   },
+  // "Get a broker shortlist" from the buyer onboarding page (/{locale}/start).
+  // The page derives the segment from the answers: rent becomes a renter,
+  // a non-EU citizen buying becomes a foreign buyer, everyone else a buyer.
+  website_buyer_onboarding: {
+    leadTypes: ["buyer", "foreign_buyer", "renter"],
+    intent: "consultation",
+    reachableContact: true,
+  },
 });
 export const BROKER_INTAKE_SOURCES = Object.freeze([
   "broker_phone",
