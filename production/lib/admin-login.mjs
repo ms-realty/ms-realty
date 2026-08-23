@@ -234,6 +234,9 @@ const LOGIN_STYLE = `
   }
   .login-page[data-login-state="error"] #admin-email,
   .login-page[data-login-state="error"] #admin-password { border-color: var(--danger-500, #C42E44); }
+  /* A rejected second factor means the password was right, so only the code
+     field is marked. */
+  .login-page[data-login-state="error-2fa"] #admin-code { border-color: var(--danger-500, #C42E44); }
   .login__reveal {
     position: absolute;
     inset-inline-end: 6px;
@@ -312,6 +315,8 @@ export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
     ? `<p class="login__error" id="admin-login-error" role="alert">${ALERT_ICON}<span>${escapeHtml(error === "2fa" ? copy.errorTwoFactor : copy.error)}</span></p>`
     : "";
   const describedBy = error ? ' aria-describedby="admin-login-error"' : "";
+  const credentialDescribedBy = error === "2fa" ? "" : describedBy;
+  const codeDescribedBy = error === "2fa" ? describedBy : "";
   const locales = ADMIN_LOGIN_LOCALES.map((code) => {
     const href = code === "bg" ? "/admin/login" : `/admin/login?locale=${code}`;
     const current = code === active ? ' aria-current="page"' : "";
@@ -330,7 +335,7 @@ export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
 <link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">
 <style>${LOGIN_STYLE}</style>
 </head>
-<body class="login-page" data-login-state="${error ? "error" : "idle"}" data-admin-login-locale="${active}">
+<body class="login-page" data-login-state="${error ? (error === "2fa" ? "error-2fa" : "error") : "idle"}" data-admin-login-locale="${active}">
 <main class="login" aria-labelledby="admin-login-title">
   <div class="login__top">
     <p class="login__brand"><img src="${LOGO_URL}" alt="MS Realty" height="40" width="${Math.round(40 * LOGO_ASPECT)}"></p>
@@ -341,14 +346,14 @@ export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
   ${errorBanner}
   <form method="POST" action="/admin/login" class="login__form" data-admin-login-form="true">
     <label for="admin-email">${escapeHtml(copy.email)}</label>
-    <div class="login__field"><input id="admin-email" name="email" type="email" autocomplete="username" inputmode="email" required autofocus${describedBy}></div>
+    <div class="login__field"><input id="admin-email" name="email" type="email" autocomplete="username" inputmode="email" required autofocus${credentialDescribedBy}></div>
     <label for="admin-password">${escapeHtml(copy.password)}</label>
     <div class="login__field">
-      <input id="admin-password" name="password" type="password" autocomplete="current-password" required${describedBy}>
+      <input id="admin-password" name="password" type="password" autocomplete="current-password" required${credentialDescribedBy}>
       <button type="button" class="login__reveal" data-login-reveal="true" aria-controls="admin-password" aria-pressed="false" aria-label="${escapeHtml(copy.showPassword)}" data-show-label="${escapeHtml(copy.showShort)}" data-hide-label="${escapeHtml(copy.hideShort)}" data-show-aria="${escapeHtml(copy.showPassword)}" data-hide-aria="${escapeHtml(copy.hidePassword)}">${escapeHtml(copy.showShort)}</button>
     </div>
     <label for="admin-code">${escapeHtml(copy.code)} <span class="login__optional">${escapeHtml(copy.codeOptional)}</span></label>
-    <div class="login__field"><input id="admin-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9A-Za-z -]*" maxlength="20" spellcheck="false"${describedBy}></div>
+    <div class="login__field"><input id="admin-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9A-Za-z -]*" maxlength="20" spellcheck="false"${codeDescribedBy}></div>
     <button type="submit" class="login__submit" data-login-submit="true" data-idle-label="${escapeHtml(copy.submit)}" data-busy-label="${escapeHtml(copy.submitting)}">${SPINNER_ICON}<span data-login-submit-label="true">${escapeHtml(copy.submit)}</span></button>
   </form>
   <p class="login__support">${escapeHtml(copy.support)}</p>

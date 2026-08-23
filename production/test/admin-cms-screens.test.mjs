@@ -203,6 +203,12 @@ test("the standalone pages speak the three workbench languages and carry their s
     assert.match(html, /data-login-reveal="true"/);
   }
   assert.match(renderAdminLoginPage({ error: true }), /data-login-state="error"/);
+  // A rejected second factor marks the code field, not the credentials.
+  const twoFactor = renderAdminLoginPage({ error: "2fa", locale: "en" });
+  assert.match(twoFactor, /data-login-state="error-2fa"/);
+  assert.match(twoFactor, /The authenticator code was not accepted/);
+  assert.match(twoFactor, /id="admin-code"[^>]*aria-describedby="admin-login-error"/);
+  assert.doesNotMatch(twoFactor, /id="admin-email"[^>]*aria-describedby="admin-login-error"/);
 
   for (const [locale, marker] of [
     ["bg", "Още няма оператори."],
