@@ -4,6 +4,7 @@ export const FILE_BACKED_PUBLIC_MUTATIONS = new Set([
   "/api/events",
   "/api/language-requests",
   "/api/saved-searches",
+  "/api/saved-searches/manage",
 ]);
 
 export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
@@ -30,6 +31,7 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/replies",
   "/api/admin/replies/delivery",
   "/api/admin/replies/draft",
+  "/api/admin/saved-search-alerts/run-due",
   "/api/admin/seller-pipeline/outcome",
   "/api/admin/tours/approve",
   "/api/admin/translations/approve",
