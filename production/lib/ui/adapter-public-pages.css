@@ -577,3 +577,15 @@ form[data-seller-stepper] .sell-form__section { padding-top: 0; border-top: 0; }
   .guide-toc a,
   .guide-sources__links a { min-height: 44px; }
 }
+
+/* Responsive rhythm for the sections and the sell band this sheet owns. It
+   lives here, not in adapter-public.css: the bundle concatenates this sheet
+   later, so an earlier media rule would lose to the base rule above. */
+@media (max-width: 900px) {
+  .hp-sell__in { flex-direction: column; align-items: flex-start; gap: var(--space-5); }
+}
+@media (max-width: 760px) {
+  .hp-sec { padding-block: var(--space-8); }
+  .hp-sec__head { margin-bottom: var(--space-5); }
+  .hp-sec__head h2 { font-size: var(--text-2xl); }
+}

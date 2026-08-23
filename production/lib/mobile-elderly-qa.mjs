@@ -109,7 +109,13 @@ export function buildMobileElderlyQaReport({
     renderSellerPage({ registry, localeCode: "he", leadWritesDisabled: true }),
   );
   const gallerySlideCount = (galleryListingHtml.match(/data-mobile-gallery-slide=/g) || []).length;
-  const publicAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-public.css"), "utf8");
+  // The public sheet is split per screen family (adapter-public.css plus the
+  // adapter-public-*.css extensions the design build concatenates), so the CSS
+  // contracts below are checked against all of them.
+  const uiDir = fromRoot("production", "lib", "ui");
+  const publicAdapterCss = ["adapter-public.css", ...fs.readdirSync(uiDir).filter((name) => /^adapter-public-.+\.css$/.test(name)).sort()]
+    .map((name) => fs.readFileSync(path.join(uiDir, name), "utf8"))
+    .join("\n");
   const adminAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-admin.css"), "utf8");
 
   for (const [kind, html] of Object.entries(pages)) {
