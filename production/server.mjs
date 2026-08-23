@@ -2,6 +2,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { isProductionEnvironment, searchRuntimeEnvironment } from "./lib/launch-service-contract.mjs";
 import { DEFAULT_AUDIT_LOG_PATH } from "./lib/audit-log.mjs";
+// B6 workspace security and data
+import { DEFAULT_ADMIN_SESSION_LEDGER_PATH } from "./lib/admin-sessions.mjs";
+import { DEFAULT_OPERATOR_TWO_FACTOR_PATH } from "./lib/operator-two-factor.mjs";
+import { DEFAULT_WORKSPACE_EXPORT_DIR, DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./lib/workspace-export.mjs";
 import { DEFAULT_ACCOUNT_LEDGER_PATH } from "./lib/account-ledger.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./lib/broker-contacts.mjs";
 import { createHttpApp } from "./lib/http.mjs";
@@ -148,6 +152,15 @@ export function productionServerConfig(env = process.env) {
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
+    // B6 workspace security and data
+    adminSessionLedgerPath: env.MS_REALTY_ADMIN_SESSION_LEDGER_PATH || DEFAULT_ADMIN_SESSION_LEDGER_PATH,
+    operatorTwoFactorPath: env.MS_REALTY_OPERATOR_2FA_PATH || DEFAULT_OPERATOR_TWO_FACTOR_PATH,
+    operatorTwoFactorKey: env.MS_REALTY_OPERATOR_2FA_KEY,
+    operatorTwoFactorStepUpSeconds: env.MS_REALTY_OPERATOR_2FA_STEP_UP_SECONDS,
+    workspaceExportLedgerPath: env.MS_REALTY_WORKSPACE_EXPORT_LEDGER_PATH || DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH,
+    workspaceExportDir: env.MS_REALTY_WORKSPACE_EXPORT_DIR || DEFAULT_WORKSPACE_EXPORT_DIR,
+    workspaceExportTtlSeconds: env.MS_REALTY_WORKSPACE_EXPORT_TTL_SECONDS,
+    auditRetentionWindowDays: env.MS_REALTY_AUDIT_RETENTION_DAYS,
     accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     leadAssignmentLedgerPath: env.MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH || DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
@@ -250,6 +263,15 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     eventLedgerPath: config.eventLedgerPath,
     consentLedgerPath: config.consentLedgerPath,
     auditLogPath: config.auditLogPath,
+    // B6 workspace security and data
+    adminSessionLedgerPath: config.adminSessionLedgerPath,
+    operatorTwoFactorPath: config.operatorTwoFactorPath,
+    operatorTwoFactorKey: config.operatorTwoFactorKey,
+    operatorTwoFactorStepUpSeconds: config.operatorTwoFactorStepUpSeconds,
+    workspaceExportLedgerPath: config.workspaceExportLedgerPath,
+    workspaceExportDir: config.workspaceExportDir,
+    workspaceExportTtlSeconds: config.workspaceExportTtlSeconds,
+    auditRetentionWindowDays: config.auditRetentionWindowDays,
     accountLedgerPath: config.accountLedgerPath,
     payloadAdminAuth: config.payloadAdminAuth,
     leadLedgerPath: config.leadLedgerPath,

@@ -7,13 +7,38 @@ const MIN_OPERATOR_TOKEN_LENGTH = 24;
 
 export const ADMIN_ROLES = ["admin", "broker", "editor", "translator", "agent"];
 
+// security:self is every operator's own second factor and own session list.
+// data:export is deliberately admin-only (through the admin wildcard): a
+// workspace export is a bulk personal-data release, not an operations read.
 const ROLE_CAPABILITIES = {
   admin: ["*"],
-  broker: ["workspace:read", "operations:read", "operations:write", "cases:read", "cases:write", "content:read", "activity:read"],
-  editor: ["workspace:read", "content:read", "content:write", "translations:read", "translations:write", "translations:publish", "activity:read"],
-  translator: ["workspace:read", "content:read", "translations:read", "translations:write", "activity:read"],
-  agent: ["workspace:read", "cases:read", "cases:write", "activity:read"],
+  broker: ["workspace:read", "operations:read", "operations:write", "cases:read", "cases:write", "content:read", "activity:read", "security:self"],
+  editor: ["workspace:read", "content:read", "content:write", "translations:read", "translations:write", "translations:publish", "activity:read", "security:self"],
+  translator: ["workspace:read", "content:read", "translations:read", "translations:write", "activity:read", "security:self"],
+  agent: ["workspace:read", "cases:read", "cases:write", "activity:read", "security:self"],
 };
+
+// B6 workspace security and data
+const SECURITY_SELF_PATHS = new Set([
+  "/api/admin/security/two-factor",
+  "/api/admin/security/two-factor/enrol",
+  "/api/admin/security/two-factor/activate",
+  "/api/admin/security/two-factor/verify",
+  "/api/admin/security/two-factor/disable",
+  "/api/admin/security/sessions",
+  "/api/admin/security/sessions/revoke",
+]);
+const DATA_EXPORT_PATHS = new Set(["/api/admin/data-exports", "/api/admin/data-exports/download"]);
+// Reachable with only a bearer token while a required second factor is not yet
+// active, so turning the requirement on never locks an operator out of the very
+// routes that let them enrol.
+export const TWO_FACTOR_SELF_SERVICE_PATHS = new Set([
+  "/api/admin/security/two-factor",
+  "/api/admin/security/two-factor/enrol",
+  "/api/admin/security/two-factor/activate",
+  "/api/admin/security/two-factor/verify",
+  "/api/admin/security/two-factor/disable",
+]);
 
 const AGENT_REALTY_CASE_ACTIONS = new Set(["step_completed", "step_blocked", "case_closed"]);
 const AGENT_REALTY_CASE_CONDITION_ACTIONS = new Set([
@@ -92,6 +117,16 @@ function timingSafeMatch(actual, expected) {
   return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 }
 
+// Off unless an operator entry opts in, so shipping the feature cannot lock
+// anybody out. Only an explicit true turns it on.
+function twoFactorRequirement(row, label) {
+  const value = row?.require_two_factor ?? row?.require_2fa;
+  if (value === undefined || value === null || value === "") return false;
+  if (value === true || value === "true") return true;
+  if (value === false || value === "false") return false;
+  throw new Error(`${label} must be true or false`);
+}
+
 function workspaceIds(value) {
   const values = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
   return [...new Set(values.map((workspaceId) => String(workspaceId || "").trim()).filter(Boolean))].sort();
@@ -143,6 +178,10 @@ export function canAdminAccessWorkspace(principal, workspaceId) {
 export function requiredAdminCapability(method, pathname) {
   const verb = String(method || "GET").toUpperCase();
   if (pathname === "/admin") return "workspace:read";
+  // B6 workspace security and data
+  if (SECURITY_SELF_PATHS.has(pathname)) return "security:self";
+  if (DATA_EXPORT_PATHS.has(pathname)) return "data:export";
+  if (verb === "GET" && pathname === "/api/admin/security/audit-retention") return "activity:read";
   if (["/admin/team", "/api/admin/team"].includes(pathname)) return "team:manage";
   // Every operator may read the workspace settings screen; only an admin saves.
   if (["/admin/settings", "/api/admin/settings"].includes(pathname)) {
@@ -196,6 +235,7 @@ export function publicAdminPrincipal(principal) {
     roles: [...(principal.roles || [])],
     workspace_ids: [...(principal.workspace_ids || [])],
     capabilities: adminCapabilities(principal),
+    require_two_factor: principal.require_two_factor === true,
   };
 }
 
@@ -226,6 +266,7 @@ export function adminCredentials(env = process.env) {
     tokens.add(token);
     const roles = normalizedRoles(row.roles, `${CREDENTIALS_ENV} entry ${index + 1} roles`);
     const assignedWorkspaces = workspaceIds(row.workspace_ids);
+    const requireTwoFactor = twoFactorRequirement(row, `${CREDENTIALS_ENV} entry ${index + 1} require_two_factor`);
     const priorRoles = rolesByOperator.get(id);
     if (priorRoles && priorRoles.join(",") !== roles.join(",")) {
       throw new Error(`${CREDENTIALS_ENV} entries for ${id} must use the same roles`);
@@ -236,7 +277,7 @@ export function adminCredentials(env = process.env) {
     }
     rolesByOperator.set(id, roles);
     workspacesByOperator.set(id, assignedWorkspaces);
-    return { id, token, roles, workspace_ids: assignedWorkspaces };
+    return { id, token, roles, workspace_ids: assignedWorkspaces, require_two_factor: requireTwoFactor };
   });
 }
 
@@ -260,6 +301,7 @@ export function resolveAdminPrincipal(auth, env = process.env) {
         can_mutate: true,
         roles: credential.roles,
         workspace_ids: credential.workspace_ids,
+        require_two_factor: credential.require_two_factor === true,
       };
     }
   }

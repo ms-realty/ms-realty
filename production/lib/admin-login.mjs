@@ -93,8 +93,10 @@ const LOGIN_STYLE = `
     font-weight: 600;
     line-height: 1.25;
   }
+  .login__optional { font-weight: 400; color: var(--text-muted, #948263); }
   .login #admin-email,
-  .login #admin-password {
+  .login #admin-password,
+  .login #admin-code {
     display: block;
     width: 100%;
     height: 48px;
@@ -111,7 +113,8 @@ const LOGIN_STYLE = `
     line-height: 1.25;
   }
   .login #admin-email:focus-visible,
-  .login #admin-password:focus-visible {
+  .login #admin-password:focus-visible,
+  .login #admin-code:focus-visible {
     outline: none;
     border-color: var(--ink-500, #545453);
     box-shadow: var(--shadow-focus, 0 0 0 3px rgba(219, 62, 62, 0.45));
@@ -143,10 +146,16 @@ const LOGIN_STYLE = `
   }
 `;
 
+// B6 workspace security and data: `error` is either a truthy generic flag or
+// the literal "2fa", which is what /admin/login redirects with when the
+// password was right but the operator's second factor was not supplied or not
+// accepted. A plain refusal still says nothing about which half failed.
 export function renderAdminLoginPage({ error = false } = {}) {
-  const errorBanner = error
-    ? `<p class="login__error" role="alert">Данните не бяха приети. Опитай отново. / Sign-in details were not accepted. Try again.</p>`
-    : "";
+  const errorBanner = !error
+    ? ""
+    : error === "2fa"
+      ? `<p class="login__error" role="alert">Кодът от приложението не беше приет. / The authenticator code was not accepted.</p>`
+      : `<p class="login__error" role="alert">Данните не бяха приети. Опитай отново. / Sign-in details were not accepted. Try again.</p>`;
   return `<!doctype html>
 <html lang="bg">
 <head>
@@ -171,6 +180,8 @@ export function renderAdminLoginPage({ error = false } = {}) {
     <input id="admin-email" name="email" type="email" autocomplete="username" inputmode="email" required autofocus>
     <label for="admin-password">Парола</label>
     <input id="admin-password" name="password" type="password" autocomplete="current-password" required>
+    <label for="admin-code">Код от приложението <span class="login__optional">(само ако си включил двуфакторна защита)</span></label>
+    <input id="admin-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9A-Za-z -]*" maxlength="20" spellcheck="false">
     <button type="submit" class="login__submit">Влез</button>
   </form>
 </main>

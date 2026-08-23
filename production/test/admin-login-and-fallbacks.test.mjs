@@ -98,8 +98,11 @@ test("session cookie helpers round-trip and cap the Payload session token", () =
   assert.match(login, /\.login-page \{[^}]*background: var\(--ink-50, #F4F4F3\)/);
   assert.match(login, /\.login \{[^}]*max-width: 420px;[^}]*border-radius: 14px/);
   assert.match(login, /\.login__title \{[^}]*font-size: 22px;\s*font-weight: 600/);
-  assert.match(login, /\.login #admin-email,\s*\.login #admin-password \{[^}]*height: 48px;[^}]*border: 1px solid var\(--ink-200, #C9C9C7\);\s*border-radius: 8px/);
-  assert.match(login, /#admin-password:focus-visible \{[^}]*box-shadow: var\(--shadow-focus,/);
+  assert.match(login, /\.login #admin-email,\s*\.login #admin-password,\s*\.login #admin-code \{[^}]*height: 48px;[^}]*border: 1px solid var\(--ink-200, #C9C9C7\);\s*border-radius: 8px/);
+  assert.match(login, /#admin-code:focus-visible \{[^}]*box-shadow: var\(--shadow-focus,/);
+  // The optional second-factor code shares the field and focus treatment.
+  assert.match(login, /\.login #admin-password:focus-visible,\s*\.login #admin-code:focus-visible \{/);
+  assert.match(login, /name="code"[^>]*autocomplete="one-time-code"/);
   assert.match(login, /\.login__submit \{[^}]*height: 48px;[^}]*border-radius: 8px;\s*background: var\(--accent, #C42D2D\)/);
   assert.match(login, /class="login__submit">Влез</);
   assert.doesNotMatch(login, /[—–]/);
