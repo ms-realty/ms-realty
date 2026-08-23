@@ -18,6 +18,9 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/lead-pipeline/outcome",
   "/api/admin/leads",
   "/api/admin/leads/assign",
+  "/api/admin/leads/bulk",
+  "/api/admin/leads/snooze",
+  "/api/admin/leads/unsnooze",
   "/api/admin/listing-quality/import",
   "/api/admin/listings/publication-schedules",
   "/api/admin/listings/publication-schedules/cancel",
@@ -39,6 +42,7 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/translations/publish",
   "/api/admin/viewings",
   "/api/admin/viewings/follow-up",
+  "/api/admin/views",
 ]);
 
 export const FILE_BACKED_ADMIN_READS = new Set([
@@ -65,6 +69,7 @@ export const FILE_BACKED_ADMIN_READS = new Set([
   "/api/admin/requests",
   "/api/admin/viewings",
   "/api/admin/viewings.ics",
+  "/api/admin/views",
 ]);
 
 export function productionRuntimeDataUnavailable({

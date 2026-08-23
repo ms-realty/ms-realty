@@ -518,6 +518,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
   const {
     leadSla: providedLeadSla,
     leadSlaGeneratedAt,
+    leadSnoozes = [],
     operatorId,
     leadPipelineQueue: providedLeadPipelineQueue,
     replyDeliveryQueue: providedReplyDeliveryQueue,
@@ -532,6 +533,8 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       leads: data.leads,
       replies: data.replies,
       replyDeliveryStates: providedReplyDeliveryQueue?.states || [],
+      // A snooze DEFERS both clocks; it never restarts them.
+      snoozes: leadSnoozes,
       generatedAt: leadSlaGeneratedAt,
     });
   const replyDeliveryQueue =
@@ -633,6 +636,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       readyLeadBriefs: leadBriefs.summary.ready,
       leadSlaManagerEscalations: leadSla.summary.manager_escalation_required,
       leadSlaReminders: leadSla.summary.reminder_required,
+      leadsSnoozed: leadSla.summary.snoozed || 0,
       languageRequests: data.languageRequests.length,
       viewings: data.viewings.length,
       viewingFollowUpsOpen: viewingFollowUpQueue.summary.open,

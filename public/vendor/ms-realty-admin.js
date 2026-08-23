@@ -1151,6 +1151,134 @@
     var target = Number(firstReply.value);
     escalation.min = Number.isFinite(target) && target > 0 ? String(target + 1) : "5";
   }
+  // A datetime-local control carries no timezone; the ledger only accepts an
+  // instant, so the browser resolves it before the request leaves.
+  function adminMutationPayload(form) {
+    var payload = tourPayload(form);
+    var stamps = form.querySelectorAll('input[type="datetime-local"]');
+    for (var i = 0; i < stamps.length; i += 1) {
+      var field = stamps[i];
+      if (!field.name || !field.value) continue;
+      var parsed = new Date(field.value);
+      if (!isNaN(parsed.getTime())) payload[field.name] = parsed.toISOString();
+    }
+    var boxes = form.querySelectorAll('[data-lead-select]');
+    if (boxes.length) {
+      var selected = [];
+      for (var j = 0; j < boxes.length; j += 1) if (boxes[j].checked) selected.push(boxes[j].value);
+      payload.leadIds = selected;
+    }
+    if (form.hasAttribute("data-lead-bulk-form")) payload.bulkConfirmed = form.elements.bulkConfirmed && form.elements.bulkConfirmed.checked;
+    return payload;
+  }
+  function bulkOutcomeText(form, payload) {
+    var failure = form.getAttribute("data-admin-mutation-failure") || "Could not apply to every enquiry.";
+    var refused = (payload.results || []).filter(function (row) { return row.status === "refused"; });
+    var first = refused.length ? refused[0].message : "";
+    return failure + " " + String(payload.applied) + "/" + String(payload.requested) + (first ? " — " + first : "");
+  }
+  function initLeadBulkForm() {
+    var form = document.querySelector("[data-lead-bulk-form]");
+    if (!form) return;
+    var boxes = document.querySelectorAll("[data-lead-select]");
+    var toggle = form.querySelector("[data-lead-select-all]");
+    var count = form.querySelector("[data-lead-selection-count]");
+    var action = form.querySelector("[data-lead-bulk-action]");
+    var selectedLabel = form.getAttribute("data-lead-selected-label") || "{count} selected";
+    function refreshCount() {
+      var selected = 0;
+      for (var i = 0; i < boxes.length; i += 1) if (boxes[i].checked && !boxes[i].closest("[data-lead-row]").hidden) selected += 1;
+      if (count) count.textContent = selectedLabel.replace("{count}", String(selected));
+    }
+    function refreshFields() {
+      var value = action ? action.value : "assign";
+      var fields = form.querySelectorAll("[data-lead-bulk-field]");
+      for (var i = 0; i < fields.length; i += 1) {
+        var wanted = fields[i].getAttribute("data-lead-bulk-field");
+        var on = wanted === value;
+        fields[i].hidden = !on;
+        var control = fields[i].querySelector("input, select");
+        if (control) control.required = on && wanted === "snooze";
+      }
+    }
+    document.addEventListener("change", function (event) {
+      if (event.target && event.target.matches("[data-lead-select]")) refreshCount();
+      if (event.target === toggle) {
+        for (var i = 0; i < boxes.length; i += 1) {
+          var row = boxes[i].closest("[data-lead-row]");
+          if (row && row.hidden) continue;
+          boxes[i].checked = toggle.checked;
+        }
+        refreshCount();
+      }
+      if (event.target === action) refreshFields();
+    });
+    refreshFields();
+    refreshCount();
+  }
+  // A saved view is the current list filters under a name. Selecting one puts
+  // its filters back on the list and in the address, so it can be revisited.
+  function currentLeadFilters() {
+    var tabs = document.querySelector("[data-lead-queue-tabs]");
+    var active = tabs ? tabs.querySelector('button[data-lead-filter][data-on="1"]') : null;
+    var filters = { queue: active ? active.getAttribute("data-lead-filter") : "all" };
+    var params = new URLSearchParams(window.location.search || "");
+    ["broker", "leadType", "language", "source", "listingReference", "q"].forEach(function (key) {
+      if (params.get(key)) filters[key] = params.get(key);
+    });
+    return filters;
+  }
+  function applySavedLeadView(filters) {
+    if (!filters || !filters.queue) return;
+    var tabs = document.querySelector("[data-lead-queue-tabs]");
+    if (!tabs) return;
+    var button = tabs.querySelector('button[data-lead-filter="' + filters.queue + '"]');
+    if (button) button.click();
+  }
+  function initSavedViews() {
+    var select = document.querySelector("[data-saved-view-select]");
+    var form = document.querySelector("[data-saved-view-form]");
+    if (form) {
+      var field = form.querySelector("[data-saved-view-filters-field]");
+      var sync = function () { if (field) field.value = JSON.stringify(currentLeadFilters()); };
+      sync();
+      document.addEventListener("click", function (event) {
+        if (event.target && event.target.closest("button[data-lead-filter]")) window.setTimeout(sync, 0);
+      });
+      form.addEventListener("submit", sync);
+    }
+    if (!select) return;
+    select.addEventListener("change", function () {
+      var option = select.options[select.selectedIndex];
+      var raw = option ? option.getAttribute("data-saved-view-filters") : "";
+      if (!raw) return;
+      try { applySavedLeadView(JSON.parse(raw)); } catch (error) { /* a stored view we cannot read changes nothing */ }
+    });
+    var remove = document.querySelector("[data-saved-view-delete]");
+    if (!remove) return;
+    remove.addEventListener("click", function () {
+      var slug = select.value;
+      if (!slug) return;
+      var status = document.querySelector("[data-saved-view-status]");
+      remove.disabled = true;
+      fetch("/api/admin/views", {
+        method: "DELETE",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ surface: select.getAttribute("data-saved-view-select"), slug: slug }),
+      })
+        .then(function (response) { if (!response.ok) throw new Error(String(response.status)); return response.json(); })
+        .then(function () {
+          select.remove(select.selectedIndex);
+          select.value = "";
+          if (status) { status.textContent = remove.getAttribute("data-deleted-label") || "View deleted."; status.setAttribute("data-state", "success"); }
+        })
+        .catch(function () {
+          if (status) { status.textContent = remove.getAttribute("data-delete-failed-label") || "Could not delete the view."; status.setAttribute("data-state", "error"); }
+        })
+        .then(function () { remove.disabled = false; });
+    });
+  }
   function initAdminMutationForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -1168,16 +1296,22 @@
         method: "POST",
         credentials: "same-origin",
         headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify(tourPayload(form)),
+        body: JSON.stringify(adminMutationPayload(form)),
       })
         .then(function (response) {
           return response.json().catch(function () { return {}; }).then(function (payload) {
-            if (!response.ok) throw new Error(payload.message || failure);
+            if (!response.ok && response.status !== 207) throw new Error(payload.message || failure);
             return payload;
           });
         })
         .then(function (payload) {
-          if (status) { status.textContent = success; status.setAttribute("data-state", "success"); }
+          // A batch that refused some enquiries is not a success: the strip
+          // says how many landed and how many did not.
+          var partial = payload && payload.kind === "lead_bulk_action" && payload.refused > 0;
+          if (status) {
+            status.textContent = partial ? bulkOutcomeText(form, payload) : success;
+            status.setAttribute("data-state", partial ? "error" : "success");
+          }
           if (form.hasAttribute("data-editor-form")) commitEditorFormState(form);
           if (form.hasAttribute("data-route-decision-form")) completeRouteDecision(form, payload);
         })
@@ -1200,6 +1334,8 @@
   initAdminMutationForms();
   initWorkspaceOnboarding();
   initWorkspaceSettingsForms();
+  initLeadBulkForm();
+  initSavedViews();
   initTourEditor();
   initViewingFollowUpForms();
   initSellerPipelineOutcomeForms();

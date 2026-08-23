@@ -69,6 +69,8 @@ const OPERATIONS_READ_PATHS = new Set([
   "/api/admin/reports",
   "/api/admin/reports/export",
   "/api/admin/viewings.ics",
+  // B1: an operator reads their own saved views for the inbox and pipeline.
+  "/api/admin/views",
 ]);
 
 const CONTENT_READ_PATHS = new Set([
@@ -89,6 +91,11 @@ const OPERATIONS_WRITE_PATHS = new Set([
   "/api/admin/leads",
   "/api/admin/lead-pipeline/outcome",
   "/api/admin/leads/assign",
+  // B1 lead operations: deferral, batch work, and saved views.
+  "/api/admin/leads/snooze",
+  "/api/admin/leads/unsnooze",
+  "/api/admin/leads/bulk",
+  "/api/admin/views",
   "/api/admin/accounts",
   "/api/admin/accounts/link",
   "/api/admin/documents/outcome",

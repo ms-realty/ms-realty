@@ -97,24 +97,84 @@ test("every CRM list screen carries the same toolbar filter and empty-note patte
   assert.match(ADMIN_APP_JS, /function initAdminListFilters\(\)/);
 });
 
-test("planned controls render disabled, badged, and explain what they wait for", async () => {
+// B1 made snooze and bulk actions real, so their coming-soon marking is gone
+// and the contract now asserts working controls. Saved views stay marked when
+// the caller has no operator identity to own them, and the viewings week view
+// is still waiting for broker availability.
+test("the list tools strip and the snooze control are wired to their routes", async () => {
   const inbox = await dispatchHttp(app(), { url: "/admin/leads?locale=en", headers: auth });
-  // Saved views and bulk actions live in one closed strip above the queue.
-  assert.match(inbox.body, /data-planned-control="lead_list_tools"/);
+  // The strip is live, so it no longer carries the planned marking or badge.
+  assert.match(inbox.body, /data-list-tools="lead_list_tools"/);
+  assert.doesNotMatch(inbox.body, /data-planned-control="lead_list_tools"/);
+  assert.doesNotMatch(inbox.body, /data-planned-control="lead_bulk_actions"/);
+  assert.doesNotMatch(inbox.body, /data-planned-control="lead_snooze"/);
+  assert.doesNotMatch(inbox.body, /Bulk assignment and snoozing are waiting for a batch endpoint/);
+  assert.doesNotMatch(inbox.body, /Snoozing is waiting for a due-date field/);
+
+  // Bulk actions: selectable rows, one confirmation, one posting form.
+  assert.match(inbox.body, /<form[^>]*id="lead-bulk-actions"/);
+  assert.match(inbox.body, /action="\/api\/admin\/leads\/bulk"/);
+  assert.match(inbox.body, /data-lead-bulk-form="true"/);
+  assert.match(inbox.body, /data-lead-select="[^"]+"/);
+  assert.match(inbox.body, /name="bulkConfirmed"/);
+  assert.match(inbox.body, /data-lead-selection-count="true"/);
+  for (const action of ["assign", "snooze", "handle"]) {
+    assert.ok(inbox.body.includes(`value="${action}"`), `bulk action ${action}`);
+  }
+  assert.match(inbox.body, /One confirmation, one audit entry per selected enquiry\./);
+
+  // Snooze: a real form on the lead detail, naming the deferral rule.
+  assert.match(inbox.body, /data-lead-snooze-control="[^"]+"/);
+  assert.match(inbox.body, /action="\/api\/admin\/leads\/snooze"/);
+  assert.match(inbox.body, /data-admin-mutation-form="lead-snooze"/);
+  assert.match(inbox.body, /type="datetime-local" name="until"/);
+  assert.match(inbox.body, /Snoozing moves the reply and escalation clocks by the same window/);
+  assert.match(ADMIN_APP_JS, /function initLeadBulkForm\(\)/);
+  assert.match(ADMIN_APP_JS, /function initSavedViews\(\)/);
+});
+
+test("what is still planned keeps its disabled, badged treatment", async () => {
+  // The shared local token carries no operator identity, and a saved view has
+  // to belong to somebody, so this half stays honestly marked.
+  const inbox = await dispatchHttp(app(), { url: "/admin/leads?locale=en", headers: auth });
   assert.match(inbox.body, /data-planned-control="saved_views"/);
-  assert.match(inbox.body, /data-planned-control="lead_bulk_actions"/);
   assert.match(inbox.body, /<select id="saved-view-leads" name="savedView" disabled/);
-  assert.match(inbox.body, /<fieldset class="adm-planned__group" disabled/);
   assert.match(inbox.body, /Saved views are waiting for a stored per-operator filter/);
-  assert.match(inbox.body, /Bulk assignment and snoozing are waiting for a batch endpoint/);
-  // Snooze sits with the lead actions and names its missing field.
-  assert.match(inbox.body, /data-planned-control="lead_snooze"/);
-  assert.match(inbox.body, /Snoozing is waiting for a due-date field/);
   assert.match(inbox.body, /class="adm-planned-badge">Coming soon<\/span>/);
 
   const viewings = await dispatchHttp(app(), { url: "/admin/viewings?locale=en", headers: auth });
   assert.match(viewings.body, /data-planned-control="viewing_week_view"/);
   assert.match(viewings.body, /The week calendar is waiting for broker availability/);
+});
+
+test("a named operator gets working saved views instead of the planned strip", () => {
+  const previous = process.env.MS_REALTY_ADMIN_ACTOR;
+  process.env.MS_REALTY_ADMIN_ACTOR = "operations_lead";
+  try {
+    return dispatchHttp(createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" }), {
+      url: "/admin/leads?locale=en",
+      headers: auth,
+    }).then((inbox) => {
+      assert.match(inbox.body, /data-saved-views-control="leads"/);
+      assert.match(inbox.body, /data-saved-view-form="leads"/);
+      assert.match(inbox.body, /action="\/api\/admin\/views"/);
+      assert.match(inbox.body, /data-saved-view-delete="leads"/);
+      assert.doesNotMatch(inbox.body, /data-planned-control="saved_views"/);
+    });
+  } finally {
+    if (previous === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+    else process.env.MS_REALTY_ADMIN_ACTOR = previous;
+  }
+});
+
+test("the Hermes draft button knows it is unconfigured on first paint", async () => {
+  const inbox = await dispatchHttp(app(), { url: "/admin/leads?locale=en", headers: auth });
+  // Derived from configuration on the payload, so the note is revealed by the
+  // existing CSS without a failed draft request first.
+  assert.match(inbox.body, /data-hermes-state="unavailable"/);
+  assert.match(inbox.body, /data-hermes-reason="not_configured"/);
+  assert.match(inbox.body, /Hermes is not configured in this environment\. Missing: HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY\./);
+  assert.match(crmCss, /\[data-hermes-state="unavailable"\] \.adm-hermes-note/);
 });
 
 test("a role without operations:write sees why a control is missing, not an empty cell", () => {

@@ -388,6 +388,22 @@ import {
 } from "./workspace-export.mjs";
 import { auditRetentionDays, auditRetentionPlan } from "./audit-retention.mjs";
 import { renderTwoFactorEnrolmentPage, renderWorkspaceExportReadyPage } from "./admin-security-handoff.mjs";
+// B1 lead operations: snooze, bulk actions, saved views, Hermes availability.
+import { hermesReplyAvailability } from "./hermes-availability.mjs";
+import {
+  appendLeadSnooze,
+  createLeadSnooze,
+  createLeadUnsnooze,
+  readLeadSnoozes,
+} from "./lead-snoozes.mjs";
+import {
+  OPERATOR_VIEW_SURFACES,
+  appendOperatorView,
+  createOperatorView,
+  createOperatorViewDeletion,
+  operatorViewsFor,
+  readOperatorViews,
+} from "./operator-views.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -863,6 +879,8 @@ export function createHttpApp({
   leadLedgerPath = null,
   accountLedgerPath = null,
   leadAssignmentLedgerPath = null,
+  leadSnoozeLedgerPath = null,
+  operatorViewLedgerPath = null,
   leadPipelineOutcomeLedgerPath = null,
   leadContactVaultPath = null,
   leadContactKey = null,
@@ -965,7 +983,9 @@ export function createHttpApp({
   slugChangedAt,
   listingQualityGeneratedAt,
   leadSlaGeneratedAt,
+  leadSnoozeAt,
   hermesReplyProvider = null,
+  hermesEnv = process.env,
   rateLimit = null,
   trustProxy = process.env.MS_REALTY_TRUST_PROXY === "1",
   naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
@@ -1063,6 +1083,27 @@ export function createHttpApp({
       }),
       readLeadAssignments(leadAssignmentLedgerPath || undefined),
     );
+  // B1 lead operations: the snooze ledger and the derived Hermes state both
+  // feed the admin lead payload so the screen paints correct controls first
+  // time, without probing Hermes.
+  const currentLeadSnoozes = () => (runtimeDataDurableOnly ? [] : readLeadSnoozes(leadSnoozeLedgerPath || undefined));
+  const currentHermesAvailability = () => hermesReplyAvailability({ env: hermesEnv, provider: hermesReplyProvider });
+  const currentOperatorViews = (operator, surface = null) => {
+    const operatorId = typeof operator === "string" ? operator : operator?.id || null;
+    if (!operatorId || runtimeDataDurableOnly) return [];
+    try {
+      return operatorViewsFor(readOperatorViews(operatorViewLedgerPath || undefined), operatorId, surface);
+    } catch {
+      return [];
+    }
+  };
+  const currentLeadOperations = (operator) => ({
+    // Every control below is backed by a route in this file; a surface that
+    // cannot reach them keeps its disabled treatment instead.
+    snoozeWritable: !runtimeDataDurableOnly && canAdminAccess(operator, "operations:write"),
+    bulkWritable: !runtimeDataDurableOnly && canAdminAccess(operator, "operations:write"),
+    savedViewsWritable: !runtimeDataDurableOnly && Boolean(operator?.id) && canAdminAccess(operator, "operations:write"),
+  });
   const currentDurableLeads = async (principal, payloadSession = null) => {
     if (!isLeadDurableStoreEnabled(leadDurableStore)) {
       throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
@@ -1247,6 +1288,9 @@ export function createHttpApp({
           deals: [],
           brokerContacts: [],
           brokerProfiles: [],
+          hermes: currentHermesAvailability(),
+          leadOperations: currentLeadOperations(operatorId),
+          operatorViews: [],
         }),
         runtime_data_mode: "durable_only",
       };
@@ -1282,6 +1326,10 @@ export function createHttpApp({
       ...currentSellerPipelineData(),
       deals: readDeals(dealLedgerPath || undefined),
       brokerContacts: currentBrokerContacts(),
+      leadSnoozes: currentLeadSnoozes(),
+      hermes: currentHermesAvailability(),
+      leadOperations: currentLeadOperations(operatorId),
+      operatorViews: currentOperatorViews(operatorId),
     });
   };
   const currentAdminViewingsPayload = async (requestedLocale, operatorId = null, scopedLeads = null, payloadSession = null) => {
@@ -1339,6 +1387,10 @@ export function createHttpApp({
       }),
       deals,
       brokerContacts: currentBrokerContacts(),
+      leadSnoozes: currentLeadSnoozes(),
+      hermes: currentHermesAvailability(),
+      leadOperations: currentLeadOperations(operatorId),
+      operatorViews: currentOperatorViews(operatorId),
     });
   };
   const currentContactPayload = (requestedLocale, operatorId = null, leads = currentLeads()) => {
@@ -3004,6 +3056,284 @@ export function createHttpApp({
       }
 
       return privateJson(405, { kind: "method_not_allowed" });
+    }
+
+    // B1 lead operations: snooze with a deferred SLA, bulk actions with one
+    // audit entry per enquiry, and per-operator saved views.
+    if (
+      ["/api/admin/leads/snooze", "/api/admin/leads/unsnooze", "/api/admin/leads/bulk", "/api/admin/views"].includes(url.pathname)
+    ) {
+      // recordAudit is declared further down this handler, so this block keeps
+      // its own binding over the same writeAudit helper.
+      const auditLeadOperation = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
+      const leadOperationAt = () => leadSnoozeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
+
+      // One enquiry deferred to a chosen moment. Reused verbatim by the bulk
+      // route, so both paths share one set of rules.
+      const snoozeOne = (leads, input, recordedAt) => {
+        const bound = bindAuthenticatedOperator(input, principal, ["actor"]);
+        const record = createLeadSnooze(leads, readLeadSnoozes(leadSnoozeLedgerPath || undefined), bound, recordedAt);
+        const persisted = appendLeadSnooze(record, { filePath: leadSnoozeLedgerPath || undefined });
+        if (!persisted.idempotent) {
+          auditLeadOperation(
+            {
+              action: "lead_snoozed",
+              actor: persisted.actor,
+              objectType: "lead_snooze",
+              objectId: persisted.id,
+              metadata: { lead_id: persisted.lead_id, until: persisted.until, reason: persisted.reason },
+            },
+            recordedAt,
+          );
+        }
+        return persisted;
+      };
+      const unsnoozeOne = (leads, input, recordedAt) => {
+        const bound = bindAuthenticatedOperator(input, principal, ["actor"]);
+        const record = createLeadUnsnooze(leads, readLeadSnoozes(leadSnoozeLedgerPath || undefined), bound, recordedAt);
+        const persisted = appendLeadSnooze(record, { filePath: leadSnoozeLedgerPath || undefined });
+        if (!persisted.idempotent) {
+          auditLeadOperation(
+            {
+              action: "lead_unsnoozed",
+              actor: persisted.actor,
+              objectType: "lead_snooze",
+              objectId: persisted.id,
+              metadata: { lead_id: persisted.lead_id, snooze_id: persisted.snooze_id, reason: persisted.reason },
+            },
+            recordedAt,
+          );
+        }
+        return persisted;
+      };
+      const assignOne = (leads, input, recordedAt) => {
+        const bound = bindAuthenticatedOperator(input, principal, ["actor"]);
+        const assignment = createLeadAssignment(leads, bound, recordedAt);
+        const persisted = appendLeadAssignment(assignment, { filePath: leadAssignmentLedgerPath || undefined });
+        if (!persisted.idempotent) {
+          auditLeadOperation(
+            {
+              action: "lead_assigned",
+              actor: persisted.assigned_by,
+              objectType: "lead_assignment",
+              objectId: persisted.id,
+              metadata: {
+                lead_id: persisted.lead_id,
+                previous_broker_id: persisted.previous_broker_id,
+                broker_id: persisted.broker_id,
+                assignment_method: persisted.assignment_method,
+              },
+            },
+            recordedAt,
+          );
+        }
+        return persisted;
+      };
+      // "Handled" is recorded on the pipeline the enquiry actually belongs to:
+      // a seller pipeline note, or a buyer/renter pipeline note. Both are
+      // existing single-item paths with their own validation and audit action.
+      const handleOne = (leads, input, recordedAt) => {
+        const bound = bindAuthenticatedOperator(input, principal, ["actor"]);
+        const leadId = String(bound.leadId || bound.lead_id || "").trim();
+        const lead = leads.find((row) => row.lead_id === leadId);
+        if (!lead) throw new Error("Handled requires a known leadId");
+        const sellerPipelines = readSellerPipeline(sellerPipelinePath || undefined);
+        const sellerPipeline = sellerPipelines.find((row) => row.lead_id === leadId);
+        if (sellerPipeline) {
+          const result = appendSellerPipelineOutcome(
+            sellerPipelines,
+            { ...bound, action: "note", note: bound.note || bound.reason, sellerPipelineId: sellerPipeline.id },
+            { filePath: sellerPipelineOutcomeLedgerPath || undefined, recordedAt },
+          );
+          if (!result.idempotent) {
+            auditLeadOperation(
+              {
+                action: "seller_pipeline_outcome_recorded",
+                actor: result.outcome.actor,
+                objectType: "seller_pipeline_outcome",
+                objectId: result.outcome.id,
+                metadata: {
+                  lead_id: result.outcome.lead_id,
+                  seller_pipeline_id: result.outcome.seller_pipeline_id,
+                  outcome_action: result.outcome.action,
+                },
+              },
+              recordedAt,
+            );
+          }
+          return { kind: "seller_pipeline_note", ...result };
+        }
+        const result = appendLeadPipelineOutcome(
+          currentLeadJourneyContext(leads),
+          { ...bound, action: "note", note: bound.note || bound.reason },
+          { filePath: leadPipelineOutcomeLedgerPath || undefined, recordedAt },
+        );
+        if (!result.idempotent) {
+          auditLeadOperation(
+            {
+              action: "lead_pipeline_outcome_recorded",
+              actor: result.outcome.actor,
+              objectType: "lead_pipeline_outcome",
+              objectId: result.outcome.id,
+              metadata: {
+                lead_id: result.outcome.lead_id,
+                pipeline: result.outcome.pipeline,
+                outcome_action: result.outcome.action,
+                from_stage: result.outcome.from_stage,
+                to_stage: result.outcome.to_stage,
+              },
+            },
+            recordedAt,
+          );
+        }
+        return { kind: "lead_pipeline_note", ...result };
+      };
+
+      if (request.method === "POST" && url.pathname === "/api/admin/leads/snooze") {
+        try {
+          const recordedAt = leadOperationAt();
+          const persisted = snoozeOne(currentLeads(), parseBody(request), recordedAt);
+          return adminJson(persisted.idempotent ? 200 : 201, { kind: "lead_snooze", ...persisted });
+        } catch (error) {
+          return adminJson(400, { kind: "bad_request", message: error.message });
+        }
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/admin/leads/unsnooze") {
+        try {
+          const recordedAt = leadOperationAt();
+          const persisted = unsnoozeOne(currentLeads(), parseBody(request), recordedAt);
+          return adminJson(persisted.idempotent ? 200 : 201, { kind: "lead_unsnooze", ...persisted });
+        } catch (error) {
+          return adminJson(400, { kind: "bad_request", message: error.message });
+        }
+      }
+
+      // One approval, one audit entry PER ENQUIRY. A refusal on one enquiry
+      // never discards the rest: the body reports every item's own outcome.
+      if (request.method === "POST" && url.pathname === "/api/admin/leads/bulk") {
+        try {
+          const input = parseBody(request);
+          const action = String(input.action || "").trim();
+          if (!["assign", "snooze", "handle"].includes(action)) {
+            throw new Error("Bulk action must be assign, snooze, or handle");
+          }
+          const submittedIds = input.leadIds ?? input.lead_ids;
+          const leadIds = [
+            ...new Set(
+              (Array.isArray(submittedIds) ? submittedIds : String(submittedIds || "").split(","))
+                .map((value) => String(value || "").trim())
+                .filter(Boolean),
+            ),
+          ];
+          if (!leadIds.length) throw new Error("Bulk actions require at least one leadId");
+          if (leadIds.length > 100) throw new Error("Bulk actions accept 100 enquiries or fewer");
+          const confirmed = input.bulkConfirmed ?? input.bulk_confirmed;
+          if (confirmed !== true && !["true", "on", "1"].includes(String(confirmed || ""))) {
+            throw new Error("Bulk actions require one explicit human confirmation");
+          }
+          const recordedAt = leadOperationAt();
+          const leads = currentLeads();
+          const results = [];
+          for (const leadId of leadIds) {
+            try {
+              const itemInput = { ...input, leadId, leadIds: undefined, lead_ids: undefined };
+              const outcome =
+                action === "assign"
+                  ? assignOne(leads, itemInput, recordedAt)
+                  : action === "snooze"
+                    ? snoozeOne(leads, itemInput, recordedAt)
+                    : handleOne(leads, itemInput, recordedAt);
+              results.push({
+                lead_id: leadId,
+                status: outcome.idempotent ? "unchanged" : "applied",
+                idempotent: Boolean(outcome.idempotent),
+                record_id: outcome.id || outcome.outcome?.id || null,
+              });
+            } catch (error) {
+              results.push({ lead_id: leadId, status: "refused", idempotent: false, record_id: null, message: error.message });
+            }
+          }
+          const applied = results.filter((row) => row.status === "applied").length;
+          const refused = results.filter((row) => row.status === "refused").length;
+          return adminJson(refused ? 207 : applied ? 201 : 200, {
+            kind: "lead_bulk_action",
+            action,
+            requested: leadIds.length,
+            applied,
+            unchanged: results.filter((row) => row.status === "unchanged").length,
+            refused,
+            results,
+          });
+        } catch (error) {
+          return adminJson(400, { kind: "bad_request", message: error.message });
+        }
+      }
+
+      // Saved views belong to the authenticated operator and to nobody else:
+      // the owner is read from the principal, never from the request body.
+      if (url.pathname === "/api/admin/views") {
+        if (!principal?.id) return adminOperatorIdentityRequired();
+        const viewFilePath = operatorViewLedgerPath || undefined;
+        try {
+          if (request.method === "GET") {
+            const surface = url.searchParams.get("surface");
+            return adminJson(200, {
+              kind: "operator_views",
+              operator_id: principal.id,
+              surfaces: OPERATOR_VIEW_SURFACES,
+              views: operatorViewsFor(readOperatorViews(viewFilePath), principal.id, surface || null),
+            });
+          }
+          const recordedAt = leadOperationAt();
+          const input = bindAuthenticatedOperator(parseBody(request), principal, ["operatorId"]);
+          if (request.method === "POST") {
+            const view = createOperatorView(readOperatorViews(viewFilePath), input, {
+              operatorId: principal.id,
+              savedAt: recordedAt,
+            });
+            const persisted = appendOperatorView(view, { filePath: viewFilePath });
+            if (!persisted.idempotent) {
+              auditLeadOperation(
+                {
+                  action: "operator_view_saved",
+                  actor: principal.id,
+                  objectType: "operator_view",
+                  objectId: persisted.id,
+                  metadata: { surface: persisted.surface, slug: persisted.slug, filter_keys: Object.keys(persisted.filters) },
+                },
+                recordedAt,
+              );
+            }
+            return adminJson(persisted.idempotent ? 200 : 201, { kind: "operator_view", ...persisted });
+          }
+          if (request.method === "DELETE") {
+            const tombstone = createOperatorViewDeletion(readOperatorViews(viewFilePath), input, {
+              operatorId: principal.id,
+              deletedAt: recordedAt,
+            });
+            const persisted = appendOperatorView(tombstone, { filePath: viewFilePath });
+            if (!persisted.idempotent) {
+              auditLeadOperation(
+                {
+                  action: "operator_view_deleted",
+                  actor: principal.id,
+                  objectType: "operator_view",
+                  objectId: persisted.id,
+                  metadata: { surface: persisted.surface, slug: persisted.slug },
+                },
+                recordedAt,
+              );
+            }
+            return adminJson(200, { kind: "operator_view", ...persisted });
+          }
+          return adminJson(405, { kind: "method_not_allowed" });
+        } catch (error) {
+          return adminJson(400, { kind: "bad_request", message: error.message });
+        }
+      }
+
+      return adminJson(405, { kind: "method_not_allowed" });
     }
 
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {

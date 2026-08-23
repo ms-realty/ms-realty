@@ -515,6 +515,11 @@ function EnquiryDialog({ page, labels, copy }) {
       h("input", { type: "hidden", name: "source", defaultValue: "website_listing_detail" }),
       h("input", { type: "hidden", name: "intent", defaultValue: "inquiry" }),
       h("input", { type: "hidden", name: "leadType", defaultValue: "buyer" }),
+      // Source and channel attribution. The channel names the surface family,
+      // the first touch path names where the visit started. Both are filled by
+      // the client, neither travels in a URL, and neither identifies a visitor.
+      h("input", { type: "hidden", name: "channel", defaultValue: "", "data-lead-channel-field": "true" }),
+      h("input", { type: "hidden", name: "firstTouchPath", defaultValue: "", "data-first-touch-field": "true" }),
       h("input", { type: "hidden", name: "language", defaultValue: page.locale }),
       h("input", { type: "hidden", name: "listingReference", defaultValue: "" }),
       propertyTitle
@@ -3817,6 +3822,11 @@ function SellerBody({ page }) {
           h("input", { type: "hidden", name: "source", defaultValue: valuation.payload.source }),
           h("input", { type: "hidden", name: "intent", defaultValue: valuation.payload.intent }),
           h("input", { type: "hidden", name: "leadType", defaultValue: valuation.payload.leadType }),
+          // Source and channel attribution. The channel names the surface family,
+          // the first touch path names where the visit started. Both are filled by
+          // the client, neither travels in a URL, and neither identifies a visitor.
+          h("input", { type: "hidden", name: "channel", defaultValue: "", "data-lead-channel-field": "true" }),
+          h("input", { type: "hidden", name: "firstTouchPath", defaultValue: "", "data-first-touch-field": "true" }),
           h("input", { type: "hidden", name: "language", defaultValue: valuation.payload.language }),
           h(
             "section",
@@ -4058,6 +4068,11 @@ function ContactBody({ page }) {
             h("input", { type: "hidden", name: "source", defaultValue: callback.payload.source }),
             h("input", { type: "hidden", name: "intent", defaultValue: callback.payload.intent }),
             h("input", { type: "hidden", name: "leadType", defaultValue: callback.payload.leadType }),
+            // Source and channel attribution. The channel names the surface family,
+            // the first touch path names where the visit started. Both are filled by
+            // the client, neither travels in a URL, and neither identifies a visitor.
+            h("input", { type: "hidden", name: "channel", defaultValue: "", "data-lead-channel-field": "true" }),
+            h("input", { type: "hidden", name: "firstTouchPath", defaultValue: "", "data-first-touch-field": "true" }),
             h("input", { type: "hidden", name: "language", defaultValue: callback.payload.language }),
             h("input", { type: "hidden", name: "contact_preference", defaultValue: callback.payload.contact_preference }),
             h(

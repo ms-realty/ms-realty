@@ -148,6 +148,24 @@ import {
   createLeadAssignment,
   readLeadAssignments,
 } from "./lead-assignments.mjs";
+// B1 lead operations: snooze, bulk actions, saved views, Hermes availability.
+import { hermesReplyAvailability } from "./hermes-availability.mjs";
+import {
+  DEFAULT_LEAD_SNOOZE_LEDGER_PATH,
+  appendLeadSnooze,
+  createLeadSnooze,
+  createLeadUnsnooze,
+  readLeadSnoozes,
+} from "./lead-snoozes.mjs";
+import {
+  DEFAULT_OPERATOR_VIEW_LEDGER_PATH,
+  OPERATOR_VIEW_SURFACES,
+  appendOperatorView,
+  createOperatorView,
+  createOperatorViewDeletion,
+  operatorViewsFor,
+  readOperatorViews,
+} from "./operator-views.mjs";
 import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
   DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
@@ -364,6 +382,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     leadAssignmentLedgerPath: env.MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH || DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
+    leadSnoozeLedgerPath: env.MS_REALTY_LEAD_SNOOZE_LEDGER_PATH || DEFAULT_LEAD_SNOOZE_LEDGER_PATH,
+    operatorViewLedgerPath: env.MS_REALTY_OPERATOR_VIEW_LEDGER_PATH || DEFAULT_OPERATOR_VIEW_LEDGER_PATH,
     leadPipelineOutcomeLedgerPath:
       env.MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH || DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
     leadContactVaultPath:
@@ -1001,6 +1021,29 @@ function leadScopedRows(source) {
   return (rows) => rowsForLeadIds(rows, leadIds);
 }
 
+// B1: what the lead inbox may actually do here, derived from configuration and
+// the authenticated principal. A surface that cannot reach a route keeps the
+// control's disabled treatment instead of pretending.
+function leadOperationsFor(config) {
+  const principal = config.adminPrincipal;
+  const writable = !config.runtimeDataDurableOnly && canAdminAccess(principal, "operations:write");
+  return {
+    snoozeWritable: writable,
+    bulkWritable: writable,
+    savedViewsWritable: writable && Boolean(principal?.id),
+  };
+}
+
+function operatorViewsForConfig(config, surface = null) {
+  const operatorId = config.adminPrincipal?.id || null;
+  if (!operatorId || config.runtimeDataDurableOnly) return [];
+  try {
+    return operatorViewsFor(readOperatorViews(config.operatorViewLedgerPath), operatorId, surface);
+  } catch {
+    return [];
+  }
+}
+
 async function leadInboxPayload(registry, url, config) {
   const source = await adminLeadSource(config);
   const filterRows = leadScopedRows(source);
@@ -1065,6 +1108,9 @@ async function leadInboxPayload(registry, url, config) {
         deals: [],
         brokerContacts: [],
         brokerProfiles: [],
+        hermes: hermesReplyAvailability({ env: config.authEnv || process.env }),
+        leadOperations: leadOperationsFor(config),
+        operatorViews: [],
       }),
       runtime_data_mode: "durable_only",
     };
@@ -1124,6 +1170,10 @@ async function leadInboxPayload(registry, url, config) {
     }),
     deals,
     brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
+    leadSnoozes: readLeadSnoozes(config.leadSnoozeLedgerPath),
+    hermes: hermesReplyAvailability({ env: config.authEnv || process.env }),
+    leadOperations: leadOperationsFor(config),
+    operatorViews: operatorViewsForConfig(config, "leads"),
   });
 }
 
@@ -2559,6 +2609,167 @@ function appendBrokerLeadEntry(input, registry, config) {
   return { lead, ledger, contactVault, consent, sellerPipeline, idempotent: false };
 }
 
+// B1 lead operations. Each helper is the single-item path; the bulk route
+// below reuses them verbatim so both share one set of rules and write one
+// audit entry per enquiry.
+function appendLeadSnoozeEntry(input, config, recordedAt) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const leads = readLeadLedger(config.leadLedgerPath);
+  const record = createLeadSnooze(leads, readLeadSnoozes(config.leadSnoozeLedgerPath), attributed, recordedAt);
+  const persisted = appendLeadSnooze(record, { filePath: config.leadSnoozeLedgerPath });
+  if (!persisted.idempotent) {
+    recordAudit(
+      {
+        action: "lead_snoozed",
+        actor: persisted.actor,
+        objectType: "lead_snooze",
+        objectId: persisted.id,
+        metadata: { lead_id: persisted.lead_id, until: persisted.until, reason: persisted.reason },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return persisted;
+}
+
+function appendLeadUnsnoozeEntry(input, config, recordedAt) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const leads = readLeadLedger(config.leadLedgerPath);
+  const record = createLeadUnsnooze(leads, readLeadSnoozes(config.leadSnoozeLedgerPath), attributed, recordedAt);
+  const persisted = appendLeadSnooze(record, { filePath: config.leadSnoozeLedgerPath });
+  if (!persisted.idempotent) {
+    recordAudit(
+      {
+        action: "lead_unsnoozed",
+        actor: persisted.actor,
+        objectType: "lead_snooze",
+        objectId: persisted.id,
+        metadata: { lead_id: persisted.lead_id, snooze_id: persisted.snooze_id, reason: persisted.reason },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return persisted;
+}
+
+// "Handled" is recorded on the pipeline the enquiry actually belongs to.
+function appendLeadHandledEntry(input, config, recordedAt) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const leadId = String(attributed.leadId || attributed.lead_id || "").trim();
+  const context = leadJourneyContext(config);
+  if (!context.leads.some((row) => row.lead_id === leadId)) throw new Error("Handled requires a known leadId");
+  const sellerPipelines = readSellerPipeline(config.sellerPipelinePath);
+  const sellerPipeline = sellerPipelines.find((row) => row.lead_id === leadId);
+  if (sellerPipeline) {
+    const result = appendSellerPipelineOutcome(
+      sellerPipelines,
+      { ...attributed, action: "note", note: attributed.note || attributed.reason, sellerPipelineId: sellerPipeline.id },
+      { filePath: config.sellerPipelineOutcomeLedgerPath, recordedAt },
+    );
+    if (!result.idempotent) {
+      recordAudit(
+        {
+          action: "seller_pipeline_outcome_recorded",
+          actor: result.outcome.actor,
+          objectType: "seller_pipeline_outcome",
+          objectId: result.outcome.id,
+          metadata: {
+            lead_id: result.outcome.lead_id,
+            seller_pipeline_id: result.outcome.seller_pipeline_id,
+            outcome_action: result.outcome.action,
+          },
+        },
+        config,
+        recordedAt,
+      );
+    }
+    return { kind: "seller_pipeline_note", ...result };
+  }
+  const result = appendLeadPipelineOutcome(
+    context,
+    { ...attributed, action: "note", note: attributed.note || attributed.reason },
+    { filePath: config.leadPipelineOutcomeLedgerPath, recordedAt },
+  );
+  if (!result.idempotent) {
+    recordAudit(
+      {
+        action: "lead_pipeline_outcome_recorded",
+        actor: result.outcome.actor,
+        objectType: "lead_pipeline_outcome",
+        objectId: result.outcome.id,
+        metadata: {
+          lead_id: result.outcome.lead_id,
+          pipeline: result.outcome.pipeline,
+          outcome_action: result.outcome.action,
+          from_stage: result.outcome.from_stage,
+          to_stage: result.outcome.to_stage,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return { kind: "lead_pipeline_note", ...result };
+}
+
+// One approval, one audit entry per enquiry. A refusal on one enquiry never
+// discards the rest: every item reports its own outcome.
+function applyLeadBulkAction(input, config) {
+  const action = String(input.action || "").trim();
+  if (!["assign", "snooze", "handle"].includes(action)) throw new Error("Bulk action must be assign, snooze, or handle");
+  const submittedIds = input.leadIds ?? input.lead_ids;
+  const leadIds = [
+    ...new Set(
+      (Array.isArray(submittedIds) ? submittedIds : String(submittedIds || "").split(","))
+        .map((value) => String(value || "").trim())
+        .filter(Boolean),
+    ),
+  ];
+  if (!leadIds.length) throw new Error("Bulk actions require at least one leadId");
+  if (leadIds.length > 100) throw new Error("Bulk actions accept 100 enquiries or fewer");
+  const confirmed = input.bulkConfirmed ?? input.bulk_confirmed;
+  if (confirmed !== true && !["true", "on", "1"].includes(String(confirmed || ""))) {
+    throw new Error("Bulk actions require one explicit human confirmation");
+  }
+  const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
+  const results = [];
+  for (const leadId of leadIds) {
+    try {
+      const itemInput = { ...input, leadId, leadIds: undefined, lead_ids: undefined };
+      const outcome =
+        action === "assign"
+          ? appendLeadAssignmentEntry(itemInput, config)
+          : action === "snooze"
+            ? appendLeadSnoozeEntry(itemInput, config, recordedAt)
+            : appendLeadHandledEntry(itemInput, config, recordedAt);
+      results.push({
+        lead_id: leadId,
+        status: outcome.idempotent ? "unchanged" : "applied",
+        idempotent: Boolean(outcome.idempotent),
+        record_id: outcome.id || outcome.outcome?.id || null,
+      });
+    } catch (error) {
+      results.push({ lead_id: leadId, status: "refused", idempotent: false, record_id: null, message: error.message });
+    }
+  }
+  const applied = results.filter((row) => row.status === "applied").length;
+  const refused = results.filter((row) => row.status === "refused").length;
+  return {
+    status: refused ? 207 : applied ? 201 : 200,
+    body: {
+      kind: "lead_bulk_action",
+      action,
+      requested: leadIds.length,
+      applied,
+      unchanged: results.filter((row) => row.status === "unchanged").length,
+      refused,
+      results,
+    },
+  };
+}
+
 function appendLeadAssignmentEntry(input, config) {
   const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
   const leads = applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath));
@@ -3920,6 +4131,77 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "POST" && url.pathname === "/api/admin/leads") {
       const result = appendBrokerLeadEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), registry, config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    // B1 lead operations: snooze, bulk actions, saved views.
+    if (request.method === "POST" && url.pathname === "/api/admin/leads/snooze") {
+      const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
+      const result = appendLeadSnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
+      return jsonResponse(result.idempotent ? 200 : 201, { kind: "lead_snooze", ...result });
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/leads/unsnooze") {
+      const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
+      const result = appendLeadUnsnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
+      return jsonResponse(result.idempotent ? 200 : 201, { kind: "lead_unsnooze", ...result });
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/leads/bulk") {
+      const outcome = applyLeadBulkAction(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(outcome.status, outcome.body);
+    }
+    // Saved views belong to the authenticated operator and to nobody else.
+    if (url.pathname === "/api/admin/views") {
+      const operatorId = config.adminPrincipal?.id || null;
+      if (!operatorId) return adminOperatorIdentityRequired();
+      if (request.method === "GET") {
+        return jsonResponse(200, {
+          kind: "operator_views",
+          operator_id: operatorId,
+          surfaces: OPERATOR_VIEW_SURFACES,
+          views: operatorViewsFor(readOperatorViews(config.operatorViewLedgerPath), operatorId, url.searchParams.get("surface") || null),
+        });
+      }
+      const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
+      const input = bindAuthenticatedOperator(
+        parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+        config.adminPrincipal,
+        ["operatorId"],
+      );
+      if (request.method === "POST") {
+        const view = createOperatorView(readOperatorViews(config.operatorViewLedgerPath), input, { operatorId, savedAt: recordedAt });
+        const persisted = appendOperatorView(view, { filePath: config.operatorViewLedgerPath });
+        if (!persisted.idempotent) {
+          recordAudit(
+            {
+              action: "operator_view_saved",
+              actor: operatorId,
+              objectType: "operator_view",
+              objectId: persisted.id,
+              metadata: { surface: persisted.surface, slug: persisted.slug, filter_keys: Object.keys(persisted.filters) },
+            },
+            config,
+            recordedAt,
+          );
+        }
+        return jsonResponse(persisted.idempotent ? 200 : 201, { kind: "operator_view", ...persisted });
+      }
+      if (request.method === "DELETE") {
+        const tombstone = createOperatorViewDeletion(readOperatorViews(config.operatorViewLedgerPath), input, { operatorId, deletedAt: recordedAt });
+        const persisted = appendOperatorView(tombstone, { filePath: config.operatorViewLedgerPath });
+        if (!persisted.idempotent) {
+          recordAudit(
+            {
+              action: "operator_view_deleted",
+              actor: operatorId,
+              objectType: "operator_view",
+              objectId: persisted.id,
+              metadata: { surface: persisted.surface, slug: persisted.slug },
+            },
+            config,
+            recordedAt,
+          );
+        }
+        return jsonResponse(200, { kind: "operator_view", ...persisted });
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {
       const result = appendLeadAssignmentEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);

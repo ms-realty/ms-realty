@@ -610,6 +610,38 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
 .adm-planned .crm-seg button:disabled { cursor: not-allowed; opacity: 0.55; }
 .adm-planned .crm-seg button:disabled .adm-planned-badge { background: var(--surface); }
 
+/* Live list tools: saved views and bulk actions, once their routes exist. */
+.adm-list-tools__group { display: grid; gap: var(--space-2); min-width: 0; padding: 0; }
+.adm-list-tools__field { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: var(--space-2); min-width: 0; color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--fw-semibold); }
+.adm-list-tools__field > span { grid-column: 1 / -1; display: inline-flex; align-items: center; gap: var(--space-2); }
+.adm-list-tools__field select { width: 100%; min-width: 0; }
+.adm-list-tools__form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: var(--space-2); padding: 0; }
+.adm-list-tools__form > p { grid-column: 1 / -1; min-height: 1.25em; margin: 0; }
+.adm-list-tools__fieldset { display: grid; gap: var(--space-2); min-width: 0; padding: 0; border: 0; }
+.adm-list-tools__fieldset legend { padding: 0; color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--fw-semibold); }
+.adm-list-tools__fieldset > label:not(.adm-check) { display: grid; gap: 5px; min-width: 0; color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--fw-semibold); }
+/* The action select hides the fields the chosen action does not use; the
+   display rule above would otherwise defeat the hidden attribute. */
+.adm-list-tools__fieldset > label[hidden] { display: none; }
+.adm-list-tools__fieldset input:not([type="checkbox"]),
+.adm-list-tools__fieldset select,
+.adm-list-tools__fieldset textarea { width: 100%; min-width: 0; }
+.adm-list-tools__count { color: var(--text-subtle); font-size: var(--text-xs); font-variant-numeric: tabular-nums; }
+.adm-hint { margin: 0; color: var(--text-subtle); font-size: var(--text-xs); line-height: var(--lh-snug); }
+.adm-hint[data-state="success"] { color: var(--success-500); }
+.adm-hint[data-state="error"] { color: var(--brick-600); }
+.adm-inbox__select { position: absolute; inset-inline-start: var(--space-2); inset-block-start: var(--space-3); z-index: 1; min-height: 0; }
+.adm-inbox__rows > li { position: relative; }
+.adm-inbox__rows > li:has(> .adm-inbox__select) > .adm-inbox__row { padding-inline-start: calc(var(--space-4) + var(--space-5)); }
+.adm-lead-snooze { display: grid; gap: var(--space-2); min-width: 0; }
+.adm-lead-snooze > summary { display: inline-flex; align-items: center; gap: var(--space-2); width: max-content; list-style: none; cursor: pointer; }
+.adm-lead-snooze > summary::-webkit-details-marker { display: none; }
+.adm-lead-snooze__form { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+.adm-lead-snooze__form > p { min-height: 1.25em; margin: 0; color: var(--text-subtle); font-size: var(--text-xs); }
+.adm-lead-snooze__form [data-admin-mutation-status][data-state="success"] { color: var(--success-500); }
+.adm-lead-snooze__form [data-admin-mutation-status][data-state="error"] { color: var(--brick-600); }
+[data-lead-snoozed="true"] .adm-inbox__title { color: var(--text-muted); }
+
 /* The Hermes note only appears once a draft request proves it is unavailable. */
 .adm-hermes-note { display: none; }
 [data-hermes-state="unavailable"] .adm-hermes-note { display: flex; }

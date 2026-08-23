@@ -1,3 +1,4 @@
+import { normalizeLeadAttribution } from "./lead-attribution.mjs";
 import { getLocale, adminLocales } from "./locales.mjs";
 import { newRecordId, normalizeIdempotencyKey } from "./record-ids.mjs";
 
@@ -343,6 +344,9 @@ export function createLeadDraft(registry, input, { assignedId = null } = {}) {
     request_details: leadInput.request_details,
     requirements: leadInput.requirements,
     contact_preference: normalizeContactPreference(leadInput),
+    // Attribution rides with the lead: which surface family produced it and
+    // where the visit started. Both are bounded, neither identifies a visitor.
+    ...normalizeLeadAttribution(leadInput, leadInput.source),
     message: leadInput.message || "",
     language,
     status: "draft",

@@ -1413,6 +1413,10 @@ export function createCrmInboxItem(registry, input, { assignedId = null } = {}) 
     contactPreference: leadInput.contactPreference,
     preferred_channel: leadInput.preferred_channel,
     message: leadInput.message,
+    // Attribution: which surface family produced the enquiry and where the
+    // visit started. Both are validated in createLeadDraft, never free text.
+    channel: leadInput.channel,
+    firstTouchPath: leadInput.firstTouchPath ?? leadInput.first_touch_path,
     idempotencyKey: leadInput.idempotencyKey ?? leadInput.idempotency_key,
   }, { assignedId });
   const brokerAssignment = assignLeadBroker(lead, {

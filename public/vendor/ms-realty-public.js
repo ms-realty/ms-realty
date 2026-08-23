@@ -153,6 +153,47 @@
     } catch (error) {}
     document.body.removeChild(field);
   }
+  // First touch: the path of the page where this visit started. Kept in
+  // sessionStorage, stripped of any query string, and never put in a URL.
+  var FIRST_TOUCH_KEY = "ms-realty:first-touch";
+  function sitePath(value) {
+    var raw = String(value || "");
+    var path = raw.split("#")[0].split("?")[0];
+    if (path.indexOf("/") !== 0 || path.indexOf("//") === 0) return "";
+    return path.length > 200 ? "" : path;
+  }
+  function firstTouchPath() {
+    var here = sitePath(window.location.pathname);
+    try {
+      var stored = sitePath(window.sessionStorage.getItem(FIRST_TOUCH_KEY) || "");
+      if (stored) return stored;
+      if (here) window.sessionStorage.setItem(FIRST_TOUCH_KEY, here);
+    } catch (error) {
+      return here;
+    }
+    return here;
+  }
+  // The channel is the surface family this page belongs to, from a closed
+  // list the server also knows. Never free text.
+  function leadChannel() {
+    var main = document.querySelector("main[data-kind]");
+    var kind = main ? main.getAttribute("data-kind") : "";
+    if (kind === "listing") return "listing_detail";
+    if (kind === "search") return "search_results";
+    if (kind === "home") return "home";
+    if (kind === "seller") return "seller_page";
+    if (kind === "start") return "buyer_onboarding";
+    if (kind === "guide") return "guide";
+    if (kind === "contact") return "contact_page";
+    return "";
+  }
+  function applyLeadAttribution(form) {
+    if (!form) return;
+    var channelField = form.querySelector("[data-lead-channel-field]");
+    var pathField = form.querySelector("[data-first-touch-field]");
+    if (channelField && !channelField.value) channelField.value = leadChannel();
+    if (pathField) pathField.value = firstTouchPath();
+  }
   function submitJson(form, onDone) {
     var submit = form.querySelector('[type="submit"]');
     if (submit) {
@@ -2043,6 +2084,7 @@
     var intercept = action === "/api/leads" || action === "/api/saved-searches" || action === "/api/language-requests" || form.hasAttribute("data-save-search-endpoint") || form.hasAttribute("data-request-language");
     if (!intercept && !isEnquiry) return;
     event.preventDefault();
+    if (action === "/api/leads" || isEnquiry) applyLeadAttribution(form);
     submitJson(form, function () {
       if (isEnquiry) {
         var dialog = document.getElementById("mk-enquiry");
@@ -2087,4 +2129,5 @@
  initSellerIntake();
  initPhotoSphereViewers();
  initPrivacySafeAnalytics();
+ firstTouchPath();
 })();

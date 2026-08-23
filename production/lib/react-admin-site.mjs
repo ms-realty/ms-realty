@@ -238,6 +238,38 @@ const ADMIN_UI_COPY = {
     bulkActionsNote: "Груповото възлагане и отлагане чакат партиден endpoint, който записва по едно одобрение на запитване.",
     snooze: "Отложи",
     snoozeNote: "Отлагането чака поле за срок в реда на запитването, за да не пропада SLA таймерът.",
+    snoozeLive: "Отлагането измества таймера за отговор и ескалацията с точно същия период. Връщането възстановява първоначалния срок.",
+    snoozeUntil: "Отложи до",
+    snoozeReason: "Причина",
+    snoozeSaving: "Записваме отлагането…",
+    snoozeSaved: "Запитването е отложено. Опреснете, за да видите новия срок.",
+    snoozeFailed: "Отлагането не беше записано.",
+    unsnooze: "Върни в опашката",
+    unsnoozeSaving: "Връщаме запитването…",
+    unsnoozeSaved: "Първоначалният срок е възстановен. Опреснете.",
+    unsnoozeFailed: "Връщането не беше записано.",
+    snoozedUntil: "Отложено до",
+    savedViewName: "Име на изгледа",
+    saveView: "Запази този изглед",
+    savedViewSaving: "Записваме изгледа…",
+    savedViewSaved: "Изгледът е запазен.",
+    savedViewFailed: "Изгледът не беше запазен.",
+    savedViewsLive: "Запазените изгледи са лични за вас и се отварят от адреса на списъка.",
+    savedViewDelete: "Изтрий",
+    savedViewDeleted: "Изгледът е изтрит.",
+    savedViewDeleteFailed: "Изгледът не беше изтрит.",
+    bulkAction: "Действие за избраните",
+    bulkSnooze: "Отложи",
+    bulkHandle: "Отбележи като обработено",
+    bulkNote: "Бележка",
+    bulkConfirm: "Потвърждавам това действие за всяко избрано запитване.",
+    bulkApply: "Приложи към избраните",
+    bulkSaving: "Прилагаме към избраните запитвания…",
+    bulkSaved: "Действието е приложено. Опреснете, за да видите резултата.",
+    bulkFailed: "Действието не беше приложено към всички избрани запитвания.",
+    bulkActionsLive: "Едно потвърждение, по един одитен запис за всяко избрано запитване.",
+    selectedEnquiries: "{count} избрани",
+    selectLeadForBulk: "Избери запитването",
     viewingLayout: "Изглед на графика",
     listView: "Списък",
     weekView: "Седмица",
@@ -758,6 +790,38 @@ const ADMIN_UI_COPY = {
     bulkActionsNote: "Групповое назначение и откладывание ждут пакетный endpoint, который пишет по одному подтверждению на заявку.",
     snooze: "Отложить",
     snoozeNote: "Откладывание ждёт поле срока в записи заявки, чтобы таймер SLA не сбрасывался.",
+    snoozeLive: "Откладывание сдвигает таймер ответа и эскалацию ровно на тот же период. Возврат восстанавливает исходный срок.",
+    snoozeUntil: "Отложить до",
+    snoozeReason: "Причина",
+    snoozeSaving: "Записываем откладывание…",
+    snoozeSaved: "Заявка отложена. Обновите, чтобы увидеть новый срок.",
+    snoozeFailed: "Откладывание не записано.",
+    unsnooze: "Вернуть в очередь",
+    unsnoozeSaving: "Возвращаем заявку…",
+    unsnoozeSaved: "Исходный срок восстановлен. Обновите страницу.",
+    unsnoozeFailed: "Возврат не записан.",
+    snoozedUntil: "Отложено до",
+    savedViewName: "Название вида",
+    saveView: "Сохранить этот вид",
+    savedViewSaving: "Сохраняем вид…",
+    savedViewSaved: "Вид сохранён.",
+    savedViewFailed: "Вид не сохранён.",
+    savedViewsLive: "Сохранённые виды принадлежат только вам и открываются из адреса списка.",
+    savedViewDelete: "Удалить",
+    savedViewDeleted: "Вид удалён.",
+    savedViewDeleteFailed: "Вид не удалён.",
+    bulkAction: "Действие для выбранных",
+    bulkSnooze: "Отложить",
+    bulkHandle: "Отметить обработанным",
+    bulkNote: "Заметка",
+    bulkConfirm: "Подтверждаю это действие для каждой выбранной заявки.",
+    bulkApply: "Применить к выбранным",
+    bulkSaving: "Применяем к выбранным заявкам…",
+    bulkSaved: "Действие применено. Обновите, чтобы увидеть результат.",
+    bulkFailed: "Действие применено не ко всем выбранным заявкам.",
+    bulkActionsLive: "Одно подтверждение, по одной записи аудита на каждую выбранную заявку.",
+    selectedEnquiries: "{count} выбрано",
+    selectLeadForBulk: "Выбрать заявку",
     viewingLayout: "Вид расписания",
     listView: "Список",
     weekView: "Неделя",
@@ -1262,6 +1326,38 @@ const ADMIN_UI_COPY = {
     bulkActionsNote: "Bulk assignment and snoozing are waiting for a batch endpoint that records one approval per enquiry.",
     snooze: "Snooze",
     snoozeNote: "Snoozing is waiting for a due-date field on the enquiry record, so the SLA timer is not lost.",
+    snoozeLive: "Snoozing moves the reply and escalation clocks by the same window. Un-snoozing restores the original clock.",
+    snoozeUntil: "Snooze until",
+    snoozeReason: "Reason",
+    snoozeSaving: "Recording the snooze…",
+    snoozeSaved: "Enquiry snoozed. Refresh to see the new clock.",
+    snoozeFailed: "Could not snooze this enquiry.",
+    unsnooze: "Return to the queue",
+    unsnoozeSaving: "Returning the enquiry…",
+    unsnoozeSaved: "The original clock is restored. Refresh the page.",
+    unsnoozeFailed: "Could not return this enquiry.",
+    snoozedUntil: "Snoozed until",
+    savedViewName: "View name",
+    saveView: "Save this view",
+    savedViewSaving: "Saving the view…",
+    savedViewSaved: "View saved.",
+    savedViewFailed: "Could not save the view.",
+    savedViewsLive: "Saved views are yours alone and open from the list address.",
+    savedViewDelete: "Delete",
+    savedViewDeleted: "View deleted.",
+    savedViewDeleteFailed: "Could not delete the view.",
+    bulkAction: "Action for selected",
+    bulkSnooze: "Snooze",
+    bulkHandle: "Mark handled",
+    bulkNote: "Note",
+    bulkConfirm: "I confirm this action for every selected enquiry.",
+    bulkApply: "Apply to selected",
+    bulkSaving: "Applying to the selected enquiries…",
+    bulkSaved: "Action applied. Refresh to see the result.",
+    bulkFailed: "The action did not apply to every selected enquiry.",
+    bulkActionsLive: "One confirmation, one audit entry per selected enquiry.",
+    selectedEnquiries: "{count} selected",
+    selectLeadForBulk: "Select this enquiry",
     viewingLayout: "Schedule layout",
     listView: "List",
     weekView: "Week",
@@ -1906,56 +2002,192 @@ function PlannedBadge({ ui }) {
   return h("span", { className: "adm-planned-badge" }, ui.comingSoon);
 }
 
-// Saved views and bulk actions are designed but have no backend yet, so they
-// live in one closed strip above the queue: discoverable and honest, never
-// competing with the leads themselves.
-function LeadListTools({ ui }) {
+// Saved views and bulk actions live in one closed strip above the queue:
+// discoverable and honest, never competing with the leads themselves. Each
+// half turns into a working control only when the payload says its route is
+// reachable; otherwise it keeps the disabled, badged treatment.
+function SavedViewsTool({ page, ui, copy, surface = "leads" }) {
+  const writable = page.leadOperations?.savedViewsWritable === true;
+  const views = (page.operatorViews || []).filter((view) => view.surface === surface);
+  if (!writable) {
+    return h(
+      "div",
+      { className: "adm-planned", "data-planned-control": "saved_views" },
+      h(
+        "label",
+        { className: "adm-planned__field", htmlFor: `saved-view-${surface}` },
+        h("span", null, ui.savedViews, h(PlannedBadge, { ui })),
+        h(
+          "select",
+          { id: `saved-view-${surface}`, name: "savedView", disabled: true, "aria-describedby": `saved-view-${surface}-note` },
+          h("option", null, ui.savedViewsDefault),
+        ),
+      ),
+      h(PlannedNote, { id: `saved-view-${surface}-note` }, ui.savedViewsNote),
+    );
+  }
+  return h(
+    "div",
+    { className: "adm-list-tools__group", "data-saved-views-control": surface },
+    h(
+      "label",
+      { className: "adm-list-tools__field", htmlFor: `saved-view-${surface}` },
+      h("span", null, ui.savedViews),
+      h(
+        "select",
+        { id: `saved-view-${surface}`, name: "savedView", "data-saved-view-select": surface, "aria-describedby": `saved-view-${surface}-note` },
+        h("option", { value: "" }, ui.savedViewsDefault),
+        ...views.map((view) =>
+          h("option", { key: view.id, value: view.slug, "data-saved-view-filters": JSON.stringify(view.filters) }, view.name),
+        ),
+      ),
+      h(
+        "button",
+        {
+          type: "button",
+          className: "mk-btn mk-btn--ghost mk-btn--sm",
+          "data-saved-view-delete": surface,
+          "data-deleted-label": ui.savedViewDeleted,
+          "data-delete-failed-label": ui.savedViewDeleteFailed,
+        },
+        h(Icon, { name: "x", size: 14 }),
+        h("span", null, ui.savedViewDelete),
+      ),
+    ),
+    h("p", { className: "adm-hint", role: "status", "aria-live": "polite", "data-saved-view-status": "true" }),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/views",
+        className: "adm-form adm-list-tools__form",
+        "data-admin-mutation-form": "operator-view",
+        "data-saved-view-form": surface,
+        "data-admin-mutation-saving": ui.savedViewSaving,
+        "data-admin-mutation-success": ui.savedViewSaved,
+        "data-admin-mutation-failure": ui.savedViewFailed,
+      },
+      h("input", { type: "hidden", name: "surface", defaultValue: surface }),
+      h("input", { type: "hidden", name: "filters", defaultValue: "{}", "data-saved-view-filters-field": "true" }),
+      h("label", null, ui.savedViewName, h("input", { name: "name", required: true, maxLength: 80 })),
+      h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+      h(
+        "button",
+        { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" },
+        h(Icon, { name: "filter", size: 15 }),
+        h("span", null, ui.saveView),
+      ),
+    ),
+    h("p", { className: "adm-hint", id: `saved-view-${surface}-note` }, ui.savedViewsLive),
+  );
+}
+
+function LeadBulkActionsTool({ page, ui, copy }) {
+  const writable = page.leadOperations?.bulkWritable === true;
+  if (!writable) {
+    return h(
+      "div",
+      { className: "adm-planned", "data-planned-control": "lead_bulk_actions" },
+      h(
+        "fieldset",
+        { className: "adm-planned__group", disabled: true, "aria-describedby": "lead-bulk-note" },
+        h("legend", null, ui.bulkActions),
+        h(
+          "label",
+          { className: "adm-check" },
+          h("input", { type: "checkbox", name: "selectAllLeads" }),
+          h("span", null, ui.selectAllLeads),
+        ),
+        h("button", { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm" }, ui.bulkAssign),
+        h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--sm" }, ui.snooze),
+      ),
+      h(PlannedNote, { id: "lead-bulk-note" }, ui.bulkActionsNote),
+    );
+  }
+  return h(
+    "form",
+    {
+      method: "post",
+      action: "/api/admin/leads/bulk",
+      className: "adm-form adm-list-tools__group",
+      id: "lead-bulk-actions",
+      "data-admin-mutation-form": "lead-bulk",
+      "data-lead-bulk-form": "true",
+      "data-admin-mutation-saving": ui.bulkSaving,
+      "data-admin-mutation-success": ui.bulkSaved,
+      "data-admin-mutation-failure": ui.bulkFailed,
+      "data-lead-selected-label": ui.selectedEnquiries,
+    },
+    h(
+      "fieldset",
+      { className: "adm-list-tools__fieldset" },
+      h("legend", null, ui.bulkActions),
+      h(
+        "label",
+        { className: "adm-check" },
+        h("input", { type: "checkbox", name: "selectAllLeads", "data-lead-select-all": "true" }),
+        h("span", null, ui.selectAllLeads),
+      ),
+      h("span", { className: "adm-list-tools__count", "data-lead-selection-count": "true", "aria-live": "polite" }, ui.selectedEnquiries.replace("{count}", "0")),
+      h(
+        "label",
+        null,
+        ui.bulkAction,
+        h(
+          "select",
+          { name: "action", required: true, "data-lead-bulk-action": "true" },
+          h("option", { value: "assign" }, ui.bulkAssign),
+          h("option", { value: "snooze" }, ui.bulkSnooze),
+          h("option", { value: "handle" }, ui.bulkHandle),
+        ),
+      ),
+      h(
+        "label",
+        { "data-lead-bulk-field": "assign" },
+        label(copy, "assignedBroker", "Assigned broker"),
+        h(
+          "select",
+          { name: "brokerId" },
+          ...(page.brokerProfiles || []).map((profile) => h("option", { key: profile.id, value: profile.id }, profile.id.replaceAll("_", " "))),
+        ),
+      ),
+      h("label", { "data-lead-bulk-field": "snooze" }, ui.snoozeUntil, h("input", { type: "datetime-local", name: "until" })),
+      h("label", null, ui.bulkNote, h("textarea", { name: "reason", rows: 2, required: true, maxLength: 500 })),
+      h(
+        "label",
+        { className: "adm-check" },
+        h("input", { type: "checkbox", name: "bulkConfirmed", value: "true", required: true }),
+        h("span", null, ui.bulkConfirm),
+      ),
+    ),
+    h("p", { className: "adm-hint" }, ui.bulkActionsLive),
+    h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+    h(
+      "button",
+      { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" },
+      h(Icon, { name: "list", size: 15 }),
+      h("span", null, ui.bulkApply),
+    ),
+  );
+}
+
+function LeadListTools({ page, ui, copy }) {
+  const live = page.leadOperations?.bulkWritable === true || page.leadOperations?.savedViewsWritable === true;
   return h(
     "details",
-    { className: "adm-list-tools", "data-planned-control": "lead_list_tools" },
+    { className: "adm-list-tools", ...(live ? { "data-list-tools": "lead_list_tools" } : { "data-planned-control": "lead_list_tools" }) },
     h(
       "summary",
       { className: "adm-list-tools__summary adm-disclosure-chevron" },
       h(Icon, { name: "sliders-horizontal", size: 15 }),
       h("span", null, ui.listTools),
-      h(PlannedBadge, { ui }),
+      live ? null : h(PlannedBadge, { ui }),
     ),
     h(
       "div",
       { className: "adm-list-tools__body" },
-      h(
-        "div",
-        { className: "adm-planned", "data-planned-control": "saved_views" },
-        h(
-          "label",
-          { className: "adm-planned__field", htmlFor: "saved-view-leads" },
-          h("span", null, ui.savedViews),
-          h(
-            "select",
-            { id: "saved-view-leads", name: "savedView", disabled: true, "aria-describedby": "saved-view-leads-note" },
-            h("option", null, ui.savedViewsDefault),
-          ),
-        ),
-        h(PlannedNote, { id: "saved-view-leads-note" }, ui.savedViewsNote),
-      ),
-      h(
-        "div",
-        { className: "adm-planned", "data-planned-control": "lead_bulk_actions" },
-        h(
-          "fieldset",
-          { className: "adm-planned__group", disabled: true, "aria-describedby": "lead-bulk-note" },
-          h("legend", null, ui.bulkActions),
-          h(
-            "label",
-            { className: "adm-check" },
-            h("input", { type: "checkbox", name: "selectAllLeads" }),
-            h("span", null, ui.selectAllLeads),
-          ),
-          h("button", { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm" }, ui.bulkAssign),
-          h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--sm" }, ui.snooze),
-        ),
-        h(PlannedNote, { id: "lead-bulk-note" }, ui.bulkActionsNote),
-      ),
+      h(SavedViewsTool, { page, ui, copy, surface: "leads" }),
+      h(LeadBulkActionsTool, { page, ui, copy }),
     ),
   );
 }
@@ -5467,8 +5699,9 @@ function LeadContactChannels({ lead, ui }) {
 
 // List pane row: who, context, SLA and age. The link targets the detail
 // article, so selection works through the URL fragment without JavaScript.
-function LeadInboxRow({ row, ui, locale }) {
-  const { lead, slaStatus, delivery, delivered, brokerId, leadContext, requestDetails, age } = row;
+function LeadInboxRow({ page, row, ui, locale }) {
+  const { lead, slaStatus, delivery, delivered, brokerId, leadContext, requestDetails, age, snooze } = row;
+  const selectable = page?.leadOperations?.bulkWritable === true;
   return h(
     "li",
     {
@@ -5476,8 +5709,17 @@ function LeadInboxRow({ row, ui, locale }) {
       "data-lead-id": lead.lead_id,
       "data-lead-type": lead.lead_type,
       "data-lead-replied": delivered ? "true" : "false",
+      "data-lead-snoozed": snooze?.status === "active" ? "true" : undefined,
       hidden: delivered,
     },
+    selectable
+      ? h(
+          "label",
+          { className: "adm-check adm-inbox__select" },
+          h("input", { type: "checkbox", name: "leadIds", value: lead.lead_id, form: "lead-bulk-actions", "data-lead-select": lead.lead_id }),
+          h("span", { className: "adm-visually-hidden" }, ui.selectLeadForBulk),
+        )
+      : null,
     h(
       "a",
       { className: "adm-inbox__row", href: `#lead-${encodeURIComponent(lead.lead_id)}`, "data-lead-link": lead.lead_id },
@@ -5489,10 +5731,93 @@ function LeadInboxRow({ row, ui, locale }) {
         "span",
         { className: "adm-inbox__tags" },
         h(StatusPill, { tone: leadSlaTone(slaStatus), "data-sla-status": slaStatus }, statusText(ui, slaStatus)),
+        snooze?.status === "active" && snooze.until
+          ? h(StatusPill, { tone: "sand", "data-lead-snooze-until": snooze.until }, `${ui.snoozedUntil} ${formatAdminDateTime(snooze.until, locale)}`)
+          : null,
         delivery && !delivered ? h(StatusPill, { tone: delivery.status === "failed" ? "brick" : "sun" }, statusText(ui, delivery.status)) : null,
         h("span", { className: "adm-inbox__broker" }, brokerId || ui.notSet),
       ),
     ),
+  );
+}
+
+// Snooze defers one enquiry to a chosen moment. The SLA clock moves with it
+// by exactly the same window, so nothing is lost; un-snoozing puts the
+// original clock back. Without a reachable route the control keeps its
+// disabled, badged treatment instead of pretending.
+function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
+  const writable = page.leadOperations?.snoozeWritable === true && pageCan(page, "operations:write");
+  const snooze = leadSla?.snooze || null;
+  const active = snooze?.status === "active";
+  if (!writable) {
+    return h(
+      "div",
+      { className: "adm-lead-snooze" },
+      h(
+        "button",
+        {
+          type: "button",
+          className: "mk-btn mk-btn--ghost mk-btn--sm",
+          disabled: true,
+          "data-planned-control": "lead_snooze",
+          "aria-describedby": `snooze-note-${lead.lead_id}`,
+          title: ui.snoozeNote,
+        },
+        h(Icon, { name: "clock", size: 15 }),
+        h("span", null, ui.snooze),
+        h(PlannedBadge, { ui }),
+      ),
+      h(PlannedNote, { id: `snooze-note-${lead.lead_id}`, className: "adm-planned-note adm-visually-hidden" }, ui.snoozeNote),
+    );
+  }
+  return h(
+    "details",
+    { className: "adm-lead-snooze", "data-lead-snooze-control": lead.lead_id, "data-snooze-state": active ? "active" : "open" },
+    h(
+      "summary",
+      { className: "mk-btn mk-btn--ghost mk-btn--sm" },
+      h(Icon, { name: "clock", size: 15 }),
+      h("span", null, active ? ui.unsnooze : ui.snooze),
+      active && snooze?.until
+        ? h(StatusPill, { tone: "sun", "data-snooze-until": snooze.until }, `${ui.snoozedUntil} ${formatAdminDateTime(snooze.until, locale)}`)
+        : null,
+    ),
+    active
+      ? h(
+          "form",
+          {
+            method: "post",
+            action: "/api/admin/leads/unsnooze",
+            className: "adm-form adm-lead-snooze__form",
+            "data-admin-mutation-form": "lead-unsnooze",
+            "data-admin-mutation-saving": ui.unsnoozeSaving,
+            "data-admin-mutation-success": ui.unsnoozeSaved,
+            "data-admin-mutation-failure": ui.unsnoozeFailed,
+          },
+          h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
+          h("label", null, ui.snoozeReason, h("textarea", { name: "reason", rows: 2, required: true, maxLength: 500 })),
+          h("p", { className: "adm-hint" }, ui.snoozeLive),
+          h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+          h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h("span", null, ui.unsnooze)),
+        )
+      : h(
+          "form",
+          {
+            method: "post",
+            action: "/api/admin/leads/snooze",
+            className: "adm-form adm-lead-snooze__form",
+            "data-admin-mutation-form": "lead-snooze",
+            "data-admin-mutation-saving": ui.snoozeSaving,
+            "data-admin-mutation-success": ui.snoozeSaved,
+            "data-admin-mutation-failure": ui.snoozeFailed,
+          },
+          h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
+          h("label", null, ui.snoozeUntil, h("input", { type: "datetime-local", name: "until", required: true })),
+          h("label", null, ui.snoozeReason, h("textarea", { name: "reason", rows: 2, required: true, maxLength: 500 })),
+          h("p", { className: "adm-hint" }, ui.snoozeLive),
+          h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+          h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h("span", null, ui.snooze)),
+        ),
   );
 }
 
@@ -5501,6 +5826,12 @@ function LeadInboxRow({ row, ui, locale }) {
 function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
   const { lead, leadSla, slaStatus, queuedReply, delivery, delivered, brokerId, leadContext, requestDetails, intake, brief, thread } = row;
   const replyOpen = queuedReply && delivery && !delivered;
+  // Hermes availability comes from configuration on the payload, never from a
+  // probe request: the draft button must be right the first time it renders.
+  const hermesAvailable = page.hermes ? page.hermes.available === true : true;
+  const hermesReason =
+    page.hermes?.reason ||
+    label(copy, "replyDraftUnavailable", "Hermes is not configured in this environment. Use an approved template or write the reply manually.");
   return h(
     "article",
     {
@@ -5543,21 +5874,7 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
           h(Icon, { name: "list", size: 15 }),
           h("span", null, label(copy, "viewHistory", "History")),
         ),
-        h(
-          "button",
-          {
-            type: "button",
-            className: "mk-btn mk-btn--ghost mk-btn--sm",
-            disabled: true,
-            "data-planned-control": "lead_snooze",
-            "aria-describedby": `snooze-note-${lead.lead_id}`,
-            title: ui.snoozeNote,
-          },
-          h(Icon, { name: "clock", size: 15 }),
-          h("span", null, ui.snooze),
-          h(PlannedBadge, { ui }),
-        ),
-        h(PlannedNote, { id: `snooze-note-${lead.lead_id}`, className: "adm-planned-note adm-visually-hidden" }, ui.snoozeNote),
+        h(LeadSnoozeControl, { page, lead, leadSla, ui, locale }),
       ),
       h(LeadContactChannels, { lead, ui }),
     ),
@@ -5597,7 +5914,12 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
     ),
     h(
       "div",
-      { className: "adm-lead-detail__section adm-reply-cell", "data-lead-column": "reply", "data-label": leadColumns.reply },
+      {
+        className: "adm-lead-detail__section adm-reply-cell",
+        "data-lead-column": "reply",
+        "data-label": leadColumns.reply,
+        ...(hermesAvailable ? {} : { "data-hermes-state": "unavailable" }),
+      },
       h("h3", null, leadColumns.reply),
       replyOpen ? h(ReplyDeliveryForm, { page, lead, reply: queuedReply, delivery, copy, ui }) : null,
       page.leadSourceDurable && !replyOpen && pageCan(page, "operations:write") ? h(DirectProviderReplyForm, { page, lead, copy, ui }) : null,
@@ -5627,7 +5949,15 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
           h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
           h(
             "button",
-            { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" },
+            {
+              type: "submit",
+              className: "mk-btn mk-btn--secondary mk-btn--sm",
+              // Derived from configuration, so the button is honest on first
+              // paint instead of learning it after a failed request.
+              disabled: hermesAvailable ? undefined : true,
+              "aria-describedby": hermesAvailable ? undefined : `hermes-note-${lead.lead_id}`,
+              title: hermesAvailable ? undefined : hermesReason,
+            },
             h(Icon, { name: "sparkles", size: 16 }),
             h("span", null, label(copy, "draftWithHermes", "Draft with Hermes")),
           ),
@@ -5683,9 +6013,14 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
       ),
       h(
         "p",
-        { className: "adm-planned-note adm-hermes-note", "data-hermes-unavailable-note": "true" },
+        {
+          className: "adm-planned-note adm-hermes-note",
+          id: `hermes-note-${lead.lead_id}`,
+          "data-hermes-unavailable-note": "true",
+          ...(hermesAvailable ? {} : { "data-hermes-reason": page.hermes?.reason_key || "not_configured" }),
+        },
         h(Icon, { name: "info", size: 15 }),
-        h("span", null, label(copy, "replyDraftUnavailable", "Hermes is not configured in this environment. Use an approved template or write the reply manually.")),
+        h("span", null, hermesAvailable ? label(copy, "replyDraftUnavailable", "Hermes is not configured in this environment. Use an approved template or write the reply manually.") : hermesReason),
       ),
       h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-status": "true" }),
     ),
@@ -5761,6 +6096,7 @@ function LeadInboxBody({ page }) {
       requestDetails: requestDetailsText(lead),
       intake: lead.intake_completion || { complete: false, missing_fields: [] },
       brief: briefByLeadId.get(lead.lead_id),
+      snooze: leadSla?.snooze || null,
       thread: communicationByLeadId.get(lead.lead_id),
       age: formatRelativeAge(lead.received_at, ui, now),
     };
@@ -5813,10 +6149,10 @@ function LeadInboxBody({ page }) {
         h(
           "div",
           { className: "adm-inbox__list" },
-          leads.length ? h(LeadListTools, { ui }) : null,
+          leads.length ? h(LeadListTools, { page, ui, copy }) : null,
           leads.length ? null : h("p", { className: "adm-empty", "data-empty-leads": "true" }, ui.noLeads),
           leads.length ? h("p", { className: "adm-empty", "data-lead-queue-empty": "true", role: "status", hidden: true }, ui.noQueueMatches) : null,
-          leads.length ? h("ol", { className: "adm-inbox__rows" }, ...rows.map((row) => h(LeadInboxRow, { key: row.lead.lead_id, row, ui, locale }))) : null,
+          leads.length ? h("ol", { className: "adm-inbox__rows" }, ...rows.map((row) => h(LeadInboxRow, { key: row.lead.lead_id, page, row, ui, locale }))) : null,
         ),
         h(
           "div",
