@@ -1511,7 +1511,7 @@
         "replyQueueReady": "Ответ поставлен в очередь для ручной отправки.",
         "replyTemplate": "Шаблон ответа",
         "reviewTranslation": "Проверить перевод",
-        "templateReviewNotice": "Шаблон — только отправная точка. Проверьте факты и отредактируйте текст перед одобрением."
+        "templateReviewNotice": "Шаблон это только отправная точка. Проверьте факты и отредактируйте текст перед одобрением."
       },
       "modules": [
         {
@@ -2042,7 +2042,7 @@
           "replyQueueReady": "Ответ поставлен в очередь для ручной отправки.",
           "replyTemplate": "Шаблон ответа",
           "reviewTranslation": "Проверить перевод",
-          "templateReviewNotice": "Шаблон — только отправная точка. Проверьте факты и отредактируйте текст перед одобрением."
+          "templateReviewNotice": "Шаблон это только отправная точка. Проверьте факты и отредактируйте текст перед одобрением."
         },
         "interface_locales": [
           "bg",
@@ -4699,9 +4699,9 @@
   },
   "crm_inbox": {
     "buyer_he": {
-      "id": "inbox-lead-draft-8cf91542-5cb1-496c-865a-a9bad54a1e5f",
+      "id": "inbox-lead-draft-98f93bf5-dc40-4131-bc13-49a4b99b8e80",
       "lead": {
-        "id": "lead-draft-8cf91542-5cb1-496c-865a-a9bad54a1e5f",
+        "id": "lead-draft-98f93bf5-dc40-4131-bc13-49a4b99b8e80",
         "idempotency_key": null,
         "source": "website_listing_detail",
         "intent": null,
@@ -4789,9 +4789,9 @@
       }
     },
     "seller_el": {
-      "id": "inbox-lead-draft-e3379a7c-f664-4d95-89f5-5ebcbb7ba478",
+      "id": "inbox-lead-draft-0195eae8-70d3-42b2-88ee-90e33c9ad5fc",
       "lead": {
-        "id": "lead-draft-e3379a7c-f664-4d95-89f5-5ebcbb7ba478",
+        "id": "lead-draft-0195eae8-70d3-42b2-88ee-90e33c9ad5fc",
         "idempotency_key": null,
         "source": "website_seller_valuation",
         "intent": null,

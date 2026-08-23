@@ -46,9 +46,10 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -186,8 +187,10 @@
         "id": "MS-CRAWL-0001",
         "location": "סנדנסקי",
         "property_type": "commercial",
+        "property_family": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "floor": null,
         "total_floors": null,
@@ -469,6 +472,119 @@
           }
         ]
       },
+      "location_links": {
+        "search": "/he/search?location=Sandanski",
+        "map": "/he/search?view=map&country_code=BG&region_id=BG%3Adistrict%3ABLG",
+        "pin_available": false
+      },
+      "cost_estimator": {
+        "endpoint": "/api/purchase-fees/estimate",
+        "locale": "he",
+        "municipality": "Sandanski",
+        "buyer_scope": "eu",
+        "buyer_scopes": [
+          "eu",
+          "non_eu"
+        ],
+        "table": [
+          {
+            "buyer_scope": "eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          },
+          {
+            "buyer_scope": "non_eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee",
+              "company_route_setup"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "company_route_setup",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          }
+        ],
+        "currency": "EUR",
+        "available": false,
+        "reason": "incomplete_fee_table",
+        "missing": [
+          {
+            "line_key": "local_transfer_tax",
+            "municipality": "Sandanski",
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "notary_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "registry_entry_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "agency_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          }
+        ],
+        "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
+      },
       "related_listings": [
         {
           "id": "MS-CRAWL-0006",
@@ -490,6 +606,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 1,
           "price_on_request": false,
           "listing_status": "available",
@@ -547,6 +664,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 6,
           "price_on_request": false,
           "listing_status": "available",
@@ -604,6 +722,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 83,
           "price_on_request": false,
           "listing_status": "available",
@@ -682,7 +801,7 @@
         "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
-        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
@@ -726,7 +845,57 @@
           "active": false
         }
       ],
-      "languages": [],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en",
+          "active": true,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he",
+          "active": false,
+          "dir": "rtl"
+        }
+      ],
       "contact": {
         "email": "office@makler-realty.com",
         "phone": "+359879696870",
@@ -818,8 +987,10 @@
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
         "property_type": "commercial",
+        "property_family": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "floor": null,
         "total_floors": null,
@@ -1101,6 +1272,119 @@
           }
         ]
       },
+      "location_links": {
+        "search": "/en/search?location=Sandanski",
+        "map": "/en/search?view=map&country_code=BG&region_id=BG%3Adistrict%3ABLG",
+        "pin_available": false
+      },
+      "cost_estimator": {
+        "endpoint": "/api/purchase-fees/estimate",
+        "locale": "en",
+        "municipality": "Sandanski",
+        "buyer_scope": "eu",
+        "buyer_scopes": [
+          "eu",
+          "non_eu"
+        ],
+        "table": [
+          {
+            "buyer_scope": "eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          },
+          {
+            "buyer_scope": "non_eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee",
+              "company_route_setup"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "company_route_setup",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          }
+        ],
+        "currency": "EUR",
+        "available": false,
+        "reason": "incomplete_fee_table",
+        "missing": [
+          {
+            "line_key": "local_transfer_tax",
+            "municipality": "Sandanski",
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "notary_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "registry_entry_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "agency_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          }
+        ],
+        "notice": "The purchase cost table is not complete, so no total is shown."
+      },
       "related_listings": [
         {
           "id": "MS-CRAWL-0006",
@@ -1122,6 +1406,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 1,
           "price_on_request": false,
           "listing_status": "available",
@@ -1179,6 +1464,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 6,
           "price_on_request": false,
           "listing_status": "available",
@@ -1236,6 +1522,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 83,
           "price_on_request": false,
           "listing_status": "available",
@@ -1316,9 +1603,10 @@
         "navRent": "Аренда",
         "navSell": "Продать",
         "navContact": "Контакты",
+        "buyerGuides": "Руководства для покупателей",
         "explore": "Обзор",
         "getInTouch": "Связаться с нами",
-        "tagline": "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции — с местными офисами и брокерами, говорящими на вашем языке.",
+        "tagline": "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции, с местными офисами и брокерами, говорящими на вашем языке.",
         "copyright": "Все права защищены.",
         "requestSent": "Запрос отправлен. Брокер свяжется с вами.",
         "requestFailed": "Не удалось отправить запрос. Попробуйте ещё раз.",
@@ -1435,8 +1723,10 @@
         "id": "MS-CRAWL-0114",
         "location": "Сандански",
         "property_type": "apartment",
+        "property_family": "apartment",
         "offer_type": "sale",
         "bedrooms": null,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "floor": null,
         "total_floors": null,
@@ -1676,6 +1966,119 @@
           }
         ]
       },
+      "location_links": {
+        "search": "/ru/search?location=Sandanski",
+        "map": "/ru/search?view=map&country_code=BG&region_id=BG%3Adistrict%3ABLG",
+        "pin_available": false
+      },
+      "cost_estimator": {
+        "endpoint": "/api/purchase-fees/estimate",
+        "locale": "ru",
+        "municipality": "Sandanski",
+        "buyer_scope": "eu",
+        "buyer_scopes": [
+          "eu",
+          "non_eu"
+        ],
+        "table": [
+          {
+            "buyer_scope": "eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          },
+          {
+            "buyer_scope": "non_eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee",
+              "company_route_setup"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "company_route_setup",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          }
+        ],
+        "currency": "EUR",
+        "available": false,
+        "reason": "incomplete_fee_table",
+        "missing": [
+          {
+            "line_key": "local_transfer_tax",
+            "municipality": "Sandanski",
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "notary_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "registry_entry_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "agency_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          }
+        ],
+        "notice": "Таблица расходов неполная, поэтому итог не показывается."
+      },
       "related_listings": [
         {
           "id": "MS-CRAWL-0119",
@@ -1697,6 +2100,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": null,
           "price_on_request": true,
           "listing_status": "available",
@@ -1754,6 +2158,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 93000,
           "price_on_request": false,
           "listing_status": "available",
@@ -1811,6 +2216,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 594000,
           "price_on_request": false,
           "listing_status": "available",
@@ -1907,9 +2313,10 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -2637,19 +3044,19 @@
             ],
             "property_families": [
               "apartment",
-              "commercial",
-              "hotel",
               "house",
               "plot",
-              "property"
+              "agricultural_land",
+              "commercial",
+              "hotel"
             ],
             "property_types": [
               "apartment",
-              "commercial",
-              "hotel",
               "house",
               "plot",
-              "property"
+              "agricultural_land",
+              "commercial",
+              "hotel"
             ],
             "property_subtypes": [
               "apartment",
@@ -2662,6 +3069,28 @@
               "rent",
               "sale"
             ],
+            "price_presets": {
+              "sale": [
+                50000,
+                75000,
+                100000,
+                150000,
+                200000,
+                300000,
+                500000,
+                750000,
+                1000000
+              ],
+              "rent": [
+                300,
+                400,
+                500,
+                700,
+                1000,
+                1500,
+                2000
+              ]
+            },
             "bedrooms": [],
             "premises": [],
             "hotel_rooms": []
@@ -2677,18 +3106,9 @@
             "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
           },
           "applicable_filter_fields": [
-            "property_subtype",
             "bedrooms_min",
-            "premises_min",
-            "hotel_rooms_min",
             "area_min",
-            "area_max",
-            "land_area_min",
-            "land_area_max",
-            "floor_min",
-            "floor_max",
-            "storeys_min",
-            "storeys_max"
+            "area_max"
           ]
         }
       },
@@ -2702,7 +3122,32 @@
         "path": "/he/contact",
         "label": "שיחה חוזרת"
       },
+      "start": {
+        "path": "/he/start",
+        "label": "התחילו את החיפוש"
+      },
       "guides": null,
+      "guides_alternate": {
+        "locale": "en",
+        "links": [
+          {
+            "id": "foreign-buyers-bg-land-ownership",
+            "href": "/en/guides/foreign-buyers",
+            "label": "Foreign buyers and Bulgarian land ownership",
+            "summary": "Non-EU buyers cannot own Bulgarian land directly in their own name.",
+            "reviewer": "editor_bg",
+            "active": false
+          },
+          {
+            "id": "buyer-due-diligence-liens",
+            "href": "/en/guides/buying-process",
+            "label": "Title and encumbrance checks",
+            "summary": "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
+            "reviewer": "editor_bg",
+            "active": false
+          }
+        ]
+      },
       "locations": [
         {
           "location": "סנדנסקי",
@@ -2760,6 +3205,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -2817,6 +3263,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -2874,6 +3321,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 600,
         "price_on_request": false,
         "listing_status": "available",
@@ -2931,6 +3379,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 355,
         "price_on_request": false,
         "listing_status": "available",
@@ -2988,6 +3437,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -3045,6 +3495,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
         "listing_status": "available",
@@ -3139,9 +3590,10 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -3334,9 +3786,10 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -3469,6 +3922,29 @@
           "label": "office@makler-realty.com"
         }
       },
+      "offices": [
+        {
+          "id": "sandanski",
+          "location": "Sandanski",
+          "name": "סנדנסקי",
+          "search_path": "/he/search?location=Sandanski",
+          "map_href": "https://www.openstreetmap.org/search?query=Sandanski%2C%20Bulgaria"
+        },
+        {
+          "id": "bansko",
+          "location": "Bansko",
+          "name": "בנסקו",
+          "search_path": "/he/search?location=Bansko",
+          "map_href": "https://www.openstreetmap.org/search?query=Bansko%2C%20Bulgaria"
+        },
+        {
+          "id": "sveti-vlas",
+          "location": "Sveti Vlas",
+          "name": "סבטי ולאס",
+          "search_path": "/he/search?location=Sveti%20Vlas",
+          "map_href": "https://www.openstreetmap.org/search?query=Sveti%20Vlas%2C%20Bulgaria"
+        }
+      ],
       "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "callback": null,
       "search": {
@@ -3513,7 +3989,7 @@
         "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
-        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
@@ -3740,9 +4216,10 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -3857,7 +4334,30 @@
     "body": {
       "h1": "נכסים ב-סנדנסקי",
       "location": "Sandanski",
-      "listing_count": 1
+      "listing_count": 1,
+      "intro": "נכסים שנבדקו על ידי MS Realty ב-סנדנסקי.",
+      "sub_areas": [
+        {
+          "id": "BG:settlement:65334",
+          "count": 1,
+          "label": "סנדנסקי",
+          "href": "/he/search?region_id=BG%3Asettlement%3A65334"
+        }
+      ],
+      "guides": [],
+      "seller": {
+        "path": "/he/sell",
+        "label": "הערכת מוכר",
+        "description": "בקשו הערכת מתווך וחזרה מצוות MS Realty."
+      },
+      "search_href": "/he/search?region_id=BG%3Amunicipality%3ABLG40",
+      "area_guide": {
+        "available": false,
+        "reason": "not_approved",
+        "area_key": "Sandanski",
+        "locale": "he",
+        "notice": "המידע על האזור טרם פורסם."
+      }
     },
     "cards": [
       {
@@ -3880,6 +4380,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -3965,9 +4466,10 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -4105,8 +4607,10 @@
         "id": "MS-CRAWL-0001",
         "location": "סנדנסקי",
         "property_type": "commercial",
+        "property_family": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": true,
         "area_sqm": null,
         "floor": null,
         "total_floors": null,
@@ -4388,6 +4892,119 @@
           }
         ]
       },
+      "location_links": {
+        "search": "/he/search?location=Sandanski",
+        "map": "/he/search?view=map&country_code=BG&region_id=BG%3Adistrict%3ABLG",
+        "pin_available": false
+      },
+      "cost_estimator": {
+        "endpoint": "/api/purchase-fees/estimate",
+        "locale": "he",
+        "municipality": "Sandanski",
+        "buyer_scope": "eu",
+        "buyer_scopes": [
+          "eu",
+          "non_eu"
+        ],
+        "table": [
+          {
+            "buyer_scope": "eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          },
+          {
+            "buyer_scope": "non_eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee",
+              "company_route_setup"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "company_route_setup",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          }
+        ],
+        "currency": "EUR",
+        "available": false,
+        "reason": "incomplete_fee_table",
+        "missing": [
+          {
+            "line_key": "local_transfer_tax",
+            "municipality": "Sandanski",
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "notary_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "registry_entry_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "agency_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          }
+        ],
+        "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
+      },
       "related_listings": [
         {
           "id": "MS-CRAWL-0006",
@@ -4409,6 +5026,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 1,
           "price_on_request": false,
           "listing_status": "available",
@@ -4466,6 +5084,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 6,
           "price_on_request": false,
           "listing_status": "available",
@@ -4523,6 +5142,7 @@
           "bedrooms": null,
           "bedrooms_not_applicable": true,
           "area_sqm": null,
+          "land_area_sqm": null,
           "price_eur": 83,
           "price_on_request": false,
           "listing_status": "available",
@@ -4596,9 +5216,10 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -5368,19 +5989,19 @@
           ],
           "property_families": [
             "apartment",
-            "commercial",
-            "hotel",
             "house",
             "plot",
-            "property"
+            "agricultural_land",
+            "commercial",
+            "hotel"
           ],
           "property_types": [
             "apartment",
-            "commercial",
-            "hotel",
             "house",
             "plot",
-            "property"
+            "agricultural_land",
+            "commercial",
+            "hotel"
           ],
           "property_subtypes": [
             "apartment",
@@ -5393,6 +6014,28 @@
             "rent",
             "sale"
           ],
+          "price_presets": {
+            "sale": [
+              50000,
+              75000,
+              100000,
+              150000,
+              200000,
+              300000,
+              500000,
+              750000,
+              1000000
+            ],
+            "rent": [
+              300,
+              400,
+              500,
+              700,
+              1000,
+              1500,
+              2000
+            ]
+          },
           "bedrooms": [],
           "premises": [],
           "hotel_rooms": []
@@ -5408,18 +6051,9 @@
           "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
         },
         "applicable_filter_fields": [
-          "property_subtype",
           "bedrooms_min",
-          "premises_min",
-          "hotel_rooms_min",
           "area_min",
-          "area_max",
-          "land_area_min",
-          "land_area_max",
-          "floor_min",
-          "floor_max",
-          "storeys_min",
-          "storeys_max"
+          "area_max"
         ]
       },
       "fallback": {
@@ -5449,6 +6083,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -5506,6 +6141,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 600,
         "price_on_request": false,
         "listing_status": "available",
@@ -5563,6 +6199,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 355,
         "price_on_request": false,
         "listing_status": "available",
@@ -5620,6 +6257,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -5677,6 +6315,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
         "listing_status": "available",
@@ -5734,6 +6373,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 53289,
         "price_on_request": false,
         "listing_status": "available",
@@ -5791,6 +6431,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 350,
         "price_on_request": false,
         "listing_status": "available",
@@ -5848,6 +6489,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 400,
         "price_on_request": false,
         "listing_status": "available",
@@ -5905,6 +6547,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 130000,
         "price_on_request": false,
         "listing_status": "available",
@@ -5962,6 +6605,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -6019,6 +6663,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,
         "listing_status": "available",
@@ -6076,6 +6721,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 35000,
         "price_on_request": false,
         "listing_status": "available",
@@ -6137,9 +6783,10 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -6254,7 +6901,72 @@
     "body": {
       "h1": "נכסים ב-סנדנסקי",
       "location": "Sandanski",
-      "listing_count": 80
+      "listing_count": 80,
+      "intro": "נכסים שנבדקו על ידי MS Realty ב-סנדנסקי.",
+      "sub_areas": [
+        {
+          "id": "BG:settlement:65334",
+          "count": 61,
+          "label": "סנדנסקי",
+          "href": "/he/search?region_id=BG%3Asettlement%3A65334"
+        },
+        {
+          "id": "BG:settlement:77361",
+          "count": 4,
+          "label": "חוטובו",
+          "href": "/he/search?region_id=BG%3Asettlement%3A77361"
+        },
+        {
+          "id": "BG:settlement:57176",
+          "count": 4,
+          "label": "Polenitsa",
+          "href": "/he/search?region_id=BG%3Asettlement%3A57176"
+        },
+        {
+          "id": "BG:settlement:20780",
+          "count": 3,
+          "label": "Dzhigurovo",
+          "href": "/he/search?region_id=BG%3Asettlement%3A20780"
+        },
+        {
+          "id": "BG:settlement:43565",
+          "count": 2,
+          "label": "Leshnitsa",
+          "href": "/he/search?region_id=BG%3Asettlement%3A43565"
+        },
+        {
+          "id": "BG:settlement:43243",
+          "count": 2,
+          "label": "Levunovo",
+          "href": "/he/search?region_id=BG%3Asettlement%3A43243"
+        },
+        {
+          "id": "BG:settlement:43150",
+          "count": 1,
+          "label": "Laskarevo",
+          "href": "/he/search?region_id=BG%3Asettlement%3A43150"
+        },
+        {
+          "id": "BG:settlement:56410",
+          "count": 1,
+          "label": "Pirin",
+          "href": "/he/search?region_id=BG%3Asettlement%3A56410"
+        }
+      ],
+      "guides": [],
+      "seller": {
+        "path": "/he/sell",
+        "label": "הערכת מוכר",
+        "description": "בקשו הערכת מתווך וחזרה מצוות MS Realty."
+      },
+      "search_href": "/he/search?region_id=BG%3Amunicipality%3ABLG40",
+      "area_guide": {
+        "available": false,
+        "reason": "not_approved",
+        "area_key": "Sandanski",
+        "locale": "he",
+        "notice": "המידע על האזור טרם פורסם."
+      }
     },
     "cards": [
       {
@@ -6277,6 +6989,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -6334,6 +7047,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 600,
         "price_on_request": false,
         "listing_status": "available",
@@ -6391,6 +7105,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 355,
         "price_on_request": false,
         "listing_status": "available",
@@ -6448,6 +7163,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -6505,6 +7221,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
         "listing_status": "available",
@@ -6562,6 +7279,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 53289,
         "price_on_request": false,
         "listing_status": "available",
@@ -6619,6 +7337,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 350,
         "price_on_request": false,
         "listing_status": "available",
@@ -6676,6 +7395,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 400,
         "price_on_request": false,
         "listing_status": "available",
@@ -6733,6 +7453,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 130000,
         "price_on_request": false,
         "listing_status": "available",
@@ -6790,6 +7511,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -6847,6 +7569,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,
         "listing_status": "available",
@@ -6904,6 +7627,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 35000,
         "price_on_request": false,
         "listing_status": "available",
@@ -6946,6 +7670,20 @@
   "fallback_fr": {
     "kind": "language_fallback",
     "status": 200,
+    "body": {
+      "h1": "This language is not available yet",
+      "intro": "MS Realty is available in Bulgarian, English, German, Dutch, Russian, Greek and Hebrew. Pick one of them above, or request this language and we will tell you when it is ready.",
+      "success": "Thank you. We will let you know when this language is ready.",
+      "search": {
+        "path": "/en/search"
+      },
+      "contact_channels": {
+        "phone": {
+          "href": "tel:+359879696870",
+          "label": "+359 879 69 68 70"
+        }
+      }
+    },
     "chrome": {
       "copy": {
         "navBuy": "Buy",
@@ -6955,7 +7693,7 @@
         "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
-        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
@@ -7130,9 +7868,10 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -7902,19 +8641,19 @@
           ],
           "property_families": [
             "apartment",
-            "commercial",
-            "hotel",
             "house",
             "plot",
-            "property"
+            "agricultural_land",
+            "commercial",
+            "hotel"
           ],
           "property_types": [
             "apartment",
-            "commercial",
-            "hotel",
             "house",
             "plot",
-            "property"
+            "agricultural_land",
+            "commercial",
+            "hotel"
           ],
           "property_subtypes": [
             "apartment",
@@ -7927,6 +8666,28 @@
             "rent",
             "sale"
           ],
+          "price_presets": {
+            "sale": [
+              50000,
+              75000,
+              100000,
+              150000,
+              200000,
+              300000,
+              500000,
+              750000,
+              1000000
+            ],
+            "rent": [
+              300,
+              400,
+              500,
+              700,
+              1000,
+              1500,
+              2000
+            ]
+          },
           "bedrooms": [],
           "premises": [],
           "hotel_rooms": []
@@ -7942,18 +8703,9 @@
           "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
         },
         "applicable_filter_fields": [
-          "property_subtype",
           "bedrooms_min",
-          "premises_min",
-          "hotel_rooms_min",
           "area_min",
-          "area_max",
-          "land_area_min",
-          "land_area_max",
-          "floor_min",
-          "floor_max",
-          "storeys_min",
-          "storeys_max"
+          "area_max"
         ]
       },
       "fallback": {
@@ -7983,6 +8735,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -8040,6 +8793,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -8097,6 +8851,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 600,
         "price_on_request": false,
         "listing_status": "available",
@@ -8154,6 +8909,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 355,
         "price_on_request": false,
         "listing_status": "available",
@@ -8211,6 +8967,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -8268,6 +9025,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
         "listing_status": "available",
@@ -8325,6 +9083,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 53289,
         "price_on_request": false,
         "listing_status": "available",
@@ -8382,6 +9141,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 350,
         "price_on_request": false,
         "listing_status": "available",
@@ -8439,6 +9199,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 400,
         "price_on_request": false,
         "listing_status": "available",
@@ -8496,6 +9257,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 130000,
         "price_on_request": false,
         "listing_status": "available",
@@ -8553,6 +9315,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -8610,6 +9373,7 @@
         "bedrooms": null,
         "bedrooms_not_applicable": true,
         "area_sqm": null,
+        "land_area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,
         "listing_status": "available",
@@ -8650,9 +9414,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-5a08f537-f342-4c0f-83d7-6a6a7a519396",
+    "id": "inbox-lead-draft-06f91c4d-3ee2-4060-b6e7-51527e32af04",
     "lead": {
-      "id": "lead-draft-5a08f537-f342-4c0f-83d7-6a6a7a519396",
+      "id": "lead-draft-06f91c4d-3ee2-4060-b6e7-51527e32af04",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -8751,9 +9515,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-d3e2c8a5-0b07-43d6-b234-4b4e4405356f",
+    "id": "inbox-lead-draft-893aa3b2-9ee4-4e80-ba26-0b0315f55efc",
     "lead": {
-      "id": "lead-draft-d3e2c8a5-0b07-43d6-b234-4b4e4405356f",
+      "id": "lead-draft-893aa3b2-9ee4-4e80-ba26-0b0315f55efc",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -8855,9 +9619,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-838309d9-b88d-41f4-91c7-80ecf9648d0b",
+    "id": "inbox-lead-draft-57574e6b-b506-46b6-af57-82baa6ae90c3",
     "lead": {
-      "id": "lead-draft-838309d9-b88d-41f4-91c7-80ecf9648d0b",
+      "id": "lead-draft-57574e6b-b506-46b6-af57-82baa6ae90c3",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",

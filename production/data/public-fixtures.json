@@ -77,6 +77,7 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
@@ -887,7 +888,32 @@
         "path": "/he/contact",
         "label": "שיחה חוזרת"
       },
+      "start": {
+        "path": "/he/start",
+        "label": "התחילו את החיפוש"
+      },
       "guides": null,
+      "guides_alternate": {
+        "locale": "en",
+        "links": [
+          {
+            "id": "foreign-buyers-bg-land-ownership",
+            "href": "/en/guides/foreign-buyers",
+            "label": "Foreign buyers and Bulgarian land ownership",
+            "summary": "Non-EU buyers cannot own Bulgarian land directly in their own name.",
+            "reviewer": "editor_bg",
+            "active": false
+          },
+          {
+            "id": "buyer-due-diligence-liens",
+            "href": "/en/guides/buying-process",
+            "label": "Title and encumbrance checks",
+            "summary": "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
+            "reviewer": "editor_bg",
+            "active": false
+          }
+        ]
+      },
       "locations": [
         {
           "location": "סנדנסקי",
@@ -1624,6 +1650,119 @@
           }
         ]
       },
+      "location_links": {
+        "search": "/bg/tarsene?location=Sandanski",
+        "map": "/bg/tarsene?view=map&country_code=BG&region_id=BG%3Adistrict%3ABLG",
+        "pin_available": false
+      },
+      "cost_estimator": {
+        "endpoint": "/api/purchase-fees/estimate",
+        "locale": "bg",
+        "municipality": "Sandanski",
+        "buyer_scope": "eu",
+        "buyer_scopes": [
+          "eu",
+          "non_eu"
+        ],
+        "table": [
+          {
+            "buyer_scope": "eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          },
+          {
+            "buyer_scope": "non_eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee",
+              "company_route_setup"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "company_route_setup",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          }
+        ],
+        "currency": "EUR",
+        "available": false,
+        "reason": "incomplete_fee_table",
+        "missing": [
+          {
+            "line_key": "local_transfer_tax",
+            "municipality": "Sandanski",
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "notary_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "registry_entry_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "agency_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          }
+        ],
+        "notice": "Таблицата с разходите не е пълна, затова обща сума не се показва."
+      },
       "related_listings": [],
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
@@ -1679,6 +1818,7 @@
         "navRent": "Ενοικίαση",
         "navSell": "Πώληση",
         "navContact": "Επικοινωνία",
+        "buyerGuides": "Οδηγοί αγοραστή",
         "explore": "Εξερευνήστε",
         "getInTouch": "Επικοινωνήστε",
         "tagline": "Ακίνητα προς πώληση και ενοικίαση στο Σαντάνσκι και τον Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη γειτονική Ελλάδα, με τοπικά γραφεία και μεσίτες που μιλούν τη γλώσσα σας.",
@@ -1965,6 +2105,119 @@
           }
         ]
       },
+      "location_links": {
+        "search": "/el/anazitisi?location=Sandanski",
+        "map": "/el/anazitisi?view=map&country_code=BG&region_id=BG%3Adistrict%3ABLG",
+        "pin_available": false
+      },
+      "cost_estimator": {
+        "endpoint": "/api/purchase-fees/estimate",
+        "locale": "el",
+        "municipality": "Sandanski",
+        "buyer_scope": "eu",
+        "buyer_scopes": [
+          "eu",
+          "non_eu"
+        ],
+        "table": [
+          {
+            "buyer_scope": "eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          },
+          {
+            "buyer_scope": "non_eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee",
+              "company_route_setup"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "company_route_setup",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          }
+        ],
+        "currency": "EUR",
+        "available": false,
+        "reason": "incomplete_fee_table",
+        "missing": [
+          {
+            "line_key": "local_transfer_tax",
+            "municipality": "Sandanski",
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "notary_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "registry_entry_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "agency_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          }
+        ],
+        "notice": "Ο πίνακας εξόδων δεν είναι πλήρης, επομένως δεν εμφανίζεται σύνολο."
+      },
       "related_listings": [],
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
@@ -2020,6 +2273,7 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
@@ -2305,6 +2559,119 @@
             "pdf_status": "browser_print_ready"
           }
         ]
+      },
+      "location_links": {
+        "search": "/he/search?location=Sandanski",
+        "map": "/he/search?view=map&country_code=BG&region_id=BG%3Adistrict%3ABLG",
+        "pin_available": false
+      },
+      "cost_estimator": {
+        "endpoint": "/api/purchase-fees/estimate",
+        "locale": "he",
+        "municipality": "Sandanski",
+        "buyer_scope": "eu",
+        "buyer_scopes": [
+          "eu",
+          "non_eu"
+        ],
+        "table": [
+          {
+            "buyer_scope": "eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          },
+          {
+            "buyer_scope": "non_eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee",
+              "company_route_setup"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "company_route_setup",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          }
+        ],
+        "currency": "EUR",
+        "available": false,
+        "reason": "incomplete_fee_table",
+        "missing": [
+          {
+            "line_key": "local_transfer_tax",
+            "municipality": "Sandanski",
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "notary_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "registry_entry_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "agency_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          }
+        ],
+        "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
       },
       "related_listings": [],
       "source": {
@@ -2679,6 +3046,119 @@
           }
         ]
       },
+      "location_links": {
+        "search": "/en/search?location=Sandanski",
+        "map": "/en/search?view=map&country_code=BG&region_id=BG%3Adistrict%3ABLG",
+        "pin_available": false
+      },
+      "cost_estimator": {
+        "endpoint": "/api/purchase-fees/estimate",
+        "locale": "en",
+        "municipality": "Sandanski",
+        "buyer_scope": "eu",
+        "buyer_scopes": [
+          "eu",
+          "non_eu"
+        ],
+        "table": [
+          {
+            "buyer_scope": "eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          },
+          {
+            "buyer_scope": "non_eu",
+            "required_lines": [
+              "local_transfer_tax",
+              "notary_fee",
+              "registry_entry_fee",
+              "agency_fee",
+              "company_route_setup"
+            ],
+            "available": false,
+            "missing": [
+              {
+                "line_key": "local_transfer_tax",
+                "municipality": "Sandanski",
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "notary_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "registry_entry_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "agency_fee",
+                "municipality": null,
+                "reason": "not_approved"
+              },
+              {
+                "line_key": "company_route_setup",
+                "municipality": null,
+                "reason": "not_approved"
+              }
+            ]
+          }
+        ],
+        "currency": "EUR",
+        "available": false,
+        "reason": "incomplete_fee_table",
+        "missing": [
+          {
+            "line_key": "local_transfer_tax",
+            "municipality": "Sandanski",
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "notary_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "registry_entry_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          },
+          {
+            "line_key": "agency_fee",
+            "municipality": null,
+            "reason": "not_approved"
+          }
+        ],
+        "notice": "The purchase cost table is not complete, so no total is shown."
+      },
       "related_listings": [],
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
@@ -2694,7 +3174,16 @@
     "body": {
       "h1": "This language is not available yet",
       "intro": "MS Realty is available in Bulgarian, English, German, Dutch, Russian, Greek and Hebrew. Pick one of them above, or request this language and we will tell you when it is ready.",
-      "success": "Thank you. We will let you know when this language is ready."
+      "success": "Thank you. We will let you know when this language is ready.",
+      "search": {
+        "path": "/en/search"
+      },
+      "contact_channels": {
+        "phone": {
+          "href": "tel:+359879696870",
+          "label": "+359 879 69 68 70"
+        }
+      }
     },
     "chrome": {
       "copy": {
@@ -2880,6 +3369,7 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
@@ -4445,6 +4935,7 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
@@ -4562,7 +5053,30 @@
     "body": {
       "h1": "נכסים ב-סנדנסקי",
       "location": "Sandanski",
-      "listing_count": 1
+      "listing_count": 1,
+      "intro": "נכסים שנבדקו על ידי MS Realty ב-סנדנסקי.",
+      "sub_areas": [
+        {
+          "id": "BG:settlement:65334",
+          "count": 1,
+          "label": "סנדנסקי",
+          "href": "/he/search?region_id=BG%3Asettlement%3A65334"
+        }
+      ],
+      "guides": [],
+      "seller": {
+        "path": "/he/sell",
+        "label": "הערכת מוכר",
+        "description": "בקשו הערכת מתווך וחזרה מצוות MS Realty."
+      },
+      "search_href": "/he/search?region_id=BG%3Amunicipality%3ABLG40",
+      "area_guide": {
+        "available": false,
+        "reason": "not_approved",
+        "area_key": "Sandanski",
+        "locale": "he",
+        "notice": "המידע על האזור טרם פורסם."
+      }
     },
     "cards": [
       {
@@ -4678,6 +5192,7 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
@@ -4873,6 +5388,7 @@
         "navRent": "השכרה",
         "navSell": "מכירה",
         "navContact": "צור קשר",
+        "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
@@ -5008,6 +5524,29 @@
           "label": "office@makler-realty.com"
         }
       },
+      "offices": [
+        {
+          "id": "sandanski",
+          "location": "Sandanski",
+          "name": "סנדנסקי",
+          "search_path": "/he/search?location=Sandanski",
+          "map_href": "https://www.openstreetmap.org/search?query=Sandanski%2C%20Bulgaria"
+        },
+        {
+          "id": "bansko",
+          "location": "Bansko",
+          "name": "בנסקו",
+          "search_path": "/he/search?location=Bansko",
+          "map_href": "https://www.openstreetmap.org/search?query=Bansko%2C%20Bulgaria"
+        },
+        {
+          "id": "sveti-vlas",
+          "location": "Sveti Vlas",
+          "name": "סבטי ולאס",
+          "search_path": "/he/search?location=Sveti%20Vlas",
+          "map_href": "https://www.openstreetmap.org/search?query=Sveti%20Vlas%2C%20Bulgaria"
+        }
+      ],
       "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "callback": null,
       "search": {
@@ -5637,7 +6176,7 @@
         "replyQueueReady": "Ответ поставлен в очередь для ручной отправки.",
         "replyTemplate": "Шаблон ответа",
         "reviewTranslation": "Проверить перевод",
-        "templateReviewNotice": "Шаблон — только отправная точка. Проверьте факты и отредактируйте текст перед одобрением."
+        "templateReviewNotice": "Шаблон это только отправная точка. Проверьте факты и отредактируйте текст перед одобрением."
       },
       "interface_locales": [
         "bg",
