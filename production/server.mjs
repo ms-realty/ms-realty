@@ -31,6 +31,13 @@ import { DEFAULT_REALTY_CASE_LEDGER_PATH } from "./lib/realty-cases.mjs";
 import { realtyCasePayloadAuthorityConfigFromEnv } from "./lib/realty-case-payload-authority.mjs";
 import { realtyCaseRequestProjectionConfigFromEnv } from "./lib/realty-case-request-projection.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH } from "./lib/saved-searches.mjs";
+import { DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH } from "./lib/saved-search-manage.mjs";
+import { DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH } from "./lib/saved-search-alert-deliveries.mjs";
+import {
+  savedSearchAccessSecret,
+  savedSearchManagePathTemplate,
+  savedSearchManageTtlDays,
+} from "./lib/saved-search-access.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
 import { DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/seller-pipeline-outcomes.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./lib/slug-history.mjs";
@@ -46,6 +53,17 @@ import { viewingDurableStoreConfigFromEnv } from "./lib/viewing-durable-store.mj
 import { DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH } from "./lib/viewing-follow-ups.mjs";
 import { DEFAULT_LAUNCH_FREEZE_PATH } from "./lib/launch-freeze.mjs";
 import { DEFAULT_WORKSPACE_SETTINGS_PATH } from "./lib/workspace-settings.mjs";
+
+// A missing or too-short signing secret disables manage links instead of
+// taking the whole server down: the saved search itself still works, and the
+// manage routes refuse with their single generic answer.
+function savedSearchManageSecretOrNull(env) {
+  try {
+    return savedSearchAccessSecret(env);
+  } catch {
+    return null;
+  }
+}
 
 function portFrom(value) {
   const raw = value === undefined || value === "" ? "3000" : String(value);
@@ -157,6 +175,18 @@ export function productionServerConfig(env = process.env) {
     viewingDurablePayload: undefined,
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
+    savedSearchManageEventLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH || DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+    savedSearchAlertDeliveryLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH || DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+    // Signs the saved-search manage links. Local runs fall back to a documented
+    // development secret; production requires MS_REALTY_SAVED_SEARCH_TOKEN_SECRET.
+    // Without it the links are refused rather than signed with a guessable key,
+    // and the rest of the site keeps serving.
+    savedSearchManageSecret: savedSearchManageSecretOrNull(env),
+    savedSearchManageLinkTemplate: savedSearchManagePathTemplate(env),
+    savedSearchManageLinkTtlDays: savedSearchManageTtlDays(env),
+    savedSearchPublicOrigin: env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com",
     publicRequestOutcomeLedgerPath:
       env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH || DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
@@ -245,6 +275,12 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     viewingDurablePayload: config.viewingDurablePayload,
     viewingFollowUpLedgerPath: config.viewingFollowUpLedgerPath,
     savedSearchLedgerPath: config.savedSearchLedgerPath,
+    savedSearchManageEventLedgerPath: config.savedSearchManageEventLedgerPath,
+    savedSearchAlertDeliveryLedgerPath: config.savedSearchAlertDeliveryLedgerPath,
+    savedSearchManageSecret: config.savedSearchManageSecret,
+    savedSearchManageLinkTemplate: config.savedSearchManageLinkTemplate,
+    savedSearchManageLinkTtlDays: config.savedSearchManageLinkTtlDays,
+    savedSearchPublicOrigin: config.savedSearchPublicOrigin,
     publicRequestOutcomeLedgerPath: config.publicRequestOutcomeLedgerPath,
     sellerPipelinePath: config.sellerPipelinePath,
     sellerPipelineOutcomeLedgerPath: config.sellerPipelineOutcomeLedgerPath,

@@ -72,6 +72,7 @@ const OPERATIONS_WRITE_PATHS = new Set([
   "/api/admin/viewings/follow-up",
   "/api/admin/seller-pipeline/outcome",
   "/api/admin/public-requests/outcome",
+  "/api/admin/saved-search-alerts/run-due",
   "/api/admin/deals/close",
 ]);
 
