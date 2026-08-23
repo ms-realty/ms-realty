@@ -446,22 +446,6 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .crm-tbl td[data-seller-pipeline-column="action"] .adm-reply > summary,
 .crm-tbl td[data-consent-column="action"] .adm-consent-action > summary { justify-self: end; }
 
-/* The reply queue is the work surface, not a wide export table. Keep the
-   broker action visible alongside its SLA on a normal laptop viewport; the
-   card treatment below still takes over on phones. */
-main[data-react-admin-ui="lead-inbox"] .crm-tbl {
-  width: 100%;
-  min-width: 0;
-  table-layout: fixed;
-}
-main[data-react-admin-ui="lead-inbox"] .crm-tbl th,
-main[data-react-admin-ui="lead-inbox"] .crm-tbl td { overflow-wrap: break-word; vertical-align: top; }
-main[data-react-admin-ui="lead-inbox"] .crm-tbl th:nth-child(1) { width: 40%; }
-main[data-react-admin-ui="lead-inbox"] .crm-tbl th:nth-child(2) { width: 16%; }
-main[data-react-admin-ui="lead-inbox"] .crm-tbl th:nth-child(3) { width: 16%; }
-main[data-react-admin-ui="lead-inbox"] .crm-tbl th:nth-child(4) { width: 28%; }
-main[data-react-admin-ui="lead-inbox"] .adm-reply-cell { min-width: 0; }
-
 /* Lead reply cell: Hermes draft button + collapsible review form */
 .adm-reply-cell { display: grid; justify-items: end; gap: var(--space-2); min-width: 0; }
 .adm-reply-cell > .adm-reply-status,
@@ -768,8 +752,6 @@ main[data-react-admin-ui="lead-inbox"] .adm-reply-cell { min-width: 0; }
 .adm-activity__details dt { color: var(--text-muted); }
 .adm-activity__details dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
 .adm-draft-form { display: inline-flex; }
-tr[data-reply-queue-status] .adm-draft-form,
-tr[data-reply-queue-status] .adm-reply { display: none; }
 .adm-reply > summary {
   list-style: none;
   cursor: pointer;
@@ -1401,20 +1383,6 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
     background: var(--surface);
     box-shadow: none;
   }
-  main[data-react-admin-ui="lead-inbox"] .crm-panel {
-    border: 0;
-    background: transparent;
-  }
-  main[data-react-admin-ui="lead-inbox"] .crm-panel__hd {
-    padding: 0 0 var(--space-3);
-    border: 0;
-  }
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    border-radius: var(--radius-md);
-    box-shadow: none;
-  }
   .crm-tbl tr[data-lead-row] td,
   .crm-tbl tr[data-viewing-follow-up-row] td,
   .crm-tbl tr[data-seller-pipeline-row] td,
@@ -1455,45 +1423,6 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   .crm-tbl tr[data-viewing-follow-up-row] .crm-mono,
   .crm-tbl tr[data-seller-pipeline-row] .crm-mono,
   .crm-tbl tr[data-consent-row] .crm-mono { min-width: 0; overflow-wrap: anywhere; }
-  .crm-tbl tr[data-lead-row] .adm-reply-cell { display: block; min-width: 0; }
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="lead"] {
-    display: block;
-    grid-column: 1 / -1;
-    padding: var(--space-4);
-  }
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="lead"]::before { display: none; }
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="sla"],
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="escalation_due"] {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 6px;
-    align-content: start;
-    padding: var(--space-3) var(--space-4);
-  }
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="reply"] {
-    grid-column: 1 / -1;
-  }
-  .crm-tbl tr[data-lead-row] .adm-reply-cell {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    justify-items: stretch;
-    gap: var(--space-2);
-    min-width: 0;
-  }
-  .crm-tbl tr[data-lead-row] .adm-reply-cell::before { display: block; grid-column: 1 / -1; margin-bottom: 0; }
-  .crm-tbl tr[data-lead-row] .adm-draft-form,
-  .crm-tbl tr[data-lead-row] .adm-reply { min-width: 0; width: 100%; }
-  .crm-tbl tr[data-lead-row] .adm-draft-form .mk-btn,
-  .crm-tbl tr[data-lead-row] .adm-reply > summary { width: 100%; min-height: 44px; white-space: normal; line-height: var(--lh-snug); }
-  .crm-tbl tr[data-lead-row] .adm-draft-form .mk-btn,
-  .crm-tbl tr[data-lead-row] .adm-reply > summary { justify-content: center; }
-  .crm-tbl tr[data-lead-row] .adm-reply[open],
-  .crm-tbl tr[data-lead-row] .adm-delivery,
-  .crm-tbl tr[data-lead-row] .adm-reply-status { grid-column: 1 / -1; }
-  .crm-tbl tr[data-lead-row] .adm-reply-form { min-width: 0; }
-  .crm-tbl tr[data-lead-row] .adm-delivery > summary { width: 100%; margin-inline-start: 0; min-height: 44px; }
-  .crm-tbl tr[data-lead-row] .adm-delivery-form { padding: var(--space-3); }
-  .crm-tbl tr[data-lead-row] .adm-delivery-form__actions { grid-template-columns: 1fr; }
   .crm-tbl tr[data-viewing-follow-up-row] .adm-reply > summary,
   .crm-tbl tr[data-seller-pipeline-row] .adm-reply > summary { width: 100%; justify-content: center; }
   .crm-tbl tr[data-viewing-follow-up-row] .adm-form,
@@ -1873,13 +1802,6 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .adm-route-decision,
   .adm-runtime-evidence__chevron { transition: none; }
-}
-
-@media (max-width: 440px) {
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] { grid-template-columns: 1fr; }
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="sla"],
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="escalation_due"],
-  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="reply"] { grid-column: 1; }
 }
 
 /* Alerts sit on the canvas, not in a panel */

@@ -55,7 +55,11 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
 
 test("admin keeps desktop navigation visible from 1024px through 1439px", () => {
   for (const css of [adminAdapterCss, generatedDesignCss]) {
-    const desktopNavigation = css.slice(css.lastIndexOf("@media (min-width"));
+    // Locate the block by its own rule, not by position: every adapter-admin-*
+    // extension sheet is concatenated after this one and may add media queries.
+    const ruleIndex = css.search(/grid-template-columns:\s*244px\s+minmax\(0,\s*1fr\)/);
+    assert.ok(ruleIndex > 0, "desktop navigation rule present");
+    const desktopNavigation = css.slice(css.lastIndexOf("@media (min-width", ruleIndex));
     assert.match(desktopNavigation, /min-width:\s*1024px/);
     assert.match(desktopNavigation, /max-width:\s*1439px/);
     assert.match(desktopNavigation, /grid-template-columns:\s*244px\s+minmax\(0,\s*1fr\)/);

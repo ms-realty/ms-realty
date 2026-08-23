@@ -432,7 +432,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-kind="admin-lead-inbox"/);
       assert.match(inboxHtml, /data-react-admin-ui="lead-inbox"/);
       assert.match(inboxHtml, /data-admin-workbench="crm"/);
-      assert.match(inboxHtml, /data-inbox-layout="action-queue"/);
+      assert.match(inboxHtml, /data-inbox-layout="two-pane"/);
       assert.match(inboxHtml, /data-task-led="true"/);
       assert.match(inboxHtml, /data-admin-mobile-nav="true"/);
       assert.match(inboxHtml, /aria-controls="admin-mobile-navigation-ru" aria-expanded="false"/);
@@ -475,7 +475,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /Входящие заявки/);
       assert.match(inboxHtml, /Входящие заявки CRM с ответами, проверенными брокером\./);
       assert.match(inboxHtml, /Арендатор/);
-      assert.match(inboxHtml, /scope="col"/);
+      assert.match(inboxHtml, /data-inbox-panes="true"/);
+      assert.match(inboxHtml, new RegExp(`data-lead-link="${leadId}"`));
+      assert.match(inboxHtml, new RegExp(`<article id="lead-${leadId}" class="adm-lead-detail" data-lead-row="true"`));
       assert.match(inboxHtml, /data-lead-column="reply"/);
       assert.match(inboxHtml, /data-label="Ответ"/);
       assert.match(inboxHtml, /data-lead-column="escalation_due"[^>]*><time dateTime="[^"]+" title="[^"]+">/);

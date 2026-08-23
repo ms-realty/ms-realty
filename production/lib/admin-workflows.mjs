@@ -778,7 +778,7 @@ const ADMIN_COPY = {
     replyQueueReady: "Ответ поставлен в очередь для ручной отправки.",
     replyTemplate: "Шаблон ответа",
     reviewTranslation: "Проверить перевод",
-    templateReviewNotice: "Шаблон — только отправная точка. Проверьте факты и отредактируйте текст перед одобрением.",
+    templateReviewNotice: "Шаблон это только отправная точка. Проверьте факты и отредактируйте текст перед одобрением.",
   },
   en: {
     workspaceTitle: "MS Realty Admin",

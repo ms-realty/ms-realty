@@ -35,6 +35,133 @@
     var empty = document.querySelector("[data-lead-queue-empty]");
     if (empty) empty.hidden = visible > 0 || rows.length === 0;
   }
+  function initAdminListFilters() {
+    var navs = document.querySelectorAll("[data-list-filter]");
+    for (var i = 0; i < navs.length; i += 1) {
+      (function (nav) {
+        var scope = nav.getAttribute("data-list-filter");
+        var buttons = nav.querySelectorAll("button[data-filter-value]");
+        function apply(value) {
+          var items = document.querySelectorAll('[data-list-item="' + scope + '"]');
+          var visible = 0;
+          for (var j = 0; j < items.length; j += 1) {
+            var tags = " " + (items[j].getAttribute("data-filter-tags") || "") + " ";
+            var show = value === "all" || tags.indexOf(" " + value + " ") >= 0;
+            items[j].hidden = !show;
+            if (show) visible += 1;
+          }
+          for (var k = 0; k < buttons.length; k += 1) {
+            var on = buttons[k].getAttribute("data-filter-value") === value;
+            buttons[k].setAttribute("data-on", on ? "1" : "0");
+            buttons[k].setAttribute("aria-pressed", on ? "true" : "false");
+          }
+          var empty = document.querySelector('[data-list-empty="' + scope + '"]');
+          if (empty) empty.hidden = visible > 0 || items.length === 0;
+        }
+        nav.addEventListener("click", function (event) {
+          var button = event.target.closest("button[data-filter-value]");
+          if (!button) return;
+          apply(button.getAttribute("data-filter-value") || "all");
+        });
+        var selected = nav.querySelector('button[data-filter-value][data-on="1"]');
+        if (selected && selected.getAttribute("data-filter-value") !== "all") apply(selected.getAttribute("data-filter-value"));
+      })(navs[i]);
+    }
+  }
+  function syncPipelineBoardCounts() {
+    var columns = document.querySelectorAll("[data-stage-group]");
+    for (var i = 0; i < columns.length; i += 1) {
+      var cards = columns[i].querySelectorAll("[data-pipeline-card]");
+      var visible = 0;
+      for (var j = 0; j < cards.length; j += 1) if (!cards[j].hidden) visible += 1;
+      var count = columns[i].querySelector("[data-board-count]");
+      if (count) count.textContent = String(visible);
+    }
+  }
+  function initPipelineBoard() {
+    if (!document.querySelector("[data-stage-group]")) return;
+    document.addEventListener("click", function (event) {
+      if (event.target.closest("[data-pipeline-filter]")) syncPipelineBoardCounts();
+    });
+    syncPipelineBoardCounts();
+  }
+  // Lead inbox panes: the list links target the detail articles, so the
+  // URL fragment already selects a lead without JavaScript. With JavaScript
+  // the selection becomes an attribute, the first visible lead opens on wide
+  // screens, and queue filters keep the selection in sync.
+  function initLeadInboxPanes() {
+    var inbox = document.querySelector("[data-inbox-panes]");
+    if (!inbox) return;
+    var detail = inbox.querySelector(".adm-inbox__detail");
+    if (!detail) return;
+    var narrow = window.matchMedia("(max-width: 1023px)");
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    inbox.setAttribute("data-inbox-js", "true");
+    function articles() {
+      return detail.querySelectorAll(":scope > [data-lead-row]");
+    }
+    function hashLeadId() {
+      var hash = window.location.hash || "";
+      if (hash.indexOf("#lead-") !== 0) return "";
+      try {
+        return decodeURIComponent(hash.slice(6));
+      } catch (error) {
+        return hash.slice(6);
+      }
+    }
+    function firstVisibleId() {
+      var rows = articles();
+      for (var i = 0; i < rows.length; i += 1) if (!rows[i].hidden) return rows[i].getAttribute("data-lead-id");
+      return "";
+    }
+    function select(id, options) {
+      var rows = articles();
+      var chosen = null;
+      for (var i = 0; i < rows.length; i += 1) {
+        var on = Boolean(id) && rows[i].getAttribute("data-lead-id") === id && !rows[i].hidden;
+        if (on) {
+          rows[i].setAttribute("data-lead-selected", "true");
+          chosen = rows[i];
+        } else {
+          rows[i].removeAttribute("data-lead-selected");
+        }
+      }
+      var links = inbox.querySelectorAll("[data-lead-link]");
+      for (var j = 0; j < links.length; j += 1) {
+        if (chosen && links[j].getAttribute("data-lead-link") === id) links[j].setAttribute("aria-current", "true");
+        else links[j].removeAttribute("aria-current");
+      }
+      if (chosen && options.updateHash && window.history && window.history.replaceState) {
+        window.history.replaceState(null, "", "#lead-" + encodeURIComponent(id));
+      }
+      if (chosen && options.scroll) {
+        chosen.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+      }
+      return chosen;
+    }
+    function ensureSelection() {
+      var selected = detail.querySelector(':scope > [data-lead-row][data-lead-selected="true"]');
+      if (selected && !selected.hidden) return;
+      select(narrow.matches ? "" : firstVisibleId(), {});
+    }
+    inbox.addEventListener("click", function (event) {
+      var link = event.target.closest("[data-lead-link]");
+      if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+      event.preventDefault();
+      select(link.getAttribute("data-lead-link"), { updateHash: true, scroll: narrow.matches });
+    });
+    document.addEventListener("click", function (event) {
+      if (event.target.closest("[data-lead-filter]")) ensureSelection();
+    });
+    window.addEventListener("hashchange", function () {
+      var id = hashLeadId();
+      if (id) select(id, { scroll: narrow.matches });
+      else if (narrow.matches) select("", {});
+    });
+    var initial = hashLeadId();
+    if (initial && select(initial, { scroll: narrow.matches })) return;
+    ensureSelection();
+  }
   function initLeadQueueFilters() {
     var tabs = document.querySelector("[data-lead-queue-tabs]");
     if (!tabs) return;
@@ -436,14 +563,23 @@
           setReplyStatus(form, success, "success");
         })
         .catch(function (error) {
-          var message = isDraft && /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY/.test(String(error && error.message || ""))
-            ? unavailable
-            : failure;
-          setReplyStatus(form, message, "error");
+          var missingHermes = isDraft && /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY/.test(String(error && error.message || ""));
+          // The page cannot know up front whether Hermes is configured, so the
+          // first failed draft turns the composer into its unavailable state:
+          // the draft button stays disabled and its note becomes visible.
+          if (missingHermes) {
+            var host = form.closest("[data-lead-row]") || form.parentElement;
+            if (host) host.setAttribute("data-hermes-state", "unavailable");
+            var button = form.querySelector('[type="submit"]');
+            if (button) button.disabled = true;
+          }
+          setReplyStatus(form, missingHermes ? unavailable : failure, "error");
         })
         .then(function () {
           form.removeAttribute("aria-busy");
-          if (submit) submit.disabled = false;
+          var host = form.closest("[data-lead-row]");
+          var unavailableNow = host && host.getAttribute("data-hermes-state") === "unavailable";
+          if (submit && !(isDraft && unavailableNow)) submit.disabled = false;
         });
     });
   }
@@ -943,4 +1079,7 @@
   initReplyDeliveryForms();
   initReplyForms();
   initCommunicationTemplates();
+  initAdminListFilters();
+  initPipelineBoard();
+  initLeadInboxPanes();
 })();
