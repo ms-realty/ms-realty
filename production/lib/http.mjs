@@ -325,12 +325,15 @@ import {
   adminSessionList,
   adminSessionSeenDue,
   adminSessionStates,
+  adminStepUpClearCookie,
+  adminStepUpSetCookie,
   appendAdminSessionEvent,
   createAdminSessionOpened,
   createAdminSessionSeen,
   isAdminSessionRevoked,
   readAdminSessionEvents,
   revokeAdminSessions,
+  stepUpTokenFromCookie,
 } from "./admin-sessions.mjs";
 import {
   activateOperatorEnrolment,
@@ -355,6 +358,7 @@ import {
   writeWorkspaceExportFile,
 } from "./workspace-export.mjs";
 import { auditRetentionDays, auditRetentionPlan } from "./audit-retention.mjs";
+import { renderTwoFactorEnrolmentPage, renderWorkspaceExportReadyPage } from "./admin-security-handoff.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -1689,6 +1693,90 @@ export function createHttpApp({
     }
     return true;
   };
+  // What the Settings screen's Security and Data sections render. Returns null
+  // when the workspace-security ledgers are not configured, which is what keeps
+  // those sections in their honest "not connected" treatment.
+  const workspaceSecurityView = (principal, currentFingerprint = "", notice = null, stepUpActive = false) => {
+    if (!principal?.id) return null;
+    if (!operatorTwoFactorPath && !adminSessionLedgerPath && !workspaceExportLedgerPath) return null;
+    const auditable = Boolean(auditLogPath) && !runtimeDataDurableOnly;
+    const now = Date.parse(securityNow());
+    let twoFactor = null;
+    try {
+      twoFactor = {
+        ...operatorTwoFactorStatus(twoFactorRows(), principal.id),
+        required: principal.require_two_factor === true,
+        step_up_required: principal.source === "credential_registry",
+        step_up_active: stepUpActive === true,
+        step_up_header: "x-ms-admin-2fa",
+        writable: Boolean(operatorTwoFactorPath) && auditable,
+      };
+    } catch {
+      twoFactor = null;
+    }
+    let sessions = null;
+    try {
+      sessions = {
+        writable: Boolean(adminSessionLedgerPath) && auditable,
+        can_manage_team: canAdminAccess(principal, "team:manage"),
+        current_session_id: currentFingerprint
+          ? adminSessionStates(adminSessionRows(), { now }).get(currentFingerprint)?.session_id || null
+          : null,
+        rows: adminSessionList(adminSessionRows(), {
+          operatorId: principal.id,
+          currentFingerprint,
+          now,
+        }),
+      };
+    } catch {
+      sessions = null;
+    }
+    let exports = null;
+    if (canAdminAccess(principal, "data:export")) {
+      try {
+        exports = {
+          writable: Boolean(workspaceExportLedgerPath) && auditable,
+          datasets: [...WORKSPACE_EXPORT_DATASETS],
+          rows: workspaceExportList(workspaceExportRows(), { requestedBy: principal.id, now }).slice(0, 5),
+        };
+      } catch {
+        exports = null;
+      }
+    }
+    let retention = null;
+    if (canAdminAccess(principal, "activity:read")) {
+      try {
+        const plan = auditRetentionPlan(readAuditLog(auditLogPath || undefined), {
+          now: securityNow(),
+          retentionDays: Number(auditRetentionWindowDays) || auditRetentionDays(),
+        });
+        retention = {
+          retention_days: plan.retention_days,
+          cutoff: plan.cutoff,
+          total: plan.total,
+          retained: plan.retained,
+          prunable: plan.prunable,
+          protected_beyond_window: plan.protected_beyond_window,
+          scanned_artifacts: plan.scanned_artifacts,
+          applied_on_read: false,
+          apply_command: "npm run audit:retention -- --apply",
+          unavailable: null,
+        };
+      } catch (error) {
+        // A retention window we cannot verify is reported as unavailable, never
+        // as a number somebody might act on.
+        retention = { unavailable: error.message };
+      }
+    }
+    return {
+      operator_id: principal.id,
+      notice: typeof notice === "string" && /^[a-z_]{1,40}$/.test(notice) ? notice : null,
+      two_factor: twoFactor,
+      sessions,
+      exports,
+      audit_retention: retention,
+    };
+  };
   const writeAudit = (input, recordedAt = reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()) =>
     !runtimeDataDurableOnly && auditLogPath
       ? appendAuditLog(createAuditLogEntry(input, recordedAt), {
@@ -2064,7 +2152,9 @@ export function createHttpApp({
     //
     // This block sits immediately before the first capability-gated admin route
     // so the second-factor gate below covers every admin route that follows it.
-    const b6StepUpToken = String(readHeader(request.headers, "x-ms-admin-2fa") || "").trim();
+    const b6StepUpToken =
+      String(readHeader(request.headers, "x-ms-admin-2fa") || "").trim() ||
+      stepUpTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
     const b6CurrentToken = sessionToken || b6StepUpToken;
     const b6CurrentFingerprint = (() => {
       try {
@@ -2088,8 +2178,19 @@ export function createHttpApp({
       }
       return entry;
     };
-    const b6Failure = (error) =>
-      adminJson(error?.status || 400, { kind: error?.code || "bad_request", message: error?.message || "Request refused" });
+    // The Settings screen posts plain forms, so every write below answers a form
+    // with a redirect (or a one-time handoff page) and an API client with JSON.
+    const b6FormRequest = String(request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes(
+      "application/x-www-form-urlencoded",
+    );
+    const b6SettingsRedirect = (notice, anchor) =>
+      adminResponse(303, "", "text/plain; charset=utf-8", {
+        location: `/admin/settings?security=${encodeURIComponent(notice)}#settings-${anchor}`,
+      });
+    const b6Failure = (error, anchor = "security") =>
+      b6FormRequest
+        ? b6SettingsRedirect(String(error?.code || "bad_request").slice(0, 40), anchor)
+        : adminJson(error?.status || 400, { kind: error?.code || "bad_request", message: error?.message || "Request refused" });
     const b6Body = () => {
       try {
         return parseBody(request);
@@ -2102,23 +2203,38 @@ export function createHttpApp({
 
     // Second-factor gate for the credential-registry path. The Payload path is
     // gated at /admin/login instead, where the password is checked.
-    if (adminRequest && principal?.source === "credential_registry" && !TWO_FACTOR_SELF_SERVICE_PATHS.has(url.pathname)) {
+    // Reading the settings screen is exempt because it is where the control
+    // that satisfies this gate lives. It carries workspace configuration and
+    // the operator's own security state, no lead or contact data, and saving
+    // settings (POST) is still gated. Without the exemption an operator who
+    // switches their second factor on from that screen would be locked out of
+    // the only page that can let them back in.
+    const b6StepUpExempt =
+      TWO_FACTOR_SELF_SERVICE_PATHS.has(url.pathname) ||
+      (request.method === "GET" && ["/admin/settings", "/api/admin/settings"].includes(url.pathname));
+    if (adminRequest && principal?.source === "credential_registry" && !b6StepUpExempt) {
       const b6Status = operatorTwoFactorStatus(twoFactorRows(), principal.id);
+      // An HTML screen sends the operator to the settings page that can satisfy
+      // the gate; an API path always answers with the refusal itself, whatever
+      // Accept header a client happens to send.
+      const b6GateRefusal = (kind, message) =>
+        wantsHtml(request, url) && !url.pathname.startsWith("/api/")
+          ? adminResponse(303, "", "text/plain; charset=utf-8", { location: `/admin/settings?security=${kind}#settings-security` })
+          : adminJson(403, { kind, message });
       if (b6Status.status === "active") {
         if (!activeAdminSessionState(b6StepUpToken, principal.id, "credential_registry")) {
-          return adminJson(403, {
-            kind: "two_factor_required",
-            message:
-              "Post a current authenticator code to /api/admin/security/two-factor/verify and send the returned token as x-ms-admin-2fa.",
-          });
+          return b6GateRefusal(
+            "two_factor_required",
+            "Post a current authenticator code to /api/admin/security/two-factor/verify and send the returned token as x-ms-admin-2fa.",
+          );
         }
       } else if (principal.require_two_factor === true) {
         // Required but not yet active: only the enrolment routes are reachable,
         // so switching the requirement on never locks an operator out.
-        return adminJson(403, {
-          kind: "two_factor_enrolment_required",
-          message: "This operator must enrol a second factor at /api/admin/security/two-factor/enrol before using the workspace.",
-        });
+        return b6GateRefusal(
+          "two_factor_enrolment_required",
+          "This operator must enrol a second factor at /api/admin/security/two-factor/enrol before using the workspace.",
+        );
       }
     }
     if (adminRequest && principal?.id) touchAdminSession(b6CurrentToken, principal.id);
@@ -2143,6 +2259,7 @@ export function createHttpApp({
         if (current.status === "active" || current.status === "pending") {
           // Re-enrolling would silently replace a live second factor, which is
           // exactly what a stolen bearer token would try first.
+          if (b6FormRequest) return b6SettingsRedirect("two_factor_already_enrolled", "security");
           return adminJson(409, { kind: "two_factor_already_enrolled", status: current.status });
         }
         const enrolment = createOperatorEnrolment(
@@ -2157,7 +2274,22 @@ export function createHttpApp({
         });
         recordTwoFactorEvent(enrolment.row);
         // Shown once, here. The secret and the codes are never written to the
-        // ledger in the clear, never audited, and never logged.
+        // ledger in the clear, never audited, and never logged. A form gets a
+        // dedicated page rather than a redirect, so the secret never has to
+        // travel in a URL.
+        if (b6FormRequest) {
+          return adminResponse(
+            201,
+            renderTwoFactorEnrolmentPage({
+              locale: adminLocaleParam(url),
+              secret: enrolment.secret,
+              provisioningUri: enrolment.provisioning_uri,
+              recoveryCodes: enrolment.recovery_codes,
+            }),
+            "text/html; charset=utf-8",
+            { "referrer-policy": "no-referrer" },
+          );
+        }
         return adminJson(201, {
           kind: "admin_two_factor_enrolment",
           enrolment_id: enrolment.enrolment_id,
@@ -2189,6 +2321,7 @@ export function createHttpApp({
           metadata: { operator_id: principal.id, source: principal.source },
         });
         recordTwoFactorEvent(event);
+        if (b6FormRequest) return b6SettingsRedirect("two_factor_active", "security");
         return adminJson(200, { kind: "admin_two_factor_status", ...operatorTwoFactorStatus(twoFactorRows(), principal.id) });
       } catch (error) {
         return b6Failure(error);
@@ -2215,7 +2348,10 @@ export function createHttpApp({
           { secret: operatorTwoFactorKey, recordedAt: securityNow() },
         );
         // One generic refusal: a caller learns nothing about which half failed.
-        if (!verification.ok) return adminJson(403, { kind: "two_factor_rejected", message: "That code was not accepted" });
+        if (!verification.ok) {
+          if (b6FormRequest) return b6SettingsRedirect("two_factor_rejected", "security");
+          return adminJson(403, { kind: "two_factor_rejected", message: "That code was not accepted" });
+        }
         for (const event of verification.events) recordTwoFactorEvent(event);
         const ttlSeconds = Math.max(
           60,
@@ -2235,14 +2371,25 @@ export function createHttpApp({
           objectId: opened.session_id,
           metadata: { operator_id: principal.id, method: verification.method, source: principal.source },
         });
-        return adminJson(201, {
-          kind: "admin_two_factor_step_up",
-          session_id: opened.session_id,
-          step_up_token: stepUpToken,
-          step_up_header: "x-ms-admin-2fa",
-          expires_at: expiresAt,
-          method: verification.method,
-        });
+        const stepUpCookie = adminStepUpSetCookie(stepUpToken, { maxAgeSeconds: ttlSeconds });
+        if (b6FormRequest) {
+          const redirect = b6SettingsRedirect("two_factor_verified", "security");
+          redirect.headers["set-cookie"] = stepUpCookie;
+          return redirect;
+        }
+        return adminResponse(
+          201,
+          {
+            kind: "admin_two_factor_step_up",
+            session_id: opened.session_id,
+            step_up_token: stepUpToken,
+            step_up_header: "x-ms-admin-2fa",
+            expires_at: expiresAt,
+            method: verification.method,
+          },
+          "application/json; charset=utf-8",
+          { "set-cookie": stepUpCookie },
+        );
       } catch (error) {
         return b6Failure(error);
       }
@@ -2287,6 +2434,7 @@ export function createHttpApp({
           metadata: { operator_id: target, forced, reason: disabled.reason },
         });
         for (const event of events) recordTwoFactorEvent(event);
+        if (b6FormRequest) return b6SettingsRedirect("two_factor_disabled", "security");
         return adminJson(200, { kind: "admin_two_factor_status", ...operatorTwoFactorStatus(twoFactorRows(), target) });
       } catch (error) {
         return b6Failure(error);
@@ -2345,11 +2493,21 @@ export function createHttpApp({
             // The ledger revocation already refuses this cookie on the way in.
           }
         }
+        const clearCurrent = result.revoked_current
+          ? { "set-cookie": sessionToken ? adminSessionClearCookie() : adminStepUpClearCookie() }
+          : {};
+        if (b6FormRequest) {
+          const redirect = result.revoked_current
+            ? adminResponse(303, "", "text/plain; charset=utf-8", { location: sessionToken ? "/admin/login" : "/admin/settings#settings-security" })
+            : b6SettingsRedirect("sessions_revoked", "security");
+          Object.assign(redirect.headers, clearCurrent);
+          return redirect;
+        }
         return adminResponse(
           200,
           { kind: "admin_sessions_revoked", revoked_session_ids: result.revoked_session_ids, revoked_current: result.revoked_current },
           "application/json; charset=utf-8",
-          result.revoked_current ? { "set-cookie": adminSessionClearCookie() } : {},
+          clearCurrent,
         );
       } catch (error) {
         return b6Failure(error);
@@ -2443,6 +2601,21 @@ export function createHttpApp({
           securityNow(),
         );
         recordWorkspaceExportEvent(completed);
+        const downloadUrl = `/api/admin/data-exports/download?job=${encodeURIComponent(created.row.job_id)}&token=${encodeURIComponent(created.download_token)}`;
+        if (b6FormRequest) {
+          return adminResponse(
+            201,
+            renderWorkspaceExportReadyPage({
+              locale: adminLocaleParam(url),
+              downloadUrl,
+              expiresAt: created.row.download_expires_at,
+              counts: completed.counts,
+              redactions: document.redactions,
+            }),
+            "text/html; charset=utf-8",
+            { "referrer-policy": "no-referrer" },
+          );
+        }
         return adminJson(201, {
           kind: "admin_data_export",
           job_id: created.row.job_id,
@@ -2451,14 +2624,14 @@ export function createHttpApp({
           counts: completed.counts,
           redactions: document.redactions,
           redaction_policy: document.redaction_policy,
-          download_url: `/api/admin/data-exports/download?job=${encodeURIComponent(created.row.job_id)}&token=${encodeURIComponent(created.download_token)}`,
+          download_url: downloadUrl,
           download_token: created.download_token,
           download_token_header: "x-ms-export-token",
           download_expires_at: created.row.download_expires_at,
           single_use: true,
         });
       } catch (error) {
-        return b6Failure(error);
+        return b6Failure(error, "data");
       }
     }
 
@@ -2581,6 +2754,13 @@ export function createHttpApp({
             saved: url.searchParams.get("saved"),
             form,
             writable: Boolean(workspaceSettingsPath) && !runtimeDataDurableOnly,
+            // B6 workspace security and data
+            security: workspaceSecurityView(
+              principal,
+              b6CurrentFingerprint,
+              url.searchParams.get("security"),
+              Boolean(activeAdminSessionState(b6StepUpToken, principal?.id, "credential_registry")),
+            ),
           }),
         );
       if (request.method === "GET") {

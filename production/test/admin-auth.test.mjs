@@ -34,6 +34,9 @@ test("individual admin credentials are authoritative and bind a stable operator"
     can_mutate: true,
     roles: ["broker"],
     workspace_ids: ["sandanski"],
+    // Off unless the registry entry opts in, so shipping the second factor
+    // cannot lock an existing operator out.
+    require_two_factor: false,
   });
   assert.equal(canAdminMutate(principal), true);
   assert.equal(canAdminAccess(principal, "operations:write"), true);
@@ -45,8 +48,13 @@ test("individual admin credentials are authoritative and bind a stable operator"
     "content:read",
     "operations:read",
     "operations:write",
+    // Every role manages its own second factor and its own session list.
+    "security:self",
     "workspace:read",
   ]);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/security/two-factor/enrol")), true);
+  // A workspace export is a bulk personal-data release, so it stays admin-only.
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/data-exports")), false);
   assert.equal(adminHomePath(principal), "/admin/today");
   assert.equal(isAdminAuthorized("Bearer legacy-shared-token", env), false);
   assert.equal(resolveAdminPrincipal("Bearer broker-bg-token-0123456789abcdef-extra", env), null);
@@ -70,7 +78,9 @@ test("trusted agent credentials are restricted to mandate-enforced case routes",
   };
   const principal = resolveAdminPrincipal("Bearer trusted-agent-token-0123456789abcdef", env);
 
-  assert.deepEqual(adminCapabilities(principal), ["activity:read", "cases:read", "cases:write", "workspace:read"]);
+  assert.deepEqual(adminCapabilities(principal), ["activity:read", "cases:read", "cases:write", "security:self", "workspace:read"]);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("GET", "/api/admin/security/sessions")), true);
+  assert.equal(canAdminAccess(principal, requiredAdminCapability("GET", "/api/admin/data-exports")), false);
   assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/cases/actions")), true);
   assert.equal(canAdminAccess(principal, requiredAdminCapability("POST", "/api/admin/cases/conditions/actions")), true);
   assert.equal(canAdminAccess(principal, requiredAdminCapability("GET", "/api/admin/cases/conditions")), true);

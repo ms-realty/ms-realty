@@ -452,6 +452,76 @@ const ADMIN_UI_COPY = {
           },
         },
       },
+      liveSections: {
+        security: {
+          title: "Сигурност",
+          description: "Защита при вход на операторите и сесиите, отворени в това работно пространство.",
+          twoFactor: {
+            label: "Двуфакторно удостоверяване",
+            hint: "Приложение за еднократни кодове (Google Authenticator, 1Password, Aegis) на телефона ти.",
+            statuses: { not_enrolled: "Не е включено", pending: "Чака потвърждение", active: "Включено", disabled: "Изключено" },
+            required: "Задължително за този оператор",
+            recoveryCodes: "Останали резервни кодове: {count}",
+            activatedAt: "Включено на",
+            enrol: "Настрой второто удостоверяване",
+            enrolAgain: "Настрой отново",
+            activate: "Потвърди с код",
+            disable: "Изключи",
+            codeLabel: "Код от приложението или резервен код",
+            stepUp: "Bearer токенът вече не е достатъчен сам по себе си: потвърди с код или изпращай заглавка x-ms-admin-2fa.",
+            stepUpActive: "Потвърдено за тази сесия.",
+            stepUpAction: "Потвърди сесията",
+            nextSignIn: "Кодът ще се иска при следващия вход.",
+          },
+          sessions: {
+            label: "Активни сесии",
+            empty: "Няма записани активни сесии.",
+            current: "Текуща",
+            created: "Отворена",
+            lastSeen: "Последно видяна",
+            revoke: "Прекрати",
+            revokeOthers: "Прекрати другите сесии",
+            note: "Прекратяването изключва сесията на сървъра, а не само изтрива бисквитката в браузъра.",
+            sources: { payload_session: "Вход в браузър", credential_registry: "Потвърден втори фактор" },
+          },
+          notices: {
+            two_factor_active: "Двуфакторното удостоверяване е включено.",
+            two_factor_disabled: "Двуфакторното удостоверяване е изключено.",
+            two_factor_verified: "Сесията е потвърдена.",
+            sessions_revoked: "Другите сесии са прекратени.",
+            two_factor_rejected: "Кодът не беше приет.",
+            two_factor_already_enrolled: "Вече има активна настройка. Първо я изключи.",
+            audit_log_unavailable: "Действието е отказано: историята не може да бъде записана.",
+            bad_request: "Заявката беше отказана.",
+          },
+        },
+        data: {
+          title: "Данни",
+          description: "Експорт на това, което работното пространство съхранява, и срок на съхранение на историята.",
+          export: {
+            label: "Експорт на данните",
+            hint: "Личните данни в трезора остават скрити. Файлът казва какво е скрито и защо.",
+            datasets: { enquiries: "Запитвания", contacts: "Контакти", listings: "Обяви", audit: "История на действията" },
+            from: "От дата",
+            to: "До дата",
+            action: "Подготви експорт",
+            recent: "Последни експорти",
+            empty: "Още няма поискан експорт.",
+            statuses: { queued: "В опашка", ready: "Готов", downloaded: "Изтеглен", expired: "Изтекъл", failed: "Неуспешен" },
+            once: "Връзката за изтегляне работи еднократно и изтича скоро.",
+          },
+          retention: {
+            label: "Срок на съхранение на историята",
+            days: "{days} дни",
+            cutoff: "Записи преди",
+            counts: "Общо {total}, задържани {retained}, за изчистване {prunable}",
+            protected: "Защитени извън срока: {count}",
+            command: "Изчистването става само с команда: {command}",
+            note: "Нищо не се изтрива при отваряне на този екран. Записи, свързани с одобрение или доказателство за пускане, никога не се изтриват.",
+            unavailable: "Планът не може да бъде проверен: {message}",
+          },
+        },
+      },
       plannedRows: {
         notification_centre: { label: "Център за известия в продукта", note: "Нужно е хранилище за известия в приложението; днес всичко е имейл или брояч в опашката." },
       },
@@ -902,6 +972,76 @@ const ADMIN_UI_COPY = {
           },
         },
       },
+      liveSections: {
+        security: {
+          title: "Безопасность",
+          description: "Защита входа операторов и сессии, открытые в этом рабочем пространстве.",
+          twoFactor: {
+            label: "Двухфакторная аутентификация",
+            hint: "Приложение одноразовых кодов (Google Authenticator, 1Password, Aegis) на вашем телефоне.",
+            statuses: { not_enrolled: "Не включена", pending: "Ждет подтверждения", active: "Включена", disabled: "Отключена" },
+            required: "Обязательна для этого оператора",
+            recoveryCodes: "Осталось резервных кодов: {count}",
+            activatedAt: "Включена",
+            enrol: "Настроить второй фактор",
+            enrolAgain: "Настроить заново",
+            activate: "Подтвердить кодом",
+            disable: "Отключить",
+            codeLabel: "Код из приложения или резервный код",
+            stepUp: "Bearer-токена больше недостаточно: подтвердите кодом или передавайте заголовок x-ms-admin-2fa.",
+            stepUpActive: "Подтверждено для этой сессии.",
+            stepUpAction: "Подтвердить сессию",
+            nextSignIn: "Код будет запрошен при следующем входе.",
+          },
+          sessions: {
+            label: "Активные сессии",
+            empty: "Активных сессий не записано.",
+            current: "Текущая",
+            created: "Открыта",
+            lastSeen: "Последний раз",
+            revoke: "Прекратить",
+            revokeOthers: "Прекратить остальные сессии",
+            note: "Прекращение отключает сессию на сервере, а не просто удаляет cookie в браузере.",
+            sources: { payload_session: "Вход в браузере", credential_registry: "Подтвержденный второй фактор" },
+          },
+          notices: {
+            two_factor_active: "Двухфакторная аутентификация включена.",
+            two_factor_disabled: "Двухфакторная аутентификация отключена.",
+            two_factor_verified: "Сессия подтверждена.",
+            sessions_revoked: "Остальные сессии прекращены.",
+            two_factor_rejected: "Код не принят.",
+            two_factor_already_enrolled: "Настройка уже активна. Сначала отключите ее.",
+            audit_log_unavailable: "Действие отклонено: историю невозможно записать.",
+            bad_request: "Запрос отклонен.",
+          },
+        },
+        data: {
+          title: "Данные",
+          description: "Экспорт того, что хранит рабочее пространство, и срок хранения истории.",
+          export: {
+            label: "Экспорт данных",
+            hint: "Личные данные из хранилища остаются скрытыми. Файл сообщает, что скрыто и почему.",
+            datasets: { enquiries: "Заявки", contacts: "Контакты", listings: "Объекты", audit: "История действий" },
+            from: "С даты",
+            to: "По дату",
+            action: "Подготовить экспорт",
+            recent: "Последние экспорты",
+            empty: "Экспорт еще не запрашивали.",
+            statuses: { queued: "В очереди", ready: "Готов", downloaded: "Скачан", expired: "Истек", failed: "Не удался" },
+            once: "Ссылка на скачивание работает один раз и скоро истекает.",
+          },
+          retention: {
+            label: "Срок хранения истории",
+            days: "{days} дней",
+            cutoff: "Записи до",
+            counts: "Всего {total}, сохраняется {retained}, к очистке {prunable}",
+            protected: "Защищено сверх срока: {count}",
+            command: "Очистка выполняется только командой: {command}",
+            note: "Открытие этого экрана ничего не удаляет. Записи, связанные с одобрением или доказательством запуска, не удаляются никогда.",
+            unavailable: "План невозможно проверить: {message}",
+          },
+        },
+      },
       plannedRows: {
         notification_centre: { label: "Центр уведомлений в продукте", note: "Нужно хранилище уведомлений в приложении; сегодня это только email или счетчик в очереди." },
       },
@@ -1333,6 +1473,76 @@ const ADMIN_UI_COPY = {
           items: {
             export: { label: "Export workspace data", note: "Needs an export job that writes an audit entry, covering leads, contacts and listings.", options: { leads: "Leads", contacts: "Contacts", listings: "Listings" }, action: "Prepare export" },
             audit_retention: { label: "Activity history retention", note: "Needs a ledger clean-up job with an approved retention window.", sample: "12 months" },
+          },
+        },
+      },
+      liveSections: {
+        security: {
+          title: "Security",
+          description: "Operator sign-in protection and the sessions open on this workspace.",
+          twoFactor: {
+            label: "Two-factor authentication",
+            hint: "A one-time code app (Google Authenticator, 1Password, Aegis) on your phone.",
+            statuses: { not_enrolled: "Not set up", pending: "Waiting for confirmation", active: "On", disabled: "Off" },
+            required: "Required for this operator",
+            recoveryCodes: "Recovery codes left: {count}",
+            activatedAt: "Turned on",
+            enrol: "Set up a second factor",
+            enrolAgain: "Set up again",
+            activate: "Confirm with a code",
+            disable: "Turn off",
+            codeLabel: "Code from your app, or a recovery code",
+            stepUp: "A bearer token is no longer enough on its own: confirm with a code, or send the x-ms-admin-2fa header.",
+            stepUpActive: "Confirmed for this session.",
+            stepUpAction: "Confirm this session",
+            nextSignIn: "You will be asked for a code at your next sign-in.",
+          },
+          sessions: {
+            label: "Active sessions",
+            empty: "No active sessions recorded.",
+            current: "This one",
+            created: "Opened",
+            lastSeen: "Last seen",
+            revoke: "Revoke",
+            revokeOthers: "Revoke other sessions",
+            note: "Revoking switches the session off on the server, not just deletes the browser's cookie.",
+            sources: { payload_session: "Browser sign-in", credential_registry: "Verified second factor" },
+          },
+          notices: {
+            two_factor_active: "Two-factor authentication is on.",
+            two_factor_disabled: "Two-factor authentication is off.",
+            two_factor_verified: "This session is confirmed.",
+            sessions_revoked: "The other sessions were revoked.",
+            two_factor_rejected: "That code was not accepted.",
+            two_factor_already_enrolled: "A second factor is already set up. Turn it off first.",
+            audit_log_unavailable: "Refused: the action could not be written to the history.",
+            bad_request: "That request was refused.",
+          },
+        },
+        data: {
+          title: "Data",
+          description: "Export what the workspace holds, and how long the activity history is kept.",
+          export: {
+            label: "Export workspace data",
+            hint: "Personal details held in the contact vault stay out. The file says what was withheld and why.",
+            datasets: { enquiries: "Enquiries", contacts: "Contacts", listings: "Listings", audit: "Activity history" },
+            from: "From date",
+            to: "To date",
+            action: "Prepare export",
+            recent: "Recent exports",
+            empty: "No export has been requested yet.",
+            statuses: { queued: "Queued", ready: "Ready", downloaded: "Downloaded", expired: "Expired", failed: "Failed" },
+            once: "The download link works once and expires shortly.",
+          },
+          retention: {
+            label: "Activity history retention",
+            days: "{days} days",
+            cutoff: "Entries before",
+            counts: "{total} total, {retained} kept, {prunable} prunable",
+            protected: "Protected beyond the window: {count}",
+            command: "Pruning only happens through one command: {command}",
+            note: "Opening this screen deletes nothing. Entries an approval or launch-evidence artifact still references are never prunable.",
+            unavailable: "The plan could not be verified: {message}",
           },
         },
       },
@@ -8133,6 +8343,406 @@ function SettingsPlannedSection({ page, section, icon }) {
   );
 }
 
+// ==== B6 workspace security and data =========================================
+// The live Security and Data sections. They render only when the request
+// carried a workspace-security block; without one the planned (disabled)
+// treatment below stays, so an unconfigured runtime never pretends to work.
+
+function fillTemplate(text, values) {
+  return Object.entries(values).reduce((output, [key, value]) => output.replaceAll(`{${key}}`, String(value)), String(text || ""));
+}
+
+function SecurityNotice({ copy, notice }) {
+  if (!notice) return null;
+  const message = copy.notices[notice];
+  if (!message) return null;
+  const bad = ["two_factor_rejected", "two_factor_already_enrolled", "audit_log_unavailable", "bad_request"].includes(notice);
+  return h(
+    "p",
+    { className: bad ? "adm-settings-note adm-settings-note--blocked" : "adm-settings-note", role: "status", "data-security-notice": notice },
+    h(Icon, { name: bad ? "alert-triangle" : "check", size: 15 }),
+    h("span", null, message),
+  );
+}
+
+function SettingsSecuritySection({ page, icon }) {
+  const settings = settingsCopy(page);
+  const copy = settings.liveSections.security;
+  const security = page.workspace_security || {};
+  const twoFactor = security.two_factor;
+  const sessions = security.sessions;
+  const locale = page.workspace?.locale;
+  const hidden = (name, value) => h("input", { key: name, type: "hidden", name, value });
+  const twoFactorForm = (action, children, key) =>
+    h(
+      "form",
+      { key, method: "post", action, className: "adm-inline-form" },
+      hidden("locale", locale || "en"),
+      ...children,
+    );
+  const status = twoFactor ? twoFactor.status : "not_enrolled";
+  const canWrite = Boolean(twoFactor?.writable);
+  const codeField = (id) =>
+    h(
+      "label",
+      { key: `${id}-label`, className: "adm-settings-inline-field" },
+      h("span", null, copy.twoFactor.codeLabel),
+      h("input", {
+        name: "code",
+        type: "text",
+        inputMode: "numeric",
+        autoComplete: "one-time-code",
+        maxLength: 20,
+        required: true,
+        spellCheck: false,
+        "aria-label": copy.twoFactor.codeLabel,
+      }),
+    );
+  return h(
+    "section",
+    {
+      className: "crm-panel adm-settings-panel",
+      id: "settings-security",
+      "data-settings-section": "security",
+      "data-settings-live": "true",
+    },
+    h(
+      "div",
+      { className: "crm-panel__hd adm-settings-panel__hd" },
+      h(
+        "div",
+        { className: "adm-settings-panel__title" },
+        h("h2", null, h(Icon, { name: icon, size: 17 }), h("span", null, copy.title)),
+        h("p", null, copy.description),
+      ),
+    ),
+    h(
+      "div",
+      { className: "adm-settings-planned" },
+      h(SecurityNotice, { copy, notice: security.notice }),
+      h(
+        "div",
+        { className: "adm-planned adm-settings-planned__row", "data-security-control": "two_factor" },
+        h(
+          "div",
+          { className: "adm-settings-pending__copy" },
+          h("strong", null, copy.twoFactor.label),
+          h("p", { className: "adm-planned-note" }, copy.twoFactor.hint),
+          twoFactor?.required ? h("p", { className: "adm-planned-note" }, copy.twoFactor.required) : null,
+          status === "active" && twoFactor?.step_up_required
+            ? h(
+                "p",
+                { className: "adm-planned-note", "data-step-up": twoFactor.step_up_active ? "active" : "required" },
+                twoFactor.step_up_active ? copy.twoFactor.stepUpActive : copy.twoFactor.stepUp,
+              )
+            : null,
+          status === "active" && !twoFactor?.step_up_required
+            ? h("p", { className: "adm-planned-note" }, copy.twoFactor.nextSignIn)
+            : null,
+          status === "active"
+            ? h(
+                "p",
+                { className: "adm-planned-note" },
+                fillTemplate(copy.twoFactor.recoveryCodes, { count: twoFactor.recovery_codes_remaining }),
+              )
+            : null,
+        ),
+        h(
+          "div",
+          { className: "adm-settings-pending__control adm-settings-planned__stack" },
+          h(
+            StatusPill,
+            { tone: status === "active" ? "sea" : "ink", "data-two-factor-status": status },
+            copy.twoFactor.statuses[status] || status,
+          ),
+          ...(!canWrite
+            ? []
+            : status === "active"
+              ? [
+                  ...(twoFactor?.step_up_required && !twoFactor.step_up_active
+                    ? [
+                        twoFactorForm(
+                          "/api/admin/security/two-factor/verify",
+                          [
+                            codeField("verify"),
+                            h(
+                              "button",
+                              { key: "submit", type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
+                              h(Icon, { name: "check", size: 15 }),
+                              h("span", null, copy.twoFactor.stepUpAction),
+                            ),
+                          ],
+                          "verify",
+                        ),
+                      ]
+                    : []),
+                  twoFactorForm(
+                    "/api/admin/security/two-factor/disable",
+                    [
+                      codeField("disable"),
+                      h(
+                        "button",
+                        { key: "submit", type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" },
+                        h(Icon, { name: "x", size: 15 }),
+                        h("span", null, copy.twoFactor.disable),
+                      ),
+                    ],
+                    "disable",
+                  ),
+                ]
+              : status === "pending"
+                ? [
+                    twoFactorForm(
+                      "/api/admin/security/two-factor/activate",
+                      [
+                        codeField("activate"),
+                        h(
+                          "button",
+                          { key: "submit", type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
+                          h(Icon, { name: "check", size: 15 }),
+                          h("span", null, copy.twoFactor.activate),
+                        ),
+                      ],
+                      "activate",
+                    ),
+                  ]
+                : [
+                    twoFactorForm(
+                      "/api/admin/security/two-factor/enrol",
+                      [
+                        h(
+                          "button",
+                          { key: "submit", type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
+                          h(Icon, { name: "shield-check", size: 15 }),
+                          h("span", null, status === "disabled" ? copy.twoFactor.enrolAgain : copy.twoFactor.enrol),
+                        ),
+                      ],
+                      "enrol",
+                    ),
+                  ]),
+        ),
+      ),
+      h(
+        "div",
+        { className: "adm-planned adm-settings-planned__row", "data-security-control": "sessions" },
+        h(
+          "div",
+          { className: "adm-settings-pending__copy" },
+          h("strong", null, copy.sessions.label),
+          h("p", { className: "adm-planned-note" }, copy.sessions.note),
+        ),
+        h(
+          "div",
+          { className: "adm-settings-pending__control adm-settings-planned__stack" },
+          (sessions?.rows || []).length
+            ? h(
+                "ul",
+                { className: "adm-readiness-list", "data-admin-sessions": "true" },
+                ...sessions.rows.map((session) =>
+                  h(
+                    "li",
+                    { key: session.session_id, "data-admin-session": session.session_id, "data-session-current": session.current ? "true" : undefined },
+                    h(
+                      "span",
+                      { className: "adm-readiness-copy" },
+                      h("strong", null, session.client),
+                      h(
+                        "small",
+                        null,
+                        `${copy.sessions.sources[session.source] || session.source} · ${copy.sessions.created} ${formatAdminDateTime(session.created_at, locale)} · ${copy.sessions.lastSeen} ${formatAdminDateTime(session.last_seen_at, locale)}`,
+                      ),
+                    ),
+                    h(
+                      "span",
+                      { className: "adm-readiness-value" },
+                      session.current ? h(StatusPill, { tone: "sea" }, copy.sessions.current) : null,
+                      sessions.writable
+                        ? h(
+                            "form",
+                            { method: "post", action: "/api/admin/security/sessions/revoke", className: "adm-inline-form" },
+                            h("input", { type: "hidden", name: "locale", value: locale || "en" }),
+                            h("input", { type: "hidden", name: "session_id", value: session.session_id }),
+                            h(
+                              "button",
+                              { type: "submit", className: "mk-btn mk-btn--ghost mk-btn--sm" },
+                              h("span", null, copy.sessions.revoke),
+                            ),
+                          )
+                        : null,
+                    ),
+                  ),
+                ),
+              )
+            : h("p", { className: "adm-empty", "data-admin-sessions-empty": "true" }, copy.sessions.empty),
+          sessions?.writable && (sessions.rows || []).length > 1
+            ? h(
+                "form",
+                { method: "post", action: "/api/admin/security/sessions/revoke", className: "adm-inline-form" },
+                h("input", { type: "hidden", name: "locale", value: locale || "en" }),
+                h("input", { type: "hidden", name: "scope", value: "others" }),
+                h(
+                  "button",
+                  { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" },
+                  h(Icon, { name: "x", size: 15 }),
+                  h("span", null, copy.sessions.revokeOthers),
+                ),
+              )
+            : null,
+        ),
+      ),
+    ),
+  );
+}
+
+function SettingsDataSection({ page, icon }) {
+  const settings = settingsCopy(page);
+  const copy = settings.liveSections.data;
+  const security = page.workspace_security || {};
+  const exports = security.exports;
+  const retention = security.audit_retention;
+  const locale = page.workspace?.locale;
+  return h(
+    "section",
+    {
+      className: "crm-panel adm-settings-panel",
+      id: "settings-data",
+      "data-settings-section": "data",
+      "data-settings-live": "true",
+    },
+    h(
+      "div",
+      { className: "crm-panel__hd adm-settings-panel__hd" },
+      h(
+        "div",
+        { className: "adm-settings-panel__title" },
+        h("h2", null, h(Icon, { name: icon, size: 17 }), h("span", null, copy.title)),
+        h("p", null, copy.description),
+      ),
+    ),
+    h(
+      "div",
+      { className: "adm-settings-planned" },
+      exports
+        ? h(
+            "div",
+            { className: "adm-planned adm-settings-planned__row", "data-security-control": "export" },
+            h(
+              "div",
+              { className: "adm-settings-pending__copy" },
+              h("strong", null, copy.export.label),
+              h("p", { className: "adm-planned-note" }, copy.export.hint),
+              h("p", { className: "adm-planned-note" }, copy.export.once),
+            ),
+            h(
+              "div",
+              { className: "adm-settings-pending__control adm-settings-planned__stack" },
+              h(
+                "form",
+                { method: "post", action: "/api/admin/data-exports", className: "adm-settings-planned__stack", "data-export-form": "true" },
+                h("input", { type: "hidden", name: "locale", value: locale || "en" }),
+                h(
+                  "fieldset",
+                  { className: "adm-planned__group", disabled: exports.writable ? undefined : true },
+                  ...exports.datasets.map((dataset) =>
+                    h(
+                      "label",
+                      { key: dataset, className: "adm-check" },
+                      h("input", { type: "checkbox", name: "datasets", value: dataset, defaultChecked: dataset === "enquiries" }),
+                      h("span", null, copy.export.datasets[dataset] || dataset),
+                    ),
+                  ),
+                ),
+                h(
+                  "label",
+                  { className: "adm-settings-inline-field" },
+                  h("span", null, copy.export.from),
+                  h("input", { type: "date", name: "from", required: true, disabled: exports.writable ? undefined : true }),
+                ),
+                h(
+                  "label",
+                  { className: "adm-settings-inline-field" },
+                  h("span", null, copy.export.to),
+                  h("input", { type: "date", name: "to", required: true, disabled: exports.writable ? undefined : true }),
+                ),
+                h(
+                  "button",
+                  { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm", disabled: exports.writable ? undefined : true },
+                  h(Icon, { name: "download", size: 15 }),
+                  h("span", null, copy.export.action),
+                ),
+              ),
+              h("strong", null, copy.export.recent),
+              exports.rows.length
+                ? h(
+                    "ul",
+                    { className: "adm-readiness-list", "data-workspace-exports": "true" },
+                    ...exports.rows.map((job) =>
+                      h(
+                        "li",
+                        { key: job.job_id, "data-workspace-export": job.job_id },
+                        h(
+                          "span",
+                          { className: "adm-readiness-copy" },
+                          h("strong", null, (job.scope?.datasets || []).map((dataset) => copy.export.datasets[dataset] || dataset).join(", ")),
+                          h("small", null, `${job.scope?.from || ""} — ${job.scope?.to || ""} · ${formatAdminDateTime(job.requested_at, locale)}`),
+                        ),
+                        h(
+                          "span",
+                          { className: "adm-readiness-value" },
+                          h(
+                            StatusPill,
+                            { tone: job.status === "ready" ? "sea" : "ink", "data-export-status": job.status },
+                            copy.export.statuses[job.status] || job.status,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : h("p", { className: "adm-empty", "data-workspace-exports-empty": "true" }, copy.export.empty),
+            ),
+          )
+        : null,
+      retention
+        ? h(
+            "div",
+            { className: "adm-planned adm-settings-planned__row", "data-security-control": "audit_retention" },
+            h(
+              "div",
+              { className: "adm-settings-pending__copy" },
+              h("strong", null, copy.retention.label),
+              h("p", { className: "adm-planned-note" }, copy.retention.note),
+            ),
+            h(
+              "div",
+              { className: "adm-settings-pending__control adm-settings-planned__stack" },
+              retention.unavailable
+                ? h(
+                    "p",
+                    { className: "adm-settings-note adm-settings-note--blocked", "data-retention-unavailable": "true" },
+                    h(Icon, { name: "alert-triangle", size: 15 }),
+                    h("span", null, fillTemplate(copy.retention.unavailable, { message: retention.unavailable })),
+                  )
+                : h(
+                    "div",
+                    { "data-audit-retention": "true" },
+                    h(StatusPill, { tone: "ink", "data-retention-days": String(retention.retention_days) }, fillTemplate(copy.retention.days, { days: retention.retention_days })),
+                    h("p", { className: "adm-planned-note" }, `${copy.retention.cutoff} ${formatAdminDateTime(retention.cutoff, locale)}`),
+                    h(
+                      "p",
+                      { className: "adm-planned-note" },
+                      fillTemplate(copy.retention.counts, { total: retention.total, retained: retention.retained, prunable: retention.prunable }),
+                    ),
+                    h("p", { className: "adm-planned-note" }, fillTemplate(copy.retention.protected, { count: retention.protected_beyond_window })),
+                    h("p", { className: "adm-planned-note" }, h("code", null, fillTemplate(copy.retention.command, { command: retention.apply_command }))),
+                  ),
+            ),
+          )
+        : null,
+    ),
+  );
+}
+// ==== end B6 workspace security and data =====================================
+
 // Settings whose front end is designed but whose backend does not exist yet.
 // They live in one closed strip, so they stay discoverable without pushing the
 // working sections down the screen.
@@ -8253,8 +8863,15 @@ function SettingsBody({ page }) {
           ),
         );
       }),
-      ...["security", "data"].map((section) =>
-        h(
+      // B6 workspace security and data: the rail only says "coming soon" while
+      // the section really is still the planned panel.
+      ...["security", "data"].map((section) => {
+        const live =
+          section === "security"
+            ? Boolean(page.workspace_security?.two_factor)
+            : Boolean(page.workspace_security?.exports || page.workspace_security?.audit_retention);
+        const sectionTitle = live ? settings.liveSections[section].title : settings.plannedSections[section].title;
+        return h(
           "li",
           { key: section, "data-settings-index-row": section },
           h(
@@ -8263,13 +8880,17 @@ function SettingsBody({ page }) {
             h(
               "span",
               { className: "adm-readiness-copy" },
-              h("strong", null, settings.plannedSections[section].title),
-              h("small", null, ui.comingSoon),
+              h("strong", null, sectionTitle),
+              h("small", null, live ? settings.sectionState.updated : ui.comingSoon),
             ),
-            h("span", { className: "adm-readiness-value" }, h(StatusPill, { tone: "ink" }, ui.comingSoon)),
+            h(
+              "span",
+              { className: "adm-readiness-value" },
+              h(StatusPill, { tone: live ? "sea" : "ink" }, live ? settings.sectionState.updated : ui.comingSoon),
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     ),
   );
   return adminShell(page, {
@@ -8570,8 +9191,14 @@ function SettingsBody({ page }) {
               }),
             ],
           }),
-          h(SettingsPlannedSection, { page, section: "security", icon: "shield-check" }),
-          h(SettingsPlannedSection, { page, section: "data", icon: "download" }),
+          // B6 workspace security and data: live when the request carried a
+          // workspace-security block, otherwise the honest "not connected" panel.
+          page.workspace_security?.two_factor
+            ? h(SettingsSecuritySection, { page, icon: "shield-check" })
+            : h(SettingsPlannedSection, { page, section: "security", icon: "shield-check" }),
+          page.workspace_security?.exports || page.workspace_security?.audit_retention
+            ? h(SettingsDataSection, { page, icon: "download" })
+            : h(SettingsPlannedSection, { page, section: "data", icon: "download" }),
           h(SettingsPendingList, { page }),
         ),
         h(

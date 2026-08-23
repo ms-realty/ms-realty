@@ -40,6 +40,38 @@ const PLATFORMS = [
   [/linux/i, "Linux"],
 ];
 
+// Step-up transport for the credential-registry path. An API client sends the
+// token in the x-ms-admin-2fa header; a browser reaching the workbench through
+// a bearer proxy cannot set a header, so the same token also rides in this
+// cookie. Without it an operator who switches their second factor on from the
+// settings screen would have no way to satisfy the gate they just created.
+export const ADMIN_STEP_UP_COOKIE = "ms_admin_2fa";
+export const ADMIN_STEP_UP_HEADER = "x-ms-admin-2fa";
+
+export function stepUpTokenFromCookie(cookieHeader) {
+  for (const part of String(cookieHeader || "").split(";")) {
+    const [name, ...rest] = part.trim().split("=");
+    if (name === ADMIN_STEP_UP_COOKIE) {
+      try {
+        return decodeURIComponent(rest.join("=") || "");
+      } catch {
+        return "";
+      }
+    }
+  }
+  return "";
+}
+
+export function adminStepUpSetCookie(token, { maxAgeSeconds }) {
+  const requested = Number(maxAgeSeconds);
+  const maxAge = Number.isFinite(requested) ? Math.max(0, Math.floor(requested)) : 0;
+  return `${ADMIN_STEP_UP_COOKIE}=${encodeURIComponent(token)}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Lax`;
+}
+
+export function adminStepUpClearCookie() {
+  return `${ADMIN_STEP_UP_COOKIE}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`;
+}
+
 export function adminSessionFingerprint(token) {
   const value = String(token || "");
   if (!value) throw new Error("A session token is required to compute a session fingerprint");

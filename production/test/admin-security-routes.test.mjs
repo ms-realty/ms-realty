@@ -253,7 +253,9 @@ test("the session list marks the current session and revoking it stops the token
       body: { session_id: second.session_id },
     });
     assert.equal(self.body.revoked_current, true);
-    assert.match(String(self.headers["set-cookie"]), /^ms_admin=; Max-Age=0/);
+    // This caller authenticated with a bearer token plus a step-up header, so
+    // the credential the revocation invalidates is the step-up one.
+    assert.match(String(self.headers["set-cookie"]), /^ms_admin_2fa=; Max-Age=0/);
     assert.equal((await dispatchHttp(app, { url: "/api/admin/activity", headers: authed })).body.kind, "two_factor_required");
 
     // Revocation is not just a client-side cookie delete: the ledger holds it.
@@ -442,4 +444,230 @@ test("the sign-in page offers an optional authenticator code and names a rejecte
   // The plain refusal still says nothing about which half failed.
   assert.match(renderAdminLoginPage({ error: true }), /Данните не бяха приети/);
   assert.doesNotMatch(renderAdminLoginPage({ error: true }), /Кодът от приложението не беше приет/);
+});
+
+// --- Settings screen wiring --------------------------------------------------
+// The Security and Data sections were shipped visibly disabled by the settings
+// package. These prove they are now driven by this package's backend, and that
+// they fall back to the disabled treatment when its ledgers are absent.
+
+function browserSession() {
+  const jar = new Map();
+  return {
+    header(extra = {}) {
+      return {
+        authorization: `Bearer ${TOKENS.owner}`,
+        accept: "text/html",
+        "user-agent": CHROME_MAC,
+        cookie: [...jar].map(([name, value]) => `${name}=${value}`).join("; "),
+        ...extra,
+      };
+    },
+    form(extra = {}) {
+      return this.header({ "content-type": "application/x-www-form-urlencoded", ...extra });
+    },
+    absorb(response) {
+      const raw = response.headers?.["set-cookie"];
+      if (raw) {
+        const [name, value] = String(raw).split(";")[0].split("=");
+        if (/Max-Age=0/.test(String(raw))) jar.delete(name);
+        else jar.set(name, value);
+      }
+      return response;
+    },
+    cookies() {
+      return [...jar.keys()];
+    },
+  };
+}
+
+test("the settings screen renders the Security and Data sections from live state", async () => {
+  await withWorkspace(async ({ app, directory }) => {
+    const settingsPath = `${directory}/workspace-settings.json`;
+    fs.copyFileSync(fromRoot("production", "data", "workspace-settings.json"), settingsPath);
+    const wired = createHttpApp({
+      auditLogPath: `${directory}/audit-log.jsonl`,
+      adminSessionLedgerPath: `${directory}/admin-sessions.jsonl`,
+      operatorTwoFactorPath: `${directory}/operator-two-factor.jsonl`,
+      operatorTwoFactorKey: TWO_FACTOR_KEY,
+      workspaceExportLedgerPath: `${directory}/workspace-exports.jsonl`,
+      workspaceExportDir: `${directory}/exports`,
+      workspaceSettingsPath: settingsPath,
+      securityAt: () => START,
+    });
+    void app;
+
+    const page = await dispatchHttp(wired, { url: "/admin/settings", headers: headers(TOKENS.owner, { accept: "text/html" }) });
+    assert.equal(page.status, 200);
+    // Live, not the "not connected" panel.
+    assert.match(page.body, /data-settings-section="security"[^>]*data-settings-live="true"/);
+    assert.match(page.body, /data-settings-section="data"[^>]*data-settings-live="true"/);
+    assert.doesNotMatch(page.body, /data-settings-planned="true"[^>]*data-planned-control="workspace_settings_security"/);
+    assert.match(page.body, /data-two-factor-status="not_enrolled"/);
+    assert.match(page.body, /data-admin-sessions-empty="true"/);
+    assert.match(page.body, /data-export-form="true"/);
+    assert.match(page.body, /data-audit-retention="true"/);
+    assert.match(page.body, /action="\/api\/admin\/security\/two-factor\/enrol"/);
+    assert.match(page.body, /action="\/api\/admin\/data-exports"/);
+    // The prune command is shown, not offered as a button.
+    assert.match(page.body, /npm run audit:retention -- --apply/);
+
+    // A broker keeps Security but never sees the export controls.
+    const brokerPage = await dispatchHttp(wired, { url: "/admin/settings", headers: headers(TOKENS.broker, { accept: "text/html" }) });
+    assert.equal(brokerPage.status, 200);
+    assert.match(brokerPage.body, /data-two-factor-status="not_enrolled"/);
+    assert.doesNotMatch(brokerPage.body, /data-export-form="true"/);
+  });
+});
+
+test("without the workspace-security ledgers the sections keep their disabled treatment", async () => {
+  await withWorkspace(async ({ directory }) => {
+    const settingsPath = `${directory}/workspace-settings-bare.json`;
+    fs.copyFileSync(fromRoot("production", "data", "workspace-settings.json"), settingsPath);
+    const bare = createHttpApp({ workspaceSettingsPath: settingsPath, securityAt: () => START });
+    const page = await dispatchHttp(bare, { url: "/admin/settings", headers: headers(TOKENS.owner, { accept: "text/html" }) });
+    assert.equal(page.status, 200);
+    assert.match(page.body, /data-planned-control="workspace_settings_security"/);
+    assert.match(page.body, /data-planned-control="workspace_settings_data"/);
+    assert.doesNotMatch(page.body, /data-settings-live="true"/);
+    assert.doesNotMatch(page.body, /action="\/api\/admin\/security\/two-factor\/enrol"/);
+  });
+});
+
+test("a browser drives enrolment, step-up, export and revoke with forms and cookies alone", async () => {
+  await withWorkspace(async ({ app, paths, clock, directory }) => {
+    const settingsPath = `${directory}/workspace-settings-live.json`;
+    fs.copyFileSync(fromRoot("production", "data", "workspace-settings.json"), settingsPath);
+    const wired = createHttpApp({
+      ...paths,
+      workspaceSettingsPath: settingsPath,
+      operatorTwoFactorKey: TWO_FACTOR_KEY,
+      securityAt: () => new Date(clock.at).toISOString(),
+    });
+    void app;
+    const browser = browserSession();
+
+    // Enrolment answers with a one-time page, never a redirect carrying a secret.
+    const enrolled = await dispatchHttp(wired, {
+      method: "POST",
+      url: "/api/admin/security/two-factor/enrol",
+      headers: browser.form(),
+      body: "locale=en",
+    });
+    assert.equal(enrolled.status, 201);
+    assert.match(String(enrolled.headers["content-type"]), /text\/html/);
+    assert.equal(enrolled.headers["cache-control"], "no-store");
+    assert.equal(enrolled.headers["referrer-policy"], "no-referrer");
+    assert.equal(enrolled.headers.location, undefined, "a secret must never travel in a redirect URL");
+    const secret = /data-two-factor-secret="true">([A-Z2-7]+)</.exec(enrolled.body)?.[1];
+    assert.ok(secret, "the one-time page shows the secret");
+    assert.equal((enrolled.body.match(/<li>[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}<\/li>/g) || []).length, 10);
+
+    const activated = await dispatchHttp(wired, {
+      method: "POST",
+      url: "/api/admin/security/two-factor/activate",
+      headers: browser.form(),
+      body: `locale=en&code=${totpCode(secret, { timestamp: clock.at })}`,
+    });
+    assert.equal(activated.status, 303);
+    assert.equal(activated.headers.location, "/admin/settings?security=two_factor_active#settings-security");
+
+    // Gated everywhere except the settings screen, which is where the fix lives.
+    assert.equal((await dispatchHttp(wired, { url: "/api/admin/activity", headers: browser.header() })).status, 403);
+    const gatedSettings = await dispatchHttp(wired, { url: "/admin/settings", headers: browser.header() });
+    assert.equal(gatedSettings.status, 200);
+    assert.match(gatedSettings.body, /data-step-up="required"/);
+    assert.match(gatedSettings.body, /action="\/api\/admin\/security\/two-factor\/verify"/);
+
+    clock.at += 60_000;
+    const verified = browser.absorb(
+      await dispatchHttp(wired, {
+        method: "POST",
+        url: "/api/admin/security/two-factor/verify",
+        headers: browser.form(),
+        body: `locale=en&code=${totpCode(secret, { timestamp: clock.at })}`,
+      }),
+    );
+    assert.equal(verified.status, 303);
+    assert.equal(verified.headers.location, "/admin/settings?security=two_factor_verified#settings-security");
+    // The step-up rides in an HttpOnly cookie so a browser behind a bearer
+    // proxy, which cannot set a header, is never locked out.
+    assert.deepEqual(browser.cookies(), ["ms_admin_2fa"]);
+    assert.match(String(verified.headers["set-cookie"]), /HttpOnly; Secure; SameSite=Lax/);
+    assert.equal((await dispatchHttp(wired, { url: "/api/admin/activity", headers: browser.header() })).status, 200);
+
+    const confirmed = await dispatchHttp(wired, { url: "/admin/settings?security=two_factor_verified", headers: browser.header() });
+    assert.match(confirmed.body, /data-step-up="active"/);
+    assert.match(confirmed.body, /data-security-notice="two_factor_verified"/);
+    assert.match(confirmed.body, /data-admin-sessions="true"/);
+    assert.match(confirmed.body, /data-session-current="true"/);
+
+    // The export form answers with its own one-time page and a working link.
+    const exported = await dispatchHttp(wired, {
+      method: "POST",
+      url: "/api/admin/data-exports",
+      headers: browser.form(),
+      body: "locale=en&datasets=enquiries&datasets=audit&from=2026-07-01&to=2026-08-31",
+    });
+    assert.equal(exported.status, 201);
+    assert.match(String(exported.headers["content-type"]), /text\/html/);
+    assert.match(exported.body, /data-export-redactions="true"/);
+    const href = /href="([^"]*data-exports\/download[^"]*)"/.exec(exported.body)?.[1];
+    assert.ok(href);
+    const downloaded = await dispatchHttp(wired, {
+      url: href.replaceAll("&#38;", "&").replaceAll("&amp;", "&"),
+      headers: browser.header(),
+    });
+    assert.equal(downloaded.status, 200);
+    assert.equal(JSON.parse(downloaded.body).kind, "ms_realty_workspace_export");
+    const listedAgain = await dispatchHttp(wired, { url: "/admin/settings", headers: browser.header() });
+    assert.match(listedAgain.body, /data-export-status="downloaded"/);
+
+    // Revoking the current step-up clears its cookie and closes the gate again.
+    const sessions = await dispatchHttp(wired, {
+      url: "/api/admin/security/sessions",
+      headers: browser.header({ accept: "application/json" }),
+    });
+    const revoked = browser.absorb(
+      await dispatchHttp(wired, {
+        method: "POST",
+        url: "/api/admin/security/sessions/revoke",
+        headers: browser.form(),
+        body: `locale=en&session_id=${sessions.body.current_session_id}`,
+      }),
+    );
+    assert.equal(revoked.status, 303);
+    assert.deepEqual(browser.cookies(), []);
+    assert.equal((await dispatchHttp(wired, { url: "/api/admin/activity", headers: browser.header() })).body.kind, "two_factor_required");
+
+    // Nothing in this flow wrote to the committed workspace settings document.
+    assert.equal(
+      fs.readFileSync(settingsPath, "utf8"),
+      fs.readFileSync(fromRoot("production", "data", "workspace-settings.json"), "utf8"),
+    );
+  });
+});
+
+test("a rejected form action returns to the settings screen with a named notice", async () => {
+  await withWorkspace(async ({ app, clock }) => {
+    const enrolment = await enrolAndActivate(app, TOKENS.owner, clock);
+    void enrolment;
+    const rejected = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/security/two-factor/verify",
+      headers: headers(TOKENS.owner, { "content-type": "application/x-www-form-urlencoded" }),
+      body: "locale=en&code=000000",
+    });
+    assert.equal(rejected.status, 303);
+    assert.equal(rejected.headers.location, "/admin/settings?security=two_factor_rejected#settings-security");
+
+    const duplicate = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/security/two-factor/enrol",
+      headers: headers(TOKENS.owner, { "content-type": "application/x-www-form-urlencoded" }),
+      body: "locale=en",
+    });
+    assert.equal(duplicate.status, 303);
+    assert.equal(duplicate.headers.location, "/admin/settings?security=two_factor_already_enrolled#settings-security");
+  });
 });
