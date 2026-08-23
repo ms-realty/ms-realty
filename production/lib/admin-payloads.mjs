@@ -9,6 +9,13 @@ import { buildLeadBriefs } from "./lead-briefs.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingQualityReport } from "./listing-quality.mjs";
 import { CANONICAL_PROPERTY_FAMILIES, propertyFamilyFor } from "./listing-facts.mjs";
+import {
+  DEFAULT_BROKER_LEAD_GROUPS,
+  WORKSPACE_DATE_FORMATS,
+  WORKSPACE_SETTINGS_SECTIONS,
+  WORKSPACE_TIMEZONES,
+  workspaceSettingsView,
+} from "./workspace-settings.mjs";
 export { DURABLE_LISTING_EDIT_FIELDS as LISTING_EDIT_FIELDS } from "./listing-draft-service.mjs";
 import { DURABLE_LISTING_EDIT_FIELDS as LISTING_EDIT_FIELDS } from "./listing-draft-service.mjs";
 
@@ -132,6 +139,71 @@ export function renderAdminOperationalQueuePayload(payload, { kind, path, titleK
       description: copy[descriptionKey],
       robots: "noindex,nofollow",
     },
+  };
+}
+
+const WORKSPACE_SETTINGS_METADATA = {
+  bg: { title: "Настройки", description: "Профил на агенцията, срокове за отговор, известия, работно пространство и публичен сайт." },
+  ru: { title: "Настройки", description: "Профиль агентства, сроки ответа, уведомления, рабочее пространство и публичный сайт." },
+  en: { title: "Settings", description: "Agency profile, lead reply targets, notifications, workspace and public site defaults." },
+};
+
+function settingsFormEcho(values) {
+  if (!values || typeof values !== "object" || Array.isArray(values)) return {};
+  const echo = {};
+  for (const [key, value] of Object.entries(values)) {
+    if (["actor", "locale", "section"].includes(key)) continue;
+    if (Array.isArray(value)) echo[key] = value.map((entry) => String(entry).slice(0, 500)).slice(0, 20);
+    else if (value && typeof value === "object") echo[key] = settingsFormEcho(value);
+    else echo[key] = String(value ?? "").slice(0, 500);
+  }
+  return echo;
+}
+
+export function renderAdminWorkspaceSettingsPayload(
+  registry,
+  requestedLocale,
+  {
+    settings,
+    operator = null,
+    brokerProfiles = DEFAULT_BROKER_PROFILES,
+    adminLocales: locales = ["bg", "ru", "en"],
+    saved = null,
+    form = null,
+    writable = true,
+  } = {},
+) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const metadata = WORKSPACE_SETTINGS_METADATA[workspace.locale] || WORKSPACE_SETTINGS_METADATA.en;
+  return {
+    kind: "admin_workspace_settings",
+    status: form?.error ? 400 : 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/settings",
+    canonical: "/admin/settings",
+    indexable: false,
+    metadata: { title: `${metadata.title} | MS Realty`, description: metadata.description, robots: "noindex,nofollow" },
+    workspace: workspaceWithOperator(workspace, operator),
+    workspace_settings: workspaceSettingsView(settings),
+    settings_writable: writable !== false,
+    brokerProfiles: brokerProfiles.map((profile) => ({ id: profile.id, languages: profile.languages || [] })),
+    settingsOptions: {
+      admin_locales: [...locales],
+      timezones: [...WORKSPACE_TIMEZONES],
+      date_formats: [...WORKSPACE_DATE_FORMATS],
+      broker_groups: Object.keys(DEFAULT_BROKER_LEAD_GROUPS),
+    },
+    settingsForm: form
+      ? {
+          section: WORKSPACE_SETTINGS_SECTIONS.includes(form.section) ? form.section : null,
+          error: form.error ? String(form.error) : null,
+          field: form.field ? String(form.field) : null,
+          values: settingsFormEcho(form.values),
+        }
+      : null,
+    savedSection: WORKSPACE_SETTINGS_SECTIONS.includes(saved) ? saved : null,
   };
 }
 

@@ -39,9 +39,9 @@ const ICON_NAMES = [
   "clock", "compass", "contact", "download", "external-link", "eye", "file-check", "file-text",
   "filter", "flame", "globe", "handshake", "heart", "home", "house", "inbox", "info",
   "kanban-square", "key", "landmark", "languages", "layout-dashboard", "layout-grid", "link",
-  "list", "loader-circle", "mail", "map", "map-pin", "menu", "message-circle", "messages-square",
+  "list", "list-checks", "loader-circle", "mail", "map", "map-pin", "menu", "message-circle", "messages-square",
   "minus", "pencil", "percent", "phone", "pin", "plus", "printer", "ruler", "search", "search-x",
-  "send", "share-2", "shield-check", "sliders-horizontal", "sparkles", "star", "sun",
+  "send", "settings", "share-2", "shield-check", "sliders-horizontal", "sparkles", "star", "sun",
   "table-properties", "trending-up", "triangle-alert", "upload", "user", "user-round", "users",
   "wallet", "x",
 ];

@@ -139,6 +139,10 @@ export function requiredAdminCapability(method, pathname) {
   const verb = String(method || "GET").toUpperCase();
   if (pathname === "/admin") return "workspace:read";
   if (["/admin/team", "/api/admin/team"].includes(pathname)) return "team:manage";
+  // Every operator may read the workspace settings screen; only an admin saves.
+  if (["/admin/settings", "/api/admin/settings"].includes(pathname)) {
+    return verb === "GET" ? "workspace:read" : "settings:manage";
+  }
   if (verb === "GET" && ["/admin/activity", "/api/admin/activity"].includes(pathname)) return "activity:read";
   if (
     verb === "GET" &&
