@@ -2896,6 +2896,9 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
     productionRecoveryReportPath,
     productionRecoverySigningPublicKey: RECOVERY_PUBLIC_KEY,
     reviewedAt: "2026-07-23T00:00:00.000Z",
+    // Pin the freshness clock to the fixture's own date. Without this the test
+    // passes for thirty days after that date and then fails on the calendar.
+    productionRecoveryAt: "2026-07-23T00:00:00.000Z",
   });
   const auth = { authorization: "Bearer local-admin-smoke" };
 

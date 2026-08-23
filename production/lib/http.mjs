@@ -884,6 +884,8 @@ export function createHttpApp({
   monitoringRollbackReportPath = null,
   payloadRuntimeReportPath = null,
   productionRecoveryReportPath = null,
+  // Freshness is measured against the wall clock in production; tests pin it.
+  productionRecoveryAt = null,
   productionRecoverySigningPublicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
@@ -1556,6 +1558,7 @@ export function createHttpApp({
       payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
       productionRecovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
         publicKey: productionRecoverySigningPublicKey,
+        ...(productionRecoveryAt ? { now: productionRecoveryAt } : {}),
       }),
       productionRecoveryPublicKey: productionRecoverySigningPublicKey,
     });
@@ -1611,6 +1614,7 @@ export function createHttpApp({
         payload_runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
         production_recovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
           publicKey: productionRecoverySigningPublicKey,
+          ...(productionRecoveryAt ? { now: productionRecoveryAt } : {}),
         }),
       },
     };
@@ -3255,6 +3259,7 @@ export function createHttpApp({
         kind: "admin_production_recovery",
         recovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
           publicKey: productionRecoverySigningPublicKey,
+          ...(productionRecoveryAt ? { now: productionRecoveryAt } : {}),
         }),
       });
     }
@@ -3346,6 +3351,7 @@ export function createHttpApp({
         });
         const recovery = productionRecoveryState(productionRecoveryReportPath || undefined, {
           publicKey: productionRecoverySigningPublicKey,
+          ...(productionRecoveryAt ? { now: productionRecoveryAt } : {}),
         });
         recordAudit({
           action: "production_recovery_report_imported",
