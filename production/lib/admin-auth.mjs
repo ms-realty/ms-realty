@@ -50,6 +50,10 @@ const CONTENT_READ_PATHS = new Set([
   "/admin/listings",
   "/api/admin/listings",
   "/admin/listings/edit",
+  // Package B2: the approved-content review surface (team profiles, area
+  // guides, financing partners, purchase fee table).
+  "/admin/approved-content",
+  "/api/admin/approved-content",
 ]);
 
 const TRANSLATION_READ_PATHS = new Set(["/admin/translations", "/api/admin/translations"]);

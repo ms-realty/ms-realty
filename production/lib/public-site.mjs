@@ -36,6 +36,31 @@ import {
   isPublishableGuide,
   readApprovedCmsContent,
 } from "./approved-content.mjs";
+import {
+  DEFAULT_APPROVED_AREA_GUIDES_PATH,
+  areaGuidePayloadFor,
+  readApprovedAreaGuides,
+} from "./area-guides.mjs";
+import {
+  DEFAULT_APPROVED_TEAM_PROFILES_PATH,
+  publicTeamProfilesFor,
+  readApprovedTeamProfiles,
+  teamAbsence,
+} from "./team-profiles.mjs";
+import {
+  DEFAULT_APPROVED_FINANCING_PARTNERS_PATH,
+  financingAbsence,
+  publicFinancingPartnersFor,
+  readApprovedFinancingPartners,
+} from "./financing-partners.mjs";
+import {
+  DEFAULT_APPROVED_PURCHASE_FEES_PATH,
+  PURCHASE_FEE_BUYER_SCOPES,
+  purchaseFeeEstimate,
+  purchaseFeeTableStatus,
+  readApprovedPurchaseFees,
+} from "./purchase-fees.mjs";
+import { readThroughCached } from "./file-cache.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { isPublicBrokerContact } from "./broker-contacts.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
@@ -1775,7 +1800,15 @@ function listingActions(locale, view, path, labels, brokerContact = null) {
   };
 }
 
-export function renderListingPage({ registry, listing, localeCode, translations, brokerContact = null, relatedListings = [] }) {
+export function renderListingPage({
+  registry,
+  listing,
+  localeCode,
+  translations,
+  brokerContact = null,
+  relatedListings = [],
+  purchaseFees = null,
+}) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const view = listingToPublicViewModel(listing);
@@ -1880,6 +1913,14 @@ export function renderListingPage({ registry, listing, localeCode, translations,
         seller_valuation: labels.valuation,
       },
       actions: listingActions(locale, view, path, labels, brokerContact),
+      // Package B2: the purchase cost estimator. Refuses to show a total while
+      // any required fee line is unapproved, and names the lines that block it.
+      cost_estimator: purchaseFeePayload({
+        localeCode: locale.code,
+        priceEur: view.price_on_request === true ? null : view.price_eur,
+        municipality: view.municipality || null,
+        document: purchaseFees,
+      }),
       related_listings: relatedListingCards(registry, relatedListings, locale, listing),
       source: {
         old_url: view.source_url,
@@ -2477,6 +2518,180 @@ export function renderListingPreservationPage({ registry, entry, path }) {
   };
 }
 
+// Package B2: approved-content payloads.
+//
+// Four public surfaces have no source of truth today: the about-and-team page,
+// the area copy on a location page, the onboarding financing step, and the
+// listing cost estimator. Each reads one of these builders. Every builder
+// returns either approved content or a marked absence carrying the reason it
+// is withheld, so a page can say "not published yet" instead of rendering an
+// empty section that reads as a fact.
+const APPROVED_CONTENT_NOTICES = {
+  bg: {
+    team: "Профилите на екипа още не са публикувани.",
+    area_guide: "Информацията за района още не е публикувана.",
+    financing: "Финансиращите партньори още не са публикувани.",
+    purchase_fees: "Таблицата с разходите не е пълна, затова обща сума не се показва.",
+  },
+  en: {
+    team: "Team profiles are not published yet.",
+    area_guide: "Area information for this location is not published yet.",
+    financing: "Financing options are not published yet.",
+    purchase_fees: "The purchase cost table is not complete, so no total is shown.",
+  },
+  de: {
+    team: "Die Teamprofile sind noch nicht veröffentlicht.",
+    area_guide: "Die Informationen zur Region sind noch nicht veröffentlicht.",
+    financing: "Die Finanzierungsoptionen sind noch nicht veröffentlicht.",
+    purchase_fees: "Die Kostenübersicht ist unvollständig, daher wird keine Summe angezeigt.",
+  },
+  nl: {
+    team: "De teamprofielen zijn nog niet gepubliceerd.",
+    area_guide: "De informatie over dit gebied is nog niet gepubliceerd.",
+    financing: "De financieringsopties zijn nog niet gepubliceerd.",
+    purchase_fees: "Het kostenoverzicht is niet compleet, daarom wordt geen totaal getoond.",
+  },
+  ru: {
+    team: "Профили команды ещё не опубликованы.",
+    area_guide: "Информация о районе ещё не опубликована.",
+    financing: "Варианты финансирования ещё не опубликованы.",
+    purchase_fees: "Таблица расходов неполная, поэтому итог не показывается.",
+  },
+  el: {
+    team: "Τα προφίλ της ομάδας δεν έχουν δημοσιευθεί ακόμη.",
+    area_guide: "Οι πληροφορίες για την περιοχή δεν έχουν δημοσιευθεί ακόμη.",
+    financing: "Οι επιλογές χρηματοδότησης δεν έχουν δημοσιευθεί ακόμη.",
+    purchase_fees: "Ο πίνακας εξόδων δεν είναι πλήρης, επομένως δεν εμφανίζεται σύνολο.",
+  },
+  he: {
+    team: "פרופילי הצוות טרם פורסמו.",
+    area_guide: "המידע על האזור טרם פורסם.",
+    financing: "אפשרויות המימון טרם פורסמו.",
+    purchase_fees: "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל.",
+  },
+};
+
+export function approvedContentNotice(localeCode, surface) {
+  return (APPROVED_CONTENT_NOTICES[localeCode] || APPROVED_CONTENT_NOTICES.en)[surface];
+}
+
+function approvedFileFor(filePath, loader) {
+  try {
+    return readThroughCached(filePath, () => loader(filePath || undefined));
+  } catch {
+    // A missing or unreadable approved-content file is an absence, never a
+    // reason to fail a page that has other things to say.
+    return null;
+  }
+}
+
+/**
+ * Team profiles for the about-and-team page.
+ * Returns { available: true, profiles: [...] } or a marked absence.
+ */
+export function teamProfilesPayload({ localeCode = "bg", sourceLocale = "bg", document = null, filePath = null, now } = {}) {
+  const doc = document || approvedFileFor(filePath || DEFAULT_APPROVED_TEAM_PROFILES_PATH, readApprovedTeamProfiles);
+  const profiles = doc ? publicTeamProfilesFor(doc, localeCode, { now, sourceLocale }) : [];
+  const notice = approvedContentNotice(localeCode, "team");
+  if (!profiles.length) {
+    return { ...(doc ? teamAbsence(doc, localeCode, { now }) : { available: false, reason: "not_approved" }), notice };
+  }
+  return { available: true, locale: localeCode, profiles, count: profiles.length };
+}
+
+/**
+ * Approved area copy for one location page, keyed by the same `location` value
+ * the listings carry.
+ */
+export function areaGuidePayload({ localeCode = "bg", location, document = null, filePath = null, now } = {}) {
+  const doc = document || approvedFileFor(filePath || DEFAULT_APPROVED_AREA_GUIDES_PATH, readApprovedAreaGuides);
+  const payload = doc
+    ? areaGuidePayloadFor(doc, location, localeCode, { now })
+    : { available: false, reason: "not_approved", area_key: location, locale: localeCode };
+  return payload.available ? payload : { ...payload, notice: approvedContentNotice(localeCode, "area_guide") };
+}
+
+/**
+ * Financing routes for the onboarding financing step.
+ * `buyerScope` is "eu", "non_eu", or "any".
+ */
+export function financingPartnersPayload({
+  localeCode = "bg",
+  sourceLocale = "bg",
+  buyerScope = "any",
+  document = null,
+  filePath = null,
+  now,
+} = {}) {
+  const doc = document || approvedFileFor(filePath || DEFAULT_APPROVED_FINANCING_PARTNERS_PATH, readApprovedFinancingPartners);
+  const partners = doc ? publicFinancingPartnersFor(doc, localeCode, { buyerScope, now, sourceLocale }) : [];
+  if (!partners.length) {
+    return {
+      ...(doc ? financingAbsence(doc, localeCode, { buyerScope, now }) : { available: false, reason: "not_approved" }),
+      notice: approvedContentNotice(localeCode, "financing"),
+    };
+  }
+  return { available: true, locale: localeCode, buyer_scope: buyerScope, partners, count: partners.length };
+}
+
+/**
+ * The listing cost estimator. With a price it returns a full estimate or the
+ * refusal naming every missing line; without one it returns the table state so
+ * the page can render the control disabled and say why.
+ */
+export function purchaseFeePayload({
+  localeCode = "bg",
+  priceEur = null,
+  municipality = null,
+  buyerScope = "eu",
+  document = null,
+  filePath = null,
+  now,
+} = {}) {
+  const doc = document || approvedFileFor(filePath || DEFAULT_APPROVED_PURCHASE_FEES_PATH, readApprovedPurchaseFees);
+  const notice = approvedContentNotice(localeCode, "purchase_fees");
+  const endpoint = "/api/purchase-fees/estimate";
+  const buyerScopes = [...PURCHASE_FEE_BUYER_SCOPES];
+  if (!doc) {
+    return {
+      available: false,
+      reason: "not_approved",
+      notice,
+      endpoint,
+      locale: localeCode,
+      municipality,
+      buyer_scopes: buyerScopes,
+      table: [],
+    };
+  }
+  const table = purchaseFeeTableStatus(doc, { municipality, now });
+  const base = {
+    endpoint,
+    locale: localeCode,
+    municipality,
+    buyer_scope: buyerScope,
+    buyer_scopes: buyerScopes,
+    // Per buyer scope: which lines are required and which are still missing.
+    table,
+    currency: "EUR",
+  };
+  if (priceEur === null || priceEur === undefined || priceEur === "") {
+    const scope = table.find((row) => row.buyer_scope === buyerScope);
+    return scope?.available
+      ? { ...base, available: true, reason: null, estimate: null, missing: [] }
+      : { ...base, available: false, reason: "incomplete_fee_table", missing: scope?.missing || [], notice };
+  }
+  let estimate;
+  try {
+    estimate = purchaseFeeEstimate(doc, { priceEur, municipality, buyerScope, now });
+  } catch (error) {
+    return { ...base, available: false, reason: "bad_request", message: error.message, missing: [], notice };
+  }
+  return estimate.available
+    ? { ...base, available: true, reason: null, estimate, missing: [] }
+    : { ...base, available: false, reason: estimate.reason, missing: estimate.missing, estimate, notice };
+}
+
 function locationPageCopy(localeCode, location) {
   const bgDescriptions = {
     Сандански: "Проверени обяви на MS Realty в Сандански и официални източници за кадастър, Имотен регистър и удостоверения.",
@@ -2523,7 +2738,7 @@ function locationPageCopy(localeCode, location) {
   return copy[localeCode] || copy.en;
 }
 
-export function renderLocationPage({ registry, localeCode, location, listings }) {
+export function renderLocationPage({ registry, localeCode, location, listings, areaGuides = null }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const localizedMatches = listings.filter((listing) => {
@@ -2585,6 +2800,8 @@ export function renderLocationPage({ registry, localeCode, location, listings })
       location,
       listing_count: matchedListings.length,
       ...(context ? { context } : {}),
+      // Package B2: approved area copy for this location, or a marked absence.
+      area_guide: areaGuidePayload({ localeCode: locale.code, location, document: areaGuides }),
     },
     cards: matchedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale)),
   };

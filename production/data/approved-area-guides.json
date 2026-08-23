@@ -1,0 +1,82 @@
+{
+  "artifact_id": "approved-area-guides-20260823",
+  "purpose": "Human-approved area copy for the public location pages, keyed by the same location value the listings carry. Projected rows carry the reviewer, approval date and official source of the approved CMS guide they came from.",
+  "publishing_note": "Run production/scripts/build-approved-content.mjs to reproject. Hand-authored guides (no derived_from_document_id) are preserved. An inland area may never be described as a sea destination; production/lib/area-guides.mjs refuses that in validation.",
+  "guides": [
+    {
+      "id": "hotovo-bg",
+      "type": "area_guide",
+      "area_key": "Hotovo",
+      "locale": "bg",
+      "source_locale": "bg",
+      "status": "approved",
+      "human_approved": true,
+      "reviewer": "editor_bg",
+      "approved_at": "2026-07-29T00:00:00Z",
+      "review_due_at": null,
+      "derived_from_document_id": "hotovo-locality-official-context",
+      "title": "Хотово: официален контекст за населеното място",
+      "sea_access": false,
+      "sections": {
+        "what_it_is": [
+          {
+            "text": "Община Сандански посочва, че с. Хотово е разположено в западното подножие на Среден Пирин.",
+            "claim_id": "hotovo-locality",
+            "source_id": "sandanski-hotovo-locality"
+          }
+        ]
+      },
+      "sources": [
+        {
+          "id": "sandanski-hotovo-locality",
+          "publisher": "Община Сандански",
+          "label": "Хотово",
+          "url": "https://sandanski.bg/%D0%BE%D0%B1%D1%89%D0%B8%D0%BD%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/%D0%BD%D0%B0%D1%81%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8-%D0%BC%D0%B5%D1%81%D1%82%D0%B0/%D1%85%D0%BE%D1%82%D0%BE%D0%B2%D0%BE/",
+          "checked_at": "2026-07-29",
+          "claim_ids": [
+            "hotovo-locality"
+          ]
+        }
+      ],
+      "source_hash": "5956c53052ccc43fe5d100882c4f4ffd228de9f7e55538e1d2b5ce45897f99bc"
+    },
+    {
+      "id": "petrich-bg",
+      "type": "area_guide",
+      "area_key": "Petrich",
+      "locale": "bg",
+      "source_locale": "bg",
+      "status": "approved",
+      "human_approved": true,
+      "reviewer": "editor_bg",
+      "approved_at": "2026-07-29T00:00:00Z",
+      "review_due_at": null,
+      "derived_from_document_id": "petrich-municipality-official-context",
+      "title": "Петрич: официален контекст за общината",
+      "sea_access": false,
+      "sections": {
+        "what_it_is": [
+          {
+            "text": "Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина и обхваща части от Беласица, Огражден и южните склонове на Пирин.",
+            "claim_id": "petrich-municipality-geography",
+            "source_id": "petrich-municipality-geography"
+          }
+        ]
+      },
+      "sources": [
+        {
+          "id": "petrich-municipality-geography",
+          "publisher": "Община Петрич",
+          "label": "За нас",
+          "url": "https://petrich.bg/bg/administraciya/za-nas/",
+          "checked_at": "2026-07-29",
+          "claim_ids": [
+            "petrich-municipality-geography"
+          ]
+        }
+      ],
+      "source_hash": "cf6c42a3c1d8e00fddc117ffb6607c4f4a55f28bc24ec54cc42c826e86275d95"
+    }
+  ],
+  "generated_at": "2026-08-23T00:00:00Z"
+}

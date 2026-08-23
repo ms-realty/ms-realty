@@ -299,6 +299,10 @@ import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
+// Package B2: approved content.
+import { approvedContentReviewPayload } from "./approved-content-review.mjs";
+import { purchaseFeePayload } from "./public-site.mjs";
+import { PURCHASE_FEE_BUYER_SCOPES } from "./purchase-fees.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -803,6 +807,11 @@ export function createHttpApp({
   realtyCasePayload = null,
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
+  // Package B2: approved-content files. Null means "the module's own default".
+  approvedTeamProfilePath = null,
+  approvedAreaGuidePath = null,
+  approvedFinancingPartnerPath = null,
+  approvedPurchaseFeePath = null,
   eventLedgerPath = null,
   consentLedgerPath = null,
   auditLogPath = null,
@@ -1817,6 +1826,44 @@ export function createHttpApp({
       }
       }
     }
+    // Package B2: approved content (team profiles, area guides, financing
+    // partners, purchase fee table).
+    if (request.method === "GET" && url.pathname === "/api/purchase-fees/estimate") {
+      const buyerScope = url.searchParams.get("buyer") || url.searchParams.get("buyer_scope") || "eu";
+      const rawPrice = url.searchParams.get("price_eur");
+      if (!PURCHASE_FEE_BUYER_SCOPES.includes(buyerScope)) {
+        return json(400, { kind: "bad_request", message: `buyer must be one of: ${PURCHASE_FEE_BUYER_SCOPES.join(", ")}` });
+      }
+      if (rawPrice !== null && !/^\d+(\.\d{1,2})?$/.test(rawPrice.trim())) {
+        return json(400, { kind: "bad_request", message: "price_eur must be a positive amount in euro" });
+      }
+      const payload = purchaseFeePayload({
+        localeCode: url.searchParams.get("locale") || activeRegistry.source_locale,
+        priceEur: rawPrice === null || rawPrice.trim() === "" ? null : Number(rawPrice),
+        municipality: url.searchParams.get("municipality") || null,
+        buyerScope,
+        filePath: approvedPurchaseFeePath || undefined,
+      });
+      if (payload.reason === "bad_request") return json(400, { kind: "bad_request", message: payload.message });
+      // A missing or expired fee line is a refusal, not a zero: 409 carries the
+      // exact lines that block the total so the estimator can name them.
+      return json(payload.available ? 200 : 409, { kind: "purchase_fee_estimate", ...payload });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/approved-content") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(
+        200,
+        approvedContentReviewPayload({
+          teamProfilePath: approvedTeamProfilePath || undefined,
+          areaGuidePath: approvedAreaGuidePath || undefined,
+          financingPartnerPath: approvedFinancingPartnerPath || undefined,
+          purchaseFeePath: approvedPurchaseFeePath || undefined,
+          ...(reviewedAt ? { now: reviewedAt } : {}),
+        }),
+      );
+    }
+
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
       const service = await configuredPayloadAdminAuth();
       if (!payloadSession || !service) return adminForbidden("payload_session");
