@@ -35,6 +35,11 @@ import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
 import { DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/seller-pipeline-outcomes.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./lib/slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./lib/tours.mjs";
+// Package B2: approved content.
+import { DEFAULT_APPROVED_AREA_GUIDES_PATH } from "./lib/area-guides.mjs";
+import { DEFAULT_APPROVED_FINANCING_PARTNERS_PATH } from "./lib/financing-partners.mjs";
+import { DEFAULT_APPROVED_PURCHASE_FEES_PATH } from "./lib/purchase-fees.mjs";
+import { DEFAULT_APPROVED_TEAM_PROFILES_PATH } from "./lib/team-profiles.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./lib/translation-ledger.mjs";
 import { DEFAULT_VIEWING_LEDGER_PATH } from "./lib/viewing-ledger.mjs";
 import { viewingDurableStoreConfigFromEnv } from "./lib/viewing-durable-store.mjs";
@@ -168,6 +173,11 @@ export function productionServerConfig(env = process.env) {
     slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
+    approvedTeamProfilePath: env.MS_REALTY_APPROVED_TEAM_PROFILES_PATH || DEFAULT_APPROVED_TEAM_PROFILES_PATH,
+    approvedAreaGuidePath: env.MS_REALTY_APPROVED_AREA_GUIDES_PATH || DEFAULT_APPROVED_AREA_GUIDES_PATH,
+    approvedFinancingPartnerPath:
+      env.MS_REALTY_APPROVED_FINANCING_PARTNERS_PATH || DEFAULT_APPROVED_FINANCING_PARTNERS_PATH,
+    approvedPurchaseFeePath: env.MS_REALTY_APPROVED_PURCHASE_FEES_PATH || DEFAULT_APPROVED_PURCHASE_FEES_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH,
@@ -249,6 +259,10 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     slugHistoryPath: config.slugHistoryPath,
     brokerContactLedgerPath: config.brokerContactLedgerPath,
     tourApprovalLedgerPath: config.tourApprovalLedgerPath,
+    approvedTeamProfilePath: config.approvedTeamProfilePath,
+    approvedAreaGuidePath: config.approvedAreaGuidePath,
+    approvedFinancingPartnerPath: config.approvedFinancingPartnerPath,
+    approvedPurchaseFeePath: config.approvedPurchaseFeePath,
     localeRegistryPath: config.localeRegistryPath,
     redirectApprovalPath: config.redirectApprovalPath,
     deployableRedirectOutputPath: config.deployableRedirectOutputPath,
