@@ -7,7 +7,11 @@ import {
 } from "./locales.mjs";
 import { adminSurfaceCatalog } from "./admin-workflows.mjs";
 import {
+  aboutPath,
+  alertsPath,
+  comparePath,
   contactPath,
+  hreflangForAbout,
   hreflangForListing,
   hreflangForLocation,
   hreflangForHome,
@@ -17,6 +21,8 @@ import {
   homePath,
   isTranslationIndexable,
   listingPath,
+  localeAlternatesForAlerts,
+  localeAlternatesForCompare,
   locationPath,
   matchesPublicLocationScope,
   publicLocationNames,
@@ -39,6 +45,8 @@ import {
   isPublishableGuide,
   readApprovedCmsContent,
 } from "./approved-content.mjs";
+// Package B3 owns the saved-search self-service vocabulary.
+import { SAVED_SEARCH_FREQUENCIES, SAVED_SEARCH_MANAGE_ACTIONS } from "./saved-search-manage.mjs";
 import {
   DEFAULT_APPROVED_AREA_GUIDES_PATH,
   areaGuidePayloadFor,
@@ -2369,6 +2377,21 @@ function publicChrome(
       dir: entry.direction || "ltr",
     })),
     contact: { ...BRAND_CONTACT, path: contactPath(registry, locale.code), label: copy.navContact, offices: copy.offices },
+    // Package P4: the saved shortlist gets a header counter with a compare
+    // shortcut, and the footer gains the company routes P4 added. Both are
+    // plain links, so they work before the client script runs.
+    saved: {
+      href: `${searchBase}?saved=1`,
+      label: labels.savedListings,
+      compare: { href: comparePath(registry, locale.code), label: p4CopyFor(locale.code).compare.h1, active: active === "compare" },
+    },
+    company: {
+      label: copy.explore,
+      links: [
+        { id: "about", href: aboutPath(registry, locale.code), label: p4CopyFor(locale.code).about.h1, active: active === "about" },
+        { id: "alerts", href: alertsPath(registry, locale.code), label: p4CopyFor(locale.code).alerts.h1, active: active === "alerts" },
+      ],
+    },
     resources: guideLinks.length
       ? {
           label: copy.buyerGuides || copy.explore,
@@ -3027,6 +3050,10 @@ export function renderListingPage({
         municipality: view.municipality || null,
         document: purchaseFees,
       }),
+      // Package P4: the explicit brochure action and the purchase-cost
+      // disclosure. Both live under their own key so the rest of the listing
+      // contract is untouched.
+      extras: listingExtras({ registry, locale, view, path }),
       related_listings: relatedListingCards(registry, relatedListings, locale, listing),
       source: {
         old_url: view.source_url,
@@ -4417,6 +4444,1663 @@ export function renderStartPage({
             label: copy.shortlistSubmit,
             success: copy.shortlistSent,
           },
+    },
+  };
+}
+
+/* ============================================================
+   Package P4: compare, about and team, saved-search management,
+   plus the listing brochure and purchase-cost disclosure.
+   Everything below this banner belongs to P4 and is self-contained.
+   ============================================================ */
+
+// Rows the comparison shows, in this order. `numeric` rows are right aligned
+// in the stylesheet; every value is formatted on the server so the table reads
+// the same with and without JavaScript.
+const COMPARE_ROWS = Object.freeze([
+  { id: "price", numeric: true },
+  { id: "price_per_sqm", numeric: true },
+  { id: "area_sqm", numeric: true },
+  { id: "land_area_sqm", numeric: true },
+  { id: "bedrooms", numeric: true },
+  { id: "floor", numeric: true },
+  { id: "offer_type", numeric: false },
+  { id: "location", numeric: false },
+  { id: "reference", numeric: false },
+]);
+
+const COMPARE_MAX_COLUMNS = 4;
+const COMPARE_STORAGE_KEY = "ms-realty:saved-listings";
+const ALERTS_STORAGE_KEY = "ms-realty:saved-searches:v1";
+
+// The three offices the agency runs. Verified against the legacy site header
+// and the site chrome ("Sandanski · Bansko · Sveti Vlas"); street addresses are
+// not published anywhere we can cite, so the cards carry the shared agency
+// line instead of an address nobody approved.
+const P4_AGENCY_OFFICES = Object.freeze(["sandanski", "bansko", "sveti_vlas"]);
+
+// Fee lines a Bulgarian purchase actually involves. No rate is stated: an
+// approved fee table in the CMS supplies the values, and until then every line
+// renders a marked placeholder and the total stays unavailable.
+const PURCHASE_COST_LINES = Object.freeze(["transfer_tax", "notary", "agency", "company"]);
+
+const P4_COPY = {
+  bg: {
+    compare: {
+      title: "Сравнете запазените имоти | MS Realty",
+      description: "Поставете до четири запазени имота на MS Realty един до друг и сравнете цена, площ, спални, етаж и локация.",
+      h1: "Сравнете запазените имоти",
+      intro: "До четири от вашите запазени имота, един до друг. Списъкът се пази в този браузър, така че никой друг не го вижда.",
+      fallbackTitle: "Запазените имоти се пазят в този браузър",
+      fallbackText:
+        "Сравнението се съставя от имотите, които сте запазили на това устройство, затова изисква JavaScript. Може да отворите запазените имоти като списък или да споделите връзка към сравнение, която работи и без JavaScript.",
+      savedLink: "Отворете запазените имоти",
+      searchLink: "Разгледайте имоти",
+      emptyTitle: "Още няма какво да се сравнява",
+      emptyText: "Запазете два или повече имота със сърцето и те ще се появят тук един до друг.",
+      limitNote: "Показваме първите {max} от {count} запазени имота.",
+      unavailableNote: "Част от запазените имоти вече не са налични и не се показват.",
+      identicalShow: "Покажете еднаквите редове ({count})",
+      identicalHide: "Скрийте еднаквите редове ({count})",
+      identicalHint: "Редовете, в които всички имоти имат една и съща стойност, са скрити, за да личат разликите.",
+      remove: "Премахнете",
+      removeLabel: "Премахнете {title} от запазените имоти",
+      view: "Отворете имота",
+      detail: "Показател",
+      notStated: "Няма данни",
+      addMore: "Добавете още един имот",
+      columnLabel: "Имот {index}",
+      tableLabel: "Сравнение на запазени имоти",
+      rows: {
+        price: "Цена",
+        price_per_sqm: "Цена на m²",
+        area_sqm: "Площ",
+        land_area_sqm: "Площ на парцела",
+        bedrooms: "Спални",
+        floor: "Етаж",
+        offer_type: "Оферта",
+        location: "Локация",
+        reference: "Референция",
+      },
+    },
+    about: {
+      title: "За MS Realty",
+      description: "MS Realty е семейна агенция за недвижими имоти в Сандански с офиси в Сандански, Банско и Свети Влас, която работи на седем езика.",
+      h1: "За MS Realty",
+      intro: "Семейна агенция в Сандански, която работи в Пиринския край, по Черноморието и в Северна Гърция.",
+      storyTitle: "Кои сме ние",
+      story: [
+        "MS Realty е семейна агенция за недвижими имоти със седалище в Сандански. Продаваме и отдаваме имоти в града и Пиринския край, по Черноморието и отвъд границата в Северна Гърция.",
+        "Повечето от нашите купувачи идват извън България, затова агенцията изгради работата си около една задача: покупката в чужда държава да бъде разбираема. Това означава факти за имота, проверени от брокер, ясно казани местни правила и човек, който отговаря на вашия език.",
+        "Публикуваме сайта на български, английски, немски, нидерландски, руски, гръцки и иврит. Пишем първо на български и всеки превод се одобрява от човек, преди да се появи.",
+      ],
+      officesTitle: "Нашите офиси",
+      officesIntro: "Три офиса покриват районите, в които работим. Обадете се на общия номер и ще ви свържем с офиса, най-близък до имота.",
+      offices: {
+        sandanski: { town: "Сандански", role: "Централен офис", note: "Градът, полите на Пирин и област Благоевград." },
+        bansko: { town: "Банско", role: "Планински офис", note: "Банско и планинските курорти." },
+        sveti_vlas: { town: "Свети Влас", role: "Крайбрежен офис", note: "Свети Влас и Черноморието." },
+      },
+      pillarsTitle: "Какво обещаваме на купувача",
+      pillarsIntro: "Пет неща, към които се придържаме. Всяко от тях личи в сайта, не само тук.",
+      pillars: {
+        verified: {
+          title: "Проверено",
+          text: "Човек проверява всяка обява, преди да бъде публикувана, а страницата показва референцията и кога наличността е потвърдена за последно.",
+        },
+        transparent: {
+          title: "Прозрачно",
+          text: "Цената, референцията и източникът стоят на страницата на имота. Когато даден факт не е потвърден, го казваме, вместо да запълваме празнотата.",
+        },
+        fast: {
+          title: "Бързо",
+          text: "Запитването отива директно при брокер заедно с имота, който сте чели, така че първият отговор вече е по същество.",
+        },
+        multilingual: { title: "На вашия език", text: "Седем езика и брокер, който отговаря на този, на който сте писали." },
+        local: { title: "Местни хора", text: "Три офиса в района, така че някой да отвори вратата, да мине по улицата и да прочете документите с вас." },
+      },
+      teamTitle: "Екипът",
+      teamIntro: "Брокерите, с които ще работите, езиците, на които говорят, и данните за лиценза им.",
+      teamEmptyTitle: "Профилите на екипа още не са публикувани",
+      teamEmptyText:
+        "Никой още не е одобрил профил на екипа в системата за съдържание, затова не показваме нито един, вместо да ги измисляме. Обадете се и ще ви кажем кой отговаря за имота, който гледате.",
+      teamFields: "Всеки профил ще съдържа име, роля, офис, езиците на брокера, снимка и номер на лиценз.",
+      contactTitle: "Говорете с брокер",
+      contactText: "Един номер стига до трите офиса, по телефон, WhatsApp или Viber.",
+      contactCta: "Свържете се с агенцията",
+    },
+    alerts: {
+      title: "Вашите известия за имоти | MS Realty",
+      description: "Запазените търсения, които сте заявили от това устройство, с критериите, честотата и канала на известията.",
+      h1: "Вашите известия за имоти",
+      intro: "Търсенията, които сте ни поръчали да следим. За всяко са изброени критериите, колко често пишем и къде отива известието.",
+      notConnected: "Не е свързано",
+      notConnectedTitle: "Тези бутони още не са свързани",
+      notConnectedText:
+        "Известията се създават, когато запазите търсене, но още няма начин да бъдат прочетени, спрени или изтрити от сайта. Докато това не е готово, кажете на брокер и ще променим или спрем известието вместо вас.",
+      deviceNote:
+        "Този списък е това, което браузърът помни за заявените от вас известия. Не се чете от агенцията и тук никога не пазим вашия имейл или телефон.",
+      fallbackTitle: "Тази страница изисква JavaScript",
+      fallbackText:
+        "Списъкът се пази в този браузър и се чете тук, а не на сървъра. Без JavaScript пак може да създадете известие от страницата с резултати или да се обадите на брокер.",
+      emptyTitle: "Няма известия от този браузър",
+      emptyText: "Запазете търсене на страницата с резултати и то ще се появи тук с критериите си.",
+      emptyCta: "Търсете имоти",
+      criteria: "Критерии",
+      frequency: "Колко често",
+      channel: "Къде",
+      requested: "Заявено на",
+      anyCriteria: "Всякакъв имот",
+      pause: "Спрете",
+      resume: "Възобновете",
+      remove: "Изтрийте",
+      controlsNote:
+        "Спирането, възобновяването и изтриването изискват услугата за известия да предостави маршрут за четене и промяна. Показани са, за да е пълна страницата, и остават неактивни, докато той не съществува.",
+      openSearch: "Отворете това търсене",
+      contactTitle: "Промяна на известие",
+      contactText: "Кажете на брокер кое известие да спрем и ще го направим вместо вас.",
+      contactCta: "Свържете се с агенцията",
+      listLabel: "Запазени търсения",
+    },
+    listing: {
+      brochureTitle: "Запазете или отпечатайте имота",
+      saveAsPdf: "Запазете като PDF",
+      brochureNote: "Отваря изглед за печат на една страница с проверените факти, снимките и референтния номер, готов за запазване като PDF.",
+      costTitle: "Колко струва покупката",
+      costIntro: "Освен цената покупката в България носи и тези разходи. Публикуваме ставка едва след като агенцията я одобри, а ред без одобрена ставка е отбелязан, вместо да бъде предположен.",
+      costLines: {
+        transfer_tax: {
+          label: "Местен данък за прехвърляне",
+          note: "Определя се от общината, в която е имотът, и се плаща при подписване на нотариалния акт.",
+        },
+        notary: { label: "Нотариална такса", note: "Начислява се върху стойността по акта по държавна тарифа, плюс вписването в имотния регистър." },
+        agency: { label: "Комисиона на агенцията", note: "Нашето възнаграждение, договорено писмено, преди да направите оферта." },
+        company: {
+          label: "Българско дружество, купувачи извън ЕС",
+          note: "Граждани извън ЕС не могат да притежават земя на свое име и я държат чрез българско дружество, чиято регистрация и поддръжка струват пари.",
+        },
+      },
+      costTotal: "Общо",
+      costTotalUnavailable: "Недостъпно, докато таблицата с такси не бъде одобрена",
+      costNote:
+        "Нито едно число тук не е прогноза. Редовете са разходите, които покупката включва; ставките идват от таблица с такси, която човек от агенцията трябва да одобри, преди да я публикуваме.",
+      costCta: "Попитайте брокер за сумите",
+    },
+  },
+  en: {
+    compare: {
+      title: "Compare saved properties | MS Realty",
+      description: "Put up to four saved MS Realty properties side by side and compare price, area, bedrooms, floor and location.",
+      h1: "Compare saved properties",
+      intro: "Up to four of your saved properties, side by side. The list lives in this browser, so nobody else sees your shortlist.",
+      fallbackTitle: "Your saved properties live in this browser",
+      fallbackText:
+        "The comparison is built from the properties you saved on this device, so it needs JavaScript. You can open your saved properties as a list instead, or share a comparison link, which works without JavaScript.",
+      savedLink: "Open saved properties",
+      searchLink: "Browse properties",
+      emptyTitle: "Nothing to compare yet",
+      emptyText: "Save two or more properties with the heart button and they appear here side by side.",
+      limitNote: "Showing the first {max} of {count} saved properties.",
+      unavailableNote: "Some saved properties are no longer available and are not shown.",
+      identicalShow: "Show identical rows ({count})",
+      identicalHide: "Hide identical rows ({count})",
+      identicalHint: "Rows where every property has the same value are collapsed so the differences stay visible.",
+      remove: "Remove",
+      removeLabel: "Remove {title} from your saved properties",
+      view: "Open property",
+      detail: "Detail",
+      notStated: "Not stated",
+      addMore: "Add another property",
+      columnLabel: "Property {index}",
+      tableLabel: "Saved property comparison",
+      rows: {
+        price: "Price",
+        price_per_sqm: "Price per m²",
+        area_sqm: "Area",
+        land_area_sqm: "Land area",
+        bedrooms: "Bedrooms",
+        floor: "Floor",
+        offer_type: "Offer",
+        location: "Location",
+        reference: "Reference",
+      },
+    },
+    about: {
+      title: "About MS Realty",
+      description: "MS Realty is a family estate agency in Sandanski with offices in Sandanski, Bansko and Sveti Vlas, working in seven languages.",
+      h1: "About MS Realty",
+      intro: "A family agency in Sandanski, working across the Pirin region, the Black Sea coast and northern Greece.",
+      storyTitle: "Who we are",
+      story: [
+        "MS Realty is a family estate agency based in Sandanski. We sell and let property in the town and the surrounding Pirin region, along the Black Sea coast, and across the border in northern Greece.",
+        "Most of our buyers come from outside Bulgaria, so the agency grew around one job: making a purchase in a foreign country understandable. That means property facts a broker has checked, the local rules stated plainly, and a person who answers in your language.",
+        "We publish the site in Bulgarian, English, German, Dutch, Russian, Greek and Hebrew. Bulgarian is the language we write in first, and a person approves every translation before it appears.",
+      ],
+      officesTitle: "Our offices",
+      officesIntro: "Three offices cover the areas we work in. Call the agency line and we will put you through to the office nearest the property.",
+      offices: {
+        sandanski: { town: "Sandanski", role: "Head office", note: "The town, the Pirin foothills and the Blagoevgrad district." },
+        bansko: { town: "Bansko", role: "Mountain office", note: "Bansko and the mountain resorts." },
+        sveti_vlas: { town: "Sveti Vlas", role: "Coast office", note: "Sveti Vlas and the Black Sea coast." },
+      },
+      pillarsTitle: "What we promise a buyer",
+      pillarsIntro: "Five things we hold ourselves to. Each one is visible on the site, not only stated here.",
+      pillars: {
+        verified: {
+          title: "Verified",
+          text: "A person checks each listing before it is published, and the page shows the reference and when availability was last confirmed.",
+        },
+        transparent: {
+          title: "Transparent",
+          text: "Price, reference and source sit on the listing page. When a fact has not been confirmed we say so instead of filling the gap.",
+        },
+        fast: { title: "Fast", text: "An enquiry goes straight to a broker with the property you were reading, so the first reply already has the context." },
+        multilingual: { title: "Multilingual", text: "Seven languages, and a broker who answers in the one you wrote in." },
+        local: { title: "Local", text: "Three offices in the region, so someone can open the door, walk the street and read the paperwork with you." },
+      },
+      teamTitle: "The team",
+      teamIntro: "The brokers you will deal with, the languages they work in and their licence details.",
+      teamEmptyTitle: "Team profiles are not published yet",
+      teamEmptyText:
+        "Nobody has approved a team profile in the content system yet, so we show none rather than invent them. Call the agency and we will tell you who covers the property you are looking at.",
+      teamFields: "Each profile will carry a name, a role, an office, the languages the broker works in, a photo and a licence number.",
+      contactTitle: "Talk to a broker",
+      contactText: "One line reaches all three offices, on the phone, WhatsApp or Viber.",
+      contactCta: "Contact the agency",
+    },
+    alerts: {
+      title: "Your property alerts | MS Realty",
+      description: "The saved searches you asked for on this device, with their criteria, how often we write and where the alert goes.",
+      h1: "Your property alerts",
+      intro: "The searches you asked us to watch. Each one lists its criteria, how often we write and where the alert goes.",
+      notConnected: "Not connected",
+      notConnectedTitle: "These controls are not connected yet",
+      notConnectedText:
+        "Alerts are created when you save a search, but there is no way yet to read, pause or delete them from the website. Until that is built, ask a broker and we will change or stop an alert for you.",
+      deviceNote:
+        "This list is what this browser remembers about the alerts you asked for. It is not read back from the agency, and we never keep your email address or phone number here.",
+      fallbackTitle: "This page needs JavaScript",
+      fallbackText:
+        "The list is stored in this browser, so it is read here rather than on the server. Without JavaScript you can still create an alert from the search page, or ask a broker directly.",
+      emptyTitle: "No alerts from this browser",
+      emptyText: "Save a search on the results page and it appears here with its criteria.",
+      emptyCta: "Search properties",
+      criteria: "Criteria",
+      frequency: "How often",
+      channel: "Where",
+      requested: "Requested",
+      anyCriteria: "Any property",
+      pause: "Pause",
+      resume: "Resume",
+      remove: "Delete",
+      controlsNote:
+        "Pause, resume and delete need the alert service to expose a read and update route. They are shown here so the page is complete, and they stay disabled until it exists.",
+      openSearch: "Open this search",
+      contactTitle: "Change an alert",
+      contactText: "Tell a broker which alert to pause or stop and we will do it for you.",
+      contactCta: "Contact the agency",
+      listLabel: "Saved searches",
+    },
+    listing: {
+      brochureTitle: "Save or print this property",
+      saveAsPdf: "Save as PDF",
+      brochureNote: "Opens a one page print view with the reviewed facts, the photos and the reference number, ready to save as a PDF.",
+      costTitle: "What this costs to buy",
+      costIntro: "Besides the price, a Bulgarian purchase carries these costs. We publish a rate only once the agency has approved it, and a line without an approved rate is marked rather than guessed.",
+      costLines: {
+        transfer_tax: {
+          label: "Local property transfer tax",
+          note: "Set by the municipality the property sits in, and paid when the deed is signed.",
+        },
+        notary: { label: "Notary fee", note: "Charged on the deed value on a state scale, plus the entry in the property register." },
+        agency: { label: "Agency commission", note: "Our fee, agreed in writing before you make an offer." },
+        company: {
+          label: "Bulgarian company, non-EU buyers",
+          note: "Non-EU citizens cannot own land in their own name and hold it through a Bulgarian company, which costs money to register and to keep.",
+        },
+      },
+      costTotal: "Total",
+      costTotalUnavailable: "Unavailable until the fee table is approved",
+      costNote:
+        "No number here is an estimate. The lines are the costs a purchase involves; the rates come from a fee table a person at the agency has to approve before we publish it.",
+      costCta: "Ask a broker for the figures",
+    },
+  },
+  de: {
+    compare: {
+      title: "Gespeicherte Immobilien vergleichen | MS Realty",
+      description: "Stellen Sie bis zu vier gespeicherte MS Realty Immobilien nebeneinander und vergleichen Sie Preis, Fläche, Schlafzimmer, Etage und Lage.",
+      h1: "Gespeicherte Immobilien vergleichen",
+      intro: "Bis zu vier Ihrer gespeicherten Immobilien, nebeneinander. Die Liste bleibt in diesem Browser, niemand sonst sieht Ihre Auswahl.",
+      fallbackTitle: "Ihre gespeicherten Immobilien liegen in diesem Browser",
+      fallbackText:
+        "Der Vergleich entsteht aus den Immobilien, die Sie auf diesem Gerät gespeichert haben, und braucht daher JavaScript. Sie können Ihre gespeicherten Immobilien stattdessen als Liste öffnen oder einen Vergleichslink teilen, der auch ohne JavaScript funktioniert.",
+      savedLink: "Gespeicherte Immobilien öffnen",
+      searchLink: "Immobilien ansehen",
+      emptyTitle: "Noch nichts zu vergleichen",
+      emptyText: "Speichern Sie zwei oder mehr Immobilien mit dem Herz, dann erscheinen sie hier nebeneinander.",
+      limitNote: "Es werden die ersten {max} von {count} gespeicherten Immobilien gezeigt.",
+      unavailableNote: "Einige gespeicherte Immobilien sind nicht mehr verfügbar und werden nicht gezeigt.",
+      identicalShow: "Gleiche Zeilen anzeigen ({count})",
+      identicalHide: "Gleiche Zeilen ausblenden ({count})",
+      identicalHint: "Zeilen, in denen alle Immobilien denselben Wert haben, sind eingeklappt, damit die Unterschiede sichtbar bleiben.",
+      remove: "Entfernen",
+      removeLabel: "{title} aus Ihren gespeicherten Immobilien entfernen",
+      view: "Immobilie öffnen",
+      detail: "Merkmal",
+      notStated: "Keine Angabe",
+      addMore: "Weitere Immobilie hinzufügen",
+      columnLabel: "Immobilie {index}",
+      tableLabel: "Vergleich gespeicherter Immobilien",
+      rows: {
+        price: "Preis",
+        price_per_sqm: "Preis pro m²",
+        area_sqm: "Fläche",
+        land_area_sqm: "Grundstück",
+        bedrooms: "Schlafzimmer",
+        floor: "Etage",
+        offer_type: "Angebot",
+        location: "Lage",
+        reference: "Referenz",
+      },
+    },
+    about: {
+      title: "Über MS Realty",
+      description: "MS Realty ist ein Familienmaklerbüro in Sandanski mit Büros in Sandanski, Bansko und Sveti Vlas und arbeitet in sieben Sprachen.",
+      h1: "Über MS Realty",
+      intro: "Ein Familienbüro in Sandanski, tätig in der Pirin-Region, an der Schwarzmeerküste und in Nordgriechenland.",
+      storyTitle: "Wer wir sind",
+      story: [
+        "MS Realty ist ein Familienmaklerbüro mit Sitz in Sandanski. Wir verkaufen und vermieten Immobilien in der Stadt und in der Pirin-Region, an der Schwarzmeerküste und jenseits der Grenze in Nordgriechenland.",
+        "Die meisten unserer Käufer kommen von außerhalb Bulgariens, deshalb ist das Büro um eine Aufgabe herum gewachsen: einen Kauf im Ausland verständlich zu machen. Das bedeutet von einem Makler geprüfte Objektangaben, klar benannte lokale Regeln und einen Menschen, der in Ihrer Sprache antwortet.",
+        "Wir veröffentlichen die Website auf Bulgarisch, Englisch, Deutsch, Niederländisch, Russisch, Griechisch und Hebräisch. Wir schreiben zuerst auf Bulgarisch, und ein Mensch gibt jede Übersetzung frei, bevor sie erscheint.",
+      ],
+      officesTitle: "Unsere Büros",
+      officesIntro: "Drei Büros decken die Gebiete ab, in denen wir arbeiten. Rufen Sie die Bürolinie an, wir verbinden Sie mit dem Büro in der Nähe der Immobilie.",
+      offices: {
+        sandanski: { town: "Sandanski", role: "Hauptbüro", note: "Die Stadt, das Pirin-Vorland und der Bezirk Blagoevgrad." },
+        bansko: { town: "Bansko", role: "Bergbüro", note: "Bansko und die Bergorte." },
+        sveti_vlas: { town: "Sveti Vlas", role: "Küstenbüro", note: "Sveti Vlas und die Schwarzmeerküste." },
+      },
+      pillarsTitle: "Was wir einem Käufer zusagen",
+      pillarsIntro: "Fünf Punkte, an denen wir uns messen lassen. Jeder ist auf der Website sichtbar, nicht nur hier benannt.",
+      pillars: {
+        verified: {
+          title: "Geprüft",
+          text: "Ein Mensch prüft jedes Objekt vor der Veröffentlichung, und die Seite zeigt die Referenz und wann die Verfügbarkeit zuletzt bestätigt wurde.",
+        },
+        transparent: {
+          title: "Transparent",
+          text: "Preis, Referenz und Quelle stehen auf der Objektseite. Ist eine Angabe nicht bestätigt, sagen wir das, statt die Lücke zu füllen.",
+        },
+        fast: { title: "Schnell", text: "Eine Anfrage geht direkt an einen Makler, samt der Immobilie, die Sie gelesen haben, so hat die erste Antwort schon den Zusammenhang." },
+        multilingual: { title: "Mehrsprachig", text: "Sieben Sprachen und ein Makler, der in der Sprache antwortet, in der Sie geschrieben haben." },
+        local: { title: "Vor Ort", text: "Drei Büros in der Region, damit jemand die Tür öffnet, die Straße mit Ihnen abgeht und die Unterlagen mit Ihnen liest." },
+      },
+      teamTitle: "Das Team",
+      teamIntro: "Die Makler, mit denen Sie zu tun haben, die Sprachen, in denen sie arbeiten, und ihre Lizenzangaben.",
+      teamEmptyTitle: "Team-Profile sind noch nicht veröffentlicht",
+      teamEmptyText:
+        "Im Redaktionssystem hat noch niemand ein Team-Profil freigegeben, deshalb zeigen wir keines, statt welche zu erfinden. Rufen Sie an, wir sagen Ihnen, wer die Immobilie betreut, die Sie ansehen.",
+      teamFields: "Jedes Profil wird Name, Rolle, Büro, die Sprachen des Maklers, ein Foto und eine Lizenznummer enthalten.",
+      contactTitle: "Mit einem Makler sprechen",
+      contactText: "Eine Nummer erreicht alle drei Büros, per Telefon, WhatsApp oder Viber.",
+      contactCta: "Büro kontaktieren",
+    },
+    alerts: {
+      title: "Ihre Immobilien-Benachrichtigungen | MS Realty",
+      description: "Die gespeicherten Suchen, die Sie auf diesem Gerät angefordert haben, mit Kriterien, Häufigkeit und Kanal.",
+      h1: "Ihre Immobilien-Benachrichtigungen",
+      intro: "Die Suchen, die wir für Sie beobachten sollen. Jede zeigt ihre Kriterien, wie oft wir schreiben und wohin die Benachrichtigung geht.",
+      notConnected: "Nicht angebunden",
+      notConnectedTitle: "Diese Bedienelemente sind noch nicht angebunden",
+      notConnectedText:
+        "Benachrichtigungen entstehen, wenn Sie eine Suche speichern, aber sie lassen sich von der Website aus noch nicht lesen, pausieren oder löschen. Bis das gebaut ist, sagen Sie einem Makler Bescheid, wir ändern oder stoppen eine Benachrichtigung für Sie.",
+      deviceNote:
+        "Diese Liste ist das, was dieser Browser über Ihre angeforderten Benachrichtigungen weiß. Sie wird nicht vom Büro zurückgelesen, und wir speichern hier nie Ihre E-Mail-Adresse oder Telefonnummer.",
+      fallbackTitle: "Diese Seite braucht JavaScript",
+      fallbackText:
+        "Die Liste liegt in diesem Browser und wird daher hier gelesen, nicht auf dem Server. Ohne JavaScript können Sie eine Benachrichtigung weiterhin auf der Ergebnisseite anlegen oder einen Makler fragen.",
+      emptyTitle: "Keine Benachrichtigungen aus diesem Browser",
+      emptyText: "Speichern Sie eine Suche auf der Ergebnisseite, dann erscheint sie hier mit ihren Kriterien.",
+      emptyCta: "Immobilien suchen",
+      criteria: "Kriterien",
+      frequency: "Wie oft",
+      channel: "Wohin",
+      requested: "Angefordert am",
+      anyCriteria: "Jede Immobilie",
+      pause: "Pausieren",
+      resume: "Fortsetzen",
+      remove: "Löschen",
+      controlsNote:
+        "Pausieren, Fortsetzen und Löschen brauchen einen Lese- und Änderungsweg im Benachrichtigungsdienst. Sie stehen hier, damit die Seite vollständig ist, und bleiben deaktiviert, bis es ihn gibt.",
+      openSearch: "Diese Suche öffnen",
+      contactTitle: "Benachrichtigung ändern",
+      contactText: "Sagen Sie einem Makler, welche Benachrichtigung pausiert oder gestoppt werden soll, wir erledigen das.",
+      contactCta: "Büro kontaktieren",
+      listLabel: "Gespeicherte Suchen",
+    },
+    listing: {
+      brochureTitle: "Immobilie speichern oder drucken",
+      saveAsPdf: "Als PDF speichern",
+      brochureNote: "Öffnet eine einseitige Druckansicht mit den geprüften Angaben, den Fotos und der Referenznummer, fertig zum Speichern als PDF.",
+      costTitle: "Was der Kauf kostet",
+      costIntro: "Neben dem Preis bringt ein Kauf in Bulgarien diese Kosten mit sich. Eine Rate veröffentlichen wir erst, wenn das Büro sie freigegeben hat, und eine Zeile ohne freigegebene Rate wird gekennzeichnet statt geschätzt.",
+      costLines: {
+        transfer_tax: {
+          label: "Kommunale Grunderwerbsteuer",
+          note: "Wird von der Gemeinde festgelegt, in der die Immobilie liegt, und bei der Beurkundung gezahlt.",
+        },
+        notary: { label: "Notargebühr", note: "Wird nach staatlicher Tabelle auf den Urkundenwert berechnet, dazu die Eintragung im Grundbuch." },
+        agency: { label: "Maklerprovision", note: "Unser Honorar, schriftlich vereinbart, bevor Sie ein Angebot abgeben." },
+        company: {
+          label: "Bulgarische Gesellschaft, Käufer außerhalb der EU",
+          note: "Nicht-EU-Bürger können Land nicht auf ihren eigenen Namen besitzen und halten es über eine bulgarische Gesellschaft, deren Gründung und Führung Geld kostet.",
+        },
+      },
+      costTotal: "Summe",
+      costTotalUnavailable: "Nicht verfügbar, bis die Gebührentabelle freigegeben ist",
+      costNote:
+        "Keine Zahl hier ist eine Schätzung. Die Zeilen sind die Kosten, die ein Kauf mit sich bringt; die Sätze stammen aus einer Gebührentabelle, die ein Mensch im Büro freigeben muss, bevor wir sie veröffentlichen.",
+      costCta: "Einen Makler nach den Beträgen fragen",
+    },
+  },
+  nl: {
+    compare: {
+      title: "Bewaarde woningen vergelijken | MS Realty",
+      description: "Zet tot vier bewaarde MS Realty woningen naast elkaar en vergelijk prijs, oppervlakte, slaapkamers, verdieping en locatie.",
+      h1: "Bewaarde woningen vergelijken",
+      intro: "Tot vier van uw bewaarde woningen, naast elkaar. De lijst blijft in deze browser, dus niemand anders ziet uw selectie.",
+      fallbackTitle: "Uw bewaarde woningen staan in deze browser",
+      fallbackText:
+        "De vergelijking wordt opgebouwd uit de woningen die u op dit apparaat hebt bewaard en heeft daarom JavaScript nodig. U kunt uw bewaarde woningen ook als lijst openen of een vergelijkingslink delen, die wel zonder JavaScript werkt.",
+      savedLink: "Bewaarde woningen openen",
+      searchLink: "Woningen bekijken",
+      emptyTitle: "Nog niets te vergelijken",
+      emptyText: "Bewaar twee of meer woningen met het hartje, dan verschijnen ze hier naast elkaar.",
+      limitNote: "De eerste {max} van {count} bewaarde woningen worden getoond.",
+      unavailableNote: "Sommige bewaarde woningen zijn niet meer beschikbaar en worden niet getoond.",
+      identicalShow: "Gelijke rijen tonen ({count})",
+      identicalHide: "Gelijke rijen verbergen ({count})",
+      identicalHint: "Rijen waarin alle woningen dezelfde waarde hebben zijn ingeklapt, zodat de verschillen zichtbaar blijven.",
+      remove: "Verwijderen",
+      removeLabel: "{title} uit uw bewaarde woningen verwijderen",
+      view: "Woning openen",
+      detail: "Kenmerk",
+      notStated: "Niet vermeld",
+      addMore: "Nog een woning toevoegen",
+      columnLabel: "Woning {index}",
+      tableLabel: "Vergelijking van bewaarde woningen",
+      rows: {
+        price: "Prijs",
+        price_per_sqm: "Prijs per m²",
+        area_sqm: "Oppervlakte",
+        land_area_sqm: "Perceel",
+        bedrooms: "Slaapkamers",
+        floor: "Verdieping",
+        offer_type: "Aanbod",
+        location: "Locatie",
+        reference: "Referentie",
+      },
+    },
+    about: {
+      title: "Over MS Realty",
+      description: "MS Realty is een familiemakelaardij in Sandanski met kantoren in Sandanski, Bansko en Sveti Vlas, werkzaam in zeven talen.",
+      h1: "Over MS Realty",
+      intro: "Een familiekantoor in Sandanski, werkzaam in de Pirin-regio, aan de Zwarte Zeekust en in Noord-Griekenland.",
+      storyTitle: "Wie wij zijn",
+      story: [
+        "MS Realty is een familiemakelaardij gevestigd in Sandanski. Wij verkopen en verhuren vastgoed in de stad en de Pirin-regio, aan de Zwarte Zeekust en over de grens in Noord-Griekenland.",
+        "De meeste van onze kopers komen van buiten Bulgarije, dus het kantoor groeide rond één taak: een aankoop in het buitenland begrijpelijk maken. Dat betekent woninggegevens die een makelaar heeft gecontroleerd, lokale regels die duidelijk worden benoemd, en een mens die in uw taal antwoordt.",
+        "Wij publiceren de site in het Bulgaars, Engels, Duits, Nederlands, Russisch, Grieks en Hebreeuws. Wij schrijven eerst in het Bulgaars, en een mens keurt elke vertaling goed voordat die verschijnt.",
+      ],
+      officesTitle: "Onze kantoren",
+      officesIntro: "Drie kantoren dekken de gebieden waarin wij werken. Bel het algemene nummer, dan verbinden wij u met het kantoor het dichtst bij de woning.",
+      offices: {
+        sandanski: { town: "Sandanski", role: "Hoofdkantoor", note: "De stad, de uitlopers van de Pirin en het district Blagoevgrad." },
+        bansko: { town: "Bansko", role: "Bergkantoor", note: "Bansko en de bergplaatsen." },
+        sveti_vlas: { town: "Sveti Vlas", role: "Kustkantoor", note: "Sveti Vlas en de Zwarte Zeekust." },
+      },
+      pillarsTitle: "Wat wij een koper beloven",
+      pillarsIntro: "Vijf punten waaraan wij ons houden. Elk daarvan is op de site zichtbaar, niet alleen hier genoemd.",
+      pillars: {
+        verified: {
+          title: "Gecontroleerd",
+          text: "Een mens controleert elke woning voordat die wordt gepubliceerd, en de pagina toont de referentie en wanneer de beschikbaarheid het laatst is bevestigd.",
+        },
+        transparent: {
+          title: "Transparant",
+          text: "Prijs, referentie en bron staan op de woningpagina. Is een gegeven niet bevestigd, dan zeggen wij dat in plaats van het gat te vullen.",
+        },
+        fast: { title: "Snel", text: "Een aanvraag gaat rechtstreeks naar een makelaar, met de woning die u las erbij, zodat het eerste antwoord de context al heeft." },
+        multilingual: { title: "Meertalig", text: "Zeven talen, en een makelaar die antwoordt in de taal waarin u schreef." },
+        local: { title: "Lokaal", text: "Drie kantoren in de regio, zodat iemand de deur opent, de straat met u afloopt en de papieren met u doorneemt." },
+      },
+      teamTitle: "Het team",
+      teamIntro: "De makelaars met wie u te maken krijgt, de talen waarin zij werken en hun licentiegegevens.",
+      teamEmptyTitle: "Teamprofielen zijn nog niet gepubliceerd",
+      teamEmptyText:
+        "Niemand heeft in het contentsysteem al een teamprofiel goedgekeurd, dus tonen wij er geen in plaats van ze te verzinnen. Bel ons en wij vertellen u wie de woning behandelt die u bekijkt.",
+      teamFields: "Elk profiel krijgt een naam, een rol, een kantoor, de talen van de makelaar, een foto en een licentienummer.",
+      contactTitle: "Spreek een makelaar",
+      contactText: "Eén nummer bereikt alle drie de kantoren, via telefoon, WhatsApp of Viber.",
+      contactCta: "Neem contact op",
+    },
+    alerts: {
+      title: "Uw woningmeldingen | MS Realty",
+      description: "De bewaarde zoekopdrachten die u op dit apparaat hebt aangevraagd, met criteria, frequentie en kanaal.",
+      h1: "Uw woningmeldingen",
+      intro: "De zoekopdrachten die wij voor u in de gaten houden. Elk toont de criteria, hoe vaak wij schrijven en waar de melding heen gaat.",
+      notConnected: "Niet aangesloten",
+      notConnectedTitle: "Deze knoppen zijn nog niet aangesloten",
+      notConnectedText:
+        "Meldingen ontstaan wanneer u een zoekopdracht bewaart, maar ze zijn vanaf de site nog niet te lezen, te pauzeren of te verwijderen. Zolang dat niet gebouwd is, vraagt u het een makelaar en wij passen een melding voor u aan of stoppen die.",
+      deviceNote:
+        "Deze lijst is wat deze browser onthoudt over de meldingen die u hebt aangevraagd. Hij wordt niet bij het kantoor opgehaald, en wij bewaren hier nooit uw e-mailadres of telefoonnummer.",
+      fallbackTitle: "Deze pagina heeft JavaScript nodig",
+      fallbackText:
+        "De lijst staat in deze browser en wordt hier gelezen, niet op de server. Zonder JavaScript kunt u nog steeds een melding aanmaken op de resultatenpagina of een makelaar vragen.",
+      emptyTitle: "Geen meldingen uit deze browser",
+      emptyText: "Bewaar een zoekopdracht op de resultatenpagina, dan verschijnt die hier met de criteria.",
+      emptyCta: "Woningen zoeken",
+      criteria: "Criteria",
+      frequency: "Hoe vaak",
+      channel: "Waarheen",
+      requested: "Aangevraagd op",
+      anyCriteria: "Elke woning",
+      pause: "Pauzeren",
+      resume: "Hervatten",
+      remove: "Verwijderen",
+      controlsNote:
+        "Pauzeren, hervatten en verwijderen vragen om een lees- en wijzigroute in de meldingsdienst. Ze staan hier zodat de pagina volledig is, en blijven uitgeschakeld tot die er is.",
+      openSearch: "Deze zoekopdracht openen",
+      contactTitle: "Een melding wijzigen",
+      contactText: "Vertel een makelaar welke melding gepauzeerd of gestopt moet worden, dan regelen wij dat.",
+      contactCta: "Neem contact op",
+      listLabel: "Bewaarde zoekopdrachten",
+    },
+    listing: {
+      brochureTitle: "Deze woning opslaan of afdrukken",
+      saveAsPdf: "Opslaan als PDF",
+      brochureNote: "Opent een afdrukweergave van één pagina met de gecontroleerde gegevens, de foto's en het referentienummer, klaar om als PDF te bewaren.",
+      costTitle: "Wat de aankoop kost",
+      costIntro: "Naast de prijs brengt een aankoop in Bulgarije deze kosten mee. Wij publiceren een tarief pas nadat het kantoor het heeft goedgekeurd, en een regel zonder goedgekeurd tarief wordt gemarkeerd in plaats van geschat.",
+      costLines: {
+        transfer_tax: {
+          label: "Gemeentelijke overdrachtsbelasting",
+          note: "Vastgesteld door de gemeente waar de woning ligt, en betaald bij het tekenen van de akte.",
+        },
+        notary: { label: "Notariskosten", note: "Berekend over de aktewaarde volgens een staatsschaal, plus de inschrijving in het kadaster." },
+        agency: { label: "Makelaarscourtage", note: "Ons honorarium, schriftelijk afgesproken voordat u een bod doet." },
+        company: {
+          label: "Bulgaarse vennootschap, kopers van buiten de EU",
+          note: "Burgers van buiten de EU kunnen grond niet op eigen naam bezitten en houden die via een Bulgaarse vennootschap, waarvan oprichting en instandhouding geld kosten.",
+        },
+      },
+      costTotal: "Totaal",
+      costTotalUnavailable: "Niet beschikbaar tot de tarieventabel is goedgekeurd",
+      costNote:
+        "Geen enkel getal hier is een schatting. De regels zijn de kosten die een aankoop met zich meebrengt; de tarieven komen uit een tarieventabel die iemand van het kantoor moet goedkeuren voordat wij die publiceren.",
+      costCta: "Vraag een makelaar naar de bedragen",
+    },
+  },
+  ru: {
+    compare: {
+      title: "Сравнение сохранённых объектов | MS Realty",
+      description: "Поставьте до четырёх сохранённых объектов MS Realty рядом и сравните цену, площадь, спальни, этаж и расположение.",
+      h1: "Сравнение сохранённых объектов",
+      intro: "До четырёх ваших сохранённых объектов рядом. Список хранится в этом браузере, поэтому его больше никто не видит.",
+      fallbackTitle: "Сохранённые объекты хранятся в этом браузере",
+      fallbackText:
+        "Сравнение строится из объектов, сохранённых на этом устройстве, поэтому нужен JavaScript. Можно открыть сохранённые объекты списком или поделиться ссылкой на сравнение, которая работает и без JavaScript.",
+      savedLink: "Открыть сохранённые объекты",
+      searchLink: "Смотреть объекты",
+      emptyTitle: "Сравнивать пока нечего",
+      emptyText: "Сохраните два или больше объектов сердечком, и они появятся здесь рядом.",
+      limitNote: "Показаны первые {max} из {count} сохранённых объектов.",
+      unavailableNote: "Часть сохранённых объектов больше не доступна и не показана.",
+      identicalShow: "Показать одинаковые строки ({count})",
+      identicalHide: "Скрыть одинаковые строки ({count})",
+      identicalHint: "Строки, где у всех объектов одно и то же значение, свёрнуты, чтобы различия оставались на виду.",
+      remove: "Убрать",
+      removeLabel: "Убрать {title} из сохранённых объектов",
+      view: "Открыть объект",
+      detail: "Параметр",
+      notStated: "Не указано",
+      addMore: "Добавить ещё объект",
+      columnLabel: "Объект {index}",
+      tableLabel: "Сравнение сохранённых объектов",
+      rows: {
+        price: "Цена",
+        price_per_sqm: "Цена за m²",
+        area_sqm: "Площадь",
+        land_area_sqm: "Площадь участка",
+        bedrooms: "Спальни",
+        floor: "Этаж",
+        offer_type: "Предложение",
+        location: "Расположение",
+        reference: "Референс",
+      },
+    },
+    about: {
+      title: "О компании MS Realty",
+      description: "MS Realty, семейное агентство недвижимости в Сандански с офисами в Сандански, Банско и Свети-Власе, работает на семи языках.",
+      h1: "О компании MS Realty",
+      intro: "Семейное агентство в Сандански, работающее в Пиринском крае, на черноморском побережье и в Северной Греции.",
+      storyTitle: "Кто мы",
+      story: [
+        "MS Realty, семейное агентство недвижимости со штаб-квартирой в Сандански. Мы продаём и сдаём недвижимость в городе и Пиринском крае, на черноморском побережье и за границей, в Северной Греции.",
+        "Большинство наших покупателей приезжают из-за пределов Болгарии, поэтому агентство выросло вокруг одной задачи: сделать покупку в чужой стране понятной. Это значит проверенные брокером факты об объекте, прямо изложенные местные правила и человек, который отвечает на вашем языке.",
+        "Мы публикуем сайт на болгарском, английском, немецком, нидерландском, русском, греческом и иврите. Сначала мы пишем по-болгарски, и каждый перевод утверждает человек, прежде чем он появится.",
+      ],
+      officesTitle: "Наши офисы",
+      officesIntro: "Три офиса покрывают районы, где мы работаем. Позвоните на общий номер, и мы соединим вас с офисом рядом с объектом.",
+      offices: {
+        sandanski: { town: "Сандански", role: "Главный офис", note: "Город, предгорья Пирина и Благоевградская область." },
+        bansko: { town: "Банско", role: "Горный офис", note: "Банско и горные курорты." },
+        sveti_vlas: { town: "Свети-Влас", role: "Прибрежный офис", note: "Свети-Влас и черноморское побережье." },
+      },
+      pillarsTitle: "Что мы обещаем покупателю",
+      pillarsIntro: "Пять вещей, которых мы придерживаемся. Каждая видна на сайте, а не только названа здесь.",
+      pillars: {
+        verified: {
+          title: "Проверено",
+          text: "Человек проверяет каждое объявление до публикации, а страница показывает референс и когда наличие подтверждали в последний раз.",
+        },
+        transparent: {
+          title: "Прозрачно",
+          text: "Цена, референс и источник стоят на странице объекта. Если факт не подтверждён, мы так и говорим, вместо того чтобы заполнить пробел.",
+        },
+        fast: { title: "Быстро", text: "Запрос идёт прямо к брокеру вместе с объектом, который вы читали, поэтому первый ответ уже по делу." },
+        multilingual: { title: "На вашем языке", text: "Семь языков и брокер, который отвечает на том, на котором вы написали." },
+        local: { title: "Местные", text: "Три офиса в регионе, чтобы кто-то открыл дверь, прошёл с вами по улице и прочитал с вами документы." },
+      },
+      teamTitle: "Команда",
+      teamIntro: "Брокеры, с которыми вы будете работать, языки, на которых они говорят, и данные их лицензии.",
+      teamEmptyTitle: "Профили команды пока не опубликованы",
+      teamEmptyText:
+        "В системе контента пока никто не утвердил профиль сотрудника, поэтому мы не показываем ни одного, вместо того чтобы их придумать. Позвоните, и мы скажем, кто ведёт объект, который вы смотрите.",
+      teamFields: "В каждом профиле будут имя, роль, офис, языки брокера, фотография и номер лицензии.",
+      contactTitle: "Поговорить с брокером",
+      contactText: "Один номер соединяет со всеми тремя офисами: по телефону, в WhatsApp или Viber.",
+      contactCta: "Связаться с агентством",
+    },
+    alerts: {
+      title: "Ваши подписки на объекты | MS Realty",
+      description: "Сохранённые поиски, которые вы заказали с этого устройства, с критериями, частотой и каналом.",
+      h1: "Ваши подписки на объекты",
+      intro: "Поиски, за которыми вы просили следить. У каждого указаны критерии, как часто мы пишем и куда уходит уведомление.",
+      notConnected: "Не подключено",
+      notConnectedTitle: "Эти кнопки пока не подключены",
+      notConnectedText:
+        "Подписки создаются, когда вы сохраняете поиск, но прочитать, приостановить или удалить их с сайта пока нельзя. Пока это не сделано, скажите брокеру, и мы изменим или остановим подписку за вас.",
+      deviceNote:
+        "Этот список, то что браузер помнит о заказанных вами подписках. Он не читается со стороны агентства, и мы никогда не храним здесь ваш адрес почты или телефон.",
+      fallbackTitle: "Этой странице нужен JavaScript",
+      fallbackText:
+        "Список хранится в этом браузере и читается здесь, а не на сервере. Без JavaScript вы всё равно можете создать подписку на странице результатов или обратиться к брокеру.",
+      emptyTitle: "Из этого браузера подписок нет",
+      emptyText: "Сохраните поиск на странице результатов, и он появится здесь со своими критериями.",
+      emptyCta: "Искать объекты",
+      criteria: "Критерии",
+      frequency: "Как часто",
+      channel: "Куда",
+      requested: "Заказано",
+      anyCriteria: "Любой объект",
+      pause: "Приостановить",
+      resume: "Возобновить",
+      remove: "Удалить",
+      controlsNote:
+        "Приостановка, возобновление и удаление требуют, чтобы служба подписок открыла маршрут чтения и изменения. Они показаны, чтобы страница была целостной, и остаются неактивными, пока его нет.",
+      openSearch: "Открыть этот поиск",
+      contactTitle: "Изменить подписку",
+      contactText: "Скажите брокеру, какую подписку приостановить или остановить, и мы это сделаем.",
+      contactCta: "Связаться с агентством",
+      listLabel: "Сохранённые поиски",
+    },
+    listing: {
+      brochureTitle: "Сохраните или распечатайте объект",
+      saveAsPdf: "Сохранить как PDF",
+      brochureNote: "Открывает одностраничный вид для печати с проверенными фактами, фотографиями и референсным номером, готовый к сохранению в PDF.",
+      costTitle: "Во что обойдётся покупка",
+      costIntro: "Кроме цены покупка в Болгарии несёт эти расходы. Мы публикуем ставку только после того, как её утвердит агентство, а строка без утверждённой ставки помечается, а не угадывается.",
+      costLines: {
+        transfer_tax: {
+          label: "Местный налог на переход права",
+          note: "Устанавливается общиной, где находится объект, и платится при подписании нотариального акта.",
+        },
+        notary: { label: "Нотариальный сбор", note: "Начисляется на стоимость по акту по государственной шкале, плюс запись в реестр недвижимости." },
+        agency: { label: "Комиссия агентства", note: "Наше вознаграждение, согласованное письменно до того, как вы сделаете предложение." },
+        company: {
+          label: "Болгарская компания, покупатели вне ЕС",
+          note: "Граждане вне ЕС не могут владеть землёй на своё имя и держат её через болгарскую компанию, регистрация и содержание которой стоят денег.",
+        },
+      },
+      costTotal: "Итого",
+      costTotalUnavailable: "Недоступно, пока таблица сборов не утверждена",
+      costNote:
+        "Ни одно число здесь не является оценкой. Строки, это расходы, которые несёт покупка; ставки берутся из таблицы сборов, которую человек в агентстве должен утвердить до публикации.",
+      costCta: "Спросить брокера о суммах",
+    },
+  },
+  el: {
+    compare: {
+      title: "Σύγκριση αποθηκευμένων ακινήτων | MS Realty",
+      description: "Βάλτε έως τέσσερα αποθηκευμένα ακίνητα της MS Realty δίπλα δίπλα και συγκρίνετε τιμή, εμβαδόν, υπνοδωμάτια, όροφο και τοποθεσία.",
+      h1: "Σύγκριση αποθηκευμένων ακινήτων",
+      intro: "Έως τέσσερα από τα αποθηκευμένα σας ακίνητα, δίπλα δίπλα. Η λίστα μένει σε αυτό το πρόγραμμα περιήγησης, οπότε δεν τη βλέπει κανείς άλλος.",
+      fallbackTitle: "Τα αποθηκευμένα ακίνητα βρίσκονται σε αυτό το πρόγραμμα περιήγησης",
+      fallbackText:
+        "Η σύγκριση χτίζεται από τα ακίνητα που αποθηκεύσατε σε αυτή τη συσκευή, γι αυτό χρειάζεται JavaScript. Μπορείτε να ανοίξετε τα αποθηκευμένα ακίνητα ως λίστα ή να μοιραστείτε έναν σύνδεσμο σύγκρισης, που λειτουργεί και χωρίς JavaScript.",
+      savedLink: "Άνοιγμα αποθηκευμένων ακινήτων",
+      searchLink: "Δείτε ακίνητα",
+      emptyTitle: "Δεν υπάρχει ακόμη κάτι για σύγκριση",
+      emptyText: "Αποθηκεύστε δύο ή περισσότερα ακίνητα με την καρδιά και θα εμφανιστούν εδώ δίπλα δίπλα.",
+      limitNote: "Εμφανίζονται τα πρώτα {max} από {count} αποθηκευμένα ακίνητα.",
+      unavailableNote: "Ορισμένα αποθηκευμένα ακίνητα δεν είναι πια διαθέσιμα και δεν εμφανίζονται.",
+      identicalShow: "Εμφάνιση ίδιων γραμμών ({count})",
+      identicalHide: "Απόκρυψη ίδιων γραμμών ({count})",
+      identicalHint: "Οι γραμμές όπου όλα τα ακίνητα έχουν την ίδια τιμή είναι κλειστές, ώστε να ξεχωρίζουν οι διαφορές.",
+      remove: "Αφαίρεση",
+      removeLabel: "Αφαίρεση του {title} από τα αποθηκευμένα σας ακίνητα",
+      view: "Άνοιγμα ακινήτου",
+      detail: "Στοιχείο",
+      notStated: "Δεν αναφέρεται",
+      addMore: "Προσθήκη ακόμη ενός ακινήτου",
+      columnLabel: "Ακίνητο {index}",
+      tableLabel: "Σύγκριση αποθηκευμένων ακινήτων",
+      rows: {
+        price: "Τιμή",
+        price_per_sqm: "Τιμή ανά m²",
+        area_sqm: "Εμβαδόν",
+        land_area_sqm: "Έκταση οικοπέδου",
+        bedrooms: "Υπνοδωμάτια",
+        floor: "Όροφος",
+        offer_type: "Προσφορά",
+        location: "Τοποθεσία",
+        reference: "Κωδικός",
+      },
+    },
+    about: {
+      title: "Σχετικά με τη MS Realty",
+      description: "Η MS Realty είναι οικογενειακό κτηματομεσιτικό γραφείο στο Σαντάνσκι με γραφεία σε Σαντάνσκι, Μπάνσκο και Σβετί Βλας, που εργάζεται σε επτά γλώσσες.",
+      h1: "Σχετικά με τη MS Realty",
+      intro: "Οικογενειακό γραφείο στο Σαντάνσκι, με δραστηριότητα στην περιοχή του Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη Βόρεια Ελλάδα.",
+      storyTitle: "Ποιοι είμαστε",
+      story: [
+        "Η MS Realty είναι οικογενειακό κτηματομεσιτικό γραφείο με έδρα το Σαντάνσκι. Πουλάμε και εκμισθώνουμε ακίνητα στην πόλη και στην περιοχή του Πιρίν, στις ακτές της Μαύρης Θάλασσας και πέρα από τα σύνορα, στη Βόρεια Ελλάδα.",
+        "Οι περισσότεροι αγοραστές μας έρχονται από άλλες χώρες, οπότε το γραφείο μεγάλωσε γύρω από μία δουλειά: να γίνεται κατανοητή μια αγορά σε ξένη χώρα. Αυτό σημαίνει στοιχεία ακινήτου ελεγμένα από μεσίτη, τοπικούς κανόνες που λέγονται καθαρά και έναν άνθρωπο που απαντά στη γλώσσα σας.",
+        "Δημοσιεύουμε τον ιστότοπο στα βουλγαρικά, αγγλικά, γερμανικά, ολλανδικά, ρωσικά, ελληνικά και εβραϊκά. Γράφουμε πρώτα στα βουλγαρικά και κάθε μετάφραση την εγκρίνει άνθρωπος πριν εμφανιστεί.",
+      ],
+      officesTitle: "Τα γραφεία μας",
+      officesIntro: "Τρία γραφεία καλύπτουν τις περιοχές όπου εργαζόμαστε. Καλέστε τη γραμμή του γραφείου και θα σας συνδέσουμε με το πλησιέστερο στο ακίνητο.",
+      offices: {
+        sandanski: { town: "Σαντάνσκι", role: "Κεντρικό γραφείο", note: "Η πόλη, οι πρόποδες του Πιρίν και η περιφέρεια Μπλαγκόεβγκραντ." },
+        bansko: { town: "Μπάνσκο", role: "Ορεινό γραφείο", note: "Το Μπάνσκο και τα ορεινά θέρετρα." },
+        sveti_vlas: { town: "Σβετί Βλας", role: "Παράκτιο γραφείο", note: "Το Σβετί Βλας και οι ακτές της Μαύρης Θάλασσας." },
+      },
+      pillarsTitle: "Τι υποσχόμαστε σε έναν αγοραστή",
+      pillarsIntro: "Πέντε πράγματα στα οποία δεσμευόμαστε. Το καθένα φαίνεται στον ιστότοπο, δεν δηλώνεται μόνο εδώ.",
+      pillars: {
+        verified: {
+          title: "Ελεγμένο",
+          text: "Άνθρωπος ελέγχει κάθε αγγελία πριν δημοσιευτεί, και η σελίδα δείχνει τον κωδικό και πότε επιβεβαιώθηκε τελευταία η διαθεσιμότητα.",
+        },
+        transparent: {
+          title: "Διαφανές",
+          text: "Τιμή, κωδικός και πηγή βρίσκονται στη σελίδα του ακινήτου. Όταν ένα στοιχείο δεν έχει επιβεβαιωθεί, το λέμε αντί να καλύψουμε το κενό.",
+        },
+        fast: { title: "Γρήγορο", text: "Το αίτημα πάει κατευθείαν σε μεσίτη μαζί με το ακίνητο που διαβάζατε, οπότε η πρώτη απάντηση έχει ήδη το πλαίσιο." },
+        multilingual: { title: "Πολύγλωσσο", text: "Επτά γλώσσες και ένας μεσίτης που απαντά σε αυτήν που γράψατε." },
+        local: { title: "Ντόπιοι", text: "Τρία γραφεία στην περιοχή, ώστε κάποιος να ανοίξει την πόρτα, να περπατήσει τον δρόμο και να διαβάσει τα χαρτιά μαζί σας." },
+      },
+      teamTitle: "Η ομάδα",
+      teamIntro: "Οι μεσίτες με τους οποίους θα συνεργαστείτε, οι γλώσσες που μιλούν και τα στοιχεία της άδειάς τους.",
+      teamEmptyTitle: "Τα προφίλ της ομάδας δεν έχουν δημοσιευτεί ακόμη",
+      teamEmptyText:
+        "Κανείς δεν έχει εγκρίνει ακόμη προφίλ ομάδας στο σύστημα περιεχομένου, οπότε δεν δείχνουμε κανένα αντί να τα επινοήσουμε. Καλέστε μας και θα σας πούμε ποιος έχει το ακίνητο που βλέπετε.",
+      teamFields: "Κάθε προφίλ θα έχει όνομα, ρόλο, γραφείο, τις γλώσσες του μεσίτη, φωτογραφία και αριθμό άδειας.",
+      contactTitle: "Μιλήστε με μεσίτη",
+      contactText: "Μία γραμμή φτάνει και στα τρία γραφεία, στο τηλέφωνο, στο WhatsApp ή στο Viber.",
+      contactCta: "Επικοινωνήστε με το γραφείο",
+    },
+    alerts: {
+      title: "Οι ειδοποιήσεις ακινήτων σας | MS Realty",
+      description: "Οι αποθηκευμένες αναζητήσεις που ζητήσατε από αυτή τη συσκευή, με τα κριτήρια, τη συχνότητα και το κανάλι.",
+      h1: "Οι ειδοποιήσεις ακινήτων σας",
+      intro: "Οι αναζητήσεις που μας ζητήσατε να παρακολουθούμε. Κάθε μία δείχνει τα κριτήριά της, πόσο συχνά γράφουμε και πού πάει η ειδοποίηση.",
+      notConnected: "Χωρίς σύνδεση",
+      notConnectedTitle: "Αυτά τα χειριστήρια δεν είναι ακόμη συνδεδεμένα",
+      notConnectedText:
+        "Οι ειδοποιήσεις δημιουργούνται όταν αποθηκεύετε μια αναζήτηση, αλλά δεν υπάρχει ακόμη τρόπος να διαβαστούν, να παύσουν ή να διαγραφούν από τον ιστότοπο. Μέχρι να γίνει αυτό, πείτε το σε μεσίτη και θα αλλάξουμε ή θα σταματήσουμε μια ειδοποίηση για εσάς.",
+      deviceNote:
+        "Αυτή η λίστα είναι όσα θυμάται αυτό το πρόγραμμα περιήγησης για τις ειδοποιήσεις που ζητήσατε. Δεν διαβάζεται από το γραφείο, και εδώ δεν κρατάμε ποτέ το email ή το τηλέφωνό σας.",
+      fallbackTitle: "Αυτή η σελίδα χρειάζεται JavaScript",
+      fallbackText:
+        "Η λίστα αποθηκεύεται σε αυτό το πρόγραμμα περιήγησης και διαβάζεται εδώ, όχι στον διακομιστή. Χωρίς JavaScript μπορείτε ακόμη να δημιουργήσετε ειδοποίηση από τη σελίδα αποτελεσμάτων ή να ρωτήσετε μεσίτη.",
+      emptyTitle: "Καμία ειδοποίηση από αυτό το πρόγραμμα περιήγησης",
+      emptyText: "Αποθηκεύστε μια αναζήτηση στη σελίδα αποτελεσμάτων και θα εμφανιστεί εδώ με τα κριτήριά της.",
+      emptyCta: "Αναζήτηση ακινήτων",
+      criteria: "Κριτήρια",
+      frequency: "Πόσο συχνά",
+      channel: "Πού",
+      requested: "Ζητήθηκε",
+      anyCriteria: "Οποιοδήποτε ακίνητο",
+      pause: "Παύση",
+      resume: "Συνέχιση",
+      remove: "Διαγραφή",
+      controlsNote:
+        "Η παύση, η συνέχιση και η διαγραφή χρειάζονται μια διαδρομή ανάγνωσης και αλλαγής από την υπηρεσία ειδοποιήσεων. Εμφανίζονται εδώ ώστε η σελίδα να είναι πλήρης, και μένουν ανενεργά μέχρι να υπάρξει.",
+      openSearch: "Άνοιγμα αυτής της αναζήτησης",
+      contactTitle: "Αλλαγή ειδοποίησης",
+      contactText: "Πείτε σε μεσίτη ποια ειδοποίηση να σταματήσει και θα το κάνουμε εμείς.",
+      contactCta: "Επικοινωνήστε με το γραφείο",
+      listLabel: "Αποθηκευμένες αναζητήσεις",
+    },
+    listing: {
+      brochureTitle: "Αποθηκεύστε ή εκτυπώστε το ακίνητο",
+      saveAsPdf: "Αποθήκευση ως PDF",
+      brochureNote: "Ανοίγει μια μονοσέλιδη προβολή εκτύπωσης με τα ελεγμένα στοιχεία, τις φωτογραφίες και τον κωδικό, έτοιμη για αποθήκευση ως PDF.",
+      costTitle: "Τι κοστίζει η αγορά",
+      costIntro: "Πέρα από την τιμή, μια αγορά στη Βουλγαρία φέρνει και αυτά τα έξοδα. Δημοσιεύουμε συντελεστή μόνο αφού τον εγκρίνει το γραφείο, και μια γραμμή χωρίς εγκεκριμένο συντελεστή σημειώνεται αντί να εκτιμηθεί.",
+      costLines: {
+        transfer_tax: {
+          label: "Τοπικός φόρος μεταβίβασης",
+          note: "Ορίζεται από τον δήμο όπου βρίσκεται το ακίνητο και πληρώνεται με την υπογραφή του συμβολαίου.",
+        },
+        notary: { label: "Συμβολαιογραφικά", note: "Υπολογίζονται στην αξία του συμβολαίου με κρατική κλίμακα, συν την εγγραφή στο κτηματολόγιο." },
+        agency: { label: "Προμήθεια γραφείου", note: "Η αμοιβή μας, συμφωνημένη γραπτώς πριν κάνετε προσφορά." },
+        company: {
+          label: "Βουλγαρική εταιρεία, αγοραστές εκτός ΕΕ",
+          note: "Πολίτες εκτός ΕΕ δεν μπορούν να έχουν γη στο όνομά τους και την κατέχουν μέσω βουλγαρικής εταιρείας, της οποίας η σύσταση και η διατήρηση κοστίζουν.",
+        },
+      },
+      costTotal: "Σύνολο",
+      costTotalUnavailable: "Μη διαθέσιμο μέχρι να εγκριθεί ο πίνακας εξόδων",
+      costNote:
+        "Κανένας αριθμός εδώ δεν είναι εκτίμηση. Οι γραμμές είναι τα έξοδα που φέρνει μια αγορά, και οι συντελεστές προέρχονται από πίνακα εξόδων που πρέπει να εγκρίνει άνθρωπος του γραφείου πριν τον δημοσιεύσουμε.",
+      costCta: "Ρωτήστε μεσίτη για τα ποσά",
+    },
+  },
+  he: {
+    compare: {
+      title: "השוואת נכסים שמורים | MS Realty",
+      description: "העמידו עד ארבעה נכסים שמורים של MS Realty זה לצד זה והשוו מחיר, שטח, חדרי שינה, קומה ומיקום.",
+      h1: "השוואת נכסים שמורים",
+      intro: "עד ארבעה מהנכסים שלכם, זה לצד זה. הרשימה נשמרת בדפדפן הזה, כך שאף אחד אחר לא רואה אותה.",
+      fallbackTitle: "הנכסים השמורים נמצאים בדפדפן הזה",
+      fallbackText:
+        "ההשוואה נבנית מהנכסים ששמרתם במכשיר הזה, ולכן היא זקוקה ל JavaScript. אפשר לפתוח את הנכסים השמורים כרשימה, או לשתף קישור השוואה שעובד גם בלי JavaScript.",
+      savedLink: "פתחו את הנכסים השמורים",
+      searchLink: "עיינו בנכסים",
+      emptyTitle: "אין עדיין מה להשוות",
+      emptyText: "שמרו שני נכסים או יותר בעזרת הלב והם יופיעו כאן זה לצד זה.",
+      limitNote: "מוצגים {max} הנכסים הראשונים מתוך {count} שמורים.",
+      unavailableNote: "חלק מהנכסים השמורים כבר אינם זמינים ואינם מוצגים.",
+      identicalShow: "הצגת שורות זהות ({count})",
+      identicalHide: "הסתרת שורות זהות ({count})",
+      identicalHint: "שורות שבהן לכל הנכסים אותו ערך מקופלות, כדי שההבדלים יישארו גלויים.",
+      remove: "הסרה",
+      removeLabel: "הסירו את {title} מהנכסים השמורים",
+      view: "פתחו את הנכס",
+      detail: "נתון",
+      notStated: "לא צוין",
+      addMore: "הוסיפו נכס נוסף",
+      columnLabel: "נכס {index}",
+      tableLabel: "השוואת נכסים שמורים",
+      rows: {
+        price: "מחיר",
+        price_per_sqm: "מחיר ל m²",
+        area_sqm: "שטח",
+        land_area_sqm: "שטח מגרש",
+        bedrooms: "חדרי שינה",
+        floor: "קומה",
+        offer_type: "סוג עסקה",
+        location: "מיקום",
+        reference: "מספר נכס",
+      },
+    },
+    about: {
+      title: "אודות MS Realty",
+      description: "MS Realty היא סוכנות נדלן משפחתית בסנדנסקי עם משרדים בסנדנסקי, בנסקו וסבטי ולאס, הפועלת בשבע שפות.",
+      h1: "אודות MS Realty",
+      intro: "סוכנות משפחתית בסנדנסקי, הפועלת באזור פירין, לאורך חוף הים השחור ובצפון יוון.",
+      storyTitle: "מי אנחנו",
+      story: [
+        "MS Realty היא סוכנות נדלן משפחתית שמרכזה בסנדנסקי. אנחנו מוכרים ומשכירים נכסים בעיר ובאזור פירין, לאורך חוף הים השחור ומעבר לגבול, בצפון יוון.",
+        "רוב הקונים שלנו מגיעים מחוץ לבולגריה, ולכן הסוכנות גדלה סביב משימה אחת: להפוך רכישה במדינה זרה למובנת. זה אומר נתוני נכס שמתווך בדק, כללים מקומיים שנאמרים בפשטות, ואדם שעונה בשפה שלכם.",
+        "אנחנו מפרסמים את האתר בבולגרית, אנגלית, גרמנית, הולנדית, רוסית, יוונית ועברית. אנחנו כותבים קודם בבולגרית, ואדם מאשר כל תרגום לפני שהוא עולה.",
+      ],
+      officesTitle: "המשרדים שלנו",
+      officesIntro: "שלושה משרדים מכסים את האזורים שבהם אנחנו פועלים. התקשרו לקו המשרד ונחבר אתכם למשרד הקרוב לנכס.",
+      offices: {
+        sandanski: { town: "סנדנסקי", role: "משרד ראשי", note: "העיר, מרגלות פירין ומחוז בלגואבגרד." },
+        bansko: { town: "בנסקו", role: "משרד ההרים", note: "בנסקו ואתרי הנופש בהרים." },
+        sveti_vlas: { town: "סבטי ולאס", role: "משרד החוף", note: "סבטי ולאס וחוף הים השחור." },
+      },
+      pillarsTitle: "מה אנחנו מבטיחים לקונה",
+      pillarsIntro: "חמישה דברים שאנחנו מחויבים להם. כל אחד מהם נראה באתר, לא רק נאמר כאן.",
+      pillars: {
+        verified: {
+          title: "מאומת",
+          text: "אדם בודק כל נכס לפני הפרסום, והדף מציג את מספר הנכס ואת המועד שבו הזמינות אומתה לאחרונה.",
+        },
+        transparent: {
+          title: "שקוף",
+          text: "המחיר, מספר הנכס והמקור נמצאים בדף הנכס. כשנתון לא אומת אנחנו אומרים זאת, במקום למלא את החסר.",
+        },
+        fast: { title: "מהיר", text: "פנייה מגיעה ישירות למתווך יחד עם הנכס שקראתם עליו, כך שהתשובה הראשונה כבר בהקשר." },
+        multilingual: { title: "רב לשוני", text: "שבע שפות, ומתווך שעונה בשפה שבה כתבתם." },
+        local: { title: "מקומיים", text: "שלושה משרדים באזור, כדי שמישהו יפתח את הדלת, ילך אתכם ברחוב ויקרא אתכם את המסמכים." },
+      },
+      teamTitle: "הצוות",
+      teamIntro: "המתווכים שתעבדו איתם, השפות שהם עובדים בהן ופרטי הרישיון שלהם.",
+      teamEmptyTitle: "פרופילי הצוות טרם פורסמו",
+      teamEmptyText:
+        "אף אחד עדיין לא אישר פרופיל צוות במערכת התוכן, ולכן איננו מציגים אף אחד במקום להמציא. התקשרו ונאמר לכם מי מטפל בנכס שאתם בוחנים.",
+      teamFields: "כל פרופיל יכלול שם, תפקיד, משרד, השפות של המתווך, תמונה ומספר רישיון.",
+      contactTitle: "דברו עם מתווך",
+      contactText: "קו אחד מגיע לשלושת המשרדים, בטלפון, בוואטסאפ או בוויבר.",
+      contactCta: "צרו קשר עם הסוכנות",
+    },
+    alerts: {
+      title: "התראות הנכסים שלכם | MS Realty",
+      description: "החיפושים השמורים שביקשתם מהמכשיר הזה, עם הקריטריונים, התדירות והערוץ.",
+      h1: "התראות הנכסים שלכם",
+      intro: "החיפושים שביקשתם שנעקוב אחריהם. לכל אחד מופיעים הקריטריונים, כל כמה זמן אנחנו כותבים ולאן ההתראה נשלחת.",
+      notConnected: "לא מחובר",
+      notConnectedTitle: "הפקדים האלה עדיין אינם מחוברים",
+      notConnectedText:
+        "התראות נוצרות כששומרים חיפוש, אך עדיין אין דרך לקרוא, להשהות או למחוק אותן מהאתר. עד שזה ייבנה, אמרו למתווך ונשנה או נעצור עבורכם התראה.",
+      deviceNote:
+        "הרשימה הזו היא מה שהדפדפן הזה זוכר על ההתראות שביקשתם. היא אינה נקראת מהסוכנות, ואיננו שומרים כאן את כתובת הדואר או הטלפון שלכם.",
+      fallbackTitle: "הדף הזה זקוק ל JavaScript",
+      fallbackText:
+        "הרשימה נשמרת בדפדפן הזה ולכן נקראת כאן, לא בשרת. בלי JavaScript עדיין אפשר ליצור התראה בדף התוצאות או לפנות למתווך.",
+      emptyTitle: "אין התראות מהדפדפן הזה",
+      emptyText: "שמרו חיפוש בדף התוצאות והוא יופיע כאן עם הקריטריונים שלו.",
+      emptyCta: "חפשו נכסים",
+      criteria: "קריטריונים",
+      frequency: "כל כמה זמן",
+      channel: "לאן",
+      requested: "נתבקש בתאריך",
+      anyCriteria: "כל נכס",
+      pause: "השהיה",
+      resume: "חידוש",
+      remove: "מחיקה",
+      controlsNote:
+        "השהיה, חידוש ומחיקה דורשים ששירות ההתראות יחשוף נתיב קריאה ועדכון. הם מוצגים כאן כדי שהדף יהיה שלם, ונשארים מושבתים עד שיהיה כזה.",
+      openSearch: "פתחו את החיפוש הזה",
+      contactTitle: "שינוי התראה",
+      contactText: "אמרו למתווך איזו התראה להשהות או לעצור ונטפל בזה.",
+      contactCta: "צרו קשר עם הסוכנות",
+      listLabel: "חיפושים שמורים",
+    },
+    listing: {
+      brochureTitle: "שמרו או הדפיסו את הנכס",
+      saveAsPdf: "שמירה כ PDF",
+      brochureNote: "פותח תצוגת הדפסה של עמוד אחד עם הנתונים שנבדקו, התמונות ומספר הנכס, מוכנה לשמירה כ PDF.",
+      costTitle: "כמה עולה הרכישה",
+      costIntro: "מלבד המחיר, רכישה בבולגריה כרוכה בעלויות האלה. אנחנו מפרסמים שיעור רק אחרי שהסוכנות אישרה אותו, ושורה בלי שיעור מאושר מסומנת ולא מנוחשת.",
+      costLines: {
+        transfer_tax: {
+          label: "מס העברה מקומי",
+          note: "נקבע על ידי הרשות המקומית שבה נמצא הנכס, ומשולם בעת חתימת השטר.",
+        },
+        notary: { label: "שכר נוטריון", note: "מחושב על שווי השטר לפי טבלה ממשלתית, בתוספת הרישום בפנקס המקרקעין." },
+        agency: { label: "עמלת הסוכנות", note: "שכר הטרחה שלנו, מסוכם בכתב לפני שאתם מגישים הצעה." },
+        company: {
+          label: "חברה בולגרית, קונים שאינם מהאיחוד האירופי",
+          note: "אזרחים שאינם מהאיחוד האירופי אינם יכולים להחזיק קרקע על שמם ומחזיקים אותה דרך חברה בולגרית, שרישומה ותחזוקתה עולים כסף.",
+        },
+      },
+      costTotal: "סך הכול",
+      costTotalUnavailable: "לא זמין עד שטבלת העלויות תאושר",
+      costNote:
+        "אף מספר כאן אינו הערכה. השורות הן העלויות שרכישה כרוכה בהן, והשיעורים מגיעים מטבלת עלויות שאדם בסוכנות חייב לאשר לפני שנפרסם אותה.",
+      costCta: "בקשו מהמתווך את הסכומים",
+    },
+  },
+};
+
+// Package B3 landed the saved-search self-service contract, so the alerts page
+// manages a real record through its capability link. These strings sit beside
+// the P4 copy rather than inside it so the two packages stay separable.
+const P4_ALERTS_MANAGE_COPY = {
+  bg: {
+    notConnectedTitle: "Управлявайте известие през своята връзка",
+    notConnectedText:
+      "Когато запазите търсене, ви изпращаме лична връзка за управление. Отворете я и ще можете да спрете, възобновите, пренастроите или изтриете известието тук.",
+    linkTitle: "Вашето известие",
+    linkIntro: "Отворихте връзката за управление, така че промените по-долу се записват веднага.",
+    linkInvalidTitle: "Тази връзка за управление не е валидна",
+    linkInvalidText: "Възможно е да е изтекла или да е заменена. Запазете търсенето отново, за да получите нова, или се обадете на брокер.",
+    linkExpires: "Връзката е валидна до",
+    statusActive: "Активно",
+    statusPaused: "Спряно",
+    nextAlert: "Следващо известие",
+    matchesNow: "Съвпадения сега",
+    changeFrequency: "Колко често да пишем",
+    changeChannel: "Къде да пишем",
+    apply: "Запазете промяната",
+    saving: "Запазване...",
+    savedChange: "Промяната е запазена.",
+    failedChange: "Промяната не бе запазена. Опитайте отново.",
+    deleteConfirm: "Да изтрием ли това известие? Няма да ви пишем повече.",
+    deleted: "Известието е изтрито. Няма да ви пишем повече.",
+    localTitle: "Запазени в този браузър",
+    localIntro: "Търсения, които сте запазили на това устройство. Отворете изпратената връзка за управление, за да промените или спрете някое от тях.",
+    localControlsNote:
+      "Тези бутони работят само през личната връзка за управление, изпратена при запазването. Тук те остават неактивни, защото браузърът не може да докаже кой е заявил известието.",
+    channelNotRecorded: "Не е записано",
+  },
+  en: {
+    notConnectedTitle: "Manage an alert through your own link",
+    notConnectedText:
+      "When you save a search we send you a personal manage link. Open it and you can pause, resume, retune or delete that alert right here.",
+    linkTitle: "Your alert",
+    linkIntro: "You opened the manage link, so the changes below are saved straight away.",
+    linkInvalidTitle: "This manage link is not valid",
+    linkInvalidText: "It may have expired or been replaced. Save the search again to get a new one, or call a broker.",
+    linkExpires: "Link valid until",
+    statusActive: "Active",
+    statusPaused: "Paused",
+    nextAlert: "Next alert",
+    matchesNow: "Matches now",
+    changeFrequency: "How often we write",
+    changeChannel: "Where we write",
+    apply: "Save this change",
+    saving: "Saving...",
+    savedChange: "Change saved.",
+    failedChange: "That change was not saved. Try again.",
+    deleteConfirm: "Delete this alert? We will not write to you again.",
+    deleted: "This alert is deleted. We will not write to you again.",
+    localTitle: "Saved in this browser",
+    localIntro: "Searches you saved on this device. Open the manage link we sent you to change or stop one of them.",
+    localControlsNote:
+      "These controls work through the personal manage link sent when you saved the search. They stay disabled here because this browser cannot prove who asked for the alert.",
+    channelNotRecorded: "Not recorded",
+  },
+  de: {
+    notConnectedTitle: "Eine Benachrichtigung über Ihren eigenen Link verwalten",
+    notConnectedText:
+      "Wenn Sie eine Suche speichern, senden wir Ihnen einen persönlichen Verwaltungslink. Öffnen Sie ihn, dann können Sie die Benachrichtigung hier pausieren, fortsetzen, neu einstellen oder löschen.",
+    linkTitle: "Ihre Benachrichtigung",
+    linkIntro: "Sie haben den Verwaltungslink geöffnet, die Änderungen unten werden also sofort gespeichert.",
+    linkInvalidTitle: "Dieser Verwaltungslink ist nicht gültig",
+    linkInvalidText: "Er kann abgelaufen oder ersetzt worden sein. Speichern Sie die Suche erneut für einen neuen Link, oder rufen Sie einen Makler an.",
+    linkExpires: "Link gültig bis",
+    statusActive: "Aktiv",
+    statusPaused: "Pausiert",
+    nextAlert: "Nächste Benachrichtigung",
+    matchesNow: "Treffer jetzt",
+    changeFrequency: "Wie oft wir schreiben",
+    changeChannel: "Wohin wir schreiben",
+    apply: "Änderung speichern",
+    saving: "Wird gespeichert...",
+    savedChange: "Änderung gespeichert.",
+    failedChange: "Die Änderung wurde nicht gespeichert. Versuchen Sie es erneut.",
+    deleteConfirm: "Diese Benachrichtigung löschen? Wir schreiben Ihnen dann nicht mehr.",
+    deleted: "Diese Benachrichtigung ist gelöscht. Wir schreiben Ihnen nicht mehr.",
+    localTitle: "In diesem Browser gespeichert",
+    localIntro: "Suchen, die Sie auf diesem Gerät gespeichert haben. Öffnen Sie den gesendeten Verwaltungslink, um eine davon zu ändern oder zu stoppen.",
+    localControlsNote:
+      "Diese Bedienelemente arbeiten über den persönlichen Verwaltungslink, den Sie beim Speichern erhalten haben. Hier bleiben sie deaktiviert, weil dieser Browser nicht nachweisen kann, wer die Benachrichtigung angefordert hat.",
+    channelNotRecorded: "Nicht erfasst",
+  },
+  nl: {
+    notConnectedTitle: "Een melding beheren via uw eigen link",
+    notConnectedText:
+      "Als u een zoekopdracht bewaart, sturen wij u een persoonlijke beheerlink. Open die en u kunt de melding hier pauzeren, hervatten, bijstellen of verwijderen.",
+    linkTitle: "Uw melding",
+    linkIntro: "U hebt de beheerlink geopend, dus de wijzigingen hieronder worden meteen bewaard.",
+    linkInvalidTitle: "Deze beheerlink is niet geldig",
+    linkInvalidText: "Hij kan verlopen of vervangen zijn. Bewaar de zoekopdracht opnieuw voor een nieuwe link, of bel een makelaar.",
+    linkExpires: "Link geldig tot",
+    statusActive: "Actief",
+    statusPaused: "Gepauzeerd",
+    nextAlert: "Volgende melding",
+    matchesNow: "Treffers nu",
+    changeFrequency: "Hoe vaak wij schrijven",
+    changeChannel: "Waar wij schrijven",
+    apply: "Wijziging bewaren",
+    saving: "Bezig met bewaren...",
+    savedChange: "Wijziging bewaard.",
+    failedChange: "Die wijziging is niet bewaard. Probeer het opnieuw.",
+    deleteConfirm: "Deze melding verwijderen? Wij schrijven u dan niet meer.",
+    deleted: "Deze melding is verwijderd. Wij schrijven u niet meer.",
+    localTitle: "Bewaard in deze browser",
+    localIntro: "Zoekopdrachten die u op dit apparaat hebt bewaard. Open de toegestuurde beheerlink om er een te wijzigen of te stoppen.",
+    localControlsNote:
+      "Deze knoppen werken via de persoonlijke beheerlink die u bij het bewaren kreeg. Hier blijven ze uitgeschakeld omdat deze browser niet kan aantonen wie de melding heeft aangevraagd.",
+    channelNotRecorded: "Niet vastgelegd",
+  },
+  ru: {
+    notConnectedTitle: "Управляйте подпиской по своей ссылке",
+    notConnectedText:
+      "Когда вы сохраняете поиск, мы отправляем вам личную ссылку управления. Откройте её, и здесь можно будет приостановить, возобновить, перенастроить или удалить подписку.",
+    linkTitle: "Ваша подписка",
+    linkIntro: "Вы открыли ссылку управления, поэтому изменения ниже сохраняются сразу.",
+    linkInvalidTitle: "Эта ссылка управления недействительна",
+    linkInvalidText: "Возможно, она истекла или была заменена. Сохраните поиск заново, чтобы получить новую, или позвоните брокеру.",
+    linkExpires: "Ссылка действует до",
+    statusActive: "Активна",
+    statusPaused: "Приостановлена",
+    nextAlert: "Следующее уведомление",
+    matchesNow: "Совпадений сейчас",
+    changeFrequency: "Как часто мы пишем",
+    changeChannel: "Куда мы пишем",
+    apply: "Сохранить изменение",
+    saving: "Сохранение...",
+    savedChange: "Изменение сохранено.",
+    failedChange: "Изменение не сохранено. Попробуйте ещё раз.",
+    deleteConfirm: "Удалить эту подписку? Мы больше не будем вам писать.",
+    deleted: "Подписка удалена. Мы больше не будем вам писать.",
+    localTitle: "Сохранено в этом браузере",
+    localIntro: "Поиски, сохранённые на этом устройстве. Откройте присланную ссылку управления, чтобы изменить или остановить любой из них.",
+    localControlsNote:
+      "Эти кнопки работают через личную ссылку управления, присланную при сохранении. Здесь они неактивны, потому что браузер не может подтвердить, кто заказал подписку.",
+    channelNotRecorded: "Не записано",
+  },
+  el: {
+    notConnectedTitle: "Διαχειριστείτε μια ειδοποίηση από τον δικό σας σύνδεσμο",
+    notConnectedText:
+      "Όταν αποθηκεύετε μια αναζήτηση, σας στέλνουμε προσωπικό σύνδεσμο διαχείρισης. Ανοίξτε τον και μπορείτε εδώ να παύσετε, να συνεχίσετε, να ρυθμίσετε ή να διαγράψετε την ειδοποίηση.",
+    linkTitle: "Η ειδοποίησή σας",
+    linkIntro: "Ανοίξατε τον σύνδεσμο διαχείρισης, οπότε οι αλλαγές παρακάτω αποθηκεύονται αμέσως.",
+    linkInvalidTitle: "Αυτός ο σύνδεσμος διαχείρισης δεν είναι έγκυρος",
+    linkInvalidText: "Μπορεί να έχει λήξει ή να αντικαταστάθηκε. Αποθηκεύστε ξανά την αναζήτηση για νέο σύνδεσμο ή καλέστε μεσίτη.",
+    linkExpires: "Ο σύνδεσμος ισχύει έως",
+    statusActive: "Ενεργή",
+    statusPaused: "Σε παύση",
+    nextAlert: "Επόμενη ειδοποίηση",
+    matchesNow: "Αντιστοιχίες τώρα",
+    changeFrequency: "Πόσο συχνά γράφουμε",
+    changeChannel: "Πού γράφουμε",
+    apply: "Αποθήκευση αλλαγής",
+    saving: "Αποθήκευση...",
+    savedChange: "Η αλλαγή αποθηκεύτηκε.",
+    failedChange: "Η αλλαγή δεν αποθηκεύτηκε. Προσπαθήστε ξανά.",
+    deleteConfirm: "Διαγραφή αυτής της ειδοποίησης; Δεν θα σας ξαναγράψουμε.",
+    deleted: "Η ειδοποίηση διαγράφηκε. Δεν θα σας ξαναγράψουμε.",
+    localTitle: "Αποθηκευμένα σε αυτό το πρόγραμμα περιήγησης",
+    localIntro: "Αναζητήσεις που αποθηκεύσατε σε αυτή τη συσκευή. Ανοίξτε τον σύνδεσμο διαχείρισης που σας στείλαμε για να αλλάξετε ή να σταματήσετε κάποια.",
+    localControlsNote:
+      "Αυτά τα χειριστήρια λειτουργούν μέσω του προσωπικού συνδέσμου διαχείρισης που λάβατε κατά την αποθήκευση. Εδώ μένουν ανενεργά, γιατί αυτό το πρόγραμμα περιήγησης δεν μπορεί να αποδείξει ποιος ζήτησε την ειδοποίηση.",
+    channelNotRecorded: "Δεν έχει καταγραφεί",
+  },
+  he: {
+    notConnectedTitle: "נהלו התראה דרך הקישור האישי שלכם",
+    notConnectedText:
+      "כששומרים חיפוש אנחנו שולחים לכם קישור ניהול אישי. פתחו אותו ותוכלו כאן להשהות, לחדש, לכוונן או למחוק את ההתראה.",
+    linkTitle: "ההתראה שלכם",
+    linkIntro: "פתחתם את קישור הניהול, ולכן השינויים שלהלן נשמרים מיד.",
+    linkInvalidTitle: "קישור הניהול הזה אינו תקף",
+    linkInvalidText: "ייתכן שפג תוקפו או שהוחלף. שמרו את החיפוש שוב כדי לקבל קישור חדש, או התקשרו למתווך.",
+    linkExpires: "הקישור בתוקף עד",
+    statusActive: "פעילה",
+    statusPaused: "מושהית",
+    nextAlert: "ההתראה הבאה",
+    matchesNow: "התאמות כעת",
+    changeFrequency: "כל כמה זמן נכתוב",
+    changeChannel: "לאן נכתוב",
+    apply: "שמירת השינוי",
+    saving: "שומר...",
+    savedChange: "השינוי נשמר.",
+    failedChange: "השינוי לא נשמר. נסו שוב.",
+    deleteConfirm: "למחוק את ההתראה הזו? לא נכתוב לכם שוב.",
+    deleted: "ההתראה נמחקה. לא נכתוב לכם שוב.",
+    localTitle: "נשמרו בדפדפן הזה",
+    localIntro: "חיפושים ששמרתם במכשיר הזה. פתחו את קישור הניהול ששלחנו כדי לשנות או לעצור אחד מהם.",
+    localControlsNote:
+      "הפקדים האלה פועלים דרך קישור הניהול האישי שנשלח בעת השמירה. כאן הם נשארים מושבתים, כי הדפדפן הזה אינו יכול להוכיח מי ביקש את ההתראה.",
+    channelNotRecorded: "לא נרשם",
+  },
+};
+
+// Package B2 owns the approved purchase-fee table and its line keys, so the
+// listing disclosure names exactly those lines. No rate is written here: an
+// unapproved line renders as a marked absence and the total stays withheld.
+const P4_COSTS_COPY = {
+  bg: {
+    buyerLabel: "Кой купува",
+    buyers: { eu: "Гражданин на ЕС или ЕИП", non_eu: "Гражданин извън ЕС" },
+    missing: "Все още не е одобрено",
+    lines: {
+      local_transfer_tax: { label: "Местен данък за прехвърляне", note: "Определя се от общината, в която е имотът, и се плаща при подписване на нотариалния акт." },
+      notary_fee: { label: "Нотариална такса", note: "Начислява се върху стойността по акта по държавна тарифа." },
+      registry_entry_fee: { label: "Такса за вписване", note: "Вписване на акта в Имотния регистър." },
+      agency_fee: { label: "Комисиона на агенцията", note: "Нашето възнаграждение, договорено писмено, преди да направите оферта." },
+      company_route_setup: { label: "Българско дружество, купувачи извън ЕС", note: "Граждани извън ЕС не могат да притежават земя на свое име и я държат чрез българско дружество." },
+    },
+    linesTitle: "Какво включва",
+    totalWithPrice: "Цена плюс разходи",
+  },
+  en: {
+    buyerLabel: "Who is buying",
+    buyers: { eu: "EU or EEA citizen", non_eu: "Non-EU citizen" },
+    missing: "Not approved yet",
+    lines: {
+      local_transfer_tax: { label: "Local property transfer tax", note: "Set by the municipality the property sits in, and paid when the deed is signed." },
+      notary_fee: { label: "Notary fee", note: "Charged on the deed value on a state scale." },
+      registry_entry_fee: { label: "Registry entry fee", note: "Entering the deed in the property register." },
+      agency_fee: { label: "Agency commission", note: "Our fee, agreed in writing before you make an offer." },
+      company_route_setup: { label: "Bulgarian company, non-EU buyers", note: "Non-EU citizens cannot own land in their own name and hold it through a Bulgarian company." },
+    },
+    linesTitle: "What it covers",
+    totalWithPrice: "Price plus costs",
+  },
+  de: {
+    buyerLabel: "Wer kauft",
+    buyers: { eu: "EU- oder EWR-Bürger", non_eu: "Nicht-EU-Bürger" },
+    missing: "Noch nicht freigegeben",
+    lines: {
+      local_transfer_tax: { label: "Kommunale Grunderwerbsteuer", note: "Wird von der Gemeinde festgelegt, in der die Immobilie liegt, und bei der Beurkundung gezahlt." },
+      notary_fee: { label: "Notargebühr", note: "Wird nach staatlicher Tabelle auf den Urkundenwert berechnet." },
+      registry_entry_fee: { label: "Eintragungsgebühr", note: "Eintragung der Urkunde im Grundbuch." },
+      agency_fee: { label: "Maklerprovision", note: "Unser Honorar, schriftlich vereinbart, bevor Sie ein Angebot abgeben." },
+      company_route_setup: { label: "Bulgarische Gesellschaft, Käufer außerhalb der EU", note: "Nicht-EU-Bürger können Land nicht auf ihren eigenen Namen besitzen und halten es über eine bulgarische Gesellschaft." },
+    },
+    linesTitle: "Was enthalten ist",
+    totalWithPrice: "Preis plus Kosten",
+  },
+  nl: {
+    buyerLabel: "Wie koopt",
+    buyers: { eu: "Burger van de EU of EER", non_eu: "Burger van buiten de EU" },
+    missing: "Nog niet goedgekeurd",
+    lines: {
+      local_transfer_tax: { label: "Gemeentelijke overdrachtsbelasting", note: "Vastgesteld door de gemeente waar de woning ligt, en betaald bij het tekenen van de akte." },
+      notary_fee: { label: "Notariskosten", note: "Berekend over de aktewaarde volgens een staatsschaal." },
+      registry_entry_fee: { label: "Inschrijvingskosten", note: "Inschrijving van de akte in het kadaster." },
+      agency_fee: { label: "Makelaarscourtage", note: "Ons honorarium, schriftelijk afgesproken voordat u een bod doet." },
+      company_route_setup: { label: "Bulgaarse vennootschap, kopers van buiten de EU", note: "Burgers van buiten de EU kunnen grond niet op eigen naam bezitten en houden die via een Bulgaarse vennootschap." },
+    },
+    linesTitle: "Wat het omvat",
+    totalWithPrice: "Prijs plus kosten",
+  },
+  ru: {
+    buyerLabel: "Кто покупает",
+    buyers: { eu: "Гражданин ЕС или ЕЭП", non_eu: "Гражданин вне ЕС" },
+    missing: "Ещё не утверждено",
+    lines: {
+      local_transfer_tax: { label: "Местный налог на переход права", note: "Устанавливается общиной, где находится объект, и платится при подписании акта." },
+      notary_fee: { label: "Нотариальный сбор", note: "Начисляется на стоимость по акту по государственной шкале." },
+      registry_entry_fee: { label: "Сбор за внесение в реестр", note: "Внесение акта в реестр недвижимости." },
+      agency_fee: { label: "Комиссия агентства", note: "Наше вознаграждение, согласованное письменно до того, как вы сделаете предложение." },
+      company_route_setup: { label: "Болгарская компания, покупатели вне ЕС", note: "Граждане вне ЕС не могут владеть землёй на своё имя и держат её через болгарскую компанию." },
+    },
+    linesTitle: "Что входит",
+    totalWithPrice: "Цена плюс расходы",
+  },
+  el: {
+    buyerLabel: "Ποιος αγοράζει",
+    buyers: { eu: "Πολίτης ΕΕ ή ΕΟΧ", non_eu: "Πολίτης εκτός ΕΕ" },
+    missing: "Δεν έχει εγκριθεί ακόμη",
+    lines: {
+      local_transfer_tax: { label: "Τοπικός φόρος μεταβίβασης", note: "Ορίζεται από τον δήμο όπου βρίσκεται το ακίνητο και πληρώνεται με την υπογραφή του συμβολαίου." },
+      notary_fee: { label: "Συμβολαιογραφικά", note: "Υπολογίζονται στην αξία του συμβολαίου με κρατική κλίμακα." },
+      registry_entry_fee: { label: "Τέλος εγγραφής", note: "Εγγραφή του συμβολαίου στο κτηματολόγιο." },
+      agency_fee: { label: "Προμήθεια γραφείου", note: "Η αμοιβή μας, συμφωνημένη γραπτώς πριν κάνετε προσφορά." },
+      company_route_setup: { label: "Βουλγαρική εταιρεία, αγοραστές εκτός ΕΕ", note: "Πολίτες εκτός ΕΕ δεν μπορούν να έχουν γη στο όνομά τους και την κατέχουν μέσω βουλγαρικής εταιρείας." },
+    },
+    linesTitle: "Τι περιλαμβάνει",
+    totalWithPrice: "Τιμή συν έξοδα",
+  },
+  he: {
+    buyerLabel: "מי קונה",
+    buyers: { eu: "אזרח האיחוד האירופי או האזור הכלכלי", non_eu: "אזרח שאינו מהאיחוד האירופי" },
+    missing: "טרם אושר",
+    lines: {
+      local_transfer_tax: { label: "מס העברה מקומי", note: "נקבע על ידי הרשות המקומית שבה נמצא הנכס, ומשולם בעת חתימת השטר." },
+      notary_fee: { label: "שכר נוטריון", note: "מחושב על שווי השטר לפי טבלה ממשלתית." },
+      registry_entry_fee: { label: "אגרת רישום", note: "רישום השטר בפנקס המקרקעין." },
+      agency_fee: { label: "עמלת הסוכנות", note: "שכר הטרחה שלנו, מסוכם בכתב לפני שאתם מגישים הצעה." },
+      company_route_setup: { label: "חברה בולגרית, קונים שאינם מהאיחוד האירופי", note: "אזרחים שאינם מהאיחוד האירופי אינם יכולים להחזיק קרקע על שמם ומחזיקים אותה דרך חברה בולגרית." },
+    },
+    linesTitle: "מה כלול",
+    totalWithPrice: "מחיר בתוספת עלויות",
+  },
+};
+
+function p4CopyFor(localeCode) {
+  return P4_COPY[localeCode] || P4_COPY.en;
+}
+
+function p4Param(params, key) {
+  if (!params) return "";
+  const value = typeof params.get === "function" ? params.get(key) : params[key];
+  return value === null || value === undefined ? "" : String(value);
+}
+
+// The comparison reads its columns from `?ids=`, so a shared link renders the
+// same table without JavaScript. The client rewrites the query from the saved
+// ids in localStorage, which keeps the page free of any backend.
+function compareIdsFromParams(params, max = COMPARE_MAX_COLUMNS) {
+  const raw = p4Param(params, "ids");
+  if (!raw) return [];
+  const seen = [];
+  for (const part of raw.split(",")) {
+    const id = part.trim();
+    if (!id || seen.includes(id) || !/^[A-Za-z0-9._:-]{1,64}$/.test(id)) continue;
+    seen.push(id);
+    if (seen.length >= max * 4) break;
+  }
+  return seen;
+}
+
+function compareValue(value, copy) {
+  if (value === null || value === undefined || value === "") return copy.notStated;
+  return String(value);
+}
+
+function compareColumn(registry, locale, listing, copy, labels) {
+  const card = listingCard(registry, listing, locale);
+  const view = listingToPublicViewModel(listing);
+  const priceEur = Number(view.price_eur);
+  const areaSqm = Number(view.area_sqm);
+  const hasPrice = !view.price_on_request && Number.isFinite(priceEur) && priceEur > 1;
+  const perSqm = hasPrice && Number.isFinite(areaSqm) && areaSqm > 0 ? Math.round(priceEur / areaSqm) : null;
+  const floor =
+    view.floor === null || view.floor === undefined || view.floor === ""
+      ? null
+      : view.total_floors === null || view.total_floors === undefined || view.total_floors === ""
+        ? String(view.floor)
+        : `${view.floor} / ${view.total_floors}`;
+  return {
+    id: card.id,
+    title: card.title,
+    path: card.path,
+    thumbnail: card.thumbnail,
+    values: {
+      price: hasPrice ? startEuro(priceEur, locale.code) : labels.priceOnRequest,
+      price_per_sqm: perSqm ? startEuro(perSqm, locale.code) : copy.notStated,
+      area_sqm: Number.isFinite(areaSqm) && areaSqm > 0 ? `${areaSqm} m²` : copy.notStated,
+      land_area_sqm: view.land_area_sqm ? `${view.land_area_sqm} m²` : copy.notStated,
+      bedrooms: view.bedrooms_not_applicable ? copy.notStated : compareValue(view.bedrooms, copy),
+      floor: compareValue(floor, copy),
+      offer_type: card.offer_type_label || compareValue(view.offer_type, copy),
+      location: compareValue(card.location, copy),
+      reference: card.id,
+    },
+  };
+}
+
+// Compare saved listings. Everything the table needs is server-rendered from
+// the ids in the query, so there is no client-side catalogue, no endpoint and
+// no personal data in the URL.
+export function renderComparePage({ registry, localeCode, listings = [], searchParams = null } = {}) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const path = comparePath(registry, locale.code);
+  const labels = labelsFor(locale.code);
+  const copy = p4CopyFor(locale.code).compare;
+  const searchPathForLocale = `/${locale.code}/${locale.route_segments.search}`;
+  const savedPath = `${searchPathForLocale}?saved=1`;
+  const requested = compareIdsFromParams(searchParams);
+  const byId = new Map();
+  for (const listing of listings) {
+    if (isActiveListing(listing)) byId.set(listing.id, listing);
+  }
+  const resolvedIds = requested.filter((id) => byId.has(id));
+  const columnIds = resolvedIds.slice(0, COMPARE_MAX_COLUMNS);
+  const columns = columnIds.map((id) => compareColumn(registry, locale, byId.get(id), copy, labels));
+  const rows = COMPARE_ROWS.map((row) => {
+    const values = columns.map((column) => column.values[row.id]);
+    return {
+      id: row.id,
+      label: copy.rows[row.id],
+      numeric: row.numeric,
+      values,
+      // A single column has nothing to be identical to, so nothing collapses.
+      identical: columns.length > 1 && values.every((value) => value === values[0]),
+    };
+  });
+  const identicalCount = rows.filter((row) => row.identical).length;
+
+  return {
+    kind: "compare",
+    status: 200,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    // A per visitor shortlist is never an index target.
+    indexable: false,
+    metadata: { title: copy.title, description: copy.description, robots: "noindex,follow" },
+    hreflang: [],
+    chrome: publicChrome(registry, locale, {
+      hreflang: resolved.available ? localeAlternatesForCompare(registry) : [],
+      active: "compare",
+      currentPath: path,
+    }),
+    body: {
+      h1: copy.h1,
+      intro: copy.intro,
+      copy,
+      state: columns.length ? "columns" : "empty",
+      max_columns: COMPARE_MAX_COLUMNS,
+      storage_key: COMPARE_STORAGE_KEY,
+      requested_ids: requested,
+      columns,
+      rows,
+      identical_count: identicalCount,
+      // Saved ids that no longer resolve to an active listing.
+      unavailable_count: Math.max(requested.length - resolvedIds.length, 0),
+      over_limit: resolvedIds.length > COMPARE_MAX_COLUMNS ? resolvedIds.length : 0,
+      saved: { path: savedPath, label: labels.savedListings },
+      search: { path: searchPathForLocale, label: copy.searchLink },
+    },
+  };
+}
+
+// About and team. The team list comes from approved CMS documents; today there
+// are none, so the section states that instead of showing invented people.
+export function renderAboutPage({
+  registry,
+  localeCode,
+  teamProfiles = null,
+  leadWritesDisabled = leadWritesDisabledFromEnv(),
+} = {}) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const path = aboutPath(registry, locale.code);
+  const copy = p4CopyFor(locale.code).about;
+  const chromeCopy = chromeCopyFor(locale.code);
+  const hreflang = resolved.available ? hreflangForAbout(registry) : [];
+  // Package B2 owns the approved team records. A profile is public only when a
+  // named human approved that exact content, and its photo only when the photo
+  // itself was approved, so the page never borrows a face.
+  const team = teamProfiles || teamProfilesPayload({ localeCode: locale.code, sourceLocale: registry.source_locale });
+
+  return {
+    kind: "about",
+    status: 200,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: resolved.available,
+    metadata: {
+      title: copy.title,
+      description: copy.description,
+      robots: resolved.available ? "index,follow" : "noindex,follow",
+    },
+    hreflang,
+    chrome: publicChrome(registry, locale, { hreflang, active: "about", currentPath: path, leadWritesDisabled }),
+    body: {
+      h1: copy.h1,
+      intro: copy.intro,
+      copy,
+      story: { title: copy.storyTitle, paragraphs: [...copy.story] },
+      offices: {
+        title: copy.officesTitle,
+        intro: copy.officesIntro,
+        line: chromeCopy.offices,
+        items: P4_AGENCY_OFFICES.map((id) => ({ id, ...copy.offices[id] })),
+      },
+      pillars: {
+        title: copy.pillarsTitle,
+        intro: copy.pillarsIntro,
+        items: ["verified", "transparent", "fast", "multilingual", "local"].map((id) => ({
+          id,
+          icon: { verified: "shield-check", transparent: "eye", fast: "send", multilingual: "languages", local: "map-pin" }[id],
+          ...copy.pillars[id],
+        })),
+      },
+      team: {
+        title: copy.teamTitle,
+        intro: copy.teamIntro,
+        available: team.available === true,
+        profiles: team.available === true ? team.profiles : [],
+        // The section renders even when nobody is approved yet: the approved
+        // source says why, and the page repeats that instead of inventing people.
+        empty:
+          team.available === true
+            ? null
+            : {
+                title: team.notice || copy.teamEmptyTitle,
+                text: copy.teamEmptyText,
+                fields: copy.teamFields,
+                reason: team.reason || "not_approved",
+                source: "approved_team_profiles",
+              },
+      },
+      contact: {
+        title: copy.contactTitle,
+        text: copy.contactText,
+        label: copy.contactCta,
+        path: contactPath(registry, locale.code),
+        channels: {
+          phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
+          whatsapp: { href: BRAND_CONTACT.whatsapp, label: "WhatsApp" },
+          viber: { href: BRAND_CONTACT.viber, label: "Viber" },
+          email: { href: `mailto:${BRAND_CONTACT.email}`, label: BRAND_CONTACT.email },
+        },
+      },
+      search: { path: `/${locale.code}/${locale.route_segments.search}` },
+      seller: { path: sellerPath(registry, locale.code) },
+      start: { path: startPath(registry, locale.code) },
+    },
+  };
+}
+
+// Saved-search management. Package B3 mints a capability link at save time and
+// serves GET and POST /api/saved-searches/manage, so a visitor holding that
+// link genuinely pauses, retunes or deletes their own alert here. Without the
+// link the page still lists what this browser recorded, with the controls
+// disabled and the reason on screen.
+export function renderAlertsPage({ registry, localeCode } = {}) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const path = alertsPath(registry, locale.code);
+  const labels = labelsFor(locale.code);
+  const copy = { ...p4CopyFor(locale.code).alerts, ...(P4_ALERTS_MANAGE_COPY[locale.code] || P4_ALERTS_MANAGE_COPY.en) };
+  const searchPathForLocale = `/${locale.code}/${locale.route_segments.search}`;
+
+  return {
+    kind: "alerts",
+    status: 200,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: false,
+    metadata: { title: copy.title, description: copy.description, robots: "noindex,follow" },
+    hreflang: [],
+    chrome: publicChrome(registry, locale, {
+      hreflang: resolved.available ? localeAlternatesForAlerts(registry) : [],
+      active: "alerts",
+      currentPath: path,
+    }),
+    body: {
+      h1: copy.h1,
+      intro: copy.intro,
+      copy,
+      storage_key: ALERTS_STORAGE_KEY,
+      create: { endpoint: "/api/saved-searches", method: "POST" },
+      // The live contract. The token never reaches the server render: the page
+      // is noindex and the client reads the token out of the query itself.
+      manage: {
+        endpoint: "/api/saved-searches/manage",
+        token_param: "token",
+        read: "GET",
+        write: "POST",
+        actions: [...SAVED_SEARCH_MANAGE_ACTIONS],
+        frequencies: [...SAVED_SEARCH_FREQUENCIES],
+      },
+      frequencies: {
+        instant: labels.alertInstant,
+        daily: labels.alertDaily,
+        weekly: labels.alertWeekly,
+      },
+      channels: { email: labels.email, whatsapp: "WhatsApp", phone: labels.phone, viber: "Viber" },
+      // Stored criteria are raw filter values; this dictionary lets the client
+      // name the ones it knows and fall back to the raw value for the rest.
+      filter_labels: {
+        offer_type: Object.fromEntries(
+          ["sale", "rent"].map((value) => [value, localizedListingValue(locale.code, "offer_type", value)]),
+        ),
+        property_type: Object.fromEntries(
+          CANONICAL_PROPERTY_FAMILIES.map((family) => [family, localizedListingValue(locale.code, "property_type", family)]),
+        ),
+        property_family: Object.fromEntries(
+          CANONICAL_PROPERTY_FAMILIES.map((family) => [family, localizedListingValue(locale.code, "property_type", family)]),
+        ),
+      },
+      controls: [
+        { id: "pause", label: copy.pause, icon: "pause" },
+        { id: "resume", label: copy.resume, icon: "play" },
+        { id: "delete", label: copy.remove, icon: "trash-2" },
+      ],
+      search: { path: searchPathForLocale, label: copy.emptyCta },
+      contact: {
+        title: copy.contactTitle,
+        text: copy.contactText,
+        label: copy.contactCta,
+        path: contactPath(registry, locale.code),
+        phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
+      },
+    },
+  };
+}
+
+// Listing extras. The brochure action, and the vocabulary the purchase-cost
+// disclosure needs to render page.body.cost_estimator (package B2). No rate is
+// stated here: an unapproved line is shown as a marked absence.
+export function listingExtras({ registry, locale, view, path }) {
+  const copy = p4CopyFor(locale.code).listing;
+  const costs = P4_COSTS_COPY[locale.code] || P4_COSTS_COPY.en;
+  return {
+    brochure: {
+      title: copy.brochureTitle,
+      label: copy.saveAsPdf,
+      note: copy.brochureNote,
+      url: `${path}?print=1`,
+      reference: view.id,
+      pdf_status: "browser_print_ready",
+    },
+    costs: {
+      // Renting carries none of the purchase fees, so the disclosure is a
+      // buy-only surface.
+      applicable: view.offer_type === "sale",
+      title: copy.costTitle,
+      intro: copy.costIntro,
+      buyer_label: costs.buyerLabel,
+      buyers: { ...costs.buyers },
+      lines: { ...costs.lines },
+      lines_title: costs.linesTitle,
+      missing_label: costs.missing,
+      total_label: copy.costTotal,
+      total_with_price_label: costs.totalWithPrice,
+      total_unavailable: copy.costTotalUnavailable,
+      note: copy.costNote,
+      cta: { label: copy.costCta, path: contactPath(registry, locale.code) },
     },
   };
 }

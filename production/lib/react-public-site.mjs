@@ -211,6 +211,42 @@ function SiteHeader({ chrome }) {
       h(
       "div",
       { className: "site-hd__right" },
+        // Package P4: saved counter plus a compare shortcut. The counter reuses
+        // the data-saved-count and data-saved-navigation contract the client
+        // already maintains; the compare link stays hidden until two or more
+        // properties are saved, and the script fills in their ids.
+        chrome.saved
+          ? h(
+              "a",
+              {
+                className: "site-hd__saved",
+                href: chrome.saved.href,
+                "data-saved-navigation": "true",
+                "data-saved-navigation-label": chrome.saved.label,
+                "aria-label": chrome.saved.label,
+              },
+              h(Icon, { name: "heart", size: 18 }),
+              h("span", { className: "site-hd__saved-label" }, chrome.saved.label),
+              h("span", { className: "site-hd__saved-count", "data-saved-count": "true", hidden: true }),
+            )
+          : null,
+        chrome.saved?.compare
+          ? h(
+              "a",
+              {
+                className: "site-hd__compare",
+                href: chrome.saved.compare.href,
+                "data-compare-link": "true",
+                "data-compare-min": "2",
+                "aria-label": chrome.saved.compare.label,
+                title: chrome.saved.compare.label,
+                "aria-current": chrome.saved.compare.active ? "page" : undefined,
+                hidden: true,
+              },
+              h(Icon, { name: "columns-3", size: 18 }),
+              h("span", { className: "site-hd__compare-label" }, chrome.saved.compare.label),
+            )
+          : null,
         h(LanguageMenu, { languages: chrome.languages, label: copy.languageLabel }),
         h(
           Btn,
@@ -281,7 +317,9 @@ function SiteFooter({ chrome, labels }) {
   const locations = chrome.footer.locations || [];
   const resources = chrome.resources?.links || [];
   const buy = chrome.nav.find((item) => item.id === "buy");
-  const exploreLinks = [...chrome.nav, ...resources];
+  // Package P4 appends the company routes it added (about, alerts) to the
+  // existing explore group rather than opening a fourth footer column.
+  const exploreLinks = [...chrome.nav, ...resources, ...(chrome.company?.links || [])];
   const locationLinks = locations.length
     ? locations.map((location) => ({ id: location.href, href: location.href, label: location.label }))
     : [{ id: "search", href: buy?.href || chrome.home.href, label: chrome.footer.searchLabel }];
@@ -2687,7 +2725,31 @@ function SearchBody({ page }) {
               savedView ? "" : `${page.search.total_matches} ${labels.matches}`,
             ),
           ),
-          savedView ? null : toolbarForm(),
+          // Package P4: the saved view gets a compare action instead of the
+          // sort and view controls. It stays hidden until the client counts two
+          // or more saved properties, and carries their ids in the link.
+          savedView
+            ? page.chrome?.saved?.compare
+              ? h(
+                  "div",
+                  { className: "sr-saved-actions" },
+                  h(
+                    Btn,
+                    {
+                      tag: "a",
+                      variant: "secondary",
+                      size: "md",
+                      iconStart: "columns-3",
+                      href: page.chrome.saved.compare.href,
+                      "data-compare-link": "true",
+                      "data-compare-min": "2",
+                      hidden: true,
+                    },
+                    page.chrome.saved.compare.label,
+                  ),
+                )
+              : null
+            : toolbarForm(),
         ),
         savedView
           ? null
@@ -2950,6 +3012,160 @@ function listingVerificationDate(value, localeCode) {
 
 function nativeListingVideo(url = "") {
   return /\.(?:mov|mp4|webm)(?:[?#]|$)/i.test(url);
+}
+
+/* Package P4: listing brochure action and purchase-cost disclosure. */
+
+function ListingBrochure({ page }) {
+  const brochure = page.body.extras?.brochure;
+  if (!brochure) return null;
+  return h(
+    "section",
+    { className: "ld-sec ld-brochure", "data-listing-brochure": "true" },
+    h("h2", null, brochure.title),
+    h(
+      "div",
+      { className: "ld-brochure__row" },
+      h(
+        Btn,
+        {
+          tag: "a",
+          variant: "secondary",
+          size: "md",
+          iconStart: "download",
+          href: brochure.url,
+          "data-listing-action": "save_pdf",
+          "data-listing-brochure-action": "true",
+          "data-pdf-status": brochure.pdf_status,
+        },
+        brochure.label,
+      ),
+      h(
+        "p",
+        { className: "ld-brochure__note" },
+        h("span", null, brochure.note),
+        h("span", { className: "ld-brochure__ref", "data-listing-brochure-reference": "true" }, brochure.reference),
+      ),
+    ),
+  );
+}
+
+function ListingPurchaseCosts({ page }) {
+  const costs = page.body.extras?.costs;
+  // Package B2's payload. It refuses a total while any required line is
+  // unapproved and names each blocking line, so this renders the refusal
+  // rather than a figure nobody signed off.
+  const estimator = page.body.cost_estimator;
+  if (!costs || !costs.applicable || !estimator) return null;
+  const labels = uiLabels(page);
+  const scopes = estimator.buyer_scopes || ["eu", "non_eu"];
+  const table = estimator.table || [];
+  const estimate = estimator.estimate || null;
+  const missingByLine = new Map((estimator.missing || []).map((row) => [row.line_key, row]));
+  const amountByLine = new Map((estimate?.lines || []).map((line) => [line.line_key, line]));
+  const lineKeys = [...new Set([...(estimate?.required_lines || []), ...(table.find((row) => row.buyer_scope === "non_eu")?.required_lines || [])])];
+  const missingCount = (estimator.missing || []).length;
+
+  const lineRow = (lineKey) => {
+    const copy = costs.lines[lineKey] || { label: lineKey.replaceAll("_", " "), note: "" };
+    const amount = amountByLine.get(lineKey);
+    const blocked = missingByLine.get(lineKey);
+    const nonEuOnly = lineKey === "company_route_setup";
+    return h(
+      "div",
+      { key: lineKey, className: "ld-costs__line", "data-cost-line": lineKey, "data-cost-state": amount ? "approved" : "missing" },
+      h(
+        "dt",
+        null,
+        h(
+          "span",
+          { className: "ld-costs__label" },
+          copy.label,
+          nonEuOnly ? h("span", { className: "ld-costs__scope" }, costs.buyers.non_eu) : null,
+        ),
+        h("span", { className: "ld-costs__note" }, copy.note),
+      ),
+      h(
+        "dd",
+        null,
+        amount
+          ? h("span", { className: "ld-costs__value" }, formatEuro(amount.amount_eur, page.locale))
+          : h(
+              "span",
+              { className: "ld-costs__missing", "data-cost-missing": blocked ? blocked.reason : "not_approved" },
+              h(Icon, { name: "circle-alert", size: 14 }),
+              h("span", null, costs.missing_label),
+            ),
+      ),
+    );
+  };
+
+  return h(
+    "details",
+    {
+      className: "ld-costs",
+      "data-listing-costs": "true",
+      "data-costs-available": estimator.available ? "true" : "false",
+      "data-costs-reason": estimator.reason || "",
+      "data-costs-endpoint": estimator.endpoint,
+      "data-costs-missing-count": String(missingCount),
+    },
+    h(
+      "summary",
+      { className: "ld-costs__summary" },
+      h(Icon, { name: "calculator", size: 18 }),
+      h("span", { className: "ld-costs__summary-label" }, costs.title),
+      estimator.available ? null : h(Badge, { variant: "warning", icon: "circle-alert" }, costs.missing_label),
+      h(Icon, { name: "chevron-down", size: 16, className: "ld-costs__chevron" }),
+    ),
+    h(
+      "div",
+      { className: "ld-costs__body" },
+      h("p", { className: "ld-costs__intro" }, costs.intro),
+      h(
+        "p",
+        { className: "ld-costs__scopes" },
+        h("span", { className: "ld-costs__scopes-label" }, costs.buyer_label),
+        ...scopes.map((scope) =>
+          h(
+            "span",
+            {
+              key: scope,
+              className: "ld-costs__scope-chip",
+              "data-cost-scope": scope,
+              "data-cost-scope-available": table.find((row) => row.buyer_scope === scope)?.available ? "true" : "false",
+            },
+            costs.buyers[scope] || scope,
+          ),
+        ),
+      ),
+      h("dl", { className: "ld-costs__list" }, ...lineKeys.map((lineKey) => lineRow(lineKey))),
+      h(
+        "p",
+        { className: "ld-costs__total", "data-cost-total": estimator.available ? "available" : "unavailable" },
+        h("span", null, costs.total_label),
+        estimator.available && estimate?.total_eur !== null && estimate?.total_eur !== undefined
+          ? h("strong", null, formatEuro(estimate.total_eur, page.locale))
+          : h("strong", { className: "ld-costs__unavailable", "data-cost-total-unavailable": "true" }, costs.total_unavailable),
+      ),
+      estimator.available && estimate?.total_including_price_eur
+        ? h(
+            "p",
+            { className: "ld-costs__total ld-costs__total--with-price" },
+            h("span", null, costs.total_with_price_label),
+            h("strong", null, formatEuro(estimate.total_including_price_eur, page.locale)),
+          )
+        : null,
+      h(
+        "p",
+        { className: "ld-costs__source" },
+        h(Icon, { name: "info", size: 16 }),
+        h("span", null, estimator.available ? costs.note : estimator.notice || costs.note),
+      ),
+      h(Btn, { tag: "a", variant: "secondary", size: "sm", iconStart: "message-circle", href: costs.cta.path }, costs.cta.label),
+      labels ? null : null,
+    ),
+  );
 }
 
 function ListingBody({ page }) {
@@ -3558,6 +3774,10 @@ function ListingBody({ page }) {
                 ),
               )
             : null,
+          // Package P4: purchase costs and the brochure action sit between the
+          // reviewed facts and the area link, where a buyer decides.
+          h(ListingPurchaseCosts, { page }),
+          h(ListingBrochure, { page }),
           locationSection,
           mediaNav,
           gallery.length ? h("h2", { className: "ld-media-title" }, labels.gallery, h("small", null, `${galleryCount} ${photoCountLabel(galleryCount, labels)}`)) : null,
@@ -4485,6 +4705,644 @@ function GuideBody({ page }) {
   return shell(page, main);
 }
 
+/* ============================================================
+   Package P4: compare, about and team, saved-search management.
+   Every block below belongs to P4.
+   ============================================================ */
+
+function CompareBody({ page }) {
+  const body = page.body;
+  const copy = body.copy;
+  const labels = uiLabels(page);
+  const columns = body.columns || [];
+  const hasColumns = columns.length > 0;
+  // Removing a column is a plain link to the same page without that id, so it
+  // works before the client script runs; the script also drops the id from the
+  // saved list.
+  const withoutHref = (id) => {
+    const rest = columns.filter((column) => column.id !== id).map((column) => column.id);
+    return rest.length ? `${page.path}?ids=${rest.join(",")}` : page.path;
+  };
+
+  const columnHead = (column, index) =>
+    h(
+      "th",
+      { key: column.id, scope: "col", className: "cmp-col", "data-compare-column": column.id },
+      h(
+        "div",
+        { className: "cmp-col__in" },
+        h(
+          "a",
+          { className: "cmp-col__media", href: column.path, tabIndex: -1, "aria-hidden": "true" },
+          column.thumbnail
+            ? h("img", publicImageProps(column.thumbnail, column.title, index === 0 ? "eager" : "lazy"))
+            : h("span", { className: `cmp-col__tone cmp-col__tone--${toneFor(column.id)}` }, h(Icon, { name: "camera", size: 20 })),
+        ),
+        h(
+          "a",
+          { className: "cmp-col__title", href: column.path, "data-compare-open": column.id },
+          h("span", { className: "cmp-col__index" }, copy.columnLabel.replace("{index}", String(index + 1))),
+          h("span", { className: "cmp-col__name" }, column.title),
+        ),
+        h(
+          "a",
+          {
+            className: "cmp-col__remove",
+            href: withoutHref(column.id),
+            "data-compare-remove": column.id,
+            "aria-label": copy.removeLabel.replace("{title}", column.title),
+            title: copy.remove,
+          },
+          h(Icon, { name: "x", size: 16 }),
+          h("span", { className: "cmp-col__remove-label" }, copy.remove),
+        ),
+      ),
+    );
+
+  const table = h(
+    "table",
+    { className: "cmp-table", "data-compare-table": "true" },
+    h("caption", { className: "mk-sr-only" }, copy.tableLabel),
+    h(
+      "thead",
+      null,
+      h(
+        "tr",
+        null,
+        h("th", { scope: "col", className: "cmp-table__corner" }, copy.detail),
+        ...columns.map((column, index) => columnHead(column, index)),
+      ),
+    ),
+    h(
+      "tbody",
+      null,
+      ...(body.rows || []).map((row) =>
+        h(
+          "tr",
+          {
+            key: row.id,
+            "data-compare-row": row.id,
+            "data-compare-identical": row.identical ? "true" : "false",
+          },
+          h("th", { scope: "row", className: "cmp-table__label" }, row.label),
+          ...row.values.map((value, index) =>
+            h(
+              "td",
+              {
+                key: columns[index] ? columns[index].id : String(index),
+                "data-compare-cell": columns[index] ? columns[index].id : undefined,
+                "data-compare-numeric": row.numeric ? "true" : undefined,
+              },
+              value,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  // A checkbox disclosure rather than a button: identical rows collapse and
+  // expand from CSS alone, so a shared comparison link stays complete without
+  // JavaScript.
+  const identical = h(
+    "div",
+    { className: "cmp-identical", "data-compare-identical-disclosure": "true" },
+    h("input", {
+      type: "checkbox",
+      className: "cmp-identical__input",
+      id: "compare-identical",
+      "data-compare-identical-input": "true",
+    }),
+    h(
+      "label",
+      { className: "cmp-identical__label", htmlFor: "compare-identical" },
+      h(Icon, { name: "chevron-down", size: 16, className: "cmp-identical__chevron" }),
+      h(
+        "span",
+        { className: "cmp-identical__show", "data-compare-identical-show": copy.identicalShow },
+        copy.identicalShow.replace("{count}", String(body.identical_count)),
+      ),
+      h(
+        "span",
+        { className: "cmp-identical__hide", "data-compare-identical-hide": copy.identicalHide },
+        copy.identicalHide.replace("{count}", String(body.identical_count)),
+      ),
+    ),
+    h("p", { className: "cmp-identical__hint" }, copy.identicalHint),
+  );
+
+  const main = h(
+    "main",
+    {
+      id: "main",
+      tabIndex: -1,
+      className: "cmp-page",
+      "data-kind": "compare",
+      "data-react-public-ui": "compare",
+      "data-compare-page": "true",
+      "data-compare-state": body.state,
+      "data-compare-max": String(body.max_columns),
+      "data-compare-path": page.path,
+      "data-compare-storage-key": body.storage_key,
+      "data-compare-column-label": copy.columnLabel,
+      "data-min-touch-target": "44",
+    },
+    h(
+      "header",
+      { className: "cmp-head" },
+      h("h1", null, body.h1),
+      h("p", { className: "cmp-head__intro" }, body.intro),
+      h(
+        "div",
+        { className: "cmp-head__actions" },
+        h(Btn, { tag: "a", variant: "secondary", size: "sm", iconStart: "heart", href: body.saved.path }, copy.savedLink),
+        h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "search", href: body.search.path }, copy.addMore),
+      ),
+    ),
+    // Server-rendered fallback: shown until the client script confirms it can
+    // read the saved list from this browser.
+    h(
+      "section",
+      { className: "cmp-fallback", "data-compare-fallback": "true", "aria-labelledby": "compare-fallback-title" },
+      h(Icon, { name: "info", size: 20 }),
+      h(
+        "div",
+        null,
+        h("h2", { id: "compare-fallback-title" }, copy.fallbackTitle),
+        h("p", null, copy.fallbackText),
+        h(
+          "div",
+          { className: "cmp-fallback__actions" },
+          h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "heart", href: body.saved.path }, copy.savedLink),
+          h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "search", href: body.search.path }, copy.searchLink),
+        ),
+      ),
+    ),
+    h(
+      "section",
+      { className: "cmp-empty", "data-compare-empty": "true", "aria-live": "polite", hidden: true },
+      h("span", { className: "cmp-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "columns-3", size: 30 })),
+      h("h2", null, copy.emptyTitle),
+      h("p", null, copy.emptyText),
+      h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "search", href: body.search.path }, copy.searchLink),
+    ),
+    h(
+      "p",
+      {
+        className: "cmp-flag",
+        "data-compare-limit": "true",
+        "data-compare-limit-template": copy.limitNote,
+        role: "status",
+        hidden: body.over_limit ? undefined : true,
+      },
+      h(Icon, { name: "info", size: 16 }),
+      h(
+        "span",
+        null,
+        copy.limitNote.replace("{max}", String(body.max_columns)).replace("{count}", String(body.over_limit || body.max_columns)),
+      ),
+    ),
+    h(
+      "p",
+      { className: "cmp-flag", "data-compare-unavailable": "true", role: "status", hidden: body.unavailable_count ? undefined : true },
+      h(Icon, { name: "triangle-alert", size: 16 }),
+      h("span", null, copy.unavailableNote),
+    ),
+    h(
+      "div",
+      { className: "cmp", "data-compare-region": "true", hidden: hasColumns ? undefined : true },
+      identical,
+      h("div", { className: "cmp-scroll", "data-compare-scroll": "true", tabIndex: 0, role: "region", "aria-label": copy.tableLabel }, table),
+      h(
+        "div",
+        { className: "cmp-foot" },
+        ...columns.map((column) =>
+          h(
+            Btn,
+            { key: column.id, tag: "a", variant: "secondary", size: "sm", iconEnd: page.dir === "rtl" ? "arrow-left" : "arrow-right", href: column.path, "data-compare-foot-open": column.id },
+            copy.view,
+          ),
+        ),
+      ),
+      h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "plus", href: body.saved.path, className: "mk-btn mk-btn--ghost mk-btn--sm cmp-add" }, copy.addMore),
+    ),
+    labels.savedListings ? null : null,
+  );
+  return shell(page, main);
+}
+
+function AboutBody({ page }) {
+  const body = page.body;
+  const copy = body.copy;
+  const labels = uiLabels(page);
+  const team = body.team;
+  const contact = body.contact;
+
+  const main = h(
+    "main",
+    {
+      id: "main",
+      tabIndex: -1,
+      className: "ab-page",
+      "data-kind": "about",
+      "data-react-public-ui": "about",
+      "data-min-touch-target": "44",
+    },
+    h(
+      "header",
+      { className: "ab-head" },
+      h("h1", null, body.h1),
+      h("p", { className: "ab-head__intro" }, body.intro),
+      h(
+        "div",
+        { className: "ab-head__actions" },
+        h(Btn, { tag: "a", variant: "accent", size: "md", iconStart: "message-circle", href: contact.path }, contact.label),
+        h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "search", href: body.search.path }, labels.browseListings),
+      ),
+    ),
+    h(
+      "section",
+      { className: "ab-story", "aria-labelledby": "about-story-title" },
+      h("h2", { id: "about-story-title" }, body.story.title),
+      ...body.story.paragraphs.map((paragraph, index) => h("p", { key: index }, paragraph)),
+    ),
+    h(
+      "section",
+      { className: "ab-offices", "aria-labelledby": "about-offices-title", "data-about-offices": "true" },
+      h("h2", { id: "about-offices-title" }, body.offices.title),
+      h("p", { className: "ab-lede" }, body.offices.intro),
+      h(
+        "ul",
+        { className: "ab-offices__grid" },
+        ...body.offices.items.map((office) =>
+          h(
+            "li",
+            { key: office.id, className: "mk-card mk-card--pad-md ab-office", "data-about-office": office.id },
+            h(
+              "p",
+              { className: "ab-office__head" },
+              h(Icon, { name: "building-2", size: 18 }),
+              h("span", { className: "ab-office__town" }, office.town),
+            ),
+            h("p", { className: "ab-office__role" }, office.role),
+            h("p", { className: "ab-office__note" }, office.note),
+            h(
+              "a",
+              { className: "ab-office__call", href: contact.channels.phone.href },
+              h(Icon, { name: "phone", size: 16 }),
+              h("span", null, contact.channels.phone.label),
+            ),
+          ),
+        ),
+      ),
+    ),
+    h(
+      "section",
+      { className: "ab-pillars", "aria-labelledby": "about-pillars-title", "data-about-pillars": "true" },
+      h("h2", { id: "about-pillars-title" }, body.pillars.title),
+      h("p", { className: "ab-lede" }, body.pillars.intro),
+      h(
+        "dl",
+        { className: "ab-pillars__list" },
+        ...body.pillars.items.map((pillar) =>
+          h(
+            "div",
+            { key: pillar.id, className: "ab-pillar", "data-about-pillar": pillar.id },
+            h("dt", null, h(Icon, { name: pillar.icon, size: 18 }), h("span", null, pillar.title)),
+            h("dd", null, pillar.text),
+          ),
+        ),
+      ),
+    ),
+    h(
+      "section",
+      {
+        className: "ab-team",
+        "aria-labelledby": "about-team-title",
+        "data-about-team": "true",
+        "data-about-team-available": team.available ? "true" : "false",
+        "data-about-team-count": String(team.profiles.length),
+      },
+      h("h2", { id: "about-team-title" }, team.title),
+      h("p", { className: "ab-lede" }, team.intro),
+      team.empty
+        ? h(
+            "div",
+            {
+              className: "ab-team__empty",
+              "data-about-team-empty": "true",
+              "data-about-team-reason": team.empty.reason,
+              "data-about-team-source": team.empty.source,
+            },
+            h("span", { className: "ab-team__empty-icon", "aria-hidden": "true" }, h(Icon, { name: "users", size: 26 })),
+            h(
+              "div",
+              null,
+              h("p", { className: "ab-team__empty-title" }, team.empty.title),
+              h("p", { className: "ab-team__empty-text" }, team.empty.text),
+              h("p", { className: "ab-team__empty-fields" }, team.empty.fields),
+              h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "phone", href: contact.channels.phone.href }, contact.channels.phone.label),
+            ),
+          )
+        : h(
+            "ul",
+            { className: "ab-team__grid" },
+            ...team.profiles.map((profile) =>
+              h(
+                "li",
+                { key: profile.profile_key, className: "mk-card mk-card--pad-md ab-member", "data-about-team-member": profile.profile_key },
+                // A face is shown only when the photo itself was approved.
+                // Otherwise the card carries initials, never a borrowed image.
+                profile.photo
+                  ? h("img", {
+                      className: "ab-member__photo",
+                      src: profile.photo.url,
+                      alt: profile.photo.alt || profile.name,
+                      loading: "lazy",
+                      decoding: "async",
+                    })
+                  : h(
+                      "span",
+                      { className: "ab-member__photo ab-member__photo--pending", "data-about-team-photo": "not_approved", "aria-hidden": "true" },
+                      String(profile.name || "")
+                        .split(/\s+/u)
+                        .slice(0, 2)
+                        .map((part) => part.charAt(0))
+                        .join(""),
+                    ),
+                h("p", { className: "ab-member__name" }, profile.name),
+                h("p", { className: "ab-member__role" }, profile.role),
+                profile.office ? h("p", { className: "ab-member__office" }, profile.office) : null,
+                profile.languages?.length ? h("p", { className: "ab-member__languages" }, profile.languages.join(", ")) : null,
+                profile.bio ? h("p", { className: "ab-member__bio" }, profile.bio) : null,
+                profile.licence
+                  ? h(
+                      "p",
+                      { className: "ab-member__licence", "data-about-team-licence": "true" },
+                      [profile.licence.reference, profile.licence.authority].filter(Boolean).join(" · "),
+                    )
+                  : null,
+              ),
+            ),
+          ),
+    ),
+    h(
+      "section",
+      { className: "ab-contact", "aria-labelledby": "about-contact-title" },
+      h("h2", { id: "about-contact-title" }, contact.title),
+      h("p", { className: "ab-lede" }, contact.text),
+      h(
+        "div",
+        { className: "ab-contact__actions" },
+        h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: contact.channels.phone.href }, contact.channels.phone.label),
+        h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: contact.channels.whatsapp.href }, contact.channels.whatsapp.label),
+        h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "mail", href: contact.channels.email.href }, contact.channels.email.label),
+      ),
+    ),
+  );
+  return shell(page, main);
+}
+
+function AlertsBody({ page }) {
+  const body = page.body;
+  const copy = body.copy;
+  const contact = body.contact;
+  const labels = uiLabels(page);
+  const controlNote = "alerts-controls-note";
+
+  // The managed record. Filled by the client from GET
+  // /api/saved-searches/manage when the visitor arrives on their capability
+  // link; a refused token renders the same "no valid link" state as no token
+  // at all, so the page never confirms whether a saved search exists.
+  const managed = h(
+    "section",
+    {
+      className: "al-managed",
+      "data-alerts-managed": "true",
+      hidden: true,
+      "aria-labelledby": "alerts-managed-title",
+    },
+    h(
+      "div",
+      { className: "al-managed__head" },
+      h("h2", { id: "alerts-managed-title" }, copy.linkTitle),
+      h(
+        "span",
+        { className: "mk-badge mk-badge--neutral mk-badge--sm al-managed__status", "data-alert-status": "true", "data-status-active": copy.statusActive, "data-status-paused": copy.statusPaused },
+        copy.statusActive,
+      ),
+    ),
+    h("p", { className: "al-managed__intro" }, copy.linkIntro),
+    h("h3", { className: "al-managed__criteria", "data-alert-title": "true" }),
+    h(
+      "dl",
+      { className: "al-item__facts" },
+      h("div", null, h("dt", null, copy.frequency), h("dd", { "data-alert-frequency": "true" })),
+      h("div", null, h("dt", null, copy.channel), h("dd", { "data-alert-channel": "true" })),
+      h("div", null, h("dt", null, copy.matchesNow), h("dd", { "data-alert-matches": "true" })),
+      h("div", null, h("dt", null, copy.nextAlert), h("dd", null, h("time", { "data-alert-next": "true" }))),
+      h("div", null, h("dt", null, copy.requested), h("dd", null, h("time", { "data-alert-date": "true" }))),
+    ),
+    h(
+      "div",
+      { className: "al-managed__controls" },
+      h(
+        "a",
+        { className: "mk-btn mk-btn--secondary mk-btn--md", "data-alert-open": "true", href: body.search.path },
+        h(Icon, { name: "search", size: 16 }),
+        h("span", null, copy.openSearch),
+      ),
+      ...body.controls.map((control) =>
+        h(
+          "button",
+          {
+            key: control.id,
+            type: "button",
+            className: `mk-btn mk-btn--${control.id === "delete" ? "ghost" : "secondary"} mk-btn--md`,
+            "data-alert-action": control.id,
+            "data-alert-confirm": control.id === "delete" ? copy.deleteConfirm : undefined,
+            hidden: control.id === "resume" ? true : undefined,
+          },
+          h(Icon, { name: control.icon, size: 16 }),
+          h("span", null, control.label),
+        ),
+      ),
+    ),
+    h(
+      "div",
+      { className: "al-managed__tune" },
+      h(
+        "label",
+        { className: "al-managed__field" },
+        h("span", null, copy.changeFrequency),
+        h(
+          "select",
+          { "data-alert-frequency-select": "true" },
+          ...body.manage.frequencies.map((value) => h("option", { key: value, value }, body.frequencies[value] || value)),
+        ),
+      ),
+      h(
+        "label",
+        { className: "al-managed__field", "data-alert-channel-field": "true", hidden: true },
+        h("span", null, copy.changeChannel),
+        h("select", { "data-alert-channel-select": "true" }),
+      ),
+    ),
+    h(
+      "p",
+      {
+        className: "al-managed__status-line",
+        "data-alert-feedback": "true",
+        role: "status",
+        "aria-live": "polite",
+        "data-saving": copy.saving,
+        "data-saved": copy.savedChange,
+        "data-failed": copy.failedChange,
+        "data-deleted": copy.deleted,
+      },
+    ),
+    h("p", { className: "al-managed__expiry" }, h("span", null, `${copy.linkExpires} `), h("time", { "data-alert-expires": "true" })),
+  );
+
+  // A refused, expired or unknown token is one indistinguishable state.
+  const linkInvalid = h(
+    "section",
+    { className: "al-fallback al-fallback--invalid", "data-alerts-link-invalid": "true", hidden: true, "aria-labelledby": "alerts-invalid-title" },
+    h(Icon, { name: "triangle-alert", size: 20 }),
+    h(
+      "div",
+      null,
+      h("h2", { id: "alerts-invalid-title" }, copy.linkInvalidTitle),
+      h("p", null, copy.linkInvalidText),
+      h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "search", href: body.search.path }, body.search.label),
+    ),
+  );
+
+  // Searches this browser recorded at save time. Their controls stay disabled:
+  // without the capability link the site cannot prove who asked for the alert.
+  const rowTemplate = h(
+    "template",
+    { "data-alerts-row-template": "true" },
+    h(
+      "li",
+      { className: "al-item", "data-alert-item": "true" },
+      h("div", { className: "al-item__head" }, h("h3", { className: "al-item__title", "data-alert-title": "true" })),
+      h(
+        "dl",
+        { className: "al-item__facts" },
+        h("div", { className: "al-item__facts-wide" }, h("dt", null, copy.criteria), h("dd", { "data-alert-criteria": "true" })),
+        h("div", null, h("dt", null, copy.frequency), h("dd", { "data-alert-frequency": "true" })),
+        h("div", null, h("dt", null, copy.channel), h("dd", { "data-alert-channel": "true" })),
+        h("div", null, h("dt", null, copy.requested), h("dd", null, h("time", { "data-alert-date": "true" }))),
+      ),
+      h(
+        "div",
+        { className: "al-item__actions" },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", "data-alert-open": "true", href: body.search.path },
+          h(Icon, { name: "search", size: 16 }),
+          h("span", null, copy.openSearch),
+        ),
+        ...body.controls.map((control) =>
+          h(
+            "button",
+            {
+              key: control.id,
+              type: "button",
+              className: "mk-btn mk-btn--ghost mk-btn--sm",
+              disabled: true,
+              "aria-disabled": "true",
+              "aria-describedby": controlNote,
+              "data-alert-control": control.id,
+            },
+            h(Icon, { name: control.icon, size: 16 }),
+            h("span", null, control.label),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  const main = h(
+    "main",
+    {
+      id: "main",
+      tabIndex: -1,
+      className: "al-page",
+      "data-kind": "alerts",
+      "data-react-public-ui": "alerts",
+      "data-alerts-page": "true",
+      "data-alerts-storage-key": body.storage_key,
+      "data-alerts-endpoint": body.create.endpoint,
+      "data-alerts-manage-endpoint": body.manage.endpoint,
+      "data-alerts-token-param": body.manage.token_param,
+      // Localised labels the client needs to name a stored record without a
+      // lookup table of its own.
+      "data-alerts-frequencies": JSON.stringify(body.frequencies),
+      "data-alerts-channels": JSON.stringify(body.channels),
+      "data-alerts-any": copy.anyCriteria,
+      "data-alerts-filter-labels": JSON.stringify(body.filter_labels),
+      "data-alerts-search-path": body.search.path,
+      "data-min-touch-target": "44",
+    },
+    h("header", { className: "al-head" }, h("h1", null, body.h1), h("p", { className: "al-head__intro" }, body.intro)),
+    managed,
+    linkInvalid,
+    h(
+      "section",
+      { className: "al-notice", "data-alerts-link-explainer": "true", "aria-labelledby": "alerts-notice-title" },
+      h("h2", { id: "alerts-notice-title" }, copy.notConnectedTitle),
+      h("p", null, copy.notConnectedText),
+      h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "message-circle", href: contact.path }, contact.label),
+    ),
+    h(
+      "section",
+      { className: "al-fallback", "data-alerts-fallback": "true", "aria-labelledby": "alerts-fallback-title" },
+      h(Icon, { name: "info", size: 20 }),
+      h(
+        "div",
+        null,
+        h("h2", { id: "alerts-fallback-title" }, copy.fallbackTitle),
+        h("p", null, copy.fallbackText),
+        h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "search", href: body.search.path }, body.search.label),
+      ),
+    ),
+    h(
+      "section",
+      { className: "al-empty", "data-alerts-empty": "true", "aria-live": "polite", hidden: true },
+      h("span", { className: "al-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "bell", size: 30 })),
+      h("h2", null, copy.emptyTitle),
+      h("p", null, copy.emptyText),
+      h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "search", href: body.search.path }, copy.emptyCta),
+    ),
+    h(
+      "section",
+      { className: "al-listing", "data-alerts-region": "true", hidden: true, "aria-labelledby": "alerts-list-title" },
+      h("h2", { id: "alerts-list-title" }, copy.localTitle),
+      h("p", { className: "al-lede" }, copy.localIntro),
+      h("p", { className: "al-device", "data-alerts-device-note": "true" }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, copy.deviceNote)),
+      h("ul", { className: "al-list", "data-alerts-list": "true" }),
+      h("p", { className: "al-controls-note", id: controlNote }, copy.localControlsNote),
+    ),
+    rowTemplate,
+    h(
+      "section",
+      { className: "al-contact", "aria-labelledby": "alerts-contact-title" },
+      h("h2", { id: "alerts-contact-title" }, copy.contactTitle),
+      h("p", null, copy.contactText),
+      h(
+        "div",
+        { className: "al-contact__actions" },
+        h(Btn, { tag: "a", variant: "accent", size: "md", iconStart: "phone", href: contact.phone.href }, contact.phone.label),
+        h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "message-circle", href: contact.path }, contact.label),
+      ),
+    ),
+    labels ? null : null,
+  );
+  return shell(page, main);
+}
+
 export function renderReactPublicBody(page) {
   if (page.kind === "home") return renderStaticElement(h(HomeBody, { page }));
   if (page.kind === "search") return renderStaticElement(h(SearchBody, { page }));
@@ -4492,6 +5350,9 @@ export function renderReactPublicBody(page) {
   if (page.kind === "location") return renderStaticElement(h(LocationBody, { page }));
   if (page.kind === "seller") return renderStaticElement(h(SellerBody, { page }));
   if (page.kind === "start") return renderStaticElement(h(StartBody, { page }));
+  if (page.kind === "compare") return renderStaticElement(h(CompareBody, { page }));
+  if (page.kind === "about") return renderStaticElement(h(AboutBody, { page }));
+  if (page.kind === "alerts") return renderStaticElement(h(AlertsBody, { page }));
   if (page.kind === "contact") return renderStaticElement(h(ContactBody, { page }));
   if (page.kind === "search_unavailable") return renderStaticElement(h(SearchUnavailableBody, { page }));
   if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));
