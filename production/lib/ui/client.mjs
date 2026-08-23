@@ -928,6 +928,35 @@ export const PUBLIC_APP_JS = `(function () {
       })(images[i]);
     }
   }
+  function initListingGalleryLinks() {
+    // "All N photos" is a plain anchor to the photo grid; once the viewer
+    // dialog can open, it takes over instead of jumping down the page.
+    var dialog = document.querySelector("[data-listing-gallery-dialog]");
+    if (!dialog || typeof dialog.showModal !== "function") return;
+    var links = document.querySelectorAll("a[data-listing-gallery-open]");
+    for (var i = 0; i < links.length; i += 1) {
+      links[i].addEventListener("click", function (event) { event.preventDefault(); });
+    }
+  }
+  function initListingGalleryImageState() {
+    // The viewer swaps one <img> between photos, so the figure carries the
+    // loading and failed states: a spinner while the next photo arrives, a
+    // notice when it never does.
+    var figure = document.querySelector("[data-listing-gallery-figure]");
+    var image = figure ? figure.querySelector("[data-listing-gallery-image]") : null;
+    if (!figure || !image) return;
+    function loaded() { figure.removeAttribute("data-image-state"); }
+    function failed() { figure.setAttribute("data-image-state", "unavailable"); }
+    image.addEventListener("load", loaded);
+    image.addEventListener("error", failed);
+    if (typeof MutationObserver === "function") {
+      new MutationObserver(function () {
+        if (image.complete && image.naturalWidth > 0) return;
+        figure.setAttribute("data-image-state", "loading");
+      }).observe(image, { attributes: true, attributeFilter: ["src"] });
+    }
+    if (image.complete && image.naturalWidth === 0) failed();
+  }
   function initListingGallery() {
     var dialog = document.querySelector("[data-listing-gallery-dialog]");
     var sourceButtons = document.querySelectorAll("[data-listing-gallery-source]");
@@ -1643,6 +1672,8 @@ export const PUBLIC_APP_JS = `(function () {
   initHeroGallery();
   initHorizontalFocusRails();
   initImageFallbacks();
+ initListingGalleryLinks();
+ initListingGalleryImageState();
  initListingGallery();
  initMobileListingGallery();
  initSellerIntake();

@@ -1,5 +1,5 @@
 import { h, renderStaticElement } from "./react-static-html.mjs";
-import { humanizeIdentifier, labelsFor, localizedListingValue, localizedSearchFilterValue, uiCopyFor } from "./public-site.mjs";
+import { humanizeIdentifier, labelsFor, localizedListingValue, localizedLocationValue, localizedSearchFilterValue, uiCopyFor } from "./public-site.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
 
@@ -13,7 +13,16 @@ function price(value, labels = labelsFor("en"), localeCode = "en") {
 }
 
 function cardSummary(card) {
-  return [card.location, card.property_type_label || card.property_type, card.offer_type_label || card.offer_type].filter(Boolean).join(" / ");
+  // The offer type rides on the photo badge, so the location line stays short.
+  return [card.location, card.property_type_label || card.property_type].filter(Boolean).join(" · ");
+}
+
+function fillLabel(template, values = {}) {
+  return String(template || "").replace(/\{(\w+)\}/g, (match, key) => (values[key] === undefined ? match : String(values[key])));
+}
+
+function hasFact(value) {
+  return value !== null && value !== undefined && value !== "";
 }
 
 // Placeholder photo tones from the DS media tokens; deterministic per listing id
@@ -620,13 +629,19 @@ function publicImageProps(image, fallbackAlt, loading = "lazy", fetchPriority) {
 function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orientation = "vertical", rootAttrs, priority = false }) {
   const badge = cardBadge(card, labels, localeCode);
   const tone = toneFor(card.id);
-  const mediaCountText = `${card.image_count || 0} ${photoCountLabel(card.image_count || 0, labels)}`;
+  const imageCount = Number(card.image_count || 0);
+  const mediaCountText = `${imageCount} ${photoCountLabel(imageCount, labels)}`;
+  const isRent = card.offer_type === "rent";
+  const offerLabel = card.offer_type_label || (card.offer_type ? localizedListingValue(localeCode, "offer_type", card.offer_type) : "");
+  const statusLabel = card.listing_status && card.listing_status !== "available" ? labels.listingStatuses?.[card.listing_status] : null;
   const mediaChildren = [
-    badge
-      ? h(
-          "div",
-          { key: "badges", className: "mk-pcard__badges" },
-          h(
+    h(
+      "div",
+      { key: "badges", className: "mk-pcard__badges" },
+      offerLabel ? h(Badge, { variant: isRent ? "for-rent" : "for-sale", solid: true, "data-card-offer": card.offer_type }, offerLabel) : null,
+      statusLabel ? h(Badge, { variant: "reduced", solid: true, "data-card-status": card.listing_status }, statusLabel) : null,
+      badge
+        ? h(
             Badge,
             {
               variant: badge.variant,
@@ -636,9 +651,9 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
               lang: badge.contentLocale || undefined,
             },
             badge.label,
-          ),
-        )
-      : null,
+          )
+        : null,
+    ),
     h(
       "span",
       { key: "count", className: "mk-pcard__count", "data-card-media-count": card.image_count },
@@ -646,24 +661,22 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       ` ${mediaCountText}`,
     ),
   ];
+  const mediaAttrs = {
+    href: card.path,
+    className: `mk-pcard__media mk-photo mk-photo--${tone}`,
+    "aria-label": `${card.title}; ${mediaCountText}`,
+    lang: card.content_locale || undefined,
+  };
+  const photoPlaceholder = h("span", { key: "noimage", className: "mk-pcard__noimage", "aria-hidden": "true" }, h(Icon, { name: "camera", size: 22 }));
   const media = card.thumbnail?.url
     ? h(
         "a",
-        {
-          href: card.path,
-          className: `mk-pcard__media mk-photo mk-photo--${tone}`,
-          "data-card-thumbnail": "true",
-          "aria-label": `${card.title}; ${mediaCountText}`,
-          lang: card.content_locale || undefined,
-        },
+        { ...mediaAttrs, "data-card-thumbnail": "true" },
         h("img", publicImageProps(card.thumbnail, card.title, priority ? "eager" : "lazy", priority ? "high" : undefined)),
+        photoPlaceholder,
         ...mediaChildren,
       )
-    : h(
-        "a",
-        { href: card.path, className: `mk-pcard__media mk-photo mk-photo--${tone}`, "aria-label": `${card.title}; ${mediaCountText}`, lang: card.content_locale || undefined },
-        ...mediaChildren,
-      );
+    : h("a", mediaAttrs, photoPlaceholder, ...mediaChildren);
   return h(
     "article",
     {
@@ -679,7 +692,12 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
     h(
       "div",
       { className: "mk-pcard__body" },
-      h("div", { className: "mk-pcard__pricerow" }, h("span", { className: "mk-pcard__price", "data-card-price": "true" }, price(card.price_eur, labels, localeCode))),
+      h(
+        "div",
+        { className: "mk-pcard__pricerow" },
+        h("span", { className: "mk-pcard__price", "data-card-price": "true" }, price(card.price_eur, labels, localeCode)),
+        isRent && !card.price_on_request && Number(card.price_eur) > 1 ? h("span", { className: "mk-pcard__per" }, labels.perMonth) : null,
+      ),
       h("h2", { className: "mk-pcard__title", lang: card.content_locale || undefined }, h("a", { href: card.path }, card.title)),
       h(
         "div",
@@ -693,12 +711,10 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
         card.bedrooms && !card.bedrooms_not_applicable
           ? h("span", { "data-card-spec": "bedrooms" }, h(Icon, { name: "bed", size: 16 }), ` ${card.bedrooms}`)
           : null,
-        card.land_area_sqm ? h("span", { "data-card-spec": "land" }, h(Icon, { name: "map", size: 16 }), ` ${card.land_area_sqm} m²`) : null,
         card.area_sqm ? h("span", { "data-card-spec": "area" }, h(Icon, { name: "ruler", size: 16 }), ` ${card.area_sqm} m²`) : null,
-        h("span", { "data-card-spec": "photos" }, h(Icon, { name: "camera", size: 16 }), ` ${card.image_count || 0}`),
-        /^MS-CRAWL-/i.test(card.id)
-          ? null
-          : h("span", { className: "mk-pcard__ref", "data-card-spec": "reference" }, card.id),
+        card.land_area_sqm ? h("span", { "data-card-spec": "land" }, h(Icon, { name: "map", size: 16 }), ` ${card.land_area_sqm} m²`) : null,
+        h("span", { "data-card-spec": "photos" }, h(Icon, { name: "camera", size: 16 }), ` ${imageCount}`),
+        /^MS-CRAWL-/i.test(card.id) ? null : h("span", { className: "mk-pcard__ref", "data-card-spec": "reference" }, card.id),
       ),
       h(
         "nav",
@@ -734,6 +750,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
             "data-save-label": card.actions.save.label,
             "data-saved-label": card.actions.save.saved_label || labels.saved,
             "aria-label": card.actions.save.label,
+            "aria-pressed": "false",
           },
           h(Icon, { name: "heart", size: 16 }),
           h("span", null, card.actions.save.label),
@@ -743,34 +760,64 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
   );
 }
 
-function factsList(facts = {}, labels = labelsFor("en"), localeCode = "en") {
-  // Attribute-only <dl>: tests assert the literal `<dl data-listing-facts="true">`;
-  // styling hooks onto the attribute selector in adapter-public.css.
+const LISTING_FACT_GROUPS = [
+  { id: "property", keys: ["property_type", "offer_type", "bedrooms", "area_sqm", "condition"] },
+  { id: "building", keys: ["floor", "storeys"] },
+  { id: "land", keys: ["land_area_sqm"] },
+  { id: "status", keys: ["availability", "verified", "location_precision", "reference", "source_language"] },
+];
+
+// Every reviewed fact the detail page can state, keyed for the grouped facts
+// block and for the facts bar. Only facts that carry a value come back.
+function listingFactRows({ facts, labels, ui, localeCode, verificationDate, verifiedAt, reference, sourceLanguage }) {
+  const factLabel = (key) => labels.factLabels?.[key] || key.replaceAll("_", " ");
+  const rows = {};
+  if (hasFact(facts.property_type)) rows.property_type = { label: factLabel("property_type"), value: localizedListingValue(localeCode, "property_type", facts.property_type) };
+  if (hasFact(facts.offer_type)) rows.offer_type = { label: factLabel("offer_type"), value: localizedListingValue(localeCode, "offer_type", facts.offer_type) };
+  if (hasFact(facts.bedrooms) && !facts.bedrooms_not_applicable) rows.bedrooms = { label: factLabel("bedrooms"), value: String(facts.bedrooms) };
+  if (hasFact(facts.area_sqm)) rows.area_sqm = { label: factLabel("area_sqm"), value: `${facts.area_sqm} m²` };
+  if (hasFact(facts.condition)) rows.condition = { label: factLabel("condition"), value: String(facts.condition) };
+  if (hasFact(facts.floor)) {
+    rows.floor = { label: factLabel("floor"), value: hasFact(facts.total_floors) ? `${facts.floor}/${facts.total_floors}` : String(facts.floor) };
+  } else if (hasFact(facts.total_floors)) {
+    rows.storeys = { label: factLabel("storeys"), value: String(facts.total_floors) };
+  }
+  if (hasFact(facts.land_area_sqm)) rows.land_area_sqm = { label: factLabel("land_area_sqm"), value: `${facts.land_area_sqm} m²` };
+  if (hasFact(facts.listing_status)) {
+    rows.availability = { label: labels.availability, value: labels.listingStatuses?.[facts.listing_status] || humanizeIdentifier(facts.listing_status) };
+  }
+  if (verificationDate) rows.verified = { label: ui.verifiedInventory, value: h("time", { dateTime: verifiedAt }, verificationDate) };
+  if (hasFact(facts.location_precision)) {
+    rows.location_precision = { label: factLabel("location_precision"), value: ui.locationPrecisions?.[facts.location_precision] || humanizeIdentifier(facts.location_precision) };
+  }
+  if (reference) rows.reference = { label: labels.reference, value: reference, mono: true };
+  if (sourceLanguage) rows.source_language = { label: labels.sourceLanguage, value: sourceLanguage, lang: sourceLanguage.toLowerCase() };
+  return rows;
+}
+
+function ListingFactGroups({ rows, labels }) {
+  // Each group keeps the attribute-only <dl>: tests assert the literal
+  // `<dl data-listing-facts="true">` and the CSS hooks onto that attribute.
+  const groups = LISTING_FACT_GROUPS.map((group) => ({ ...group, keys: group.keys.filter((key) => rows[key]) })).filter((group) => group.keys.length);
+  if (!groups.length) return null;
   return h(
-    "dl",
-    { "data-listing-facts": "true" },
-    ...["property_type", "offer_type", "bedrooms", "area_sqm", "floor", "land_area_sqm", "condition", "location_precision"]
-      .map((key) => [key, facts[key]])
-      .filter(([key, value]) => {
-        if (key === "bedrooms" && facts.bedrooms_not_applicable) return false;
-        return value !== null && value !== undefined && value !== "";
-      })
-      .flatMap(([key, value]) => [
-        h("dt", { key: `${key}-term` }, key === "area_sqm" ? labels.area : labels.factLabels?.[key] || key.replaceAll("_", " ")),
+    "div",
+    { className: "ld-factgroups" },
+    ...groups.map((group) =>
+      h(
+        "section",
+        { key: group.id, className: "ld-factgroup", "data-listing-fact-group": group.id },
+        h("h3", null, labels.factGroups?.[group.id] || group.id),
         h(
-          "dd",
-          { key: `${key}-value` },
-          key === "property_type" || key === "offer_type"
-            ? localizedListingValue(localeCode, key, value)
-            : key === "area_sqm" || key === "land_area_sqm"
-              ? `${value} m²`
-              : key === "floor" && facts.total_floors !== null && facts.total_floors !== undefined && facts.total_floors !== ""
-                ? `${value}/${facts.total_floors}`
-                : key === "location_precision"
-                  ? uiCopyFor(localeCode).locationPrecisions?.[value] || humanizeIdentifier(value)
-              : value,
+          "dl",
+          { "data-listing-facts": "true" },
+          ...group.keys.flatMap((key) => [
+            h("dt", { key: `${key}-term` }, rows[key].label),
+            h("dd", { key: `${key}-value`, className: rows[key].mono ? "ld-factgroup__mono" : undefined, lang: rows[key].lang }, rows[key].value),
+          ]),
         ),
-      ]),
+      ),
+    ),
   );
 }
 
@@ -1977,10 +2024,11 @@ function SearchBody({ page }) {
               ),
             ),
         h(OfficialAreaMaps, { page, labels }),
+        savedView ? h("p", { className: "sr-saved__hint" }, labels.savedHint) : null,
         savedView
           ? h(
               "section",
-              { className: "sr-saved-empty", "data-saved-listings-empty": "true", "aria-live": "polite", hidden: true },
+              { className: "sr-saved-empty", "data-saved-listings-empty": "true", "aria-live": "polite" },
               h("span", { className: "sr-saved-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "heart", size: 30 })),
               h("p", null, labels.savedEmpty),
               h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "search", href: page.path }, labels.browseListings),
@@ -2002,13 +2050,35 @@ function SearchBody({ page }) {
           : h(
               "section",
               {
-                className: "sr-list",
+                className: savedView ? "sr-list sr-list--grid" : "sr-list",
                 "aria-label": savedView ? labels.savedListings : labels.searchResults,
                 "data-search-results": "true",
                 "data-saved-listings-grid": savedView ? "true" : undefined,
+                hidden: savedView ? true : undefined,
               },
-              ...(page.cards || []).map((card, index) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "horizontal", priority: index === 0 })),
+              ...(page.cards || []).map((card, index) =>
+                h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: savedView ? "vertical" : "horizontal", priority: index === 0 }),
+              ),
             ),
+        savedView
+          ? h(
+              "details",
+              { className: "sr-saved__search", "data-saved-search-disclosure": "true" },
+              h(
+                "summary",
+                null,
+                h(Icon, { name: "bell", size: 18 }),
+                h("span", null, labels.saveSearch),
+                h(Icon, { name: "chevron-down", size: 16, className: "sr-saved__chevron" }),
+              ),
+              h(
+                "div",
+                { className: "sr-saved__search-body" },
+                h("p", null, labels.saveSearchHint),
+                h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "search", href: page.path }, labels.search),
+              ),
+            )
+          : null,
         !savedView && page.search.pagination?.total_pages > 1
           ? h(
               "nav",
@@ -2034,9 +2104,16 @@ function SearchBody({ page }) {
 
 function LocationBody({ page }) {
   const labels = uiLabels(page);
+  const chrome = page.chrome;
   const cards = page.cards || [];
   const context = page.body.context;
-  const searchPath = page.chrome?.nav?.find((item) => item.id === "buy")?.href || `/${page.locale}/search`;
+  const subAreas = page.body.sub_areas || [];
+  const guides = page.body.guides || [];
+  const seller = page.body.seller;
+  const searchPath = chrome?.nav?.find((item) => item.id === "buy")?.href || `/${page.locale}/search`;
+  const allListingsHref = page.body.search_href || searchPath;
+  const locationName = localizedLocationValue(page.locale, page.body.location);
+  const forwardArrow = page.dir === "rtl" ? "arrow-left" : "arrow-right";
   const main = h(
     "main",
     {
@@ -2049,25 +2126,51 @@ function LocationBody({ page }) {
       "data-list-first-mobile": "true",
     },
     h(
-      "section",
-      { className: "hp-sec" },
+      "header",
+      { className: "loc-head" },
       h(
         "div",
-        { className: "hp-sec__head" },
-        h("div", null, h("h1", null, page.body.h1), h("p", null, `${page.body.listing_count} ${labels.reviewedListings}`)),
+        { className: "loc-head__in" },
+        h("h1", null, page.body.h1),
+        h("p", { className: "loc-head__count", "data-location-count": page.body.listing_count }, `${page.body.listing_count} ${labels.reviewedListings}`),
+        page.body.intro ? h("p", { className: "loc-head__intro" }, page.body.intro) : null,
+        context
+          ? h(
+              "div",
+              { className: "loc-context", "data-location-context": "true" },
+              h(Icon, { name: "file-check", size: 18 }),
+              h("p", null, `${context.summary} `, h("a", { href: context.href }, context.title)),
+            )
+          : null,
+        subAreas.length > 1
+          ? h(
+              "nav",
+              { className: "loc-areas", "aria-label": labels.areas, "data-location-areas": "true" },
+              ...subAreas.map((area) =>
+                h(
+                  "a",
+                  { key: area.id, className: "mk-tag mk-tag--outline mk-tag--interactive", href: area.href, "data-location-area": area.id },
+                  area.label,
+                  h("span", { className: "loc-areas__count" }, String(area.count)),
+                ),
+              ),
+            )
+          : null,
       ),
-      context
-        ? h(
-            "aside",
-            { className: "mk-card mk-card--pad-md", "data-location-context": "true" },
-            h("p", null, context.summary),
-            h("a", { href: context.href }, context.title),
-          )
-        : null,
+    ),
+    h(
+      "section",
+      { className: "loc-sec", "aria-label": labels.locationListings },
+      h(
+        "div",
+        { className: "loc-sec__head" },
+        h("h2", null, labels.locationListings),
+        cards.length ? h(Btn, { tag: "a", variant: "secondary", iconEnd: forwardArrow, href: allListingsHref, "data-location-all": "true" }, labels.browseAllListings) : null,
+      ),
       cards.length
         ? h(
             "div",
-            { className: "hp-grid", "aria-label": labels.locationListings, "data-location-listings": "true" },
+            { className: "loc-grid", "aria-label": labels.locationListings, "data-location-listings": "true" },
             ...cards.map((card, index) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, priority: index === 0 })),
           )
         : h(
@@ -2075,13 +2178,56 @@ function LocationBody({ page }) {
             { className: "mk-empty loc-empty", "data-location-empty": "true", "aria-label": labels.noLocationListings },
             h("span", { className: "loc-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "map-pin", size: 24 })),
             h("h2", null, labels.noLocationListings),
+            h("p", { className: "loc-empty__text" }, labels.saveSearchHint),
             h(
               "div",
               { className: "mk-empty__actions" },
               h(Btn, { tag: "a", variant: "primary", size: "lg", iconStart: "search", href: searchPath }, labels.browseAllListings),
+              chrome?.contact?.path
+                ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: chrome.contact.path }, chrome.contact.label)
+                : null,
             ),
           ),
     ),
+    guides.length
+      ? h(
+          "section",
+          { className: "loc-sec loc-guides", "aria-label": chrome?.copy?.buyerGuides || labels.guideActions, "data-location-guides": "true" },
+          h("div", { className: "loc-sec__head" }, h("h2", null, chrome?.copy?.buyerGuides || labels.guideActions)),
+          h(
+            "div",
+            { className: "loc-guides__rail" },
+            ...guides.map((guide) =>
+              h(
+                "a",
+                { key: guide.href, className: "loc-guide", href: guide.href },
+                h("h3", null, guide.title),
+                guide.summary ? h("p", null, guide.summary) : null,
+                h("span", { className: "loc-guide__more", "aria-hidden": "true" }, h(Icon, { name: forwardArrow, size: 16 })),
+              ),
+            ),
+          ),
+        )
+      : null,
+    seller
+      ? h(
+          "section",
+          { className: "loc-cta", "aria-label": labels.sellerValuation, "data-location-sell": "true" },
+          h(
+            "div",
+            { className: "loc-cta__in" },
+            h("div", null, h("h2", null, fillLabel(labels.sellInLocation, { location: locationName })), seller.description ? h("p", null, seller.description) : null),
+            h(
+              "nav",
+              { className: "loc-cta__actions", "aria-label": labels.primaryActions },
+              h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: seller.path, "data-action": "seller" }, seller.label),
+              chrome?.contact?.path
+                ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: chrome.contact.path, "data-action": "contact" }, chrome.contact.label)
+                : null,
+            ),
+          ),
+        )
+      : null,
   );
   return shell(page, main);
 }
@@ -2125,24 +2271,59 @@ function ListingBody({ page }) {
   const gallery = page.body.media.gallery || [];
   const floorPlans = page.body.media.floor_plans || [];
   const videos = page.body.media.videos || [];
-  // The desktop composition uses the first three images as a visual preview.
-  // On phones the same DOM becomes the primary swipe carousel, so retain every
-  // reviewed photo instead of trapping buyers in a three-image teaser.
+  const galleryCount = page.body.media.gallery_count || gallery.length;
+  // Desktop shows the main photo plus a 2x2 thumbnail block; phones reuse the
+  // same DOM as a swipe carousel, so every reviewed photo stays in the markup
+  // instead of trapping buyers in a five-image teaser.
   const gallerySlides = gallery.length ? gallery : [null];
+  const galleryLayout = gallerySlides.length >= 5 ? "quad" : gallerySlides.length >= 3 ? "trio" : gallerySlides.length === 2 ? "pair" : "single";
   const channels = page.body.actions.direct_contact.channels || [];
   const brokerChannels = channels.filter((channel) => channel.enabled);
-  const tone = toneFor(page.body.facts?.id || page.path);
+  // Without a per-listing approved broker contact the panel falls back to the
+  // agency line that the footer and contact page already publish, marked as
+  // such so the review status stays honest. Viber stays off this fallback: it
+  // is only ever published as a reviewed per-listing broker channel.
+  const agencyChannels = chrome?.contact
+    ? [
+        { id: "phone", label: labels.phone, href: chrome.contact.phone ? `tel:${chrome.contact.phone}` : null },
+        { id: "whatsapp", label: "WhatsApp", href: chrome.contact.whatsapp || null },
+      ].filter((channel) => channel.href)
+    : [];
+  const contactChannels = brokerChannels.length ? brokerChannels : agencyChannels;
+  const tone = toneFor(facts.id || page.path);
   const breadcrumbChevron = page.dir === "rtl" ? "chevron-left" : "chevron-right";
   const sourceLocale = page.body.source.source_locale;
   const contentLocale = page.body.content_locale || sourceLocale;
   const reviewedTranslation = page.locale !== sourceLocale && page.translation.human_approved === true;
   const translationLabel = reviewedTranslation ? labels.reviewedTranslation : null;
   const sourceLanguageLabel = contentLocale !== page.locale ? contentLocale.toUpperCase() : null;
-  const verificationDate = listingVerificationDate(page.body.verification?.availability_verified_at, page.locale);
-  const locationPrecision = ui.locationPrecisions?.[facts.location_precision] || humanizeIdentifier(facts.location_precision);
-  const hasDetailFacts = ["property_type", "offer_type", "bedrooms", "area_sqm", "floor", "land_area_sqm", "condition", "location_precision"].some(
-    (key) => facts[key] !== null && facts[key] !== undefined && facts[key] !== "",
-  );
+  const verifiedAt = page.body.verification?.availability_verified_at || null;
+  const verificationDate = listingVerificationDate(verifiedAt, page.locale);
+  const factsReviewed = page.body.lifecycle?.publish_approved === true;
+  const locationPrecision = hasFact(facts.location_precision)
+    ? ui.locationPrecisions?.[facts.location_precision] || humanizeIdentifier(facts.location_precision)
+    : "";
+  const locationLine = [facts.location, locationPrecision].filter(Boolean).join(" · ");
+  const isRent = facts.offer_type === "rent";
+  const offerLabel = hasFact(facts.offer_type) ? localizedListingValue(page.locale, "offer_type", facts.offer_type) : "";
+  const statusLabel = facts.listing_status && facts.listing_status !== "available" ? labels.listingStatuses?.[facts.listing_status] : null;
+  const priceText = facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels, page.locale);
+  const showPerMonth = isRent && !facts.price_on_request && Number(facts.price_eur) > 1;
+  const reference = /^MS-CRAWL-/i.test(String(facts.id || "")) ? null : facts.id;
+  const searchPath = chrome?.nav?.[0]?.href || `/${page.locale}/search`;
+  const locationLinks = page.body.location_links || {};
+  const factRows = listingFactRows({
+    facts,
+    labels,
+    ui,
+    localeCode: page.locale,
+    verificationDate,
+    verifiedAt,
+    reference,
+    sourceLanguage: sourceLanguageLabel,
+  });
+  const hasFactRows = Object.keys(factRows).length > 0;
+  const related = page.body.related_listings || [];
 
   const crumbs = chrome
     ? h(
@@ -2154,58 +2335,302 @@ function ListingBody({ page }) {
       )
     : null;
 
-  const toolButtons = (page.body.actions.secondary || []).map((action) => {
-    const icon = action.id === "back_to_results" && page.dir === "rtl" ? "arrow-right" : LISTING_ACTION_ICONS[action.id] || LISTING_ACTION_ICONS[action.kind] || "link";
-    const compactOnMobile = ["save", "share_family", "print"].includes(action.id);
-    const actionAttrs = {
-      "aria-label": action.label,
-      "data-listing-action": action.id,
-      "data-history-back": action.id === "back_to_results" ? "same-origin" : undefined,
-      "data-compact-mobile-action": compactOnMobile ? "true" : undefined,
-    };
-    if (action.kind === "share" || action.kind === "print" || action.kind === "link") {
-      return h(Btn, { key: action.id, tag: "a", variant: "secondary", size: "sm", iconStart: icon, href: action.url, ...actionAttrs }, action.label);
-    }
-    return h(
-      Btn,
-      {
-        key: action.id,
-        variant: "secondary",
-        size: "sm",
-        iconStart: icon,
-        ...actionAttrs,
-        "data-client-save-listing": action.listing_id,
-        "data-save-label": action.label,
-        "data-saved-label": action.saved_label || labels.saved,
-      },
-      action.label,
-    );
-  });
-
-  const specIcons = { bedrooms: "bed", land_area_sqm: "map", area_sqm: "ruler", property_type: "house", offer_type: "key", location: "map-pin" };
-  const specs = ["bedrooms", "land_area_sqm", "area_sqm", "property_type", "offer_type", "location"]
-    .filter((key) => {
-      if (key === "bedrooms" && facts.bedrooms_not_applicable) return false;
-      return facts[key];
-    })
-    .map((key) => {
-      const value =
-        key === "property_type" || key === "offer_type"
-          ? localizedListingValue(page.locale, key, facts[key])
-          : key === "land_area_sqm" || key === "area_sqm"
-            ? `${facts[key]} m²`
-            : facts[key];
+  const secondaryActions = page.body.actions.secondary || [];
+  const backAction = secondaryActions.find((action) => action.id === "back_to_results");
+  const backIcon = page.dir === "rtl" ? "arrow-right" : "arrow-left";
+  // Rendered twice on purpose: a quiet link in the desktop top bar and a round
+  // overlay button on the phone gallery. CSS shows exactly one per viewport.
+  const backLink = (keySuffix) =>
+    backAction
+      ? h(
+          Btn,
+          {
+            key: `back${keySuffix}`,
+            tag: "a",
+            variant: "ghost",
+            size: "sm",
+            iconStart: backIcon,
+            href: backAction.url,
+            "aria-label": backAction.label,
+            "data-listing-action": "back_to_results",
+            "data-history-back": "same-origin",
+          },
+          backAction.label,
+        )
+      : null;
+  const toolButtons = secondaryActions
+    .filter((action) => action.id !== "back_to_results")
+    .map((action) => {
+      const icon = LISTING_ACTION_ICONS[action.id] || LISTING_ACTION_ICONS[action.kind] || "link";
+      const actionAttrs = { "aria-label": action.label, "data-listing-action": action.id, "data-compact-mobile-action": "true" };
+      if (action.kind === "share" || action.kind === "print" || action.kind === "link") {
+        return h(Btn, { key: action.id, tag: "a", variant: "secondary", size: "sm", iconStart: icon, href: action.url, ...actionAttrs }, action.label);
+      }
       return h(
-        "div",
-        { key, className: "ld-spec" },
-        h(Icon, { name: specIcons[key], size: 22 }),
-        h("b", null, value),
-        h("span", null, labels.factLabels?.[key] || key.replaceAll("_", " ")),
+        Btn,
+        {
+          key: action.id,
+          variant: "secondary",
+          size: "sm",
+          iconStart: icon,
+          ...actionAttrs,
+          "aria-pressed": "false",
+          "data-client-save-listing": action.listing_id,
+          "data-save-label": action.label,
+          "data-saved-label": action.saved_label || labels.saved,
+        },
+        action.label,
       );
     });
+  const tools = h("nav", { className: "ld-tools", "aria-label": labels.saveAndShare, "data-listing-tools": "true" }, backLink("-mobile"), ...toolButtons);
+
+  const priceBlock = (attrs, { compact = false } = {}) =>
+    h(
+      "div",
+      {
+        className: `ld-price${compact ? " ld-price--compact" : ""}${facts.price_on_request ? " ld-price--request" : ""}`,
+        ...attrs,
+      },
+      h("span", { className: "ld-price__amount" }, priceText),
+      showPerMonth ? h("span", { className: "ld-price__per" }, labels.perMonth) : null,
+      offerLabel ? h(Badge, { variant: isRent ? "for-rent" : "for-sale", "data-listing-offer": facts.offer_type }, offerLabel) : null,
+    );
+
+  const barItems = [];
+  if (factRows.bedrooms) barItems.push({ key: "bedrooms", icon: "bed", ...factRows.bedrooms });
+  if (factRows.area_sqm) barItems.push({ key: "area", icon: "ruler", ...factRows.area_sqm });
+  if (factRows.land_area_sqm) barItems.push({ key: "land", icon: "map", ...factRows.land_area_sqm });
+  if (factRows.floor) barItems.push({ key: "floor", icon: "building-2", ...factRows.floor });
+  else if (factRows.storeys) barItems.push({ key: "storeys", icon: "building-2", ...factRows.storeys });
+  if (factRows.availability) barItems.push({ key: "availability", icon: "circle-check", ...factRows.availability });
+  if (factRows.reference) barItems.push({ key: "reference", icon: "file-text", ...factRows.reference });
+  // One lonely fact is not a strip; it already appears in the grouped facts.
+  const factsBar = barItems.length > 1
+    ? h(
+        "ul",
+        { className: "ld-bar", "aria-label": labels.propertyDetails, "data-listing-facts-bar": "true" },
+        ...barItems.map((item) =>
+          h(
+            "li",
+            { key: item.key, className: "ld-bar__item", "data-listing-fact": item.key },
+            h(Icon, { name: item.icon, size: 20 }),
+            h(
+              "span",
+              { className: "ld-bar__text" },
+              h("strong", { className: item.mono ? "ld-bar__value ld-bar__value--mono" : "ld-bar__value" }, item.value),
+              h("span", { className: "ld-bar__label" }, item.label),
+            ),
+          ),
+        ),
+      )
+    : null;
+
+  const header = h(
+    "section",
+    {
+      className: "ld-head",
+      "aria-label": labels.listingSummary,
+      "data-listing-summary": "true",
+      "data-source-domain": page.body.source.source_domain,
+      "data-schema-ready": page.schema ? "true" : "false",
+    },
+    h(
+      "div",
+      { className: "ld-head__main" },
+      h("h1", { lang: contentLocale }, page.body.h1),
+      locationLine ? h("p", { className: "ld-head__loc" }, h(Icon, { name: "map-pin", size: 18 }), h("span", null, locationLine)) : null,
+      translationLabel || sourceLanguageLabel || verificationDate || statusLabel
+        ? h(
+            "div",
+            { className: "ld-head__badges" },
+            statusLabel ? h("span", { className: "mk-badge mk-badge--reduced mk-badge--sm", "data-listing-state": facts.listing_status }, statusLabel) : null,
+            translationLabel ? h("span", { className: "mk-badge mk-badge--new mk-badge--sm", "data-listing-verification": "translation" }, translationLabel) : null,
+            sourceLanguageLabel
+              ? h("span", { className: "mk-badge mk-badge--neutral mk-badge--sm", "data-listing-verification": "source-language", lang: contentLocale }, sourceLanguageLabel)
+              : null,
+            verificationDate
+              ? h(
+                  "span",
+                  { className: "mk-badge mk-badge--success mk-badge--sm", "data-listing-verification": "availability" },
+                  h(Icon, { name: "shield-check", size: 14 }),
+                  ` ${ui.verifiedInventory} · `,
+                  h("time", { dateTime: verifiedAt }, verificationDate),
+                )
+              : null,
+          )
+        : null,
+    ),
+    priceBlock({ "data-listing-price-summary": "true" }),
+  );
+
+  const galleryShell = h(
+    "div",
+    { className: "ld-gallery-shell", "data-gallery-layout": galleryLayout },
+    h(
+      "div",
+      {
+        className: "ld-gallery",
+        role: "region",
+        "aria-label": labels.gallery,
+        "data-mobile-gallery-label": labels.gallery,
+        "data-mobile-gallery": "true",
+        "data-mobile-gallery-index": "1",
+        tabIndex: gallerySlides.length > 1 ? 0 : undefined,
+      },
+      ...gallerySlides.map((image, index) =>
+        h(
+          "button",
+          {
+            key: image?.url || `gallery-placeholder-${index}`,
+            type: "button",
+            className: `ld-g${index === 0 ? " ld-g--main" : ""}${index > 4 ? " ld-g--desktop-extra" : ""} mk-photo mk-photo--${index === 0 ? tone : index % 2 ? "sand" : "sky"}`,
+            "aria-label": `${index + 1} / ${gallerySlides.length}${image?.alt ? `: ${image.alt}` : ""}`,
+            "data-mobile-gallery-slide": String(index + 1),
+            "data-gallery-active": index === 0 ? "true" : undefined,
+            "data-listing-gallery-open": String(index),
+            "data-has-photo": image ? "true" : "false",
+            disabled: image ? undefined : true,
+          },
+          image ? h("img", publicImageProps(image, page.body.h1, index === 0 ? "eager" : "lazy", index === 0 ? "high" : undefined)) : null,
+          h("span", { className: "ld-g__empty" }, h(Icon, { name: "camera", size: 26 }), h("span", null, labels.photoUnavailable)),
+        ),
+      ),
+    ),
+    gallery.length > 1
+      ? h(
+          "a",
+          {
+            className: "ld-gallery__all mk-btn mk-btn--secondary mk-btn--sm",
+            href: "#listing-gallery",
+            "data-listing-gallery-open": "0",
+            "data-listing-gallery-all": "true",
+          },
+          h(Icon, { name: "layout-grid", size: 16 }),
+          h("span", null, fillLabel(labels.allPhotos, { count: galleryCount })),
+        )
+      : null,
+    gallerySlides.length > 1
+      ? h(
+          "div",
+          {
+            className: "ld-g__count",
+            role: "status",
+            "aria-live": "polite",
+            "aria-label": `1 / ${gallerySlides.length}`,
+            "data-mobile-gallery-progress": "true",
+            "data-gallery-total": gallerySlides.length,
+          },
+          h(Icon, { name: "camera", size: 16 }),
+          h("span", null, h("span", { "data-mobile-gallery-current": "true" }, "1"), ` / ${gallerySlides.length}`),
+        )
+      : null,
+    gallerySlides.length > 1
+      ? h(
+          "div",
+          { className: "ld-g__controls", "aria-label": labels.gallery },
+          h(
+            "button",
+            {
+              type: "button",
+              className: "mk-btn mk-btn--secondary mk-btn--sm",
+              "data-mobile-gallery-prev": "true",
+              "aria-label": `${labels.previous} ${photoCountLabel(1, labels)}`,
+            },
+            h(Icon, { name: page.dir === "rtl" ? "chevron-right" : "chevron-left", size: 18 }),
+          ),
+          h(
+            "button",
+            {
+              type: "button",
+              className: "mk-btn mk-btn--secondary mk-btn--sm",
+              "data-mobile-gallery-next": "true",
+              "aria-label": `${labels.next} ${photoCountLabel(1, labels)}`,
+            },
+            h(Icon, { name: page.dir === "rtl" ? "chevron-left" : "chevron-right", size: 18 }),
+          ),
+        )
+      : null,
+  );
+
+  const photoViewer = gallery.length
+    ? h(
+        "dialog",
+        { className: "ld-photo-viewer", "aria-modal": "true", "data-listing-gallery-dialog": "true", "aria-label": labels.gallery },
+        h(
+          "header",
+          { className: "ld-photo-viewer__head" },
+          h(
+            "p",
+            { className: "ld-photo-viewer__count", role: "status", "aria-live": "polite" },
+            h("span", { "data-listing-gallery-current": "true" }, "1"),
+            ` / ${gallery.length}`,
+          ),
+          h(
+            "button",
+            {
+              type: "button",
+              className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--lg",
+              "data-listing-gallery-close": "true",
+              "aria-label": chrome?.copy?.close || "Close",
+            },
+            h(Icon, { name: "x", size: 22 }),
+          ),
+        ),
+        h(
+          "div",
+          { className: "ld-photo-viewer__stage" },
+          h(
+            "button",
+            {
+              type: "button",
+              className: "ld-photo-viewer__nav ld-photo-viewer__nav--prev",
+              "data-listing-gallery-prev": "true",
+              "aria-label": `${labels.previous} ${photoCountLabel(1, labels)}`,
+            },
+            h(Icon, { name: page.dir === "rtl" ? "chevron-right" : "chevron-left", size: 24 }),
+          ),
+          h(
+            "figure",
+            { "data-listing-gallery-figure": "true" },
+            h("img", {
+              ...publicImageProps(gallery[0], page.body.h1, "lazy"),
+              "data-listing-gallery-image": "true",
+            }),
+            // Loading and failed-photo states for the viewer; the client script
+            // flips data-image-state on the figure, CSS reveals one of these.
+            h(
+              "p",
+              { className: "ld-photo-viewer__state ld-photo-viewer__state--loading", role: "status", "aria-live": "polite" },
+              h("span", { className: "ld-photo-viewer__spinner", "aria-hidden": "true" }),
+              h("span", null, labels.photoLoading),
+            ),
+            h(
+              "p",
+              { className: "ld-photo-viewer__state ld-photo-viewer__state--failed", role: "status" },
+              h(Icon, { name: "triangle-alert", size: 18 }),
+              h("span", null, labels.photoUnavailable),
+            ),
+            h("figcaption", { "data-listing-gallery-caption": "true" }, gallery[0].alt || page.body.h1),
+          ),
+          h(
+            "button",
+            {
+              type: "button",
+              className: "ld-photo-viewer__nav ld-photo-viewer__nav--next",
+              "data-listing-gallery-next": "true",
+              "aria-label": `${labels.next} ${photoCountLabel(1, labels)}`,
+            },
+            h(Icon, { name: page.dir === "rtl" ? "chevron-left" : "chevron-right", size: 24 }),
+          ),
+        ),
+      )
+    : null;
 
   const primaryIcons = { inquiry: "message-circle", callback: "phone", request_viewing: "calendar" };
-  const primaryActionList = page.body.actions.primary || [];
+  const primaryOrder = { inquiry: 0, request_viewing: 1, callback: 2 };
+  const primaryActionList = [...(page.body.actions.primary || [])].sort(
+    (left, right) => (primaryOrder[left.id] ?? 9) - (primaryOrder[right.id] ?? 9),
+  );
   const stickyActionId = facts.price_on_request ? "inquiry" : "request_viewing";
   const leadButton = (action, { variant = "secondary", size = "lg", full = true, keySuffix = "" } = {}) =>
     h(
@@ -2238,8 +2663,8 @@ function ListingBody({ page }) {
     h(
       "span",
       { className: "ld-mobile-price", "aria-hidden": "true" },
-      h("strong", null, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels, page.locale)),
-      h("small", null, localizedListingValue(page.locale, "offer_type", facts.offer_type)),
+      h("strong", null, priceText),
+      h("small", null, showPerMonth ? `${labels.perMonth} · ${offerLabel}` : offerLabel),
     ),
     ...primaryActionList.map((action, index) => leadButton(action, { variant: index === 0 ? "accent" : "secondary", keySuffix: `-${index}` })),
     h(
@@ -2254,6 +2679,15 @@ function ListingBody({ page }) {
       h(Icon, { name: "message-circle", size: 20 }),
     ),
   );
+
+  const channelButtons = (prefix, { variant = "secondary", size = "md", full = true } = {}) =>
+    contactChannels.map((channel) =>
+      h(
+        Btn,
+        { key: `${prefix}-${channel.id || channel.label}`, tag: "a", variant, size, full, iconStart: channelIcon(channel.href), href: channel.href },
+        channel.label,
+      ),
+    );
 
   const mobileContactOptions = h(
     "dialog",
@@ -2273,22 +2707,111 @@ function ListingBody({ page }) {
       { className: "ld-contact-options__actions", "aria-label": labels.listingActions },
       ...primaryActionList.map((action, index) => leadButton(action, { variant: action.id === stickyActionId ? "accent" : "secondary", keySuffix: `-mobile-${index}` })),
     ),
-    brokerChannels.length
+    contactChannels.length
       ? h(
           "nav",
           { className: "ld-contact-options__direct", "aria-label": labels.brokerContact },
-          ...brokerChannels.map((channel) =>
-            h(Btn, { key: `mobile-${channel.label}`, tag: "a", variant: "ghost", size: "sm", iconStart: channelIcon(channel.href), href: channel.href }, channel.label),
-          ),
+          ...channelButtons("mobile", { variant: "ghost", size: "sm", full: false }),
         )
       : null,
   );
 
-  const brokerContact = h(
-    "nav",
-    { className: "ld-aside__contact", "aria-label": labels.brokerContact, "data-broker-contact-actions": "true" },
-    ...brokerChannels.map((channel) => h(Btn, { key: channel.label, tag: "a", variant: "secondary", size: "md", full: true, iconStart: channelIcon(channel.href), href: channel.href }, channel.label)),
-  );
+  const officeBlock = chrome?.contact
+    ? h(
+        "div",
+        { className: "ld-office", "data-listing-office": "true" },
+        h("p", { className: "ld-office__name" }, h(Icon, { name: "landmark", size: 16 }), h("span", null, `${labels.office}: ${chrome.home?.label || "MS Realty"}`)),
+        chrome.contact.offices ? h("p", { className: "ld-office__meta" }, chrome.contact.offices) : null,
+        contactChannels.length
+          ? h(
+              "nav",
+              {
+                className: "ld-aside__contact",
+                "aria-label": labels.brokerContact,
+                "data-broker-contact-actions": "true",
+                "data-contact-source": brokerChannels.length ? "broker" : "agency",
+              },
+              ...channelButtons("panel"),
+            )
+          : null,
+      )
+    : null;
+
+  const trustRows = [
+    factsReviewed
+      ? h("p", { key: "facts", className: "ld-trust__row", "data-listing-trust": "facts-reviewed" }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, labels.factsReviewed))
+      : null,
+    verificationDate
+      ? h(
+          "p",
+          { key: "verified", className: "ld-trust__row", "data-availability-verification": "true" },
+          h(Icon, { name: "calendar-check", size: 16 }),
+          h("span", null, `${ui.verifiedInventory}: `, h("time", { dateTime: verifiedAt }, verificationDate)),
+        )
+      : null,
+    translationLabel
+      ? h("p", { key: "translation", className: "ld-trust__row", "data-listing-trust": "reviewed-translation" }, h(Icon, { name: "languages", size: 16 }), h("span", null, translationLabel))
+      : null,
+    sourceLanguageLabel
+      ? h(
+          "p",
+          { key: "source", className: "ld-trust__row", "data-listing-trust": "source-language" },
+          h(Icon, { name: "languages", size: 16 }),
+          h("span", null, `${labels.sourceLanguage}: `, h("span", { className: "mk-badge mk-badge--neutral mk-badge--sm", lang: contentLocale }, sourceLanguageLabel)),
+        )
+      : null,
+  ].filter(Boolean);
+  const trustBlock = trustRows.length ? h("div", { className: "ld-trust" }, ...trustRows) : null;
+
+  const locationSection = hasFact(facts.location)
+    ? h(
+        "section",
+        { className: "ld-sec ld-location", "aria-label": labels.location, "data-listing-location": "true" },
+        h("h2", null, labels.location),
+        h("p", { className: "ld-location__line" }, h(Icon, { name: "map-pin", size: 18 }), h("span", null, locationLine)),
+        h(
+          "div",
+          { className: "ld-location__links" },
+          h(
+            Btn,
+            { tag: "a", variant: "secondary", size: "sm", iconStart: "search", href: locationLinks.search || searchPath, "data-listing-location-link": "search" },
+            fillLabel(labels.moreInLocation, { location: facts.location }),
+          ),
+          locationLinks.map
+            ? h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "map", href: locationLinks.map, "data-listing-location-link": "map" }, labels.viewOnMap)
+            : null,
+          // A pin needs approved public coordinates, which no listing carries
+          // yet; the affordance stays visible and disabled instead of missing.
+          locationLinks.pin_available
+            ? null
+            : h(
+                Btn,
+                { variant: "ghost", size: "sm", iconStart: "pin", disabled: true, "data-listing-map-pending": "true", title: labels.mapComingSoon },
+                labels.mapComingSoon,
+              ),
+        ),
+      )
+    : null;
+
+  // The nav keeps the media review attributes even with a single entry (tests
+  // and operators read them); the tab links only appear when there is a choice.
+  const mediaEntries = [gallery.length, floorPlans.length, videos.length, tour.available].filter(Boolean).length;
+  const mediaNav =
+    gallery.length || tour.available || floorPlans.length || videos.length
+      ? h(
+          "nav",
+          {
+            className: "mk-tabs mk-tabs--segmented ld-media-nav",
+            "aria-label": labels.listingMedia,
+            "data-media-gallery-count": page.body.media.gallery_count || 0,
+            "data-tour-status": tour.available ? "available" : tour.review_status || "review_required",
+          },
+          mediaEntries > 1 && gallery.length ? h("a", { className: "mk-tab", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 16 }), labels.gallery) : null,
+          mediaEntries > 1 && floorPlans.length ? h("a", { className: "mk-tab", href: "#listing-floor-plans" }, h(Icon, { name: "file-check", size: 16 }), labels.floorPlans) : null,
+          mediaEntries > 1 && videos.length ? h("a", { className: "mk-tab", href: "#listing-videos" }, h(Icon, { name: "external-link", size: 16 }), labels.videos) : null,
+          mediaEntries > 1 && tour.available ? h("a", { className: "mk-tab", href: "#listing-tour" }, h(Icon, { name: "globe", size: 16 }), labels.tour360) : null,
+        )
+      : null;
 
   const main = h(
     "main",
@@ -2309,264 +2832,63 @@ function ListingBody({ page }) {
     h(
       "div",
       { className: "ld" },
-      crumbs,
-      h(
-        "section",
-        {
-          className: "ld-top",
-          "aria-label": labels.listingSummary,
-          "data-listing-summary": "true",
-          "data-source-domain": page.body.source.source_domain,
-          "data-schema-ready": page.schema ? "true" : "false",
-        },
-        h(
-          "div",
-          { className: "ld-top__main" },
-          translationLabel
-            ? h("p", { className: "mk-badge mk-badge--new mk-badge--sm ld-top__badge", "data-listing-verification": "translation" }, translationLabel)
-            : null,
-          sourceLanguageLabel
-            ? h(
-                "p",
-                {
-                  className: "mk-badge mk-badge--neutral mk-badge--sm ld-top__badge",
-                  "data-listing-verification": "source-language",
-                  lang: contentLocale,
-                },
-                sourceLanguageLabel,
-              )
-            : null,
-          verificationDate
-            ? h(
-                "p",
-                { className: "mk-badge mk-badge--success mk-badge--sm ld-top__badge", "data-listing-verification": "availability" },
-                h(Icon, { name: "shield-check", size: 14 }),
-                ` ${ui.verifiedInventory} · `,
-                h("time", { dateTime: page.body.verification.availability_verified_at }, verificationDate),
-              )
-            : null,
-          h("h1", { lang: contentLocale }, page.body.h1),
-          h(
-            "div",
-            { className: "ld-top__loc" },
-            h(Icon, { name: "map-pin", size: 17 }),
-            ` ${[facts.location, locationPrecision, localizedListingValue(page.locale, "property_type", facts.property_type)].filter(Boolean).join(" · ")}`,
-          ),
-          h("div", { className: "ld-top__price", "data-listing-price-summary": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels, page.locale)),
-          h(
-            "ul",
-            { className: "ld-feats", "data-listing-highlights": "true" },
-            ...["location", "property_type", "offer_type", "bedrooms", "land_area_sqm"]
-              .filter((key) => {
-                if (key === "bedrooms" && facts.bedrooms_not_applicable) return false;
-                return facts[key];
-              })
-              .map((key) => {
-                const value =
-                  key === "property_type" || key === "offer_type"
-                    ? localizedListingValue(page.locale, key, facts[key])
-                    : key === "land_area_sqm"
-                      ? `${facts[key]} m²`
-                      : facts[key];
-                return h("li", { key, className: "mk-tag mk-tag--neutral mk-tag--md" }, h(Icon, { name: "check", size: 15 }), `${labels.factLabels?.[key] || key}: ${value}`);
-              }),
-          ),
-        ),
-        h("nav", { className: "ld-top__acts", "aria-label": labels.saveAndShare, "data-listing-tools": "true" }, ...toolButtons),
-      ),
-      h(
-        "div",
-        { className: "ld-gallery-shell" },
-        h(
-          "div",
-          {
-            className: "ld-gallery",
-            role: "region",
-            "aria-label": labels.gallery,
-            "data-mobile-gallery-label": labels.gallery,
-            "data-mobile-gallery": "true",
-            "data-mobile-gallery-index": "1",
-      tabIndex: gallerySlides.length > 1 ? 0 : undefined,
-          },
-          ...gallerySlides.map((image, index) =>
-            h(
-              "button",
-              {
-                key: image?.url || `gallery-placeholder-${index}`,
-                type: "button",
-                className: `ld-g${index === 0 ? " ld-g--main" : ""}${index > 2 ? " ld-g--desktop-extra" : ""} mk-photo mk-photo--${index === 0 ? tone : index === 1 ? "sand" : "sky"}`,
-                "aria-label": `${index + 1} / ${gallerySlides.length}${image?.alt ? `: ${image.alt}` : ""}${
-                  gallerySlides.length > 3 && index === 2
-                    ? `; ${page.body.media.gallery_count || gallery.length} ${photoCountLabel(page.body.media.gallery_count || gallery.length, labels)}`
-                    : ""
-                }`,
-                "data-mobile-gallery-slide": String(index + 1),
-                "data-gallery-active": index === 0 ? "true" : undefined,
-                "data-listing-gallery-open": String(index),
-              },
-              image ? h("img", publicImageProps(image, page.body.h1, index === 0 ? "eager" : "lazy", index === 0 ? "high" : undefined)) : null,
-              gallerySlides.length > 3 && index === 2
-                ? h("span", { className: "ld-g__more", "aria-hidden": "true" }, h(Icon, { name: "camera", size: 18 }), ` ${page.body.media.gallery_count || gallery.length} ${photoCountLabel(page.body.media.gallery_count || gallery.length, labels)}`)
-                : null,
-            ),
-          ),
-        ),
-        gallerySlides.length > 1
-          ? h(
-              "div",
-              {
-                className: "ld-g__count",
-                role: "status",
-                "aria-live": "polite",
-                "aria-label": `1 / ${gallerySlides.length}`,
-                "data-mobile-gallery-progress": "true",
-                "data-gallery-total": gallerySlides.length,
-              },
-              h(Icon, { name: "camera", size: 16 }),
-              h("span", null, h("span", { "data-mobile-gallery-current": "true" }, "1"), ` / ${gallerySlides.length}`),
-            )
-          : null,
-        gallerySlides.length > 1
-          ? h(
-              "div",
-              { className: "ld-g__controls", "aria-label": labels.gallery },
-              h(
-                "button",
-                {
-                  type: "button",
-                  className: "mk-btn mk-btn--secondary mk-btn--sm",
-                  "data-mobile-gallery-prev": "true",
-                  "aria-label": `${labels.previous} ${photoCountLabel(1, labels)}`,
-                },
-                h(Icon, { name: page.dir === "rtl" ? "chevron-right" : "chevron-left", size: 18 }),
-              ),
-              h(
-                "button",
-                {
-                  type: "button",
-                  className: "mk-btn mk-btn--secondary mk-btn--sm",
-                  "data-mobile-gallery-next": "true",
-                  "aria-label": `${labels.next} ${photoCountLabel(1, labels)}`,
-                },
-                h(Icon, { name: page.dir === "rtl" ? "chevron-left" : "chevron-right", size: 18 }),
-              ),
-            )
-          : null,
-      ),
-      gallery.length
-        ? h(
-            "dialog",
-            { className: "ld-photo-viewer", "aria-modal": "true", "data-listing-gallery-dialog": "true", "aria-label": labels.gallery },
-            h(
-              "header",
-              { className: "ld-photo-viewer__head" },
-              h(
-                "p",
-                { className: "ld-photo-viewer__count", role: "status", "aria-live": "polite" },
-                h("span", { "data-listing-gallery-current": "true" }, "1"),
-                ` / ${gallery.length}`,
-              ),
-              h(
-                "button",
-                {
-                  type: "button",
-                  className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--lg",
-                  "data-listing-gallery-close": "true",
-                  "aria-label": chrome?.copy?.close || "Close",
-                },
-                h(Icon, { name: "x", size: 22 }),
-              ),
-            ),
-            h(
-              "div",
-              { className: "ld-photo-viewer__stage" },
-              h(
-                "button",
-                {
-                  type: "button",
-                  className: "ld-photo-viewer__nav ld-photo-viewer__nav--prev",
-                  "data-listing-gallery-prev": "true",
-                  "aria-label": `${labels.previous} ${photoCountLabel(1, labels)}`,
-                },
-                h(Icon, { name: page.dir === "rtl" ? "chevron-right" : "chevron-left", size: 24 }),
-              ),
-              h(
-                "figure",
-                null,
-                h("img", {
-                  ...publicImageProps(gallery[0], page.body.h1, "lazy"),
-                  "data-listing-gallery-image": "true",
-                }),
-                h("figcaption", { "data-listing-gallery-caption": "true" }, gallery[0].alt || page.body.h1),
-              ),
-              h(
-                "button",
-                {
-                  type: "button",
-                  className: "ld-photo-viewer__nav ld-photo-viewer__nav--next",
-                  "data-listing-gallery-next": "true",
-                  "aria-label": `${labels.next} ${photoCountLabel(1, labels)}`,
-                },
-                h(Icon, { name: page.dir === "rtl" ? "chevron-left" : "chevron-right", size: 24 }),
-              ),
-            ),
-          )
-        : null,
+      h("div", { className: "ld-topbar" }, crumbs, backLink("-desktop")),
+      header,
+      factsBar,
+      galleryShell,
+      photoViewer,
       h(
         "section",
         { className: "ld-cols", "aria-label": labels.listingContent, "data-listing-content-grid": "true" },
         h(
           "section",
           { className: "ld-main", "aria-label": labels.listingMediaFacts, "data-listing-main-column": "true" },
-          h("div", { className: "ld-specs" }, ...specs),
           h(
-            "div",
+            "section",
             { className: "ld-sec" },
-            h("h2", null, labels.propertyDetails),
-            h("p", { className: "ld-desc", "data-listing-description": "true", lang: contentLocale }, page.body.description || ""),
+            h("h2", null, labels.description),
+            page.body.description
+              ? h("p", { className: "ld-desc", "data-listing-description": "true", lang: contentLocale }, page.body.description)
+              : h("p", { className: "ld-desc ld-desc--empty", "data-listing-description": "true", lang: contentLocale }, labels.reviewRequired),
           ),
-          hasDetailFacts ? h("div", { className: "ld-sec" }, h("h2", null, labels.listingMediaFacts), factsList(facts, labels, page.locale)) : null,
-          gallery.length || tour.available || floorPlans.length || videos.length
+          hasFactRows
             ? h(
-                "nav",
-                {
-                  className: "mk-tabs mk-tabs--segmented ld-media-nav",
-                  "aria-label": labels.listingMedia,
-                  "data-media-gallery-count": page.body.media.gallery_count || 0,
-                  "data-tour-status": tour.available ? "available" : tour.review_status || "review_required",
-                },
-                gallery.length
-                  ? h(
-                      "a",
-                      { className: "mk-tab", href: "#listing-gallery" },
-                      h(Icon, { name: "camera", size: 16 }),
-                      labels.gallery,
-                    )
-                  : null,
-                floorPlans.length ? h("a", { className: "mk-tab", href: "#listing-floor-plans" }, h(Icon, { name: "file-check", size: 16 }), labels.floorPlans) : null,
-                videos.length ? h("a", { className: "mk-tab", href: "#listing-videos" }, h(Icon, { name: "external-link", size: 16 }), labels.videos) : null,
-                tour.available ? h("a", { className: "mk-tab", href: "#listing-tour" }, h(Icon, { name: "globe", size: 16 }), labels.tour360) : null,
+                "section",
+                { className: "ld-sec" },
+                h("h2", null, labels.propertyDetails),
+                h(ListingFactGroups, { rows: factRows, labels }),
+                // Price history needs a reviewed price-change ledger in the CMS;
+                // the row is shown as pending rather than silently missing.
+                h(
+                  "p",
+                  { className: "ld-soon", "data-listing-price-history": "pending" },
+                  h(Icon, { name: "trending-up", size: 16 }),
+                  h("span", null, labels.priceHistoryComingSoon),
+                ),
               )
             : null,
-         h(
-           "section",
-           { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
-           ...gallery.map((image, index) =>
-             h(
-               "button",
-               {
-                 key: image.url,
-                 type: "button",
-                 className: "ld-gallery-full__item",
-                 "data-listing-gallery-source": "true",
-                 "data-listing-gallery-open": String(index),
-                 "aria-label": `${index + 1} / ${gallery.length}${image.alt ? `: ${image.alt}` : ""}`,
-               },
-               h("img", publicImageProps(image, page.body.h1)),
-             ),
-           ),
-         ),
-         floorPlans.length
+          locationSection,
+          mediaNav,
+          gallery.length ? h("h2", { className: "ld-media-title" }, labels.gallery, h("small", null, `${galleryCount} ${photoCountLabel(galleryCount, labels)}`)) : null,
+          h(
+            "section",
+            { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
+            ...gallery.map((image, index) =>
+              h(
+                "button",
+                {
+                  key: image.url,
+                  type: "button",
+                  className: "ld-gallery-full__item",
+                  "data-listing-gallery-source": "true",
+                  "data-listing-gallery-open": String(index),
+                  "aria-label": `${index + 1} / ${gallery.length}${image.alt ? `: ${image.alt}` : ""}`,
+                },
+                h("img", publicImageProps(image, page.body.h1)),
+              ),
+            ),
+          ),
+          floorPlans.length
             ? h(
                 "section",
                 { id: "listing-floor-plans", className: "ld-gallery-full", "aria-label": labels.floorPlans, "data-floor-plan-gallery": "true" },
@@ -2624,18 +2946,14 @@ function ListingBody({ page }) {
                       h(
                         "div",
                         { className: "ld-tour__fallback", "data-tour-gallery-fallback": "true", role: "status" },
-                        tour.fallback_gallery?.[0]
-                          ? h("img", { ...publicImageProps(tour.fallback_gallery[0], page.body.h1, "lazy") })
-                          : null,
+                        tour.fallback_gallery?.[0] ? h("img", { ...publicImageProps(tour.fallback_gallery[0], page.body.h1, "lazy") }) : null,
                         h("a", { className: "mk-btn mk-btn--secondary mk-btn--md", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${labels.gallery}`),
                       ),
                     )
                   : h(
                       "div",
                       { className: "ld-tour__fallback", hidden: true, "data-photo-sphere-fallback": "true", role: "status" },
-                      tour.fallback_gallery?.[0]
-                        ? h("img", { ...publicImageProps(tour.fallback_gallery[0], page.body.h1, "lazy") })
-                        : null,
+                      tour.fallback_gallery?.[0] ? h("img", { ...publicImageProps(tour.fallback_gallery[0], page.body.h1, "lazy") }) : null,
                       h("a", { className: "mk-btn mk-btn--secondary mk-btn--md", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${labels.gallery}`),
                     ),
               )
@@ -2644,16 +2962,7 @@ function ListingBody({ page }) {
         h(
           "aside",
           { className: "ld-aside", "aria-label": labels.contactBroker, "data-listing-contact-panel": "true" },
-          h(
-            "div",
-            { className: "mk-card mk-card--elevated mk-card--pad-lg ld-aside__card" },
-            h("div", { className: "ld-price", "data-listing-price": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels, page.locale)),
-            primaryActions,
-            brokerChannels.length ? brokerContact : null,
-            translationLabel ? h("div", { className: "ld-trust" }, h(Icon, { name: "shield-check", size: 16 }), ` ${translationLabel}`) : null,
-            verificationDate ? h("div", { className: "ld-trust", "data-availability-verification": "true" }, h(Icon, { name: "calendar-check", size: 16 }), ` ${ui.verifiedInventory}: ${verificationDate}`) : null,
-            h("div", { className: "ld-aside__ref" }, h("span", null, facts.id), h("span", null, page.body.source.source_domain)),
-          ),
+          h("div", { className: "ld-panel" }, priceBlock({ "data-listing-price": "true" }, { compact: true }), primaryActions, officeBlock, trustBlock, tools),
         ),
       ),
     ),
@@ -2661,13 +2970,23 @@ function ListingBody({ page }) {
       "section",
       { className: "ld-similar", "aria-label": labels.relatedListings, "data-related-listings": "true" },
       h("h2", null, labels.relatedListings),
-      h(
-        "div",
-        { className: "ld-similar__grid" },
-        ...(page.body.related_listings || []).map((card) =>
-          h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, rootAttrs: { "data-related-listing": "true" } }),
-        ),
-      ),
+      related.length
+        ? h(
+            "div",
+            { className: "ld-similar__grid" },
+            ...related.map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, rootAttrs: { "data-related-listing": "true" } })),
+          )
+        : h(
+            "div",
+            { className: "mk-empty ld-similar__empty", "data-related-listings-empty": "true" },
+            h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "search-x", size: 22 })),
+            h("p", { className: "mk-empty__text" }, labels.noLocationListings),
+            h(
+              "div",
+              { className: "mk-empty__actions" },
+              h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "search", href: locationLinks.search || searchPath }, labels.browseAllListings),
+            ),
+          ),
     ),
     mobileContactOptions,
   );

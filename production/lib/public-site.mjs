@@ -19,6 +19,7 @@ import {
   locationPath,
   matchesPublicLocationScope,
   publicLocationNames,
+  PUBLIC_LOCATION_SCOPES,
   sellerPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
@@ -159,7 +160,27 @@ const ACTION_LABELS = {
     languageUnavailableText: "MS Realty е достъпен на български, английски, немски, нидерландски, руски, гръцки и иврит. Изберете някой от тях по-горе или заявете този език и ще ви уведомим, когато е готов.",
     languageRequestSent: "Благодарим. Ще ви уведомим, когато този език е готов.",
     guideActions: "Действия за ръководството",
-    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Оферта", bedrooms: "Спални", premises: "Помещения", hotel_rooms: "Хотелски стаи", storeys: "Етажи", floor: "Етаж", land_area_sqm: "Площ на парцела", condition: "Състояние", location_precision: "Локация" },
+    allPhotos: "Всички {count} снимки",
+    description: "Описание",
+    factGroups: { property: "Имот", building: "Сграда", land: "Земя", status: "Статус" },
+    reference: "Референция",
+    availability: "Наличност",
+    listingStatuses: { available: "Наличен", reserved: "Резервиран", sold: "Продаден", rented: "Отдаден под наем" },
+    factsReviewed: "Фактите са проверени",
+    sourceLanguage: "Изходен език",
+    office: "Офис",
+    moreInLocation: "Още имоти в {location}",
+    viewOnMap: "Вижте района на картата",
+    savedHint: "Запазените имоти се пазят на това устройство.",
+    saveSearchHint: "Направете търсене и изберете „Запази търсенето“ във филтрите, за да получавате известие при нови съвпадения.",
+    areas: "Райони",
+    sellInLocation: "Продавате имот в {location}?",
+    mapComingSoon: "Картата на имота идва скоро",
+    photoLoading: "Снимката се зарежда",
+    photoUnavailable: "Снимката не е налична",
+    priceHistory: "История на цената",
+    priceHistoryComingSoon: "Историята на цената идва скоро",
+    factLabels: { area_sqm: "Площ", location: "Локация", property_type: "Тип", offer_type: "Оферта", bedrooms: "Спални", premises: "Помещения", hotel_rooms: "Хотелски стаи", storeys: "Етажи", floor: "Етаж", land_area_sqm: "Площ на парцела", condition: "Състояние", location_precision: "Локация" },
   },
   en: {
     min: "Min",
@@ -266,7 +287,27 @@ const ACTION_LABELS = {
     languageUnavailableText: "MS Realty is available in Bulgarian, English, German, Dutch, Russian, Greek and Hebrew. Pick one of them above, or request this language and we will tell you when it is ready.",
     languageRequestSent: "Thank you. We will let you know when this language is ready.",
     guideActions: "Guide actions",
-    factLabels: { location: "Location", property_type: "Type", offer_type: "Offer", bedrooms: "Bedrooms", premises: "Premises", hotel_rooms: "Hotel rooms", storeys: "Storeys", floor: "Floor", land_area_sqm: "Land area", condition: "Condition", location_precision: "Location" },
+    allPhotos: "All {count} photos",
+    description: "Description",
+    factGroups: { property: "Property", building: "Building", land: "Land", status: "Status" },
+    reference: "Reference",
+    availability: "Availability",
+    listingStatuses: { available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented" },
+    factsReviewed: "Facts reviewed",
+    sourceLanguage: "Source language",
+    office: "Office",
+    moreInLocation: "More properties in {location}",
+    viewOnMap: "View area on map",
+    savedHint: "Saved properties stay on this device.",
+    saveSearchHint: "Run a search, then choose Save search in the filters to get an alert when new properties match.",
+    areas: "Areas",
+    sellInLocation: "Selling in {location}?",
+    mapComingSoon: "Property map coming soon",
+    photoLoading: "Photo loading",
+    photoUnavailable: "Photo unavailable",
+    priceHistory: "Price history",
+    priceHistoryComingSoon: "Price history coming soon",
+    factLabels: { area_sqm: "Area", location: "Location", property_type: "Type", offer_type: "Offer", bedrooms: "Bedrooms", premises: "Premises", hotel_rooms: "Hotel rooms", storeys: "Storeys", floor: "Floor", land_area_sqm: "Land area", condition: "Condition", location_precision: "Location" },
   },
   de: {
     min: "Min.",
@@ -373,7 +414,27 @@ const ACTION_LABELS = {
     languageUnavailableText: "MS Realty gibt es auf Bulgarisch, Englisch, Deutsch, Niederländisch, Russisch, Griechisch und Hebräisch. Wählen Sie oben eine davon oder fordern Sie diese Sprache an, und wir sagen Ihnen Bescheid, sobald sie bereit ist.",
     languageRequestSent: "Vielen Dank. Wir melden uns, sobald diese Sprache bereit ist.",
     guideActions: "Ratgeberaktionen",
-    factLabels: { location: "Ort", property_type: "Typ", offer_type: "Angebot", bedrooms: "Schlafzimmer", premises: "Räume", hotel_rooms: "Hotelzimmer", storeys: "Stockwerke", floor: "Etage", land_area_sqm: "Grundstücksfläche", condition: "Zustand", location_precision: "Standort" },
+    allPhotos: "Alle {count} Fotos",
+    description: "Beschreibung",
+    factGroups: { property: "Immobilie", building: "Gebäude", land: "Grundstück", status: "Status" },
+    reference: "Referenz",
+    availability: "Verfügbarkeit",
+    listingStatuses: { available: "Verfügbar", reserved: "Reserviert", sold: "Verkauft", rented: "Vermietet" },
+    factsReviewed: "Fakten geprüft",
+    sourceLanguage: "Ausgangssprache",
+    office: "Büro",
+    moreInLocation: "Weitere Immobilien in {location}",
+    viewOnMap: "Gebiet auf der Karte ansehen",
+    savedHint: "Gespeicherte Immobilien bleiben auf diesem Gerät.",
+    saveSearchHint: "Starten Sie eine Suche und wählen Sie in den Filtern „Suche speichern“, um bei neuen Treffern benachrichtigt zu werden.",
+    areas: "Gebiete",
+    sellInLocation: "Verkaufen Sie in {location}?",
+    mapComingSoon: "Immobilienkarte folgt in Kürze",
+    photoLoading: "Foto wird geladen",
+    photoUnavailable: "Foto nicht verfügbar",
+    priceHistory: "Preisverlauf",
+    priceHistoryComingSoon: "Preisverlauf folgt in Kürze",
+    factLabels: { area_sqm: "Fläche", location: "Ort", property_type: "Typ", offer_type: "Angebot", bedrooms: "Schlafzimmer", premises: "Räume", hotel_rooms: "Hotelzimmer", storeys: "Stockwerke", floor: "Etage", land_area_sqm: "Grundstücksfläche", condition: "Zustand", location_precision: "Standort" },
   },
   nl: {
     min: "Min.",
@@ -480,7 +541,27 @@ const ACTION_LABELS = {
     languageUnavailableText: "MS Realty is beschikbaar in het Bulgaars, Engels, Duits, Nederlands, Russisch, Grieks en Hebreeuws. Kies er hierboven een, of vraag deze taal aan en wij laten u weten wanneer die klaar is.",
     languageRequestSent: "Dank u. Wij laten u weten wanneer deze taal klaar is.",
     guideActions: "Gidsacties",
-    factLabels: { location: "Locatie", property_type: "Type", offer_type: "Aanbod", bedrooms: "Slaapkamers", premises: "Ruimtes", hotel_rooms: "Hotelkamers", storeys: "Verdiepingen", floor: "Verdieping", land_area_sqm: "Perceeloppervlakte", condition: "Staat", location_precision: "Locatie" },
+    allPhotos: "Alle {count} foto's",
+    description: "Beschrijving",
+    factGroups: { property: "Object", building: "Gebouw", land: "Grond", status: "Status" },
+    reference: "Referentie",
+    availability: "Beschikbaarheid",
+    listingStatuses: { available: "Beschikbaar", reserved: "Gereserveerd", sold: "Verkocht", rented: "Verhuurd" },
+    factsReviewed: "Feiten gecontroleerd",
+    sourceLanguage: "Brontaal",
+    office: "Kantoor",
+    moreInLocation: "Meer vastgoed in {location}",
+    viewOnMap: "Gebied op de kaart bekijken",
+    savedHint: "Opgeslagen objecten blijven op dit apparaat.",
+    saveSearchHint: "Start een zoekopdracht en kies in de filters „Zoekopdracht bewaren“ om een melding te krijgen bij nieuwe matches.",
+    areas: "Gebieden",
+    sellInLocation: "Verkoopt u in {location}?",
+    mapComingSoon: "Objectkaart komt binnenkort",
+    photoLoading: "Foto wordt geladen",
+    photoUnavailable: "Foto niet beschikbaar",
+    priceHistory: "Prijsgeschiedenis",
+    priceHistoryComingSoon: "Prijsgeschiedenis komt binnenkort",
+    factLabels: { area_sqm: "Oppervlakte", location: "Locatie", property_type: "Type", offer_type: "Aanbod", bedrooms: "Slaapkamers", premises: "Ruimtes", hotel_rooms: "Hotelkamers", storeys: "Verdiepingen", floor: "Verdieping", land_area_sqm: "Perceeloppervlakte", condition: "Staat", location_precision: "Locatie" },
   },
   ru: {
     min: "Мин.",
@@ -587,7 +668,27 @@ const ACTION_LABELS = {
     languageUnavailableText: "MS Realty доступен на болгарском, английском, немецком, нидерландском, русском, греческом и иврите. Выберите один из них выше или запросите этот язык, и мы сообщим, когда он будет готов.",
     languageRequestSent: "Спасибо. Мы сообщим, когда этот язык будет готов.",
     guideActions: "Действия руководства",
-    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Предложение", bedrooms: "Спальни", premises: "Помещения", hotel_rooms: "Номера", storeys: "Этажи", floor: "Этаж", land_area_sqm: "Площадь участка", condition: "Состояние", location_precision: "Локация" },
+    allPhotos: "Все {count} фото",
+    description: "Описание",
+    factGroups: { property: "Объект", building: "Здание", land: "Участок", status: "Статус" },
+    reference: "Референс",
+    availability: "Доступность",
+    listingStatuses: { available: "Доступен", reserved: "Зарезервирован", sold: "Продан", rented: "Сдан" },
+    factsReviewed: "Факты проверены",
+    sourceLanguage: "Язык оригинала",
+    office: "Офис",
+    moreInLocation: "Ещё объекты в {location}",
+    viewOnMap: "Посмотреть район на карте",
+    savedHint: "Сохранённые объекты хранятся на этом устройстве.",
+    saveSearchHint: "Выполните поиск и нажмите «Сохранить поиск» в фильтрах, чтобы получать уведомления о новых совпадениях.",
+    areas: "Районы",
+    sellInLocation: "Продаёте недвижимость в {location}?",
+    mapComingSoon: "Карта объекта скоро появится",
+    photoLoading: "Фото загружается",
+    photoUnavailable: "Фото недоступно",
+    priceHistory: "История цены",
+    priceHistoryComingSoon: "История цены скоро появится",
+    factLabels: { area_sqm: "Площадь", location: "Локация", property_type: "Тип", offer_type: "Предложение", bedrooms: "Спальни", premises: "Помещения", hotel_rooms: "Номера", storeys: "Этажи", floor: "Этаж", land_area_sqm: "Площадь участка", condition: "Состояние", location_precision: "Локация" },
   },
   el: {
     min: "Ελάχ.",
@@ -694,7 +795,27 @@ const ACTION_LABELS = {
     languageUnavailableText: "Η MS Realty είναι διαθέσιμη στα βουλγαρικά, αγγλικά, γερμανικά, ολλανδικά, ρωσικά, ελληνικά και εβραϊκά. Επιλέξτε μία από αυτές παραπάνω ή ζητήστε αυτή τη γλώσσα και θα σας ενημερώσουμε μόλις είναι έτοιμη.",
     languageRequestSent: "Ευχαριστούμε. Θα σας ενημερώσουμε μόλις αυτή η γλώσσα είναι έτοιμη.",
     guideActions: "Ενέργειες οδηγού",
-    factLabels: { location: "Τοποθεσία", property_type: "Τύπος", offer_type: "Προσφορά", bedrooms: "Υπνοδωμάτια", premises: "Χώροι", hotel_rooms: "Δωμάτια ξενοδοχείου", storeys: "Όροφοι", floor: "Όροφος", land_area_sqm: "Εμβαδόν οικοπέδου", condition: "Κατάσταση", location_precision: "Τοποθεσία" },
+    allPhotos: "Όλες οι {count} φωτογραφίες",
+    description: "Περιγραφή",
+    factGroups: { property: "Ακίνητο", building: "Κτίριο", land: "Γη", status: "Κατάσταση" },
+    reference: "Κωδικός",
+    availability: "Διαθεσιμότητα",
+    listingStatuses: { available: "Διαθέσιμο", reserved: "Κρατημένο", sold: "Πωλήθηκε", rented: "Ενοικιάστηκε" },
+    factsReviewed: "Τα στοιχεία ελέγχθηκαν",
+    sourceLanguage: "Γλώσσα προέλευσης",
+    office: "Γραφείο",
+    moreInLocation: "Περισσότερα ακίνητα: {location}",
+    viewOnMap: "Δείτε την περιοχή στον χάρτη",
+    savedHint: "Τα αποθηκευμένα ακίνητα μένουν σε αυτή τη συσκευή.",
+    saveSearchHint: "Κάντε μια αναζήτηση και επιλέξτε «Αποθήκευση αναζήτησης» στα φίλτρα για να ειδοποιηθείτε όταν ταιριάζουν νέα ακίνητα.",
+    areas: "Περιοχές",
+    sellInLocation: "Πουλάτε ακίνητο στην περιοχή {location};",
+    mapComingSoon: "Ο χάρτης του ακινήτου έρχεται σύντομα",
+    photoLoading: "Η φωτογραφία φορτώνεται",
+    photoUnavailable: "Η φωτογραφία δεν είναι διαθέσιμη",
+    priceHistory: "Ιστορικό τιμής",
+    priceHistoryComingSoon: "Το ιστορικό τιμής έρχεται σύντομα",
+    factLabels: { area_sqm: "Εμβαδόν", location: "Τοποθεσία", property_type: "Τύπος", offer_type: "Προσφορά", bedrooms: "Υπνοδωμάτια", premises: "Χώροι", hotel_rooms: "Δωμάτια ξενοδοχείου", storeys: "Όροφοι", floor: "Όροφος", land_area_sqm: "Εμβαδόν οικοπέδου", condition: "Κατάσταση", location_precision: "Τοποθεσία" },
   },
   he: {
     min: "מינימום",
@@ -801,7 +922,27 @@ const ACTION_LABELS = {
     languageUnavailableText: "MS Realty זמין בבולגרית, אנגלית, גרמנית, הולנדית, רוסית, יוונית ועברית. בחרו אחת מהן למעלה, או בקשו את השפה הזו ונודיע לכם כשהיא תהיה מוכנה.",
     languageRequestSent: "תודה. נודיע לכם כשהשפה הזו תהיה מוכנה.",
     guideActions: "פעולות מדריך",
-    factLabels: { location: "מיקום", property_type: "סוג", offer_type: "הצעה", bedrooms: "חדרי שינה", premises: "חללים", hotel_rooms: "חדרי מלון", storeys: "קומות", floor: "קומה", land_area_sqm: "שטח מגרש", condition: "מצב", location_precision: "מיקום" },
+    allPhotos: "כל {count} התמונות",
+    description: "תיאור",
+    factGroups: { property: "נכס", building: "בניין", land: "קרקע", status: "סטטוס" },
+    reference: "מספר נכס",
+    availability: "זמינות",
+    listingStatuses: { available: "זמין", reserved: "שמור", sold: "נמכר", rented: "הושכר" },
+    factsReviewed: "העובדות נבדקו",
+    sourceLanguage: "שפת המקור",
+    office: "משרד",
+    moreInLocation: "נכסים נוספים ב-{location}",
+    viewOnMap: "הצגת האזור במפה",
+    savedHint: "נכסים שמורים נשארים במכשיר הזה.",
+    saveSearchHint: "בצעו חיפוש ובחרו „שמירת חיפוש“ במסננים כדי לקבל התראה כשנכסים חדשים מתאימים.",
+    areas: "אזורים",
+    sellInLocation: "מוכרים נכס ב-{location}?",
+    mapComingSoon: "מפת הנכס בקרוב",
+    photoLoading: "התמונה נטענת",
+    photoUnavailable: "התמונה אינה זמינה",
+    priceHistory: "היסטוריית מחיר",
+    priceHistoryComingSoon: "היסטוריית המחיר בקרוב",
+    factLabels: { area_sqm: "שטח", location: "מיקום", property_type: "סוג", offer_type: "הצעה", bedrooms: "חדרי שינה", premises: "חללים", hotel_rooms: "חדרי מלון", storeys: "קומות", floor: "קומה", land_area_sqm: "שטח מגרש", condition: "מצב", location_precision: "מיקום" },
   },
 };
 
@@ -1884,6 +2025,26 @@ function listingActions(locale, view, path, labels, brokerContact = null) {
   };
 }
 
+// Links from the listing detail "Location" section back into search: the
+// reviewed location name for the list, the official geography filter for the
+// map. A per-listing map needs approved coordinates, which the public view
+// model does not publish yet, so the detail page links to the area map.
+function listingLocationLinks(locale, view) {
+  const searchPath = `/${locale.code}/${locale.route_segments?.search || "search"}`;
+  const searchParams = new URLSearchParams();
+  if (view.location) searchParams.set("location", view.location);
+  const mapParams = new URLSearchParams({ view: "map" });
+  if (view.country_code) mapParams.set("country_code", view.country_code);
+  if (view.country_code === "BG" && view.district_code) mapParams.set("region_id", `BG:district:${view.district_code}`);
+  return {
+    search: [...searchParams.keys()].length ? `${searchPath}?${searchParams}` : searchPath,
+    map: view.country_code ? `${searchPath}?${mapParams}` : null,
+    // A precise pin needs approved public coordinates; until the CMS publishes
+    // them the detail page offers the area map instead of an invented location.
+    pin_available: Boolean(view.public_coordinates),
+  };
+}
+
 export function renderListingPage({ registry, listing, localeCode, translations, brokerContact = null, relatedListings = [] }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -1989,6 +2150,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
         seller_valuation: labels.valuation,
       },
       actions: listingActions(locale, view, path, labels, brokerContact),
+      location_links: listingLocationLinks(locale, view),
       related_listings: relatedListingCards(registry, relatedListings, locale, listing),
       source: {
         old_url: view.source_url,
@@ -2636,6 +2798,43 @@ function locationPageCopy(localeCode, location) {
   return copy[localeCode] || copy.en;
 }
 
+// Sub-area chips for a location landing: the settlements (from the official
+// geography registry) that the matched listings actually sit in, with counts.
+function locationSubAreas(listings, locale, location) {
+  const scope = PUBLIC_LOCATION_SCOPES[location];
+  if (!scope?.municipality_code) return [];
+  const searchPath = `/${locale.code}/${locale.route_segments?.search || "search"}`;
+  const counts = new Map();
+  for (const listing of listings) {
+    const view = listingToPublicViewModel(listing);
+    if (!view.settlement_ekatte) continue;
+    const id = `BG:settlement:${view.settlement_ekatte}`;
+    counts.set(id, (counts.get(id) || 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([id, count]) => ({ id, count, area: geographyRegistryArea(publicGeographyRegistry(), id) }))
+    .filter(({ area }) => area?.names?.en)
+    .sort((left, right) => right.count - left.count || left.area.names.en.localeCompare(right.area.names.en))
+    .slice(0, 8)
+    .map(({ id, count, area }) => ({
+      id,
+      count,
+      label: locale.code === "bg" ? area.names.native : localizedLocationValue(locale.code, area.names.en),
+      href: `${searchPath}?region_id=${encodeURIComponent(id)}`,
+    }));
+}
+
+function locationSearchHref(locale, location) {
+  const scope = PUBLIC_LOCATION_SCOPES[location];
+  const searchPath = `/${locale.code}/${locale.route_segments?.search || "search"}`;
+  const areaId = scope?.municipality_code
+    ? `BG:municipality:${scope.municipality_code}`
+    : scope?.settlement_ekatte
+      ? `BG:settlement:${scope.settlement_ekatte}`
+      : null;
+  return areaId ? `${searchPath}?region_id=${encodeURIComponent(areaId)}` : `${searchPath}?location=${encodeURIComponent(location)}`;
+}
+
 export function renderLocationPage({ registry, localeCode, location, listings }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -2657,9 +2856,8 @@ export function renderLocationPage({ registry, localeCode, location, listings })
   const indexable = resolved.available && localizedMatches.length > 0;
   const hasInventory = matchedListings.length > 0;
   const copy = locationPageCopy(locale.code, localizedLocationValue(locale.code, location));
-  const contextGuide = indexable
-    ? approvedContentDocumentsForLocation(readApprovedCmsContent(), location, locale.code)[0]
-    : null;
+  const locationGuides = indexable ? approvedContentDocumentsForLocation(readApprovedCmsContent(), location, locale.code) : [];
+  const contextGuide = locationGuides[0] || null;
   const context = contextGuide?.facts?.[0]
     ? {
         href: contextGuide.path,
@@ -2667,6 +2865,10 @@ export function renderLocationPage({ registry, localeCode, location, listings })
         summary: contextGuide.facts[0],
       }
     : null;
+  const guides = locationGuides
+    .filter((doc) => doc.path !== contextGuide?.path)
+    .slice(0, 3)
+    .map((doc) => ({ href: doc.path, title: doc.title, summary: doc.facts?.[0] || "" }));
   const locales = publicIndexableLocales(registry)
     .filter((candidate) =>
       listings.some((listing) => {
@@ -2698,6 +2900,15 @@ export function renderLocationPage({ registry, localeCode, location, listings })
       location,
       listing_count: matchedListings.length,
       ...(context ? { context } : {}),
+      intro: copy.description,
+      sub_areas: locationSubAreas(matchedListings, locale, location),
+      guides,
+      seller: {
+        path: sellerPath(registry, locale.code),
+        label: labelsFor(locale.code).valuation,
+        description: sellerCopy(locale.code).description,
+      },
+      search_href: locationSearchHref(locale, location),
     },
     cards: matchedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale)),
   };
