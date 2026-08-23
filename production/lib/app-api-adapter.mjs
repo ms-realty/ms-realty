@@ -15,6 +15,13 @@ import {
   privacySafeLanguageRequest,
 } from "./language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead } from "./lead-ledger.mjs";
+import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
+import {
+  DEFAULT_WORKSPACE_SETTINGS_PATH,
+  applyWorkspaceDefaultBroker,
+  leadSlaOptions,
+  readWorkspaceSettings,
+} from "./workspace-settings.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact } from "./lead-contact-vault.mjs";
 import {
   LeadStoreUnavailableError,
@@ -89,6 +96,7 @@ export function appApiConfigFromEnv(env = process.env) {
     eventDurableStore: eventDurableStoreConfigFromEnv(env),
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || DEFAULT_WORKSPACE_SETTINGS_PATH,
     leadContactVaultPath:
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
@@ -285,10 +293,22 @@ async function routeSearch(requestUrl, registry, seed, config, preview = false) 
   }
 }
 
+// Workspace settings (Settings > Leads and SLA) supply the reply deadlines and
+// the default broker per lead type for every new public enquiry.
+function workspaceSettingsFor(config = {}) {
+  const filePath = config.workspaceSettingsPath || DEFAULT_WORKSPACE_SETTINGS_PATH;
+  return readThroughCached(filePath, () => readWorkspaceSettings(filePath));
+}
+
 async function routeLead(request, body, registry, seed, config) {
   try {
     const input = parseBody(request, body);
-    const lead = submitRuntimeLead(registry, seed, input);
+    const workspaceSettings = workspaceSettingsFor(config);
+    const lead = applyWorkspaceDefaultBroker(
+      submitRuntimeLead(registry, seed, input),
+      workspaceSettings,
+      DEFAULT_BROKER_PROFILES,
+    );
     const durableStore = config.leadDurableStore || {};
     const durableRequested = durableStore.leadDurableStoreEnabled === true;
     if (config.runtimeDataDurableOnly && !durableRequested) {
@@ -322,6 +342,7 @@ async function routeLead(request, body, registry, seed, config) {
         filePath: config.leadLedgerPath,
         receivedAt: config.receivedAt,
         contactSecret: config.leadContactKey,
+        ...leadSlaOptions(workspaceSettings),
       });
     const consent = durable
       ? durable.consent

@@ -379,7 +379,7 @@ const ADMIN_UI_COPY = {
       consent_withdrawn: "Оттеглено съгласие или известие",
       document_checklist_updated: "Обновен контролен списък за документи",
       lead_created: "Създадено запитване от брокер",
-      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
+      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед", workspace_settings_updated: "Обновени настройки на работното пространство",
     },
     values: {
       website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане", broker_phone: "Телефонно обаждане", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Имейл", broker_walk_in: "Посещение в офис", partner_referral: "Партньорска препоръка", lead_response_sla: "SLA за отговор", buyer_renter_pipeline: "Купувачи и наематели", reply_delivery: "Изпращане на отговори", viewing_follow_up: "След оглед", seller_pipeline: "Продавачи", website_requests: "Заявки от сайта", translation_review: "Преглед на преводи", deal_aftercare: "След сделка",
@@ -396,6 +396,107 @@ const ADMIN_UI_COPY = {
       commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", plot: "Парцел", agricultural_land: "Земеделска земя", land: "Парцел", property: "Имот", sale: "Продажба", rent: "Наем",
       instant: "Веднага", daily: "Ежедневно", weekly: "Седмично",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
+    },
+    workspaceSettings: {
+      navGroup: "Работно пространство",
+      title: "Настройки",
+      description: "Профил на агенцията, срокове за отговор, известия, настройки на работното пространство и публичния сайт. Всяка промяна се записва в историята на действията.",
+      sectionsNav: "Раздели на настройките",
+      sectionState: { defaults: "По подразбиране", updated: "Обновено" },
+      lastUpdated: "Последна промяна",
+      notConfirmed: "Използват се стойности по подразбиране, нищо не е потвърдено.",
+      save: "Запази промените",
+      saving: "Записване…",
+      saved: "Записано.",
+      saveFailed: "Промените не бяха записани. Проверете отбелязаното поле.",
+      unsaved: "Незаписани промени.",
+      noChanges: "Няма промени.",
+      readOnly: "Хранилището за настройки не е конфигурирано в тази среда.",
+      sections: {
+        agency: { title: "Профил на агенцията", description: "Как агенцията се представя пред клиентите и от кои канали идват отговорите." },
+        leads: { title: "Запитвания и срокове", description: "Срокове за отговор на нови запитвания и брокер по подразбиране за всеки тип запитване.", note: "Важи за запитвания, създадени от този момент. Съществуващите запазват сроковете си." },
+        notifications: { title: "Известия", description: "Дневно резюме и незабавни известия за екипа.", note: "Изпращането на резюмета и известия още не е свързано. Предпочитанията се пазят за момента, в който бъде." },
+        workspace: { title: "Работно пространство", description: "Език на интерфейса, часова зона и формат на датата за всички в работното пространство." },
+        public_site: { title: "Публичен сайт", description: "Стойности по подразбиране, които публичният сайт чете от работното пространство.", note: "Записват се сега; публичният сайт ще ги приложи, когато започне да чете настройките." },
+      },
+      fields: {
+        name: "Име на агенцията", phone: "Телефон", email: "Имейл", whatsapp: "WhatsApp", viber: "Viber", offices: "Офиси", officesHint: "По един офис на ред.",
+        first_reply_target_minutes: "Срок за първи отговор (минути)", firstReplyHint: "Напомняне се отваря, когато ново запитване няма изпратен отговор след толкова минути.",
+        manager_escalation_minutes: "Ескалация към мениджър (минути)", escalationHint: "Запитвания без отговор отиват при мениджъра след толкова минути.",
+        defaultBrokers: "Брокер по подразбиране за тип запитване", automaticBroker: "Автоматично (правила по език и район)",
+        default_broker_buyer: "Купувачи и инвеститори", default_broker_renter: "Наематели", default_broker_seller: "Продавачи", default_broker_landlord: "Наемодатели",
+        daily_digest_enabled: "Дневно резюме", dailyDigestHint: "Сутрешно обобщение на нови запитвания, просрочени задачи и огледи.",
+        daily_digest_recipients: "Получатели на резюмето", digestRecipientsHint: "По един имейл на ред.",
+        instant_new_lead_alerts: "Незабавни известия за нови запитвания", instantAlertsHint: "Уведомява отговорния брокер веднага щом пристигне ново запитване.",
+        default_locale: "Език на интерфейса по подразбиране", timezone: "Часова зона", date_format: "Формат на датата", dateFormatLocale: "Според езика",
+        featured_listings_count: "Избрани имоти на началната страница", show_price_on_request: "Показвай имоти с цена при запитване", saved_search_alerts_enabled: "Известия за запазени търсения",
+      },
+      locales: { bg: "Български", ru: "Руски", en: "Английски" },
+      plannedSections: {
+        security: {
+          title: "Сигурност",
+          description: "Защита при вход на операторите и сесиите, отворени в това работно пространство.",
+          note: "Още не е свързано: входът на операторите минава през Payload, който още не поддържа втори фактор и не показва списък със сесии.",
+          items: {
+            two_factor: { label: "Двуфакторно удостоверяване", note: "Нужна е поддръжка в Payload за втори фактор при вход на оператор.", control: "Изисквай втори фактор" },
+            sessions: { label: "Активни сесии", note: "Нужно е Payload да показва и прекратява сесиите на операторите.", empty: "Отворените сесии ще се появят тук, когато Payload може да ги изброи.", action: "Прекрати другите сесии" },
+          },
+        },
+        data: {
+          title: "Данни",
+          description: "Експорт на това, което работното пространство съхранява, и срок на съхранение на историята.",
+          note: "Още не е свързано: няма задача за експорт с преглед на личните данни и запис в историята.",
+          items: {
+            export: { label: "Експорт на данните", note: "Нужна е задача за експорт, която записва действие в историята, за запитвания, контакти и обяви.", options: { leads: "Запитвания", contacts: "Контакти", listings: "Обяви" }, action: "Подготви експорт" },
+            audit_retention: { label: "Срок на съхранение на историята", note: "Нужна е задача за изчистване на журнала с одобрен срок.", sample: "12 месеца" },
+          },
+        },
+      },
+      plannedRows: {
+        notification_centre: { label: "Център за известия в продукта", note: "Нужно е хранилище за известия в приложението; днес всичко е имейл или брояч в опашката." },
+      },
+      pending: {
+        title: "Още не е свързано",
+        description: "Тези настройки са подготвени, но нямат работеща основа. Показани са, за да е ясно какво предстои, и остават неактивни, докато не бъдат свързани.",
+        items: {
+          messaging_credentials: { label: "Данни за изпращане на имейл и SMS", sample: "SMTP / SMS", note: "Нужно е хранилище за ключове на доставчик и проверка на подателя, преди работното пространство да изпраща само." },
+          working_hours: { label: "Работно време и почивни дни", sample: "09:00 - 18:00", note: "Нужно е часовникът за срокове да разбира работно време, за да не текат минути извън него." },
+          routing_rules: { label: "Правила за разпределяне на запитвания", sample: "Език, район, бюджет", note: "Нужен е механизъм за правила по език, район и бюджет извън брокера по подразбиране." },
+        },
+      },
+      onboarding: {
+        title: "Настройте работното пространство",
+        progress: "{done} от {total} готови",
+        dismiss: "Скрий списъка",
+        done: "Готово",
+        todo: "Предстои",
+        items: {
+          agency_profile: { label: "Попълнете профила на агенцията", note: "Име и телефон или имейл, които клиентите ще виждат" },
+          lead_sla: { label: "Потвърдете сроковете за отговор", note: "Минути за напомняне и ескалация" },
+          teammate: { label: "Поканете колега", note: "Добавете втори операторски акаунт" },
+          provider: { label: "Свържете канал", note: "Google, WhatsApp или Viber" },
+          first_reply: { label: "Изпратете първия отговор до клиент", note: "Одобрете и изпратете отговор от входящите запитвания" },
+        },
+      },
+      welcome: {
+        title: "Добре дошли, {operator}.",
+        titleAnonymous: "Добре дошли.",
+        text: "Следващите действия са най-отгоре. Опашките, готовността и списъкът за настройка са в страничната лента.",
+        dismiss: "Затвори",
+      },
+      nextActions: {
+        title: "Следващи действия",
+        description: "Един списък за запитвания, последващи действия, заявки от сайта и възможности, най-спешните първо.",
+        empty: "Нищо не чака. Новите запитвания и дължимите действия ще се появят тук.",
+        more: "Още {count} в опашките по-долу",
+        filters: { all: "Всички", overdue: "Просрочени", enquiries: "Запитвания", followUps: "Последващи", requests: "Заявки", opportunities: "Възможности" },
+        emptyFiltered: "Нищо в този изглед.",
+        due: "Срок",
+        overdue: "Просрочено",
+        kinds: { lead: "Запитване", viewing: "След оглед", seller: "Оценка за продавач", request: "Заявка от сайта", pipeline: "Възможност" },
+        actions: { reply: "Отвори и отговори", review: "Прегледай и отговори", requeue: "Поправи изпращането", sendQueued: "Изпрати чакащия отговор", followUp: "Запиши последващо действие", feedback: "Поискай обратна връзка", sellerStep: "Запиши стъпка за продавача", outcome: "Запиши резултат", opportunity: "Отвори възможността" },
+        priorities: { critical: "Критично", urgent: "Спешно", normal: "Нормално" },
+      },
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
   },
@@ -728,7 +829,7 @@ const ADMIN_UI_COPY = {
       consent_withdrawn: "Согласие или уведомление отозвано",
       document_checklist_updated: "Обновлен чек-лист документов",
       lead_created: "Заявка создана брокером",
-      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
+      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано", workspace_settings_updated: "Настройки рабочего пространства обновлены",
     },
     values: {
       website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок", broker_phone: "Телефонный звонок", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Эл. почта", broker_walk_in: "Визит в офис", partner_referral: "Партнерская рекомендация", lead_response_sla: "SLA ответа", buyer_renter_pipeline: "Покупатели и арендаторы", reply_delivery: "Отправка ответов", viewing_follow_up: "После просмотра", seller_pipeline: "Продавцы", website_requests: "Заявки с сайта", translation_review: "Проверка переводов", deal_aftercare: "После сделки",
@@ -745,6 +846,107 @@ const ADMIN_UI_COPY = {
       commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", plot: "Участок", agricultural_land: "Сельхозземля", land: "Участок", property: "Объект", sale: "Продажа", rent: "Аренда",
       instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
+    },
+    workspaceSettings: {
+      navGroup: "Рабочее пространство",
+      title: "Настройки",
+      description: "Профиль агентства, сроки ответа, уведомления, настройки рабочего пространства и публичного сайта. Каждое изменение записывается в историю действий.",
+      sectionsNav: "Разделы настроек",
+      sectionState: { defaults: "По умолчанию", updated: "Обновлено" },
+      lastUpdated: "Последнее изменение",
+      notConfirmed: "Используются значения по умолчанию, ничего не подтверждено.",
+      save: "Сохранить изменения",
+      saving: "Сохранение…",
+      saved: "Сохранено.",
+      saveFailed: "Не удалось сохранить. Проверьте выделенное поле.",
+      unsaved: "Несохраненные изменения.",
+      noChanges: "Изменений нет.",
+      readOnly: "Хранилище настроек не настроено в этой среде.",
+      sections: {
+        agency: { title: "Профиль агентства", description: "Как агентство представляется клиентам и из каких каналов приходят ответы." },
+        leads: { title: "Заявки и сроки", description: "Сроки ответа на новые заявки и брокер по умолчанию для каждого типа заявки.", note: "Действует для заявок, созданных с этого момента. У существующих сроки не меняются." },
+        notifications: { title: "Уведомления", description: "Ежедневная сводка и мгновенные уведомления для команды.", note: "Отправка сводок и уведомлений пока не подключена. Настройки сохраняются на будущее." },
+        workspace: { title: "Рабочее пространство", description: "Язык интерфейса, часовой пояс и формат даты для всех в рабочем пространстве." },
+        public_site: { title: "Публичный сайт", description: "Значения по умолчанию, которые публичный сайт берет из рабочего пространства.", note: "Сохраняются сейчас; публичный сайт применит их, когда начнет читать настройки." },
+      },
+      fields: {
+        name: "Название агентства", phone: "Телефон", email: "Email", whatsapp: "WhatsApp", viber: "Viber", offices: "Офисы", officesHint: "По одному офису в строке.",
+        first_reply_target_minutes: "Срок первого ответа (минуты)", firstReplyHint: "Напоминание откроется, если на новую заявку нет отправленного ответа через столько минут.",
+        manager_escalation_minutes: "Эскалация менеджеру (минуты)", escalationHint: "Заявки без ответа уходят менеджеру через столько минут.",
+        defaultBrokers: "Брокер по умолчанию для типа заявки", automaticBroker: "Автоматически (правила по языку и району)",
+        default_broker_buyer: "Покупатели и инвесторы", default_broker_renter: "Арендаторы", default_broker_seller: "Продавцы", default_broker_landlord: "Арендодатели",
+        daily_digest_enabled: "Ежедневная сводка", dailyDigestHint: "Утренняя сводка новых заявок, просроченных задач и просмотров.",
+        daily_digest_recipients: "Получатели сводки", digestRecipientsHint: "По одному email в строке.",
+        instant_new_lead_alerts: "Мгновенные уведомления о новых заявках", instantAlertsHint: "Сообщает назначенному брокеру сразу после поступления заявки.",
+        default_locale: "Язык интерфейса по умолчанию", timezone: "Часовой пояс", date_format: "Формат даты", dateFormatLocale: "По языку интерфейса",
+        featured_listings_count: "Рекомендуемых объектов на главной", show_price_on_request: "Показывать объекты с ценой по запросу", saved_search_alerts_enabled: "Уведомления о сохраненных поисках",
+      },
+      locales: { bg: "Болгарский", ru: "Русский", en: "Английский" },
+      plannedSections: {
+        security: {
+          title: "Безопасность",
+          description: "Защита входа операторов и сессии, открытые в этом рабочем пространстве.",
+          note: "Еще не подключено: вход операторов идет через Payload, который пока не поддерживает второй фактор и не отдает список сессий.",
+          items: {
+            two_factor: { label: "Двухфакторная аутентификация", note: "Нужна поддержка второго фактора при входе оператора в Payload.", control: "Требовать второй фактор" },
+            sessions: { label: "Активные сессии", note: "Нужно, чтобы Payload показывал и завершал сессии операторов.", empty: "Открытые сессии появятся здесь, когда Payload сможет их перечислить.", action: "Завершить другие сессии" },
+          },
+        },
+        data: {
+          title: "Данные",
+          description: "Экспорт того, что хранит рабочее пространство, и срок хранения истории действий.",
+          note: "Еще не подключено: нет задачи экспорта с проверкой персональных данных и записью в историю.",
+          items: {
+            export: { label: "Экспорт данных", note: "Нужна задача экспорта с записью в историю действий, охватывающая заявки, контакты и объекты.", options: { leads: "Заявки", contacts: "Контакты", listings: "Объекты" }, action: "Подготовить экспорт" },
+            audit_retention: { label: "Срок хранения истории действий", note: "Нужна задача очистки журнала с утвержденным сроком.", sample: "12 месяцев" },
+          },
+        },
+      },
+      plannedRows: {
+        notification_centre: { label: "Центр уведомлений в продукте", note: "Нужно хранилище уведомлений в приложении; сегодня это только email или счетчик в очереди." },
+      },
+      pending: {
+        title: "Еще не подключено",
+        description: "Эти настройки подготовлены, но не имеют рабочей основы. Они показаны, чтобы было видно, что впереди, и остаются неактивными до подключения.",
+        items: {
+          messaging_credentials: { label: "Доступы для отправки email и SMS", sample: "SMTP / SMS", note: "Нужно хранилище ключей провайдера и проверка отправителя, прежде чем рабочее пространство начнет отправлять само." },
+          working_hours: { label: "Рабочее время и выходные", sample: "09:00 - 18:00", note: "Нужно, чтобы часы сроков понимали рабочее время и не считали минуты вне его." },
+          routing_rules: { label: "Правила распределения заявок", sample: "Язык, район, бюджет", note: "Нужен механизм правил по языку, району и бюджету помимо брокера по умолчанию." },
+        },
+      },
+      onboarding: {
+        title: "Настройте рабочее пространство",
+        progress: "{done} из {total} готово",
+        dismiss: "Скрыть список",
+        done: "Готово",
+        todo: "Предстоит",
+        items: {
+          agency_profile: { label: "Заполните профиль агентства", note: "Название и телефон или email, которые увидят клиенты" },
+          lead_sla: { label: "Подтвердите сроки ответа", note: "Минуты до напоминания и эскалации" },
+          teammate: { label: "Пригласите коллегу", note: "Добавьте второй аккаунт оператора" },
+          provider: { label: "Подключите канал", note: "Google, WhatsApp или Viber" },
+          first_reply: { label: "Отправьте первый ответ клиенту", note: "Одобрите и отправьте ответ из входящих заявок" },
+        },
+      },
+      welcome: {
+        title: "Добро пожаловать, {operator}.",
+        titleAnonymous: "Добро пожаловать.",
+        text: "Следующие действия идут первыми. Очереди, готовность и список настройки находятся в боковой панели.",
+        dismiss: "Закрыть",
+      },
+      nextActions: {
+        title: "Следующие действия",
+        description: "Один список по заявкам, последующим действиям, запросам с сайта и возможностям, самые срочные первыми.",
+        empty: "Ничего не ждет. Новые заявки и назначенные действия появятся здесь.",
+        more: "Еще {count} в очередях ниже",
+        filters: { all: "Все", overdue: "Просроченные", enquiries: "Заявки", followUps: "Последующие", requests: "Запросы", opportunities: "Возможности" },
+        emptyFiltered: "В этом виде ничего нет.",
+        due: "Срок",
+        overdue: "Просрочено",
+        kinds: { lead: "Заявка", viewing: "После просмотра", seller: "Оценка для продавца", request: "Запрос с сайта", pipeline: "Возможность" },
+        actions: { reply: "Открыть и ответить", review: "Проверить и ответить", requeue: "Исправить отправку", sendQueued: "Отправить ответ из очереди", followUp: "Записать действие", feedback: "Запросить отзыв", sellerStep: "Записать шаг продавца", outcome: "Записать результат", opportunity: "Открыть возможность" },
+        priorities: { critical: "Критично", urgent: "Срочно", normal: "Обычно" },
+      },
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
   },
@@ -1061,7 +1263,7 @@ const ADMIN_UI_COPY = {
       consent_withdrawn: "Consent or notification withdrawn",
       document_checklist_updated: "Document checklist updated",
       lead_created: "Broker-created enquiry",
-      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
+      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded", workspace_settings_updated: "Workspace settings updated",
     },
     values: {
       website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request", broker_phone: "Phone call", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Email", broker_walk_in: "Office walk-in", partner_referral: "Partner referral", lead_response_sla: "Response SLA", buyer_renter_pipeline: "Buyers and renters", reply_delivery: "Reply delivery", viewing_follow_up: "Post-viewing", seller_pipeline: "Sellers", website_requests: "Website requests", translation_review: "Translation review", deal_aftercare: "Deal aftercare",
@@ -1078,6 +1280,107 @@ const ADMIN_UI_COPY = {
       commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", plot: "Plot", agricultural_land: "Agricultural land", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
       instant: "As soon as possible", daily: "Daily", weekly: "Weekly",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
+    },
+    workspaceSettings: {
+      navGroup: "Workspace",
+      title: "Settings",
+      description: "Agency profile, lead reply targets, notifications, workbench and public site defaults. Every change is recorded in the activity history.",
+      sectionsNav: "Settings sections",
+      sectionState: { defaults: "Defaults", updated: "Updated" },
+      lastUpdated: "Last change",
+      notConfirmed: "Defaults in use, nothing confirmed yet.",
+      save: "Save changes",
+      saving: "Saving…",
+      saved: "Saved.",
+      saveFailed: "Could not save. Check the highlighted field.",
+      unsaved: "Unsaved changes.",
+      noChanges: "No changes.",
+      readOnly: "Settings storage is not configured on this runtime.",
+      sections: {
+        agency: { title: "Agency profile", description: "How the agency introduces itself to customers and which channels replies come from." },
+        leads: { title: "Leads and SLA", description: "Reply targets for new enquiries and the default broker for each lead type.", note: "Applies to enquiries created from now on. Existing enquiries keep their deadlines." },
+        notifications: { title: "Notifications", description: "Daily digest and instant alerts for the team.", note: "Delivery of digests and alerts is not connected yet. The preferences are stored for when it is." },
+        workspace: { title: "Workspace", description: "Interface language, timezone and date format for everyone in the workbench." },
+        public_site: { title: "Public site", description: "Defaults the public website reads from the workspace.", note: "Stored now; the public site applies them once it reads workspace settings." },
+      },
+      fields: {
+        name: "Agency name", phone: "Phone", email: "Email", whatsapp: "WhatsApp", viber: "Viber", offices: "Offices", officesHint: "One office per line.",
+        first_reply_target_minutes: "First reply target (minutes)", firstReplyHint: "A reminder opens when a new enquiry has no sent reply after this many minutes.",
+        manager_escalation_minutes: "Manager escalation (minutes)", escalationHint: "Unanswered enquiries go to the manager after this many minutes.",
+        defaultBrokers: "Default broker per lead type", automaticBroker: "Automatic (language and area rules)",
+        default_broker_buyer: "Buyers and investors", default_broker_renter: "Renters", default_broker_seller: "Sellers", default_broker_landlord: "Landlords",
+        daily_digest_enabled: "Daily digest", dailyDigestHint: "A morning summary of new enquiries, overdue tasks and viewings.",
+        daily_digest_recipients: "Digest recipients", digestRecipientsHint: "One email per line.",
+        instant_new_lead_alerts: "Instant new lead alerts", instantAlertsHint: "Tell the assigned broker the moment a new enquiry arrives.",
+        default_locale: "Default interface language", timezone: "Timezone", date_format: "Date format", dateFormatLocale: "Language default",
+        featured_listings_count: "Featured listings on the home page", show_price_on_request: "Show listings with price on request", saved_search_alerts_enabled: "Saved search alerts",
+      },
+      locales: { bg: "Bulgarian", ru: "Russian", en: "English" },
+      plannedSections: {
+        security: {
+          title: "Security",
+          description: "Operator sign-in protection and the sessions open on this workspace.",
+          note: "Not connected: operator sign-in runs on Payload, which exposes neither a second factor nor a session list yet.",
+          items: {
+            two_factor: { label: "Two-factor authentication", note: "Needs Payload support for a second factor at operator sign-in.", control: "Require a second factor" },
+            sessions: { label: "Active sessions", note: "Needs Payload to list and revoke operator sessions.", empty: "Open sessions will appear here once Payload can list them.", action: "Revoke other sessions" },
+          },
+        },
+        data: {
+          title: "Data",
+          description: "Export what the workspace holds, and how long the activity history is kept.",
+          note: "Not connected: an export job with a personal-data review and an audit entry does not exist yet.",
+          items: {
+            export: { label: "Export workspace data", note: "Needs an export job that writes an audit entry, covering leads, contacts and listings.", options: { leads: "Leads", contacts: "Contacts", listings: "Listings" }, action: "Prepare export" },
+            audit_retention: { label: "Activity history retention", note: "Needs a ledger clean-up job with an approved retention window.", sample: "12 months" },
+          },
+        },
+      },
+      plannedRows: {
+        notification_centre: { label: "In-product notification centre", note: "Needs an in-app notification store; today every alert is an email or a queue badge." },
+      },
+      pending: {
+        title: "Not connected yet",
+        description: "These settings are prepared but have no working backend. They are shown so the gap is visible, and stay inactive until each one is connected.",
+        items: {
+          messaging_credentials: { label: "Email and SMS sending credentials", sample: "SMTP / SMS", note: "Needs a provider credential vault and sender verification before the workspace can send on its own." },
+          working_hours: { label: "Working hours and closed days", sample: "09:00 - 18:00", note: "Needs the reply clock to understand business hours so minutes do not run outside them." },
+          routing_rules: { label: "Lead routing rules", sample: "Language, area, budget", note: "Needs a rules engine for language, area and budget beyond the default broker per lead type." },
+        },
+      },
+      onboarding: {
+        title: "Set up your workspace",
+        progress: "{done} of {total} done",
+        dismiss: "Hide checklist",
+        done: "Done",
+        todo: "To do",
+        items: {
+          agency_profile: { label: "Complete the agency profile", note: "Name and a phone or email customers will see" },
+          lead_sla: { label: "Confirm lead reply targets", note: "Reminder and escalation minutes" },
+          teammate: { label: "Invite a teammate", note: "Add a second operator account" },
+          provider: { label: "Connect a channel", note: "Google, WhatsApp or Viber" },
+          first_reply: { label: "Send the first customer reply", note: "Approve and send a reply from the lead inbox" },
+        },
+      },
+      welcome: {
+        title: "Welcome, {operator}.",
+        titleAnonymous: "Welcome.",
+        text: "Next actions come first. Queues, readiness and your setup checklist sit in the rail.",
+        dismiss: "Dismiss",
+      },
+      nextActions: {
+        title: "Next actions",
+        description: "One list across enquiries, follow-ups, website requests and opportunities, most urgent first.",
+        empty: "Nothing is waiting. New enquiries and due follow-ups will appear here.",
+        more: "{count} more in the queues below",
+        filters: { all: "All", overdue: "Overdue", enquiries: "Enquiries", followUps: "Follow-ups", requests: "Website", opportunities: "Opportunities" },
+        emptyFiltered: "Nothing in this view.",
+        due: "Due",
+        overdue: "Overdue",
+        kinds: { lead: "Enquiry", viewing: "Viewing follow-up", seller: "Seller valuation", request: "Website request", pipeline: "Opportunity" },
+        actions: { reply: "Open and reply", review: "Review and reply", requeue: "Fix delivery", sendQueued: "Send queued reply", followUp: "Record follow-up", feedback: "Request feedback", sellerStep: "Record seller step", outcome: "Record outcome", opportunity: "Open opportunity" },
+        priorities: { critical: "Critical", urgent: "Urgent", normal: "Normal" },
+      },
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location", media_kind_photo: "Photo", media_kind_floor_plan: "Floor plan", media_kind_video: "Video" },
   },
@@ -1159,9 +1462,16 @@ function listingQualityIssueText(ui, issue) {
   return statusText(ui, issue);
 }
 
+// The workspace default locale (Settings, Workspace section) is what the server
+// renders when no ?locale= is present, so links only carry the param when the
+// page locale differs from it.
+function adminDefaultLocale(page) {
+  return page?.workspace_settings?.sections?.workspace?.default_locale || "en";
+}
+
 function adminHref(path, page) {
   const locale = page.workspace?.locale;
-  if (!locale || locale === "en") return path;
+  if (!locale || locale === adminDefaultLocale(page)) return path;
   const url = new URL(path, "http://ms-realty.local");
   url.searchParams.set("locale", locale);
   return `${url.pathname}${url.search}${url.hash}`;
@@ -1173,7 +1483,7 @@ function adminLocaleHref(page, locale) {
     if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, String(value));
   }
   if (page.listing?.id) url.searchParams.set("listingId", page.listing.id);
-  if (locale && locale !== "en") url.searchParams.set("locale", locale);
+  if (locale && locale !== adminDefaultLocale(page)) url.searchParams.set("locale", locale);
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
@@ -1185,14 +1495,44 @@ function currentOperatorId(page, fallback) {
   return page.workspace?.operator_id || fallback;
 }
 
+// Display settings (timezone, date format) come from the workspace settings
+// carried in the page payload; renderReactAdminBody activates them for the
+// duration of one synchronous render so every date helper picks them up.
+const DEFAULT_DISPLAY_SETTINGS = Object.freeze({ timezone: "Europe/Sofia", date_format: "locale" });
+let activeDisplaySettings = DEFAULT_DISPLAY_SETTINGS;
+
+function displaySettingsFor(page) {
+  const workspace = page?.workspace_settings?.sections?.workspace || {};
+  const timezone = String(workspace.timezone || DEFAULT_DISPLAY_SETTINGS.timezone);
+  try {
+    new Intl.DateTimeFormat("en-GB", { timeZone: timezone });
+    return { timezone, date_format: String(workspace.date_format || "locale") };
+  } catch {
+    return { ...DEFAULT_DISPLAY_SETTINGS, date_format: String(workspace.date_format || "locale") };
+  }
+}
+
 function formatAdminDateTime(value, locale) {
   if (!value || Number.isNaN(new Date(value).getTime())) return "";
   const language = locale === "bg" ? "bg-BG" : locale === "ru" ? "ru-RU" : "en-GB";
-  return new Intl.DateTimeFormat(language, {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Europe/Sofia",
-  }).format(new Date(value));
+  const { timezone: timeZone, date_format: dateFormat } = activeDisplaySettings;
+  const date = new Date(value);
+  if (!["dd.mm.yyyy", "dd/mm/yyyy", "yyyy-mm-dd"].includes(dateFormat)) {
+    return new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(date);
+  }
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", { timeZone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+      .formatToParts(date)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+  const day =
+    dateFormat === "yyyy-mm-dd"
+      ? `${parts.year}-${parts.month}-${parts.day}`
+      : dateFormat === "dd/mm/yyyy"
+        ? `${parts.day}/${parts.month}/${parts.year}`
+        : `${parts.day}.${parts.month}.${parts.year}`;
+  return `${day}, ${parts.hour}:${parts.minute}`;
 }
 
 function leadContactActions(lead, copy) {
@@ -1446,6 +1786,7 @@ const NAV_ROUTES = [
   { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
   { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
   { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
+  { id: "settings", module: "workspace", path: "/admin/settings", icon: "settings", kind: "admin_workspace_settings", capability: "workspace:read" },
 ];
 
 function adminNavigationGroups(page) {
@@ -1502,6 +1843,10 @@ function adminNavigationGroups(page) {
     {
       label: label(copy, "launchEvidence", "Launch"),
       items: [{ ...route("migration_review"), label: label(copy, "migrationReview", "Migration review") }],
+    },
+    {
+      label: workbenchCopy(page).workspaceSettings.navGroup,
+      items: [{ ...route("settings"), label: workbenchCopy(page).workspaceSettings.title }],
     },
   ];
   return groups
@@ -1709,6 +2054,302 @@ function queueTone(status) {
   return "sun";
 }
 
+const NEXT_ACTION_PRIORITY_RANK = { critical: 0, urgent: 1, normal: 2 };
+
+// One prioritised list across every operating queue on Today. Rows come from
+// the same payload the queue previews below use, so nothing is invented here.
+function todayNextActions(page, copy, ui, queue, inboxHref) {
+  const na = workbenchCopy(page).workspaceSettings.nextActions;
+  const rows = [];
+  for (const lead of queue.pending) {
+    const sla = queue.leadSlaById.get(lead.lead_id);
+    const delivery = queue.deliveryByLeadId.get(lead.lead_id);
+    const slaStatus = sla?.status || "pending";
+    let priority = "normal";
+    let action = na.actions.reply;
+    let dueAt = sla?.sla_due_at || null;
+    if (delivery?.status === "failed") {
+      priority = "critical";
+      action = na.actions.requeue;
+    } else if (slaStatus === "manager_escalation_required") {
+      priority = "critical";
+      action = na.actions.review;
+      dueAt = sla?.manager_escalation_due_at || dueAt;
+    } else if (delivery?.status === "queued") {
+      priority = "urgent";
+      action = na.actions.sendQueued;
+    } else if (slaStatus === "reminder_required") {
+      priority = "urgent";
+    }
+    rows.push({
+      key: `lead:${lead.lead_id}`,
+      kind: "lead",
+      tags: "enquiries",
+      priority,
+      dueAt,
+      overdue: priority !== "normal",
+      title: [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source),
+      context: statusText(ui, delivery?.status === "failed" ? "failed" : slaStatus),
+      reference: lead.lead_id,
+      href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}`,
+      action,
+    });
+  }
+  for (const row of page.viewingFollowUpQueue?.rows || []) {
+    if (row.task_status && row.task_status !== "open") continue;
+    rows.push({
+      key: `viewing:${row.viewing_id}:${row.task}`,
+      tags: "follow-ups",
+      kind: "viewing",
+      priority: row.overdue ? "urgent" : "normal",
+      dueAt: row.due_at || null,
+      overdue: row.overdue === true,
+      title: row.listing_reference || row.lead_id,
+      context: `${row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")} · ${statusText(ui, row.viewing_status)}`,
+      reference: row.viewing_id,
+      href: adminHref("/admin/viewings", page),
+      action: row.task === "feedback" ? na.actions.feedback : na.actions.followUp,
+    });
+  }
+  for (const row of page.sellerPipelineQueue?.rows || []) {
+    if (row.task_status && row.task_status !== "open") continue;
+    rows.push({
+      key: `seller:${row.seller_pipeline_id}:${row.task}`,
+      tags: "follow-ups",
+      kind: "seller",
+      priority: row.overdue ? "urgent" : "normal",
+      dueAt: row.due_at || null,
+      overdue: row.overdue === true,
+      title: row.property?.location || row.lead_id,
+      context: statusText(ui, row.stage),
+      reference: row.seller_pipeline_id,
+      href: adminHref("/admin/viewings", page),
+      action: na.actions.sellerStep,
+    });
+  }
+  for (const row of page.publicRequestQueue?.rows || []) {
+    if (row.status && !["open", "contacted"].includes(row.status)) continue;
+    rows.push({
+      key: `request:${row.request_type}:${row.request_id}`,
+      tags: "requests",
+      kind: "request",
+      priority: row.overdue ? "urgent" : "normal",
+      dueAt: row.next_follow_up_at || null,
+      overdue: row.overdue === true,
+      title:
+        row.request_type === "saved_search"
+          ? label(copy, "savedSearchRequest", "Saved search")
+          : label(copy, "languageRequest", "Language request"),
+      context: statusText(ui, row.status),
+      reference: row.request_id,
+      href: adminHref("/admin/requests", page),
+      action: na.actions.outcome,
+    });
+  }
+  for (const row of page.leadPipelineQueue?.rows || []) {
+    if (row.status && row.status !== "open") continue;
+    rows.push({
+      key: `pipeline:${row.lead_id}`,
+      tags: "opportunities",
+      kind: "pipeline",
+      priority: row.overdue ? "urgent" : "normal",
+      dueAt: row.next_follow_up_at || null,
+      overdue: row.overdue === true,
+      title: `${statusText(ui, row.lead_type)} · ${statusText(ui, row.stage)}`,
+      context: row.next_action ? statusText(ui, row.next_action) : statusText(ui, row.status),
+      reference: row.lead_id,
+      href: adminHref("/admin/pipeline", page),
+      action: na.actions.opportunity,
+    });
+  }
+  return rows.sort((left, right) => {
+    if (left.overdue !== right.overdue) return left.overdue ? -1 : 1;
+    const rank = NEXT_ACTION_PRIORITY_RANK[left.priority] - NEXT_ACTION_PRIORITY_RANK[right.priority];
+    if (rank !== 0) return rank;
+    return Date.parse(left.dueAt || "9999-12-31") - Date.parse(right.dueAt || "9999-12-31");
+  });
+}
+
+function nextActionFilterOptions(rows, na) {
+  const count = (tag) => rows.filter((row) => row.tags === tag).length;
+  return [
+    { value: "all", label: na.filters.all, count: rows.length },
+    { value: "overdue", label: na.filters.overdue, count: rows.filter((row) => row.overdue).length },
+    { value: "enquiries", label: na.filters.enquiries, count: count("enquiries") },
+    { value: "follow-ups", label: na.filters.followUps, count: count("follow-ups") },
+    { value: "requests", label: na.filters.requests, count: count("requests") },
+    { value: "opportunities", label: na.filters.opportunities, count: count("opportunities") },
+  ].filter((option) => option.value === "all" || option.count > 0);
+}
+
+function NextActionsPanel({ page, copy, ui, rows, inboxHref }) {
+  const na = workbenchCopy(page).workspaceSettings.nextActions;
+  const visible = rows.slice(0, 8);
+  const remaining = rows.length - visible.length;
+  return h(
+    Panel,
+    {
+      title: na.title,
+      "data-next-actions": "true",
+      "data-next-action-count": String(rows.length),
+    },
+    h("p", { className: "adm-next-actions__intro" }, na.description),
+    visible.length
+      ? h(
+          "ol",
+          { className: "adm-next-actions" },
+          ...visible.map((row) =>
+            h(
+              "li",
+              {
+                key: row.key,
+                "data-next-action": row.kind,
+                "data-next-action-priority": row.priority,
+                "data-overdue": row.overdue ? "true" : "false",
+                "data-list-item": "next-actions",
+                "data-filter-tags": `${row.tags}${row.overdue ? " overdue" : ""}`,
+              },
+              h(
+                "div",
+                { className: "adm-next-actions__body" },
+                h(
+                  "div",
+                  { className: "adm-next-actions__meta" },
+                  h(
+                    StatusPill,
+                    { tone: row.priority === "critical" ? "brick" : row.priority === "urgent" ? "sun" : "sea" },
+                    na.kinds[row.kind],
+                  ),
+                  row.dueAt
+                    ? h(
+                        "time",
+                        { dateTime: row.dueAt, title: row.dueAt },
+                        `${row.overdue ? na.overdue : na.due}: ${formatAdminDateTime(row.dueAt, page.workspace?.locale)}`,
+                      )
+                    : null,
+                ),
+                h("strong", null, row.title),
+                h("small", { className: "adm-lead-context" }, row.context),
+                h("code", { className: "crm-mono adm-task-list__reference" }, row.reference),
+              ),
+              h(
+                "div",
+                { className: "adm-next-actions__action" },
+                h(
+                  "a",
+                  { className: "mk-btn mk-btn--primary mk-btn--sm", href: row.href },
+                  h("span", null, row.action),
+                ),
+              ),
+            ),
+          ),
+        )
+      : h("p", { className: "adm-empty", "data-next-actions-empty": "true" }, na.empty),
+    h(ListEmptyNote, { scope: "next-actions" }, na.emptyFiltered),
+    remaining > 0
+      ? h("p", { className: "adm-next-actions__more", "data-next-actions-more": String(remaining) }, na.more.replace("{count}", String(remaining)))
+      : null,
+  );
+}
+
+function WorkspaceWelcomeBanner({ page }) {
+  if (!page.welcome) return null;
+  const copy = settingsCopy(page).welcome;
+  const operator = page.workspace?.operator_id || "";
+  return h(
+    "aside",
+    {
+      className: "adm-welcome",
+      "data-workspace-welcome": "true",
+      "data-workspace-operator": operator || "anonymous",
+      role: "note",
+    },
+    h(Icon, { name: "sparkles", size: 18 }),
+    h(
+      "div",
+      { className: "adm-welcome__body" },
+      h("strong", null, operator ? copy.title.replace("{operator}", operator.replaceAll("_", " ")) : copy.titleAnonymous),
+      h("p", null, copy.text),
+    ),
+    h(
+      "button",
+      {
+        type: "button",
+        className: "mk-btn mk-btn--ghost mk-btn--sm adm-welcome__dismiss",
+        "data-workspace-welcome-dismiss": "true",
+        hidden: true,
+      },
+      h(Icon, { name: "x", size: 15 }),
+      h("span", null, copy.dismiss),
+    ),
+  );
+}
+
+function WorkspaceChecklistPanel({ page }) {
+  const onboarding = page.onboarding;
+  if (!onboarding) return null;
+  const settings = settingsCopy(page);
+  const copy = settings.onboarding;
+  return h(
+    Panel,
+    {
+      title: copy.title,
+      "data-workspace-onboarding": onboarding.complete ? "complete" : "open",
+      "data-workspace-onboarding-progress": `${onboarding.done}/${onboarding.total}`,
+      "data-workspace-operator": page.workspace?.operator_id || "anonymous",
+    },
+    h(
+      "div",
+      { className: "adm-onboarding" },
+      h(
+        "div",
+        { className: "adm-onboarding__progress" },
+        h("progress", {
+          value: onboarding.done,
+          max: onboarding.total,
+          "aria-label": copy.progress.replace("{done}", String(onboarding.done)).replace("{total}", String(onboarding.total)),
+        }),
+        h("span", null, copy.progress.replace("{done}", String(onboarding.done)).replace("{total}", String(onboarding.total))),
+      ),
+      h(
+        "ul",
+        { className: "adm-onboarding__list" },
+        ...onboarding.items.map((item) =>
+          h(
+            "li",
+            { key: item.id, "data-onboarding-item": item.id, "data-onboarding-done": item.done ? "true" : "false" },
+            h(
+              "span",
+              { className: "adm-onboarding__mark", "aria-hidden": "true" },
+              h(Icon, { name: item.done ? "check-circle-2" : "circle", size: 17 }),
+            ),
+            h(
+              "span",
+              { className: "adm-onboarding__copy" },
+              item.done
+                ? h("strong", null, copy.items[item.id].label)
+                : h("a", { href: adminHref(item.href, page) }, copy.items[item.id].label),
+              h("small", null, copy.items[item.id].note),
+            ),
+            h(StatusPill, { tone: item.done ? "success" : "ink" }, item.done ? copy.done : copy.todo),
+          ),
+        ),
+      ),
+      h(
+        "button",
+        {
+          type: "button",
+          className: "mk-btn mk-btn--ghost mk-btn--sm adm-onboarding__dismiss",
+          "data-workspace-onboarding-dismiss": "true",
+          hidden: true,
+        },
+        h(Icon, { name: "x", size: 15 }),
+        h("span", null, copy.dismiss),
+      ),
+    ),
+  );
+}
+
 function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, inboxHref }) {
   const readinessItems = [
     {
@@ -1771,6 +2412,7 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
         ),
       ),
     ),
+    h(WorkspaceChecklistPanel, { page }),
     h(
       Panel,
       {
@@ -1805,6 +2447,7 @@ function TodayBody({ page }) {
     (page.summary?.leadPipelineOverdue || 0);
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
+  const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -1815,17 +2458,30 @@ function TodayBody({ page }) {
       "data-admin-locale": page.workspace.locale,
     },
     children: [
+      h(WorkspaceWelcomeBanner, { page }),
       h(
         PageHeader,
         { title, subtitle: page.metadata?.description },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
       ),
+      nextActions.length
+        ? h(
+            PageToolbar,
+            { "data-today-toolbar": "true" },
+            h(ListFilterTabs, {
+              scope: "next-actions",
+              label: workbenchCopy(page).workspaceSettings.nextActions.title,
+              options: nextActionFilterOptions(nextActions, workbenchCopy(page).workspaceSettings.nextActions),
+            }),
+          )
+        : null,
       h(
         "div",
         { className: "adm-workbench-shell adm-workbench-shell--today", "data-today-layout": "action-rail" },
         h(
           "div",
           { className: "adm-workbench-main" },
+          h(NextActionsPanel, { page, copy, ui, rows: nextActions, inboxHref }),
           h(
             Panel,
             { title: label(copy, "priorityLeads", "Priority leads"), "data-priority-leads": "true" },
@@ -7202,8 +7858,771 @@ function MigrationReviewBody({ page }) {
   });
 }
 
+function settingsCopy(page) {
+  return workbenchCopy(page).workspaceSettings;
+}
+
+function settingsSectionValues(page, section) {
+  const stored = page.workspace_settings?.sections?.[section] || {};
+  const echoed = page.settingsForm?.section === section ? page.settingsForm.values || {} : null;
+  const truthy = (value) => [true, "true", "on", "1", "yes"].includes(value);
+  return {
+    hasEcho: Boolean(echoed),
+    text: (key, fallback = "") => {
+      const value = echoed && echoed[key] !== undefined ? echoed[key] : stored[key];
+      return value === undefined || value === null ? fallback : String(value);
+    },
+    list: (key) => {
+      const value = echoed && echoed[key] !== undefined ? echoed[key] : stored[key];
+      if (Array.isArray(value)) return value.join("\n");
+      return value === undefined || value === null ? "" : String(value);
+    },
+    flag: (key) => {
+      if (echoed) return truthy(echoed[key]);
+      return stored[key] === true;
+    },
+    nested: (group, key) => {
+      if (echoed) {
+        const flat = echoed[`${group}_${key}`];
+        if (flat !== undefined) return String(flat);
+        const nestedEcho = echoed[group];
+        if (nestedEcho && typeof nestedEcho === "object" && nestedEcho[key] !== undefined) return String(nestedEcho[key]);
+      }
+      const value = stored[group]?.[key];
+      return value === undefined || value === null ? "" : String(value);
+    },
+  };
+}
+
+function settingsFieldError(page, section, field) {
+  const form = page.settingsForm;
+  if (!form || form.section !== section || !form.error) return null;
+  return form.field === field ? form.error : null;
+}
+
+function SettingsField({ labelText, hint, error, control, wide = false }) {
+  return h(
+    "label",
+    {
+      className: `adm-settings-field${wide ? " adm-settings-field--wide" : ""}`,
+      ...(error ? { "data-field-error": "true" } : {}),
+    },
+    h("span", { className: "adm-settings-field__label" }, labelText),
+    control,
+    hint ? h("small", { className: "adm-settings-field__hint" }, hint) : null,
+    error ? h("small", { className: "adm-settings-field__error", role: "alert" }, error) : null,
+  );
+}
+
+function SettingsCheck({ name, labelText, hint, checked, disabled }) {
+  return h(
+    "div",
+    { className: "adm-settings-check" },
+    h(
+      "label",
+      null,
+      h("input", { type: "checkbox", name, value: "true", defaultChecked: checked || undefined, disabled: disabled || undefined }),
+      h("span", null, labelText),
+    ),
+    hint ? h("small", { className: "adm-settings-field__hint" }, hint) : null,
+  );
+}
+
+function SettingsSection({ page, section, icon, fields }) {
+  const copy = settingsCopy(page);
+  const sectionCopy = copy.sections[section];
+  const meta = page.workspace_settings?.section_updates?.[section] || null;
+  const saved = page.savedSection === section;
+  const failure = page.settingsForm?.section === section ? page.settingsForm.error : null;
+  const writable = page.settings_writable !== false;
+  const canManage = pageCan(page, "settings:manage");
+  const disabled = !writable || !canManage;
+  const statusText = saved ? copy.saved : failure || "";
+  const statusState = saved ? "success" : failure ? "error" : undefined;
+  return h(
+    "section",
+    {
+      className: "crm-panel adm-settings-panel",
+      id: `settings-${section}`,
+      "data-settings-section": section,
+      "data-settings-state": meta ? "updated" : "defaults",
+      ...(disabled ? { "data-settings-disabled": "true" } : {}),
+    },
+    h(
+      "div",
+      { className: "crm-panel__hd adm-settings-panel__hd" },
+      h(
+        "div",
+        { className: "adm-settings-panel__title" },
+        h("h2", null, h(Icon, { name: icon, size: 17 }), h("span", null, sectionCopy.title)),
+        h("p", null, sectionCopy.description),
+      ),
+      h(
+        StatusPill,
+        { tone: meta ? "sea" : "ink", "data-settings-section-state": meta ? "updated" : "defaults" },
+        meta ? copy.sectionState.updated : copy.sectionState.defaults,
+      ),
+    ),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/settings",
+        className: "adm-settings-form",
+        "data-workspace-settings-form": section,
+        "data-admin-mutation-form": `workspace-settings-${section}`,
+        "data-admin-mutation-saving": copy.saving,
+        "data-admin-mutation-success": copy.saved,
+        "data-admin-mutation-failure": copy.saveFailed,
+        "data-settings-dirty-message": copy.unsaved,
+        "data-settings-updated-label": copy.sectionState.updated,
+      },
+      h("input", { type: "hidden", name: "section", value: section }),
+      h("input", { type: "hidden", name: "locale", value: page.workspace?.locale || "en" }),
+      h("div", { className: "adm-settings-grid" }, ...fields),
+      sectionCopy.note ? h("p", { className: "adm-settings-note" }, h(Icon, { name: "info", size: 15 }), h("span", null, sectionCopy.note)) : null,
+      disabled
+        ? h(
+            "p",
+            { className: "adm-settings-note adm-settings-note--blocked", "data-settings-read-only": "true" },
+            h(Icon, { name: "info", size: 15 }),
+            h("span", null, writable ? label(adminCopy(page), "readOnlyAccess", "This role has read-only access.") : copy.readOnly),
+          )
+        : null,
+      h(
+        "div",
+        { className: "adm-settings-actions" },
+        h(
+          "p",
+          {
+            className: "adm-settings-status",
+            role: "status",
+            "aria-live": "polite",
+            "data-admin-mutation-status": "true",
+            ...(statusState ? { "data-state": statusState } : {}),
+          },
+          statusText,
+        ),
+        h(
+          "button",
+          { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm", disabled: disabled || undefined },
+          h(Icon, { name: "check", size: 16 }),
+          h("span", null, copy.save),
+        ),
+      ),
+    ),
+  );
+}
+
+const SETTINGS_PENDING_CONTROLS = {
+  messaging_credentials: { kind: "input", type: "text" },
+  working_hours: { kind: "input", type: "text" },
+  routing_rules: { kind: "select" },
+  data_export: { kind: "button", icon: "download" },
+  two_factor: { kind: "check" },
+  audit_retention: { kind: "select" },
+};
+
+// A settings section that is designed and reachable but has no backend: same
+// header, spacing and field vocabulary as a live section, every control inert,
+// and one line per control saying what it is waiting for.
+function SettingsPlannedSection({ page, section, icon }) {
+  const ui = workbenchCopy(page);
+  const copy = ui.workspaceSettings.plannedSections[section];
+  const items = copy.items;
+  const control = (id) => {
+    if (id === "two_factor") {
+      return h(
+        "div",
+        { className: "adm-settings-check" },
+        h(
+          "label",
+          null,
+          h("input", { type: "checkbox", disabled: true, "aria-describedby": `settings-${section}-${id}-note` }),
+          h("span", null, items[id].control),
+        ),
+      );
+    }
+    if (id === "sessions") {
+      return h(
+        "div",
+        { className: "adm-settings-planned__stack" },
+        h("p", { className: "adm-empty" }, items[id].empty),
+        h(
+          "button",
+          { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: true, "aria-describedby": `settings-${section}-${id}-note` },
+          h(Icon, { name: "x", size: 15 }),
+          h("span", null, items[id].action),
+        ),
+      );
+    }
+    if (id === "export") {
+      return h(
+        "div",
+        { className: "adm-settings-planned__stack" },
+        h(
+          "fieldset",
+          { className: "adm-planned__group", disabled: true, "aria-describedby": `settings-${section}-${id}-note` },
+          ...Object.entries(items[id].options).map(([value, optionLabel]) =>
+            h(
+              "label",
+              { key: value, className: "adm-check" },
+              h("input", { type: "checkbox", name: `export_${value}` }),
+              h("span", null, optionLabel),
+            ),
+          ),
+        ),
+        h(
+          "button",
+          { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: true },
+          h(Icon, { name: "download", size: 15 }),
+          h("span", null, items[id].action),
+        ),
+      );
+    }
+    return h(
+      "select",
+      { disabled: true, "aria-label": items[id].label, "aria-describedby": `settings-${section}-${id}-note` },
+      h("option", null, items[id].sample || ""),
+    );
+  };
+  return h(
+    "section",
+    {
+      className: "crm-panel adm-settings-panel adm-settings-panel--planned",
+      id: `settings-${section}`,
+      "data-settings-section": section,
+      "data-settings-planned": "true",
+      "data-planned-control": `workspace_settings_${section}`,
+      "data-settings-disabled": "true",
+    },
+    h(
+      "div",
+      { className: "crm-panel__hd adm-settings-panel__hd" },
+      h(
+        "div",
+        { className: "adm-settings-panel__title" },
+        h("h2", null, h(Icon, { name: icon, size: 17 }), h("span", null, copy.title)),
+        h("p", null, copy.description),
+      ),
+      h(PlannedBadge, { ui }),
+    ),
+    h(
+      "div",
+      { className: "adm-settings-planned" },
+      ...Object.keys(items).map((id) =>
+        h(
+          "div",
+          { key: id, className: "adm-planned adm-settings-planned__row", "data-planned-control": id },
+          h(
+            "div",
+            { className: "adm-settings-pending__copy" },
+            h("strong", null, items[id].label),
+            h(PlannedNote, { id: `settings-${section}-${id}-note` }, items[id].note),
+          ),
+          h("div", { className: "adm-settings-pending__control" }, control(id)),
+        ),
+      ),
+    ),
+    h(
+      "p",
+      { className: "adm-settings-note adm-settings-note--blocked" },
+      h(Icon, { name: "info", size: 15 }),
+      h("span", null, copy.note),
+    ),
+  );
+}
+
+// Settings whose front end is designed but whose backend does not exist yet.
+// They live in one closed strip, so they stay discoverable without pushing the
+// working sections down the screen.
+function SettingsPendingList({ page }) {
+  const ui = workbenchCopy(page);
+  const pending = ui.workspaceSettings.pending;
+  return h(
+    "details",
+    { className: "adm-list-tools adm-settings-pending-tools", id: "settings-pending", "data-planned-control": "workspace_settings_pending", "data-settings-pending-panel": "true" },
+    h(
+      "summary",
+      { className: "adm-list-tools__summary adm-disclosure-chevron" },
+      h(Icon, { name: "clock", size: 15 }),
+      h("span", null, pending.title),
+      h(PlannedBadge, { ui }),
+    ),
+    h(
+      "div",
+      { className: "adm-list-tools__body" },
+      h("p", { className: "adm-planned-note" }, pending.description),
+    h(
+      "ul",
+      { className: "adm-settings-pending" },
+      ...Object.entries(pending.items).map(([id, item]) => {
+        const control = SETTINGS_PENDING_CONTROLS[id] || { kind: "input", type: "text" };
+        return h(
+          "li",
+          { key: id, className: "adm-planned", "data-settings-pending": id, "data-planned-control": id },
+          h(
+            "div",
+            { className: "adm-settings-pending__copy" },
+            h("strong", null, item.label),
+            h(PlannedNote, { id: `settings-pending-${id}-note` }, item.note),
+          ),
+          h(
+            "div",
+            { className: "adm-settings-pending__control" },
+            control.kind === "select"
+              ? h("select", { disabled: true, "aria-label": item.label }, h("option", null, item.sample || ""))
+              : control.kind === "button"
+                ? h(
+                    "button",
+                    { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: true },
+                    h(Icon, { name: control.icon, size: 15 }),
+                    h("span", null, item.sample || item.label),
+                  )
+                : control.kind === "check"
+                  ? h("input", { type: "checkbox", disabled: true, "aria-label": item.label })
+                  : h("input", { type: control.type, disabled: true, placeholder: item.sample || "", "aria-label": item.label }),
+          ),
+        );
+      }),
+    ),
+    ),
+  );
+}
+
+function SettingsBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const settings = settingsCopy(page);
+  const options = page.settingsOptions || { admin_locales: ["bg", "ru", "en"], timezones: [], date_formats: [], broker_groups: [] };
+  const brokers = page.brokerProfiles || [];
+  const title = settings.title;
+  const disabled = page.settings_writable === false || !pageCan(page, "settings:manage");
+  const agency = settingsSectionValues(page, "agency");
+  const leads = settingsSectionValues(page, "leads");
+  const notifications = settingsSectionValues(page, "notifications");
+  const workspace = settingsSectionValues(page, "workspace");
+  const publicSite = settingsSectionValues(page, "public_site");
+  const fieldError = (section, field) => settingsFieldError(page, section, field);
+  const brokerSelect = (group) =>
+    h(
+      "select",
+      { name: `default_broker_${group}`, disabled: disabled || undefined, defaultValue: leads.nested("default_brokers", group) },
+      h("option", { value: "" }, settings.fields.automaticBroker),
+      ...brokers.map((profile) =>
+        h(
+          "option",
+          { key: profile.id, value: profile.id, selected: leads.nested("default_brokers", group) === profile.id ? true : undefined },
+          profile.id.replaceAll("_", " "),
+        ),
+      ),
+    );
+  const sectionsNav = h(
+    Panel,
+    { title: settings.sectionsNav, "data-settings-index": "true" },
+    h(
+      "ul",
+      { className: "adm-readiness-list" },
+      ...["agency", "leads", "notifications", "workspace", "public_site"].map((section) => {
+        const meta = page.workspace_settings?.section_updates?.[section] || null;
+        return h(
+          "li",
+          { key: section, "data-settings-index-row": section },
+          h(
+            "a",
+            { className: "adm-readiness-link", href: `#settings-${section}` },
+            h(
+              "span",
+              { className: "adm-readiness-copy" },
+              h("strong", null, settings.sections[section].title),
+              h(
+                "small",
+                null,
+                meta ? `${settings.lastUpdated}: ${formatAdminDateTime(meta.updated_at, page.workspace?.locale)}` : settings.sectionState.defaults,
+              ),
+            ),
+            h(
+              "span",
+              { className: "adm-readiness-value" },
+              h(
+                StatusPill,
+                { tone: meta ? "sea" : "ink", "data-settings-section-state": meta ? "updated" : "defaults" },
+                meta ? settings.sectionState.updated : settings.sectionState.defaults,
+              ),
+            ),
+          ),
+        );
+      }),
+      ...["security", "data"].map((section) =>
+        h(
+          "li",
+          { key: section, "data-settings-index-row": section },
+          h(
+            "a",
+            { className: "adm-readiness-link", href: `#settings-${section}` },
+            h(
+              "span",
+              { className: "adm-readiness-copy" },
+              h("strong", null, settings.plannedSections[section].title),
+              h("small", null, ui.comingSoon),
+            ),
+            h("span", { className: "adm-readiness-value" }, h(StatusPill, { tone: "ink" }, ui.comingSoon)),
+          ),
+        ),
+      ),
+    ),
+  );
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-settings",
+      "data-react-admin-ui": "settings",
+      "data-admin-workbench": "workspace",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(PageHeader, { title, subtitle: settings.description }),
+      h(
+        "div",
+        { className: "adm-workbench-shell adm-workbench-shell--settings", "data-settings-layout": "sections-rail" },
+        h(
+          "div",
+          { className: "adm-workbench-main" },
+          h(SettingsSection, {
+            page,
+            section: "agency",
+            icon: "building-2",
+            fields: [
+              h(SettingsField, {
+                key: "name",
+                labelText: settings.fields.name,
+                error: fieldError("agency", "name"),
+                control: h("input", {
+                  name: "name",
+                  required: true,
+                  maxLength: 120,
+                  autoComplete: "organization",
+                  defaultValue: agency.text("name"),
+                  disabled: disabled || undefined,
+                  "aria-invalid": fieldError("agency", "name") ? "true" : undefined,
+                }),
+              }),
+              h(SettingsField, {
+                key: "phone",
+                labelText: settings.fields.phone,
+                error: fieldError("agency", "phone"),
+                control: h("input", {
+                  name: "phone",
+                  type: "tel",
+                  inputMode: "tel",
+                  maxLength: 32,
+                  autoComplete: "tel",
+                  defaultValue: agency.text("phone"),
+                  disabled: disabled || undefined,
+                  "aria-invalid": fieldError("agency", "phone") ? "true" : undefined,
+                }),
+              }),
+              h(SettingsField, {
+                key: "email",
+                labelText: settings.fields.email,
+                error: fieldError("agency", "email"),
+                control: h("input", {
+                  name: "email",
+                  type: "email",
+                  maxLength: 160,
+                  autoComplete: "email",
+                  defaultValue: agency.text("email"),
+                  disabled: disabled || undefined,
+                  "aria-invalid": fieldError("agency", "email") ? "true" : undefined,
+                }),
+              }),
+              h(SettingsField, {
+                key: "whatsapp",
+                labelText: settings.fields.whatsapp,
+                error: fieldError("agency", "whatsapp"),
+                control: h("input", {
+                  name: "whatsapp",
+                  type: "tel",
+                  inputMode: "tel",
+                  maxLength: 32,
+                  defaultValue: agency.text("whatsapp"),
+                  disabled: disabled || undefined,
+                  "aria-invalid": fieldError("agency", "whatsapp") ? "true" : undefined,
+                }),
+              }),
+              h(SettingsField, {
+                key: "viber",
+                labelText: settings.fields.viber,
+                error: fieldError("agency", "viber"),
+                control: h("input", {
+                  name: "viber",
+                  type: "tel",
+                  inputMode: "tel",
+                  maxLength: 32,
+                  defaultValue: agency.text("viber"),
+                  disabled: disabled || undefined,
+                  "aria-invalid": fieldError("agency", "viber") ? "true" : undefined,
+                }),
+              }),
+              h(SettingsField, {
+                key: "offices",
+                wide: true,
+                labelText: settings.fields.offices,
+                hint: settings.fields.officesHint,
+                error: fieldError("agency", "offices"),
+                control: h("textarea", { name: "offices", rows: 3, defaultValue: agency.list("offices"), disabled: disabled || undefined }),
+              }),
+            ],
+          }),
+          h(SettingsSection, {
+            page,
+            section: "leads",
+            icon: "inbox",
+            fields: [
+              h(SettingsField, {
+                key: "first_reply",
+                labelText: settings.fields.first_reply_target_minutes,
+                hint: settings.fields.firstReplyHint,
+                error: fieldError("leads", "first_reply_target_minutes"),
+                control: h("input", {
+                  name: "first_reply_target_minutes",
+                  type: "number",
+                  inputMode: "numeric",
+                  min: 5,
+                  max: 1440,
+                  step: 5,
+                  required: true,
+                  defaultValue: leads.text("first_reply_target_minutes"),
+                  disabled: disabled || undefined,
+                  "aria-invalid": fieldError("leads", "first_reply_target_minutes") ? "true" : undefined,
+                }),
+              }),
+              h(SettingsField, {
+                key: "escalation",
+                labelText: settings.fields.manager_escalation_minutes,
+                hint: settings.fields.escalationHint,
+                error: fieldError("leads", "manager_escalation_minutes"),
+                control: h("input", {
+                  name: "manager_escalation_minutes",
+                  type: "number",
+                  inputMode: "numeric",
+                  min: 5,
+                  max: 10080,
+                  step: 5,
+                  required: true,
+                  defaultValue: leads.text("manager_escalation_minutes"),
+                  disabled: disabled || undefined,
+                  "aria-invalid": fieldError("leads", "manager_escalation_minutes") ? "true" : undefined,
+                }),
+              }),
+              h(
+                "fieldset",
+                { key: "brokers", className: "adm-settings-fieldset" },
+                h("legend", null, settings.fields.defaultBrokers),
+                ...(options.broker_groups || []).map((group) =>
+                  h(SettingsField, {
+                    key: group,
+                    labelText: settings.fields[`default_broker_${group}`] || group,
+                    error: fieldError("leads", `default_broker_${group}`),
+                    control: brokerSelect(group),
+                  }),
+                ),
+              ),
+            ],
+          }),
+          h(SettingsSection, {
+            page,
+            section: "notifications",
+            icon: "bell",
+            fields: [
+              h(SettingsCheck, {
+                key: "digest",
+                name: "daily_digest_enabled",
+                labelText: settings.fields.daily_digest_enabled,
+                hint: settings.fields.dailyDigestHint,
+                checked: notifications.flag("daily_digest_enabled"),
+                disabled,
+              }),
+              h(SettingsCheck, {
+                key: "instant",
+                name: "instant_new_lead_alerts",
+                labelText: settings.fields.instant_new_lead_alerts,
+                hint: settings.fields.instantAlertsHint,
+                checked: notifications.flag("instant_new_lead_alerts"),
+                disabled,
+              }),
+              h(SettingsField, {
+                key: "recipients",
+                wide: true,
+                labelText: settings.fields.daily_digest_recipients,
+                hint: settings.fields.digestRecipientsHint,
+                error: fieldError("notifications", "daily_digest_recipients"),
+                control: h("textarea", {
+                  name: "daily_digest_recipients",
+                  rows: 3,
+                  defaultValue: notifications.list("daily_digest_recipients"),
+                  disabled: disabled || undefined,
+                  "aria-invalid": fieldError("notifications", "daily_digest_recipients") ? "true" : undefined,
+                }),
+              }),
+              h(
+                "div",
+                { key: "centre", className: "adm-planned adm-settings-check adm-settings-field--wide", "data-planned-control": "notification_centre" },
+                h(
+                  "label",
+                  null,
+                  h("input", { type: "checkbox", disabled: true, "aria-describedby": "settings-notification-centre-note" }),
+                  h("span", null, settings.plannedRows.notification_centre.label),
+                ),
+                h(PlannedNote, { id: "settings-notification-centre-note" }, settings.plannedRows.notification_centre.note),
+              ),
+            ],
+          }),
+          h(SettingsSection, {
+            page,
+            section: "workspace",
+            icon: "layout-dashboard",
+            fields: [
+              h(SettingsField, {
+                key: "locale",
+                labelText: settings.fields.default_locale,
+                error: fieldError("workspace", "default_locale"),
+                control: h(
+                  "select",
+                  { name: "default_locale", disabled: disabled || undefined, defaultValue: workspace.text("default_locale", "en") },
+                  ...(options.admin_locales || []).map((code) =>
+                    h(
+                      "option",
+                      { key: code, value: code, selected: workspace.text("default_locale", "en") === code ? true : undefined },
+                      settings.locales[code] || code.toUpperCase(),
+                    ),
+                  ),
+                ),
+              }),
+              h(SettingsField, {
+                key: "timezone",
+                labelText: settings.fields.timezone,
+                error: fieldError("workspace", "timezone"),
+                control: h(
+                  "select",
+                  { name: "timezone", disabled: disabled || undefined, defaultValue: workspace.text("timezone", "Europe/Sofia") },
+                  ...(options.timezones || []).map((zone) =>
+                    h(
+                      "option",
+                      { key: zone, value: zone, selected: workspace.text("timezone", "Europe/Sofia") === zone ? true : undefined },
+                      zone.replace("_", " "),
+                    ),
+                  ),
+                ),
+              }),
+              h(SettingsField, {
+                key: "date_format",
+                labelText: settings.fields.date_format,
+                error: fieldError("workspace", "date_format"),
+                control: h(
+                  "select",
+                  { name: "date_format", disabled: disabled || undefined, defaultValue: workspace.text("date_format", "locale") },
+                  ...(options.date_formats || []).map((format) =>
+                    h(
+                      "option",
+                      { key: format, value: format, selected: workspace.text("date_format", "locale") === format ? true : undefined },
+                      format === "locale" ? settings.fields.dateFormatLocale : format,
+                    ),
+                  ),
+                ),
+              }),
+            ],
+          }),
+          h(SettingsSection, {
+            page,
+            section: "public_site",
+            icon: "globe",
+            fields: [
+              h(SettingsField, {
+                key: "featured",
+                labelText: settings.fields.featured_listings_count,
+                error: fieldError("public_site", "featured_listings_count"),
+                control: h("input", {
+                  name: "featured_listings_count",
+                  type: "number",
+                  inputMode: "numeric",
+                  min: 0,
+                  max: 24,
+                  required: true,
+                  defaultValue: publicSite.text("featured_listings_count"),
+                  disabled: disabled || undefined,
+                  "aria-invalid": fieldError("public_site", "featured_listings_count") ? "true" : undefined,
+                }),
+              }),
+              h(SettingsCheck, {
+                key: "price_on_request",
+                name: "show_price_on_request",
+                labelText: settings.fields.show_price_on_request,
+                checked: publicSite.flag("show_price_on_request"),
+                disabled,
+              }),
+              h(SettingsCheck, {
+                key: "saved_search",
+                name: "saved_search_alerts_enabled",
+                labelText: settings.fields.saved_search_alerts_enabled,
+                checked: publicSite.flag("saved_search_alerts_enabled"),
+                disabled,
+              }),
+            ],
+          }),
+          h(SettingsPlannedSection, { page, section: "security", icon: "shield-check" }),
+          h(SettingsPlannedSection, { page, section: "data", icon: "download" }),
+          h(SettingsPendingList, { page }),
+        ),
+        h(
+          "aside",
+          { className: "adm-workbench-rail", "data-settings-rail": "true" },
+          sectionsNav,
+          h(
+            Panel,
+            { title: settings.lastUpdated, "data-settings-history": "true" },
+            h(
+              "div",
+              { className: "adm-settings-history" },
+              page.workspace_settings?.updated_at
+                ? h(
+                    "p",
+                    null,
+                    h(
+                      "time",
+                      { dateTime: page.workspace_settings.updated_at, title: page.workspace_settings.updated_at },
+                      formatAdminDateTime(page.workspace_settings.updated_at, page.workspace?.locale),
+                    ),
+                    page.workspace_settings.updated_by ? h("small", null, page.workspace_settings.updated_by) : null,
+                  )
+                : h("p", { className: "adm-empty" }, settings.notConfirmed),
+              h(
+                "a",
+                { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/activity?action=workspace_settings_updated", page) },
+                h(Icon, { name: "list", size: 16 }),
+                h("span", null, label(copy, "viewHistory", "History")),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  });
+}
+
 export function renderReactAdminBody(page) {
+  const previousDisplaySettings = activeDisplaySettings;
+  activeDisplaySettings = displaySettingsFor(page);
+  try {
+    return renderReactAdminBodyHtml(page);
+  } finally {
+    activeDisplaySettings = previousDisplaySettings;
+  }
+}
+
+function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
+  if (page.kind === "admin_workspace_settings") return renderStaticElement(h(SettingsBody, { page }));
   if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
   if (page.kind === "admin_consents") return renderStaticElement(h(ConsentsBody, { page }));
   if (page.kind === "admin_document_checklists") return renderStaticElement(h(DocumentChecklistsBody, { page }));

@@ -21,6 +21,20 @@ import {
   renderAdminLoginPage,
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
+import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
+import { adminCredentials } from "./admin-auth.mjs";
+import { readThroughCached } from "./file-cache.mjs";
+import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
+import { adminLocales } from "./locales.mjs";
+import {
+  DEFAULT_WORKSPACE_SETTINGS_PATH,
+  applyWorkspaceDefaultBroker,
+  buildWorkspaceOnboarding,
+  leadSlaOptions,
+  readWorkspaceSettings,
+  updateWorkspaceSettings,
+  workspaceSettingsView,
+} from "./workspace-settings.mjs";
 import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
@@ -345,6 +359,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     eventDurableStore: eventDurableStoreConfigFromEnv(env),
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
+    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || DEFAULT_WORKSPACE_SETTINGS_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
@@ -446,11 +461,83 @@ function leadStoreUnavailable(kind = "lead_store_unavailable") {
   });
 }
 
-function htmlResponse(payload) {
+function renderAdminHtmlResponse(payload) {
   return new Response(renderHtmlPage(payload, { bodyHtml: renderReactAdminBody(payload) }), {
     status: payload.status || 200,
     headers: PRIVATE_HTML_HEADERS,
   });
+}
+
+// Workspace settings: read through the committed defaults or the configured
+// ledger; every admin HTML page carries the privacy-safe view so the renderer
+// can apply the default locale, timezone and date format.
+function workspaceSettingsFor(config = {}) {
+  const filePath = config.workspaceSettingsPath || DEFAULT_WORKSPACE_SETTINGS_PATH;
+  return readThroughCached(filePath, () => readWorkspaceSettings(filePath));
+}
+
+function withWorkspaceSettings(payload, config) {
+  return payload && typeof payload === "object" && !payload.workspace_settings
+    ? { ...payload, workspace_settings: workspaceSettingsView(workspaceSettingsFor(config)) }
+    : payload;
+}
+
+function adminLocaleParam(url, config = {}) {
+  return url.searchParams.get("locale") || workspaceSettingsFor(config).sections.workspace.default_locale || "en";
+}
+
+async function workspaceTeamSize(config) {
+  if (config.payloadAdminSession) {
+    try {
+      const service = await configuredPayloadAdminAuth(config);
+      if (service) return { size: (await service.listOperators(config.payloadAdminSession)).length, known: true };
+    } catch {
+      // Fall through to the credential registry.
+    }
+  }
+  try {
+    const operators = new Set(adminCredentials(config.authEnv || process.env).map((credential) => credential.id));
+    if (operators.size) return { size: operators.size, known: true };
+  } catch {
+    // An invalid registry is reported by the auth layer; onboarding stays conservative.
+  }
+  return { size: 1, known: false };
+}
+
+async function workspaceConnectedProviders(config) {
+  try {
+    const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+    if (!providerConnectionAvailability(providerConfig).store.ready) return [];
+    return await (config.readProviderConnections || readProviderConnections)({ payload: config.providerConnectionPayload || null });
+  } catch {
+    return [];
+  }
+}
+
+async function workspaceOnboardingFor(page, config) {
+  const [team, providerConnections] = await Promise.all([workspaceTeamSize(config), workspaceConnectedProviders(config)]);
+  return buildWorkspaceOnboarding({
+    settings: workspaceSettingsFor(config),
+    teamSize: team.size,
+    teamSizeKnown: team.known,
+    providerConnections,
+    replyDeliveryStates: page.replyDeliveryQueue?.states || [],
+  });
+}
+
+function workspaceSettingsPayload(registry, url, config, { requestedLocale = adminLocaleParam(url, config), form = null } = {}) {
+  return withWorkspaceSettings(
+    renderAdminWorkspaceSettingsPayload(registry, requestedLocale, {
+      settings: workspaceSettingsFor(config),
+      operator: config.adminPrincipal,
+      brokerProfiles: DEFAULT_BROKER_PROFILES,
+      adminLocales: adminLocales(registry),
+      saved: url.searchParams.get("saved"),
+      form,
+      writable: Boolean(config.workspaceSettingsPath) && !config.runtimeDataDurableOnly,
+    }),
+    config,
+  );
 }
 
 function jsonResponse(status, body) {
@@ -2416,7 +2503,12 @@ function appendBrokerLeadEntry(input, registry, config) {
   const existing = readLeadLedger(config.leadLedgerPath).find((row) => row.lead_id === leadId);
   if (existing) return { lead: existing, idempotent: true };
   const recordedAt = config.reviewedAt || new Date().toISOString();
-  const lead = createCrmInboxItem(registry, normalized, { assignedId: leadId });
+  const workspaceSettings = workspaceSettingsFor(config);
+  const lead = applyWorkspaceDefaultBroker(
+    createCrmInboxItem(registry, normalized, { assignedId: leadId }),
+    workspaceSettings,
+    DEFAULT_BROKER_PROFILES,
+  );
   const contactVault = appendLeadContact(lead, {
     filePath: config.leadContactVaultPath,
     secret: config.leadContactKey,
@@ -2426,6 +2518,7 @@ function appendBrokerLeadEntry(input, registry, config) {
     filePath: config.leadLedgerPath,
     receivedAt: recordedAt,
     contactSecret: config.leadContactKey,
+    ...leadSlaOptions(workspaceSettings),
   });
   const consent = appendConsentRecord(
     createConsentRecord(
@@ -3048,6 +3141,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     return payloadAdminAuthPromise;
   };
   const requestPath = new URL(request.url, "http://localhost").pathname;
+  const htmlResponse = (payload) => renderAdminHtmlResponse(withWorkspaceSettings(payload, config));
   if (requestPath === "/admin/login") {
     if (request.method === "GET") {
       let session = null;
@@ -3221,12 +3315,84 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       }
       return jsonResponse(405, { kind: "method_not_allowed" });
     }
+    if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
+      const registry = loadLocaleRegistry(config.localeRegistryPath);
+      if (request.method === "GET") {
+        const payload = workspaceSettingsPayload(registry, url, config);
+        if (url.pathname === "/admin/settings") return htmlResponse(payload);
+        return jsonResponse(200, payload);
+      }
+      if (request.method === "POST" && url.pathname === "/api/admin/settings") {
+        const formRequest = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes)) || {};
+        const section = String(input.section || "").trim();
+        const requestedLocale = String(input.locale || "").trim() || adminLocaleParam(url, config);
+        if (config.runtimeDataDurableOnly || !config.workspaceSettingsPath) {
+          return jsonResponse(503, {
+            kind: "workspace_settings_read_only",
+            message: "Workspace settings storage is not configured on this runtime.",
+          });
+        }
+        try {
+          const result = updateWorkspaceSettings({
+            filePath: config.workspaceSettingsPath,
+            section,
+            values: input,
+            actor: principal?.id || "admin",
+            recordedAt: auditRecordedAt(config),
+            brokerIds: DEFAULT_BROKER_PROFILES.map((profile) => profile.id),
+            adminLocales: adminLocales(registry),
+          });
+          if (!result.idempotent) {
+            recordAudit(
+              {
+                action: "workspace_settings_updated",
+                objectType: "workspace_settings",
+                objectId: result.section,
+                metadata: { section: result.section, changed_fields: result.changed_fields, revision: result.revision },
+              },
+              config,
+            );
+          }
+          if (formRequest) {
+            const target = new URL("/admin/settings", "http://localhost");
+            if (input.locale) target.searchParams.set("locale", requestedLocale);
+            target.searchParams.set("saved", result.section);
+            return new Response(null, {
+              status: 303,
+              headers: { location: `${target.pathname}${target.search}#settings-${result.section}`, "cache-control": "no-store" },
+            });
+          }
+          return jsonResponse(200, {
+            kind: "workspace_settings",
+            section: result.section,
+            values: result.values,
+            changed_fields: result.changed_fields,
+            revision: result.revision,
+            idempotent: result.idempotent,
+            settings: workspaceSettingsView(result.settings),
+          });
+        } catch (error) {
+          const status = error.status || 400;
+          if (formRequest && status === 400) {
+            return htmlResponse(
+              workspaceSettingsPayload(registry, url, config, {
+                requestedLocale,
+                form: { section, error: error.message, field: error.field || null, values: input },
+              }),
+            );
+          }
+          return jsonResponse(status, { kind: error.code || "bad_request", message: error.message, field: error.field || null });
+        }
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
+    }
     if (request.method === "GET" && url.pathname === "/admin") {
-      const locale = url.searchParams.get("locale");
-      const query = locale ? `?locale=${encodeURIComponent(locale)}` : "";
+      const locale = url.searchParams.get("locale") || adminLocaleParam(url, config);
+      const welcome = principal?.source === "payload_session" ? "&welcome=1" : "";
       return new Response(null, {
         status: 307,
-        headers: { ...PRIVATE_HTML_HEADERS, location: `${adminHomePath(principal)}${query}` },
+        headers: { ...PRIVATE_HTML_HEADERS, location: `${adminHomePath(principal)}?locale=${encodeURIComponent(locale)}${welcome}` },
       });
     }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
@@ -3401,8 +3567,14 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       }
       return jsonResponse(405, { kind: "method_not_allowed" });
     }
-    if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(await todayPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, await todayPayload(registry, url, config));
+    if (request.method === "GET" && ["/admin/today", "/api/admin/today"].includes(url.pathname)) {
+      const today = await todayPayload(registry, url, config);
+      const payload = withWorkspaceSettings(
+        { ...today, onboarding: await workspaceOnboardingFor(today, config), welcome: url.searchParams.get("welcome") === "1" },
+        config,
+      );
+      return url.pathname === "/admin/today" ? htmlResponse(payload) : jsonResponse(200, payload);
+    }
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(await contactsPayload(registry, url, config));

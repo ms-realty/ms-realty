@@ -1024,6 +1024,133 @@
     }, reducedMotion ? 0 : 220);
     return true;
   }
+  function workspaceStorageKey(prefix, element) {
+    return prefix + ":" + (element.getAttribute("data-workspace-operator") || "anonymous");
+  }
+  function workspaceFlagRead(key) {
+    try {
+      return localStorage.getItem(key) === "1";
+    } catch (error) {
+      return false;
+    }
+  }
+  function workspaceFlagWrite(key) {
+    try {
+      localStorage.setItem(key, "1");
+    } catch (error) {
+      // Private browsing: the panel simply reappears on the next visit.
+    }
+  }
+  function initWorkspaceOnboarding() {
+    var panel = document.querySelector("[data-workspace-onboarding]");
+    if (panel) {
+      var panelKey = workspaceStorageKey("ms-realty:admin-onboarding-dismissed:v1", panel);
+      var dismissPanel = panel.querySelector("[data-workspace-onboarding-dismiss]");
+      if (workspaceFlagRead(panelKey)) panel.hidden = true;
+      else if (dismissPanel) {
+        dismissPanel.hidden = false;
+        dismissPanel.addEventListener("click", function () {
+          workspaceFlagWrite(panelKey);
+          panel.hidden = true;
+        });
+      }
+    }
+    var welcome = document.querySelector("[data-workspace-welcome]");
+    if (!welcome) return;
+    var welcomeKey = workspaceStorageKey("ms-realty:admin-welcome-seen:v1", welcome);
+    if (workspaceFlagRead(welcomeKey)) {
+      welcome.hidden = true;
+      return;
+    }
+    var dismissWelcome = welcome.querySelector("[data-workspace-welcome-dismiss]");
+    if (dismissWelcome) {
+      dismissWelcome.hidden = false;
+      dismissWelcome.addEventListener("click", function () {
+        welcome.hidden = true;
+      });
+    }
+    // The banner greets an operator once per browser after login.
+    workspaceFlagWrite(welcomeKey);
+  }
+  function workspaceSettingsFormState(form) {
+    var pairs = [];
+    new FormData(form).forEach(function (value, key) {
+      pairs.push(key + "=" + String(value));
+    });
+    return pairs.sort().join("&");
+  }
+  function initWorkspaceSettingsForms() {
+    var forms = document.querySelectorAll("[data-workspace-settings-form]");
+    for (var i = 0; i < forms.length; i += 1) {
+      bindWorkspaceSettingsForm(forms[i]);
+    }
+  }
+  function bindWorkspaceSettingsForm(form) {
+    var submit = form.querySelector('[type="submit"]');
+    if (!submit || submit.disabled) return;
+    var status = form.querySelector("[data-admin-mutation-status]");
+    var dirtyMessage = form.getAttribute("data-settings-dirty-message") || "";
+    var baseline = workspaceSettingsFormState(form);
+    function sync() {
+      var dirty = workspaceSettingsFormState(form) !== baseline;
+      form.setAttribute("data-settings-dirty", dirty ? "true" : "false");
+      submit.disabled = !dirty;
+      if (!status) return;
+      var state = status.getAttribute("data-state");
+      if (state === "saving") return;
+      if (dirty) {
+        status.textContent = dirtyMessage;
+        status.setAttribute("data-state", "dirty");
+      } else if (state === "dirty") {
+        status.textContent = "";
+        status.removeAttribute("data-state");
+      }
+    }
+    if (status && window.MutationObserver) {
+      new MutationObserver(function () {
+        if (status.getAttribute("data-state") !== "success") return;
+        baseline = workspaceSettingsFormState(form);
+        form.setAttribute("data-settings-dirty", "false");
+        // The shared mutation handler re-enables submit buttons after its
+        // success step, so the saved form returns to pristine on the next tick.
+        window.setTimeout(function () {
+          submit.disabled = true;
+          markWorkspaceSettingsSaved(form);
+        }, 0);
+      }).observe(status, { attributes: true, attributeFilter: ["data-state"] });
+    }
+    form.addEventListener("input", sync);
+    form.addEventListener("change", sync);
+    syncWorkspaceSettingsConstraints(form);
+    form.addEventListener("input", function () {
+      syncWorkspaceSettingsConstraints(form);
+    });
+    sync();
+  }
+  // A saved section stops claiming it still holds the committed defaults.
+  function markWorkspaceSettingsSaved(form) {
+    var section = form.getAttribute("data-workspace-settings-form");
+    var updatedLabel = form.getAttribute("data-settings-updated-label") || "";
+    var panel = form.closest("[data-settings-section]");
+    if (panel) panel.setAttribute("data-settings-state", "updated");
+    var pills = document.querySelectorAll(
+      '[data-settings-section="' + section + '"] [data-settings-section-state], [data-settings-index-row="' + section + '"] [data-settings-section-state]',
+    );
+    for (var i = 0; i < pills.length; i += 1) {
+      pills[i].setAttribute("data-settings-section-state", "updated");
+      var text = pills[i].lastChild;
+      if (text && text.nodeType === 3) text.nodeValue = updatedLabel;
+    }
+  }
+  // Mirrors the server rule (escalation must come after the first reply target)
+  // as a native constraint, so the browser marks the offending field itself.
+  function syncWorkspaceSettingsConstraints(form) {
+    var firstReply = form.querySelector('[name="first_reply_target_minutes"]');
+    var escalation = form.querySelector('[name="manager_escalation_minutes"]');
+    if (!firstReply || !escalation) return;
+    var target = Number(firstReply.value);
+    escalation.min = Number.isFinite(target) && target > 0 ? String(target + 1) : "5";
+  }
   function initAdminMutationForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -1071,6 +1198,8 @@
   initListingBulkForms();
   initRouteDecisionForms();
   initAdminMutationForms();
+  initWorkspaceOnboarding();
+  initWorkspaceSettingsForms();
   initTourEditor();
   initViewingFollowUpForms();
   initSellerPipelineOutcomeForms();

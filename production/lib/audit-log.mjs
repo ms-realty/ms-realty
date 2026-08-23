@@ -56,6 +56,7 @@ const ADMIN_ACTIONS = new Set([
   "translation_published",
   "viewing_booked",
   "viewing_follow_up_recorded",
+  "workspace_settings_updated",
 ]);
 
 const RAW_PRIVATE_FIELDS = new Set(["body", "contact", "email", "message", "phone", "prompt", "reviewedReply", "sourceContent", "whatsapp"]);

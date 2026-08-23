@@ -40,6 +40,7 @@ import { DEFAULT_VIEWING_LEDGER_PATH } from "./lib/viewing-ledger.mjs";
 import { viewingDurableStoreConfigFromEnv } from "./lib/viewing-durable-store.mjs";
 import { DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH } from "./lib/viewing-follow-ups.mjs";
 import { DEFAULT_LAUNCH_FREEZE_PATH } from "./lib/launch-freeze.mjs";
+import { DEFAULT_WORKSPACE_SETTINGS_PATH } from "./lib/workspace-settings.mjs";
 
 function portFrom(value) {
   const raw = value === undefined || value === "" ? "3000" : String(value);
@@ -171,6 +172,7 @@ export function productionServerConfig(env = process.env) {
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH,
     launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
+    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || DEFAULT_WORKSPACE_SETTINGS_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     listingQualityReviewPath: env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH,
     seoEvidenceInputDir: env.MS_REALTY_SEO_EVIDENCE_INPUT_DIR,
@@ -251,6 +253,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     redirectApprovalPath: config.redirectApprovalPath,
     deployableRedirectOutputPath: config.deployableRedirectOutputPath,
     launchReadinessOutputPath: config.launchReadinessOutputPath,
+    workspaceSettingsPath: config.workspaceSettingsPath,
     listingQualityReviewPath: config.listingQualityReviewPath,
     seoEvidenceInputDir: config.seoEvidenceInputDir,
     seoEvidenceOutputPath: config.seoEvidenceOutputPath,

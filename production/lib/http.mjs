@@ -28,6 +28,7 @@ import {
   resolveAdminPrincipal,
   requiredAdminCapability,
   withAuthenticatedAuditActor,
+  adminCredentials,
 } from "./admin-auth.mjs";
 import { renderOperatorConnectPage } from "./operator-connect.mjs";
 import {
@@ -70,6 +71,7 @@ import {
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
+  renderAdminWorkspaceSettingsPayload,
   renderAdminRealtyCasesPayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
@@ -90,7 +92,17 @@ import { renderHtmlPage } from "./html.mjs";
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
-import { normalizeBrokerLeadInput } from "./leads.mjs";
+import { DEFAULT_BROKER_PROFILES, normalizeBrokerLeadInput } from "./leads.mjs";
+import { adminLocales } from "./locales.mjs";
+import {
+  DEFAULT_WORKSPACE_SETTINGS_PATH,
+  applyWorkspaceDefaultBroker,
+  buildWorkspaceOnboarding,
+  leadSlaOptions,
+  readWorkspaceSettings,
+  updateWorkspaceSettings,
+  workspaceSettingsView,
+} from "./workspace-settings.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
 import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
@@ -440,7 +452,7 @@ function searchEngineResultIsComplete(engineResult) {
   return !Number.isFinite(engineResult.total) || engineResult.total <= engineResult.hits.length;
 }
 
-function adminHtml(page) {
+function renderAdminHtml(page) {
   return renderHtmlPage(page, { bodyHtml: renderReactAdminBody(page) });
 }
 
@@ -810,6 +822,7 @@ export function createHttpApp({
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
   launchFreezePath = DEFAULT_LAUNCH_FREEZE_PATH,
+  workspaceSettingsPath = null,
   launchReadinessOutputPath = null,
   listingQualityReviewPath = null,
   searchSyncReportPath = null,
@@ -1356,7 +1369,7 @@ export function createHttpApp({
   const currentActivityPayload = (url, operatorId = null) =>
     renderAdminActivityPayload(
       activeRegistry,
-      url.searchParams.get("locale") || "en",
+      adminLocaleParam(url),
       readAuditLog(auditLogPath || undefined),
       operatorId,
       {
@@ -1368,7 +1381,7 @@ export function createHttpApp({
       },
     );
   const currentListingManagerPayload = async (url, operatorId = null) => {
-    const payload = renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
+    const payload = renderAdminListingManagerPayload(activeRegistry, adminLocaleParam(url), {
       seed: await projectListingDraftSeed(currentSeed(), {
         payload: payloadListingRuntime,
         env: payloadListingEnv,
@@ -1392,7 +1405,7 @@ export function createHttpApp({
   const currentListingEditorPayload = async (url, operatorId = null) => {
     const payload = renderAdminListingEditorPayload(
       activeRegistry,
-      url.searchParams.get("locale") || "en",
+      adminLocaleParam(url),
       await projectListingDraftSeed(currentSeed(), {
         payload: payloadListingRuntime,
         env: payloadListingEnv,
@@ -1407,7 +1420,7 @@ export function createHttpApp({
     return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
   };
   const currentTranslationQueuePayload = async (url, operatorId = null) => {
-    const payload = renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
+    const payload = renderAdminTranslationQueuePayload(activeRegistry, adminLocaleParam(url), {
       seed: await projectListingDraftSeed(currentSeed(), {
         payload: payloadListingRuntime,
         env: payloadListingEnv,
@@ -1546,6 +1559,53 @@ export function createHttpApp({
           filePath: auditLogPath,
         })
       : null;
+  // Workspace settings: the committed defaults are the read path; writes need a
+  // configured ledger so tests and durable-only runtimes never touch the repo file.
+  const workspaceSettingsReadPath = workspaceSettingsPath || DEFAULT_WORKSPACE_SETTINGS_PATH;
+  const currentWorkspaceSettings = () =>
+    readThroughCached(workspaceSettingsReadPath, () => readWorkspaceSettings(workspaceSettingsReadPath));
+  const withWorkspaceSettings = (page) =>
+    page && typeof page === "object" && !page.workspace_settings
+      ? { ...page, workspace_settings: workspaceSettingsView(currentWorkspaceSettings()) }
+      : page;
+  const adminHtml = (page) => renderAdminHtml(withWorkspaceSettings(page));
+  const adminLocaleParam = (url) =>
+    url.searchParams.get("locale") || currentWorkspaceSettings().sections.workspace.default_locale || "en";
+  const currentTeamSize = async (payloadSession) => {
+    if (payloadSession) {
+      try {
+        const service = await configuredPayloadAdminAuth();
+        if (service) return { size: (await service.listOperators(payloadSession)).length, known: true };
+      } catch {
+        // Fall through to the credential registry.
+      }
+    }
+    try {
+      const operators = new Set(adminCredentials().map((credential) => credential.id));
+      if (operators.size) return { size: operators.size, known: true };
+    } catch {
+      // An invalid registry is reported by the auth layer; onboarding stays conservative.
+    }
+    return { size: 1, known: false };
+  };
+  const currentConnectedProviders = async () => {
+    try {
+      if (!providerConnectionAvailability(providerConnection).store.ready) return [];
+      return await readProviderConnections({ payload: providerConnectionPayload });
+    } catch {
+      return [];
+    }
+  };
+  const currentWorkspaceOnboarding = async (page, payloadSession) => {
+    const [team, providerConnections] = await Promise.all([currentTeamSize(payloadSession), currentConnectedProviders()]);
+    return buildWorkspaceOnboarding({
+      settings: currentWorkspaceSettings(),
+      teamSize: team.size,
+      teamSizeKnown: team.known,
+      providerConnections,
+      replyDeliveryStates: page.replyDeliveryQueue?.states || [],
+    });
+  };
   const productionSearch = String(search.environment ?? process.env.NODE_ENV ?? "").trim().toLowerCase() === "production";
   const currentSearchResult = async (searchRequest, options = {}) => {
     const { intent, query, filters, sort, page } = searchRequest;
@@ -1856,6 +1916,90 @@ export function createHttpApp({
       return adminJson(405, { kind: "method_not_allowed" });
     }
     const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
+    if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
+      const settingsPage = (requestedLocale, form = null) =>
+        withWorkspaceSettings(
+          renderAdminWorkspaceSettingsPayload(activeRegistry, requestedLocale, {
+            settings: currentWorkspaceSettings(),
+            operator: principal,
+            brokerProfiles: DEFAULT_BROKER_PROFILES,
+            adminLocales: adminLocales(activeRegistry),
+            saved: url.searchParams.get("saved"),
+            form,
+            writable: Boolean(workspaceSettingsPath) && !runtimeDataDurableOnly,
+          }),
+        );
+      if (request.method === "GET") {
+        const payload = settingsPage(adminLocaleParam(url));
+        if (url.pathname === "/admin/settings" || wantsHtml(request, url)) {
+          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        }
+        return adminJson(200, payload);
+      }
+      if (request.method === "POST" && url.pathname === "/api/admin/settings") {
+        const formRequest = String(request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes(
+          "application/x-www-form-urlencoded",
+        );
+        let input;
+        try {
+          input = parseBody(request) || {};
+        } catch (error) {
+          return adminJson(400, { kind: "bad_request", message: error.message });
+        }
+        const section = String(input.section || "").trim();
+        const requestedLocale = String(input.locale || "").trim() || adminLocaleParam(url);
+        if (runtimeDataDurableOnly || !workspaceSettingsPath) {
+          return adminJson(503, {
+            kind: "workspace_settings_read_only",
+            message: "Workspace settings storage is not configured on this runtime.",
+          });
+        }
+        try {
+          const result = updateWorkspaceSettings({
+            filePath: workspaceSettingsPath,
+            section,
+            values: input,
+            actor: principal?.id || "admin",
+            recordedAt: reviewedAt || new Date().toISOString(),
+            brokerIds: DEFAULT_BROKER_PROFILES.map((profile) => profile.id),
+            adminLocales: adminLocales(activeRegistry),
+          });
+          if (!result.idempotent) {
+            recordAudit({
+              action: "workspace_settings_updated",
+              objectType: "workspace_settings",
+              objectId: result.section,
+              metadata: { section: result.section, changed_fields: result.changed_fields, revision: result.revision },
+            });
+          }
+          if (formRequest) {
+            const target = new URL("/admin/settings", "http://ms-realty.local");
+            if (input.locale) target.searchParams.set("locale", requestedLocale);
+            target.searchParams.set("saved", result.section);
+            return adminResponse(303, "", "text/plain; charset=utf-8", {
+              location: `${target.pathname}${target.search}#settings-${result.section}`,
+            });
+          }
+          return adminJson(200, {
+            kind: "workspace_settings",
+            section: result.section,
+            values: result.values,
+            changed_fields: result.changed_fields,
+            revision: result.revision,
+            idempotent: result.idempotent,
+            settings: workspaceSettingsView(result.settings),
+          });
+        } catch (error) {
+          const status = error.status || 400;
+          if (formRequest && status === 400) {
+            const payload = settingsPage(requestedLocale, { section, error: error.message, field: error.field || null, values: input });
+            return adminResponse(400, adminHtml(payload), "text/html; charset=utf-8");
+          }
+          return adminJson(status, { kind: error.code || "bad_request", message: error.message, field: error.field || null });
+        }
+      }
+      return adminJson(405, { kind: "method_not_allowed" });
+    }
     const recordProviderConnectionFailure = (provider, phase, error) =>
       recordAudit({
         action: "provider_connection_failed",
@@ -2200,7 +2344,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const requestedLocale = url.searchParams.get("locale") || "en";
+      const requestedLocale = adminLocaleParam(url);
       const payload = currentAdminLeadPayload(requestedLocale, principal, requestLeadRows);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
@@ -2381,14 +2525,14 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows)),
+        adminHtml(currentAdminLeadPayload(adminLocaleParam(url), principal, requestLeadRows)),
         "text/html; charset=utf-8",
       );
     }
 
     if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentContactPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
+      const payload = currentContactPayload(adminLocaleParam(url), principal, requestLeadRows);
       if (url.pathname === "/admin/contacts" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2397,7 +2541,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/documents", "/admin/documents"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentDocumentChecklistPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
+      const payload = currentDocumentChecklistPayload(adminLocaleParam(url), principal, requestLeadRows);
       if (url.pathname === "/admin/documents" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2408,7 +2552,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       let payload;
       try {
-        payload = await currentRealtyCasePayload(url.searchParams.get("locale") || "en", principal);
+        payload = await currentRealtyCasePayload(adminLocaleParam(url), principal);
       } catch (error) {
         if (realtyCasePayloadAuthorityEnabled) return adminJson(503, realtyCasePayloadAuthorityFailure());
         throw error;
@@ -2441,7 +2585,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/consents", "/admin/consents"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentConsentPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentConsentPayload(adminLocaleParam(url), principal);
       if (url.pathname === "/admin/consents" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2450,15 +2594,23 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/admin") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const locale = url.searchParams.get("locale") || "en";
+      const locale = adminLocaleParam(url);
+      // A Payload login lands here first; the one-time welcome banner rides on
+      // this hop so bearer-token API clients never see it.
+      const welcome = principal?.source === "payload_session" ? "&welcome=1" : "";
       return adminResponse(302, "", "text/plain; charset=utf-8", {
-        location: `${adminHomePath(principal)}?locale=${encodeURIComponent(locale)}`,
+        location: `${adminHomePath(principal)}?locale=${encodeURIComponent(locale)}${welcome}`,
       });
     }
 
     if (request.method === "GET" && ["/api/admin/today", "/admin/today"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentTodayPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
+      const todayPayload = currentTodayPayload(adminLocaleParam(url), principal, requestLeadRows);
+      const payload = withWorkspaceSettings({
+        ...todayPayload,
+        onboarding: await currentWorkspaceOnboarding(todayPayload, payloadSession),
+        welcome: url.searchParams.get("welcome") === "1",
+      });
       if (url.pathname === "/admin/today" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2467,7 +2619,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
+      const payload = currentPipelinePayload(adminLocaleParam(url), principal, requestLeadRows);
       if (url.pathname === "/admin/pipeline" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2476,7 +2628,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/requests", "/admin/requests"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal, requestLeadRows);
+      const payload = currentRequestsPayload(adminLocaleParam(url), principal, requestLeadRows);
       if (url.pathname === "/admin/requests" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -2487,7 +2639,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const payload = await currentViewingsPayload(
-          url.searchParams.get("locale") || "en",
+          adminLocaleParam(url),
           principal,
           requestLeadRows,
           payloadSession,
@@ -2540,7 +2692,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const payload = await currentReportsPayload(
-          url.searchParams.get("locale") || "en",
+          adminLocaleParam(url),
           principal,
           requestLeadRows,
           payloadSession,
@@ -2588,7 +2740,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const requestedLocale = url.searchParams.get("locale") || "en";
+      const requestedLocale = adminLocaleParam(url);
       return adminJson(200, {
         workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
         locales: activeRegistry.locales,
@@ -3702,13 +3854,23 @@ export function createHttpApp({
         const leadId = String(input.id || `broker-lead-${randomUUID()}`).trim();
         const existing = currentLeads().find((row) => row.lead_id === leadId);
         if (existing) return adminJson(200, { lead: existing, idempotent: true });
-        const lead = createCrmInboxItem(activeRegistry, input, { assignedId: leadId });
+        const workspaceSettings = currentWorkspaceSettings();
+        const lead = applyWorkspaceDefaultBroker(
+          createCrmInboxItem(activeRegistry, input, { assignedId: leadId }),
+          workspaceSettings,
+          DEFAULT_BROKER_PROFILES,
+        );
         const contactVault = appendLeadContact(lead, {
           filePath: leadContactVaultPath,
           secret: leadContactKey,
           storedAt: receivedAt,
         });
-        const ledger = appendLead(lead, { filePath: leadLedgerPath || undefined, receivedAt, contactSecret: leadContactKey });
+        const ledger = appendLead(lead, {
+          filePath: leadLedgerPath || undefined,
+          receivedAt,
+          contactSecret: leadContactKey,
+          ...leadSlaOptions(workspaceSettings),
+        });
         const consent = recordConsent({
           consentType: "inquiry_follow_up",
           source: lead.lead.source,
@@ -4365,7 +4527,12 @@ export function createHttpApp({
       try {
         const input = parseBody(request);
         const context = await currentPublicContext();
-        const lead = submitRuntimeLead(context.registry, context.seed, input);
+        const workspaceSettings = currentWorkspaceSettings();
+        const lead = applyWorkspaceDefaultBroker(
+          submitRuntimeLead(context.registry, context.seed, input),
+          workspaceSettings,
+          DEFAULT_BROKER_PROFILES,
+        );
         const durableRequested = leadDurableStore.leadDurableStoreEnabled === true;
         if (runtimeDataDurableOnly && !durableRequested) {
           throw new LeadStoreUnavailableError("Production lead intake requires the durable store");
@@ -4390,7 +4557,9 @@ export function createHttpApp({
             : null;
         const ledger =
           durable?.lead ||
-          (leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt, contactSecret: leadContactKey }) : null);
+          (leadLedgerPath
+            ? appendLead(lead, { filePath: leadLedgerPath, receivedAt, contactSecret: leadContactKey, ...leadSlaOptions(workspaceSettings) })
+            : null);
         const consent = durable
           ? durable.consent
           : recordConsent({
