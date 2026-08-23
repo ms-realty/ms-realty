@@ -11,6 +11,8 @@ const store = createLedgerStore({
 
 const ADMIN_ACTIONS = new Set([
   "account_created",
+  "admin_session_revoked",
+  "audit_log_pruned",
   "broker_contact_approved",
   "contact_linked",
   "consent_withdrawn",
@@ -54,8 +56,14 @@ const ADMIN_ACTIONS = new Set([
   "translation_drafted",
   "translation_approved",
   "translation_published",
+  "two_factor_activated",
+  "two_factor_disabled",
+  "two_factor_enrolment_started",
+  "two_factor_verified",
   "viewing_booked",
   "viewing_follow_up_recorded",
+  "workspace_export_downloaded",
+  "workspace_export_requested",
   "workspace_settings_updated",
 ]);
 
@@ -104,6 +112,19 @@ export function appendAuditLog(entry, { filePath = DEFAULT_AUDIT_LOG_PATH } = {}
 
 export function readAuditLog(filePath = DEFAULT_AUDIT_LOG_PATH) {
   return store.readRows(filePath);
+}
+
+// Rewrites the ledger with exactly `rows`. The audit log is append-only for
+// every runtime path; this exists only for the explicit retention maintenance
+// command in production/scripts/run-audit-retention.mjs, which takes a backup
+// first and refuses to drop any row a launch-evidence or approval artifact
+// still references.
+export function replaceAuditLog(rows, { filePath = DEFAULT_AUDIT_LOG_PATH } = {}) {
+  if (!Array.isArray(rows)) throw new Error("Audit log replacement requires an array of rows");
+  if (rows.length) assertAuditLog(rows);
+  store.resetLedger(filePath);
+  for (const row of rows) store.appendRow(filePath, row);
+  return rows.length;
 }
 
 export function assertAuditLog(rows) {

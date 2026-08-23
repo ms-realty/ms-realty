@@ -315,6 +315,46 @@ import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
 import { purchaseFeePayload } from "./public-site.mjs";
 import { PURCHASE_FEE_BUYER_SCOPES } from "./purchase-fees.mjs";
+// B6 workspace security and data
+import { randomBytes } from "node:crypto";
+import { MAX_ADMIN_SESSION_SECONDS } from "./admin-login.mjs";
+import { TWO_FACTOR_SELF_SERVICE_PATHS } from "./admin-auth.mjs";
+import {
+  DEFAULT_ADMIN_SESSION_SEEN_INTERVAL_SECONDS,
+  adminSessionFingerprint,
+  adminSessionList,
+  adminSessionSeenDue,
+  adminSessionStates,
+  appendAdminSessionEvent,
+  createAdminSessionOpened,
+  createAdminSessionSeen,
+  isAdminSessionRevoked,
+  readAdminSessionEvents,
+  revokeAdminSessions,
+} from "./admin-sessions.mjs";
+import {
+  activateOperatorEnrolment,
+  appendOperatorTwoFactorEvent,
+  createOperatorEnrolment,
+  disableOperatorTwoFactor,
+  operatorTwoFactorActive,
+  operatorTwoFactorStatus,
+  readOperatorTwoFactorEvents,
+  verifyOperatorTwoFactor,
+} from "./operator-two-factor.mjs";
+import {
+  WORKSPACE_EXPORT_DATASETS,
+  appendWorkspaceExportEvent,
+  buildWorkspaceExportDocument,
+  claimWorkspaceExportDownload,
+  createWorkspaceExportCompleted,
+  createWorkspaceExportDownloaded,
+  createWorkspaceExportJob,
+  readWorkspaceExportEvents,
+  workspaceExportList,
+  writeWorkspaceExportFile,
+} from "./workspace-export.mjs";
+import { auditRetentionDays, auditRetentionPlan } from "./audit-retention.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -827,6 +867,17 @@ export function createHttpApp({
   eventLedgerPath = null,
   consentLedgerPath = null,
   auditLogPath = null,
+  // B6 workspace security and data
+  securityAt = null,
+  adminSessionLedgerPath = null,
+  adminSessionSeenIntervalSeconds = DEFAULT_ADMIN_SESSION_SEEN_INTERVAL_SECONDS,
+  operatorTwoFactorPath = null,
+  operatorTwoFactorKey = process.env.MS_REALTY_OPERATOR_2FA_KEY,
+  operatorTwoFactorStepUpSeconds = null,
+  workspaceExportLedgerPath = null,
+  workspaceExportDir = null,
+  workspaceExportTtlSeconds = null,
+  auditRetentionWindowDays = null,
   slugHistoryPath = null,
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
@@ -1562,6 +1613,82 @@ export function createHttpApp({
     !runtimeDataDurableOnly && consentLedgerPath
       ? appendConsentRecord(createConsentRecord(input, receivedAt || new Date().toISOString()), { filePath: consentLedgerPath })
       : null;
+  // ---- B6 workspace security and data: shared ledger accessors ------------
+  // These sit in the app scope (not the route block) because the login route
+  // and the request-time revocation check both run before the route block.
+  // Deliberately NOT the shared `receivedAt` fixture clock: a frozen clock
+  // would freeze the TOTP step and the export link's expiry with it. Tests pass
+  // securityAt (a string, or a function so a test can advance it).
+  const securityNow = () => (typeof securityAt === "function" ? securityAt() : securityAt || new Date().toISOString());
+  const twoFactorRows = () => readOperatorTwoFactorEvents(operatorTwoFactorPath || undefined);
+  const recordTwoFactorEvent = (row) => appendOperatorTwoFactorEvent(row, { filePath: operatorTwoFactorPath || undefined });
+  const adminSessionRows = () => readAdminSessionEvents(adminSessionLedgerPath || undefined);
+  const recordAdminSessionEvent = (row) => appendAdminSessionEvent(row, { filePath: adminSessionLedgerPath || undefined });
+  const workspaceExportRows = () => readWorkspaceExportEvents(workspaceExportLedgerPath || undefined);
+  const recordWorkspaceExportEvent = (row) => appendWorkspaceExportEvent(row, { filePath: workspaceExportLedgerPath || undefined });
+  const adminSessionRevoked = (token) => {
+    try {
+      return isAdminSessionRevoked(adminSessionRows(), adminSessionFingerprint(token));
+    } catch {
+      // A session ledger that cannot be read is not evidence that nothing was
+      // revoked, so the cookie is refused until an operator repairs it.
+      return true;
+    }
+  };
+  const openAdminSession = (token, { operatorId, source, headers, expiresAt }) =>
+    recordAdminSessionEvent(
+      createAdminSessionOpened(
+        { token, operatorId, source, expiresAt, userAgent: readHeader(headers, "user-agent") },
+        securityNow(),
+      ),
+    );
+  const touchAdminSession = (token, operatorId) => {
+    if (!token || !operatorId || runtimeDataDurableOnly || !adminSessionLedgerPath) return;
+    try {
+      const rows = adminSessionRows();
+      const fingerprint = adminSessionFingerprint(token);
+      const now = Date.parse(securityNow());
+      if (!adminSessionSeenDue(rows, fingerprint, { now, intervalSeconds: adminSessionSeenIntervalSeconds })) return;
+      const state = adminSessionStates(rows, { now }).get(fingerprint);
+      recordAdminSessionEvent(createAdminSessionSeen({ fingerprint, operatorId, sessionId: state?.session_id }, securityNow()));
+    } catch {
+      // Last-seen bookkeeping must never break an authenticated admin request.
+    }
+  };
+  const activeAdminSessionState = (token, operatorId, source) => {
+    if (!token) return null;
+    let fingerprint;
+    try {
+      fingerprint = adminSessionFingerprint(token);
+    } catch {
+      return null;
+    }
+    const state = adminSessionStates(adminSessionRows(), { now: Date.parse(securityNow()) }).get(fingerprint);
+    if (!state || state.status !== "active") return null;
+    if (state.operator_id !== operatorId) return null;
+    if (source && state.source !== source) return null;
+    return state;
+  };
+  // Second factor at Payload sign-in. Returns false when the operator has an
+  // active enrolment and did not supply a code that clears it, and also when
+  // the accepted code could not be recorded: without the recorded counter the
+  // same code stays replayable, so the sign-in is refused instead.
+  const passesLoginSecondFactor = (loginPrincipal, code) => {
+    const rows = twoFactorRows();
+    if (!operatorTwoFactorActive(rows, loginPrincipal?.id)) return true;
+    const verification = verifyOperatorTwoFactor(
+      rows,
+      { operatorId: loginPrincipal.id, code },
+      { secret: operatorTwoFactorKey, recordedAt: securityNow() },
+    );
+    if (!verification.ok) return false;
+    try {
+      for (const event of verification.events) recordTwoFactorEvent(event);
+    } catch {
+      return false;
+    }
+    return true;
+  };
   const writeAudit = (input, recordedAt = reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()) =>
     !runtimeDataDurableOnly && auditLogPath
       ? appendAuditLog(createAuditLogEntry(input, recordedAt), {
@@ -1745,6 +1872,21 @@ export function createHttpApp({
    let auth = request.headers?.authorization || request.headers?.Authorization || "";
     const sessionToken = auth ? "" : adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
 
+    // B6 workspace security and data: server-side session revocation. A revoked
+    // cookie is refused here, before the token ever reaches Payload, so "sign
+    // out everywhere" invalidates the session rather than the browser's copy of
+    // it. /admin/logout stays reachable so the cookie is still cleared.
+    if (runtimeDataAdminRequest && sessionToken && url.pathname !== "/admin/logout" && adminSessionRevoked(sessionToken)) {
+      if (wantsHtml(request, url)) {
+        return adminResponse(303, "", "text/plain; charset=utf-8", {
+          location: "/admin/login",
+          "set-cookie": adminSessionClearCookie(),
+        });
+      }
+      const revoked = adminUnauthorized();
+      revoked.headers["set-cookie"] = adminSessionClearCookie();
+      return revoked;
+    }
     if (url.pathname === "/admin/login") {
       if (request.method === "GET") {
         let session = null;
@@ -1758,7 +1900,7 @@ export function createHttpApp({
         if ((auth && resolveAdminPrincipal(auth)) || session?.principal) {
           return response(303, "", "text/plain; charset=utf-8", { location: "/admin" });
         }
-        return response(200, renderAdminLoginPage({ error: url.searchParams.get("error") === "1" }), "text/html; charset=utf-8", {
+        return response(200, renderAdminLoginPage({ error: url.searchParams.get("error") }), "text/html; charset=utf-8", {
           "cache-control": "no-store",
           "x-robots-tag": "noindex, nofollow",
           ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
@@ -1772,6 +1914,33 @@ export function createHttpApp({
           const login = await service.login({ email: form.get("email"), password: form.get("password") });
           const maxAgeSeconds = Math.floor(Number(login.exp) - nowSeconds());
           if (!login.token || maxAgeSeconds <= 0) throw new Error("Payload returned an expired session");
+          // B6 workspace security and data: the password is only the first
+          // factor. A failed second factor also ends the session Payload just
+          // issued, so a rejected sign-in leaves no usable token behind.
+          if (!passesLoginSecondFactor(login.principal, form.get("code"))) {
+            try {
+              await service.logout(login.token);
+            } catch {
+              // The token was never handed to the browser and expires on its own.
+            }
+            return response(303, "", "text/plain; charset=utf-8", {
+              location: "/admin/login?error=2fa",
+              "cache-control": "no-store",
+            });
+          }
+          if (adminSessionLedgerPath) {
+            try {
+              openAdminSession(login.token, {
+                operatorId: login.principal.id,
+                source: "payload_session",
+                headers: request.headers,
+                expiresAt: new Date(Number(login.exp) * 1000).toISOString(),
+              });
+            } catch {
+              // A session that cannot be registered is simply not listable; it
+              // is not a reason to refuse a correctly authenticated operator.
+            }
+          }
           return response(303, "", "text/plain; charset=utf-8", {
             location: "/admin",
             "set-cookie": adminSessionSetCookie(login.token, { maxAgeSeconds }),
@@ -1886,6 +2055,444 @@ export function createHttpApp({
       }
       }
     }
+    // ==== B6 workspace security and data =====================================
+    // Two-factor authentication, the admin session list and revoke, workspace
+    // data export, and the read-only audit-retention preview. Pruning the audit
+    // log has deliberately no route at all: it is only ever done by the
+    // `npm run audit:retention -- --apply` maintenance command, so no request
+    // can delete an accountability record.
+    //
+    // This block sits immediately before the first capability-gated admin route
+    // so the second-factor gate below covers every admin route that follows it.
+    const b6StepUpToken = String(readHeader(request.headers, "x-ms-admin-2fa") || "").trim();
+    const b6CurrentToken = sessionToken || b6StepUpToken;
+    const b6CurrentFingerprint = (() => {
+      try {
+        return b6CurrentToken ? adminSessionFingerprint(b6CurrentToken) : "";
+      } catch {
+        return "";
+      }
+    })();
+    const b6CurrentSessionId = b6CurrentFingerprint
+      ? adminSessionStates(adminSessionRows(), { now: Date.parse(securityNow()) }).get(b6CurrentFingerprint)?.session_id || null
+      : null;
+    // Every workspace-security state change is accountable. If the audit log is
+    // not writable the action is refused rather than performed unrecorded.
+    const b6Audit = (input) => {
+      const entry = writeAudit(withAuthenticatedAuditActor(input, principal), securityNow());
+      if (!entry) {
+        const error = new Error("This action requires a writable audit log");
+        error.status = 503;
+        error.code = "audit_log_unavailable";
+        throw error;
+      }
+      return entry;
+    };
+    const b6Failure = (error) =>
+      adminJson(error?.status || 400, { kind: error?.code || "bad_request", message: error?.message || "Request refused" });
+    const b6Body = () => {
+      try {
+        return parseBody(request);
+      } catch (error) {
+        error.status = 400;
+        error.code = "bad_request";
+        throw error;
+      }
+    };
+
+    // Second-factor gate for the credential-registry path. The Payload path is
+    // gated at /admin/login instead, where the password is checked.
+    if (adminRequest && principal?.source === "credential_registry" && !TWO_FACTOR_SELF_SERVICE_PATHS.has(url.pathname)) {
+      const b6Status = operatorTwoFactorStatus(twoFactorRows(), principal.id);
+      if (b6Status.status === "active") {
+        if (!activeAdminSessionState(b6StepUpToken, principal.id, "credential_registry")) {
+          return adminJson(403, {
+            kind: "two_factor_required",
+            message:
+              "Post a current authenticator code to /api/admin/security/two-factor/verify and send the returned token as x-ms-admin-2fa.",
+          });
+        }
+      } else if (principal.require_two_factor === true) {
+        // Required but not yet active: only the enrolment routes are reachable,
+        // so switching the requirement on never locks an operator out.
+        return adminJson(403, {
+          kind: "two_factor_enrolment_required",
+          message: "This operator must enrol a second factor at /api/admin/security/two-factor/enrol before using the workspace.",
+        });
+      }
+    }
+    if (adminRequest && principal?.id) touchAdminSession(b6CurrentToken, principal.id);
+
+    if (url.pathname === "/api/admin/security/two-factor") {
+      if (request.method !== "GET") return adminJson(405, { kind: "method_not_allowed" });
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      return adminJson(200, {
+        kind: "admin_two_factor_status",
+        ...operatorTwoFactorStatus(twoFactorRows(), principal.id),
+        required: principal.require_two_factor === true,
+        step_up_required: principal.source === "credential_registry",
+        step_up_header: "x-ms-admin-2fa",
+      });
+    }
+
+    if (url.pathname === "/api/admin/security/two-factor/enrol") {
+      if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      try {
+        const current = operatorTwoFactorStatus(twoFactorRows(), principal.id);
+        if (current.status === "active" || current.status === "pending") {
+          // Re-enrolling would silently replace a live second factor, which is
+          // exactly what a stolen bearer token would try first.
+          return adminJson(409, { kind: "two_factor_already_enrolled", status: current.status });
+        }
+        const enrolment = createOperatorEnrolment(
+          { operatorId: principal.id, account: principal.email || principal.id },
+          { secret: operatorTwoFactorKey, recordedAt: securityNow() },
+        );
+        b6Audit({
+          action: "two_factor_enrolment_started",
+          objectType: "operator_two_factor",
+          objectId: enrolment.enrolment_id,
+          metadata: { operator_id: principal.id, source: principal.source, recovery_code_count: enrolment.recovery_codes.length },
+        });
+        recordTwoFactorEvent(enrolment.row);
+        // Shown once, here. The secret and the codes are never written to the
+        // ledger in the clear, never audited, and never logged.
+        return adminJson(201, {
+          kind: "admin_two_factor_enrolment",
+          enrolment_id: enrolment.enrolment_id,
+          secret: enrolment.secret,
+          provisioning_uri: enrolment.provisioning_uri,
+          recovery_codes: enrolment.recovery_codes,
+          shown_once: true,
+          next: "POST /api/admin/security/two-factor/activate with a current code",
+        });
+      } catch (error) {
+        return b6Failure(error);
+      }
+    }
+
+    if (url.pathname === "/api/admin/security/two-factor/activate") {
+      if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      try {
+        const rows = twoFactorRows();
+        const event = activateOperatorEnrolment(
+          rows,
+          { operatorId: principal.id, code: b6Body().code },
+          { secret: operatorTwoFactorKey, recordedAt: securityNow() },
+        );
+        b6Audit({
+          action: "two_factor_activated",
+          objectType: "operator_two_factor",
+          objectId: event.enrolment_id,
+          metadata: { operator_id: principal.id, source: principal.source },
+        });
+        recordTwoFactorEvent(event);
+        return adminJson(200, { kind: "admin_two_factor_status", ...operatorTwoFactorStatus(twoFactorRows(), principal.id) });
+      } catch (error) {
+        return b6Failure(error);
+      }
+    }
+
+    if (url.pathname === "/api/admin/security/two-factor/verify") {
+      if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      if (principal.source !== "credential_registry") {
+        return adminJson(409, {
+          kind: "two_factor_step_up_not_applicable",
+          message: "Browser sessions verify their second factor at sign-in.",
+        });
+      }
+      if (!adminSessionLedgerPath) {
+        return adminJson(503, { kind: "admin_session_store_unavailable", message: "Step-up sessions need a configured session ledger" });
+      }
+      try {
+        const rows = twoFactorRows();
+        const verification = verifyOperatorTwoFactor(
+          rows,
+          { operatorId: principal.id, code: b6Body().code },
+          { secret: operatorTwoFactorKey, recordedAt: securityNow() },
+        );
+        // One generic refusal: a caller learns nothing about which half failed.
+        if (!verification.ok) return adminJson(403, { kind: "two_factor_rejected", message: "That code was not accepted" });
+        for (const event of verification.events) recordTwoFactorEvent(event);
+        const ttlSeconds = Math.max(
+          60,
+          Math.min(Number(operatorTwoFactorStepUpSeconds) || MAX_ADMIN_SESSION_SECONDS, MAX_ADMIN_SESSION_SECONDS),
+        );
+        const stepUpToken = randomBytes(32).toString("base64url");
+        const expiresAt = new Date(Date.parse(securityNow()) + ttlSeconds * 1000).toISOString();
+        const opened = openAdminSession(stepUpToken, {
+          operatorId: principal.id,
+          source: "credential_registry",
+          headers: request.headers,
+          expiresAt,
+        });
+        b6Audit({
+          action: "two_factor_verified",
+          objectType: "admin_session",
+          objectId: opened.session_id,
+          metadata: { operator_id: principal.id, method: verification.method, source: principal.source },
+        });
+        return adminJson(201, {
+          kind: "admin_two_factor_step_up",
+          session_id: opened.session_id,
+          step_up_token: stepUpToken,
+          step_up_header: "x-ms-admin-2fa",
+          expires_at: expiresAt,
+          method: verification.method,
+        });
+      } catch (error) {
+        return b6Failure(error);
+      }
+    }
+
+    if (url.pathname === "/api/admin/security/two-factor/disable") {
+      if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      try {
+        const body = b6Body();
+        const target = String(body.operator_id || body.operatorId || "").trim() || principal.id;
+        const forced = target !== principal.id;
+        if (forced) {
+          if (!canAdminAccess(principal, "team:manage")) return adminForbidden("team:manage");
+          // Turning off someone else's second factor is itself a privileged act,
+          // so a team manager who has their own factor must have stepped up.
+          const managerStatus = operatorTwoFactorStatus(twoFactorRows(), principal.id);
+          if (
+            managerStatus.status === "active" &&
+            principal.source === "credential_registry" &&
+            !activeAdminSessionState(b6StepUpToken, principal.id, "credential_registry")
+          ) {
+            return adminJson(403, { kind: "two_factor_required", message: "Step up before disabling another operator's second factor" });
+          }
+        }
+        const events = disableOperatorTwoFactor(
+          twoFactorRows(),
+          {
+            operatorId: target,
+            code: body.code,
+            actor: principal.id,
+            reason: forced ? "team_manage" : "operator_request",
+            forced,
+          },
+          { secret: operatorTwoFactorKey, recordedAt: securityNow() },
+        );
+        const disabled = events[events.length - 1];
+        b6Audit({
+          action: "two_factor_disabled",
+          objectType: "operator_two_factor",
+          objectId: disabled.enrolment_id,
+          metadata: { operator_id: target, forced, reason: disabled.reason },
+        });
+        for (const event of events) recordTwoFactorEvent(event);
+        return adminJson(200, { kind: "admin_two_factor_status", ...operatorTwoFactorStatus(twoFactorRows(), target) });
+      } catch (error) {
+        return b6Failure(error);
+      }
+    }
+
+    if (url.pathname === "/api/admin/security/sessions") {
+      if (request.method !== "GET") return adminJson(405, { kind: "method_not_allowed" });
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      const scope = url.searchParams.get("scope") === "all" ? "all" : "self";
+      if (scope === "all" && !canAdminAccess(principal, "team:manage")) return adminForbidden("team:manage");
+      return adminJson(200, {
+        kind: "admin_sessions",
+        scope,
+        current_session_id: b6CurrentSessionId,
+        sessions: adminSessionList(adminSessionRows(), {
+          operatorId: principal.id,
+          currentFingerprint: b6CurrentFingerprint,
+          scope,
+          now: Date.parse(securityNow()),
+          includeRevoked: url.searchParams.get("include_revoked") === "1",
+        }),
+      });
+    }
+
+    if (url.pathname === "/api/admin/security/sessions/revoke") {
+      if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      try {
+        const body = b6Body();
+        const result = revokeAdminSessions(
+          adminSessionRows(),
+          {
+            operatorId: principal.id,
+            sessionId: body.session_id || body.sessionId,
+            scope: body.scope === "others" ? "others" : "one",
+            revokedBy: principal.id,
+            currentFingerprint: b6CurrentFingerprint,
+            canManageTeam: canAdminAccess(principal, "team:manage"),
+          },
+          { recordedAt: securityNow() },
+        );
+        for (const event of result.events) {
+          b6Audit({
+            action: "admin_session_revoked",
+            objectType: "admin_session",
+            objectId: event.session_id,
+            metadata: { operator_id: event.operator_id, reason: event.reason, revoked_by: principal.id },
+          });
+          recordAdminSessionEvent(event);
+        }
+        if (result.revoked_current && sessionToken) {
+          try {
+            await (await configuredPayloadAdminAuth())?.logout(sessionToken);
+          } catch {
+            // The ledger revocation already refuses this cookie on the way in.
+          }
+        }
+        return adminResponse(
+          200,
+          { kind: "admin_sessions_revoked", revoked_session_ids: result.revoked_session_ids, revoked_current: result.revoked_current },
+          "application/json; charset=utf-8",
+          result.revoked_current ? { "set-cookie": adminSessionClearCookie() } : {},
+        );
+      } catch (error) {
+        return b6Failure(error);
+      }
+    }
+
+    if (url.pathname === "/api/admin/security/audit-retention") {
+      if (request.method !== "GET") return adminJson(405, { kind: "method_not_allowed" });
+      try {
+        const plan = auditRetentionPlan(readAuditLog(auditLogPath || undefined), {
+          now: securityNow(),
+          retentionDays: Number(auditRetentionWindowDays) || auditRetentionDays(),
+        });
+        const { retained_rows: _retained, prunable_rows: _prunable, ...summary } = plan;
+        return adminJson(200, {
+          ...summary,
+          kind: "admin_audit_retention",
+          applied_on_read: false,
+          apply_command: "npm run audit:retention -- --apply",
+        });
+      } catch (error) {
+        // Refusing to answer beats implying a plan we could not verify.
+        return adminJson(503, { kind: "audit_retention_unavailable", message: error.message });
+      }
+    }
+
+    if (url.pathname === "/api/admin/data-exports" && request.method === "GET") {
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      const scope = url.searchParams.get("scope") === "all" ? "all" : "self";
+      if (scope === "all" && !canAdminAccess(principal, "team:manage")) return adminForbidden("team:manage");
+      return adminJson(200, {
+        kind: "admin_data_exports",
+        scope,
+        datasets: WORKSPACE_EXPORT_DATASETS,
+        exports: workspaceExportList(workspaceExportRows(), {
+          requestedBy: principal.id,
+          scope,
+          now: Date.parse(securityNow()),
+        }),
+      });
+    }
+
+    if (url.pathname === "/api/admin/data-exports" && request.method === "POST") {
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      if (!workspaceExportLedgerPath) {
+        return adminJson(503, { kind: "workspace_export_unavailable", message: "Workspace export needs a configured export ledger" });
+      }
+      // The file ledgers are not the authority in durable-only production, so an
+      // export built from them would be a partial answer presented as complete.
+      if (runtimeDataDurableOnly) return adminJson(503, runtimeDataUnavailablePayload(url.pathname));
+      try {
+        const created = createWorkspaceExportJob(
+          { requestedBy: principal.id, request: b6Body() },
+          { requestedAt: securityNow(), ttlSeconds: workspaceExportTtlSeconds ?? undefined },
+        );
+        // Audited before the file exists: requesting the export is the
+        // accountable act, whether or not the run then succeeds.
+        b6Audit({
+          action: "workspace_export_requested",
+          objectType: "workspace_export",
+          objectId: created.row.job_id,
+          metadata: {
+            requested_by: principal.id,
+            datasets: created.row.scope.datasets,
+            from: created.row.scope.from,
+            to: created.row.scope.to,
+          },
+        });
+        recordWorkspaceExportEvent(created.row);
+        const exportLeads = readLeadLedger(leadLedgerPath || undefined);
+        const document = buildWorkspaceExportDocument(
+          { job_id: created.row.job_id, requested_by: created.row.requested_by, scope: created.row.scope },
+          {
+            // The contact vault is never opened here. Contacts are derived from
+            // ledger rows only, so no decrypted contact detail can reach the file.
+            leads: exportLeads,
+            contacts: buildContactRecords({ leads: exportLeads }),
+            listings: currentSeed().records,
+            auditRows: readAuditLog(auditLogPath || undefined),
+          },
+          { generatedAt: securityNow() },
+        );
+        const exportPath = writeWorkspaceExportFile(document, { directory: workspaceExportDir || undefined });
+        const completed = createWorkspaceExportCompleted(
+          {
+            jobId: created.row.job_id,
+            filePath: exportPath,
+            byteSize: fs.statSync(exportPath).size,
+            counts: Object.fromEntries(Object.entries(document.datasets).map(([dataset, value]) => [dataset, value.count])),
+          },
+          securityNow(),
+        );
+        recordWorkspaceExportEvent(completed);
+        return adminJson(201, {
+          kind: "admin_data_export",
+          job_id: created.row.job_id,
+          status: "ready",
+          scope: created.row.scope,
+          counts: completed.counts,
+          redactions: document.redactions,
+          redaction_policy: document.redaction_policy,
+          download_url: `/api/admin/data-exports/download?job=${encodeURIComponent(created.row.job_id)}&token=${encodeURIComponent(created.download_token)}`,
+          download_token: created.download_token,
+          download_token_header: "x-ms-export-token",
+          download_expires_at: created.row.download_expires_at,
+          single_use: true,
+        });
+      } catch (error) {
+        return b6Failure(error);
+      }
+    }
+
+    if (url.pathname === "/api/admin/data-exports/download") {
+      if (request.method !== "GET") return adminJson(405, { kind: "method_not_allowed" });
+      if (!principal?.id) return adminOperatorIdentityRequired();
+      try {
+        const job = claimWorkspaceExportDownload(workspaceExportRows(), {
+          jobId: url.searchParams.get("job"),
+          // The header keeps the one-time token out of access logs; the query
+          // parameter exists because the brief asks for a link.
+          token: readHeader(request.headers, "x-ms-export-token") || url.searchParams.get("token") || "",
+          operatorId: principal.id,
+          now: Date.parse(securityNow()),
+        });
+        const body = fs.readFileSync(job.file_path, "utf8");
+        b6Audit({
+          action: "workspace_export_downloaded",
+          objectType: "workspace_export",
+          objectId: job.job_id,
+          metadata: { downloaded_by: principal.id, byte_size: job.byte_size },
+        });
+        // Recorded after the bytes are in hand; the row is what makes a second
+        // fetch of the same link a 410.
+        recordWorkspaceExportEvent(createWorkspaceExportDownloaded({ jobId: job.job_id, downloadedBy: principal.id }, securityNow()));
+        return adminResponse(200, body, "application/json; charset=utf-8", {
+          "content-disposition": `attachment; filename="${job.job_id}.json"`,
+        });
+      } catch (error) {
+        return b6Failure(error);
+      }
+    }
+    // ==== end B6 workspace security and data =================================
+
     // Package B2: approved content (team profiles, area guides, financing
     // partners, purchase fee table).
     if (request.method === "GET" && url.pathname === "/api/purchase-fees/estimate") {
