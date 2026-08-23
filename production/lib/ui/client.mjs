@@ -1075,6 +1075,45 @@ export const PUBLIC_APP_JS = `(function () {
     window.addEventListener("resize", scheduleGalleryPosition);
     updateGalleryPosition();
   }
+  function initGuideToc() {
+    var toc = document.querySelector("[data-guide-toc]");
+    if (!toc || !("IntersectionObserver" in window)) return;
+    var links = toc.querySelectorAll('a[href^="#"]');
+    var targets = [];
+    for (var i = 0; i < links.length; i += 1) {
+      var target = document.getElementById(links[i].getAttribute("href").slice(1));
+      if (target) targets.push({ link: links[i], target: target });
+    }
+    if (!targets.length) return;
+    function setCurrent(id) {
+      for (var j = 0; j < targets.length; j += 1) {
+        if (targets[j].target.id === id) targets[j].link.setAttribute("aria-current", "location");
+        else targets[j].link.removeAttribute("aria-current");
+      }
+    }
+    var visible = {};
+    var observer = new IntersectionObserver(function (entries) {
+      for (var k = 0; k < entries.length; k += 1) visible[entries[k].target.id] = entries[k].isIntersecting;
+      for (var m = 0; m < targets.length; m += 1) {
+        if (visible[targets[m].target.id]) {
+          setCurrent(targets[m].target.id);
+          return;
+        }
+      }
+    }, { rootMargin: "-96px 0px -55% 0px", threshold: 0 });
+    for (var n = 0; n < targets.length; n += 1) observer.observe(targets[n].target);
+    setCurrent(targets[0].target.id);
+  }
+  function initSellerStepper() {
+    var form = document.querySelector("form[data-seller-intake]");
+    if (!form) return;
+    // Next and Back only make sense once the intake is a stepper. Without JS
+    // every step stays visible and the form submits natively, so the
+    // controls ship hidden and are revealed here.
+    var controls = form.querySelectorAll("[data-seller-next], [data-seller-back]");
+    for (var i = 0; i < controls.length; i += 1) controls[i].hidden = false;
+    form.setAttribute("data-seller-stepper", "true");
+  }
   function initSellerIntake() {
     var form = document.querySelector("form[data-seller-intake]");
     if (!form) return;
@@ -1121,11 +1160,26 @@ export const PUBLIC_APP_JS = `(function () {
       var fields = panels[currentIndex].querySelectorAll("input[required], select[required], textarea[required]");
       for (var i = 0; i < fields.length; i += 1) {
         if (fields[i].checkValidity()) continue;
+        // Mark the field so it also reads as an error visually, not only in
+        // the native bubble; the mark clears as soon as the visitor edits it.
+        fields[i].setAttribute("aria-invalid", "true");
         fields[i].reportValidity();
         return false;
       }
       return true;
     }
+    form.addEventListener("input", function (event) {
+      var field = event.target;
+      if (field && field.getAttribute && field.getAttribute("aria-invalid") === "true" && field.checkValidity && field.checkValidity()) {
+        field.removeAttribute("aria-invalid");
+      }
+    });
+    form.addEventListener("change", function (event) {
+      var field = event.target;
+      if (field && field.getAttribute && field.getAttribute("aria-invalid") === "true" && field.checkValidity && field.checkValidity()) {
+        field.removeAttribute("aria-invalid");
+      }
+    });
     form.addEventListener("click", function (event) {
       var next = event.target.closest("[data-seller-next]");
       if (next && form.contains(next)) {
@@ -1998,6 +2052,8 @@ export const PUBLIC_APP_JS = `(function () {
   initImageFallbacks();
  initListingGallery();
  initMobileListingGallery();
+ initGuideToc();
+ initSellerStepper();
  initSellerIntake();
  initPhotoSphereViewers();
  initPrivacySafeAnalytics();

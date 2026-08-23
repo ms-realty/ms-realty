@@ -1055,6 +1055,8 @@ function HomeBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome || { copy: {} };
   const guides = page.body.guides?.links || [];
+  const alternateGuides = page.body.guides_alternate?.links || [];
+  const start = page.body.start || { path: `/${page.locale}/start`, label: labels.startSearch };
   const main = h(
     "main",
     { id: "main", tabIndex: -1, "data-kind": "home", "data-react-public-ui": "home" },
@@ -1120,11 +1122,11 @@ function HomeBody({ page }) {
     (page.body.locations || []).length
       ? h(
           "section",
-          { className: "hp-sec" },
-          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", null, labels.locations))),
+          { className: "hp-sec hp-areas", "aria-labelledby": "hp-areas-title" },
+          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", { id: "hp-areas-title" }, labels.browseByArea))),
           h(
             "nav",
-            { className: "hp-resorts", "aria-label": labels.locations, "data-home-locations": "true" },
+            { className: "hp-resorts", "aria-label": labels.browseByArea, "data-home-locations": "true" },
             ...(page.body.locations || []).map((location) =>
               h(
                 "a",
@@ -1134,53 +1136,66 @@ function HomeBody({ page }) {
                   className: "hp-resort",
                   "data-location-media": location.image?.url ? "approved" : "fallback",
                 },
-                location.image?.url ? h("img", { src: location.image.url, alt: location.image.alt || location.location, loading: "lazy", decoding: "async" }) : null,
-                location.listing_count ? h("span", { className: "hp-resort__c" }, location.listing_count) : null,
-                h("div", { className: "hp-resort__t" }, h("h3", null, location.location)),
-              ),
-            ),
-          ),
-        )
-      : h("nav", { "aria-label": labels.locations, "data-home-locations": "true", hidden: true }),
-    guides.length
-      ? h(
-          "section",
-          { className: "hp-sec hp-guides", "data-home-guides": "true", "data-approved-source": "cms" },
-          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", null, page.body.guides.label))),
-          h(
-            "nav",
-            { className: "hp-guides__rail", "aria-label": page.body.guides.label },
-            ...guides.map((guide) =>
-              h(
-                "a",
-                {
-                  key: guide.id,
-                  href: guide.href,
-                  className: "hp-guide",
-                  "data-guide-reviewer": guide.reviewer,
-                },
+                location.image?.url ? h("img", { src: location.image.url, alt: "", loading: "lazy", decoding: "async" }) : null,
                 h(
                   "div",
-                  { className: "hp-guide__meta" },
-                  h("span", { className: "hp-guide__icon" }, h(Icon, { name: "file-check", size: 21 })),
-                  h(Badge, { variant: "neutral", icon: "shield-check" }, labels.approvedSource),
-                  h(Icon, { name: "arrow-right", size: 18, className: "hp-guide__arrow" }),
+                  { className: "hp-resort__t" },
+                  h("h3", null, location.location),
+                  location.listing_count
+                    ? h("span", { className: "hp-resort__c" }, `${location.listing_count} ${labels.reviewedListings}`)
+                    : null,
                 ),
-                h("h3", null, guide.label),
-                h("p", null, guide.summary),
               ),
             ),
           ),
         )
-      : null,
+      : h(
+          "section",
+          { className: "hp-sec hp-areas", "aria-labelledby": "hp-areas-title" },
+          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", { id: "hp-areas-title" }, labels.browseByArea))),
+          h(
+            "nav",
+            { className: "mk-empty hp-rail-empty", "aria-label": labels.browseByArea, "data-home-locations": "true", "data-home-locations-empty": "true" },
+            h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "map-pin", size: 24 })),
+            h("p", { className: "mk-empty__text" }, labels.areasEmpty),
+            h(
+              "div",
+              { className: "mk-empty__actions" },
+              h(Btn, { tag: "a", variant: "secondary", iconStart: "search", href: page.body.search.path }, labels.browseAllListings),
+            ),
+          ),
+        ),
     h(
       "section",
-      { className: "hp-sec", style: "padding-top:0", "aria-label": labels.featuredListings, "data-featured-listings": "true" },
+      { className: "hp-sec hp-how", "aria-labelledby": "hp-how-title", "data-home-how-buying-works": "true" },
+      h(
+        "div",
+        { className: "hp-sec__head" },
+        h("div", null, h("h2", { id: "hp-how-title" }, labels.howBuyingWorks)),
+        h(
+          "a",
+          { className: "mk-btn mk-btn--primary mk-btn--lg", href: start.path, "data-action": "start" },
+          h("span", null, start.label),
+          h(Icon, { name: "arrow-right", size: 20, className: "ico-dir" }),
+        ),
+      ),
+      h(FlowSteps, {
+        className: "hp-how__steps",
+        steps: [
+          { title: labels.buyingStepOneTitle, text: labels.buyingStepOneText },
+          { title: labels.buyingStepTwoTitle, text: labels.buyingStepTwoText },
+          { title: labels.buyingStepThreeTitle, text: labels.buyingStepThreeText },
+        ],
+      }),
+    ),
+    h(
+      "section",
+      { className: "hp-sec hp-featured", "aria-label": labels.featuredListings, "data-featured-listings": "true" },
       h(
         "div",
         { className: "hp-sec__head" },
         h("div", null, h("h2", null, labels.featuredListings)),
-        h(Btn, { tag: "a", variant: "secondary", iconEnd: "arrow-right", href: page.body.search.path }, labels.searchResults),
+        h(Btn, { tag: "a", variant: "secondary", iconEnd: "arrow-right", href: page.body.search.path }, labels.browseAllListings),
       ),
       (page.cards || []).length
         ? h(
@@ -1196,19 +1211,85 @@ function HomeBody({ page }) {
             h("p", { className: "mk-empty__text" }, `0 ${labels.reviewedListings}`),
           ),
     ),
+    guides.length
+      ? h(
+          "section",
+          { className: "hp-sec hp-guides", "data-home-guides": "true", "data-approved-source": "cms", "aria-labelledby": "hp-guides-title" },
+          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", { id: "hp-guides-title" }, page.body.guides.label))),
+          h(
+            "nav",
+            { className: "hp-guides__rail", "aria-label": page.body.guides.label },
+            ...guides.map((guide) =>
+              h(
+                "a",
+                {
+                  key: guide.id,
+                  href: guide.href,
+                  className: "hp-guide",
+                  "data-guide-reviewer": guide.reviewer,
+                },
+                h(
+                  "div",
+                  { className: "hp-guide__meta" },
+                  h(Badge, { variant: "neutral", icon: "shield-check" }, labels.approvedSource),
+                  h(Icon, { name: "arrow-right", size: 18, className: "hp-guide__arrow ico-dir" }),
+                ),
+                h("h3", null, guide.label),
+                h("p", null, guide.summary),
+              ),
+            ),
+          ),
+        )
+      : alternateGuides.length
+        ? h(
+            "section",
+            { className: "hp-sec hp-guides", "data-home-guides": "true", "data-home-guides-empty": "true", "data-approved-source": "cms", "aria-labelledby": "hp-guides-title" },
+            h("div", { className: "hp-sec__head" }, h("div", null, h("h2", { id: "hp-guides-title" }, chrome.copy.buyerGuides))),
+            h(
+              "div",
+              { className: "mk-empty hp-rail-empty" },
+              h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "languages", size: 24 })),
+              h("p", { className: "mk-empty__text" }, labels.guidesUnavailable),
+              h("p", { className: "hp-rail-empty__note" }, labels.guidesInEnglish),
+              h(
+                "nav",
+                { className: "mk-empty__actions", "aria-label": chrome.copy.buyerGuides },
+                ...alternateGuides.slice(0, 2).map((guide) =>
+                  h(
+                    "a",
+                    { key: guide.id, className: "mk-btn mk-btn--secondary mk-btn--md", href: guide.href, lang: page.body.guides_alternate.locale, hrefLang: page.body.guides_alternate.locale },
+                    h(Icon, { name: "file-check", size: 18 }),
+                    h("span", null, guide.label),
+                  ),
+                ),
+              ),
+            ),
+          )
+        : null,
     h(
       "section",
-      { className: "hp-sell" },
+      { className: "hp-trust", "aria-label": labels.trustOffices, "data-home-trust": "true" },
+      h(
+        "ul",
+        { className: "hp-trust__in" },
+        h("li", null, h(Icon, { name: "shield-check", size: 20 }), h("span", null, labels.trustReviewed)),
+        h("li", null, h(Icon, { name: "languages", size: 20 }), h("span", null, labels.trustLanguages)),
+        h("li", null, h(Icon, { name: "map-pin", size: 20 }), h("span", null, `${labels.trustOffices}: ${chrome.copy.offices || ""}`)),
+      ),
+    ),
+    h(
+      "section",
+      { className: "hp-sell", "aria-labelledby": "hp-sell-title" },
       h("div", { className: "hp-sell__glow", "aria-hidden": "true" }),
       h(
         "div",
         { className: "hp-sell__in" },
-        h("div", null, h("h2", null, page.body.seller.title || page.body.seller.label), h("p", null, page.body.seller.description || "")),
+        h("div", null, h("h2", { id: "hp-sell-title" }, page.body.seller.title || page.body.seller.label), h("p", null, page.body.seller.description || "")),
         h(
           "nav",
           { "aria-label": labels.primaryActions, className: "hp-sell__actions" },
-          h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: page.body.seller.path, "data-action": "seller" }, page.body.seller.label),
-          h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: page.body.contact.path, "data-action": "contact" }, page.body.contact.label),
+          h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "landmark", href: page.body.seller.path, "data-action": "seller" }, page.body.seller.label),
+          h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "phone", href: page.body.contact.path, "data-action": "contact" }, page.body.contact.label),
         ),
       ),
     ),
@@ -3283,10 +3364,78 @@ function ListingBody({ page }) {
    Seller valuation
    ============================================================ */
 
+/* ============================================================
+   Shared pieces for the seller, contact, guide and utility pages
+   ============================================================ */
+
+function fillTemplate(template, values = {}) {
+  return String(template || "").replace(/\{(\w+)\}/g, (match, key) => (values[key] === undefined ? match : String(values[key])));
+}
+
+function phoneChannel(page) {
+  const channel = page.body?.contact_channels?.phone;
+  if (channel?.href) return channel;
+  const contact = page.chrome?.contact;
+  return contact?.phone ? { href: `tel:${contact.phone}`, label: contact.phone_display || contact.phone } : null;
+}
+
+function searchPathFor(page) {
+  return page.body?.search?.path || page.body?.ctas?.search?.path || page.chrome?.nav?.find((item) => item.id === "buy")?.href || page.chrome?.home?.href || "/";
+}
+
+// Numbered strip ("How buying works", "What happens next"): an ordered list of
+// steps, never a card grid. The numeral is decorative; the list carries order.
+function FlowSteps({ steps, className = "", ...attrs }) {
+  return h(
+    "ol",
+    { className: `flow-steps ${className}`.trim(), ...attrs },
+    ...steps.map((step, index) =>
+      h(
+        "li",
+        { key: step.title, className: "flow-steps__item" },
+        h("span", { className: "flow-steps__num", "aria-hidden": "true" }, String(index + 1)),
+        h("div", { className: "flow-steps__body" }, h("h3", null, step.title), step.text ? h("p", null, step.text) : null),
+      ),
+    ),
+  );
+}
+
+// Utility template shared by language fallback, search unavailable, legacy
+// archive, listing preservation and 404: icon, one-line title, one sentence,
+// a primary action and the phone. Extra content renders under the card.
+function UtilityPage({ page, kind, icon, meta, title, text, actions = [], rootAttrs = {}, children = [] }) {
+  const main = h(
+    "main",
+    { id: "main", tabIndex: -1, "data-kind": kind, "data-react-public-ui": kind, ...rootAttrs, className: "pg-narrow ut-page" },
+    h(
+      "section",
+      { className: "mk-empty ut-card", "data-utility-template": "true" },
+      h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: icon, size: 28 })),
+      meta ? h("p", { className: "ut-card__meta" }, meta) : null,
+      h("h1", { className: "mk-empty__title" }, title),
+      text ? h("p", { className: "mk-empty__text" }, text) : null,
+      h("div", { className: "mk-empty__actions ut-card__actions" }, ...actions.filter(Boolean)),
+    ),
+    ...(Array.isArray(children) ? children : [children]),
+  );
+  return shell(page, main);
+}
+
+function phoneAction(channel, variant = "secondary") {
+  if (!channel?.href) return null;
+  return h(Btn, { tag: "a", variant, size: "lg", iconStart: "phone", href: channel.href, "data-utility-phone": "true" }, channel.label);
+}
+
+/* ============================================================
+   Seller valuation (Persuade header + Operate stepper)
+   ============================================================ */
+
 function SellerBody({ page }) {
   const labels = uiLabels(page);
   const valuation = page.body.valuation;
+  const channels = page.body.contact_channels;
   const steps = [labels.propertyDetails, labels.callback, labels.brokerReview];
+  const questions = [labels.sellerStepOneQuestion, labels.sellerStepTwoQuestion, labels.sellerStepThreeQuestion];
   const propertyTypes = Object.entries(uiCopyFor(page.locale).propertyTypes || {});
   const reviewFields = [
     ["property.location", labels.location],
@@ -3298,6 +3447,7 @@ function SellerBody({ page }) {
     ["contact_preference", labels.preferredContact],
     ["message", labels.message],
   ];
+  const stepLabel = (index) => h("p", { className: "sell-form__step" }, fillTemplate(labels.stepOf, { n: index + 1, total: steps.length }));
   const main = h(
     "main",
     {
@@ -3309,329 +3459,487 @@ function SellerBody({ page }) {
       "data-no-public-avm": "true",
       "data-broker-review-required": "true",
       "data-min-touch-target": "44",
-      className: "ct-page pg-narrow",
+      className: "pg-narrow sell-page",
     },
     h(
       "section",
-      { className: "ct-page__head", "aria-label": labels.sellerValuation, "data-seller-valuation-flow": "broker_callback" },
+      { className: "page-head sell-head", "aria-label": labels.sellerValuation, "data-seller-valuation-flow": "broker_callback" },
       h("h1", null, page.body.h1),
       h("p", null, page.body.intro),
-      h(
-        "ol",
-        { className: "sell-steps", "data-seller-steps": "true" },
-        ...steps.map((step, index) =>
-          h(
-            "li",
-            { key: step, "data-seller-step-indicator": String(index + 1), "aria-current": index === 0 ? "step" : undefined },
-            h("span", { className: "sell-steps__num", "aria-hidden": "true" }, index + 1),
-            step,
-          ),
-        ),
-      ),
+      h("p", { className: "sell-promise", "data-seller-promise": "true" }, h(Icon, { name: "shield-check", size: 18 }), h("span", null, labels.sellerPromise)),
+      // Without a submittable form there is no flow to track, so the progress
+      // indicator would promise a stepper the visitor cannot use.
+      valuation
+        ? h(
+            "ol",
+            { className: "sell-steps", "data-seller-steps": "true" },
+            ...steps.map((step, index) =>
+              h(
+                "li",
+                { key: step, "data-seller-step-indicator": String(index + 1), "aria-current": index === 0 ? "step" : undefined },
+                h("span", { className: "sell-steps__num", "aria-hidden": "true" }, index + 1),
+                h("span", { className: "sell-steps__label" }, step),
+              ),
+            ),
+          )
+        : null,
     ),
     valuation
       ? h(
-      "form",
-      {
-        className: "mk-card mk-card--elevated mk-card--pad-lg ct-form",
-        method: valuation.method || "POST",
-        action: valuation.endpoint,
-        "data-lead-type": "seller",
-        "data-seller-intake": "true",
-        "data-seller-step": "1",
-      },
-      h("input", { type: "hidden", name: "source", defaultValue: valuation.payload.source }),
-      h("input", { type: "hidden", name: "intent", defaultValue: valuation.payload.intent }),
-      h("input", { type: "hidden", name: "leadType", defaultValue: valuation.payload.leadType }),
-      h("input", { type: "hidden", name: "language", defaultValue: valuation.payload.language }),
-      h(
-        "section",
-        {
-          className: "sell-form__section",
-          "data-seller-property-fields": "true",
-          "data-seller-step": "1",
-          role: "group",
-          "aria-labelledby": "seller-step-property",
-        },
-        h("h2", { id: "seller-step-property", className: "ct-form__title", tabIndex: "-1", "data-seller-step-title": "true" }, labels.propertyDetails),
-        h("label", null, labels.location, h("input", { name: "property.location", required: true, autoComplete: "address-level2" })),
-        h(
-          "div",
-          { className: "sell-form__grid" },
+          "form",
+          {
+            className: "mk-card mk-card--elevated mk-card--pad-lg ct-form sell-form",
+            method: valuation.method || "POST",
+            action: valuation.endpoint,
+            "data-lead-type": "seller",
+            "data-seller-intake": "true",
+            "data-seller-step": "1",
+          },
+          h("input", { type: "hidden", name: "source", defaultValue: valuation.payload.source }),
+          h("input", { type: "hidden", name: "intent", defaultValue: valuation.payload.intent }),
+          h("input", { type: "hidden", name: "leadType", defaultValue: valuation.payload.leadType }),
+          h("input", { type: "hidden", name: "language", defaultValue: valuation.payload.language }),
           h(
-            "label",
-            null,
-            labels.propertyType,
-            h(
-              "select",
-              { name: "property.type", required: true },
-              h("option", { value: "", disabled: true, selected: true }, labels.propertyType),
-              ...propertyTypes.map(([value, option]) => h("option", { key: value, value }, option)),
-            ),
-          ),
-          h("label", null, labels.area, h("input", { name: "property.area", type: "number", min: "0", inputMode: "decimal" })),
-          h("label", null, labels.factLabels?.bedrooms || "Bedrooms", h("input", { name: "property.bedrooms", type: "number", min: "0", inputMode: "numeric" })),
-        ),
-        h("div", { className: "sell-form__actions sell-form__actions--end" }, h(Btn, { type: "button", variant: "accent", size: "lg", "data-seller-next": "true" }, labels.next)),
-      ),
-      h(
-        "section",
-        { className: "sell-form__section", "data-seller-step": "2", role: "group", "aria-labelledby": "seller-step-contact" },
-        h("h2", { id: "seller-step-contact", className: "ct-form__title", tabIndex: "-1", "data-seller-step-title": "true" }, labels.callback),
-        h(
-          "div",
-          { className: "ct-form__row" },
-          h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
-          h("label", null, labels.phone, h("input", { name: "contact.phone", type: "tel", required: true, autoComplete: "tel", inputMode: "tel" })),
-        ),
-        h(
-          "div",
-          { className: "ct-form__row" },
-          h(
-            "label",
-            null,
-            labels.preferredContact,
-            h(
-              "select",
-              { name: "contact_preference" },
-              h("option", { value: "phone" }, labels.phone),
-              h("option", { value: "whatsapp" }, "WhatsApp"),
-              h("option", { value: "viber" }, "Viber"),
-            ),
-          ),
-          h("label", null, labels.message, h("textarea", { name: "message", required: true })),
-        ),
-        h(
-          "div",
-          { className: "sell-form__actions" },
-          h(Btn, { type: "button", variant: "secondary", size: "lg", "data-seller-back": "true" }, labels.previous),
-          h(Btn, { type: "button", variant: "accent", size: "lg", "data-seller-next": "true" }, labels.next),
-        ),
-      ),
-      h(
-        "section",
-        { className: "sell-form__section", "data-seller-step": "3", role: "group", "aria-labelledby": "seller-step-review" },
-        h("h2", { id: "seller-step-review", className: "ct-form__title", tabIndex: "-1", "data-seller-step-title": "true" }, labels.brokerReview),
-        h(
-          "dl",
-          { className: "sell-form__review", "data-seller-review": "true" },
-          ...reviewFields.map(([name, label]) =>
+            "section",
+            {
+              className: "sell-form__section",
+              "data-seller-property-fields": "true",
+              "data-seller-step": "1",
+              role: "group",
+              "aria-labelledby": "seller-step-property",
+            },
+            stepLabel(0),
+            h("h2", { id: "seller-step-property", className: "ct-form__title", tabIndex: "-1", "data-seller-step-title": "true" }, questions[0]),
+            h("label", null, labels.location, h("input", { name: "property.location", required: true, autoComplete: "address-level2" })),
             h(
               "div",
-              { key: name, "data-seller-summary-row": "true", hidden: true },
-              h("dt", null, label),
-              h("dd", { "data-seller-summary": name }),
+              { className: "sell-form__grid" },
+              h(
+                "label",
+                null,
+                labels.propertyType,
+                h(
+                  "select",
+                  { name: "property.type", required: true },
+                  h("option", { value: "", disabled: true, selected: true }, labels.propertyType),
+                  ...propertyTypes.map(([value, option]) => h("option", { key: value, value }, option)),
+                ),
+              ),
+              h("label", null, labels.area, h("input", { name: "property.area", type: "number", min: "0", inputMode: "decimal" })),
+              h("label", null, labels.factLabels?.bedrooms || "Bedrooms", h("input", { name: "property.bedrooms", type: "number", min: "0", inputMode: "numeric" })),
+            ),
+            // Sellers expect to attach photos here. There is no public media
+            // upload endpoint yet, so the control ships visibly disabled with
+            // the reason next to it instead of a missing affordance.
+            h(
+              "div",
+              { className: "sell-form__pending", "data-feature-pending": "photo_upload" },
+              h(
+                "button",
+                { type: "button", className: "mk-btn mk-btn--secondary mk-btn--md", disabled: true, "aria-describedby": "seller-photos-note" },
+                h(Icon, { name: "camera", size: 18 }),
+                h("span", null, labels.addPhotos),
+              ),
+              h("p", { id: "seller-photos-note", className: "sell-form__pending-note" }, labels.photosUnavailable),
+            ),
+            h(
+              "div",
+              { className: "sell-form__actions sell-form__actions--end" },
+              h(Btn, { type: "button", variant: "primary", size: "lg", iconEnd: "arrow-right", "data-seller-next": "true", hidden: true }, labels.next),
             ),
           ),
-        ),
-        h(
-          "div",
-          { className: "sell-form__actions" },
-          h(Btn, { type: "button", variant: "secondary", size: "lg", "data-seller-back": "true" }, labels.previous),
-          h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "send" }, valuation.label),
-        ),
-      ),
+          h(
+            "section",
+            { className: "sell-form__section", "data-seller-step": "2", role: "group", "aria-labelledby": "seller-step-contact" },
+            stepLabel(1),
+            h("h2", { id: "seller-step-contact", className: "ct-form__title", tabIndex: "-1", "data-seller-step-title": "true" }, questions[1]),
+            h(
+              "div",
+              { className: "ct-form__row" },
+              h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+              h("label", null, labels.phone, h("input", { name: "contact.phone", type: "tel", required: true, autoComplete: "tel", inputMode: "tel" })),
+            ),
+            h("label", null, labels.emailOptional, h("input", { name: "contact.email", type: "email", autoComplete: "email", inputMode: "email" })),
+            h(
+              "label",
+              null,
+              labels.preferredContact,
+              h(
+                "select",
+                { name: "contact_preference" },
+                h("option", { value: "phone" }, labels.phone),
+                h("option", { value: "whatsapp" }, "WhatsApp"),
+                h("option", { value: "viber" }, "Viber"),
+              ),
+            ),
+            h("label", null, labels.message, h("textarea", { name: "message", required: true })),
+            h(
+              "div",
+              { className: "sell-form__actions" },
+              h(Btn, { type: "button", variant: "secondary", size: "lg", iconStart: "arrow-left", "data-seller-back": "true", hidden: true }, labels.previous),
+              h(Btn, { type: "button", variant: "primary", size: "lg", iconEnd: "arrow-right", "data-seller-next": "true", hidden: true }, labels.next),
+            ),
+          ),
+          h(
+            "section",
+            { className: "sell-form__section", "data-seller-step": "3", role: "group", "aria-labelledby": "seller-step-review" },
+            stepLabel(2),
+            h("h2", { id: "seller-step-review", className: "ct-form__title", tabIndex: "-1", "data-seller-step-title": "true" }, questions[2]),
+            h(
+              "dl",
+              { className: "sell-form__review", "data-seller-review": "true" },
+              ...reviewFields.map(([name, label]) =>
+                h(
+                  "div",
+                  { key: name, "data-seller-summary-row": "true", hidden: true },
+                  h("dt", null, label),
+                  h("dd", { "data-seller-summary": name }),
+                ),
+              ),
+            ),
+            h("p", { className: "sell-form__note" }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, labels.sellerNextThreeText)),
+            h(
+              "div",
+              { className: "sell-form__actions" },
+              h(Btn, { type: "button", variant: "secondary", size: "lg", iconStart: "arrow-left", "data-seller-back": "true", hidden: true }, labels.previous),
+              h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "send" }, valuation.label),
+            ),
+          ),
         )
       : h(
           "div",
           { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
           h("h2", { className: "ct-form__title" }, labels.sellerValuation),
           h("p", null, page.body.form_unavailable),
-          page.body.contact_channels
-            ? h(
-                Btn,
-                {
-                  tag: "a",
-                  variant: "accent",
-                  size: "lg",
-                  full: true,
-                  iconStart: "phone",
-                  href: page.body.contact_channels.phone.href,
-                },
-                page.body.contact_channels.phone.label,
-              )
-            : null,
+          channels ? phoneAction(channels.phone, "accent") : null,
         ),
+    h(
+      "section",
+      { className: "sell-next", "aria-labelledby": "sell-next-title", "data-seller-next-steps": "true" },
+      h("h2", { id: "sell-next-title" }, labels.whatHappensNext),
+      h(FlowSteps, {
+        className: "flow-steps--compact",
+        steps: [
+          { title: labels.sellerNextOneTitle, text: labels.sellerNextOneText },
+          { title: labels.sellerNextTwoTitle, text: labels.sellerNextTwoText },
+          { title: labels.sellerNextThreeTitle, text: labels.sellerNextThreeText },
+        ],
+      }),
+    ),
+    channels
+      ? h(
+          "section",
+          { className: "sell-channels", "aria-labelledby": "sell-channels-title", "data-contact-channels": "true" },
+          h("h2", { id: "sell-channels-title" }, labels.callOrMessage),
+          h(
+            "div",
+            { className: "channel-row" },
+            h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "phone", href: channels.phone.href }, channels.phone.label),
+            channels.whatsapp ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.whatsapp.href }, channels.whatsapp.label) : null,
+            channels.viber ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.viber.href }, channels.viber.label) : null,
+            channels.email ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "mail", href: channels.email.href }, channels.email.label) : null,
+          ),
+        )
+      : null,
   );
   return shell(page, main);
 }
 
 /* ============================================================
-   Contact (ui_kits/website/ContactPanel → ContactPage)
+   Contact (channels, offices, callback form)
    ============================================================ */
 
 function ContactBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome;
   const callback = page.body.callback;
+  const channels = page.body.contact_channels;
+  const offices = page.body.offices || [];
+  const topics = [
+    ["buying", labels.topicBuying],
+    ["renting", labels.topicRenting],
+    ["selling", labels.topicSelling],
+    ["other", labels.topicOther],
+  ];
   const main = h(
     "main",
     { id: "main", tabIndex: -1, "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page" },
-    h("div", { className: "ct-page__head" }, h("h1", null, page.body.h1), h("p", null, page.body.intro)),
+    h("div", { className: "page-head ct-page__head" }, h("h1", null, page.body.h1), h("p", null, page.body.intro)),
     h(
       "div",
       { className: "ct-page__cols" },
       h(
         "div",
-        { className: "ct-offices" },
-        chrome
+        { className: "ct-side" },
+        channels
           ? h(
-              "div",
-              { className: "ct-office" },
+              "section",
+              { className: "ct-section", "aria-labelledby": "ct-channels-title", "data-contact-channels": "true" },
+              h("h2", { id: "ct-channels-title" }, labels.callOrMessage),
               h(
                 "div",
-                null,
-                h("h3", null, chrome.copy.getInTouch),
-                h(
-                  "div",
-                  { className: "ct-office__meta" },
-                  h("span", null, h(Icon, { name: "map-pin", size: 16 }), ` ${chrome.copy.offices}`),
-                  h("span", null, h(Icon, { name: "mail", size: 16 }), h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
-                ),
-                page.body.contact_channels
-                  ? h(
-                      "div",
-                      { className: "ct-actions", "data-contact-channels": "true" },
-                      h(
-                        Btn,
-                        { tag: "a", variant: "accent", size: "lg", full: true, iconStart: "phone", href: page.body.contact_channels.phone.href },
-                        page.body.contact_channels.phone.label,
-                      ),
-                      h(
-                        Btn,
-                        { tag: "a", variant: "secondary", iconStart: "message-circle", href: page.body.contact_channels.whatsapp.href },
-                        page.body.contact_channels.whatsapp.label,
-                      ),
-                      page.body.contact_channels.viber
-                        ? h(
-                            Btn,
-                            { tag: "a", variant: "secondary", iconStart: "message-circle", href: page.body.contact_channels.viber.href },
-                            page.body.contact_channels.viber.label,
-                          )
-                        : null,
-                    )
-                  : null,
+                { className: "channel-row" },
+                h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: channels.phone.href }, channels.phone.label),
+                channels.whatsapp ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.whatsapp.href }, channels.whatsapp.label) : null,
+                channels.viber ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.viber.href }, channels.viber.label) : null,
+                channels.email ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "mail", href: channels.email.href }, channels.email.label) : null,
               ),
             )
           : null,
-        h(
-          "nav",
-          { className: "ct-actions", "aria-label": labels.contactActions },
-          h(Btn, { tag: "a", variant: "secondary", iconStart: "search", href: page.body.search.path, "data-action": "search" }, labels.search),
-          h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.seller.path, "data-action": "seller" }, labels.sellerValuation),
-        ),
+        offices.length
+          ? h(
+              "section",
+              { className: "ct-section", "aria-labelledby": "ct-offices-title", "data-contact-offices": "true" },
+              h("h2", { id: "ct-offices-title" }, labels.ourOffices),
+              h(
+                "ul",
+                { className: "ct-offices" },
+                ...offices.map((office) =>
+                  h(
+                    "li",
+                    { key: office.id, className: "ct-office", "data-office": office.id },
+                    h("h3", null, h(Icon, { name: "map-pin", size: 18 }), h("span", null, office.name)),
+                    h(
+                      "div",
+                      { className: "ct-office__links" },
+                      h("a", { href: office.search_path }, h(Icon, { name: "search", size: 16 }), h("span", null, fillTemplate(labels.propertiesIn, { area: office.name }))),
+                      h(
+                        "a",
+                        { href: office.map_href, target: "_blank", rel: "noopener noreferrer" },
+                        h(Icon, { name: "map", size: 16 }),
+                        h("span", null, labels.openMap),
+                        h(Icon, { name: "external-link", size: 14, className: "ct-office__ext" }),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
+        chrome
+          ? h(
+              "nav",
+              { className: "ct-actions", "aria-label": labels.contactActions },
+              h(Btn, { tag: "a", variant: "secondary", iconStart: "search", href: page.body.search.path, "data-action": "search" }, labels.browseListings),
+              h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.seller.path, "data-action": "seller" }, labels.sellerValuation),
+            )
+          : null,
       ),
       callback
         ? h(
             "form",
             {
-              className: "mk-card mk-card--elevated mk-card--pad-lg ct-form",
+              className: "mk-card mk-card--elevated mk-card--pad-lg ct-form ct-form--contact",
               method: callback.method || "POST",
               action: callback.endpoint,
               "data-lead-type": "general",
               "data-source": callback.payload.source,
             },
-            h("h2", { className: "ct-form__title" }, labels.message),
+            h("h2", { className: "ct-form__title" }, labels.contactFormTitle),
             h("input", { type: "hidden", name: "source", defaultValue: callback.payload.source }),
             h("input", { type: "hidden", name: "intent", defaultValue: callback.payload.intent }),
             h("input", { type: "hidden", name: "leadType", defaultValue: callback.payload.leadType }),
             h("input", { type: "hidden", name: "language", defaultValue: callback.payload.language }),
             h("input", { type: "hidden", name: "contact_preference", defaultValue: callback.payload.contact_preference }),
-            h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
-            h("label", null, labels.phone, h("input", { name: "contact.phone", type: "tel", required: true, autoComplete: "tel", inputMode: "tel" })),
+            h(
+              "div",
+              { className: "ct-form__row" },
+              h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+              h("label", null, labels.phone, h("input", { name: "contact.phone", type: "tel", required: true, autoComplete: "tel", inputMode: "tel" })),
+            ),
+            h("label", null, labels.emailOptional, h("input", { name: "contact.email", type: "email", autoComplete: "email", inputMode: "email" })),
+            h(
+              "label",
+              null,
+              labels.contactTopic,
+              h(
+                "select",
+                { name: "request_details.topic", "data-contact-topic": "true" },
+                h("option", { value: "", disabled: true, selected: true }, labels.contactTopic),
+                ...topics.map(([value, label]) => h("option", { key: value, value }, label)),
+              ),
+            ),
             h("label", null, labels.preferredCallbackTime, h("input", { name: "request_details.callback_time", maxLength: 120 })),
             h("label", null, labels.message, h("textarea", { name: "message" })),
-            h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send" }, callback.label),
+            h(Btn, { type: "submit", variant: "primary", size: "lg", full: true, iconStart: "send" }, callback.label),
           )
         : h(
             "div",
             { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
-            h("h2", { className: "ct-form__title" }, labels.message),
+            h("h2", { className: "ct-form__title" }, labels.contactFormTitle),
             h("p", null, page.body.form_unavailable),
-            page.body.contact_channels
-              ? h(
-                  Btn,
-                  { tag: "a", variant: "accent", size: "lg", full: true, iconStart: "phone", href: page.body.contact_channels.phone.href },
-                  page.body.contact_channels.phone.label,
-                )
-              : null,
+            channels ? phoneAction(channels.phone, "accent") : null,
           ),
     ),
   );
   return shell(page, main);
 }
 
+/* ============================================================
+   Utility pages: search unavailable, language fallback, legacy archive,
+   listing preservation, not found
+   ============================================================ */
+
 function SearchUnavailableBody({ page }) {
   const labels = uiLabels(page);
   const channels = page.body.contact_channels;
-  const main = h(
-    "main",
-    { id: "main", tabIndex: -1, "data-kind": "search-unavailable", "data-react-public-ui": "search-unavailable", className: "pg-narrow" },
-    h(
-      "div",
-      { className: "mk-empty" },
-      h("span", { className: "mk-empty__icon" }, h(Icon, { name: "search", size: 24 })),
-      h("h1", { className: "mk-empty__title" }, page.body.h1),
-      h("p", { className: "mk-empty__text" }, page.body.intro),
-      h(
-        "div",
-        { className: "mk-empty__actions" },
-        channels
-          ? h(
-              Btn,
-              { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: channels.phone.href },
-              channels.phone.label,
-            )
-          : null,
-        h(Btn, { tag: "a", variant: "secondary", iconStart: "message-circle", href: page.body.ctas.contact.path }, labels.contactActions),
-        h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
-      ),
-    ),
-  );
-  return shell(page, main);
+  return h(UtilityPage, {
+    page,
+    kind: "search-unavailable",
+    icon: "search-x",
+    title: page.body.h1,
+    text: page.body.intro,
+    actions: [
+      phoneAction(channels?.phone, "accent"),
+      h(Btn, { key: "contact", tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: page.body.ctas.contact.path }, labels.contactBroker),
+      h(Btn, { key: "seller", tag: "a", variant: "secondary", size: "lg", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
+    ],
+  });
 }
-
-/* ============================================================
-   Language fallback + guide
-   ============================================================ */
 
 function LanguageFallbackBody({ page }) {
   const labels = uiLabels(page);
-  const main = h(
-    "main",
-    {
-      id: "main",
-      tabIndex: -1,
-      "data-kind": "language-fallback",
-      "data-react-public-ui": "language-fallback",
-      "data-public-translation-available": page.public_translation_available ? "true" : "false",
-      className: "pg-narrow",
-    },
-    h(
-      "div",
-      { className: "mk-empty" },
-      h("span", { className: "mk-empty__icon" }, h(Icon, { name: "languages", size: 24 })),
-      h("h1", { className: "mk-empty__title" }, page.body?.h1 || page.metadata.title),
-      h("p", { className: "mk-empty__text" }, page.body?.intro || page.metadata.description),
+  return h(UtilityPage, {
+    page,
+    kind: "language-fallback",
+    icon: "languages",
+    title: page.body?.h1 || page.metadata.title,
+    text: page.body?.intro || page.metadata.description,
+    rootAttrs: { "data-public-translation-available": page.public_translation_available ? "true" : "false" },
+    actions: [
       h(
-        "div",
-        { className: "mk-empty__actions" },
+        "form",
+        { key: "request", method: "POST", action: "/api/language-requests", "data-request-language": "true", "data-success-message": page.body?.success || undefined },
+        h("input", { type: "hidden", name: "requestedLocale", defaultValue: page.requested_locale }),
+        h("input", { type: "hidden", name: "requestedPath", defaultValue: page.requested_path }),
+        h(Btn, { type: "submit", variant: "primary", size: "lg", iconStart: "languages" }, labels.requestLanguage),
+      ),
+      h(Btn, { key: "search", tag: "a", variant: "secondary", size: "lg", iconStart: "search", href: searchPathFor(page) }, labels.browseListings),
+      phoneAction(phoneChannel(page)),
+    ],
+  });
+}
+
+function LegacyArchiveBody({ page }) {
+  const labels = uiLabels(page);
+  const source = page.body.source || {};
+  const sourceFacts = [
+    ["Домейн", source.domain],
+    ["Тип", source.type],
+    ["Архивирано", source.captured_at_utc],
+    ["SHA-256", source.text_sha256],
+  ].filter(([, value]) => value);
+  return h(UtilityPage, {
+    page,
+    kind: "legacy-archive",
+    icon: "file-text",
+    meta: "Неиндексиран архив",
+    title: page.body.h1,
+    text: page.body.notice,
+    rootAttrs: { "data-legacy-archive-source": "true" },
+    actions: [
+      h(Btn, { key: "search", tag: "a", variant: "primary", size: "lg", iconStart: "search", href: searchPathFor(page) }, labels.browseListings),
+      phoneAction(phoneChannel(page)),
+    ],
+    children: h(
+      "article",
+      { className: "ut-article legacy-archive__content", lang: page.lang },
+      h("p", { className: "ut-article__text legacy-archive__text" }, page.body.text),
+      h(
+        "footer",
+        { className: "ut-article__source legacy-archive__source" },
+        h("h2", null, "Източник"),
         h(
-          "form",
-          { method: "POST", action: "/api/language-requests", "data-request-language": "true", "data-success-message": page.body?.success || undefined },
-          h("input", { type: "hidden", name: "requestedLocale", defaultValue: page.requested_locale }),
-          h("input", { type: "hidden", name: "requestedPath", defaultValue: page.requested_path }),
-          h(Btn, { type: "submit", variant: "primary", iconStart: "languages" }, labels.requestLanguage),
+          "dl",
+          null,
+          ...sourceFacts.flatMap(([label, value]) => [h("dt", { key: `${label}-label` }, label), h("dd", { key: `${label}-value` }, value)]),
         ),
+        source.url ? h("a", { href: source.url, target: "_blank", rel: "nofollow noopener noreferrer" }, source.url) : null,
       ),
     ),
-  );
-  return shell(page, main);
+  });
 }
+
+function ListingPreservationBody({ page }) {
+  const labels = uiLabels(page);
+  const archived = page.body.catalog_state !== "active";
+  return h(UtilityPage, {
+    page,
+    kind: "listing-preservation",
+    icon: archived ? "file-check" : "clock",
+    meta: `${page.body.reference.label}: ${page.body.reference.value}`,
+    title: page.body.h1,
+    text: page.body.notice,
+    rootAttrs: { "data-catalog-state": page.body.catalog_state },
+    actions: [
+      h(Btn, { key: "contact", tag: "a", variant: "primary", size: "lg", iconStart: "message-circle", href: page.body.contact.path }, page.body.contact.label),
+      h(Btn, { key: "search", tag: "a", variant: "secondary", size: "lg", iconStart: "search", href: searchPathFor(page) }, labels.browseListings),
+      phoneAction(phoneChannel(page)),
+    ],
+    children: h(
+      "dl",
+      { className: "ut-facts legacy-archive__content", "data-preservation-facts": "true" },
+      h("div", null, h("dt", null, page.body.reference.label), h("dd", null, page.body.reference.value)),
+      h("div", null, h("dt", null, page.body.checked_at.label), h("dd", null, page.body.checked_at.value)),
+    ),
+  });
+}
+
+function NotFoundBody({ page }) {
+  const labels = uiLabels(page);
+  const ctas = page.body?.ctas || {};
+  return h(UtilityPage, {
+    page,
+    kind: "not-found",
+    icon: "search-x",
+    title: page.body?.h1 || labels.notFoundTitle,
+    text: page.body?.intro || labels.notFoundText,
+    actions: [
+      h(Btn, { key: "search", tag: "a", variant: "primary", size: "lg", iconStart: "search", href: searchPathFor(page) }, labels.browseListings),
+      phoneAction(phoneChannel(page)),
+      ctas.home?.path ? h(Btn, { key: "home", tag: "a", variant: "ghost", size: "lg", iconStart: "house", href: ctas.home.path }, labels.goHome) : null,
+    ],
+    // A dead link is the one moment a visitor most needs the search itself,
+    // so the page carries a working GET form, not only links.
+    children: h(
+      "form",
+      { className: "ut-search", method: "get", action: searchPathFor(page), role: "search", "aria-label": labels.search, "data-not-found-search": "true" },
+      h("label", { htmlFor: "not-found-query" }, labels.keywordSearch),
+      h(
+        "div",
+        { className: "ut-search__row" },
+        h("input", { id: "not-found-query", name: "q", type: "search", autoComplete: "off", placeholder: labels.locationPlaceholder }),
+        h(Btn, { type: "submit", variant: "primary", size: "lg", iconStart: "search" }, labels.search),
+      ),
+    ),
+  });
+}
+
+/* ============================================================
+   Guides (Read mode): 68ch measure, sticky table of contents, sources,
+   "Ask a broker", related guides
+   ============================================================ */
 
 function GuideBody({ page }) {
   const labels = uiLabels(page);
+  const chrome = page.chrome || {};
   const sections = page.body.sections || [];
+  const related = (chrome.resources?.links || []).filter((link) => !link.active);
+  const phone = phoneChannel(page);
+  const tocEntries = [
+    ...sections.filter((section) => section.title !== page.body.h1).map((section) => ({ id: section.id, label: section.title })),
+    { id: "guide-ask", label: labels.askBroker },
+    ...(related.length ? [{ id: "guide-related", label: labels.relatedGuides }] : []),
+  ];
+  const toc =
+    tocEntries.length > 1
+      ? h(
+          "nav",
+          { className: "guide-toc", "aria-labelledby": "guide-toc-title", "data-guide-toc": "true" },
+          h("p", { id: "guide-toc-title", className: "guide-toc__label" }, labels.onThisPage),
+          h("ol", null, ...tocEntries.map((entry) => h("li", { key: entry.id }, h("a", { href: `#${entry.id}` }, entry.label)))),
+        )
+      : null;
   const main = h(
     "main",
     {
@@ -3641,157 +3949,103 @@ function GuideBody({ page }) {
       "data-react-public-ui": "guide",
       "data-approved-source": "cms",
       "data-min-touch-target": "44",
-      className: "pg-narrow",
+      className: "guide-page",
     },
     h(
-      "header",
-      { className: "ct-page__head guide-head" },
-      h(Badge, { variant: "neutral", icon: "shield-check", "data-guide-trust": "approved" }, labels.approvedSource),
-      h("h1", null, page.body.h1),
-    ),
-    ...sections.map((section) => {
-      const primary = section.title === page.body.h1;
-      return h(
-        "section",
-        {
-          key: section.id,
-          id: section.id,
-          className: `mk-card mk-card--pad-lg guide-sec${primary ? " guide-sec--primary" : ""}`,
-          "data-reviewer": section.reviewer,
-          "data-primary-guide-section": primary ? "true" : undefined,
-          "aria-label": primary ? section.title : undefined,
-        },
-        primary ? null : h("h2", null, section.title),
-        h("ul", { className: "guide-facts" }, ...(section.facts || []).map((fact) => h("li", { key: fact }, h(Icon, { name: "check", size: 15 }), fact))),
-        section.sources?.length
+      "div",
+      { className: `guide-page__in${toc ? " guide-page__in--toc" : ""}` },
+      h(
+        "header",
+        { className: "guide-head" },
+        h(Badge, { variant: "neutral", icon: "shield-check", "data-guide-trust": "approved" }, labels.approvedSource),
+        h("h1", null, page.body.h1),
+      ),
+      toc ? h("aside", { className: "guide-page__aside" }, toc) : null,
+      h(
+        "article",
+        { className: "guide-article" },
+        ...sections.map((section) => {
+          const primary = section.title === page.body.h1;
+          return h(
+            "section",
+            {
+              key: section.id,
+              id: section.id,
+              className: `guide-sec${primary ? " guide-sec--primary" : ""}`,
+              "data-reviewer": section.reviewer,
+              "data-primary-guide-section": primary ? "true" : undefined,
+              "aria-label": primary ? section.title : undefined,
+            },
+            primary ? null : h("h2", null, section.title),
+            h("ul", { className: "guide-facts" }, ...(section.facts || []).map((fact) => h("li", { key: fact }, h(Icon, { name: "check", size: 16 }), h("span", null, fact)))),
+            section.sources?.length
+              ? h(
+                  "div",
+                  { className: "guide-sources", "data-guide-sources": "true" },
+                  section.sources_label ? h("p", { className: "guide-sources__label" }, section.sources_label) : null,
+                  h(
+                    "ul",
+                    { className: "guide-sources__links" },
+                    ...section.sources.map((source) =>
+                      h(
+                        "li",
+                        { key: source.id },
+                        h(
+                          "a",
+                          { href: source.url, target: "_blank", rel: "noopener noreferrer" },
+                          h("span", null, source.label || source.publisher),
+                          h(Icon, { name: "external-link", size: 14 }),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : null,
+          );
+        }),
+        h(
+          "section",
+          { id: "guide-ask", className: "guide-ask", "aria-labelledby": "guide-ask-title", "data-guide-ask-broker": "true" },
+          h("h2", { id: "guide-ask-title" }, labels.askBroker),
+          h("p", null, labels.askBrokerText),
+          h(
+            "nav",
+            { className: "pg-actions", "aria-label": labels.guideActions },
+            h(Btn, { tag: "a", variant: "primary", iconStart: "message-circle", href: page.body.ctas.contact.path }, labels.contactBroker),
+            phone ? h(Btn, { tag: "a", variant: "secondary", iconStart: "phone", href: phone.href }, phone.label) : null,
+            h(Btn, { tag: "a", variant: "secondary", iconStart: "search", href: page.body.ctas.search.path }, labels.search),
+            h(Btn, { tag: "a", variant: "ghost", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
+          ),
+        ),
+        related.length
           ? h(
-              "div",
-              { className: "guide-sources", "data-guide-sources": "true" },
-              section.sources_label ? h("p", { className: "guide-sources__label" }, section.sources_label) : null,
+              "section",
+              { id: "guide-related", className: "guide-related", "aria-labelledby": "guide-related-title", "data-guide-related": "true" },
+              h("h2", { id: "guide-related-title" }, labels.relatedGuides),
               h(
                 "ul",
-                { className: "guide-sources__links" },
-                ...section.sources.map((source) =>
+                null,
+                ...related.map((guide) =>
                   h(
                     "li",
-                    { key: source.id },
+                    { key: guide.id },
                     h(
                       "a",
-                      { href: source.url, target: "_blank", rel: "noopener noreferrer" },
-                      source.label || source.publisher,
+                      { href: guide.href },
+                      h(
+                        "span",
+                        { className: "guide-related__text" },
+                        h("span", { className: "guide-related__title" }, guide.label),
+                        guide.summary ? h("span", { className: "guide-related__summary" }, guide.summary) : null,
+                      ),
+                      h(Icon, { name: "arrow-right", size: 18, className: "guide-related__arrow ico-dir" }),
                     ),
                   ),
                 ),
               ),
             )
           : null,
-      );
-    }),
-    h(
-      "nav",
-      { className: "pg-actions", "aria-label": labels.guideActions },
-      h(Btn, { tag: "a", variant: "primary", iconStart: "search", href: page.body.ctas.search.path }, labels.search),
-      h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
-      h(Btn, { tag: "a", variant: "secondary", iconStart: "phone", href: page.body.ctas.contact.path }, labels.contact),
-    ),
-  );
-  return shell(page, main);
-}
-
-function LegacyArchiveBody({ page }) {
-  const source = page.body.source || {};
-  const sourceFacts = [
-    ["Домейн", source.domain],
-    ["Тип", source.type],
-    ["Архивирано", source.captured_at_utc],
-    ["SHA-256", source.text_sha256],
-  ].filter(([, value]) => value);
-  const main = h(
-    "main",
-    {
-      id: "main",
-      tabIndex: -1,
-      "data-kind": "legacy-archive",
-      "data-react-public-ui": "legacy-archive",
-      "data-legacy-archive-source": "true",
-      className: "pg-narrow legacy-archive",
-    },
-    h(
-      "header",
-      { className: "ct-page__head guide-head" },
-      h(Badge, { variant: "neutral", icon: "file-text" }, "Неиндексиран архив"),
-      h("h1", null, page.body.h1),
-    ),
-    h(
-      "aside",
-      { className: "legacy-archive__notice", role: "note" },
-      h(Icon, { name: "info", size: 20 }),
-      h("p", null, page.body.notice),
-    ),
-    h(
-      "article",
-      { className: "mk-card mk-card--pad-lg legacy-archive__content" },
-      h("p", { className: "legacy-archive__text" }, page.body.text),
-      h(
-        "footer",
-        { className: "legacy-archive__source" },
-        h("h2", null, "Източник"),
-        h(
-          "dl",
-          null,
-          ...sourceFacts.flatMap(([label, value]) => [
-            h("dt", { key: `${label}-label` }, label),
-            h("dd", { key: `${label}-value` }, value),
-          ]),
-        ),
-        source.url
-          ? h(
-              "a",
-              { href: source.url, target: "_blank", rel: "nofollow noopener noreferrer" },
-              source.url,
-            )
-          : null,
       ),
-    ),
-  );
-  return shell(page, main);
-}
-
-function ListingPreservationBody({ page }) {
-  const main = h(
-    "main",
-    {
-      id: "main",
-      tabIndex: -1,
-      "data-kind": "listing-preservation",
-      "data-react-public-ui": "listing-preservation",
-      "data-catalog-state": page.body.catalog_state,
-      className: "pg-narrow legacy-archive",
-    },
-    h(
-      "header",
-      { className: "ct-page__head guide-head" },
-      h(Badge, { variant: "neutral", icon: "file-check" }, page.body.reference.value),
-      h("h1", null, page.body.h1),
-    ),
-    h(
-      "aside",
-      { className: "legacy-archive__notice", role: "note" },
-      h(Icon, { name: "info", size: 20 }),
-      h("p", null, page.body.notice),
-    ),
-    h(
-      "article",
-      { className: "mk-card mk-card--pad-lg legacy-archive__content" },
-      h(
-        "dl",
-        null,
-        h("dt", null, page.body.reference.label),
-        h("dd", null, page.body.reference.value),
-        h("dt", null, page.body.checked_at.label),
-        h("dd", null, page.body.checked_at.value),
-      ),
-      h(Btn, { tag: "a", variant: "primary", iconStart: "message-circle", href: page.body.contact.path }, page.body.contact.label),
     ),
   );
   return shell(page, main);
@@ -3810,5 +4064,6 @@ export function renderReactPublicBody(page) {
   if (page.kind === "guide") return renderStaticElement(h(GuideBody, { page }));
   if (page.kind === "legacy_archive") return renderStaticElement(h(LegacyArchiveBody, { page }));
   if (page.kind === "listing_preservation") return renderStaticElement(h(ListingPreservationBody, { page }));
+  if (page.kind === "not_found" && page.chrome) return renderStaticElement(h(NotFoundBody, { page }));
   return "";
 }

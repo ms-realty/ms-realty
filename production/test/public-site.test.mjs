@@ -875,7 +875,9 @@ test("seller valuation page degrades to a phone CTA when lead writes are disable
   assert.equal(disabled.body.callback, null);
   assert.equal(
     disabled.body.form_unavailable,
-    "Формата е временно недостъпна. Обадете се или ни пишете — отговаряме бързо.",
+    // Contract updated deliberately: PRODUCT.md forbids em-dashes in public
+    // copy, so the seller fallback sentence now uses a comma.
+    "Формата е временно недостъпна. Обадете се или ни пишете, отговаряме бързо.",
   );
   assert.equal(disabled.body.contact_channels.phone.href, "tel:+359879696870");
 
