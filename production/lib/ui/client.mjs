@@ -1147,6 +1147,358 @@ export const PUBLIC_APP_JS = `(function () {
     });
     showStep(0, false);
   }
+  // Buyer onboarding (/{locale}/start): the server renders one GET form with
+  // four sections; this turns it into a stepper, keeps the "See matching
+  // properties" link and the shortlist lead in sync with the answers, and
+  // navigates straight to the results instead of the no-JavaScript review page.
+  function initStartFlow() {
+    var root = document.querySelector("main[data-start-flow]");
+    if (!root) return;
+    var form = root.querySelector("form[data-start-form]");
+    var lead = root.querySelector("form[data-start-lead]");
+    var finish = root.querySelector("[data-start-finish]");
+    var seeMatches = root.querySelector("[data-start-see-matches]");
+    var matchCount = root.querySelector("[data-start-match-count]");
+    var searchPath = root.getAttribute("data-start-search-path") || "";
+    if (!form || !searchPath) return;
+    function value(name) {
+      var control = form.elements.namedItem(name);
+      return control && typeof control.value === "string" ? control.value : "";
+    }
+    function checkedControl(name) {
+      return form.querySelector('input[name="' + name + '"]:checked');
+    }
+    function residential() {
+      return NON_RESIDENTIAL_FAMILIES.indexOf(value("property_family")) < 0;
+    }
+    function searchParams() {
+      var params = new URLSearchParams();
+      if (value("offer_type")) params.set("offer_type", value("offer_type"));
+      if (value("property_family")) params.set("property_family", value("property_family"));
+      var area = checkedControl("area");
+      if (area) {
+        try {
+          var extra = JSON.parse(area.getAttribute("data-search-params") || "{}");
+          Object.keys(extra).forEach(function (key) { params.set(key, extra[key]); });
+        } catch (error) {}
+      }
+      if (value("price_max")) params.set("price_max", value("price_max"));
+      if (value("bedrooms_min") && residential()) params.set("bedrooms_min", value("bedrooms_min"));
+      return params;
+    }
+    function searchUrl() {
+      var query = searchParams().toString();
+      return query ? searchPath + "?" + query : searchPath;
+    }
+    function leadLabel(name) {
+      var control = checkedControl(name);
+      return control ? control.getAttribute("data-lead-label") || "" : "";
+    }
+    function syncLead() {
+      if (!lead) return;
+      function set(field, next) {
+        var input = lead.querySelector('[data-start-lead-field="' + field + '"]');
+        if (input) input.value = next || "";
+      }
+      var area = checkedControl("area");
+      var financing = value("financing");
+      set("leadType", value("offer_type") === "rent" ? "renter" : value("citizenship") === "non_eu" ? "foreign_buyer" : "buyer");
+      set("requirements.locations", area ? area.getAttribute("data-lead-location") || "" : "");
+      set("requirements.property_types", value("property_family"));
+      set("requirements.budget_max_eur", value("price_max"));
+      set("requirements.bedrooms_min", residential() ? value("bedrooms_min") : "");
+      set("requirements.timeline", leadLabel("timeline"));
+      set("requirements.finance_status", financing === "mortgage" || financing === "cash" ? financing : "");
+      var parts = [
+        leadLabel("offer_type"),
+        value("property_family"),
+        area ? area.getAttribute("data-lead-location") || "" : "",
+        value("price_max") ? "max EUR " + value("price_max") : "",
+        residential() && value("bedrooms_min") ? value("bedrooms_min") + "+ bedrooms" : "",
+        leadLabel("citizenship"),
+        leadLabel("financing"),
+        leadLabel("timeline"),
+      ].filter(Boolean);
+      set("message", (lead.getAttribute("data-start-message-prefix") || "Buyer onboarding") + (parts.length ? ": " + parts.join("; ") : ""));
+      lead.setAttribute("data-lead-type", lead.querySelector('[data-start-lead-field="leadType"]').value);
+    }
+    var countRequest = 0;
+    // Live match count from the search API (same filters as the link); the
+    // generic title stays when the API is unavailable.
+    function syncMatchCount() {
+      if (!matchCount || typeof fetch !== "function") return;
+      var params = searchParams();
+      params.set("locale", root.getAttribute("data-start-locale") || "bg");
+      var request = (countRequest += 1);
+      fetch("/api/search?" + params.toString(), { headers: { accept: "application/json", "x-ms-realty-preview": "search-count" } })
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (result) {
+          if (request !== countRequest || !result || !result.search) return;
+          var total = Number(result.search.total_matches);
+          if (!isFinite(total)) return;
+          matchCount.textContent = total > 0
+            ? (matchCount.getAttribute("data-start-match-template") || "{count}").replace("{count}", String(total))
+            : matchCount.getAttribute("data-start-no-matches") || matchCount.textContent;
+          root.setAttribute("data-start-matches", String(total));
+          if (seeMatches) {
+            seeMatches.classList.toggle("mk-btn--accent", total > 0);
+            seeMatches.classList.toggle("mk-btn--secondary", total === 0);
+          }
+          var alertPanel = root.querySelector("[data-start-alert]");
+          if (alertPanel && total === 0) alertPanel.open = true;
+          syncWiden(total === 0);
+        })
+        .catch(function () {});
+    }
+    function syncAlert() {
+      var filters = root.querySelector("[data-start-alert-filters]");
+      if (!filters) return;
+      var payload = {};
+      searchParams().forEach(function (value, key) { payload[key] = value; });
+      filters.value = JSON.stringify(payload);
+    }
+    // The "coming soon" financing panel only makes sense to someone who said
+    // they need financing.
+    function syncUpcoming() {
+      var items = root.querySelectorAll('[data-start-upcoming-when="mortgage"]');
+      for (var i = 0; i < items.length; i += 1) items[i].hidden = value("financing") !== "mortgage";
+    }
+    function syncFinish() {
+      if (seeMatches) seeMatches.setAttribute("href", searchUrl());
+      syncLead();
+      syncAlert();
+      syncUpcoming();
+    }
+    // Zero matches: rebuild the "try a wider search" links by relaxing one
+    // answer at a time and keeping only the variants that do have listings,
+    // so the visitor is never sent to an empty results page.
+    var widen = root.querySelector("[data-start-widen]");
+    var widenList = root.querySelector("[data-start-widen-list]");
+    function widenCandidates() {
+      var area = checkedControl("area");
+      var areaId = area ? area.value : "";
+      var district = areaId === "sandanski" || areaId === "bansko";
+      var out = [];
+      if (value("price_max")) out.push({ id: "price", drop: ["price_max"] });
+      if (value("bedrooms_min") && residential()) out.push({ id: "bedrooms", drop: ["bedrooms_min"] });
+      if (value("property_family")) out.push({ id: "type", drop: ["property_family"] });
+      if (areaId) out.push({ id: "area", district: district, drop: ["geography_id", "region_id", "country_code"] });
+      return out;
+    }
+    function candidateParams(candidate) {
+      var params = searchParams();
+      for (var i = 0; i < candidate.drop.length; i += 1) params.delete(candidate.drop[i]);
+      if (candidate.id === "area" && candidate.district) params.set("region_id", "BG:district:BLG");
+      return params;
+    }
+    function candidateLabel(candidate) {
+      if (candidate.id === "area") {
+        return widen.getAttribute(candidate.district ? "data-widen-district" : "data-widen-area") || "";
+      }
+      return widen.getAttribute("data-widen-" + candidate.id) || "";
+    }
+    var widenRequest = 0;
+    function syncWiden(zero) {
+      if (!widen || !widenList) return;
+      if (!zero) {
+        widen.hidden = true;
+        return;
+      }
+      var request = (widenRequest += 1);
+      var candidates = widenCandidates();
+      var template = matchCount ? matchCount.getAttribute("data-start-match-template") || "{count}" : "{count}";
+      var locale = root.getAttribute("data-start-locale") || "bg";
+      var results = [];
+      var pending = candidates.length;
+      if (!pending) {
+        widen.hidden = true;
+        return;
+      }
+      candidates.forEach(function (candidate, index) {
+        var params = candidateParams(candidate);
+        var query = params.toString();
+        params.set("locale", locale);
+        fetch("/api/search?" + params.toString(), { headers: { accept: "application/json", "x-ms-realty-preview": "search-count" } })
+          .then(function (response) { return response.ok ? response.json() : null; })
+          .then(function (result) {
+            var total = result && result.search ? Number(result.search.total_matches) : 0;
+            if (total > 0) results[index] = { id: candidate.id, label: candidateLabel(candidate), count: total, query: query };
+          })
+          .catch(function () {})
+          .then(function () {
+            pending -= 1;
+            if (pending > 0 || request !== widenRequest) return;
+            var kept = results.filter(Boolean).slice(0, 3);
+            widenList.textContent = "";
+            for (var i = 0; i < kept.length; i += 1) {
+              var item = document.createElement("li");
+              var link = document.createElement("a");
+              link.className = "st-widen__link";
+              link.setAttribute("data-start-widen-option", kept[i].id);
+              link.href = kept[i].query ? searchPath + "?" + kept[i].query : searchPath;
+              var label = document.createElement("span");
+              label.className = "st-widen__label";
+              label.textContent = kept[i].label;
+              var count = document.createElement("span");
+              count.className = "st-widen__count";
+              count.textContent = template.replace("{count}", String(kept[i].count));
+              link.appendChild(label);
+              link.appendChild(count);
+              item.appendChild(link);
+              widenList.appendChild(item);
+            }
+            widen.hidden = kept.length === 0;
+          });
+      });
+    }
+    // Rent budgets are monthly, so the preset list follows the Buy/Rent choice.
+    function applyPricePresets() {
+      var source = value("offer_type") === "rent" ? "data-price-rent" : "data-price-sale";
+      var selects = form.querySelectorAll("[data-price-presets]");
+      for (var i = 0; i < selects.length; i += 1) {
+        var select = selects[i];
+        var current = select.value;
+        var entries = (select.getAttribute(source) || "").split(";");
+        select.textContent = "";
+        var any = document.createElement("option");
+        any.value = "";
+        any.textContent = select.getAttribute("data-price-any") || "";
+        select.appendChild(any);
+        for (var j = 0; j < entries.length; j += 1) {
+          if (!entries[j]) continue;
+          var parts = entries[j].split("|");
+          var option = document.createElement("option");
+          option.value = parts[0];
+          option.textContent = parts[1] || parts[0];
+          if (parts[0] === current) option.selected = true;
+          select.appendChild(option);
+        }
+      }
+    }
+    // Plots, land, commercial space and hotels carry no bedroom count.
+    function syncBedrooms() {
+      var group = root.querySelector("[data-start-bedrooms]");
+      if (!group) return;
+      var hide = !residential();
+      group.hidden = hide;
+      if (hide) {
+        var any = form.querySelector('input[name="bedrooms_min"][value=""]');
+        if (any) any.checked = true;
+      }
+    }
+    form.addEventListener("change", function (event) {
+      if (event.target.name === "offer_type") applyPricePresets();
+      if (event.target.name === "property_family") syncBedrooms();
+      if (root.getAttribute("data-start-state") === "answer") syncFinish();
+    });
+    if (lead) lead.addEventListener("submit", syncLead);
+    // Submitting state: the shared JSON submit already marks the button busy;
+    // this adds the localized status line and clears it if the post failed
+    // (a success replaces the whole form with the success card).
+    function wireSubmitStatus(target) {
+      if (!target) return;
+      target.addEventListener("submit", function () {
+        var status = target.querySelector("[data-start-status]");
+        var button = target.querySelector('[type="submit"]');
+        if (!status || !button) return;
+        status.textContent = target.getAttribute("data-sending-message") || "";
+        if (typeof MutationObserver !== "function") return;
+        var observer = new MutationObserver(function () {
+          if (button.hasAttribute("aria-busy")) return;
+          status.textContent = "";
+          observer.disconnect();
+        });
+        observer.observe(button, { attributes: true, attributeFilter: ["aria-busy"] });
+      });
+    }
+    wireSubmitStatus(lead);
+    wireSubmitStatus(root.querySelector("[data-start-alert-form]"));
+    if (seeMatches) seeMatches.addEventListener("click", function () { seeMatches.setAttribute("href", searchUrl()); });
+    applyPricePresets();
+    syncBedrooms();
+    // The finish state (answers in the URL) is already complete server-side.
+    if (root.getAttribute("data-start-state") !== "answer") return;
+    // Reveals the step buttons, which are inert without this script.
+    root.setAttribute("data-start-enhanced", "true");
+    var panels = form.querySelectorAll("[data-start-step]");
+    var indicators = root.querySelectorAll("[data-start-step-indicator]");
+    var progress = root.querySelector("[data-start-progress]");
+    var continueButton = form.querySelector("[data-start-continue]");
+    if (!panels.length) return;
+    var current = 0;
+    function stepError(show) {
+      var error = panels[current].querySelector("[data-start-error]");
+      if (error) error.hidden = !show;
+    }
+    function showStep(index, moveFocus) {
+      current = Math.max(0, Math.min(index, panels.length - 1));
+      var last = current === panels.length - 1;
+      root.setAttribute("data-start-current-step", String(current + 1));
+      for (var i = 0; i < panels.length; i += 1) panels[i].hidden = i !== current;
+      for (var j = 0; j < indicators.length; j += 1) {
+        if (j === current) indicators[j].setAttribute("aria-current", "step");
+        else indicators[j].removeAttribute("aria-current");
+        if (j === current) indicators[j].setAttribute("data-active", "true");
+        else indicators[j].removeAttribute("data-active");
+        if (j < current) indicators[j].setAttribute("data-complete", "true");
+        else indicators[j].removeAttribute("data-complete");
+      }
+      if (continueButton) continueButton.hidden = true;
+      if (finish) finish.hidden = !last;
+      if (progress) {
+        progress.hidden = false;
+        progress.textContent = (progress.getAttribute("data-start-progress-template") || "{current} / {total}")
+          .replace("{current}", String(current + 1))
+          .replace("{total}", String(panels.length));
+      }
+      if (last) {
+        syncFinish();
+        syncMatchCount();
+      }
+      if (moveFocus) {
+        var title = panels[current].querySelector("[data-start-step-title]");
+        if (title) window.requestAnimationFrame(function () { title.focus(); });
+      }
+    }
+    function currentStepIsValid() {
+      var fields = panels[current].querySelectorAll("input[required], select[required]");
+      for (var i = 0; i < fields.length; i += 1) {
+        if (fields[i].checkValidity()) continue;
+        stepError(true);
+        fields[i].focus();
+        return false;
+      }
+      stepError(false);
+      return true;
+    }
+    form.addEventListener("click", function (event) {
+      var next = event.target.closest("[data-start-next]");
+      if (next && form.contains(next)) {
+        event.preventDefault();
+        if (currentStepIsValid()) showStep(current + 1, true);
+        return;
+      }
+      var back = event.target.closest("[data-start-back]");
+      if (back && form.contains(back)) {
+        event.preventDefault();
+        showStep(current - 1, true);
+      }
+    });
+    form.addEventListener("change", function () {
+      if (root.getAttribute("data-start-current-step") === String(panels.length)) syncMatchCount();
+    });
+    // Enter or the last step's submit goes straight to the matching results.
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (!currentStepIsValid()) return;
+      if (current < panels.length - 1) {
+        showStep(current + 1, true);
+        return;
+      }
+      window.location.href = searchUrl();
+    });
+    showStep(0, false);
+  }
   function initGuidedSearch() {
     var root = document.querySelector("main[data-guided-search-path]");
     if (!root) return;
@@ -1630,6 +1982,7 @@ export const PUBLIC_APP_JS = `(function () {
     if (event.key === KEY) markSaved();
   });
   markSaved();
+  initStartFlow();
   initGuidedSearch();
   initSearchScrollRestoration();
   initDialogFocusReturn();

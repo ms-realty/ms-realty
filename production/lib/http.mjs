@@ -4540,6 +4540,9 @@ export function createHttpApp({
     let rendered;
     try {
       const context = await currentPublicContext();
+      // Public content routes (home, listing, location, seller, the buyer
+      // onboarding start page, contact, guides) resolve by path; the query is
+      // handed along so the onboarding finish step works without JavaScript.
       rendered = renderRuntimePath(
         context.registry,
         context.seed,
@@ -4548,6 +4551,7 @@ export function createHttpApp({
         currentBrokerContacts(),
         currentTourApprovals(),
         preservationCatalog,
+        { searchParams: url.searchParams },
       );
     } catch (error) {
       return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });

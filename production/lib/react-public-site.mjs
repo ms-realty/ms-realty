@@ -216,7 +216,8 @@ function SiteHeader({ chrome }) {
 }
 
 function MobileTaskNavigation({ page, chrome }) {
-  if (page.kind === "listing" || page.kind === "seller") return null;
+  // Stepper pages own the bottom of the viewport (their own next/back actions).
+  if (page.kind === "listing" || page.kind === "seller" || page.kind === "start") return null;
   const labels = uiLabels(page);
   const buy = chrome.nav.find((item) => item.id === "buy");
   const savedView = page.search?.saved_view === true;
@@ -1211,6 +1212,610 @@ function HomeBody({ page }) {
         ),
       ),
     ),
+  );
+  return shell(page, main);
+}
+
+/* ============================================================
+   Buyer onboarding: "Start your search" (/{locale}/start)
+   One GET form that posts its answers back to the page (no JavaScript:
+   the server renders the finish step) and becomes a stepper with
+   client.mjs initStartFlow. Styles live in adapter-public-start.css.
+   ============================================================ */
+
+function StartRadio({ className, name, value, label, note, checked = false, required = false, attrs = {} }) {
+  return h(
+    "label",
+    { className },
+    h("input", {
+      type: "radio",
+      name,
+      value,
+      defaultChecked: checked ? true : undefined,
+      required: required ? true : undefined,
+      ...attrs,
+    }),
+    note === undefined
+      ? h("span", null, label)
+      : h(
+          "span",
+          { className: "st-tile__body" },
+          h("span", { className: "st-tile__check", "aria-hidden": "true" }, h(Icon, { name: "check", size: 14, strokeWidth: 3 })),
+          h("span", { className: "st-tile__name" }, label),
+          note ? h("span", { className: "st-tile__note" }, note) : null,
+        ),
+  );
+}
+
+function StartBody({ page }) {
+  const labels = uiLabels(page);
+  const body = page.body;
+  const copy = body.copy;
+  const answers = body.answers || {};
+  const finish = body.finish;
+  const shortlist = body.shortlist;
+  const answerState = body.state !== "finish";
+  const presets = body.price_presets || PRICE_PRESETS;
+  const rent = answers.offer_type === "rent";
+  const residential = !answers.property_family || (body.property_families || []).some((family) => family.value === answers.property_family && family.residential);
+  const bedroomsLabel = labels.factLabels?.bedrooms || "Bedrooms";
+  const chip = (name, value, label, checked, extra = {}) =>
+    h(StartRadio, { key: `${name}-${value || "any"}`, className: "st-chip", name, value, label, checked, ...extra });
+
+  const stepper = h(
+    "ol",
+    { className: "st-stepper", "data-start-steps": "true" },
+    ...body.steps.map((step, index) =>
+      h(
+        "li",
+        {
+          key: step.id,
+          "data-start-step-indicator": String(index + 1),
+          "aria-current": answerState && index === 0 ? "step" : undefined,
+          "data-active": answerState && index === 0 ? "true" : undefined,
+          "data-complete": answerState ? undefined : "true",
+        },
+        h("span", { className: "st-stepper__num", "aria-hidden": "true" }, index + 1),
+        h("span", { className: "st-stepper__label" }, step.label),
+      ),
+    ),
+  );
+
+  // Without JavaScript the step buttons would be inert, so only the final
+  // submit row survives; the stylesheet reveals the rest once client.mjs marks
+  // the page enhanced.
+  const actions = (index, last = false) =>
+    h(
+      "div",
+      { className: `st-actions${index === 1 ? " st-actions--end" : ""}${last ? " st-actions--final" : ""}` },
+      index > 1 ? h(Btn, { type: "button", variant: "secondary", size: "lg", iconStart: "arrow-left", "data-start-back": "true" }, labels.previous) : null,
+      last
+        ? h(Btn, { type: "submit", variant: "primary", size: "lg", iconEnd: "arrow-right", "data-start-continue": "true" }, copy.review)
+        : h(Btn, { type: "button", variant: "primary", size: "lg", iconEnd: "arrow-right", "data-start-next": "true" }, labels.next),
+    );
+
+  const step = (index, id, title, content, last = false) =>
+    h(
+      "section",
+      { className: "st-step", "data-start-step": String(index), role: "group", "aria-labelledby": `${id}-title` },
+      h(
+        "h2",
+        { id: `${id}-title`, className: "st-step__title", tabIndex: "-1", "data-start-step-title": "true" },
+        h("span", { className: "st-step__index", "aria-hidden": "true" }, String(index)),
+        h("span", null, title),
+      ),
+      ...content,
+      h("p", { className: "st-error", "data-start-error": "true", role: "alert", hidden: true }, copy.chooseOption),
+      actions(index, last),
+    );
+
+  const form = h(
+    "form",
+    { id: "start-form", className: "st-form ct-form", method: "get", action: page.path, "data-start-form": "true", "aria-label": body.h1 },
+    step(1, "start-step-intent", copy.steps.intent, [
+      h(
+        "fieldset",
+        { className: "st-group" },
+        h("legend", { className: "st-group__legend" }, copy.buyOrRent),
+        h(
+          "div",
+          { className: "st-seg", role: "group" },
+          ...body.offer_types.map((option) =>
+            h(StartRadio, {
+              key: option.value,
+              className: "st-seg__option",
+              name: "offer_type",
+              value: option.value,
+              label: option.label,
+              checked: (answers.offer_type || "sale") === option.value,
+              attrs: { "data-lead-label": option.lead_label },
+            }),
+          ),
+        ),
+      ),
+      h(
+        "fieldset",
+        { className: "st-group" },
+        h("legend", { className: "st-group__legend" }, copy.propertyType),
+        h(
+          "div",
+          { className: "st-chips" },
+          chip("property_family", "", copy.anyType, !answers.property_family),
+          ...body.property_families.map((family) =>
+            chip("property_family", family.value, family.label, answers.property_family === family.value, {
+              attrs: { "data-lead-label": family.value, "data-residential": family.residential ? "true" : "false" },
+            }),
+          ),
+        ),
+      ),
+    ]),
+    step(2, "start-step-where", copy.whereTitle, [
+      h(
+        "fieldset",
+        { className: "st-group" },
+        h("legend", { className: "mk-sr-only" }, copy.whereTitle),
+        h(
+          "div",
+          { className: "st-tiles" },
+          ...body.areas.map((area) =>
+            h(StartRadio, {
+              key: area.id,
+              className: "st-tile",
+              name: "area",
+              value: area.id,
+              label: area.label,
+              note: area.note,
+              checked: answers.area === area.id,
+              required: true,
+              attrs: { "data-search-params": JSON.stringify(area.search), "data-lead-location": area.location },
+            }),
+          ),
+          h(StartRadio, {
+            className: "st-tile st-tile--any",
+            name: "area",
+            value: "",
+            label: copy.anywhere,
+            note: "",
+            checked: !answerState && !answers.area,
+            required: true,
+            attrs: { "data-search-params": "{}", "data-lead-location": "" },
+          }),
+        ),
+      ),
+    ]),
+    step(3, "start-step-budget", copy.budgetTitle, [
+      h(
+        "div",
+        { className: "st-field" },
+        h("label", { htmlFor: "start-price-max" }, labels.maxPrice),
+        h(
+          "select",
+          { id: "start-price-max", name: "price_max", ...pricePresetData(presets, page.locale, labels) },
+          ...pricePresetOptions({
+            values: rent ? presets.rent : presets.sale,
+            localeCode: page.locale,
+            labels,
+            suffix: rent ? ` ${labels.perMonth}` : "",
+            selected: answers.price_max || "",
+          }),
+        ),
+      ),
+      h(
+        "fieldset",
+        { className: "st-group", "data-start-bedrooms": "true", hidden: residential ? undefined : true },
+        h("legend", { className: "st-group__legend" }, bedroomsLabel),
+        h(
+          "div",
+          { className: "st-chips" },
+          chip("bedrooms_min", "", labels.any, !answers.bedrooms_min),
+          ...body.bedrooms.map((count) => chip("bedrooms_min", String(count), `${count}+`, answers.bedrooms_min === count)),
+        ),
+        h("p", { className: "st-hint" }, copy.bedroomsHint),
+      ),
+    ]),
+    step(
+      4,
+      "start-step-about",
+      copy.aboutTitle,
+      [
+        h(
+          "fieldset",
+          { className: "st-group" },
+          h("legend", { className: "st-group__legend" }, copy.citizenship),
+          h(
+            "div",
+            { className: "st-chips" },
+            ...body.citizenships.map((option) =>
+              chip("citizenship", option.value, option.label, answers.citizenship === option.value, {
+                required: true,
+                attrs: { "data-lead-label": option.lead_label },
+              }),
+            ),
+          ),
+          h("p", { className: "st-note", "data-start-note": "land_rule" }, h(Icon, { name: "info", size: 16 }), h("span", null, body.notes.land_rule)),
+        ),
+        h(
+          "fieldset",
+          { className: "st-group" },
+          h("legend", { className: "st-group__legend" }, copy.financing),
+          h(
+            "div",
+            { className: "st-chips" },
+            ...body.financing.map((option) =>
+              chip("financing", option.value, option.label, answers.financing === option.value, {
+                required: true,
+                attrs: { "data-lead-label": option.lead_label },
+              }),
+            ),
+          ),
+          h("p", { className: "st-note", "data-start-note": "financing_gap" }, h(Icon, { name: "info", size: 16 }), h("span", null, body.notes.financing_gap)),
+        ),
+        h(
+          "fieldset",
+          { className: "st-group" },
+          h("legend", { className: "st-group__legend" }, copy.timeline),
+          h(
+            "div",
+            { className: "st-chips" },
+            ...body.timelines.map((option) =>
+              chip("timeline", option.value, option.label, answers.timeline === option.value, {
+                required: true,
+                attrs: { "data-lead-label": option.lead_label },
+              }),
+            ),
+          ),
+        ),
+      ],
+      true,
+    ),
+  );
+
+  const leadHidden = (name, value, field) =>
+    h("input", { type: "hidden", name, defaultValue: value || "", "data-start-lead-field": field ? name : undefined });
+  const widen = finish?.widen || [];
+  const zeroMatches = Boolean(finish && finish.match_count === 0);
+  const alertConfig = body.alert;
+
+  // Saved-search alerts (existing /api/saved-searches contract). The channel
+  // select swaps the contact field through the shared initSavedSearchContacts.
+  const alertPanel = alertConfig
+    ? h(
+        "details",
+        { className: "st-alert", "data-start-alert": "true", open: zeroMatches ? true : undefined },
+        h(
+          "summary",
+          { className: "st-alert__summary" },
+          h(Icon, { name: "bell", size: 18 }),
+          h("span", null, copy.alertTitle),
+          h(Icon, { name: "chevron-down", size: 16, className: "st-alert__chevron" }),
+        ),
+        h("p", { className: "st-alert__intro" }, copy.alertIntro),
+        h(
+          "form",
+          {
+            className: "st-lead ct-form",
+            method: alertConfig.method || "POST",
+            action: alertConfig.endpoint,
+            "data-save-search-endpoint": alertConfig.endpoint,
+            "data-save-search-form": "start",
+            "data-start-alert-form": "true",
+            "data-success-message": alertConfig.success,
+            "data-sending-message": copy.sending,
+          },
+          h("input", { type: "hidden", name: "locale", defaultValue: alertConfig.payload.locale }),
+          h("input", { type: "hidden", name: "query", defaultValue: alertConfig.payload.query }),
+          h("input", {
+            type: "hidden",
+            name: "filters",
+            defaultValue: JSON.stringify(alertConfig.payload.filters),
+            "data-start-alert-filters": "true",
+          }),
+          h(
+            "div",
+            { className: "st-lead__row" },
+            h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+            h(
+              "label",
+              null,
+              labels.alertDelivery,
+              h(
+                "select",
+                { name: "contact_preference", "data-save-search-channel": "true", defaultValue: "email" },
+                h("option", { value: "email" }, labels.email),
+                h("option", { value: "whatsapp" }, "WhatsApp"),
+              ),
+            ),
+          ),
+          h(
+            "div",
+            { className: "st-lead__row" },
+            // The shared channel switcher rewrites this label's text, so the
+            // input stays a sibling instead of a child of the label.
+            h(
+              "div",
+              { className: "st-lead__field" },
+              h(
+                "label",
+                {
+                  htmlFor: "start-alert-contact",
+                  "data-save-search-contact-label": "true",
+                  "data-email-label": labels.email,
+                  "data-whatsapp-label": "WhatsApp",
+                },
+                labels.email,
+              ),
+              h("input", {
+                id: "start-alert-contact",
+                name: "contact.email",
+                type: "email",
+                required: true,
+                autoComplete: "email",
+                inputMode: "email",
+                "data-save-search-contact": "true",
+              }),
+            ),
+            h(
+              "label",
+              null,
+              labels.alertFrequency,
+              h(
+                "select",
+                { name: "alertFrequency", defaultValue: "weekly" },
+                h("option", { value: "weekly" }, labels.alertWeekly),
+                h("option", { value: "daily" }, labels.alertDaily),
+                h("option", { value: "instant" }, labels.alertInstant),
+              ),
+            ),
+          ),
+          h(
+            "label",
+            { className: "st-lead__consent" },
+            h("input", { type: "checkbox", name: "alertConsent", value: "true", required: true }),
+            h("span", null, labels.alertConsent),
+          ),
+          h(
+            "div",
+            { className: "st-lead__actions" },
+            h(Btn, { type: "submit", variant: "secondary", size: "lg", iconStart: "bell" }, alertConfig.label),
+            h("p", { className: "st-lead__status", "data-start-status": "true", role: "status", "aria-live": "polite" }),
+          ),
+        ),
+      )
+    : null;
+
+  // Features the visitor plainly needs that have no backend yet: rendered as
+  // disabled controls with a "coming soon" badge and the interim path.
+  const upcomingPanel = (body.upcoming || []).length
+    ? h(
+        "div",
+        { className: "st-upcoming", "data-start-upcoming": "true" },
+        ...body.upcoming.map((item) =>
+          h(
+            "div",
+            {
+              key: item.id,
+              className: "st-upcoming__item",
+              "data-start-upcoming-item": item.id,
+              "data-start-upcoming-when": item.when,
+              hidden: item.visible ? undefined : true,
+            },
+            h(
+              "div",
+              { className: "st-upcoming__head" },
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "mk-btn mk-btn--secondary mk-btn--md",
+                  disabled: true,
+                  "aria-disabled": "true",
+                  "data-start-upcoming-action": item.id,
+                  "aria-describedby": `start-upcoming-${item.id}`,
+                },
+                h(Icon, { name: item.icon, size: 18 }),
+                h("span", null, item.label),
+              ),
+              h(Badge, { variant: "neutral", icon: "clock" }, copy.comingSoon),
+            ),
+            h("p", { id: `start-upcoming-${item.id}`, className: "st-upcoming__note" }, item.note),
+          ),
+        ),
+      )
+    : null;
+
+  const finishSection = h(
+    "section",
+    { className: "st-finish", "data-start-finish": "true", hidden: answerState ? true : undefined, "aria-labelledby": "start-finish-title" },
+    h(
+      "h2",
+      { id: "start-finish-title", className: "st-finish__title", "data-start-match-count": "true", "data-start-match-template": copy.matchCount, "data-start-no-matches": copy.noMatches },
+      finish && typeof finish.match_count === "number"
+        ? finish.match_count > 0
+          ? copy.matchCount.replace("{count}", String(finish.match_count))
+          : copy.noMatches
+        : copy.seeMatches,
+    ),
+    h(
+      "div",
+      { className: "st-finish__actions" },
+      h(
+        Btn,
+        {
+          tag: "a",
+          variant: zeroMatches ? "secondary" : "accent",
+          size: "lg",
+          iconStart: "search",
+          href: finish ? finish.search_url : body.search.path,
+          "data-start-see-matches": "true",
+        },
+        copy.seeMatches,
+      ),
+    ),
+    // No matches: offer the wider searches that do have listings instead of
+    // sending the visitor to an empty results page.
+    h(
+      "div",
+      {
+        className: "st-widen",
+        "data-start-widen": "true",
+        "data-widen-price": copy.widen.price,
+        "data-widen-bedrooms": copy.widen.bedrooms,
+        "data-widen-type": copy.widen.type,
+        "data-widen-area": copy.widen.area,
+        "data-widen-district": copy.areas.blagoevgrad_district,
+        hidden: widen.length ? undefined : true,
+      },
+      h("h3", { className: "st-widen__title" }, copy.widenTitle),
+      h(
+        "ul",
+        { className: "st-widen__list", "data-start-widen-list": "true" },
+        ...widen.map((option) =>
+          h(
+            "li",
+            { key: option.id },
+            h(
+              "a",
+              { className: "st-widen__link", href: option.url, "data-start-widen-option": option.id },
+              h(Icon, { name: "arrow-right", size: 16 }),
+              h("span", { className: "st-widen__label" }, option.label),
+              h("span", { className: "st-widen__count" }, copy.matchCount.replace("{count}", String(option.match_count))),
+            ),
+          ),
+        ),
+      ),
+    ),
+    alertPanel,
+    upcomingPanel,
+    shortlist
+      ? h(
+          "details",
+          { className: "st-shortlist", "data-start-shortlist": "true" },
+          h(
+            "summary",
+            { className: "st-shortlist__summary" },
+            h(Icon, { name: "users", size: 18 }),
+            h("span", null, copy.shortlistTitle),
+            h(Icon, { name: "chevron-down", size: 16, className: "st-shortlist__chevron" }),
+          ),
+          h("p", { className: "st-shortlist__intro" }, copy.shortlistIntro),
+          h(
+            "form",
+            {
+              className: "st-lead ct-form",
+              method: shortlist.method || "POST",
+              action: shortlist.endpoint,
+              "data-start-lead": "true",
+              "data-lead-type": shortlist.payload.leadType,
+              "data-source": shortlist.payload.source,
+              "data-success-message": shortlist.success,
+              "data-sending-message": copy.sending,
+              "data-start-message-prefix": shortlist.lead_labels.prefix,
+            },
+            leadHidden("source", shortlist.payload.source),
+            leadHidden("intent", shortlist.payload.intent),
+            leadHidden("leadType", shortlist.payload.leadType, true),
+            leadHidden("language", shortlist.payload.language),
+            leadHidden("requirements.locations", shortlist.requirements.locations, true),
+            leadHidden("requirements.property_types", shortlist.requirements.property_types, true),
+            leadHidden("requirements.budget_max_eur", shortlist.requirements.budget_max_eur, true),
+            leadHidden("requirements.bedrooms_min", shortlist.requirements.bedrooms_min, true),
+            leadHidden("requirements.timeline", shortlist.requirements.timeline, true),
+            leadHidden("requirements.finance_status", shortlist.requirements.finance_status, true),
+            leadHidden("message", shortlist.message, true),
+            h(
+              "div",
+              { className: "st-lead__row" },
+              h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+              h("label", null, labels.phone, h("input", { name: "contact.phone", type: "tel", required: true, autoComplete: "tel", inputMode: "tel" })),
+            ),
+            h(
+              "div",
+              { className: "st-lead__row" },
+              h("label", null, labels.email, h("input", { name: "contact.email", type: "email", autoComplete: "email", inputMode: "email" })),
+              h(
+                "label",
+                null,
+                labels.preferredContact,
+                h(
+                  "select",
+                  { name: "contact_preference", defaultValue: "phone" },
+                  h("option", { value: "phone" }, labels.phone),
+                  h("option", { value: "whatsapp" }, "WhatsApp"),
+                  h("option", { value: "viber" }, "Viber"),
+                  h("option", { value: "email" }, labels.email),
+                ),
+              ),
+            ),
+            h(
+              "div",
+              { className: "st-lead__actions" },
+              h(Btn, { type: "submit", variant: "primary", size: "lg", iconStart: "send" }, shortlist.label),
+              h("p", { className: "st-lead__status", "data-start-status": "true", role: "status", "aria-live": "polite" }),
+            ),
+          ),
+        )
+      : h(
+          "div",
+          { className: "st-unavailable", "data-form-unavailable": "true" },
+          h("p", null, body.form_unavailable),
+          body.contact_channels
+            ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "phone", href: body.contact_channels.phone.href }, body.contact_channels.phone.label)
+            : null,
+        ),
+  );
+
+  const summarySection = finish
+    ? h(
+        "section",
+        { className: "st-summary", "data-start-summary": "true", "aria-labelledby": "start-summary-title" },
+        h("h2", { id: "start-summary-title", className: "st-summary__title" }, copy.summaryTitle),
+        h(
+          "dl",
+          { className: "st-summary__list" },
+          ...finish.summary.map((row) => h("div", { key: row.id, "data-start-summary-row": row.id }, h("dt", null, row.label), h("dd", null, row.value))),
+        ),
+      )
+    : null;
+
+  const main = h(
+    "main",
+    {
+      id: "main",
+      tabIndex: -1,
+      "data-kind": "start",
+      "data-react-public-ui": "start",
+      "data-start-flow": "true",
+      "data-start-state": body.state,
+      "data-start-search-path": body.search.path,
+      "data-start-locale": page.locale,
+      "data-phone-first": "true",
+      "data-min-touch-target": "44",
+      className: "st-page",
+    },
+    h(
+      "header",
+      { className: "st-head" },
+      h("h1", null, body.h1),
+      h("p", { className: "st-head__intro" }, body.intro),
+      stepper,
+      h("p", { className: "st-progress", "data-start-progress": "true", "data-start-progress-template": copy.stepOf, hidden: true }),
+    ),
+    summarySection,
+    answerState ? form : finishSection,
+    answerState
+      ? finishSection
+      : h(
+          "details",
+          { className: "st-edit", id: "start-edit", "data-start-edit": "true" },
+          h(
+            "summary",
+            { className: "st-edit__summary" },
+            h(Icon, { name: "pencil", size: 16 }),
+            h("span", null, copy.changeAnswers),
+            h(Icon, { name: "chevron-down", size: 16, className: "st-edit__chevron" }),
+          ),
+          form,
+        ),
   );
   return shell(page, main);
 }
@@ -3198,6 +3803,7 @@ export function renderReactPublicBody(page) {
   if (page.kind === "listing") return renderStaticElement(h(ListingBody, { page }));
   if (page.kind === "location") return renderStaticElement(h(LocationBody, { page }));
   if (page.kind === "seller") return renderStaticElement(h(SellerBody, { page }));
+  if (page.kind === "start") return renderStaticElement(h(StartBody, { page }));
   if (page.kind === "contact") return renderStaticElement(h(ContactBody, { page }));
   if (page.kind === "search_unavailable") return renderStaticElement(h(SearchUnavailableBody, { page }));
   if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));

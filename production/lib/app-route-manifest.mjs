@@ -12,6 +12,10 @@ const ROUTE_MODULES = {
   listing: { module: "app/[locale]/[...slug]/route", renderer: "renderListingPage", dynamic: true },
   location: { module: "app/[locale]/[...slug]/route", renderer: "renderLocationPage", dynamic: true },
   seller: { module: "app/[locale]/[...slug]/route", renderer: "renderSellerPage", dynamic: true },
+  // Buyer onboarding. The route is served by the same catch-all content
+  // handler; it is not in the generated sitemap yet (see P3-log.md), so this
+  // entry only takes effect once a sitemap entry of type "start" exists.
+  start: { module: "app/[locale]/[...slug]/route", renderer: "renderStartPage", dynamic: true },
   contact: { module: "app/[locale]/[...slug]/route", renderer: "renderContactPage", dynamic: true },
   guide: { module: "app/[locale]/[...slug]/route", renderer: "renderGuidePage", dynamic: true },
 };

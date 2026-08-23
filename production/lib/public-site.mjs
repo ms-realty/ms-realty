@@ -13,6 +13,7 @@ import {
   hreflangForHome,
   hreflangForContact,
   hreflangForSeller,
+  hreflangForStart,
   homePath,
   isTranslationIndexable,
   listingPath,
@@ -20,6 +21,7 @@ import {
   matchesPublicLocationScope,
   publicLocationNames,
   sellerPath,
+  startPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
 import { isLeadDurableStoreEnabled, leadDurableStoreConfigFromEnv } from "./lead-durable-store.mjs";
@@ -1061,6 +1063,411 @@ const SELLER_COPY = {
   },
 };
 
+// Buyer onboarding ("Start your search", /{locale}/start). Every string exists
+// in all seven public locales; sentence case, no dashes, no exclamation marks.
+// The two notes in step 4 restate the verified market facts from
+// SOURCE_OF_TRUTH.md section 2 (land ownership and the financing gap).
+const START_COPY = {
+  bg: {
+    title: "Започнете търсенето си | MS Realty",
+    description: "Отговорете на четири кратки въпроса и вижте подходящи имоти от MS Realty, заедно с местните правила за чуждестранни купувачи.",
+    h1: "Започнете търсенето си",
+    intro: "Четири кратки въпроса, след това подходящи имоти и местните правила, които важат за вас.",
+    stepOf: "Стъпка {current} от {total}",
+    steps: { intent: "Какво търсите", where: "Къде", budget: "Бюджет и спални", about: "За вас" },
+    buyOrRent: "Покупка или наем",
+    propertyType: "Тип имот",
+    anyType: "Всякакъв тип",
+    whereTitle: "Къде търсите?",
+    anywhere: "Навсякъде, където работим",
+    areas: { sandanski: "Сандански", bansko: "Банско", blagoevgrad_district: "Област Благоевград", black_sea_coast: "Черноморие", greece: "Гърция" },
+    areaNotes: { sandanski: "Централен офис", bansko: "Местен офис", blagoevgrad_district: "Цялата област", black_sea_coast: "Офис в Свети Влас", greece: "Отвъд границата" },
+    budgetTitle: "Вашият бюджет",
+    bedroomsHint: "Не е нужно за парцели, земя, търговски имоти и хотели.",
+    aboutTitle: "За вас",
+    citizenship: "Вашето гражданство",
+    eu: "Гражданин на ЕС или ЕИП",
+    nonEu: "Гражданин извън ЕС",
+    landRule: "Граждани извън ЕС не могат да притежават земя на свое име в България и я държат чрез българско дружество, докато граждани на ЕС и ЕИП могат да купуват земя директно.",
+    financing: "Как ще платите?",
+    cash: "В брой",
+    mortgage: "Нужно ми е финансиране",
+    financingGap: "Българските банки не предлагат стандартна ипотека на чужденци, затова планирайте финансирането преди огледа.",
+    timeline: "Кога планирате да купите или да се нанесете?",
+    timelines: { soon: "До 3 месеца", year: "До една година", browsing: "Само разглеждам" },
+    chooseOption: "Изберете една от опциите, за да продължите.",
+    review: "Преглед на отговорите",
+    seeMatches: "Вижте подходящите имоти",
+    matchCount: "{count} подходящи имота",
+    noMatches: "Засега няма подходящи имоти, но брокер пак може да помогне.",
+    summaryTitle: "Вашите отговори",
+    changeAnswers: "Промяна на отговорите",
+    shortlistTitle: "Получете подбор от брокер",
+    shortlistIntro: "Брокер, който говори вашия език, подбира имоти за вас и се свързва с вас.",
+    shortlistSubmit: "Заявете подбор",
+    shortlistSent: "Заявката е изпратена. Брокер ще се свърже с вас с подбор.",
+    formUnavailable: "Формата е временно недостъпна. Обадете се или ни пишете и брокер ще помогне.",
+    widenTitle: "Опитайте по-широко търсене",
+    widen: { price: "Без ограничение за бюджет", bedrooms: "Всякакъв брой спални", type: "Всякакъв тип имот", area: "Навсякъде, където работим" },
+    alertTitle: "Известете ме за нови съвпадения",
+    alertIntro: "Ще ви пишем, когато се появи имот по тези критерии.",
+    alertSubmit: "Включете известията",
+    alertSent: "Известията са включени. Ще ви пишем при ново съвпадение.",
+    comingSoon: "Очаквайте скоро",
+    planTrip: "Планирайте пътуване за огледи",
+    planTripNote: "Онлайн заявката за два или три дни огледи предстои. Дотогава брокер ги организира по телефона.",
+    financingOptions: "Вижте вариантите за финансиране",
+    financingOptionsNote: "Подготвяме списък с партньори за финансиране. Дотогава брокер обсъжда вариантите с вас.",
+    sending: "Изпращане...",
+  },
+  en: {
+    title: "Start your property search | MS Realty",
+    description: "Answer four short questions and see matching MS Realty properties, with the local rules for foreign buyers explained.",
+    h1: "Start your search",
+    intro: "Four short questions, then matching properties and the local rules that apply to you.",
+    stepOf: "Step {current} of {total}",
+    steps: { intent: "What you need", where: "Where", budget: "Budget and bedrooms", about: "About you" },
+    buyOrRent: "Buy or rent",
+    propertyType: "Property type",
+    anyType: "Any type",
+    whereTitle: "Where are you looking?",
+    anywhere: "Anywhere we work",
+    areas: { sandanski: "Sandanski", bansko: "Bansko", blagoevgrad_district: "Blagoevgrad district", black_sea_coast: "Black Sea coast", greece: "Greece" },
+    areaNotes: { sandanski: "Head office", bansko: "Local office", blagoevgrad_district: "The whole district", black_sea_coast: "Sveti Vlas office", greece: "Across the border" },
+    budgetTitle: "Your budget",
+    bedroomsHint: "Not needed for plots, land, commercial property and hotels.",
+    aboutTitle: "About you",
+    citizenship: "Your citizenship",
+    eu: "EU or EEA citizen",
+    nonEu: "Non-EU citizen",
+    landRule: "Non-EU citizens cannot own land in their own name in Bulgaria and hold it through a Bulgarian company, while EU and EEA citizens can buy land directly.",
+    financing: "How will you pay?",
+    cash: "Cash",
+    mortgage: "I need financing",
+    financingGap: "Bulgarian banks offer no standard mortgage to foreign nationals, so plan your financing before you view.",
+    timeline: "When do you plan to buy or move?",
+    timelines: { soon: "Within 3 months", year: "Within a year", browsing: "Just looking" },
+    chooseOption: "Choose one of the options to continue.",
+    review: "Review my answers",
+    seeMatches: "See matching properties",
+    matchCount: "{count} matching properties",
+    noMatches: "No matching properties yet, but a broker can still help.",
+    summaryTitle: "Your answers",
+    changeAnswers: "Change answers",
+    shortlistTitle: "Get a broker shortlist",
+    shortlistIntro: "A broker who speaks your language picks properties for you and gets in touch.",
+    shortlistSubmit: "Request a shortlist",
+    shortlistSent: "Your request was sent. A broker will contact you with a shortlist.",
+    formUnavailable: "The form is temporarily unavailable. Call or message us instead and a broker will help.",
+    widenTitle: "Try a wider search",
+    widen: { price: "Without the budget limit", bedrooms: "Any number of bedrooms", type: "Any property type", area: "Anywhere we work" },
+    alertTitle: "Alert me about new matches",
+    alertIntro: "We write to you when a property matching these criteria appears.",
+    alertSubmit: "Turn on alerts",
+    alertSent: "Alerts are on. We will write to you when a property matches.",
+    comingSoon: "Coming soon",
+    planTrip: "Plan a viewing trip",
+    planTripNote: "Booking two or three days of viewings online is on the way. A broker arranges it by phone in the meantime.",
+    financingOptions: "See financing options",
+    financingOptionsNote: "A list of financing partners is in preparation. Until then a broker talks the options through with you.",
+    sending: "Sending...",
+  },
+  de: {
+    title: "Starten Sie Ihre Immobiliensuche | MS Realty",
+    description: "Beantworten Sie vier kurze Fragen und sehen Sie passende MS Realty Immobilien, mit den lokalen Regeln für ausländische Käufer.",
+    h1: "Starten Sie Ihre Suche",
+    intro: "Vier kurze Fragen, dann passende Immobilien und die lokalen Regeln, die für Sie gelten.",
+    stepOf: "Schritt {current} von {total}",
+    steps: { intent: "Was Sie suchen", where: "Wo", budget: "Budget und Schlafzimmer", about: "Über Sie" },
+    buyOrRent: "Kaufen oder mieten",
+    propertyType: "Immobilientyp",
+    anyType: "Jeder Typ",
+    whereTitle: "Wo suchen Sie?",
+    anywhere: "Überall, wo wir tätig sind",
+    areas: { sandanski: "Sandanski", bansko: "Bansko", blagoevgrad_district: "Bezirk Blagoevgrad", black_sea_coast: "Schwarzmeerküste", greece: "Griechenland" },
+    areaNotes: { sandanski: "Hauptbüro", bansko: "Lokales Büro", blagoevgrad_district: "Der ganze Bezirk", black_sea_coast: "Büro in Sveti Vlas", greece: "Jenseits der Grenze" },
+    budgetTitle: "Ihr Budget",
+    bedroomsHint: "Entfällt bei Grundstücken, Land, Gewerbeimmobilien und Hotels.",
+    aboutTitle: "Über Sie",
+    citizenship: "Ihre Staatsangehörigkeit",
+    eu: "EU- oder EWR-Bürger",
+    nonEu: "Nicht-EU-Bürger",
+    landRule: "Nicht-EU-Bürger können in Bulgarien kein Land auf ihren eigenen Namen besitzen und halten es über eine bulgarische Gesellschaft, während EU- und EWR-Bürger Land direkt kaufen können.",
+    financing: "Wie bezahlen Sie?",
+    cash: "Bar",
+    mortgage: "Ich brauche eine Finanzierung",
+    financingGap: "Bulgarische Banken bieten ausländischen Staatsangehörigen keine Standardhypothek an, planen Sie Ihre Finanzierung also vor der Besichtigung.",
+    timeline: "Wann möchten Sie kaufen oder einziehen?",
+    timelines: { soon: "Innerhalb von 3 Monaten", year: "Innerhalb eines Jahres", browsing: "Ich schaue mich nur um" },
+    chooseOption: "Wählen Sie eine Option, um fortzufahren.",
+    review: "Antworten prüfen",
+    seeMatches: "Passende Immobilien ansehen",
+    matchCount: "{count} passende Immobilien",
+    noMatches: "Noch keine passenden Immobilien, ein Makler kann trotzdem helfen.",
+    summaryTitle: "Ihre Antworten",
+    changeAnswers: "Antworten ändern",
+    shortlistTitle: "Eine Makler-Auswahl erhalten",
+    shortlistIntro: "Ein Makler, der Ihre Sprache spricht, wählt Immobilien für Sie aus und meldet sich bei Ihnen.",
+    shortlistSubmit: "Auswahl anfordern",
+    shortlistSent: "Ihre Anfrage wurde gesendet. Ein Makler meldet sich mit einer Auswahl.",
+    formUnavailable: "Das Formular ist vorübergehend nicht verfügbar. Rufen Sie uns an oder schreiben Sie uns, ein Makler hilft Ihnen.",
+    widenTitle: "Versuchen Sie eine breitere Suche",
+    widen: { price: "Ohne Budgetgrenze", bedrooms: "Beliebig viele Schlafzimmer", type: "Jeder Immobilientyp", area: "Überall, wo wir tätig sind" },
+    alertTitle: "Über neue Treffer benachrichtigen",
+    alertIntro: "Wir schreiben Ihnen, sobald eine Immobilie zu diesen Kriterien erscheint.",
+    alertSubmit: "Benachrichtigungen aktivieren",
+    alertSent: "Die Benachrichtigungen sind aktiv. Wir schreiben Ihnen bei einem Treffer.",
+    comingSoon: "Demnächst",
+    planTrip: "Besichtigungsreise planen",
+    planTripNote: "Zwei oder drei Besichtigungstage online zu buchen ist in Arbeit. Bis dahin organisiert ein Makler das telefonisch.",
+    financingOptions: "Finanzierungsoptionen ansehen",
+    financingOptionsNote: "Eine Liste mit Finanzierungspartnern wird vorbereitet. Bis dahin bespricht ein Makler die Optionen mit Ihnen.",
+    sending: "Wird gesendet...",
+  },
+  nl: {
+    title: "Start uw zoektocht naar vastgoed | MS Realty",
+    description: "Beantwoord vier korte vragen en bekijk passend MS Realty vastgoed, met de lokale regels voor buitenlandse kopers.",
+    h1: "Start uw zoektocht",
+    intro: "Vier korte vragen, daarna passend vastgoed en de lokale regels die voor u gelden.",
+    stepOf: "Stap {current} van {total}",
+    steps: { intent: "Wat u zoekt", where: "Waar", budget: "Budget en slaapkamers", about: "Over u" },
+    buyOrRent: "Kopen of huren",
+    propertyType: "Type vastgoed",
+    anyType: "Elk type",
+    whereTitle: "Waar zoekt u?",
+    anywhere: "Overal waar wij werken",
+    areas: { sandanski: "Sandanski", bansko: "Bansko", blagoevgrad_district: "District Blagoevgrad", black_sea_coast: "Zwarte Zeekust", greece: "Griekenland" },
+    areaNotes: { sandanski: "Hoofdkantoor", bansko: "Lokaal kantoor", blagoevgrad_district: "Het hele district", black_sea_coast: "Kantoor in Sveti Vlas", greece: "Over de grens" },
+    budgetTitle: "Uw budget",
+    bedroomsHint: "Niet nodig voor kavels, grond, commercieel vastgoed en hotels.",
+    aboutTitle: "Over u",
+    citizenship: "Uw nationaliteit",
+    eu: "EU- of EER-burger",
+    nonEu: "Burger van buiten de EU",
+    landRule: "Burgers van buiten de EU kunnen in Bulgarije geen grond op eigen naam bezitten en houden die via een Bulgaarse vennootschap, terwijl EU- en EER-burgers grond rechtstreeks kunnen kopen.",
+    financing: "Hoe betaalt u?",
+    cash: "Contant",
+    mortgage: "Ik heb financiering nodig",
+    financingGap: "Bulgaarse banken bieden buitenlanders geen standaardhypotheek, dus regel uw financiering voordat u gaat bezichtigen.",
+    timeline: "Wanneer wilt u kopen of verhuizen?",
+    timelines: { soon: "Binnen 3 maanden", year: "Binnen een jaar", browsing: "Ik kijk alleen rond" },
+    chooseOption: "Kies een van de opties om verder te gaan.",
+    review: "Antwoorden bekijken",
+    seeMatches: "Bekijk passend vastgoed",
+    matchCount: "{count} passende objecten",
+    noMatches: "Nog geen passend vastgoed, een makelaar kan alsnog helpen.",
+    summaryTitle: "Uw antwoorden",
+    changeAnswers: "Antwoorden wijzigen",
+    shortlistTitle: "Ontvang een selectie van een makelaar",
+    shortlistIntro: "Een makelaar die uw taal spreekt, kiest vastgoed voor u uit en neemt contact op.",
+    shortlistSubmit: "Selectie aanvragen",
+    shortlistSent: "Uw aanvraag is verzonden. Een makelaar neemt contact op met een selectie.",
+    formUnavailable: "Het formulier is tijdelijk niet beschikbaar. Bel of stuur ons een bericht en een makelaar helpt u.",
+    widenTitle: "Probeer een bredere zoekopdracht",
+    widen: { price: "Zonder budgetlimiet", bedrooms: "Elk aantal slaapkamers", type: "Elk type vastgoed", area: "Overal waar wij werken" },
+    alertTitle: "Waarschuw mij bij nieuwe resultaten",
+    alertIntro: "We sturen u bericht zodra er vastgoed verschijnt dat aan deze criteria voldoet.",
+    alertSubmit: "Meldingen inschakelen",
+    alertSent: "De meldingen staan aan. We sturen u bericht bij een match.",
+    comingSoon: "Binnenkort",
+    planTrip: "Een bezichtigingsreis plannen",
+    planTripNote: "Twee of drie dagen bezichtigingen online boeken is in voorbereiding. Tot die tijd regelt een makelaar het telefonisch.",
+    financingOptions: "Financieringsopties bekijken",
+    financingOptionsNote: "Een lijst met financieringspartners is in voorbereiding. Tot die tijd bespreekt een makelaar de opties met u.",
+    sending: "Verzenden...",
+  },
+  ru: {
+    title: "Начните поиск недвижимости | MS Realty",
+    description: "Ответьте на четыре коротких вопроса и посмотрите подходящие объекты MS Realty, а также местные правила для иностранных покупателей.",
+    h1: "Начните поиск",
+    intro: "Четыре коротких вопроса, затем подходящие объекты и местные правила, которые касаются вас.",
+    stepOf: "Шаг {current} из {total}",
+    steps: { intent: "Что вы ищете", where: "Где", budget: "Бюджет и спальни", about: "О вас" },
+    buyOrRent: "Покупка или аренда",
+    propertyType: "Тип недвижимости",
+    anyType: "Любой тип",
+    whereTitle: "Где вы ищете?",
+    anywhere: "Везде, где мы работаем",
+    areas: { sandanski: "Сандански", bansko: "Банско", blagoevgrad_district: "Благоевградская область", black_sea_coast: "Черноморское побережье", greece: "Греция" },
+    areaNotes: { sandanski: "Главный офис", bansko: "Местный офис", blagoevgrad_district: "Вся область", black_sea_coast: "Офис в Свети-Влас", greece: "За границей" },
+    budgetTitle: "Ваш бюджет",
+    bedroomsHint: "Не нужно для участков, земли, коммерческой недвижимости и отелей.",
+    aboutTitle: "О вас",
+    citizenship: "Ваше гражданство",
+    eu: "Гражданин ЕС или ЕЭЗ",
+    nonEu: "Гражданин страны вне ЕС",
+    landRule: "Граждане стран вне ЕС не могут владеть землёй в Болгарии на своё имя и оформляют её через болгарскую компанию, а граждане ЕС и ЕЭЗ могут покупать землю напрямую.",
+    financing: "Как вы будете платить?",
+    cash: "Наличными",
+    mortgage: "Мне нужно финансирование",
+    financingGap: "Болгарские банки не предлагают иностранцам стандартную ипотеку, поэтому спланируйте финансирование до просмотра.",
+    timeline: "Когда вы планируете купить или переехать?",
+    timelines: { soon: "В течение 3 месяцев", year: "В течение года", browsing: "Пока присматриваюсь" },
+    chooseOption: "Выберите один из вариантов, чтобы продолжить.",
+    review: "Проверить ответы",
+    seeMatches: "Смотреть подходящие объекты",
+    matchCount: "{count} подходящих объектов",
+    noMatches: "Подходящих объектов пока нет, но брокер всё равно поможет.",
+    summaryTitle: "Ваши ответы",
+    changeAnswers: "Изменить ответы",
+    shortlistTitle: "Получить подборку от брокера",
+    shortlistIntro: "Брокер, говорящий на вашем языке, подберёт объекты для вас и свяжется с вами.",
+    shortlistSubmit: "Запросить подборку",
+    shortlistSent: "Запрос отправлен. Брокер свяжется с вами с подборкой.",
+    formUnavailable: "Форма временно недоступна. Позвоните или напишите нам, и брокер поможет.",
+    widenTitle: "Попробуйте более широкий поиск",
+    widen: { price: "Без ограничения бюджета", bedrooms: "Любое число спален", type: "Любой тип недвижимости", area: "Везде, где мы работаем" },
+    alertTitle: "Сообщить мне о новых совпадениях",
+    alertIntro: "Мы напишем вам, когда появится объект по этим критериям.",
+    alertSubmit: "Включить уведомления",
+    alertSent: "Уведомления включены. Мы напишем вам при новом совпадении.",
+    comingSoon: "Скоро",
+    planTrip: "Запланировать поездку на просмотры",
+    planTripNote: "Онлайн-заявка на два или три дня просмотров готовится. Пока брокер организует их по телефону.",
+    financingOptions: "Посмотреть варианты финансирования",
+    financingOptionsNote: "Список партнёров по финансированию готовится. До этого брокер обсуждает варианты с вами.",
+    sending: "Отправка...",
+  },
+  el: {
+    title: "Ξεκινήστε την αναζήτηση ακινήτου | MS Realty",
+    description: "Απαντήστε σε τέσσερις σύντομες ερωτήσεις και δείτε ακίνητα της MS Realty που σας ταιριάζουν, μαζί με τους τοπικούς κανόνες για ξένους αγοραστές.",
+    h1: "Ξεκινήστε την αναζήτησή σας",
+    intro: "Τέσσερις σύντομες ερωτήσεις, έπειτα ακίνητα που ταιριάζουν και οι τοπικοί κανόνες που ισχύουν για εσάς.",
+    stepOf: "Βήμα {current} από {total}",
+    steps: { intent: "Τι ψάχνετε", where: "Πού", budget: "Προϋπολογισμός και υπνοδωμάτια", about: "Σχετικά με εσάς" },
+    buyOrRent: "Αγορά ή ενοικίαση",
+    propertyType: "Τύπος ακινήτου",
+    anyType: "Οποιοσδήποτε τύπος",
+    whereTitle: "Πού ψάχνετε;",
+    anywhere: "Οπουδήποτε δραστηριοποιούμαστε",
+    areas: { sandanski: "Σαντάνσκι", bansko: "Μπάνσκο", blagoevgrad_district: "Περιφέρεια Μπλαγκόεβγκραντ", black_sea_coast: "Ακτές Μαύρης Θάλασσας", greece: "Ελλάδα" },
+    areaNotes: { sandanski: "Κεντρικό γραφείο", bansko: "Τοπικό γραφείο", blagoevgrad_district: "Ολόκληρη η περιφέρεια", black_sea_coast: "Γραφείο στο Σβέτι Βλας", greece: "Πέρα από τα σύνορα" },
+    budgetTitle: "Ο προϋπολογισμός σας",
+    bedroomsHint: "Δεν χρειάζεται για οικόπεδα, γη, επαγγελματικά ακίνητα και ξενοδοχεία.",
+    aboutTitle: "Σχετικά με εσάς",
+    citizenship: "Η υπηκοότητά σας",
+    eu: "Πολίτης ΕΕ ή ΕΟΧ",
+    nonEu: "Πολίτης εκτός ΕΕ",
+    landRule: "Οι πολίτες εκτός ΕΕ δεν μπορούν να κατέχουν γη στη Βουλγαρία στο όνομά τους και την κατέχουν μέσω βουλγαρικής εταιρείας, ενώ οι πολίτες ΕΕ και ΕΟΧ μπορούν να αγοράσουν γη απευθείας.",
+    financing: "Πώς θα πληρώσετε;",
+    cash: "Μετρητά",
+    mortgage: "Χρειάζομαι χρηματοδότηση",
+    financingGap: "Οι βουλγαρικές τράπεζες δεν προσφέρουν τυπικό στεγαστικό δάνειο σε αλλοδαπούς, οπότε σχεδιάστε τη χρηματοδότηση πριν από την επίσκεψη.",
+    timeline: "Πότε σκοπεύετε να αγοράσετε ή να μετακομίσετε;",
+    timelines: { soon: "Μέσα σε 3 μήνες", year: "Μέσα σε ένα έτος", browsing: "Απλώς κοιτάζω" },
+    chooseOption: "Επιλέξτε μία από τις επιλογές για να συνεχίσετε.",
+    review: "Έλεγχος απαντήσεων",
+    seeMatches: "Δείτε τα ακίνητα που ταιριάζουν",
+    matchCount: "{count} ακίνητα που ταιριάζουν",
+    noMatches: "Δεν υπάρχουν ακόμη ακίνητα που ταιριάζουν, ένας μεσίτης μπορεί ωστόσο να βοηθήσει.",
+    summaryTitle: "Οι απαντήσεις σας",
+    changeAnswers: "Αλλαγή απαντήσεων",
+    shortlistTitle: "Λάβετε επιλογή από μεσίτη",
+    shortlistIntro: "Ένας μεσίτης που μιλά τη γλώσσα σας επιλέγει ακίνητα για εσάς και επικοινωνεί μαζί σας.",
+    shortlistSubmit: "Ζητήστε επιλογή",
+    shortlistSent: "Το αίτημά σας εστάλη. Ένας μεσίτης θα επικοινωνήσει μαζί σας με μια επιλογή.",
+    formUnavailable: "Η φόρμα δεν είναι προσωρινά διαθέσιμη. Καλέστε μας ή στείλτε μήνυμα και ένας μεσίτης θα βοηθήσει.",
+    widenTitle: "Δοκιμάστε ευρύτερη αναζήτηση",
+    widen: { price: "Χωρίς όριο προϋπολογισμού", bedrooms: "Οποιοσδήποτε αριθμός υπνοδωματίων", type: "Οποιοσδήποτε τύπος ακινήτου", area: "Οπουδήποτε δραστηριοποιούμαστε" },
+    alertTitle: "Ειδοποιήστε με για νέα αποτελέσματα",
+    alertIntro: "Σας γράφουμε μόλις εμφανιστεί ακίνητο που ταιριάζει σε αυτά τα κριτήρια.",
+    alertSubmit: "Ενεργοποίηση ειδοποιήσεων",
+    alertSent: "Οι ειδοποιήσεις είναι ενεργές. Θα σας γράψουμε μόλις ταιριάξει ένα ακίνητο.",
+    comingSoon: "Έρχεται σύντομα",
+    planTrip: "Σχεδιάστε ταξίδι για επισκέψεις",
+    planTripNote: "Η κράτηση δύο ή τριών ημερών επισκέψεων μέσω διαδικτύου ετοιμάζεται. Μέχρι τότε ένας μεσίτης τη διοργανώνει τηλεφωνικά.",
+    financingOptions: "Δείτε επιλογές χρηματοδότησης",
+    financingOptionsNote: "Ετοιμάζεται λίστα συνεργατών χρηματοδότησης. Μέχρι τότε ένας μεσίτης συζητά τις επιλογές μαζί σας.",
+    sending: "Αποστολή...",
+  },
+  he: {
+    title: "התחילו את חיפוש הנכס | MS Realty",
+    description: "ענו על ארבע שאלות קצרות וראו נכסים מתאימים של MS Realty, יחד עם הכללים המקומיים לרוכשים זרים.",
+    h1: "התחילו את החיפוש",
+    intro: "ארבע שאלות קצרות, ואחריהן נכסים מתאימים והכללים המקומיים שחלים עליכם.",
+    stepOf: "שלב {current} מתוך {total}",
+    steps: { intent: "מה אתם מחפשים", where: "איפה", budget: "תקציב וחדרי שינה", about: "עליכם" },
+    buyOrRent: "קנייה או השכרה",
+    propertyType: "סוג הנכס",
+    anyType: "כל סוג",
+    whereTitle: "איפה אתם מחפשים?",
+    anywhere: "בכל מקום שבו אנחנו פועלים",
+    areas: { sandanski: "סנדנסקי", bansko: "בנסקו", blagoevgrad_district: "מחוז בלגואבגרד", black_sea_coast: "חוף הים השחור", greece: "יוון" },
+    areaNotes: { sandanski: "המשרד הראשי", bansko: "משרד מקומי", blagoevgrad_district: "המחוז כולו", black_sea_coast: "משרד בסבטי ולאס", greece: "מעבר לגבול" },
+    budgetTitle: "התקציב שלכם",
+    bedroomsHint: "לא נדרש למגרשים, קרקע, נכסים מסחריים ומלונות.",
+    aboutTitle: "עליכם",
+    citizenship: "האזרחות שלכם",
+    eu: "אזרח האיחוד האירופי או האזור הכלכלי האירופי",
+    nonEu: "אזרח מחוץ לאיחוד האירופי",
+    landRule: "אזרחים מחוץ לאיחוד האירופי אינם יכולים להחזיק קרקע בבולגריה על שמם ומחזיקים בה באמצעות חברה בולגרית, בעוד אזרחי האיחוד האירופי והאזור הכלכלי האירופי יכולים לרכוש קרקע ישירות.",
+    financing: "איך תשלמו?",
+    cash: "במזומן",
+    mortgage: "אני זקוק למימון",
+    financingGap: "בנקים בבולגריה אינם מציעים משכנתה רגילה לאזרחים זרים, לכן תכננו את המימון לפני הביקור בנכס.",
+    timeline: "מתי אתם מתכננים לקנות או לעבור?",
+    timelines: { soon: "תוך 3 חודשים", year: "תוך שנה", browsing: "רק מסתכלים" },
+    chooseOption: "בחרו אחת מהאפשרויות כדי להמשיך.",
+    review: "בדיקת התשובות",
+    seeMatches: "הצגת נכסים מתאימים",
+    matchCount: "{count} נכסים מתאימים",
+    noMatches: "עדיין אין נכסים מתאימים, אבל מתווך עדיין יכול לעזור.",
+    summaryTitle: "התשובות שלכם",
+    changeAnswers: "שינוי התשובות",
+    shortlistTitle: "קבלו רשימה מותאמת ממתווך",
+    shortlistIntro: "מתווך שמדבר בשפה שלכם בוחר עבורכם נכסים ויוצר אתכם קשר.",
+    shortlistSubmit: "בקשת רשימה מותאמת",
+    shortlistSent: "הבקשה נשלחה. מתווך ייצור אתכם קשר עם רשימה מותאמת.",
+    formUnavailable: "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה ומתווך יעזור.",
+    widenTitle: "נסו חיפוש רחב יותר",
+    widen: { price: "בלי הגבלת תקציב", bedrooms: "כל מספר חדרי שינה", type: "כל סוג נכס", area: "בכל מקום שבו אנחנו פועלים" },
+    alertTitle: "עדכנו אותי על נכסים חדשים",
+    alertIntro: "נכתוב לכם ברגע שיופיע נכס שמתאים לקריטריונים האלה.",
+    alertSubmit: "הפעלת התראות",
+    alertSent: "ההתראות פעילות. נכתוב לכם כשיימצא נכס מתאים.",
+    comingSoon: "בקרוב",
+    planTrip: "תכנון נסיעת ביקורים",
+    planTripNote: "הזמנת יומיים או שלושה ימי ביקורים באינטרנט נמצאת בהכנה. עד אז מתווך מארגן אותם בטלפון.",
+    financingOptions: "הצגת אפשרויות מימון",
+    financingOptionsNote: "רשימת שותפי מימון נמצאת בהכנה. עד אז מתווך עובר אתכם על האפשרויות.",
+    sending: "שולח...",
+  },
+};
+
+// The onboarding area tiles. Only areas that exist in the geography catalog
+// or registry may appear here; renderStartPage verifies every id. Each tile
+// maps to the search filter the results page already understands, so the
+// finish step lands on real matches. `location` is the English requirement
+// label the broker sees on the shortlist lead.
+const START_AREAS = Object.freeze([
+  { id: "sandanski", search: { geography_id: "BG:municipality:BLG40" }, location: "Sandanski" },
+  { id: "bansko", search: { geography_id: "BG:municipality:BLG01" }, location: "Bansko" },
+  { id: "blagoevgrad_district", search: { region_id: "BG:district:BLG" }, location: "Blagoevgrad district" },
+  // The agency's coastal office is in Sveti Vlas (Burgas district), which is
+  // the only coastal scope the geography registry can express as one filter.
+  { id: "black_sea_coast", search: { region_id: "BG:district:BGS" }, location: "Black Sea coast" },
+  { id: "greece", search: { country_code: "GR" }, location: "Greece" },
+]);
+const START_OFFER_TYPES = Object.freeze(["sale", "rent"]);
+const START_CITIZENSHIPS = Object.freeze(["eu", "non_eu"]);
+const START_FINANCING = Object.freeze(["cash", "mortgage"]);
+const START_TIMELINES = Object.freeze(["soon", "year", "browsing"]);
+const START_BEDROOMS = Object.freeze([1, 2, 3, 4]);
+const START_PRICE_PRESETS = Object.freeze({
+  sale: [50000, 75000, 100000, 150000, 200000, 300000, 500000, 750000, 1000000],
+  rent: [300, 400, 500, 700, 1000, 1500, 2000],
+});
+// English vocabulary for the broker-facing lead message and requirements
+// (the admin workbench reads bg, ru and en; the lead keeps the visitor's
+// language separately).
+const START_LEAD_LABELS = Object.freeze({
+  prefix: "Buyer onboarding",
+  offer: { sale: "buy", rent: "rent" },
+  citizenship: { eu: "EU or EEA citizen", non_eu: "non-EU citizen" },
+  financing: { cash: "cash buyer", mortgage: "needs financing" },
+  timelines: { soon: "Within 3 months", year: "Within a year", browsing: "Just looking" },
+});
+
 const HOME_COPY = {
   bg: {
     title: "MS Realty имоти в Югозападна България",
@@ -1456,6 +1863,10 @@ function translationFor(translations, localeCode) {
 
 function sellerCopy(localeCode) {
   return SELLER_COPY[localeCode] || SELLER_COPY.en;
+}
+
+function startCopy(localeCode) {
+  return START_COPY[localeCode] || START_COPY.en;
 }
 
 function homeCopy(localeCode) {
@@ -2776,6 +3187,328 @@ export function renderSellerPage({
               contact_preference: "phone",
             },
             label: labels.callback,
+          },
+    },
+  };
+}
+
+function startParam(params, key) {
+  if (!params) return "";
+  const value = typeof params.get === "function" ? params.get(key) : params[key];
+  if (value === undefined || value === null) return "";
+  return String(Array.isArray(value) ? value[0] : value).trim();
+}
+
+// Answers arrive as the GET query of the onboarding form (no JavaScript) or as
+// a plain object in tests. Unknown values fall back to "not answered".
+function startAnswersFromParams(params) {
+  const pick = (key, options) => {
+    const value = startParam(params, key);
+    return options.includes(value) ? value : "";
+  };
+  const price = startParam(params, "price_max");
+  const bedrooms = startParam(params, "bedrooms_min");
+  return {
+    offer_type: pick("offer_type", START_OFFER_TYPES),
+    property_family: pick("property_family", CANONICAL_PROPERTY_FAMILIES),
+    area: pick(
+      "area",
+      START_AREAS.map((area) => area.id),
+    ),
+    price_max: /^\d{1,9}$/.test(price) && Number(price) > 0 ? Number(price) : null,
+    bedrooms_min: /^[1-9]$/.test(bedrooms) ? Number(bedrooms) : null,
+    citizenship: pick("citizenship", START_CITIZENSHIPS),
+    financing: pick("financing", START_FINANCING),
+    timeline: pick("timeline", START_TIMELINES),
+  };
+}
+
+function startResidential(answers) {
+  return !answers.property_family || isFactApplicable(answers.property_family, "bedrooms_count");
+}
+
+function startArea(answers) {
+  return START_AREAS.find((area) => area.id === answers.area) || null;
+}
+
+// Every tile must resolve in the geography data the search already uses.
+function assertStartAreas() {
+  for (const area of START_AREAS) {
+    for (const [key, value] of Object.entries(area.search)) {
+      const known =
+        key === "country_code"
+          ? GEOGRAPHY_CATALOG.countries.some((country) => country.code === value)
+          : Boolean(geographyRegistryArea(publicGeographyRegistry(), value));
+      if (!known) throw new Error(`Buyer onboarding area ${area.id} points outside the geography catalog: ${value}`);
+    }
+  }
+}
+
+export function startSearchParams(answers) {
+  const params = new URLSearchParams();
+  if (answers.offer_type) params.set("offer_type", answers.offer_type);
+  if (answers.property_family) params.set("property_family", answers.property_family);
+  for (const [key, value] of Object.entries(startArea(answers)?.search || {})) params.set(key, value);
+  if (answers.price_max) params.set("price_max", String(answers.price_max));
+  // Plots, land, commercial space and hotels carry no bedroom count; a
+  // bedroom filter on them would be rejected by the search request.
+  if (answers.bedrooms_min && startResidential(answers)) params.set("bedrooms_min", String(answers.bedrooms_min));
+  return params;
+}
+
+function startLeadType(answers) {
+  if (answers.offer_type === "rent") return "renter";
+  if (answers.citizenship === "non_eu") return "foreign_buyer";
+  return "buyer";
+}
+
+function startLeadMessage(answers) {
+  const area = startArea(answers);
+  const parts = [
+    START_LEAD_LABELS.offer[answers.offer_type] || "",
+    answers.property_family || "",
+    area ? area.location : "",
+    answers.price_max ? `max EUR ${answers.price_max}` : "",
+    answers.bedrooms_min && startResidential(answers) ? `${answers.bedrooms_min}+ bedrooms` : "",
+    START_LEAD_LABELS.citizenship[answers.citizenship] || "",
+    START_LEAD_LABELS.financing[answers.financing] || "",
+    START_LEAD_LABELS.timelines[answers.timeline] || "",
+  ].filter(Boolean);
+  return parts.length ? `${START_LEAD_LABELS.prefix}: ${parts.join("; ")}` : START_LEAD_LABELS.prefix;
+}
+
+function startEuro(value, localeCode) {
+  try {
+    return new Intl.NumberFormat(localeCode, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(value));
+  } catch {
+    return `€${Number(value).toLocaleString("en-US")}`;
+  }
+}
+
+function startMatchCount(registry, localeCode, listings, params) {
+  if (!Array.isArray(listings) || !listings.length) return 0;
+  try {
+    const page = renderSearchPage({ registry, localeCode, listings, query: "", filters: Object.fromEntries(params), pageSize: 1 });
+    return Number(page.search?.total_matches) || 0;
+  } catch {
+    return null;
+  }
+}
+
+// When the chosen filters return nothing, relax one dimension at a time and
+// keep the variants that do have listings, so the visitor is never sent to an
+// empty results page.
+function startWidenSuggestions(registry, localeCode, listings, answers, copy, searchPathForLocale) {
+  const candidates = [];
+  if (answers.price_max) candidates.push({ id: "price", label: copy.widen.price, answers: { ...answers, price_max: null } });
+  if (answers.bedrooms_min && startResidential(answers)) {
+    candidates.push({ id: "bedrooms", label: copy.widen.bedrooms, answers: { ...answers, bedrooms_min: null } });
+  }
+  if (answers.property_family) candidates.push({ id: "type", label: copy.widen.type, answers: { ...answers, property_family: "" } });
+  if (answers.area) {
+    // Sandanski and Bansko are municipalities inside Blagoevgrad district, so
+    // the district is the natural next step outwards; everything else widens
+    // to the whole coverage area.
+    const district = answers.area === "sandanski" || answers.area === "bansko";
+    candidates.push({
+      id: "area",
+      label: district ? copy.areas.blagoevgrad_district : copy.widen.area,
+      answers: { ...answers, area: district ? "blagoevgrad_district" : "" },
+    });
+  }
+  const suggestions = [];
+  for (const candidate of candidates) {
+    const params = startSearchParams(candidate.answers);
+    const count = startMatchCount(registry, localeCode, listings, params);
+    if (!count) continue;
+    suggestions.push({
+      id: candidate.id,
+      label: candidate.label,
+      match_count: count,
+      url: params.toString() ? `${searchPathForLocale}?${params.toString()}` : searchPathForLocale,
+    });
+    if (suggestions.length === 3) break;
+  }
+  return suggestions;
+}
+
+// "Start your search": a four-step buyer onboarding page that works as one GET
+// form without JavaScript (the query renders the finish step server-side) and
+// becomes a stepper with JavaScript. The finish step links to the locale
+// search route with the chosen filters and offers an optional broker
+// shortlist lead (name plus preferred contact) with source
+// website_buyer_onboarding, using the same lead_writes_disabled fallback as
+// the contact and seller pages.
+export function renderStartPage({
+  registry,
+  localeCode,
+  listings = [],
+  searchParams = null,
+  leadWritesDisabled = leadWritesDisabledFromEnv(),
+} = {}) {
+  assertStartAreas();
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const path = startPath(registry, locale.code);
+  const searchPathForLocale = `/${locale.code}/${locale.route_segments.search}`;
+  const labels = labelsFor(locale.code);
+  const copy = startCopy(locale.code);
+  const chromeCopy = chromeCopyFor(locale.code);
+  const answers = startAnswersFromParams(searchParams);
+  const answered = START_OFFER_TYPES.includes(startParam(searchParams, "offer_type"));
+  const residential = startResidential(answers);
+  const area = startArea(answers);
+  const query = startSearchParams(answers);
+  const searchUrl = query.toString() ? `${searchPathForLocale}?${query.toString()}` : searchPathForLocale;
+  const hreflang = resolved.available ? hreflangForStart(registry) : [];
+  const leadType = startLeadType(answers);
+  const matchCount = answered ? startMatchCount(registry, locale.code, listings, query) : null;
+  const summary = answered
+    ? [
+        { id: "offer_type", label: copy.buyOrRent, value: answers.offer_type === "rent" ? chromeCopy.navRent : chromeCopy.navBuy },
+        {
+          id: "property_family",
+          label: copy.propertyType,
+          value: answers.property_family ? localizedListingValue(locale.code, "property_type", answers.property_family) : copy.anyType,
+        },
+        { id: "area", label: labels.location, value: area ? copy.areas[area.id] : copy.anywhere },
+        { id: "price_max", label: labels.maxPrice, value: answers.price_max ? startEuro(answers.price_max, locale.code) : labels.any },
+        ...(residential
+          ? [{ id: "bedrooms_min", label: labels.factLabels?.bedrooms || "Bedrooms", value: answers.bedrooms_min ? `${answers.bedrooms_min}+` : labels.any }]
+          : []),
+        ...(answers.citizenship ? [{ id: "citizenship", label: copy.citizenship, value: answers.citizenship === "eu" ? copy.eu : copy.nonEu }] : []),
+        ...(answers.financing ? [{ id: "financing", label: copy.financing, value: answers.financing === "cash" ? copy.cash : copy.mortgage }] : []),
+        ...(answers.timeline ? [{ id: "timeline", label: copy.timeline, value: copy.timelines[answers.timeline] }] : []),
+      ]
+    : [];
+
+  return {
+    kind: "start",
+    status: 200,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: resolved.available,
+    metadata: {
+      title: copy.title,
+      description: copy.description,
+      // Query variants (the no-JavaScript finish step) stay out of the index;
+      // the canonical points at the clean route.
+      robots: resolved.available && !answered ? "index,follow" : "noindex,follow",
+    },
+    hreflang,
+    chrome: publicChrome(registry, locale, { hreflang, active: "start", leadWritesDisabled }),
+    body: {
+      h1: copy.h1,
+      intro: copy.intro,
+      copy,
+      state: answered ? "finish" : "answer",
+      steps: [
+        { id: "intent", label: copy.steps.intent },
+        { id: "where", label: copy.steps.where },
+        { id: "budget", label: copy.steps.budget },
+        { id: "about", label: copy.steps.about },
+      ],
+      offer_types: START_OFFER_TYPES.map((value) => ({
+        value,
+        label: value === "rent" ? chromeCopy.navRent : chromeCopy.navBuy,
+        lead_label: START_LEAD_LABELS.offer[value],
+      })),
+      property_families: CANONICAL_PROPERTY_FAMILIES.map((family) => ({
+        value: family,
+        label: localizedListingValue(locale.code, "property_type", family),
+        residential: isFactApplicable(family, "bedrooms_count"),
+      })),
+      areas: START_AREAS.map((entry) => ({
+        id: entry.id,
+        label: copy.areas[entry.id],
+        note: copy.areaNotes[entry.id],
+        location: entry.location,
+        search: entry.search,
+      })),
+      price_presets: START_PRICE_PRESETS,
+      bedrooms: [...START_BEDROOMS],
+      citizenships: START_CITIZENSHIPS.map((value) => ({
+        value,
+        label: value === "eu" ? copy.eu : copy.nonEu,
+        lead_label: START_LEAD_LABELS.citizenship[value],
+      })),
+      financing: START_FINANCING.map((value) => ({
+        value,
+        label: value === "cash" ? copy.cash : copy.mortgage,
+        lead_label: START_LEAD_LABELS.financing[value],
+      })),
+      timelines: START_TIMELINES.map((value) => ({ value, label: copy.timelines[value], lead_label: START_LEAD_LABELS.timelines[value] })),
+      notes: { land_rule: copy.landRule, financing_gap: copy.financingGap },
+      answers,
+      search: { path: searchPathForLocale },
+      finish: answered
+        ? {
+            search_url: searchUrl,
+            match_count: matchCount,
+            summary,
+            widen:
+              matchCount === 0 ? startWidenSuggestions(registry, locale.code, listings, answers, copy, searchPathForLocale) : [],
+          }
+        : null,
+      // Saved-search alerts reuse the existing /api/saved-searches contract, so
+      // a visitor with no matches today can still be told when one appears.
+      alert: {
+        endpoint: "/api/saved-searches",
+        method: "POST",
+        payload: { locale: locale.code, query: "", filters: Object.fromEntries(query) },
+        label: copy.alertSubmit,
+        success: copy.alertSent,
+      },
+      // Front ends for work the backend cannot do yet. Both render as clearly
+      // disabled controls with a "coming soon" badge instead of a hole.
+      upcoming: [
+        { id: "viewing_trip", label: copy.planTrip, note: copy.planTripNote, icon: "calendar-days", when: "always", visible: true },
+        {
+          id: "financing",
+          label: copy.financingOptions,
+          note: copy.financingOptionsNote,
+          icon: "banknote",
+          when: "mortgage",
+          visible: answers.financing === "mortgage",
+        },
+      ],
+      contact_channels: {
+        phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
+        whatsapp: { href: BRAND_CONTACT.whatsapp, label: "WhatsApp" },
+        viber: { href: BRAND_CONTACT.viber, label: "Viber" },
+        email: { href: `mailto:${BRAND_CONTACT.email}`, label: BRAND_CONTACT.email },
+      },
+      form_unavailable: leadWritesDisabled ? copy.formUnavailable : null,
+      shortlist: leadWritesDisabled
+        ? null
+        : {
+            endpoint: "/api/leads",
+            method: "POST",
+            minimum_tap_target_px: 44,
+            required_fields: ["contact.name", "contact.phone"],
+            payload: {
+              source: "website_buyer_onboarding",
+              intent: "consultation",
+              leadType,
+              language: locale.code,
+              contact_preference: "phone",
+            },
+            requirements: {
+              locations: area ? area.location : "",
+              property_types: answers.property_family || "",
+              budget_max_eur: answers.price_max ? String(answers.price_max) : "",
+              bedrooms_min: answers.bedrooms_min && residential ? String(answers.bedrooms_min) : "",
+              timeline: START_LEAD_LABELS.timelines[answers.timeline] || "",
+              finance_status: answers.financing || "",
+            },
+            message: startLeadMessage(answers),
+            lead_labels: START_LEAD_LABELS,
+            label: copy.shortlistSubmit,
+            success: copy.shortlistSent,
           },
     },
   };

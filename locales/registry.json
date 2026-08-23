@@ -44,7 +44,8 @@
         "search": "tarsene",
         "location": "lokacii",
         "contact": "kontakt",
-        "seller": "prodai"
+        "seller": "prodai",
+        "start": "nachalo"
       }
     },
     {
@@ -62,7 +63,8 @@
         "search": "search",
         "location": "locations",
         "contact": "contact",
-        "seller": "sell"
+        "seller": "sell",
+        "start": "start"
       }
     },
     {
@@ -80,7 +82,8 @@
         "search": "suche",
         "location": "orte",
         "contact": "kontakt",
-        "seller": "verkaufen"
+        "seller": "verkaufen",
+        "start": "start"
       }
     },
     {
@@ -98,7 +101,8 @@
         "search": "zoeken",
         "location": "locaties",
         "contact": "contact",
-        "seller": "verkopen"
+        "seller": "verkopen",
+        "start": "start"
       }
     },
     {
@@ -116,7 +120,8 @@
         "search": "search",
         "location": "locations",
         "contact": "contact",
-        "seller": "sell"
+        "seller": "sell",
+        "start": "start"
       }
     },
     {
@@ -134,7 +139,8 @@
         "search": "anazitisi",
         "location": "topothesies",
         "contact": "epikoinonia",
-        "seller": "polisi"
+        "seller": "polisi",
+        "start": "arxi"
       }
     },
     {
@@ -152,7 +158,8 @@
         "search": "search",
         "location": "locations",
         "contact": "contact",
-        "seller": "sell"
+        "seller": "sell",
+        "start": "start"
       }
     },
     {
@@ -170,7 +177,8 @@
         "search": "recherche",
         "location": "lieux",
         "contact": "contact",
-        "seller": "vendre"
+        "seller": "vendre",
+        "start": "commencer"
       }
     }
   ]
