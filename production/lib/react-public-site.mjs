@@ -593,6 +593,27 @@ function EnquiryDialog({ page, labels, copy }) {
         labels.preferredCallbackTime,
         h("input", { name: "request_details.callback_time", maxLength: 120, "data-enquiry-callback-time": "true" }),
       ),
+      // B5: real slots for the listing's broker, fetched from /api/viewing-slots.
+      // The free date and time stay as the no-JS and no-slots path, so the
+      // request never depends on the picker being able to load.
+      h(
+        "label",
+        {
+          "data-enquiry-slot-group": "true",
+          hidden: true,
+          "data-enquiry-slot-endpoint": "/api/viewing-slots",
+          "data-enquiry-slot-locale": page.locale,
+          "data-enquiry-slot-loading": labels.viewingSlotLoading,
+          "data-enquiry-slot-empty": labels.viewingSlotEmpty,
+        },
+        labels.viewingSlot,
+        h(
+          "select",
+          { name: "request_details.viewing_slot", "data-enquiry-slot": "true" },
+          h("option", { value: "" }, labels.viewingSlotPlaceholder),
+        ),
+        h("small", { className: "mk-enquiry__slot-note", "data-enquiry-slot-note": "true" }, labels.viewingSlotRequest),
+      ),
       h(
         "div",
         { className: "ct-form__row", "data-enquiry-viewing-fields": "true", hidden: true },
@@ -1754,8 +1775,61 @@ function StartBody({ page }) {
       )
     : null;
 
-  // Features the visitor plainly needs that have no backend yet: rendered as
-  // disabled controls with a "coming soon" badge and the interim path.
+  // A viewing trip is a request a broker arranges, so the control opens a real
+  // form. Entries that still have no backend keep the disabled control and the
+  // "coming soon" badge, which is honest rather than a hole.
+  const tripForm = (item) =>
+    h(
+      "details",
+      { className: "st-upcoming__request", "data-start-trip": "true" },
+      h(
+        "summary",
+        { className: "mk-btn mk-btn--secondary mk-btn--md", "data-start-upcoming-action": item.id, "aria-describedby": `start-upcoming-${item.id}` },
+        h(Icon, { name: item.icon, size: 18 }),
+        h("span", null, item.label),
+      ),
+      h(
+        "form",
+        {
+          className: "st-lead__form st-trip__form",
+          method: "post",
+          action: item.request.endpoint,
+          "data-start-trip-form": "true",
+          // The shared JSON submit swaps the form for a success card built from this.
+          "data-success-message": item.request.success,
+        },
+        h("input", { type: "hidden", name: "locale", defaultValue: item.request.payload.locale }),
+        // Filled from the visitor's saved listings by the client script.
+        h("input", { type: "hidden", name: "listingReferences", defaultValue: "", "data-start-trip-shortlist": "true" }),
+        h(
+          "div",
+          { className: "st-lead__row" },
+          h("label", null, item.request.fields.arrival, h("input", { type: "date", name: "arrivalDate", required: true, "data-start-trip-arrival": "true" })),
+          h("label", null, item.request.fields.departure, h("input", { type: "date", name: "departureDate", required: true, "data-start-trip-departure": "true" })),
+        ),
+        h(
+          "div",
+          { className: "st-lead__row" },
+          h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+          h("label", null, labels.phone, h("input", { name: "contact.phone", type: "tel", required: true, autoComplete: "tel", inputMode: "tel" })),
+        ),
+        h(
+          "div",
+          { className: "st-lead__row" },
+          h("label", null, item.request.fields.party, h("input", { type: "number", name: "partySize", min: 1, max: 12, inputMode: "numeric" })),
+          h("label", null, item.request.fields.areas, h("input", { name: "areas", defaultValue: (item.request.areas || []).join(", "), "data-start-trip-areas": "true" })),
+        ),
+        h("label", null, item.request.fields.note, h("textarea", { name: "note", rows: 3, maxLength: 2000 })),
+        h(
+          "div",
+          { className: "st-lead__actions" },
+          h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "calendar-days" }, item.request.label),
+          h("p", { className: "st-lead__status", "data-start-trip-status": "true", role: "status", "aria-live": "polite" }),
+        ),
+        h("p", { className: "st-upcoming__note" }, item.request.pending),
+      ),
+    );
+
   const upcomingPanel = (body.upcoming || []).length
     ? h(
         "div",
@@ -1768,26 +1842,29 @@ function StartBody({ page }) {
               className: "st-upcoming__item",
               "data-start-upcoming-item": item.id,
               "data-start-upcoming-when": item.when,
+              "data-start-upcoming-live": item.request ? "true" : undefined,
               hidden: item.visible ? undefined : true,
             },
-            h(
-              "div",
-              { className: "st-upcoming__head" },
-              h(
-                "button",
-                {
-                  type: "button",
-                  className: "mk-btn mk-btn--secondary mk-btn--md",
-                  disabled: true,
-                  "aria-disabled": "true",
-                  "data-start-upcoming-action": item.id,
-                  "aria-describedby": `start-upcoming-${item.id}`,
-                },
-                h(Icon, { name: item.icon, size: 18 }),
-                h("span", null, item.label),
-              ),
-              h(Badge, { variant: "neutral", icon: "clock" }, copy.comingSoon),
-            ),
+            item.request
+              ? tripForm(item)
+              : h(
+                  "div",
+                  { className: "st-upcoming__head" },
+                  h(
+                    "button",
+                    {
+                      type: "button",
+                      className: "mk-btn mk-btn--secondary mk-btn--md",
+                      disabled: true,
+                      "aria-disabled": "true",
+                      "data-start-upcoming-action": item.id,
+                      "aria-describedby": `start-upcoming-${item.id}`,
+                    },
+                    h(Icon, { name: item.icon, size: 18 }),
+                    h("span", null, item.label),
+                  ),
+                  h(Badge, { variant: "neutral", icon: "clock" }, copy.comingSoon),
+                ),
             h("p", { id: `start-upcoming-${item.id}`, className: "st-upcoming__note" }, item.note),
           ),
         ),

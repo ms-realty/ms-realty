@@ -217,7 +217,9 @@ export function normalizeLeadInput(input = {}) {
     if (value !== undefined && String(value).trim()) property[field] = String(value).trim();
     else if (typeof property[field] === "string") property[field] = property[field].trim();
   }
-  for (const field of ["callback_time", "viewing_date", "viewing_time"]) {
+  // viewing_slot records the exact instant a visitor picked from the broker's
+  // free slots; viewing_date and viewing_time stay the contract the pipeline reads.
+  for (const field of ["callback_time", "viewing_date", "viewing_time", "viewing_slot"]) {
     const value = input[`request_details.${field}`];
     if (value !== undefined && String(value).trim()) requestDetails[field] = String(value).trim();
     else if (typeof requestDetails[field] === "string") requestDetails[field] = requestDetails[field].trim();

@@ -5,7 +5,7 @@ import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_CONSENT_LEDGER_PATH = fromRoot("production", "data", "consent-ledger.jsonl");
 
-const CONSENT_TYPES = new Set(["inquiry_follow_up", "language_request", "saved_search_alerts"]);
+const CONSENT_TYPES = new Set(["inquiry_follow_up", "language_request", "saved_search_alerts", "viewing_trip_request"]);
 const RAW_PRIVATE_FIELDS = new Set(["contact", "email", "phone", "whatsapp", "viber", "message"]);
 const WITHDRAWAL_REASONS = new Set(["customer_request", "broker_recorded_request", "data_correction"]);
 

@@ -59,6 +59,9 @@ import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./lib/translation-ledger.mjs";
 import { DEFAULT_VIEWING_LEDGER_PATH } from "./lib/viewing-ledger.mjs";
 import { viewingDurableStoreConfigFromEnv } from "./lib/viewing-durable-store.mjs";
 import { DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH } from "./lib/viewing-follow-ups.mjs";
+// B5 Viewings and availability.
+import { DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH } from "./lib/broker-availability.mjs";
+import { DEFAULT_VIEWING_TRIP_LEDGER_PATH } from "./lib/viewing-trip-requests.mjs";
 import { DEFAULT_LAUNCH_FREEZE_PATH } from "./lib/launch-freeze.mjs";
 import { DEFAULT_WORKSPACE_SETTINGS_PATH } from "./lib/workspace-settings.mjs";
 
@@ -198,6 +201,11 @@ export function productionServerConfig(env = process.env) {
     viewingDurableStore: viewingDurableStoreConfigFromEnv(env),
     viewingDurablePayload: undefined,
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
+    brokerAvailabilityLedgerPath:
+      env.MS_REALTY_BROKER_AVAILABILITY_LEDGER_PATH || DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH,
+    viewingTripLedgerPath: env.MS_REALTY_VIEWING_TRIP_LEDGER_PATH || DEFAULT_VIEWING_TRIP_LEDGER_PATH,
+    brokerAvailabilityAt: env.MS_REALTY_BROKER_AVAILABILITY_AT,
+    viewingTripRequestedAt: env.MS_REALTY_VIEWING_TRIP_REQUESTED_AT,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     savedSearchManageEventLedgerPath:
       env.MS_REALTY_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH || DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
@@ -313,6 +321,10 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     viewingDurableStore: config.viewingDurableStore,
     viewingDurablePayload: config.viewingDurablePayload,
     viewingFollowUpLedgerPath: config.viewingFollowUpLedgerPath,
+    brokerAvailabilityLedgerPath: config.brokerAvailabilityLedgerPath,
+    viewingTripLedgerPath: config.viewingTripLedgerPath,
+    brokerAvailabilityAt: config.brokerAvailabilityAt,
+    viewingTripRequestedAt: config.viewingTripRequestedAt,
     savedSearchLedgerPath: config.savedSearchLedgerPath,
     savedSearchManageEventLedgerPath: config.savedSearchManageEventLedgerPath,
     savedSearchAlertDeliveryLedgerPath: config.savedSearchAlertDeliveryLedgerPath,

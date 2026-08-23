@@ -273,10 +273,31 @@ test("features without a backend render as disabled coming-soon affordances", ()
   assert.deepEqual(mortgage.body.upcoming.map((item) => [item.id, item.visible]), [["viewing_trip", true], ["financing", true]]);
 
   const html = renderReactPublicBody(mortgage);
-  assert.match(html, /data-start-upcoming-action="viewing_trip"[^>]*aria-describedby="start-upcoming-viewing_trip"/);
-  assert.match(html, /<button type="button" class="mk-btn mk-btn--secondary mk-btn--md" disabled aria-disabled="true" data-start-upcoming-action="viewing_trip"/);
+  // Financing still has no backend, so it keeps the disabled control and badge.
+  assert.match(html, /<button type="button" class="mk-btn mk-btn--secondary mk-btn--md" disabled aria-disabled="true" data-start-upcoming-action="financing"/);
   assert.match(html, /data-start-upcoming-item="financing" data-start-upcoming-when="mortgage"/);
   assert.doesNotMatch(renderReactPublicBody(cash), /data-start-upcoming-item="financing"[^>]*data-start-upcoming-when="mortgage">/);
+});
+
+// B5 built the viewing-trip request, so the control is real: no disabled button,
+// no coming-soon badge, and a form that posts to the public request route.
+test("the viewing trip control is a real request a broker confirms", () => {
+  const mortgage = render("en", ANSWERED);
+  const trip = mortgage.body.upcoming.find((item) => item.id === "viewing_trip");
+  assert.equal(trip.request.endpoint, "/api/viewing-trips");
+  assert.equal(trip.request.confirmation, "human_required");
+
+  const html = renderReactPublicBody(mortgage);
+  assert.match(html, /data-start-upcoming-item="viewing_trip"[^>]*data-start-upcoming-live="true"/);
+  assert.match(html, /data-start-upcoming-action="viewing_trip"[^>]*aria-describedby="start-upcoming-viewing_trip"/);
+  assert.doesNotMatch(html, /disabled aria-disabled="true" data-start-upcoming-action="viewing_trip"/);
+  assert.match(html, /<form[^>]*action="\/api\/viewing-trips"[^>]*data-start-trip-form="true"/);
+  assert.match(html, /name="arrivalDate"/);
+  assert.match(html, /name="departureDate"/);
+  assert.match(html, /name="areas"/);
+  assert.match(html, /data-start-trip-shortlist="true"/);
+  // The copy has to keep saying a person confirms the days.
+  assert.match(html, /This is a request\. A person confirms every viewing\./);
 });
 
 // The onboarding shortlist is a lead like any other, so it must never render a

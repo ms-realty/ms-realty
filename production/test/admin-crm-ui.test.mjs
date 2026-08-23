@@ -142,9 +142,21 @@ test("what is still planned keeps its disabled, badged treatment", async () => {
   assert.match(inbox.body, /Saved views are waiting for a stored per-operator filter/);
   assert.match(inbox.body, /class="adm-planned-badge">Coming soon<\/span>/);
 
+  // B5 built broker availability and the free-slot calculation, so the week
+  // view is no longer planned: the segmented control is two real links and the
+  // week renders a grid of days, free slots and booked viewings.
   const viewings = await dispatchHttp(app(), { url: "/admin/viewings?locale=en", headers: auth });
-  assert.match(viewings.body, /data-planned-control="viewing_week_view"/);
-  assert.match(viewings.body, /The week calendar is waiting for broker availability/);
+  assert.doesNotMatch(viewings.body, /data-planned-control="viewing_week_view"/);
+  assert.doesNotMatch(viewings.body, /The week calendar is waiting for broker availability/);
+  assert.match(viewings.body, /<a href="\/admin\/viewings\?view=week"[^>]*>Week<\/a>/);
+
+  const week = await dispatchHttp(app(), { url: "/admin/viewings?locale=en&view=week", headers: auth });
+  assert.match(week.body, /data-viewing-week-grid="true"/);
+  assert.match(week.body, /data-viewing-week-day="/);
+  assert.match(week.body, /data-week-broker="broker_bg"/);
+  // A broker with no recorded hours falls back to the office week, and the
+  // screen says so rather than passing it off as that broker's own diary.
+  assert.match(week.body, /has not recorded working hours yet/);
 });
 
 test("a named operator gets working saved views instead of the planned strip", () => {

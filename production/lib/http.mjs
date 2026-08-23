@@ -188,7 +188,12 @@ import {
   readListingPublicationSchedules,
 } from "./listing-publication-schedules.mjs";
 import { appendViewing, createViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
-import { appendViewingFollowUp, buildViewingFollowUpQueue, readViewingFollowUps } from "./viewing-follow-ups.mjs";
+import {
+  appendViewingFollowUp,
+  buildViewingFollowUpQueue,
+  deriveViewingFollowUpStates,
+  readViewingFollowUps,
+} from "./viewing-follow-ups.mjs";
 import {
   ViewingConflictError,
   ViewingStoreUnavailableError,
@@ -417,6 +422,34 @@ import {
   listMediaUploads,
   readMediaUploadBytes,
 } from "./media-upload-routes.mjs";
+
+// B5 Viewings and availability.
+import {
+  appendBrokerAvailability,
+  brokerAvailabilityDirectory,
+  brokerAvailabilityFor,
+  canEditBrokerAvailability,
+  createBrokerAvailability,
+  officeTimeZone,
+  readBrokerAvailability,
+} from "./broker-availability.mjs";
+import {
+  DEFAULT_SLOT_STEP_MINUTES,
+  DEFAULT_VIEWING_DURATION_MINUTES,
+  addDays,
+  computeFreeSlots,
+  zonedParts,
+} from "./broker-free-slots.mjs";
+import { buildViewingWeekView } from "./viewing-week-view.mjs";
+import {
+  appendViewingTripRequest,
+  createViewingTripRequest,
+  privacySafeViewingTripRequest,
+  readViewingTripRequests,
+} from "./viewing-trip-requests.mjs";
+import { assignLeadBroker } from "./leads.mjs";
+import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
+import { resolvePublicLocale } from "./locales.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -919,6 +952,11 @@ export function createHttpApp({
   listingPublicationSchedulePath = null,
   viewingLedgerPath = null,
   viewingFollowUpLedgerPath = null,
+  // B5 Viewings and availability.
+  brokerAvailabilityLedgerPath = null,
+  viewingTripLedgerPath = null,
+  brokerAvailabilityAt = null,
+  viewingTripRequestedAt = null,
   savedSearchLedgerPath = null,
   savedSearchManageEventLedgerPath = null,
   savedSearchAlertDeliveryLedgerPath = null,
@@ -1209,8 +1247,13 @@ export function createHttpApp({
         contactMaps = {
           saved_search: readPublicContacts(publicContactVaultPath, publicContactKey, "saved_search"),
           language_request: readPublicContacts(publicContactVaultPath, publicContactKey, "language_request"),
+          viewing_trip: readPublicContacts(publicContactVaultPath, publicContactKey, "viewing_trip"),
         };
-        contactVaultStatus = [...contactMaps.saved_search.values(), ...contactMaps.language_request.values()].length
+        contactVaultStatus = [
+          ...contactMaps.saved_search.values(),
+          ...contactMaps.language_request.values(),
+          ...contactMaps.viewing_trip.values(),
+        ].length
           ? "available"
           : "empty";
       } catch {
@@ -1221,6 +1264,7 @@ export function createHttpApp({
     return buildPublicRequestQueue({
       savedSearches: currentSavedSearches(),
       languageRequests: readLanguageRequests(languageRequestPath || undefined),
+      viewingTrips: readViewingTripRequests(viewingTripLedgerPath || undefined),
       outcomes: readPublicRequestOutcomes(publicRequestOutcomeLedgerPath || undefined),
       contactMaps,
       contactVaultStatus,
@@ -1356,7 +1400,13 @@ export function createHttpApp({
       operatorViews: currentOperatorViews(operatorId),
     });
   };
-  const currentAdminViewingsPayload = async (requestedLocale, operatorId = null, scopedLeads = null, payloadSession = null) => {
+  const currentAdminViewingsPayload = async (
+    requestedLocale,
+    operatorId = null,
+    scopedLeads = null,
+    payloadSession = null,
+    viewingWeekOptions = {},
+  ) => {
     const [leadSource, viewingSource] = await Promise.all([
       currentDurableLeadSource(operatorId, payloadSession, scopedLeads),
       currentDurableViewingSource(),
@@ -1378,6 +1428,8 @@ export function createHttpApp({
     const replyData = currentReplyData();
     const replies = filterRows(replyData.replies);
     const replyOutcomes = filterRows(replyData.outcomes);
+    const viewingsNow = viewingFollowUpAt || bookedAt || reviewedAt || receivedAt || new Date().toISOString();
+    const viewingsFollowUpQueue = buildViewingFollowUpQueue(viewings, viewingFollowUps, { now: viewingsNow });
     return renderAdminLeadsPayload(activeRegistry, requestedLocale, {
       leads,
       leadPipelineQueue,
@@ -1399,8 +1451,17 @@ export function createHttpApp({
       operatorId,
       viewings,
       viewingFollowUpWritable: !viewingSource.durable,
-      viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, viewingFollowUps, {
-        now: viewingFollowUpAt || bookedAt || reviewedAt || receivedAt || new Date().toISOString(),
+      viewingFollowUpQueue: viewingsFollowUpQueue,
+      // "list" stays the default; "week" draws the grid from viewingWeek.
+      viewingLayout: viewingWeekOptions.view === "week" ? "week" : "list",
+      // B5: the week the viewings screen draws its grid from.
+      viewingWeek: buildViewingWeekView({
+        availabilityRows: readBrokerAvailability(brokerAvailabilityLedgerPath || undefined),
+        brokers: DEFAULT_BROKER_PROFILES.map((profile) => profile.id),
+        viewings: viewingSource.durable ? viewings : deriveViewingFollowUpStates(viewings, viewingFollowUps),
+        viewingFollowUpQueue: viewingsFollowUpQueue,
+        week: viewingWeekOptions.week || null,
+        now: viewingsNow,
       }),
       savedSearches: currentSavedSearches(),
       publicRequestQueue: currentPublicRequestQueue(),
@@ -1559,9 +1620,15 @@ export function createHttpApp({
       titleKey: "today",
       descriptionKey: "todayDescription",
     });
-  const currentViewingsPayload = async (requestedLocale, operatorId = null, leads = null, payloadSession = null) =>
+  const currentViewingsPayload = async (
+    requestedLocale,
+    operatorId = null,
+    leads = null,
+    payloadSession = null,
+    viewingWeekOptions = {},
+  ) =>
     renderAdminOperationalQueuePayload(
-      await currentAdminViewingsPayload(requestedLocale, operatorId, leads, payloadSession),
+      await currentAdminViewingsPayload(requestedLocale, operatorId, leads, payloadSession, viewingWeekOptions),
       {
       kind: "admin_viewings",
       path: "/admin/viewings",
@@ -3481,6 +3548,244 @@ export function createHttpApp({
       return privateJson(sellerPhotos.status, sellerPhotos.body);
     }
 
+    // B5 Viewings and availability: broker working hours, the free-slot
+    // calculation behind the admin week view and the public slot picker, and
+    // the viewing-trip request. Nothing here books anything: the public routes
+    // produce requests that a human confirms.
+    if (["/api/admin/availability", "/api/admin/viewings/week", "/api/viewing-slots", "/api/viewing-trips"].includes(url.pathname)) {
+      const availabilityRows = () => readBrokerAvailability(brokerAvailabilityLedgerPath || undefined);
+      const knownBrokerIds = () => DEFAULT_BROKER_PROFILES.map((profile) => profile.id);
+      const availabilityNow = () =>
+        brokerAvailabilityAt || viewingFollowUpAt || bookedAt || reviewedAt || receivedAt || new Date().toISOString();
+      // Viewings already on a calendar, with their current state: a rescheduled
+      // viewing must block its new time, not its original one.
+      const scheduledViewings = async () => {
+        const source = await currentDurableViewingSource();
+        if (source.durable) return source.viewings;
+        return deriveViewingFollowUpStates(source.viewings, readViewingFollowUps(viewingFollowUpLedgerPath || undefined));
+      };
+      const wholeNumberParam = (value, fallback) => {
+        const raw = String(value ?? "").trim();
+        if (!raw) return fallback;
+        if (!/^\d+$/.test(raw)) throw new Error("Slot parameters must be whole numbers");
+        return Number(raw);
+      };
+
+      if (url.pathname === "/api/admin/availability") {
+        if (!isAdminAuthorized(auth)) return adminUnauthorized();
+        if (request.method === "GET") {
+          try {
+            const rows = availabilityRows();
+            const requested = String(url.searchParams.get("broker") || "").trim();
+            const brokerIds = requested ? [requested] : knownBrokerIds();
+            return adminJson(200, {
+              kind: "admin_broker_availability",
+              timezone: officeTimeZone(),
+              brokers: brokerAvailabilityDirectory(rows, brokerIds),
+              history: requested ? rows.filter((row) => row.broker_id === requested) : rows,
+              editable_brokers: brokerIds.filter((brokerId) => canEditBrokerAvailability(principal, brokerId)),
+            });
+          } catch (error) {
+            return adminJson(400, { kind: "bad_request", message: error.message });
+          }
+        }
+        if (request.method === "POST") {
+          try {
+            const submitted = bindAuthenticatedOperator(parseBody(request), principal);
+            const brokerId = String(submitted.brokerId ?? submitted.broker_id ?? submitted.broker ?? "").trim();
+            // A broker may set their own hours; a manager may set anyone's.
+            if (!canEditBrokerAvailability(principal, brokerId)) return adminForbidden("broker_availability:own");
+            const recordedAt = availabilityNow();
+            const record = createBrokerAvailability({ ...submitted, brokerId }, { recordedAt });
+            const persisted = appendBrokerAvailability(record, { filePath: brokerAvailabilityLedgerPath || undefined });
+            if (!persisted.idempotent) {
+              writeAudit(
+                withAuthenticatedAuditActor(
+                  {
+                    action: "broker_availability_updated",
+                    actor: record.actor,
+                    objectType: "broker_availability",
+                    objectId: persisted.id,
+                    metadata: {
+                      broker_id: record.broker_id,
+                      timezone: record.timezone,
+                      weekly_windows: record.weekly_hours.length,
+                      exceptions: record.exceptions.length,
+                      self_service: principal?.id === record.broker_id,
+                    },
+                  },
+                  principal,
+                ),
+                recordedAt,
+              );
+            }
+            return adminJson(persisted.idempotent ? 200 : 201, {
+              kind: "admin_broker_availability_recorded",
+              availability: persisted,
+              resolved: brokerAvailabilityFor([persisted], record.broker_id),
+            });
+          } catch (error) {
+            return adminJson(400, { kind: "bad_request", message: error.message });
+          }
+        }
+        return adminJson(405, { kind: "method_not_allowed" });
+      }
+
+      if (url.pathname === "/api/admin/viewings/week") {
+        if (!isAdminAuthorized(auth)) return adminUnauthorized();
+        if (request.method !== "GET") return adminJson(405, { kind: "method_not_allowed" });
+        try {
+          const now = availabilityNow();
+          const viewings = await scheduledViewings();
+          return adminJson(200, {
+            kind: "admin_viewing_week",
+            week: buildViewingWeekView({
+              availabilityRows: availabilityRows(),
+              brokers: knownBrokerIds(),
+              viewings,
+              viewingFollowUpQueue: buildViewingFollowUpQueue(
+                viewings,
+                readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
+                { now },
+              ),
+              week: url.searchParams.get("week"),
+              now,
+              durationMinutes: wholeNumberParam(url.searchParams.get("duration"), DEFAULT_VIEWING_DURATION_MINUTES),
+            }),
+          });
+        } catch (error) {
+          if (error instanceof ViewingStoreUnavailableError || error?.code === "viewing_store_unavailable") {
+            return adminJson(503, { kind: "viewing_store_unavailable", message: "Viewing storage is temporarily unavailable" });
+          }
+          return adminJson(400, { kind: "bad_request", message: error.message });
+        }
+      }
+
+      // Public: the slots a visitor can pick from for one listing's broker.
+      if (url.pathname === "/api/viewing-slots") {
+        if (request.method !== "GET") return privateJson(405, { kind: "method_not_allowed" });
+        if (publicWriteLimiter) {
+          const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
+          if (!verdict.allowed) {
+            return response(429, { kind: "rate_limited", retry_after: verdict.retryAfterSec }, "application/json; charset=utf-8", {
+              "retry-after": String(verdict.retryAfterSec),
+              "cache-control": "no-store",
+            });
+          }
+        }
+        try {
+          const listingReference = String(url.searchParams.get("listing") || url.searchParams.get("listingReference") || "").trim();
+          if (!listingReference) throw new Error("listing is required");
+          const context = await currentPublicContext();
+          const listing = context.seed.records.find(
+            (record) => record.collection === "listings" && record.id === listingReference,
+          );
+          // Fail closed: no published listing, no slots. Never guess a broker.
+          if (!listing) return privateJson(404, { kind: "listing_not_found", listing_reference: listingReference });
+          const requestedLocale = String(url.searchParams.get("locale") || context.registry.source_locale).trim();
+          const resolvedLocale = resolvePublicLocale(context.registry, requestedLocale);
+          const brokerContact = latestApprovedBrokerContact(currentBrokerContacts(), listingReference);
+          const brokerId =
+            brokerContact?.broker ||
+            assignLeadBroker(
+              { language: { language: resolvedLocale.locale.code, adminLocale: "en" }, leadType: "buyer" },
+              {
+                listingContext: {
+                  location: listing.facts?.location || null,
+                  property_type: listing.facts?.property_type || null,
+                },
+              },
+            ).broker_id;
+          const now = availabilityNow();
+          const timeZone = officeTimeZone();
+          const firstDay = url.searchParams.get("from") || addDays(zonedParts(Date.parse(now), timeZone).date, 1);
+          const lastDay = url.searchParams.get("to") || addDays(firstDay, 13);
+          const availability = brokerAvailabilityFor(availabilityRows(), brokerId, { now });
+          const slots = computeFreeSlots({
+            availability,
+            viewings: await scheduledViewings(),
+            from: firstDay,
+            to: lastDay,
+            durationMinutes: wholeNumberParam(url.searchParams.get("duration"), DEFAULT_VIEWING_DURATION_MINUTES),
+            stepMinutes: DEFAULT_SLOT_STEP_MINUTES,
+            now,
+            // A visitor cannot pick a slot a broker has no time to prepare for.
+            leadTimeMinutes: wholeNumberParam(url.searchParams.get("leadTime"), 24 * 60),
+            limit: wholeNumberParam(url.searchParams.get("limit"), 24),
+          });
+          return privateJson(200, {
+            kind: "viewing_slots",
+            listing_reference: listingReference,
+            locale: resolvedLocale.locale.code,
+            broker_id: brokerId,
+            // Office hours are the agency's published week, not a claim about
+            // this broker's diary, so the visitor is told a broker confirms.
+            availability_source: availability.source,
+            confirmation: "human_required",
+            timezone: slots.timezone,
+            from: slots.from,
+            to: slots.to,
+            duration_minutes: slots.duration_minutes,
+            slots: slots.slots.map((slot) => ({
+              starts_at: slot.starts_at,
+              ends_at: slot.ends_at,
+              local_date: slot.local_date,
+              local_start: slot.local_start,
+              local_end: slot.local_end,
+            })),
+            summary: slots.summary,
+          });
+        } catch (error) {
+          return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+        }
+      }
+
+      // Public: a viewing trip is a request for a human to arrange, never a booking.
+      if (url.pathname === "/api/viewing-trips") {
+        if (request.method !== "POST") return privateJson(405, { kind: "method_not_allowed" });
+        if (publicWriteLimiter) {
+          const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
+          if (!verdict.allowed) {
+            return response(429, { kind: "rate_limited", retry_after: verdict.retryAfterSec }, "application/json; charset=utf-8", {
+              "retry-after": String(verdict.retryAfterSec),
+              "cache-control": "no-store",
+            });
+          }
+        }
+        try {
+          const requestedAt = viewingTripRequestedAt || savedAt || receivedAt || new Date().toISOString();
+          const trip = createViewingTripRequest(activeRegistry, parseBody(request), { requestedAt });
+          if (!publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
+          const contactVault = appendPublicContact(
+            {
+              subjectType: "viewing_trip",
+              subjectId: trip.id,
+              contact: trip.contact,
+              contactPreference: trip.contact_preference,
+              message: trip.note,
+            },
+            { filePath: publicContactVaultPath, secret: publicContactKey, storedAt: requestedAt },
+          );
+          const safeTrip = privacySafeViewingTripRequest(trip);
+          const ledger = viewingTripLedgerPath
+            ? appendViewingTripRequest(safeTrip, { filePath: viewingTripLedgerPath })
+            : null;
+          const consent = recordConsent({
+            consentType: "viewing_trip_request",
+            source: "website_viewing_trip",
+            subjectId: trip.id,
+            locale: trip.requested_locale,
+            contact: trip.contact,
+            granted: true,
+            legalBasis: "contract",
+            marketingOptIn: parseBody(request).marketingOptIn === true,
+          });
+          return privateJson(201, { ...safeTrip, ledger, contactVault, consent });
+        } catch (error) {
+          return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+        }
+      }
+    }
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
       // Team management needs the Payload runtime. When it cannot start (no
       // database locally, or an outage), answer like a missing session instead
@@ -4255,6 +4560,7 @@ export function createHttpApp({
           principal,
           requestLeadRows,
           payloadSession,
+          { week: url.searchParams.get("week"), view: url.searchParams.get("view") },
         );
         if (url.pathname === "/admin/viewings" || wantsHtml(request, url)) {
           return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -6040,6 +6346,7 @@ export function createHttpApp({
           {
             savedSearches: currentSavedSearches(),
             languageRequests: readLanguageRequests(languageRequestPath || undefined),
+            viewingTrips: readViewingTripRequests(viewingTripLedgerPath || undefined),
           },
           bindAuthenticatedOperator(parseBody(request), principal),
           { filePath: publicRequestOutcomeLedgerPath || undefined, recordedAt },

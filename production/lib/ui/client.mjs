@@ -478,6 +478,15 @@ export const PUBLIC_APP_JS = `(function () {
     if (viewingFields) viewingFields.hidden = intent !== "viewing";
     if (viewingDate) viewingDate.required = intent === "viewing";
     if (viewingTime) viewingTime.required = intent === "viewing";
+    var slotGroup = form.querySelector("[data-enquiry-slot-group]");
+    if (slotGroup) {
+      if (intent === "viewing") loadEnquirySlots(form, lead.getAttribute("data-listing-reference") || "");
+      else {
+        slotGroup.hidden = true;
+        var slotSelect = form.querySelector("[data-enquiry-slot]");
+        if (slotSelect) slotSelect.required = false;
+      }
+    }
     if (viewingDate) {
       var localToday = new Date();
       localToday.setMinutes(localToday.getMinutes() - localToday.getTimezoneOffset());
@@ -496,6 +505,96 @@ export const PUBLIC_APP_JS = `(function () {
     dialog.setAttribute("data-enquiry-intent", intent);
     form.setAttribute("data-lead-intent", intent);
     updateEnquiryContact(form);
+  }
+  // B5: fill the viewing dialog with real slots from the listing's broker.
+  // A slot is a REQUEST, not a booking: picking one only mirrors the chosen
+  // date and time into the fields the enquiry already posts. When the picker
+  // cannot offer anything the free date and time inputs stay in charge, so the
+  // request always works.
+  var enquirySlotToken = 0;
+  function enquirySlotLabel(slot, locale) {
+    var day = slot.local_date;
+    try {
+      day = new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(
+        new Date(slot.local_date + "T00:00:00Z"),
+      );
+    } catch (error) {
+      day = slot.local_date;
+    }
+    return day + ", " + slot.local_start + "\u2013" + slot.local_end;
+  }
+  function applyEnquirySlotChoice(form) {
+    var select = form.querySelector("[data-enquiry-slot]");
+    var date = form.querySelector("[data-enquiry-viewing-date]");
+    var time = form.querySelector("[data-enquiry-viewing-time]");
+    if (!select) return;
+    var option = select.options[select.selectedIndex];
+    if (!option || !option.value) return;
+    if (date) date.value = option.getAttribute("data-slot-date") || "";
+    if (time) time.value = option.getAttribute("data-slot-time") || "";
+  }
+  function showEnquiryManualViewingFields(form, show) {
+    var fields = form.querySelector("[data-enquiry-viewing-fields]");
+    var date = form.querySelector("[data-enquiry-viewing-date]");
+    var time = form.querySelector("[data-enquiry-viewing-time]");
+    if (fields) fields.hidden = !show;
+    if (date) date.required = show;
+    if (time) time.required = show;
+  }
+  function loadEnquirySlots(form, listingReference) {
+    var group = form.querySelector("[data-enquiry-slot-group]");
+    var select = form.querySelector("[data-enquiry-slot]");
+    if (!group || !select) return;
+    var placeholder = select.options.length ? select.options[0].textContent : "";
+    var token = (enquirySlotToken += 1);
+    var reset = function () {
+      group.hidden = true;
+      select.required = false;
+      showEnquiryManualViewingFields(form, true);
+    };
+    if (!listingReference || typeof fetch !== "function") {
+      reset();
+      return;
+    }
+    group.hidden = false;
+    select.required = false;
+    select.disabled = true;
+    select.innerHTML = "";
+    select.appendChild(new Option(group.getAttribute("data-enquiry-slot-loading") || placeholder, ""));
+    var locale = group.getAttribute("data-enquiry-slot-locale") || "en";
+    var endpoint = group.getAttribute("data-enquiry-slot-endpoint") || "/api/viewing-slots";
+    fetch(endpoint + "?listing=" + encodeURIComponent(listingReference) + "&locale=" + encodeURIComponent(locale), {
+      headers: { accept: "application/json" },
+    })
+      .then(function (response) {
+        return response.ok ? response.json() : null;
+      })
+      .then(function (payload) {
+        if (token !== enquirySlotToken) return;
+        var slots = payload && payload.slots ? payload.slots : [];
+        select.disabled = false;
+        select.innerHTML = "";
+        if (!slots.length) {
+          select.appendChild(new Option(group.getAttribute("data-enquiry-slot-empty") || placeholder, ""));
+          reset();
+          return;
+        }
+        select.appendChild(new Option(placeholder, ""));
+        for (var i = 0; i < slots.length; i += 1) {
+          var slot = slots[i];
+          var option = new Option(enquirySlotLabel(slot, locale), slot.starts_at);
+          option.setAttribute("data-slot-date", slot.local_date);
+          option.setAttribute("data-slot-time", slot.local_start);
+          select.appendChild(option);
+        }
+        select.required = true;
+        showEnquiryManualViewingFields(form, false);
+      })
+      .catch(function () {
+        if (token !== enquirySlotToken) return;
+        select.disabled = false;
+        reset();
+      });
   }
   function updateSavedSearchContact(form) {
     var channel = form.querySelector("[data-save-search-channel]");
@@ -2155,6 +2254,22 @@ export const PUBLIC_APP_JS = `(function () {
     }
     wireSubmitStatus(lead);
     wireSubmitStatus(root.querySelector("[data-start-alert-form]"));
+    var tripForm = root.querySelector("[data-start-trip-form]");
+    if (tripForm) {
+      var tripArrival = tripForm.querySelector("[data-start-trip-arrival]");
+      var tripDeparture = tripForm.querySelector("[data-start-trip-departure]");
+      var localNow = new Date();
+      localNow.setMinutes(localNow.getMinutes() - localNow.getTimezoneOffset());
+      var todayValue = localNow.toISOString().slice(0, 10);
+      if (tripArrival) tripArrival.min = todayValue;
+      if (tripDeparture) tripDeparture.min = todayValue;
+      if (tripArrival && tripDeparture) {
+        tripArrival.addEventListener("change", function () {
+          tripDeparture.min = tripArrival.value || todayValue;
+          if (tripDeparture.value && tripDeparture.value < tripArrival.value) tripDeparture.value = tripArrival.value;
+        });
+      }
+    }
     if (seeMatches) seeMatches.addEventListener("click", function () { seeMatches.setAttribute("href", searchUrl()); });
     applyPricePresets();
     syncBedrooms();
@@ -2690,6 +2805,8 @@ export const PUBLIC_APP_JS = `(function () {
     }
   });
   document.addEventListener("change", function (event) {
+    var slotPick = event.target.closest("[data-enquiry-slot]");
+    if (slotPick && slotPick.form) applyEnquirySlotChoice(slotPick.form);
     var channel = event.target.closest("[data-enquiry-channel]");
     if (channel && channel.form) updateEnquiryContact(channel.form);
     var savedSearchChannel = event.target.closest("[data-save-search-channel]");
@@ -2700,7 +2817,13 @@ export const PUBLIC_APP_JS = `(function () {
     if (!(form instanceof HTMLFormElement)) return;
     var action = form.getAttribute("action") || "";
     var isEnquiry = form.hasAttribute("data-enquiry-form");
-    var intercept = action === "/api/leads" || action === "/api/saved-searches" || action === "/api/language-requests" || form.hasAttribute("data-save-search-endpoint") || form.hasAttribute("data-request-language");
+    var intercept = action === "/api/leads" || action === "/api/saved-searches" || action === "/api/language-requests" || action === "/api/viewing-trips" || form.hasAttribute("data-save-search-endpoint") || form.hasAttribute("data-request-language");
+    // The viewing trip carries whatever the visitor has saved, so a broker can
+    // build the days around real properties rather than a guess.
+    if (form.hasAttribute("data-start-trip-form")) {
+      var shortlist = form.querySelector("[data-start-trip-shortlist]");
+      if (shortlist) shortlist.value = readSaved().join(",");
+    }
     if (!intercept && !isEnquiry) return;
     event.preventDefault();
     if (action === "/api/leads" || isEnquiry) applyLeadAttribution(form);

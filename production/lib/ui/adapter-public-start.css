@@ -471,3 +471,10 @@ main form label.st-tile { display: grid; gap: 0; }
   .st-chip > span,
   .st-seg__option > span { min-height: 44px; }
 }
+
+/* B5: the viewing-trip request. A disclosure so the onboarding page keeps its
+ * shape until the visitor wants the form. */
+.st-upcoming__request { display: block; }
+.st-upcoming__request > summary { display: inline-flex; list-style: none; cursor: pointer; }
+.st-upcoming__request > summary::-webkit-details-marker { display: none; }
+.st-trip__form { margin-top: var(--space-4); }

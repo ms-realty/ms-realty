@@ -3,7 +3,7 @@ import { appendPrivateContact, readPrivateContacts } from "./private-contact-vau
 
 export const DEFAULT_PUBLIC_CONTACT_VAULT_PATH = fromRoot("production", "data", "public-contact-vault.jsonl");
 
-const SUBJECT_TYPES = new Set(["saved_search", "language_request"]);
+const SUBJECT_TYPES = new Set(["saved_search", "language_request", "viewing_trip"]);
 
 function contactPayload(record, { includeMessage = false } = {}) {
   if (!SUBJECT_TYPES.has(record.subjectType)) throw new Error("Public contact vault subject type is invalid");

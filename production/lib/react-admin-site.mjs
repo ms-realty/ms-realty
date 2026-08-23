@@ -314,7 +314,18 @@ const ADMIN_UI_COPY = {
     viewingLayout: "Изглед на графика",
     listView: "Списък",
     weekView: "Седмица",
-    weekViewNote: "Седмичният календар чака заетостта на брокерите, за да показва свободните часове.",
+    weekViewNote: "Седмицата е в часовата зона на офиса и приспада заетите часове и изключенията.",
+    weekOf: "Седмица от",
+    previousWeek: "Предишна седмица",
+    nextWeek: "Следваща седмица",
+    thisWeek: "Тази седмица",
+    freeSlots: "Свободни часове",
+    followUpsDue: "Задачи за седмицата",
+    closedDay: "Затворено",
+    recordedHours: "Записано работно време",
+    officeDefaultHours: "Работно време на офиса",
+    officeDefaultNote: "Брокерът още не е записал работно време. Показва се работното време на офиса, докато не го направи.",
+    noViewingsThisWeek: "Няма огледи тази седмица.",
     bulkStatusSaving: "Промяна на избраните обяви…",
     bulkStatusSaved: "Статусът на избраните обяви е променен.",
     bulkStatusFailed: "Статусът на избраните обяви не беше променен.",
@@ -964,7 +975,18 @@ const ADMIN_UI_COPY = {
     viewingLayout: "Вид расписания",
     listView: "Список",
     weekView: "Неделя",
-    weekViewNote: "Недельный календарь ждёт занятость брокеров, чтобы показывать свободные часы.",
+    weekViewNote: "Неделя показана в часовом поясе офиса и вычитает занятые часы и исключения.",
+    weekOf: "Неделя с",
+    previousWeek: "Предыдущая неделя",
+    nextWeek: "Следующая неделя",
+    thisWeek: "Текущая неделя",
+    freeSlots: "Свободные часы",
+    followUpsDue: "Задачи на неделю",
+    closedDay: "Закрыто",
+    recordedHours: "Записанное рабочее время",
+    officeDefaultHours: "Рабочее время офиса",
+    officeDefaultNote: "Брокер ещё не записал рабочее время. Пока показано рабочее время офиса.",
+    noViewingsThisWeek: "На этой неделе просмотров нет.",
     bulkStatusSaving: "Изменяем выбранные объекты…",
     bulkStatusSaved: "Статус выбранных объектов изменен.",
     bulkStatusFailed: "Не удалось изменить статус выбранных объектов.",
@@ -1598,7 +1620,18 @@ const ADMIN_UI_COPY = {
     viewingLayout: "Schedule layout",
     listView: "List",
     weekView: "Week",
-    weekViewNote: "The week calendar is waiting for broker availability, so it can show free slots.",
+    weekViewNote: "The week is shown in the office time zone and subtracts booked hours and exceptions.",
+    weekOf: "Week of",
+    previousWeek: "Previous week",
+    nextWeek: "Next week",
+    thisWeek: "This week",
+    freeSlots: "Free slots",
+    followUpsDue: "Due this week",
+    closedDay: "Closed",
+    recordedHours: "Recorded hours",
+    officeDefaultHours: "Office hours",
+    officeDefaultNote: "This broker has not recorded working hours yet, so the office week is shown until they do.",
+    noViewingsThisWeek: "No viewings this week.",
     bulkStatusSaving: "Updating selected listings…",
     bulkStatusSaved: "Selected listing statuses updated.",
     bulkStatusFailed: "Could not update selected listing statuses.",
@@ -3326,16 +3359,148 @@ function TodayBody({ page }) {
   });
 }
 
+// B5: the admin week view. Seven days in the office time zone, each broker's
+// working windows minus their booked viewings, plus the follow-ups that fall
+// due inside the week. The payload comes from production/lib/viewing-week-view.mjs.
+const WEEKDAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
+function weekdayLabel(weekday, locale) {
+  const language = locale === "bg" ? "bg-BG" : locale === "ru" ? "ru-RU" : "en-GB";
+  // 2026-01-05 is a Monday, so ISO weekday N lands on the 4th + N.
+  const date = new Date(Date.UTC(2026, 0, 4 + weekday));
+  return new Intl.DateTimeFormat(language, { weekday: "short", timeZone: "UTC" }).format(date);
+}
+
+function weekDayNumber(date, locale) {
+  const language = locale === "bg" ? "bg-BG" : locale === "ru" ? "ru-RU" : "en-GB";
+  return new Intl.DateTimeFormat(language, { day: "numeric", month: "short", timeZone: "UTC" }).format(
+    new Date(`${date}T00:00:00Z`),
+  );
+}
+
+function weekHref(page, week) {
+  const url = new URL("/admin/viewings", "http://ms-realty.local");
+  url.searchParams.set("view", "week");
+  if (week) url.searchParams.set("week", week);
+  const locale = page.workspace?.locale;
+  if (locale && locale !== adminDefaultLocale(page)) url.searchParams.set("locale", locale);
+  return `${url.pathname}${url.search}`;
+}
+
+function ViewingWeekPanel({ page, copy, ui }) {
+  const week = page.viewingWeek;
+  if (!week) return null;
+  const locale = page.workspace.locale;
+  const brokersOnDefault = week.brokers.filter((broker) => broker.availability_source === "office_default");
+  return h(
+    Panel,
+    {
+      title: `${ui.weekOf} ${weekDayNumber(week.week_start, locale)}`,
+      "data-viewing-week": week.week_start,
+      action: h(
+        "div",
+        { className: "adm-week__nav" },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--ghost mk-btn--sm", href: weekHref(page, week.previous_week), rel: "prev" },
+          h(Icon, { name: "chevron-left", size: 16 }),
+          h("span", null, ui.previousWeek),
+        ),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: weekHref(page, null) }, ui.thisWeek),
+        h(
+          "a",
+          { className: "mk-btn mk-btn--ghost mk-btn--sm", href: weekHref(page, week.next_week), rel: "next" },
+          h("span", null, ui.nextWeek),
+          h(Icon, { name: "chevron-right", size: 16 }),
+        ),
+      ),
+    },
+    h("p", { className: "adm-week__zone" }, `${ui.weekViewNote} (${week.timezone})`),
+    h(
+      "ol",
+      { className: "adm-week", "data-viewing-week-grid": "true" },
+      ...week.days.map((day) =>
+        h(
+          "li",
+          {
+            key: day.date,
+            className: "adm-week__day",
+            "data-viewing-week-day": day.date,
+            "data-today": day.is_today ? "1" : undefined,
+            "data-past": day.is_past ? "1" : undefined,
+          },
+          h(
+            "div",
+            { className: "adm-week__head" },
+            h("span", { className: "adm-week__weekday" }, weekdayLabel(day.weekday, locale)),
+            h("time", { className: "adm-week__date", dateTime: day.date }, weekDayNumber(day.date, locale)),
+          ),
+          h(
+            "p",
+            { className: "adm-week__slots", "data-week-open-slots": String(day.open_slots) },
+            day.open_slots
+              ? `${day.open_slots} ${ui.freeSlots.toLowerCase()}`
+              : h("span", { className: "adm-week__closed" }, ui.closedDay),
+          ),
+          day.viewings.length
+            ? h(
+                "ul",
+                { className: "adm-week__viewings" },
+                ...day.viewings.map((viewing) =>
+                  h(
+                    "li",
+                    { key: viewing.id, "data-week-viewing": viewing.id },
+                    h("time", { dateTime: viewing.starts_at }, viewing.local_start),
+                    h("span", null, viewing.listing_reference || viewing.lead_id),
+                    h("small", null, viewing.broker),
+                  ),
+                ),
+              )
+            : null,
+          day.follow_ups_due.length
+            ? h(
+                "p",
+                { className: "adm-week__due", "data-week-due": String(day.follow_ups_due.length) },
+                h(Icon, { name: "calendar-check", size: 14 }),
+                h("span", null, `${day.follow_ups_due.length} ${ui.followUpsDue.toLowerCase()}`),
+              )
+            : null,
+        ),
+      ),
+    ),
+    h(
+      "ul",
+      { className: "adm-week__brokers" },
+      ...week.brokers.map((broker) =>
+        h(
+          "li",
+          { key: broker.broker_id, "data-week-broker": broker.broker_id },
+          h("strong", null, broker.broker_id),
+          h(
+            StatusPill,
+            { tone: broker.availability_source === "broker_recorded" ? "sea" : "sand" },
+            broker.availability_source === "broker_recorded" ? ui.recordedHours : ui.officeDefaultHours,
+          ),
+          h("span", null, `${broker.open_slots} ${ui.freeSlots.toLowerCase()}`),
+        ),
+      ),
+    ),
+    brokersOnDefault.length ? h("p", { className: "adm-week__note" }, ui.officeDefaultNote) : null,
+  );
+}
+
 function ViewingsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const title = label(copy, "viewingsWorkspace", "Viewings and follow-ups");
   const viewings = [...(page.viewings || [])].sort((left, right) => Date.parse(left.starts_at) - Date.parse(right.starts_at));
+  const weekLayout = page.viewingLayout === "week" && Boolean(page.viewingWeek);
   const metrics = [
     [label(copy, "viewings", "Viewings"), page.summary?.viewings || 0, "calendar-days", "sea"],
     [label(copy, "openFollowUps", "Open follow-ups"), page.summary?.viewingFollowUpsOpen || 0, "calendar-check", "sun"],
     [label(copy, "overdueFollowUps", "Overdue follow-ups"), page.summary?.viewingFollowUpsOverdue || 0, "triangle-alert", "brick"],
     [statusText(ui, "completed"), page.viewingFollowUpQueue?.summary?.completed || 0, "check-circle-2", "success"],
+    ...(page.viewingWeek ? [[ui.freeSlots, page.viewingWeek.summary.open_slots, "clock", "sea"]] : []),
   ];
   return adminShell(page, {
     title,
@@ -3351,18 +3516,22 @@ function ViewingsBody({ page }) {
         { title, subtitle: page.metadata?.description },
         h(
           "div",
-          { className: "adm-planned adm-planned--inline", "data-planned-control": "viewing_week_view" },
+          { className: "crm-seg", role: "group", "aria-label": ui.viewingLayout },
           h(
-            "div",
-            { className: "crm-seg", role: "group", "aria-label": ui.viewingLayout },
-            h("button", { type: "button", "data-on": "1", "aria-pressed": "true" }, ui.listView),
-            h("button", { type: "button", "data-on": "0", disabled: true, "aria-describedby": "viewing-week-note", title: ui.weekViewNote }, ui.weekView, h(PlannedBadge, { ui })),
+            "a",
+            { href: adminHref("/admin/viewings", page), "data-on": weekLayout ? "0" : "1", "aria-current": weekLayout ? undefined : "page" },
+            ui.listView,
           ),
-          h(PlannedNote, { id: "viewing-week-note", className: "adm-planned-note adm-visually-hidden" }, ui.weekViewNote),
+          h(
+            "a",
+            { href: weekHref(page, null), "data-on": weekLayout ? "1" : "0", "aria-current": weekLayout ? "page" : undefined },
+            ui.weekView,
+          ),
         ),
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/viewings.ics", download: true }, h(Icon, { name: "download", size: 16 }), h("span", null, label(copy, "downloadCalendar", "Download calendar"))),
       ),
       h(StatGrid, { metrics }),
+      weekLayout ? h(ViewingWeekPanel, { page, copy, ui }) : null,
       h(
         Panel,
         { title: label(copy, "upcomingViewings", "Upcoming viewings"), "data-viewing-schedule": "true" },

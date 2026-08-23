@@ -13,6 +13,7 @@ const ADMIN_ACTIONS = new Set([
   "account_created",
   "admin_session_revoked",
   "audit_log_pruned",
+  "broker_availability_updated",
   "broker_contact_approved",
   "contact_linked",
   "consent_withdrawn",
