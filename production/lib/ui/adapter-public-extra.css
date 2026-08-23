@@ -226,12 +226,20 @@
   color: var(--text-muted);
   font-size: var(--text-xs);
   font-weight: var(--fw-bold);
-  letter-spacing: 0.04em;
   text-align: start;
-  text-transform: uppercase;
   vertical-align: middle;
 }
-.cmp-table thead th { border-block-end: 1px solid var(--border-strong); vertical-align: top; }
+.cmp-table tbody th { letter-spacing: var(--tracking-caps); text-transform: uppercase; }
+.cmp-table thead th {
+  border-block-end: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-strong);
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  vertical-align: top;
+}
 .cmp-table__corner { vertical-align: bottom; }
 .cmp-table tbody tr + tr th,
 .cmp-table tbody tr + tr td { border-block-start: 1px solid var(--border); }
@@ -276,7 +284,7 @@
 }
 .cmp-col__title:hover .cmp-col__name { text-decoration: underline; }
 .cmp-col__title:focus-visible { outline: none; border-radius: var(--radius-sm); box-shadow: var(--shadow-focus); }
-.cmp-col__index { color: var(--text-subtle); font-size: var(--text-xs); font-weight: var(--fw-bold); letter-spacing: 0.04em; text-transform: uppercase; }
+.cmp-col__index { display: none; }
 .cmp-col__name { font-size: var(--text-md); font-weight: var(--fw-semibold); line-height: var(--lh-snug); overflow-wrap: anywhere; }
 .cmp-col__remove {
   display: inline-flex;
