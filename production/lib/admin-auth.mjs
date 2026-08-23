@@ -84,6 +84,7 @@ const CONTENT_WRITE_PATHS = new Set([
   "/api/admin/listings/publication-schedules/cancel",
   "/api/admin/listings/publication-schedules/run-due",
   "/api/admin/media/reviews",
+  "/api/admin/media/uploads",
   "/api/admin/tours/approve",
 ]);
 
@@ -162,6 +163,11 @@ export function requiredAdminCapability(method, pathname) {
     )
   ) {
     return "cases:write";
+  }
+  // Uploaded media: listing and enquiry photo bytes are unreviewed and private,
+  // so reading one is a content read and writing one is a content write.
+  if (pathname === "/api/admin/media/uploads" || pathname.startsWith("/api/admin/media/uploads/")) {
+    return verb === "GET" ? "content:read" : "content:write";
   }
   if (verb === "GET" && OPERATIONS_READ_PATHS.has(pathname)) return "operations:read";
   if (verb === "GET" && CONTENT_READ_PATHS.has(pathname)) return "content:read";

@@ -1142,6 +1142,149 @@
     for (var i = 0; i < controls.length; i += 1) controls[i].hidden = false;
     form.setAttribute("data-seller-stepper", "true");
   }
+  // Seller photo upload. The form is a real multipart post that works with
+  // JavaScript switched off (the server redirects back with ?photos=), and this
+  // upgrades it to inline progress, per-file errors, and a disabled button
+  // while bytes are in flight.
+  function initSellerPhotoUpload() {
+    var form = document.querySelector("[data-seller-photo-form]");
+    if (!form) return;
+    var input = form.querySelector("[data-seller-photo-input]");
+    var reference = form.querySelector("[data-seller-photo-reference]");
+    var referenceField = form.querySelector("[data-seller-photo-reference-field]");
+    var status = form.querySelector("[data-seller-photo-status]");
+    var results = form.querySelector("[data-seller-photo-results]");
+    var progress = form.querySelector("[data-seller-photo-progress]");
+    var submit = form.querySelector("[data-seller-photo-submit]");
+    var limitsHint = form.getAttribute("data-seller-photo-limits") || "";
+    var maxFiles = Number(form.getAttribute("data-seller-photo-max-files")) || 8;
+    var maxBytes = Number(form.getAttribute("data-seller-photo-max-bytes")) || 8 * 1024 * 1024;
+    var pendingText = form.getAttribute("data-seller-photo-pending") || "";
+    var successText = form.getAttribute("data-seller-photo-success") || "";
+    var failureText = form.getAttribute("data-seller-photo-failure") || "";
+    var STORE_KEY = "ms-realty:seller-enquiry";
+
+    function readStoredReference() {
+      try {
+        return window.sessionStorage.getItem(STORE_KEY) || "";
+      } catch (error) {
+        return "";
+      }
+    }
+    function rememberReference(value) {
+      try {
+        window.sessionStorage.setItem(STORE_KEY, value);
+      } catch (error) {
+        // Private browsing: the visible field still carries the reference.
+      }
+    }
+    function setStatus(text, state) {
+      if (!status) return;
+      status.textContent = text || "";
+      if (state) status.setAttribute("data-state", state);
+      else status.removeAttribute("data-state");
+    }
+    function clearResults() {
+      if (results) results.textContent = "";
+    }
+    function addResult(text, state) {
+      if (!results) return;
+      var item = document.createElement("li");
+      item.textContent = text;
+      item.setAttribute("data-state", state);
+      results.appendChild(item);
+    }
+
+    var params = new URLSearchParams(window.location.search);
+    var prefill = (params.get("enquiry") || readStoredReference()).trim();
+    if (prefill && reference) {
+      reference.value = prefill;
+      if (referenceField) referenceField.hidden = true;
+    }
+    var outcome = params.get("photos");
+    if (outcome === "ok") setStatus(successText, "success");
+    else if (outcome === "partial") setStatus(successText, "warning");
+    else if (outcome === "error") setStatus(failureText, "error");
+
+    if (!window.FormData || !window.XMLHttpRequest) return;
+
+    form.addEventListener("submit", function (event) {
+      var files = input && input.files ? Array.prototype.slice.call(input.files) : [];
+      if (!files.length || !reference || !reference.value.trim()) return;
+      event.preventDefault();
+      clearResults();
+
+      var payload = new FormData();
+      payload.append(reference.getAttribute("name") || "enquiryId", reference.value.trim());
+      var queued = [];
+      for (var i = 0; i < files.length; i += 1) {
+        if (queued.length >= maxFiles || files[i].size > maxBytes) {
+          addResult(files[i].name + " — " + limitsHint, "error");
+          continue;
+        }
+        queued.push(files[i]);
+        payload.append(input.getAttribute("name") || "photo", files[i], files[i].name);
+      }
+      if (!queued.length) {
+        setStatus(failureText, "error");
+        return;
+      }
+
+      if (submit) submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setStatus(pendingText, "pending");
+      if (progress) {
+        progress.hidden = false;
+        progress.value = 0;
+      }
+
+      var request = new XMLHttpRequest();
+      request.open("POST", form.getAttribute("action"), true);
+      request.setRequestHeader("accept", "application/json");
+      request.withCredentials = true;
+      if (request.upload) {
+        request.upload.onprogress = function (progressEvent) {
+          if (!progress || !progressEvent.lengthComputable) return;
+          progress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+        };
+      }
+      request.onload = function () {
+        var body = {};
+        try {
+          body = JSON.parse(request.responseText || "{}");
+        } catch (error) {
+          body = {};
+        }
+        var received = body.received || [];
+        var refused = body.rejected || [];
+        for (var a = 0; a < received.length; a += 1) {
+          var acceptedFile = queued[received[a].index];
+          addResult((acceptedFile ? acceptedFile.name : "") + " — " + successText, "success");
+        }
+        for (var r = 0; r < refused.length; r += 1) {
+          var refusedFile = queued[refused[r].index];
+          addResult((refusedFile ? refusedFile.name + " — " : "") + (refused[r].message || failureText), "error");
+        }
+        if (request.status >= 200 && request.status < 300) {
+          rememberReference(reference.value.trim());
+          setStatus(refused.length ? successText : successText, refused.length ? "warning" : "success");
+          if (input) input.value = "";
+        } else {
+          setStatus(body.message || failureText, "error");
+        }
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.onerror = function () {
+        setStatus(failureText, "error");
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.send(payload);
+    });
+  }
   function initSellerIntake() {
     var form = document.querySelector("form[data-seller-intake]");
     if (!form) return;
@@ -2085,6 +2228,7 @@
  initGuideToc();
  initSellerStepper();
  initSellerIntake();
+ initSellerPhotoUpload();
  initPhotoSphereViewers();
  initPrivacySafeAnalytics();
 })();

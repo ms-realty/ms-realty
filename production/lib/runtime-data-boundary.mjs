@@ -2,6 +2,7 @@ const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 export const FILE_BACKED_PUBLIC_MUTATIONS = new Set([
   "/api/events",
+  "/api/seller-photos",
   "/api/language-requests",
   "/api/saved-searches",
   "/api/saved-searches/manage",
@@ -25,6 +26,7 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/listings/slug",
   "/api/admin/locales",
   "/api/admin/media/reviews",
+  "/api/admin/media/uploads",
   "/api/admin/public-requests/outcome",
   "/api/admin/redirect-approvals",
   "/api/admin/redirect-approvals/import",

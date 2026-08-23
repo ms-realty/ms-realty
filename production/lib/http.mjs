@@ -344,6 +344,18 @@ import {
 } from "./saved-search-alert-deliveries.mjs";
 import { buildSavedSearchAlertReport } from "./saved-search-alerts.mjs";
 import { DEFAULT_PUBLIC_ORIGIN } from "./seo-files.mjs";
+// B4 media upload
+import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./media-upload-storage.mjs";
+import { applyMediaUploads, mediaUploadLimitsFromEnv, mediaUploadRequestBytes, readMediaUploads } from "./media-uploads.mjs";
+import {
+  ADMIN_MEDIA_UPLOAD_PATH,
+  SELLER_PHOTO_UPLOAD_PATH,
+  acceptsHtmlResponse,
+  handleAdminMediaUpload,
+  handleSellerPhotoUpload,
+  listMediaUploads,
+  readMediaUploadBytes,
+} from "./media-upload-routes.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -835,6 +847,12 @@ export function createHttpApp({
   translationLedgerPath = null,
   listingEditLedgerPath = null,
   mediaReviewLedgerPath = null,
+  // B4 media upload
+  mediaUploadLedgerPath = null,
+  mediaUploadStorage = null,
+  mediaUploadStorageConfig = null,
+  mediaUploadLimits = null,
+  sellerPhotoUploadEnabled = true,
   listingPublicationSchedulePath = null,
   viewingLedgerPath = null,
   viewingFollowUpLedgerPath = null,
@@ -954,7 +972,12 @@ export function createHttpApp({
     runtimeDataDurableOnly
       ? seed
       : applyMediaReviews(
-      applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined)),
+      // B4: uploaded listing assets join the seed before reviews are applied,
+      // so an upload enters the existing review queue instead of bypassing it.
+      applyMediaUploads(
+        applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined)),
+        readMediaUploads(mediaUploadLedgerPath || undefined),
+      ),
       readMediaReviews(mediaReviewLedgerPath || undefined),
     );
   const currentPublicSeed = () => {
@@ -2220,6 +2243,100 @@ export function createHttpApp({
       }
 
       return privateJson(405, { kind: "method_not_allowed" });
+    }
+
+    // B4 media upload — admin listing-editor uploads and public seller-intake
+    // photos, both filed as unreviewed assets in the existing media review
+    // workflow. Nothing written here is public; publication still requires a
+    // human decision and alt text through /api/admin/media/reviews. The rules
+    // live in media-upload-routes.mjs so the Next App Router handoff runs the
+    // same ones.
+    if (url.pathname === ADMIN_MEDIA_UPLOAD_PATH || url.pathname.startsWith(`${ADMIN_MEDIA_UPLOAD_PATH}/`)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const uploadLimits = mediaUploadLimits || mediaUploadLimitsFromEnv();
+      const uploadStorage = () =>
+        mediaUploadStorage || createMediaUploadStorage(mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
+
+      if (request.method === "GET" && url.pathname === ADMIN_MEDIA_UPLOAD_PATH) {
+        const listed = listMediaUploads({
+          ledgerPath: mediaUploadLedgerPath,
+          listing: url.searchParams.get("listing") || "",
+          enquiry: url.searchParams.get("enquiry") || "",
+          limits: uploadLimits,
+        });
+        return adminJson(listed.status, listed.body);
+      }
+
+      if (request.method === "GET") {
+        // Byte preview for the reviewer. Unreviewed media is private, so the
+        // response is admin-only and never cached.
+        let assetId = "";
+        try {
+          assetId = decodeURIComponent(url.pathname.slice(`${ADMIN_MEDIA_UPLOAD_PATH}/`.length));
+        } catch {
+          return adminJson(400, { kind: "bad_request", message: "Malformed upload id" });
+        }
+        const preview = await readMediaUploadBytes({ ledgerPath: mediaUploadLedgerPath, assetId, storage: uploadStorage() });
+        if (preview.status !== 200) return adminJson(preview.status, preview.body);
+        return { status: 200, headers: { ...SECURITY_HEADERS, ...PRIVATE_HEADERS, ...preview.headers }, body: preview.body };
+      }
+
+      if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
+      const uploaded = await handleAdminMediaUpload({
+        bytes: mediaUploadRequestBytes(request),
+        contentType: readHeader(request.headers, "content-type"),
+        // A browser form post (no JavaScript) asks for HTML and gets a redirect
+        // back to the editor; the enhanced fetch asks for JSON and gets JSON.
+        acceptsHtml: acceptsHtmlResponse(readHeader(request.headers, "accept")),
+        seed: currentSeed(),
+        limits: uploadLimits,
+        storage: uploadStorage(),
+        ledgerPath: mediaUploadLedgerPath,
+        uploadedBy: principal?.id || "admin",
+        uploadedAt: reviewedAt || editedAt || receivedAt || new Date().toISOString(),
+        recordAudit: (entry) => writeAudit(withAuthenticatedAuditActor(entry, principal)),
+        editorPathFor: listingEditorPath,
+      });
+      if (uploaded.status === 303) return adminResponse(303, "", "text/plain; charset=utf-8", uploaded.headers);
+      return adminJson(uploaded.status, uploaded.body);
+    }
+
+    if (request.method === "POST" && url.pathname === SELLER_PHOTO_UPLOAD_PATH) {
+      // Public write: same origin guard, same limiter and the same byte rules
+      // as the admin route. The limiter runs here because this block is
+      // reached before the shared public-write limiter further down.
+      const photoProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
+      const photoRequestUrl = new URL(
+        request.url,
+        `${["http", "https"].includes(photoProtocol) ? photoProtocol : "http"}://${requestHost(request.headers) || "localhost"}`,
+      );
+      const photoCrossOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl: photoRequestUrl });
+      if (photoCrossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: photoCrossOrigin });
+      if (publicWriteLimiter) {
+        const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
+        if (!verdict.allowed) {
+          return response(429, { kind: "rate_limited", retry_after: verdict.retryAfterSec }, "application/json; charset=utf-8", {
+            "retry-after": String(verdict.retryAfterSec),
+            "cache-control": "no-store",
+          });
+        }
+      }
+      const sellerStoreReady = sellerPhotoUploadEnabled && !runtimeDataDurableOnly && Boolean(sellerPipelinePath);
+      const sellerPhotos = await handleSellerPhotoUpload({
+        bytes: mediaUploadRequestBytes(request),
+        contentType: readHeader(request.headers, "content-type"),
+        acceptsHtml: acceptsHtmlResponse(readHeader(request.headers, "accept")),
+        returnPath: url.searchParams.get("return") || "",
+        enabled: sellerStoreReady,
+        sellerEnquiries: sellerStoreReady ? readSellerPipeline(sellerPipelinePath) : null,
+        limits: mediaUploadLimits || mediaUploadLimitsFromEnv(),
+        storage: mediaUploadStorage || createMediaUploadStorage(mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv()),
+        ledgerPath: mediaUploadLedgerPath,
+        uploadedAt: receivedAt || new Date().toISOString(),
+        recordAudit: (entry) => writeAudit(entry),
+      });
+      if (sellerPhotos.status === 303) return privateResponse(303, "", "text/plain; charset=utf-8", sellerPhotos.headers);
+      return privateJson(sellerPhotos.status, sellerPhotos.body);
     }
 
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
@@ -5153,8 +5270,13 @@ export function createHttpApp({
   };
 }
 
-export async function dispatchHttp(app, { method = "GET", url, body, headers } = {}) {
-  return app({ method, url, headers, body: typeof body === "string" ? body : body ? JSON.stringify(body) : "" });
+export async function dispatchHttp(app, { method = "GET", url, body, headers, remoteAddress } = {}) {
+  // A Buffer body is passed through byte-exact for multipart uploads; the
+  // latin1 view keeps the string form lossless for anything that reads it.
+  if (Buffer.isBuffer(body)) {
+    return app({ method, url, headers, remoteAddress, body: body.toString("latin1"), bodyBytes: body });
+  }
+  return app({ method, url, headers, remoteAddress, body: typeof body === "string" ? body : body ? JSON.stringify(body) : "" });
 }
 
 export function assertHttpSmoke(smoke) {
