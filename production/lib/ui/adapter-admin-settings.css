@@ -223,6 +223,10 @@
 .adm-settings-pending__copy > strong { color: var(--text-strong); font-size: var(--text-sm); }
 .adm-settings-pending__copy .adm-planned-note { margin: 0; }
 .adm-settings-pending__control { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); min-width: 0; }
+.adm-settings-pending__control.adm-settings-planned__stack { display: grid; align-items: stretch; justify-content: stretch; }
+.adm-settings-planned__row:has(> .adm-settings-planned__stack form) { grid-template-columns: minmax(0, 1fr) minmax(0, 380px); }
+.adm-settings-planned__stack form .adm-settings-inline-field { width: 100%; }
+.adm-settings-planned__stack form + strong { margin-top: var(--space-3); }
 .adm-settings-pending__control input:not([type="checkbox"]),
 .adm-settings-pending__control select { width: 100%; min-width: 0; }
 .adm-settings-pending__control input[type="checkbox"] { width: 17px; height: 17px; }
