@@ -106,10 +106,28 @@ export function assertLocaleRegistry(registry) {
       // The buyer onboarding segment is optional for registries written before
       // it existed (startPath falls back to "start"), but when present it must
       // be a valid URL segment like every other route.
-      (locale.route_segments.start !== undefined && !ROUTE_SEGMENT.test(locale.route_segments.start))
+      (locale.route_segments.start !== undefined && !ROUTE_SEGMENT.test(locale.route_segments.start)) ||
+      // Compare, about and alerts follow the same optional-but-valid rule as
+      // the onboarding segment, so an older registry keeps resolving.
+      (locale.route_segments.compare !== undefined && !ROUTE_SEGMENT.test(locale.route_segments.compare)) ||
+      (locale.route_segments.about !== undefined && !ROUTE_SEGMENT.test(locale.route_segments.about)) ||
+      (locale.route_segments.alerts !== undefined && !ROUTE_SEGMENT.test(locale.route_segments.alerts))
     ) {
       throw new Error(`Invalid route segment for ${locale.code}`);
     }
+    // Two routes of the same locale may never resolve to the same path.
+    const owned = [
+      locale.route_segments.listing,
+      locale.route_segments.search,
+      locale.route_segments.location,
+      locale.route_segments.contact,
+      locale.route_segments.seller,
+      locale.route_segments.start,
+      locale.route_segments.compare,
+      locale.route_segments.about,
+      locale.route_segments.alerts,
+    ].filter((segment) => segment !== undefined);
+    if (new Set(owned).size !== owned.length) throw new Error(`Duplicate route segment for ${locale.code}`);
   }
 
   for (const code of requiredPublicLocales(registry)) {
@@ -163,6 +181,9 @@ export function addLocaleToRegistry(registry, input) {
       contact: input.route_segments?.contact || "contact",
       seller: input.route_segments?.seller || "sell",
       start: input.route_segments?.start || "start",
+      compare: input.route_segments?.compare || "compare",
+      about: input.route_segments?.about || "about",
+      alerts: input.route_segments?.alerts || "alerts",
     },
   };
   const next = { ...registry, locales: [...registry.locales, locale] };

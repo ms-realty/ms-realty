@@ -87,6 +87,10 @@
       }
       savedView.setAttribute("data-saved-listings-ready", "true");
     }
+    // Package P4: the header shortcut and the saved-view compare action follow
+    // the same shortlist, so they are refreshed here rather than through a
+    // second click listener.
+    syncCompareLinks();
   }
   function nestFormData(form) {
     var data = new FormData(form);
@@ -116,6 +120,9 @@
     message.textContent = form.getAttribute("data-success-message") || I18N.requestSent || "Sent.";
     note.appendChild(icon);
     note.appendChild(message);
+    // Package P4: a saved search is remembered for this session so the alerts
+    // page can list it. Only accepted requests reach this point.
+    recordSavedSearch(form);
     form.replaceWith(note);
     note.focus();
   }
@@ -501,6 +508,474 @@
     contact.autocomplete = value === "email" ? "email" : "tel";
     if (label) label.textContent = label.getAttribute(value === "email" ? "data-email-label" : "data-whatsapp-label") || value;
   }
+  /* ==========================================================
+     Package P4: saved-listing comparison, the header compare
+     shortcut and saved-search management.
+     ========================================================== */
+  var SAVED_SEARCH_KEY = "ms-realty:saved-searches:v1";
+  var COMPARE_MAX = 4;
+
+  function readSavedSearches() {
+    try {
+      var value = JSON.parse(sessionStorage.getItem(SAVED_SEARCH_KEY));
+      return Array.isArray(value) ? value.filter(function (item) { return item && typeof item === "object" && item.id; }) : [];
+    } catch (error) { return []; }
+  }
+  function writeSavedSearches(records) {
+    try { sessionStorage.setItem(SAVED_SEARCH_KEY, JSON.stringify(records.slice(0, 20))); return true; }
+    catch (error) { return false; }
+  }
+  // Called by showSuccess once /api/saved-searches has accepted the request.
+  // Only the criteria are kept, never the visitor's email address or phone
+  // number, and the store is per session because there is no read endpoint to
+  // reconcile it against.
+  function recordSavedSearch(form) {
+    if (!form || typeof form.hasAttribute !== "function" || !form.hasAttribute("data-save-search-endpoint")) return;
+    var data;
+    try { data = new FormData(form); } catch (error) { return; }
+    var filters = {};
+    try { filters = JSON.parse(String(data.get("filters") || "{}")) || {}; } catch (error) { filters = {}; }
+    // The localised criteria already exist on the page as the active filter
+    // chips (results) or the answer summary (onboarding), so the alert list can
+    // name them later without a lookup table in the client.
+    var chips = document.querySelectorAll("[data-filter-chip]");
+    if (!chips.length) chips = document.querySelectorAll("[data-start-summary-row] dd");
+    var labels = [];
+    for (var i = 0; i < chips.length; i += 1) {
+      var text = String(chips[i].textContent || "").trim();
+      if (text && labels.indexOf(text) === -1) labels.push(text);
+    }
+    var seeMatches = document.querySelector("[data-start-see-matches]");
+    var searchHref = seeMatches
+      ? seeMatches.getAttribute("href") || ""
+      : document.querySelector("[data-search-results]") ? window.location.pathname + window.location.search : "";
+    var records = readSavedSearches();
+    records.unshift({
+      id: "ss-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
+      saved_at: new Date().toISOString(),
+      locale: String(data.get("locale") || document.documentElement.lang || ""),
+      query: String(data.get("query") || ""),
+      filters: filters,
+      labels: labels,
+      frequency: String(data.get("alertFrequency") || "weekly"),
+      channel: String(data.get("contact_preference") || "email"),
+      search_href: searchHref
+    });
+    writeSavedSearches(records);
+  }
+
+  function compareBaseHref(link) {
+    var base = link.getAttribute("data-compare-base");
+    if (base) return base;
+    base = String(link.getAttribute("href") || "").split("?")[0];
+    link.setAttribute("data-compare-base", base);
+    return base;
+  }
+  // The header counter and the saved-results toolbar both carry the shortlist
+  // ids into the comparison, so arriving at /compare needs no redirect.
+  function syncCompareLinks() {
+    var links = document.querySelectorAll("[data-compare-link]");
+    if (!links.length) return;
+    var saved = readSaved();
+    var ids = saved.slice(0, COMPARE_MAX);
+    for (var i = 0; i < links.length; i += 1) {
+      var base = compareBaseHref(links[i]);
+      links[i].setAttribute("href", ids.length ? base + "?ids=" + ids.join(",") : base);
+      links[i].hidden = saved.length < Number(links[i].getAttribute("data-compare-min") || 2);
+    }
+  }
+  function initCompareLinks() {
+    syncCompareLinks();
+  }
+
+  function compareColumnIds(table) {
+    var columns = table ? table.querySelectorAll("[data-compare-column]") : [];
+    var ids = [];
+    for (var i = 0; i < columns.length; i += 1) ids.push(columns[i].getAttribute("data-compare-column"));
+    return ids;
+  }
+  // Recompute which rows are identical, the disclosure count, the remove links
+  // and the shown-of-saved note after a column leaves.
+  function refreshCompare(root, path) {
+    var table = root.querySelector("[data-compare-table]");
+    var ids = compareColumnIds(table);
+    var rows = table ? table.querySelectorAll("tr[data-compare-row]") : [];
+    var identical = 0;
+    for (var i = 0; i < rows.length; i += 1) {
+      var cells = rows[i].querySelectorAll("td");
+      var same = ids.length > 1;
+      for (var j = 1; j < cells.length && same; j += 1) {
+        if (String(cells[j].textContent) !== String(cells[0].textContent)) same = false;
+      }
+      rows[i].setAttribute("data-compare-identical", same ? "true" : "false");
+      if (same) identical += 1;
+    }
+    // Columns are numbered for the reader, so the numbers close up when one
+    // leaves.
+    var template = root.getAttribute("data-compare-column-label") || "";
+    var indices = root.querySelectorAll(".cmp-col__index");
+    for (var n = 0; n < indices.length; n += 1) {
+      indices[n].textContent = template.replace("{index}", String(n + 1));
+    }
+    var show = root.querySelector("[data-compare-identical-show]");
+    var hide = root.querySelector("[data-compare-identical-hide]");
+    if (show) show.textContent = String(show.getAttribute("data-compare-identical-show") || "").replace("{count}", String(identical));
+    if (hide) hide.textContent = String(hide.getAttribute("data-compare-identical-hide") || "").replace("{count}", String(identical));
+    var disclosure = root.querySelector("[data-compare-identical-disclosure]");
+    if (disclosure) disclosure.hidden = identical === 0;
+    var removes = root.querySelectorAll("[data-compare-remove]");
+    for (var r = 0; r < removes.length; r += 1) {
+      var self = removes[r].getAttribute("data-compare-remove");
+      var rest = [];
+      for (var k = 0; k < ids.length; k += 1) { if (ids[k] !== self) rest.push(ids[k]); }
+      removes[r].setAttribute("href", rest.length ? path + "?ids=" + rest.join(",") : path);
+    }
+    var limit = root.querySelector("[data-compare-limit]");
+    if (limit) {
+      var savedCount = readSaved().length;
+      var max = Number(root.getAttribute("data-compare-max") || COMPARE_MAX);
+      var text = limit.querySelector("span:last-child");
+      if (text) {
+        text.textContent = String(limit.getAttribute("data-compare-limit-template") || "")
+          .replace("{max}", String(max))
+          .replace("{count}", String(savedCount));
+      }
+      limit.hidden = savedCount <= max;
+    }
+    if (ids.length) {
+      try { window.history.replaceState({}, "", path + "?ids=" + ids.join(",")); } catch (error) {}
+    }
+    return ids.length;
+  }
+  function initComparePage() {
+    var root = document.querySelector("[data-compare-page]");
+    if (!root) return;
+    var max = Number(root.getAttribute("data-compare-max") || COMPARE_MAX);
+    var path = root.getAttribute("data-compare-path") || window.location.pathname;
+    var fallback = root.querySelector("[data-compare-fallback]");
+    var empty = root.querySelector("[data-compare-empty]");
+    var region = root.querySelector("[data-compare-region]");
+    var table = root.querySelector("[data-compare-table]");
+    // The saved list only exists in this browser, so the server-rendered
+    // fallback stays until the script can read it.
+    if (fallback) fallback.hidden = true;
+    root.setAttribute("data-compare-ready", "true");
+    var saved = readSaved();
+    if (!compareColumnIds(table).length) {
+      var target = path + (saved.length ? "?ids=" + saved.slice(0, max).join(",") : "");
+      if (!saved.length || window.location.pathname + window.location.search === target) {
+        if (empty) empty.hidden = false;
+        if (region) region.hidden = true;
+        return;
+      }
+      window.location.replace(target);
+      return;
+    }
+    refreshCompare(root, path);
+    root.addEventListener("click", function (event) {
+      var remove = event.target.closest ? event.target.closest("[data-compare-remove]") : null;
+      if (!remove) return;
+      event.preventDefault();
+      var id = remove.getAttribute("data-compare-remove");
+      var ids = readSaved();
+      var index = ids.indexOf(id);
+      if (index !== -1) {
+        ids.splice(index, 1);
+        if (!writeSaved(ids)) {
+          showToast(I18N.requestFailed || "Could not update your saved properties.");
+          return;
+        }
+        markSaved();
+        syncCompareLinks();
+      }
+      var head = root.querySelector('[data-compare-column="' + id + '"]');
+      var cells = root.querySelectorAll('[data-compare-cell="' + id + '"]');
+      var foot = root.querySelector('[data-compare-foot-open="' + id + '"]');
+      if (head) head.remove();
+      for (var i = 0; i < cells.length; i += 1) cells[i].remove();
+      if (foot) foot.remove();
+      var left = refreshCompare(root, path);
+      if (left) {
+        var next = root.querySelector("[data-compare-remove]");
+        if (next) next.focus();
+        return;
+      }
+      if (region) region.hidden = true;
+      if (empty) {
+        empty.hidden = false;
+        var emptyAction = empty.querySelector("a");
+        if (emptyAction) emptyAction.focus();
+      }
+      try { window.history.replaceState({}, "", path); } catch (error) {}
+    });
+  }
+
+  function alertCriteriaLabel(record, fallbackLabel, dictionary) {
+    // The results page already rendered the criteria in the visitor's language,
+    // so the recorded chips are preferred over the raw filter values.
+    var labels = Array.isArray(record.labels) ? record.labels.slice(0) : [];
+    if (record.query) labels.unshift(String(record.query));
+    if (labels.length) return labels.join(" · ");
+    return alertsCriteriaFromFilters(record.filters, record.query, fallbackLabel, dictionary);
+  }
+  function alertSearchHref(record, searchPath) {
+    if (record.search_href) return record.search_href;
+    var params = new URLSearchParams();
+    if (record.query) params.set("q", String(record.query));
+    var filters = record.filters && typeof record.filters === "object" ? record.filters : {};
+    for (var key in filters) {
+      if (!Object.prototype.hasOwnProperty.call(filters, key)) continue;
+      var value = filters[key];
+      if (value === null || value === undefined || String(value) === "") continue;
+      params.set(key, String(value));
+    }
+    var query = params.toString();
+    return query ? searchPath + "?" + query : searchPath;
+  }
+  function alertsLocalise(root) {
+    var frequencies = {};
+    var channels = {};
+    try { frequencies = JSON.parse(root.getAttribute("data-alerts-frequencies") || "{}") || {}; } catch (error) { frequencies = {}; }
+    try { channels = JSON.parse(root.getAttribute("data-alerts-channels") || "{}") || {}; } catch (error) { channels = {}; }
+    return { frequencies: frequencies, channels: channels };
+  }
+  function alertsDate(value, locale) {
+    var when = new Date(value);
+    return isNaN(when.getTime()) ? "" : when.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" });
+  }
+  function alertsFilterLabels(root) {
+    try { return JSON.parse(root.getAttribute("data-alerts-filter-labels") || "{}") || {}; }
+    catch (error) { return {}; }
+  }
+  function alertsCriteriaFromFilters(filters, query, fallback, dictionary) {
+    var parts = [];
+    if (query) parts.push(String(query));
+    var source = filters && typeof filters === "object" ? filters : {};
+    var labels = dictionary || {};
+    for (var key in source) {
+      if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
+      var value = source[key];
+      if (value === null || value === undefined || String(value) === "") continue;
+      var known = labels[key] ? labels[key][String(value)] : null;
+      parts.push(known || String(value));
+    }
+    return parts.length ? parts.join(" · ") : fallback;
+  }
+  // The managed record, read from the capability link the visitor followed.
+  // Every refusal from the endpoint is one state: no valid link.
+  function initAlertsManage(root) {
+    var endpoint = root.getAttribute("data-alerts-manage-endpoint");
+    var tokenParam = root.getAttribute("data-alerts-token-param") || "token";
+    if (!endpoint) return false;
+    var token = "";
+    try { token = new URL(window.location.href).searchParams.get(tokenParam) || ""; } catch (error) { token = ""; }
+    if (!token) return false;
+    var managed = root.querySelector("[data-alerts-managed]");
+    var invalid = root.querySelector("[data-alerts-link-invalid]");
+    var explainer = root.querySelector("[data-alerts-link-explainer]");
+    var feedback = root.querySelector("[data-alert-feedback]");
+    var text = alertsLocalise(root);
+    var locale = document.documentElement.lang || "en";
+    var anyLabel = root.getAttribute("data-alerts-any") || "";
+    var searchPath = root.getAttribute("data-alerts-search-path") || "/";
+    var dictionary = alertsFilterLabels(root);
+    var localEmpty = root.querySelector("[data-alerts-empty]");
+    function showRefused() {
+      if (managed) managed.hidden = true;
+      if (invalid) invalid.hidden = false;
+      if (explainer) explainer.hidden = false;
+    }
+    function say(kind) {
+      if (!feedback) return;
+      feedback.textContent = feedback.getAttribute("data-" + kind) || "";
+      feedback.setAttribute("data-state", kind);
+    }
+    function busy(on) {
+      var controls = root.querySelectorAll("[data-alert-action], [data-alert-frequency-select], [data-alert-channel-select]");
+      for (var i = 0; i < controls.length; i += 1) {
+        controls[i].disabled = Boolean(on);
+        if (on) controls[i].setAttribute("aria-busy", "true");
+        else controls[i].removeAttribute("aria-busy");
+      }
+    }
+    function paint(payload) {
+      var record = payload.saved_search || {};
+      var contact = payload.contact || {};
+      var options = payload.options || {};
+      var active = (record.status || "active") === "active";
+      var status = root.querySelector("[data-alert-status]");
+      if (status) {
+        status.textContent = status.getAttribute(active ? "data-status-active" : "data-status-paused") || "";
+        status.setAttribute("data-state", active ? "active" : "paused");
+      }
+      var title = root.querySelector("[data-alerts-managed] [data-alert-title]");
+      var criteria = root.querySelector("[data-alerts-managed] [data-alert-criteria]");
+      var label = alertsCriteriaFromFilters(record.filters, record.query, anyLabel, dictionary);
+      if (title) title.textContent = label;
+      if (criteria) criteria.textContent = label;
+      var frequency = root.querySelector("[data-alerts-managed] [data-alert-frequency]");
+      if (frequency) frequency.textContent = text.frequencies[record.alert_frequency] || record.alert_frequency || "";
+      var channel = root.querySelector("[data-alerts-managed] [data-alert-channel]");
+      if (channel) channel.textContent = text.channels[record.contact_preference] || record.contact_preference || "";
+      var matches = root.querySelector("[data-alert-matches]");
+      if (matches) matches.textContent = String(record.match_count || 0);
+      var next = root.querySelector("[data-alert-next]");
+      if (next) {
+        next.setAttribute("datetime", record.next_alert_at || "");
+        next.textContent = record.next_alert_at ? alertsDate(record.next_alert_at, locale) : "";
+      }
+      var saved = root.querySelector("[data-alerts-managed] [data-alert-date]");
+      if (saved) {
+        saved.setAttribute("datetime", record.saved_at || "");
+        saved.textContent = alertsDate(record.saved_at, locale);
+      }
+      var expires = root.querySelector("[data-alert-expires]");
+      if (expires && payload.link) {
+        expires.setAttribute("datetime", payload.link.expires_at || "");
+        expires.textContent = payload.link.expires_at ? alertsDate(payload.link.expires_at, locale) : "";
+      }
+      var open = root.querySelector("[data-alerts-managed] [data-alert-open]");
+      if (open) open.setAttribute("href", alertSearchHref({ filters: record.filters, query: record.query, search_href: "" }, searchPath));
+      var pause = root.querySelector('[data-alert-action="pause"]');
+      var resume = root.querySelector('[data-alert-action="resume"]');
+      if (pause) pause.hidden = !active;
+      if (resume) resume.hidden = active;
+      var frequencySelect = root.querySelector("[data-alert-frequency-select]");
+      if (frequencySelect) frequencySelect.value = record.alert_frequency || "weekly";
+      // The channel list is whatever contact details the visitor actually gave
+      // us, so it is empty when the vault cannot be read.
+      var channelField = root.querySelector("[data-alert-channel-field]");
+      var channelSelect = root.querySelector("[data-alert-channel-select]");
+      var available = (options.channels || []).slice(0);
+      if (channelField && channelSelect) {
+        channelField.hidden = available.length < 2;
+        channelSelect.textContent = "";
+        for (var i = 0; i < available.length; i += 1) {
+          var option = document.createElement("option");
+          option.value = available[i];
+          option.textContent = text.channels[available[i]] || available[i];
+          channelSelect.appendChild(option);
+        }
+        if (record.contact_preference) channelSelect.value = record.contact_preference;
+      }
+      void contact;
+      if (managed) managed.hidden = false;
+      if (invalid) invalid.hidden = true;
+      if (explainer) explainer.hidden = true;
+      // A real record is on screen, so the "nothing saved here" state would
+      // only contradict it.
+      if (localEmpty) localEmpty.hidden = true;
+    }
+    function send(payload) {
+      busy(true);
+      say("saving");
+      fetch(endpoint, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(Object.assign({ token: token }, payload)),
+      })
+        .then(function (response) {
+          if (response.status === 404) throw new Error("refused");
+          if (!response.ok) throw new Error(String(response.status));
+          return response.json();
+        })
+        .then(function (data) {
+          if (payload.action === "delete") {
+            if (managed) managed.hidden = true;
+            say("deleted");
+            return;
+          }
+          paint(data);
+          say("saved");
+        })
+        .catch(function (error) {
+          if (error && error.message === "refused") {
+            showRefused();
+            return;
+          }
+          say("failed");
+        })
+        .then(function () { busy(false); });
+    }
+    root.addEventListener("click", function (event) {
+      var action = event.target.closest ? event.target.closest("[data-alert-action]") : null;
+      if (!action || action.disabled) return;
+      event.preventDefault();
+      var name = action.getAttribute("data-alert-action");
+      var confirmText = action.getAttribute("data-alert-confirm");
+      if (confirmText && !window.confirm(confirmText)) return;
+      send({ action: name });
+    });
+    root.addEventListener("change", function (event) {
+      var frequency = event.target.closest ? event.target.closest("[data-alert-frequency-select]") : null;
+      if (frequency) {
+        send({ action: "update_frequency", frequency: frequency.value });
+        return;
+      }
+      var channel = event.target.closest ? event.target.closest("[data-alert-channel-select]") : null;
+      if (channel) send({ action: "update_channel", channel: channel.value });
+    });
+    fetch(endpoint + "?" + tokenParam + "=" + encodeURIComponent(token), {
+      credentials: "same-origin",
+      headers: { accept: "application/json" },
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error(String(response.status));
+        return response.json();
+      })
+      .then(paint)
+      .catch(showRefused);
+    return true;
+  }
+  function initAlertsPage() {
+    var root = document.querySelector("[data-alerts-page]");
+    if (!root) return;
+    var fallback = root.querySelector("[data-alerts-fallback]:not([data-alerts-link-invalid])");
+    var empty = root.querySelector("[data-alerts-empty]");
+    var region = root.querySelector("[data-alerts-region]");
+    var list = root.querySelector("[data-alerts-list]");
+    var template = root.querySelector("[data-alerts-row-template]");
+    if (fallback) fallback.hidden = true;
+    root.setAttribute("data-alerts-ready", "true");
+    // A capability link manages one real record; the local list is what this
+    // browser happens to remember about searches saved here.
+    initAlertsManage(root);
+    var records = readSavedSearches();
+    if (!records.length || !template || !list || !template.content) {
+      if (empty) empty.hidden = false;
+      return;
+    }
+    var text = alertsLocalise(root);
+    var anyLabel = root.getAttribute("data-alerts-any") || "";
+    var searchPath = root.getAttribute("data-alerts-search-path") || "/";
+    var locale = document.documentElement.lang || "en";
+    for (var i = 0; i < records.length; i += 1) {
+      var record = records[i];
+      var row = template.content.firstElementChild.cloneNode(true);
+      row.setAttribute("data-alert-id", record.id);
+      var title = row.querySelector("[data-alert-title]");
+      var criteria = row.querySelector("[data-alert-criteria]");
+      var frequency = row.querySelector("[data-alert-frequency]");
+      var channel = row.querySelector("[data-alert-channel]");
+      var date = row.querySelector("[data-alert-date]");
+      var open = row.querySelector("[data-alert-open]");
+      var label = alertCriteriaLabel(record, anyLabel, alertsFilterLabels(root));
+      if (title) title.textContent = label;
+      if (criteria) criteria.textContent = label;
+      if (frequency) frequency.textContent = text.frequencies[record.frequency] || record.frequency || "";
+      if (channel) channel.textContent = text.channels[record.channel] || record.channel || "";
+      if (date) {
+        date.setAttribute("datetime", record.saved_at || "");
+        date.textContent = alertsDate(record.saved_at, locale);
+      }
+      if (open) open.setAttribute("href", alertSearchHref(record, searchPath));
+      list.appendChild(row);
+    }
+    if (region) region.hidden = false;
+    if (empty) empty.hidden = true;
+  }
+
   function initSavedSearchContacts() {
     var forms = document.querySelectorAll("[data-save-search-form]");
     for (var i = 0; i < forms.length; i += 1) updateSavedSearchContact(forms[i]);
@@ -2250,6 +2725,9 @@
   });
   markSaved();
   initStartFlow();
+  initCompareLinks();
+  initComparePage();
+  initAlertsPage();
   initGuidedSearch();
   initSearchScrollRestoration();
   initDialogFocusReturn();
