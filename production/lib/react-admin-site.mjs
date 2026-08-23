@@ -24,6 +24,7 @@ const DURABLE_ONLY_NAV_IDS = new Set([
   "realty_cases",
   "listing_manager",
   "translation_queue",
+  "approved_content",
 ]);
 
 function durableRuntimeMutationAvailable(page, pathname) {
@@ -51,6 +52,44 @@ function adminHomeForPage(page) {
 // can be reviewed in the same locale set as the rest of the admin surface.
 const ADMIN_UI_COPY = {
   bg: {
+    // Package A2 (CMS and launch screens): summary strips, empty states,
+    // and the controls the product needs whose backend does not exist yet.
+    objectTypes: "Видове обекти",
+    listingTranslations: "превода",
+    exportListingsCsv: "Изтегляне на таблицата (CSV)",
+    exportListingsCsvNote: "Таблицата с обяви още няма крайна точка за експорт.",
+    duplicateListing: "Дублиране на обява",
+    duplicateListingNote: "Дублирането изисква крайна точка за копиране на обява.",
+    selectionEmptyHint: "Избери обяви, за да смениш статуса им.",
+    noListingResultsTitle: "Няма обява по тези филтри",
+    noListingResultsBody: "Разшири търсенето, смени статуса или изчисти филтрите.",
+    noTranslationTitle: "Няма преводи за преглед",
+    noTranslationBody: "Всяка обява в този изглед има одобрен превод за избраните езици.",
+    assignReviewer: "Възлагане на проверяващ",
+    assignReviewerNote: "Груповото възлагане изисква крайна точка за възлагане на преводи.",
+    noActivityTitle: "Още няма записани действия",
+    noActivityBody: "Всяко действие на оператор върху обяви, запитвания и решения за пускане се появява тук веднага.",
+    noReportDataTitle: "Още няма данни за този отчет",
+    noReportDataBody: "Числата се появяват, когато има записани запитвания, търсения и отговори.",
+    reportPeriod: "Период",
+    reportPeriodAll: "Всички записани данни",
+    reportPeriodNote: "Изборът на период изисква отчет с диапазон от дати.",
+    noRouteDecisionsTitle: "Няма стар URL за решение",
+    noRouteDecisionsBody: "Всеки URL в този изглед вече има прегледано окончателно решение.",
+    noMediaTitle: "Няма медия за преглед",
+    noMediaBody: "Снимките, плановете и видеата се появяват тук, след като огледалото на медиите ги внесе.",
+    uploadMedia: "Качване на медия",
+    uploadMediaNote: "Качването изисква крайна точка за приемане на медия. Внасянето минава през огледалото на медиите.",
+    uploadMediaHint: "Пусни файловете тук или ги избери.",
+    mediaPreviewFailed: "Прегледът не се зареди.",
+    editingAs: "Редактира",
+    saveConflictTitle: "Обявата е променена, докато я редактираше",
+    saveConflictBody: "Презареди обявата, за да видиш текущите данни, и приложи промяната отново.",
+    reloadListing: "Презареждане",
+    tourNotPublished: "Няма одобрена 360 обиколка",
+    tourNotPublishedBody: "Попълни формата, за да я прегледаш и публикуваш. Полетата следват избрания визуализатор.",
+    launchTools: "Инструменти за пускане",
+    previewOnSite: "Преглед в сайта",
     urls: "URL адреси",
     reviewRequired: "Изисква преглед",
     mappedListings: "Свързани обяви",
@@ -232,6 +271,8 @@ const ADMIN_UI_COPY = {
     savedViewsDefault: "Всички запитвания",
     savedViewsNote: "Запазените изгледи чакат съхранен филтър за всеки оператор в настройките на работното пространство.",
     listTools: "Инструменти за списъка",
+    editorTools: "Инструменти на редактора",
+    reportTools: "Инструменти за отчета",
     bulkActions: "Групови действия",
     selectAllLeads: "Избери всички в този изглед",
     bulkAssign: "Възложи на брокер",
@@ -436,6 +477,57 @@ const ADMIN_UI_COPY = {
       instant: "Веднага", daily: "Ежедневно", weekly: "Седмично",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
+    approvedContent: {
+      title: "Одобрено съдържание",
+      description: "Какво публичният сайт има право да публикува и какво се задържа, докато човек не го одобри.",
+      records: "Записи",
+      ready: "Готови за публикуване",
+      withheld: "Задържани",
+      readyShort: "Готово",
+      withheldShort: "Задържано",
+      filters: "Изглед",
+      all: "Всички",
+      surface: "Къде се показва",
+      requirementLabel: "За да се пусне тази страница",
+      howToTitle: "Как става одобрението",
+      howTo: "Този екран е само за четене. За да одобрите запис, редактирайте файла с данни в {dir} и изпълнете {command}.",
+      howToWhy: "Билдът преизчислява хеша на източника, което доказва, че одобреният текст е точно текстът, който ще се публикува.",
+      surfaces: "Публични страници",
+      readyOf: "Готови за публикуване: {ready} от {total}",
+      readOnlyBadge: "Само за четене",
+      columns: { record: "Запис", locale: "Език", status: "Състояние", approver: "Одобрено от", publishing: "Публикуване" },
+      noApprover: "Няма посочен одобряващ",
+      emptySection: "Тази страница още няма записи.",
+      emptyFiltered: "Няма записи в този изглед.",
+      reviewedAt: "Проверено на",
+      estimatorTitle: "Калкулатор на разходите",
+      estimatorDescription: "Оценката на разходите се показва само когато всички задължителни пера са одобрени и валидни.",
+      estimatorAvailable: "Показва се на купувачите",
+      estimatorBlocked: "Не се показва",
+      estimatorMissing: "Липсва",
+      sections: {
+        team_profiles: { title: "Профили на екипа", requirement: "Заменете примерните редове с реални хора, добавете лицензния номер и одобрена снимка, където има такива, задайте статус одобрено с вашия оператор и дата на одобрение, след което направете нов билд." },
+        area_guides: { title: "Информация за районите", requirement: "Одобрете справка за район с поне един факт и един официален източник, свържете твърдението със секция в скрипта за билд и направете нов билд. Район във вътрешността никога не се описва като морска дестинация." },
+        financing_partners: { title: "Партньори за финансиране", requirement: "Заменете примерните редове с кредитори, с които агенцията наистина работи, задайте дата за преглед и добавяйте лихва само заедно с датата, от която важи, датата на одобрение и вашия оператор." },
+        purchase_fees: { title: "Разходи при покупка", requirement: "Въведете одобрените местен данък при прехвърляне, нотариална тарифа, такса за вписване, агентска такса и разход за фирмения път, всеки с официален източник, начална дата и срок на валидност на одобрението, след което одобрете и направете нов билд." },
+      },
+      reasons: {
+        example_record: "Примерен запис, не е реално съдържание",
+        not_approved: "Още не е одобрено от човек",
+        no_named_reviewer: "Няма посочен одобряващ",
+        changed_since_approval: "Текстът е променен след одобрението",
+        approval_expired: "Срокът на одобрението изтече",
+        translation_not_approved: "Преводът не е одобрен",
+      },
+      lines: {
+        local_transfer_tax: "Местен данък при прехвърляне",
+        notary_fee: "Нотариална такса",
+        registry_entry_fee: "Такса за вписване",
+        agency_fee: "Агентска такса",
+        company_route_setup: "Учредяване на дружество",
+      },
+      scopes: { eu: "Купувач от ЕС или ЕИП", non_eu: "Купувач извън ЕС" },
+    },
     workspaceSettings: {
       navGroup: "Работно пространство",
       title: "Настройки",
@@ -610,6 +702,44 @@ const ADMIN_UI_COPY = {
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
   },
   ru: {
+    // Package A2 (CMS and launch screens): summary strips, empty states,
+    // and the controls the product needs whose backend does not exist yet.
+    objectTypes: "Типы объектов",
+    listingTranslations: "переводов",
+    exportListingsCsv: "Скачать таблицу (CSV)",
+    exportListingsCsvNote: "У таблицы объектов пока нет точки экспорта.",
+    duplicateListing: "Дублировать объект",
+    duplicateListingNote: "Дублирование требует точки копирования объекта.",
+    selectionEmptyHint: "Выбери объекты, чтобы изменить их статус.",
+    noListingResultsTitle: "Нет объектов по этим фильтрам",
+    noListingResultsBody: "Расширь поиск, смени статус или очисти фильтры.",
+    noTranslationTitle: "Нет переводов на проверку",
+    noTranslationBody: "У каждого объекта в этом виде есть одобренный перевод для выбранных языков.",
+    assignReviewer: "Назначить проверяющего",
+    assignReviewerNote: "Групповое назначение требует точки назначения переводов.",
+    noActivityTitle: "Действия пока не записаны",
+    noActivityBody: "Каждое действие оператора по объектам, обращениям и решениям запуска появится здесь сразу.",
+    noReportDataTitle: "Для этого отчёта пока нет данных",
+    noReportDataBody: "Цифры появятся, когда будут записаны обращения, поиски и ответы.",
+    reportPeriod: "Период",
+    reportPeriodAll: "Все записанные данные",
+    reportPeriodNote: "Выбор периода требует отчёта с диапазоном дат.",
+    noRouteDecisionsTitle: "Нет старого URL для решения",
+    noRouteDecisionsBody: "У каждого URL в этом виде уже есть проверенное окончательное решение.",
+    noMediaTitle: "Нет медиа для проверки",
+    noMediaBody: "Фото, планировки и видео появятся здесь после импорта зеркалом медиа.",
+    uploadMedia: "Загрузить медиа",
+    uploadMediaNote: "Загрузка требует точки приёма медиа. Импорт идёт через зеркало медиа.",
+    uploadMediaHint: "Перетащи файлы сюда или выбери их.",
+    mediaPreviewFailed: "Предпросмотр не загрузился.",
+    editingAs: "Редактирует",
+    saveConflictTitle: "Объект изменился, пока ты его редактировал",
+    saveConflictBody: "Перезагрузи объект, чтобы увидеть текущие данные, и примени изменение снова.",
+    reloadListing: "Перезагрузить",
+    tourNotPublished: "Одобренного 360-тура нет",
+    tourNotPublishedBody: "Заполни форму, чтобы проверить и опубликовать тур. Поля зависят от выбранного просмотрщика.",
+    launchTools: "Инструменты запуска",
+    previewOnSite: "Открыть на сайте",
     urls: "URL-адреса",
     reviewRequired: "Требует проверки",
     mappedListings: "Связанные объекты",
@@ -791,6 +921,8 @@ const ADMIN_UI_COPY = {
     savedViewsDefault: "Все заявки",
     savedViewsNote: "Сохранённые виды ждут хранимый фильтр для каждого оператора в настройках рабочего пространства.",
     listTools: "Инструменты списка",
+    editorTools: "Инструменты редактора",
+    reportTools: "Инструменты отчёта",
     bulkActions: "Групповые действия",
     selectAllLeads: "Выбрать все в этом виде",
     bulkAssign: "Назначить брокеру",
@@ -995,6 +1127,57 @@ const ADMIN_UI_COPY = {
       instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
+    approvedContent: {
+      title: "Одобренный контент",
+      description: "Что публичный сайт вправе публиковать и что удерживается, пока человек это не одобрит.",
+      records: "Записи",
+      ready: "Готовы к публикации",
+      withheld: "Удержаны",
+      readyShort: "Готово",
+      withheldShort: "Удержано",
+      filters: "Представление",
+      all: "Все",
+      surface: "Где показывается",
+      requirementLabel: "Чтобы выпустить эту страницу",
+      howToTitle: "Как происходит одобрение",
+      howTo: "Этот экран только для чтения. Чтобы одобрить запись, отредактируйте файл данных в {dir} и выполните {command}.",
+      howToWhy: "Сборка пересчитывает хеш источника, и именно это доказывает, что одобренный текст и есть текст, который будет опубликован.",
+      surfaces: "Публичные страницы",
+      readyOf: "Готовы к публикации: {ready} из {total}",
+      readOnlyBadge: "Только чтение",
+      columns: { record: "Запись", locale: "Язык", status: "Состояние", approver: "Одобрено кем", publishing: "Публикация" },
+      noApprover: "Утверждающий не указан",
+      emptySection: "У этой страницы пока нет записей.",
+      emptyFiltered: "В этом представлении нет записей.",
+      reviewedAt: "Проверено",
+      estimatorTitle: "Калькулятор расходов",
+      estimatorDescription: "Оценка расходов показывается только когда все обязательные позиции одобрены и действительны.",
+      estimatorAvailable: "Показывается покупателям",
+      estimatorBlocked: "Не показывается",
+      estimatorMissing: "Не хватает",
+      sections: {
+        team_profiles: { title: "Профили команды", requirement: "Замените примерные строки реальными людьми, добавьте номер лицензии и одобренное фото, где они есть, поставьте статус одобрено с вашим идентификатором оператора и датой одобрения, затем пересоберите." },
+        area_guides: { title: "Информация о районах", requirement: "Одобрите справку о районе минимум с одним фактом и одним официальным источником, свяжите утверждение с разделом в скрипте сборки и пересоберите. Район внутри страны никогда не описывается как морское направление." },
+        financing_partners: { title: "Партнёры по финансированию", requirement: "Замените примерные строки кредиторами, с которыми агентство действительно работает, задайте дату пересмотра и добавляйте ставку только вместе с датой её вступления в силу, датой одобрения и вашим идентификатором оператора." },
+        purchase_fees: { title: "Расходы при покупке", requirement: "Укажите одобренные местный налог на передачу, нотариальный тариф, сбор за регистрацию, комиссию агентства и стоимость корпоративного пути, каждый с официальным источником, датой начала и сроком действия одобрения, затем одобрите и пересоберите." },
+      },
+      reasons: {
+        example_record: "Пример записи, не реальный контент",
+        not_approved: "Ещё не одобрено человеком",
+        no_named_reviewer: "Утверждающий не указан",
+        changed_since_approval: "Текст изменён после одобрения",
+        approval_expired: "Срок одобрения истёк",
+        translation_not_approved: "Перевод не одобрен",
+      },
+      lines: {
+        local_transfer_tax: "Местный налог на передачу",
+        notary_fee: "Нотариальный сбор",
+        registry_entry_fee: "Сбор за регистрацию",
+        agency_fee: "Комиссия агентства",
+        company_route_setup: "Оформление через компанию",
+      },
+      scopes: { eu: "Покупатель из ЕС или ЕЭП", non_eu: "Покупатель вне ЕС" },
+    },
     workspaceSettings: {
       navGroup: "Рабочее пространство",
       title: "Настройки",
@@ -1169,6 +1352,44 @@ const ADMIN_UI_COPY = {
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
   },
   en: {
+    // Package A2 (CMS and launch screens): summary strips, empty states,
+    // and the controls the product needs whose backend does not exist yet.
+    objectTypes: "Object types",
+    listingTranslations: "translations",
+    exportListingsCsv: "Download the table (CSV)",
+    exportListingsCsvNote: "The listing table has no export endpoint yet.",
+    duplicateListing: "Duplicate listing",
+    duplicateListingNote: "Duplication needs a listing copy endpoint.",
+    selectionEmptyHint: "Select listings to change their status.",
+    noListingResultsTitle: "No listing matches these filters",
+    noListingResultsBody: "Widen the search, change the status or clear the filters.",
+    noTranslationTitle: "Nothing waits for translation review",
+    noTranslationBody: "Every listing in this view has an approved translation for the selected locales.",
+    assignReviewer: "Assign reviewer",
+    assignReviewerNote: "Bulk assignment needs a translation assignment endpoint.",
+    noActivityTitle: "No action recorded yet",
+    noActivityBody: "Every operator action on listings, enquiries and launch decisions appears here as it happens.",
+    noReportDataTitle: "No data for this report yet",
+    noReportDataBody: "Figures appear once enquiries, searches and replies are recorded.",
+    reportPeriod: "Period",
+    reportPeriodAll: "All recorded data",
+    reportPeriodNote: "A period filter needs a date range report endpoint.",
+    noRouteDecisionsTitle: "No legacy URL waits for a decision",
+    noRouteDecisionsBody: "Every URL in this view already carries a reviewed terminal decision.",
+    noMediaTitle: "No media to review",
+    noMediaBody: "Photos, floor plans and videos appear here once the media mirror has imported them.",
+    uploadMedia: "Upload media",
+    uploadMediaNote: "Uploads need a media ingest endpoint. Import runs through the media mirror.",
+    uploadMediaHint: "Drop files here or choose them.",
+    mediaPreviewFailed: "The preview could not be loaded.",
+    editingAs: "Editing as",
+    saveConflictTitle: "This listing changed while you were editing",
+    saveConflictBody: "Reload the listing to see the current facts, then apply your change again.",
+    reloadListing: "Reload",
+    tourNotPublished: "No approved 360 tour",
+    tourNotPublishedBody: "Complete the form to review and publish one. The fields follow the selected viewer.",
+    launchTools: "Launch tools",
+    previewOnSite: "Open on the public site",
     urls: "URLs",
     reviewRequired: "Review required",
     mappedListings: "Mapped listings",
@@ -1334,6 +1555,8 @@ const ADMIN_UI_COPY = {
     savedViewsDefault: "All enquiries",
     savedViewsNote: "Saved views are waiting for a stored per-operator filter in the workspace settings ledger.",
     listTools: "List tools",
+    editorTools: "Editor tools",
+    reportTools: "Report tools",
     bulkActions: "Bulk actions",
     selectAllLeads: "Select all in this view",
     bulkAssign: "Assign to broker",
@@ -1537,6 +1760,57 @@ const ADMIN_UI_COPY = {
       commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", plot: "Plot", agricultural_land: "Agricultural land", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
       instant: "As soon as possible", daily: "Daily", weekly: "Weekly",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
+    },
+    approvedContent: {
+      title: "Approved content",
+      description: "What the public site is allowed to publish, and what is being withheld until a person approves it.",
+      records: "Records",
+      ready: "Ready to publish",
+      withheld: "Withheld",
+      readyShort: "Ready",
+      withheldShort: "Withheld",
+      filters: "View",
+      all: "All",
+      surface: "Where it appears",
+      requirementLabel: "To release this surface",
+      howToTitle: "How approval works",
+      howTo: "This screen is read-only. To approve a record, edit its data file under {dir} and run {command}.",
+      howToWhy: "The rebuild recomputes the source hash, and that is what proves the approved text is the text that will be published.",
+      surfaces: "Public surfaces",
+      readyOf: "Ready to publish: {ready} of {total}",
+      readOnlyBadge: "Read-only",
+      columns: { record: "Record", locale: "Language", status: "State", approver: "Approved by", publishing: "Publishing" },
+      noApprover: "No named approver",
+      emptySection: "This surface has no records yet.",
+      emptyFiltered: "No records in this view.",
+      reviewedAt: "Reviewed at",
+      estimatorTitle: "Cost estimator",
+      estimatorDescription: "The cost estimate appears only when every required line is approved and still valid.",
+      estimatorAvailable: "Shown to buyers",
+      estimatorBlocked: "Not shown",
+      estimatorMissing: "Missing",
+      sections: {
+        team_profiles: { title: "Team profiles", requirement: "Replace the example rows with real people, add the licence reference and an approved photo where they exist, set the status to approved with your operator id and the approval date, then rebuild." },
+        area_guides: { title: "Area information", requirement: "Approve an area guide with at least one fact and one official source, map its claim to an area guide section in the build script, then rebuild. An inland area may never be described as a sea destination." },
+        financing_partners: { title: "Financing partners", requirement: "Replace the example rows with lenders the agency actually works with, set the review date, and add a rate only together with its effective date, the approval date and your operator id." },
+        purchase_fees: { title: "Purchase costs", requirement: "Supply the approved local transfer tax, notary tariff, registry entry fee, agency fee and company route cost, each with its official source, start date and approval lifetime, then approve and rebuild." },
+      },
+      reasons: {
+        example_record: "Example record, not real content",
+        not_approved: "Not approved by a person yet",
+        no_named_reviewer: "No named approver",
+        changed_since_approval: "Text changed after approval",
+        approval_expired: "Approval has expired",
+        translation_not_approved: "Translation not approved",
+      },
+      lines: {
+        local_transfer_tax: "Local transfer tax",
+        notary_fee: "Notary fee",
+        registry_entry_fee: "Registry entry fee",
+        agency_fee: "Agency fee",
+        company_route_setup: "Company route setup",
+      },
+      scopes: { eu: "EU or EEA buyer", non_eu: "Buyer from outside the EU" },
     },
     workspaceSettings: {
       navGroup: "Workspace",
@@ -2248,6 +2522,7 @@ const NAV_ROUTES = [
   { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity", capability: "activity:read" },
   { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
   { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
+  { id: "approved_content", module: "cms", path: "/admin/approved-content", icon: "check-circle-2", kind: "admin_approved_content_review", capability: "content:read" },
   { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
   { id: "settings", module: "workspace", path: "/admin/settings", icon: "settings", kind: "admin_workspace_settings", capability: "workspace:read" },
 ];
@@ -2301,6 +2576,7 @@ function adminNavigationGroups(page) {
       items: [
         { ...route("listing_manager"), label: screenLabel("cms", "listing_manager", "Listings") },
         { ...route("translation_queue"), label: screenLabel("cms", "translation_queue", "Translation review") },
+        { ...route("approved_content"), label: workbenchCopy(page).approvedContent.title },
       ],
     },
     {
@@ -3320,6 +3596,75 @@ function PublicRequestsBody({ page }) {
   });
 }
 
+/* ============================================================
+   Package A2: shared vocabulary for the CMS and launch screens
+   (listings manager, listing editor, translation review,
+   migration review, operations reports, activity history). It
+   follows the CRM shell: page header, toolbar of counted
+   filters, content, then a note when a filter matches nothing.
+   ============================================================ */
+
+// Counted filters for a server-paginated queue. Same segmented control as the
+// CRM list tabs, but each option is a link: these queues page on the server, so
+// filtering client-side would hide rows the operator never received. Works
+// with JavaScript switched off.
+function CmsFilterLinks({ label: navLabel, options, scope }) {
+  const items = options.filter(Boolean);
+  if (items.length < 2) return null;
+  return h(
+    "nav",
+    { className: "crm-seg adm-cms-filter", "aria-label": navLabel, "data-cms-filter": scope },
+    ...items.map((option) =>
+      h(
+        "a",
+        {
+          key: option.value,
+          href: option.href,
+          "data-filter-value": option.value,
+          "data-on": option.selected ? "1" : "0",
+          "aria-current": option.selected ? "true" : undefined,
+        },
+        option.label,
+        option.count === undefined ? null : h("span", { className: "adm-seg-count" }, option.count),
+      ),
+    ),
+  );
+}
+
+// Controls the CMS screens need whose backend does not exist yet. They live in
+// one closed strip above the queue, in the same shape the CRM screens use, so
+// they stay discoverable without pushing the real work below the fold.
+function CmsListTools({ ui, scope, summary, children }) {
+  return h(
+    "details",
+    { className: "adm-list-tools", "data-planned-control": scope },
+    h(
+      "summary",
+      { className: "adm-list-tools__summary adm-disclosure-chevron" },
+      h(Icon, { name: "sliders-horizontal", size: 15 }),
+      h("span", null, summary || ui.listTools),
+      h(PlannedBadge, { ui }),
+    ),
+    h("div", { className: "adm-list-tools__body" }, children),
+  );
+}
+
+// One planned control inside that strip: a real, disabled control and one
+// sentence naming what it is waiting for.
+function CmsPlannedAction({ id, icon, label: controlLabel, note, children }) {
+  return h(
+    "div",
+    { className: "adm-planned", "data-planned-control": id },
+    children ||
+      h(
+        "button",
+        { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: true, "aria-describedby": `${id}-note` },
+        icon ? h(Icon, { name: icon, size: 16 }) : null,
+        h("span", null, controlLabel),
+      ),
+    h(PlannedNote, { id: `${id}-note` }, note),
+  );
+}
 
 function auditMetadataValue(value, ui) {
   if (value === null || value === undefined || value === "") return ui.notSet;
@@ -3332,10 +3677,12 @@ function ActivityBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const title = label(copy, "activity", "Activity history");
+  const filters = page.filters || {};
+  const hasFilters = Boolean(filters.leadId || filters.listingId || filters.actor || filters.action);
   const metrics = [
     [label(copy, "totalActions", "Recorded actions"), page.summary?.totalActions || 0, "list", "ink"],
     [label(copy, "activeOperators", "Active operators"), page.summary?.activeOperators || 0, "users", "sea"],
-    [label(copy, "object", "Object"), page.summary?.objectTypes || 0, "table-properties", "sand"],
+    [ui.objectTypes, page.summary?.objectTypes || 0, "table-properties", "sand"],
   ];
   return adminShell(page, {
     title,
@@ -3353,12 +3700,36 @@ function ActivityBody({ page }) {
         "form",
         { method: "get", action: "/admin/activity", className: "adm-filterbar", role: "search", "data-activity-filters": "true" },
         filterLocaleInput(page),
-        h("label", null, label(copy, "leadReference", "Lead ID"), h("input", { name: "leadId", defaultValue: page.filters?.leadId, placeholder: "lead-…" })),
-        h("label", null, label(copy, "listingReference", "Listing ID"), h("input", { name: "listingId", defaultValue: page.filters?.listingId, placeholder: "MS-CRAWL-0001" })),
-        h("label", null, label(copy, "actor", "Operator"), h("input", { name: "actor", defaultValue: page.filters?.actor })),
-        h("label", null, label(copy, "action", "Action"), h("input", { name: "action", defaultValue: page.filters?.action })),
+        h("label", null, label(copy, "leadReference", "Lead ID"), h("input", { name: "leadId", defaultValue: filters.leadId, placeholder: "lead-…", autoComplete: "off" })),
+        h("label", null, label(copy, "listingReference", "Listing ID"), h("input", { name: "listingId", defaultValue: filters.listingId, placeholder: "MS-CRAWL-0001", autoComplete: "off" })),
+        h(
+          "label",
+          null,
+          label(copy, "actor", "Operator"),
+          h("input", { name: "actor", defaultValue: filters.actor, list: "activity-actors", autoComplete: "off" }),
+        ),
+        h(
+          "label",
+          null,
+          label(copy, "action", "Action"),
+          h("input", { name: "action", defaultValue: filters.action, list: "activity-actions", autoComplete: "off" }),
+        ),
         h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/activity", page) }, label(copy, "resetFilters", "Reset filters")),
+      ),
+      h(
+        "datalist",
+        { id: "activity-actors", "data-activity-actor-options": "true" },
+        ...[...new Set((page.auditLog || []).map((row) => row.actor).filter(Boolean))].map((actor) =>
+          h("option", { key: actor, value: actor }),
+        ),
+      ),
+      h(
+        "datalist",
+        { id: "activity-actions", "data-activity-action-options": "true" },
+        ...[...new Set((page.auditLog || []).map((row) => row.action).filter(Boolean))].map((action) =>
+          h("option", { key: action, value: action, label: ui.auditActions?.[action] || valueText(ui, action) }),
+        ),
       ),
       h(
         Panel,
@@ -3403,7 +3774,14 @@ function ActivityBody({ page }) {
                 ),
               ),
             )
-          : h("p", { className: "adm-empty" }, label(copy, "noActivity", "No actions have been recorded yet.")),
+          : h(
+              EmptyState,
+              { icon: hasFilters ? "search-x" : "list", "data-empty-activity": "true" },
+              hasFilters ? ui.noListingResultsBody : ui.noActivityBody,
+              hasFilters
+                ? h("a", { className: "adm-empty__action", href: adminHref("/admin/activity", page) }, label(copy, "resetFilters", "Reset filters"))
+                : null,
+            ),
       ),
       h(Pagination, { page, path: "/admin/activity" }),
     ],
@@ -3411,7 +3789,7 @@ function ActivityBody({ page }) {
 }
 
 function ReportBars({ rows = [], ui, keyLabel = (row) => valueText(ui, row.key), valueKey = "count" }) {
-  if (!rows.length) return h("p", { className: "adm-empty" }, ui.noReportData);
+  if (!rows.length) return h("p", { className: "adm-report-nodata", "data-report-nodata": "true" }, ui.noReportData);
   const max = Math.max(1, ...rows.map((row) => Number(row[valueKey] || 0)));
   return h(
     "ol",
@@ -3420,7 +3798,7 @@ function ReportBars({ rows = [], ui, keyLabel = (row) => valueText(ui, row.key),
       const value = Number(row[valueKey] || 0);
       return h(
         "li",
-        { key: row.key || row.stage },
+        { key: row.key || row.stage, "data-zero": value ? undefined : "true" },
         h("span", { className: "adm-report-bars__label" }, keyLabel(row)),
         h("span", { className: "adm-report-bars__track", "aria-hidden": "true" }, h("span", { style: `width:${Math.max(value ? 4 : 0, (value / max) * 100)}%` })),
         h("strong", null, value),
@@ -3436,7 +3814,7 @@ function ReportPipelineCard({ title, pipeline, ui }) {
   }));
   return h(
     "article",
-    { className: "adm-report-card" },
+    { className: "adm-report-plot", "data-report-pipeline": "true" },
     h(
       "header",
       null,
@@ -3459,6 +3837,10 @@ function OperationsReportsBody({ page }) {
     [ui.medianResponse, minuteValue(report.summary.median_response_minutes), "clock", "sun"],
     [ui.overdueWork, report.summary.overdue_tasks, "triangle-alert", report.summary.overdue_tasks ? "brick" : "success"],
   ];
+  const reportIsEmpty =
+    !report.summary.leads &&
+    !(report.website_funnel.stages || []).some((row) => Number(row.count || 0) > 0) &&
+    !(report.source_quality || []).length;
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -3475,15 +3857,41 @@ function OperationsReportsBody({ page }) {
         { title, subtitle: page.metadata?.description },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/reports/export" }, h(Icon, { name: "download", size: 16 }), ui.downloadSourceReport),
       ),
+      h(
+        CmsListTools,
+        { ui, scope: "report_tools", summary: ui.reportTools },
+        h(CmsPlannedAction, {
+          id: "report-period",
+          note: ui.reportPeriodNote,
+          children: h(
+            "label",
+            { className: "adm-planned__field", htmlFor: "report-period-select" },
+            h("span", null, ui.reportPeriod),
+            h(
+              "select",
+              { id: "report-period-select", name: "period", disabled: true, "aria-describedby": "report-period-note" },
+              h("option", null, ui.reportPeriodAll),
+            ),
+          ),
+        }),
+      ),
       h("p", { className: "adm-report-privacy" }, h(Icon, { name: "shield-check", size: 17 }), ui.privacySafeReport),
       h(StatGrid, { metrics }),
+      reportIsEmpty
+        ? h(
+            EmptyState,
+            { icon: "bar-chart-3", "data-empty-report": "true" },
+            ui.noReportDataBody,
+            h("a", { className: "adm-empty__action", href: adminHref("/admin/leads", page) }, label(copy, "leads", "Leads")),
+          )
+        : null,
       h(
         Panel,
         { title: ui.websiteFunnel, "data-report-section": "website-funnel" },
         h(
           "div",
           { className: "adm-report-grid adm-report-grid--two" },
-          h("section", { className: "adm-report-card" }, h(ReportBars, {
+          h("div", { className: "adm-report-plot" }, h(ReportBars, {
             rows: report.website_funnel.stages,
             ui,
             keyLabel: (row) => ({ page_view: ui.pageViews, search: ui.searchEvents, cta_click: ui.ctaClicks, lead: ui.funnelLeads })[row.key] || row.key,
@@ -3505,9 +3913,9 @@ function OperationsReportsBody({ page }) {
         h(
           "div",
           { className: "adm-report-grid adm-report-grid--three" },
-          h("section", { className: "adm-report-card" }, h("h3", null, ui.bySource), h(ReportBars, { rows: report.lead_volume.by_source, ui })),
-          h("section", { className: "adm-report-card" }, h("h3", null, ui.byLanguage), h(ReportBars, { rows: report.lead_volume.by_language, ui, keyLabel: (row) => row.key.toUpperCase() })),
-          h("section", { className: "adm-report-card" }, h("h3", null, ui.byType), h(ReportBars, { rows: report.lead_volume.by_type, ui, keyLabel: (row) => statusText(ui, row.key) })),
+          h("section", { className: "adm-report-plot" }, h("h3", null, ui.bySource), h(ReportBars, { rows: report.lead_volume.by_source, ui })),
+          h("section", { className: "adm-report-plot" }, h("h3", null, ui.byLanguage), h(ReportBars, { rows: report.lead_volume.by_language, ui, keyLabel: (row) => row.key.toUpperCase() })),
+          h("section", { className: "adm-report-plot" }, h("h3", null, ui.byType), h(ReportBars, { rows: report.lead_volume.by_type, ui, keyLabel: (row) => statusText(ui, row.key) })),
         ),
       ),
       h(
@@ -3520,7 +3928,7 @@ function OperationsReportsBody({ page }) {
               ...report.source_quality.map((row) =>
                 h(
                   "article",
-                  { key: row.source, className: "adm-report-source", "data-report-source": row.source },
+                  { key: row.source, className: "adm-report-source", "data-report-source": row.source, "data-leads": row.leads },
                   h("header", null, h("h3", null, valueText(ui, row.source)), h("strong", null, row.leads)),
                   h(
                     "dl",
@@ -3534,7 +3942,7 @@ function OperationsReportsBody({ page }) {
                 ),
               ),
             )
-          : h("p", { className: "adm-empty" }, ui.noReportData),
+          : h(EmptyState, { icon: "trending-up", "data-empty-source-quality": "true" }, ui.noReportDataBody),
       ),
       h(
         "div",
@@ -3560,7 +3968,24 @@ function OperationsReportsBody({ page }) {
             { className: "adm-report-facts" },
             h("div", null, h("dt", null, ui.searchEvents), h("dd", null, report.search.search_events || 0)),
             h("div", null, h("dt", null, ui.zeroResults), h("dd", null, report.search.zero_result_events || 0)),
-            h("div", null, h("dt", null, ui.popularFilters), h("dd", null, (report.search.popular_filters || []).slice(0, 3).map((row) => `${row.key} (${row.count})`).join(" · ") || ui.noData)),
+            h(
+              "div",
+              { className: "adm-report-facts__wide" },
+              h("dt", null, ui.popularFilters),
+              h(
+                "dd",
+                null,
+                (report.search.popular_filters || []).length
+                  ? h(
+                      "ul",
+                      { className: "adm-report-chips", "data-popular-filters": "true" },
+                      ...(report.search.popular_filters || [])
+                        .slice(0, 6)
+                        .map((row) => h("li", { key: row.key }, h("code", { className: "crm-mono" }, row.key), h("span", null, row.count))),
+                    )
+                  : h("span", { className: "adm-report-nodata" }, ui.noData),
+              ),
+            ),
           ),
         ),
       ),
@@ -3578,7 +4003,8 @@ function OperationsReportsBody({ page }) {
       h(
         Panel,
         { title: ui.workQueueHealth, "data-report-section": "task-health" },
-        h(
+        report.task_health.rows.length
+          ? h(
           "ul",
           { className: "adm-report-queues" },
           ...report.task_health.rows.map((row) =>
@@ -3591,7 +4017,8 @@ function OperationsReportsBody({ page }) {
               h("span", null, `${ui.blocked}: ${row.blocked}`),
             ),
           ),
-        ),
+        )
+          : h(EmptyState, { icon: "check-check", "data-empty-task-health": "true" }, ui.noReportDataBody),
       ),
       h(
         Panel,
@@ -3600,8 +4027,8 @@ function OperationsReportsBody({ page }) {
           "div",
           { className: "adm-report-inventory" },
           h("dl", { className: "adm-report-facts" }, h("div", null, h("dt", null, ui.activeListings), h("dd", null, `${report.listing_inventory.active} / ${report.listing_inventory.total}`)), h("div", null, h("dt", null, ui.reviewRequired), h("dd", null, report.listing_inventory.review_required)), h("div", null, h("dt", null, ui.translationReview), h("dd", null, report.listing_inventory.translation_review))),
-          h("section", { className: "adm-report-card" }, h("h3", null, label(copy, "qualityStatus", "Status")), h(ReportBars, { rows: report.listing_inventory.by_status, ui, keyLabel: (row) => statusText(ui, row.key) })),
-          h("section", { className: "adm-report-card" }, h("h3", null, label(copy, "language", "Language")), h(ReportBars, { rows: report.listing_inventory.by_source_locale, ui, keyLabel: (row) => row.key.toUpperCase() })),
+          h("section", { className: "adm-report-plot" }, h("h3", null, label(copy, "qualityStatus", "Status")), h(ReportBars, { rows: report.listing_inventory.by_status, ui, keyLabel: (row) => statusText(ui, row.key) })),
+          h("section", { className: "adm-report-plot" }, h("h3", null, label(copy, "language", "Language")), h(ReportBars, { rows: report.listing_inventory.by_source_locale, ui, keyLabel: (row) => row.key.toUpperCase() })),
         ),
       ),
     ],
@@ -6661,18 +7088,47 @@ function ListingManagerBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const canEditContent = pageCan(page, "content:write");
+  // Each chip drops its own filter, so narrowing a search stays reversible one
+  // step at a time and still works with JavaScript switched off.
+  const withoutFilter = (name) => {
+    const remaining = Object.entries(page.filters || {}).filter(([key, value]) => value && key !== name);
+    const search = remaining.map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join("&");
+    return adminHref(`/admin/listings${search ? `?${search}` : ""}`, page);
+  };
   const activeFilters = [
-    page.filters.q ? `${label(copy, "searchListings", "Search listings")}: ${page.filters.q}` : null,
-    page.filters.status ? `${label(copy, "qualityStatus", "Status")}: ${statusText(ui, page.filters.status)}` : null,
-    page.filters.propertyFamily ? `${ui.propertyFamily}: ${statusText(ui, page.filters.propertyFamily)}` : null,
-    page.filters.sourceLocale ? `${label(copy, "language", "Language")}: ${String(page.filters.sourceLocale).toUpperCase()}` : null,
+    page.filters.q ? { name: "q", text: `${label(copy, "searchListings", "Search listings")}: ${page.filters.q}` } : null,
+    page.filters.status ? { name: "status", text: `${label(copy, "qualityStatus", "Status")}: ${statusText(ui, page.filters.status)}` } : null,
+    page.filters.propertyFamily ? { name: "propertyFamily", text: `${ui.propertyFamily}: ${statusText(ui, page.filters.propertyFamily)}` } : null,
+    page.filters.sourceLocale ? { name: "sourceLocale", text: `${label(copy, "language", "Language")}: ${String(page.filters.sourceLocale).toUpperCase()}` } : null,
   ].filter(Boolean);
   const title = label(copy, "listingManager", "Listings");
+  const hasFilters = activeFilters.length > 0;
+  const statusOptions = page.filterOptions.statuses || [];
+  const reviewStatus = statusOptions.includes("unverified") ? "unverified" : "";
   const metrics = [
     [label(copy, "listingManager", "Listings"), page.summary.total, "building-2", "ink"],
     [ui.reviewRequired, page.summary.reviewRequired, "eye", "sun"],
     [statusText(ui, "price_on_request"), page.summary.priceOnRequest, "banknote", "sea"],
     [label(copy, "translationQueue", "Translation review"), page.summary.translationReviewRequired, "languages", "brick"],
+  ];
+  // Counted status filters in the toolbar: the fastest route from a summary
+  // figure into the rows behind it, and it works without JavaScript.
+  const statusFilterOptions = [
+    {
+      value: "",
+      label: label(copy, "all", "All"),
+      count: page.summary.total,
+      href: adminHref("/admin/listings", page),
+      selected: !page.filters.status,
+    },
+    ...statusOptions.slice(0, 5).map((value) => ({
+      value,
+      // The pill track needs the short form of a CMS status; the filter bar
+      // select below keeps the full wording.
+      label: value === "source_imported_review_required" ? statusText(ui, "review_required") : statusText(ui, value),
+      href: adminHref(`/admin/listings?status=${encodeURIComponent(value)}`, page),
+      selected: page.filters.status === value,
+    })),
   ];
   const columns = {
     select: ui.selectListings,
@@ -6694,8 +7150,37 @@ function ListingManagerBody({ page }) {
       "data-listing-count": page.summary.total,
     },
     children: [
-      h(PageHeader, { title, subtitle: page.metadata?.description }),
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 16 }), h("span", null, label(copy, "translationQueue", "Translation review"))),
+      ),
       h(StatGrid, { metrics }),
+      h(
+        PageToolbar,
+        null,
+        h(CmsFilterLinks, { scope: "listings", label: label(copy, "qualityStatus", "Status"), options: statusFilterOptions }),
+      ),
+      h(
+        CmsListTools,
+        { ui, scope: "listing_list_tools" },
+        h(CmsPlannedAction, {
+          id: "listing-saved-views",
+          note: ui.savedViewsNote,
+          children: h(
+            "label",
+            { className: "adm-planned__field", htmlFor: "saved-view-listings" },
+            h("span", null, ui.savedViews),
+            h(
+              "select",
+              { id: "saved-view-listings", name: "savedView", disabled: true, "aria-describedby": "listing-saved-views-note" },
+              h("option", null, label(copy, "all", "All")),
+            ),
+          ),
+        }),
+        h(CmsPlannedAction, { id: "listing-export", icon: "download", label: ui.exportListingsCsv, note: ui.exportListingsCsvNote }),
+        h(CmsPlannedAction, { id: "listing-duplicate", icon: "plus", label: ui.duplicateListing, note: ui.duplicateListingNote }),
+      ),
       h(
         "form",
         { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },
@@ -6703,10 +7188,26 @@ function ListingManagerBody({ page }) {
         h(
           "div",
           { className: "adm-filterbar__summary", "data-listing-filter-summary": "true" },
-          h("strong", null, `${page.summary.visible} / ${page.summary.total}`),
+          activeFilters.length ? h("strong", null, `${page.summary.visible} / ${page.summary.total}`) : null,
           activeFilters.length
-            ? h("div", { className: "adm-filterbar__chips" }, ...activeFilters.map((value) => h("span", { key: value, className: "adm-filter-chip" }, value)))
-            : h("small", null, `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`),
+            ? h(
+                "div",
+                { className: "adm-filterbar__chips" },
+                ...activeFilters.map((filter) =>
+                  h(
+                    "a",
+                    {
+                      key: filter.name,
+                      className: "adm-filter-chip adm-filter-chip--removable",
+                      href: withoutFilter(filter.name),
+                      "data-remove-filter": filter.name,
+                    },
+                    h("span", null, filter.text),
+                    h(Icon, { name: "x", size: 13 }),
+                  ),
+                ),
+              )
+            : null,
         ),
         h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "q", defaultValue: page.filters.q, placeholder: "MS-CRAWL-0114" })),
         h(
@@ -6752,12 +7253,19 @@ function ListingManagerBody({ page }) {
               h("input", { type: "hidden", name: "editor", value: currentOperatorId(page, "listing_manager_editor") }),
               h(
                 "div",
-                { className: "adm-listing-bulk__bar", "data-listing-bulk-bar": "true" },
+                {
+                  className: "adm-listing-bulk__bar",
+                  "data-listing-bulk-bar": "true",
+                  // Quiet until something is selected; the selection watcher
+                  // flips this to "active" and enables the controls.
+                  "data-selection": "empty",
+                },
                 h(
                   "div",
                   { className: "adm-listing-bulk__summary" },
                   h("strong", null, ui.bulkStatus),
-                  h("small", null, ui.bulkStatusHint),
+                  h("small", { "data-listing-bulk-hint": "true" }, canEditContent ? ui.selectionEmptyHint : ui.readOnlyAccess),
+                  h("small", { className: "adm-listing-bulk__scope" }, ui.bulkStatusHint),
                 ),
                 h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--sm", disabled: !canEditContent, "data-listing-select-all": "true" }, ui.selectAllVisible),
                 h("span", { className: "adm-listing-bulk__count", "data-listing-selection-count": "true", "aria-live": "polite" }, ui.selectedListings.replace("{count}", "0")),
@@ -6767,12 +7275,12 @@ function ListingManagerBody({ page }) {
                   h("span", { className: "adm-visually-hidden" }, ui.bulkStatus),
                   h(
                     "select",
-                    { name: "targetStatus", required: true, disabled: !canEditContent },
+                    { name: "targetStatus", required: true, disabled: !canEditContent, "data-listing-bulk-control": "true" },
                     h("option", { value: "" }, ui.chooseOption),
                     ...["available", "reserved", "sold", "rented", "archived"].map((status) => h("option", { key: status, value: status }, statusText(ui, status))),
                   ),
                 ),
-                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm", disabled: !canEditContent }, h(Icon, { name: "check", size: 16 }), ui.updateSelected),
+                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm", disabled: !canEditContent, "data-listing-bulk-control": "true" }, h(Icon, { name: "check", size: 16 }), ui.updateSelected),
                 !canEditContent ? h("small", { className: "adm-note", "data-read-only-role": "true" }, ui.readOnlyAccess) : null,
                 h("p", { className: "adm-listing-bulk__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
               ),
@@ -6823,7 +7331,14 @@ function ListingManagerBody({ page }) {
               ),
               ),
             )
-          : h("p", { className: "adm-empty" }, label(copy, "noResults", "No results.")),
+          : h(
+              EmptyState,
+              { icon: "search-x", "data-empty-listings": "true" },
+              ui.noListingResultsBody,
+              hasFilters
+                ? h("a", { className: "adm-empty__action", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters"))
+                : null,
+            ),
       ),
       h(Pagination, { page, path: "/admin/listings" }),
       canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/listings/publication-schedules")
@@ -6837,12 +7352,40 @@ function TranslationQueueBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const title = label(copy, "translationQueue", "Translation review");
+  const hasFilters = Boolean(page.filters.q || page.filters.targetLocale || page.filters.taskType);
+  const staleLocale = (page.filterOptions.taskTypes || []).includes("stale_review_required") ? "stale_review_required" : "";
   const metrics = [
     [label(copy, "openTasks", "Open tasks"), page.summary.open_translation_tasks, "languages", "ink"],
     [label(copy, "missingTranslations", "Missing translations"), page.summary.missing_translation_tasks, "circle-alert", "brick"],
     [label(copy, "staleTranslations", "Stale translations"), page.summary.stale_translation_tasks, "clock", "sun"],
     [label(copy, "results", "Results"), page.pagination.totalRows, "filter", "sea"],
   ];
+  // Counted task-type filters in the toolbar, as links: this queue pages on
+  // the server, so a client-side tab would hide rows the operator never got.
+  const taskFilterOptions = [
+    {
+      value: "",
+      label: label(copy, "all", "All"),
+      count: page.pagination.totalRows,
+      href: adminHref("/admin/translations", page),
+      selected: !page.filters.taskType,
+    },
+    ...(page.filterOptions.taskTypes || []).slice(0, 5).map((value) => ({
+      value,
+      label: statusText(ui, value),
+      href: adminHref(`/admin/translations?taskType=${encodeURIComponent(value)}`, page),
+      selected: page.filters.taskType === value,
+    })),
+  ];
+  // One listing raises a task per target locale. Grouping the rows by listing
+  // stops the same title repeating six times down the queue: only the first
+  // row of a group carries the full identity, the rest carry the reference.
+  const groups = [];
+  for (const row of page.translationTasks) {
+    const last = groups[groups.length - 1];
+    if (last && last.listingId === row.listing_id) last.rows.push(row);
+    else groups.push({ listingId: row.listing_id, rows: [row] });
+  }
   const columns = {
     listing: ui.listing,
     target: label(copy, "targetLocale", "Target locale"),
@@ -6860,8 +7403,32 @@ function TranslationQueueBody({ page }) {
       "data-admin-locale": page.workspace.locale,
     },
     children: [
-      h(PageHeader, { title, subtitle: page.metadata?.description }),
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "building-2", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
+      ),
       h(StatGrid, { metrics }),
+      h(
+        PageToolbar,
+        null,
+        h(CmsFilterLinks, { scope: "translations", label: label(copy, "taskType", "Task type"), options: taskFilterOptions }),
+      ),
+      h(
+        CmsListTools,
+        { ui, scope: "translation_list_tools" },
+        h(CmsPlannedAction, {
+          id: "translation-bulk-assign",
+          note: ui.assignReviewerNote,
+          children: h(
+            "fieldset",
+            { className: "adm-planned__group", disabled: true, "aria-describedby": "translation-bulk-assign-note" },
+            h("legend", null, ui.bulkActions),
+            h("label", { className: "adm-check" }, h("input", { type: "checkbox", name: "selectAllTranslations" }), h("span", null, ui.selectAllVisible)),
+            h("button", { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm" }, ui.assignReviewer),
+          ),
+        }),
+      ),
       h(
         "form",
         { method: "get", action: "/admin/translations", className: "adm-filterbar", role: "search", "data-translation-filters": "true" },
@@ -6875,18 +7442,28 @@ function TranslationQueueBody({ page }) {
       h(
         Panel,
         { title: `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`, "data-translation-queue": "true" },
-        page.translationTasks.length ? null : h("p", { className: "adm-empty", "data-empty-translation-tasks": "true" }, ui.noTranslationTasks),
+        page.translationTasks.length
+          ? null
+          : h(
+              EmptyState,
+              { icon: hasFilters ? "search-x" : "languages", "data-empty-translation-tasks": "true" },
+              hasFilters ? ui.noListingResultsBody : ui.noTranslationBody,
+              hasFilters
+                ? h("a", { className: "adm-empty__action", href: adminHref("/admin/translations", page) }, label(copy, "resetFilters", "Reset filters"))
+                : null,
+            ),
         h(
           "div",
           { className: "adm-scroll-x", hidden: page.translationTasks.length ? undefined : true },
           h(
             "table",
-            { className: "crm-tbl" },
+            { className: "crm-tbl adm-translation-table" },
             h("thead", null, h("tr", null, ...Object.values(columns).map((column) => h("th", { key: column, scope: "col" }, column)))),
+            ...groups.map((group) =>
             h(
               "tbody",
-              null,
-              ...page.translationTasks.map((row) => {
+              { key: group.listingId, "data-translation-group": group.listingId, "data-translation-group-size": group.rows.length },
+              ...group.rows.map((row, groupIndex) => {
                 const task = row.existing_task;
                 const canApprove =
                   pageCan(page, "translations:write") &&
@@ -6896,10 +7473,37 @@ function TranslationQueueBody({ page }) {
                 const canPublish = pageCan(page, "translations:publish") && task?.status === "approved" && task.human_approved;
                 const canEnterHumanDraft =
                   pageCan(page, "translations:write") && !task && ["human", "external_import"].includes(row.provider_mode);
+                const opensGroup = groupIndex === 0;
                 return h(
                   "tr",
-                  { key: `${row.listing_id}-${row.target_locale}`, "data-translation-task-row": row.task.id, "data-translation-status": task?.status || row.current_status },
-                  h("td", { "data-label": columns.listing, "data-translation-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.listing_id), h("strong", null, row.listing_title), h("small", { className: "adm-lead-context" }, row.listing_location))),
+                  {
+                    key: `${row.listing_id}-${row.target_locale}`,
+                    "data-translation-task-row": row.task.id,
+                    "data-translation-status": task?.status || row.current_status,
+                    "data-translation-group-start": opensGroup ? "true" : undefined,
+                  },
+                  h(
+                    "td",
+                    { "data-label": columns.listing, "data-translation-column": "listing" },
+                    opensGroup
+                      ? h(
+                          "div",
+                          { className: "adm-lead-identity" },
+                          h("code", { className: "crm-mono" }, row.listing_id),
+                          h("strong", null, row.listing_title),
+                          h(
+                            "small",
+                            { className: "adm-lead-context" },
+                            `${row.listing_location} · ${group.rows.length} ${ui.listingTranslations}`,
+                          ),
+                        )
+                      : h(
+                          "span",
+                          { className: "adm-translation-continued" },
+                          h("code", { className: "crm-mono" }, row.listing_id),
+                          h("span", { className: "adm-visually-hidden" }, row.listing_title),
+                        ),
+                  ),
                   h("td", { "data-label": columns.target, "data-translation-column": "target" }, h("span", { className: "crm-lang" }, `${row.source_locale.toUpperCase()} → ${row.target_locale.toUpperCase()}`)),
                   h("td", { "data-label": columns.status, "data-translation-column": "status" }, h(StatusPill, { tone: row.current_status === "stale" ? "brick" : task ? "sun" : "sand" }, statusText(ui, task?.status || row.current_status)), h("small", { className: "adm-lead-context" }, statusText(ui, row.task_type))),
                   h("td", { "data-label": columns.owner, "data-translation-column": "owner" }, row.reviewer_role),
@@ -6961,6 +7565,7 @@ function TranslationQueueBody({ page }) {
                   ),
                 );
               }),
+            ),
             ),
           ),
         ),
@@ -7077,7 +7682,22 @@ function ListingEditorBody({ page }) {
     .filter((item) => ["photo", "floor_plan", "video"].includes(item.kind))
     .slice(0, 50);
   const staleTranslations = page.translationTasks.filter((task) => task.status === "stale");
+  // The rail used to list a locale twice when a stale task existed beside a
+  // published translation. One locale, one state, and stale wins.
+  const staleLocales = new Set(staleTranslations.map((task) => task.target_locale || task.locale).filter(Boolean));
+  const translationStates = [
+    ...(page.listing.translations || []).map((translation) =>
+      staleLocales.has(translation.locale) ? { ...translation, status: "stale" } : translation,
+    ),
+    ...[...staleLocales]
+      .filter((locale) => !(page.listing.translations || []).some((translation) => translation.locale === locale))
+      .map((locale) => ({ locale, status: "stale" })),
+  ];
   const title = label(copy, "propertyEditor", "Property editor");
+  // The topbar already names the screen. The page heading names the listing,
+  // so an operator with several editor tabs open can tell them apart.
+  const listingName = String(facts.title || facts.h1 || page.listing.id).trim();
+  const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
   const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
   const termsFields = page.editableFields.filter((field) => ["price_eur", "price_on_request"].includes(field));
@@ -7111,14 +7731,21 @@ function ListingEditorBody({ page }) {
       h(
         PageHeader,
         {
-          title,
-          subtitle: `${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
+          title: listingName,
+          subtitle: `${title} · ${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
         page.runtime_data_mode === "durable_only"
           ? null
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
+      canEditContent
+        ? h(
+            CmsListTools,
+            { ui, scope: "listing_editor_tools", summary: ui.editorTools },
+            h(CmsPlannedAction, { id: "editor-duplicate", icon: "plus", label: ui.duplicateListing, note: ui.duplicateListingNote }),
+          )
+        : null,
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
@@ -7151,24 +7778,15 @@ function ListingEditorBody({ page }) {
                 "data-editor-dirty-message": label(copy, "unsavedChanges", "Unsaved changes"),
               },
               h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
-              h(
-                "fieldset",
-                { className: "adm-form__group adm-form__group--editor" },
-                h("legend", null, label(copy, "editor", "Editor")),
-                h(
-                  "label",
-                  null,
-                  label(copy, "editor", "Editor"),
-                  h("input", {
-                    name: "editor",
-                    required: true,
-                    readOnly: true,
-                    defaultValue: currentOperatorId(page, ""),
-                    autoComplete: "off",
-                    "data-editor-name": "true",
-                  }),
-                ),
-              ),
+              // The server attributes every edit to the authenticated operator,
+              // so the editor id travels with the form but never occupies a
+              // field: the save bar names who is editing instead.
+              h("input", {
+                type: "hidden",
+                name: "editor",
+                defaultValue: currentOperatorId(page, ""),
+                "data-editor-name": "true",
+              }),
               editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content" }),
               editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: detailFields.length <= 4, section: "details" }),
               editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms" }),
@@ -7179,18 +7797,49 @@ function ListingEditorBody({ page }) {
                 editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo" }),
               ),
               canEditContent
-                ? h(
+                ? [
+                    h(
+                      "div",
+                      {
+                        key: "conflict",
+                        className: "adm-inline-alert adm-editor-conflict",
+                        role: "alert",
+                        hidden: true,
+                        "data-editor-conflict": "true",
+                      },
+                      h(Icon, { name: "triangle-alert", size: 17 }),
+                      h(
+                        "div",
+                        null,
+                        h("strong", null, ui.saveConflictTitle),
+                        h("p", null, ui.saveConflictBody),
+                      ),
+                      h(
+                        "a",
+                        { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}`, page) },
+                        ui.reloadListing,
+                      ),
+                    ),
+                    h(
                     "div",
                     {
+                      key: "savebar",
                       className: "adm-form__actions adm-editor-savebar",
                       "data-editor-savebar": "true",
                       "data-dirty": "false",
+                      "data-save-state": "clean",
+                      "data-editor-conflict-marker": ui.saveConflictTitle,
                     },
                     h(
                       "div",
                       { className: "adm-editor-savebar__meta" },
                       h("strong", { "data-editor-dirty-note": "true" }, label(copy, "saved", "All changes saved.")),
                       h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+                      h(
+                        "small",
+                        { className: "adm-editor-savebar__actor" },
+                        `${ui.editingAs} ${currentOperatorId(page, "")}`,
+                      ),
                     ),
                     h(
                       "div",
@@ -7198,7 +7847,8 @@ function ListingEditorBody({ page }) {
                       h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--md", "data-editor-reset": "true", disabled: true }, label(copy, "discardChanges", ui.discardChanges)),
                       h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md", disabled: true }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
                     ),
-                  )
+                  ),
+                  ]
                 : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
             ),
           ),
@@ -7234,14 +7884,18 @@ function ListingEditorBody({ page }) {
                   `${ui.reviewRequired}: ${qualityReview.required_editor_fields.map((field) => fieldText(ui, field)).join(", ")}`,
                 )
               : null,
-            h(StatGrid, {
-              metrics: [
-                [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), "file-check", PILL_TONES[page.listing.cms_status] || "ink"],
-                [ui.schema, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), "check-circle-2", page.listing.seo?.schema_present ? "success" : "brick"],
-                [ui.availabilityVerification, workflow.availability_verified_at ? formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale) : ui.notVerified, "calendar-check", workflow.availability_verified_at ? "success" : "sun"],
-                [ui.publishApproval, workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing, "shield-check", workflow.publish_approved ? "success" : "sun"],
-              ],
-            }),
+            h(
+              "dl",
+              { className: "adm-editor-facts", "data-editor-readiness": "true" },
+              ...[
+                [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), PILL_TONES[page.listing.cms_status] || "ink"],
+                [ui.schema, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), page.listing.seo?.schema_present ? "success" : "brick"],
+                [ui.availabilityVerification, workflow.availability_verified_at ? formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale) : ui.notVerified, workflow.availability_verified_at ? "success" : "sun"],
+                [ui.publishApproval, workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing, workflow.publish_approved ? "success" : "sun"],
+              ].map(([factLabel, value, tone]) =>
+                h("div", { key: factLabel, "data-tone": tone }, h("dt", null, factLabel), h("dd", null, value)),
+              ),
+            ),
           ),
           h(
             Panel,
@@ -7249,23 +7903,16 @@ function ListingEditorBody({ page }) {
         h(
           "ul",
           { className: "adm-translations" },
-          ...(page.listing.translations || []).map((translation) =>
+          // A locale carrying a stale task shows once, as stale: the stale task
+          // is newer than the published state it replaces.
+          ...translationStates.map((translation) =>
             h(
               "li",
               { key: `${translation.locale}-${translation.status}`, "data-translation-locale": translation.locale, "data-translation-status": translation.status },
               h("span", { className: "crm-lang" }, translation.locale),
-              h(StatusPill, { tone: PILL_TONES[translation.status] || "sand" }, statusText(ui, translation.status)),
+              h(StatusPill, { tone: translation.status === "stale" ? "brick" : PILL_TONES[translation.status] || "sand" }, statusText(ui, translation.status)),
             ),
           ),
-          ...staleTranslations.map((task) => {
-            const locale = task.target_locale || task.locale;
-            return h(
-              "li",
-              { key: `${locale}-stale`, "data-translation-locale": locale, "data-translation-status": "stale" },
-              h("span", { className: "crm-lang" }, locale),
-              h(StatusPill, { tone: "brick" }, statusText(ui, "stale")),
-            );
-          }),
         ),
           ),
           h(
@@ -7280,12 +7927,7 @@ function ListingEditorBody({ page }) {
             h(StatGrid, {
               metrics: [
                 [label(copy, "media", "Media"), (page.listing.media || []).length, "camera", "ink"],
-                [
-                  ui.tourStatus,
-                  statusText(ui, tourStatus),
-                  "globe",
-                  tourPublished ? "success" : "sun",
-                ],
+                [ui.tourStatus, statusText(ui, tourStatus), "globe", tourPublished ? "success" : "sun"],
                 [ui.tourFallbackGallery, fallbackGalleryCount, "camera", fallbackGalleryCount ? "sea" : "brick"],
               ],
             }),
@@ -7369,6 +8011,7 @@ function ListingEditorBody({ page }) {
                         "data-media-asset": item.asset_id,
                         "data-media-kind": item.kind,
                         "data-media-public": published ? "true" : "false",
+                        "data-media-preview-state": sourceUrl && item.kind !== "video" ? "loading" : "none",
                       },
                       h(
                         "header",
@@ -7376,6 +8019,22 @@ function ListingEditorBody({ page }) {
                         h("div", null, h("strong", null, fieldText(ui, `media_kind_${item.kind}`)), h("small", { className: "crm-mono" }, item.asset_id)),
                         h(StatusPill, { tone: published ? "success" : "sun" }, statusText(ui, item.review_status)),
                       ),
+                      // An asset whose file has gone missing says so instead of
+                      // leaving a broken image in a review queue.
+                      sourceUrl && item.kind !== "video"
+                        ? h(
+                            "div",
+                            { className: "adm-media-asset__preview" },
+                            h("img", {
+                              src: sourceUrl,
+                              alt: item.alt || fieldText(ui, `media_kind_${item.kind}`),
+                              loading: "lazy",
+                              decoding: "async",
+                              "data-media-preview": "true",
+                            }),
+                            h("span", { className: "adm-media-asset__preview-failed" }, ui.mediaPreviewFailed),
+                          )
+                        : null,
                       sourceUrl
                         ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
                         : null,
@@ -7441,12 +8100,34 @@ function ListingEditorBody({ page }) {
                         : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
                     );
                   })
-                : h("p", { className: "adm-note", "data-media-empty": "true" }, ui.noReviewableMedia),
+                : h(EmptyState, { icon: "camera", "data-media-empty": "true" }, ui.noMediaBody),
             ),
             canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/tours/approve")
-              ? h(
+              ? [
+                  // A listing without an approved tour says so before the form,
+                  // so the fields read as "publish one" rather than "edit one".
+                  tourPublished
+                    ? null
+                    : h(
+                        "div",
+                        {
+                          key: "tour-state",
+                          className: "adm-tour-state",
+                          "data-tour-empty": tourConfigured ? "configured" : "true",
+                        },
+                        h("span", { className: "adm-tour-state__icon", "aria-hidden": "true" }, h(Icon, { name: "globe", size: 18 })),
+                        h(
+                          "div",
+                          null,
+                          h("strong", null, ui.tourNotPublished),
+                          h("p", null, ui.tourNotPublishedBody),
+                        ),
+                        h(StatusPill, { tone: "sun" }, statusText(ui, tourStatus)),
+                      ),
+                  h(
                   "form",
           {
+            key: "tour-form",
             method: "post",
             action: "/api/admin/tours/approve",
             className: "adm-tour-form",
@@ -7559,7 +8240,8 @@ function ListingEditorBody({ page }) {
                 h("span", null, ui.tourApprovePublish),
               ),
             ),
-          )
+          ),
+                ]
               : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
           ),
         ),
@@ -7739,6 +8421,9 @@ function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
           { className: "adm-route-decision__meta" },
           h(StatusPill, { tone: "sun" }, route.url_type),
           h("span", null, route.source_domain),
+          // 292 URLs need a decision each, so the row says what opening it is
+          // for instead of leaving a bare chevron as the only affordance.
+          h("span", { className: "adm-route-decision__cta" }, ui.decision),
         ),
       ),
       h(
@@ -8011,6 +8696,269 @@ function ListingQualityReviewDecision({ page, row, ui }) {
   );
 }
 
+// Package A2: the approved-content review screen. It is read-only on purpose.
+// Approving a record means editing its data file and rebuilding, because the
+// rebuild is what recomputes the source hash that ties the approval to the
+// exact text; an Approve button on this screen could not make that promise, so
+// the screen states the real procedure instead of faking one.
+// The approval procedure names a directory and a command. Both are literals an
+// operator retypes, so they render as code inside the sentence rather than as
+// prose a translator might reflow.
+const APPROVED_CONTENT_DIR = "production/data/";
+const APPROVED_CONTENT_COMMAND = "node production/scripts/build-approved-content.mjs";
+
+function approvedHowToParts(cms) {
+  const values = { "{dir}": APPROVED_CONTENT_DIR, "{command}": APPROVED_CONTENT_COMMAND };
+  return String(cms.howTo)
+    .split(/(\{dir\}|\{command\})/)
+    .filter((part) => part !== "")
+    .map((part, index) =>
+      values[part]
+        ? h("code", { key: `code-${index}`, className: "crm-mono" }, values[part])
+        : h("span", { key: `text-${index}` }, part),
+    );
+}
+
+function approvedRecordTitle(row, cms) {
+  return (
+    row.name ||
+    row.title ||
+    cms.lines[row.line_key] ||
+    row.line_key ||
+    row.area_key ||
+    row.partner_key ||
+    row.profile_key ||
+    row.id
+  );
+}
+
+function approvedRecordContext(row, ui) {
+  const parts = [];
+  if (row.role) parts.push(statusText(ui, row.role));
+  if (row.office) parts.push(row.office);
+  if (row.municipality) parts.push(row.municipality);
+  if (row.serves) parts.push(ui.approvedContent.scopes[row.serves] || row.serves);
+  if (row.basis) parts.push(statusText(ui, row.basis));
+  return parts.join(" · ");
+}
+
+function ApprovedContentRows({ page, section, cms, ui }) {
+  const columns = cms.columns;
+  return h(
+    "table",
+    { className: "crm-tbl crm-tbl--dense adm-approved-table" },
+    h(
+      "thead",
+      null,
+      h(
+        "tr",
+        null,
+        h("th", { scope: "col" }, columns.record),
+        h("th", { scope: "col" }, columns.locale),
+        h("th", { scope: "col" }, columns.approver),
+        h("th", { scope: "col" }, columns.publishing),
+      ),
+    ),
+    h(
+      "tbody",
+      null,
+      ...section.rows.map((row) =>
+        h(
+          "tr",
+          {
+            key: row.id,
+            "data-approved-record": row.id,
+            "data-approved-state": row.publishable ? "ready" : "withheld",
+          },
+          h(
+            "td",
+            { "data-label": columns.record },
+            h(
+              "div",
+              { className: "adm-lead-identity" },
+              h("strong", null, approvedRecordTitle(row, cms)),
+              h("code", { className: "crm-mono" }, row.id),
+              approvedRecordContext(row, ui)
+                ? h("small", { className: "adm-lead-context" }, approvedRecordContext(row, ui))
+                : null,
+            ),
+          ),
+          h("td", { "data-label": columns.locale }, row.locale ? row.locale.toUpperCase() : "—"),
+          h(
+            "td",
+            { "data-label": columns.approver },
+            row.reviewer
+              ? h(
+                  "div",
+                  { className: "adm-approved-approver" },
+                  h("span", null, row.reviewer),
+                  row.approved_at
+                    ? h("small", null, formatAdminDateTime(row.approved_at, page.workspace.locale))
+                    : null,
+                )
+              : h("span", { className: "adm-approved-none" }, cms.noApprover),
+          ),
+          h(
+            "td",
+            { "data-label": columns.publishing },
+            row.publishable
+              ? h(StatusPill, { tone: "success" }, cms.readyShort)
+              : h(
+                  "div",
+                  { className: "adm-approved-blocked" },
+                  h(StatusPill, { tone: "brick" }, cms.withheldShort),
+                  h("small", null, cms.reasons[row.blocked_reason] || statusText(ui, row.blocked_reason)),
+                ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function ApprovedContentSection({ page, section, cms, ui }) {
+  const sectionCopy = cms.sections[section.id] || {};
+  const title = sectionCopy.title || statusText(ui, section.id);
+  return h(
+    Panel,
+    {
+      title,
+      "data-approved-section": section.id,
+      "data-approved-blocked": section.blocked,
+    },
+    h(
+      "p",
+      { className: "adm-approved-surface" },
+      h(Icon, { name: "external-link", size: 15 }),
+      h("span", null, `${cms.surface}: `),
+      h("code", { className: "crm-mono" }, section.surface),
+      h(
+        "span",
+        { className: "adm-approved-ready" },
+        cms.readyOf.replace("{ready}", section.publishable).replace("{total}", section.total),
+      ),
+    ),
+    section.rows.length
+      ? h(ApprovedContentRows, { page, section, cms, ui })
+      : h(EmptyState, { icon: "search-x", "data-approved-section-empty": section.id }, cms.emptyFiltered),
+    section.blocked
+      ? h(
+          "p",
+          { className: "adm-approved-requirement", "data-approved-requirement": section.id },
+          h("strong", null, `${cms.requirementLabel}: `),
+          h("span", null, sectionCopy.requirement || section.publish_requirement),
+        )
+      : null,
+  );
+}
+
+function ApprovedCostEstimator({ cms, feeTable }) {
+  if (!feeTable.length) return null;
+  return h(
+    Panel,
+    { title: cms.estimatorTitle, "data-approved-estimator": "true" },
+    h("p", { className: "adm-approved-surface" }, cms.estimatorDescription),
+    h(
+      "ul",
+      { className: "adm-approved-scopes" },
+      ...feeTable.map((scope) =>
+        h(
+          "li",
+          { key: scope.buyer_scope, "data-estimator-scope": scope.buyer_scope, "data-estimator-available": scope.available ? "true" : "false" },
+          h(
+            "div",
+            { className: "adm-approved-scope__hd" },
+            h("strong", null, cms.scopes[scope.buyer_scope] || scope.buyer_scope),
+            scope.available
+              ? h(StatusPill, { tone: "success" }, cms.estimatorAvailable)
+              : h(StatusPill, { tone: "brick" }, cms.estimatorBlocked),
+          ),
+          scope.available
+            ? null
+            : h(
+                "p",
+                { className: "adm-approved-missing" },
+                h("span", null, `${cms.estimatorMissing}: `),
+                (scope.missing || [])
+                  .map((line) => cms.lines[line.line_key] || line.line_key)
+                  .join(", "),
+              ),
+        ),
+      ),
+    ),
+  );
+}
+
+function ApprovedContentBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const cms = ui.approvedContent;
+  const review = page.approvedContent || {};
+  const summary = review.summary || { total: 0, publishable: 0, blocked: 0 };
+  const sections = review.sections || [];
+  const state = page.filters?.state || "";
+  const metrics = [
+    [cms.records, summary.total],
+    [cms.ready, summary.publishable],
+    [cms.withheld, summary.blocked],
+    [cms.surfaces, sections.length],
+  ];
+  const filterHref = (value) =>
+    adminHref(value ? `/admin/approved-content?state=${encodeURIComponent(value)}` : "/admin/approved-content", page);
+  const filterOptions = [
+    { value: "", label: cms.all, count: summary.total, href: filterHref(""), selected: !state },
+    { value: "withheld", label: cms.withheldShort, count: summary.blocked, href: filterHref("withheld"), selected: state === "withheld" },
+    { value: "ready", label: cms.readyShort, count: summary.publishable, href: filterHref("ready"), selected: state === "ready" },
+  ];
+  return adminShell(page, {
+    title: cms.title,
+    mainAttrs: {
+      "data-kind": "admin-approved-content",
+      "data-react-admin-ui": "approved-content",
+      "data-admin-workbench": "cms",
+      "data-admin-locale": page.workspace.locale,
+      "data-approved-content-total": summary.total,
+      "data-approved-content-publishable": summary.publishable,
+      "data-approved-content-blocked": summary.blocked,
+      "data-approved-content-state": state || "all",
+    },
+    children: [
+      h(
+        PageHeader,
+        { title: cms.title, subtitle: cms.description },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/translations", page) },
+          h(Icon, { name: "languages", size: 16 }),
+          h("span", null, label(copy, "translationQueue", "Translation review")),
+        ),
+      ),
+      h(StatGrid, { metrics }),
+      h(
+        "aside",
+        { className: "adm-approved-howto", "data-approved-content-howto": "true" },
+        h(Icon, { name: "info", size: 18 }),
+        h(
+          "div",
+          null,
+          h("strong", null, cms.howToTitle),
+          h("p", null, ...approvedHowToParts(cms)),
+          h("p", { className: "adm-approved-howto__why" }, cms.howToWhy),
+        ),
+        h("span", { className: "adm-planned-badge" }, cms.readOnlyBadge),
+      ),
+      h(PageToolbar, null, h(CmsFilterLinks, { scope: "approved_content", label: cms.filters, options: filterOptions })),
+      ...sections.map((section) => h(ApprovedContentSection, { key: section.id, page, section, cms, ui })),
+      h(ApprovedCostEstimator, { cms, feeTable: review.purchase_fee_table || [] }),
+      h(
+        "p",
+        { className: "adm-approved-generated" },
+        `${cms.reviewedAt}: ${formatAdminDateTime(review.generated_at, page.workspace.locale)}`,
+      ),
+    ],
+  });
+}
+
 function MigrationReviewBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -8272,7 +9220,14 @@ function MigrationReviewBody({ page }) {
                 h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui }),
               ),
             )
-          : h("p", { className: "adm-empty", "data-empty-route-decisions": "true", tabIndex: "-1" }, ui.noPendingLegacyDecisions),
+          : h(
+              EmptyState,
+              { icon: "circle-check", "data-empty-route-decisions": "true", tabIndex: "-1" },
+              ui.noRouteDecisionsBody,
+              page.routeMap.filters?.q || page.routeMap.filters?.type || page.routeMap.filters?.domain
+                ? h("a", { className: "adm-empty__action", href: adminHref("/admin/migration/review", page) }, label(copy, "resetFilters", "Reset filters"))
+                : null,
+            ),
         h(
           "datalist",
           { id: "legacy-route-targets", "data-route-target-options": "true" },
@@ -8455,7 +9410,7 @@ function MigrationReviewBody({ page }) {
                 h(ListingQualityReviewDecision, { key: row.listing_id, page, row, ui }),
               ),
             )
-          : h("p", { className: "adm-empty", "data-empty-listing-quality-review": "true" }, ui.noReportData),
+          : h(EmptyState, { icon: "circle-check", "data-empty-listing-quality-review": "true" }, ui.noReportData),
         ),
       ),
       h(
@@ -9683,6 +10638,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_activity") return renderStaticElement(h(ActivityBody, { page }));
   if (page.kind === "admin_listing_manager") return renderStaticElement(h(ListingManagerBody, { page }));
   if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));
+  if (page.kind === "admin_approved_content_review") return renderStaticElement(h(ApprovedContentBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));
   if (page.kind === "admin_migration_review") return renderStaticElement(h(MigrationReviewBody, { page }));
   return "";

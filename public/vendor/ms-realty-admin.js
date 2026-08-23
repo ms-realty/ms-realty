@@ -849,6 +849,92 @@
     window.addEventListener("resize", syncAdminShellOffsets);
     syncOpenState();
   }
+  /* Package A2 (CMS and launch screens) --------------------------------- */
+  // The bulk bar is quiet until a listing is selected: the status control and
+  // the submit stay disabled, and the hint says what a selection would do.
+  // Without JavaScript the bar keeps its server-rendered enabled state, so a
+  // no-script operator can still post a bulk change.
+  function initListingSelectionBar() {
+    var forms = document.querySelectorAll("[data-listing-bulk-form]");
+    for (var i = 0; i < forms.length; i += 1) {
+      (function (form) {
+        var bar = form.querySelector("[data-listing-bulk-bar]");
+        if (!bar) return;
+        var boxes = form.querySelectorAll("[data-listing-select]");
+        var controls = form.querySelectorAll("[data-listing-bulk-control]");
+        var hint = form.querySelector("[data-listing-bulk-hint]");
+        var emptyHint = hint ? hint.textContent : "";
+        var readOnly = false;
+        for (var c = 0; c < controls.length; c += 1) if (controls[c].disabled) readOnly = true;
+        function selectedCount() {
+          var selected = 0;
+          for (var j = 0; j < boxes.length; j += 1) if (boxes[j].checked) selected += 1;
+          return selected;
+        }
+        function sync() {
+          var selected = selectedCount();
+          bar.setAttribute("data-selection", selected ? "active" : "empty");
+          if (readOnly) return;
+          for (var k = 0; k < controls.length; k += 1) controls[k].disabled = selected === 0;
+          if (hint) hint.textContent = selected ? bar.getAttribute("data-selection-hint") || emptyHint : emptyHint;
+        }
+        form.addEventListener("change", function (event) {
+          if (event.target && event.target.matches("[data-listing-select]")) sync();
+        });
+        form.addEventListener("click", function (event) {
+          if (event.target && event.target.closest("[data-listing-select-all]")) window.setTimeout(sync);
+        });
+        sync();
+      })(forms[i]);
+    }
+  }
+  // The editor save bar carries one state at a time: clean, dirty, saving,
+  // saved, error or conflict. Dirty comes from the shared editor watcher; the
+  // rest are mirrored from the mutation status line so the bar, and not only a
+  // sentence of text, tells the operator where the save got to. A conflict is
+  // an error the server does not report yet: the marker below is the hook, and
+  // until a version token exists the bar falls back to the plain error state.
+  function initListingEditorSaveState() {
+    var savebars = document.querySelectorAll("[data-editor-savebar]");
+    for (var i = 0; i < savebars.length; i += 1) {
+      (function (savebar) {
+        var status = savebar.querySelector("[data-admin-mutation-status]");
+        var conflict = document.querySelector("[data-editor-conflict]");
+        var marker = savebar.getAttribute("data-editor-conflict-marker") || "";
+        if (!status || typeof MutationObserver !== "function") return;
+        function sync() {
+          var state = status.getAttribute("data-state") || "";
+          if (state === "success") state = "saved";
+          if (state === "error" && marker && status.textContent.indexOf(marker) >= 0) state = "conflict";
+          if (!state) state = savebar.getAttribute("data-dirty") === "true" ? "dirty" : "clean";
+          savebar.setAttribute("data-save-state", state);
+          if (conflict) conflict.hidden = state !== "conflict";
+        }
+        new MutationObserver(sync).observe(status, { attributes: true, childList: true, characterData: true, subtree: true });
+        new MutationObserver(sync).observe(savebar, { attributes: true, attributeFilter: ["data-dirty"] });
+        sync();
+      })(savebars[i]);
+    }
+  }
+  // A media asset whose file has gone missing must say so rather than leave a
+  // broken image icon in a review queue.
+  function initListingMediaPreviews() {
+    var previews = document.querySelectorAll("[data-media-preview]");
+    for (var i = 0; i < previews.length; i += 1) {
+      (function (image) {
+        var asset = image.closest("[data-media-asset]");
+        function fail() {
+          if (asset) asset.setAttribute("data-media-preview-state", "failed");
+          image.hidden = true;
+        }
+        if (image.complete && image.naturalWidth === 0) fail();
+        image.addEventListener("error", fail);
+        image.addEventListener("load", function () {
+          if (asset) asset.setAttribute("data-media-preview-state", "loaded");
+        });
+      })(previews[i]);
+    }
+  }
   function initListingEditorTabs() {
     var nav = document.querySelector("[data-editor-tabs]");
     if (!nav) return;
@@ -1433,6 +1519,9 @@
   initEditorForms();
   initLeadPipelineFilters();
   initListingBulkForms();
+  initListingSelectionBar();
+  initListingEditorSaveState();
+  initListingMediaPreviews();
   initRouteDecisionForms();
   initAdminMutationForms();
   initMediaUploadForm();

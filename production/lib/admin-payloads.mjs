@@ -105,6 +105,46 @@ export function renderAdminOperationsReportPayload(registry, requestedLocale, re
   };
 }
 
+// Approved content review (read-only). The review body itself comes from
+// approved-content-review.mjs, which package B2 owns; this only wraps it in the
+// workbench envelope so the CMS screen can render inside the shell.
+export function renderAdminApprovedContentPayload(registry, requestedLocale, review, operator = null, state = "") {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  // The filter narrows the rows on show, never the counts: an approver has to
+  // keep seeing how much of each surface is still withheld while looking at a
+  // single state.
+  const normalizedState = ["ready", "withheld"].includes(state) ? state : "";
+  const filtered = normalizedState
+    ? {
+        ...review,
+        sections: (review.sections || []).map((section) => ({
+          ...section,
+          rows: (section.rows || []).filter((row) => (normalizedState === "ready" ? row.publishable : !row.publishable)),
+        })),
+      }
+    : review;
+  return {
+    kind: "admin_approved_content_review",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/approved-content",
+    canonical: "/admin/approved-content",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.approvedContent || "Approved content"} | MS Realty`,
+      description:
+        workspace.copy.approvedContentDescription ||
+        "Which approved-content records the public site may publish, which are withheld, and why.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    filters: { state: normalizedState },
+    approvedContent: filtered,
+  };
+}
+
 export function renderAdminRealtyCasesPayload(registry, requestedLocale, realtyCaseQueue, operator = null) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   return {

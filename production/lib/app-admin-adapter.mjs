@@ -13,7 +13,7 @@ import {
   resolveAdminPrincipal,
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
-import { renderOperatorConnectPage } from "./operator-connect.mjs";
+import { operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
 import {
   adminSessionClearCookie,
   adminSessionSetCookie,
@@ -22,6 +22,7 @@ import {
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
+import { approvedContentReviewPayload } from "./approved-content-review.mjs";
 import { adminCredentials } from "./admin-auth.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
@@ -73,6 +74,7 @@ import {
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
   renderAdminRealtyCasesPayload,
+  renderAdminApprovedContentPayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import {
@@ -3384,8 +3386,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       if ((authHeader && resolveAdminPrincipal(authHeader, authEnv)) || session?.principal) {
         return new Response(null, { status: 303, headers: { location: "/admin", "cache-control": "no-store" } });
       }
-      const error = new URL(request.url, "http://localhost").searchParams.get("error") === "1";
-      return new Response(renderAdminLoginPage({ error }), {
+      const loginUrl = new URL(request.url, "http://localhost");
+      const error = loginUrl.searchParams.get("error") === "1";
+      return new Response(renderAdminLoginPage({ error, locale: loginUrl.searchParams.get("locale") || "bg" }), {
         status: 200,
         headers: {
           "content-type": "text/html; charset=utf-8",
@@ -3514,6 +3517,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             operators,
             created: url.searchParams.get("created") === "1",
             error: url.searchParams.get("error") === "1",
+            locale: url.searchParams.get("locale") || "bg",
           }),
           { status: 200, headers: PRIVATE_HTML_HEADERS },
         );
@@ -3647,14 +3651,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       const token = principal.source === "payload_session" ? "" : String(authHeader).replace(/^Bearer\s+/i, "").trim();
       const base =
         String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
-      const connected = url.searchParams.get("connected");
-      const result = connected
-        ? `${connected === "google" ? "Google" : connected === "whatsapp" ? "WhatsApp" : "Viber"} подтверждён и подключён.`
-        : url.searchParams.get("error")
-          ? "Провайдер не подтвердил подключение. Проверь настройки и повтори."
-          : storeError
-            ? "Хранилище подключений сейчас недоступно; новые credentials не будут приняты."
-            : "";
+      const connectLocale = url.searchParams.get("locale") || "en";
+      const result = operatorConnectResult({
+        locale: connectLocale,
+        connected: url.searchParams.get("connected") || "",
+        error: Boolean(url.searchParams.get("error")),
+        storeError,
+      });
       return new Response(
         renderOperatorConnectPage({
           baseUrl: base,
@@ -3663,6 +3666,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           connections,
           availability,
           result,
+          locale: connectLocale,
         }),
         {
           status: 200,
@@ -3865,6 +3869,20 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       } catch (error) {
         return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
+    }
+    // Package A2: read-only approved-content review. The review body reads the
+    // approved data files directly, so the Payload app and the static server
+    // show the same rows.
+    if (request.method === "GET" && url.pathname === "/admin/approved-content") {
+      return htmlResponse(
+        renderAdminApprovedContentPayload(
+          registry,
+          url.searchParams.get("locale") || "en",
+          approvedContentReviewPayload(config.reviewedAt ? { now: config.reviewedAt } : {}),
+          config.adminPrincipal || null,
+          url.searchParams.get("state") || "",
+        ),
+      );
     }
     if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(await translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, await translationQueuePayload(registry, url, config));

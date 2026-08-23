@@ -30,7 +30,7 @@ import {
   withAuthenticatedAuditActor,
   adminCredentials,
 } from "./admin-auth.mjs";
-import { renderOperatorConnectPage } from "./operator-connect.mjs";
+import { operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
 import {
   adminSessionClearCookie,
   adminSessionSetCookie,
@@ -63,6 +63,7 @@ import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.m
 import {
   LISTING_EDIT_FIELDS,
   renderAdminActivityPayload,
+  renderAdminApprovedContentPayload,
   renderAdminContactsPayload,
   renderAdminConsentPayload,
   renderAdminDocumentChecklistPayload,
@@ -2128,7 +2129,8 @@ export function createHttpApp({
         if ((auth && resolveAdminPrincipal(auth)) || session?.principal) {
           return response(303, "", "text/plain; charset=utf-8", { location: "/admin" });
         }
-        return response(200, renderAdminLoginPage({ error: url.searchParams.get("error") }), "text/html; charset=utf-8", {
+        // The raw value matters: "2fa" selects the second-factor refusal.
+        return response(200, renderAdminLoginPage({ error: url.searchParams.get("error") || false, locale: url.searchParams.get("locale") || "bg" }), "text/html; charset=utf-8", {
           "cache-control": "no-store",
           "x-robots-tag": "noindex, nofollow",
           ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
@@ -2830,6 +2832,32 @@ export function createHttpApp({
       return json(payload.available ? 200 : 409, { kind: "purchase_fee_estimate", ...payload });
     }
 
+    // Package A2: the read-only review screen for the same payload. Approval
+    // itself is a data-file edit plus a rebuild, so this screen never writes.
+    if (request.method === "GET" && url.pathname === "/admin/approved-content") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const review = approvedContentReviewPayload({
+        teamProfilePath: approvedTeamProfilePath || undefined,
+        areaGuidePath: approvedAreaGuidePath || undefined,
+        financingPartnerPath: approvedFinancingPartnerPath || undefined,
+        purchaseFeePath: approvedPurchaseFeePath || undefined,
+        ...(reviewedAt ? { now: reviewedAt } : {}),
+      });
+      return adminResponse(
+        200,
+        adminHtml(
+          renderAdminApprovedContentPayload(
+            activeRegistry,
+            adminLocaleParam(url),
+            review,
+            principal,
+            url.searchParams.get("state") || "",
+          ),
+        ),
+        "text/html; charset=utf-8",
+      );
+    }
+
     if (request.method === "GET" && url.pathname === "/api/admin/approved-content") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminJson(
@@ -3468,6 +3496,7 @@ export function createHttpApp({
             operators,
             created: url.searchParams.get("created") === "1",
             error: url.searchParams.get("error") === "1",
+            locale: url.searchParams.get("locale") || "bg",
           }),
           "text/html; charset=utf-8",
         );
@@ -3952,14 +3981,13 @@ export function createHttpApp({
       const base =
         String(providerConnection.publicOrigin || "").trim() ||
         new URL(request.url, `http://${requestHost(request.headers) || "localhost"}`).origin;
-      const connected = url.searchParams.get("connected");
-      const result = connected
-        ? `${connected === "google" ? "Google" : connected === "whatsapp" ? "WhatsApp" : "Viber"} подтверждён и подключён.`
-        : url.searchParams.get("error")
-          ? "Провайдер не подтвердил подключение. Проверь настройки и повтори."
-          : storeError
-            ? "Хранилище подключений сейчас недоступно; новые credentials не будут приняты."
-            : "";
+      const connectLocale = adminLocaleParam(url);
+      const result = operatorConnectResult({
+        locale: connectLocale,
+        connected: url.searchParams.get("connected") || "",
+        error: Boolean(url.searchParams.get("error")),
+        storeError,
+      });
       return adminResponse(
         200,
         renderOperatorConnectPage({
@@ -3969,6 +3997,7 @@ export function createHttpApp({
           connections,
           availability,
           result,
+          locale: connectLocale,
         }),
         "text/html; charset=utf-8",
         { "x-robots-tag": "noindex, nofollow" },

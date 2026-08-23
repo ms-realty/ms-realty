@@ -104,7 +104,17 @@ test("session cookie helpers round-trip and cap the Payload session token", () =
   assert.match(login, /\.login #admin-password:focus-visible,\s*\.login #admin-code:focus-visible \{/);
   assert.match(login, /name="code"[^>]*autocomplete="one-time-code"/);
   assert.match(login, /\.login__submit \{[^}]*height: 48px;[^}]*border-radius: 8px;\s*background: var\(--accent, #C42D2D\)/);
-  assert.match(login, /class="login__submit">Влез</);
+  // The submit control now carries its own busy state, so the label lives in a
+  // span beside the spinner rather than as the button's only text node.
+  assert.match(login, /data-idle-label="Влез" data-busy-label="Влизане…"/);
+  assert.match(login, /<span data-login-submit-label="true">Влез<\/span>/);
+  // The workbench runs in three languages, so its door does too.
+  assert.match(login, /<nav class="login__locales"/);
+  assert.match(renderAdminLoginPage({ locale: "ru" }), /<html lang="ru">/);
+  assert.match(renderAdminLoginPage({ locale: "ru" }), /data-idle-label="Войти"/);
+  assert.match(renderAdminLoginPage({ locale: "en" }), /<html lang="en">/);
+  assert.match(renderAdminLoginPage({ locale: "en" }), /data-idle-label="Sign in"/);
+  assert.match(renderAdminLoginPage({ locale: "nope" }), /<html lang="bg">/);
   assert.doesNotMatch(login, /[—–]/);
   assert.doesNotMatch(login, /#1d4ed8/);
   assert.doesNotMatch(login, /name="token"|Операторски ключ/);
@@ -146,7 +156,7 @@ test("standalone HTTP runtime: login exchanges email/password for a Payload cook
       headers: { cookie, host: "ms-realty.ms-realty-bg.workers.dev" },
     });
     assert.equal(connect.status, 200);
-    assert.match(connect.body, /Подключения MS Realty/);
+    assert.match(connect.body, /MS Realty connections/);
     assert.equal(connect.body.includes(PAYLOAD_SESSION), false);
 
     const authed = await dispatchHttp(app, { method: "GET", url: "/admin/login", headers: { cookie } });
@@ -184,7 +194,7 @@ test("Next admin adapter: Payload login, cookie auth, and logout behave identica
     const connect = await renderAppAdminResponse(new Request(`${base}/admin/connect`, { headers: { cookie } }), { config });
     assert.equal(connect.status, 200);
     const connectBody = await connect.text();
-    assert.match(connectBody, /Подключения MS Realty/);
+    assert.match(connectBody, /MS Realty connections/);
     assert.doesNotMatch(connectBody, new RegExp(PAYLOAD_SESSION));
 
     const logout = await renderAppAdminResponse(

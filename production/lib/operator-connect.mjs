@@ -78,17 +78,194 @@ function connectionFor(connections, provider) {
   return (Array.isArray(connections) ? connections : []).find((connection) => connection.provider === provider) || null;
 }
 
-function connectionCard({ provider, title, description, connection, action }) {
+// The connect page speaks the three workbench languages like every other admin
+// screen. Its strings live here rather than inline so the markup below stays
+// one template and the browser script can take its messages as data.
+const CONNECT_COPY = {
+  bg: {
+    lang: "bg",
+    title: "Връзки MS Realty",
+    documentTitle: "Връзки · MS Realty",
+    back: "Работно място",
+    intro: "Един екран за каналите на агенцията. Зелен статус се появява само след отговор от самия доставчик.",
+    connected: "Свързано",
+    notConnected: "Не е свързано",
+    statusLabel: "Статус",
+    accountConfirmed: "Доставчикът потвърди акаунта",
+    verifiedAt: "Проверено",
+    noDate: "без посочена дата",
+    googleTitle: "Gmail + Google Calendar",
+    googleDescription: "Изпращане на одобрени писма и календар за огледи.",
+    googleConnect: "Свържи Gmail и Calendar",
+    googleBlocked: "Нужни са OAuth данни и точен публичен адрес. Добавя ги отговорникът за инфраструктурата.",
+    whatsappTitle: "WhatsApp Business",
+    whatsappDescription: "Официалната WhatsApp Business Platform през Meta Embedded Signup.",
+    whatsappConnect: "Свържи WhatsApp Business",
+    whatsappLoading: "Зареждам защитената връзка с Meta…",
+    whatsappBlocked: "Нужни са Meta App Review, Advanced Access, конфигурация за Embedded Signup и работещ webhook.",
+    viberTitle: "Viber Bot",
+    viberDescription: "Търговски Viber бот с проверен webhook.",
+    viberTokenLabel: "Токен на търговския Viber бот",
+    viberConnect: "Провери и свържи Viber",
+    viberBlocked: "Първо е нужен търговски Viber бот и работещ webhook. Създаването на нови ботове не е достъпно самостоятелно.",
+    viberTerms: "Условия на Viber",
+    aiTitle: "Свържи ИИ помощник",
+    aiStep1: "Копирай текста.",
+    aiStep2: "Отвори Claude или ChatGPT.",
+    aiStep3: "Постави го и го изпрати.",
+    aiCopy: "Копирай текста за помощника",
+    aiReveal: "Покажи текста",
+    aiHide: "Скрий текста",
+    aiCopied: "Копирано",
+    aiCopyFailed: "Копирането не стана. Маркирай текста и го копирай ръчно.",
+    aiTextareaLabel: "Текст за свързване на ИИ помощник",
+    aiWarning: "Текстът съдържа личния ключ на оператора, не го препращай. Акаунт:",
+    noToken: "MCP ключовете не се показват в сесия в браузъра. За тях се използват отделни именувани идентификатори.",
+    metaChecking: "Проверявам акаунта в Meta…",
+    metaRejected: "Meta не потвърди връзката. Провери App Review и правата на приложението.",
+    metaNoServer: "Връзката със сървъра не стана. Повтори свързването.",
+    metaReady: "Готово за защитено преминаване към Meta.",
+    metaSdkFailed: "Meta SDK не се зареди. Провери блокиращите разширения и опитай пак.",
+    metaSdkNotReady: "Meta SDK още не е готов. Изчакай и опитай пак.",
+    metaOpening: "Отварям Meta…",
+    metaCancelled: "Свързването е отказано или Meta не върна код.",
+    resultConnected: "{provider} е потвърден и свързан.",
+    resultRejected: "Доставчикът не потвърди връзката. Провери настройките и опитай пак.",
+    resultStoreError: "Хранилището на връзките е недостъпно в момента; нови идентификатори няма да бъдат приети.",
+  },
+  ru: {
+    lang: "ru",
+    title: "Подключения MS Realty",
+    documentTitle: "Подключения · MS Realty",
+    back: "Рабочее место",
+    intro: "Один экран для каналов агентства. Зелёный статус появляется только после ответа самого провайдера.",
+    connected: "Подключено",
+    notConnected: "Не подключено",
+    statusLabel: "Статус",
+    accountConfirmed: "Провайдер подтвердил аккаунт",
+    verifiedAt: "Проверено",
+    noDate: "дата не указана",
+    googleTitle: "Gmail + Google Calendar",
+    googleDescription: "Отправка одобренных писем и календарь просмотров.",
+    googleConnect: "Подключить Gmail и Calendar",
+    googleBlocked: "Нужны OAuth credentials и точный публичный адрес. Их добавляет владелец инфраструктуры.",
+    whatsappTitle: "WhatsApp Business",
+    whatsappDescription: "Официальный WhatsApp Business Platform через Meta Embedded Signup.",
+    whatsappConnect: "Подключить WhatsApp Business",
+    whatsappLoading: "Загружаю защищённое подключение Meta…",
+    whatsappBlocked: "Нужны Meta App Review, Advanced Access, конфигурация Embedded Signup и работающий webhook.",
+    viberTitle: "Viber Bot",
+    viberDescription: "Коммерческий бот Viber с проверенным webhook.",
+    viberTokenLabel: "Токен коммерческого Viber-бота",
+    viberConnect: "Проверить и подключить Viber",
+    viberBlocked: "Сначала нужен коммерческий Viber-бот и работающий webhook. Самостоятельное создание новых ботов недоступно.",
+    viberTerms: "Условия Viber",
+    aiTitle: "Подключить ИИ-помощника",
+    aiStep1: "Скопируй текст.",
+    aiStep2: "Открой Claude или ChatGPT.",
+    aiStep3: "Вставь и отправь.",
+    aiCopy: "Скопировать текст для помощника",
+    aiReveal: "Показать текст",
+    aiHide: "Скрыть текст",
+    aiCopied: "Скопировано",
+    aiCopyFailed: "Не удалось скопировать. Выдели текст и скопируй вручную.",
+    aiTextareaLabel: "Текст подключения для ИИ-помощника",
+    aiWarning: "Текст содержит личный ключ оператора, не пересылай его. Аккаунт:",
+    noToken: "MCP-ключи не показываются в браузерной сессии. Для них используются отдельные именованные credentials.",
+    metaChecking: "Проверяю аккаунт Meta…",
+    metaRejected: "Meta не подтвердила подключение. Проверь App Review и права приложения.",
+    metaNoServer: "Не удалось связаться с сервером. Повтори подключение.",
+    metaReady: "Готово к безопасному переходу в Meta.",
+    metaSdkFailed: "Meta SDK не загрузился. Проверь блокировщик и повтори.",
+    metaSdkNotReady: "Meta SDK ещё не готов. Подожди и повтори.",
+    metaOpening: "Открываю Meta…",
+    metaCancelled: "Подключение отменено или Meta не вернула код.",
+    resultConnected: "{provider} подтверждён и подключён.",
+    resultRejected: "Провайдер не подтвердил подключение. Проверь настройки и повтори.",
+    resultStoreError: "Хранилище подключений сейчас недоступно; новые credentials не будут приняты.",
+  },
+  en: {
+    lang: "en",
+    title: "MS Realty connections",
+    documentTitle: "Connections · MS Realty",
+    back: "Workbench",
+    intro: "One screen for the agency channels. A green status appears only after the provider itself answers.",
+    connected: "Connected",
+    notConnected: "Not connected",
+    statusLabel: "Status",
+    accountConfirmed: "The provider confirmed the account",
+    verifiedAt: "Verified",
+    noDate: "no date recorded",
+    googleTitle: "Gmail + Google Calendar",
+    googleDescription: "Sending approved emails and the viewings calendar.",
+    googleConnect: "Connect Gmail and Calendar",
+    googleBlocked: "Needs OAuth credentials and the exact public origin. The infrastructure owner adds them.",
+    whatsappTitle: "WhatsApp Business",
+    whatsappDescription: "The official WhatsApp Business Platform through Meta Embedded Signup.",
+    whatsappConnect: "Connect WhatsApp Business",
+    whatsappLoading: "Loading the secure Meta connection…",
+    whatsappBlocked: "Needs Meta App Review, Advanced Access, an Embedded Signup config and a live webhook runtime.",
+    viberTitle: "Viber Bot",
+    viberDescription: "A commercial Viber bot with a verified webhook.",
+    viberTokenLabel: "Commercial Viber bot token",
+    viberConnect: "Verify and connect Viber",
+    viberBlocked: "A commercial Viber bot and a live webhook runtime come first. Creating new bots yourself is not available.",
+    viberTerms: "Viber terms",
+    aiTitle: "Connect an AI assistant",
+    aiStep1: "Copy the text.",
+    aiStep2: "Open Claude or ChatGPT.",
+    aiStep3: "Paste it and send.",
+    aiCopy: "Copy the text for the assistant",
+    aiReveal: "Show the text",
+    aiHide: "Hide the text",
+    aiCopied: "Copied",
+    aiCopyFailed: "Copying did not work. Select the text and copy it by hand.",
+    aiTextareaLabel: "Connection text for an AI assistant",
+    aiWarning: "The text carries this operator's personal key, do not forward it. Account:",
+    noToken: "MCP keys are not shown in a browser session. Separate named credentials are used for them.",
+    metaChecking: "Checking the Meta account…",
+    metaRejected: "Meta did not confirm the connection. Check App Review and the app permissions.",
+    metaNoServer: "Could not reach the server. Try connecting again.",
+    metaReady: "Ready for the secure handover to Meta.",
+    metaSdkFailed: "The Meta SDK did not load. Check your blocker and try again.",
+    metaSdkNotReady: "The Meta SDK is not ready yet. Wait and try again.",
+    metaOpening: "Opening Meta…",
+    metaCancelled: "The connection was cancelled or Meta returned no code.",
+    resultConnected: "{provider} is confirmed and connected.",
+    resultRejected: "The provider did not confirm the connection. Check the settings and try again.",
+    resultStoreError: "The connection store is unavailable right now; new credentials will not be accepted.",
+  },
+};
+
+export function operatorConnectCopy(locale) {
+  return CONNECT_COPY[locale] || CONNECT_COPY.en;
+}
+
+// The banner above the cards after a provider round-trip. Both servers build it
+// from the same copy so the page never mixes languages.
+export function operatorConnectResult({ locale, connected = "", error = false, storeError = false }) {
+  const copy = operatorConnectCopy(locale);
+  if (connected) {
+    const provider = connected === "google" ? "Google" : connected === "whatsapp" ? "WhatsApp" : "Viber";
+    return copy.resultConnected.replace("{provider}", provider);
+  }
+  if (error) return copy.resultRejected;
+  if (storeError) return copy.resultStoreError;
+  return "";
+}
+
+function connectionCard({ provider, title, description, connection, action, copy }) {
   const connected = connection?.status === "connected";
+  const state = connected ? copy.connected : copy.notConnected;
   return `<section class="card" data-provider="${provider}" aria-labelledby="provider-${provider}-title">
     <div class="card__head">
       <div><h2 id="provider-${provider}-title">${escapeHtml(title)}</h2><p>${escapeHtml(description)}</p></div>
-      <strong class="status ${connected ? "status--ok" : ""}" aria-label="Статус: ${connected ? "подключено" : "не подключено"}">${connected ? "Подключено" : "Не подключено"}</strong>
+      <strong class="status ${connected ? "status--ok" : ""}" aria-label="${escapeHtml(`${copy.statusLabel}: ${state}`)}">${escapeHtml(state)}</strong>
     </div>
     ${
       connected
-        ? `<p class="account">${escapeHtml(connection.account_label || connection.external_account_id || "Провайдер подтвердил аккаунт")}</p>
-           <p class="verified">Проверено: ${escapeHtml(connection.last_verified_at || "дата не указана")}</p>`
+        ? `<p class="account">${escapeHtml(connection.account_label || connection.external_account_id || copy.accountConfirmed)}</p>
+           <p class="verified">${escapeHtml(copy.verifiedAt)}: ${escapeHtml(connection.last_verified_at || copy.noDate)}</p>`
         : action
     }
   </section>`;
@@ -133,6 +310,8 @@ const CONNECT_STYLE = `
   .notice { margin: 0; padding: 10px 12px; border: 1px solid var(--sea-100, #D2E3E1); border-radius: 8px; background: var(--sea-50, #ECF3F2); color: var(--sea-800, #122C2B); font-size: 13px; font-weight: 600; line-height: 1.4; }
   .grid { display: grid; gap: 12px; margin: 0; }
   .card { padding: 16px 20px; border: 1px solid var(--ink-100, #E6E6E5); border-radius: 8px; background: #FFFFFF; }
+  .card:hover { border-color: var(--ink-200, #C9C9C7); }
+  .card:focus-within { border-color: var(--ink-500, #545453); }
   .card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
   .status {
     flex: 0 0 auto;
@@ -182,7 +361,12 @@ const CONNECT_STYLE = `
   ol.steps { margin: 8px 0 0; padding-left: 1.3rem; font-size: 15px; line-height: 1.7; }
   .ai p { margin: 0; }
   .ai .button { margin-top: 16px; }
-  #done { display: none; margin-left: 12px; color: var(--success-600, #256345); font-weight: 600; }
+  .ai__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .button--quiet { background: var(--surface, #FFFFFF); border: 1px solid var(--ink-200, #C9C9C7); color: var(--text-strong, #241F18); }
+  .button--quiet:hover { background: var(--ink-50, #F4F4F3); }
+  .connect-page main textarea[data-masked="true"] { filter: blur(4px); user-select: none; }
+  #done { display: none; color: var(--success-600, #256345); font-weight: 600; }
+  #done[data-state="error"] { color: var(--danger-600, #9E2334); }
   .hint { margin: 12px 0 0; color: var(--text-muted, #948263); font-size: 13px; line-height: 1.4; }
   .connect-page main label { display: block; font-size: 13px; font-weight: 600; color: var(--text-strong, #241F18); }
   .connect-page main textarea {
@@ -219,7 +403,8 @@ const CONNECT_STYLE = `
     .card__head { display: block; }
     .status { margin-top: 12px; }
     .button, form .button { width: 100%; box-sizing: border-box; }
-    #done { display: none; margin: 8px 0 0; }
+    #done { display: none; margin: 0; }
+    .ai__actions { display: grid; }
   }
 `;
 
@@ -232,32 +417,34 @@ export function renderOperatorConnectPage({
   connections = [],
   availability = {},
   result = "",
+  locale = "en",
 }) {
+  const copy = operatorConnectCopy(locale);
   const prompt = token ? operatorBootstrapPrompt({ baseUrl, token, operatorId }) : "";
   const google = connectionFor(connections, "google");
   const whatsapp = connectionFor(connections, "whatsapp");
   const viber = connectionFor(connections, "viber");
   const googleAction = availability.google?.ready
-    ? '<a class="button" href="/api/admin/connections?provider=google&amp;action=start">Подключить Gmail и Calendar</a>'
-    : '<p class="blocked">Нужны OAuth credentials и точный public origin. Их добавляет владелец инфраструктуры.</p>';
+    ? `<a class="button" href="/api/admin/connections?provider=google&amp;action=start">${escapeHtml(copy.googleConnect)}</a>`
+    : `<p class="blocked">${escapeHtml(copy.googleBlocked)}</p>`;
   const whatsappAction = availability.whatsapp?.ready
-    ? '<button class="button" id="whatsapp-connect" type="button" disabled>Подключить WhatsApp Business</button><p id="whatsapp-result" class="verified" role="status" aria-live="polite" aria-atomic="true">Загружаю защищённое подключение Meta…</p>'
-    : '<p class="blocked">Нужны Meta App Review, Advanced Access, Embedded Signup config и живой webhook runtime.</p>';
+    ? `<button class="button" id="whatsapp-connect" type="button" disabled>${escapeHtml(copy.whatsappConnect)}</button><p id="whatsapp-result" class="verified" role="status" aria-live="polite" aria-atomic="true">${escapeHtml(copy.whatsappLoading)}</p>`
+    : `<p class="blocked">${escapeHtml(copy.whatsappBlocked)}</p>`;
   const viberAction = availability.viber?.ready
     ? `<form method="post" action="/api/admin/connections">
          <input type="hidden" name="provider" value="viber">
-         <label for="viber-token">Токен коммерческого Viber-бота</label>
+         <label for="viber-token">${escapeHtml(copy.viberTokenLabel)}</label>
          <input id="viber-token" name="token" type="password" required autocomplete="off" minlength="20">
-         <button class="button" type="submit">Проверить и подключить Viber</button>
+         <button class="button" type="submit">${escapeHtml(copy.viberConnect)}</button>
        </form>`
-    : '<p class="blocked">Сначала нужен коммерческий Viber-бот и живой webhook runtime. Самостоятельное создание новых ботов недоступно.</p><p><a class="link" href="https://help.viber.com/hc/en-us/articles/15247629658525-Bot-commercial-model" rel="noreferrer noopener">Условия Viber</a></p>';
+    : `<p class="blocked">${escapeHtml(copy.viberBlocked)}</p><p><a class="link" href="https://help.viber.com/hc/en-us/articles/15247629658525-Bot-commercial-model" rel="noreferrer noopener">${escapeHtml(copy.viberTerms)}</a></p>`;
   return `<!doctype html>
-<html lang="ru">
+<html lang="${copy.lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Подключения · MS Realty</title>
+<title>${escapeHtml(copy.documentTitle)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS_URL}">
@@ -268,37 +455,71 @@ export function renderOperatorConnectPage({
 <main class="connect" aria-labelledby="admin-connect-title">
   <div class="connect__top">
     <a class="connect__brand" href="/admin" aria-label="MS Realty"><img src="${LOGO_URL}" alt="MS Realty" height="32" width="${Math.round(32 * LOGO_ASPECT)}"></a>
-    <a class="connect__back" href="/admin">&larr; Рабочее место</a>
+    <a class="connect__back" href="/admin">&larr; ${escapeHtml(copy.back)}</a>
   </div>
-  <h1 id="admin-connect-title">Подключения MS Realty</h1>
-  <p class="intro">Один экран для каналов агентства. Зелёный статус появляется только после ответа самого провайдера.</p>
+  <h1 id="admin-connect-title">${escapeHtml(copy.title)}</h1>
+  <p class="intro">${escapeHtml(copy.intro)}</p>
   ${result ? `<p class="notice" role="status">${escapeHtml(result)}</p>` : ""}
   <div class="grid">
-    ${connectionCard({ provider: "google", title: "Gmail + Google Calendar", description: "Отправка одобренных писем и календарь просмотров.", connection: google, action: googleAction })}
-    ${connectionCard({ provider: "whatsapp", title: "WhatsApp Business", description: "Официальный WhatsApp Business Platform через Meta Embedded Signup.", connection: whatsapp, action: whatsappAction })}
-    ${connectionCard({ provider: "viber", title: "Viber Bot", description: "Коммерческий бот Viber с проверенным webhook.", connection: viber, action: viberAction })}
+    ${connectionCard({ provider: "google", title: copy.googleTitle, description: copy.googleDescription, connection: google, action: googleAction, copy })}
+    ${connectionCard({ provider: "whatsapp", title: copy.whatsappTitle, description: copy.whatsappDescription, connection: whatsapp, action: whatsappAction, copy })}
+    ${connectionCard({ provider: "viber", title: copy.viberTitle, description: copy.viberDescription, connection: viber, action: viberAction, copy })}
   </div>
   ${
     token
       ? `<section class="ai">
-         <h2>Подключить ИИ-помощника</h2>
+         <h2>${escapeHtml(copy.aiTitle)}</h2>
          <ol class="steps">
-           <li>Скопируй текст.</li><li>Открой Claude или ChatGPT.</li><li>Вставь и отправь.</li>
+           <li>${escapeHtml(copy.aiStep1)}</li><li>${escapeHtml(copy.aiStep2)}</li><li>${escapeHtml(copy.aiStep3)}</li>
          </ol>
-         <p><button class="button" id="copy" type="button">Скопировать текст для помощника</button><span id="done" role="status" aria-live="polite" aria-atomic="true">Скопировано ✓</span></p>
-         <label class="hint" for="prompt">Текст подключения для ИИ-помощника</label>
+         <p class="ai__actions"><button class="button" id="copy" type="button">${escapeHtml(copy.aiCopy)}</button><button class="button button--quiet" id="reveal" type="button" aria-controls="prompt" aria-pressed="false" hidden>${escapeHtml(copy.aiReveal)}</button><span id="done" role="status" aria-live="polite" aria-atomic="true">${escapeHtml(copy.aiCopied)} \u2713</span></p>
+         <label class="hint" for="prompt">${escapeHtml(copy.aiTextareaLabel)}</label>
          <textarea id="prompt" readonly spellcheck="false">${escapeHtml(prompt)}</textarea>
-         <p class="hint">Текст содержит личный ключ оператора, не пересылай его. Аккаунт: ${escapeHtml(operatorId || "operator")}.</p>
+         <p class="hint">${escapeHtml(copy.aiWarning)} ${escapeHtml(operatorId || "operator")}.</p>
        </section>`
-      : '<p class="hint">MCP-ключи не показываются в браузерной сессии. Для них используются отдельные именованные credentials.</p>'
+      : `<p class="hint">${escapeHtml(copy.noToken)}</p>`
   }
 </main>
 <script>
+  const text = ${inlineJson({
+    reveal: copy.aiReveal,
+    hide: copy.aiHide,
+    copied: `${copy.aiCopied} \u2713`,
+    copyFailed: copy.aiCopyFailed,
+    metaChecking: copy.metaChecking,
+    metaRejected: copy.metaRejected,
+    metaNoServer: copy.metaNoServer,
+    metaReady: copy.metaReady,
+    metaSdkFailed: copy.metaSdkFailed,
+    metaSdkNotReady: copy.metaSdkNotReady,
+    metaOpening: copy.metaOpening,
+    metaCancelled: copy.metaCancelled,
+  })};
+  const promptArea = document.getElementById("prompt");
+  const revealControl = document.getElementById("reveal");
+  if (promptArea && revealControl) {
+    revealControl.hidden = false;
+    promptArea.setAttribute("data-masked", "true");
+    revealControl.addEventListener("click", () => {
+      const masked = promptArea.getAttribute("data-masked") === "true";
+      if (masked) promptArea.removeAttribute("data-masked");
+      else promptArea.setAttribute("data-masked", "true");
+      revealControl.setAttribute("aria-pressed", masked ? "true" : "false");
+      revealControl.textContent = masked ? text.hide : text.reveal;
+    });
+  }
   const copy = document.getElementById("copy");
+  const done = document.getElementById("done");
   if (copy) copy.addEventListener("click", async () => {
-    const area = document.getElementById("prompt"); area.select();
-    try { await navigator.clipboard.writeText(area.value); } catch { document.execCommand("copy"); }
-    document.getElementById("done").style.display = "inline";
+    const wasMasked = promptArea.getAttribute("data-masked") === "true";
+    if (wasMasked) promptArea.removeAttribute("data-masked");
+    promptArea.select();
+    let ok = true;
+    try { await navigator.clipboard.writeText(promptArea.value); } catch { ok = document.execCommand("copy"); }
+    if (wasMasked) promptArea.setAttribute("data-masked", "true");
+    done.textContent = ok ? text.copied : text.copyFailed;
+    done.setAttribute("data-state", ok ? "success" : "error");
+    done.style.display = "inline";
   });
   const meta = ${inlineJson({
     enabled: Boolean(availability.whatsapp?.ready && !whatsapp),
@@ -314,30 +535,30 @@ export function renderOperatorConnectPage({
     const finish = async () => {
       if (!signup || !code) return;
       button.disabled = true; result.setAttribute("aria-busy", "true");
-      result.textContent = "Проверяю аккаунт Meta…";
+      result.textContent = text.metaChecking;
       try {
         const response = await fetch("/api/admin/connections", {
           method: "POST", headers: { "content-type": "application/json" },
           body: JSON.stringify({ provider: "whatsapp", code, waba_id: signup.waba_id, phone_number_id: signup.phone_number_id }),
         });
         if (response.ok) location.assign("/admin/connect?connected=whatsapp");
-        else fail("Meta не подтвердила подключение. Проверь App Review и права приложения.");
-      } catch { fail("Не удалось связаться с сервером. Повтори подключение."); }
+        else fail(text.metaRejected);
+      } catch { fail(text.metaNoServer); }
     };
     addEventListener("message", (event) => {
       if (!["https://www.facebook.com", "https://web.facebook.com"].includes(event.origin)) return;
       let data = event.data; try { if (typeof data === "string") data = JSON.parse(data); } catch { return; }
       if (data?.type === "WA_EMBEDDED_SIGNUP" && data?.event === "FINISH") { signup = data.data; finish(); }
     });
-    window.fbAsyncInit = () => { FB.init({ appId: meta.appId, autoLogAppEvents: true, xfbml: false, version: meta.version }); button.disabled = false; result.textContent = "Готово к безопасному переходу в Meta."; };
+    window.fbAsyncInit = () => { FB.init({ appId: meta.appId, autoLogAppEvents: true, xfbml: false, version: meta.version }); button.disabled = false; result.textContent = text.metaReady; };
     const script = document.createElement("script"); script.async = true; script.src = "https://connect.facebook.net/en_US/sdk.js";
-    script.onerror = () => fail("Meta SDK не загрузился. Проверь блокировщик и повтори."); document.head.append(script);
+    script.onerror = () => fail(text.metaSdkFailed); document.head.append(script);
     button?.addEventListener("click", () => {
-      if (!window.FB) return fail("Meta SDK ещё не готов. Подожди и повтори.");
-      button.disabled = true; result.textContent = "Открываю Meta…";
+      if (!window.FB) return fail(text.metaSdkNotReady);
+      button.disabled = true; result.textContent = text.metaOpening;
       FB.login((response) => {
         code = response?.authResponse?.code || null;
-        if (!code) return fail("Подключение отменено или Meta не вернула код.");
+        if (!code) return fail(text.metaCancelled);
         finish();
       }, { config_id: meta.configId, response_type: "code", override_default_response_type: true, extras: { setup: {} } });
     });

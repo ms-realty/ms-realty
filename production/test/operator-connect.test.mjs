@@ -52,7 +52,8 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
     token: OPERATOR_TOKEN,
     operatorId: "connect_operator",
   });
-  assert.ok(html.includes("Скопировать текст"));
+  // The page speaks the workbench languages; it used to be fixed to Russian.
+  assert.ok(html.includes("Copy the text for the assistant"));
   assert.ok(html.includes("Gmail + Google Calendar"));
   assert.ok(html.includes("WhatsApp Business"));
   assert.ok(html.includes("Viber Bot"));
@@ -60,6 +61,19 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
   assert.ok(html.includes("noindex"));
   assert.ok(html.includes(OPERATOR_TOKEN));
   assert.equal(html.includes("<script>alert"), false);
+  for (const [locale, marker, lang] of [
+    ["bg", "Копирай текста за помощника", "bg"],
+    ["ru", "Скопировать текст для помощника", "ru"],
+  ]) {
+    const localised = renderOperatorConnectPage({
+      baseUrl: "https://ms-realty.example.workers.dev",
+      token: OPERATOR_TOKEN,
+      operatorId: "connect_operator",
+      locale,
+    });
+    assert.ok(localised.includes(marker), locale);
+    assert.ok(localised.includes(`<html lang="${lang}">`), locale);
+  }
 });
 
 test("standalone HTTP runtime serves /admin/connect behind admin auth", async () => {

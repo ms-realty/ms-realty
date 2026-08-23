@@ -102,6 +102,7 @@ test("connect page loads the workbench fonts and design-system bundle without em
     token: "connect-operator-token-0123456789",
     operatorId: "connect_operator",
     connections: [{ provider: "google", status: "connected", account_label: "office@ms-realty.bg" }],
+    locale: "ru",
   });
   assert.ok(html.includes(`<link rel="stylesheet" href="${FONTS_URL}">`));
   assert.ok(html.includes(`<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}"`));
@@ -119,5 +120,10 @@ test("team page controls outrank the adapter's generic main field rules", () => 
   const html = renderAdminTeamPage({ operators: [] });
   assert.match(html, /\.team-page \.team__form input,\s*\.team-page \.team__form select \{/);
   assert.match(html, /\.team-page \.team__form select \{[^}]*background-image: url/);
-  assert.match(html, /Все още няма оператори\. \/ No operators yet\./);
+  // The page now speaks one workbench language at a time instead of stacking
+  // "Bulgarian / English" into every string, so the empty state is Bulgarian
+  // by default and Russian and English come from ?locale=.
+  assert.match(html, /Още няма оператори\./);
+  assert.match(renderAdminTeamPage({ operators: [], locale: "ru" }), /Операторов пока нет\./);
+  assert.match(renderAdminTeamPage({ operators: [], locale: "en" }), /No operators yet\./);
 });
