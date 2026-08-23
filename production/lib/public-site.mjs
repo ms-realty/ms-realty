@@ -65,6 +65,7 @@ import {
 } from "./purchase-fees.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { publicMediaLibrary } from "./media.mjs";
+import { mediaUploadLimitsFromEnv } from "./media-uploads.mjs";
 import { isPublicBrokerContact } from "./broker-contacts.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
@@ -1519,42 +1520,119 @@ const SELLER_COPY = {
     description: "Заявете брокерска оценка и обратна връзка от екипа на MS Realty.",
     h1: "Продайте имота си",
     form_unavailable: "Формата е временно недостъпна. Обадете се или ни пишете, отговаряме бързо.",
+    photos_title: "Добавете снимки",
+    photos_intro: "Снимките помагат на брокера да подготви оценката преди огледа.",
+    photos_privacy: "Снимките остават лични. Снимки, изпратени от посетител на сайта, никога не се публикуват автоматично и никога не се появяват в търсенето. Брокерът ги преглежда заедно с вас.",
+    photos_field: "Изберете снимки",
+    photos_reference: "Номер на запитването",
+    photos_reference_hint: "Изпратете първо заявката за оценка. Ще покажем номера тук; ако вече го имате от брокер, въведете го.",
+    photos_submit: "Изпратете снимките",
+    photos_pending: "Изпращане…",
+    photos_success: "Снимките стигнаха до вашето запитване. Остават лични до преглед от брокер.",
+    photos_failure: "Снимките не бяха изпратени.",
+    photos_limits: "JPEG, PNG, WebP или AVIF. До {files} снимки, всяка до {mb} MB. Данните за местоположение се премахват при изпращането.",
   },
   en: {
     title: "Sell your property with MS Realty",
     description: "Request a broker valuation and follow-up from the MS Realty team.",
     h1: "Sell your property",
     form_unavailable: "The form is temporarily unavailable. Call or message us instead. We reply quickly.",
+    photos_title: "Add photos",
+    photos_intro: "Photos let the broker prepare the valuation before the visit.",
+    photos_privacy: "Your photos stay private. Photos submitted by a member of the public are never published automatically and never appear in search. A broker reviews them with you.",
+    photos_field: "Choose photos",
+    photos_reference: "Enquiry reference",
+    photos_reference_hint: "Send the valuation request first. We fill the reference in here; if a broker already gave you one, type it in.",
+    photos_submit: "Send photos",
+    photos_pending: "Sending…",
+    photos_success: "Your photos reached your enquiry. They stay private until a broker reviews them.",
+    photos_failure: "The photos were not sent.",
+    photos_limits: "JPEG, PNG, WebP, or AVIF. Up to {files} photos, each up to {mb} MB. Location data is removed as they are sent.",
   },
   de: {
     title: "Verkaufen Sie Ihre Immobilie mit MS Realty",
     description: "Fordern Sie eine Maklerbewertung und Rückmeldung vom MS Realty Team an.",
     h1: "Immobilie verkaufen",
     form_unavailable: "Das Formular ist vorübergehend nicht verfügbar. Rufen Sie uns an oder schreiben Sie uns.",
+    photos_title: "Fotos hinzufügen",
+    photos_intro: "Fotos helfen dem Makler, die Bewertung vor dem Termin vorzubereiten.",
+    photos_privacy: "Ihre Fotos bleiben privat. Von Besuchern eingesendete Fotos werden nie automatisch veröffentlicht und erscheinen nie in der Suche. Ein Makler sieht sie gemeinsam mit Ihnen durch.",
+    photos_field: "Fotos auswählen",
+    photos_reference: "Anfragenummer",
+    photos_reference_hint: "Senden Sie zuerst die Bewertungsanfrage. Wir tragen die Nummer hier ein; falls Sie schon eine vom Makler haben, geben Sie sie ein.",
+    photos_submit: "Fotos senden",
+    photos_pending: "Wird gesendet…",
+    photos_success: "Ihre Fotos sind bei Ihrer Anfrage angekommen. Sie bleiben privat, bis ein Makler sie prüft.",
+    photos_failure: "Die Fotos wurden nicht gesendet.",
+    photos_limits: "JPEG, PNG, WebP oder AVIF. Bis zu {files} Fotos, je bis {mb} MB. Standortdaten werden beim Senden entfernt.",
   },
   nl: {
     title: "Verkoop uw vastgoed met MS Realty",
     description: "Vraag een makelaarswaardering en opvolging van het MS Realty team aan.",
     h1: "Vastgoed verkopen",
     form_unavailable: "Het formulier is tijdelijk niet beschikbaar. Bel of stuur ons een bericht.",
+    photos_title: "Foto's toevoegen",
+    photos_intro: "Met foto's kan de makelaar de waardering voorbereiden voor het bezoek.",
+    photos_privacy: "Uw foto's blijven privé. Foto's die een bezoeker instuurt worden nooit automatisch gepubliceerd en verschijnen nooit in de zoekresultaten. Een makelaar bekijkt ze samen met u.",
+    photos_field: "Kies foto's",
+    photos_reference: "Aanvraagnummer",
+    photos_reference_hint: "Stuur eerst de waarderingsaanvraag. Wij vullen het nummer hier in; heeft u er al een van een makelaar, typ het dan in.",
+    photos_submit: "Foto's versturen",
+    photos_pending: "Versturen…",
+    photos_success: "Uw foto's zijn bij uw aanvraag aangekomen. Ze blijven privé tot een makelaar ze bekijkt.",
+    photos_failure: "De foto's zijn niet verstuurd.",
+    photos_limits: "JPEG, PNG, WebP of AVIF. Maximaal {files} foto's, elk tot {mb} MB. Locatiegegevens worden bij het versturen verwijderd.",
   },
   ru: {
     title: "Продайте недвижимость с MS Realty",
     description: "Запросите брокерскую оценку и обратную связь от команды MS Realty.",
     h1: "Продайте недвижимость",
     form_unavailable: "Форма временно недоступна. Позвоните или напишите нам, мы быстро отвечаем.",
+    photos_title: "Добавьте фотографии",
+    photos_intro: "Фотографии помогают брокеру подготовить оценку до визита.",
+    photos_privacy: "Ваши фотографии остаются приватными. Фотографии, отправленные посетителем сайта, никогда не публикуются автоматически и никогда не появляются в поиске. Брокер просматривает их вместе с вами.",
+    photos_field: "Выберите фотографии",
+    photos_reference: "Номер обращения",
+    photos_reference_hint: "Сначала отправьте запрос на оценку. Мы подставим номер сюда; если брокер уже дал вам номер, введите его.",
+    photos_submit: "Отправить фотографии",
+    photos_pending: "Отправка…",
+    photos_success: "Фотографии дошли до вашего обращения. Они остаются приватными до проверки брокером.",
+    photos_failure: "Фотографии не отправлены.",
+    photos_limits: "JPEG, PNG, WebP или AVIF. До {files} фотографий, каждая до {mb} МБ. Данные о местоположении удаляются при отправке.",
   },
   el: {
     title: "Πουλήστε το ακίνητό σας με τη MS Realty",
     description: "Ζητήστε εκτίμηση από μεσίτη και επικοινωνία από την ομάδα της MS Realty.",
     h1: "Πουλήστε το ακίνητό σας",
     form_unavailable: "Η φόρμα δεν είναι προσωρινά διαθέσιμη. Καλέστε μας ή στείλτε μήνυμα.",
+    photos_title: "Προσθέστε φωτογραφίες",
+    photos_intro: "Οι φωτογραφίες βοηθούν τον μεσίτη να ετοιμάσει την εκτίμηση πριν την επίσκεψη.",
+    photos_privacy: "Οι φωτογραφίες σας παραμένουν ιδιωτικές. Φωτογραφίες που στέλνει επισκέπτης δεν δημοσιεύονται ποτέ αυτόματα και δεν εμφανίζονται ποτέ στην αναζήτηση. Ένας μεσίτης τις εξετάζει μαζί σας.",
+    photos_field: "Επιλέξτε φωτογραφίες",
+    photos_reference: "Αριθμός αιτήματος",
+    photos_reference_hint: "Στείλτε πρώτα το αίτημα εκτίμησης. Συμπληρώνουμε εδώ τον αριθμό· αν σας τον έδωσε ήδη μεσίτης, γράψτε τον.",
+    photos_submit: "Αποστολή φωτογραφιών",
+    photos_pending: "Αποστολή…",
+    photos_success: "Οι φωτογραφίες έφτασαν στο αίτημά σας. Παραμένουν ιδιωτικές μέχρι να τις εξετάσει μεσίτης.",
+    photos_failure: "Οι φωτογραφίες δεν στάλθηκαν.",
+    photos_limits: "JPEG, PNG, WebP ή AVIF. Έως {files} φωτογραφίες, καθεμία έως {mb} MB. Τα δεδομένα τοποθεσίας αφαιρούνται κατά την αποστολή.",
   },
   he: {
     title: "מכירת נכס עם MS Realty",
     description: "בקשו הערכת מתווך וחזרה מצוות MS Realty.",
     h1: "מכירת נכס",
     form_unavailable: "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
+    photos_title: "הוספת תמונות",
+    photos_intro: "תמונות עוזרות למתווך להכין את ההערכה לפני הביקור.",
+    photos_privacy: "התמונות שלכם נשארות פרטיות. תמונות שנשלחות על ידי מבקר באתר לעולם אינן מתפרסמות אוטומטית ואינן מופיעות בחיפוש. מתווך בודק אותן יחד אתכם.",
+    photos_field: "בחרו תמונות",
+    photos_reference: "מספר הפנייה",
+    photos_reference_hint: "שלחו קודם את בקשת ההערכה. נמלא כאן את המספר; אם כבר קיבלתם אותו ממתווך, הקלידו אותו.",
+    photos_submit: "שליחת תמונות",
+    photos_pending: "שולח…",
+    photos_success: "התמונות הגיעו לפנייה שלכם. הן נשארות פרטיות עד שמתווך יבדוק אותן.",
+    photos_failure: "התמונות לא נשלחו.",
+    photos_limits: "JPEG, PNG, WebP או AVIF. עד {files} תמונות, כל אחת עד {mb} MB. נתוני מיקום מוסרים בעת השליחה.",
   },
 };
 
@@ -2240,6 +2318,13 @@ export function chromeCopyFor(localeCode) {
 
 export function leadWritesDisabledFromEnv(env = process.env) {
   return !isLeadDurableStoreEnabled(leadDurableStoreConfigFromEnv(env));
+}
+
+// Seller photo upload is its own switch. It does not depend on the durable lead
+// store, because a seller who already holds an enquiry reference can send
+// photos for it whether or not the intake form is currently offered.
+export function sellerPhotoUploadDisabledFromEnv(env = process.env) {
+  return env.MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED === "1";
 }
 
 function publicChrome(
@@ -3906,6 +3991,8 @@ export function renderSellerPage({
   // edge use. Without it the seller page renders a live POST form that the
   // edge rejects, so the highest-intent seller lead ends on a generic error.
   leadWritesDisabled = leadWritesDisabledFromEnv(),
+  photoUploadDisabled = sellerPhotoUploadDisabledFromEnv(),
+  photoUploadLimits = mediaUploadLimitsFromEnv(),
 } = {}) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -3944,6 +4031,41 @@ export function renderSellerPage({
         email: { href: `mailto:${BRAND_CONTACT.email}`, label: BRAND_CONTACT.email },
       },
       form_unavailable: leadWritesDisabled ? copy.form_unavailable : null,
+      // Photos attach to an enquiry, never to a listing, and never publish
+      // themselves. The page says so and the endpoint enforces it.
+      photo_upload: photoUploadDisabled
+        ? null
+        : {
+            endpoint: `/api/seller-photos?return=${encodeURIComponent(path)}`,
+            method: "POST",
+            enctype: "multipart/form-data",
+            field: "photo",
+            reference_field: "enquiryId",
+            accept: ["image/jpeg", "image/png", "image/webp", "image/avif"],
+            max_files: photoUploadLimits.maxFiles,
+            max_file_bytes: photoUploadLimits.maxFileBytes,
+            max_request_bytes: photoUploadLimits.maxRequestBytes,
+            minimum_tap_target_px: 44,
+            public: false,
+            searchable: false,
+            published_automatically: false,
+            review_required: true,
+            copy: {
+              title: copy.photos_title,
+              intro: copy.photos_intro,
+              privacy: copy.photos_privacy,
+              field: copy.photos_field,
+              reference: copy.photos_reference,
+              reference_hint: copy.photos_reference_hint,
+              submit: copy.photos_submit,
+              pending: copy.photos_pending,
+              success: copy.photos_success,
+              failure: copy.photos_failure,
+              limits: copy.photos_limits
+                .replace("{files}", String(photoUploadLimits.maxFiles))
+                .replace("{mb}", String(Math.max(1, Math.floor(photoUploadLimits.maxFileBytes / (1024 * 1024))))),
+            },
+          },
       valuation: leadWritesDisabled
         ? null
         : {

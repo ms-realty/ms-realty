@@ -32,6 +32,10 @@ import {
 import { publicLaunchReadinessHeaders, publicLaunchReadinessPayload } from "./launch-readiness.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
+// B4 media upload
+import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, applyMediaUploads, mediaUploadLimitsFromEnv, readMediaUploads } from "./media-uploads.mjs";
+import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./media-upload-storage.mjs";
+import { SELLER_PHOTO_UPLOAD_PATH, acceptsHtmlResponse, handleSellerPhotoUpload } from "./media-upload-routes.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, appendPublicContact } from "./public-contact-vault.mjs";
@@ -53,7 +57,7 @@ import {
   publicSearchConfigFromEnv,
 } from "./public-search.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
-import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
+import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
@@ -106,6 +110,11 @@ export function appApiConfigFromEnv(env = process.env) {
     publicContactKey: env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
+    mediaUploadLedgerPath: env.MS_REALTY_MEDIA_UPLOAD_LEDGER_PATH || DEFAULT_MEDIA_UPLOAD_LEDGER_PATH,
+    mediaUploadStorageConfig: mediaUploadStorageConfigFromEnv(env),
+    mediaUploadLimits: mediaUploadLimitsFromEnv(env, { maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES) }),
+    sellerPhotoUploadEnabled: env.MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED !== "1",
+    sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || LAUNCH_READINESS_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
@@ -138,8 +147,11 @@ function privateJson(status, body) {
   return response(status, body, "application/json; charset=utf-8", PRIVATE_HEADERS);
 }
 
-async function readRequestBody(request, maxBodyBytes) {
-  if (!request.body) return "";
+// Text routes want a decoded body; a multipart photo upload needs the exact
+// bytes, which a UTF-8 decode would destroy. Both views come from one read,
+// because a request stream can only be consumed once.
+async function readRequestBytes(request, maxBodyBytes) {
+  if (!request.body) return Buffer.alloc(0);
   const reader = request.body.getReader();
   const chunks = [];
   let total = 0;
@@ -160,7 +172,7 @@ async function readRequestBody(request, maxBodyBytes) {
     bytes.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  return new TextDecoder().decode(bytes);
+  return Buffer.from(bytes);
 }
 
 function parseJsonBody(body) {
@@ -195,9 +207,14 @@ function currentSeed(config) {
   const seed = readThroughCached(seedPath, () => loadCmsSeed(seedPath));
   if (config.runtimeDataDurableOnly) return publicSeedFor(seed);
   const reviewedSeed = applyMediaReviews(
-    applyListingEdits(
-      seed,
-      readThroughCached(config.listingEditLedgerPath, () => readListingEdits(config.listingEditLedgerPath)),
+    // B4: uploaded listing assets join the seed before reviews are applied, so
+    // an upload enters the existing review queue instead of bypassing it.
+    applyMediaUploads(
+      applyListingEdits(
+        seed,
+        readThroughCached(config.listingEditLedgerPath, () => readListingEdits(config.listingEditLedgerPath)),
+      ),
+      readThroughCached(config.mediaUploadLedgerPath, () => readMediaUploads(config.mediaUploadLedgerPath)),
     ),
     readThroughCached(config.mediaReviewLedgerPath, () => readMediaReviews(config.mediaReviewLedgerPath)),
   );
@@ -228,7 +245,7 @@ function currentTranslationTasks(config) {
 }
 
 // Public (unauthenticated) write endpoints protected by the rate limiter.
-const PUBLIC_WRITE_PATHS = new Set(["/api/leads", "/api/events", "/api/language-requests", "/api/saved-searches"]);
+const PUBLIC_WRITE_PATHS = new Set(["/api/leads", "/api/events", "/api/language-requests", "/api/saved-searches", "/api/seller-photos"]);
 
 let sharedPublicWriteLimiter = null;
 
@@ -507,7 +524,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     if (url.pathname === "/api/hermes/chat") {
       return webResponse(privateJson(404, { kind: "not_found" }));
     }
-    if (request.method === "POST" && ["/api/leads", "/api/events"].includes(url.pathname)) {
+    if (request.method === "POST" && ["/api/leads", "/api/events", SELLER_PHOTO_UPLOAD_PATH].includes(url.pathname)) {
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : url.protocol.slice(0, -1);
       const host = requestHost(request.headers);
@@ -542,7 +559,8 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
         );
       }
     }
-    const body = await readRequestBody(request, config.maxBodyBytes);
+    const bodyBytes = await readRequestBytes(request, config.maxBodyBytes);
+    const body = bodyBytes.toString("utf8");
 
     if (request.method === "GET" && url.pathname === "/api/health") {
       const readiness = readLaunchReadiness(config.launchReadinessOutputPath);
@@ -603,6 +621,26 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
 
     if (request.method === "POST" && url.pathname === "/api/events") {
       return webResponse(await routeEvent(request, body, config));
+    }
+
+    // B4 media upload: seller photos, bound to the enquiry they belong to.
+    if (request.method === "POST" && url.pathname === SELLER_PHOTO_UPLOAD_PATH) {
+      const sellerStoreReady = config.sellerPhotoUploadEnabled && !config.runtimeDataDurableOnly && Boolean(config.sellerPipelinePath);
+      const uploaded = await handleSellerPhotoUpload({
+        bytes: bodyBytes,
+        contentType: request.headers.get("content-type") || "",
+        acceptsHtml: acceptsHtmlResponse(request.headers.get("accept")),
+        returnPath: url.searchParams.get("return") || "",
+        enabled: sellerStoreReady,
+        sellerEnquiries: sellerStoreReady ? readSellerPipeline(config.sellerPipelinePath) : null,
+        limits: config.mediaUploadLimits || mediaUploadLimitsFromEnv(),
+        storage: createMediaUploadStorage(config.mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv()),
+        ledgerPath: config.mediaUploadLedgerPath,
+      });
+      if (uploaded.status === 303) {
+        return webResponse(privateResponse(303, "", "text/plain; charset=utf-8", uploaded.headers));
+      }
+      return webResponse(privateJson(uploaded.status, uploaded.body));
     }
 
     if (request.method === "POST" && url.pathname === "/api/language-requests") {

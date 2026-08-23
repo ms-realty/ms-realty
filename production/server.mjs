@@ -28,6 +28,8 @@ import { DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH } from "./lib/reply-delivery
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH } from "./lib/listing-edits.mjs";
 import { DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH } from "./lib/listing-publication-schedules.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH } from "./lib/media-reviews.mjs";
+import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, mediaUploadLimitsFromEnv } from "./lib/media-uploads.mjs";
+import { mediaUploadStorageConfigFromEnv } from "./lib/media-upload-storage.mjs";
 import { createNodeServer, listen, close } from "./lib/node-server.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH } from "./lib/events.mjs";
 import { DEFAULT_CONSENT_LEDGER_PATH } from "./lib/consent-ledger.mjs";
@@ -185,6 +187,11 @@ export function productionServerConfig(env = process.env) {
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
+    mediaUploadLedgerPath: env.MS_REALTY_MEDIA_UPLOAD_LEDGER_PATH || DEFAULT_MEDIA_UPLOAD_LEDGER_PATH,
+    mediaUploadStorageConfig: mediaUploadStorageConfigFromEnv(env),
+    // The per-request photo cap can never exceed the transport body limit.
+    mediaUploadLimits: mediaUploadLimitsFromEnv(env, { maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES) }),
+    sellerPhotoUploadEnabled: env.MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED !== "1",
     listingPublicationSchedulePath:
       env.MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH || DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
@@ -297,6 +304,10 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     translationLedgerPath: config.translationLedgerPath,
     listingEditLedgerPath: config.listingEditLedgerPath,
     mediaReviewLedgerPath: config.mediaReviewLedgerPath,
+    mediaUploadLedgerPath: config.mediaUploadLedgerPath,
+    mediaUploadStorageConfig: config.mediaUploadStorageConfig,
+    mediaUploadLimits: config.mediaUploadLimits,
+    sellerPhotoUploadEnabled: config.sellerPhotoUploadEnabled,
     listingPublicationSchedulePath: config.listingPublicationSchedulePath,
     viewingLedgerPath: config.viewingLedgerPath,
     viewingDurableStore: config.viewingDurableStore,

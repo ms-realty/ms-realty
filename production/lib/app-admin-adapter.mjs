@@ -196,6 +196,16 @@ import {
   createMediaReview,
   readMediaReviews,
 } from "./media-reviews.mjs";
+// B4 media upload
+import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, applyMediaUploads, mediaUploadLimitsFromEnv, readMediaUploads } from "./media-uploads.mjs";
+import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./media-upload-storage.mjs";
+import {
+  ADMIN_MEDIA_UPLOAD_PATH,
+  acceptsHtmlResponse,
+  handleAdminMediaUpload,
+  listMediaUploads,
+  readMediaUploadBytes,
+} from "./media-upload-routes.mjs";
 import {
   DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
   appendListingPublicationSchedule,
@@ -407,6 +417,9 @@ export function appAdminConfigFromEnv(env = process.env) {
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
+    mediaUploadLedgerPath: env.MS_REALTY_MEDIA_UPLOAD_LEDGER_PATH || DEFAULT_MEDIA_UPLOAD_LEDGER_PATH,
+    mediaUploadStorageConfig: mediaUploadStorageConfigFromEnv(env),
+    mediaUploadLimits: mediaUploadLimitsFromEnv(env, { maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES) }),
     listingPublicationSchedulePath:
       env.MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH || DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH || DEFAULT_REDIRECT_APPROVALS_PATH,
@@ -825,7 +838,12 @@ function bindRealtyCaseConditionExecutor(input, principal, action) {
 function currentSeed(config) {
   if (config.runtimeDataDurableOnly) return loadCmsSeed();
   return applyMediaReviews(
-    applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
+    // B4: uploaded listing assets join the seed before reviews are applied, so
+    // an upload enters the existing review queue instead of bypassing it.
+    applyMediaUploads(
+      applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
+      readMediaUploads(config.mediaUploadLedgerPath),
+    ),
     readMediaReviews(config.mediaReviewLedgerPath),
   );
 }
@@ -4265,6 +4283,56 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       } catch (error) {
         return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
+    }
+    // B4 media upload
+    if (url.pathname === ADMIN_MEDIA_UPLOAD_PATH || url.pathname.startsWith(`${ADMIN_MEDIA_UPLOAD_PATH}/`)) {
+      const uploadLimits = config.mediaUploadLimits || mediaUploadLimitsFromEnv();
+      const uploadStorage = createMediaUploadStorage(config.mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
+      if (request.method === "GET" && url.pathname === ADMIN_MEDIA_UPLOAD_PATH) {
+        const listed = listMediaUploads({
+          ledgerPath: config.mediaUploadLedgerPath,
+          listing: url.searchParams.get("listing") || "",
+          enquiry: url.searchParams.get("enquiry") || "",
+          limits: uploadLimits,
+        });
+        return jsonResponse(listed.status, listed.body);
+      }
+      if (request.method === "GET") {
+        let assetId = "";
+        try {
+          assetId = decodeURIComponent(url.pathname.slice(`${ADMIN_MEDIA_UPLOAD_PATH}/`.length));
+        } catch {
+          return jsonResponse(400, { kind: "bad_request", message: "Malformed upload id" });
+        }
+        const preview = await readMediaUploadBytes({
+          ledgerPath: config.mediaUploadLedgerPath,
+          assetId,
+          storage: uploadStorage,
+        });
+        if (preview.status !== 200) return jsonResponse(preview.status, preview.body);
+        return new Response(preview.body, {
+          status: 200,
+          headers: { ...SECURITY_HEADERS, "cache-control": "no-store", ...preview.headers },
+        });
+      }
+      if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
+      const uploaded = await handleAdminMediaUpload({
+        bytes: Buffer.from(await request.arrayBuffer()),
+        contentType: request.headers.get("content-type") || "",
+        acceptsHtml: acceptsHtmlResponse(request.headers.get("accept")),
+        seed: currentSeed(config),
+        limits: uploadLimits,
+        storage: uploadStorage,
+        ledgerPath: config.mediaUploadLedgerPath,
+        uploadedBy: config.adminPrincipal?.id || "admin",
+        uploadedAt: auditRecordedAt(config),
+        recordAudit: (entry) => recordAudit(entry, config),
+        editorPathFor: listingEditorPath,
+      });
+      if (uploaded.status === 303) {
+        return new Response("", { status: 303, headers: { ...SECURITY_HEADERS, "cache-control": "no-store", ...uploaded.headers } });
+      }
+      return jsonResponse(uploaded.status, uploaded.body);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
       const result = appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);

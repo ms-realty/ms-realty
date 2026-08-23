@@ -3757,6 +3757,7 @@ function phoneAction(channel, variant = "secondary") {
 function SellerBody({ page }) {
   const labels = uiLabels(page);
   const valuation = page.body.valuation;
+  const photoUpload = page.body.photo_upload;
   const channels = page.body.contact_channels;
   const steps = [labels.propertyDetails, labels.callback, labels.brokerReview];
   const questions = [labels.sellerStepOneQuestion, labels.sellerStepTwoQuestion, labels.sellerStepThreeQuestion];
@@ -3857,20 +3858,40 @@ function SellerBody({ page }) {
               h("label", null, labels.area, h("input", { name: "property.area", type: "number", min: "0", inputMode: "decimal" })),
               h("label", null, labels.factLabels?.bedrooms || "Bedrooms", h("input", { name: "property.bedrooms", type: "number", min: "0", inputMode: "numeric" })),
             ),
-            // Sellers expect to attach photos here. There is no public media
-            // upload endpoint yet, so the control ships visibly disabled with
-            // the reason next to it instead of a missing affordance.
-            h(
-              "div",
-              { className: "sell-form__pending", "data-feature-pending": "photo_upload" },
-              h(
-                "button",
-                { type: "button", className: "mk-btn mk-btn--secondary mk-btn--md", disabled: true, "aria-describedby": "seller-photos-note" },
-                h(Icon, { name: "camera", size: 18 }),
-                h("span", null, labels.addPhotos),
-              ),
-              h("p", { id: "seller-photos-note", className: "sell-form__pending-note" }, labels.photosUnavailable),
-            ),
+            // Photos attach to the enquiry, not to this form: the enquiry has
+            // to exist before anything can be filed against it. The control is
+            // live and leads to the upload block further down the page; it only
+            // ships disabled when the endpoint itself is switched off.
+            photoUpload
+              ? h(
+                  "div",
+                  { className: "sell-form__pending", "data-feature-ready": "photo_upload" },
+                  h(
+                    Btn,
+                    {
+                      tag: "a",
+                      variant: "secondary",
+                      size: "md",
+                      iconStart: "camera",
+                      href: "#seller-photos",
+                      "aria-describedby": "seller-photos-note",
+                      "data-seller-photos-link": "true",
+                    },
+                    labels.addPhotos,
+                  ),
+                  h("p", { id: "seller-photos-note", className: "sell-form__pending-note" }, photoUpload.copy.intro),
+                )
+              : h(
+                  "div",
+                  { className: "sell-form__pending", "data-feature-pending": "photo_upload" },
+                  h(
+                    "button",
+                    { type: "button", className: "mk-btn mk-btn--secondary mk-btn--md", disabled: true, "aria-describedby": "seller-photos-note" },
+                    h(Icon, { name: "camera", size: 18 }),
+                    h("span", null, labels.addPhotos),
+                  ),
+                  h("p", { id: "seller-photos-note", className: "sell-form__pending-note" }, labels.photosUnavailable),
+                ),
             h(
               "div",
               { className: "sell-form__actions sell-form__actions--end" },
@@ -3942,6 +3963,85 @@ function SellerBody({ page }) {
           h("p", null, page.body.form_unavailable),
           channels ? phoneAction(channels.phone, "accent") : null,
         ),
+    photoUpload
+      ? h(
+          "section",
+          {
+            id: "seller-photos",
+            className: "mk-card mk-card--elevated mk-card--pad-lg ct-form sell-photos",
+            "aria-labelledby": "seller-photos-title",
+            "data-seller-photos": "true",
+            "data-seller-photos-public": "false",
+            "data-seller-photos-searchable": "false",
+          },
+          h("h2", { id: "seller-photos-title", className: "ct-form__title" }, photoUpload.copy.title),
+          h("p", null, photoUpload.copy.intro),
+          h(
+            "p",
+            { className: "sell-form__note", "data-seller-photos-privacy": "true" },
+            h(Icon, { name: "shield-check", size: 16 }),
+            h("span", null, photoUpload.copy.privacy),
+          ),
+          h(
+            "form",
+            {
+              className: "sell-photos__form",
+              method: photoUpload.method || "POST",
+              action: photoUpload.endpoint,
+              enctype: photoUpload.enctype,
+              "data-seller-photo-form": "true",
+              "data-seller-photo-pending": photoUpload.copy.pending,
+              "data-seller-photo-success": photoUpload.copy.success,
+              "data-seller-photo-failure": photoUpload.copy.failure,
+              "data-seller-photo-max-files": String(photoUpload.max_files),
+              "data-seller-photo-max-bytes": String(photoUpload.max_file_bytes),
+              "data-seller-photo-limits": photoUpload.copy.limits,
+            },
+            h(
+              "label",
+              { "data-seller-photo-reference-field": "true" },
+              photoUpload.copy.reference,
+              h("input", {
+                name: photoUpload.reference_field,
+                required: true,
+                autoComplete: "off",
+                spellCheck: "false",
+                "data-seller-photo-reference": "true",
+              }),
+              h("small", { className: "sell-photos__hint" }, photoUpload.copy.reference_hint),
+            ),
+            h(
+              "label",
+              null,
+              photoUpload.copy.field,
+              h("input", {
+                type: "file",
+                name: photoUpload.field,
+                multiple: true,
+                required: true,
+                accept: (photoUpload.accept || []).join(","),
+                "data-seller-photo-input": "true",
+              }),
+              h("small", { className: "sell-photos__hint" }, photoUpload.copy.limits),
+            ),
+            h("progress", {
+              className: "sell-photos__progress",
+              max: "100",
+              value: "0",
+              hidden: true,
+              "data-seller-photo-progress": "true",
+              "aria-label": photoUpload.copy.pending,
+            }),
+            h("p", { className: "sell-photos__status", role: "status", "aria-live": "polite", "data-seller-photo-status": "true" }),
+            h("ul", { className: "sell-photos__results", "data-seller-photo-results": "true" }),
+            h(
+              "div",
+              { className: "sell-form__actions sell-form__actions--end" },
+              h(Btn, { type: "submit", variant: "secondary", size: "lg", iconStart: "camera", "data-seller-photo-submit": "true" }, photoUpload.copy.submit),
+            ),
+          ),
+        )
+      : null,
     h(
       "section",
       { className: "sell-next", "aria-labelledby": "sell-next-title", "data-seller-next-steps": "true" },

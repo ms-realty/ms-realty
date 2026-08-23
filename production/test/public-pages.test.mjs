@@ -248,12 +248,30 @@ test("home rails carry an empty state instead of disappearing", () => {
   assert.doesNotMatch(english, /data-home-guides-empty/);
 });
 
-test("lead forms offer an optional email and the seller flow declares its pending photo upload", () => {
+test("lead forms offer an optional email and the seller flow offers a working photo upload", () => {
   const seller = renderReactPublicBody(renderSellerPage({ registry, localeCode: "en", leadWritesDisabled: false }));
   assert.match(seller, /<label>Email \(optional\)<input name="contact.email" type="email" autocomplete="email" inputmode="email">/);
-  assert.match(seller, /data-feature-pending="photo_upload"/);
-  assert.match(seller, /<button type="button" class="mk-btn mk-btn--secondary mk-btn--md" disabled aria-describedby="seller-photos-note">/);
-  assert.match(seller, /<p id="seller-photos-note" class="sell-form__pending-note">Photo upload is not available yet\.<\/p>/);
+  // The control is live and leads to the upload block, which is a real
+  // multipart form that works without JavaScript.
+  assert.match(seller, /data-feature-ready="photo_upload"/);
+  assert.doesNotMatch(seller, /data-feature-pending="photo_upload"/);
+  assert.match(seller, /href="#seller-photos"/);
+  assert.match(seller, /<form class="sell-photos__form" method="POST" action="\/api\/seller-photos\?return=[^"]+" enctype="multipart\/form-data"/);
+  assert.match(seller, /<input type="file" name="photo" multiple required accept="image\/jpeg,image\/png,image\/webp,image\/avif"/);
+  assert.match(seller, /data-seller-photo-progress="true"/);
+  assert.match(seller, /data-seller-photo-status="true"/);
+  assert.match(seller, /data-seller-photo-results="true"/);
+  assert.match(seller, /never published automatically and never appear in search/);
+  assert.match(seller, /data-seller-photos-searchable="false"/);
+
+  // Switched off, the control ships visibly disabled with the reason next to it
+  // rather than as a missing affordance.
+  const withoutUpload = renderReactPublicBody(
+    renderSellerPage({ registry, localeCode: "en", leadWritesDisabled: false, photoUploadDisabled: true }),
+  );
+  assert.match(withoutUpload, /data-feature-pending="photo_upload"/);
+  assert.match(withoutUpload, /<button type="button" class="mk-btn mk-btn--secondary mk-btn--md" disabled aria-describedby="seller-photos-note">/);
+  assert.match(withoutUpload, /<p id="seller-photos-note" class="sell-form__pending-note">Photo upload is not available yet\.<\/p>/);
 
   const contact = renderReactPublicBody(renderContactPage({ registry, localeCode: "de", leadWritesDisabled: false }));
   assert.match(contact, /name="contact.email" type="email"/);

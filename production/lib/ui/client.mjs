@@ -1184,6 +1184,149 @@ export const PUBLIC_APP_JS = `(function () {
     for (var i = 0; i < controls.length; i += 1) controls[i].hidden = false;
     form.setAttribute("data-seller-stepper", "true");
   }
+  // Seller photo upload. The form is a real multipart post that works with
+  // JavaScript switched off (the server redirects back with ?photos=), and this
+  // upgrades it to inline progress, per-file errors, and a disabled button
+  // while bytes are in flight.
+  function initSellerPhotoUpload() {
+    var form = document.querySelector("[data-seller-photo-form]");
+    if (!form) return;
+    var input = form.querySelector("[data-seller-photo-input]");
+    var reference = form.querySelector("[data-seller-photo-reference]");
+    var referenceField = form.querySelector("[data-seller-photo-reference-field]");
+    var status = form.querySelector("[data-seller-photo-status]");
+    var results = form.querySelector("[data-seller-photo-results]");
+    var progress = form.querySelector("[data-seller-photo-progress]");
+    var submit = form.querySelector("[data-seller-photo-submit]");
+    var limitsHint = form.getAttribute("data-seller-photo-limits") || "";
+    var maxFiles = Number(form.getAttribute("data-seller-photo-max-files")) || 8;
+    var maxBytes = Number(form.getAttribute("data-seller-photo-max-bytes")) || 8 * 1024 * 1024;
+    var pendingText = form.getAttribute("data-seller-photo-pending") || "";
+    var successText = form.getAttribute("data-seller-photo-success") || "";
+    var failureText = form.getAttribute("data-seller-photo-failure") || "";
+    var STORE_KEY = "ms-realty:seller-enquiry";
+
+    function readStoredReference() {
+      try {
+        return window.sessionStorage.getItem(STORE_KEY) || "";
+      } catch (error) {
+        return "";
+      }
+    }
+    function rememberReference(value) {
+      try {
+        window.sessionStorage.setItem(STORE_KEY, value);
+      } catch (error) {
+        // Private browsing: the visible field still carries the reference.
+      }
+    }
+    function setStatus(text, state) {
+      if (!status) return;
+      status.textContent = text || "";
+      if (state) status.setAttribute("data-state", state);
+      else status.removeAttribute("data-state");
+    }
+    function clearResults() {
+      if (results) results.textContent = "";
+    }
+    function addResult(text, state) {
+      if (!results) return;
+      var item = document.createElement("li");
+      item.textContent = text;
+      item.setAttribute("data-state", state);
+      results.appendChild(item);
+    }
+
+    var params = new URLSearchParams(window.location.search);
+    var prefill = (params.get("enquiry") || readStoredReference()).trim();
+    if (prefill && reference) {
+      reference.value = prefill;
+      if (referenceField) referenceField.hidden = true;
+    }
+    var outcome = params.get("photos");
+    if (outcome === "ok") setStatus(successText, "success");
+    else if (outcome === "partial") setStatus(successText, "warning");
+    else if (outcome === "error") setStatus(failureText, "error");
+
+    if (!window.FormData || !window.XMLHttpRequest) return;
+
+    form.addEventListener("submit", function (event) {
+      var files = input && input.files ? Array.prototype.slice.call(input.files) : [];
+      if (!files.length || !reference || !reference.value.trim()) return;
+      event.preventDefault();
+      clearResults();
+
+      var payload = new FormData();
+      payload.append(reference.getAttribute("name") || "enquiryId", reference.value.trim());
+      var queued = [];
+      for (var i = 0; i < files.length; i += 1) {
+        if (queued.length >= maxFiles || files[i].size > maxBytes) {
+          addResult(files[i].name + " \u2014 " + limitsHint, "error");
+          continue;
+        }
+        queued.push(files[i]);
+        payload.append(input.getAttribute("name") || "photo", files[i], files[i].name);
+      }
+      if (!queued.length) {
+        setStatus(failureText, "error");
+        return;
+      }
+
+      if (submit) submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setStatus(pendingText, "pending");
+      if (progress) {
+        progress.hidden = false;
+        progress.value = 0;
+      }
+
+      var request = new XMLHttpRequest();
+      request.open("POST", form.getAttribute("action"), true);
+      request.setRequestHeader("accept", "application/json");
+      request.withCredentials = true;
+      if (request.upload) {
+        request.upload.onprogress = function (progressEvent) {
+          if (!progress || !progressEvent.lengthComputable) return;
+          progress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+        };
+      }
+      request.onload = function () {
+        var body = {};
+        try {
+          body = JSON.parse(request.responseText || "{}");
+        } catch (error) {
+          body = {};
+        }
+        var received = body.received || [];
+        var refused = body.rejected || [];
+        for (var a = 0; a < received.length; a += 1) {
+          var acceptedFile = queued[received[a].index];
+          addResult((acceptedFile ? acceptedFile.name : "") + " \u2014 " + successText, "success");
+        }
+        for (var r = 0; r < refused.length; r += 1) {
+          var refusedFile = queued[refused[r].index];
+          addResult((refusedFile ? refusedFile.name + " \u2014 " : "") + (refused[r].message || failureText), "error");
+        }
+        if (request.status >= 200 && request.status < 300) {
+          rememberReference(reference.value.trim());
+          setStatus(refused.length ? successText : successText, refused.length ? "warning" : "success");
+          if (input) input.value = "";
+        } else {
+          setStatus(body.message || failureText, "error");
+        }
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.onerror = function () {
+        setStatus(failureText, "error");
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.send(payload);
+    });
+  }
   function initSellerIntake() {
     var form = document.querySelector("form[data-seller-intake]");
     if (!form) return;
@@ -2128,6 +2271,7 @@ export const PUBLIC_APP_JS = `(function () {
  initGuideToc();
  initSellerStepper();
  initSellerIntake();
+ initSellerPhotoUpload();
  initPhotoSphereViewers();
  initPrivacySafeAnalytics();
  firstTouchPath();
@@ -3409,6 +3553,109 @@ export const ADMIN_APP_JS = `(function () {
           if (status) { status.textContent = remove.getAttribute("data-delete-failed-label") || "Could not delete the view."; status.setAttribute("data-state", "error"); }
         })
         .then(function () { remove.disabled = false; });
+    }
+    }
+
+  // Listing photo upload inside the media manager. Without JavaScript the same
+  // form posts multipart and the server redirects back to this panel; here it
+  // becomes inline progress with a per-file outcome list.
+  function initMediaUploadForm() {
+    var form = document.querySelector("[data-media-upload-form]");
+    if (!form || !window.FormData || !window.XMLHttpRequest) return;
+    var input = form.querySelector("[data-media-upload-input]");
+    var status = form.querySelector("[data-media-upload-status]");
+    var results = form.querySelector("[data-media-upload-results]");
+    var progress = form.querySelector("[data-media-upload-progress]");
+    var submit = form.querySelector("[data-media-upload-submit]");
+    var pendingText = form.getAttribute("data-media-upload-pending") || "Uploading…";
+    var successText = form.getAttribute("data-media-upload-success") || "Uploaded.";
+    var failureText = form.getAttribute("data-media-upload-failure") || "Could not upload.";
+    var rejectedText = form.getAttribute("data-media-upload-rejected") || "File refused";
+
+    function setStatus(text, state) {
+      if (!status) return;
+      status.textContent = text || "";
+      if (state) status.setAttribute("data-state", state);
+      else status.removeAttribute("data-state");
+    }
+    function addResult(text, state) {
+      if (!results) return null;
+      var item = document.createElement("li");
+      item.textContent = text;
+      item.setAttribute("data-state", state);
+      results.appendChild(item);
+      return item;
+    }
+
+    form.addEventListener("submit", function (event) {
+      var files = input && input.files ? Array.prototype.slice.call(input.files) : [];
+      if (!files.length) return;
+      event.preventDefault();
+      if (results) results.textContent = "";
+      var payload = new FormData(form);
+      if (submit) submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setStatus(pendingText, "saving");
+      if (progress) {
+        progress.hidden = false;
+        progress.value = 0;
+      }
+      var request = new XMLHttpRequest();
+      request.open("POST", form.getAttribute("action"), true);
+      request.setRequestHeader("accept", "application/json");
+      request.withCredentials = true;
+      if (request.upload) {
+        request.upload.onprogress = function (progressEvent) {
+          if (!progress || !progressEvent.lengthComputable) return;
+          progress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+        };
+      }
+      request.onload = function () {
+        var body = {};
+        try {
+          body = JSON.parse(request.responseText || "{}");
+        } catch (error) {
+          body = {};
+        }
+        var uploaded = body.uploaded || [];
+        var refused = body.rejected || [];
+        for (var u = 0; u < uploaded.length; u += 1) {
+          var uploadedFile = files[uploaded[u].index];
+          var entry = addResult((uploadedFile ? uploadedFile.name + " \u2014 " : "") + successText, "success");
+          // The editor may hold unsaved fact edits, so the panel is never
+          // reloaded from under the operator. A link to the stored bytes lets
+          // them check the photo now and open the review form on their own next
+          // visit to this panel.
+          if (entry && uploaded[u].preview_path) {
+            var link = document.createElement("a");
+            link.href = uploaded[u].preview_path;
+            link.target = "_blank";
+            link.rel = "noreferrer";
+            link.textContent = " " + uploaded[u].asset_id;
+            entry.appendChild(link);
+          }
+        }
+        for (var r = 0; r < refused.length; r += 1) {
+          var refusedFile = files[refused[r].index];
+          addResult((refusedFile ? refusedFile.name + " \u2014 " : rejectedText + ": ") + (refused[r].message || failureText), "error");
+        }
+        if (request.status >= 200 && request.status < 300) {
+          setStatus(successText, refused.length ? "warning" : "success");
+          if (input) input.value = "";
+        } else {
+          setStatus(body.message || failureText, "error");
+        }
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.onerror = function () {
+        setStatus(failureText, "error");
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.send(payload);
     });
   }
   function initAdminMutationForms() {
@@ -3464,6 +3711,7 @@ export const ADMIN_APP_JS = `(function () {
   initListingBulkForms();
   initRouteDecisionForms();
   initAdminMutationForms();
+  initMediaUploadForm();
   initWorkspaceOnboarding();
   initWorkspaceSettingsForms();
   initLeadBulkForm();

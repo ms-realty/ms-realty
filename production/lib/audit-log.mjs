@@ -28,6 +28,7 @@ const ADMIN_ACTIONS = new Set([
   "listing_quality_imported",
   "listing_slug_changed",
   "media_reviewed",
+  "media_uploaded",
   "lead_assigned",
   "lead_created",
   "lead_pipeline_outcome_recorded",

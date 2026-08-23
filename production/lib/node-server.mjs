@@ -54,7 +54,7 @@ async function readBody(req, maxBodyBytes = DEFAULT_MAX_BODY_BYTES) {
     }
     chunks.push(chunk);
   }
-  return Buffer.concat(chunks).toString("utf8");
+  return Buffer.concat(chunks);
 }
 
 export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT_MAX_BODY_BYTES } = {}) {
@@ -63,6 +63,10 @@ export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT
     let status = 500;
     try {
       const headRequest = req.method === "HEAD";
+      // Text routes want a decoded body; a multipart photo upload needs the
+      // exact bytes, which a UTF-8 decode would destroy. Both views come from
+      // the same buffer, which the body limit above already bounded.
+      const rawBody = await readBody(req, maxBodyBytes);
       const response = await app({
         method: headRequest ? "GET" : req.method,
         url: req.url,
@@ -70,7 +74,8 @@ export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT
         // The socket peer is the only un-spoofable client identity for a
         // direct bind; the rate limiter uses it when no trusted proxy is set.
         remoteAddress: req.socket?.remoteAddress || "",
-        body: await readBody(req, maxBodyBytes),
+        body: rawBody.toString("utf8"),
+        bodyBytes: rawBody,
       });
       status = response.status;
       const headers = { ...response.headers };
