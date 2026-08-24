@@ -84,6 +84,23 @@ test("public consultation source accepts explicit operating segments but rejects
   );
 });
 
+// A contact form posted without JavaScript arrives flat. Every other
+// request_details field was un-flattened; topic was not, so the subject the
+// visitor chose was dropped in silence on the no-JS path.
+test("a flat contact form keeps the subject the visitor chose", () => {
+  const enquiry = normalizePublicLeadInput({
+    source: "website_contact_callback",
+    leadType: "general",
+    language: "en",
+    contact: { name: "Visitor", phone: "+359880000005" },
+    "request_details.topic": "viewing",
+    "request_details.callback_time": "Weekdays after 14:00",
+  });
+
+  assert.equal(enquiry.request_details.topic, "viewing");
+  assert.equal(enquiry.request_details.callback_time, "Weekdays after 14:00");
+});
+
 test("unsupported internal lead segments are rejected before broker routing", () => {
   assert.throws(
     () =>

@@ -3,6 +3,14 @@
 // The point of these builders is that the bytes are constructed here, so a test
 // can say exactly what it is asserting: "this JPEG really does carry a GPS
 // coordinate, and after sanitising it does not".
+//
+// The hand-built fixtures below are 1x1 images: enough to exercise sniffing and
+// metadata stripping, and small enough to paste into this file. The optimiser
+// needs real photographs — something with dimensions to reduce and detail that
+// costs bytes — so those are generated with sharp at the bottom of this file
+// rather than committed. Nothing large is stored in the repository.
+
+import sharp from "sharp";
 
 const TINY_JPEG_BASE64 =
   "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a" +
@@ -193,6 +201,59 @@ export function avifWithoutMetadata() {
 
 export function avifWithExif() {
   return avif(["av01", "Exif"]);
+}
+
+/* ------------------------------------------------- photographs (generated) */
+
+// Gaussian noise, not a flat colour: a solid rectangle compresses to almost
+// nothing at any size, which would make every "did re-encoding save bytes"
+// assertion below meaningless.
+function noise(width, height) {
+  return sharp({ create: { width, height, channels: 3, noise: { type: "gaussian", mean: 128, sigma: 40 } } });
+}
+
+/**
+ * A photograph taken with the phone held sideways: the pixels are landscape
+ * and an EXIF Orientation tag says to display it rotated. This is the fixture
+ * that catches the ordering bug — strip the EXIF before rotating and the
+ * sideways pixels are all that is left.
+ */
+export async function orientedPhotoJpeg({ width = 3000, height = 1200, orientation = 6 } = {}) {
+  const flat = await noise(width, height).jpeg({ quality: 92 }).toBuffer();
+  return sharp(flat).withMetadata({ orientation }).jpeg({ quality: 92 }).toBuffer();
+}
+
+/** A graphic with real transparency — a JPEG cannot represent it. */
+export async function alphaPng({ width = 900, height = 300 } = {}) {
+  return sharp({ create: { width, height, channels: 4, background: { r: 20, g: 90, b: 160, alpha: 0.5 } } })
+    .png()
+    .toBuffer();
+}
+
+/** A photograph that happens to have been saved as PNG. */
+export async function photoPng({ width = 1200, height = 800 } = {}) {
+  return noise(width, height).png().toBuffer();
+}
+
+/** A large, generously encoded WebP: recompressing it is worth real bytes. */
+export async function photoWebp({ width = 3000, height = 1200, quality = 95 } = {}) {
+  return noise(width, height).webp({ quality }).toBuffer();
+}
+
+/** A small WebP that is already efficient: recompressing it would not pay. */
+export async function efficientWebp({ width = 400, height = 300, quality = 60 } = {}) {
+  return noise(width, height).webp({ quality }).toBuffer();
+}
+
+/**
+ * A decode bomb: a couple of hundred kilobytes on the wire that expand to 64
+ * megapixels once decoded. The file-size limit cannot catch this; only a
+ * dimension check can.
+ */
+export async function decodeBombPng({ width = 8000, height = 8000 } = {}) {
+  return sharp({ create: { width, height, channels: 3, background: "#ffffff" } })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
 }
 
 /* ----------------------------------------------------------- not an image */

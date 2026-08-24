@@ -425,6 +425,52 @@ test("a viewing trip is a request that reaches the admin queue with its own voca
   assert.equal(completed.body.request.next_follow_up_at, null);
 });
 
+// The /start trip form posts contact.name and contact.phone as flat keys.
+// Without JavaScript nothing nests them for the server, so a native post used
+// to die on "contact.name is required" while the fetch path worked.
+test("a viewing trip form posted without JavaScript is accepted on the same terms", async () => {
+  const space = workspace();
+  const app = createHttpApp(space.options);
+
+  const submitted = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/viewing-trips",
+    headers: { ...SAME_ORIGIN, "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      locale: "en",
+      arrivalDate: "2026-10-12",
+      departureDate: "2026-10-14",
+      areas: "Sandanski",
+      "contact.name": "No JavaScript",
+      "contact.phone": "+31612345679",
+    }).toString(),
+  });
+
+  assert.equal(submitted.status, 201);
+  assert.deepEqual(submitted.body.areas, ["Sandanski"]);
+  assert.equal(submitted.body.contact_preference, "phone");
+  assert.equal(submitted.body.contact, undefined, "the ledger still keeps no raw contact");
+  const vault = readPublicContacts(space.at("public-contact-vault.jsonl"), PUBLIC_CONTACT_KEY, "viewing_trip");
+  assert.equal(vault.get(submitted.body.id).contact.phone, "+31612345679");
+
+  // The rule the client now mirrors: neither an area nor a shortlisted
+  // property is a refusal, and it names what is missing.
+  const withoutScope = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/viewing-trips",
+    headers: { ...SAME_ORIGIN, "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      locale: "en",
+      arrivalDate: "2026-10-12",
+      departureDate: "2026-10-14",
+      "contact.name": "No JavaScript",
+      "contact.phone": "+31612345679",
+    }).toString(),
+  });
+  assert.equal(withoutScope.status, 400);
+  assert.match(withoutScope.body.message, /at least one area or one shortlisted property/);
+});
+
 test("the office default is documented, overridable, and never claims a broker's own diary", () => {
   const fallback = brokerAvailabilityFor([], "broker_ru", { env: {} });
   assert.equal(fallback.source, "office_default");

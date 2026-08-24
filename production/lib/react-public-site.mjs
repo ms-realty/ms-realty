@@ -1808,6 +1808,9 @@ function StartBody({ page }) {
           "data-start-trip-form": "true",
           // The shared JSON submit swaps the form for a success card built from this.
           "data-success-message": item.request.success,
+          "data-sending-message": item.request.sending || copy.sending,
+          // Mirrors the server rule: a trip needs an area or a saved property.
+          "data-start-trip-scope-message": item.request.scope_required || "",
         },
         h("input", { type: "hidden", name: "locale", defaultValue: item.request.payload.locale }),
         // Filled from the visitor's saved listings by the client script.
@@ -1835,7 +1838,7 @@ function StartBody({ page }) {
           "div",
           { className: "st-lead__actions" },
           h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "calendar-days" }, item.request.label),
-          h("p", { className: "st-lead__status", "data-start-trip-status": "true", role: "status", "aria-live": "polite" }),
+          h("p", { className: "st-lead__status", "data-start-status": "true", role: "status", "aria-live": "polite" }),
         ),
         h("p", { className: "st-upcoming__note" }, item.request.pending),
       ),
@@ -1973,6 +1976,11 @@ function StartBody({ page }) {
             leadHidden("source", shortlist.payload.source),
             leadHidden("intent", shortlist.payload.intent),
             leadHidden("leadType", shortlist.payload.leadType, true),
+            // Source and channel attribution. The channel names the surface family,
+            // the first touch path names where the visit started. Both are filled by
+            // the client, neither travels in a URL, and neither identifies a visitor.
+            h("input", { type: "hidden", name: "channel", defaultValue: "", "data-lead-channel-field": "true" }),
+            h("input", { type: "hidden", name: "firstTouchPath", defaultValue: "", "data-first-touch-field": "true" }),
             leadHidden("language", shortlist.payload.language),
             leadHidden("requirements.locations", shortlist.requirements.locations, true),
             leadHidden("requirements.property_types", shortlist.requirements.property_types, true),
