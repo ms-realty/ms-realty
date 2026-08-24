@@ -7,6 +7,7 @@ import { en } from "@payloadcms/translations/languages/en";
 import { ru } from "@payloadcms/translations/languages/ru";
 import { buildConfig } from "payload";
 import { LEAD_COLLECTIONS } from "./production/lib/lead-collections.mjs";
+import { LEAD_OPERATION_COLLECTION } from "./production/lib/lead-ops-durable-store.mjs";
 import { FUNNEL_EVENT_COLLECTION } from "./production/lib/event-durable-store.mjs";
 import { PROVIDER_CONNECTION_COLLECTION } from "./production/lib/provider-connections.mjs";
 import { PROVIDER_DELIVERY_RECEIPT_COLLECTION } from "./production/lib/provider-delivery.mjs";
@@ -373,6 +374,7 @@ export default buildConfig({
     providerWebhookEventCollectionWithAccess,
     providerDeliveryReceiptCollectionWithAccess,
     VIEWING_COLLECTION,
+    LEAD_OPERATION_COLLECTION,
     ...durableLeadSideEffectCollections,
   ],
 });

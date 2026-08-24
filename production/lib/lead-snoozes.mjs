@@ -148,15 +148,23 @@ function nextSnoozeId(rows, record) {
   return `${base}-${ordinal}`;
 }
 
+// The append decision, without the storage. A durable writer runs the same
+// rules against rows it read from Postgres, so both backends collapse a retry
+// onto the original record and mint the same next id.
+export function resolveLeadSnoozeAppend(rows, record) {
+  // A retried submission with the same intent returns the original record.
+  const existing = (rows || []).find((row) => sameIntent(row, record));
+  if (existing) return { record: existing, idempotent: true };
+  return { record: { ...record, id: record.id || nextSnoozeId(rows || [], record) }, idempotent: false };
+}
+
 export function appendLeadSnooze(record, { filePath = DEFAULT_LEAD_SNOOZE_LEDGER_PATH } = {}) {
   const rows = readLeadSnoozes(filePath);
-  // A retried submission with the same intent returns the original record.
-  const existing = rows.find((row) => sameIntent(row, record));
-  if (existing) return { ...existing, idempotent: true };
-  const persisted = { ...record, id: record.id || nextSnoozeId(rows, record) };
+  const resolved = resolveLeadSnoozeAppend(rows, record);
+  if (resolved.idempotent) return { ...resolved.record, idempotent: true };
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(persisted)}\n`);
-  return { ...persisted, idempotent: false };
+  fs.appendFileSync(filePath, `${JSON.stringify(resolved.record)}\n`);
+  return { ...resolved.record, idempotent: false };
 }
 
 // How long each lead's clocks are pushed out, in milliseconds, together with
