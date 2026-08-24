@@ -136,7 +136,7 @@ jobs:
           step "prepare incoming dir" ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" 'install -d -m 0700 /opt/ms-realty/incoming; df -h /opt /var/lib/containerd 2>/dev/null | tail -2'
           step "upload archive" scp "${ssh_args[@]}" "$archive" "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.tar.gz"
           step "upload deploy script" scp "${ssh_args[@]}" production/scripts/deploy-production-review.sh "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh"
-          step "activate release" ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; trap 'rm -f /opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' EXIT; bash '/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' '$GITHUB_SHA' </dev/null; test \"\$(readlink -f /opt/ms-realty/current)\" = '/opt/ms-realty/releases/${GITHUB_SHA}'"
+          step "activate release" ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; trap 'rm -f /opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' EXIT; bash -x '/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' '$GITHUB_SHA' </dev/null; test \"\$(readlink -f /opt/ms-realty/current)\" = '/opt/ms-realty/releases/${GITHUB_SHA}'"
 
   deploy:
     name: Deploy production
