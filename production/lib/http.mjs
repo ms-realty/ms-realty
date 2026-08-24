@@ -384,6 +384,7 @@ import {
   writeWorkspaceExportFile,
 } from "./workspace-export.mjs";
 import { auditRetentionDays, auditRetentionPlan } from "./audit-retention.mjs";
+import { buildWorkspaceSecurityView } from "./workspace-security-view.mjs";
 import { renderTwoFactorEnrolmentPage, renderWorkspaceExportReadyPage } from "./admin-security-handoff.mjs";
 // B1 lead operations: snooze, bulk actions, saved views, Hermes availability.
 import { hermesReplyAvailability } from "./hermes-availability.mjs";
@@ -1892,90 +1893,22 @@ export function createHttpApp({
     }
     return true;
   };
-  // What the Settings screen's Security and Data sections render. Returns null
-  // when the workspace-security ledgers are not configured, which is what keeps
-  // those sections in their honest "not connected" treatment.
-  const workspaceSecurityView = (principal, currentFingerprint = "", notice = null, stepUpActive = false) => {
-    if (!principal?.id) return null;
-    if (!operatorTwoFactorPath && !adminSessionLedgerPath && !workspaceExportLedgerPath) return null;
-    const auditable = Boolean(auditLogPath) && !runtimeDataDurableOnly;
-    const now = Date.parse(securityNow());
-    let twoFactor = null;
-    try {
-      twoFactor = {
-        ...operatorTwoFactorStatus(twoFactorRows(), principal.id),
-        required: principal.require_two_factor === true,
-        step_up_required: principal.source === "credential_registry",
-        step_up_active: stepUpActive === true,
-        step_up_header: "x-ms-admin-2fa",
-        writable: Boolean(operatorTwoFactorPath) && auditable,
-      };
-    } catch {
-      twoFactor = null;
-    }
-    let sessions = null;
-    try {
-      sessions = {
-        writable: Boolean(adminSessionLedgerPath) && auditable,
-        can_manage_team: canAdminAccess(principal, "team:manage"),
-        current_session_id: currentFingerprint
-          ? adminSessionStates(adminSessionRows(), { now }).get(currentFingerprint)?.session_id || null
-          : null,
-        rows: adminSessionList(adminSessionRows(), {
-          operatorId: principal.id,
-          currentFingerprint,
-          now,
-        }),
-      };
-    } catch {
-      sessions = null;
-    }
-    let exports = null;
-    if (canAdminAccess(principal, "data:export")) {
-      try {
-        exports = {
-          writable: Boolean(workspaceExportLedgerPath) && auditable,
-          datasets: [...WORKSPACE_EXPORT_DATASETS],
-          rows: workspaceExportList(workspaceExportRows(), { requestedBy: principal.id, now }).slice(0, 5),
-        };
-      } catch {
-        exports = null;
-      }
-    }
-    let retention = null;
-    if (canAdminAccess(principal, "activity:read")) {
-      try {
-        const plan = auditRetentionPlan(readAuditLog(auditLogPath || undefined), {
-          now: securityNow(),
-          retentionDays: Number(auditRetentionWindowDays) || auditRetentionDays(),
-        });
-        retention = {
-          retention_days: plan.retention_days,
-          cutoff: plan.cutoff,
-          total: plan.total,
-          retained: plan.retained,
-          prunable: plan.prunable,
-          protected_beyond_window: plan.protected_beyond_window,
-          scanned_artifacts: plan.scanned_artifacts,
-          applied_on_read: false,
-          apply_command: "npm run audit:retention -- --apply",
-          unavailable: null,
-        };
-      } catch (error) {
-        // A retention window we cannot verify is reported as unavailable, never
-        // as a number somebody might act on.
-        retention = { unavailable: error.message };
-      }
-    }
-    return {
-      operator_id: principal.id,
-      notice: typeof notice === "string" && /^[a-z_]{1,40}$/.test(notice) ? notice : null,
-      two_factor: twoFactor,
-      sessions,
-      exports,
-      audit_retention: retention,
-    };
-  };
+  // What the Settings screen's Security and Data sections render. The whole
+  // decision lives in the shared builder so the App Router adapter renders the
+  // identical payload; this only supplies the ledgers and the clock.
+  const workspaceSecurityView = (principal, currentFingerprint = "", notice = null, stepUpActive = false) =>
+    buildWorkspaceSecurityView(principal, {
+      currentFingerprint,
+      notice,
+      stepUpActive,
+      now: securityNow(),
+      auditLogPath,
+      adminSessionLedgerPath,
+      operatorTwoFactorPath,
+      workspaceExportLedgerPath,
+      auditRetentionWindowDays,
+      runtimeDataDurableOnly,
+    });
   const writeAudit = (input, recordedAt = reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()) =>
     !runtimeDataDurableOnly && auditLogPath
       ? appendAuditLog(createAuditLogEntry(input, recordedAt), {

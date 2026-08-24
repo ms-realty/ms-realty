@@ -20,6 +20,19 @@ import {
   adminTokenFromCookie,
   renderAdminLoginPage,
 } from "./admin-login.mjs";
+// B6 workspace security and data: the payload the Settings screen renders its
+// Security and Data sections from. The routes themselves are served by
+// app-workspace-security.mjs, which delegates to the one implementation.
+import { buildWorkspaceSecurityView } from "./workspace-security-view.mjs";
+import {
+  DEFAULT_ADMIN_SESSION_LEDGER_PATH,
+  adminSessionFingerprint,
+  adminSessionStates,
+  readAdminSessionEvents,
+  stepUpTokenFromCookie,
+} from "./admin-sessions.mjs";
+import { DEFAULT_OPERATOR_TWO_FACTOR_PATH } from "./operator-two-factor.mjs";
+import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
@@ -358,8 +371,37 @@ import {
   DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
   appendViewingFollowUp,
   buildViewingFollowUpQueue,
+  deriveViewingFollowUpStates,
   readViewingFollowUps,
 } from "./viewing-follow-ups.mjs";
+// B5 viewings and availability: broker working hours and the week calendar.
+import {
+  DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH,
+  appendBrokerAvailability,
+  brokerAvailabilityDirectory,
+  brokerAvailabilityFor,
+  canEditBrokerAvailability,
+  createBrokerAvailability,
+  officeTimeZone,
+  readBrokerAvailability,
+} from "./broker-availability.mjs";
+import { DEFAULT_VIEWING_DURATION_MINUTES } from "./broker-free-slots.mjs";
+import { buildViewingWeekView } from "./viewing-week-view.mjs";
+import { wholeNumberSlotParam } from "./viewing-slots.mjs";
+// B3 saved-search alerts: the broker-facing delivery queue.
+import {
+  DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+  buildSavedSearchAlertDeliveryQueue,
+  queueDueSavedSearchAlerts,
+  readSavedSearchAlertDeliveries,
+} from "./saved-search-alert-deliveries.mjs";
+import { buildSavedSearchAlertReport } from "./saved-search-alerts.mjs";
+import { publicSeedFor } from "./public-inventory.mjs";
+import {
+  DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+  applySavedSearchManageEvents,
+  readSavedSearchManageEvents,
+} from "./saved-search-manage.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -460,6 +502,21 @@ export function appAdminConfigFromEnv(env = process.env) {
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
     viewingDurableStore: viewingDurableStoreConfigFromEnv(env),
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
+    // B5: the recorded broker week behind the calendar and the public picker.
+    brokerAvailabilityLedgerPath: env.MS_REALTY_BROKER_AVAILABILITY_LEDGER_PATH || DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH,
+    brokerAvailabilityAt: env.MS_REALTY_BROKER_AVAILABILITY_AT,
+    // B6 workspace security and data: the ledgers the Settings screen reads.
+    adminSessionLedgerPath: env.MS_REALTY_ADMIN_SESSION_LEDGER_PATH || DEFAULT_ADMIN_SESSION_LEDGER_PATH,
+    operatorTwoFactorPath: env.MS_REALTY_OPERATOR_2FA_PATH || DEFAULT_OPERATOR_TWO_FACTOR_PATH,
+    workspaceExportLedgerPath: env.MS_REALTY_WORKSPACE_EXPORT_LEDGER_PATH || DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH,
+    auditRetentionWindowDays: env.MS_REALTY_AUDIT_RETENTION_DAYS,
+    securityAt: env.MS_REALTY_SECURITY_AT,
+    // B3: the saved-search alert queue a broker works from.
+    savedSearchManageEventLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH || DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+    savedSearchAlertDeliveryLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH || DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+    savedSearchAlertQueuedAt: env.MS_REALTY_SAVED_SEARCH_ALERT_QUEUED_AT,
     bookedAt: env.MS_REALTY_BOOKED_AT,
     viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
     sellerPipelineOutcomeAt: env.MS_REALTY_SELLER_PIPELINE_OUTCOME_AT,
@@ -578,6 +635,25 @@ async function workspaceOnboardingFor(page, config) {
   });
 }
 
+// B6: the Security and Data sections render only when this payload is present.
+// Without it the settings screen looks like a workspace with no second factor,
+// no session list, no export and no retention preview — while every one of
+// those APIs is live and answering.
+function workspaceSecurityFor(url, config) {
+  return buildWorkspaceSecurityView(config.adminPrincipal, {
+    currentFingerprint: config.adminSessionFingerprint || "",
+    notice: url.searchParams.get("security"),
+    stepUpActive: config.adminStepUpActive === true,
+    now: config.securityAt || config.reviewedAt || config.receivedAt || new Date().toISOString(),
+    auditLogPath: config.auditLogPath,
+    adminSessionLedgerPath: config.adminSessionLedgerPath,
+    operatorTwoFactorPath: config.operatorTwoFactorPath,
+    workspaceExportLedgerPath: config.workspaceExportLedgerPath,
+    auditRetentionWindowDays: config.auditRetentionWindowDays,
+    runtimeDataDurableOnly: config.runtimeDataDurableOnly,
+  });
+}
+
 function workspaceSettingsPayload(registry, url, config, { requestedLocale = adminLocaleParam(url, config), form = null } = {}) {
   return withWorkspaceSettings(
     renderAdminWorkspaceSettingsPayload(registry, requestedLocale, {
@@ -588,6 +664,8 @@ function workspaceSettingsPayload(registry, url, config, { requestedLocale = adm
       saved: url.searchParams.get("saved"),
       form,
       writable: Boolean(config.workspaceSettingsPath) && !config.runtimeDataDurableOnly,
+      // B6 workspace security and data
+      security: workspaceSecurityFor(url, config),
     }),
     config,
   );
@@ -1105,6 +1183,178 @@ async function adminViewingSource(config) {
   });
   if (!Array.isArray(viewings)) throw new ViewingStoreUnavailableError("Durable viewing readback returned invalid rows");
   return { durable: true, viewings };
+}
+
+// ---- B5 broker availability and the week calendar ------------------------
+function availabilityNow(config) {
+  return (
+    config.brokerAvailabilityAt ||
+    config.viewingFollowUpAt ||
+    config.bookedAt ||
+    config.reviewedAt ||
+    config.receivedAt ||
+    new Date().toISOString()
+  );
+}
+
+function availabilityRows(config) {
+  return readBrokerAvailability(config.brokerAvailabilityLedgerPath || undefined);
+}
+
+function knownBrokerIds() {
+  return DEFAULT_BROKER_PROFILES.map((profile) => profile.id);
+}
+
+// Viewings already on a calendar, with their current state: a rescheduled
+// viewing must block its new time, not its original one.
+async function scheduledViewings(config) {
+  const source = await adminViewingSource(config);
+  if (source.durable) return source.viewings;
+  return deriveViewingFollowUpStates(source.viewings, readViewingFollowUps(config.viewingFollowUpLedgerPath || undefined));
+}
+
+function brokerAvailabilityPayload(url, config) {
+  const rows = availabilityRows(config);
+  const requested = String(url.searchParams.get("broker") || "").trim();
+  const brokerIds = requested ? [requested] : knownBrokerIds();
+  return {
+    kind: "admin_broker_availability",
+    timezone: officeTimeZone(),
+    brokers: brokerAvailabilityDirectory(rows, brokerIds),
+    history: requested ? rows.filter((row) => row.broker_id === requested) : rows,
+    editable_brokers: brokerIds.filter((brokerId) => canEditBrokerAvailability(config.adminPrincipal, brokerId)),
+  };
+}
+
+// A broker may set their own hours; a manager may set anyone's.
+function recordBrokerAvailability(input, config) {
+  const submitted = bindAuthenticatedOperator(input, config.adminPrincipal);
+  const brokerId = String(submitted.brokerId ?? submitted.broker_id ?? submitted.broker ?? "").trim();
+  if (!canEditBrokerAvailability(config.adminPrincipal, brokerId)) {
+    throw Object.assign(new Error("Broker availability requires broker_availability:own"), {
+      status: 403,
+      capability: "broker_availability:own",
+    });
+  }
+  const recordedAt = availabilityNow(config);
+  const record = createBrokerAvailability({ ...submitted, brokerId }, { recordedAt });
+  const persisted = appendBrokerAvailability(record, { filePath: config.brokerAvailabilityLedgerPath || undefined });
+  if (!persisted.idempotent) {
+    recordAudit(
+      {
+        action: "broker_availability_updated",
+        actor: record.actor,
+        objectType: "broker_availability",
+        objectId: persisted.id,
+        metadata: {
+          broker_id: record.broker_id,
+          timezone: record.timezone,
+          weekly_windows: record.weekly_hours.length,
+          exceptions: record.exceptions.length,
+          self_service: config.adminPrincipal?.id === record.broker_id,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return {
+    status: persisted.idempotent ? 200 : 201,
+    body: {
+      kind: "admin_broker_availability_recorded",
+      availability: persisted,
+      resolved: brokerAvailabilityFor([persisted], record.broker_id),
+    },
+  };
+}
+
+async function viewingWeekPayload(url, config) {
+  const now = availabilityNow(config);
+  const viewings = await scheduledViewings(config);
+  return {
+    kind: "admin_viewing_week",
+    week: buildViewingWeekView({
+      availabilityRows: availabilityRows(config),
+      brokers: knownBrokerIds(),
+      viewings,
+      viewingFollowUpQueue: buildViewingFollowUpQueue(
+        viewings,
+        readViewingFollowUps(config.viewingFollowUpLedgerPath || undefined),
+        { now },
+      ),
+      week: url.searchParams.get("week"),
+      now,
+      durationMinutes: wholeNumberSlotParam(url.searchParams.get("duration"), DEFAULT_VIEWING_DURATION_MINUTES),
+    }),
+  };
+}
+
+// ---- B3 saved-search alert delivery --------------------------------------
+// The intake rows with every visitor change folded in. Deleted searches
+// disappear here, which is what stops their alerts.
+function adminSavedSearches(config) {
+  return applySavedSearchManageEvents(
+    readSavedSearches(config.savedSearchLedgerPath || undefined),
+    readSavedSearchManageEvents(config.savedSearchManageEventLedgerPath || undefined),
+  );
+}
+
+function adminSavedSearchAlertDeliveries(config) {
+  return config.savedSearchAlertDeliveryLedgerPath
+    ? readSavedSearchAlertDeliveries(config.savedSearchAlertDeliveryLedgerPath)
+    : [];
+}
+
+function savedSearchAlertQueue(config, queuedAt) {
+  return buildSavedSearchAlertDeliveryQueue({
+    savedSearches: adminSavedSearches(config),
+    deliveries: adminSavedSearchAlertDeliveries(config),
+    now: queuedAt,
+  });
+}
+
+// Queues the alerts that are due. This route creates broker work; it never
+// sends anything, which is why `delivered` is stated as zero rather than
+// omitted.
+async function runDueSavedSearchAlerts(config) {
+  const queuedAt = config.savedSearchAlertQueuedAt || config.reviewedAt || config.receivedAt || new Date().toISOString();
+  const savedSearches = adminSavedSearches(config);
+  const alertReport = buildSavedSearchAlertReport({
+    registry: loadLocaleRegistry(config.localeRegistryPath),
+    seed: publicSeedFor(currentSeed(config)),
+    savedSearches,
+    requestOutcomes: readPublicRequestOutcomes(config.publicRequestOutcomeLedgerPath || undefined),
+    translationTasks: config.runtimeDataDurableOnly ? [] : readTranslationLedger(config.translationLedgerPath),
+    generatedAt: queuedAt,
+  });
+  const run = queueDueSavedSearchAlerts({
+    savedSearches,
+    alertReport,
+    filePath: config.savedSearchAlertDeliveryLedgerPath,
+    queuedAt,
+  });
+  for (const delivery of run.queued) {
+    recordAudit(
+      {
+        action: "saved_search_alerts_queued",
+        actor: "system",
+        objectType: "saved_search",
+        objectId: delivery.saved_search_id,
+        locale: delivery.locale,
+        status: "queued",
+        metadata: {
+          delivery_id: delivery.id,
+          reason: delivery.reason,
+          new_match_count: delivery.new_match_count,
+          price_change_count: delivery.price_change_count,
+          delivery_mode: delivery.delivery_mode,
+        },
+      },
+      config,
+      queuedAt,
+    );
+  }
+  return { kind: "saved_search_alert_run", ...run, delivered: 0, queue: savedSearchAlertQueue(config, queuedAt) };
 }
 
 function rowsForLeadIds(rows, leadIds) {
@@ -3419,7 +3669,38 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     return new Response(response.body, { status: response.status, headers });
   }
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
-  config = { ...config, adminPrincipal: principal, payloadAdminSession: payloadSession };
+  // B6: which session is "this" one, so the settings screen can mark it and
+  // refuse to present a revoke that would sign the operator out silently. A
+  // token that cannot be fingerprinted simply marks nothing.
+  const stepUpToken =
+    String(request.headers.get("x-ms-admin-2fa") || "").trim() || stepUpTokenFromCookie(request.headers.get("cookie") || "");
+  const currentFingerprint = (() => {
+    try {
+      const token = sessionToken || stepUpToken;
+      return token ? adminSessionFingerprint(token) : "";
+    } catch {
+      return "";
+    }
+  })();
+  const stepUpActive = (() => {
+    if (!stepUpToken || principal.source !== "credential_registry") return false;
+    try {
+      const fingerprint = adminSessionFingerprint(stepUpToken);
+      const state = adminSessionStates(readAdminSessionEvents(config.adminSessionLedgerPath || undefined), {
+        now: Date.parse(config.securityAt || config.reviewedAt || config.receivedAt || new Date().toISOString()),
+      }).get(fingerprint);
+      return state?.status === "active" && state.operator_id === principal.id && state.source === "credential_registry";
+    } catch {
+      return false;
+    }
+  })();
+  config = {
+    ...config,
+    adminPrincipal: principal,
+    payloadAdminSession: payloadSession,
+    adminSessionFingerprint: currentFingerprint,
+    adminStepUpActive: stepUpActive,
+  };
   try {
     const url = new URL(request.url, "http://localhost");
     const requiredCapability = requiredAdminCapability(request.method, url.pathname);
@@ -3839,6 +4120,39 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           url.searchParams.get("state") || "",
         ),
       );
+    }
+    // Package B2: the same review payload the HTML screen above renders.
+    if (request.method === "GET" && url.pathname === "/api/admin/approved-content") {
+      return jsonResponse(200, approvedContentReviewPayload(config.reviewedAt ? { now: config.reviewedAt } : {}));
+    }
+    // B5: broker working hours, read by anyone with the queue and written by
+    // the broker themselves or a manager.
+    if (url.pathname === "/api/admin/availability") {
+      if (request.method === "GET") return jsonResponse(200, brokerAvailabilityPayload(url, config));
+      if (request.method === "POST") {
+        const recorded = recordBrokerAvailability(
+          parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+          config,
+        );
+        return jsonResponse(recorded.status, recorded.body);
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
+    }
+    // B5: the week calendar, with the follow-ups that are due on it.
+    if (url.pathname === "/api/admin/viewings/week") {
+      if (request.method !== "GET") return jsonResponse(405, { kind: "method_not_allowed" });
+      return jsonResponse(200, await viewingWeekPayload(url, config));
+    }
+    // B3: without this route saved-search alerts can never be dispatched.
+    if (url.pathname === "/api/admin/saved-search-alerts/run-due") {
+      if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
+      if (!config.savedSearchAlertDeliveryLedgerPath) {
+        return jsonResponse(503, {
+          kind: "saved_search_alert_storage_unavailable",
+          message: "Saved search alert delivery storage is not configured.",
+        });
+      }
+      return jsonResponse(201, await runDueSavedSearchAlerts(config));
     }
     if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(await translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, await translationQueuePayload(registry, url, config));
@@ -4341,6 +4655,16 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(viewing.idempotent ? 200 : 201, viewing);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
+      // Fail closed. With the durable viewing store on, the viewing this
+      // follow-up belongs to lives in Postgres while the follow-up would land
+      // in a file ledger, so recording one would split the viewing's state
+      // across two stores that never reconcile.
+      if (config.viewingDurableStore?.viewingDurableStoreEnabled) {
+        return jsonResponse(503, {
+          kind: "viewing_follow_up_read_only",
+          message: "Durable viewing follow-up storage is not available",
+        });
+      }
       const result = appendViewingFollowUpEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
