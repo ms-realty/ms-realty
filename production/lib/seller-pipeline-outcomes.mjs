@@ -375,15 +375,14 @@ function nextOutcomeId(rows, pipelineId) {
   return id;
 }
 
-export function appendSellerPipelineOutcome(
-  pipelines,
-  input,
-  { filePath = DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH, recordedAt = new Date().toISOString() } = {},
-) {
+// The whole decision — validation, timeline and transition guards, idempotency,
+// id, and the resulting pipeline state — against caller-supplied outcome rows,
+// so a durable writer enforces exactly these rules over rows read from Postgres.
+export function resolveSellerPipelineOutcome(pipelines, outcomes, input, recordedAt = new Date().toISOString()) {
   const pipelineId = String(input.sellerPipelineId || input.seller_pipeline_id || input.pipelineId || "").trim();
   const pipeline = (pipelines || []).find((row) => row.id === pipelineId);
   if (!pipeline) throw new Error("Seller pipeline outcome requires a known sellerPipelineId");
-  const rows = readSellerPipelineOutcomes(filePath);
+  const rows = outcomes || [];
   const state = deriveSellerPipelineStates(pipelines, rows).find((row) => row.id === pipelineId);
   const outcome = normalizedOutcomeInput(pipeline, state, input, recordedAt);
   const explicitRetry = existingIdempotentOutcome(rows, outcome);
@@ -393,10 +392,21 @@ export function appendSellerPipelineOutcome(
   assertTransition(state, outcome);
 
   const persisted = { ...outcome, id: outcome.id || nextOutcomeId(rows, pipelineId) };
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(persisted)}\n`);
   const sellerPipeline = deriveSellerPipelineStates(pipelines, [...rows, persisted]).find((row) => row.id === pipelineId);
   return { outcome: persisted, seller_pipeline: sellerPipeline, idempotent: false };
+}
+
+export function appendSellerPipelineOutcome(
+  pipelines,
+  input,
+  { filePath = DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH, recordedAt = new Date().toISOString() } = {},
+) {
+  const rows = readSellerPipelineOutcomes(filePath);
+  const resolved = resolveSellerPipelineOutcome(pipelines, rows, input, recordedAt);
+  if (resolved.idempotent) return resolved;
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.appendFileSync(filePath, `${JSON.stringify(resolved.outcome)}\n`);
+  return resolved;
 }
 
 export function assertSellerPipelineOutcomes(rows) {

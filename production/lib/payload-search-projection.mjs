@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import { buildApprovedSearchProjection } from "./search-engine-sync.mjs";
 import { loadPayloadCmsImportRuntime } from "./payload-cms-import.mjs";
+import { loadLocaleRegistry } from "./locales.mjs";
+import { listingPath } from "./seo.mjs";
 
 function objectRelation(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : null;
@@ -41,7 +43,21 @@ function listingFactVerifications(listing, property) {
   return result;
 }
 
-function rowFor(listing, translation) {
+// The locale's own listing segment — properties in English, immobilien in
+// German, imoti in Bulgarian — from the same route map the site renders links
+// with. Hardcoding one locale's segment here sent every locale's search results
+// to Bulgarian URLs, so /en/search linked to /bg/imoti/*.
+function localeListingPath(registry, localeCode, listingId) {
+  try {
+    return listingPath(registry, localeCode, encodeURIComponent(listingId));
+  } catch {
+    // A locale the registry does not know cannot be given a route. Refusing is
+    // the honest answer; a guessed segment is a broken link nobody notices.
+    throw new Error(`Published listing ${listingId} has no route for locale ${localeCode}`);
+  }
+}
+
+function rowFor(listing, translation, registry) {
   const locale = objectRelation(translation.locale);
   const sourceLocale = objectRelation(listing.source_locale);
   const property = objectRelation(listing.property);
@@ -55,7 +71,7 @@ function rowFor(listing, translation) {
   const localePath =
     listing.routing?.target_locale === localeCode && text(listing.routing?.target_path)
       ? text(listing.routing.target_path)
-      : `/${localeCode}/imoti/${encodeURIComponent(listingId)}`;
+      : localeListingPath(registry, localeCode, listingId);
   return {
     listing: {
       ...listingFacts,
@@ -91,7 +107,7 @@ function rowFor(listing, translation) {
   };
 }
 
-export function payloadListingSearchRows(listings = []) {
+export function payloadListingSearchRows(listings = [], { registry = loadLocaleRegistry() } = {}) {
   const rows = [];
   for (const listing of listings) {
     if (listing?.cms_status !== "published" || listing?.workflow?.publish_approved !== true) continue;
@@ -99,7 +115,7 @@ export function payloadListingSearchRows(listings = []) {
     // ponytail: translation rows currently store approval metadata, not localized copy; index only the source locale until copy fields exist.
     for (const translation of Array.isArray(listing.translations) ? listing.translations : []) {
       if (!publishedTranslation(translation) || text(objectRelation(translation.locale)?.code) !== sourceLocale) continue;
-      rows.push(rowFor(listing, translation));
+      rows.push(rowFor(listing, translation, registry));
     }
   }
   return rows;
@@ -130,10 +146,10 @@ async function approvedListings(payload, pageSize) {
   return docs;
 }
 
-export async function buildPayloadApprovedSearchProjection(payload, { pageSize = 100 } = {}) {
+export async function buildPayloadApprovedSearchProjection(payload, { pageSize = 100, registry = loadLocaleRegistry() } = {}) {
   if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 1000) throw new Error("Payload search projection pageSize is invalid");
   const listings = await approvedListings(payload, pageSize);
-  const rows = payloadListingSearchRows(listings);
+  const rows = payloadListingSearchRows(listings, { registry });
   const projection = buildApprovedSearchProjection(rows);
   projection.documents.sort((left, right) => left.id.localeCompare(right.id));
   const digest = crypto.createHash("sha256").update(JSON.stringify(projection.documents)).digest("hex");

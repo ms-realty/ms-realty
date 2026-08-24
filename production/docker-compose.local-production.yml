@@ -20,6 +20,8 @@ x-app-environment: &app-environment
   # Local Docker preview state only. This named volume is not production persistence.
   MS_REALTY_AUDIT_LOG_PATH: /runtime-data/audit-log.jsonl
   MS_REALTY_ACCOUNT_LEDGER_PATH: /runtime-data/accounts.jsonl
+  MS_REALTY_ADMIN_SESSION_LEDGER_PATH: /runtime-data/admin-sessions.jsonl
+  MS_REALTY_BROKER_AVAILABILITY_LEDGER_PATH: /runtime-data/broker-availability.jsonl
   MS_REALTY_BROKER_CONTACT_LEDGER_PATH: /runtime-data/broker-contacts.jsonl
   MS_REALTY_CONSENT_LEDGER_PATH: /runtime-data/consent-ledger.jsonl
   MS_REALTY_CASE_LEDGER_PATH: /runtime-data/realty-case-events.jsonl
@@ -34,9 +36,14 @@ x-app-environment: &app-environment
   MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH: /runtime-data/lead-assignments.jsonl
   MS_REALTY_LEAD_CONTACT_VAULT_PATH: /runtime-data/lead-contact-vault.jsonl
   MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH: /runtime-data/lead-pipeline-outcomes.jsonl
+  MS_REALTY_LEAD_SNOOZE_LEDGER_PATH: /runtime-data/lead-snoozes.jsonl
+  MS_REALTY_OPERATOR_VIEW_LEDGER_PATH: /runtime-data/operator-views.jsonl
+  MS_REALTY_OPERATOR_2FA_PATH: /runtime-data/operator-two-factor.jsonl
   MS_REALTY_PUBLIC_CONTACT_VAULT_PATH: /runtime-data/public-contact-vault.jsonl
   MS_REALTY_LISTING_EDIT_LEDGER_PATH: /runtime-data/listing-edits.jsonl
   MS_REALTY_MEDIA_REVIEW_LEDGER_PATH: /runtime-data/media-reviews.jsonl
+  MS_REALTY_MEDIA_UPLOAD_LEDGER_PATH: /runtime-data/media-uploads.jsonl
+  MS_REALTY_MEDIA_UPLOAD_DIR: /runtime-data/media-uploads
   MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH: /runtime-data/listing-publication-schedules.jsonl
   MS_REALTY_LISTING_QUALITY_REVIEW_PATH: /runtime-evidence/listing-quality-review.csv
   MS_REALTY_LOCALE_REGISTRY_PATH: /runtime-data/locales.json
@@ -45,6 +52,8 @@ x-app-environment: &app-environment
   MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH: /runtime-data/reply-delivery-outcomes.jsonl
   MS_REALTY_REPLY_OUTBOX_PATH: /runtime-data/reply-outbox.jsonl
   MS_REALTY_SAVED_SEARCH_LEDGER_PATH: /runtime-data/saved-searches.jsonl
+  MS_REALTY_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH: /runtime-data/saved-search-manage-events.jsonl
+  MS_REALTY_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH: /runtime-data/saved-search-alert-deliveries.jsonl
   MS_REALTY_SELLER_PIPELINE_PATH: /runtime-data/seller-pipeline.jsonl
   MS_REALTY_SELLER_PIPELINE_OUTCOME_LEDGER_PATH: /runtime-data/seller-pipeline-outcomes.jsonl
   MS_REALTY_SEO_EVIDENCE_INPUT_DIR: /runtime-evidence/seo-inputs
@@ -54,6 +63,9 @@ x-app-environment: &app-environment
   MS_REALTY_TRANSLATION_LEDGER_PATH: /runtime-data/translation-tasks.jsonl
   MS_REALTY_VIEWING_LEDGER_PATH: /runtime-data/viewings.jsonl
   MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH: /runtime-data/viewing-follow-ups.jsonl
+  MS_REALTY_VIEWING_TRIP_LEDGER_PATH: /runtime-data/viewing-trip-requests.jsonl
+  MS_REALTY_WORKSPACE_EXPORT_LEDGER_PATH: /runtime-data/workspace-exports.jsonl
+  MS_REALTY_WORKSPACE_EXPORT_DIR: /runtime-data/workspace-exports
   MS_REALTY_LOCAL_READINESS_SOURCE_PATH: /app/production/data/launch-readiness.json
   MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: /runtime-evidence/local-launch-readiness.json
   MS_REALTY_LOCAL_READINESS_MAX_AGE_SECONDS: "900"

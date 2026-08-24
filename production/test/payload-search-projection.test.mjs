@@ -4,6 +4,7 @@ import {
   buildPayloadApprovedSearchProjection,
   payloadListingSearchRows,
 } from "../lib/payload-search-projection.mjs";
+import { loadLocaleRegistry } from "../lib/locales.mjs";
 
 function approvedListing(overrides = {}) {
   const locale = { id: "locale-bg", code: "bg", public_enabled: true, indexable: true };
@@ -78,6 +79,38 @@ test("Payload projection exposes only approved source-locale copy and verified f
   assert.equal(rows[0].listing.public_latitude, 41.56);
   assert.equal(rows[0].approval.translation_human_approved, true);
   assert.ok(rows[0].approval.fact_verification.some((item) => item.field === "listing_status" && item.state === "broker_verified"));
+});
+
+// Every locale routes listings under its own segment. The projection used to
+// hardcode the Bulgarian one, so a search in any other language linked every
+// result to a /bg/imoti/ URL.
+test("Payload projection links each locale to its own listing segment", () => {
+  const registry = loadLocaleRegistry();
+  const localised = (code) => {
+    const locale = { id: `locale-${code}`, code, public_enabled: true, indexable: true };
+    const listing = approvedListing({
+      id: `MS-LOCALE-${code.toUpperCase()}`,
+      source_locale: locale,
+      // No routing override: this is the derived path, which is the one that
+      // was wrong.
+      routing: {},
+    });
+    listing.translations = listing.translations.map((translation) => ({ ...translation, locale }));
+    return payloadListingSearchRows([listing], { registry })[0].listing.locale_path;
+  };
+
+  assert.equal(localised("en"), "/en/properties/MS-LOCALE-EN");
+  assert.equal(localised("bg"), "/bg/imoti/MS-LOCALE-BG");
+  assert.equal(localised("de"), "/de/immobilien/MS-LOCALE-DE");
+  // Hebrew is right-to-left and carries its own segment like every other locale.
+  const hebrew = registry.locales.find((locale) => locale.code === "he");
+  assert.equal(localised("he"), `/he/${hebrew.route_segments.listing}/MS-LOCALE-HE`);
+  assert.notEqual(hebrew.route_segments.listing, "imoti");
+
+  // An explicit routing target still wins: a listing with a redirect history
+  // keeps the path the redirects point at.
+  const routed = approvedListing({ routing: { target_path: "/bg/imoti/legacy-slug", target_locale: "bg" } });
+  assert.equal(payloadListingSearchRows([routed], { registry })[0].listing.locale_path, "/bg/imoti/legacy-slug");
 });
 
 test("Payload projection treats zero approved listings as a valid authoritative catalog", async () => {

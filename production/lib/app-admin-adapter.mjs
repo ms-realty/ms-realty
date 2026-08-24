@@ -20,6 +20,19 @@ import {
   adminTokenFromCookie,
   renderAdminLoginPage,
 } from "./admin-login.mjs";
+// B6 workspace security and data: the payload the Settings screen renders its
+// Security and Data sections from. The routes themselves are served by
+// app-workspace-security.mjs, which delegates to the one implementation.
+import { buildWorkspaceSecurityView } from "./workspace-security-view.mjs";
+import {
+  DEFAULT_ADMIN_SESSION_LEDGER_PATH,
+  adminSessionFingerprint,
+  adminSessionStates,
+  readAdminSessionEvents,
+  stepUpTokenFromCookie,
+} from "./admin-sessions.mjs";
+import { DEFAULT_OPERATOR_TWO_FACTOR_PATH } from "./operator-two-factor.mjs";
+import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
@@ -98,7 +111,7 @@ import {
 import { buildContactRecords } from "./contact-records.mjs";
 import { loadMigrationRecords } from "./content.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
-import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
+import { DEFAULT_DEAL_LEDGER_PATH, readDeals } from "./deal-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, readEventLedger } from "./events.mjs";
 import {
   EventStoreUnavailableError,
@@ -136,32 +149,47 @@ import {
   leadReadScopeForPrincipal,
   leadDurableStoreConfigFromEnv,
   payloadUserForLeadRead,
+  appendConsentEventDurably,
+  readConsentEventsDurably,
   readLeadIntakesDurably,
+  readSellerPipelineItemsDurably,
 } from "./lead-durable-store.mjs";
+import {
+  LeadOperationStoreUnavailableError,
+  isLeadOperationsDurableStoreEnabled,
+  leadOperationsDurableStoreConfigFromEnv,
+} from "./lead-ops-durable-store.mjs";
+import {
+  applyLeadBulkOperation,
+  consentLedgerFor,
+  leadJourneyContextFrom,
+  leadOperationLedgers,
+  recordDealCloseOperation,
+  recordLeadAssignmentOperation,
+  recordLeadPipelineOutcomeOperation,
+  recordConsentWithdrawalOperation,
+  recordLeadSnoozeOperation,
+  recordLeadUnsnoozeOperation,
+  recordSellerPipelineOutcomeOperation,
+} from "./lead-ops-workflows.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
 import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import {
   DEFAULT_CONSENT_LEDGER_PATH,
   appendConsentRecord,
   createConsentRecord,
-  createConsentWithdrawal,
   latestConsentStates,
   readConsentLedger,
 } from "./consent-ledger.mjs";
 import {
   DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
-  appendLeadAssignment,
   applyLeadAssignments,
-  createLeadAssignment,
   readLeadAssignments,
 } from "./lead-assignments.mjs";
 // B1 lead operations: snooze, bulk actions, saved views, Hermes availability.
 import { hermesReplyAvailability } from "./hermes-availability.mjs";
 import {
   DEFAULT_LEAD_SNOOZE_LEDGER_PATH,
-  appendLeadSnooze,
-  createLeadSnooze,
-  createLeadUnsnooze,
   readLeadSnoozes,
 } from "./lead-snoozes.mjs";
 import {
@@ -176,7 +204,6 @@ import {
 import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
   DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
-  appendLeadPipelineOutcome,
   buildLeadPipelineQueue,
   readLeadPipelineOutcomes,
 } from "./lead-pipeline-outcomes.mjs";
@@ -311,7 +338,6 @@ import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import {
   DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH,
-  appendSellerPipelineOutcome,
   buildSellerPipelineQueue,
   readSellerPipelineOutcomes,
 } from "./seller-pipeline-outcomes.mjs";
@@ -346,8 +372,37 @@ import {
   DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
   appendViewingFollowUp,
   buildViewingFollowUpQueue,
+  deriveViewingFollowUpStates,
   readViewingFollowUps,
 } from "./viewing-follow-ups.mjs";
+// B5 viewings and availability: broker working hours and the week calendar.
+import {
+  DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH,
+  appendBrokerAvailability,
+  brokerAvailabilityDirectory,
+  brokerAvailabilityFor,
+  canEditBrokerAvailability,
+  createBrokerAvailability,
+  officeTimeZone,
+  readBrokerAvailability,
+} from "./broker-availability.mjs";
+import { DEFAULT_VIEWING_DURATION_MINUTES } from "./broker-free-slots.mjs";
+import { buildViewingWeekView } from "./viewing-week-view.mjs";
+import { wholeNumberSlotParam } from "./viewing-slots.mjs";
+// B3 saved-search alerts: the broker-facing delivery queue.
+import {
+  DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+  buildSavedSearchAlertDeliveryQueue,
+  queueDueSavedSearchAlerts,
+  readSavedSearchAlertDeliveries,
+} from "./saved-search-alert-deliveries.mjs";
+import { buildSavedSearchAlertReport } from "./saved-search-alerts.mjs";
+import { publicSeedFor } from "./public-inventory.mjs";
+import {
+  DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+  applySavedSearchManageEvents,
+  readSavedSearchManageEvents,
+} from "./saved-search-manage.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -407,6 +462,7 @@ export function appAdminConfigFromEnv(env = process.env) {
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
     leadDurableStore: leadDurableStoreConfigFromEnv(env),
+    leadOperationsDurableStore: leadOperationsDurableStoreConfigFromEnv(env),
     publicContactVaultPath:
       env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
     publicContactKey: env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY,
@@ -447,6 +503,21 @@ export function appAdminConfigFromEnv(env = process.env) {
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
     viewingDurableStore: viewingDurableStoreConfigFromEnv(env),
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
+    // B5: the recorded broker week behind the calendar and the public picker.
+    brokerAvailabilityLedgerPath: env.MS_REALTY_BROKER_AVAILABILITY_LEDGER_PATH || DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH,
+    brokerAvailabilityAt: env.MS_REALTY_BROKER_AVAILABILITY_AT,
+    // B6 workspace security and data: the ledgers the Settings screen reads.
+    adminSessionLedgerPath: env.MS_REALTY_ADMIN_SESSION_LEDGER_PATH || DEFAULT_ADMIN_SESSION_LEDGER_PATH,
+    operatorTwoFactorPath: env.MS_REALTY_OPERATOR_2FA_PATH || DEFAULT_OPERATOR_TWO_FACTOR_PATH,
+    workspaceExportLedgerPath: env.MS_REALTY_WORKSPACE_EXPORT_LEDGER_PATH || DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH,
+    auditRetentionWindowDays: env.MS_REALTY_AUDIT_RETENTION_DAYS,
+    securityAt: env.MS_REALTY_SECURITY_AT,
+    // B3: the saved-search alert queue a broker works from.
+    savedSearchManageEventLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH || DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+    savedSearchAlertDeliveryLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH || DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+    savedSearchAlertQueuedAt: env.MS_REALTY_SAVED_SEARCH_ALERT_QUEUED_AT,
     bookedAt: env.MS_REALTY_BOOKED_AT,
     viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
     sellerPipelineOutcomeAt: env.MS_REALTY_SELLER_PIPELINE_OUTCOME_AT,
@@ -565,6 +636,25 @@ async function workspaceOnboardingFor(page, config) {
   });
 }
 
+// B6: the Security and Data sections render only when this payload is present.
+// Without it the settings screen looks like a workspace with no second factor,
+// no session list, no export and no retention preview — while every one of
+// those APIs is live and answering.
+function workspaceSecurityFor(url, config) {
+  return buildWorkspaceSecurityView(config.adminPrincipal, {
+    currentFingerprint: config.adminSessionFingerprint || "",
+    notice: url.searchParams.get("security"),
+    stepUpActive: config.adminStepUpActive === true,
+    now: config.securityAt || config.reviewedAt || config.receivedAt || new Date().toISOString(),
+    auditLogPath: config.auditLogPath,
+    adminSessionLedgerPath: config.adminSessionLedgerPath,
+    operatorTwoFactorPath: config.operatorTwoFactorPath,
+    workspaceExportLedgerPath: config.workspaceExportLedgerPath,
+    auditRetentionWindowDays: config.auditRetentionWindowDays,
+    runtimeDataDurableOnly: config.runtimeDataDurableOnly,
+  });
+}
+
 function workspaceSettingsPayload(registry, url, config, { requestedLocale = adminLocaleParam(url, config), form = null } = {}) {
   return withWorkspaceSettings(
     renderAdminWorkspaceSettingsPayload(registry, requestedLocale, {
@@ -575,6 +665,8 @@ function workspaceSettingsPayload(registry, url, config, { requestedLocale = adm
       saved: url.searchParams.get("saved"),
       form,
       writable: Boolean(config.workspaceSettingsPath) && !config.runtimeDataDurableOnly,
+      // B6 workspace security and data
+      security: workspaceSecurityFor(url, config),
     }),
     config,
   );
@@ -855,16 +947,94 @@ function currentSeed(config) {
   );
 }
 
-function leadJourneyContext(config) {
-  return {
-    leads: applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath)),
-    outcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
-    viewings: readViewings(config.viewingLedgerPath),
-    viewingFollowUps: readViewingFollowUps(config.viewingFollowUpLedgerPath),
-    deals: readDeals(config.dealLedgerPath),
-    sellerPipelines: readSellerPipeline(config.sellerPipelinePath),
-    sellerPipelineOutcomes: readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath),
-  };
+// Durable lead operations are active only when the operator asked for them AND
+// the runtime is configured. Anything short of that keeps the file ledgers, and
+// the boundary keeps refusing the routes rather than writing to a disk that is
+// about to be wiped.
+function leadOperationsDurable(config) {
+  const store = config.leadOperationsDurableStore || {};
+  if (!store.leadOperationsDurableStoreEnabled) return false;
+  if (!isLeadOperationsDurableStoreEnabled(store)) {
+    throw new LeadOperationStoreUnavailableError("Durable lead operation store is enabled but not fully configured");
+  }
+  return true;
+}
+
+function leadOperationLedgersFor(config) {
+  const store = config.leadOperationsDurableStore || {};
+  return leadOperationLedgers({
+    durable: leadOperationsDurable(config),
+    payload: config.leadOperationsPayload || config.leadDurablePayload || null,
+    workspaceId: store.workspaceId,
+    paths: {
+      snooze: config.leadSnoozeLedgerPath,
+      assignment: config.leadAssignmentLedgerPath,
+      leadPipelineOutcome: config.leadPipelineOutcomeLedgerPath,
+      sellerPipelineOutcome: config.sellerPipelineOutcomeLedgerPath,
+      deal: config.dealLedgerPath,
+    },
+    ...(config.readLeadOperationsDurably ? { readOperations: config.readLeadOperationsDurably } : {}),
+    ...(config.appendLeadOperationDurably ? { appendOperations: config.appendLeadOperationDurably } : {}),
+  });
+}
+
+// Consent withdrawal has a durable home already: the consent_events collection
+// durable intake writes into. It goes durable together with the other lead
+// operations, and only while intake owns the consents.
+function consentLedgerForConfig(config) {
+  const durable = leadOperationsDurable(config) && config.leadDurableStore?.leadDurableStoreEnabled === true;
+  return consentLedgerFor({
+    durable,
+    filePath: config.consentLedgerPath,
+    payload: config.leadDurablePayload || null,
+    workspaceId: config.leadDurableStore?.workspaceId,
+    readConsentEvents: config.readConsentEventsDurably || readConsentEventsDurably,
+    appendConsentEvent: config.appendConsentEventDurably || appendConsentEventDurably,
+  });
+}
+
+// The seller pipeline items themselves are created at intake. Durable intake
+// already stores them as seller_pipeline_events, so that is where they are read
+// from once the lead store owns the leads.
+async function sellerPipelineItems(config, source = null) {
+  const durableStore = config.leadDurableStore || {};
+  // Only once the durable operations store owns the seller outcomes does the
+  // pipeline it acts on come from Postgres; otherwise this stays the file read
+  // it has always been.
+  if (!leadOperationsDurable(config) || !durableStore.leadDurableStoreEnabled) {
+    return readSellerPipeline(config.sellerPipelinePath);
+  }
+  const items = await (config.readSellerPipelineItemsDurably || readSellerPipelineItemsDurably)({
+    payload: config.leadDurablePayload || null,
+    workspaceId: durableStore.workspaceId,
+  });
+  if (!Array.isArray(items)) throw new LeadStoreUnavailableError("Durable seller pipeline readback returned invalid rows");
+  if (!source?.leads) return items;
+  const leadIds = new Set(source.leads.map((lead) => lead.lead_id));
+  return items.filter((item) => leadIds.has(item.lead_id));
+}
+
+// The journey's leads: the plain file ledger while intake is file-backed (which
+// is what this context has always used), the durable leads once it is not.
+async function leadJourneySource(config) {
+  if (!config.leadDurableStore?.leadDurableStoreEnabled) {
+    return { durable: false, leads: readLeadLedger(config.leadLedgerPath) };
+  }
+  return adminLeadSource(config);
+}
+
+async function leadJourneyContext(config, source = null) {
+  const ledgers = leadOperationLedgersFor(config);
+  const leadSource = source || (await leadJourneySource(config));
+  const filterRows = leadScopedRows(leadSource);
+  const assignments = filterRows(await ledgers.assignments.read());
+  return leadJourneyContextFrom({
+    ledgers,
+    leads: applyLeadAssignments(leadSource.leads, assignments),
+    viewings: filterRows((await adminViewingSource(config)).viewings),
+    viewingFollowUps: filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath)),
+    sellerPipelines: await sellerPipelineItems(config, leadSource),
+  });
 }
 
 function currentListingQualityReport(config, options = {}) {
@@ -1034,6 +1204,178 @@ async function adminViewingSource(config) {
   });
   if (!Array.isArray(viewings)) throw new ViewingStoreUnavailableError("Durable viewing readback returned invalid rows");
   return { durable: true, viewings };
+}
+
+// ---- B5 broker availability and the week calendar ------------------------
+function availabilityNow(config) {
+  return (
+    config.brokerAvailabilityAt ||
+    config.viewingFollowUpAt ||
+    config.bookedAt ||
+    config.reviewedAt ||
+    config.receivedAt ||
+    new Date().toISOString()
+  );
+}
+
+function availabilityRows(config) {
+  return readBrokerAvailability(config.brokerAvailabilityLedgerPath || undefined);
+}
+
+function knownBrokerIds() {
+  return DEFAULT_BROKER_PROFILES.map((profile) => profile.id);
+}
+
+// Viewings already on a calendar, with their current state: a rescheduled
+// viewing must block its new time, not its original one.
+async function scheduledViewings(config) {
+  const source = await adminViewingSource(config);
+  if (source.durable) return source.viewings;
+  return deriveViewingFollowUpStates(source.viewings, readViewingFollowUps(config.viewingFollowUpLedgerPath || undefined));
+}
+
+function brokerAvailabilityPayload(url, config) {
+  const rows = availabilityRows(config);
+  const requested = String(url.searchParams.get("broker") || "").trim();
+  const brokerIds = requested ? [requested] : knownBrokerIds();
+  return {
+    kind: "admin_broker_availability",
+    timezone: officeTimeZone(),
+    brokers: brokerAvailabilityDirectory(rows, brokerIds),
+    history: requested ? rows.filter((row) => row.broker_id === requested) : rows,
+    editable_brokers: brokerIds.filter((brokerId) => canEditBrokerAvailability(config.adminPrincipal, brokerId)),
+  };
+}
+
+// A broker may set their own hours; a manager may set anyone's.
+function recordBrokerAvailability(input, config) {
+  const submitted = bindAuthenticatedOperator(input, config.adminPrincipal);
+  const brokerId = String(submitted.brokerId ?? submitted.broker_id ?? submitted.broker ?? "").trim();
+  if (!canEditBrokerAvailability(config.adminPrincipal, brokerId)) {
+    throw Object.assign(new Error("Broker availability requires broker_availability:own"), {
+      status: 403,
+      capability: "broker_availability:own",
+    });
+  }
+  const recordedAt = availabilityNow(config);
+  const record = createBrokerAvailability({ ...submitted, brokerId }, { recordedAt });
+  const persisted = appendBrokerAvailability(record, { filePath: config.brokerAvailabilityLedgerPath || undefined });
+  if (!persisted.idempotent) {
+    recordAudit(
+      {
+        action: "broker_availability_updated",
+        actor: record.actor,
+        objectType: "broker_availability",
+        objectId: persisted.id,
+        metadata: {
+          broker_id: record.broker_id,
+          timezone: record.timezone,
+          weekly_windows: record.weekly_hours.length,
+          exceptions: record.exceptions.length,
+          self_service: config.adminPrincipal?.id === record.broker_id,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return {
+    status: persisted.idempotent ? 200 : 201,
+    body: {
+      kind: "admin_broker_availability_recorded",
+      availability: persisted,
+      resolved: brokerAvailabilityFor([persisted], record.broker_id),
+    },
+  };
+}
+
+async function viewingWeekPayload(url, config) {
+  const now = availabilityNow(config);
+  const viewings = await scheduledViewings(config);
+  return {
+    kind: "admin_viewing_week",
+    week: buildViewingWeekView({
+      availabilityRows: availabilityRows(config),
+      brokers: knownBrokerIds(),
+      viewings,
+      viewingFollowUpQueue: buildViewingFollowUpQueue(
+        viewings,
+        readViewingFollowUps(config.viewingFollowUpLedgerPath || undefined),
+        { now },
+      ),
+      week: url.searchParams.get("week"),
+      now,
+      durationMinutes: wholeNumberSlotParam(url.searchParams.get("duration"), DEFAULT_VIEWING_DURATION_MINUTES),
+    }),
+  };
+}
+
+// ---- B3 saved-search alert delivery --------------------------------------
+// The intake rows with every visitor change folded in. Deleted searches
+// disappear here, which is what stops their alerts.
+function adminSavedSearches(config) {
+  return applySavedSearchManageEvents(
+    readSavedSearches(config.savedSearchLedgerPath || undefined),
+    readSavedSearchManageEvents(config.savedSearchManageEventLedgerPath || undefined),
+  );
+}
+
+function adminSavedSearchAlertDeliveries(config) {
+  return config.savedSearchAlertDeliveryLedgerPath
+    ? readSavedSearchAlertDeliveries(config.savedSearchAlertDeliveryLedgerPath)
+    : [];
+}
+
+function savedSearchAlertQueue(config, queuedAt) {
+  return buildSavedSearchAlertDeliveryQueue({
+    savedSearches: adminSavedSearches(config),
+    deliveries: adminSavedSearchAlertDeliveries(config),
+    now: queuedAt,
+  });
+}
+
+// Queues the alerts that are due. This route creates broker work; it never
+// sends anything, which is why `delivered` is stated as zero rather than
+// omitted.
+async function runDueSavedSearchAlerts(config) {
+  const queuedAt = config.savedSearchAlertQueuedAt || config.reviewedAt || config.receivedAt || new Date().toISOString();
+  const savedSearches = adminSavedSearches(config);
+  const alertReport = buildSavedSearchAlertReport({
+    registry: loadLocaleRegistry(config.localeRegistryPath),
+    seed: publicSeedFor(currentSeed(config)),
+    savedSearches,
+    requestOutcomes: readPublicRequestOutcomes(config.publicRequestOutcomeLedgerPath || undefined),
+    translationTasks: config.runtimeDataDurableOnly ? [] : readTranslationLedger(config.translationLedgerPath),
+    generatedAt: queuedAt,
+  });
+  const run = queueDueSavedSearchAlerts({
+    savedSearches,
+    alertReport,
+    filePath: config.savedSearchAlertDeliveryLedgerPath,
+    queuedAt,
+  });
+  for (const delivery of run.queued) {
+    recordAudit(
+      {
+        action: "saved_search_alerts_queued",
+        actor: "system",
+        objectType: "saved_search",
+        objectId: delivery.saved_search_id,
+        locale: delivery.locale,
+        status: "queued",
+        metadata: {
+          delivery_id: delivery.id,
+          reason: delivery.reason,
+          new_match_count: delivery.new_match_count,
+          price_change_count: delivery.price_change_count,
+          delivery_mode: delivery.delivery_mode,
+        },
+      },
+      config,
+      queuedAt,
+    );
+  }
+  return { kind: "saved_search_alert_run", ...run, delivered: 0, queue: savedSearchAlertQueue(config, queuedAt) };
 }
 
 function rowsForLeadIds(rows, leadIds) {
@@ -2174,7 +2516,7 @@ function appendViewingFollowUpEntry(input, config) {
   return result;
 }
 
-function appendSellerPipelineOutcomeEntry(input, config) {
+async function appendSellerPipelineOutcomeEntry(input, config) {
   const recordedAt = config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
   const authenticatedInput = bindAuthenticatedOperator(input, config.adminPrincipal);
   if ((authenticatedInput.commissionEur ?? authenticatedInput.commission_eur) !== undefined && !canAdminAccess(config.adminPrincipal, "financials:write")) {
@@ -2183,32 +2525,37 @@ function appendSellerPipelineOutcomeEntry(input, config) {
       capability: "financials:write",
     });
   }
-  const result = appendSellerPipelineOutcome(readSellerPipeline(config.sellerPipelinePath), authenticatedInput, {
-    filePath: config.sellerPipelineOutcomeLedgerPath,
+  return recordSellerPipelineOutcomeOperation({
+    ledgers: leadOperationLedgersFor(config),
+    sellerPipelines: await sellerPipelineItems(config),
+    input: authenticatedInput,
+    principal: config.adminPrincipal,
     recordedAt,
-  });
-  // ponytail: separate JSONL ledgers are not transactional; an idempotent retry repairs a missing summary audit.
-  if (!readAuditLog(config.auditLogPath).some((row) => row.action === "seller_pipeline_outcome_recorded" && row.object_id === result.outcome.id)) {
-    recordAudit(
-      {
-        action: "seller_pipeline_outcome_recorded",
-        actor: result.outcome.actor,
-        objectType: "seller_pipeline_outcome",
-        objectId: result.outcome.id,
-        locale: result.seller_pipeline.original_language,
-        metadata: {
-          seller_pipeline_id: result.seller_pipeline.id,
-          lead_id: result.seller_pipeline.lead_id,
-          action: result.outcome.action,
-          stage: result.seller_pipeline.stage,
-          due_at: result.seller_pipeline.next_task?.due_at || null,
+    onRecorded: (result) => {
+      // ponytail: separate JSONL ledgers are not transactional; an idempotent retry repairs a missing summary audit.
+      if (readAuditLog(config.auditLogPath).some((row) => row.action === "seller_pipeline_outcome_recorded" && row.object_id === result.outcome.id)) {
+        return;
+      }
+      recordAudit(
+        {
+          action: "seller_pipeline_outcome_recorded",
+          actor: result.outcome.actor,
+          objectType: "seller_pipeline_outcome",
+          objectId: result.outcome.id,
+          locale: result.seller_pipeline.original_language,
+          metadata: {
+            seller_pipeline_id: result.seller_pipeline.id,
+            lead_id: result.seller_pipeline.lead_id,
+            action: result.outcome.action,
+            stage: result.seller_pipeline.stage,
+            due_at: result.seller_pipeline.next_task?.due_at || null,
+          },
         },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return result;
+        config,
+        recordedAt,
+      );
+    },
+  });
 }
 
 function appendPublicRequestOutcomeEntry(input, config) {
@@ -2365,39 +2712,44 @@ async function sendQueuedReplyViaProvider(input, config) {
   return { ...result, provider_delivery: providerDelivery };
 }
 
-function appendLeadPipelineOutcomeEntry(input, config) {
+async function appendLeadPipelineOutcomeEntry(input, config) {
   const recordedAt = config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
-  const result = appendLeadPipelineOutcome(
-    leadJourneyContext(config),
-    bindAuthenticatedOperator(input, config.adminPrincipal),
-    { filePath: config.leadPipelineOutcomeLedgerPath, recordedAt },
-  );
-  if (
-    !readAuditLog(config.auditLogPath).some(
-      (row) => row.action === "lead_pipeline_outcome_recorded" && row.object_id === result.outcome.id,
-    )
-  ) {
-    recordAudit(
-      {
-        action: "lead_pipeline_outcome_recorded",
-        actor: result.outcome.actor,
-        objectType: "lead_pipeline_outcome",
-        objectId: result.outcome.id,
-        locale: result.lead_pipeline.original_language,
-        metadata: {
-          lead_id: result.outcome.lead_id,
-          pipeline: result.outcome.pipeline,
-          action: result.outcome.action,
-          from_stage: result.outcome.from_stage,
-          to_stage: result.outcome.to_stage,
-          next_follow_up_at: result.outcome.next_follow_up_at,
+  return recordLeadPipelineOutcomeOperation({
+    ledgers: leadOperationLedgersFor(config),
+    journey: await leadJourneyContext(config),
+    input: bindAuthenticatedOperator(input, config.adminPrincipal),
+    principal: config.adminPrincipal,
+    recordedAt,
+    onRecorded: (result) => {
+      // ponytail: separate JSONL ledgers are not transactional; an idempotent retry repairs a missing summary audit.
+      if (
+        readAuditLog(config.auditLogPath).some(
+          (row) => row.action === "lead_pipeline_outcome_recorded" && row.object_id === result.outcome.id,
+        )
+      ) {
+        return;
+      }
+      recordAudit(
+        {
+          action: "lead_pipeline_outcome_recorded",
+          actor: result.outcome.actor,
+          objectType: "lead_pipeline_outcome",
+          objectId: result.outcome.id,
+          locale: result.lead_pipeline.original_language,
+          metadata: {
+            lead_id: result.outcome.lead_id,
+            pipeline: result.outcome.pipeline,
+            action: result.outcome.action,
+            from_stage: result.outcome.from_stage,
+            to_stage: result.outcome.to_stage,
+            next_follow_up_at: result.outcome.next_follow_up_at,
+          },
         },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return result;
+        config,
+        recordedAt,
+      );
+    },
+  });
 }
 
 async function openRealtyCaseEntry(input, config) {
@@ -2637,188 +2989,68 @@ function appendBrokerLeadEntry(input, registry, config) {
 // B1 lead operations. Each helper is the single-item path; the bulk route
 // below reuses them verbatim so both share one set of rules and write one
 // audit entry per enquiry.
-function appendLeadSnoozeEntry(input, config, recordedAt) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const leads = readLeadLedger(config.leadLedgerPath);
-  const record = createLeadSnooze(leads, readLeadSnoozes(config.leadSnoozeLedgerPath), attributed, recordedAt);
-  const persisted = appendLeadSnooze(record, { filePath: config.leadSnoozeLedgerPath });
-  if (!persisted.idempotent) {
-    recordAudit(
-      {
-        action: "lead_snoozed",
-        actor: persisted.actor,
-        objectType: "lead_snooze",
-        objectId: persisted.id,
-        metadata: { lead_id: persisted.lead_id, until: persisted.until, reason: persisted.reason },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return persisted;
+function leadOperationAudit(config) {
+  return (entry, recordedAt) => recordAudit(entry, config, recordedAt);
 }
 
-function appendLeadUnsnoozeEntry(input, config, recordedAt) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const leads = readLeadLedger(config.leadLedgerPath);
-  const record = createLeadUnsnooze(leads, readLeadSnoozes(config.leadSnoozeLedgerPath), attributed, recordedAt);
-  const persisted = appendLeadSnooze(record, { filePath: config.leadSnoozeLedgerPath });
-  if (!persisted.idempotent) {
-    recordAudit(
-      {
-        action: "lead_unsnoozed",
-        actor: persisted.actor,
-        objectType: "lead_snooze",
-        objectId: persisted.id,
-        metadata: { lead_id: persisted.lead_id, snooze_id: persisted.snooze_id, reason: persisted.reason },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return persisted;
+async function appendLeadSnoozeEntry(input, config, recordedAt) {
+  return recordLeadSnoozeOperation({
+    ledgers: leadOperationLedgersFor(config),
+    leads: (await leadJourneySource(config)).leads,
+    input,
+    principal: config.adminPrincipal,
+    recordedAt,
+    audit: leadOperationAudit(config),
+  });
 }
 
-// "Handled" is recorded on the pipeline the enquiry actually belongs to.
-function appendLeadHandledEntry(input, config, recordedAt) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const leadId = String(attributed.leadId || attributed.lead_id || "").trim();
-  const context = leadJourneyContext(config);
-  if (!context.leads.some((row) => row.lead_id === leadId)) throw new Error("Handled requires a known leadId");
-  const sellerPipelines = readSellerPipeline(config.sellerPipelinePath);
-  const sellerPipeline = sellerPipelines.find((row) => row.lead_id === leadId);
-  if (sellerPipeline) {
-    const result = appendSellerPipelineOutcome(
-      sellerPipelines,
-      { ...attributed, action: "note", note: attributed.note || attributed.reason, sellerPipelineId: sellerPipeline.id },
-      { filePath: config.sellerPipelineOutcomeLedgerPath, recordedAt },
-    );
-    if (!result.idempotent) {
-      recordAudit(
-        {
-          action: "seller_pipeline_outcome_recorded",
-          actor: result.outcome.actor,
-          objectType: "seller_pipeline_outcome",
-          objectId: result.outcome.id,
-          metadata: {
-            lead_id: result.outcome.lead_id,
-            seller_pipeline_id: result.outcome.seller_pipeline_id,
-            outcome_action: result.outcome.action,
-          },
-        },
-        config,
-        recordedAt,
-      );
-    }
-    return { kind: "seller_pipeline_note", ...result };
-  }
-  const result = appendLeadPipelineOutcome(
-    context,
-    { ...attributed, action: "note", note: attributed.note || attributed.reason },
-    { filePath: config.leadPipelineOutcomeLedgerPath, recordedAt },
-  );
-  if (!result.idempotent) {
-    recordAudit(
-      {
-        action: "lead_pipeline_outcome_recorded",
-        actor: result.outcome.actor,
-        objectType: "lead_pipeline_outcome",
-        objectId: result.outcome.id,
-        metadata: {
-          lead_id: result.outcome.lead_id,
-          pipeline: result.outcome.pipeline,
-          outcome_action: result.outcome.action,
-          from_stage: result.outcome.from_stage,
-          to_stage: result.outcome.to_stage,
-        },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return { kind: "lead_pipeline_note", ...result };
+async function appendLeadUnsnoozeEntry(input, config, recordedAt) {
+  return recordLeadUnsnoozeOperation({
+    ledgers: leadOperationLedgersFor(config),
+    leads: (await leadJourneySource(config)).leads,
+    input,
+    principal: config.adminPrincipal,
+    recordedAt,
+    audit: leadOperationAudit(config),
+  });
 }
 
-// One approval, one audit entry per enquiry. A refusal on one enquiry never
-// discards the rest: every item reports its own outcome.
-function applyLeadBulkAction(input, config) {
-  const action = String(input.action || "").trim();
-  if (!["assign", "snooze", "handle"].includes(action)) throw new Error("Bulk action must be assign, snooze, or handle");
-  const submittedIds = input.leadIds ?? input.lead_ids;
-  const leadIds = [
-    ...new Set(
-      (Array.isArray(submittedIds) ? submittedIds : String(submittedIds || "").split(","))
-        .map((value) => String(value || "").trim())
-        .filter(Boolean),
-    ),
-  ];
-  if (!leadIds.length) throw new Error("Bulk actions require at least one leadId");
-  if (leadIds.length > 100) throw new Error("Bulk actions accept 100 enquiries or fewer");
-  const confirmed = input.bulkConfirmed ?? input.bulk_confirmed;
-  if (confirmed !== true && !["true", "on", "1"].includes(String(confirmed || ""))) {
-    throw new Error("Bulk actions require one explicit human confirmation");
-  }
-  const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
-  const results = [];
-  for (const leadId of leadIds) {
-    try {
-      const itemInput = { ...input, leadId, leadIds: undefined, lead_ids: undefined };
-      const outcome =
-        action === "assign"
-          ? appendLeadAssignmentEntry(itemInput, config)
-          : action === "snooze"
-            ? appendLeadSnoozeEntry(itemInput, config, recordedAt)
-            : appendLeadHandledEntry(itemInput, config, recordedAt);
-      results.push({
-        lead_id: leadId,
-        status: outcome.idempotent ? "unchanged" : "applied",
-        idempotent: Boolean(outcome.idempotent),
-        record_id: outcome.id || outcome.outcome?.id || null,
-      });
-    } catch (error) {
-      results.push({ lead_id: leadId, status: "refused", idempotent: false, record_id: null, message: error.message });
-    }
-  }
-  const applied = results.filter((row) => row.status === "applied").length;
-  const refused = results.filter((row) => row.status === "refused").length;
-  return {
-    status: refused ? 207 : applied ? 201 : 200,
-    body: {
-      kind: "lead_bulk_action",
-      action,
-      requested: leadIds.length,
-      applied,
-      unchanged: results.filter((row) => row.status === "unchanged").length,
-      refused,
-      results,
-    },
-  };
+// "Handled", bulk actions and manual assignment all run through the shared
+// workflows, so this adapter and the standalone server apply one set of rules
+// and write one set of audit entries.
+async function appendLeadHandledEntry(input, config, recordedAt) {
+  return recordLeadHandledOperation({
+    ledgers: leadOperationLedgersFor(config),
+    journey: await leadJourneyContext(config),
+    input: bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]),
+    principal: config.adminPrincipal,
+    recordedAt,
+    audit: leadOperationAudit(config),
+  });
 }
 
-function appendLeadAssignmentEntry(input, config) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const leads = applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath));
-  const assignment = createLeadAssignment(leads, attributed, config.reviewedAt || new Date().toISOString());
-  const persisted = appendLeadAssignment(assignment, { filePath: config.leadAssignmentLedgerPath });
-  if (!persisted.idempotent) {
-    recordAudit(
-      {
-        action: "lead_assigned",
-        actor: persisted.assigned_by,
-        objectType: "lead_assignment",
-        objectId: persisted.id,
-        metadata: {
-          lead_id: persisted.lead_id,
-          previous_broker_id: persisted.previous_broker_id,
-          broker_id: persisted.broker_id,
-          assignment_method: persisted.assignment_method,
-        },
-      },
-      config,
-      persisted.assigned_at,
-    );
-  }
-  return persisted;
+async function applyLeadBulkAction(input, config) {
+  return applyLeadBulkOperation({
+    ledgers: leadOperationLedgersFor(config),
+    journey: await leadJourneyContext(config),
+    input,
+    principal: config.adminPrincipal,
+    recordedAt: config.leadSnoozeAt || config.reviewedAt || new Date().toISOString(),
+    audit: leadOperationAudit(config),
+  });
+}
+
+async function appendLeadAssignmentEntry(input, config) {
+  const ledgers = leadOperationLedgersFor(config);
+  const source = await leadJourneySource(config);
+  return recordLeadAssignmentOperation({
+    ledgers,
+    leads: applyLeadAssignments(source.leads, leadScopedRows(source)(await ledgers.assignments.read())),
+    input,
+    principal: config.adminPrincipal,
+    recordedAt: config.reviewedAt || new Date().toISOString(),
+    audit: leadOperationAudit(config),
+  });
 }
 
 function appendAccountCreationEntry(input, config) {
@@ -2895,54 +3127,25 @@ function appendDocumentChecklistOutcomeEntry(input, config) {
   return result;
 }
 
-function appendConsentWithdrawalEntry(input, config) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const result = createConsentWithdrawal(
-    attributed,
-    readConsentLedger(config.consentLedgerPath),
-    config.reviewedAt || new Date().toISOString(),
-  );
-  if (!result.idempotent) {
-    appendConsentRecord(result.record, { filePath: config.consentLedgerPath });
-    recordAudit(
-      {
-        action: "consent_withdrawn",
-        actor: result.record.actor,
-        objectType: "consent",
-        objectId: result.record.subject_id,
-        locale: result.record.locale,
-        metadata: {
-          consent_type: result.record.consent_type,
-          reason_code: result.record.reason_code,
-          granted: false,
-        },
-      },
-      config,
-      result.record.recorded_at,
-    );
-  }
-  return result;
+async function appendConsentWithdrawalEntry(input, config) {
+  return recordConsentWithdrawalOperation({
+    consents: consentLedgerForConfig(config),
+    input,
+    principal: config.adminPrincipal,
+    recordedAt: config.reviewedAt || new Date().toISOString(),
+    audit: leadOperationAudit(config),
+  });
 }
 
-function appendDealClose(input, config) {
-  const deal = appendClosedDeal(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
-    filePath: config.dealLedgerPath,
+async function appendDealClose(input, config) {
+  return recordDealCloseOperation({
+    ledgers: leadOperationLedgersFor(config),
+    journey: await leadJourneyContext(config),
+    input,
+    principal: config.adminPrincipal,
     closedAt: config.dealClosedAt,
+    audit: (entry, recordedAt) => recordAudit(entry, config, recordedAt),
   });
-  if (!deal.idempotent) {
-    recordAudit(
-      {
-        action: "deal_closed",
-        actor: deal.broker,
-        objectType: "deal",
-        objectId: deal.id,
-        locale: deal.original_language,
-        metadata: { lead_id: deal.lead_id, listing_reference: deal.listing_reference, status: deal.status },
-      },
-      config,
-    );
-  }
-  return deal;
 }
 
 function appendBrokerContactApproval(input, config) {
@@ -3468,7 +3671,38 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     return new Response(response.body, { status: response.status, headers });
   }
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
-  config = { ...config, adminPrincipal: principal, payloadAdminSession: payloadSession };
+  // B6: which session is "this" one, so the settings screen can mark it and
+  // refuse to present a revoke that would sign the operator out silently. A
+  // token that cannot be fingerprinted simply marks nothing.
+  const stepUpToken =
+    String(request.headers.get("x-ms-admin-2fa") || "").trim() || stepUpTokenFromCookie(request.headers.get("cookie") || "");
+  const currentFingerprint = (() => {
+    try {
+      const token = sessionToken || stepUpToken;
+      return token ? adminSessionFingerprint(token) : "";
+    } catch {
+      return "";
+    }
+  })();
+  const stepUpActive = (() => {
+    if (!stepUpToken || principal.source !== "credential_registry") return false;
+    try {
+      const fingerprint = adminSessionFingerprint(stepUpToken);
+      const state = adminSessionStates(readAdminSessionEvents(config.adminSessionLedgerPath || undefined), {
+        now: Date.parse(config.securityAt || config.reviewedAt || config.receivedAt || new Date().toISOString()),
+      }).get(fingerprint);
+      return state?.status === "active" && state.operator_id === principal.id && state.source === "credential_registry";
+    } catch {
+      return false;
+    }
+  })();
+  config = {
+    ...config,
+    adminPrincipal: principal,
+    payloadAdminSession: payloadSession,
+    adminSessionFingerprint: currentFingerprint,
+    adminStepUpActive: stepUpActive,
+  };
   try {
     const url = new URL(request.url, "http://localhost");
     const requiredCapability = requiredAdminCapability(request.method, url.pathname);
@@ -3479,6 +3713,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         : null;
     if (
       isFileBackedLeadMutationBlocked({
+        durableLeadOperations: config.leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
         durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
         durableStore: config.leadDurableStore,
         durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
@@ -3489,6 +3724,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return leadStoreUnavailable("lead_store_read_only");
     }
     if (productionRuntimeDataUnavailable({
+      durableLeadOperations: config.leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
       durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
       durableOnly: config.runtimeDataDurableOnly,
       durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
@@ -3967,6 +4203,39 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         ),
       );
     }
+    // Package B2: the same review payload the HTML screen above renders.
+    if (request.method === "GET" && url.pathname === "/api/admin/approved-content") {
+      return jsonResponse(200, approvedContentReviewPayload(config.reviewedAt ? { now: config.reviewedAt } : {}));
+    }
+    // B5: broker working hours, read by anyone with the queue and written by
+    // the broker themselves or a manager.
+    if (url.pathname === "/api/admin/availability") {
+      if (request.method === "GET") return jsonResponse(200, brokerAvailabilityPayload(url, config));
+      if (request.method === "POST") {
+        const recorded = recordBrokerAvailability(
+          parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+          config,
+        );
+        return jsonResponse(recorded.status, recorded.body);
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
+    }
+    // B5: the week calendar, with the follow-ups that are due on it.
+    if (url.pathname === "/api/admin/viewings/week") {
+      if (request.method !== "GET") return jsonResponse(405, { kind: "method_not_allowed" });
+      return jsonResponse(200, await viewingWeekPayload(url, config));
+    }
+    // B3: without this route saved-search alerts can never be dispatched.
+    if (url.pathname === "/api/admin/saved-search-alerts/run-due") {
+      if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
+      if (!config.savedSearchAlertDeliveryLedgerPath) {
+        return jsonResponse(503, {
+          kind: "saved_search_alert_storage_unavailable",
+          message: "Saved search alert delivery storage is not configured.",
+        });
+      }
+      return jsonResponse(201, await runDueSavedSearchAlerts(config));
+    }
     if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(await translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, await translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/migration/review") {
@@ -4138,7 +4407,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
-      const result = appendLeadPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendLeadPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/cases") {
@@ -4254,16 +4523,16 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     // B1 lead operations: snooze, bulk actions, saved views.
     if (request.method === "POST" && url.pathname === "/api/admin/leads/snooze") {
       const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
-      const result = appendLeadSnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
+      const result = await appendLeadSnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
       return jsonResponse(result.idempotent ? 200 : 201, { kind: "lead_snooze", ...result });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/unsnooze") {
       const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
-      const result = appendLeadUnsnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
+      const result = await appendLeadUnsnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
       return jsonResponse(result.idempotent ? 200 : 201, { kind: "lead_unsnooze", ...result });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/bulk") {
-      const outcome = applyLeadBulkAction(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const outcome = await applyLeadBulkAction(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(outcome.status, outcome.body);
     }
     // Saved views belong to the authenticated operator and to nobody else.
@@ -4323,7 +4592,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(405, { kind: "method_not_allowed" });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {
-      const result = appendLeadAssignmentEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendLeadAssignmentEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/accounts") {
@@ -4339,7 +4608,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/consents/withdraw") {
-      const result = appendConsentWithdrawalEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendConsentWithdrawalEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
@@ -4408,6 +4677,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         const preview = await readMediaUploadBytes({
           ledgerPath: config.mediaUploadLedgerPath,
           assetId,
+          rendition: url.searchParams.get("rendition") || "",
           storage: uploadStorage,
         });
         if (preview.status !== 200) return jsonResponse(preview.status, preview.body);
@@ -4467,11 +4737,21 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(viewing.idempotent ? 200 : 201, viewing);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
+      // Fail closed. With the durable viewing store on, the viewing this
+      // follow-up belongs to lives in Postgres while the follow-up would land
+      // in a file ledger, so recording one would split the viewing's state
+      // across two stores that never reconcile.
+      if (config.viewingDurableStore?.viewingDurableStoreEnabled) {
+        return jsonResponse(503, {
+          kind: "viewing_follow_up_read_only",
+          message: "Durable viewing follow-up storage is not available",
+        });
+      }
       const result = appendViewingFollowUpEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seller-pipeline/outcome") {
-      const result = appendSellerPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendSellerPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/public-requests/outcome") {
@@ -4484,7 +4764,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return calendarResponse(renderViewingCalendar(viewings, { now: config.bookedAt }));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
-      const deal = appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const deal = await appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(deal.idempotent ? 200 : 201, deal);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {

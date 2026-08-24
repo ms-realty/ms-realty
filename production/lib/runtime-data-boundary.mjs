@@ -1,3 +1,5 @@
+import { DURABLE_LEAD_OPERATION_PATHS } from "./lead-durable-boundary.mjs";
+
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 export const FILE_BACKED_PUBLIC_MUTATIONS = new Set([
@@ -74,8 +76,13 @@ export const FILE_BACKED_ADMIN_READS = new Set([
   "/api/admin/views",
 ]);
 
+// The pipeline screens render from the lead-operation ledgers, so once those
+// are durable the read has a durable authority behind it too.
+const DURABLE_LEAD_OPERATION_READS = ["/admin/pipeline", "/api/admin/pipeline"];
+
 export function productionRuntimeDataUnavailable({
   durableEvent = false,
+  durableLeadOperations = false,
   durableOnly = false,
   durableProviderDelivery = false,
   durableViewing = false,
@@ -87,12 +94,14 @@ export function productionRuntimeDataUnavailable({
   const verb = String(method || "GET").toUpperCase();
   if (verb === "GET" || verb === "HEAD") {
     if (durableViewing && ["/admin/viewings", "/api/admin/viewings", "/api/admin/viewings.ics"].includes(path)) return false;
+    if (durableLeadOperations && DURABLE_LEAD_OPERATION_READS.includes(path)) return false;
     return FILE_BACKED_ADMIN_READS.has(path);
   }
   if (!MUTATING_METHODS.has(verb)) return false;
   if (path === "/api/events" && durableEvent) return false;
   if (path === "/api/admin/replies/delivery" && durableProviderDelivery) return false;
   if (["/api/admin/viewings", "/api/admin/viewings/follow-up"].includes(path) && durableViewing) return false;
+  if (durableLeadOperations && DURABLE_LEAD_OPERATION_PATHS.has(path)) return false;
   return FILE_BACKED_PUBLIC_MUTATIONS.has(path) || FILE_BACKED_ADMIN_MUTATIONS.has(path);
 }
 

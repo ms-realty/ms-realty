@@ -43,11 +43,29 @@ reclaim() {
     rm -rf "$candidate" || true
   done < <(find "$releases" -maxdepth 1 -mindepth 1 -type d -name '[0-9a-f]*' -printf '%T@ %p\n' 2>/dev/null |
     sort -rn | tail -n +$((keep_releases + 1)) | cut -d' ' -f2-)
-  # Build cache only. Images are deliberately left alone: the very next step
-  # backs up the previous release by running a container from that release's
-  # image, and the new image is not built until later, so pruning images here
-  # removes the only image the backup can use. Release directories and build
-  # cache are where the space actually went.
+  # Build cache, plus the images of releases this function just retired.
+  #
+  # History of this block, because both prior versions caused an incident:
+  # a blanket "docker image prune" removed the image the pre-deploy backup
+  # needed and took the site down; removing pruning entirely let one
+  # ms-realty-local-app:<sha> image accumulate per deploy until layer
+  # extraction died with a full /var/lib/containerd. The rule that survives
+  # both: an image is removed ONLY when its release directory is gone too -
+  # the kept set (running, incoming, three newest) always keeps its images,
+  # so the backup and the rollback path always have theirs.
+  # A stopped container from an old release pins its image, so clear those
+  # first; the running stack is untouched by definition.
+  docker container prune --force >/dev/null 2>&1 || true
+  local kept_pattern keep_dirs
+  keep_dirs="$(find "$releases" -maxdepth 1 -mindepth 1 -type d -name '[0-9a-f]*' -printf '%f\n' 2>/dev/null)"
+  kept_pattern="$(printf '%s\n%s\n' "$keep_dirs" "$release_id" | sed '/^$/d' | sort -u | paste -sd'|' -)"
+  docker image ls --format '{{.Repository}}:{{.Tag}}' 2>/dev/null |
+    grep -E '^ms-realty-local-app:[0-9a-f]{40}$' |
+    grep -Ev ":(${kept_pattern:-nothing-kept})$" |
+    while read -r stale_image; do
+      echo "reclaiming retired image $stale_image" >&2
+      docker image rm "$stale_image" >/dev/null 2>&1 || true
+    done
   docker builder prune --force >/dev/null 2>&1 || true
 }
 reclaim
