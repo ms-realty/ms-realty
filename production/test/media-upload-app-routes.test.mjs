@@ -169,3 +169,41 @@ test("the public adapter keeps a seller photo private and bound to the enquiry",
   );
   assert.equal(crossOrigin.status, 403);
 });
+
+// A browser form post asks for HTML and gets a redirect back to the page it
+// came from. That branch used to reference a helper this module never defined,
+// so every no-JS seller upload answered 500 in production while the JSON path
+// stayed green.
+test("the public adapter redirects a no-JS seller photo form back to the page", async () => {
+  const context = scratch();
+  const config = {
+    ...appApiConfigFromEnv(),
+    mediaUploadLedgerPath: context.uploadLedger,
+    mediaUploadStorageConfig: { driver: "local", root: context.uploadRoot, host: "makler-realty.com" },
+    sellerPipelinePath: context.sellerPipeline,
+    sellerPhotoUploadEnabled: true,
+    rateLimit: null,
+  };
+
+  const redirected = await renderAppApiResponse(
+    uploadRequest(
+      "http://localhost/api/seller-photos?return=%2Fen%2Fsell",
+      multipartBody([
+        { name: "enquiryId", value: ENQUIRY_ID },
+        { name: "photo", filename: "front.jpg", contentType: "image/jpeg", value: jpegWithGpsExif() },
+      ]),
+      {
+        host: "localhost",
+        origin: "http://localhost",
+        "sec-fetch-site": "same-origin",
+        accept: "text/html,application/xhtml+xml",
+      },
+    ),
+    { config },
+  );
+
+  assert.equal(redirected.status, 303);
+  assert.equal(redirected.headers.get("location"), "/en/sell?photos=ok#seller-photos");
+  assert.equal(redirected.headers.get("cache-control"), "no-store");
+  assert.equal(readMediaUploads(context.uploadLedger).length, 1);
+});
