@@ -4,7 +4,7 @@
   "summary": {
     "routes": 205,
     "eligible_routes": 198,
-    "sitemap_indexable_routes": 26,
+    "sitemap_indexable_routes": 198,
     "utility_routes": 7,
     "by_type": {
       "home": 7,
@@ -141,7 +141,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -166,7 +166,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -191,7 +191,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -216,7 +216,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -241,7 +241,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -266,7 +266,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -291,7 +291,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -316,7 +316,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -341,7 +341,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -366,7 +366,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -391,7 +391,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -416,7 +416,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -441,7 +441,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -466,7 +466,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -491,7 +491,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -516,7 +516,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -541,7 +541,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -566,7 +566,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -591,7 +591,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -616,7 +616,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -641,7 +641,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -666,7 +666,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -691,7 +691,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -716,7 +716,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -741,7 +741,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -766,7 +766,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -791,7 +791,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -816,7 +816,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -841,7 +841,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -866,7 +866,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -891,7 +891,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -916,7 +916,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -941,7 +941,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -966,7 +966,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -991,7 +991,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1016,7 +1016,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1041,7 +1041,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1066,7 +1066,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1091,7 +1091,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1116,7 +1116,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1141,7 +1141,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1166,7 +1166,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1191,7 +1191,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1216,7 +1216,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1241,7 +1241,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1266,7 +1266,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1291,7 +1291,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1316,7 +1316,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1341,7 +1341,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1366,7 +1366,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1391,7 +1391,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1416,7 +1416,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1441,7 +1441,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1466,7 +1466,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1491,7 +1491,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1516,7 +1516,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1541,7 +1541,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1566,7 +1566,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1591,7 +1591,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1616,7 +1616,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1641,7 +1641,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1666,7 +1666,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1691,7 +1691,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1716,7 +1716,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1741,7 +1741,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1766,7 +1766,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1791,7 +1791,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1816,7 +1816,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1841,7 +1841,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1866,7 +1866,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1891,7 +1891,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1916,7 +1916,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1941,7 +1941,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1966,7 +1966,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -1991,7 +1991,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2016,7 +2016,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2041,7 +2041,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2066,7 +2066,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2091,7 +2091,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2116,7 +2116,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2141,7 +2141,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2166,7 +2166,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2191,7 +2191,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2216,7 +2216,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2241,7 +2241,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2266,7 +2266,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2291,7 +2291,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2316,7 +2316,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2341,7 +2341,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2366,7 +2366,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2391,7 +2391,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2416,7 +2416,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2441,7 +2441,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2466,7 +2466,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2491,7 +2491,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2516,7 +2516,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2541,7 +2541,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2566,7 +2566,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2591,7 +2591,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2616,7 +2616,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2641,7 +2641,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2666,7 +2666,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2691,7 +2691,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2716,7 +2716,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2741,7 +2741,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2766,7 +2766,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2791,7 +2791,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2816,7 +2816,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2841,7 +2841,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2866,7 +2866,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2891,7 +2891,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2916,7 +2916,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2941,7 +2941,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -2990,7 +2990,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3015,7 +3015,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3040,7 +3040,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3499,7 +3499,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3524,7 +3524,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3741,7 +3741,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3766,7 +3766,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3791,7 +3791,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3816,7 +3816,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3841,7 +3841,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3866,7 +3866,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3891,7 +3891,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3916,7 +3916,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3941,7 +3941,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3966,7 +3966,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -3991,7 +3991,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4016,7 +4016,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4041,7 +4041,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4066,7 +4066,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4091,7 +4091,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4116,7 +4116,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4141,7 +4141,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4166,7 +4166,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4191,7 +4191,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4216,7 +4216,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4241,7 +4241,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4266,7 +4266,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4291,7 +4291,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4316,7 +4316,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4341,7 +4341,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4366,7 +4366,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4391,7 +4391,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4416,7 +4416,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4441,7 +4441,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4466,7 +4466,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4491,7 +4491,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4516,7 +4516,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4541,7 +4541,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4566,7 +4566,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4591,7 +4591,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4616,7 +4616,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4641,7 +4641,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4666,7 +4666,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4691,7 +4691,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4716,7 +4716,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4741,7 +4741,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4766,7 +4766,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4791,7 +4791,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4816,7 +4816,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4841,7 +4841,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4866,7 +4866,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4891,7 +4891,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4916,7 +4916,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4941,7 +4941,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4966,7 +4966,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4991,7 +4991,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -5016,7 +5016,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -5041,7 +5041,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -5066,7 +5066,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {

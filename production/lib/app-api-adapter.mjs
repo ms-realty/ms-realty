@@ -114,7 +114,6 @@ export function appApiConfigFromEnv(env = process.env) {
     mediaUploadStorageConfig: mediaUploadStorageConfigFromEnv(env),
     mediaUploadLimits: mediaUploadLimitsFromEnv(env, { maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES) }),
     sellerPhotoUploadEnabled: env.MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED !== "1",
-    sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || LAUNCH_READINESS_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
@@ -143,8 +142,15 @@ function json(status, body, headers = {}) {
   return response(status, body, "application/json; charset=utf-8", headers);
 }
 
+// A private response of any content type. The no-JS seller-photo upload answers
+// a browser form with a 303 and a text/plain body, so this cannot be
+// JSON-only — it was referenced by that branch long before it existed here.
+function privateResponse(status, body, contentType, headers = {}) {
+  return response(status, body, contentType, { ...PRIVATE_HEADERS, ...headers });
+}
+
 function privateJson(status, body) {
-  return response(status, body, "application/json; charset=utf-8", PRIVATE_HEADERS);
+  return privateResponse(status, body, "application/json; charset=utf-8");
 }
 
 // Text routes want a decoded body; a multipart photo upload needs the exact

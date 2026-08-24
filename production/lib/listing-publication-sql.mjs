@@ -1,10 +1,12 @@
-import { freezeActiveListingIds } from "./listing-publication-approval.mjs";
+import { operatorPublishedListingIds } from "./listing-publication-approval.mjs";
 
 function sqlStringList(ids) {
   return ids.map((id) => `'${String(id).replaceAll("'", "''")}'`).join(",\n  ");
 }
 
-export function freezeActivePublicationSql(ids = freezeActiveListingIds()) {
+// Defaults to the listing ids the operator publication approval names, so the
+// Payload database publishes exactly the same set as the static seed gate.
+export function freezeActivePublicationSql(ids = operatorPublishedListingIds()) {
   if (!Array.isArray(ids) || ids.length === 0) throw new Error("Freeze-active publication SQL requires listing ids");
   const list = sqlStringList(ids);
   return `BEGIN;

@@ -11,7 +11,7 @@ const CSS = `
   border: 1px solid transparent;
 }
 .mk-badge--md { font-size: var(--text-xs); padding: 6px 11px; }
-.mk-badge .mk-icon { margin-left: -1px; }
+.mk-badge .mk-icon { margin-inline-start: -1px; }
 .mk-badge__dot { width: 6px; height: 6px; border-radius: var(--radius-full); background: currentColor; }
 
 /* Tonal (default) — soft tint + colored text */

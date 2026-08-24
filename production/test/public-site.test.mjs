@@ -477,11 +477,19 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-card-action="inquiry"/);
   assert.match(html, /data-card-action="save"/);
   assert.match(html, /data-listing-id="MS-CRAWL-/);
-  assert.doesNotMatch(html, /data-card-spec="reference"/);
+  // Several crawl listings share a title word-for-word (three parcels in
+  // Sandanski, two identical rentals); the reference chip is the one visible
+  // differentiator, so cards show it - it is the listing's public identity in
+  // the URL and on the detail page anyway.
+  assert.match(html, /data-card-spec="reference"/);
   assert.doesNotMatch(html, /name="hotel_rooms_min"|name="premises_min"|name="storeys_min"|name="land_area_min"|name="property_subtype"/);
   assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*loading="eager"/);
   const thumbnailLink = html.match(/<a[^>]*data-card-thumbnail="true"[^>]*>/)?.[0] || "";
-  assert.match(thumbnailLink, /aria-label="[^"]+; \d+ photos?"/);
+  // The photo stays clickable for mouse and touch but leaves the keyboard and
+  // screen-reader order: the title right below is the card's one link, so a
+  // second stop with the same destination is not announced.
+  assert.match(thumbnailLink, /aria-hidden="true"/);
+  assert.match(thumbnailLink, /tabindex="-1"/i);
   assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*fetchPriority="high"/);
   assert.match(html, /<img[^>]*loading="lazy"[^>]*decoding="async"/);
 });
@@ -630,7 +638,9 @@ test("district search exposes official Bulgarian administrative areas without in
   );
   assert.equal(blagoevgrad.cards.some((card) => card.id === "MS-CRAWL-0072"), false);
   assert.deepEqual(blagoevgrad.search.controls.active_filter_chips, [{ key: "district", value: "Blagoevgrad", active: true }]);
-  assert.match(html, /<option value="BG:district:BLG" data-country="BG">Blagoevgrad<\/option>/);
+  // The page is Russian, so the oblast reads in Russian; the VALUE stays the
+  // stable machine id the backend filters on.
+  assert.match(html, /<option value="BG:district:BLG" data-country="BG">Благоевград<\/option>/);
   assert.doesNotMatch(html, /<(?:select|input(?![^>]*type="hidden"))[^>]*name="district"/);
   assert.match(html, /<input type="hidden" name="district" value="Blagoevgrad">/);
 });

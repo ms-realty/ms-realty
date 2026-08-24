@@ -6,7 +6,11 @@ const ARTIFACT_ID = "20260817-deterministic-launch-freeze";
 const APPROVAL_ID = "MSR-LAUNCH-FREEZE-1";
 const APPROVED_SOURCE_COMMIT = "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720";
 const APPROVED_SOURCE_ARTIFACT_SHA256 = "c627594492d253a2831bb72227920e092d32d253e89ba9a16b8a87ea32743360";
-export const APPROVED_LAUNCH_FREEZE_SHA256 = "38b34064a8f37e2281ff97bd9b804b5e685984462709c56464de0a5be959158f";
+// Re-sealed for the owner's 2026-08-24 full-catalog publication directive.
+// The frozen catalog and route contract are unchanged (165 listings, 30 active
+// / 135 archived, 457 approved routes); only the recorded digest of the derived
+// app route manifest moved, because published listings are sitemap-indexable.
+export const APPROVED_LAUNCH_FREEZE_SHA256 = "338ce14fa46c44d35f4afe83e30d75d65a345383c2854c29ab3215ac4397f172";
 export const DEFAULT_LAUNCH_FREEZE_PATH = fromRoot("production", "data", "launch-freeze.json");
 
 const EXPECTED = Object.freeze({
