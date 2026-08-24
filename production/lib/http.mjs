@@ -323,22 +323,15 @@ import { purchaseFeeEstimateResponse } from "./purchase-fee-estimate-route.mjs";
 // B3 saved-search self-service: capability links, visitor changes, alert delivery.
 import {
   DEFAULT_SAVED_SEARCH_MANAGE_PATH,
-  SAVED_SEARCH_LINK_REFUSAL,
-  SavedSearchLinkRefusedError,
-  assertSavedSearchAccess,
-  readSavedSearchAccessToken,
   savedSearchAccessSecret,
   savedSearchManageMinter,
   savedSearchManagePathTemplate,
   savedSearchManageTtlDays,
 } from "./saved-search-access.mjs";
 import {
-  appendSavedSearchManageEvent,
   applySavedSearchManageEvents,
-  normalizeSavedSearchManageEvent,
   readSavedSearchManageEvents,
-  reachableContactChannels,
-  savedSearchManagePayload,
+  savedSearchManageRouteResponse,
 } from "./saved-search-manage.mjs";
 import {
   buildSavedSearchAlertDeliveryQueue,
@@ -2927,7 +2920,6 @@ export function createHttpApp({
     // B3 saved searches: visitor self-service through a capability link, plus
     // the broker-facing alert delivery queue. No public accounts, ever.
     if (url.pathname === "/api/saved-searches/manage" || url.pathname === "/api/admin/saved-search-alerts/run-due") {
-      const savedSearchRefusal = () => privateJson(404, { ...SAVED_SEARCH_LINK_REFUSAL });
       const savedSearchLinkSecret = () => {
         try {
           return savedSearchManageSecret || savedSearchAccessSecret();
@@ -2948,26 +2940,23 @@ export function createHttpApp({
           return { contacts: null, state: "locked" };
         }
       };
-      const savedSearchManageState = (token, now) => {
-        const secret = savedSearchLinkSecret();
-        if (!secret) throw new SavedSearchLinkRefusedError("secret_unavailable");
-        const presented = readSavedSearchAccessToken(token, { secret, now });
-        const records = withSavedSearchAlertState(currentSavedSearches(), currentSavedSearchAlertDeliveries());
-        const record = records.find((row) => row.id === presented.record_id) || null;
-        // A deleted or unknown record is refused exactly like a forged token,
-        // so the route cannot confirm that a saved search exists.
-        assertSavedSearchAccess(record, presented);
-        return { record, presented };
-      };
-      const savedSearchManageBody = (record, presented, now) => {
+      // One shared implementation decides every manage answer; this runtime only
+      // supplies the ledgers, the clock and the audit sink.
+      const savedSearchManageRoute = (method, { token, input } = {}) => {
         const vault = savedSearchContactMap();
-        const contact = vault.contacts?.get(record.id)?.contact || null;
-        return savedSearchManagePayload(record, {
-          contact,
+        const answer = savedSearchManageRouteResponse({
+          method,
+          token,
+          input,
+          secret: savedSearchLinkSecret(),
+          readRecords: () => withSavedSearchAlertState(currentSavedSearches(), currentSavedSearchAlertDeliveries()),
+          contacts: vault.contacts,
           contactState: vault.state,
-          linkExpiresAt: presented.expires_at,
-          now,
+          manageEventLedgerPath: savedSearchManageEventLedgerPath,
+          now: savedSearchManagedAt || receivedAt || new Date().toISOString(),
+          recordAudit: (entry, recordedAt) => writeAudit(entry, recordedAt),
         });
+        return privateJson(answer.status, answer.body);
       };
 
       if (request.method === "GET" && url.pathname === "/api/saved-searches/manage") {
@@ -2982,122 +2971,17 @@ export function createHttpApp({
             });
           }
         }
-        const now = savedSearchManagedAt || receivedAt || new Date().toISOString();
-        try {
-          const { record, presented } = savedSearchManageState(url.searchParams.get("token"), now);
-          return privateJson(200, savedSearchManageBody(record, presented, now));
-        } catch (error) {
-          if (error instanceof SavedSearchLinkRefusedError) return savedSearchRefusal();
-          return privateJson(400, { kind: "bad_request", message: error.message });
-        }
+        return savedSearchManageRoute("GET", { token: url.searchParams.get("token") });
       }
 
       if (request.method === "POST" && url.pathname === "/api/saved-searches/manage") {
-        const now = savedSearchManagedAt || receivedAt || new Date().toISOString();
         let input;
         try {
           input = parseBody(request);
         } catch (error) {
           return privateJson(400, { kind: "bad_request", message: error.message });
         }
-        let record;
-        let presented;
-        try {
-          ({ record, presented } = savedSearchManageState(input.token, now));
-        } catch (error) {
-          if (error instanceof SavedSearchLinkRefusedError) return savedSearchRefusal();
-          return privateJson(400, { kind: "bad_request", message: error.message });
-        }
-        if (!savedSearchManageEventLedgerPath) {
-          return privateJson(503, {
-            kind: "saved_search_manage_unavailable",
-            message: "Saved search changes are unavailable because their storage is not configured.",
-          });
-        }
-        try {
-          const event = normalizeSavedSearchManageEvent({ ...input, savedSearchId: record.id }, now);
-          const vault = savedSearchContactMap();
-          const contact = vault.contacts?.get(record.id)?.contact || null;
-          if (event.action === "update_channel") {
-            // Fail closed: without the vault we cannot prove the requested
-            // channel is one the visitor actually gave us.
-            if (!contact) {
-              return privateJson(409, {
-                kind: "saved_search_channel_unverifiable",
-                message: "The stored contact channels cannot be read, so the alert channel cannot be changed.",
-              });
-            }
-            if (!reachableContactChannels(contact).includes(event.channel)) {
-              return privateJson(400, {
-                kind: "bad_request",
-                message: "channel must be one of the contact channels supplied with this saved search",
-              });
-            }
-          }
-          const currentStatus = record.status || "active";
-          const unchanged =
-            (event.action === "pause" && currentStatus === "paused") ||
-            (event.action === "resume" && currentStatus === "active") ||
-            (event.action === "update_frequency" && record.alert_frequency === event.frequency) ||
-            (event.action === "update_channel" && record.contact_preference === event.channel);
-          if (unchanged) {
-            return privateJson(200, {
-              ...savedSearchManageBody(record, presented, now),
-              action: event.action,
-              idempotent: true,
-            });
-          }
-          appendSavedSearchManageEvent(event, { filePath: savedSearchManageEventLedgerPath });
-          const auditAction = {
-            pause: "saved_search_paused",
-            resume: "saved_search_resumed",
-            update_frequency: "saved_search_frequency_updated",
-            update_channel: "saved_search_channel_updated",
-            delete: "saved_search_deleted",
-          }[event.action];
-          // Every mutation is audited. The actor is the capability link, not an
-          // operator, and the metadata carries no contact data.
-          writeAudit(
-            {
-              action: auditAction,
-              actor: "saved_search_link",
-              objectType: "saved_search",
-              objectId: record.id,
-              locale: record.locale,
-              status: event.action === "delete" ? "deleted" : "recorded",
-              metadata: {
-                source: "manage_link",
-                action: event.action,
-                ...(event.frequency ? { alert_frequency: event.frequency } : {}),
-                ...(event.channel ? { channel: event.channel } : {}),
-              },
-            },
-            now,
-          );
-          if (event.action === "delete") {
-            return privateJson(200, {
-              kind: "saved_search_manage",
-              action: "delete",
-              deleted: true,
-              saved_search: null,
-              idempotent: false,
-              message: "This saved search is deleted and its alerts have stopped. The manage link no longer works.",
-            });
-          }
-          const updated =
-            applySavedSearchManageEvents(
-              withSavedSearchAlertState(currentSavedSearches(), currentSavedSearchAlertDeliveries()),
-              [],
-            ).find((row) => row.id === record.id) || record;
-          return privateJson(200, {
-            ...savedSearchManageBody(updated, presented, now),
-            action: event.action,
-            idempotent: false,
-          });
-        } catch (error) {
-          if (error instanceof SavedSearchLinkRefusedError) return savedSearchRefusal();
-          return privateJson(400, { kind: "bad_request", message: error.message });
-        }
+        return savedSearchManageRoute("POST", { input });
       }
 
       if (request.method === "POST" && url.pathname === "/api/admin/saved-search-alerts/run-due") {

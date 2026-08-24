@@ -232,3 +232,78 @@ export function savedSearchManageLink(
     expires_at: expiresAt || null,
   };
 }
+
+// Minting a link is two steps that must agree: createSavedSearch asks for the
+// access record while it builds the row, and the link can only be handed back
+// once the ledger has told us which row the visitor actually got. A retried
+// submission returns the ORIGINAL record, so its link has to be re-derived from
+// that row's own issue window rather than the token we just minted.
+//
+// Both runtimes serve POST /api/saved-searches, and production only runs the
+// adapter. Keeping the two steps together here is what stops one runtime from
+// returning a manage link and the other from silently returning none.
+export function savedSearchManageMinter({ secret = null, issuedAt = new Date().toISOString(), ttlDays } = {}) {
+  let mintedToken = null;
+  let mintedId = null;
+  let unavailableReason = secret ? null : "Saved search manage links are not configured";
+
+  return {
+    // Passed to createSavedSearch as `manageAccess`; null when we cannot sign.
+    manageAccess: secret
+      ? (recordId) => {
+          const minted = mintSavedSearchAccess(recordId, { secret, issuedAt, ttlDays });
+          mintedToken = minted.token;
+          mintedId = recordId;
+          return minted.access;
+        }
+      : null,
+    // The stored record decides the answer, never the in-flight token.
+    linkFor(ledger, { origin = "", template = DEFAULT_SAVED_SEARCH_MANAGE_PATH } = {}) {
+      let reason = unavailableReason;
+      if (!ledger) {
+        reason ||= "Saved search storage is not configured";
+        return { manage: null, reason };
+      }
+      if (!ledger.manage_access?.verifier) {
+        reason ||= "This saved search predates manage links";
+        return { manage: null, reason };
+      }
+      if (ledger.id === mintedId && mintedToken) {
+        return {
+          manage: savedSearchManageLink(
+            { locale: ledger.locale, token: mintedToken, expiresAt: ledger.manage_access.expires_at },
+            { origin, template },
+          ),
+          reason: null,
+        };
+      }
+      if (!secret) return { manage: null, reason };
+      const storedTtlDays = Math.round(
+        (Date.parse(ledger.manage_access.expires_at) - Date.parse(ledger.manage_access.issued_at)) / 86_400_000,
+      );
+      const reminted =
+        storedTtlDays >= 1
+          ? mintSavedSearchAccess(ledger.id, {
+              secret,
+              issuedAt: ledger.manage_access.issued_at,
+              ttlDays: storedTtlDays,
+            })
+          : null;
+      if (reminted && reminted.access.verifier === ledger.manage_access.verifier) {
+        return {
+          manage: savedSearchManageLink(
+            { locale: ledger.locale, token: reminted.token, expiresAt: ledger.manage_access.expires_at },
+            { origin, template },
+          ),
+          reason: null,
+        };
+      }
+      reason ||= "The manage link for this saved search can no longer be derived";
+      return { manage: null, reason };
+    },
+    // Lets a caller record why signing was impossible before minting started.
+    refuse(message) {
+      unavailableReason ||= message;
+    },
+  };
+}
