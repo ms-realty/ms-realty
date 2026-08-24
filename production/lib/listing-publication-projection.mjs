@@ -430,7 +430,7 @@ function assertPayload(payload) {
 }
 
 function retryableTransactionError(error) {
-  return /could not serialize|serialization failure|deadlock detected/i.test(String(error?.message || error));
+  return /could not serialize|serialization failure|deadlock detected|duplicate key/i.test(String(error?.message || error));
 }
 
 async function findAll(payload, collection, req) {
@@ -461,6 +461,12 @@ export function payloadPublicationSchemaFields(payload) {
   };
 }
 
+// Unlike the CMS importer, these writes deliberately do NOT set the import
+// context flag: publishing a listing is a real change, so payload.config.js's
+// listingSearchOutboxHook should enqueue the reindex event for it. The batch
+// search-seed that follows in the deploy covers the same ground; the outbox
+// keeps an already-running runtime in step. Its inserts are idempotent by key,
+// and a rare key collision inside the transaction is retried above.
 function writeOptions(collection, id, data, req) {
   return {
     collection,
