@@ -232,8 +232,8 @@
         "status": "available",
         "active_in_search": true,
         "seo_kept_live": true,
-        "publish_approved": false,
-        "publish_approved_at": null,
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
         "last_edited_at": null
       },
       "verification": {
@@ -1110,8 +1110,8 @@
         "status": "available",
         "active_in_search": true,
         "seo_kept_live": true,
-        "publish_approved": false,
-        "publish_approved_at": null,
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
         "last_edited_at": null
       },
       "verification": {
@@ -1924,8 +1924,8 @@
         "status": "available",
         "active_in_search": true,
         "seo_kept_live": true,
-        "publish_approved": false,
-        "publish_approved_at": null,
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
         "last_edited_at": null
       },
       "verification": {
@@ -5050,8 +5050,8 @@
         "status": "sold",
         "active_in_search": false,
         "seo_kept_live": true,
-        "publish_approved": false,
-        "publish_approved_at": null,
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
         "last_edited_at": null
       },
       "verification": {
@@ -9994,9 +9994,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-377fd0d3-9616-4c02-986a-222f8eb0f8a3",
+    "id": "inbox-lead-draft-2230e472-5f82-4bcc-81d7-1daa432844c2",
     "lead": {
-      "id": "lead-draft-377fd0d3-9616-4c02-986a-222f8eb0f8a3",
+      "id": "lead-draft-2230e472-5f82-4bcc-81d7-1daa432844c2",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10097,9 +10097,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-4d0f6067-54e1-4fe9-a0d6-758c679e45ba",
+    "id": "inbox-lead-draft-6be29dee-abaf-413a-9ae5-ab092055e8c5",
     "lead": {
-      "id": "lead-draft-4d0f6067-54e1-4fe9-a0d6-758c679e45ba",
+      "id": "lead-draft-6be29dee-abaf-413a-9ae5-ab092055e8c5",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10203,9 +10203,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-94dda521-7f86-42ac-bd2b-4d045fcad34d",
+    "id": "inbox-lead-draft-fafac027-989c-4812-97eb-faa2a4d93b9e",
     "lead": {
-      "id": "lead-draft-94dda521-7f86-42ac-bd2b-4d045fcad34d",
+      "id": "lead-draft-fafac027-989c-4812-97eb-faa2a4d93b9e",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",

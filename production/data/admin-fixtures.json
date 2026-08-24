@@ -4883,9 +4883,9 @@
   },
   "crm_inbox": {
     "buyer_he": {
-      "id": "inbox-lead-draft-309ecaf3-c287-4336-9ccd-06d9402146fb",
+      "id": "inbox-lead-draft-dc99f4b1-b849-4e58-aafb-342a32c29e0b",
       "lead": {
-        "id": "lead-draft-309ecaf3-c287-4336-9ccd-06d9402146fb",
+        "id": "lead-draft-dc99f4b1-b849-4e58-aafb-342a32c29e0b",
         "idempotency_key": null,
         "source": "website_listing_detail",
         "intent": null,
@@ -4975,9 +4975,9 @@
       }
     },
     "seller_el": {
-      "id": "inbox-lead-draft-26e7fc8b-1ddd-4d81-b8f5-8519652b9bb7",
+      "id": "inbox-lead-draft-e6a03e98-57a9-4c53-a815-66d3ea9b2d31",
       "lead": {
-        "id": "lead-draft-26e7fc8b-1ddd-4d81-b8f5-8519652b9bb7",
+        "id": "lead-draft-e6a03e98-57a9-4c53-a815-66d3ea9b2d31",
         "idempotency_key": null,
         "source": "website_seller_valuation",
         "intent": null,

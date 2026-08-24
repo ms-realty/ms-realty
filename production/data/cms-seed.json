@@ -66,6 +66,16 @@
       }
     ]
   },
+  "publication_approval": {
+    "approval_id": "MSR-LISTING-PUBLICATION-1",
+    "scope": "full_freeze_catalog",
+    "decision": "publish_source_as_is",
+    "approved_by": "agency_owner",
+    "approved_at": "2026-08-24T00:00:00.000Z",
+    "reason": "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.",
+    "published_listings": 165,
+    "excluded_listings": []
+  },
   "summary": {
     "listings": 165,
     "properties": 165,
@@ -89,6 +99,8 @@
     "mediaReviewGatedAssets": 2,
     "tourFields": 165,
     "publicTours": 0,
+    "publishedListings": 165,
+    "publicationExcludedListings": 0,
     "missingMigrationRecords": 0,
     "missingRouteRows": 0,
     "reviewRequiredRoutes": 165,
@@ -98,7 +110,12 @@
     {
       "id": "MS-CRAWL-0001",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
@@ -636,7 +653,12 @@
     {
       "id": "MS-CRAWL-0002",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%ba%d0%be%d0%bc%d0%bf%d0%bb%d0%b5%d0%ba%d1%81/",
@@ -969,7 +991,12 @@
     {
       "id": "MS-CRAWL-0003",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba/",
@@ -1446,7 +1473,12 @@
     {
       "id": "MS-CRAWL-0004",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%b0-2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -1857,7 +1889,12 @@
     {
       "id": "MS-CRAWL-0005",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -2268,7 +2305,12 @@
     {
       "id": "MS-CRAWL-0006",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
@@ -2572,7 +2614,12 @@
     {
       "id": "MS-CRAWL-0007",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -2961,7 +3008,12 @@
     {
       "id": "MS-CRAWL-0008",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/",
@@ -3471,7 +3523,12 @@
     {
       "id": "MS-CRAWL-0009",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd/",
@@ -3882,7 +3939,12 @@
     {
       "id": "MS-CRAWL-0010",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
@@ -4381,7 +4443,12 @@
     {
       "id": "MS-CRAWL-0011",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d1%8a%d0%bb%d0%b3%d0%be%d1%81%d1%80%d0%be%d1%87%d0%b5%d0%bd-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d1%85%d0%be%d1%82%d0%b5%d0%bb-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%b3%d1%80/",
@@ -4924,7 +4991,12 @@
     {
       "id": "MS-CRAWL-0012",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%b8%d0%bd%d0%b2%d0%b5%d1%81%d1%82%d0%b8%d1%86%d0%b8%d0%be%d0%bd%d0%b5%d0%bd-%d0%bf%d1%80%d0%be%d0%b5%d0%ba%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -5242,7 +5314,12 @@
     {
       "id": "MS-CRAWL-0013",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
@@ -5631,7 +5708,12 @@
     {
       "id": "MS-CRAWL-0014",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -6009,7 +6091,12 @@
     {
       "id": "MS-CRAWL-0015",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
@@ -6563,7 +6650,12 @@
     {
       "id": "MS-CRAWL-0016",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d1%8f%d1%89%d0%b8-%d1%81%d0%b5-%d0%ba%d1%8a%d1%89%d0%b8-%d0%b2-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
@@ -7106,7 +7198,12 @@
     {
       "id": "MS-CRAWL-0017",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
@@ -7550,7 +7647,12 @@
     {
       "id": "MS-CRAWL-0018",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%be%d0%b1%d0%be%d1%80%d1%83%d0%b4%d0%b2%d0%b0%d0%bd%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -8181,7 +8283,12 @@
     {
       "id": "MS-CRAWL-0019",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81%d0%b8%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd%d0%b8-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -8647,7 +8754,12 @@
     {
       "id": "MS-CRAWL-0020",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -8995,7 +9107,12 @@
     {
       "id": "MS-CRAWL-0021",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b3%d0%b0%d1%80%d0%b0/",
@@ -9604,7 +9721,12 @@
     {
       "id": "MS-CRAWL-0022",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/",
@@ -10070,7 +10192,12 @@
     {
       "id": "MS-CRAWL-0023",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -10536,7 +10663,12 @@
     {
       "id": "MS-CRAWL-0024",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%be%d0%bb%d1%83%d0%bd/",
@@ -10971,7 +11103,12 @@
     {
       "id": "MS-CRAWL-0025",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%bf%d0%bb%d0%b0%d0%bd%d0%b8%d0%bd%d0%b0/",
@@ -11503,7 +11640,12 @@
     {
       "id": "MS-CRAWL-0026",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -11969,7 +12111,12 @@
     {
       "id": "MS-CRAWL-0027",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/",
@@ -12358,7 +12505,12 @@
     {
       "id": "MS-CRAWL-0028",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
@@ -12824,7 +12976,12 @@
     {
       "id": "MS-CRAWL-0029",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be/",
@@ -13224,7 +13381,12 @@
     {
       "id": "MS-CRAWL-0030",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/",
@@ -13635,7 +13797,12 @@
     {
       "id": "MS-CRAWL-0031",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -14079,7 +14246,12 @@
     {
       "id": "MS-CRAWL-0032",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -14457,7 +14629,12 @@
     {
       "id": "MS-CRAWL-0033",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
@@ -14912,7 +15089,12 @@
     {
       "id": "MS-CRAWL-0034",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%88%d0%b8%d1%80%d0%be%d0%ba%d0%b8%d1%8f-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%bd/",
@@ -15312,7 +15494,12 @@
     {
       "id": "MS-CRAWL-0035",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be/",
@@ -15767,7 +15954,12 @@
     {
       "id": "MS-CRAWL-0036",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d0%b5%d0%b4%d0%b5%d0%bb%d1%81%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
@@ -16130,7 +16322,12 @@
     {
       "id": "MS-CRAWL-0037",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%bd%d0%b0-%d0%b579-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -16574,7 +16771,12 @@
     {
       "id": "MS-CRAWL-0038",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -17370,7 +17572,12 @@
     {
       "id": "MS-CRAWL-0039",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -17703,7 +17910,12 @@
     {
       "id": "MS-CRAWL-0040",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%81-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
@@ -18036,7 +18248,12 @@
     {
       "id": "MS-CRAWL-0041",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/",
@@ -18425,7 +18642,12 @@
     {
       "id": "MS-CRAWL-0042",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%bd%d0%b0-%d0%b3%d0%bb-%d0%bf%d1%8a%d1%82-%d0%b579-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -18825,7 +19047,12 @@
     {
       "id": "MS-CRAWL-0043",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f-%d0%b5%d1%80%d0%b5%d1%82%d1%80%d0%b8%d1%8f-%d0%ba%d0%be%d1%82%d1%80%d0%be%d0%bd%d0%b8/",
@@ -19315,7 +19542,12 @@
     {
       "id": "MS-CRAWL-0044",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%ba%d1%83%d0%bb%d0%b0%d1%82%d0%b0/",
@@ -19678,7 +19910,12 @@
     {
       "id": "MS-CRAWL-0045",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/",
@@ -20111,7 +20348,12 @@
     {
       "id": "MS-CRAWL-0046",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
@@ -20533,7 +20775,12 @@
     {
       "id": "MS-CRAWL-0047",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
@@ -20944,7 +21191,12 @@
     {
       "id": "MS-CRAWL-0048",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%86%d0%b0%d0%bf%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
@@ -21432,7 +21684,12 @@
     {
       "id": "MS-CRAWL-0049",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -21736,7 +21993,12 @@
     {
       "id": "MS-CRAWL-0050",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bc%d0%b5%d0%b7%d0%be%d0%bd%d0%b5%d1%82-%d0%b2-%d1%85%d0%b0%d0%bb%d0%ba%d0%b8%d0%b4%d0%b8%d0%ba%d0%b8-%d1%80-%d0%bd-%d0%b5%d0%bb%d0%b0%d0%bd%d0%b8-%d1%81/",
@@ -22168,7 +22430,12 @@
     {
       "id": "MS-CRAWL-0051",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -22601,7 +22868,12 @@
     {
       "id": "MS-CRAWL-0052",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -23056,7 +23328,12 @@
     {
       "id": "MS-CRAWL-0053",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%84%d0%b8%d1%81-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -23419,7 +23696,12 @@
     {
       "id": "MS-CRAWL-0054",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5/",
@@ -23918,7 +24200,12 @@
     {
       "id": "MS-CRAWL-0055",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/",
@@ -24307,7 +24594,12 @@
     {
       "id": "MS-CRAWL-0056",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -24640,7 +24932,12 @@
     {
       "id": "MS-CRAWL-0057",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
@@ -25003,7 +25300,12 @@
     {
       "id": "MS-CRAWL-0058",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
@@ -25366,7 +25668,12 @@
     {
       "id": "MS-CRAWL-0059",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
@@ -25729,7 +26036,12 @@
     {
       "id": "MS-CRAWL-0060",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b7%d0%b0-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4/",
@@ -26092,7 +26404,12 @@
     {
       "id": "MS-CRAWL-0061",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd/",
@@ -26591,7 +26908,12 @@
     {
       "id": "MS-CRAWL-0062",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d0%b8%d1%88%d0%bb%d0%b5%d0%bd%d0%b8-%d1%85%d0%b0%d0%bb%d0%b5%d1%82%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4/",
@@ -27068,7 +27390,12 @@
     {
       "id": "MS-CRAWL-0063",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d0%b5-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%b3%d1%80%d0%b0%d0%bb%d0%b8%d1%89%d0%b5-%d0%bc%d0%b0%d0%bb%d0%b5%d1%88%d0%b5%d0%b2%d0%be/",
@@ -27446,7 +27773,12 @@
     {
       "id": "MS-CRAWL-0064",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d0%b0%d1%80%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
@@ -27794,7 +28126,12 @@
     {
       "id": "MS-CRAWL-0065",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be-%d0%b2-%d1%81%d0%b0%d0%bf%d1%84%d0%b8%d1%80-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
@@ -28227,7 +28564,12 @@
     {
       "id": "MS-CRAWL-0066",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8/",
@@ -28816,7 +29158,12 @@
     {
       "id": "MS-CRAWL-0067",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
@@ -29227,7 +29574,12 @@
     {
       "id": "MS-CRAWL-0068",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-15%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%ba%d0%b0%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be/",
@@ -29531,7 +29883,12 @@
     {
       "id": "MS-CRAWL-0069",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-8%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%b2-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8%d1%89%d0%b5%d1%82%d0%be-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8/",
@@ -29879,7 +30236,12 @@
     {
       "id": "MS-CRAWL-0070",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%b8%d0%b7%d0%bd%d0%b5%d1%81-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d0%bf%d0%b5%d1%82%d1%80%d0%b8/",
@@ -30183,7 +30545,12 @@
     {
       "id": "MS-CRAWL-0071",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
@@ -30546,7 +30913,12 @@
     {
       "id": "MS-CRAWL-0072",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bb%d0%be%d0%b3%d0%b0%d1%80%d0%b8-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/",
@@ -30959,7 +31331,12 @@
     {
       "id": "MS-CRAWL-0073",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -31348,7 +31725,12 @@
     {
       "id": "MS-CRAWL-0074",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bb%d1%83%d0%ba%d1%81%d0%be%d0%b7%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
@@ -31913,7 +32295,12 @@
     {
       "id": "MS-CRAWL-0075",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd-%d0%b2-%d0%b3%d1%80-%d0%b1%d0%bb%d0%b0%d0%b3%d0%be%d0%b5%d0%b2%d0%b3%d1%80%d0%b0%d0%b4/",
@@ -32434,7 +32821,12 @@
     {
       "id": "MS-3000",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/",
@@ -32812,7 +33204,12 @@
     {
       "id": "MS-CRAWL-0077",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d1%81%d0%b2%d0%b5%d1%82%d1%8a%d0%bb-%d1%8e%d0%b6%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b4%d0%be-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81/",
@@ -33234,7 +33631,12 @@
     {
       "id": "MS-CRAWL-0078",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -33656,7 +34058,12 @@
     {
       "id": "MS-CRAWL-0079",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0/",
@@ -34166,7 +34573,12 @@
     {
       "id": "MS-CRAWL-0080",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
@@ -34775,7 +35187,12 @@
     {
       "id": "MS-CRAWL-0081",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
@@ -35164,7 +35581,12 @@
     {
       "id": "MS-CRAWL-0082",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%84%d0%b5%d1%80%d0%bc%d1%83-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -35468,7 +35890,12 @@
     {
       "id": "MS-CRAWL-0083",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b0-%d1%80%d0%b5%d1%85%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8/",
@@ -35967,7 +36394,12 @@
     {
       "id": "MS-CRAWL-0084",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/2-bedrooms-apartment-for-sale-in-sandanski/",
@@ -36466,7 +36898,12 @@
     {
       "id": "MS-CRAWL-0085",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/",
@@ -36877,7 +37314,12 @@
     {
       "id": "MS-CRAWL-0086",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/apartments-park-hotel-pirin-sandanski/",
@@ -37321,7 +37763,12 @@
     {
       "id": "MS-CRAWL-0087",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/big-plot-of-land-and-buildings-for-sale-near-sandanski/",
@@ -37732,7 +38179,12 @@
     {
       "id": "MS-CRAWL-0088",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/building-land-with-a-great-view-in-sandanski/",
@@ -38080,7 +38532,12 @@
     {
       "id": "MS-CRAWL-0089",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/ein-zimmer-wohnung-zum-verkauf-im-park-hotel-pirin-sandanski/",
@@ -38579,7 +39036,12 @@
     {
       "id": "MS-CRAWL-0090",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/front-compartment-in-pasalimani-piraeus-in-6th-floor/",
@@ -39432,7 +39894,12 @@
     {
       "id": "MS-CRAWL-0091",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/haus-zum-verkauf-im-dorf-vinogradi-3-km-von-melnik-entfernt/",
@@ -39887,7 +40354,12 @@
     {
       "id": "MS-CRAWL-0092",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/house-for-sale-in-the-park-of-sandanski/",
@@ -40386,7 +40858,12 @@
     {
       "id": "MS-CRAWL-0093",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/house-for-sale-in-the-village-of-leshnitsa/",
@@ -40786,7 +41263,12 @@
     {
       "id": "MS-CRAWL-0094",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/industrial-building-for-rent-in-petrich/",
@@ -41145,7 +41627,12 @@
     {
       "id": "MS-CRAWL-0095",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/industrial-building-for-sale-petrich-municipality/",
@@ -41566,7 +42053,12 @@
     {
       "id": "MS-CRAWL-0096",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/industrial-buildings-for-rent-near-sandanski/",
@@ -41999,7 +42491,12 @@
     {
       "id": "MS-CRAWL-0097",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/industriegebaude-zur-miete-in-petrich-bulgarien/",
@@ -42362,7 +42859,12 @@
     {
       "id": "MS-CRAWL-0098",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/industrieraume-zum-verkauf-rund-um-sandanski/",
@@ -42795,7 +43297,12 @@
     {
       "id": "MS-CRAWL-0099",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/luxushaus-zum-verkauf-in-sandanski/",
@@ -43360,7 +43867,12 @@
     {
       "id": "MS-CRAWL-0100",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/neue-1-zimmer-wohnung-zur-miete-in-sandanski/",
@@ -43793,7 +44305,12 @@
     {
       "id": "MS-CRAWL-0101",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/new-apartment-for-rent-in-sandanski/",
@@ -44325,7 +44842,12 @@
     {
       "id": "MS-CRAWL-0102",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/one-bedroom-apartment-in-the-park-of-sandanski/",
@@ -44802,7 +45324,12 @@
     {
       "id": "MS-CRAWL-0103",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/prodava-mezonet-ul-pirin-sandanski/",
@@ -45224,7 +45751,12 @@
     {
       "id": "MS-CRAWL-0104",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/real-estate-for-sale-in-nafplio-greece/",
@@ -46198,7 +46730,12 @@
     {
       "id": "MS-CRAWL-0105",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/spa-hotel-mit-mineralwasser-zum-verkauf-in-sandanski-bulgarien/",
@@ -46851,7 +47388,12 @@
     {
       "id": "MS-CRAWL-0106",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/studio-for-rent-in-sandanski/",
@@ -47328,7 +47870,12 @@
     {
       "id": "MS-CRAWL-0107",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/two-bedroom-apartment-in-the-complex-arena-1-st-vlas-for-sale/",
@@ -47805,7 +48352,12 @@
     {
       "id": "MS-CRAWL-0108",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/villa-for-sale-in-the-mountains-near-sandanski/",
@@ -48194,7 +48746,12 @@
     {
       "id": "MS-CRAWL-0109",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/wohnung-zu-vermieten-beim-aquasun-in-sandanski/",
@@ -48704,7 +49261,12 @@
     {
       "id": "MS-CRAWL-0110",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/wohnung-zur-miete-in-spa-complex-medite-sandanski/",
@@ -49148,7 +49710,12 @@
     {
       "id": "MS-CRAWL-0111",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/working-business-for-sale-pellet-production/",
@@ -49713,7 +50280,12 @@
     {
       "id": "MS-CRAWL-0112",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
@@ -50031,7 +50603,12 @@
     {
       "id": "MS-CRAWL-0113",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
       "source_url": "https://makler-realty.com/listing/zwei-zimmer-wohnung-zum-verkauf-in-park-hotel-pirin-sandanski/",
@@ -50574,7 +51151,12 @@
     {
       "id": "MS-CRAWL-0114",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%8b-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
@@ -51058,7 +51640,12 @@
     {
       "id": "MS-CRAWL-0115",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b9-%d0%b4%d0%b2%d1%83%d1%88%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
@@ -51586,7 +52173,12 @@
     {
       "id": "MS-CRAWL-0116",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b9-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -52037,7 +52629,12 @@
     {
       "id": "MS-CRAWL-0117",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%b2-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b5-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0%d0%bb%d0%b8%d1%82%d0%b5%d1%82-%d1%81/",
@@ -52488,7 +53085,12 @@
     {
       "id": "MS-CRAWL-0118",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b5%d1%82%d1%80%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0/",
@@ -52961,7 +53563,12 @@
     {
       "id": "MS-CRAWL-0119",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d0%b0-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -53544,7 +54151,12 @@
     {
       "id": "MS-CRAWL-0120",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -54160,7 +54772,12 @@
     {
       "id": "MS-CRAWL-0121",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -54516,7 +55133,12 @@
     {
       "id": "MS-CRAWL-0122",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%be%d1%81%d0%be%d0%b1%d0%bd%d1%8f%d0%ba-%d0%b3%d0%be%d1%80%d0%be%d0%b4-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -55341,7 +55963,12 @@
     {
       "id": "MS-CRAWL-0123",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d0%b5/",
@@ -55803,7 +56430,12 @@
     {
       "id": "MS-CRAWL-0124",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d1%8d%d0%bb%d0%b8%d1%82%d0%bd%d1%8b%d0%b9-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d1%80%d1%8f%d0%b4/",
@@ -56408,7 +57040,12 @@
     {
       "id": "MS-CRAWL-0125",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -56914,7 +57551,12 @@
     {
       "id": "MS-CRAWL-0126",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba/",
@@ -57310,7 +57952,12 @@
     {
       "id": "MS-CRAWL-0127",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
@@ -57711,7 +58358,12 @@
     {
       "id": "MS-CRAWL-0128",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%bd%d0%b8%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bc%d0%b5%d1%80%d0%bb%d0%be/",
@@ -58151,7 +58803,12 @@
     {
       "id": "MS-CRAWL-0129",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
@@ -58657,7 +59314,12 @@
     {
       "id": "MS-CRAWL-0130",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-4/",
@@ -59141,7 +59803,12 @@
     {
       "id": "MS-CRAWL-0131",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -59614,7 +60281,12 @@
     {
       "id": "MS-CRAWL-0132",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -60120,7 +60792,12 @@
     {
       "id": "MS-CRAWL-0133",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -60476,7 +61153,12 @@
     {
       "id": "MS-CRAWL-0134",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/",
@@ -60927,7 +61609,12 @@
     {
       "id": "MS-CRAWL-0135",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bc%d0%b5%d0%b1%d0%bb%d0%b8%d1%80%d0%be%d0%b2%d0%b0%d0%bd%d0%bd%d0%be%d0%b9-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%b8-%d0%b2-%d0%b6%d0%b8%d0%bb%d0%be%d0%bc/",
@@ -61400,7 +62087,12 @@
     {
       "id": "MS-CRAWL-0136",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/",
@@ -61818,7 +62510,12 @@
     {
       "id": "MS-CRAWL-0137",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2/",
@@ -62199,7 +62896,12 @@
     {
       "id": "MS-CRAWL-0138",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -62617,7 +63319,12 @@
     {
       "id": "MS-CRAWL-0139",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b9-%d0%b1%d0%b0%d0%b7%d1%8b-%d0%be%d0%ba%d0%be%d0%bb%d0%be/",
@@ -63035,7 +63742,12 @@
     {
       "id": "MS-CRAWL-0140",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%81%d0%bf%d0%b0-%d0%be%d1%82%d0%b5%d0%bb%d1%8f-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -63717,7 +64429,12 @@
     {
       "id": "MS-CRAWL-0141",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%b4%d0%b5%d1%80%d0%b1%d0%b5%d1%80%d0%b5-%d1%81%d0%b0%d0%bd/",
@@ -64145,7 +64862,12 @@
     {
       "id": "MS-CRAWL-0142",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bb%d0%b8%d0%bb%d1%8f%d0%bd%d0%be%d0%b2%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -64596,7 +65318,12 @@
     {
       "id": "MS-CRAWL-0143",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b5%d0%b6%d0%b4%d1%83%d0%bd%d0%b0%d1%80%d0%be%d0%b4%d0%bd%d0%be%d0%b9-%d1%82%d1%80%d0%b0/",
@@ -65069,7 +65796,12 @@
     {
       "id": "MS-CRAWL-0144",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%81-%d0%b2%d0%b8%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -65476,7 +66208,12 @@
     {
       "id": "MS-CRAWL-0145",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-2-%d0%b3%d0%ba%d0%b0-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
@@ -65832,7 +66569,12 @@
     {
       "id": "MS-CRAWL-0146",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd-%d1%81-%d0%be%d1%82%d0%b5%d0%bb%d0%b5%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -66188,7 +66930,12 @@
     {
       "id": "MS-CRAWL-0147",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b0-%d1%81%d0%b0-2/",
@@ -66705,7 +67452,12 @@
     {
       "id": "MS-CRAWL-0148",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
@@ -67211,7 +67963,12 @@
     {
       "id": "MS-CRAWL-0149",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/",
@@ -67706,7 +68463,12 @@
     {
       "id": "MS-CRAWL-0150",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%81%d0%b5%d0%bb%d1%8c%d1%85%d0%be%d0%b7-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b8-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86/",
@@ -68113,7 +68875,12 @@
     {
       "id": "MS-CRAWL-0151",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -68531,7 +69298,12 @@
     {
       "id": "MS-CRAWL-0152",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/",
@@ -68960,7 +69732,12 @@
     {
       "id": "MS-CRAWL-0153",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
@@ -69389,7 +70166,12 @@
     {
       "id": "MS-CRAWL-0154",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -69862,7 +70644,12 @@
     {
       "id": "MS-CRAWL-0155",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
@@ -70243,7 +71030,12 @@
     {
       "id": "MS-CRAWL-0156",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
@@ -70672,7 +71464,12 @@
     {
       "id": "MS-CRAWL-0157",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/",
@@ -71053,7 +71850,12 @@
     {
       "id": "MS-CRAWL-0158",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/",
@@ -71482,7 +72284,12 @@
     {
       "id": "MS-CRAWL-0159",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/",
@@ -72004,7 +72811,12 @@
     {
       "id": "MS-CRAWL-0160",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/",
@@ -72444,7 +73256,12 @@
     {
       "id": "MS-CRAWL-0161",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d1%80%d0%be/",
@@ -72862,7 +73679,12 @@
     {
       "id": "MS-CRAWL-0162",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/a%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%b4%d0%b2%d1%83%d1%85%d0%ba%d0%be%d0%bc%d0%bd%d0%b0%d1%82%d0%bd%d0%be%d0%b9-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4/",
@@ -73434,7 +74256,12 @@
     {
       "id": "MS-CRAWL-0163",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/arenda-dvuhkomnatnaia-kvartira-garazh-sandanski/",
@@ -73951,7 +74778,12 @@
     {
       "id": "MS-CRAWL-0164",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/paralia-ofrinio-kvartira/",
@@ -74525,7 +75357,12 @@
     {
       "id": "MS-CRAWL-0165",
       "collection": "listings",
-      "cms_status": "source_imported_review_required",
+      "cms_status": "published",
+      "workflow": {
+        "publish_approved": true,
+        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_by": "agency_owner"
+      },
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/uchastok-strumiani/",

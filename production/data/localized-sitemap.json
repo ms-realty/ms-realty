@@ -19,22 +19,22 @@
       "he": 5
     },
     "public": {
-      "listings": 0,
+      "listings": 165,
       "home_pages": 7,
-      "listing_entries": 0,
-      "location_pages": 0,
+      "listing_entries": 166,
+      "location_pages": 6,
       "seller_pages": 7,
       "contact_pages": 7,
       "guide_pages": 5,
-      "entries": 26,
+      "entries": 198,
       "byLocale": {
-        "bg": 6,
+        "bg": 122,
         "en": 5,
         "de": 3,
         "nl": 3,
-        "ru": 3,
+        "ru": 57,
         "el": 3,
-        "he": 3
+        "he": 5
       }
     }
   },
@@ -337,7 +337,7 @@
           "href": "/bg/imoti/MS-CRAWL-0001"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -357,7 +357,7 @@
           "href": "/bg/imoti/MS-CRAWL-0001"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -373,7 +373,7 @@
           "href": "/bg/imoti/MS-CRAWL-0002"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -389,7 +389,7 @@
           "href": "/bg/imoti/MS-CRAWL-0003"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -405,7 +405,7 @@
           "href": "/bg/imoti/MS-CRAWL-0004"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -421,7 +421,7 @@
           "href": "/bg/imoti/MS-CRAWL-0005"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -437,7 +437,7 @@
           "href": "/bg/imoti/MS-CRAWL-0006"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -453,7 +453,7 @@
           "href": "/bg/imoti/MS-CRAWL-0007"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -469,7 +469,7 @@
           "href": "/bg/imoti/MS-CRAWL-0008"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -485,7 +485,7 @@
           "href": "/bg/imoti/MS-CRAWL-0009"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -501,7 +501,7 @@
           "href": "/bg/imoti/MS-CRAWL-0010"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -517,7 +517,7 @@
           "href": "/bg/imoti/MS-CRAWL-0011"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -533,7 +533,7 @@
           "href": "/bg/imoti/MS-CRAWL-0012"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -549,7 +549,7 @@
           "href": "/bg/imoti/MS-CRAWL-0013"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -565,7 +565,7 @@
           "href": "/bg/imoti/MS-CRAWL-0014"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -581,7 +581,7 @@
           "href": "/bg/imoti/MS-CRAWL-0015"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -597,7 +597,7 @@
           "href": "/bg/imoti/MS-CRAWL-0016"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -613,7 +613,7 @@
           "href": "/bg/imoti/MS-CRAWL-0017"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -629,7 +629,7 @@
           "href": "/bg/imoti/MS-CRAWL-0018"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -645,7 +645,7 @@
           "href": "/bg/imoti/MS-CRAWL-0019"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -661,7 +661,7 @@
           "href": "/bg/imoti/MS-CRAWL-0020"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -677,7 +677,7 @@
           "href": "/bg/imoti/MS-CRAWL-0021"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -693,7 +693,7 @@
           "href": "/bg/imoti/MS-CRAWL-0022"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -709,7 +709,7 @@
           "href": "/bg/imoti/MS-CRAWL-0023"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -725,7 +725,7 @@
           "href": "/bg/imoti/MS-CRAWL-0024"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -741,7 +741,7 @@
           "href": "/bg/imoti/MS-CRAWL-0025"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -757,7 +757,7 @@
           "href": "/bg/imoti/MS-CRAWL-0026"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -773,7 +773,7 @@
           "href": "/bg/imoti/MS-CRAWL-0027"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -789,7 +789,7 @@
           "href": "/bg/imoti/MS-CRAWL-0028"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -805,7 +805,7 @@
           "href": "/bg/imoti/MS-CRAWL-0029"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -821,7 +821,7 @@
           "href": "/bg/imoti/MS-CRAWL-0030"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -837,7 +837,7 @@
           "href": "/bg/imoti/MS-CRAWL-0031"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -853,7 +853,7 @@
           "href": "/bg/imoti/MS-CRAWL-0032"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -869,7 +869,7 @@
           "href": "/bg/imoti/MS-CRAWL-0033"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -885,7 +885,7 @@
           "href": "/bg/imoti/MS-CRAWL-0034"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -901,7 +901,7 @@
           "href": "/bg/imoti/MS-CRAWL-0035"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -917,7 +917,7 @@
           "href": "/bg/imoti/MS-CRAWL-0036"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -933,7 +933,7 @@
           "href": "/bg/imoti/MS-CRAWL-0037"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -949,7 +949,7 @@
           "href": "/bg/imoti/MS-CRAWL-0038"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -965,7 +965,7 @@
           "href": "/bg/imoti/MS-CRAWL-0039"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -981,7 +981,7 @@
           "href": "/bg/imoti/MS-CRAWL-0040"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -997,7 +997,7 @@
           "href": "/bg/imoti/MS-CRAWL-0041"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1013,7 +1013,7 @@
           "href": "/bg/imoti/MS-CRAWL-0042"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1029,7 +1029,7 @@
           "href": "/bg/imoti/MS-CRAWL-0043"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1045,7 +1045,7 @@
           "href": "/bg/imoti/MS-CRAWL-0044"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1061,7 +1061,7 @@
           "href": "/bg/imoti/MS-CRAWL-0045"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1077,7 +1077,7 @@
           "href": "/bg/imoti/MS-CRAWL-0046"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1093,7 +1093,7 @@
           "href": "/bg/imoti/MS-CRAWL-0047"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1109,7 +1109,7 @@
           "href": "/bg/imoti/MS-CRAWL-0048"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1125,7 +1125,7 @@
           "href": "/bg/imoti/MS-CRAWL-0049"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1141,7 +1141,7 @@
           "href": "/bg/imoti/MS-CRAWL-0050"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1157,7 +1157,7 @@
           "href": "/bg/imoti/MS-CRAWL-0051"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1173,7 +1173,7 @@
           "href": "/bg/imoti/MS-CRAWL-0052"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1189,7 +1189,7 @@
           "href": "/bg/imoti/MS-CRAWL-0053"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1205,7 +1205,7 @@
           "href": "/bg/imoti/MS-CRAWL-0054"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1221,7 +1221,7 @@
           "href": "/bg/imoti/MS-CRAWL-0055"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1237,7 +1237,7 @@
           "href": "/bg/imoti/MS-CRAWL-0056"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1253,7 +1253,7 @@
           "href": "/bg/imoti/MS-CRAWL-0057"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1269,7 +1269,7 @@
           "href": "/bg/imoti/MS-CRAWL-0058"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1285,7 +1285,7 @@
           "href": "/bg/imoti/MS-CRAWL-0059"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1301,7 +1301,7 @@
           "href": "/bg/imoti/MS-CRAWL-0060"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1317,7 +1317,7 @@
           "href": "/bg/imoti/MS-CRAWL-0061"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1333,7 +1333,7 @@
           "href": "/bg/imoti/MS-CRAWL-0062"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1349,7 +1349,7 @@
           "href": "/bg/imoti/MS-CRAWL-0063"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1365,7 +1365,7 @@
           "href": "/bg/imoti/MS-CRAWL-0064"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1381,7 +1381,7 @@
           "href": "/bg/imoti/MS-CRAWL-0065"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1397,7 +1397,7 @@
           "href": "/bg/imoti/MS-CRAWL-0066"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1413,7 +1413,7 @@
           "href": "/bg/imoti/MS-CRAWL-0067"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1429,7 +1429,7 @@
           "href": "/bg/imoti/MS-CRAWL-0068"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1445,7 +1445,7 @@
           "href": "/bg/imoti/MS-CRAWL-0069"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1461,7 +1461,7 @@
           "href": "/bg/imoti/MS-CRAWL-0070"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1477,7 +1477,7 @@
           "href": "/bg/imoti/MS-CRAWL-0071"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1493,7 +1493,7 @@
           "href": "/bg/imoti/MS-CRAWL-0072"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1509,7 +1509,7 @@
           "href": "/bg/imoti/MS-CRAWL-0073"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1525,7 +1525,7 @@
           "href": "/bg/imoti/MS-CRAWL-0074"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1541,7 +1541,7 @@
           "href": "/bg/imoti/MS-CRAWL-0075"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1557,7 +1557,7 @@
           "href": "/bg/imoti/MS-3000"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1573,7 +1573,7 @@
           "href": "/bg/imoti/MS-CRAWL-0077"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1589,7 +1589,7 @@
           "href": "/bg/imoti/MS-CRAWL-0078"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1605,7 +1605,7 @@
           "href": "/bg/imoti/MS-CRAWL-0079"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1621,7 +1621,7 @@
           "href": "/bg/imoti/MS-CRAWL-0080"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1637,7 +1637,7 @@
           "href": "/bg/imoti/MS-CRAWL-0081"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1653,7 +1653,7 @@
           "href": "/bg/imoti/MS-CRAWL-0082"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1669,7 +1669,7 @@
           "href": "/bg/imoti/MS-CRAWL-0083"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1685,7 +1685,7 @@
           "href": "/bg/imoti/MS-CRAWL-0084"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1701,7 +1701,7 @@
           "href": "/bg/imoti/MS-CRAWL-0085"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1717,7 +1717,7 @@
           "href": "/bg/imoti/MS-CRAWL-0086"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1733,7 +1733,7 @@
           "href": "/bg/imoti/MS-CRAWL-0087"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1749,7 +1749,7 @@
           "href": "/bg/imoti/MS-CRAWL-0088"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1765,7 +1765,7 @@
           "href": "/bg/imoti/MS-CRAWL-0089"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1781,7 +1781,7 @@
           "href": "/bg/imoti/MS-CRAWL-0090"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1797,7 +1797,7 @@
           "href": "/bg/imoti/MS-CRAWL-0091"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1813,7 +1813,7 @@
           "href": "/bg/imoti/MS-CRAWL-0092"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1829,7 +1829,7 @@
           "href": "/bg/imoti/MS-CRAWL-0093"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1845,7 +1845,7 @@
           "href": "/bg/imoti/MS-CRAWL-0094"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1861,7 +1861,7 @@
           "href": "/bg/imoti/MS-CRAWL-0095"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1877,7 +1877,7 @@
           "href": "/bg/imoti/MS-CRAWL-0096"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1893,7 +1893,7 @@
           "href": "/bg/imoti/MS-CRAWL-0097"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1909,7 +1909,7 @@
           "href": "/bg/imoti/MS-CRAWL-0098"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1925,7 +1925,7 @@
           "href": "/bg/imoti/MS-CRAWL-0099"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1941,7 +1941,7 @@
           "href": "/bg/imoti/MS-CRAWL-0100"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1957,7 +1957,7 @@
           "href": "/bg/imoti/MS-CRAWL-0101"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1973,7 +1973,7 @@
           "href": "/bg/imoti/MS-CRAWL-0102"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -1989,7 +1989,7 @@
           "href": "/bg/imoti/MS-CRAWL-0103"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2005,7 +2005,7 @@
           "href": "/bg/imoti/MS-CRAWL-0104"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2021,7 +2021,7 @@
           "href": "/bg/imoti/MS-CRAWL-0105"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2037,7 +2037,7 @@
           "href": "/bg/imoti/MS-CRAWL-0106"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2053,7 +2053,7 @@
           "href": "/bg/imoti/MS-CRAWL-0107"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2069,7 +2069,7 @@
           "href": "/bg/imoti/MS-CRAWL-0108"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2085,7 +2085,7 @@
           "href": "/bg/imoti/MS-CRAWL-0109"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2101,7 +2101,7 @@
           "href": "/bg/imoti/MS-CRAWL-0110"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2117,7 +2117,7 @@
           "href": "/bg/imoti/MS-CRAWL-0111"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2133,7 +2133,7 @@
           "href": "/bg/imoti/MS-CRAWL-0112"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2149,7 +2149,7 @@
           "href": "/bg/imoti/MS-CRAWL-0113"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2161,7 +2161,7 @@
           "href": "/ru/properties/MS-CRAWL-0114"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2173,7 +2173,7 @@
           "href": "/ru/properties/MS-CRAWL-0115"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2185,7 +2185,7 @@
           "href": "/ru/properties/MS-CRAWL-0116"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2197,7 +2197,7 @@
           "href": "/ru/properties/MS-CRAWL-0117"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2209,7 +2209,7 @@
           "href": "/ru/properties/MS-CRAWL-0118"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2221,7 +2221,7 @@
           "href": "/ru/properties/MS-CRAWL-0119"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2233,7 +2233,7 @@
           "href": "/ru/properties/MS-CRAWL-0120"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2245,7 +2245,7 @@
           "href": "/ru/properties/MS-CRAWL-0121"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2257,7 +2257,7 @@
           "href": "/ru/properties/MS-CRAWL-0122"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2269,7 +2269,7 @@
           "href": "/ru/properties/MS-CRAWL-0123"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2281,7 +2281,7 @@
           "href": "/ru/properties/MS-CRAWL-0124"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2293,7 +2293,7 @@
           "href": "/ru/properties/MS-CRAWL-0125"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2305,7 +2305,7 @@
           "href": "/ru/properties/MS-CRAWL-0126"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2317,7 +2317,7 @@
           "href": "/ru/properties/MS-CRAWL-0127"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2329,7 +2329,7 @@
           "href": "/ru/properties/MS-CRAWL-0128"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2341,7 +2341,7 @@
           "href": "/ru/properties/MS-CRAWL-0129"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2353,7 +2353,7 @@
           "href": "/ru/properties/MS-CRAWL-0130"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2365,7 +2365,7 @@
           "href": "/ru/properties/MS-CRAWL-0131"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2377,7 +2377,7 @@
           "href": "/ru/properties/MS-CRAWL-0132"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2389,7 +2389,7 @@
           "href": "/ru/properties/MS-CRAWL-0133"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2401,7 +2401,7 @@
           "href": "/ru/properties/MS-CRAWL-0134"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2413,7 +2413,7 @@
           "href": "/ru/properties/MS-CRAWL-0135"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2425,7 +2425,7 @@
           "href": "/ru/properties/MS-CRAWL-0136"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2437,7 +2437,7 @@
           "href": "/ru/properties/MS-CRAWL-0137"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2449,7 +2449,7 @@
           "href": "/ru/properties/MS-CRAWL-0138"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2461,7 +2461,7 @@
           "href": "/ru/properties/MS-CRAWL-0139"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2473,7 +2473,7 @@
           "href": "/ru/properties/MS-CRAWL-0140"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2485,7 +2485,7 @@
           "href": "/ru/properties/MS-CRAWL-0141"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2497,7 +2497,7 @@
           "href": "/ru/properties/MS-CRAWL-0142"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2509,7 +2509,7 @@
           "href": "/ru/properties/MS-CRAWL-0143"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2521,7 +2521,7 @@
           "href": "/ru/properties/MS-CRAWL-0144"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2533,7 +2533,7 @@
           "href": "/ru/properties/MS-CRAWL-0145"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2545,7 +2545,7 @@
           "href": "/ru/properties/MS-CRAWL-0146"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2557,7 +2557,7 @@
           "href": "/ru/properties/MS-CRAWL-0147"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2569,7 +2569,7 @@
           "href": "/ru/properties/MS-CRAWL-0148"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2581,7 +2581,7 @@
           "href": "/ru/properties/MS-CRAWL-0149"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2593,7 +2593,7 @@
           "href": "/ru/properties/MS-CRAWL-0150"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2605,7 +2605,7 @@
           "href": "/ru/properties/MS-CRAWL-0151"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2617,7 +2617,7 @@
           "href": "/ru/properties/MS-CRAWL-0152"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2629,7 +2629,7 @@
           "href": "/ru/properties/MS-CRAWL-0153"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2641,7 +2641,7 @@
           "href": "/ru/properties/MS-CRAWL-0154"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2653,7 +2653,7 @@
           "href": "/ru/properties/MS-CRAWL-0155"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2665,7 +2665,7 @@
           "href": "/ru/properties/MS-CRAWL-0156"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2677,7 +2677,7 @@
           "href": "/ru/properties/MS-CRAWL-0157"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2689,7 +2689,7 @@
           "href": "/ru/properties/MS-CRAWL-0158"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2701,7 +2701,7 @@
           "href": "/ru/properties/MS-CRAWL-0159"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2713,7 +2713,7 @@
           "href": "/ru/properties/MS-CRAWL-0160"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2725,7 +2725,7 @@
           "href": "/ru/properties/MS-CRAWL-0161"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2737,7 +2737,7 @@
           "href": "/ru/properties/MS-CRAWL-0162"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2749,7 +2749,7 @@
           "href": "/ru/properties/MS-CRAWL-0163"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2761,7 +2761,7 @@
           "href": "/ru/properties/MS-CRAWL-0164"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2773,7 +2773,7 @@
           "href": "/ru/properties/MS-CRAWL-0165"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "location",
@@ -2798,7 +2798,7 @@
           "href": "/bg/lokacii/sandanski"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "location",
@@ -2823,7 +2823,7 @@
           "href": "/bg/lokacii/sandanski"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "location",
@@ -2848,7 +2848,7 @@
           "href": "/bg/lokacii/sandanski"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "location",
@@ -2869,7 +2869,7 @@
           "href": "/bg/lokacii/petrich"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "location",
@@ -2890,7 +2890,7 @@
           "href": "/bg/lokacii/petrich"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "location",
@@ -2907,7 +2907,7 @@
           "href": "/bg/lokacii/hotovo"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "seller",

@@ -217,7 +217,23 @@ function propertyFactsForListing(listing, snapshot, locationId) {
   };
 }
 
-export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows }) {
+// The operator publication approval is the only thing that flips a crawled
+// listing from "source imported, review required" to "published". Review data
+// (facts, verification, media, translations) is copied through untouched, so
+// every admin quality queue keeps showing the same outstanding work.
+function publishedListingState(approval, listingId) {
+  if (!approval?.listing_ids?.includes(listingId)) return null;
+  return {
+    cms_status: "published",
+    workflow: {
+      publish_approved: true,
+      publish_approved_at: approval.approved_at,
+      publish_approved_by: approval.approved_by,
+    },
+  };
+}
+
+export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows, publicationApproval = null }) {
   const migrationByUrl = new Map(migrationRecords.map((record) => [record.old_url, record]));
   const routeByUrl = new Map(routeMap.map((route) => [route.old_url, route]));
   const mediaByUrl = groupBy(mediaRows, (row) => row.page_url);
@@ -266,10 +282,13 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       }),
     );
 
+    const publication = publishedListingState(publicationApproval, listing.id);
+
     return {
       id: listing.id,
       collection: "listings",
-      cms_status: "source_imported_review_required",
+      cms_status: publication?.cms_status || "source_imported_review_required",
+      ...(publication ? { workflow: publication.workflow } : {}),
       source_locale: listing.locale,
       source_domain: listing.domain,
       source_url: listing.url,
@@ -324,6 +343,18 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
   return {
     artifact_id: "cms-seed-20260730",
     taxonomy_contract: propertyTaxonomyContract(),
+    publication_approval: publicationApproval
+      ? {
+          approval_id: publicationApproval.approval_id,
+          scope: publicationApproval.scope,
+          decision: publicationApproval.decision,
+          approved_by: publicationApproval.approved_by,
+          approved_at: publicationApproval.approved_at,
+          reason: publicationApproval.reason || null,
+          published_listings: publicationApproval.listing_ids.length,
+          excluded_listings: publicationApproval.excluded_listings,
+        }
+      : null,
     summary: {
       listings: records.length,
       properties: properties.length,
@@ -339,6 +370,8 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       mediaReviewGatedAssets,
       tourFields,
       publicTours,
+      publishedListings: records.filter((record) => record.cms_status === "published").length,
+      publicationExcludedListings: publicationApproval?.excluded_listings?.length || 0,
       missingMigrationRecords: records.filter((record) => !record.migration).length,
       missingRouteRows: records.filter((record) => !record.routing).length,
       reviewRequiredRoutes: records.filter((record) => record.routing?.review_required).length,
