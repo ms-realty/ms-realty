@@ -143,11 +143,15 @@ async function runDisconnect({ provider, config, deps }) {
   // Revoke first, delete second. If the delete failed after a successful revoke
   // the operator would be looking at a row whose credential no longer works;
   // this order at least never leaves a live credential with no row to remove it.
+  // A credential we cannot read is a credential we cannot revoke, but it must
+  // never be a reason to refuse the operator the disconnect. The revoke is
+  // skipped and honestly reported as not done; if the store itself is down the
+  // delete below fails and that is what surfaces as unavailable.
   let credentials = null;
   try {
     credentials = await deps.readProviderCredentials(provider, deps.storeOptions);
-  } catch (error) {
-    if (error?.code === "provider_connection_unavailable") throw error;
+  } catch {
+    credentials = null;
   }
   const revocation = credentials
     ? await provider_(deps, "revokeOperatorProvider", revokeOperatorProvider)(
