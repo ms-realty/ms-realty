@@ -298,6 +298,46 @@ Cloudflare is configuration, not a rewrite.
 | `MS_REALTY_SELLER_PHOTO_MAX_PER_ENQUIRY` | `12` | photos one enquiry can hold |
 | `MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED` | *(unset)* | `1` removes the public seller photo control and the endpoint |
 
+Every accepted upload is decoded, turned upright, resized and re-encoded by
+`production/lib/image-optimizer.mjs` before it is stored — the admin editor and
+the public seller intake share one step with one set of settings.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `MS_REALTY_IMAGE_MAX_EDGE` | `2560` | long edge in pixels; images are fitted inside it and never enlarged |
+| `MS_REALTY_IMAGE_QUALITY` | `82` | JPEG (mozjpeg) and WebP quality, 1–100 |
+| `MS_REALTY_IMAGE_THUMBNAIL_EDGE` | `640` | long edge of the WebP thumbnail stored beside each photo |
+| `MS_REALTY_IMAGE_MAX_PIXELS` | `50000000` | decode-bomb cap; a header declaring more is refused with 415 before any decode |
+
+All four fail loudly at startup if they are not positive integers (quality must
+also be ≤ 100), because a silently clamped encoder setting is worse than a
+refused boot.
+
+What the pipeline decides, and why it may not be what you expect:
+
+- **Rotation happens before metadata is stripped.** A phone held sideways
+  writes the rotation into EXIF and leaves the pixels alone. Stripping EXIF
+  first discards the tag and keeps the sideways pixels, which is how photos
+  used to end up permanently on their side. The strip still runs, and runs last,
+  on the bytes actually stored.
+- **PNG stays PNG only when it has an alpha channel**, which JPEG cannot
+  represent. An opaque PNG is encoded both ways and the smaller wins, so flat
+  graphics stay PNG and PNG-wrapped photographs become JPEG.
+- **WebP is only recompressed when it saves more than 10%**, since recompressing
+  costs a generation of quality. JPEG and PNG only have to beat break-even.
+  A rotation or a downscale is never declined on size grounds.
+- **AVIF is passed through untouched.** Re-encoding it would turn the
+  sanitiser's "refuse metadata I cannot strip" into a silent acceptance.
+- **A photo already below the thumbnail edge gets no rendition**, because a
+  second copy of an already small image is wasted storage.
+
+The thumbnail is stored beside its photo under the same content hash
+(`ms-<hash>.jpg` gains `ms-<hash>-thumb.webp`) and therefore in the same key
+space — which is what keeps a seller's thumbnail as unreachable from the edge
+as the seller's photo. Admin surfaces fetch it from the existing preview route
+via `?rendition=thumb`; an unknown rendition name falls back to the full photo
+rather than failing.
+
 Two key spaces, and the difference matters:
 
 - `makler-realty.com/wp-content/uploads/<YYYY>/<MM>/ms-<hash>.<ext>` — listing
