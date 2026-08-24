@@ -754,6 +754,9 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       "data-listing-id": card.id,
       "data-translation-display": card.translation_display,
       "data-content-language": card.content_locale,
+      // data-content-language is ours; lang is the one a screen reader and a
+      // crawler read, so untranslated source text declares itself there too.
+      ...(card.content_locale && card.content_locale !== localeCode ? { lang: card.content_locale } : {}),
       "data-review-badge": card.review_badge,
       "data-listing-status": card.listing_status,
       ...(rootAttrs || { "data-search-card": "true" }),
@@ -3816,6 +3819,7 @@ function ListingBody({ page }) {
       "data-availability-verified": page.body.verification?.verified ? "true" : "false",
       "data-location-precision": facts.location_precision || "approximate",
       "data-content-language": contentLocale,
+      ...(contentLocale && contentLocale !== (page.locale || page.lang) ? { lang: contentLocale } : {}),
       "data-min-touch-target": "44",
     },
     h(
