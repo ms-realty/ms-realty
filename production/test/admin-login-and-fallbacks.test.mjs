@@ -71,6 +71,60 @@ async function withNamedOperator(fn) {
   }
 }
 
+// The owner reported the Bulgarian "Покажи" control rendering as a large grey
+// slab hanging over the password field's right edge. The cause was the design
+// system's global `button,input{min-height:44px}` beating the chip's own 36px
+// height inside a 48px field, so the control has to opt out of that minimum and
+// centre itself rather than hang from a fixed top inset.
+test("password reveal is a compact inline toggle that cannot overflow the field", () => {
+  const html = renderAdminLoginPage({ locale: "bg" });
+  const reveal = html.match(/<button type="button" class="login__reveal"[^>]*>/)?.[0];
+  assert.ok(reveal, "the reveal control is rendered");
+  // Keyboard operable by construction: a real button, not a div, with the
+  // pressed state and the field it controls exposed to assistive technology.
+  assert.match(reveal, /type="button"/);
+  assert.match(reveal, /aria-pressed="false"/);
+  assert.match(reveal, /aria-controls="admin-password"/);
+  // Bulgarian labels for both states, with no English leaking through.
+  assert.match(reveal, /data-show-label="Покажи"/);
+  assert.match(reveal, /data-hide-label="Скрий"/);
+  assert.match(reveal, /aria-label="Покажи паролата"/);
+  assert.match(reveal, /data-hide-aria="Скрий паролата"/);
+  // It lives inside the field wrapper, which is the positioning context.
+  assert.match(html, /<div class="login__field">\s*<input id="admin-password"[^>]*>\s*<button type="button" class="login__reveal"/);
+  assert.match(html, /\.login__field \{ position: relative;/);
+
+  const rule = html.match(/\.login__reveal \{[^}]+\}/)?.[0];
+  assert.ok(rule, "the reveal control has its own rule");
+  // Opts out of the 44px minimum, so 36px is what actually renders.
+  assert.match(rule, /min-height: 0;/);
+  assert.match(rule, /height: 36px;/);
+  // Centred rather than pinned to a fixed top inset: any height stays inside.
+  assert.match(rule, /inset-block-start: 50%;/);
+  assert.match(rule, /transform: translateY\(-50%\);/);
+  // RTL-safe: logical inset only, never a physical `right`.
+  assert.match(rule, /inset-inline-end: 6px;/);
+  assert.equal(/(^|[^-])right:/.test(rule), false, "no physical right offset");
+  // The active nudge must keep the centring translate or the chip jumps.
+  assert.match(html, /\.login__reveal:active \{ transform: translateY\(calc\(-50% \+ 1px\)\); \}/);
+
+  // Presentation belongs to the stylesheet; the script only marks it live, so
+  // without JavaScript the control stays hidden instead of being a dead chip.
+  assert.match(html, /\.login__reveal\[data-login-reveal-ready="true"\] \{ display: inline-flex; \}/);
+  assert.match(html, /reveal\.setAttribute\("data-login-reveal-ready", "true"\)/);
+  assert.equal(html.includes('reveal.style.display'), false);
+  assert.equal(reveal.includes("data-login-reveal-ready"), false, "hidden until the script runs");
+
+  for (const [locale, show, hide] of [
+    ["ru", "Показать", "Скрыть"],
+    ["en", "Show", "Hide"],
+  ]) {
+    const localised = renderAdminLoginPage({ locale });
+    assert.match(localised, new RegExp(`data-show-label="${show}"`), locale);
+    assert.match(localised, new RegExp(`data-hide-label="${hide}"`), locale);
+  }
+});
+
 test("session cookie helpers round-trip and cap the Payload session token", () => {
   const cookie = adminSessionSetCookie("abc=123");
   assert.match(cookie, /HttpOnly/);

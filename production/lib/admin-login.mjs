@@ -237,26 +237,39 @@ const LOGIN_STYLE = `
   /* A rejected second factor means the password was right, so only the code
      field is marked. */
   .login-page[data-login-state="error-2fa"] #admin-code { border-color: var(--danger-500, #C42E44); }
+  /* A compact chip that sits inside the password field. The design system gives
+     every control a 44px tap target (button,input{min-height:44px}); at 44px
+     this chip is taller than the 48px field allows once it is inset, so it used
+     to spill over the input's rounded edge as a grey slab. It opts out of that
+     minimum and centres itself, so its own height can never overflow the field.
+     inset-inline-end keeps it on the correct side in RTL. */
   .login__reveal {
     position: absolute;
     inset-inline-end: 6px;
-    top: 6px;
+    inset-block-start: 50%;
+    transform: translateY(-50%);
     display: none;
     align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 0;
     height: 36px;
     padding: 0 10px;
+    border: 0;
     border-radius: 6px;
-    border: 1px solid var(--ink-100, #E6E6E5);
-    background: var(--ink-50, #F4F4F3);
+    background: transparent;
     color: var(--text-muted, #948263);
     font: inherit;
     font-size: 12px;
     font-weight: 600;
+    line-height: 1;
     white-space: nowrap;
     cursor: pointer;
   }
-  .login__reveal:hover { border-color: var(--ink-300, #A8A8A6); color: var(--text-strong, #241F18); background: var(--stone-100, #F2ECE1); }
-  .login__reveal:active { transform: translateY(1px); }
+  /* Shown only once the script that gives it behaviour has run. */
+  .login__reveal[data-login-reveal-ready="true"] { display: inline-flex; }
+  .login__reveal:hover { color: var(--text-strong, #241F18); background: var(--ink-50, #F4F4F3); }
+  .login__reveal:active { transform: translateY(calc(-50% + 1px)); }
   .login__reveal:focus-visible { outline: none; box-shadow: var(--shadow-focus, 0 0 0 3px rgba(219, 62, 62, 0.45)); }
   .login__submit {
     display: flex;
@@ -365,14 +378,16 @@ export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
     var reveal = document.querySelector("[data-login-reveal]");
     var field = document.getElementById("admin-password");
     if (reveal && field) {
-      reveal.style.display = "flex";
+      // Presentation stays in the stylesheet; the script only says it is live.
+      reveal.setAttribute("data-login-reveal-ready", "true");
       reveal.addEventListener("click", function () {
         var shown = field.type === "text";
         field.type = shown ? "password" : "text";
         reveal.setAttribute("aria-pressed", shown ? "false" : "true");
         reveal.textContent = shown ? reveal.getAttribute("data-show-label") : reveal.getAttribute("data-hide-label");
         reveal.setAttribute("aria-label", shown ? reveal.getAttribute("data-show-aria") : reveal.getAttribute("data-hide-aria"));
-        field.focus();
+        // Focus stays on the toggle so a keyboard user can flip it back with a
+        // second Space or Enter instead of tabbing backwards for it.
       });
     }
     var form = document.querySelector("[data-admin-login-form]");
