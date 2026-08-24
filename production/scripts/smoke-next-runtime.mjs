@@ -102,8 +102,11 @@ try {
   const listing = await fetch(`${baseUrl}/bg/imoti/MS-CRAWL-0001`);
   assert(listing.status === 200, "Next localized listing must preserve its approved URL");
   const listingHtml = await listing.text();
-  assert(listingHtml.includes('<meta name="robots" content="noindex,follow">'), "Next preserved listing must stay noindex");
-  assert(listingHtml.includes('data-react-public-ui="listing-preservation"'), "Next preserved listing must not invent facts");
+  // Published by the owner: the URL now serves the real listing page and is
+  // indexable at the meta level (the preview host still adds x-robots-tag
+  // noindex at the edge, keyed on hostname - that guard is unchanged).
+  assert(listingHtml.includes('<meta name="robots" content="index,follow">'), "Next published listing must be indexable");
+  assert(listingHtml.includes('data-react-public-ui="listing"'), "Next published listing must render the full listing page");
 
   const search = await fetch(`${baseUrl}/bg/tarsene?q=Sandanski`);
   assert(search.status === 503, "Next production search must fail closed without a configured engine");
