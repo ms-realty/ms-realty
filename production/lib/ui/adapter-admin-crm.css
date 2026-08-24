@@ -385,7 +385,7 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
 .adm-contact-card h3 { font-size: var(--text-base); }
 .adm-contact-card > header .crm-pill { white-space: normal; }
 /* The generated identifier is evidence, not a headline: one quiet line. */
-.adm-contact-card__id {
+.adm-id-caption {
   display: block;
   min-width: 0;
   padding: 0;
