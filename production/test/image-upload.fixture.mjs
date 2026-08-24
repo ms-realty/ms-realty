@@ -88,8 +88,7 @@ export function gpsExifPayload() {
   return Buffer.concat([header, ifd0, gpsIfd, latitude]);
 }
 
-export function jpegWithGpsExif() {
-  const base = tinyJpeg();
+function withGpsExif(base) {
   const exif = Buffer.concat([Buffer.from("Exif\u0000\u0000", "latin1"), gpsExifPayload()]);
   const segment = Buffer.alloc(4);
   segment[0] = 0xff;
@@ -97,6 +96,10 @@ export function jpegWithGpsExif() {
   segment.writeUInt16BE(exif.length + 2, 2);
   // APP1 goes directly after SOI so the JPEG stays valid.
   return Buffer.concat([base.slice(0, 2), segment, exif, base.slice(2)]);
+}
+
+export function jpegWithGpsExif() {
+  return withGpsExif(tinyJpeg());
 }
 
 /* -------------------------------------------------------------------- PNG */
@@ -221,6 +224,20 @@ function noise(width, height) {
 export async function orientedPhotoJpeg({ width = 3000, height = 1200, orientation = 6 } = {}) {
   const flat = await noise(width, height).jpeg({ quality: 92 }).toBuffer();
   return sharp(flat).withMetadata({ orientation }).jpeg({ quality: 92 }).toBuffer();
+}
+
+/**
+ * A photograph of a room, carrying the same GPS block a phone would write.
+ *
+ * The 1x1 `jpegWithGpsExif` above is enough to prove metadata is stripped, but
+ * it is not a property photo and the gallery is right to refuse it — anything
+ * under 160px wide is rejected as crawl chrome by
+ * `isPublicPropertyPhoto` in production/lib/media.mjs. Once uploads started
+ * recording their real dimensions, that rule began to apply to them too, so a
+ * test about publication needs a photo with a plausible size.
+ */
+export async function photoJpegWithGpsExif({ width = 800, height = 600 } = {}) {
+  return withGpsExif(await noise(width, height).jpeg({ quality: 90 }).toBuffer());
 }
 
 /** A graphic with real transparency — a JPEG cannot represent it. */

@@ -10,6 +10,7 @@ import path from "node:path";
 
 import { renderAppAdminResponse, appAdminConfigFromEnv } from "../lib/app-admin-adapter.mjs";
 import { renderAppApiResponse, appApiConfigFromEnv } from "../lib/app-api-adapter.mjs";
+import { optimizeImageUpload } from "../lib/image-optimizer.mjs";
 import { readMediaUploads } from "../lib/media-uploads.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { jpegWithGpsExif, multipartBody, textFileNamedJpg, tinyJpeg } from "./image-upload.fixture.mjs";
@@ -75,8 +76,12 @@ test("the admin adapter stores an upload unreviewed and refuses a renamed text f
   const rows = readMediaUploads(context.uploadLedger);
   assert.equal(rows.length, 1);
   // The bytes survive the Web Request round trip unchanged, which is the whole
-  // reason the adapter reads raw bytes instead of a decoded string.
-  assert.deepEqual(fs.readFileSync(path.join(context.uploadRoot, rows[0].storage_key)), tinyJpeg());
+  // reason the adapter reads raw bytes instead of a decoded string. What is
+  // stored is now the optimised photo, so the check is that optimising the
+  // source locally lands on exactly the same bytes: any corruption in transit
+  // would decode differently and could not.
+  const expected = await optimizeImageUpload(tinyJpeg());
+  assert.deepEqual(fs.readFileSync(path.join(context.uploadRoot, rows[0].storage_key)), expected.bytes);
 
   const refused = await renderAppAdminResponse(
     uploadRequest(
@@ -105,7 +110,7 @@ test("the admin adapter stores an upload unreviewed and refuses a renamed text f
   );
   assert.equal(preview.status, 200);
   assert.equal(preview.headers.get("cache-control"), "no-store");
-  assert.deepEqual(Buffer.from(await preview.arrayBuffer()), tinyJpeg());
+  assert.deepEqual(Buffer.from(await preview.arrayBuffer()), expected.bytes);
 });
 
 test("the public adapter keeps a seller photo private and bound to the enquiry", async () => {

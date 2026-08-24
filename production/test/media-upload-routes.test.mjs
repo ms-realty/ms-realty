@@ -6,17 +6,20 @@ import path from "node:path";
 
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
+import { sniffImageFormat } from "../lib/image-sanitizer.mjs";
 import { readMediaUploads } from "../lib/media-uploads.mjs";
 import { approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture.mjs";
 import {
   avifWithExif,
   jpegWithGpsExif,
   multipartBody,
+  photoJpegWithGpsExif,
   textFileNamedJpg,
   tinyJpeg,
   tinyPng,
 } from "./image-upload.fixture.mjs";
 
+const EXIF_HEADER = Buffer.from("Exif\u0000\u0000", "latin1");
 const ADMIN = Object.freeze({ authorization: "Bearer local-admin-smoke", accept: "application/json" });
 const SAME_ORIGIN = Object.freeze({
   host: "localhost",
@@ -84,7 +87,10 @@ test("an admin upload is stored unreviewed, audited, absent from the public payl
   assert.equal(before.status, 200);
   const galleryBefore = before.body.body.media.gallery.map((item) => item.url);
 
-  const created = await post(context.app, "/api/admin/media/uploads", adminUpload([{ name: "kitchen.jpg", bytes: jpegWithGpsExif() }]), ADMIN);
+  // A photograph, not the 1x1 marker: publication is under test here, and the
+  // gallery refuses anything too small to be a real property photo.
+  const photo = await photoJpegWithGpsExif({ width: 800, height: 600 });
+  const created = await post(context.app, "/api/admin/media/uploads", adminUpload([{ name: "kitchen.jpg", bytes: photo }]), ADMIN);
   assert.equal(created.status, 201);
   assert.equal(created.body.kind, "media_upload_accepted");
   assert.equal(created.body.public, false);
@@ -105,7 +111,13 @@ test("an admin upload is stored unreviewed, audited, absent from the public payl
   assert.equal(stored.length, 1);
   const bytesPath = path.join(context.uploadRoot, stored[0].storage_key);
   assert.ok(fs.existsSync(bytesPath));
-  assert.deepEqual(fs.readFileSync(bytesPath), tinyJpeg());
+  // The stored bytes are the *optimised* photo, not the posted file, so the
+  // assertion is that they are a real JPEG of the recorded size rather than
+  // that they are byte-identical to the upload.
+  const onDisk = fs.readFileSync(bytesPath);
+  assert.equal(sniffImageFormat(onDisk).format, "jpeg");
+  assert.equal(onDisk.length, stored[0].bytes, "the ledger records the byte count actually written");
+  assert.equal(onDisk.includes(EXIF_HEADER), false, "no EXIF survives optimisation");
 
   // One audit entry naming the authenticated actor.
   const audit = readAuditLog(context.auditLogPath).filter((row) => row.action === "media_uploaded");
@@ -319,7 +331,12 @@ test("an operator can list uploads and preview the stored bytes privately", asyn
   assert.equal(preview.status, 200);
   assert.equal(preview.headers["content-type"], "image/jpeg");
   assert.equal(preview.headers["cache-control"], "no-store");
-  assert.deepEqual(preview.body, tinyJpeg());
+  const storedRow = readMediaUploads(context.mediaUploadLedgerPath)[0];
+  assert.deepEqual(
+    preview.body,
+    fs.readFileSync(path.join(context.uploadRoot, storedRow.storage_key)),
+    "the preview serves exactly the bytes that were stored",
+  );
 
   const unknown = await dispatchHttp(context.app, { url: "/api/admin/media/uploads/media-0000000000000000000", headers: ADMIN });
   assert.equal(unknown.status, 404);
@@ -371,7 +388,10 @@ test("a seller photo reaches the enquiry, stays private, and says so", async () 
   assert.equal(row.asset_url, null, "a public submission never gets a public URL");
   assert.match(row.storage_key, /^makler-realty\.com\/wp-content\/private\/enquiries\//);
   assert.equal(row.storage_key.includes("/wp-content/uploads/"), false, "must sit outside the edge-served prefix");
-  assert.deepEqual(fs.readFileSync(path.join(context.uploadRoot, row.storage_key)), tinyJpeg());
+  const sellerBytes = fs.readFileSync(path.join(context.uploadRoot, row.storage_key));
+  assert.equal(sniffImageFormat(sellerBytes).format, "jpeg");
+  assert.equal(sellerBytes.length, row.bytes);
+  assert.equal(sellerBytes.includes(EXIF_HEADER), false);
 
   const audit = readAuditLog(context.auditLogPath).filter((entry) => entry.action === "media_uploaded");
   assert.equal(audit.length, 1);
