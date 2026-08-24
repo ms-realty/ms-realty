@@ -202,6 +202,27 @@ export const PUBLIC_APP_JS = `(function () {
     if (channelField && !channelField.value) channelField.value = leadChannel();
     if (pathField) pathField.value = firstTouchPath();
   }
+  // One place a form says what went wrong, so a rule checked before the post
+  // reads exactly like a rule the server enforced.
+  function showFormError(form, message) {
+    var warn = form.querySelector("[data-enquiry-error]");
+    if (!warn) {
+      warn = document.createElement("p");
+      warn.className = "mk-alert mk-alert--danger";
+      warn.setAttribute("data-enquiry-error", "true");
+      warn.setAttribute("role", "alert");
+      form.insertBefore(warn, form.firstChild);
+    }
+    warn.textContent = message;
+    warn.setAttribute("tabindex", "-1");
+    warn.focus({ preventScroll: true });
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    warn.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+  }
+  function clearFormError(form) {
+    var warn = form.querySelector("[data-enquiry-error]");
+    if (warn) warn.remove();
+  }
   function submitJson(form, onDone) {
     var submit = form.querySelector('[type="submit"]');
     if (submit) {
@@ -222,19 +243,7 @@ export const PUBLIC_APP_JS = `(function () {
         onDone();
       })
       .catch(function () {
-        var warn = form.querySelector("[data-enquiry-error]");
-        if (!warn) {
-          warn = document.createElement("p");
-          warn.className = "mk-alert mk-alert--danger";
-          warn.setAttribute("data-enquiry-error", "true");
-          warn.setAttribute("role", "alert");
-          form.insertBefore(warn, form.firstChild);
-        }
-        warn.textContent = I18N.requestFailed || "Request failed";
-        warn.setAttribute("tabindex", "-1");
-        warn.focus({ preventScroll: true });
-        var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        warn.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+        showFormError(form, I18N.requestFailed || "Request failed");
       })
       .then(function () {
         if (submit) {
@@ -2255,6 +2264,9 @@ export const PUBLIC_APP_JS = `(function () {
     wireSubmitStatus(lead);
     wireSubmitStatus(root.querySelector("[data-start-alert-form]"));
     var tripForm = root.querySelector("[data-start-trip-form]");
+    // The trip form carries the same status line as the other two start forms;
+    // it was rendering one under a name nothing read.
+    wireSubmitStatus(tripForm);
     if (tripForm) {
       var tripArrival = tripForm.querySelector("[data-start-trip-arrival]");
       var tripDeparture = tripForm.querySelector("[data-start-trip-departure]");
@@ -2823,6 +2835,20 @@ export const PUBLIC_APP_JS = `(function () {
     if (form.hasAttribute("data-start-trip-form")) {
       var shortlist = form.querySelector("[data-start-trip-shortlist]");
       if (shortlist) shortlist.value = readSaved().join(",");
+      // The server refuses a trip that names neither an area nor a property.
+      // Checking it here names the missing thing instead of letting the post
+      // come back as a generic failure.
+      var areasField = form.querySelector("[data-start-trip-areas]");
+      var hasAreas = Boolean(areasField && String(areasField.value || "").trim());
+      var hasShortlist = Boolean(shortlist && String(shortlist.value || "").trim());
+      var scopeMessage = form.getAttribute("data-start-trip-scope-message") || "";
+      if (!hasAreas && !hasShortlist && scopeMessage) {
+        event.preventDefault();
+        showFormError(form, scopeMessage);
+        if (areasField && areasField.focus) areasField.focus();
+        return;
+      }
+      clearFormError(form);
     }
     if (!intercept && !isEnquiry) return;
     event.preventDefault();

@@ -402,31 +402,42 @@ function nextOutcomeId(rows, leadId) {
   return id;
 }
 
-export function appendLeadPipelineOutcome(
-  context,
-  input,
-  { filePath = DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH, recordedAt = new Date().toISOString() } = {},
-) {
+// The whole decision — validation, transition guard, idempotency, id, and the
+// resulting pipeline state — against a caller-supplied set of outcome rows.
+// A durable writer runs this over rows read from Postgres and then appends,
+// so both backends enforce one set of pipeline rules.
+export function resolveLeadPipelineOutcome(context, outcomes, input, recordedAt = new Date().toISOString()) {
   const leadId = String(input.leadId || input.lead_id || "").trim();
   const lead = (context.leads || []).find((row) => row.lead_id === leadId);
   if (!lead || !pipelineKind(lead)) throw new Error("Lead pipeline requires a known buyer or renter leadId");
-  const outcomes = readLeadPipelineOutcomes(filePath);
-  const state = deriveLeadPipelineStates({ ...context, outcomes }).find((row) => row.lead_id === leadId);
-  const explicitExisting = input.id ? outcomes.find((row) => row.id === String(input.id).trim()) : null;
+  const rows = outcomes || [];
+  const state = deriveLeadPipelineStates({ ...context, outcomes: rows }).find((row) => row.lead_id === leadId);
+  const explicitExisting = input.id ? rows.find((row) => row.id === String(input.id).trim()) : null;
   if (explicitExisting) {
     if (!outcomeMatchesInput(explicitExisting, input, leadId)) {
       throw new Error("Lead pipeline outcome id already belongs to another action");
     }
     return { outcome: explicitExisting, lead_pipeline: state, idempotent: true };
   }
-  const implicitExisting = [...outcomes].reverse().find((row) => outcomeMatchesInput(row, input, leadId));
+  const implicitExisting = [...rows].reverse().find((row) => outcomeMatchesInput(row, input, leadId));
   if (implicitExisting) return { outcome: implicitExisting, lead_pipeline: state, idempotent: true };
   const outcome = normalizedOutcome(state, input, recordedAt);
-  outcome.id ||= nextOutcomeId(outcomes, leadId);
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(outcome)}\n`);
-  const leadPipeline = deriveLeadPipelineStates({ ...context, outcomes: [...outcomes, outcome] }).find((row) => row.lead_id === leadId);
+  outcome.id ||= nextOutcomeId(rows, leadId);
+  const leadPipeline = deriveLeadPipelineStates({ ...context, outcomes: [...rows, outcome] }).find((row) => row.lead_id === leadId);
   return { outcome, lead_pipeline: leadPipeline, idempotent: false };
+}
+
+export function appendLeadPipelineOutcome(
+  context,
+  input,
+  { filePath = DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH, recordedAt = new Date().toISOString() } = {},
+) {
+  const outcomes = readLeadPipelineOutcomes(filePath);
+  const resolved = resolveLeadPipelineOutcome(context, outcomes, input, recordedAt);
+  if (resolved.idempotent) return resolved;
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.appendFileSync(filePath, `${JSON.stringify(resolved.outcome)}\n`);
+  return resolved;
 }
 
 export function assertLeadPipelineOutcomes(rows) {

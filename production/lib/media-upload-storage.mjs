@@ -71,6 +71,29 @@ export function mediaUploadKey({ scope, subjectId, hash, ext, host = DEFAULT_MED
   return `${host}/${PRIVATE_PREFIX}/${id}/${name}`;
 }
 
+// A rendition sits beside the object it was derived from, in the same prefix,
+// under the same content hash: `ms-<hash>.jpg` gains `ms-<hash>-thumb.webp`.
+//
+// Staying in the prefix is the point, not a convenience. The public/private
+// split is expressed entirely by the prefix (the Worker serves only
+// `wp-content/uploads/*`), so a thumbnail of a seller's photo is unreachable
+// from the edge for exactly the same structural reason the photo is. There is
+// no branch here that could get that wrong.
+export function mediaUploadRenditionKey(key, { label = "thumb", ext } = {}) {
+  const value = assertSafeKey(key);
+  if (!/^[a-z0-9]{2,16}$/.test(String(label))) {
+    throw new MediaUploadStorageError("Rendition label must be a short slug", "bad_request");
+  }
+  if (!/^[a-z0-9]{3,4}$/.test(String(ext))) {
+    throw new MediaUploadStorageError("Rendition key requires a sniffed extension", "bad_request");
+  }
+  const slash = value.lastIndexOf("/");
+  const name = value.slice(slash + 1);
+  const dot = name.lastIndexOf(".");
+  if (dot < 1) throw new MediaUploadStorageError("Rendition key requires a named object", "bad_request");
+  return `${value.slice(0, slash + 1)}${name.slice(0, dot)}-${label}.${ext}`;
+}
+
 export function mediaUploadPublicUrl(key) {
   const value = String(key || "");
   const slash = value.indexOf("/");
