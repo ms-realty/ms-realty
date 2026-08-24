@@ -265,10 +265,10 @@ test("approved content lists every surface with its counts, its route and its wi
   const page = await dispatchHttp(app(), { url: "/admin/approved-content?locale=en", headers: auth });
   assert.equal(page.status, 200);
   assert.match(page.body, /data-kind="admin-approved-content"/);
-  assert.match(page.body, /data-approved-content-total="13"/);
+  assert.match(page.body, /data-approved-content-total="28"/);
   assert.match(page.body, /data-approved-content-publishable="2"/);
-  assert.match(page.body, /data-approved-content-blocked="11"/);
-  for (const section of ["team_profiles", "area_guides", "financing_partners", "purchase_fees"]) {
+  assert.match(page.body, /data-approved-content-blocked="26"/);
+  for (const section of ["team_profiles", "area_guides", "financing_partners", "purchase_fees", "guide_translations"]) {
     assert.match(page.body, new RegExp(`data-approved-section="${section}"`), section);
   }
   // Where the records surface, so an approver knows what goes live.
@@ -310,7 +310,7 @@ test("the approved content state filter narrows the rows on show and keeps the c
   assert.equal(withheld.status, 200);
   assert.match(withheld.body, /data-approved-content-state="withheld"/);
   // The counts still describe every record, not the filtered view.
-  assert.match(withheld.body, /data-approved-content-total="13"/);
+  assert.match(withheld.body, /data-approved-content-total="28"/);
   assert.match(withheld.body, /href="\/admin\/approved-content\?state=withheld"[^>]*data-on="1" aria-current="true"/);
   assert.doesNotMatch(withheld.body, /data-approved-state="ready"/);
   // A surface with nothing in the current view says so rather than showing an
