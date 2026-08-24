@@ -151,7 +151,11 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.doesNotMatch(css, /hp-hero__advanced|hp-hero__families|hp-hero__search-form/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /@media \(prefers-color-scheme: dark\) \{[\s\S]*?html:has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;/);
-  assert.match(css, /@media \(min-width: 901px\) \{\s*\.hp-guides__rail \{ grid-template-columns: repeat\(3, minmax\(0, 1fr\)\); \}/);
+  // The rail carries two approved guides, so it is two columns wide and a
+  // snap-scrolling carousel on a phone; a third column would leave a hole.
+  const pagesCss = readFileSync(new URL("../lib/ui/adapter-public-pages.css", import.meta.url), "utf8");
+  assert.match(pagesCss, /\.hp-guides__rail \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+  assert.match(pagesCss, /@media \(max-width: 760px\) \{[\s\S]*?\.hp-guides__rail \{[\s\S]*?scroll-snap-type: inline mandatory;/);
   assert.match(css, /\[data-featured-listings\]:has\(\[data-featured-empty\]\) \{ padding-bottom: var\(--space-8\); \}/);
   assert.match(css, /@media \(min-width: 1081px\) \{[\s\S]*?\.sr-filters--desktop \{[\s\S]*?max-height: calc\(100svh - 73px - var\(--space-12\)\);[\s\S]*?overflow-y: auto;/);
   assert.match(css, /main\.ct-page\.pg-narrow\[data-react-public-ui="seller"\] \{[\s\S]*?grid-template-columns: minmax\(0, 0\.9fr\) minmax\(0, 1\.1fr\);/);

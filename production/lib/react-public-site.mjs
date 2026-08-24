@@ -190,7 +190,12 @@ function SiteHeader({ chrome }) {
       h(
         "a",
         { href: chrome.home.href, className: "site-hd__logo", "aria-label": chrome.home.label },
-        h("img", { src: LOGO_URL, alt: chrome.home.label, height: 40, width: Math.round(40 * LOGO_ASPECT) }),
+        h(
+          "picture",
+          null,
+          h("source", { media: "(prefers-color-scheme: dark)", srcSet: LOGO_URL_REVERSED }),
+          h("img", { src: LOGO_URL, alt: chrome.home.label, height: 40, width: Math.round(40 * LOGO_ASPECT) }),
+        ),
       ),
       h(
         "nav",

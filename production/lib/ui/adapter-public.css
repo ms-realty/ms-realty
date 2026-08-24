@@ -1284,3 +1284,63 @@ main .ct-form select {
   .sr-active a,
   .sr-toolbar__view button,
   .sr-area-map__directory a { min-height: 44px; }}
+/* ---- Dark mode: the same scale, read from the other end ----
+   Every value below is a token from the design system's own stone/ink/brick
+   ramps, so a dark viewer sees the same palette inverted rather than a second
+   palette invented for the occasion. Only the surfaces and the two ring
+   colours are literal, because the scale has no step that dark enough. */
+@media (prefers-color-scheme: dark) {
+  html:has(main[data-react-public-ui]) {
+    color-scheme: dark;
+    --canvas: #12110f;
+    --surface: #1c1a17;
+    --surface-sunken: #25221e;
+    --surface-hover: #302b25;
+    --surface-inverse: #0c0c0b;
+    --overlay: rgba(0, 0, 0, 0.68);
+    --text-strong: var(--stone-50);
+    --text-body: var(--stone-200);
+    --text-muted: var(--stone-400);
+    --text-subtle: var(--stone-500);
+    --text-on-dark: var(--stone-50);
+    --text-on-brand: var(--ink-950);
+    --text-link: var(--stone-100);
+    --border: #443c32;
+    --border-strong: #665a49;
+    --brand: var(--ink-50);
+    --brand-hover: #ffffff;
+    --brand-active: var(--ink-100);
+    --brand-subtle: #2b2926;
+    --accent: var(--brick-600);
+    --accent-hover: var(--brick-500);
+    --accent-active: var(--brick-700);
+    --accent-subtle: #3b2020;
+    --price: #ffffff;
+    --rating: var(--stone-100);
+    --ring: rgba(237, 132, 132, 0.58);
+    --ring-accent: rgba(244, 244, 243, 0.45);
+    --for-sale-fg: var(--ink-50);
+    --for-sale-bg: var(--ink-600);
+    --for-rent-fg: var(--ink-100);
+    --for-rent-bg: var(--ink-700);
+    --new-fg: var(--stone-100);
+    --new-bg: var(--stone-800);
+    --reduced-fg: var(--brick-200);
+    --reduced-bg: var(--brick-900);
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.24);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.28);
+    --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.38);
+    --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.46);
+  }
+
+  html:has(main[data-react-public-ui]) .site-hd {
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+  }
+
+  /* The search card sits on the hero photograph, so it keeps its own opacity
+     rather than inheriting the header's. */
+  html:has(main[data-react-public-ui]) .hp-search__card {
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+  }
+}

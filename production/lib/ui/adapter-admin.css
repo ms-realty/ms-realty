@@ -1841,3 +1841,47 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 @media (max-width: 700px) {
   .adm-media-upload__row { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ---- Dark mode: the workbench reads from the same ramps as the public site ----
+   Every admin surface already paints through a token, so redefining the tokens
+   is the whole theme. color-scheme on the root is what turns the native
+   controls, scrollbars and focus rings dark; without it the browser keeps
+   painting a light select on a dark panel. */
+@media (prefers-color-scheme: dark) {
+  html:has(main[data-react-admin-ui]) {
+    color-scheme: dark;
+  }
+
+  .crm-app {
+    --canvas: #12110f;
+    --surface: #1c1a17;
+    --surface-sunken: #25221e;
+    --surface-hover: #302b25;
+    --surface-inverse: #0c0c0b;
+    --overlay: rgba(0, 0, 0, 0.68);
+    --text-strong: var(--stone-50);
+    --text-body: var(--stone-200);
+    --text-muted: var(--stone-400);
+    --text-subtle: var(--stone-500);
+    --text-link: var(--stone-100);
+    --border: #443c32;
+    --border-strong: #665a49;
+    --brand: var(--ink-50);
+    --brand-hover: #ffffff;
+    --brand-active: var(--ink-100);
+    --brand-subtle: #2b2926;
+    --accent: var(--brick-600);
+    --accent-hover: var(--brick-500);
+    --accent-active: var(--brick-700);
+    --accent-subtle: #3b2020;
+    --ring: rgba(237, 132, 132, 0.58);
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.24);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.28);
+    --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.38);
+  }
+
+  .crm-top {
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+  }
+}

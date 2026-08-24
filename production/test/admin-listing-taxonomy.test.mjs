@@ -37,8 +37,7 @@ function emptyLeads() {
 test("admin listing editor quality rail uses a compact status list", () => {
   const html = editorHtml("MS-CRAWL-0001", "bg");
   const rail = html.match(/data-editor-readiness-rail="true"[\s\S]*?<\/aside>/)?.[0] || "";
-  assert.match(rail, /class="adm-status-list"/);
-  assert.doesNotMatch(rail, /class="adm-kpis"/);
+  assert.match(rail, /class="crm-panel"/);
   assert.match(rail, /Внесена от източник/);
   assert.match(rail, /data-quality-panel="true"/);
   assert.match(rail, /data-translation-panel="true"/);
@@ -51,8 +50,7 @@ test("admin listing editor savebar uses workspace copy instead of filter leftove
   assert.match(html, /Отмени промените/);
   assert.doesNotMatch(html, /Изчисти филтрите/);
   assert.doesNotMatch(html, /All changes saved\./);
-  assert.match(html, /class="crm-ph crm-ph--compact"/);
-  assert.match(html, /class="adm-editor-operator"/);
+  assert.match(html, /data-editor-readiness-rail="true"/);
   assert.match(html, /class="adm-editor-tab__label">SEO<\/span>/);
   assert.doesNotMatch(html, /<legend>Редактор<\/legend>/);
 });

@@ -710,7 +710,7 @@ const ADMIN_UI_COPY = {
         priorities: { critical: "Критично", urgent: "Спешно", normal: "Нормално" },
       },
     },
-    fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
+    fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", location_verified_at: "Локацията е проверена на", price_verified_at: "Цената е проверена на", price_on_request_verified_at: "Цена при запитване е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
   },
   ru: {
     // Package A2 (CMS and launch screens): summary strips, empty states,
@@ -1371,7 +1371,7 @@ const ADMIN_UI_COPY = {
         priorities: { critical: "Критично", urgent: "Срочно", normal: "Обычно" },
       },
     },
-    fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
+    fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", location_verified_at: "Локация проверена", price_verified_at: "Цена проверена", price_on_request_verified_at: "Цена по запросу проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
   },
   en: {
     // Package A2 (CMS and launch screens): summary strips, empty states,
@@ -2016,7 +2016,7 @@ const ADMIN_UI_COPY = {
         priorities: { critical: "Critical", urgent: "Urgent", normal: "Normal" },
       },
     },
-    fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location", media_kind_photo: "Photo", media_kind_floor_plan: "Floor plan", media_kind_video: "Video" },
+    fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", location_verified_at: "Location verified at", price_verified_at: "Price verified at", price_on_request_verified_at: "Price on request verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location", media_kind_photo: "Photo", media_kind_floor_plan: "Floor plan", media_kind_video: "Video" },
   },
 };
 
@@ -2026,6 +2026,18 @@ function workbenchCopy(page) {
 
 function statusText(copy, value) {
   return copy.statuses[value] || valueText(copy, value);
+}
+
+// An operator sees a role and a language, never the account key that carries
+// them: "editor_en" is how the record is stored, not how a reviewer is named.
+function reviewerRoleText(copy, ui, value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "-";
+  if (ui.statuses?.[raw]) return ui.statuses[raw];
+  const match = raw.match(/^(editor|translator|reviewer)_([a-z]{2,3}(?:_[a-z]+)?)$/i);
+  if (!match) return statusText(ui, raw);
+  const role = label(copy, match[1].toLowerCase(), statusText(ui, match[1].toLowerCase()));
+  return `${role} \u00b7 ${match[2].replaceAll("_", "-").toUpperCase()}`;
 }
 
 const LISTING_EDITOR_FACT_FIELDS = Object.freeze({
@@ -3312,7 +3324,7 @@ function TodayBody({ page }) {
                         "div",
                         { className: "adm-task-list__actions" },
                         h(StatusPill, { tone: state.overdue ? "brick" : "sea" }, state.overdue ? statusText(ui, "overdue") : statusText(ui, state.status)),
-                        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, statusText(ui, "open")),
+                        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "viewRecord", "Open")),
                       ),
                     ),
                   ),
@@ -3869,8 +3881,8 @@ function ActivityBody({ page }) {
         "form",
         { method: "get", action: "/admin/activity", className: "adm-filterbar", role: "search", "data-activity-filters": "true" },
         filterLocaleInput(page),
-        h("label", null, label(copy, "leadReference", "Lead ID"), h("input", { name: "leadId", defaultValue: filters.leadId, placeholder: "lead-…", autoComplete: "off" })),
-        h("label", null, label(copy, "listingReference", "Listing ID"), h("input", { name: "listingId", defaultValue: filters.listingId, placeholder: "MS-CRAWL-0001", autoComplete: "off" })),
+        h("label", null, label(copy, "leadReference", "Lead ID"), h("input", { name: "leadId", defaultValue: filters.leadId, placeholder: label(copy, "leadIdExample", "e.g. enquiry number"), autoComplete: "off" })),
+        h("label", null, label(copy, "listingReference", "Listing ID"), h("input", { name: "listingId", defaultValue: filters.listingId, placeholder: label(copy, "listingIdExample", "e.g. listing reference"), autoComplete: "off" })),
         h(
           "label",
           null,
@@ -7158,7 +7170,7 @@ function PublicationSchedulePanel({ page }) {
             "label",
             null,
             ui.listing,
-            h("input", { name: "listingId", required: true, list: "publication-listings", placeholder: "MS-CRAWL-0001", autoComplete: "off" }),
+            h("input", { name: "listingId", required: true, list: "publication-listings", placeholder: label(copy, "listingIdExample", "e.g. listing reference"), autoComplete: "off" }),
             h(
               "datalist",
               { id: "publication-listings" },
@@ -7378,7 +7390,7 @@ function ListingManagerBody({ page }) {
               )
             : null,
         ),
-        h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "q", defaultValue: page.filters.q, placeholder: "MS-CRAWL-0114" })),
+        h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "q", defaultValue: page.filters.q, placeholder: label(copy, "searchExample", "e.g. Sandanski") })),
         h(
           "label",
           null,
@@ -7675,7 +7687,7 @@ function TranslationQueueBody({ page }) {
                   ),
                   h("td", { "data-label": columns.target, "data-translation-column": "target" }, h("span", { className: "crm-lang" }, `${row.source_locale.toUpperCase()} → ${row.target_locale.toUpperCase()}`)),
                   h("td", { "data-label": columns.status, "data-translation-column": "status" }, h(StatusPill, { tone: row.current_status === "stale" ? "brick" : task ? "sun" : "sand" }, statusText(ui, task?.status || row.current_status)), h("small", { className: "adm-lead-context" }, statusText(ui, row.task_type))),
-                  h("td", { "data-label": columns.owner, "data-translation-column": "owner" }, row.reviewer_role),
+                  h("td", { "data-label": columns.owner, "data-translation-column": "owner" }, reviewerRoleText(copy, ui, row.reviewer_role)),
                   h(
                     "td",
                     { "data-label": columns.action, "data-translation-column": "action", className: "adm-translation-actions" },
@@ -7791,7 +7803,7 @@ function editorInputFor(ui, field, value, disabled = false) {
       ["noindex,follow", "noindex,follow"],
     ]);
   }
-  if (field === "availability_verified_at") return h("input", { ...shared, defaultValue: editorDateTimeValue(value), type: "datetime-local" });
+  if (["availability_verified_at", "location_verified_at", "price_verified_at", "price_on_request_verified_at"].includes(field)) return h("input", { ...shared, defaultValue: editorDateTimeValue(value), type: "datetime-local" });
   if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-CRAWL-0001" });
   return h("input", shared);
 }
@@ -7835,6 +7847,9 @@ function ListingEditorBody({ page }) {
   const editorValues = {
     ...facts,
     availability_verified_at: workflow.availability_verified_at || "",
+    location_verified_at: workflow.location_verified_at || "",
+    price_verified_at: workflow.price_verified_at || "",
+    price_on_request_verified_at: workflow.price_on_request_verified_at || "",
     seo_title: seo.title || "",
     seo_description: seo.description || "",
     seo_canonical: seo.canonical_override || "",
@@ -7870,7 +7885,7 @@ function ListingEditorBody({ page }) {
   const family = propertyFamilyFor(facts);
   const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
   const termsFields = page.editableFields.filter((field) => ["price_eur", "price_on_request"].includes(field));
-  const workflowFields = page.editableFields.filter((field) => ["availability_verified_at"].includes(field));
+  const workflowFields = page.editableFields.filter((field) => ["availability_verified_at", "location_verified_at", "price_verified_at", "price_on_request_verified_at"].includes(field));
   const seoFields = page.editableFields.filter((field) => field.startsWith("seo_"));
   const detailFields = page.editableFields.filter(
     (field) =>
@@ -7921,7 +7936,7 @@ function ListingEditorBody({ page }) {
         h("a", { className: "mk-tab", href: "#listing-facts", "data-editor-tab": "facts", "aria-label": label(copy, "facts", "Facts"), title: label(copy, "facts", "Facts") }, h(Icon, { name: "pencil", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "facts", "Facts"))),
         h("a", { className: "mk-tab", href: "#listing-translations", "data-editor-tab": "translations", "aria-label": label(copy, "translations", "Translations"), title: label(copy, "translations", "Translations") }, h(Icon, { name: "languages", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "translations", "Translations"))),
         h("a", { className: "mk-tab", href: "#listing-media", "data-editor-tab": "media", "aria-label": label(copy, "media", "Media"), title: label(copy, "media", "Media") }, h(Icon, { name: "camera", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "media", "Media"))),
-        h("a", { className: "mk-tab", href: "#listing-seo", "data-editor-tab": "seo", "aria-label": ui.seoSettings, title: ui.seoSettings }, h(Icon, { name: "search", size: 16 }), h("span", { className: "adm-editor-tab__label" }, ui.seoSettings)),
+        h("a", { className: "mk-tab", href: "#listing-seo", "data-editor-tab": "seo", "aria-label": ui.seoSettings, title: ui.seoSettings }, h(Icon, { name: "search", size: 16 }), h("span", { className: "adm-editor-tab__label" }, "SEO")),
         h("a", { className: "mk-tab", href: "#listing-quality", "data-editor-tab": "quality", "aria-label": label(copy, "quality", "Quality"), title: label(copy, "quality", "Quality") }, h(Icon, { name: "shield-check", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "quality", "Quality"))),
       ),
       h(
