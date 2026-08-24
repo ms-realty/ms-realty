@@ -485,7 +485,7 @@ const ADMIN_UI_COPY = {
       unverified: "Непроверена", available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", offer_received: "Получена оферта", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", listing_publish: "Публикуване на обявата", listing_offer: "Оферта за обявата", seller_close: "Приключване на продажбата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
       commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", plot: "Парцел", agricultural_land: "Земеделска земя", land: "Парцел", property: "Имот", sale: "Продажба", rent: "Наем",
-      public_enabled: "Публично включен", indexable: "Индексируем", fallback_locale: "Резервен език", object_id: "Идентификатор на обект", public_indexable: "Публично индексируем", can_mark_indexable: "Може да се маркира за индекс", lead_id: "Номер на запитване", listing_id: "Референция на обява", instant: "Веднага", daily: "Ежедневно", weekly: "Седмично", broker_international: "Международен брокер",
+      public_enabled: "Публично включен", indexable: "Индексируем", fallback_locale: "Резервен език", object_id: "Идентификатор на обект", public_indexable: "Публично индексируем", can_mark_indexable: "Може да се маркира за индекс", lead_id: "Номер на запитване", listing_id: "Референция на обява", approved_imported_photo: "Одобрена снимка от източника", reviewed_private: "Прегледана, непублична", needs_media_review: "Чака преглед на медията", instant: "Веднага", daily: "Ежедневно", weekly: "Седмично", broker_international: "Международен брокер",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
     approvedContent: {
@@ -1146,7 +1146,7 @@ const ADMIN_UI_COPY = {
       unverified: "Не проверено", available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", offer_received: "Предложение получено", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", listing_publish: "Публикация объекта", listing_offer: "Предложение по объекту", seller_close: "Завершение продажи", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
       commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", plot: "Участок", agricultural_land: "Сельхозземля", land: "Участок", property: "Объект", sale: "Продажа", rent: "Аренда",
-      public_enabled: "Публично включено", indexable: "Индексируемый", fallback_locale: "Резервный язык", object_id: "Идентификатор объекта", public_indexable: "Публично индексируемый", can_mark_indexable: "Можно отметить для индекса", lead_id: "Номер заявки", listing_id: "Ссылка объекта", instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно", broker_international: "Международный брокер",
+      public_enabled: "Публично включено", indexable: "Индексируемый", fallback_locale: "Резервный язык", object_id: "Идентификатор объекта", public_indexable: "Публично индексируемый", can_mark_indexable: "Можно отметить для индекса", lead_id: "Номер заявки", listing_id: "Ссылка объекта", approved_imported_photo: "Одобренное фото из источника", reviewed_private: "Проверено, непубличное", needs_media_review: "Ожидает проверки медиа", instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно", broker_international: "Международный брокер",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
     approvedContent: {
@@ -1807,7 +1807,7 @@ const ADMIN_UI_COPY = {
       unverified: "Unverified", available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", offer_received: "Offer received", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", listing_publish: "Listing publication", listing_offer: "Listing offer", seller_close: "Sale completion", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
       commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", plot: "Plot", agricultural_land: "Agricultural land", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
-      public_enabled: "Publicly enabled", indexable: "Indexable", fallback_locale: "Fallback locale", object_id: "Object ID", public_indexable: "Publicly indexable", can_mark_indexable: "Can mark indexable", lead_id: "Enquiry ID", listing_id: "Listing reference", instant: "As soon as possible", daily: "Daily", weekly: "Weekly", broker_international: "International broker",
+      public_enabled: "Publicly enabled", indexable: "Indexable", fallback_locale: "Fallback locale", object_id: "Object ID", public_indexable: "Publicly indexable", can_mark_indexable: "Can mark indexable", lead_id: "Enquiry ID", listing_id: "Listing reference", approved_imported_photo: "Approved imported photo", reviewed_private: "Reviewed, private", needs_media_review: "Awaiting media review", instant: "As soon as possible", daily: "Daily", weekly: "Weekly", broker_international: "International broker",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
     },
     approvedContent: {
@@ -7775,7 +7775,15 @@ function TranslationQueueBody({ page }) {
                               ),
                             )
                           : h("span", { className: "crm-tbl__muted" }, task ? label(copy, "awaitingHermesDraft", "Awaiting Hermes draft") : statusText(ui, row.task_type)),
-                    h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(row.listing_id, page) }, label(copy, "openEditor", "Open editor")),
+                    h(
+                      "a",
+                      {
+                        className: "mk-btn mk-btn--ghost mk-btn--sm",
+                        href: `${payloadAdminListingHref(row.listing_id, page)}&translation=${encodeURIComponent(row.target_locale)}#listing-translations`,
+                        "aria-label": `${label(copy, "openEditor", "Open editor")} \u00b7 ${String(row.target_locale || "").toUpperCase()}`,
+                      },
+                      label(copy, "openEditor", "Open editor"),
+                    ),
                   ),
                 );
               }),
@@ -9784,12 +9792,12 @@ function SettingsSection({ page, section, icon, fields }) {
       h("input", { type: "hidden", name: "locale", value: page.workspace?.locale || "en" }),
       h("div", { className: "adm-settings-grid" }, ...fields),
       sectionCopy.note ? h("p", { className: "adm-settings-note" }, h(Icon, { name: "info", size: 15 }), h("span", null, sectionCopy.note)) : null,
-      disabled
+      disabled && writable
         ? h(
             "p",
             { className: "adm-settings-note adm-settings-note--blocked", "data-settings-read-only": "true" },
             h(Icon, { name: "info", size: 15 }),
-            h("span", null, writable ? label(adminCopy(page), "readOnlyAccess", "This role has read-only access.") : copy.readOnly),
+            h("span", null, label(adminCopy(page), "readOnlyAccess", "This role has read-only access.")),
           )
         : null,
       h(
@@ -10401,6 +10409,7 @@ function SettingsBody({ page }) {
   const brokers = page.brokerProfiles || [];
   const title = settings.title;
   const disabled = page.settings_writable === false || !pageCan(page, "settings:manage");
+  const storeMissing = page.settings_writable === false;
   const agency = settingsSectionValues(page, "agency");
   const leads = settingsSectionValues(page, "leads");
   const notifications = settingsSectionValues(page, "notifications");
@@ -10496,6 +10505,16 @@ function SettingsBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: settings.description }),
+      // The store being unconfigured is one fact about the environment, said
+      // once - not restated under every section.
+      storeMissing
+        ? h(
+            "p",
+            { className: "adm-settings-note adm-settings-note--blocked", "data-settings-store-missing": "true" },
+            h(Icon, { name: "info", size: 15 }),
+            h("span", null, settings.readOnly),
+          )
+        : null,
       h(
         "div",
         { className: "adm-workbench-shell adm-workbench-shell--settings", "data-settings-layout": "sections-rail" },

@@ -114,7 +114,6 @@ export function appApiConfigFromEnv(env = process.env) {
     mediaUploadStorageConfig: mediaUploadStorageConfigFromEnv(env),
     mediaUploadLimits: mediaUploadLimitsFromEnv(env, { maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES) }),
     sellerPhotoUploadEnabled: env.MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED !== "1",
-    sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || LAUNCH_READINESS_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,

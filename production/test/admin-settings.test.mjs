@@ -365,8 +365,10 @@ test("settings stay read-only without a configured ledger and for operators with
     const app = createHttpApp({ ...paths(), workspaceSettingsPath: null });
     const page = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
     assert.equal(page.status, 200);
-    assert.match(page.body, /data-settings-read-only="true"/);
-    assert.match(page.body, /Settings storage is not configured on this runtime\./);
+    // The unconfigured store is one page-level banner now, not a note under
+    // every section; the per-section note is reserved for the role case.
+    assert.match(page.body, /data-settings-store-missing="true"/);
+    assert.equal([...page.body.matchAll(/Settings storage is not configured on this runtime\./g)].length, 1);
     assert.match(page.body, /data-settings-disabled="true"/);
     const blocked = await dispatchHttp(app, { method: "POST", url: "/api/admin/settings", headers: HEADERS, body: { section: "agency", name: "X" } });
     assert.equal(blocked.status, 503);
