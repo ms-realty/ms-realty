@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import { fromRoot } from "../lib/paths.mjs";
 import { loadApprovedLaunchFreeze } from "../lib/launch-freeze.mjs";
 import { operatorPublishedListingApproval } from "../lib/listing-publication-approval.mjs";
 import { loadPayloadCollections } from "../lib/payload-collections.mjs";
@@ -11,6 +13,7 @@ import {
   PUBLICATION_REFUSAL_REASONS,
   PUBLICATION_SKIP_REASONS,
   publicationSyncAuditRecords,
+  readPublicationRows,
   seedListingRecords,
   seedPublicationStateFor,
   TRANSLATION_HOLD_REASONS,
@@ -533,20 +536,39 @@ test("applying the plan writes publication state through the Local API and commi
   assert.equal(second.idempotent, true);
 });
 
-test("a dry-run plan writes nothing", async () => {
-  const records = [seedRecord("MS-1")];
+test("a dry run reads and plans without opening a transaction or writing a row", async () => {
+  const records = [seedRecord("MS-1"), seedRecord("MS-2")];
   const rows = importedRows(records);
-  const approval = approvalFor(["MS-1"]);
-  const plan = buildListingPublicationSyncPlan({ ...rows, seedRecords: records, approval });
-  const runtime = fakePayloadRuntime(rows);
+  const approval = approvalFor(["MS-1", "MS-2"]);
+  // Any write at all fails this runtime, so planning cannot quietly write.
+  const runtime = fakePayloadRuntime(rows, {
+    failWrite: () => {
+      throw new Error("a dry run must not write");
+    },
+  });
 
-  // A dry run builds the plan and stops before applyListingPublicationSync.
-  assert.equal(plan.summary.apply, 1);
+  const readBack = await readPublicationRows(runtime.payload);
+  const plan = buildListingPublicationSyncPlan({ ...readBack, seedRecords: records, approval });
+
+  assert.equal(plan.summary.apply, 2);
   assert.equal(runtime.calls.begin, 0);
+  assert.equal(runtime.calls.commit, 0);
   assert.equal(runtime.calls.updates.length, 0);
+
   const untouched = runtime.currentRows();
-  assert.equal(untouched.currentListings[0].cms_status, "source_imported_review_required");
-  assert.equal(untouched.currentTranslations[0].public_indexable, false);
+  for (const listing of untouched.currentListings) {
+    assert.equal(listing.cms_status, "source_imported_review_required");
+    assert.equal(listing._status, "draft");
+    assert.equal(listing.workflow.publish_approved, null);
+  }
+  for (const translation of untouched.currentTranslations) {
+    assert.equal(translation.public_indexable, false);
+    assert.equal(translation.status, "draft");
+  }
+
+  // And the command routes --dry-run before the apply step rather than after.
+  const script = fs.readFileSync(fromRoot("production", "scripts", "run-payload-publication-sync.mjs"), "utf8");
+  assert.ok(script.indexOf("dry_run_ready") < script.indexOf("applyListingPublicationSync({"));
 });
 
 test("a failed write rolls back and leaves the database at its previous publication state", async () => {
