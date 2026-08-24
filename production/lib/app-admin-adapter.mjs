@@ -132,7 +132,24 @@ import {
   leadDurableStoreConfigFromEnv,
   payloadUserForLeadRead,
   readLeadIntakesDurably,
+  readSellerPipelineItemsDurably,
 } from "./lead-durable-store.mjs";
+import {
+  LeadOperationStoreUnavailableError,
+  isLeadOperationsDurableStoreEnabled,
+  leadOperationsDurableStoreConfigFromEnv,
+} from "./lead-ops-durable-store.mjs";
+import {
+  applyLeadBulkOperation,
+  leadJourneyContextFrom,
+  leadOperationLedgers,
+  recordDealCloseOperation,
+  recordLeadAssignmentOperation,
+  recordLeadPipelineOutcomeOperation,
+  recordLeadSnoozeOperation,
+  recordLeadUnsnoozeOperation,
+  recordSellerPipelineOutcomeOperation,
+} from "./lead-ops-workflows.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
 import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import {
@@ -402,6 +419,7 @@ export function appAdminConfigFromEnv(env = process.env) {
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
     leadDurableStore: leadDurableStoreConfigFromEnv(env),
+    leadOperationsDurableStore: leadOperationsDurableStoreConfigFromEnv(env),
     publicContactVaultPath:
       env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
     publicContactKey: env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY,
@@ -850,16 +868,74 @@ function currentSeed(config) {
   );
 }
 
-function leadJourneyContext(config) {
-  return {
-    leads: applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath)),
-    outcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
-    viewings: readViewings(config.viewingLedgerPath),
-    viewingFollowUps: readViewingFollowUps(config.viewingFollowUpLedgerPath),
-    deals: readDeals(config.dealLedgerPath),
-    sellerPipelines: readSellerPipeline(config.sellerPipelinePath),
-    sellerPipelineOutcomes: readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath),
-  };
+// Durable lead operations are active only when the operator asked for them AND
+// the runtime is configured. Anything short of that keeps the file ledgers, and
+// the boundary keeps refusing the routes rather than writing to a disk that is
+// about to be wiped.
+function leadOperationsDurable(config) {
+  const store = config.leadOperationsDurableStore || {};
+  if (!store.leadOperationsDurableStoreEnabled) return false;
+  if (!isLeadOperationsDurableStoreEnabled(store)) {
+    throw new LeadOperationStoreUnavailableError("Durable lead operation store is enabled but not fully configured");
+  }
+  return true;
+}
+
+function leadOperationLedgersFor(config) {
+  const store = config.leadOperationsDurableStore || {};
+  return leadOperationLedgers({
+    durable: leadOperationsDurable(config),
+    payload: config.leadOperationsPayload || config.leadDurablePayload || null,
+    workspaceId: store.workspaceId,
+    paths: {
+      snooze: config.leadSnoozeLedgerPath,
+      assignment: config.leadAssignmentLedgerPath,
+      leadPipelineOutcome: config.leadPipelineOutcomeLedgerPath,
+      sellerPipelineOutcome: config.sellerPipelineOutcomeLedgerPath,
+      deal: config.dealLedgerPath,
+    },
+    ...(config.readLeadOperationsDurably ? { readOperations: config.readLeadOperationsDurably } : {}),
+    ...(config.appendLeadOperationDurably ? { appendOperations: config.appendLeadOperationDurably } : {}),
+  });
+}
+
+// The seller pipeline items themselves are created at intake. Durable intake
+// already stores them as seller_pipeline_events, so that is where they are read
+// from once the lead store owns the leads.
+async function sellerPipelineItems(config, source = null) {
+  const durableStore = config.leadDurableStore || {};
+  if (!durableStore.leadDurableStoreEnabled) return readSellerPipeline(config.sellerPipelinePath);
+  const items = await (config.readSellerPipelineItemsDurably || readSellerPipelineItemsDurably)({
+    payload: config.leadDurablePayload || null,
+    workspaceId: durableStore.workspaceId,
+  });
+  if (!Array.isArray(items)) throw new LeadStoreUnavailableError("Durable seller pipeline readback returned invalid rows");
+  if (!source?.leads) return items;
+  const leadIds = new Set(source.leads.map((lead) => lead.lead_id));
+  return items.filter((item) => leadIds.has(item.lead_id));
+}
+
+// The journey's leads: the plain file ledger while intake is file-backed (which
+// is what this context has always used), the durable leads once it is not.
+async function leadJourneySource(config) {
+  if (!config.leadDurableStore?.leadDurableStoreEnabled) {
+    return { durable: false, leads: readLeadLedger(config.leadLedgerPath) };
+  }
+  return adminLeadSource(config);
+}
+
+async function leadJourneyContext(config, source = null) {
+  const ledgers = leadOperationLedgersFor(config);
+  const leadSource = source || (await leadJourneySource(config));
+  const filterRows = leadScopedRows(leadSource);
+  const assignments = filterRows(await ledgers.assignments.read());
+  return leadJourneyContextFrom({
+    ledgers,
+    leads: applyLeadAssignments(leadSource.leads, assignments),
+    viewings: filterRows((await adminViewingSource(config)).viewings),
+    viewingFollowUps: filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath)),
+    sellerPipelines: await sellerPipelineItems(config, leadSource),
+  });
 }
 
 function currentListingQualityReport(config, options = {}) {
@@ -2169,7 +2245,7 @@ function appendViewingFollowUpEntry(input, config) {
   return result;
 }
 
-function appendSellerPipelineOutcomeEntry(input, config) {
+async function appendSellerPipelineOutcomeEntry(input, config) {
   const recordedAt = config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
   const authenticatedInput = bindAuthenticatedOperator(input, config.adminPrincipal);
   if ((authenticatedInput.commissionEur ?? authenticatedInput.commission_eur) !== undefined && !canAdminAccess(config.adminPrincipal, "financials:write")) {
@@ -2178,32 +2254,37 @@ function appendSellerPipelineOutcomeEntry(input, config) {
       capability: "financials:write",
     });
   }
-  const result = appendSellerPipelineOutcome(readSellerPipeline(config.sellerPipelinePath), authenticatedInput, {
-    filePath: config.sellerPipelineOutcomeLedgerPath,
+  return recordSellerPipelineOutcomeOperation({
+    ledgers: leadOperationLedgersFor(config),
+    sellerPipelines: await sellerPipelineItems(config),
+    input: authenticatedInput,
+    principal: config.adminPrincipal,
     recordedAt,
-  });
-  // ponytail: separate JSONL ledgers are not transactional; an idempotent retry repairs a missing summary audit.
-  if (!readAuditLog(config.auditLogPath).some((row) => row.action === "seller_pipeline_outcome_recorded" && row.object_id === result.outcome.id)) {
-    recordAudit(
-      {
-        action: "seller_pipeline_outcome_recorded",
-        actor: result.outcome.actor,
-        objectType: "seller_pipeline_outcome",
-        objectId: result.outcome.id,
-        locale: result.seller_pipeline.original_language,
-        metadata: {
-          seller_pipeline_id: result.seller_pipeline.id,
-          lead_id: result.seller_pipeline.lead_id,
-          action: result.outcome.action,
-          stage: result.seller_pipeline.stage,
-          due_at: result.seller_pipeline.next_task?.due_at || null,
+    onRecorded: (result) => {
+      // ponytail: separate JSONL ledgers are not transactional; an idempotent retry repairs a missing summary audit.
+      if (readAuditLog(config.auditLogPath).some((row) => row.action === "seller_pipeline_outcome_recorded" && row.object_id === result.outcome.id)) {
+        return;
+      }
+      recordAudit(
+        {
+          action: "seller_pipeline_outcome_recorded",
+          actor: result.outcome.actor,
+          objectType: "seller_pipeline_outcome",
+          objectId: result.outcome.id,
+          locale: result.seller_pipeline.original_language,
+          metadata: {
+            seller_pipeline_id: result.seller_pipeline.id,
+            lead_id: result.seller_pipeline.lead_id,
+            action: result.outcome.action,
+            stage: result.seller_pipeline.stage,
+            due_at: result.seller_pipeline.next_task?.due_at || null,
+          },
         },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return result;
+        config,
+        recordedAt,
+      );
+    },
+  });
 }
 
 function appendPublicRequestOutcomeEntry(input, config) {
@@ -2360,39 +2441,44 @@ async function sendQueuedReplyViaProvider(input, config) {
   return { ...result, provider_delivery: providerDelivery };
 }
 
-function appendLeadPipelineOutcomeEntry(input, config) {
+async function appendLeadPipelineOutcomeEntry(input, config) {
   const recordedAt = config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
-  const result = appendLeadPipelineOutcome(
-    leadJourneyContext(config),
-    bindAuthenticatedOperator(input, config.adminPrincipal),
-    { filePath: config.leadPipelineOutcomeLedgerPath, recordedAt },
-  );
-  if (
-    !readAuditLog(config.auditLogPath).some(
-      (row) => row.action === "lead_pipeline_outcome_recorded" && row.object_id === result.outcome.id,
-    )
-  ) {
-    recordAudit(
-      {
-        action: "lead_pipeline_outcome_recorded",
-        actor: result.outcome.actor,
-        objectType: "lead_pipeline_outcome",
-        objectId: result.outcome.id,
-        locale: result.lead_pipeline.original_language,
-        metadata: {
-          lead_id: result.outcome.lead_id,
-          pipeline: result.outcome.pipeline,
-          action: result.outcome.action,
-          from_stage: result.outcome.from_stage,
-          to_stage: result.outcome.to_stage,
-          next_follow_up_at: result.outcome.next_follow_up_at,
+  return recordLeadPipelineOutcomeOperation({
+    ledgers: leadOperationLedgersFor(config),
+    journey: await leadJourneyContext(config),
+    input: bindAuthenticatedOperator(input, config.adminPrincipal),
+    principal: config.adminPrincipal,
+    recordedAt,
+    onRecorded: (result) => {
+      // ponytail: separate JSONL ledgers are not transactional; an idempotent retry repairs a missing summary audit.
+      if (
+        readAuditLog(config.auditLogPath).some(
+          (row) => row.action === "lead_pipeline_outcome_recorded" && row.object_id === result.outcome.id,
+        )
+      ) {
+        return;
+      }
+      recordAudit(
+        {
+          action: "lead_pipeline_outcome_recorded",
+          actor: result.outcome.actor,
+          objectType: "lead_pipeline_outcome",
+          objectId: result.outcome.id,
+          locale: result.lead_pipeline.original_language,
+          metadata: {
+            lead_id: result.outcome.lead_id,
+            pipeline: result.outcome.pipeline,
+            action: result.outcome.action,
+            from_stage: result.outcome.from_stage,
+            to_stage: result.outcome.to_stage,
+            next_follow_up_at: result.outcome.next_follow_up_at,
+          },
         },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return result;
+        config,
+        recordedAt,
+      );
+    },
+  });
 }
 
 async function openRealtyCaseEntry(input, config) {
@@ -2632,188 +2718,68 @@ function appendBrokerLeadEntry(input, registry, config) {
 // B1 lead operations. Each helper is the single-item path; the bulk route
 // below reuses them verbatim so both share one set of rules and write one
 // audit entry per enquiry.
-function appendLeadSnoozeEntry(input, config, recordedAt) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const leads = readLeadLedger(config.leadLedgerPath);
-  const record = createLeadSnooze(leads, readLeadSnoozes(config.leadSnoozeLedgerPath), attributed, recordedAt);
-  const persisted = appendLeadSnooze(record, { filePath: config.leadSnoozeLedgerPath });
-  if (!persisted.idempotent) {
-    recordAudit(
-      {
-        action: "lead_snoozed",
-        actor: persisted.actor,
-        objectType: "lead_snooze",
-        objectId: persisted.id,
-        metadata: { lead_id: persisted.lead_id, until: persisted.until, reason: persisted.reason },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return persisted;
+function leadOperationAudit(config) {
+  return (entry, recordedAt) => recordAudit(entry, config, recordedAt);
 }
 
-function appendLeadUnsnoozeEntry(input, config, recordedAt) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const leads = readLeadLedger(config.leadLedgerPath);
-  const record = createLeadUnsnooze(leads, readLeadSnoozes(config.leadSnoozeLedgerPath), attributed, recordedAt);
-  const persisted = appendLeadSnooze(record, { filePath: config.leadSnoozeLedgerPath });
-  if (!persisted.idempotent) {
-    recordAudit(
-      {
-        action: "lead_unsnoozed",
-        actor: persisted.actor,
-        objectType: "lead_snooze",
-        objectId: persisted.id,
-        metadata: { lead_id: persisted.lead_id, snooze_id: persisted.snooze_id, reason: persisted.reason },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return persisted;
+async function appendLeadSnoozeEntry(input, config, recordedAt) {
+  return recordLeadSnoozeOperation({
+    ledgers: leadOperationLedgersFor(config),
+    leads: (await leadJourneySource(config)).leads,
+    input,
+    principal: config.adminPrincipal,
+    recordedAt,
+    audit: leadOperationAudit(config),
+  });
 }
 
-// "Handled" is recorded on the pipeline the enquiry actually belongs to.
-function appendLeadHandledEntry(input, config, recordedAt) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const leadId = String(attributed.leadId || attributed.lead_id || "").trim();
-  const context = leadJourneyContext(config);
-  if (!context.leads.some((row) => row.lead_id === leadId)) throw new Error("Handled requires a known leadId");
-  const sellerPipelines = readSellerPipeline(config.sellerPipelinePath);
-  const sellerPipeline = sellerPipelines.find((row) => row.lead_id === leadId);
-  if (sellerPipeline) {
-    const result = appendSellerPipelineOutcome(
-      sellerPipelines,
-      { ...attributed, action: "note", note: attributed.note || attributed.reason, sellerPipelineId: sellerPipeline.id },
-      { filePath: config.sellerPipelineOutcomeLedgerPath, recordedAt },
-    );
-    if (!result.idempotent) {
-      recordAudit(
-        {
-          action: "seller_pipeline_outcome_recorded",
-          actor: result.outcome.actor,
-          objectType: "seller_pipeline_outcome",
-          objectId: result.outcome.id,
-          metadata: {
-            lead_id: result.outcome.lead_id,
-            seller_pipeline_id: result.outcome.seller_pipeline_id,
-            outcome_action: result.outcome.action,
-          },
-        },
-        config,
-        recordedAt,
-      );
-    }
-    return { kind: "seller_pipeline_note", ...result };
-  }
-  const result = appendLeadPipelineOutcome(
-    context,
-    { ...attributed, action: "note", note: attributed.note || attributed.reason },
-    { filePath: config.leadPipelineOutcomeLedgerPath, recordedAt },
-  );
-  if (!result.idempotent) {
-    recordAudit(
-      {
-        action: "lead_pipeline_outcome_recorded",
-        actor: result.outcome.actor,
-        objectType: "lead_pipeline_outcome",
-        objectId: result.outcome.id,
-        metadata: {
-          lead_id: result.outcome.lead_id,
-          pipeline: result.outcome.pipeline,
-          outcome_action: result.outcome.action,
-          from_stage: result.outcome.from_stage,
-          to_stage: result.outcome.to_stage,
-        },
-      },
-      config,
-      recordedAt,
-    );
-  }
-  return { kind: "lead_pipeline_note", ...result };
+async function appendLeadUnsnoozeEntry(input, config, recordedAt) {
+  return recordLeadUnsnoozeOperation({
+    ledgers: leadOperationLedgersFor(config),
+    leads: (await leadJourneySource(config)).leads,
+    input,
+    principal: config.adminPrincipal,
+    recordedAt,
+    audit: leadOperationAudit(config),
+  });
 }
 
-// One approval, one audit entry per enquiry. A refusal on one enquiry never
-// discards the rest: every item reports its own outcome.
-function applyLeadBulkAction(input, config) {
-  const action = String(input.action || "").trim();
-  if (!["assign", "snooze", "handle"].includes(action)) throw new Error("Bulk action must be assign, snooze, or handle");
-  const submittedIds = input.leadIds ?? input.lead_ids;
-  const leadIds = [
-    ...new Set(
-      (Array.isArray(submittedIds) ? submittedIds : String(submittedIds || "").split(","))
-        .map((value) => String(value || "").trim())
-        .filter(Boolean),
-    ),
-  ];
-  if (!leadIds.length) throw new Error("Bulk actions require at least one leadId");
-  if (leadIds.length > 100) throw new Error("Bulk actions accept 100 enquiries or fewer");
-  const confirmed = input.bulkConfirmed ?? input.bulk_confirmed;
-  if (confirmed !== true && !["true", "on", "1"].includes(String(confirmed || ""))) {
-    throw new Error("Bulk actions require one explicit human confirmation");
-  }
-  const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
-  const results = [];
-  for (const leadId of leadIds) {
-    try {
-      const itemInput = { ...input, leadId, leadIds: undefined, lead_ids: undefined };
-      const outcome =
-        action === "assign"
-          ? appendLeadAssignmentEntry(itemInput, config)
-          : action === "snooze"
-            ? appendLeadSnoozeEntry(itemInput, config, recordedAt)
-            : appendLeadHandledEntry(itemInput, config, recordedAt);
-      results.push({
-        lead_id: leadId,
-        status: outcome.idempotent ? "unchanged" : "applied",
-        idempotent: Boolean(outcome.idempotent),
-        record_id: outcome.id || outcome.outcome?.id || null,
-      });
-    } catch (error) {
-      results.push({ lead_id: leadId, status: "refused", idempotent: false, record_id: null, message: error.message });
-    }
-  }
-  const applied = results.filter((row) => row.status === "applied").length;
-  const refused = results.filter((row) => row.status === "refused").length;
-  return {
-    status: refused ? 207 : applied ? 201 : 200,
-    body: {
-      kind: "lead_bulk_action",
-      action,
-      requested: leadIds.length,
-      applied,
-      unchanged: results.filter((row) => row.status === "unchanged").length,
-      refused,
-      results,
-    },
-  };
+// "Handled", bulk actions and manual assignment all run through the shared
+// workflows, so this adapter and the standalone server apply one set of rules
+// and write one set of audit entries.
+async function appendLeadHandledEntry(input, config, recordedAt) {
+  return recordLeadHandledOperation({
+    ledgers: leadOperationLedgersFor(config),
+    journey: await leadJourneyContext(config),
+    input: bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]),
+    principal: config.adminPrincipal,
+    recordedAt,
+    audit: leadOperationAudit(config),
+  });
 }
 
-function appendLeadAssignmentEntry(input, config) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const leads = applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath));
-  const assignment = createLeadAssignment(leads, attributed, config.reviewedAt || new Date().toISOString());
-  const persisted = appendLeadAssignment(assignment, { filePath: config.leadAssignmentLedgerPath });
-  if (!persisted.idempotent) {
-    recordAudit(
-      {
-        action: "lead_assigned",
-        actor: persisted.assigned_by,
-        objectType: "lead_assignment",
-        objectId: persisted.id,
-        metadata: {
-          lead_id: persisted.lead_id,
-          previous_broker_id: persisted.previous_broker_id,
-          broker_id: persisted.broker_id,
-          assignment_method: persisted.assignment_method,
-        },
-      },
-      config,
-      persisted.assigned_at,
-    );
-  }
-  return persisted;
+async function applyLeadBulkAction(input, config) {
+  return applyLeadBulkOperation({
+    ledgers: leadOperationLedgersFor(config),
+    journey: await leadJourneyContext(config),
+    input,
+    principal: config.adminPrincipal,
+    recordedAt: config.leadSnoozeAt || config.reviewedAt || new Date().toISOString(),
+    audit: leadOperationAudit(config),
+  });
+}
+
+async function appendLeadAssignmentEntry(input, config) {
+  const ledgers = leadOperationLedgersFor(config);
+  const source = await leadJourneySource(config);
+  return recordLeadAssignmentOperation({
+    ledgers,
+    leads: applyLeadAssignments(source.leads, leadScopedRows(source)(await ledgers.assignments.read())),
+    input,
+    principal: config.adminPrincipal,
+    recordedAt: config.reviewedAt || new Date().toISOString(),
+    audit: leadOperationAudit(config),
+  });
 }
 
 function appendAccountCreationEntry(input, config) {
@@ -2919,25 +2885,15 @@ function appendConsentWithdrawalEntry(input, config) {
   return result;
 }
 
-function appendDealClose(input, config) {
-  const deal = appendClosedDeal(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
-    filePath: config.dealLedgerPath,
+async function appendDealClose(input, config) {
+  return recordDealCloseOperation({
+    ledgers: leadOperationLedgersFor(config),
+    journey: await leadJourneyContext(config),
+    input,
+    principal: config.adminPrincipal,
     closedAt: config.dealClosedAt,
+    audit: (entry, recordedAt) => recordAudit(entry, config, recordedAt),
   });
-  if (!deal.idempotent) {
-    recordAudit(
-      {
-        action: "deal_closed",
-        actor: deal.broker,
-        objectType: "deal",
-        objectId: deal.id,
-        locale: deal.original_language,
-        metadata: { lead_id: deal.lead_id, listing_reference: deal.listing_reference, status: deal.status },
-      },
-      config,
-    );
-  }
-  return deal;
 }
 
 function appendBrokerContactApproval(input, config) {
@@ -4055,7 +4011,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
-      const result = appendLeadPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendLeadPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/cases") {
@@ -4171,16 +4127,16 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     // B1 lead operations: snooze, bulk actions, saved views.
     if (request.method === "POST" && url.pathname === "/api/admin/leads/snooze") {
       const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
-      const result = appendLeadSnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
+      const result = await appendLeadSnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
       return jsonResponse(result.idempotent ? 200 : 201, { kind: "lead_snooze", ...result });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/unsnooze") {
       const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
-      const result = appendLeadUnsnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
+      const result = await appendLeadUnsnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
       return jsonResponse(result.idempotent ? 200 : 201, { kind: "lead_unsnooze", ...result });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/bulk") {
-      const outcome = applyLeadBulkAction(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const outcome = await applyLeadBulkAction(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(outcome.status, outcome.body);
     }
     // Saved views belong to the authenticated operator and to nobody else.
@@ -4240,7 +4196,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(405, { kind: "method_not_allowed" });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {
-      const result = appendLeadAssignmentEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendLeadAssignmentEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/accounts") {
@@ -4325,6 +4281,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         const preview = await readMediaUploadBytes({
           ledgerPath: config.mediaUploadLedgerPath,
           assetId,
+          rendition: url.searchParams.get("rendition") || "",
           storage: uploadStorage,
         });
         if (preview.status !== 200) return jsonResponse(preview.status, preview.body);
@@ -4388,7 +4345,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seller-pipeline/outcome") {
-      const result = appendSellerPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendSellerPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/public-requests/outcome") {
@@ -4401,7 +4358,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return calendarResponse(renderViewingCalendar(viewings, { now: config.bookedAt }));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
-      const deal = appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const deal = await appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(deal.idempotent ? 200 : 201, deal);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
