@@ -68,7 +68,11 @@
         "search": "tarsene",
         "location": "lokacii",
         "contact": "kontakt",
-        "seller": "prodai"
+        "seller": "prodai",
+        "start": "nachalo",
+        "compare": "sravnenie",
+        "about": "za-nas",
+        "alerts": "abonamenti"
       }
     },
     {
@@ -86,7 +90,11 @@
         "search": "search",
         "location": "locations",
         "contact": "contact",
-        "seller": "sell"
+        "seller": "sell",
+        "start": "start",
+        "compare": "compare",
+        "about": "about",
+        "alerts": "alerts"
       }
     },
     {
@@ -104,7 +112,11 @@
         "search": "suche",
         "location": "orte",
         "contact": "kontakt",
-        "seller": "verkaufen"
+        "seller": "verkaufen",
+        "start": "start",
+        "compare": "vergleich",
+        "about": "ueber-uns",
+        "alerts": "benachrichtigungen"
       }
     },
     {
@@ -122,7 +134,11 @@
         "search": "zoeken",
         "location": "locaties",
         "contact": "contact",
-        "seller": "verkopen"
+        "seller": "verkopen",
+        "start": "start",
+        "compare": "vergelijken",
+        "about": "over-ons",
+        "alerts": "meldingen"
       }
     },
     {
@@ -140,7 +156,11 @@
         "search": "search",
         "location": "locations",
         "contact": "contact",
-        "seller": "sell"
+        "seller": "sell",
+        "start": "start",
+        "compare": "sravnenie",
+        "about": "o-nas",
+        "alerts": "podpiski"
       }
     },
     {
@@ -158,7 +178,11 @@
         "search": "anazitisi",
         "location": "topothesies",
         "contact": "epikoinonia",
-        "seller": "polisi"
+        "seller": "polisi",
+        "start": "arxi",
+        "compare": "sygkrisi",
+        "about": "sxetika",
+        "alerts": "eidopoiiseis"
       }
     },
     {
@@ -176,7 +200,11 @@
         "search": "search",
         "location": "locations",
         "contact": "contact",
-        "seller": "sell"
+        "seller": "sell",
+        "start": "start",
+        "compare": "compare",
+        "about": "about",
+        "alerts": "alerts"
       }
     },
     {
@@ -194,7 +222,11 @@
         "search": "recherche",
         "location": "lieux",
         "contact": "contact",
-        "seller": "vendre"
+        "seller": "vendre",
+        "start": "commencer",
+        "compare": "comparer",
+        "about": "a-propos",
+        "alerts": "alertes"
       }
     },
     {
@@ -212,7 +244,11 @@
         "search": "buscar",
         "location": "locations",
         "contact": "contact",
-        "seller": "sell"
+        "seller": "sell",
+        "start": "start",
+        "compare": "compare",
+        "about": "about",
+        "alerts": "alerts"
       }
     }
   ]

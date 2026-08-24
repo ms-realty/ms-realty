@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { leadChannelForSource } from "./lead-attribution.mjs";
 import { fromRoot } from "./paths.mjs";
 import { createLedgerStore } from "./sqlite-ledger.mjs";
 
@@ -96,6 +97,8 @@ export function createLeadLedgerRow(
     lead_id: lead.lead?.id,
     source: lead.lead?.source,
     intent: lead.lead?.intent || null,
+    channel: lead.lead?.channel || leadChannelForSource(lead.lead?.source),
+    first_touch_path: lead.lead?.first_touch_path || null,
     lead_type: lead.lead?.leadType,
     listing_reference: lead.lead?.listingReference || null,
     property: withoutPlaintextMessageFields(lead.lead?.property || {}),

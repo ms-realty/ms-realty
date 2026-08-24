@@ -371,7 +371,7 @@ test("Payload browser sessions see provider connections without becoming MCP bea
   );
   assert.equal(sessionResponse.status, 200);
   const sessionBody = await sessionResponse.text();
-  assert.match(sessionBody, /Подключения MS Realty/);
+  assert.match(sessionBody, /MS Realty connections/);
   assert.doesNotMatch(sessionBody, /payload\.jwt\.session/);
 
   const token = "named-mcp-operator-token-0123456789";

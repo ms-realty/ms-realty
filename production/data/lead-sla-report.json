@@ -5,7 +5,8 @@
     "customer_reply_sent": 0,
     "reminder_required": 0,
     "manager_escalation_required": 4,
-    "pending": 0
+    "pending": 0,
+    "snoozed": 0
   },
   "rows": [
     {
@@ -14,6 +15,9 @@
       "assigned_broker": "broker_international",
       "sla_due_at": "2026-07-04T00:15:00.000Z",
       "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "original_sla_due_at": "2026-07-04T00:15:00.000Z",
+      "original_manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "snooze": null,
       "status": "manager_escalation_required",
       "reminder_task": null,
       "manager_escalation": {
@@ -28,6 +32,9 @@
       "assigned_broker": "broker_international",
       "sla_due_at": "2026-07-04T00:15:00.000Z",
       "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "original_sla_due_at": "2026-07-04T00:15:00.000Z",
+      "original_manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "snooze": null,
       "status": "manager_escalation_required",
       "reminder_task": null,
       "manager_escalation": {
@@ -42,6 +49,9 @@
       "assigned_broker": "broker_international",
       "sla_due_at": "2026-07-04T00:15:00.000Z",
       "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "original_sla_due_at": "2026-07-04T00:15:00.000Z",
+      "original_manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "snooze": null,
       "status": "manager_escalation_required",
       "reminder_task": null,
       "manager_escalation": {
@@ -56,6 +66,9 @@
       "assigned_broker": "broker_international",
       "sla_due_at": "2026-07-04T00:15:00.000Z",
       "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "original_sla_due_at": "2026-07-04T00:15:00.000Z",
+      "original_manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "snooze": null,
       "status": "manager_escalation_required",
       "reminder_task": null,
       "manager_escalation": {

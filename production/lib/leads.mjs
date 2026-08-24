@@ -1,3 +1,4 @@
+import { normalizeLeadAttribution } from "./lead-attribution.mjs";
 import { getLocale, adminLocales } from "./locales.mjs";
 import { newRecordId, normalizeIdempotencyKey } from "./record-ids.mjs";
 
@@ -27,6 +28,14 @@ const PUBLIC_LEAD_SOURCE_CONTRACTS = Object.freeze({
   website_seller_valuation: { leadTypes: ["seller"], intent: "valuation", phone: true, property: true },
   website_consultation_request: {
     leadTypes: ["buyer", "foreign_buyer", "investor", "renter", "landlord", "partner_referral", "general"],
+    intent: "consultation",
+    reachableContact: true,
+  },
+  // "Get a broker shortlist" from the buyer onboarding page (/{locale}/start).
+  // The page derives the segment from the answers: rent becomes a renter,
+  // a non-EU citizen buying becomes a foreign buyer, everyone else a buyer.
+  website_buyer_onboarding: {
+    leadTypes: ["buyer", "foreign_buyer", "renter"],
     intent: "consultation",
     reachableContact: true,
   },
@@ -208,7 +217,9 @@ export function normalizeLeadInput(input = {}) {
     if (value !== undefined && String(value).trim()) property[field] = String(value).trim();
     else if (typeof property[field] === "string") property[field] = property[field].trim();
   }
-  for (const field of ["callback_time", "viewing_date", "viewing_time"]) {
+  // viewing_slot records the exact instant a visitor picked from the broker's
+  // free slots; viewing_date and viewing_time stay the contract the pipeline reads.
+  for (const field of ["callback_time", "viewing_date", "viewing_time", "viewing_slot"]) {
     const value = input[`request_details.${field}`];
     if (value !== undefined && String(value).trim()) requestDetails[field] = String(value).trim();
     else if (typeof requestDetails[field] === "string") requestDetails[field] = requestDetails[field].trim();
@@ -335,6 +346,9 @@ export function createLeadDraft(registry, input, { assignedId = null } = {}) {
     request_details: leadInput.request_details,
     requirements: leadInput.requirements,
     contact_preference: normalizeContactPreference(leadInput),
+    // Attribution rides with the lead: which surface family produced it and
+    // where the visit started. Both are bounded, neither identifies a visitor.
+    ...normalizeLeadAttribution(leadInput, leadInput.source),
     message: leadInput.message || "",
     language,
     status: "draft",

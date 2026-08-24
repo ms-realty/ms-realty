@@ -1,0 +1,46 @@
+{
+  "kind": "workspace_settings",
+  "version": 1,
+  "revision": 0,
+  "updated_at": null,
+  "updated_by": null,
+  "sections": {
+    "agency": {
+      "name": "MS Realty",
+      "phone": "",
+      "email": "",
+      "whatsapp": "",
+      "viber": "",
+      "offices": [
+        "Sandanski"
+      ]
+    },
+    "leads": {
+      "first_reply_target_minutes": 15,
+      "manager_escalation_minutes": 60,
+      "default_brokers": {
+        "buyer": "",
+        "renter": "",
+        "seller": "",
+        "landlord": ""
+      }
+    },
+    "notifications": {
+      "daily_digest_enabled": false,
+      "daily_digest_recipients": [],
+      "instant_new_lead_alerts": false
+    },
+    "workspace": {
+      "default_locale": "en",
+      "timezone": "Europe/Sofia",
+      "date_format": "locale"
+    },
+    "public_site": {
+      "featured_listings_count": 6,
+      "show_price_on_request": true,
+      "saved_search_alerts_enabled": true
+    }
+  },
+  "section_updates": {},
+  "revisions": []
+}

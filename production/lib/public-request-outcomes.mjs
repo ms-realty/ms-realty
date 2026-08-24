@@ -8,9 +8,41 @@ export const DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH = fromRoot(
   "public-request-outcomes.jsonl",
 );
 
-const REQUEST_TYPES = new Set(["saved_search", "language_request"]);
-const ACTIONS = new Set(["contacted", "complete", "close", "reopen", "note"]);
+const REQUEST_TYPES = new Set(["saved_search", "language_request", "viewing_trip"]);
+// Each request type carries its own outcome vocabulary. A viewing trip is
+// arranged over several steps that a saved search does not have, so it gets
+// its own verbs rather than being squeezed into "contacted / complete".
+export const PUBLIC_REQUEST_ACTIONS = Object.freeze({
+  saved_search: Object.freeze(["contacted", "complete", "close", "reopen", "note"]),
+  language_request: Object.freeze(["contacted", "complete", "close", "reopen", "note"]),
+  viewing_trip: Object.freeze([
+    "contacted",
+    "itinerary_drafted",
+    "trip_confirmed",
+    "trip_completed",
+    "close",
+    "reopen",
+    "note",
+  ]),
+});
+const ACTIONS = new Set(Object.values(PUBLIC_REQUEST_ACTIONS).flat());
+// Where each verb leaves the request.
+const ACTION_STATUS = Object.freeze({
+  contacted: "contacted",
+  itinerary_drafted: "itinerary_drafted",
+  trip_confirmed: "trip_confirmed",
+  trip_completed: "completed",
+  complete: "completed",
+  close: "closed",
+  reopen: "open",
+});
 const TERMINAL_STATUSES = new Set(["completed", "closed"]);
+// Verbs that must say what happened before they end or park a request.
+const NOTE_REQUIRED_ACTIONS = new Set(["complete", "close", "trip_completed"]);
+
+export function publicRequestActions(requestType) {
+  return [...(PUBLIC_REQUEST_ACTIONS[requestType] || PUBLIC_REQUEST_ACTIONS.saved_search)];
+}
 
 function isoTimestamp(value, label) {
   const text = String(value || "").trim();
@@ -96,6 +128,47 @@ function languageRequestState(row, contactMaps, contactVaultStatus) {
   };
 }
 
+function viewingTripState(row, contactMaps, contactVaultStatus) {
+  const privatePayload = contactFor(contactMaps, "viewing_trip", row.id);
+  return {
+    request_type: "viewing_trip",
+    request_id: row.id,
+    created_at: row.requested_at,
+    requested_locale: row.requested_locale,
+    locale: row.locale,
+    owner: `broker_${row.locale === "bg" || row.locale === "ru" ? row.locale : "international"}`,
+    status: "open",
+    query: "",
+    filters: {},
+    alert_frequency: null,
+    match_count: row.listing_references?.length ?? 0,
+    requested_path: null,
+    fallback_locale: row.fallback_used ? row.locale : null,
+    contact_preference: privatePayload.contact_preference || row.contact_preference || null,
+    contact: privatePayload.contact,
+    message: privatePayload.message,
+    contact_state: privatePayload.contact ? "available" : contactVaultStatus,
+    // The trip arrives before the visitor does; the first follow-up is the day
+    // after it lands, never later than the day before arrival.
+    next_follow_up_at: new Date(
+      Math.min(Date.parse(row.requested_at) + 24 * 60 * 60 * 1000, Date.parse(`${row.arrival_date}T00:00:00.000Z`)),
+    ).toISOString(),
+    trip: {
+      arrival_date: row.arrival_date,
+      departure_date: row.departure_date,
+      nights: row.nights ?? null,
+      areas: row.areas || [],
+      listing_references: row.listing_references || [],
+      party_size: row.party_size ?? null,
+      note: row.note || null,
+      confirmation: row.confirmation || "human_required",
+    },
+    last_action: null,
+    last_recorded_at: null,
+    note_count: 0,
+  };
+}
+
 function applyOutcome(state, outcome) {
   state.last_action = outcome.action;
   state.last_recorded_at = outcome.recorded_at;
@@ -103,18 +176,16 @@ function applyOutcome(state, outcome) {
     state.note_count += 1;
     return;
   }
-  if (outcome.action === "contacted") state.status = "contacted";
-  if (outcome.action === "complete") state.status = "completed";
-  if (outcome.action === "close") state.status = "closed";
-  if (outcome.action === "reopen") state.status = "open";
-  state.next_follow_up_at = ["completed", "closed"].includes(state.status) ? null : outcome.next_follow_up_at;
+  const status = ACTION_STATUS[outcome.action];
+  if (status) state.status = status;
+  state.next_follow_up_at = TERMINAL_STATUSES.has(state.status) ? null : outcome.next_follow_up_at;
 }
 
 export function derivePublicRequestStates(
   savedSearches = [],
   languageRequests = [],
   outcomes = [],
-  { contactMaps = {}, contactVaultStatus = "not_configured" } = {},
+  { contactMaps = {}, contactVaultStatus = "not_configured", viewingTrips = [] } = {},
 ) {
   const states = new Map([
     ...savedSearches.map((row) => {
@@ -123,6 +194,10 @@ export function derivePublicRequestStates(
     }),
     ...languageRequests.map((row) => {
       const state = languageRequestState(row, contactMaps, contactVaultStatus);
+      return [requestKey(state.request_type, state.request_id), state];
+    }),
+    ...viewingTrips.map((row) => {
+      const state = viewingTripState(row, contactMaps, contactVaultStatus);
       return [requestKey(state.request_type, state.request_id), state];
     }),
   ]);
@@ -139,6 +214,7 @@ export function buildPublicRequestQueue({
   outcomes = [],
   contactMaps = {},
   contactVaultStatus = "not_configured",
+  viewingTrips = [],
   now = new Date().toISOString(),
 } = {}) {
   const nowTime = Date.parse(now);
@@ -146,6 +222,7 @@ export function buildPublicRequestQueue({
   const states = derivePublicRequestStates(savedSearches, languageRequests, outcomes, {
     contactMaps,
     contactVaultStatus,
+    viewingTrips,
   });
   const rows = states
     .filter((state) => !TERMINAL_STATUSES.has(state.status))
@@ -170,6 +247,7 @@ export function buildPublicRequestQueue({
       closed: states.filter((state) => state.status === "closed").length,
       saved_search_open: rows.filter((row) => row.request_type === "saved_search").length,
       language_request_open: rows.filter((row) => row.request_type === "language_request").length,
+      viewing_trip_open: rows.filter((row) => row.request_type === "viewing_trip").length,
       contacts_available: states.filter((state) => state.contact).length,
     },
   };
@@ -192,14 +270,17 @@ export function readPublicRequestOutcomes(filePath = DEFAULT_PUBLIC_REQUEST_OUTC
 
 function normalizedOutcomeInput(state, input, recordedAt) {
   const action = String(input.action || "").trim();
-  if (!ACTIONS.has(action)) throw new Error("Public request action must be contacted, complete, close, reopen, or note");
+  const allowed = publicRequestActions(state.request_type);
+  if (!allowed.includes(action)) {
+    throw new Error(`Public request action for a ${state.request_type} must be one of: ${allowed.join(", ")}`);
+  }
   const actor = String(input.actor || input.broker || "").trim();
   if (!actor) throw new Error("Public request outcome actor is required");
   const note = optionalNote(input.note);
-  if (["complete", "close"].includes(action) && !note) throw new Error(`${action} requires an outcome note`);
+  if (NOTE_REQUIRED_ACTIONS.has(action) && !note) throw new Error(`${action} requires an outcome note`);
   const recorded = isoTimestamp(recordedAt, "recordedAt");
   const suppliedNext = input.nextFollowUpAt || input.next_follow_up_at;
-  const nextFollowUpAt = ["complete", "close", "note"].includes(action)
+  const nextFollowUpAt = TERMINAL_STATUSES.has(ACTION_STATUS[action] || "") || action === "note"
     ? null
     : suppliedNext
       ? isoTimestamp(suppliedNext, "nextFollowUpAt")
@@ -251,7 +332,7 @@ function nextOutcomeId(rows, requestType, requestId) {
 }
 
 export function appendPublicRequestOutcome(
-  { savedSearches = [], languageRequests = [] },
+  { savedSearches = [], languageRequests = [], viewingTrips = [] },
   input,
   { filePath = DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH, recordedAt = new Date().toISOString() } = {},
 ) {
@@ -259,7 +340,7 @@ export function appendPublicRequestOutcome(
   const requestId = String(input.requestId || input.request_id || "").trim();
   if (!REQUEST_TYPES.has(requestType) || !requestId) throw new Error("Known public request type and id are required");
   const rows = readPublicRequestOutcomes(filePath);
-  const state = derivePublicRequestStates(savedSearches, languageRequests, rows).find(
+  const state = derivePublicRequestStates(savedSearches, languageRequests, rows, { viewingTrips }).find(
     (candidate) => candidate.request_type === requestType && candidate.request_id === requestId,
   );
   if (!state) throw new Error("Known public request type and id are required");
@@ -275,7 +356,7 @@ export function appendPublicRequestOutcome(
   outcome.id ||= nextOutcomeId(rows, requestType, requestId);
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.appendFileSync(filePath, `${JSON.stringify(outcome)}\n`);
-  const updated = derivePublicRequestStates(savedSearches, languageRequests, [...rows, outcome]).find(
+  const updated = derivePublicRequestStates(savedSearches, languageRequests, [...rows, outcome], { viewingTrips }).find(
     (candidate) => candidate.request_type === requestType && candidate.request_id === requestId,
   );
   return { outcome, request: updated, idempotent: false };
@@ -289,6 +370,9 @@ export function assertPublicRequestOutcomes(rows) {
     ids.add(row.id);
     if (!REQUEST_TYPES.has(row.request_type) || !row.request_id || !ACTIONS.has(row.action) || !row.actor) {
       throw new Error("Public request outcome row is missing routing data");
+    }
+    if (!publicRequestActions(row.request_type).includes(row.action)) {
+      throw new Error(`${row.action} is not part of the ${row.request_type} outcome vocabulary`);
     }
     if (!row.recorded_at || Number.isNaN(Date.parse(row.recorded_at))) {
       throw new Error("Public request outcome row must include recorded_at");

@@ -1,0 +1,289 @@
+/* Package A3: workspace settings, operator onboarding and the Today
+ * next-actions list. Concatenated after adapter-admin.css by
+ * production/scripts/build-design-assets.mjs. Operate mode only:
+ * one family, fixed scale, no decorative motion. */
+
+/* ---- Today: next actions ---- */
+.adm-next-actions__intro {
+  margin: 0;
+  padding: var(--space-3) var(--space-5) 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--lh-snug);
+}
+.adm-next-actions {
+  display: grid;
+  gap: 0;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: adm-next-action;
+}
+.adm-next-actions > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: center;
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border);
+}
+/* Priority is carried by the row's own overdue time and type chip; an edge bar
+   repeated it and, with most rows overdue, read as noise. */
+.adm-next-actions > li[data-next-action-priority="critical"] { background: var(--brick-50); }
+.adm-next-actions__body { display: grid; gap: 3px; min-width: 0; }
+.adm-next-actions__meta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+.adm-next-actions__meta time {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+.adm-next-actions > li[data-overdue="true"] .adm-next-actions__meta time { color: var(--brick-600); font-weight: var(--fw-semibold); }
+.adm-next-actions__body > strong { color: var(--text-strong); font-size: var(--text-sm); overflow-wrap: anywhere; }
+.adm-next-actions__action { display: flex; justify-content: flex-end; flex: none; }
+.adm-next-actions__more {
+  margin: 0;
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+/* ---- Today: welcome banner ---- */
+.adm-welcome {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--sea-200, var(--border));
+  border-radius: var(--radius-md);
+  background: var(--sea-50, var(--surface-sunken));
+}
+.adm-welcome > .mk-icon { color: var(--sea-600, var(--text-muted)); }
+.adm-welcome__body { display: grid; gap: 2px; min-width: 0; }
+.adm-welcome__body > strong { color: var(--text-strong); font-size: var(--text-md); }
+.adm-welcome__body > p { margin: 0; color: var(--text-body); font-size: var(--text-sm); line-height: var(--lh-snug); }
+.adm-welcome__dismiss { align-self: start; }
+
+/* ---- Today rail: onboarding checklist ---- */
+.adm-onboarding { display: grid; gap: var(--space-3); padding: var(--space-4) var(--space-5) var(--space-5); }
+.adm-onboarding__progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+.adm-onboarding__progress progress { width: 100%; height: 6px; accent-color: var(--success-500, var(--sea-500)); }
+.adm-onboarding__list { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.adm-onboarding__list > li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: start;
+  min-width: 0;
+}
+.adm-onboarding__mark { display: inline-flex; color: var(--text-subtle); }
+.adm-onboarding__list > li[data-onboarding-done="true"] .adm-onboarding__mark { color: var(--success-600); }
+.adm-onboarding__list > li[data-onboarding-done="true"] .adm-onboarding__copy > strong { color: var(--text-muted); font-weight: var(--fw-regular); }
+.adm-onboarding__copy { display: grid; gap: 2px; min-width: 0; }
+.adm-onboarding__copy > a,
+.adm-onboarding__copy > strong { color: var(--text-strong); font-size: var(--text-sm); font-weight: var(--fw-semibold); overflow-wrap: anywhere; }
+.adm-onboarding__copy > small { color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
+.adm-onboarding__dismiss { justify-self: start; }
+[data-workspace-onboarding="complete"] .adm-onboarding__progress progress { accent-color: var(--success-600); }
+
+/* ---- Settings screen ---- */
+.adm-workbench-shell--settings { align-items: start; }
+.adm-settings-panel { scroll-margin-top: calc(var(--adm-shell-top-offset, 64px) + var(--space-4)); }
+.adm-settings-panel__hd { align-items: flex-start; }
+.adm-settings-panel__title { display: grid; gap: 3px; min-width: 0; }
+.adm-settings-panel__title h2 { display: flex; align-items: center; gap: var(--space-2); }
+.adm-settings-panel__title h2 .mk-icon { color: var(--text-muted); }
+.adm-settings-panel__title p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+  max-width: 62ch;
+}
+.adm-settings-form { display: grid; gap: var(--space-3); }
+.adm-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-5) 0;
+}
+.adm-settings-field { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.adm-settings-field--wide { grid-column: 1 / -1; }
+.adm-settings-field__label { color: var(--text-strong); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-settings-field > input,
+.adm-settings-field > select,
+.adm-settings-field > textarea { width: 100%; min-width: 0; }
+.adm-settings-field > textarea { min-height: 5.5rem; resize: vertical; }
+/* A role without settings:manage, or a runtime without a settings ledger, must
+ * read as unavailable rather than as an empty form. */
+.adm-settings-field > input:disabled,
+.adm-settings-field > select:disabled,
+.adm-settings-field > textarea:disabled,
+.adm-settings-check input:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+.adm-settings-check input:disabled + span { color: var(--text-muted); }
+.adm-settings-field__hint { color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
+.adm-settings-field__error { color: var(--brick-600); font-size: var(--text-xs); font-weight: var(--fw-semibold); line-height: var(--lh-snug); }
+.adm-settings-field[data-field-error="true"] > input,
+.adm-settings-field[data-field-error="true"] > select,
+.adm-settings-field[data-field-error="true"] > textarea { border-color: var(--brick-500); }
+.adm-settings-fieldset {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.adm-settings-fieldset legend {
+  grid-column: 1 / -1;
+  padding: var(--space-2) 0 var(--space-1);
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+}
+.adm-settings-check { display: grid; gap: 4px; min-width: 0; align-content: start; }
+.adm-settings-check > label { display: flex; align-items: flex-start; gap: var(--space-2); color: var(--text-strong); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-settings-check input[type="checkbox"] { flex: none; width: 17px; height: 17px; margin-top: 1px; accent-color: var(--brand); }
+.adm-settings-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+}
+.adm-settings-note .mk-icon { flex: none; color: var(--sea-600, var(--text-muted)); }
+.adm-settings-note--blocked .mk-icon { color: var(--warning-600); }
+.adm-settings-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  border-top: 1px solid var(--border);
+}
+.adm-settings-status { min-height: 1.3em; margin: 0; color: var(--text-muted); font-size: var(--text-xs); }
+.adm-settings-status[data-state="success"] { color: var(--success-600); font-weight: var(--fw-semibold); }
+.adm-settings-status[data-state="error"] { color: var(--brick-600); font-weight: var(--fw-semibold); }
+.adm-settings-status[data-state="dirty"] { color: var(--warning-600); font-weight: var(--fw-semibold); }
+.adm-settings-panel[data-settings-disabled="true"] .adm-settings-grid { opacity: 0.72; }
+
+/* A whole section that is designed but has no backend: it keeps the live
+ * sections' shape so it reads as part of the same screen, and every control
+ * inside it is inert. */
+.adm-settings-panel--planned { border-style: dashed; }
+.adm-settings-planned { display: grid; gap: 0; }
+.adm-settings-planned__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 260px);
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--border);
+}
+.adm-settings-planned__row:first-child { border-top: 0; padding-top: var(--space-4); }
+.adm-settings-planned__stack { display: grid; gap: var(--space-2); justify-items: start; width: 100%; }
+.adm-settings-planned__stack .adm-empty { padding: 0; font-size: var(--text-xs); }
+.adm-settings-planned__stack .adm-planned__group { display: grid; gap: var(--space-1); margin: 0; padding: 0; border: 0; }
+.adm-settings-panel--planned + .adm-settings-panel--planned { margin-top: 0; }
+.adm-settings-check.adm-planned { gap: 4px; }
+.adm-settings-check.adm-planned .adm-planned-note { margin: 0; }
+
+/* Designed but not connected to a backend yet: one closed strip, same
+ * planned-control vocabulary the CRM screens use. */
+.adm-settings-pending { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.adm-settings-pending > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 260px);
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--border);
+}
+.adm-settings-pending > li:first-child { border-top: 0; }
+.adm-settings-pending__copy { display: grid; gap: 2px; min-width: 0; }
+.adm-settings-pending__copy > strong { color: var(--text-strong); font-size: var(--text-sm); }
+.adm-settings-pending__copy .adm-planned-note { margin: 0; }
+.adm-settings-pending__control { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); min-width: 0; }
+.adm-settings-pending__control.adm-settings-planned__stack { display: grid; align-items: stretch; justify-content: stretch; }
+.adm-settings-planned__row:has(> .adm-settings-planned__stack form) { grid-template-columns: minmax(0, 1fr) minmax(0, 380px); }
+.adm-settings-planned__stack form .adm-settings-inline-field { width: 100%; }
+.adm-settings-planned__stack form + strong { margin-top: var(--space-3); }
+.adm-settings-pending__control input:not([type="checkbox"]),
+.adm-settings-pending__control select { width: 100%; min-width: 0; }
+.adm-settings-pending__control input[type="checkbox"] { width: 17px; height: 17px; }
+.adm-settings-pending__control .mk-btn { white-space: nowrap; }
+.adm-settings-pending [disabled] { cursor: not-allowed; }
+
+.adm-settings-history { display: grid; gap: var(--space-3); padding: var(--space-4) var(--space-5) var(--space-5); }
+.adm-settings-history p { display: grid; gap: 2px; margin: 0; color: var(--text-strong); font-size: var(--text-sm); }
+.adm-settings-history p.adm-empty { padding: 0; color: var(--text-muted); }
+.adm-settings-history small { color: var(--text-muted); font-size: var(--text-xs); }
+.adm-settings-history .mk-btn { width: 100%; justify-content: center; }
+
+/* The Today toolbar carries the next-action filters; they wrap instead of
+ * scrolling so no count is hidden on a narrow screen. */
+.adm-toolbar [data-list-filter="next-actions"] { flex-wrap: wrap; }
+
+@media (max-width: 1023px) {
+  .adm-settings-pending > li { grid-template-columns: minmax(0, 1fr) minmax(0, 200px); }
+}
+
+@media (max-width: 767px) {
+  /* Six filters do not fit one phone row without shrinking their counts away,
+   * so they become a three-across grid that wraps to a second row. The CRM
+   * toolbar rule keeps its buttons at max-content, which is overridden here. */
+  .adm-toolbar > .crm-seg[data-list-filter="next-actions"] {
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    width: 100%;
+    overflow-x: visible;
+  }
+  .adm-toolbar > .crm-seg[data-list-filter="next-actions"] button {
+    flex: none;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 6px;
+    font-size: var(--text-xs);
+    white-space: normal;
+  }
+  .adm-next-actions > li { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding: var(--space-4); }
+  .adm-next-actions__action { justify-content: stretch; }
+  .adm-next-actions__action .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
+  .adm-next-actions__intro { padding: var(--space-3) var(--space-4) 0; }
+  .adm-next-actions__more { padding: var(--space-3) var(--space-4); }
+  .adm-welcome { grid-template-columns: auto minmax(0, 1fr); padding: var(--space-4); }
+  .adm-welcome__dismiss { grid-column: 1 / -1; width: 100%; min-height: 44px; justify-content: center; }
+  .adm-onboarding { padding: var(--space-4); }
+  .adm-onboarding__dismiss { width: 100%; min-height: 44px; justify-content: center; }
+  .adm-settings-grid { grid-template-columns: 1fr; padding: var(--space-4) var(--space-4) 0; }
+  .adm-settings-fieldset { grid-template-columns: 1fr; }
+  .adm-settings-note { padding-inline: var(--space-4); }
+  .adm-settings-actions { grid-template-columns: 1fr; padding: var(--space-3) var(--space-4) var(--space-4); }
+  .adm-settings-actions .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
+  .adm-settings-pending > li { grid-template-columns: 1fr; gap: var(--space-2); padding: var(--space-4); }
+  .adm-settings-planned__row { grid-template-columns: 1fr; gap: var(--space-2); padding: var(--space-4); }
+  .adm-settings-planned__stack .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
+  .adm-settings-pending__control { justify-content: flex-start; }
+  .adm-settings-history { padding: var(--space-4); }
+}

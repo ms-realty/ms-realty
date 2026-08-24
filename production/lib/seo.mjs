@@ -40,6 +40,30 @@ export function contactPath(registry, localeCode) {
   return `/${locale.code}/${locale.route_segments.contact}`;
 }
 
+// Buyer onboarding ("Start your search"). Older registries without the segment
+// still resolve to /{locale}/start so the route never disappears.
+export function startPath(registry, localeCode) {
+  const locale = getLocale(registry, localeCode);
+  return `/${locale.code}/${locale.route_segments.start || "start"}`;
+}
+
+// Compare, about and alerts (package P4). Each falls back to the English
+// segment so a registry written before the route existed still resolves.
+export function comparePath(registry, localeCode) {
+  const locale = getLocale(registry, localeCode);
+  return `/${locale.code}/${locale.route_segments.compare || "compare"}`;
+}
+
+export function aboutPath(registry, localeCode) {
+  const locale = getLocale(registry, localeCode);
+  return `/${locale.code}/${locale.route_segments.about || "about"}`;
+}
+
+export function alertsPath(registry, localeCode) {
+  const locale = getLocale(registry, localeCode);
+  return `/${locale.code}/${locale.route_segments.alerts || "alerts"}`;
+}
+
 export function homePath(registry, localeCode) {
   const locale = getLocale(registry, localeCode);
   return `/${locale.code}`;
@@ -67,6 +91,42 @@ export function hreflangForSeller(registry) {
       href: sellerPath(registry, locale.code),
     })),
     { hreflang: "x-default", href: sellerPath(registry, registry.source_locale) },
+  ];
+}
+
+export function hreflangForStart(registry) {
+  return [
+    ...publicIndexableLocales(registry).map((locale) => ({
+      hreflang: locale.code,
+      href: startPath(registry, locale.code),
+    })),
+    { hreflang: "x-default", href: startPath(registry, registry.source_locale) },
+  ];
+}
+
+// Compare and alerts are per-visitor surfaces and stay out of the index, so
+// these alternates only feed the header language switcher, never <link rel>.
+export function localeAlternatesForCompare(registry) {
+  return publicIndexableLocales(registry).map((locale) => ({
+    hreflang: locale.code,
+    href: comparePath(registry, locale.code),
+  }));
+}
+
+export function localeAlternatesForAlerts(registry) {
+  return publicIndexableLocales(registry).map((locale) => ({
+    hreflang: locale.code,
+    href: alertsPath(registry, locale.code),
+  }));
+}
+
+export function hreflangForAbout(registry) {
+  return [
+    ...publicIndexableLocales(registry).map((locale) => ({
+      hreflang: locale.code,
+      href: aboutPath(registry, locale.code),
+    })),
+    { hreflang: "x-default", href: aboutPath(registry, registry.source_locale) },
   ];
 }
 

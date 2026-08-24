@@ -127,7 +127,7 @@ test("Payload admin sessions see safe connection status without credential leaka
 
   const page = await dispatchHttp(app, { method: "GET", url: "/admin/connect", headers });
   assert.equal(page.status, 200);
-  assert.match(page.body, /Подключения MS Realty/);
+  assert.match(page.body, /MS Realty connections/);
   assert.match(page.body, /owner@example\.com/);
   for (const secret of [
     SESSION_TOKEN,

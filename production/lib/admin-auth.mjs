@@ -7,13 +7,38 @@ const MIN_OPERATOR_TOKEN_LENGTH = 24;
 
 export const ADMIN_ROLES = ["admin", "broker", "editor", "translator", "agent"];
 
+// security:self is every operator's own second factor and own session list.
+// data:export is deliberately admin-only (through the admin wildcard): a
+// workspace export is a bulk personal-data release, not an operations read.
 const ROLE_CAPABILITIES = {
   admin: ["*"],
-  broker: ["workspace:read", "operations:read", "operations:write", "cases:read", "cases:write", "content:read", "activity:read"],
-  editor: ["workspace:read", "content:read", "content:write", "translations:read", "translations:write", "translations:publish", "activity:read"],
-  translator: ["workspace:read", "content:read", "translations:read", "translations:write", "activity:read"],
-  agent: ["workspace:read", "cases:read", "cases:write", "activity:read"],
+  broker: ["workspace:read", "operations:read", "operations:write", "cases:read", "cases:write", "content:read", "activity:read", "security:self"],
+  editor: ["workspace:read", "content:read", "content:write", "translations:read", "translations:write", "translations:publish", "activity:read", "security:self"],
+  translator: ["workspace:read", "content:read", "translations:read", "translations:write", "activity:read", "security:self"],
+  agent: ["workspace:read", "cases:read", "cases:write", "activity:read", "security:self"],
 };
+
+// B6 workspace security and data
+const SECURITY_SELF_PATHS = new Set([
+  "/api/admin/security/two-factor",
+  "/api/admin/security/two-factor/enrol",
+  "/api/admin/security/two-factor/activate",
+  "/api/admin/security/two-factor/verify",
+  "/api/admin/security/two-factor/disable",
+  "/api/admin/security/sessions",
+  "/api/admin/security/sessions/revoke",
+]);
+const DATA_EXPORT_PATHS = new Set(["/api/admin/data-exports", "/api/admin/data-exports/download"]);
+// Reachable with only a bearer token while a required second factor is not yet
+// active, so turning the requirement on never locks an operator out of the very
+// routes that let them enrol.
+export const TWO_FACTOR_SELF_SERVICE_PATHS = new Set([
+  "/api/admin/security/two-factor",
+  "/api/admin/security/two-factor/enrol",
+  "/api/admin/security/two-factor/activate",
+  "/api/admin/security/two-factor/verify",
+  "/api/admin/security/two-factor/disable",
+]);
 
 const AGENT_REALTY_CASE_ACTIONS = new Set(["step_completed", "step_blocked", "case_closed"]);
 const AGENT_REALTY_CASE_CONDITION_ACTIONS = new Set([
@@ -40,16 +65,24 @@ const OPERATIONS_READ_PATHS = new Set([
   "/api/admin/requests",
   "/admin/viewings",
   "/api/admin/viewings",
+  "/api/admin/availability",
+  "/api/admin/viewings/week",
   "/admin/reports",
   "/api/admin/reports",
   "/api/admin/reports/export",
   "/api/admin/viewings.ics",
+  // B1: an operator reads their own saved views for the inbox and pipeline.
+  "/api/admin/views",
 ]);
 
 const CONTENT_READ_PATHS = new Set([
   "/admin/listings",
   "/api/admin/listings",
   "/admin/listings/edit",
+  // Package B2: the approved-content review surface (team profiles, area
+  // guides, financing partners, purchase fee table).
+  "/admin/approved-content",
+  "/api/admin/approved-content",
 ]);
 
 const TRANSLATION_READ_PATHS = new Set(["/admin/translations", "/api/admin/translations"]);
@@ -60,14 +93,21 @@ const OPERATIONS_WRITE_PATHS = new Set([
   "/api/admin/leads",
   "/api/admin/lead-pipeline/outcome",
   "/api/admin/leads/assign",
+  // B1 lead operations: deferral, batch work, and saved views.
+  "/api/admin/leads/snooze",
+  "/api/admin/leads/unsnooze",
+  "/api/admin/leads/bulk",
+  "/api/admin/views",
   "/api/admin/accounts",
   "/api/admin/accounts/link",
   "/api/admin/documents/outcome",
   "/api/admin/consents/withdraw",
   "/api/admin/viewings",
   "/api/admin/viewings/follow-up",
+  "/api/admin/availability",
   "/api/admin/seller-pipeline/outcome",
   "/api/admin/public-requests/outcome",
+  "/api/admin/saved-search-alerts/run-due",
   "/api/admin/deals/close",
 ]);
 
@@ -79,12 +119,23 @@ const CONTENT_WRITE_PATHS = new Set([
   "/api/admin/listings/publication-schedules/cancel",
   "/api/admin/listings/publication-schedules/run-due",
   "/api/admin/media/reviews",
+  "/api/admin/media/uploads",
   "/api/admin/tours/approve",
 ]);
 
 function timingSafeMatch(actual, expected) {
   if (!actual || Buffer.byteLength(actual) !== Buffer.byteLength(expected)) return false;
   return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+}
+
+// Off unless an operator entry opts in, so shipping the feature cannot lock
+// anybody out. Only an explicit true turns it on.
+function twoFactorRequirement(row, label) {
+  const value = row?.require_two_factor ?? row?.require_2fa;
+  if (value === undefined || value === null || value === "") return false;
+  if (value === true || value === "true") return true;
+  if (value === false || value === "false") return false;
+  throw new Error(`${label} must be true or false`);
 }
 
 function workspaceIds(value) {
@@ -138,7 +189,15 @@ export function canAdminAccessWorkspace(principal, workspaceId) {
 export function requiredAdminCapability(method, pathname) {
   const verb = String(method || "GET").toUpperCase();
   if (pathname === "/admin") return "workspace:read";
+  // B6 workspace security and data
+  if (SECURITY_SELF_PATHS.has(pathname)) return "security:self";
+  if (DATA_EXPORT_PATHS.has(pathname)) return "data:export";
+  if (verb === "GET" && pathname === "/api/admin/security/audit-retention") return "activity:read";
   if (["/admin/team", "/api/admin/team"].includes(pathname)) return "team:manage";
+  // Every operator may read the workspace settings screen; only an admin saves.
+  if (["/admin/settings", "/api/admin/settings"].includes(pathname)) {
+    return verb === "GET" ? "workspace:read" : "settings:manage";
+  }
   if (verb === "GET" && ["/admin/activity", "/api/admin/activity"].includes(pathname)) return "activity:read";
   if (
     verb === "GET" &&
@@ -153,6 +212,11 @@ export function requiredAdminCapability(method, pathname) {
     )
   ) {
     return "cases:write";
+  }
+  // Uploaded media: listing and enquiry photo bytes are unreviewed and private,
+  // so reading one is a content read and writing one is a content write.
+  if (pathname === "/api/admin/media/uploads" || pathname.startsWith("/api/admin/media/uploads/")) {
+    return verb === "GET" ? "content:read" : "content:write";
   }
   if (verb === "GET" && OPERATIONS_READ_PATHS.has(pathname)) return "operations:read";
   if (verb === "GET" && CONTENT_READ_PATHS.has(pathname)) return "content:read";
@@ -187,6 +251,7 @@ export function publicAdminPrincipal(principal) {
     roles: [...(principal.roles || [])],
     workspace_ids: [...(principal.workspace_ids || [])],
     capabilities: adminCapabilities(principal),
+    require_two_factor: principal.require_two_factor === true,
   };
 }
 
@@ -217,6 +282,7 @@ export function adminCredentials(env = process.env) {
     tokens.add(token);
     const roles = normalizedRoles(row.roles, `${CREDENTIALS_ENV} entry ${index + 1} roles`);
     const assignedWorkspaces = workspaceIds(row.workspace_ids);
+    const requireTwoFactor = twoFactorRequirement(row, `${CREDENTIALS_ENV} entry ${index + 1} require_two_factor`);
     const priorRoles = rolesByOperator.get(id);
     if (priorRoles && priorRoles.join(",") !== roles.join(",")) {
       throw new Error(`${CREDENTIALS_ENV} entries for ${id} must use the same roles`);
@@ -227,7 +293,7 @@ export function adminCredentials(env = process.env) {
     }
     rolesByOperator.set(id, roles);
     workspacesByOperator.set(id, assignedWorkspaces);
-    return { id, token, roles, workspace_ids: assignedWorkspaces };
+    return { id, token, roles, workspace_ids: assignedWorkspaces, require_two_factor: requireTwoFactor };
   });
 }
 
@@ -251,6 +317,7 @@ export function resolveAdminPrincipal(auth, env = process.env) {
         can_mutate: true,
         roles: credential.roles,
         workspace_ids: credential.workspace_ids,
+        require_two_factor: credential.require_two_factor === true,
       };
     }
   }

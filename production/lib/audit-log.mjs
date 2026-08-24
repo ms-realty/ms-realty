@@ -11,6 +11,9 @@ const store = createLedgerStore({
 
 const ADMIN_ACTIONS = new Set([
   "account_created",
+  "admin_session_revoked",
+  "audit_log_pruned",
+  "broker_availability_updated",
   "broker_contact_approved",
   "contact_linked",
   "consent_withdrawn",
@@ -26,12 +29,17 @@ const ADMIN_ACTIONS = new Set([
   "listing_quality_imported",
   "listing_slug_changed",
   "media_reviewed",
+  "media_uploaded",
   "lead_assigned",
   "lead_created",
   "lead_pipeline_outcome_recorded",
+  "lead_snoozed",
+  "lead_unsnoozed",
   "live_service_provisioning_report_imported",
   "live_service_report_imported",
   "locale_created",
+  "operator_view_deleted",
+  "operator_view_saved",
   "payload_runtime_report_imported",
   "production_recovery_report_imported",
   "provider_calendar_sync_failed",
@@ -43,6 +51,12 @@ const ADMIN_ACTIONS = new Set([
   "redirect_approval_created",
   "redirect_approvals_imported",
   "reply_approved",
+  "saved_search_alerts_queued",
+  "saved_search_channel_updated",
+  "saved_search_deleted",
+  "saved_search_frequency_updated",
+  "saved_search_paused",
+  "saved_search_resumed",
   "reply_delivery_recorded",
   "realty_case_action_recorded",
   "realty_case_condition_action_recorded",
@@ -54,8 +68,15 @@ const ADMIN_ACTIONS = new Set([
   "translation_drafted",
   "translation_approved",
   "translation_published",
+  "two_factor_activated",
+  "two_factor_disabled",
+  "two_factor_enrolment_started",
+  "two_factor_verified",
   "viewing_booked",
   "viewing_follow_up_recorded",
+  "workspace_export_downloaded",
+  "workspace_export_requested",
+  "workspace_settings_updated",
 ]);
 
 const RAW_PRIVATE_FIELDS = new Set(["body", "contact", "email", "message", "phone", "prompt", "reviewedReply", "sourceContent", "whatsapp"]);
@@ -103,6 +124,19 @@ export function appendAuditLog(entry, { filePath = DEFAULT_AUDIT_LOG_PATH } = {}
 
 export function readAuditLog(filePath = DEFAULT_AUDIT_LOG_PATH) {
   return store.readRows(filePath);
+}
+
+// Rewrites the ledger with exactly `rows`. The audit log is append-only for
+// every runtime path; this exists only for the explicit retention maintenance
+// command in production/scripts/run-audit-retention.mjs, which takes a backup
+// first and refuses to drop any row a launch-evidence or approval artifact
+// still references.
+export function replaceAuditLog(rows, { filePath = DEFAULT_AUDIT_LOG_PATH } = {}) {
+  if (!Array.isArray(rows)) throw new Error("Audit log replacement requires an array of rows");
+  if (rows.length) assertAuditLog(rows);
+  store.resetLedger(filePath);
+  for (const row of rows) store.appendRow(filePath, row);
+  return rows.length;
 }
 
 export function assertAuditLog(rows) {

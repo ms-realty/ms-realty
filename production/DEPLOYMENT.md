@@ -259,6 +259,45 @@ curl -sS -X PUT --data-binary @file.jpg \
 Verify the echoed `size` equals the local byte count. Keys must stay under the
 two `*/wp-content/` prefixes; 32 MB cap.
 
+### Runbook: photo upload storage (admin editor and seller intake)
+
+Uploaded photos go through one small storage interface
+(`production/lib/media-upload-storage.mjs`), so moving from a laptop to
+Cloudflare is configuration, not a rewrite.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `MS_REALTY_MEDIA_UPLOAD_DRIVER` | `local` | `local` writes to disk, `r2` writes through the Worker ingest route above |
+| `MS_REALTY_MEDIA_UPLOAD_DIR` | `production/data/media-uploads` | local driver root, git-ignored, laid out `<root>/<host>/<key>` like the media mirror |
+| `MS_REALTY_MEDIA_UPLOAD_R2_ENDPOINT` | *(unset)* | e.g. `https://ms-realty.ms-realty-bg.workers.dev/__media/` |
+| `MS_REALTY_MEDIA_INGEST_SECRET` | *(unset)* | the same value as the Worker's `MEDIA_INGEST_SECRET` |
+| `MS_REALTY_MEDIA_UPLOAD_HOST` | `makler-realty.com` | key/URL host prefix |
+| `MS_REALTY_MEDIA_UPLOAD_LEDGER_PATH` | `production/data/media-uploads.jsonl` | upload metadata ledger |
+| `MS_REALTY_MEDIA_UPLOAD_MAX_FILE_BYTES` | `8388608` | per file, clamped to `MS_REALTY_MAX_BODY_BYTES` |
+| `MS_REALTY_MEDIA_UPLOAD_MAX_REQUEST_BYTES` | `MS_REALTY_MAX_BODY_BYTES` | per request, never above the transport body limit |
+| `MS_REALTY_MEDIA_UPLOAD_MAX_FILES` | `8` | files per request |
+| `MS_REALTY_SELLER_PHOTO_MAX_PER_ENQUIRY` | `12` | photos one enquiry can hold |
+| `MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED` | *(unset)* | `1` removes the public seller photo control and the endpoint |
+
+Two key spaces, and the difference matters:
+
+- `makler-realty.com/wp-content/uploads/<YYYY>/<MM>/ms-<hash>.<ext>` — listing
+  photos uploaded by an operator. The edge serves `/wp-content/uploads/*` from
+  R2, so an approved photo resolves at its public URL like every mirrored asset.
+  Being fetchable is **not** being published: the asset stays out of the listing
+  payload, gallery, and search until a human approves it in the media review.
+- `makler-realty.com/wp-content/private/enquiries/<enquiry>/ms-<hash>.<ext>` —
+  photos a seller attached to their own enquiry. The ingest route accepts the
+  key (it is under `*/wp-content/`), but `serveMedia` in `workers/index.js` only
+  routes requests whose path starts with `/wp-content/uploads/`, so the object
+  has no edge URL at all. Keep that routing rule if you change the Worker.
+
+Set `MS_REALTY_MEDIA_UPLOAD_DRIVER=r2` plus the endpoint and secret to store in
+R2. The driver verifies the echoed `size` for the same reason the bulk runbook
+above does, and refuses to record a write it cannot confirm. Reading bytes back
+for the admin preview only works on the `local` driver; on `r2` the preview
+route answers 503 and names the reason rather than pretending.
+
 ## 7. Out of scope today — the domain-cutover gates
 
 7 of 12 launch gates remain blocked. None are required to operate workers.dev.

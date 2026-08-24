@@ -2,6 +2,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { isProductionEnvironment, searchRuntimeEnvironment } from "./lib/launch-service-contract.mjs";
 import { DEFAULT_AUDIT_LOG_PATH } from "./lib/audit-log.mjs";
+// B6 workspace security and data
+import { DEFAULT_ADMIN_SESSION_LEDGER_PATH } from "./lib/admin-sessions.mjs";
+import { DEFAULT_OPERATOR_TWO_FACTOR_PATH } from "./lib/operator-two-factor.mjs";
+import { DEFAULT_WORKSPACE_EXPORT_DIR, DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./lib/workspace-export.mjs";
 import { DEFAULT_ACCOUNT_LEDGER_PATH } from "./lib/account-ledger.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./lib/broker-contacts.mjs";
 import { createHttpApp } from "./lib/http.mjs";
@@ -11,6 +15,8 @@ import { rateLimitConfigFromEnv } from "./lib/rate-limit.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH } from "./lib/lead-ledger.mjs";
 import { DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH } from "./lib/lead-assignments.mjs";
+import { DEFAULT_LEAD_SNOOZE_LEDGER_PATH } from "./lib/lead-snoozes.mjs";
+import { DEFAULT_OPERATOR_VIEW_LEDGER_PATH } from "./lib/operator-views.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH } from "./lib/lead-contact-vault.mjs";
 import { leadDurableStoreConfigFromEnv } from "./lib/lead-durable-store.mjs";
 import { DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/lead-pipeline-outcomes.mjs";
@@ -22,6 +28,8 @@ import { DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH } from "./lib/reply-delivery
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH } from "./lib/listing-edits.mjs";
 import { DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH } from "./lib/listing-publication-schedules.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH } from "./lib/media-reviews.mjs";
+import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, mediaUploadLimitsFromEnv } from "./lib/media-uploads.mjs";
+import { mediaUploadStorageConfigFromEnv } from "./lib/media-upload-storage.mjs";
 import { createNodeServer, listen, close } from "./lib/node-server.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH } from "./lib/events.mjs";
 import { DEFAULT_CONSENT_LEDGER_PATH } from "./lib/consent-ledger.mjs";
@@ -31,15 +39,42 @@ import { DEFAULT_REALTY_CASE_LEDGER_PATH } from "./lib/realty-cases.mjs";
 import { realtyCasePayloadAuthorityConfigFromEnv } from "./lib/realty-case-payload-authority.mjs";
 import { realtyCaseRequestProjectionConfigFromEnv } from "./lib/realty-case-request-projection.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH } from "./lib/saved-searches.mjs";
+import { DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH } from "./lib/saved-search-manage.mjs";
+import { DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH } from "./lib/saved-search-alert-deliveries.mjs";
+import {
+  savedSearchAccessSecret,
+  savedSearchManagePathTemplate,
+  savedSearchManageTtlDays,
+} from "./lib/saved-search-access.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
 import { DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/seller-pipeline-outcomes.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./lib/slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./lib/tours.mjs";
+// Package B2: approved content.
+import { DEFAULT_APPROVED_AREA_GUIDES_PATH } from "./lib/area-guides.mjs";
+import { DEFAULT_APPROVED_FINANCING_PARTNERS_PATH } from "./lib/financing-partners.mjs";
+import { DEFAULT_APPROVED_PURCHASE_FEES_PATH } from "./lib/purchase-fees.mjs";
+import { DEFAULT_APPROVED_TEAM_PROFILES_PATH } from "./lib/team-profiles.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./lib/translation-ledger.mjs";
 import { DEFAULT_VIEWING_LEDGER_PATH } from "./lib/viewing-ledger.mjs";
 import { viewingDurableStoreConfigFromEnv } from "./lib/viewing-durable-store.mjs";
 import { DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH } from "./lib/viewing-follow-ups.mjs";
+// B5 Viewings and availability.
+import { DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH } from "./lib/broker-availability.mjs";
+import { DEFAULT_VIEWING_TRIP_LEDGER_PATH } from "./lib/viewing-trip-requests.mjs";
 import { DEFAULT_LAUNCH_FREEZE_PATH } from "./lib/launch-freeze.mjs";
+import { DEFAULT_WORKSPACE_SETTINGS_PATH } from "./lib/workspace-settings.mjs";
+
+// A missing or too-short signing secret disables manage links instead of
+// taking the whole server down: the saved search itself still works, and the
+// manage routes refuse with their single generic answer.
+function savedSearchManageSecretOrNull(env) {
+  try {
+    return savedSearchAccessSecret(env);
+  } catch {
+    return null;
+  }
+}
 
 function portFrom(value) {
   const raw = value === undefined || value === "" ? "3000" : String(value);
@@ -124,9 +159,20 @@ export function productionServerConfig(env = process.env) {
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
+    // B6 workspace security and data
+    adminSessionLedgerPath: env.MS_REALTY_ADMIN_SESSION_LEDGER_PATH || DEFAULT_ADMIN_SESSION_LEDGER_PATH,
+    operatorTwoFactorPath: env.MS_REALTY_OPERATOR_2FA_PATH || DEFAULT_OPERATOR_TWO_FACTOR_PATH,
+    operatorTwoFactorKey: env.MS_REALTY_OPERATOR_2FA_KEY,
+    operatorTwoFactorStepUpSeconds: env.MS_REALTY_OPERATOR_2FA_STEP_UP_SECONDS,
+    workspaceExportLedgerPath: env.MS_REALTY_WORKSPACE_EXPORT_LEDGER_PATH || DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH,
+    workspaceExportDir: env.MS_REALTY_WORKSPACE_EXPORT_DIR || DEFAULT_WORKSPACE_EXPORT_DIR,
+    workspaceExportTtlSeconds: env.MS_REALTY_WORKSPACE_EXPORT_TTL_SECONDS,
+    auditRetentionWindowDays: env.MS_REALTY_AUDIT_RETENTION_DAYS,
     accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     leadAssignmentLedgerPath: env.MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH || DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
+    leadSnoozeLedgerPath: env.MS_REALTY_LEAD_SNOOZE_LEDGER_PATH || DEFAULT_LEAD_SNOOZE_LEDGER_PATH,
+    operatorViewLedgerPath: env.MS_REALTY_OPERATOR_VIEW_LEDGER_PATH || DEFAULT_OPERATOR_VIEW_LEDGER_PATH,
     leadPipelineOutcomeLedgerPath:
       env.MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH || DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
     leadContactVaultPath:
@@ -144,13 +190,35 @@ export function productionServerConfig(env = process.env) {
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
+    mediaUploadLedgerPath: env.MS_REALTY_MEDIA_UPLOAD_LEDGER_PATH || DEFAULT_MEDIA_UPLOAD_LEDGER_PATH,
+    mediaUploadStorageConfig: mediaUploadStorageConfigFromEnv(env),
+    // The per-request photo cap can never exceed the transport body limit.
+    mediaUploadLimits: mediaUploadLimitsFromEnv(env, { maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES) }),
+    sellerPhotoUploadEnabled: env.MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED !== "1",
     listingPublicationSchedulePath:
       env.MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH || DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
     viewingDurableStore: viewingDurableStoreConfigFromEnv(env),
     viewingDurablePayload: undefined,
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
+    brokerAvailabilityLedgerPath:
+      env.MS_REALTY_BROKER_AVAILABILITY_LEDGER_PATH || DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH,
+    viewingTripLedgerPath: env.MS_REALTY_VIEWING_TRIP_LEDGER_PATH || DEFAULT_VIEWING_TRIP_LEDGER_PATH,
+    brokerAvailabilityAt: env.MS_REALTY_BROKER_AVAILABILITY_AT,
+    viewingTripRequestedAt: env.MS_REALTY_VIEWING_TRIP_REQUESTED_AT,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
+    savedSearchManageEventLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH || DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+    savedSearchAlertDeliveryLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH || DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+    // Signs the saved-search manage links. Local runs fall back to a documented
+    // development secret; production requires MS_REALTY_SAVED_SEARCH_TOKEN_SECRET.
+    // Without it the links are refused rather than signed with a guessable key,
+    // and the rest of the site keeps serving.
+    savedSearchManageSecret: savedSearchManageSecretOrNull(env),
+    savedSearchManageLinkTemplate: savedSearchManagePathTemplate(env),
+    savedSearchManageLinkTtlDays: savedSearchManageTtlDays(env),
+    savedSearchPublicOrigin: env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com",
     publicRequestOutcomeLedgerPath:
       env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH || DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
@@ -167,10 +235,16 @@ export function productionServerConfig(env = process.env) {
     slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
+    approvedTeamProfilePath: env.MS_REALTY_APPROVED_TEAM_PROFILES_PATH || DEFAULT_APPROVED_TEAM_PROFILES_PATH,
+    approvedAreaGuidePath: env.MS_REALTY_APPROVED_AREA_GUIDES_PATH || DEFAULT_APPROVED_AREA_GUIDES_PATH,
+    approvedFinancingPartnerPath:
+      env.MS_REALTY_APPROVED_FINANCING_PARTNERS_PATH || DEFAULT_APPROVED_FINANCING_PARTNERS_PATH,
+    approvedPurchaseFeePath: env.MS_REALTY_APPROVED_PURCHASE_FEES_PATH || DEFAULT_APPROVED_PURCHASE_FEES_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH,
     launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
+    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || DEFAULT_WORKSPACE_SETTINGS_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     listingQualityReviewPath: env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH,
     seoEvidenceInputDir: env.MS_REALTY_SEO_EVIDENCE_INPUT_DIR,
@@ -208,10 +282,21 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     eventLedgerPath: config.eventLedgerPath,
     consentLedgerPath: config.consentLedgerPath,
     auditLogPath: config.auditLogPath,
+    // B6 workspace security and data
+    adminSessionLedgerPath: config.adminSessionLedgerPath,
+    operatorTwoFactorPath: config.operatorTwoFactorPath,
+    operatorTwoFactorKey: config.operatorTwoFactorKey,
+    operatorTwoFactorStepUpSeconds: config.operatorTwoFactorStepUpSeconds,
+    workspaceExportLedgerPath: config.workspaceExportLedgerPath,
+    workspaceExportDir: config.workspaceExportDir,
+    workspaceExportTtlSeconds: config.workspaceExportTtlSeconds,
+    auditRetentionWindowDays: config.auditRetentionWindowDays,
     accountLedgerPath: config.accountLedgerPath,
     payloadAdminAuth: config.payloadAdminAuth,
     leadLedgerPath: config.leadLedgerPath,
     leadAssignmentLedgerPath: config.leadAssignmentLedgerPath,
+    leadSnoozeLedgerPath: config.leadSnoozeLedgerPath,
+    operatorViewLedgerPath: config.operatorViewLedgerPath,
     leadPipelineOutcomeLedgerPath: config.leadPipelineOutcomeLedgerPath,
     leadContactVaultPath: config.leadContactVaultPath,
     leadContactKey: config.leadContactKey,
@@ -227,12 +312,26 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     translationLedgerPath: config.translationLedgerPath,
     listingEditLedgerPath: config.listingEditLedgerPath,
     mediaReviewLedgerPath: config.mediaReviewLedgerPath,
+    mediaUploadLedgerPath: config.mediaUploadLedgerPath,
+    mediaUploadStorageConfig: config.mediaUploadStorageConfig,
+    mediaUploadLimits: config.mediaUploadLimits,
+    sellerPhotoUploadEnabled: config.sellerPhotoUploadEnabled,
     listingPublicationSchedulePath: config.listingPublicationSchedulePath,
     viewingLedgerPath: config.viewingLedgerPath,
     viewingDurableStore: config.viewingDurableStore,
     viewingDurablePayload: config.viewingDurablePayload,
     viewingFollowUpLedgerPath: config.viewingFollowUpLedgerPath,
+    brokerAvailabilityLedgerPath: config.brokerAvailabilityLedgerPath,
+    viewingTripLedgerPath: config.viewingTripLedgerPath,
+    brokerAvailabilityAt: config.brokerAvailabilityAt,
+    viewingTripRequestedAt: config.viewingTripRequestedAt,
     savedSearchLedgerPath: config.savedSearchLedgerPath,
+    savedSearchManageEventLedgerPath: config.savedSearchManageEventLedgerPath,
+    savedSearchAlertDeliveryLedgerPath: config.savedSearchAlertDeliveryLedgerPath,
+    savedSearchManageSecret: config.savedSearchManageSecret,
+    savedSearchManageLinkTemplate: config.savedSearchManageLinkTemplate,
+    savedSearchManageLinkTtlDays: config.savedSearchManageLinkTtlDays,
+    savedSearchPublicOrigin: config.savedSearchPublicOrigin,
     publicRequestOutcomeLedgerPath: config.publicRequestOutcomeLedgerPath,
     sellerPipelinePath: config.sellerPipelinePath,
     sellerPipelineOutcomeLedgerPath: config.sellerPipelineOutcomeLedgerPath,
@@ -247,10 +346,15 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     slugHistoryPath: config.slugHistoryPath,
     brokerContactLedgerPath: config.brokerContactLedgerPath,
     tourApprovalLedgerPath: config.tourApprovalLedgerPath,
+    approvedTeamProfilePath: config.approvedTeamProfilePath,
+    approvedAreaGuidePath: config.approvedAreaGuidePath,
+    approvedFinancingPartnerPath: config.approvedFinancingPartnerPath,
+    approvedPurchaseFeePath: config.approvedPurchaseFeePath,
     localeRegistryPath: config.localeRegistryPath,
     redirectApprovalPath: config.redirectApprovalPath,
     deployableRedirectOutputPath: config.deployableRedirectOutputPath,
     launchReadinessOutputPath: config.launchReadinessOutputPath,
+    workspaceSettingsPath: config.workspaceSettingsPath,
     listingQualityReviewPath: config.listingQualityReviewPath,
     seoEvidenceInputDir: config.seoEvidenceInputDir,
     seoEvidenceOutputPath: config.seoEvidenceOutputPath,
@@ -296,6 +400,19 @@ export async function startProductionServer(config = productionServerConfig()) {
   };
   process.once("SIGTERM", shutdown);
   process.once("SIGINT", shutdown);
+  // Payload's Postgres bootstrap leaves a rejected promise unobserved when the
+  // database is unreachable (seen on /admin/team without a local database).
+  // A long-running origin logs that and keeps serving instead of exiting.
+  process.on("unhandledRejection", (reason) => {
+    console.error(
+      JSON.stringify({
+        kind: "unhandled_rejection",
+        message: reason?.message || String(reason),
+        code: reason?.code,
+        stack: typeof reason?.stack === "string" ? reason.stack.split("\n").slice(0, 6).join("\n") : undefined,
+      }),
+    );
+  });
   return { server, address };
 }
 

@@ -13,7 +13,7 @@ import {
   resolveAdminPrincipal,
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
-import { renderOperatorConnectPage } from "./operator-connect.mjs";
+import { operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
 import {
   adminSessionClearCookie,
   adminSessionSetCookie,
@@ -21,6 +21,21 @@ import {
   renderAdminLoginPage,
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
+import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
+import { approvedContentReviewPayload } from "./approved-content-review.mjs";
+import { adminCredentials } from "./admin-auth.mjs";
+import { readThroughCached } from "./file-cache.mjs";
+import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
+import { adminLocales } from "./locales.mjs";
+import {
+  DEFAULT_WORKSPACE_SETTINGS_PATH,
+  applyWorkspaceDefaultBroker,
+  buildWorkspaceOnboarding,
+  leadSlaOptions,
+  readWorkspaceSettings,
+  updateWorkspaceSettings,
+  workspaceSettingsView,
+} from "./workspace-settings.mjs";
 import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
@@ -59,6 +74,7 @@ import {
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
   renderAdminRealtyCasesPayload,
+  renderAdminApprovedContentPayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import {
@@ -134,6 +150,24 @@ import {
   createLeadAssignment,
   readLeadAssignments,
 } from "./lead-assignments.mjs";
+// B1 lead operations: snooze, bulk actions, saved views, Hermes availability.
+import { hermesReplyAvailability } from "./hermes-availability.mjs";
+import {
+  DEFAULT_LEAD_SNOOZE_LEDGER_PATH,
+  appendLeadSnooze,
+  createLeadSnooze,
+  createLeadUnsnooze,
+  readLeadSnoozes,
+} from "./lead-snoozes.mjs";
+import {
+  DEFAULT_OPERATOR_VIEW_LEDGER_PATH,
+  OPERATOR_VIEW_SURFACES,
+  appendOperatorView,
+  createOperatorView,
+  createOperatorViewDeletion,
+  operatorViewsFor,
+  readOperatorViews,
+} from "./operator-views.mjs";
 import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
   DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
@@ -164,6 +198,16 @@ import {
   createMediaReview,
   readMediaReviews,
 } from "./media-reviews.mjs";
+// B4 media upload
+import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, applyMediaUploads, mediaUploadLimitsFromEnv, readMediaUploads } from "./media-uploads.mjs";
+import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./media-upload-storage.mjs";
+import {
+  ADMIN_MEDIA_UPLOAD_PATH,
+  acceptsHtmlResponse,
+  handleAdminMediaUpload,
+  listMediaUploads,
+  readMediaUploadBytes,
+} from "./media-upload-routes.mjs";
 import {
   DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
   appendListingPublicationSchedule,
@@ -345,10 +389,13 @@ export function appAdminConfigFromEnv(env = process.env) {
     eventDurableStore: eventDurableStoreConfigFromEnv(env),
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
+    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || DEFAULT_WORKSPACE_SETTINGS_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     leadAssignmentLedgerPath: env.MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH || DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
+    leadSnoozeLedgerPath: env.MS_REALTY_LEAD_SNOOZE_LEDGER_PATH || DEFAULT_LEAD_SNOOZE_LEDGER_PATH,
+    operatorViewLedgerPath: env.MS_REALTY_OPERATOR_VIEW_LEDGER_PATH || DEFAULT_OPERATOR_VIEW_LEDGER_PATH,
     leadPipelineOutcomeLedgerPath:
       env.MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH || DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
     leadContactVaultPath:
@@ -372,6 +419,9 @@ export function appAdminConfigFromEnv(env = process.env) {
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
+    mediaUploadLedgerPath: env.MS_REALTY_MEDIA_UPLOAD_LEDGER_PATH || DEFAULT_MEDIA_UPLOAD_LEDGER_PATH,
+    mediaUploadStorageConfig: mediaUploadStorageConfigFromEnv(env),
+    mediaUploadLimits: mediaUploadLimitsFromEnv(env, { maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES) }),
     listingPublicationSchedulePath:
       env.MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH || DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH || DEFAULT_REDIRECT_APPROVALS_PATH,
@@ -446,11 +496,83 @@ function leadStoreUnavailable(kind = "lead_store_unavailable") {
   });
 }
 
-function htmlResponse(payload) {
+function renderAdminHtmlResponse(payload) {
   return new Response(renderHtmlPage(payload, { bodyHtml: renderReactAdminBody(payload) }), {
     status: payload.status || 200,
     headers: PRIVATE_HTML_HEADERS,
   });
+}
+
+// Workspace settings: read through the committed defaults or the configured
+// ledger; every admin HTML page carries the privacy-safe view so the renderer
+// can apply the default locale, timezone and date format.
+function workspaceSettingsFor(config = {}) {
+  const filePath = config.workspaceSettingsPath || DEFAULT_WORKSPACE_SETTINGS_PATH;
+  return readThroughCached(filePath, () => readWorkspaceSettings(filePath));
+}
+
+function withWorkspaceSettings(payload, config) {
+  return payload && typeof payload === "object" && !payload.workspace_settings
+    ? { ...payload, workspace_settings: workspaceSettingsView(workspaceSettingsFor(config)) }
+    : payload;
+}
+
+function adminLocaleParam(url, config = {}) {
+  return url.searchParams.get("locale") || workspaceSettingsFor(config).sections.workspace.default_locale || "en";
+}
+
+async function workspaceTeamSize(config) {
+  if (config.payloadAdminSession) {
+    try {
+      const service = await configuredPayloadAdminAuth(config);
+      if (service) return { size: (await service.listOperators(config.payloadAdminSession)).length, known: true };
+    } catch {
+      // Fall through to the credential registry.
+    }
+  }
+  try {
+    const operators = new Set(adminCredentials(config.authEnv || process.env).map((credential) => credential.id));
+    if (operators.size) return { size: operators.size, known: true };
+  } catch {
+    // An invalid registry is reported by the auth layer; onboarding stays conservative.
+  }
+  return { size: 1, known: false };
+}
+
+async function workspaceConnectedProviders(config) {
+  try {
+    const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+    if (!providerConnectionAvailability(providerConfig).store.ready) return [];
+    return await (config.readProviderConnections || readProviderConnections)({ payload: config.providerConnectionPayload || null });
+  } catch {
+    return [];
+  }
+}
+
+async function workspaceOnboardingFor(page, config) {
+  const [team, providerConnections] = await Promise.all([workspaceTeamSize(config), workspaceConnectedProviders(config)]);
+  return buildWorkspaceOnboarding({
+    settings: workspaceSettingsFor(config),
+    teamSize: team.size,
+    teamSizeKnown: team.known,
+    providerConnections,
+    replyDeliveryStates: page.replyDeliveryQueue?.states || [],
+  });
+}
+
+function workspaceSettingsPayload(registry, url, config, { requestedLocale = adminLocaleParam(url, config), form = null } = {}) {
+  return withWorkspaceSettings(
+    renderAdminWorkspaceSettingsPayload(registry, requestedLocale, {
+      settings: workspaceSettingsFor(config),
+      operator: config.adminPrincipal,
+      brokerProfiles: DEFAULT_BROKER_PROFILES,
+      adminLocales: adminLocales(registry),
+      saved: url.searchParams.get("saved"),
+      form,
+      writable: Boolean(config.workspaceSettingsPath) && !config.runtimeDataDurableOnly,
+    }),
+    config,
+  );
 }
 
 function jsonResponse(status, body) {
@@ -718,7 +840,12 @@ function bindRealtyCaseConditionExecutor(input, principal, action) {
 function currentSeed(config) {
   if (config.runtimeDataDurableOnly) return loadCmsSeed();
   return applyMediaReviews(
-    applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
+    // B4: uploaded listing assets join the seed before reviews are applied, so
+    // an upload enters the existing review queue instead of bypassing it.
+    applyMediaUploads(
+      applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
+      readMediaUploads(config.mediaUploadLedgerPath),
+    ),
     readMediaReviews(config.mediaReviewLedgerPath),
   );
 }
@@ -914,6 +1041,29 @@ function leadScopedRows(source) {
   return (rows) => rowsForLeadIds(rows, leadIds);
 }
 
+// B1: what the lead inbox may actually do here, derived from configuration and
+// the authenticated principal. A surface that cannot reach a route keeps the
+// control's disabled treatment instead of pretending.
+function leadOperationsFor(config) {
+  const principal = config.adminPrincipal;
+  const writable = !config.runtimeDataDurableOnly && canAdminAccess(principal, "operations:write");
+  return {
+    snoozeWritable: writable,
+    bulkWritable: writable,
+    savedViewsWritable: writable && Boolean(principal?.id),
+  };
+}
+
+function operatorViewsForConfig(config, surface = null) {
+  const operatorId = config.adminPrincipal?.id || null;
+  if (!operatorId || config.runtimeDataDurableOnly) return [];
+  try {
+    return operatorViewsFor(readOperatorViews(config.operatorViewLedgerPath), operatorId, surface);
+  } catch {
+    return [];
+  }
+}
+
 async function leadInboxPayload(registry, url, config) {
   const source = await adminLeadSource(config);
   const filterRows = leadScopedRows(source);
@@ -978,6 +1128,9 @@ async function leadInboxPayload(registry, url, config) {
         deals: [],
         brokerContacts: [],
         brokerProfiles: [],
+        hermes: hermesReplyAvailability({ env: config.authEnv || process.env }),
+        leadOperations: leadOperationsFor(config),
+        operatorViews: [],
       }),
       runtime_data_mode: "durable_only",
     };
@@ -1037,6 +1190,10 @@ async function leadInboxPayload(registry, url, config) {
     }),
     deals,
     brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
+    leadSnoozes: readLeadSnoozes(config.leadSnoozeLedgerPath),
+    hermes: hermesReplyAvailability({ env: config.authEnv || process.env }),
+    leadOperations: leadOperationsFor(config),
+    operatorViews: operatorViewsForConfig(config, "leads"),
   });
 }
 
@@ -2416,7 +2573,12 @@ function appendBrokerLeadEntry(input, registry, config) {
   const existing = readLeadLedger(config.leadLedgerPath).find((row) => row.lead_id === leadId);
   if (existing) return { lead: existing, idempotent: true };
   const recordedAt = config.reviewedAt || new Date().toISOString();
-  const lead = createCrmInboxItem(registry, normalized, { assignedId: leadId });
+  const workspaceSettings = workspaceSettingsFor(config);
+  const lead = applyWorkspaceDefaultBroker(
+    createCrmInboxItem(registry, normalized, { assignedId: leadId }),
+    workspaceSettings,
+    DEFAULT_BROKER_PROFILES,
+  );
   const contactVault = appendLeadContact(lead, {
     filePath: config.leadContactVaultPath,
     secret: config.leadContactKey,
@@ -2426,6 +2588,7 @@ function appendBrokerLeadEntry(input, registry, config) {
     filePath: config.leadLedgerPath,
     receivedAt: recordedAt,
     contactSecret: config.leadContactKey,
+    ...leadSlaOptions(workspaceSettings),
   });
   const consent = appendConsentRecord(
     createConsentRecord(
@@ -2464,6 +2627,167 @@ function appendBrokerLeadEntry(input, registry, config) {
     recordedAt,
   );
   return { lead, ledger, contactVault, consent, sellerPipeline, idempotent: false };
+}
+
+// B1 lead operations. Each helper is the single-item path; the bulk route
+// below reuses them verbatim so both share one set of rules and write one
+// audit entry per enquiry.
+function appendLeadSnoozeEntry(input, config, recordedAt) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const leads = readLeadLedger(config.leadLedgerPath);
+  const record = createLeadSnooze(leads, readLeadSnoozes(config.leadSnoozeLedgerPath), attributed, recordedAt);
+  const persisted = appendLeadSnooze(record, { filePath: config.leadSnoozeLedgerPath });
+  if (!persisted.idempotent) {
+    recordAudit(
+      {
+        action: "lead_snoozed",
+        actor: persisted.actor,
+        objectType: "lead_snooze",
+        objectId: persisted.id,
+        metadata: { lead_id: persisted.lead_id, until: persisted.until, reason: persisted.reason },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return persisted;
+}
+
+function appendLeadUnsnoozeEntry(input, config, recordedAt) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const leads = readLeadLedger(config.leadLedgerPath);
+  const record = createLeadUnsnooze(leads, readLeadSnoozes(config.leadSnoozeLedgerPath), attributed, recordedAt);
+  const persisted = appendLeadSnooze(record, { filePath: config.leadSnoozeLedgerPath });
+  if (!persisted.idempotent) {
+    recordAudit(
+      {
+        action: "lead_unsnoozed",
+        actor: persisted.actor,
+        objectType: "lead_snooze",
+        objectId: persisted.id,
+        metadata: { lead_id: persisted.lead_id, snooze_id: persisted.snooze_id, reason: persisted.reason },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return persisted;
+}
+
+// "Handled" is recorded on the pipeline the enquiry actually belongs to.
+function appendLeadHandledEntry(input, config, recordedAt) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const leadId = String(attributed.leadId || attributed.lead_id || "").trim();
+  const context = leadJourneyContext(config);
+  if (!context.leads.some((row) => row.lead_id === leadId)) throw new Error("Handled requires a known leadId");
+  const sellerPipelines = readSellerPipeline(config.sellerPipelinePath);
+  const sellerPipeline = sellerPipelines.find((row) => row.lead_id === leadId);
+  if (sellerPipeline) {
+    const result = appendSellerPipelineOutcome(
+      sellerPipelines,
+      { ...attributed, action: "note", note: attributed.note || attributed.reason, sellerPipelineId: sellerPipeline.id },
+      { filePath: config.sellerPipelineOutcomeLedgerPath, recordedAt },
+    );
+    if (!result.idempotent) {
+      recordAudit(
+        {
+          action: "seller_pipeline_outcome_recorded",
+          actor: result.outcome.actor,
+          objectType: "seller_pipeline_outcome",
+          objectId: result.outcome.id,
+          metadata: {
+            lead_id: result.outcome.lead_id,
+            seller_pipeline_id: result.outcome.seller_pipeline_id,
+            outcome_action: result.outcome.action,
+          },
+        },
+        config,
+        recordedAt,
+      );
+    }
+    return { kind: "seller_pipeline_note", ...result };
+  }
+  const result = appendLeadPipelineOutcome(
+    context,
+    { ...attributed, action: "note", note: attributed.note || attributed.reason },
+    { filePath: config.leadPipelineOutcomeLedgerPath, recordedAt },
+  );
+  if (!result.idempotent) {
+    recordAudit(
+      {
+        action: "lead_pipeline_outcome_recorded",
+        actor: result.outcome.actor,
+        objectType: "lead_pipeline_outcome",
+        objectId: result.outcome.id,
+        metadata: {
+          lead_id: result.outcome.lead_id,
+          pipeline: result.outcome.pipeline,
+          outcome_action: result.outcome.action,
+          from_stage: result.outcome.from_stage,
+          to_stage: result.outcome.to_stage,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return { kind: "lead_pipeline_note", ...result };
+}
+
+// One approval, one audit entry per enquiry. A refusal on one enquiry never
+// discards the rest: every item reports its own outcome.
+function applyLeadBulkAction(input, config) {
+  const action = String(input.action || "").trim();
+  if (!["assign", "snooze", "handle"].includes(action)) throw new Error("Bulk action must be assign, snooze, or handle");
+  const submittedIds = input.leadIds ?? input.lead_ids;
+  const leadIds = [
+    ...new Set(
+      (Array.isArray(submittedIds) ? submittedIds : String(submittedIds || "").split(","))
+        .map((value) => String(value || "").trim())
+        .filter(Boolean),
+    ),
+  ];
+  if (!leadIds.length) throw new Error("Bulk actions require at least one leadId");
+  if (leadIds.length > 100) throw new Error("Bulk actions accept 100 enquiries or fewer");
+  const confirmed = input.bulkConfirmed ?? input.bulk_confirmed;
+  if (confirmed !== true && !["true", "on", "1"].includes(String(confirmed || ""))) {
+    throw new Error("Bulk actions require one explicit human confirmation");
+  }
+  const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
+  const results = [];
+  for (const leadId of leadIds) {
+    try {
+      const itemInput = { ...input, leadId, leadIds: undefined, lead_ids: undefined };
+      const outcome =
+        action === "assign"
+          ? appendLeadAssignmentEntry(itemInput, config)
+          : action === "snooze"
+            ? appendLeadSnoozeEntry(itemInput, config, recordedAt)
+            : appendLeadHandledEntry(itemInput, config, recordedAt);
+      results.push({
+        lead_id: leadId,
+        status: outcome.idempotent ? "unchanged" : "applied",
+        idempotent: Boolean(outcome.idempotent),
+        record_id: outcome.id || outcome.outcome?.id || null,
+      });
+    } catch (error) {
+      results.push({ lead_id: leadId, status: "refused", idempotent: false, record_id: null, message: error.message });
+    }
+  }
+  const applied = results.filter((row) => row.status === "applied").length;
+  const refused = results.filter((row) => row.status === "refused").length;
+  return {
+    status: refused ? 207 : applied ? 201 : 200,
+    body: {
+      kind: "lead_bulk_action",
+      action,
+      requested: leadIds.length,
+      applied,
+      unchanged: results.filter((row) => row.status === "unchanged").length,
+      refused,
+      results,
+    },
+  };
 }
 
 function appendLeadAssignmentEntry(input, config) {
@@ -3048,6 +3372,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     return payloadAdminAuthPromise;
   };
   const requestPath = new URL(request.url, "http://localhost").pathname;
+  const htmlResponse = (payload) => renderAdminHtmlResponse(withWorkspaceSettings(payload, config));
   if (requestPath === "/admin/login") {
     if (request.method === "GET") {
       let session = null;
@@ -3061,8 +3386,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       if ((authHeader && resolveAdminPrincipal(authHeader, authEnv)) || session?.principal) {
         return new Response(null, { status: 303, headers: { location: "/admin", "cache-control": "no-store" } });
       }
-      const error = new URL(request.url, "http://localhost").searchParams.get("error") === "1";
-      return new Response(renderAdminLoginPage({ error }), {
+      const loginUrl = new URL(request.url, "http://localhost");
+      const error = loginUrl.searchParams.get("error") === "1";
+      return new Response(renderAdminLoginPage({ error, locale: loginUrl.searchParams.get("locale") || "bg" }), {
         status: 200,
         headers: {
           "content-type": "text/html; charset=utf-8",
@@ -3191,6 +3517,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             operators,
             created: url.searchParams.get("created") === "1",
             error: url.searchParams.get("error") === "1",
+            locale: url.searchParams.get("locale") || "bg",
           }),
           { status: 200, headers: PRIVATE_HTML_HEADERS },
         );
@@ -3221,12 +3548,84 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       }
       return jsonResponse(405, { kind: "method_not_allowed" });
     }
+    if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
+      const registry = loadLocaleRegistry(config.localeRegistryPath);
+      if (request.method === "GET") {
+        const payload = workspaceSettingsPayload(registry, url, config);
+        if (url.pathname === "/admin/settings") return htmlResponse(payload);
+        return jsonResponse(200, payload);
+      }
+      if (request.method === "POST" && url.pathname === "/api/admin/settings") {
+        const formRequest = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes)) || {};
+        const section = String(input.section || "").trim();
+        const requestedLocale = String(input.locale || "").trim() || adminLocaleParam(url, config);
+        if (config.runtimeDataDurableOnly || !config.workspaceSettingsPath) {
+          return jsonResponse(503, {
+            kind: "workspace_settings_read_only",
+            message: "Workspace settings storage is not configured on this runtime.",
+          });
+        }
+        try {
+          const result = updateWorkspaceSettings({
+            filePath: config.workspaceSettingsPath,
+            section,
+            values: input,
+            actor: principal?.id || "admin",
+            recordedAt: auditRecordedAt(config),
+            brokerIds: DEFAULT_BROKER_PROFILES.map((profile) => profile.id),
+            adminLocales: adminLocales(registry),
+          });
+          if (!result.idempotent) {
+            recordAudit(
+              {
+                action: "workspace_settings_updated",
+                objectType: "workspace_settings",
+                objectId: result.section,
+                metadata: { section: result.section, changed_fields: result.changed_fields, revision: result.revision },
+              },
+              config,
+            );
+          }
+          if (formRequest) {
+            const target = new URL("/admin/settings", "http://localhost");
+            if (input.locale) target.searchParams.set("locale", requestedLocale);
+            target.searchParams.set("saved", result.section);
+            return new Response(null, {
+              status: 303,
+              headers: { location: `${target.pathname}${target.search}#settings-${result.section}`, "cache-control": "no-store" },
+            });
+          }
+          return jsonResponse(200, {
+            kind: "workspace_settings",
+            section: result.section,
+            values: result.values,
+            changed_fields: result.changed_fields,
+            revision: result.revision,
+            idempotent: result.idempotent,
+            settings: workspaceSettingsView(result.settings),
+          });
+        } catch (error) {
+          const status = error.status || 400;
+          if (formRequest && status === 400) {
+            return htmlResponse(
+              workspaceSettingsPayload(registry, url, config, {
+                requestedLocale,
+                form: { section, error: error.message, field: error.field || null, values: input },
+              }),
+            );
+          }
+          return jsonResponse(status, { kind: error.code || "bad_request", message: error.message, field: error.field || null });
+        }
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
+    }
     if (request.method === "GET" && url.pathname === "/admin") {
-      const locale = url.searchParams.get("locale");
-      const query = locale ? `?locale=${encodeURIComponent(locale)}` : "";
+      const locale = url.searchParams.get("locale") || adminLocaleParam(url, config);
+      const welcome = principal?.source === "payload_session" ? "&welcome=1" : "";
       return new Response(null, {
         status: 307,
-        headers: { ...PRIVATE_HTML_HEADERS, location: `${adminHomePath(principal)}${query}` },
+        headers: { ...PRIVATE_HTML_HEADERS, location: `${adminHomePath(principal)}?locale=${encodeURIComponent(locale)}${welcome}` },
       });
     }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
@@ -3252,14 +3651,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       const token = principal.source === "payload_session" ? "" : String(authHeader).replace(/^Bearer\s+/i, "").trim();
       const base =
         String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
-      const connected = url.searchParams.get("connected");
-      const result = connected
-        ? `${connected === "google" ? "Google" : connected === "whatsapp" ? "WhatsApp" : "Viber"} подтверждён и подключён.`
-        : url.searchParams.get("error")
-          ? "Провайдер не подтвердил подключение. Проверь настройки и повтори."
-          : storeError
-            ? "Хранилище подключений сейчас недоступно; новые credentials не будут приняты."
-            : "";
+      const connectLocale = url.searchParams.get("locale") || "en";
+      const result = operatorConnectResult({
+        locale: connectLocale,
+        connected: url.searchParams.get("connected") || "",
+        error: Boolean(url.searchParams.get("error")),
+        storeError,
+      });
       return new Response(
         renderOperatorConnectPage({
           baseUrl: base,
@@ -3268,6 +3666,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           connections,
           availability,
           result,
+          locale: connectLocale,
         }),
         {
           status: 200,
@@ -3401,8 +3800,14 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       }
       return jsonResponse(405, { kind: "method_not_allowed" });
     }
-    if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(await todayPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, await todayPayload(registry, url, config));
+    if (request.method === "GET" && ["/admin/today", "/api/admin/today"].includes(url.pathname)) {
+      const today = await todayPayload(registry, url, config);
+      const payload = withWorkspaceSettings(
+        { ...today, onboarding: await workspaceOnboardingFor(today, config), welcome: url.searchParams.get("welcome") === "1" },
+        config,
+      );
+      return url.pathname === "/admin/today" ? htmlResponse(payload) : jsonResponse(200, payload);
+    }
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(await contactsPayload(registry, url, config));
@@ -3464,6 +3869,20 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       } catch (error) {
         return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
+    }
+    // Package A2: read-only approved-content review. The review body reads the
+    // approved data files directly, so the Payload app and the static server
+    // show the same rows.
+    if (request.method === "GET" && url.pathname === "/admin/approved-content") {
+      return htmlResponse(
+        renderAdminApprovedContentPayload(
+          registry,
+          url.searchParams.get("locale") || "en",
+          approvedContentReviewPayload(config.reviewedAt ? { now: config.reviewedAt } : {}),
+          config.adminPrincipal || null,
+          url.searchParams.get("state") || "",
+        ),
+      );
     }
     if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(await translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, await translationQueuePayload(registry, url, config));
@@ -3749,6 +4168,77 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       const result = appendBrokerLeadEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), registry, config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
+    // B1 lead operations: snooze, bulk actions, saved views.
+    if (request.method === "POST" && url.pathname === "/api/admin/leads/snooze") {
+      const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
+      const result = appendLeadSnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
+      return jsonResponse(result.idempotent ? 200 : 201, { kind: "lead_snooze", ...result });
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/leads/unsnooze") {
+      const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
+      const result = appendLeadUnsnoozeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config, recordedAt);
+      return jsonResponse(result.idempotent ? 200 : 201, { kind: "lead_unsnooze", ...result });
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/leads/bulk") {
+      const outcome = applyLeadBulkAction(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(outcome.status, outcome.body);
+    }
+    // Saved views belong to the authenticated operator and to nobody else.
+    if (url.pathname === "/api/admin/views") {
+      const operatorId = config.adminPrincipal?.id || null;
+      if (!operatorId) return adminOperatorIdentityRequired();
+      if (request.method === "GET") {
+        return jsonResponse(200, {
+          kind: "operator_views",
+          operator_id: operatorId,
+          surfaces: OPERATOR_VIEW_SURFACES,
+          views: operatorViewsFor(readOperatorViews(config.operatorViewLedgerPath), operatorId, url.searchParams.get("surface") || null),
+        });
+      }
+      const recordedAt = config.leadSnoozeAt || config.reviewedAt || new Date().toISOString();
+      const input = bindAuthenticatedOperator(
+        parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+        config.adminPrincipal,
+        ["operatorId"],
+      );
+      if (request.method === "POST") {
+        const view = createOperatorView(readOperatorViews(config.operatorViewLedgerPath), input, { operatorId, savedAt: recordedAt });
+        const persisted = appendOperatorView(view, { filePath: config.operatorViewLedgerPath });
+        if (!persisted.idempotent) {
+          recordAudit(
+            {
+              action: "operator_view_saved",
+              actor: operatorId,
+              objectType: "operator_view",
+              objectId: persisted.id,
+              metadata: { surface: persisted.surface, slug: persisted.slug, filter_keys: Object.keys(persisted.filters) },
+            },
+            config,
+            recordedAt,
+          );
+        }
+        return jsonResponse(persisted.idempotent ? 200 : 201, { kind: "operator_view", ...persisted });
+      }
+      if (request.method === "DELETE") {
+        const tombstone = createOperatorViewDeletion(readOperatorViews(config.operatorViewLedgerPath), input, { operatorId, deletedAt: recordedAt });
+        const persisted = appendOperatorView(tombstone, { filePath: config.operatorViewLedgerPath });
+        if (!persisted.idempotent) {
+          recordAudit(
+            {
+              action: "operator_view_deleted",
+              actor: operatorId,
+              objectType: "operator_view",
+              objectId: persisted.id,
+              metadata: { surface: persisted.surface, slug: persisted.slug },
+            },
+            config,
+            recordedAt,
+          );
+        }
+        return jsonResponse(200, { kind: "operator_view", ...persisted });
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
+    }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {
       const result = appendLeadAssignmentEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
@@ -3811,6 +4301,56 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       } catch (error) {
         return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
+    }
+    // B4 media upload
+    if (url.pathname === ADMIN_MEDIA_UPLOAD_PATH || url.pathname.startsWith(`${ADMIN_MEDIA_UPLOAD_PATH}/`)) {
+      const uploadLimits = config.mediaUploadLimits || mediaUploadLimitsFromEnv();
+      const uploadStorage = createMediaUploadStorage(config.mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
+      if (request.method === "GET" && url.pathname === ADMIN_MEDIA_UPLOAD_PATH) {
+        const listed = listMediaUploads({
+          ledgerPath: config.mediaUploadLedgerPath,
+          listing: url.searchParams.get("listing") || "",
+          enquiry: url.searchParams.get("enquiry") || "",
+          limits: uploadLimits,
+        });
+        return jsonResponse(listed.status, listed.body);
+      }
+      if (request.method === "GET") {
+        let assetId = "";
+        try {
+          assetId = decodeURIComponent(url.pathname.slice(`${ADMIN_MEDIA_UPLOAD_PATH}/`.length));
+        } catch {
+          return jsonResponse(400, { kind: "bad_request", message: "Malformed upload id" });
+        }
+        const preview = await readMediaUploadBytes({
+          ledgerPath: config.mediaUploadLedgerPath,
+          assetId,
+          storage: uploadStorage,
+        });
+        if (preview.status !== 200) return jsonResponse(preview.status, preview.body);
+        return new Response(preview.body, {
+          status: 200,
+          headers: { ...SECURITY_HEADERS, "cache-control": "no-store", ...preview.headers },
+        });
+      }
+      if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
+      const uploaded = await handleAdminMediaUpload({
+        bytes: Buffer.from(await request.arrayBuffer()),
+        contentType: request.headers.get("content-type") || "",
+        acceptsHtml: acceptsHtmlResponse(request.headers.get("accept")),
+        seed: currentSeed(config),
+        limits: uploadLimits,
+        storage: uploadStorage,
+        ledgerPath: config.mediaUploadLedgerPath,
+        uploadedBy: config.adminPrincipal?.id || "admin",
+        uploadedAt: auditRecordedAt(config),
+        recordAudit: (entry) => recordAudit(entry, config),
+        editorPathFor: listingEditorPath,
+      });
+      if (uploaded.status === 303) {
+        return new Response("", { status: 303, headers: { ...SECURITY_HEADERS, "cache-control": "no-store", ...uploaded.headers } });
+      }
+      return jsonResponse(uploaded.status, uploaded.body);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
       const result = appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);

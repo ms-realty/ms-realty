@@ -19,6 +19,7 @@
       buttons[i].setAttribute("aria-pressed", on ? "true" : "false");
     }
     var rows = document.querySelectorAll("[data-lead-row]");
+    var visible = 0;
     for (var j = 0; j < rows.length; j += 1) {
       var row = rows[j];
       var slaCell = row.querySelector("[data-sla-status]");
@@ -28,7 +29,138 @@
       if (filter === "needs_reply") show = !replied;
       if (filter === "sla") show = sla === "reminder_required" || sla === "manager_escalation_required";
       row.hidden = !show;
+      if (show) visible += 1;
     }
+    // An empty queue says so instead of leaving a bare table header.
+    var empty = document.querySelector("[data-lead-queue-empty]");
+    if (empty) empty.hidden = visible > 0 || rows.length === 0;
+  }
+  function initAdminListFilters() {
+    var navs = document.querySelectorAll("[data-list-filter]");
+    for (var i = 0; i < navs.length; i += 1) {
+      (function (nav) {
+        var scope = nav.getAttribute("data-list-filter");
+        var buttons = nav.querySelectorAll("button[data-filter-value]");
+        function apply(value) {
+          var items = document.querySelectorAll('[data-list-item="' + scope + '"]');
+          var visible = 0;
+          for (var j = 0; j < items.length; j += 1) {
+            var tags = " " + (items[j].getAttribute("data-filter-tags") || "") + " ";
+            var show = value === "all" || tags.indexOf(" " + value + " ") >= 0;
+            items[j].hidden = !show;
+            if (show) visible += 1;
+          }
+          for (var k = 0; k < buttons.length; k += 1) {
+            var on = buttons[k].getAttribute("data-filter-value") === value;
+            buttons[k].setAttribute("data-on", on ? "1" : "0");
+            buttons[k].setAttribute("aria-pressed", on ? "true" : "false");
+          }
+          var empty = document.querySelector('[data-list-empty="' + scope + '"]');
+          if (empty) empty.hidden = visible > 0 || items.length === 0;
+        }
+        nav.addEventListener("click", function (event) {
+          var button = event.target.closest("button[data-filter-value]");
+          if (!button) return;
+          apply(button.getAttribute("data-filter-value") || "all");
+        });
+        var selected = nav.querySelector('button[data-filter-value][data-on="1"]');
+        if (selected && selected.getAttribute("data-filter-value") !== "all") apply(selected.getAttribute("data-filter-value"));
+      })(navs[i]);
+    }
+  }
+  function syncPipelineBoardCounts() {
+    var columns = document.querySelectorAll("[data-stage-group]");
+    for (var i = 0; i < columns.length; i += 1) {
+      var cards = columns[i].querySelectorAll("[data-pipeline-card]");
+      var visible = 0;
+      for (var j = 0; j < cards.length; j += 1) if (!cards[j].hidden) visible += 1;
+      var count = columns[i].querySelector("[data-board-count]");
+      if (count) count.textContent = String(visible);
+    }
+  }
+  function initPipelineBoard() {
+    if (!document.querySelector("[data-stage-group]")) return;
+    document.addEventListener("click", function (event) {
+      if (event.target.closest("[data-pipeline-filter]")) syncPipelineBoardCounts();
+    });
+    syncPipelineBoardCounts();
+  }
+  // Lead inbox panes: the list links target the detail articles, so the
+  // URL fragment already selects a lead without JavaScript. With JavaScript
+  // the selection becomes an attribute, the first visible lead opens on wide
+  // screens, and queue filters keep the selection in sync.
+  function initLeadInboxPanes() {
+    var inbox = document.querySelector("[data-inbox-panes]");
+    if (!inbox) return;
+    var detail = inbox.querySelector(".adm-inbox__detail");
+    if (!detail) return;
+    var narrow = window.matchMedia("(max-width: 1023px)");
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    inbox.setAttribute("data-inbox-js", "true");
+    function articles() {
+      return detail.querySelectorAll(":scope > [data-lead-row]");
+    }
+    function hashLeadId() {
+      var hash = window.location.hash || "";
+      if (hash.indexOf("#lead-") !== 0) return "";
+      try {
+        return decodeURIComponent(hash.slice(6));
+      } catch (error) {
+        return hash.slice(6);
+      }
+    }
+    function firstVisibleId() {
+      var rows = articles();
+      for (var i = 0; i < rows.length; i += 1) if (!rows[i].hidden) return rows[i].getAttribute("data-lead-id");
+      return "";
+    }
+    function select(id, options) {
+      var rows = articles();
+      var chosen = null;
+      for (var i = 0; i < rows.length; i += 1) {
+        var on = Boolean(id) && rows[i].getAttribute("data-lead-id") === id && !rows[i].hidden;
+        if (on) {
+          rows[i].setAttribute("data-lead-selected", "true");
+          chosen = rows[i];
+        } else {
+          rows[i].removeAttribute("data-lead-selected");
+        }
+      }
+      var links = inbox.querySelectorAll("[data-lead-link]");
+      for (var j = 0; j < links.length; j += 1) {
+        if (chosen && links[j].getAttribute("data-lead-link") === id) links[j].setAttribute("aria-current", "true");
+        else links[j].removeAttribute("aria-current");
+      }
+      if (chosen && options.updateHash && window.history && window.history.replaceState) {
+        window.history.replaceState(null, "", "#lead-" + encodeURIComponent(id));
+      }
+      if (chosen && options.scroll) {
+        chosen.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+      }
+      return chosen;
+    }
+    function ensureSelection() {
+      var selected = detail.querySelector(':scope > [data-lead-row][data-lead-selected="true"]');
+      if (selected && !selected.hidden) return;
+      select(narrow.matches ? "" : firstVisibleId(), {});
+    }
+    inbox.addEventListener("click", function (event) {
+      var link = event.target.closest("[data-lead-link]");
+      if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+      event.preventDefault();
+      select(link.getAttribute("data-lead-link"), { updateHash: true, scroll: narrow.matches });
+    });
+    document.addEventListener("click", function (event) {
+      if (event.target.closest("[data-lead-filter]")) ensureSelection();
+    });
+    window.addEventListener("hashchange", function () {
+      var id = hashLeadId();
+      if (id) select(id, { scroll: narrow.matches });
+      else if (narrow.matches) select("", {});
+    });
+    var initial = hashLeadId();
+    if (initial && select(initial, { scroll: narrow.matches })) return;
+    ensureSelection();
   }
   function initLeadQueueFilters() {
     var tabs = document.querySelector("[data-lead-queue-tabs]");
@@ -431,14 +563,23 @@
           setReplyStatus(form, success, "success");
         })
         .catch(function (error) {
-          var message = isDraft && /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY/.test(String(error && error.message || ""))
-            ? unavailable
-            : failure;
-          setReplyStatus(form, message, "error");
+          var missingHermes = isDraft && /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY/.test(String(error && error.message || ""));
+          // The page cannot know up front whether Hermes is configured, so the
+          // first failed draft turns the composer into its unavailable state:
+          // the draft button stays disabled and its note becomes visible.
+          if (missingHermes) {
+            var host = form.closest("[data-lead-row]") || form.parentElement;
+            if (host) host.setAttribute("data-hermes-state", "unavailable");
+            var button = form.querySelector('[type="submit"]');
+            if (button) button.disabled = true;
+          }
+          setReplyStatus(form, missingHermes ? unavailable : failure, "error");
         })
         .then(function () {
           form.removeAttribute("aria-busy");
-          if (submit) submit.disabled = false;
+          var host = form.closest("[data-lead-row]");
+          var unavailableNow = host && host.getAttribute("data-hermes-state") === "unavailable";
+          if (submit && !(isDraft && unavailableNow)) submit.disabled = false;
         });
     });
   }
@@ -464,7 +605,9 @@
     if (!tabs || !grid) return;
     var buttons = tabs.querySelectorAll("[data-pipeline-filter]");
     var cards = grid.querySelectorAll("[data-pipeline-card]");
+    var empty = document.querySelector("[data-pipeline-empty]");
     function applyFilter(filter) {
+      var visible = 0;
       for (var i = 0; i < cards.length; i += 1) {
         var card = cards[i];
         var matches =
@@ -472,12 +615,16 @@
             ? card.getAttribute("data-pipeline-status") === "open"
             : card.getAttribute("data-pipeline-kind") === filter || card.getAttribute("data-pipeline-status") === filter;
         card.hidden = !matches;
+        if (matches) visible += 1;
       }
       for (var j = 0; j < buttons.length; j += 1) {
         var on = buttons[j].getAttribute("data-pipeline-filter") === filter;
         buttons[j].setAttribute("data-on", on ? "1" : "0");
         buttons[j].setAttribute("aria-pressed", on ? "true" : "false");
       }
+      // The grid collapses when nothing matches, so the empty note takes its place.
+      grid.hidden = visible === 0;
+      if (empty) empty.hidden = visible > 0;
     }
     tabs.addEventListener("click", function (event) {
       var button = event.target.closest("[data-pipeline-filter]");
@@ -493,19 +640,13 @@
         var boxes = form.querySelectorAll("[data-listing-select]");
         var toggle = form.querySelector("[data-listing-select-all]");
         var count = form.querySelector("[data-listing-selection-count]");
-        var targetStatus = form.querySelector('select[name="targetStatus"]');
-        var submit = form.querySelector('button[type="submit"]');
-        var canEdit = form.getAttribute("data-listing-can-edit") === "true";
         var selectedLabel = form.getAttribute("data-listing-selected-label") || "{count} selected";
         var selectAllLabel = form.getAttribute("data-listing-select-all-label") || "Select all on this page";
         var clearLabel = form.getAttribute("data-listing-clear-label") || "Clear selection";
         function refresh() {
           var selected = 0;
           for (var j = 0; j < boxes.length; j += 1) if (boxes[j].checked) selected += 1;
-          form.setAttribute("data-has-selection", selected > 0 ? "true" : "false");
           if (count) count.textContent = selectedLabel.replace("{count}", String(selected));
-          if (targetStatus) targetStatus.disabled = !canEdit || selected === 0;
-          if (submit) submit.disabled = !canEdit || selected === 0;
           if (toggle) {
             var allSelected = boxes.length > 0 && selected === boxes.length;
             toggle.textContent = allSelected ? clearLabel : selectAllLabel;
@@ -708,6 +849,92 @@
     window.addEventListener("resize", syncAdminShellOffsets);
     syncOpenState();
   }
+  /* Package A2 (CMS and launch screens) --------------------------------- */
+  // The bulk bar is quiet until a listing is selected: the status control and
+  // the submit stay disabled, and the hint says what a selection would do.
+  // Without JavaScript the bar keeps its server-rendered enabled state, so a
+  // no-script operator can still post a bulk change.
+  function initListingSelectionBar() {
+    var forms = document.querySelectorAll("[data-listing-bulk-form]");
+    for (var i = 0; i < forms.length; i += 1) {
+      (function (form) {
+        var bar = form.querySelector("[data-listing-bulk-bar]");
+        if (!bar) return;
+        var boxes = form.querySelectorAll("[data-listing-select]");
+        var controls = form.querySelectorAll("[data-listing-bulk-control]");
+        var hint = form.querySelector("[data-listing-bulk-hint]");
+        var emptyHint = hint ? hint.textContent : "";
+        var readOnly = false;
+        for (var c = 0; c < controls.length; c += 1) if (controls[c].disabled) readOnly = true;
+        function selectedCount() {
+          var selected = 0;
+          for (var j = 0; j < boxes.length; j += 1) if (boxes[j].checked) selected += 1;
+          return selected;
+        }
+        function sync() {
+          var selected = selectedCount();
+          bar.setAttribute("data-selection", selected ? "active" : "empty");
+          if (readOnly) return;
+          for (var k = 0; k < controls.length; k += 1) controls[k].disabled = selected === 0;
+          if (hint) hint.textContent = selected ? bar.getAttribute("data-selection-hint") || emptyHint : emptyHint;
+        }
+        form.addEventListener("change", function (event) {
+          if (event.target && event.target.matches("[data-listing-select]")) sync();
+        });
+        form.addEventListener("click", function (event) {
+          if (event.target && event.target.closest("[data-listing-select-all]")) window.setTimeout(sync);
+        });
+        sync();
+      })(forms[i]);
+    }
+  }
+  // The editor save bar carries one state at a time: clean, dirty, saving,
+  // saved, error or conflict. Dirty comes from the shared editor watcher; the
+  // rest are mirrored from the mutation status line so the bar, and not only a
+  // sentence of text, tells the operator where the save got to. A conflict is
+  // an error the server does not report yet: the marker below is the hook, and
+  // until a version token exists the bar falls back to the plain error state.
+  function initListingEditorSaveState() {
+    var savebars = document.querySelectorAll("[data-editor-savebar]");
+    for (var i = 0; i < savebars.length; i += 1) {
+      (function (savebar) {
+        var status = savebar.querySelector("[data-admin-mutation-status]");
+        var conflict = document.querySelector("[data-editor-conflict]");
+        var marker = savebar.getAttribute("data-editor-conflict-marker") || "";
+        if (!status || typeof MutationObserver !== "function") return;
+        function sync() {
+          var state = status.getAttribute("data-state") || "";
+          if (state === "success") state = "saved";
+          if (state === "error" && marker && status.textContent.indexOf(marker) >= 0) state = "conflict";
+          if (!state) state = savebar.getAttribute("data-dirty") === "true" ? "dirty" : "clean";
+          savebar.setAttribute("data-save-state", state);
+          if (conflict) conflict.hidden = state !== "conflict";
+        }
+        new MutationObserver(sync).observe(status, { attributes: true, childList: true, characterData: true, subtree: true });
+        new MutationObserver(sync).observe(savebar, { attributes: true, attributeFilter: ["data-dirty"] });
+        sync();
+      })(savebars[i]);
+    }
+  }
+  // A media asset whose file has gone missing must say so rather than leave a
+  // broken image icon in a review queue.
+  function initListingMediaPreviews() {
+    var previews = document.querySelectorAll("[data-media-preview]");
+    for (var i = 0; i < previews.length; i += 1) {
+      (function (image) {
+        var asset = image.closest("[data-media-asset]");
+        function fail() {
+          if (asset) asset.setAttribute("data-media-preview-state", "failed");
+          image.hidden = true;
+        }
+        if (image.complete && image.naturalWidth === 0) fail();
+        image.addEventListener("error", fail);
+        image.addEventListener("load", function () {
+          if (asset) asset.setAttribute("data-media-preview-state", "loaded");
+        });
+      })(previews[i]);
+    }
+  }
   function initListingEditorTabs() {
     var nav = document.querySelector("[data-editor-tabs]");
     if (!nav) return;
@@ -717,10 +944,32 @@
       var href = tabNodes[i].getAttribute("href") || "";
       var sectionId = href.slice(1);
       var section = sectionId ? document.getElementById(sectionId) : null;
-      if (section && !section.closest(".adm-editor-rail")) entries.push({ tab: tabNodes[i], section: section });
+      if (section) entries.push({ tab: tabNodes[i], section: section });
     }
     if (!entries.length) return;
+    var rail = document.querySelector("[data-editor-readiness-rail]");
     var frame = 0;
+    // A clicked tab stays active while its section scrolls into place and,
+    // because the rail panels are sticky and always in view, until the
+    // operator scrolls away from that position.
+    var pinnedId = null;
+    var pinUntil = 0;
+    var pinnedScrollY = null;
+    function pin(sectionId, settledY) {
+      pinnedId = sectionId;
+      pinUntil = Date.now() + 1000;
+      pinnedScrollY = typeof settledY === "number" ? settledY : null;
+      if (pinnedScrollY === null) {
+        // Browser-driven anchor scrolls settle on their own; sample the
+        // position once the scroll has had time to finish.
+        window.setTimeout(function () {
+          if (pinnedId === sectionId && pinnedScrollY === null) pinnedScrollY = window.scrollY;
+        }, 1000);
+      }
+    }
+    function inStickyRail(section) {
+      return Boolean(rail) && rail.contains(section) && getComputedStyle(rail).position === "sticky";
+    }
     function setActive(sectionId) {
       for (var j = 0; j < entries.length; j += 1) {
         var active = entries[j].section.id === sectionId;
@@ -737,30 +986,48 @@
       syncAdminShellOffsets();
       var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       var offset = Number((document.documentElement.style.getPropertyValue("--adm-editor-anchor-offset") || "124").replace("px", "")) || 124;
-      var nextTop = window.scrollY + section.getBoundingClientRect().top - offset;
-      window.scrollTo({ top: Math.max(0, nextTop), behavior: reduceMotion ? "auto" : "smooth" });
+      var maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      var nextTop = Math.min(maxTop, Math.max(0, window.scrollY + section.getBoundingClientRect().top - offset));
+      window.scrollTo({ top: nextTop, behavior: reduceMotion ? "auto" : "smooth" });
+      return nextTop;
     }
     function syncFromScroll() {
       frame = 0;
       syncAdminShellOffsets();
-      var hashId = window.location.hash ? window.location.hash.slice(1) : "";
-      var hashSection = hashId ? document.getElementById(hashId) : null;
-      if (hashSection && hashSection.closest(".adm-editor-rail")) {
-        setActive(hashId);
-        return;
+      if (pinnedId) {
+        if (Date.now() < pinUntil) {
+          setActive(pinnedId);
+          return;
+        }
+        if (pinnedScrollY === null) pinnedScrollY = window.scrollY;
+        if (Math.abs(window.scrollY - pinnedScrollY) < 120) {
+          setActive(pinnedId);
+          return;
+        }
+        pinnedId = null;
       }
-      if (!entries.length) return;
       var anchorLine = nav.getBoundingClientRect().bottom + 24;
-      var activeSection = entries[0].section;
+      var activeSection = null;
       var activeTop = -Infinity;
       for (var j = 0; j < entries.length; j += 1) {
-        var sectionTop = entries[j].section.getBoundingClientRect().top;
+        var section = entries[j].section;
+        // Sticky rail panels never scroll, so they cannot drive the scroll-spy.
+        if (inStickyRail(section)) continue;
+        var sectionTop = section.getBoundingClientRect().top;
         if (sectionTop <= anchorLine && sectionTop > activeTop) {
-          activeSection = entries[j].section;
+          activeSection = section;
           activeTop = sectionTop;
         }
       }
-      setActive(activeSection.id);
+      if (!activeSection) {
+        for (var k = 0; k < entries.length; k += 1) {
+          if (!inStickyRail(entries[k].section)) {
+            activeSection = entries[k].section;
+            break;
+          }
+        }
+      }
+      setActive((activeSection || entries[0].section).id);
     }
     function scheduleSync() {
       if (!frame) frame = window.requestAnimationFrame(syncFromScroll);
@@ -776,7 +1043,7 @@
       setActive(targetId);
       if (window.history && window.history.pushState) window.history.pushState(null, "", "#" + targetId);
       else window.location.hash = targetId;
-      scrollToSection(section);
+      pin(targetId, scrollToSection(section));
     });
     window.addEventListener("scroll", scheduleSync, { passive: true });
     window.addEventListener("resize", function () {
@@ -786,12 +1053,16 @@
     window.addEventListener("hashchange", function () {
       var targetId = window.location.hash ? window.location.hash.slice(1) : "";
       var section = targetId ? document.getElementById(targetId) : null;
-      if (section) expandSection(section);
+      if (section) {
+        expandSection(section);
+        pin(targetId);
+      }
       scheduleSync();
     });
     var initialId = window.location.hash ? window.location.hash.slice(1) : entries[0].section.id;
     var initialSection = document.getElementById(initialId) ? document.getElementById(initialId) : entries[0].section;
     if (initialSection) expandSection(initialSection);
+    if (window.location.hash && initialSection) pin(initialSection.id);
     setActive(initialSection ? initialSection.id : entries[0].section.id);
     syncAdminShellOffsets();
     scheduleSync();
@@ -839,6 +1110,364 @@
     }, reducedMotion ? 0 : 220);
     return true;
   }
+  function workspaceStorageKey(prefix, element) {
+    return prefix + ":" + (element.getAttribute("data-workspace-operator") || "anonymous");
+  }
+  function workspaceFlagRead(key) {
+    try {
+      return localStorage.getItem(key) === "1";
+    } catch (error) {
+      return false;
+    }
+  }
+  function workspaceFlagWrite(key) {
+    try {
+      localStorage.setItem(key, "1");
+    } catch (error) {
+      // Private browsing: the panel simply reappears on the next visit.
+    }
+  }
+  function initWorkspaceOnboarding() {
+    var panel = document.querySelector("[data-workspace-onboarding]");
+    if (panel) {
+      var panelKey = workspaceStorageKey("ms-realty:admin-onboarding-dismissed:v1", panel);
+      var dismissPanel = panel.querySelector("[data-workspace-onboarding-dismiss]");
+      if (workspaceFlagRead(panelKey)) panel.hidden = true;
+      else if (dismissPanel) {
+        dismissPanel.hidden = false;
+        dismissPanel.addEventListener("click", function () {
+          workspaceFlagWrite(panelKey);
+          panel.hidden = true;
+        });
+      }
+    }
+    var welcome = document.querySelector("[data-workspace-welcome]");
+    if (!welcome) return;
+    var welcomeKey = workspaceStorageKey("ms-realty:admin-welcome-seen:v1", welcome);
+    if (workspaceFlagRead(welcomeKey)) {
+      welcome.hidden = true;
+      return;
+    }
+    var dismissWelcome = welcome.querySelector("[data-workspace-welcome-dismiss]");
+    if (dismissWelcome) {
+      dismissWelcome.hidden = false;
+      dismissWelcome.addEventListener("click", function () {
+        welcome.hidden = true;
+      });
+    }
+    // The banner greets an operator once per browser after login.
+    workspaceFlagWrite(welcomeKey);
+  }
+  function workspaceSettingsFormState(form) {
+    var pairs = [];
+    new FormData(form).forEach(function (value, key) {
+      pairs.push(key + "=" + String(value));
+    });
+    return pairs.sort().join("&");
+  }
+  function initWorkspaceSettingsForms() {
+    var forms = document.querySelectorAll("[data-workspace-settings-form]");
+    for (var i = 0; i < forms.length; i += 1) {
+      bindWorkspaceSettingsForm(forms[i]);
+    }
+  }
+  function bindWorkspaceSettingsForm(form) {
+    var submit = form.querySelector('[type="submit"]');
+    if (!submit || submit.disabled) return;
+    var status = form.querySelector("[data-admin-mutation-status]");
+    var dirtyMessage = form.getAttribute("data-settings-dirty-message") || "";
+    var baseline = workspaceSettingsFormState(form);
+    function sync() {
+      var dirty = workspaceSettingsFormState(form) !== baseline;
+      form.setAttribute("data-settings-dirty", dirty ? "true" : "false");
+      submit.disabled = !dirty;
+      if (!status) return;
+      var state = status.getAttribute("data-state");
+      if (state === "saving") return;
+      if (dirty) {
+        status.textContent = dirtyMessage;
+        status.setAttribute("data-state", "dirty");
+      } else if (state === "dirty") {
+        status.textContent = "";
+        status.removeAttribute("data-state");
+      }
+    }
+    if (status && window.MutationObserver) {
+      new MutationObserver(function () {
+        if (status.getAttribute("data-state") !== "success") return;
+        baseline = workspaceSettingsFormState(form);
+        form.setAttribute("data-settings-dirty", "false");
+        // The shared mutation handler re-enables submit buttons after its
+        // success step, so the saved form returns to pristine on the next tick.
+        window.setTimeout(function () {
+          submit.disabled = true;
+          markWorkspaceSettingsSaved(form);
+        }, 0);
+      }).observe(status, { attributes: true, attributeFilter: ["data-state"] });
+    }
+    form.addEventListener("input", sync);
+    form.addEventListener("change", sync);
+    syncWorkspaceSettingsConstraints(form);
+    form.addEventListener("input", function () {
+      syncWorkspaceSettingsConstraints(form);
+    });
+    sync();
+  }
+  // A saved section stops claiming it still holds the committed defaults.
+  function markWorkspaceSettingsSaved(form) {
+    var section = form.getAttribute("data-workspace-settings-form");
+    var updatedLabel = form.getAttribute("data-settings-updated-label") || "";
+    var panel = form.closest("[data-settings-section]");
+    if (panel) panel.setAttribute("data-settings-state", "updated");
+    var pills = document.querySelectorAll(
+      '[data-settings-section="' + section + '"] [data-settings-section-state], [data-settings-index-row="' + section + '"] [data-settings-section-state]',
+    );
+    for (var i = 0; i < pills.length; i += 1) {
+      pills[i].setAttribute("data-settings-section-state", "updated");
+      var text = pills[i].lastChild;
+      if (text && text.nodeType === 3) text.nodeValue = updatedLabel;
+    }
+  }
+  // Mirrors the server rule (escalation must come after the first reply target)
+  // as a native constraint, so the browser marks the offending field itself.
+  function syncWorkspaceSettingsConstraints(form) {
+    var firstReply = form.querySelector('[name="first_reply_target_minutes"]');
+    var escalation = form.querySelector('[name="manager_escalation_minutes"]');
+    if (!firstReply || !escalation) return;
+    var target = Number(firstReply.value);
+    escalation.min = Number.isFinite(target) && target > 0 ? String(target + 1) : "5";
+  }
+  // A datetime-local control carries no timezone; the ledger only accepts an
+  // instant, so the browser resolves it before the request leaves.
+  function adminMutationPayload(form) {
+    var payload = tourPayload(form);
+    var stamps = form.querySelectorAll('input[type="datetime-local"]');
+    for (var i = 0; i < stamps.length; i += 1) {
+      var field = stamps[i];
+      if (!field.name || !field.value) continue;
+      var parsed = new Date(field.value);
+      if (!isNaN(parsed.getTime())) payload[field.name] = parsed.toISOString();
+    }
+    var boxes = form.querySelectorAll('[data-lead-select]');
+    if (boxes.length) {
+      var selected = [];
+      for (var j = 0; j < boxes.length; j += 1) if (boxes[j].checked) selected.push(boxes[j].value);
+      payload.leadIds = selected;
+    }
+    if (form.hasAttribute("data-lead-bulk-form")) payload.bulkConfirmed = form.elements.bulkConfirmed && form.elements.bulkConfirmed.checked;
+    return payload;
+  }
+  function bulkOutcomeText(form, payload) {
+    var failure = form.getAttribute("data-admin-mutation-failure") || "Could not apply to every enquiry.";
+    var refused = (payload.results || []).filter(function (row) { return row.status === "refused"; });
+    var first = refused.length ? refused[0].message : "";
+    return failure + " " + String(payload.applied) + "/" + String(payload.requested) + (first ? " — " + first : "");
+  }
+  function initLeadBulkForm() {
+    var form = document.querySelector("[data-lead-bulk-form]");
+    if (!form) return;
+    var boxes = document.querySelectorAll("[data-lead-select]");
+    var toggle = form.querySelector("[data-lead-select-all]");
+    var count = form.querySelector("[data-lead-selection-count]");
+    var action = form.querySelector("[data-lead-bulk-action]");
+    var selectedLabel = form.getAttribute("data-lead-selected-label") || "{count} selected";
+    function refreshCount() {
+      var selected = 0;
+      for (var i = 0; i < boxes.length; i += 1) if (boxes[i].checked && !boxes[i].closest("[data-lead-row]").hidden) selected += 1;
+      if (count) count.textContent = selectedLabel.replace("{count}", String(selected));
+    }
+    function refreshFields() {
+      var value = action ? action.value : "assign";
+      var fields = form.querySelectorAll("[data-lead-bulk-field]");
+      for (var i = 0; i < fields.length; i += 1) {
+        var wanted = fields[i].getAttribute("data-lead-bulk-field");
+        var on = wanted === value;
+        fields[i].hidden = !on;
+        var control = fields[i].querySelector("input, select");
+        if (control) control.required = on && wanted === "snooze";
+      }
+    }
+    document.addEventListener("change", function (event) {
+      if (event.target && event.target.matches("[data-lead-select]")) refreshCount();
+      if (event.target === toggle) {
+        for (var i = 0; i < boxes.length; i += 1) {
+          var row = boxes[i].closest("[data-lead-row]");
+          if (row && row.hidden) continue;
+          boxes[i].checked = toggle.checked;
+        }
+        refreshCount();
+      }
+      if (event.target === action) refreshFields();
+    });
+    refreshFields();
+    refreshCount();
+  }
+  // A saved view is the current list filters under a name. Selecting one puts
+  // its filters back on the list and in the address, so it can be revisited.
+  function currentLeadFilters() {
+    var tabs = document.querySelector("[data-lead-queue-tabs]");
+    var active = tabs ? tabs.querySelector('button[data-lead-filter][data-on="1"]') : null;
+    var filters = { queue: active ? active.getAttribute("data-lead-filter") : "all" };
+    var params = new URLSearchParams(window.location.search || "");
+    ["broker", "leadType", "language", "source", "listingReference", "q"].forEach(function (key) {
+      if (params.get(key)) filters[key] = params.get(key);
+    });
+    return filters;
+  }
+  function applySavedLeadView(filters) {
+    if (!filters || !filters.queue) return;
+    var tabs = document.querySelector("[data-lead-queue-tabs]");
+    if (!tabs) return;
+    var button = tabs.querySelector('button[data-lead-filter="' + filters.queue + '"]');
+    if (button) button.click();
+  }
+  function initSavedViews() {
+    var select = document.querySelector("[data-saved-view-select]");
+    var form = document.querySelector("[data-saved-view-form]");
+    if (form) {
+      var field = form.querySelector("[data-saved-view-filters-field]");
+      var sync = function () { if (field) field.value = JSON.stringify(currentLeadFilters()); };
+      sync();
+      document.addEventListener("click", function (event) {
+        if (event.target && event.target.closest("button[data-lead-filter]")) window.setTimeout(sync, 0);
+      });
+      form.addEventListener("submit", sync);
+    }
+    if (!select) return;
+    select.addEventListener("change", function () {
+      var option = select.options[select.selectedIndex];
+      var raw = option ? option.getAttribute("data-saved-view-filters") : "";
+      if (!raw) return;
+      try { applySavedLeadView(JSON.parse(raw)); } catch (error) { /* a stored view we cannot read changes nothing */ }
+    });
+    var remove = document.querySelector("[data-saved-view-delete]");
+    if (!remove) return;
+    remove.addEventListener("click", function () {
+      var slug = select.value;
+      if (!slug) return;
+      var status = document.querySelector("[data-saved-view-status]");
+      remove.disabled = true;
+      fetch("/api/admin/views", {
+        method: "DELETE",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ surface: select.getAttribute("data-saved-view-select"), slug: slug }),
+      })
+        .then(function (response) { if (!response.ok) throw new Error(String(response.status)); return response.json(); })
+        .then(function () {
+          select.remove(select.selectedIndex);
+          select.value = "";
+          if (status) { status.textContent = remove.getAttribute("data-deleted-label") || "View deleted."; status.setAttribute("data-state", "success"); }
+        })
+        .catch(function () {
+          if (status) { status.textContent = remove.getAttribute("data-delete-failed-label") || "Could not delete the view."; status.setAttribute("data-state", "error"); }
+        })
+        .then(function () { remove.disabled = false; });
+    });
+  }
+
+  // Listing photo upload inside the media manager. Without JavaScript the same
+  // form posts multipart and the server redirects back to this panel; here it
+  // becomes inline progress with a per-file outcome list.
+  function initMediaUploadForm() {
+    var form = document.querySelector("[data-media-upload-form]");
+    if (!form || !window.FormData || !window.XMLHttpRequest) return;
+    var input = form.querySelector("[data-media-upload-input]");
+    var status = form.querySelector("[data-media-upload-status]");
+    var results = form.querySelector("[data-media-upload-results]");
+    var progress = form.querySelector("[data-media-upload-progress]");
+    var submit = form.querySelector("[data-media-upload-submit]");
+    var pendingText = form.getAttribute("data-media-upload-pending") || "Uploading…";
+    var successText = form.getAttribute("data-media-upload-success") || "Uploaded.";
+    var failureText = form.getAttribute("data-media-upload-failure") || "Could not upload.";
+    var rejectedText = form.getAttribute("data-media-upload-rejected") || "File refused";
+
+    function setStatus(text, state) {
+      if (!status) return;
+      status.textContent = text || "";
+      if (state) status.setAttribute("data-state", state);
+      else status.removeAttribute("data-state");
+    }
+    function addResult(text, state) {
+      if (!results) return null;
+      var item = document.createElement("li");
+      item.textContent = text;
+      item.setAttribute("data-state", state);
+      results.appendChild(item);
+      return item;
+    }
+
+    form.addEventListener("submit", function (event) {
+      var files = input && input.files ? Array.prototype.slice.call(input.files) : [];
+      if (!files.length) return;
+      event.preventDefault();
+      if (results) results.textContent = "";
+      var payload = new FormData(form);
+      if (submit) submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setStatus(pendingText, "saving");
+      if (progress) {
+        progress.hidden = false;
+        progress.value = 0;
+      }
+      var request = new XMLHttpRequest();
+      request.open("POST", form.getAttribute("action"), true);
+      request.setRequestHeader("accept", "application/json");
+      request.withCredentials = true;
+      if (request.upload) {
+        request.upload.onprogress = function (progressEvent) {
+          if (!progress || !progressEvent.lengthComputable) return;
+          progress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+        };
+      }
+      request.onload = function () {
+        var body = {};
+        try {
+          body = JSON.parse(request.responseText || "{}");
+        } catch (error) {
+          body = {};
+        }
+        var uploaded = body.uploaded || [];
+        var refused = body.rejected || [];
+        for (var u = 0; u < uploaded.length; u += 1) {
+          var uploadedFile = files[uploaded[u].index];
+          var entry = addResult((uploadedFile ? uploadedFile.name + " — " : "") + successText, "success");
+          // The editor may hold unsaved fact edits, so the panel is never
+          // reloaded from under the operator. A link to the stored bytes lets
+          // them check the photo now and open the review form on their own next
+          // visit to this panel.
+          if (entry && uploaded[u].preview_path) {
+            var link = document.createElement("a");
+            link.href = uploaded[u].preview_path;
+            link.target = "_blank";
+            link.rel = "noreferrer";
+            link.textContent = " " + uploaded[u].asset_id;
+            entry.appendChild(link);
+          }
+        }
+        for (var r = 0; r < refused.length; r += 1) {
+          var refusedFile = files[refused[r].index];
+          addResult((refusedFile ? refusedFile.name + " — " : rejectedText + ": ") + (refused[r].message || failureText), "error");
+        }
+        if (request.status >= 200 && request.status < 300) {
+          setStatus(successText, refused.length ? "warning" : "success");
+          if (input) input.value = "";
+        } else {
+          setStatus(body.message || failureText, "error");
+        }
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.onerror = function () {
+        setStatus(failureText, "error");
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.send(payload);
+    });
+  }
   function initAdminMutationForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -856,16 +1485,22 @@
         method: "POST",
         credentials: "same-origin",
         headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify(tourPayload(form)),
+        body: JSON.stringify(adminMutationPayload(form)),
       })
         .then(function (response) {
           return response.json().catch(function () { return {}; }).then(function (payload) {
-            if (!response.ok) throw new Error(payload.message || failure);
+            if (!response.ok && response.status !== 207) throw new Error(payload.message || failure);
             return payload;
           });
         })
         .then(function (payload) {
-          if (status) { status.textContent = success; status.setAttribute("data-state", "success"); }
+          // A batch that refused some enquiries is not a success: the strip
+          // says how many landed and how many did not.
+          var partial = payload && payload.kind === "lead_bulk_action" && payload.refused > 0;
+          if (status) {
+            status.textContent = partial ? bulkOutcomeText(form, payload) : success;
+            status.setAttribute("data-state", partial ? "error" : "success");
+          }
           if (form.hasAttribute("data-editor-form")) commitEditorFormState(form);
           if (form.hasAttribute("data-route-decision-form")) completeRouteDecision(form, payload);
         })
@@ -884,8 +1519,16 @@
   initEditorForms();
   initLeadPipelineFilters();
   initListingBulkForms();
+  initListingSelectionBar();
+  initListingEditorSaveState();
+  initListingMediaPreviews();
   initRouteDecisionForms();
   initAdminMutationForms();
+  initMediaUploadForm();
+  initWorkspaceOnboarding();
+  initWorkspaceSettingsForms();
+  initLeadBulkForm();
+  initSavedViews();
   initTourEditor();
   initViewingFollowUpForms();
   initSellerPipelineOutcomeForms();
@@ -894,4 +1537,7 @@
   initReplyDeliveryForms();
   initReplyForms();
   initCommunicationTemplates();
+  initAdminListFilters();
+  initPipelineBoard();
+  initLeadInboxPanes();
 })();

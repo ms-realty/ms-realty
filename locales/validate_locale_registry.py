@@ -64,8 +64,18 @@ def main() -> int:
             or not segments.get("location")
             or not segments.get("contact")
             or not segments.get("seller")
+            or not segments.get("start")
+            or not segments.get("compare")
+            or not segments.get("about")
+            or not segments.get("alerts")
         ):
             fail(f"missing route segments for {code}")
+        owned = [
+            segments.get(name)
+            for name in ("listing", "search", "location", "contact", "seller", "start", "compare", "about", "alerts")
+        ]
+        if len(set(owned)) != len(owned):
+            fail(f"route segments must be unique for {code}")
 
     if by_code["he"].get("direction") != "rtl":
         fail("Hebrew must be RTL")
@@ -98,6 +108,8 @@ def main() -> int:
     print("PASS: locale registry supports dynamic approved public locales")
     print("PASS: admin CMS/CRM locales are bg, ru, en")
     print("PASS: Greek and Israel Hebrew website language coverage is seeded")
+    print("PASS: every locale carries the buyer onboarding start segment")
+    print("PASS: every locale carries unique compare, about and alerts segments")
     return 0
 
 

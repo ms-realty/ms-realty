@@ -13,18 +13,32 @@ import {
   renderLegacyArchivePage,
   renderListingPreservationPage,
   renderLanguageFallback,
-  renderNotFoundPage,
   renderListingPage,
   renderLocationPage,
+  renderNotFoundPage,
   renderSearchPage,
   renderSearchUnavailablePage,
   renderContactPage,
   renderSellerPage,
+  renderStartPage,
+  renderComparePage,
+  renderAboutPage,
+  renderAlertsPage,
   isActiveListing,
 } from "./public-site.mjs";
 
 export { renderSearchUnavailablePage };
-import { contactPath, locationPath, listingPath, publicLocationNames, sellerPath } from "./seo.mjs";
+import {
+  aboutPath,
+  alertsPath,
+  comparePath,
+  contactPath,
+  locationPath,
+  listingPath,
+  publicLocationNames,
+  sellerPath,
+  startPath,
+} from "./seo.mjs";
 import { publicFactValue } from "./listing-facts.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
 import { latestTourForListing } from "./tours.mjs";
@@ -263,6 +277,31 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   });
   if (sellerLocale) return { type: "seller", localeCode: sellerLocale.code };
 
+  const startLocale = registry.locales.find((locale) => {
+    try {
+      return startPath(registry, locale.code) === normalized;
+    } catch {
+      return false;
+    }
+  });
+  if (startLocale) return { type: "start", localeCode: startLocale.code };
+
+  // Package P4 routes: compare, about and alerts.
+  for (const [type, resolvePath] of [
+    ["compare", comparePath],
+    ["about", aboutPath],
+    ["alerts", alertsPath],
+  ]) {
+    const match = registry.locales.find((locale) => {
+      try {
+        return resolvePath(registry, locale.code) === normalized;
+      } catch {
+        return false;
+      }
+    });
+    if (match) return { type, localeCode: match.code };
+  }
+
   const contactLocale = registry.locales.find((locale) => {
     try {
       return contactPath(registry, locale.code) === normalized;
@@ -305,6 +344,9 @@ export function renderRuntimePath(
   brokerContacts = [],
   tourApprovals = [],
   preservationCatalog = [],
+  // `searchParams` (URLSearchParams or a plain object) lets query-driven pages
+  // such as the buyer onboarding finish step render without JavaScript.
+  { searchParams = null } = {},
 ) {
   const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks, tourApprovals);
   const listings = () => runtimeListings(seed, translationTasks);
@@ -335,6 +377,18 @@ export function renderRuntimePath(
   if (resolved.type === "seller") {
     return renderSellerPage({ registry, localeCode: resolved.localeCode });
   }
+  if (resolved.type === "start") {
+    return renderStartPage({ registry, localeCode: resolved.localeCode, listings: listings(), searchParams });
+  }
+  if (resolved.type === "compare") {
+    return renderComparePage({ registry, localeCode: resolved.localeCode, listings: listings(), searchParams });
+  }
+  if (resolved.type === "about") {
+    return renderAboutPage({ registry, localeCode: resolved.localeCode });
+  }
+  if (resolved.type === "alerts") {
+    return renderAlertsPage({ registry, localeCode: resolved.localeCode });
+  }
   if (resolved.type === "contact") {
     return renderContactPage({ registry, localeCode: resolved.localeCode });
   }
@@ -362,7 +416,7 @@ export function renderRuntimePath(
     const preserved = preservationCatalog.find((entry) => entry.target_path === normalized);
     if (preserved) return renderListingPreservationPage({ registry, entry: preserved, path: normalized });
   }
-  return renderNotFoundPage({ registry, pathname });
+  return renderNotFoundPage({ registry, path: pathname });
 }
 
 export function searchRuntimeListings(

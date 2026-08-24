@@ -1,3 +1,4 @@
+import { buildChannelAttribution, leadChannelForSource } from "./lead-attribution.mjs";
 import { buildLeadSlaReport } from "./lead-sla.mjs";
 import { buildLeadPipelineQueue, LEAD_PIPELINES } from "./lead-pipeline-outcomes.mjs";
 import { buildPublicRequestQueue } from "./public-request-outcomes.mjs";
@@ -277,11 +278,19 @@ export function buildOperationsReport({
     },
     lead_volume: {
       by_source: countBy(leads, (lead) => lead.source),
+      by_channel: countBy(leads, (lead) => lead.channel || leadChannelForSource(lead.source)),
       by_language: countBy(leads, (lead) => lead.original_language),
       by_type: countBy(leads, (lead) => lead.lead_type),
     },
     response_time: response,
     source_quality: sourceQuality(leads, replyDelivery.states, leadPipeline.states, viewings, deals),
+    // Which channel converts. Counted from the lead ledger's own attribution;
+    // no visitor level data crosses this boundary.
+    channel_attribution: buildChannelAttribution(leads, {
+      deliveryStates: replyDelivery.states,
+      viewings,
+      deals,
+    }),
     pipelines: {
       buyer: pipelineFunnel(leadPipeline.states, "buyer"),
       renter: pipelineFunnel(leadPipeline.states, "renter"),
@@ -319,6 +328,13 @@ export function assertOperationsReport(report) {
   }
   if (report.source_quality.some((row) => row.replies_sent > row.leads || row.closed_deals > row.leads)) {
     throw new Error("Operations source quality cannot exceed source lead volume");
+  }
+  if (report.channel_attribution) {
+    const attributed = report.channel_attribution.rows.reduce((sum, row) => sum + row.leads, 0);
+    if (attributed !== report.summary.leads) throw new Error("Operations channel attribution must count every lead once");
+    if (report.channel_attribution.rows.some((row) => row.closed_deals > row.leads)) {
+      throw new Error("Operations channel attribution cannot exceed channel lead volume");
+    }
   }
   return true;
 }

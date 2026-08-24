@@ -70,11 +70,12 @@ export function buildMobileElderlyQaReport({
       ],
     }),
   };
-  const searchPage = renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" });
+  const familySearchPage = renderSearchPage({ registry, listings, localeCode: "he", filters: { property_family: "apartment" } });
+  const familySearchHtml = renderReactPage(familySearchPage);
   const pages = {
     home: renderReactPage(renderHomePage({ registry, listings, localeCode: "he" })),
     listing: renderReactPage(renderListingPage({ registry, listing, localeCode: "he" })),
-    search: renderReactPage(searchPage),
+    search: renderReactPage(renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" })),
     // The seller intake is rendered with lead writes explicitly enabled so this
     // gate always exercises the real phone-first form. Binding it to the
     // ambient durable-store state would make the intake checks vacuous exactly
@@ -108,7 +109,13 @@ export function buildMobileElderlyQaReport({
     renderSellerPage({ registry, localeCode: "he", leadWritesDisabled: true }),
   );
   const gallerySlideCount = (galleryListingHtml.match(/data-mobile-gallery-slide=/g) || []).length;
-  const publicAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-public.css"), "utf8");
+  // The public sheet is split per screen family (adapter-public.css plus the
+  // adapter-public-*.css extensions the design build concatenates), so the CSS
+  // contracts below are checked against all of them.
+  const uiDir = fromRoot("production", "lib", "ui");
+  const publicAdapterCss = ["adapter-public.css", ...fs.readdirSync(uiDir).filter((name) => /^adapter-public-.+\.css$/.test(name)).sort()]
+    .map((name) => fs.readFileSync(path.join(uiDir, name), "utf8"))
+    .join("\n");
   const adminAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-admin.css"), "utf8");
 
   for (const [kind, html] of Object.entries(pages)) {
@@ -228,10 +235,10 @@ export function buildMobileElderlyQaReport({
         adminAdapterCss,
         ".adm-editor-tabs .mk-tab { flex: 1 1 0; justify-content: center; min-width: 44px; min-height: 44px; }",
       ) &&
-        includes(adminAdapterCss, "@media (max-width: 1023px)") &&
+        includes(adminAdapterCss, "@media (max-width: 1439px)") &&
         includes(
           DESIGN_CSS,
-          "@media (max-width:1023px){.crm-app{grid-template-columns:minmax(0,1fr)}",
+          "@media (max-width:1439px){.crm-app{grid-template-columns:1fr}.crm-sb{display:none}}",
         ) &&
         includes(adminAdapterCss, '.adm-editor-tabs .mk-tab[aria-current="location"]') &&
         includes(adminAdapterCss, "#listing-seo") &&
@@ -239,11 +246,12 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "narrow_mobile_search_action",
-      includes(englishHome, "class=\"mk-search__go\" type=\"submit\" aria-label=\"Search\" title=\"Search\"") &&
+      // The hero search card stacks on phones: full-width Buy/Rent tabs and a
+      // full-width Search action under the Location / Type / Max price fields.
+      includes(englishHome, "class=\"hp-search__go mk-search__go\" type=\"submit\"") &&
         includes(publicAdapterCss, "@media (max-width: 679px)") &&
-        includes(publicAdapterCss, ".hp-hero__search-form { --hero-search-action-width: 52px; }") &&
-        includes(publicAdapterCss, ".hp-hero__search .mk-search__go { padding-inline: 0; }") &&
-        includes(publicAdapterCss, ".hp-hero__search .mk-search__go span { display: none; }"),
+        includes(publicAdapterCss, ".hp-search__intent { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }") &&
+        includes(publicAdapterCss, ".hp-search__go { grid-column: 1 / -1; width: 100%; margin: 4px 0 0; }"),
     ),
     check(
       "listing_sticky_actions",
@@ -325,10 +333,13 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "source_backed_search_filters",
+      // Subtype is scoped to a chosen family and only offered when the source
+      // data carries subtypes, so the bare search page must not show it.
       includes(pages.search, "name=\"property_family\"") &&
-        (searchPage.search.controls.filter_options.property_subtypes.length
-          ? includes(pages.search, "name=\"property_subtype\"")
-          : !includes(pages.search, "name=\"property_subtype\"")) &&
+        !includes(pages.search, "name=\"property_subtype\"") &&
+        (familySearchPage.search.controls.filter_options.property_subtypes?.length
+          ? includes(familySearchHtml, "name=\"property_subtype\"")
+          : !includes(familySearchHtml, "name=\"property_subtype\"")) &&
         includes(pages.search, "name=\"offer_type\"") &&
         includes(pages.search, "name=\"price_min\"") &&
         includes(pages.search, "name=\"price_max\"") &&

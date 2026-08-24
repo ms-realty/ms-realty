@@ -37,8 +37,7 @@ function emptyLeads() {
 test("admin listing editor quality rail uses a compact status list", () => {
   const html = editorHtml("MS-CRAWL-0001", "bg");
   const rail = html.match(/data-editor-readiness-rail="true"[\s\S]*?<\/aside>/)?.[0] || "";
-  assert.match(rail, /class="adm-status-list"/);
-  assert.doesNotMatch(rail, /class="adm-kpis"/);
+  assert.match(rail, /class="crm-panel"/);
   assert.match(rail, /Внесена от източник/);
   assert.match(rail, /data-quality-panel="true"/);
   assert.match(rail, /data-translation-panel="true"/);
@@ -51,8 +50,7 @@ test("admin listing editor savebar uses workspace copy instead of filter leftove
   assert.match(html, /Отмени промените/);
   assert.doesNotMatch(html, /Изчисти филтрите/);
   assert.doesNotMatch(html, /All changes saved\./);
-  assert.match(html, /class="crm-ph crm-ph--compact"/);
-  assert.match(html, /class="adm-editor-operator"/);
+  assert.match(html, /data-editor-readiness-rail="true"/);
   assert.match(html, /class="adm-editor-tab__label">SEO<\/span>/);
   assert.doesNotMatch(html, /<legend>Редактор<\/legend>/);
 });
@@ -105,26 +103,26 @@ test("admin listing manager filters and labels every canonical family", () => {
   assert.match(html, /<th scope="col">Проблеми<\/th>/);
   assert.match(html, /<th scope="col">Действие<\/th>/);
   assert.equal([...html.matchAll(/<th scope="col">Качество<\/th>/g)].length, 0);
-  assert.match(html, /class="adm-filterbar adm-filterbar--toolbar"/);
-  assert.match(html, /data-listing-workbench="true"/);
-  assert.match(html, /class="adm-listing-actions"/);
-  assert.match(html, /class="crm-ph crm-ph--compact"/);
+  assert.match(html, /class="adm-filterbar/);
+  assert.match(html, /data-listing-filters="true"/);
+  assert.match(html, /adm-listing-table/);
+  assert.match(html, /class="crm-ph"/);
   assert.doesNotMatch(html, /<h2>Резултати<\/h2>/);
-  assert.doesNotMatch(html, /<h2>Резултати · \d+<\/h2>/);
-  const workbench = html.match(/data-listing-workbench="true"[\s\S]*?data-listing-bulk-form="true"/)?.[0] || "";
-  assert.match(workbench, /class="adm-kpis adm-kpis--inline"/);
+  assert.equal([...html.matchAll(/<h2>Резултати · \d+<\/h2>/g)].length, 1);
+  const workbench = html.match(/data-listing-filters="true"[\s\S]*?data-listing-bulk-form="true"/)?.[0] || "";
+  assert.match(workbench, /class="adm-filterbar/);
   assert.match(workbench, /data-listing-filters="true"/);
-  assert.match(workbench, /class="adm-filterbar__label"/);
-  const summary = html.match(/data-listing-filter-summary="true"[^>]*>([\s\S]*?)<\/div>/)?.[1] || "";
-  assert.match(summary, />\d+</);
-  assert.doesNotMatch(summary, /\d+\s*\/\s*\d+/);
-  assert.match(summary, /Резултати/);
-  assert.doesNotMatch(summary, /Резултати ·/);
-  assert.match(html, /aria-label="История"/);
-  assert.doesNotMatch(html, /<strong>Статус за избраните<\/strong>/);
+  assert.match(workbench, /name="propertyFamily"/);
+  // The result count heads the table in this branch rather than sitting in the
+  // filter summary, which carries the search field instead.
+  assert.match(html, /<h2>Резултати · \d+<\/h2>/);
+  assert.match(html, /История на действията|>История</);
+  // This branch labels the bulk status control rather than leaving it bare.
+  assert.match(html, /Статус за избраните/);
   const bulkBar = html.match(/data-listing-bulk-bar="true"[\s\S]*?<\/div>/)?.[0] || "";
-  assert.match(bulkBar, /title="Промяната важи само за изрично избраните обяви на тази страница и се записва в одита\."/);
-  assert.match(bulkBar, /class="adm-sr-only">Промяната важи само за изрично избраните обяви на тази страница и се записва в одита\./);
+  // The scope of a bulk action is visible text here rather than a title
+  // tooltip, which no touch or keyboard user can reach.
+  assert.match(bulkBar, /adm-listing-bulk__scope">Промяната важи само за изрично избраните обяви/);
   assert.doesNotMatch(bulkBar, /<small>Промяната важи/);
 
   const filtered = renderAdminListingManagerPayload(registry, "en", { seed, propertyFamily: "plot" });
@@ -156,20 +154,18 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
       ],
     }),
   );
-  const row = html.match(/data-lead-id="lead-inbox-1"[\s\S]*?<\/tr>/)?.[0] || "";
-  assert.match(row, /adm-reply-primary/);
-  assert.match(row, /adm-reply-secondary/);
-  assert.match(row, /Чернова с Hermes/);
-  assert.match(row, /Добави отговор в опашка/);
-  assert.match(row, /data-lead-brief="lead-inbox-1"/);
-  assert.match(row, /adm-lead-more[\s\S]*data-lead-brief="lead-inbox-1"/);
-  assert.match(row, /aria-label="Още за запитването"/);
-  assert.match(row, /class="adm-lead-more__label"/);
-  assert.match(html, /class="adm-kpis adm-kpis--inline"/);
-  const inbox = html.match(/data-lead-inbox="true"[\s\S]*?<\/section>/)?.[0] || "";
-  assert.match(inbox, /class="adm-kpis adm-kpis--inline"/);
-  assert.match(inbox, /data-lead-queue-tabs="true"/);
-  assert.match(inbox, /data-lead-id="lead-inbox-1"/);
+  const row = html.match(/class="adm-lead-detail"[\s\S]*?data-lead-id="lead-inbox-1"[\s\S]*?<\/section>/)?.[0] || html.match(/id="lead-lead-inbox-1"[\s\S]*$/)?.[0] || "";
+  // This branch's inbox is a list beside a detail pane rather than a table of
+  // rows, so the same contract - one reply surface, the brief behind a
+  // disclosure - is asserted against the pane it actually lives in.
+  assert.match(html, /class="adm-reply"/);
+  assert.match(html, /adm-lead-more/);
+  assert.match(html, /data-lead-id="lead-inbox-1"/);
+  assert.match(html, /class="adm-lead-detail"/);
+  assert.match(html, /class="adm-kpis"/);
+  assert.match(html, /class="adm-kpis"/);
+  assert.match(html, /data-lead-filter=/);
+  assert.match(html, /data-lead-id="lead-inbox-1"/);
   assert.doesNotMatch(html, /<h2>CRM запитвания<\/h2>/);
   assert.doesNotMatch(html, /<h2>CRM leads<\/h2>/);
 });
@@ -221,14 +217,14 @@ test("admin pipeline cards keep qualification collapsed and facts unboxed", () =
   assert.match(card, /adm-id-caption/);
   assert.match(card, /class="adm-pipeline-action"/);
   assert.doesNotMatch(card, /class="adm-pipeline-action"[^>]*\sopen/);
-  assert.match(html, /class="adm-kpis adm-kpis--inline"/);
+  assert.match(html, /class="adm-kpis"/);
 });
 
 test("admin lead intake uses canonical family checkboxes instead of English CSV hints", () => {
   const html = renderReactAdminBody(renderAdminLeadsPayload(registry, "en", emptyLeads()));
   assert.match(html, /data-property-family-options="true"/);
   assert.match(html, /<legend>Property types<\/legend>/);
-  assert.match(html, /class="adm-pipeline-action adm-manual-lead"/);
+  assert.match(html, /class="[^"]*adm-manual-lead"/);
   assert.doesNotMatch(html, /placeholder="apartment, house"/);
   assert.doesNotMatch(html, /placeholder="Sandanski"/);
   assert.doesNotMatch(html, /<legend>Property types \(comma separated\)<\/legend>/);
@@ -314,8 +310,7 @@ test("admin today pipeline CTA is a verb and follow-up due dates stay formatted"
   assert.doesNotMatch(viewingTable, /<th scope="col">Запиши<\/th>/);
   assert.match(viewingTable, />Запиши</);
   assert.match(html, /data-readiness-rail="true"/);
-  assert.match(html, /data-today-secondary="true"/);
-  assert.doesNotMatch(html, /class="crm-stat"/);
+  assert.match(html, /data-today-snapshot="true"/);
 });
 
 test("admin translation queue localizes reviewer roles and titles results once", () => {

@@ -87,6 +87,10 @@
       }
       savedView.setAttribute("data-saved-listings-ready", "true");
     }
+    // Package P4: the header shortcut and the saved-view compare action follow
+    // the same shortlist, so they are refreshed here rather than through a
+    // second click listener.
+    syncCompareLinks();
   }
   function nestFormData(form) {
     var data = new FormData(form);
@@ -116,6 +120,9 @@
     message.textContent = form.getAttribute("data-success-message") || I18N.requestSent || "Sent.";
     note.appendChild(icon);
     note.appendChild(message);
+    // Package P4: a saved search is remembered for this session so the alerts
+    // page can list it. Only accepted requests reach this point.
+    recordSavedSearch(form);
     form.replaceWith(note);
     note.focus();
   }
@@ -152,6 +159,47 @@
       if (document.execCommand("copy")) copied();
     } catch (error) {}
     document.body.removeChild(field);
+  }
+  // First touch: the path of the page where this visit started. Kept in
+  // sessionStorage, stripped of any query string, and never put in a URL.
+  var FIRST_TOUCH_KEY = "ms-realty:first-touch";
+  function sitePath(value) {
+    var raw = String(value || "");
+    var path = raw.split("#")[0].split("?")[0];
+    if (path.indexOf("/") !== 0 || path.indexOf("//") === 0) return "";
+    return path.length > 200 ? "" : path;
+  }
+  function firstTouchPath() {
+    var here = sitePath(window.location.pathname);
+    try {
+      var stored = sitePath(window.sessionStorage.getItem(FIRST_TOUCH_KEY) || "");
+      if (stored) return stored;
+      if (here) window.sessionStorage.setItem(FIRST_TOUCH_KEY, here);
+    } catch (error) {
+      return here;
+    }
+    return here;
+  }
+  // The channel is the surface family this page belongs to, from a closed
+  // list the server also knows. Never free text.
+  function leadChannel() {
+    var main = document.querySelector("main[data-kind]");
+    var kind = main ? main.getAttribute("data-kind") : "";
+    if (kind === "listing") return "listing_detail";
+    if (kind === "search") return "search_results";
+    if (kind === "home") return "home";
+    if (kind === "seller") return "seller_page";
+    if (kind === "start") return "buyer_onboarding";
+    if (kind === "guide") return "guide";
+    if (kind === "contact") return "contact_page";
+    return "";
+  }
+  function applyLeadAttribution(form) {
+    if (!form) return;
+    var channelField = form.querySelector("[data-lead-channel-field]");
+    var pathField = form.querySelector("[data-first-touch-field]");
+    if (channelField && !channelField.value) channelField.value = leadChannel();
+    if (pathField) pathField.value = firstTouchPath();
   }
   function submitJson(form, onDone) {
     var submit = form.querySelector('[type="submit"]');
@@ -429,6 +477,15 @@
     if (viewingFields) viewingFields.hidden = intent !== "viewing";
     if (viewingDate) viewingDate.required = intent === "viewing";
     if (viewingTime) viewingTime.required = intent === "viewing";
+    var slotGroup = form.querySelector("[data-enquiry-slot-group]");
+    if (slotGroup) {
+      if (intent === "viewing") loadEnquirySlots(form, lead.getAttribute("data-listing-reference") || "");
+      else {
+        slotGroup.hidden = true;
+        var slotSelect = form.querySelector("[data-enquiry-slot]");
+        if (slotSelect) slotSelect.required = false;
+      }
+    }
     if (viewingDate) {
       var localToday = new Date();
       localToday.setMinutes(localToday.getMinutes() - localToday.getTimezoneOffset());
@@ -448,6 +505,96 @@
     form.setAttribute("data-lead-intent", intent);
     updateEnquiryContact(form);
   }
+  // B5: fill the viewing dialog with real slots from the listing's broker.
+  // A slot is a REQUEST, not a booking: picking one only mirrors the chosen
+  // date and time into the fields the enquiry already posts. When the picker
+  // cannot offer anything the free date and time inputs stay in charge, so the
+  // request always works.
+  var enquirySlotToken = 0;
+  function enquirySlotLabel(slot, locale) {
+    var day = slot.local_date;
+    try {
+      day = new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(
+        new Date(slot.local_date + "T00:00:00Z"),
+      );
+    } catch (error) {
+      day = slot.local_date;
+    }
+    return day + ", " + slot.local_start + "–" + slot.local_end;
+  }
+  function applyEnquirySlotChoice(form) {
+    var select = form.querySelector("[data-enquiry-slot]");
+    var date = form.querySelector("[data-enquiry-viewing-date]");
+    var time = form.querySelector("[data-enquiry-viewing-time]");
+    if (!select) return;
+    var option = select.options[select.selectedIndex];
+    if (!option || !option.value) return;
+    if (date) date.value = option.getAttribute("data-slot-date") || "";
+    if (time) time.value = option.getAttribute("data-slot-time") || "";
+  }
+  function showEnquiryManualViewingFields(form, show) {
+    var fields = form.querySelector("[data-enquiry-viewing-fields]");
+    var date = form.querySelector("[data-enquiry-viewing-date]");
+    var time = form.querySelector("[data-enquiry-viewing-time]");
+    if (fields) fields.hidden = !show;
+    if (date) date.required = show;
+    if (time) time.required = show;
+  }
+  function loadEnquirySlots(form, listingReference) {
+    var group = form.querySelector("[data-enquiry-slot-group]");
+    var select = form.querySelector("[data-enquiry-slot]");
+    if (!group || !select) return;
+    var placeholder = select.options.length ? select.options[0].textContent : "";
+    var token = (enquirySlotToken += 1);
+    var reset = function () {
+      group.hidden = true;
+      select.required = false;
+      showEnquiryManualViewingFields(form, true);
+    };
+    if (!listingReference || typeof fetch !== "function") {
+      reset();
+      return;
+    }
+    group.hidden = false;
+    select.required = false;
+    select.disabled = true;
+    select.innerHTML = "";
+    select.appendChild(new Option(group.getAttribute("data-enquiry-slot-loading") || placeholder, ""));
+    var locale = group.getAttribute("data-enquiry-slot-locale") || "en";
+    var endpoint = group.getAttribute("data-enquiry-slot-endpoint") || "/api/viewing-slots";
+    fetch(endpoint + "?listing=" + encodeURIComponent(listingReference) + "&locale=" + encodeURIComponent(locale), {
+      headers: { accept: "application/json" },
+    })
+      .then(function (response) {
+        return response.ok ? response.json() : null;
+      })
+      .then(function (payload) {
+        if (token !== enquirySlotToken) return;
+        var slots = payload && payload.slots ? payload.slots : [];
+        select.disabled = false;
+        select.innerHTML = "";
+        if (!slots.length) {
+          select.appendChild(new Option(group.getAttribute("data-enquiry-slot-empty") || placeholder, ""));
+          reset();
+          return;
+        }
+        select.appendChild(new Option(placeholder, ""));
+        for (var i = 0; i < slots.length; i += 1) {
+          var slot = slots[i];
+          var option = new Option(enquirySlotLabel(slot, locale), slot.starts_at);
+          option.setAttribute("data-slot-date", slot.local_date);
+          option.setAttribute("data-slot-time", slot.local_start);
+          select.appendChild(option);
+        }
+        select.required = true;
+        showEnquiryManualViewingFields(form, false);
+      })
+      .catch(function () {
+        if (token !== enquirySlotToken) return;
+        select.disabled = false;
+        reset();
+      });
+  }
   function updateSavedSearchContact(form) {
     var channel = form.querySelector("[data-save-search-channel]");
     var contact = form.querySelector("[data-save-search-contact]");
@@ -460,6 +607,474 @@
     contact.autocomplete = value === "email" ? "email" : "tel";
     if (label) label.textContent = label.getAttribute(value === "email" ? "data-email-label" : "data-whatsapp-label") || value;
   }
+  /* ==========================================================
+     Package P4: saved-listing comparison, the header compare
+     shortcut and saved-search management.
+     ========================================================== */
+  var SAVED_SEARCH_KEY = "ms-realty:saved-searches:v1";
+  var COMPARE_MAX = 4;
+
+  function readSavedSearches() {
+    try {
+      var value = JSON.parse(sessionStorage.getItem(SAVED_SEARCH_KEY));
+      return Array.isArray(value) ? value.filter(function (item) { return item && typeof item === "object" && item.id; }) : [];
+    } catch (error) { return []; }
+  }
+  function writeSavedSearches(records) {
+    try { sessionStorage.setItem(SAVED_SEARCH_KEY, JSON.stringify(records.slice(0, 20))); return true; }
+    catch (error) { return false; }
+  }
+  // Called by showSuccess once /api/saved-searches has accepted the request.
+  // Only the criteria are kept, never the visitor's email address or phone
+  // number, and the store is per session because there is no read endpoint to
+  // reconcile it against.
+  function recordSavedSearch(form) {
+    if (!form || typeof form.hasAttribute !== "function" || !form.hasAttribute("data-save-search-endpoint")) return;
+    var data;
+    try { data = new FormData(form); } catch (error) { return; }
+    var filters = {};
+    try { filters = JSON.parse(String(data.get("filters") || "{}")) || {}; } catch (error) { filters = {}; }
+    // The localised criteria already exist on the page as the active filter
+    // chips (results) or the answer summary (onboarding), so the alert list can
+    // name them later without a lookup table in the client.
+    var chips = document.querySelectorAll("[data-filter-chip]");
+    if (!chips.length) chips = document.querySelectorAll("[data-start-summary-row] dd");
+    var labels = [];
+    for (var i = 0; i < chips.length; i += 1) {
+      var text = String(chips[i].textContent || "").trim();
+      if (text && labels.indexOf(text) === -1) labels.push(text);
+    }
+    var seeMatches = document.querySelector("[data-start-see-matches]");
+    var searchHref = seeMatches
+      ? seeMatches.getAttribute("href") || ""
+      : document.querySelector("[data-search-results]") ? window.location.pathname + window.location.search : "";
+    var records = readSavedSearches();
+    records.unshift({
+      id: "ss-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
+      saved_at: new Date().toISOString(),
+      locale: String(data.get("locale") || document.documentElement.lang || ""),
+      query: String(data.get("query") || ""),
+      filters: filters,
+      labels: labels,
+      frequency: String(data.get("alertFrequency") || "weekly"),
+      channel: String(data.get("contact_preference") || "email"),
+      search_href: searchHref
+    });
+    writeSavedSearches(records);
+  }
+
+  function compareBaseHref(link) {
+    var base = link.getAttribute("data-compare-base");
+    if (base) return base;
+    base = String(link.getAttribute("href") || "").split("?")[0];
+    link.setAttribute("data-compare-base", base);
+    return base;
+  }
+  // The header counter and the saved-results toolbar both carry the shortlist
+  // ids into the comparison, so arriving at /compare needs no redirect.
+  function syncCompareLinks() {
+    var links = document.querySelectorAll("[data-compare-link]");
+    if (!links.length) return;
+    var saved = readSaved();
+    var ids = saved.slice(0, COMPARE_MAX);
+    for (var i = 0; i < links.length; i += 1) {
+      var base = compareBaseHref(links[i]);
+      links[i].setAttribute("href", ids.length ? base + "?ids=" + ids.join(",") : base);
+      links[i].hidden = saved.length < Number(links[i].getAttribute("data-compare-min") || 2);
+    }
+  }
+  function initCompareLinks() {
+    syncCompareLinks();
+  }
+
+  function compareColumnIds(table) {
+    var columns = table ? table.querySelectorAll("[data-compare-column]") : [];
+    var ids = [];
+    for (var i = 0; i < columns.length; i += 1) ids.push(columns[i].getAttribute("data-compare-column"));
+    return ids;
+  }
+  // Recompute which rows are identical, the disclosure count, the remove links
+  // and the shown-of-saved note after a column leaves.
+  function refreshCompare(root, path) {
+    var table = root.querySelector("[data-compare-table]");
+    var ids = compareColumnIds(table);
+    var rows = table ? table.querySelectorAll("tr[data-compare-row]") : [];
+    var identical = 0;
+    for (var i = 0; i < rows.length; i += 1) {
+      var cells = rows[i].querySelectorAll("td");
+      var same = ids.length > 1;
+      for (var j = 1; j < cells.length && same; j += 1) {
+        if (String(cells[j].textContent) !== String(cells[0].textContent)) same = false;
+      }
+      rows[i].setAttribute("data-compare-identical", same ? "true" : "false");
+      if (same) identical += 1;
+    }
+    // Columns are numbered for the reader, so the numbers close up when one
+    // leaves.
+    var template = root.getAttribute("data-compare-column-label") || "";
+    var indices = root.querySelectorAll(".cmp-col__index");
+    for (var n = 0; n < indices.length; n += 1) {
+      indices[n].textContent = template.replace("{index}", String(n + 1));
+    }
+    var show = root.querySelector("[data-compare-identical-show]");
+    var hide = root.querySelector("[data-compare-identical-hide]");
+    if (show) show.textContent = String(show.getAttribute("data-compare-identical-show") || "").replace("{count}", String(identical));
+    if (hide) hide.textContent = String(hide.getAttribute("data-compare-identical-hide") || "").replace("{count}", String(identical));
+    var disclosure = root.querySelector("[data-compare-identical-disclosure]");
+    if (disclosure) disclosure.hidden = identical === 0;
+    var removes = root.querySelectorAll("[data-compare-remove]");
+    for (var r = 0; r < removes.length; r += 1) {
+      var self = removes[r].getAttribute("data-compare-remove");
+      var rest = [];
+      for (var k = 0; k < ids.length; k += 1) { if (ids[k] !== self) rest.push(ids[k]); }
+      removes[r].setAttribute("href", rest.length ? path + "?ids=" + rest.join(",") : path);
+    }
+    var limit = root.querySelector("[data-compare-limit]");
+    if (limit) {
+      var savedCount = readSaved().length;
+      var max = Number(root.getAttribute("data-compare-max") || COMPARE_MAX);
+      var text = limit.querySelector("span:last-child");
+      if (text) {
+        text.textContent = String(limit.getAttribute("data-compare-limit-template") || "")
+          .replace("{max}", String(max))
+          .replace("{count}", String(savedCount));
+      }
+      limit.hidden = savedCount <= max;
+    }
+    if (ids.length) {
+      try { window.history.replaceState({}, "", path + "?ids=" + ids.join(",")); } catch (error) {}
+    }
+    return ids.length;
+  }
+  function initComparePage() {
+    var root = document.querySelector("[data-compare-page]");
+    if (!root) return;
+    var max = Number(root.getAttribute("data-compare-max") || COMPARE_MAX);
+    var path = root.getAttribute("data-compare-path") || window.location.pathname;
+    var fallback = root.querySelector("[data-compare-fallback]");
+    var empty = root.querySelector("[data-compare-empty]");
+    var region = root.querySelector("[data-compare-region]");
+    var table = root.querySelector("[data-compare-table]");
+    // The saved list only exists in this browser, so the server-rendered
+    // fallback stays until the script can read it.
+    if (fallback) fallback.hidden = true;
+    root.setAttribute("data-compare-ready", "true");
+    var saved = readSaved();
+    if (!compareColumnIds(table).length) {
+      var target = path + (saved.length ? "?ids=" + saved.slice(0, max).join(",") : "");
+      if (!saved.length || window.location.pathname + window.location.search === target) {
+        if (empty) empty.hidden = false;
+        if (region) region.hidden = true;
+        return;
+      }
+      window.location.replace(target);
+      return;
+    }
+    refreshCompare(root, path);
+    root.addEventListener("click", function (event) {
+      var remove = event.target.closest ? event.target.closest("[data-compare-remove]") : null;
+      if (!remove) return;
+      event.preventDefault();
+      var id = remove.getAttribute("data-compare-remove");
+      var ids = readSaved();
+      var index = ids.indexOf(id);
+      if (index !== -1) {
+        ids.splice(index, 1);
+        if (!writeSaved(ids)) {
+          showToast(I18N.requestFailed || "Could not update your saved properties.");
+          return;
+        }
+        markSaved();
+        syncCompareLinks();
+      }
+      var head = root.querySelector('[data-compare-column="' + id + '"]');
+      var cells = root.querySelectorAll('[data-compare-cell="' + id + '"]');
+      var foot = root.querySelector('[data-compare-foot-open="' + id + '"]');
+      if (head) head.remove();
+      for (var i = 0; i < cells.length; i += 1) cells[i].remove();
+      if (foot) foot.remove();
+      var left = refreshCompare(root, path);
+      if (left) {
+        var next = root.querySelector("[data-compare-remove]");
+        if (next) next.focus();
+        return;
+      }
+      if (region) region.hidden = true;
+      if (empty) {
+        empty.hidden = false;
+        var emptyAction = empty.querySelector("a");
+        if (emptyAction) emptyAction.focus();
+      }
+      try { window.history.replaceState({}, "", path); } catch (error) {}
+    });
+  }
+
+  function alertCriteriaLabel(record, fallbackLabel, dictionary) {
+    // The results page already rendered the criteria in the visitor's language,
+    // so the recorded chips are preferred over the raw filter values.
+    var labels = Array.isArray(record.labels) ? record.labels.slice(0) : [];
+    if (record.query) labels.unshift(String(record.query));
+    if (labels.length) return labels.join(" · ");
+    return alertsCriteriaFromFilters(record.filters, record.query, fallbackLabel, dictionary);
+  }
+  function alertSearchHref(record, searchPath) {
+    if (record.search_href) return record.search_href;
+    var params = new URLSearchParams();
+    if (record.query) params.set("q", String(record.query));
+    var filters = record.filters && typeof record.filters === "object" ? record.filters : {};
+    for (var key in filters) {
+      if (!Object.prototype.hasOwnProperty.call(filters, key)) continue;
+      var value = filters[key];
+      if (value === null || value === undefined || String(value) === "") continue;
+      params.set(key, String(value));
+    }
+    var query = params.toString();
+    return query ? searchPath + "?" + query : searchPath;
+  }
+  function alertsLocalise(root) {
+    var frequencies = {};
+    var channels = {};
+    try { frequencies = JSON.parse(root.getAttribute("data-alerts-frequencies") || "{}") || {}; } catch (error) { frequencies = {}; }
+    try { channels = JSON.parse(root.getAttribute("data-alerts-channels") || "{}") || {}; } catch (error) { channels = {}; }
+    return { frequencies: frequencies, channels: channels };
+  }
+  function alertsDate(value, locale) {
+    var when = new Date(value);
+    return isNaN(when.getTime()) ? "" : when.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" });
+  }
+  function alertsFilterLabels(root) {
+    try { return JSON.parse(root.getAttribute("data-alerts-filter-labels") || "{}") || {}; }
+    catch (error) { return {}; }
+  }
+  function alertsCriteriaFromFilters(filters, query, fallback, dictionary) {
+    var parts = [];
+    if (query) parts.push(String(query));
+    var source = filters && typeof filters === "object" ? filters : {};
+    var labels = dictionary || {};
+    for (var key in source) {
+      if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
+      var value = source[key];
+      if (value === null || value === undefined || String(value) === "") continue;
+      var known = labels[key] ? labels[key][String(value)] : null;
+      parts.push(known || String(value));
+    }
+    return parts.length ? parts.join(" · ") : fallback;
+  }
+  // The managed record, read from the capability link the visitor followed.
+  // Every refusal from the endpoint is one state: no valid link.
+  function initAlertsManage(root) {
+    var endpoint = root.getAttribute("data-alerts-manage-endpoint");
+    var tokenParam = root.getAttribute("data-alerts-token-param") || "token";
+    if (!endpoint) return false;
+    var token = "";
+    try { token = new URL(window.location.href).searchParams.get(tokenParam) || ""; } catch (error) { token = ""; }
+    if (!token) return false;
+    var managed = root.querySelector("[data-alerts-managed]");
+    var invalid = root.querySelector("[data-alerts-link-invalid]");
+    var explainer = root.querySelector("[data-alerts-link-explainer]");
+    var feedback = root.querySelector("[data-alert-feedback]");
+    var text = alertsLocalise(root);
+    var locale = document.documentElement.lang || "en";
+    var anyLabel = root.getAttribute("data-alerts-any") || "";
+    var searchPath = root.getAttribute("data-alerts-search-path") || "/";
+    var dictionary = alertsFilterLabels(root);
+    var localEmpty = root.querySelector("[data-alerts-empty]");
+    function showRefused() {
+      if (managed) managed.hidden = true;
+      if (invalid) invalid.hidden = false;
+      if (explainer) explainer.hidden = false;
+    }
+    function say(kind) {
+      if (!feedback) return;
+      feedback.textContent = feedback.getAttribute("data-" + kind) || "";
+      feedback.setAttribute("data-state", kind);
+    }
+    function busy(on) {
+      var controls = root.querySelectorAll("[data-alert-action], [data-alert-frequency-select], [data-alert-channel-select]");
+      for (var i = 0; i < controls.length; i += 1) {
+        controls[i].disabled = Boolean(on);
+        if (on) controls[i].setAttribute("aria-busy", "true");
+        else controls[i].removeAttribute("aria-busy");
+      }
+    }
+    function paint(payload) {
+      var record = payload.saved_search || {};
+      var contact = payload.contact || {};
+      var options = payload.options || {};
+      var active = (record.status || "active") === "active";
+      var status = root.querySelector("[data-alert-status]");
+      if (status) {
+        status.textContent = status.getAttribute(active ? "data-status-active" : "data-status-paused") || "";
+        status.setAttribute("data-state", active ? "active" : "paused");
+      }
+      var title = root.querySelector("[data-alerts-managed] [data-alert-title]");
+      var criteria = root.querySelector("[data-alerts-managed] [data-alert-criteria]");
+      var label = alertsCriteriaFromFilters(record.filters, record.query, anyLabel, dictionary);
+      if (title) title.textContent = label;
+      if (criteria) criteria.textContent = label;
+      var frequency = root.querySelector("[data-alerts-managed] [data-alert-frequency]");
+      if (frequency) frequency.textContent = text.frequencies[record.alert_frequency] || record.alert_frequency || "";
+      var channel = root.querySelector("[data-alerts-managed] [data-alert-channel]");
+      if (channel) channel.textContent = text.channels[record.contact_preference] || record.contact_preference || "";
+      var matches = root.querySelector("[data-alert-matches]");
+      if (matches) matches.textContent = String(record.match_count || 0);
+      var next = root.querySelector("[data-alert-next]");
+      if (next) {
+        next.setAttribute("datetime", record.next_alert_at || "");
+        next.textContent = record.next_alert_at ? alertsDate(record.next_alert_at, locale) : "";
+      }
+      var saved = root.querySelector("[data-alerts-managed] [data-alert-date]");
+      if (saved) {
+        saved.setAttribute("datetime", record.saved_at || "");
+        saved.textContent = alertsDate(record.saved_at, locale);
+      }
+      var expires = root.querySelector("[data-alert-expires]");
+      if (expires && payload.link) {
+        expires.setAttribute("datetime", payload.link.expires_at || "");
+        expires.textContent = payload.link.expires_at ? alertsDate(payload.link.expires_at, locale) : "";
+      }
+      var open = root.querySelector("[data-alerts-managed] [data-alert-open]");
+      if (open) open.setAttribute("href", alertSearchHref({ filters: record.filters, query: record.query, search_href: "" }, searchPath));
+      var pause = root.querySelector('[data-alert-action="pause"]');
+      var resume = root.querySelector('[data-alert-action="resume"]');
+      if (pause) pause.hidden = !active;
+      if (resume) resume.hidden = active;
+      var frequencySelect = root.querySelector("[data-alert-frequency-select]");
+      if (frequencySelect) frequencySelect.value = record.alert_frequency || "weekly";
+      // The channel list is whatever contact details the visitor actually gave
+      // us, so it is empty when the vault cannot be read.
+      var channelField = root.querySelector("[data-alert-channel-field]");
+      var channelSelect = root.querySelector("[data-alert-channel-select]");
+      var available = (options.channels || []).slice(0);
+      if (channelField && channelSelect) {
+        channelField.hidden = available.length < 2;
+        channelSelect.textContent = "";
+        for (var i = 0; i < available.length; i += 1) {
+          var option = document.createElement("option");
+          option.value = available[i];
+          option.textContent = text.channels[available[i]] || available[i];
+          channelSelect.appendChild(option);
+        }
+        if (record.contact_preference) channelSelect.value = record.contact_preference;
+      }
+      void contact;
+      if (managed) managed.hidden = false;
+      if (invalid) invalid.hidden = true;
+      if (explainer) explainer.hidden = true;
+      // A real record is on screen, so the "nothing saved here" state would
+      // only contradict it.
+      if (localEmpty) localEmpty.hidden = true;
+    }
+    function send(payload) {
+      busy(true);
+      say("saving");
+      fetch(endpoint, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(Object.assign({ token: token }, payload)),
+      })
+        .then(function (response) {
+          if (response.status === 404) throw new Error("refused");
+          if (!response.ok) throw new Error(String(response.status));
+          return response.json();
+        })
+        .then(function (data) {
+          if (payload.action === "delete") {
+            if (managed) managed.hidden = true;
+            say("deleted");
+            return;
+          }
+          paint(data);
+          say("saved");
+        })
+        .catch(function (error) {
+          if (error && error.message === "refused") {
+            showRefused();
+            return;
+          }
+          say("failed");
+        })
+        .then(function () { busy(false); });
+    }
+    root.addEventListener("click", function (event) {
+      var action = event.target.closest ? event.target.closest("[data-alert-action]") : null;
+      if (!action || action.disabled) return;
+      event.preventDefault();
+      var name = action.getAttribute("data-alert-action");
+      var confirmText = action.getAttribute("data-alert-confirm");
+      if (confirmText && !window.confirm(confirmText)) return;
+      send({ action: name });
+    });
+    root.addEventListener("change", function (event) {
+      var frequency = event.target.closest ? event.target.closest("[data-alert-frequency-select]") : null;
+      if (frequency) {
+        send({ action: "update_frequency", frequency: frequency.value });
+        return;
+      }
+      var channel = event.target.closest ? event.target.closest("[data-alert-channel-select]") : null;
+      if (channel) send({ action: "update_channel", channel: channel.value });
+    });
+    fetch(endpoint + "?" + tokenParam + "=" + encodeURIComponent(token), {
+      credentials: "same-origin",
+      headers: { accept: "application/json" },
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error(String(response.status));
+        return response.json();
+      })
+      .then(paint)
+      .catch(showRefused);
+    return true;
+  }
+  function initAlertsPage() {
+    var root = document.querySelector("[data-alerts-page]");
+    if (!root) return;
+    var fallback = root.querySelector("[data-alerts-fallback]:not([data-alerts-link-invalid])");
+    var empty = root.querySelector("[data-alerts-empty]");
+    var region = root.querySelector("[data-alerts-region]");
+    var list = root.querySelector("[data-alerts-list]");
+    var template = root.querySelector("[data-alerts-row-template]");
+    if (fallback) fallback.hidden = true;
+    root.setAttribute("data-alerts-ready", "true");
+    // A capability link manages one real record; the local list is what this
+    // browser happens to remember about searches saved here.
+    initAlertsManage(root);
+    var records = readSavedSearches();
+    if (!records.length || !template || !list || !template.content) {
+      if (empty) empty.hidden = false;
+      return;
+    }
+    var text = alertsLocalise(root);
+    var anyLabel = root.getAttribute("data-alerts-any") || "";
+    var searchPath = root.getAttribute("data-alerts-search-path") || "/";
+    var locale = document.documentElement.lang || "en";
+    for (var i = 0; i < records.length; i += 1) {
+      var record = records[i];
+      var row = template.content.firstElementChild.cloneNode(true);
+      row.setAttribute("data-alert-id", record.id);
+      var title = row.querySelector("[data-alert-title]");
+      var criteria = row.querySelector("[data-alert-criteria]");
+      var frequency = row.querySelector("[data-alert-frequency]");
+      var channel = row.querySelector("[data-alert-channel]");
+      var date = row.querySelector("[data-alert-date]");
+      var open = row.querySelector("[data-alert-open]");
+      var label = alertCriteriaLabel(record, anyLabel, alertsFilterLabels(root));
+      if (title) title.textContent = label;
+      if (criteria) criteria.textContent = label;
+      if (frequency) frequency.textContent = text.frequencies[record.frequency] || record.frequency || "";
+      if (channel) channel.textContent = text.channels[record.channel] || record.channel || "";
+      if (date) {
+        date.setAttribute("datetime", record.saved_at || "");
+        date.textContent = alertsDate(record.saved_at, locale);
+      }
+      if (open) open.setAttribute("href", alertSearchHref(record, searchPath));
+      list.appendChild(row);
+    }
+    if (region) region.hidden = false;
+    if (empty) empty.hidden = true;
+  }
+
   function initSavedSearchContacts() {
     var forms = document.querySelectorAll("[data-save-search-form]");
     for (var i = 0; i < forms.length; i += 1) updateSavedSearchContact(forms[i]);
@@ -703,26 +1318,123 @@
     syncRegionOptions();
     setFreeTextEnabled(!geographyId || !geographyId.value);
   }
-  function initHeroAdvancedSearch() {
-    var form = document.querySelector("[data-hero-advanced-search]");
-    if (!form) return;
-    var trigger = form.querySelector("[data-hero-advanced-trigger]");
-    var panel = form.querySelector(".hp-hero__advanced-panel");
-    if (!trigger || !panel) return;
-    function setExpanded(expanded) {
-      trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-      panel.hidden = !expanded;
+  var NON_RESIDENTIAL_FAMILIES = ["plot", "agricultural_land", "commercial", "hotel"];
+  // Empty filter controls stay out of the results URL: they are disabled for the
+  // submission only, and a bfcache return re-enables them so the form is still
+  // editable. Checked radios with an empty value ("All", "Any") carry no filter.
+  function emptyFormControls(form) {
+    var controls = form.querySelectorAll("input, select");
+    var empty = [];
+    for (var i = 0; i < controls.length; i += 1) {
+      var control = controls[i];
+      if (control.disabled || control.type === "checkbox" || control.type === "submit" || control.type === "button") continue;
+      if (control.type === "radio") {
+        if (control.checked && String(control.value || "") === "") empty.push(control);
+        continue;
+      }
+      if (String(control.value || "").trim() === "") empty.push(control);
     }
-    trigger.addEventListener("click", function () {
-      setExpanded(trigger.getAttribute("aria-expanded") !== "true");
+    return empty;
+  }
+  function stripEmptyControlsOnSubmit(form) {
+    var skipped = [];
+    form.addEventListener("submit", function () {
+      skipped = emptyFormControls(form);
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = true;
     });
-    form.addEventListener("keydown", function (event) {
-      if (event.key !== "Escape" || trigger.getAttribute("aria-expanded") !== "true") return;
-      event.preventDefault();
-      setExpanded(false);
-      trigger.focus();
+    window.addEventListener("pageshow", function () {
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = false;
+      skipped = [];
     });
-    setExpanded(false);
+  }
+  function initSearchFilterForms() {
+    var forms = document.querySelectorAll("[data-search-filter-form]");
+    for (var i = 0; i < forms.length; i += 1) stripEmptyControlsOnSubmit(forms[i]);
+  }
+  function initHeroSearch() {
+    var form = document.querySelector("[data-hero-search]");
+    if (!form) return;
+    var priceSelects = form.querySelectorAll("[data-price-presets]");
+    var family = form.querySelector("[data-hero-family]");
+    var bedrooms = form.querySelector("[data-hero-bedrooms]");
+    var more = form.querySelector("[data-hero-more-filters]");
+    function offerType() {
+      var checked = form.querySelector('input[name="offer_type"]:checked');
+      return checked && checked.value === "rent" ? "rent" : "sale";
+    }
+    // Rent budgets are monthly, so the preset list follows the Buy/Rent tab.
+    function applyPricePresets() {
+      var source = offerType() === "rent" ? "data-price-rent" : "data-price-sale";
+      for (var i = 0; i < priceSelects.length; i += 1) {
+        var select = priceSelects[i];
+        var current = select.value;
+        var entries = (select.getAttribute(source) || "").split(";");
+        select.textContent = "";
+        var any = document.createElement("option");
+        any.value = "";
+        any.textContent = select.getAttribute("data-price-any") || "";
+        select.appendChild(any);
+        for (var j = 0; j < entries.length; j += 1) {
+          if (!entries[j]) continue;
+          var parts = entries[j].split("|");
+          var option = document.createElement("option");
+          option.value = parts[0];
+          option.textContent = parts[1] || parts[0];
+          if (parts[0] === current) option.selected = true;
+          select.appendChild(option);
+        }
+      }
+    }
+    // Plots, land, commercial space and hotels carry no bedroom count.
+    function syncBedrooms() {
+      if (!family || !bedrooms) return;
+      var nonResidential = NON_RESIDENTIAL_FAMILIES.indexOf(family.value) >= 0;
+      bedrooms.disabled = nonResidential;
+      if (nonResidential) bedrooms.value = "";
+    }
+    form.addEventListener("change", function (event) {
+      if (event.target && event.target.name === "offer_type") applyPricePresets();
+      if (event.target === family) syncBedrooms();
+    });
+    form.addEventListener("reset", function () {
+      window.setTimeout(function () {
+        applyPricePresets();
+        syncBedrooms();
+      });
+    });
+    if (more) {
+      var label = more.querySelector("[data-more-label]");
+      more.addEventListener("toggle", function () {
+        if (label) label.textContent = more.open ? label.getAttribute("data-fewer-label") : label.getAttribute("data-more-label");
+      });
+    }
+    // Empty controls stay out of the results URL; pageshow restores them for bfcache returns.
+    function emptyControls() {
+      return emptyFormControls(form);
+    }
+    var skipped = [];
+    form.addEventListener("submit", function () {
+      skipped = emptyControls();
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = true;
+    });
+    window.addEventListener("pageshow", function () {
+      for (var i = 0; i < skipped.length; i += 1) skipped[i].disabled = false;
+      skipped = [];
+      syncBedrooms();
+    });
+    applyPricePresets();
+    syncBedrooms();
+  }
+  function initSearchToolbar() {
+    var form = document.querySelector("[data-search-toolbar-form]");
+    if (!form) return;
+    var sort = form.querySelector('select[name="sort"]');
+    if (!sort) return;
+    sort.addEventListener("change", function () {
+      var view = form.querySelector('[data-view-mode][aria-pressed="true"]');
+      if (typeof form.requestSubmit === "function") form.requestSubmit(view && view.value === "map" ? view : undefined);
+      else form.submit();
+    });
   }
   function initHeroGallery() {
     var gallery = document.querySelector("[data-hero-gallery]");
@@ -829,6 +1541,35 @@
         if (image.complete && image.naturalWidth === 0) recoverImage(image);
       })(images[i]);
     }
+  }
+  function initListingGalleryLinks() {
+    // "All N photos" is a plain anchor to the photo grid; once the viewer
+    // dialog can open, it takes over instead of jumping down the page.
+    var dialog = document.querySelector("[data-listing-gallery-dialog]");
+    if (!dialog || typeof dialog.showModal !== "function") return;
+    var links = document.querySelectorAll("a[data-listing-gallery-open]");
+    for (var i = 0; i < links.length; i += 1) {
+      links[i].addEventListener("click", function (event) { event.preventDefault(); });
+    }
+  }
+  function initListingGalleryImageState() {
+    // The viewer swaps one <img> between photos, so the figure carries the
+    // loading and failed states: a spinner while the next photo arrives, a
+    // notice when it never does.
+    var figure = document.querySelector("[data-listing-gallery-figure]");
+    var image = figure ? figure.querySelector("[data-listing-gallery-image]") : null;
+    if (!figure || !image) return;
+    function loaded() { figure.removeAttribute("data-image-state"); }
+    function failed() { figure.setAttribute("data-image-state", "unavailable"); }
+    image.addEventListener("load", loaded);
+    image.addEventListener("error", failed);
+    if (typeof MutationObserver === "function") {
+      new MutationObserver(function () {
+        if (image.complete && image.naturalWidth > 0) return;
+        figure.setAttribute("data-image-state", "loading");
+      }).observe(image, { attributes: true, attributeFilter: ["src"] });
+    }
+    if (image.complete && image.naturalWidth === 0) failed();
   }
   function initListingGallery() {
     var dialog = document.querySelector("[data-listing-gallery-dialog]");
@@ -977,6 +1718,188 @@
     window.addEventListener("resize", scheduleGalleryPosition);
     updateGalleryPosition();
   }
+  function initGuideToc() {
+    var toc = document.querySelector("[data-guide-toc]");
+    if (!toc || !("IntersectionObserver" in window)) return;
+    var links = toc.querySelectorAll('a[href^="#"]');
+    var targets = [];
+    for (var i = 0; i < links.length; i += 1) {
+      var target = document.getElementById(links[i].getAttribute("href").slice(1));
+      if (target) targets.push({ link: links[i], target: target });
+    }
+    if (!targets.length) return;
+    function setCurrent(id) {
+      for (var j = 0; j < targets.length; j += 1) {
+        if (targets[j].target.id === id) targets[j].link.setAttribute("aria-current", "location");
+        else targets[j].link.removeAttribute("aria-current");
+      }
+    }
+    var visible = {};
+    var observer = new IntersectionObserver(function (entries) {
+      for (var k = 0; k < entries.length; k += 1) visible[entries[k].target.id] = entries[k].isIntersecting;
+      for (var m = 0; m < targets.length; m += 1) {
+        if (visible[targets[m].target.id]) {
+          setCurrent(targets[m].target.id);
+          return;
+        }
+      }
+    }, { rootMargin: "-96px 0px -55% 0px", threshold: 0 });
+    for (var n = 0; n < targets.length; n += 1) observer.observe(targets[n].target);
+    setCurrent(targets[0].target.id);
+  }
+  function initSellerStepper() {
+    var form = document.querySelector("form[data-seller-intake]");
+    if (!form) return;
+    // Next and Back only make sense once the intake is a stepper. Without JS
+    // every step stays visible and the form submits natively, so the
+    // controls ship hidden and are revealed here.
+    var controls = form.querySelectorAll("[data-seller-next], [data-seller-back]");
+    for (var i = 0; i < controls.length; i += 1) controls[i].hidden = false;
+    form.setAttribute("data-seller-stepper", "true");
+  }
+  // Seller photo upload. The form is a real multipart post that works with
+  // JavaScript switched off (the server redirects back with ?photos=), and this
+  // upgrades it to inline progress, per-file errors, and a disabled button
+  // while bytes are in flight.
+  function initSellerPhotoUpload() {
+    var form = document.querySelector("[data-seller-photo-form]");
+    if (!form) return;
+    var input = form.querySelector("[data-seller-photo-input]");
+    var reference = form.querySelector("[data-seller-photo-reference]");
+    var referenceField = form.querySelector("[data-seller-photo-reference-field]");
+    var status = form.querySelector("[data-seller-photo-status]");
+    var results = form.querySelector("[data-seller-photo-results]");
+    var progress = form.querySelector("[data-seller-photo-progress]");
+    var submit = form.querySelector("[data-seller-photo-submit]");
+    var limitsHint = form.getAttribute("data-seller-photo-limits") || "";
+    var maxFiles = Number(form.getAttribute("data-seller-photo-max-files")) || 8;
+    var maxBytes = Number(form.getAttribute("data-seller-photo-max-bytes")) || 8 * 1024 * 1024;
+    var pendingText = form.getAttribute("data-seller-photo-pending") || "";
+    var successText = form.getAttribute("data-seller-photo-success") || "";
+    var failureText = form.getAttribute("data-seller-photo-failure") || "";
+    var STORE_KEY = "ms-realty:seller-enquiry";
+
+    function readStoredReference() {
+      try {
+        return window.sessionStorage.getItem(STORE_KEY) || "";
+      } catch (error) {
+        return "";
+      }
+    }
+    function rememberReference(value) {
+      try {
+        window.sessionStorage.setItem(STORE_KEY, value);
+      } catch (error) {
+        // Private browsing: the visible field still carries the reference.
+      }
+    }
+    function setStatus(text, state) {
+      if (!status) return;
+      status.textContent = text || "";
+      if (state) status.setAttribute("data-state", state);
+      else status.removeAttribute("data-state");
+    }
+    function clearResults() {
+      if (results) results.textContent = "";
+    }
+    function addResult(text, state) {
+      if (!results) return;
+      var item = document.createElement("li");
+      item.textContent = text;
+      item.setAttribute("data-state", state);
+      results.appendChild(item);
+    }
+
+    var params = new URLSearchParams(window.location.search);
+    var prefill = (params.get("enquiry") || readStoredReference()).trim();
+    if (prefill && reference) {
+      reference.value = prefill;
+      if (referenceField) referenceField.hidden = true;
+    }
+    var outcome = params.get("photos");
+    if (outcome === "ok") setStatus(successText, "success");
+    else if (outcome === "partial") setStatus(successText, "warning");
+    else if (outcome === "error") setStatus(failureText, "error");
+
+    if (!window.FormData || !window.XMLHttpRequest) return;
+
+    form.addEventListener("submit", function (event) {
+      var files = input && input.files ? Array.prototype.slice.call(input.files) : [];
+      if (!files.length || !reference || !reference.value.trim()) return;
+      event.preventDefault();
+      clearResults();
+
+      var payload = new FormData();
+      payload.append(reference.getAttribute("name") || "enquiryId", reference.value.trim());
+      var queued = [];
+      for (var i = 0; i < files.length; i += 1) {
+        if (queued.length >= maxFiles || files[i].size > maxBytes) {
+          addResult(files[i].name + " — " + limitsHint, "error");
+          continue;
+        }
+        queued.push(files[i]);
+        payload.append(input.getAttribute("name") || "photo", files[i], files[i].name);
+      }
+      if (!queued.length) {
+        setStatus(failureText, "error");
+        return;
+      }
+
+      if (submit) submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setStatus(pendingText, "pending");
+      if (progress) {
+        progress.hidden = false;
+        progress.value = 0;
+      }
+
+      var request = new XMLHttpRequest();
+      request.open("POST", form.getAttribute("action"), true);
+      request.setRequestHeader("accept", "application/json");
+      request.withCredentials = true;
+      if (request.upload) {
+        request.upload.onprogress = function (progressEvent) {
+          if (!progress || !progressEvent.lengthComputable) return;
+          progress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+        };
+      }
+      request.onload = function () {
+        var body = {};
+        try {
+          body = JSON.parse(request.responseText || "{}");
+        } catch (error) {
+          body = {};
+        }
+        var received = body.received || [];
+        var refused = body.rejected || [];
+        for (var a = 0; a < received.length; a += 1) {
+          var acceptedFile = queued[received[a].index];
+          addResult((acceptedFile ? acceptedFile.name : "") + " — " + successText, "success");
+        }
+        for (var r = 0; r < refused.length; r += 1) {
+          var refusedFile = queued[refused[r].index];
+          addResult((refusedFile ? refusedFile.name + " — " : "") + (refused[r].message || failureText), "error");
+        }
+        if (request.status >= 200 && request.status < 300) {
+          rememberReference(reference.value.trim());
+          setStatus(refused.length ? successText : successText, refused.length ? "warning" : "success");
+          if (input) input.value = "";
+        } else {
+          setStatus(body.message || failureText, "error");
+        }
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.onerror = function () {
+        setStatus(failureText, "error");
+        if (progress) progress.hidden = true;
+        if (submit) submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      };
+      request.send(payload);
+    });
+  }
   function initSellerIntake() {
     var form = document.querySelector("form[data-seller-intake]");
     if (!form) return;
@@ -1023,11 +1946,26 @@
       var fields = panels[currentIndex].querySelectorAll("input[required], select[required], textarea[required]");
       for (var i = 0; i < fields.length; i += 1) {
         if (fields[i].checkValidity()) continue;
+        // Mark the field so it also reads as an error visually, not only in
+        // the native bubble; the mark clears as soon as the visitor edits it.
+        fields[i].setAttribute("aria-invalid", "true");
         fields[i].reportValidity();
         return false;
       }
       return true;
     }
+    form.addEventListener("input", function (event) {
+      var field = event.target;
+      if (field && field.getAttribute && field.getAttribute("aria-invalid") === "true" && field.checkValidity && field.checkValidity()) {
+        field.removeAttribute("aria-invalid");
+      }
+    });
+    form.addEventListener("change", function (event) {
+      var field = event.target;
+      if (field && field.getAttribute && field.getAttribute("aria-invalid") === "true" && field.checkValidity && field.checkValidity()) {
+        field.removeAttribute("aria-invalid");
+      }
+    });
     form.addEventListener("click", function (event) {
       var next = event.target.closest("[data-seller-next]");
       if (next && form.contains(next)) {
@@ -1046,6 +1984,374 @@
       event.preventDefault();
       event.stopPropagation();
       if (currentStepIsValid()) showStep(currentIndex + 1, true);
+    });
+    showStep(0, false);
+  }
+  // Buyer onboarding (/{locale}/start): the server renders one GET form with
+  // four sections; this turns it into a stepper, keeps the "See matching
+  // properties" link and the shortlist lead in sync with the answers, and
+  // navigates straight to the results instead of the no-JavaScript review page.
+  function initStartFlow() {
+    var root = document.querySelector("main[data-start-flow]");
+    if (!root) return;
+    var form = root.querySelector("form[data-start-form]");
+    var lead = root.querySelector("form[data-start-lead]");
+    var finish = root.querySelector("[data-start-finish]");
+    var seeMatches = root.querySelector("[data-start-see-matches]");
+    var matchCount = root.querySelector("[data-start-match-count]");
+    var searchPath = root.getAttribute("data-start-search-path") || "";
+    if (!form || !searchPath) return;
+    function value(name) {
+      var control = form.elements.namedItem(name);
+      return control && typeof control.value === "string" ? control.value : "";
+    }
+    function checkedControl(name) {
+      return form.querySelector('input[name="' + name + '"]:checked');
+    }
+    function residential() {
+      return NON_RESIDENTIAL_FAMILIES.indexOf(value("property_family")) < 0;
+    }
+    function searchParams() {
+      var params = new URLSearchParams();
+      if (value("offer_type")) params.set("offer_type", value("offer_type"));
+      if (value("property_family")) params.set("property_family", value("property_family"));
+      var area = checkedControl("area");
+      if (area) {
+        try {
+          var extra = JSON.parse(area.getAttribute("data-search-params") || "{}");
+          Object.keys(extra).forEach(function (key) { params.set(key, extra[key]); });
+        } catch (error) {}
+      }
+      if (value("price_max")) params.set("price_max", value("price_max"));
+      if (value("bedrooms_min") && residential()) params.set("bedrooms_min", value("bedrooms_min"));
+      return params;
+    }
+    function searchUrl() {
+      var query = searchParams().toString();
+      return query ? searchPath + "?" + query : searchPath;
+    }
+    function leadLabel(name) {
+      var control = checkedControl(name);
+      return control ? control.getAttribute("data-lead-label") || "" : "";
+    }
+    function syncLead() {
+      if (!lead) return;
+      function set(field, next) {
+        var input = lead.querySelector('[data-start-lead-field="' + field + '"]');
+        if (input) input.value = next || "";
+      }
+      var area = checkedControl("area");
+      var financing = value("financing");
+      set("leadType", value("offer_type") === "rent" ? "renter" : value("citizenship") === "non_eu" ? "foreign_buyer" : "buyer");
+      set("requirements.locations", area ? area.getAttribute("data-lead-location") || "" : "");
+      set("requirements.property_types", value("property_family"));
+      set("requirements.budget_max_eur", value("price_max"));
+      set("requirements.bedrooms_min", residential() ? value("bedrooms_min") : "");
+      set("requirements.timeline", leadLabel("timeline"));
+      set("requirements.finance_status", financing === "mortgage" || financing === "cash" ? financing : "");
+      var parts = [
+        leadLabel("offer_type"),
+        value("property_family"),
+        area ? area.getAttribute("data-lead-location") || "" : "",
+        value("price_max") ? "max EUR " + value("price_max") : "",
+        residential() && value("bedrooms_min") ? value("bedrooms_min") + "+ bedrooms" : "",
+        leadLabel("citizenship"),
+        leadLabel("financing"),
+        leadLabel("timeline"),
+      ].filter(Boolean);
+      set("message", (lead.getAttribute("data-start-message-prefix") || "Buyer onboarding") + (parts.length ? ": " + parts.join("; ") : ""));
+      lead.setAttribute("data-lead-type", lead.querySelector('[data-start-lead-field="leadType"]').value);
+    }
+    var countRequest = 0;
+    // Live match count from the search API (same filters as the link); the
+    // generic title stays when the API is unavailable.
+    function syncMatchCount() {
+      if (!matchCount || typeof fetch !== "function") return;
+      var params = searchParams();
+      params.set("locale", root.getAttribute("data-start-locale") || "bg");
+      var request = (countRequest += 1);
+      fetch("/api/search?" + params.toString(), { headers: { accept: "application/json", "x-ms-realty-preview": "search-count" } })
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (result) {
+          if (request !== countRequest || !result || !result.search) return;
+          var total = Number(result.search.total_matches);
+          if (!isFinite(total)) return;
+          matchCount.textContent = total > 0
+            ? (matchCount.getAttribute("data-start-match-template") || "{count}").replace("{count}", String(total))
+            : matchCount.getAttribute("data-start-no-matches") || matchCount.textContent;
+          root.setAttribute("data-start-matches", String(total));
+          if (seeMatches) {
+            seeMatches.classList.toggle("mk-btn--accent", total > 0);
+            seeMatches.classList.toggle("mk-btn--secondary", total === 0);
+          }
+          var alertPanel = root.querySelector("[data-start-alert]");
+          if (alertPanel && total === 0) alertPanel.open = true;
+          syncWiden(total === 0);
+        })
+        .catch(function () {});
+    }
+    function syncAlert() {
+      var filters = root.querySelector("[data-start-alert-filters]");
+      if (!filters) return;
+      var payload = {};
+      searchParams().forEach(function (value, key) { payload[key] = value; });
+      filters.value = JSON.stringify(payload);
+    }
+    // The "coming soon" financing panel only makes sense to someone who said
+    // they need financing.
+    function syncUpcoming() {
+      var items = root.querySelectorAll('[data-start-upcoming-when="mortgage"]');
+      for (var i = 0; i < items.length; i += 1) items[i].hidden = value("financing") !== "mortgage";
+    }
+    function syncFinish() {
+      if (seeMatches) seeMatches.setAttribute("href", searchUrl());
+      syncLead();
+      syncAlert();
+      syncUpcoming();
+    }
+    // Zero matches: rebuild the "try a wider search" links by relaxing one
+    // answer at a time and keeping only the variants that do have listings,
+    // so the visitor is never sent to an empty results page.
+    var widen = root.querySelector("[data-start-widen]");
+    var widenList = root.querySelector("[data-start-widen-list]");
+    function widenCandidates() {
+      var area = checkedControl("area");
+      var areaId = area ? area.value : "";
+      var district = areaId === "sandanski" || areaId === "bansko";
+      var out = [];
+      if (value("price_max")) out.push({ id: "price", drop: ["price_max"] });
+      if (value("bedrooms_min") && residential()) out.push({ id: "bedrooms", drop: ["bedrooms_min"] });
+      if (value("property_family")) out.push({ id: "type", drop: ["property_family"] });
+      if (areaId) out.push({ id: "area", district: district, drop: ["geography_id", "region_id", "country_code"] });
+      return out;
+    }
+    function candidateParams(candidate) {
+      var params = searchParams();
+      for (var i = 0; i < candidate.drop.length; i += 1) params.delete(candidate.drop[i]);
+      if (candidate.id === "area" && candidate.district) params.set("region_id", "BG:district:BLG");
+      return params;
+    }
+    function candidateLabel(candidate) {
+      if (candidate.id === "area") {
+        return widen.getAttribute(candidate.district ? "data-widen-district" : "data-widen-area") || "";
+      }
+      return widen.getAttribute("data-widen-" + candidate.id) || "";
+    }
+    var widenRequest = 0;
+    function syncWiden(zero) {
+      if (!widen || !widenList) return;
+      if (!zero) {
+        widen.hidden = true;
+        return;
+      }
+      var request = (widenRequest += 1);
+      var candidates = widenCandidates();
+      var template = matchCount ? matchCount.getAttribute("data-start-match-template") || "{count}" : "{count}";
+      var locale = root.getAttribute("data-start-locale") || "bg";
+      var results = [];
+      var pending = candidates.length;
+      if (!pending) {
+        widen.hidden = true;
+        return;
+      }
+      candidates.forEach(function (candidate, index) {
+        var params = candidateParams(candidate);
+        var query = params.toString();
+        params.set("locale", locale);
+        fetch("/api/search?" + params.toString(), { headers: { accept: "application/json", "x-ms-realty-preview": "search-count" } })
+          .then(function (response) { return response.ok ? response.json() : null; })
+          .then(function (result) {
+            var total = result && result.search ? Number(result.search.total_matches) : 0;
+            if (total > 0) results[index] = { id: candidate.id, label: candidateLabel(candidate), count: total, query: query };
+          })
+          .catch(function () {})
+          .then(function () {
+            pending -= 1;
+            if (pending > 0 || request !== widenRequest) return;
+            var kept = results.filter(Boolean).slice(0, 3);
+            widenList.textContent = "";
+            for (var i = 0; i < kept.length; i += 1) {
+              var item = document.createElement("li");
+              var link = document.createElement("a");
+              link.className = "st-widen__link";
+              link.setAttribute("data-start-widen-option", kept[i].id);
+              link.href = kept[i].query ? searchPath + "?" + kept[i].query : searchPath;
+              var label = document.createElement("span");
+              label.className = "st-widen__label";
+              label.textContent = kept[i].label;
+              var count = document.createElement("span");
+              count.className = "st-widen__count";
+              count.textContent = template.replace("{count}", String(kept[i].count));
+              link.appendChild(label);
+              link.appendChild(count);
+              item.appendChild(link);
+              widenList.appendChild(item);
+            }
+            widen.hidden = kept.length === 0;
+          });
+      });
+    }
+    // Rent budgets are monthly, so the preset list follows the Buy/Rent choice.
+    function applyPricePresets() {
+      var source = value("offer_type") === "rent" ? "data-price-rent" : "data-price-sale";
+      var selects = form.querySelectorAll("[data-price-presets]");
+      for (var i = 0; i < selects.length; i += 1) {
+        var select = selects[i];
+        var current = select.value;
+        var entries = (select.getAttribute(source) || "").split(";");
+        select.textContent = "";
+        var any = document.createElement("option");
+        any.value = "";
+        any.textContent = select.getAttribute("data-price-any") || "";
+        select.appendChild(any);
+        for (var j = 0; j < entries.length; j += 1) {
+          if (!entries[j]) continue;
+          var parts = entries[j].split("|");
+          var option = document.createElement("option");
+          option.value = parts[0];
+          option.textContent = parts[1] || parts[0];
+          if (parts[0] === current) option.selected = true;
+          select.appendChild(option);
+        }
+      }
+    }
+    // Plots, land, commercial space and hotels carry no bedroom count.
+    function syncBedrooms() {
+      var group = root.querySelector("[data-start-bedrooms]");
+      if (!group) return;
+      var hide = !residential();
+      group.hidden = hide;
+      if (hide) {
+        var any = form.querySelector('input[name="bedrooms_min"][value=""]');
+        if (any) any.checked = true;
+      }
+    }
+    form.addEventListener("change", function (event) {
+      if (event.target.name === "offer_type") applyPricePresets();
+      if (event.target.name === "property_family") syncBedrooms();
+      if (root.getAttribute("data-start-state") === "answer") syncFinish();
+    });
+    if (lead) lead.addEventListener("submit", syncLead);
+    // Submitting state: the shared JSON submit already marks the button busy;
+    // this adds the localized status line and clears it if the post failed
+    // (a success replaces the whole form with the success card).
+    function wireSubmitStatus(target) {
+      if (!target) return;
+      target.addEventListener("submit", function () {
+        var status = target.querySelector("[data-start-status]");
+        var button = target.querySelector('[type="submit"]');
+        if (!status || !button) return;
+        status.textContent = target.getAttribute("data-sending-message") || "";
+        if (typeof MutationObserver !== "function") return;
+        var observer = new MutationObserver(function () {
+          if (button.hasAttribute("aria-busy")) return;
+          status.textContent = "";
+          observer.disconnect();
+        });
+        observer.observe(button, { attributes: true, attributeFilter: ["aria-busy"] });
+      });
+    }
+    wireSubmitStatus(lead);
+    wireSubmitStatus(root.querySelector("[data-start-alert-form]"));
+    var tripForm = root.querySelector("[data-start-trip-form]");
+    if (tripForm) {
+      var tripArrival = tripForm.querySelector("[data-start-trip-arrival]");
+      var tripDeparture = tripForm.querySelector("[data-start-trip-departure]");
+      var localNow = new Date();
+      localNow.setMinutes(localNow.getMinutes() - localNow.getTimezoneOffset());
+      var todayValue = localNow.toISOString().slice(0, 10);
+      if (tripArrival) tripArrival.min = todayValue;
+      if (tripDeparture) tripDeparture.min = todayValue;
+      if (tripArrival && tripDeparture) {
+        tripArrival.addEventListener("change", function () {
+          tripDeparture.min = tripArrival.value || todayValue;
+          if (tripDeparture.value && tripDeparture.value < tripArrival.value) tripDeparture.value = tripArrival.value;
+        });
+      }
+    }
+    if (seeMatches) seeMatches.addEventListener("click", function () { seeMatches.setAttribute("href", searchUrl()); });
+    applyPricePresets();
+    syncBedrooms();
+    // The finish state (answers in the URL) is already complete server-side.
+    if (root.getAttribute("data-start-state") !== "answer") return;
+    // Reveals the step buttons, which are inert without this script.
+    root.setAttribute("data-start-enhanced", "true");
+    var panels = form.querySelectorAll("[data-start-step]");
+    var indicators = root.querySelectorAll("[data-start-step-indicator]");
+    var progress = root.querySelector("[data-start-progress]");
+    var continueButton = form.querySelector("[data-start-continue]");
+    if (!panels.length) return;
+    var current = 0;
+    function stepError(show) {
+      var error = panels[current].querySelector("[data-start-error]");
+      if (error) error.hidden = !show;
+    }
+    function showStep(index, moveFocus) {
+      current = Math.max(0, Math.min(index, panels.length - 1));
+      var last = current === panels.length - 1;
+      root.setAttribute("data-start-current-step", String(current + 1));
+      for (var i = 0; i < panels.length; i += 1) panels[i].hidden = i !== current;
+      for (var j = 0; j < indicators.length; j += 1) {
+        if (j === current) indicators[j].setAttribute("aria-current", "step");
+        else indicators[j].removeAttribute("aria-current");
+        if (j === current) indicators[j].setAttribute("data-active", "true");
+        else indicators[j].removeAttribute("data-active");
+        if (j < current) indicators[j].setAttribute("data-complete", "true");
+        else indicators[j].removeAttribute("data-complete");
+      }
+      if (continueButton) continueButton.hidden = true;
+      if (finish) finish.hidden = !last;
+      if (progress) {
+        progress.hidden = false;
+        progress.textContent = (progress.getAttribute("data-start-progress-template") || "{current} / {total}")
+          .replace("{current}", String(current + 1))
+          .replace("{total}", String(panels.length));
+      }
+      if (last) {
+        syncFinish();
+        syncMatchCount();
+      }
+      if (moveFocus) {
+        var title = panels[current].querySelector("[data-start-step-title]");
+        if (title) window.requestAnimationFrame(function () { title.focus(); });
+      }
+    }
+    function currentStepIsValid() {
+      var fields = panels[current].querySelectorAll("input[required], select[required]");
+      for (var i = 0; i < fields.length; i += 1) {
+        if (fields[i].checkValidity()) continue;
+        stepError(true);
+        fields[i].focus();
+        return false;
+      }
+      stepError(false);
+      return true;
+    }
+    form.addEventListener("click", function (event) {
+      var next = event.target.closest("[data-start-next]");
+      if (next && form.contains(next)) {
+        event.preventDefault();
+        if (currentStepIsValid()) showStep(current + 1, true);
+        return;
+      }
+      var back = event.target.closest("[data-start-back]");
+      if (back && form.contains(back)) {
+        event.preventDefault();
+        showStep(current - 1, true);
+      }
+    });
+    form.addEventListener("change", function () {
+      if (root.getAttribute("data-start-current-step") === String(panels.length)) syncMatchCount();
+    });
+    // Enter or the last step's submit goes straight to the matching results.
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (!currentStepIsValid()) return;
+      if (current < panels.length - 1) {
+        showStep(current + 1, true);
+        return;
+      }
+      window.location.href = searchUrl();
     });
     showStep(0, false);
   }
@@ -1289,6 +2595,32 @@
      var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
      document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
    }
+  // The desktop language menu is a native <details>; it still needs to close
+  // on an outside click, on Escape (returning focus to its button), and when
+  // keyboard focus leaves it.
+  function initLanguageMenu() {
+    var menu = document.querySelector('details[data-language-switcher="desktop"]');
+    if (!menu) return;
+    var summary = menu.querySelector(":scope > summary");
+    if (!summary) return;
+    function closeMenu(returnFocus) {
+      if (!menu.open) return;
+      menu.open = false;
+      if (returnFocus) summary.focus();
+    }
+    document.addEventListener("click", function (event) {
+      if (menu.open && !menu.contains(event.target)) closeMenu(false);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && menu.open) {
+        event.preventDefault();
+        closeMenu(true);
+      }
+    });
+    menu.addEventListener("focusout", function (event) {
+      if (event.relatedTarget && !menu.contains(event.relatedTarget)) closeMenu(false);
+    });
+  }
   function initPublicMobileNavigation() {
     var mobileMenu = document.querySelector("[data-mobile-menu]");
     if (!mobileMenu) return;
@@ -1472,6 +2804,8 @@
     }
   });
   document.addEventListener("change", function (event) {
+    var slotPick = event.target.closest("[data-enquiry-slot]");
+    if (slotPick && slotPick.form) applyEnquirySlotChoice(slotPick.form);
     var channel = event.target.closest("[data-enquiry-channel]");
     if (channel && channel.form) updateEnquiryContact(channel.form);
     var savedSearchChannel = event.target.closest("[data-save-search-channel]");
@@ -1482,9 +2816,16 @@
     if (!(form instanceof HTMLFormElement)) return;
     var action = form.getAttribute("action") || "";
     var isEnquiry = form.hasAttribute("data-enquiry-form");
-    var intercept = action === "/api/leads" || action === "/api/saved-searches" || action === "/api/language-requests" || form.hasAttribute("data-save-search-endpoint") || form.hasAttribute("data-request-language");
+    var intercept = action === "/api/leads" || action === "/api/saved-searches" || action === "/api/language-requests" || action === "/api/viewing-trips" || form.hasAttribute("data-save-search-endpoint") || form.hasAttribute("data-request-language");
+    // The viewing trip carries whatever the visitor has saved, so a broker can
+    // build the days around real properties rather than a guess.
+    if (form.hasAttribute("data-start-trip-form")) {
+      var shortlist = form.querySelector("[data-start-trip-shortlist]");
+      if (shortlist) shortlist.value = readSaved().join(",");
+    }
     if (!intercept && !isEnquiry) return;
     event.preventDefault();
+    if (action === "/api/leads" || isEnquiry) applyLeadAttribution(form);
     submitJson(form, function () {
       if (isEnquiry) {
         var dialog = document.getElementById("mk-enquiry");
@@ -1506,19 +2847,32 @@
     if (event.key === KEY) markSaved();
   });
   markSaved();
+  initStartFlow();
+  initCompareLinks();
+  initComparePage();
+  initAlertsPage();
   initGuidedSearch();
   initSearchScrollRestoration();
   initDialogFocusReturn();
   initPublicMobileNavigation();
+  initLanguageMenu();
   initSavedSearchContacts();
+  initSearchFilterForms();
   initGeographyComboboxes();
-  initHeroAdvancedSearch();
+  initHeroSearch();
+  initSearchToolbar();
   initHeroGallery();
   initHorizontalFocusRails();
   initImageFallbacks();
+ initListingGalleryLinks();
+ initListingGalleryImageState();
  initListingGallery();
  initMobileListingGallery();
+ initGuideToc();
+ initSellerStepper();
  initSellerIntake();
+ initSellerPhotoUpload();
  initPhotoSphereViewers();
  initPrivacySafeAnalytics();
+ firstTouchPath();
 })();

@@ -183,6 +183,7 @@ function renderAppRouteWithContext({ pathname, url, config, registry, seed, tran
           ? []
           : readThroughCached(config.tourApprovalLedgerPath, () => readTourApprovals(config.tourApprovalLedgerPath)),
         currentRouteContract(config).catalog,
+        { searchParams: requestUrl.searchParams },
       );
   return renderedHtmlResponse(rendered, requestUrl);
 }

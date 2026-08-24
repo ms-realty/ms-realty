@@ -2,8 +2,10 @@ const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 export const FILE_BACKED_PUBLIC_MUTATIONS = new Set([
   "/api/events",
+  "/api/seller-photos",
   "/api/language-requests",
   "/api/saved-searches",
+  "/api/saved-searches/manage",
 ]);
 
 export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
@@ -17,6 +19,9 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/lead-pipeline/outcome",
   "/api/admin/leads",
   "/api/admin/leads/assign",
+  "/api/admin/leads/bulk",
+  "/api/admin/leads/snooze",
+  "/api/admin/leads/unsnooze",
   "/api/admin/listing-quality/import",
   "/api/admin/listings/publication-schedules",
   "/api/admin/listings/publication-schedules/cancel",
@@ -24,12 +29,14 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/listings/slug",
   "/api/admin/locales",
   "/api/admin/media/reviews",
+  "/api/admin/media/uploads",
   "/api/admin/public-requests/outcome",
   "/api/admin/redirect-approvals",
   "/api/admin/redirect-approvals/import",
   "/api/admin/replies",
   "/api/admin/replies/delivery",
   "/api/admin/replies/draft",
+  "/api/admin/saved-search-alerts/run-due",
   "/api/admin/seller-pipeline/outcome",
   "/api/admin/tours/approve",
   "/api/admin/translations/approve",
@@ -37,6 +44,7 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/translations/publish",
   "/api/admin/viewings",
   "/api/admin/viewings/follow-up",
+  "/api/admin/views",
 ]);
 
 export const FILE_BACKED_ADMIN_READS = new Set([
@@ -63,6 +71,7 @@ export const FILE_BACKED_ADMIN_READS = new Set([
   "/api/admin/requests",
   "/api/admin/viewings",
   "/api/admin/viewings.ics",
+  "/api/admin/views",
 ]);
 
 export function productionRuntimeDataUnavailable({

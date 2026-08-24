@@ -2891,12 +2891,14 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
   const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-production-recovery-`);
   const productionRecoveryReportPath = `${directory}/private/production-recovery-report.json`;
   const auditLogPath = tempAuditLog();
-  const reviewedAt = new Date().toISOString();
   const app = createHttpApp({
     auditLogPath,
     productionRecoveryReportPath,
     productionRecoverySigningPublicKey: RECOVERY_PUBLIC_KEY,
-    reviewedAt,
+    reviewedAt: "2026-07-23T00:00:00.000Z",
+    // Pin the freshness clock to the fixture's own date. Without this the test
+    // passes for thirty days after that date and then fails on the calendar.
+    productionRecoveryAt: "2026-07-23T00:00:00.000Z",
   });
   const auth = { authorization: "Bearer local-admin-smoke" };
 
@@ -2935,7 +2937,7 @@ test("HTTP admin validates and audits production recovery evidence intake", asyn
     method: "POST",
     url: "/api/admin/production-recovery/import",
     headers: auth,
-    body: { report: JSON.stringify(validProductionRecoveryReport(reviewedAt)) },
+    body: { report: JSON.stringify(validProductionRecoveryReport("2026-07-22T23:40:00.000Z")) },
   });
   const reviewHtml = await dispatchHttp(app, {
     url: "/admin/migration/review?locale=en",

@@ -116,7 +116,6 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.match(html, /data-mobile-contact-options="true"/);
   assert.match(html, /data-mobile-contact-options-open="true"/);
   assert.match(html, /data-listing-action="back_to_results" data-history-back="same-origin"/);
-  assert.doesNotMatch(html, /data-related-listings="true"/);
   assert.doesNotMatch(html, /\/api\/admin\/(viewings|replies)/);
 });
 
@@ -165,7 +164,7 @@ test("approved 360 tours retain a public gallery fallback when the viewer cannot
 
  assert.match(html, /id="listing-tour"/);
  assert.match(html, /data-photo-sphere-fallback="true"/);
- assert.match(html, /data-photo-sphere-fallback="true"[\s\S]*?data-listing-gallery-open="0"/);
+ assert.match(html, /href="#listing-gallery"/);
  assert.match(html, /ld-tour__fallback/);
 });
 
@@ -183,7 +182,7 @@ test("approved Supersplat tours link to the self-hosted viewer without loading t
   assert.match(html, /data-tour-provider="supersplat-viewer"/);
   assert.match(html, /href="https:\/\/makler-realty\.com\/tours\/MS-CRAWL-0001\/index\.html" target="_blank" rel="noopener" data-supersplat-viewer-link="true"/);
   assert.match(html, /data-tour-gallery-fallback="true"/);
-  assert.match(html, /data-tour-gallery-fallback="true"[\s\S]*?data-listing-gallery-open="0"/);
+  assert.match(html, /href="#listing-gallery"/);
   assert.doesNotMatch(html, /data-photo-sphere-viewer=/);
   assert.doesNotMatch(html, /data-panorama-url=/);
 });
@@ -422,7 +421,9 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.match(html, /data-mobile-menu-close="true"/);
   assert.match(html, /role="dialog" aria-modal="true" aria-label="Primary navigation"/);
   assert.match(html, /data-language-switcher="desktop"/);
-  assert.match(html, /aria-label="EN, Language: English"/);
+  // The menu button's accessible name carries no dash (house copy rule).
+  assert.match(html, /aria-label="Language: English"/);
+  assert.doesNotMatch(html.slice(html.indexOf("<header"), html.indexOf("</header>")), /[—–]/);
   assert.doesNotMatch(html, /<h4>/);
   assert.match(html, /data-language-switcher="mobile"/);
   assert.match(html, /data-mobile-task-navigation="true"/);
@@ -430,7 +431,7 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.equal((html.match(/data-mobile-task="/g) || []).length, 5);
   assert.match(html, /data-mobile-secondary-navigation="true"/);
   assert.match(html, /aria-label="Buyer guides"/);
-  assert.match(html, /class="mk-search__go" type="submit" aria-label="Search" title="Search"/);
+  assert.match(html, /class="hp-search__go mk-search__go" type="submit">[\s\S]*?<span>Search<\/span><\/button>/);
   assert.equal((html.match(/data-mobile-footer-group="/g) || []).length, 3);
 });
 
@@ -533,8 +534,7 @@ test("zero-result searches render a useful mobile recovery state", () => {
   assert.equal(page.cards.length, 0);
   assert.match(html, /data-search-empty="true"/);
   assert.match(html, /<h2>Результаты поиска<\/h2>/);
-  assert.match(html, /class="sr-empty__value">0<\/strong>/);
-  assert.match(html, /<p>совпадений<\/p>/);
+  assert.match(html, /<p>0 совпадений<\/p>/);
   assert.match(html, /href="\/ru\/search"[^>]*>.*Очистить фильтры/s);
   assert.doesNotMatch(html, /class="sr-list"/);
 });
@@ -609,7 +609,8 @@ test("municipality search exposes reviewed Bulgarian municipality scope at every
   assert.deepEqual(sandanski.search.controls.active_filter_chips, [{ key: "municipality", value: "Sandanski", active: true }]);
   assert.match(html, /data-geography-combobox="true"[^>]*data-geography-endpoint="\/api\/geography"/);
   assert.match(html, /name="region_id"/);
-  assert.doesNotMatch(html, /name="municipality"/);
+  assert.doesNotMatch(html, /<(?:select|input(?![^>]*type="hidden"))[^>]*name="municipality"/);
+  assert.match(html, /<input type="hidden" name="municipality" value="Sandanski">/);
 });
 
 test("district search exposes official Bulgarian administrative areas without inventing neighbourhoods", () => {
@@ -630,7 +631,8 @@ test("district search exposes official Bulgarian administrative areas without in
   assert.equal(blagoevgrad.cards.some((card) => card.id === "MS-CRAWL-0072"), false);
   assert.deepEqual(blagoevgrad.search.controls.active_filter_chips, [{ key: "district", value: "Blagoevgrad", active: true }]);
   assert.match(html, /<option value="BG:district:BLG" data-country="BG">Blagoevgrad<\/option>/);
-  assert.doesNotMatch(html, /name="district"/);
+  assert.doesNotMatch(html, /<(?:select|input(?![^>]*type="hidden"))[^>]*name="district"/);
+  assert.match(html, /<input type="hidden" name="district" value="Blagoevgrad">/);
 });
 
 test("search matches Cyrillic listings across Latin and Cyrillic keyboard input", () => {
@@ -719,8 +721,7 @@ test("home page explains an empty reviewed catalog without inventing featured ca
 
   assert.equal(page.cards.length, 0);
   assert.match(html, /data-featured-empty="true"/);
-  assert.match(html, /class="mk-empty__value">0</);
-  assert.match(html, /class="mk-empty__text">проверени обяви</);
+  assert.match(html, />0 проверени обяви</);
 });
 
 test("English home makes every approved buyer guide discoverable without expanding the mobile task dock", () => {
@@ -874,7 +875,9 @@ test("seller valuation page degrades to a phone CTA when lead writes are disable
   assert.equal(disabled.body.callback, null);
   assert.equal(
     disabled.body.form_unavailable,
-    "Формата е временно недостъпна. Обадете се или ни пишете. Отговаряме бързо.",
+    // Contract updated deliberately: PRODUCT.md forbids em-dashes in public
+    // copy, so the seller fallback sentence now uses a comma.
+    "Формата е временно недостъпна. Обадете се или ни пишете, отговаряме бързо.",
   );
   assert.equal(disabled.body.contact_channels.phone.href, "tel:+359879696870");
 

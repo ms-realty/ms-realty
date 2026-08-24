@@ -1,0 +1,87 @@
+{
+  "artifact_id": "approved-team-profiles-20260823",
+  "purpose": "Human-approved team profiles for the public about-and-team page. A profile publishes only when a named reviewer approved that exact content and the recorded source_hash still matches.",
+  "publishing_note": "This repository holds no real staff records. Every row below is marked example_record and can never publish. Replace name, role, office, languages, licence, photo and bio with real values, set status to approved with a named reviewer and approved_at, remove example_record, then recompute source_hash with production/scripts/build-approved-content.mjs.",
+  "generated_at": "2026-08-23T00:00:00Z",
+  "profiles": [
+    {
+      "id": "example-broker-bg",
+      "type": "team_profile",
+      "profile_key": "example-broker",
+      "locale": "bg",
+      "source_locale": "bg",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "example_record": true,
+      "name": "EXAMPLE PROFILE - replace with a real broker",
+      "role": "broker",
+      "office": "Sandanski",
+      "languages": [
+        "bg",
+        "en"
+      ],
+      "licence": null,
+      "photo": null,
+      "bio": "EXAMPLE TEXT - not publishable. Replace with a short approved biography that says what this person does for a buyer or seller, in the source locale.",
+      "display_order": 10,
+      "last_verified_at": null,
+      "source_hash": "ae328af517ea1b0da14f8f7d6e221814099cc717f3c182fbe1915f73169f26d9"
+    },
+    {
+      "id": "example-broker-en",
+      "type": "team_profile",
+      "profile_key": "example-broker",
+      "locale": "en",
+      "source_locale": "bg",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "example_record": true,
+      "source_document_id": "example-broker-bg",
+      "name": "EXAMPLE PROFILE - replace with a real broker",
+      "role": "broker",
+      "office": "Sandanski",
+      "languages": [
+        "bg",
+        "en"
+      ],
+      "licence": null,
+      "photo": null,
+      "bio": "EXAMPLE TEXT - not publishable. A non-source locale also needs human_translation_approved before it can appear on the public page.",
+      "display_order": 10,
+      "last_verified_at": null,
+      "source_hash": "c2372f955b78fa69c6ea56e0105bd809dd48b98203c34c10dd31d79597837788"
+    },
+    {
+      "id": "example-office-manager-bg",
+      "type": "team_profile",
+      "profile_key": "example-office-manager",
+      "locale": "bg",
+      "source_locale": "bg",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "example_record": true,
+      "name": "EXAMPLE PROFILE - replace with the real office manager",
+      "role": "office_manager",
+      "office": "Sandanski",
+      "languages": [
+        "bg",
+        "ru"
+      ],
+      "licence": null,
+      "photo": null,
+      "bio": "EXAMPLE TEXT - not publishable. A licence block is optional, but when present it needs a reference, the issuing authority, and the date a human verified it.",
+      "display_order": 20,
+      "last_verified_at": null,
+      "source_hash": "288b0f278c651736352c1dedf0f2808fa8d05a5576b55aaff3f2183298e749b0"
+    }
+  ]
+}

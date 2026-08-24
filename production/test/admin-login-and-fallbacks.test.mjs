@@ -12,6 +12,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { leadWritesDisabledFromEnv, renderContactPage, renderSearchUnavailablePage } from "../lib/public-site.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { DS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 const OPERATOR_TOKEN = "login-operator-token-0123456789ab";
 const PAYLOAD_SESSION = "payload.browser.session";
@@ -81,11 +82,40 @@ test("session cookie helpers round-trip and cap the Payload session token", () =
   assert.equal(adminTokenFromCookie(""), "");
   assert.match(adminSessionSetCookie("token", { maxAgeSeconds: 30 * 24 * 60 * 60 }), /Max-Age=7200/);
   const login = renderAdminLoginPage({ error: true });
+  assert.match(login, /<html lang="bg">/);
   assert.match(login, /role="alert"/);
   assert.match(login, /name="email"/);
   assert.match(login, /name="password"/);
+  assert.match(login, /<label for="admin-email">/);
+  assert.match(login, /<label for="admin-password">/);
   assert.match(login, /ms-realty-logo-/);
-  assert.match(login, /#C42D2D/);
+  // The standalone page loads the workbench webfonts and design-system bundle,
+  // then lays out a 420px card on the admin canvas: Commissioner 22px/600
+  // title, 48px inputs with an 8px radius and the focus ring, and a 48px
+  // accent submit. No em-dashes anywhere in the copy.
+  assert.ok(login.includes(`<link rel="stylesheet" href="${FONTS_URL}">`));
+  assert.ok(login.includes(`<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}"`));
+  assert.match(login, /\.login-page \{[^}]*background: var\(--ink-50, #F4F4F3\)/);
+  assert.match(login, /\.login \{[^}]*max-width: 420px;[^}]*border-radius: 14px/);
+  assert.match(login, /\.login__title \{[^}]*font-size: 22px;\s*font-weight: 600/);
+  assert.match(login, /\.login #admin-email,\s*\.login #admin-password,\s*\.login #admin-code \{[^}]*height: 48px;[^}]*border: 1px solid var\(--ink-200, #C9C9C7\);\s*border-radius: 8px/);
+  assert.match(login, /#admin-code:focus-visible \{[^}]*box-shadow: var\(--shadow-focus,/);
+  // The optional second-factor code shares the field and focus treatment.
+  assert.match(login, /\.login #admin-password:focus-visible,\s*\.login #admin-code:focus-visible \{/);
+  assert.match(login, /name="code"[^>]*autocomplete="one-time-code"/);
+  assert.match(login, /\.login__submit \{[^}]*height: 48px;[^}]*border-radius: 8px;\s*background: var\(--accent, #C42D2D\)/);
+  // The submit control now carries its own busy state, so the label lives in a
+  // span beside the spinner rather than as the button's only text node.
+  assert.match(login, /data-idle-label="Влез" data-busy-label="Влизане…"/);
+  assert.match(login, /<span data-login-submit-label="true">Влез<\/span>/);
+  // The workbench runs in three languages, so its door does too.
+  assert.match(login, /<nav class="login__locales"/);
+  assert.match(renderAdminLoginPage({ locale: "ru" }), /<html lang="ru">/);
+  assert.match(renderAdminLoginPage({ locale: "ru" }), /data-idle-label="Войти"/);
+  assert.match(renderAdminLoginPage({ locale: "en" }), /<html lang="en">/);
+  assert.match(renderAdminLoginPage({ locale: "en" }), /data-idle-label="Sign in"/);
+  assert.match(renderAdminLoginPage({ locale: "nope" }), /<html lang="bg">/);
+  assert.doesNotMatch(login, /[—–]/);
   assert.doesNotMatch(login, /#1d4ed8/);
   assert.doesNotMatch(login, /name="token"|Операторски ключ/);
 });
@@ -126,7 +156,7 @@ test("standalone HTTP runtime: login exchanges email/password for a Payload cook
       headers: { cookie, host: "ms-realty.ms-realty-bg.workers.dev" },
     });
     assert.equal(connect.status, 200);
-    assert.match(connect.body, /Подключения MS Realty/);
+    assert.match(connect.body, /MS Realty connections/);
     assert.equal(connect.body.includes(PAYLOAD_SESSION), false);
 
     const authed = await dispatchHttp(app, { method: "GET", url: "/admin/login", headers: { cookie } });
@@ -164,7 +194,7 @@ test("Next admin adapter: Payload login, cookie auth, and logout behave identica
     const connect = await renderAppAdminResponse(new Request(`${base}/admin/connect`, { headers: { cookie } }), { config });
     assert.equal(connect.status, 200);
     const connectBody = await connect.text();
-    assert.match(connectBody, /Подключения MS Realty/);
+    assert.match(connectBody, /MS Realty connections/);
     assert.doesNotMatch(connectBody, new RegExp(PAYLOAD_SESSION));
 
     const logout = await renderAppAdminResponse(

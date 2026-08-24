@@ -34,16 +34,16 @@ const TOKEN_FILES = ["colors.css", "typography.css", "spacing.css", "radius.css"
 const ICON_NAMES = [
   "arrow-down-right", "arrow-left", "arrow-right", "arrow-up-right", "banknote", "bar-chart-3",
   "bath", "bed", "bell", "building-2", "calendar", "calendar-check", "calendar-days",
-  "calendar-plus", "camera", "check", "check-check", "check-circle-2", "chevron-down",
+  "calculator", "calendar-plus", "camera", "check", "check-check", "check-circle-2", "chevron-down",
   "chevron-left", "chevron-right", "chevron-up", "circle", "circle-alert", "circle-check",
-  "clock", "compass", "contact", "download", "external-link", "eye", "file-check", "file-text",
+  "clock", "columns-3", "compass", "contact", "download", "external-link", "eye", "file-check", "file-text",
   "filter", "flame", "globe", "handshake", "heart", "home", "house", "inbox", "info",
   "kanban-square", "key", "landmark", "languages", "layout-dashboard", "layout-grid", "link",
-  "list", "loader-circle", "mail", "map", "map-pin", "menu", "message-circle", "messages-square",
-  "minus", "pencil", "percent", "phone", "pin", "plus", "printer", "ruler", "search", "search-x",
-  "send", "share-2", "shield-check", "sliders-horizontal", "sparkles", "star", "sun",
-  "table-properties", "trending-up", "triangle-alert", "upload", "user", "user-round", "users",
-  "wallet", "x",
+  "list", "list-checks", "loader-circle", "mail", "map", "map-pin", "menu", "message-circle",
+  "messages-square", "minus", "pause", "pencil", "percent", "phone", "pin", "play", "plus",
+  "printer", "ruler", "search", "search-x", "send", "settings", "share-2", "shield-check",
+  "sliders-horizontal", "sparkles", "star", "sun", "table-properties", "trash-2", "trending-up",
+  "triangle-alert", "upload", "user", "user-round", "users", "wallet", "x",
 ];
 
 function read(file) {
@@ -128,7 +128,13 @@ function collectCss() {
   // Production-only adaptations, concatenated last so they can override kit rules.
   // adapter.css = shared shell/RTL/print; adapter-public.css / adapter-admin.css
   // belong to the public-site and admin rebuilds respectively.
-  for (const file of ["adapter.css", "adapter-public.css", "adapter-admin.css"]) {
+  // Per-surface extension sheets (adapter-public-*.css, adapter-admin-*.css)
+  // follow their base sheet so each screen family can own its own file.
+  const extensions = (prefix) =>
+    readdirSync(OUT_DIR)
+      .filter((name) => name.startsWith(`${prefix}-`) && name.endsWith(".css"))
+      .sort();
+  for (const file of ["adapter.css", "adapter-public.css", ...extensions("adapter-public"), "adapter-admin.css", ...extensions("adapter-admin")]) {
     sections.push(read(path.join(OUT_DIR, file)));
   }
   return sections.map(minifyCss).filter(Boolean).join("\n");

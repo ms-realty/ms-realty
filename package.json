@@ -92,6 +92,7 @@
     "payload:cms:import": "node production/scripts/run-payload-cms-import.mjs",
     "payload:runtime": "node production/scripts/build-payload-runtime-report.mjs",
     "payload:preflight": "node production/scripts/validate-payload-runtime-report.mjs",
+    "audit:retention": "node production/scripts/run-audit-retention.mjs",
     "server:smoke": "node production/scripts/smoke-node-server.mjs",
     "qa:mobile": "node production/scripts/build-mobile-elderly-qa-report.mjs",
     "launch:readiness": "node production/scripts/build-launch-readiness.mjs",

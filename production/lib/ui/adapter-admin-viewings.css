@@ -1,0 +1,110 @@
+/* B5 Viewings week view.
+ * Seven day columns on the desktop workbench, a single readable stack on a
+ * phone. Nothing here is decorative: each column carries the day's free-slot
+ * count, its booked viewings and the follow-ups that fall due on it.
+ */
+
+.adm-week__nav { display: flex; gap: var(--space-1); align-items: center; }
+
+.adm-week__zone {
+  margin: 0 0 var(--space-3);
+  color: var(--text-subtle);
+  font-size: var(--text-2xs);
+  line-height: var(--lh-snug);
+}
+
+.adm-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.adm-week__day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.adm-week__day[data-past="1"] { opacity: 0.62; }
+.adm-week__day[data-today="1"] { border-color: var(--border-strong); box-shadow: var(--shadow-xs); }
+
+.adm-week__head { display: flex; flex-direction: column; gap: 2px; }
+
+.adm-week__weekday {
+  color: var(--text-subtle);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.adm-week__date { color: var(--text-strong); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+
+.adm-week__slots { margin: 0; color: var(--text-muted); font-size: var(--text-2xs); }
+.adm-week__closed { color: var(--text-subtle); font-style: italic; }
+
+.adm-week__viewings { display: flex; flex-direction: column; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+
+.adm-week__viewings li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--ink-50);
+  font-size: var(--text-2xs);
+  line-height: var(--lh-snug);
+}
+
+.adm-week__viewings time { color: var(--text-strong); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+.adm-week__viewings span { overflow-wrap: anywhere; }
+.adm-week__viewings small { color: var(--text-subtle); }
+
+.adm-week__due {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  margin: auto 0 0;
+  color: var(--text-muted);
+  font-size: var(--text-2xs);
+}
+
+.adm-week__brokers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+
+.adm-week__brokers li { display: flex; gap: var(--space-2); align-items: center; font-size: var(--text-2xs); }
+.adm-week__brokers strong { color: var(--text-strong); font-size: var(--text-xs); }
+.adm-week__brokers span { color: var(--text-muted); }
+
+.adm-week__note { margin: var(--space-2) 0 0; color: var(--text-subtle); font-size: var(--text-2xs); line-height: var(--lh-snug); }
+
+/* Tablet: two rows of days rather than seven squeezed columns. */
+@media (max-width: 1100px) {
+  .adm-week { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .adm-week { grid-template-columns: minmax(0, 1fr); }
+  .adm-week__day { flex-direction: row; flex-wrap: wrap; align-items: baseline; }
+  .adm-week__head { flex: 1 1 auto; flex-direction: row; gap: var(--space-2); align-items: baseline; }
+  .adm-week__slots { flex: 0 0 auto; }
+  .adm-week__viewings,
+  .adm-week__due { flex: 1 1 100%; }
+  .adm-week__due { margin-top: 0; }
+  .adm-week__nav { flex-wrap: wrap; }
+}

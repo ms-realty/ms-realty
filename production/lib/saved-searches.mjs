@@ -77,7 +77,11 @@ export function readSavedSearches(filePath = DEFAULT_SAVED_SEARCH_LEDGER_PATH) {
     .map((line) => JSON.parse(line));
 }
 
-export function createSavedSearch(registry, input, { matchCount = 0, savedAt = new Date().toISOString() } = {}) {
+export function createSavedSearch(
+  registry,
+  input,
+  { matchCount = 0, savedAt = new Date().toISOString(), manageAccess = null } = {},
+) {
   const savedSearchInput = normalizeSavedSearchInput(input);
   const searchIntent = savedSearchIntent(registry, savedSearchInput);
   const query = searchIntent.text_query;
@@ -105,9 +109,17 @@ export function createSavedSearch(registry, input, { matchCount = 0, savedAt = n
     throw new Error("contact_preference must identify a supplied contact channel");
   }
 
+  // Identity first: the manage-link capability is derived from the record id,
+  // so the id has to exist before the access verifier can be minted.
+  const id = newRecordId("saved-search");
+  const access = typeof manageAccess === "function" ? manageAccess(id) : manageAccess;
+  if (access && (access.version !== "s1" || !access.verifier)) {
+    throw new Error("Saved search manage access must carry a version and verifier");
+  }
+
   return {
     saved_at: savedAt,
-    id: newRecordId("saved-search"),
+    id,
     idempotency_key: normalizeIdempotencyKey(savedSearchInput.idempotencyKey ?? savedSearchInput.idempotency_key),
     requested_locale: requestedLocale,
     locale: resolved.locale.code,
@@ -127,6 +139,9 @@ export function createSavedSearch(registry, input, { matchCount = 0, savedAt = n
       status: "open",
       owner: savedSearchInput.owner || "broker_en",
     },
+    // Only the derived verifier is stored. The raw manage token is returned to
+    // the visitor once and never written anywhere.
+    ...(access ? { manage_access: access } : {}),
   };
 }
 
@@ -161,6 +176,12 @@ export function assertSavedSearches(rows) {
     if (!CONTACT_PREFERENCES.has(row.contact_preference)) throw new Error("Saved search row has invalid contact preference");
     if (row.alert_consent !== true) throw new Error("Saved search row must preserve explicit alert consent");
     if (row.status !== "active") throw new Error("Saved search must stay active");
+    if (row.manage_access) {
+      if (row.manage_access.version !== "s1" || !row.manage_access.verifier) {
+        throw new Error("Saved search manage access must carry a version and verifier");
+      }
+      if (row.manage_access.token) throw new Error("Saved search ledger must not store a raw manage token");
+    }
     if (row.alert_task?.status !== "open") throw new Error("Saved search must create an open alert task");
     if (!FREQUENCIES.has(row.alert_frequency)) throw new Error("Saved search has invalid alert frequency");
     if (!row.search_intent || row.search_intent.schema_version !== 1) {
