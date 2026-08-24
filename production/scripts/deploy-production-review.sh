@@ -18,6 +18,48 @@ test -f "$archive"
 test -f "$env_file"
 install -d -m 0700 "$base/incoming" "$releases"
 
+# Nothing here ever reclaimed disk, so every release directory, every Docker
+# build layer and every archive left by a failed run stayed forever. The host
+# filled up and a build died with "no space left on device" - and the rollback
+# failed straight after, because restoring the release pointer also needs an
+# inode. Reclaim first, while the only operations are deletions, so a full disk
+# heals itself on the next attempt instead of ratcheting further shut.
+keep_releases=3
+reclaim() {
+  # Archives from earlier runs: this deploy needs only its own.
+  find "$base/incoming" -maxdepth 1 -type f -name '*.tar.gz' ! -name "$release_id.tar.gz" -delete 2>/dev/null || true
+  find "$base/incoming" -maxdepth 1 -type f -name '*.deploy.sh' ! -name "$release_id.deploy.sh" -delete 2>/dev/null || true
+  # An extraction that died midway leaves a staging directory, which also blocks
+  # a retry of the same release.
+  find "$releases" -maxdepth 1 -type d -name '.staging-*' ! -name ".staging-$release_id" -exec rm -rf {} + 2>/dev/null || true
+  # Keep the running release, the incoming one, and enough history to roll back.
+  local current_path candidate
+  current_path="$(readlink -f "$current" 2>/dev/null || true)"
+  while read -r candidate; do
+    [[ -z "$candidate" ]] && continue
+    [[ "$candidate" == "$release" ]] && continue
+    [[ -n "$current_path" && "$candidate" == "$current_path" ]] && continue
+    echo "reclaiming old release $(basename "$candidate")" >&2
+    rm -rf "$candidate" || true
+  done < <(find "$releases" -maxdepth 1 -mindepth 1 -type d -name '[0-9a-f]*' -printf '%T@ %p\n' 2>/dev/null |
+    sort -rn | tail -n +$((keep_releases + 1)) | cut -d' ' -f2-)
+  # Dangling images and build cache only. Never -a, which would also take the
+  # image the previous release needs in order to come back up.
+  docker image prune --force >/dev/null 2>&1 || true
+  docker builder prune --force >/dev/null 2>&1 || true
+}
+reclaim
+
+# A build that runs out of room fails deep inside BuildKit as an opaque
+# ResourceExhausted; say it plainly here instead. The floor is deliberately low:
+# it should catch only the genuinely doomed run, never veto one that would have
+# squeezed through, because a wrong guess here blocks every deploy.
+free_kb="$(df -Pk "$base" | awk 'NR == 2 { print $4 }')"
+if [[ -n "$free_kb" ]] && ((free_kb < 1048576)); then
+  echo "origin has $((free_kb / 1024)) MB free under $base after reclaiming; a Docker build of this app cannot finish below 1 GB" >&2
+  exit 2
+fi
+
 if tar -tzf "$archive" | awk '/(^\/|(^|\/)\.\.(\/|$))/ { unsafe = 1 } END { exit unsafe ? 0 : 1 }'; then
   echo "release archive contains an unsafe path" >&2
   exit 2
@@ -116,4 +158,5 @@ node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "ut
 
 trap - ERR
 rm -f "$archive"
+reclaim
 echo "production origin deployed: $release_id"
