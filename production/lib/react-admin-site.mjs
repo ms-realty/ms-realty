@@ -238,7 +238,7 @@ const ADMIN_UI_COPY = {
     noData: "Няма данни",
     discardChanges: "Отмени промените",
     rangeTo: "до",
-    listingChecks: "Пропуски и снимки",
+    listingChecks: "Проблеми",
     noLeads: "Все още няма запитвания.",
     noQueueMatches: "Няма запитвания в тази опашка.",
     noPipelineMatches: "Няма възможности в този изглед.",
@@ -899,7 +899,7 @@ const ADMIN_UI_COPY = {
     noData: "Нет данных",
     discardChanges: "Отменить изменения",
     rangeTo: "до",
-    listingChecks: "Пробелы и фото",
+    listingChecks: "Проблемы",
     noLeads: "Запросов пока нет.",
     noQueueMatches: "В этой очереди нет запросов.",
     noPipelineMatches: "В этом представлении нет возможностей.",
@@ -1544,7 +1544,7 @@ const ADMIN_UI_COPY = {
     noData: "No data",
     discardChanges: "Discard changes",
     rangeTo: "to",
-    listingChecks: "Gaps and photos",
+    listingChecks: "Issues",
     noLeads: "No enquiries yet.",
     noQueueMatches: "No enquiries in this queue.",
     noPipelineMatches: "No opportunities in this view.",
@@ -4473,7 +4473,7 @@ function PipelinePrimaryAction({ page, state }) {
           { className: "adm-pipeline-fields adm-pipeline-fields--two" },
           h("label", null, label(copy, "budgetMin", "Minimum budget (€)"), h("input", { name: "budgetMinEur", type: "number", min: "0", step: "1", defaultValue: intake.budget_min_eur ?? "" })),
           h("label", null, label(copy, "budgetMax", "Maximum budget (€)"), h("input", { name: "budgetMaxEur", type: "number", min: "1", step: "1", required: true, defaultValue: intake.budget_max_eur ?? "" })),
-          h("label", null, label(copy, "locations", "Locations"), h("input", { name: "locations", required: true, placeholder: "Sandanski", defaultValue: (intake.locations || []).join(", ") })),
+          h("label", null, label(copy, "locations", "Locations"), h("input", { name: "locations", required: true, placeholder: label(copy, "searchExample", "e.g. Sandanski"), defaultValue: (intake.locations || []).join(", ") })),
           h(PropertyFamilyChecks, { ui, name: "propertyTypes", selected: intake.property_types, legend: label(copy, "propertyTypes", "Property types") }),
           h("label", null, label(copy, "bedroomsMin", "Minimum bedrooms"), h("input", { name: "bedroomsMin", type: "number", min: "0", max: "20", step: "1", defaultValue: intake.bedrooms_min ?? "" })),
           h(
@@ -6205,7 +6205,7 @@ function ManualLeadForm({ page }) {
           h("select", { name: "contact_preference", defaultValue: "phone" }, ...["phone", "viber", "whatsapp", "email"].map((channel) => h("option", { key: channel, value: channel }, valueText(ui, channel)))),
         ),
         h("label", null, label(copy, "listingReference", "Listing reference"), h("input", { name: "listingReference", maxLength: 120 })),
-        h("label", null, label(copy, "locations", "Locations"), h("input", { name: "requirements.locations", placeholder: "Sandanski", maxLength: 600 })),
+        h("label", null, label(copy, "locations", "Locations"), h("input", { name: "requirements.locations", placeholder: label(copy, "searchExample", "e.g. Sandanski"), maxLength: 600 })),
         h(PropertyFamilyChecks, { ui, name: "requirements.property_types", legend: label(copy, "propertyTypes", "Property types") }),
         h("label", null, label(copy, "budgetMax", "Maximum budget (€)"), h("input", { name: "requirements.budget_max_eur", type: "number", min: 0, step: 1 })),
         h("label", null, label(copy, "timeline", "Decision timeline"), h("input", { name: "requirements.timeline", maxLength: 200 })),
@@ -6831,9 +6831,9 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
   const columns = {
     viewing: label(copy, "viewings", "Viewings"),
     task: label(copy, "task", "Task"),
-    status: label(copy, "viewingStatus", "Viewing status"),
+    status: label(copy, "status", "Status"),
     dueAt: label(copy, "dueAt", "Due at"),
-    action: label(copy, "recordOutcome", "Record"),
+    action: label(copy, "action", "Action"),
   };
   return h(
     Panel,
@@ -7148,6 +7148,7 @@ function filterLocaleInput(page) {
 }
 
 function PublicationSchedulePanel({ page }) {
+  const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const queue = page.publicationSchedules || { open: [], summary: { due: 0 } };
   return h(
@@ -7335,7 +7336,7 @@ function ListingManagerBody({ page }) {
     status: label(copy, "qualityStatus", "Status"),
     locale: label(copy, "language", "Language"),
     quality: ui.listingChecks,
-    action: label(copy, "openEditor", "Open editor"),
+    action: label(copy, "action", "Action"),
   };
   return adminShell(page, {
     title,
