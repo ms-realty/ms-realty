@@ -179,6 +179,9 @@ test "$healthy" = true
 read_env() {
   awk -F= -v key="$1" '$1 == key { sub(/^[^=]*=/, ""); print; exit }' "$env_file"
 }
+# xtrace would echo the token value in the assignment and in the curl
+# command line; suspend it for exactly these lines.
+{ set +x; } 2>/dev/null
 origin_token="$(read_env MS_REALTY_ORIGIN_TOKEN)"
 review_host="$(read_env MS_REALTY_REVIEW_HOST)"
 test "${#origin_token}" -ge 32
@@ -186,6 +189,7 @@ test "${#origin_token}" -ge 32
 curl --fail --silent --show-error --max-time 20 \
   --header "X-MS-Realty-Origin-Token: $origin_token" \
   "https://$review_host/api/health" > "$health_file"
+case $- in *x*) : ;; *) set -x ;; esac 2>/dev/null
 node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== process.argv[2]) process.exit(1)' "$health_file" "$release_id"
 
 trap - ERR
