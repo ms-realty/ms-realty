@@ -15,6 +15,10 @@
   --border: var(--ink-100);
   --border-strong: var(--ink-200);
   --surface-hover: var(--ink-50);
+  /* The workbench sets small text on pale panels all day. stone-500 clears
+     3.5:1 against them, which is under the 4.5:1 a reader is owed, so muted
+     text steps one rung darker here than it does on the public site. */
+  --text-muted: var(--stone-600);
   --adm-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background: var(--ink-50);
 }

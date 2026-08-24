@@ -348,7 +348,7 @@
     min-width: 0;
     min-height: 52px;
     border-radius: var(--radius-md);
-    color: var(--text-muted);
+    color: var(--text-body);
     font-size: var(--text-2xs);
     font-weight: var(--fw-semibold);
     line-height: 1;
@@ -693,6 +693,16 @@ main form label.hp-search__tab { display: inline-flex; gap: 0; }
 .sr-body { padding-top: var(--space-6); }
 .sr-mobile-filters { display: none; }
 .sr-filters { top: 96px; padding: var(--space-5); }
+/* The rail sticks 96px below the header, so it must not grow past the screen:
+   without a ceiling the last filters sit below the fold with no way to reach
+   them once the page itself has bottomed out. */
+@media (min-width: 1081px) {
+  .sr-filters--desktop {
+    max-height: calc(100svh - 96px - var(--space-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
 .sr-filters h3 { margin: 0 0 var(--space-1); font-family: var(--font-sans); font-size: var(--text-base); font-weight: var(--fw-semibold); }
 .sr-filters form { display: block; }
 .sr-form { display: grid; gap: 0; }

@@ -97,7 +97,7 @@ test("language fallback explains the missing language in every public locale wit
   const page = renderLanguageFallback({ registry, requestedLocale: "fr" });
   assert.equal(page.body.h1, "This language is not available yet");
   const html = renderReactPublicBody(page);
-  assert.match(html, /<h1 class="mk-empty__title">This language is not available yet<\/h1>/);
+  assert.match(html, /<h1 id="[a-z-]+-title" class="mk-empty__title">This language is not available yet<\/h1>/);
   assert.match(html, /data-request-language="true" data-success-message="Thank you\. We will let you know when this language is ready\."/);
   assert.doesNotMatch(html, /Fallback route/);
 });

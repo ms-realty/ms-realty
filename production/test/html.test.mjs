@@ -124,11 +124,11 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(homeHtml, /data-location-media="approved"/);
   assert.match(homeHtml, /aria-label="נכסים מובילים"/);
   assert.match(homeHtml, /data-card-thumbnail="true"/);
-  assert.equal(assertHtmlPage(notFoundHtml, { lang: "he", dir: "rtl", kind: "not_found" }), true);
+  assert.equal(assertHtmlPage(notFoundHtml, { lang: "he", dir: "rtl", kind: "not-found" }), true);
   assert.match(notFoundHtml, /data-react-public-ui="not-found"/);
   assert.match(notFoundHtml, /class="site-hd"/);
   assert.match(notFoundHtml, /class="site-ft"/);
-  assert.match(notFoundHtml, /<h1 id="not-found-title">העמוד הזה לא נמצא<\/h1>/);
+  assert.match(notFoundHtml, /<h1 id="not-found-title"[^>]*>לא מצאנו את העמוד הזה<\/h1>/);
   assert.equal(assertHtmlPage(listingHtml, { lang: "he", dir: "rtl", kind: "listing" }), true);
   assert.match(listingHtml, /application\/ld\+json/);
   assert.match(listingHtml, /property="og:type" content="article"/);
@@ -138,7 +138,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /data-listing-contact-panel="true"/);
   assert.match(listingHtml, /data-listing-facts="true"/);
   assert.match(listingHtml, /data-listing-price="true"/);
-  assert.match(listingHtml, /data-listing-gallery-sources="true"/);
+  assert.match(listingHtml, /data-listing-gallery-source/);
   assert.doesNotMatch(listingHtml, /data-photo-sphere-viewer="review_required"|needs_panorama_upload|review required/);
   assert.match(listingHtml, /data-listing-action="back_to_results"/);
   assert.match(listingHtml, /href="\/he\/search"/);

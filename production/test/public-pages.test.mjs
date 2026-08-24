@@ -173,8 +173,8 @@ test("language fallback, search unavailable, legacy archive, listing preservatio
   ];
   for (const [label, page] of pages) {
     const html = renderReactPublicBody(page);
-    assert.match(html, /<section class="mk-empty ut-card" data-utility-template="true">/, label);
-    assert.match(html, /<h1 class="mk-empty__title">/, label);
+    assert.match(html, /<section class="mk-empty ut-card" data-utility-template="true" aria-labelledby="[a-z-]+-title">/, label);
+    assert.match(html, /<h1 id="[a-z-]+-title" class="mk-empty__title">/, label);
     assert.match(html, /<div class="mk-empty__actions ut-card__actions">/, label);
     assert.match(html, /href="tel:\+359879696870"/, `${label} keeps the phone`);
     assert.match(html, /class="site-hd/, `${label} renders the site chrome`);
@@ -311,7 +311,7 @@ test("interactive parts of the new pages declare hover, focus, disabled and curr
     /\.ct-form \.mk-btn\[data-loading\] \{/,
     /\.ct-form :disabled \{/,
     /\.sell-form__pending \.mk-btn:disabled \{/,
-    /\.hp-rail-empty \{/,
+    /\.hp-rail-empty,\n\.hp-featured \[data-featured-empty\] \{/,
     /\.sell-steps li\[aria-current="step"\] \{/,
     /\.sell-steps li\[data-complete="true"\] \{/,
   ];

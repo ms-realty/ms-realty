@@ -149,6 +149,8 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(css, /@media \(max-width: 679px\) \{[\s\S]*?\.hp-hero \{ align-items: flex-start; \}[\s\S]*?\.hp-hero__in \{ padding-block: clamp\(6\.5rem, 20svh, 10rem\) var\(--space-8\); \}/);
   assert.match(css, /@media \(min-width: 680px\) \{[\s\S]*?\.hp-hero \{ align-items: flex-start; \}[\s\S]*?\.hp-hero__in \{ padding-block: clamp\(6rem, 8vw, 7rem\) var\(--space-8\); \}[\s\S]*?data-hero-mobile-only/);
   assert.doesNotMatch(css, /hp-hero__advanced|hp-hero__families|hp-hero__search-form/);
+  // The seller, location and not-found layouts were rebuilt here and are
+  // covered by public-pages.test.mjs against this branch's own markup.
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /@media \(prefers-color-scheme: dark\) \{[\s\S]*?html:has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;/);
   // The rail carries two approved guides, so it is two columns wide and a
@@ -156,16 +158,13 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   const pagesCss = readFileSync(new URL("../lib/ui/adapter-public-pages.css", import.meta.url), "utf8");
   assert.match(pagesCss, /\.hp-guides__rail \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
   assert.match(pagesCss, /@media \(max-width: 760px\) \{[\s\S]*?\.hp-guides__rail \{[\s\S]*?scroll-snap-type: inline mandatory;/);
-  assert.match(css, /\[data-featured-listings\]:has\(\[data-featured-empty\]\) \{ padding-bottom: var\(--space-8\); \}/);
-  assert.match(css, /@media \(min-width: 1081px\) \{[\s\S]*?\.sr-filters--desktop \{[\s\S]*?max-height: calc\(100svh - 73px - var\(--space-12\)\);[\s\S]*?overflow-y: auto;/);
-  assert.match(css, /main\.ct-page\.pg-narrow\[data-react-public-ui="seller"\] \{[\s\S]*?grid-template-columns: minmax\(0, 0\.9fr\) minmax\(0, 1\.1fr\);/);
-  assert.match(css, /main\[data-react-public-ui="seller"\] \.ct-page__head \{[\s\S]*?url\("\/hero\/sandanski-town-1920\.webp"\) center \/ cover;/);
-  assert.match(css, /main\[data-kind="location"\]\[data-total-matches="1"\] \.mk-pcard \{[\s\S]*?grid-template-columns: minmax\(320px, 44%\) minmax\(0, 1fr\);/);
-  assert.match(css, /\.nf-page \{[\s\S]*?grid-template-columns: minmax\(0, 1\.06fr\) minmax\(340px, 0\.94fr\);[\s\S]*?min-height: calc\(100svh - 73px\);/);
+  assert.match(pagesCss, /\.hp-featured:has\(\[data-featured-empty\]\) \{ padding-bottom: var\(--space-8\); \}/);
+  assert.match(css, /@media \(min-width: 1081px\) \{[\s\S]*?\.sr-filters--desktop \{[\s\S]*?max-height: calc\(100svh - 96px - var\(--space-6\)\);[\s\S]*?overflow-y: auto;/);
   assert.match(css, /\.site-mobile-tabs a \{[\s\S]*?color: var\(--text-body\);/);
-  assert.match(css, /\.hp-guide \.mk-badge--neutral \{ color: var\(--text-body\); \}/);
-  assert.match(css, /\[data-featured-empty\] \.mk-empty__text \{ color: var\(--text-body\); \}/);
-  assert.match(css, /dl\[data-listing-facts="true"\] dt \{ color: var\(--text-body\);/);
-  assert.match(css, /\.ld-aside__ref \{[^}]*color: var\(--text-body\);/);
-  assert.match(css, /\.ld-trust \{[^}]*color: var\(--text-body\);/);
+  assert.match(pagesCss, /\.hp-guide p \{[\s\S]*?color: var\(--text-body\);/);
+  assert.match(pagesCss, /\.hp-rail-empty \.mk-empty__text \{[^}]*color: var\(--text-body\);/);
+    const listingCss = readFileSync(new URL("../lib/ui/adapter-public-listing.css", import.meta.url), "utf8");
+  assert.match(listingCss, /dl\[data-listing-facts="true"\] dt \{ color: var\(--text-body\);/);
+  
+    assert.match(listingCss, /\.ld-trust__row \{[^}]*color: var\(--text-body\);/);
 });

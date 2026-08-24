@@ -4035,10 +4035,12 @@ function UtilityPage({ page, kind, icon, meta, title, text, actions = [], rootAt
     { id: "main", tabIndex: -1, "data-kind": kind, "data-react-public-ui": kind, ...rootAttrs, className: "pg-narrow ut-page" },
     h(
       "section",
-      { className: "mk-empty ut-card", "data-utility-template": "true" },
+      // The card is the page's only landmark content, so it takes its
+      // accessible name from the heading it already shows.
+      { className: "mk-empty ut-card", "data-utility-template": "true", "aria-labelledby": `${kind}-title` },
       h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: icon, size: 28 })),
       meta ? h("p", { className: "ut-card__meta" }, meta) : null,
-      h("h1", { className: "mk-empty__title" }, title),
+      h("h1", { id: `${kind}-title`, className: "mk-empty__title" }, title),
       text ? h("p", { className: "mk-empty__text" }, text) : null,
       h("div", { className: "mk-empty__actions ut-card__actions" }, ...actions.filter(Boolean)),
     ),

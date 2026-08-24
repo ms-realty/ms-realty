@@ -504,18 +504,16 @@ form[data-seller-stepper] .sell-form__section { padding-top: 0; border-top: 0; }
 }
 
 /* ---- Rail empty states (home areas and buyer guides) ---- */
-.hp-rail-empty {
-  padding: var(--space-8) var(--space-6);
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-card);
-  background: var(--surface);
-}
+.hp-rail-empty,
 .hp-featured [data-featured-empty] {
   padding: var(--space-8) var(--space-6);
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius-card);
   background: var(--surface);
 }
+/* An empty rail still owes the section below it the same breathing room a
+   full one would. */
+.hp-featured:has([data-featured-empty]) { padding-bottom: var(--space-8); }
 .hp-rail-empty .mk-empty__text { max-width: 52ch; color: var(--text-body); font-size: var(--text-base); }
 .hp-rail-empty .mk-empty__actions { margin-top: var(--space-5); }
 .hp-rail-empty__note { margin: var(--space-2) 0 0; color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
