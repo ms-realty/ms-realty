@@ -233,7 +233,6 @@ test("paths without a durable writer still fail closed when the store is on", ()
     "/api/admin/accounts",
     "/api/admin/accounts/link",
     "/api/admin/documents/outcome",
-    "/api/admin/consents/withdraw",
     "/api/admin/leads",
   ]) {
     assert.equal(

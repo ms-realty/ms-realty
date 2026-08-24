@@ -14,7 +14,9 @@
 // modules' resolve* functions and run identically over whichever rows come back.
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { bindAuthenticatedOperator } from "./admin-auth.mjs";
+import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentWithdrawal, readConsentLedger } from "./consent-ledger.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, readDeals, resolveClosedDeal } from "./deal-ledger.mjs";
 import {
   DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
@@ -402,4 +404,81 @@ export async function applyLeadBulkOperation({ ledgers, journey, input, principa
       results,
     },
   };
+}
+
+/**
+ * The consent ledger, either file-backed or the durable consent_events
+ * collection that durable intake already writes into.
+ *
+ * Withdrawal is append-only in both: the superseding row outranks the grant, it
+ * never rewrites it.
+ */
+export function consentLedgerFor({
+  durable = false,
+  filePath = null,
+  payload = null,
+  workspaceId = "",
+  readConsentEvents,
+  appendConsentEvent,
+} = {}) {
+  if (!durable) {
+    const target = filePath || DEFAULT_CONSENT_LEDGER_PATH;
+    return {
+      durable: false,
+      async read() {
+        return readConsentLedger(target);
+      },
+      async append(record) {
+        appendConsentRecord(record, { filePath: target });
+        return record;
+      },
+    };
+  }
+  return {
+    durable: true,
+    async read() {
+      return readConsentEvents({ payload, workspaceId });
+    },
+    async append(record) {
+      const stored = await appendConsentEvent({ event: consentWithdrawalEvent(record, workspaceId), payload, workspaceId });
+      return stored.row;
+    },
+  };
+}
+
+// A deterministic, bounded event id: a true retry at the same instant collapses
+// onto the stored row instead of appending a second withdrawal.
+function consentWithdrawalEvent(record, workspaceId) {
+  const digest = createHash("sha256")
+    .update(`${record.consent_type}:${record.subject_id}:${record.recorded_at}`)
+    .digest("hex")
+    .slice(0, 32);
+  return {
+    event_id: `consent-withdrawal:${digest}`,
+    workspace_id: workspaceId,
+    lead_id: record.subject_id,
+    recorded_at: record.recorded_at,
+    payload: record,
+  };
+}
+
+export async function recordConsentWithdrawalOperation({ consents, input, principal, recordedAt, audit } = {}) {
+  const write = auditWith(audit);
+  const bound = bindAuthenticatedOperator(input, principal, ["actor"]);
+  const rows = await consents.read();
+  const result = createConsentWithdrawal(bound, rows, recordedAt);
+  if (result.idempotent) return result;
+  const stored = await consents.append(result.record);
+  write(
+    {
+      action: "consent_withdrawn",
+      actor: stored.actor,
+      objectType: "consent",
+      objectId: stored.subject_id,
+      locale: stored.locale,
+      metadata: { consent_type: stored.consent_type, reason_code: stored.reason_code, granted: false },
+    },
+    stored.recorded_at,
+  );
+  return { ...result, record: stored };
 }

@@ -20,6 +20,7 @@ export const FILE_BACKED_LEAD_MUTATION_PATHS = new Set([
   "/api/admin/viewings/follow-up",
   "/api/admin/seller-pipeline/outcome",
   "/api/admin/deals/close",
+  "/api/admin/consents/withdraw",
 ]);
 
 // The lead-inbox verbs that now have a durable operations authority. Each is
@@ -33,6 +34,7 @@ export const DURABLE_LEAD_OPERATION_PATHS = new Set([
   "/api/admin/lead-pipeline/outcome",
   "/api/admin/seller-pipeline/outcome",
   "/api/admin/deals/close",
+  "/api/admin/consents/withdraw",
 ]);
 
 export function isFileBackedLeadMutationBlocked({

@@ -116,6 +116,8 @@ import {
   persistLeadIntakeDurably,
   readLeadIntakesDurably as readLeadIntakesDurablyStore,
   readSellerPipelineItemsDurably as readSellerPipelineItemsDurablyStore,
+  readConsentEventsDurably as readConsentEventsDurablyStore,
+  appendConsentEventDurably as appendConsentEventDurablyStore,
 } from "./lead-durable-store.mjs";
 import {
   LeadOperationStoreUnavailableError,
@@ -124,11 +126,13 @@ import {
 } from "./lead-ops-durable-store.mjs";
 import {
   applyLeadBulkOperation,
+  consentLedgerFor,
   leadJourneyContextFrom,
   leadOperationLedgers,
   recordDealCloseOperation,
   recordLeadAssignmentOperation,
   recordLeadPipelineOutcomeOperation,
+  recordConsentWithdrawalOperation,
   recordLeadSnoozeOperation,
   recordLeadUnsnoozeOperation,
   recordSellerPipelineOutcomeOperation,
@@ -954,6 +958,8 @@ export function createHttpApp({
   readLeadOperationsDurably = null,
   appendLeadOperationDurably = null,
   readSellerPipelineItemsDurably = readSellerPipelineItemsDurablyStore,
+  readConsentEventsDurably = readConsentEventsDurablyStore,
+  appendConsentEventDurably = appendConsentEventDurablyStore,
   persistLeadIntake = persistLeadIntakeDurably,
   readLeadIntakes = null,
   readLeadIntakesDurably = readLeadIntakesDurablyStore,
@@ -1364,6 +1370,18 @@ export function createHttpApp({
       },
       ...(readLeadOperationsDurably ? { readOperations: readLeadOperationsDurably } : {}),
       ...(appendLeadOperationDurably ? { appendOperations: appendLeadOperationDurably } : {}),
+    });
+  // Consent withdrawal has a durable home already: the consent_events
+  // collection durable intake writes into. It goes durable together with the
+  // other lead operations, and only while intake owns the consents.
+  const currentConsentLedger = () =>
+    consentLedgerFor({
+      durable: leadOperationsDurable() && leadDurableStore?.leadDurableStoreEnabled === true,
+      filePath: consentLedgerPath || undefined,
+      payload: leadDurablePayload || null,
+      workspaceId: leadDurableStore?.workspaceId,
+      readConsentEvents: readConsentEventsDurably,
+      appendConsentEvent: appendConsentEventDurably,
     });
   // The seller pipeline items themselves are created at intake. Durable intake
   // stores them as seller_pipeline_events, so that is where they come from once
@@ -6183,27 +6201,13 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/consents/withdraw") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
-        const result = createConsentWithdrawal(
-          input,
-          readConsentLedger(consentLedgerPath || undefined),
-          reviewedAt || receivedAt || new Date().toISOString(),
-        );
-        if (!result.idempotent) {
-          appendConsentRecord(result.record, { filePath: consentLedgerPath || undefined });
-          recordAudit({
-            action: "consent_withdrawn",
-            actor: result.record.actor,
-            objectType: "consent",
-            objectId: result.record.subject_id,
-            locale: result.record.locale,
-            metadata: {
-              consent_type: result.record.consent_type,
-              reason_code: result.record.reason_code,
-              granted: false,
-            },
-          });
-        }
+        const result = await recordConsentWithdrawalOperation({
+          consents: currentConsentLedger(),
+          input: parseBody(request),
+          principal,
+          recordedAt: reviewedAt || receivedAt || new Date().toISOString(),
+          audit: (entry, recordedAt) => recordAudit(entry, recordedAt),
+        });
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });

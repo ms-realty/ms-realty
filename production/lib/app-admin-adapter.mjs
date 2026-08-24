@@ -131,6 +131,8 @@ import {
   leadReadScopeForPrincipal,
   leadDurableStoreConfigFromEnv,
   payloadUserForLeadRead,
+  appendConsentEventDurably,
+  readConsentEventsDurably,
   readLeadIntakesDurably,
   readSellerPipelineItemsDurably,
 } from "./lead-durable-store.mjs";
@@ -141,11 +143,13 @@ import {
 } from "./lead-ops-durable-store.mjs";
 import {
   applyLeadBulkOperation,
+  consentLedgerFor,
   leadJourneyContextFrom,
   leadOperationLedgers,
   recordDealCloseOperation,
   recordLeadAssignmentOperation,
   recordLeadPipelineOutcomeOperation,
+  recordConsentWithdrawalOperation,
   recordLeadSnoozeOperation,
   recordLeadUnsnoozeOperation,
   recordSellerPipelineOutcomeOperation,
@@ -896,6 +900,21 @@ function leadOperationLedgersFor(config) {
     },
     ...(config.readLeadOperationsDurably ? { readOperations: config.readLeadOperationsDurably } : {}),
     ...(config.appendLeadOperationDurably ? { appendOperations: config.appendLeadOperationDurably } : {}),
+  });
+}
+
+// Consent withdrawal has a durable home already: the consent_events collection
+// durable intake writes into. It goes durable together with the other lead
+// operations, and only while intake owns the consents.
+function consentLedgerForConfig(config) {
+  const durable = leadOperationsDurable(config) && config.leadDurableStore?.leadDurableStoreEnabled === true;
+  return consentLedgerFor({
+    durable,
+    filePath: config.consentLedgerPath,
+    payload: config.leadDurablePayload || null,
+    workspaceId: config.leadDurableStore?.workspaceId,
+    readConsentEvents: config.readConsentEventsDurably || readConsentEventsDurably,
+    appendConsentEvent: config.appendConsentEventDurably || appendConsentEventDurably,
   });
 }
 
@@ -2861,33 +2880,14 @@ function appendDocumentChecklistOutcomeEntry(input, config) {
   return result;
 }
 
-function appendConsentWithdrawalEntry(input, config) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const result = createConsentWithdrawal(
-    attributed,
-    readConsentLedger(config.consentLedgerPath),
-    config.reviewedAt || new Date().toISOString(),
-  );
-  if (!result.idempotent) {
-    appendConsentRecord(result.record, { filePath: config.consentLedgerPath });
-    recordAudit(
-      {
-        action: "consent_withdrawn",
-        actor: result.record.actor,
-        objectType: "consent",
-        objectId: result.record.subject_id,
-        locale: result.record.locale,
-        metadata: {
-          consent_type: result.record.consent_type,
-          reason_code: result.record.reason_code,
-          granted: false,
-        },
-      },
-      config,
-      result.record.recorded_at,
-    );
-  }
-  return result;
+async function appendConsentWithdrawalEntry(input, config) {
+  return recordConsentWithdrawalOperation({
+    consents: consentLedgerForConfig(config),
+    input,
+    principal: config.adminPrincipal,
+    recordedAt: config.reviewedAt || new Date().toISOString(),
+    audit: leadOperationAudit(config),
+  });
 }
 
 async function appendDealClose(input, config) {
@@ -4219,7 +4219,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/consents/withdraw") {
-      const result = appendConsentWithdrawalEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendConsentWithdrawalEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {

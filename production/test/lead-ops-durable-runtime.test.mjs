@@ -50,6 +50,42 @@ function durableOperationStore() {
   };
 }
 
+function durableConsentStore(seed = []) {
+  const events = [...seed];
+  return {
+    events,
+    readConsentEvents: async ({ workspaceId }) => {
+      assert.equal(workspaceId, WORKSPACE, "consent reads must be workspace-scoped");
+      return events.map((event) => event.payload);
+    },
+    appendConsentEvent: async ({ event, workspaceId }) => {
+      assert.equal(workspaceId, WORKSPACE, "consent writes must be workspace-scoped");
+      const stored = events.find((entry) => entry.event_id === event.event_id);
+      if (stored) return { row: stored.payload, idempotent: true };
+      events.push(event);
+      return { row: event.payload, idempotent: false };
+    },
+  };
+}
+
+const grantedConsent = (leadId) => ({
+  event_id: `consent-inquiry-follow-up:${leadId}`,
+  workspace_id: WORKSPACE,
+  lead_id: leadId,
+  recorded_at: "2026-08-25T08:00:00.000Z",
+  payload: {
+    recorded_at: "2026-08-25T08:00:00.000Z",
+    consent_type: "inquiry_follow_up",
+    source: "website_listing_detail",
+    subject_id: leadId,
+    locale: "bg",
+    contact_fingerprint: "fp-durable-ops",
+    granted: true,
+    legal_basis: "legitimate_interest",
+    marketing_opt_in: false,
+  },
+});
+
 const buyerLead = {
   lead_id: "durable-ops-buyer",
   source: "website_listing_detail",
@@ -87,6 +123,7 @@ function tempPaths(t) {
     viewingLedgerPath: file("viewings"),
     viewingFollowUpLedgerPath: file("viewing-follow-ups"),
     leadLedgerPath: file("leads"),
+    consentLedgerPath: file("consent-ledger"),
   };
 }
 
@@ -423,7 +460,6 @@ test("the migrated routes are accepted and the unmigrated ones still fail closed
     "/api/admin/accounts",
     "/api/admin/accounts/link",
     "/api/admin/documents/outcome",
-    "/api/admin/consents/withdraw",
   ]) {
     const refused = await httpPost(app, pathname, { leadId: buyerLead.lead_id });
     assert.equal(refused.status, 503, `${pathname} must stay refused`);
@@ -459,4 +495,84 @@ test("an operator-requested but unconfigured operations store fails closed inste
   assert.notEqual(response.status, 201, "an incomplete configuration must never report success");
   assert.equal(store.rows.length, 0);
   assert.equal(fs.readFileSync(paths.leadSnoozeLedgerPath, "utf8"), "", "and must never silently use the file ledger");
+});
+
+test("both runtimes tell the inbox its leads came from the durable store", async (t) => {
+  const store = durableOperationStore();
+  const paths = tempPaths(t);
+
+  // react-admin-site.mjs switches the reply controls on page.leadSourceDurable:
+  // durable leads get the direct provider reply form, file-era leads get the
+  // queue form. The adapter has always set it; the standalone server did not,
+  // so it rendered the wrong form against durable leads.
+  const served = await dispatchHttp(httpApp(store, paths), {
+    url: "/api/admin/leads",
+    headers: { authorization: `Bearer ${TOKEN}` },
+  });
+  assert.equal(served.status, 200);
+  assert.equal(served.body.leadSourceDurable, true);
+
+  const fileBacked = await dispatchHttp(
+    httpApp(store, tempPaths(t), {
+      runtimeDataDurableOnly: false,
+      leadDurableStore: { leadDurableStoreEnabled: false },
+      leadOperationsDurableStore: { leadOperationsDurableStoreEnabled: false },
+    }),
+    { url: "/api/admin/leads", headers: { authorization: `Bearer ${TOKEN}` } },
+  );
+  assert.equal(fileBacked.status, 200);
+  assert.equal(fileBacked.body.leadSourceDurable, false, "a file-backed runtime must say so");
+});
+
+test("a consent withdrawal is recorded durably and supersedes the grant intake stored", async (t) => {
+  const store = durableOperationStore();
+  const consents = durableConsentStore([grantedConsent(buyerLead.lead_id)]);
+  const paths = tempPaths(t);
+  const injected = {
+    readConsentEventsDurably: consents.readConsentEvents,
+    appendConsentEventDurably: consents.appendConsentEvent,
+  };
+
+  const withdrawn = await adapterPost(
+    store,
+    paths,
+    "/api/admin/consents/withdraw",
+    { consentType: "inquiry_follow_up", subjectId: buyerLead.lead_id, reasonCode: "customer_request", humanConfirmed: true },
+    injected,
+  );
+  assert.equal(withdrawn.status, 201);
+  const body = await withdrawn.json();
+  assert.equal(body.record.granted, false);
+  assert.equal(body.record.supersedes_recorded_at, "2026-08-25T08:00:00.000Z");
+
+  // Appended, never rewritten: the grant is still there, outranked by the withdrawal.
+  assert.equal(consents.events.length, 2);
+  assert.equal(consents.events[0].payload.granted, true);
+  assert.equal(consents.events[1].payload.granted, false);
+  assert.equal(consents.events[1].lead_id, buyerLead.lead_id);
+  assert.equal(fs.readFileSync(paths.directory + "/consent-ledger.jsonl", "utf8").length, 0);
+
+  const audit = readAudit(paths.auditLogPath);
+  assert.ok(audit.some((row) => row.action === "consent_withdrawn" && row.object_id === buyerLead.lead_id));
+
+  // A retry finds the consent already withdrawn and adds nothing.
+  const retry = await adapterPost(
+    store,
+    paths,
+    "/api/admin/consents/withdraw",
+    { consentType: "inquiry_follow_up", subjectId: buyerLead.lead_id, reasonCode: "customer_request", humanConfirmed: true },
+    injected,
+  );
+  assert.equal(retry.status, 200);
+  assert.equal((await retry.json()).idempotent, true);
+  assert.equal(consents.events.length, 2);
+
+  // The standalone server reads the same durable history back.
+  const served = await httpPost(
+    httpApp(store, tempPaths(t), injected),
+    "/api/admin/consents/withdraw",
+    { consentType: "inquiry_follow_up", subjectId: buyerLead.lead_id, reasonCode: "customer_request", humanConfirmed: true },
+  );
+  assert.equal(served.status, 200);
+  assert.equal(served.body.idempotent, true, "the withdrawal written by the adapter must be visible here");
 });
