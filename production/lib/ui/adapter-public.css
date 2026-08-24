@@ -1354,3 +1354,11 @@ main .ct-form select {
     background: color-mix(in srgb, var(--surface) 96%, transparent);
   }
 }
+
+/* The kit pins the search segment's chevron with a physical right offset, so in
+   RTL it sat on the edge the text starts from and overlapped the value. */
+.mk-search__seg select + .mk-icon {
+  right: auto;
+  left: auto;
+  inset-inline-end: 10px;
+}

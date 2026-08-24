@@ -25,7 +25,12 @@
 .ld-gallery-full img[hidden],
 .ld-photo-viewer img[hidden],
 .ld-tour__fallback img[hidden] { display: none; }
-.mk-pcard__badges { left: auto; right: auto; inset-inline-start: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+/* The kit pins the badges with a physical left at .mk-pcard__media .mk-pcard__badges,
+   which outranks a single-class override: the physical offset survived and, in
+   RTL, sat alongside the logical one, stretching the badge row across the card.
+   Matching the kit's specificity lets document order settle it. */
+.mk-pcard__media .mk-pcard__badges { left: auto; right: auto; inset-inline-start: 12px; }
+.mk-pcard__badges { display: flex; flex-wrap: wrap; gap: 6px; }
 .mk-pcard__badges:empty { display: none; }
 .mk-pcard__badges .mk-badge { display: inline-flex; align-items: center; }
 .mk-pcard__badges .mk-badge--solid.mk-badge--neutral {
