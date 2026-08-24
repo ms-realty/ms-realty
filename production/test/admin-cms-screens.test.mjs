@@ -237,10 +237,15 @@ test("the connect page keeps the operator token masked until it is asked for", (
     availability: { google: { ready: false } },
   });
   assert.match(html, /<button class="button button--quiet" id="reveal" type="button" aria-controls="prompt" aria-pressed="false" hidden>/);
-  assert.match(html, /textarea\[data-masked="true"\] \{ filter: blur\(4px\)/);
+  // Both the bootstrap prompt and the assistant configuration block are masked
+  // by the same rule, because both carry a credential.
+  assert.match(html, /textarea\[data-masked="true"\][^{]*\{ filter: blur\(4px\)/);
+  assert.match(html, /pre\[data-masked="true"\] \{ filter: blur\(4px\)/);
   // Without JavaScript nothing is blurred, so the prompt stays selectable.
   assert.doesNotMatch(html, /<textarea id="prompt"[^>]*data-masked/);
-  assert.match(html, /promptArea\.setAttribute\("data-masked", "true"\)/);
+  assert.doesNotMatch(html, /<pre class="agent__config"[^>]*data-masked/);
+  assert.match(html, /area\.setAttribute\("data-masked", "true"\)/);
+  assert.match(html, /maskable\(promptArea, document\.getElementById\("reveal"\)/);
   assert.match(html, /Copying did not work/);
   // Each workbench language gets the whole page, script messages included.
   const bulgarian = renderOperatorConnectPage({

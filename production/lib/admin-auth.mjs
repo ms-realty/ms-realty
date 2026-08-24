@@ -194,6 +194,17 @@ export function requiredAdminCapability(method, pathname) {
   if (DATA_EXPORT_PATHS.has(pathname)) return "data:export";
   if (verb === "GET" && pathname === "/api/admin/security/audit-retention") return "activity:read";
   if (["/admin/team", "/api/admin/team"].includes(pathname)) return "team:manage";
+  // Connecting the agency's own tools, disconnecting them, and minting the
+  // assistant's delegated access all change what this workspace can reach, so
+  // they are settings changes. Reads keep falling through to administration:read
+  // below, which is where they already were.
+  if (
+    verb !== "GET" &&
+    ["/api/admin/connections", "/api/admin/connections/disconnect"].includes(pathname)
+  ) {
+    return "settings:manage";
+  }
+  if (pathname === "/api/admin/connections/agent-config") return "settings:manage";
   // Every operator may read the workspace settings screen; only an admin saves.
   if (["/admin/settings", "/api/admin/settings"].includes(pathname)) {
     return verb === "GET" ? "workspace:read" : "settings:manage";
