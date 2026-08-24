@@ -1691,9 +1691,9 @@ export function localizedSearchFilterValue(localeCode, key, value) {
       GEOGRAPHY_CATALOG.areas.find((candidate) => candidate.id === value) ||
       geographyRegistryArea(publicGeographyRegistry(), value);
     if (!area) return humanizeIdentifier(value);
-    return (localeCode === "bg" && area.country_code === "BG") || (localeCode === "el" && area.country_code === "GR")
-      ? area.names.native
-      : area.names.en;
+    // Same rules as every other location surface: a translated name wins, the
+    // native script wins at home, and English is the fallback - not the default.
+    return localizedLocationValue(localeCode, area.names?.en || "") || area.names?.en || humanizeIdentifier(value);
   }
   return humanizeIdentifier(value);
 }

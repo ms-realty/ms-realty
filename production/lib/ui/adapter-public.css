@@ -668,8 +668,6 @@ main form label.hp-search__tab { display: inline-flex; gap: 0; }
 }
 /* Home sections below the hero (areas, steps, guides, trust, sell band) live in
    adapter-public-pages.css. */
-@media (max-width: 900px) {
-}
 @media (min-width: 1081px) {
   .hp-hero { min-height: 600px; }}
 @media (max-width: 679px) {
