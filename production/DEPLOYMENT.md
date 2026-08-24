@@ -102,6 +102,7 @@ Worker secrets currently set (dashboard → Workers → ms-realty → Settings):
 | `PAYLOAD_SECRET` | set, unproven (gate requires ≥32 bytes, non-placeholder) |
 | `MEDIA_INGEST_SECRET` | set, working |
 | `MS_REALTY_LEAD_CONTACT_KEY` | set (AES-256-GCM contact-vault key; keep safe — losing it orphans vault data) |
+| `MS_REALTY_OPERATOR_2FA_KEY` | **not set → every two-factor call 400s.** Required, ≥32 characters (`production/lib/operator-two-factor.mjs:43-45`). It encrypts the enrolled TOTP secrets exactly as the contact vault key encrypts contacts, so enrolment, verification, the sign-in second factor and the step-up gate all refuse without it — the fail-closed outcome, not a fallback to "allow". Losing it after operators enrol disables verification for all of them; they must re-enrol. |
 | `MS_REALTY_ADMIN_OPERATORS_JSON` | **dead name — no code reads it.** Code reads `MS_REALTY_ADMIN_CREDENTIALS_JSON`, which is NOT set → every admin request 401s. This is the exact incident documented in `production/test/cloudflare-container-config.test.mjs:45-51`, still unfixed in the dashboard. |
 | `MS_REALTY_SESSION_SECRET` | **dead — nothing in the repo reads it** |
 
