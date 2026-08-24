@@ -861,7 +861,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
     excluded_listing_ids: 0,
     source_locales_only: true,
   });
-  assert.equal(listingGate.evidence.reason, "owner directive 2026-08-24");
+  assert.equal(listingGate.evidence.reason, "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.");
   assert.equal(liveGate.status, "blocked");
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
   assert.ok(liveGate.evidence.provisioning.summary.missing_env.includes("DATABASE_URL"));

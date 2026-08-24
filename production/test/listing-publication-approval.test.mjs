@@ -34,7 +34,7 @@ test("the owner's full-catalog approval names every catalogued listing", () => {
   assert.equal(approval.scope, "full_freeze_catalog");
   assert.equal(approval.decision, "publish_source_as_is");
   assert.equal(approval.approved_by, "agency_owner");
-  assert.equal(approval.reason, "owner directive 2026-08-24");
+  assert.equal(approval.reason, "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.");
   assert.equal(catalogIds.length, 165);
   assert.deepEqual(approval.listing_ids, catalogIds);
   assert.deepEqual(approval.excluded_listings, []);

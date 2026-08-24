@@ -3,7 +3,7 @@
   "approval_id": "MSR-LISTING-PUBLICATION-1",
   "approved_by": "agency_owner",
   "approved_at": "2026-08-24T00:00:00.000Z",
-  "reason": "owner directive 2026-08-24",
+  "reason": "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.",
   "based_on_freeze_sha256": "338ce14fa46c44d35f4afe83e30d75d65a345383c2854c29ab3215ac4397f172",
   "based_on_freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
   "scope": "full_freeze_catalog",
