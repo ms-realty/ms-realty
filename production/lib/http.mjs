@@ -30,7 +30,7 @@ import {
   withAuthenticatedAuditActor,
   adminCredentials,
 } from "./admin-auth.mjs";
-import { operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
+import { operatorAgentConfigBlock, operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
 import {
   adminSessionClearCookie,
   adminSessionSetCookie,
@@ -41,19 +41,27 @@ import { renderAdminTeamPage } from "./admin-team.mjs";
 import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
-  completeGoogleOAuth,
-  completeViberConnection,
-  completeWhatsAppEmbeddedSignup,
-  googleAuthorizationUrl,
+  deleteProviderConnection,
   providerConnectionAvailability,
   providerConnectionConfigFromEnv,
   readProviderConnections,
   readProviderCredentials,
-  registerViberWebhook,
-  registerWhatsAppWebhook,
   saveProviderConnection,
   syncViewingToGoogleCalendar as syncViewingToGoogleCalendarProvider,
 } from "./provider-connections.mjs";
+import {
+  operatorProviderAvailability,
+  operatorProviderConfigFromEnv,
+} from "./operator-provider-catalog.mjs";
+import {
+  OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
+  OPERATOR_CONNECTION_DISCONNECT_PATH,
+  isOperatorOAuthProvider,
+  operatorConnectionAudit,
+  operatorConnectionStart,
+  runOperatorConnectionAction,
+} from "./operator-connect-routes.mjs";
+import { issueOperatorAgentToken } from "./operator-agent-access.mjs";
 import {
   ProviderDeliveryError,
   deliverApprovedProviderMessage as deliverProviderMessage,
@@ -1047,7 +1055,8 @@ export function createHttpApp({
   trustProxy = process.env.MS_REALTY_TRUST_PROXY === "1",
   naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
   payloadAdminAuth = getPayloadAdminAuthService,
-  providerConnection = providerConnectionConfigFromEnv(),
+  providerConnection = operatorProviderConfigFromEnv(),
+  operatorAgentEnv = process.env,
   providerConnectionPayload = null,
   providerWebhookPayload = providerConnectionPayload,
   providerWebhookReceivedAt,
@@ -4269,7 +4278,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/admin/connect") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      let availability = providerConnectionAvailability(providerConnection);
+      let availability = operatorProviderAvailability(providerConnection);
       let connections = [];
       let storeError = !availability.store.ready;
       try {
@@ -4290,9 +4299,24 @@ export function createHttpApp({
       const result = operatorConnectResult({
         locale: connectLocale,
         connected: url.searchParams.get("connected") || "",
+        disconnected: url.searchParams.get("disconnected") || "",
+        verified: url.searchParams.get("verified") || "",
         error: Boolean(url.searchParams.get("error")),
         storeError,
       });
+      // A delegated, expiring credential for the operator's own assistant. It is
+      // minted per page view rather than stored, so nothing here can leak a
+      // token the operator never chose to copy.
+      const agent = issueOperatorAgentToken({ principal, env: operatorAgentEnv });
+      if (agent) {
+        recordAudit({
+          action: "operator_agent_token_issued",
+          actor: principal?.id,
+          objectType: "operator_agent_token",
+          objectId: agent.operator_id,
+          metadata: { expires_at: agent.expires_at, roles: agent.roles },
+        });
+      }
       return adminResponse(
         200,
         renderOperatorConnectPage({
@@ -4301,6 +4325,9 @@ export function createHttpApp({
           operatorId: principal?.id || "operator",
           connections,
           availability,
+          providerConfig: providerConnection,
+          agentToken: agent?.token || "",
+          agentExpiresAt: agent?.expires_at || "",
           result,
           locale: connectLocale,
         }),
@@ -4309,14 +4336,32 @@ export function createHttpApp({
       );
     }
 
-    if (url.pathname === "/api/admin/connections") {
-      const availability = providerConnectionAvailability(providerConnection);
+    if (
+      url.pathname === "/api/admin/connections" ||
+      url.pathname === OPERATOR_CONNECTION_DISCONNECT_PATH ||
+      url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH
+    ) {
+      const availability = operatorProviderAvailability(providerConnection);
       const storeOptions = {
         credentialSecret: providerConnection.credentialSecret,
         payload: providerConnectionPayload,
       };
+      const connectionDeps = {
+        fetchImpl: providerFetch,
+        storeOptions,
+        env: operatorAgentEnv,
+        readProviderCredentials,
+        saveProviderConnection,
+        deleteProviderConnection,
+      };
+      const connectionRedirect = (query) =>
+        adminResponse(303, "", "text/plain; charset=utf-8", { location: `/admin/connect?${query}` });
+      const recordConnectionOutcome = (outcome) => {
+        const entry = operatorConnectionAudit(outcome, { actor: principal.id });
+        if (entry) recordAudit(entry);
+      };
       try {
-        if (request.method === "GET" && !url.searchParams.get("action")) {
+        if (request.method === "GET" && url.pathname === "/api/admin/connections" && !url.searchParams.get("action")) {
           return adminJson(200, {
             kind: "provider_connections",
             availability,
@@ -4326,42 +4371,105 @@ export function createHttpApp({
         if (!payloadSession || principal?.source !== "payload_session" || !principal.roles?.includes("admin")) {
           return adminForbidden("payload_admin_session");
         }
-        if (request.method === "GET" && url.searchParams.get("provider") === "google") {
+        // The assistant's configuration, for a caller that wants it as data
+        // rather than as the copy block on the page.
+        if (url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH) {
+          if (request.method !== "GET") return adminJson(405, { kind: "method_not_allowed" });
+          const agent = issueOperatorAgentToken({ principal, env: operatorAgentEnv });
+          if (!agent) {
+            return adminJson(503, {
+              kind: "operator_agent_token_unavailable",
+              message: "Operator agent tokens are not configured",
+            });
+          }
+          const origin =
+            String(providerConnection.publicOrigin || "").trim() ||
+            new URL(request.url, `http://${requestHost(request.headers) || "localhost"}`).origin;
+          recordAudit({
+            action: "operator_agent_token_issued",
+            actor: principal.id,
+            objectType: "operator_agent_token",
+            objectId: agent.operator_id,
+            metadata: { expires_at: agent.expires_at, roles: agent.roles },
+          });
+          return adminJson(200, {
+            kind: "operator_agent_config",
+            operator_id: agent.operator_id,
+            expires_at: agent.expires_at,
+            mcp_url: `${new URL(origin).origin}/mcp`,
+            config: operatorAgentConfigBlock({
+              baseUrl: origin,
+              token: agent.token,
+              operatorId: agent.operator_id,
+              expiresAt: agent.expires_at,
+              locale: adminLocaleParam(url),
+            }),
+          });
+        }
+        if (url.pathname === OPERATOR_CONNECTION_DISCONNECT_PATH) {
+          if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
+          const input = parseBody(request);
+          const formEncoded = String(request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes(
+            "application/x-www-form-urlencoded",
+          );
+          const outcome = await runOperatorConnectionAction({
+            intent: "disconnect",
+            provider: input.provider,
+            operatorId: principal.id,
+            config: providerConnection,
+            deps: connectionDeps,
+          });
+          if (outcome.outcome === "rejected") {
+            recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error);
+            if (formEncoded) return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`);
+            return adminJson(400, { kind: "provider_disconnect_rejected", message: "The connection was not removed" });
+          }
+          recordConnectionOutcome(outcome);
+          if (formEncoded) return connectionRedirect(`disconnected=${encodeURIComponent(outcome.provider)}`);
+          return adminJson(200, {
+            kind: "provider_disconnected",
+            provider: outcome.provider,
+            revoked: outcome.revoked,
+            deleted: outcome.deleted,
+          });
+        }
+        const requestedProvider = String(url.searchParams.get("provider") || "").trim().toLowerCase();
+        if (request.method === "GET" && isOperatorOAuthProvider(requestedProvider)) {
           const action = url.searchParams.get("action");
           if (action === "start") {
-            return adminResponse(303, "", "text/plain; charset=utf-8", {
-              location: googleAuthorizationUrl({ config: providerConnection, operatorId: principal.id }),
-            });
+            try {
+              return adminResponse(303, "", "text/plain; charset=utf-8", {
+                location: operatorConnectionStart({
+                  provider: requestedProvider,
+                  config: providerConnection,
+                  operatorId: principal.id,
+                }),
+              });
+            } catch (error) {
+              recordProviderConnectionFailure(requestedProvider, "oauth_start", error);
+              return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`);
+            }
           }
           if (action === "callback") {
             if (url.searchParams.get("error")) {
-              recordProviderConnectionFailure("google", "oauth_callback", new Error("provider_rejected"));
-              return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/connect?error=google" });
+              recordProviderConnectionFailure(requestedProvider, "oauth_callback", new Error("provider_rejected"));
+              return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`);
             }
-            try {
-              const prior = await readProviderCredentials("google", storeOptions);
-              const connection = await completeGoogleOAuth(
-                {
-                  code: url.searchParams.get("code"),
-                  state: url.searchParams.get("state"),
-                  operatorId: principal.id,
-                  existingRefreshToken: prior?.refresh_token || "",
-                },
-                { config: providerConnection, fetchImpl: providerFetch },
-              );
-              const saved = await saveProviderConnection(connection, { ...storeOptions, connectedBy: principal.id });
-              recordAudit({
-                action: "provider_connected",
-                actor: principal.id,
-                objectType: "provider_connection",
-                objectId: saved.provider,
-                metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
-              });
-              return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/connect?connected=google" });
-            } catch (error) {
-              recordProviderConnectionFailure("google", "oauth_callback", error);
-              return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/connect?error=google" });
+            const outcome = await runOperatorConnectionAction({
+              intent: "callback",
+              provider: requestedProvider,
+              code: url.searchParams.get("code"),
+              state: url.searchParams.get("state"),
+              operatorId: principal.id,
+              config: providerConnection,
+              deps: connectionDeps,
+            });
+            if (outcome.outcome === "rejected") {
+              recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error);
+              return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`);
             }
+            recordConnectionOutcome(outcome);
+            return connectionRedirect(`connected=${encodeURIComponent(outcome.provider)}`);
           }
         }
         if (request.method === "POST") {
@@ -4370,61 +4478,29 @@ export function createHttpApp({
           );
           const input = parseBody(request);
           const provider = String(input.provider || "").trim().toLowerCase();
-          try {
-            let connection;
-            if (provider === "whatsapp") {
-              const verified = await completeWhatsAppEmbeddedSignup(
-                { code: input.code, wabaId: input.waba_id, phoneNumberId: input.phone_number_id },
-                { config: providerConnection, fetchImpl: providerFetch },
-              );
-              await saveProviderConnection(verified, { ...storeOptions, connectedBy: principal.id });
-              connection = await registerWhatsAppWebhook(verified, {
-                config: providerConnection,
-                fetchImpl: providerFetch,
-              });
-            } else if (provider === "viber") {
-              const verified = await completeViberConnection(
-                { token: input.token },
-                { config: providerConnection, fetchImpl: providerFetch },
-              );
-              await saveProviderConnection(verified, { ...storeOptions, connectedBy: principal.id });
-              connection = await registerViberWebhook(verified, {
-                config: providerConnection,
-                fetchImpl: providerFetch,
-              });
-            } else {
-              throw new Error("Unsupported provider connection");
-            }
-            const saved = await saveProviderConnection(connection, { ...storeOptions, connectedBy: principal.id });
-            recordAudit({
-              action: "provider_connected",
-              actor: principal.id,
-              objectType: "provider_connection",
-              objectId: saved.provider,
-              metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
-            });
-            if (formEncoded) {
-              return adminResponse(303, "", "text/plain; charset=utf-8", {
-                location: `/admin/connect?connected=${encodeURIComponent(provider)}`,
-              });
-            }
-            return adminJson(201, { kind: "provider_connection", connection: saved });
-          } catch (error) {
-            recordProviderConnectionFailure(
-              provider,
-              provider === "viber" ? "account_or_webhook" : "embedded_signup",
-              error,
-            );
-            if (formEncoded) {
-              return adminResponse(303, "", "text/plain; charset=utf-8", {
-                location: `/admin/connect?error=${encodeURIComponent(provider || "provider")}`,
-              });
-            }
+          const outcome = await runOperatorConnectionAction({
+            intent: "submit",
+            provider,
+            input,
+            operatorId: principal.id,
+            config: providerConnection,
+            deps: connectionDeps,
+          });
+          if (outcome.outcome === "rejected") {
+            recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error);
+            if (formEncoded) return connectionRedirect(`error=${encodeURIComponent(outcome.provider || "provider")}`);
             return adminJson(400, {
               kind: "provider_connection_rejected",
               message: "The provider did not confirm the connection",
             });
           }
+          recordConnectionOutcome(outcome);
+          const query =
+            outcome.outcome === "verified"
+              ? `verified=${encodeURIComponent(outcome.provider)}`
+              : `connected=${encodeURIComponent(outcome.provider)}`;
+          if (formEncoded) return connectionRedirect(query);
+          return adminJson(201, { kind: "provider_connection", connection: outcome.connection });
         }
         return adminJson(405, { kind: "method_not_allowed" });
       } catch (error) {

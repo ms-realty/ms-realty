@@ -2878,8 +2878,89 @@ export const PUBLIC_APP_JS = `(function () {
  firstTouchPath();
 })();`;
 
+// Copy-to-clipboard for a block of text that is already on the page.
+//
+// The markup is the contract, so the same behaviour serves the admin shell and
+// the standalone /admin/connect screen:
+//
+//   <button data-copy-block="ID" data-copy-done="…" data-copy-failed="…" hidden>
+//   <pre id="ID">…</pre>                     (or a <textarea id="ID">)
+//   <span data-copy-status="ID" role="status" aria-live="polite"></span>
+//
+// The button ships hidden and this script reveals it, so without JavaScript the
+// operator still sees the whole block and can select it by hand rather than
+// pressing a button that does nothing. A block the page has masked is unmasked
+// for the duration of the copy and re-masked afterwards, so the clipboard gets
+// real text without the secret ever being shown.
+export const COPY_BLOCK_JS = `
+  function msRealtySelectAndCopy(source) {
+    try {
+      if (typeof source.select === "function") {
+        source.select();
+      } else {
+        var range = document.createRange();
+        range.selectNodeContents(source);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      return document.execCommand("copy");
+    } catch (error) {
+      return false;
+    }
+  }
+  function initCopyBlocks(root) {
+    var scope = root || document;
+    var buttons = scope.querySelectorAll("[data-copy-block]");
+    for (var i = 0; i < buttons.length; i += 1) {
+      bindCopyBlock(buttons[i]);
+    }
+  }
+  function bindCopyBlock(button) {
+    var id = button.getAttribute("data-copy-block");
+    var source = document.getElementById(id);
+    if (!source || button.getAttribute("data-copy-bound") === "1") return;
+    button.setAttribute("data-copy-bound", "1");
+    button.hidden = false;
+    button.addEventListener("click", function () {
+      var status = document.querySelector('[data-copy-status="' + id + '"]');
+      var wasMasked = source.getAttribute("data-masked") === "true";
+      if (wasMasked) source.removeAttribute("data-masked");
+      var value = typeof source.value === "string" ? source.value : source.textContent;
+      var settle = function (ok) {
+        // Re-mask only on success. The failure message asks the operator to
+        // select the text and copy it by hand, which they cannot do through a
+        // blur, so a block that failed to copy stays readable -- and any
+        // show/hide toggle for it is told, so it does not claim to be hiding
+        // something that is on screen.
+        if (wasMasked && ok) source.setAttribute("data-masked", "true");
+        if (wasMasked && !ok) {
+          var toggle = document.querySelector('[aria-controls="' + id + '"][aria-pressed]');
+          if (toggle) {
+            toggle.setAttribute("aria-pressed", "true");
+            var hideLabel = toggle.getAttribute("data-hide-label");
+            if (hideLabel) toggle.textContent = hideLabel;
+          }
+        }
+        if (!status) return;
+        status.textContent = button.getAttribute(ok ? "data-copy-done" : "data-copy-failed");
+        status.setAttribute("data-state", ok ? "success" : "error");
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).then(
+          function () { settle(true); },
+          function () { settle(msRealtySelectAndCopy(source)); }
+        );
+        return;
+      }
+      settle(msRealtySelectAndCopy(source));
+    });
+  }
+`;
+
 export const ADMIN_APP_JS = `(function () {
   "use strict";
+${COPY_BLOCK_JS}
   function syncAdminShellOffsets() {
     var topbar = document.querySelector(".crm-top");
     var editorTabs = document.querySelector("[data-editor-tabs]");
@@ -4417,4 +4498,5 @@ export const ADMIN_APP_JS = `(function () {
   initAdminListFilters();
   initPipelineBoard();
   initLeadInboxPanes();
+  initCopyBlocks(document);
 })();`;

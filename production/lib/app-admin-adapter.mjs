@@ -13,7 +13,7 @@ import {
   resolveAdminPrincipal,
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
-import { operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
+import { operatorAgentConfigBlock, operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
 import {
   adminSessionClearCookie,
   adminSessionSetCookie,
@@ -39,19 +39,24 @@ import {
 import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
-  completeGoogleOAuth,
-  completeViberConnection,
-  completeWhatsAppEmbeddedSignup,
-  googleAuthorizationUrl,
+  deleteProviderConnection,
   providerConnectionAvailability,
   providerConnectionConfigFromEnv,
   readProviderConnections,
   readProviderCredentials,
-  registerWhatsAppWebhook,
-  registerViberWebhook,
   saveProviderConnection,
   syncViewingToGoogleCalendar,
 } from "./provider-connections.mjs";
+import { operatorProviderAvailability, operatorProviderConfigFromEnv } from "./operator-provider-catalog.mjs";
+import {
+  OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
+  OPERATOR_CONNECTION_DISCONNECT_PATH,
+  isOperatorOAuthProvider,
+  operatorConnectionAudit,
+  operatorConnectionStart,
+  runOperatorConnectionAction,
+} from "./operator-connect-routes.mjs";
+import { issueOperatorAgentToken } from "./operator-agent-access.mjs";
 import { ProviderDeliveryError, deliverApprovedProviderMessage } from "./provider-delivery.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
@@ -3630,8 +3635,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/connect") {
-      const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
-      let availability = providerConnectionAvailability(providerConfig);
+      const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
+      let availability = operatorProviderAvailability(providerConfig);
       let connections = [];
       let storeError = !availability.store.ready;
       try {
@@ -3655,9 +3660,26 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       const result = operatorConnectResult({
         locale: connectLocale,
         connected: url.searchParams.get("connected") || "",
+        disconnected: url.searchParams.get("disconnected") || "",
+        verified: url.searchParams.get("verified") || "",
         error: Boolean(url.searchParams.get("error")),
         storeError,
       });
+      // A delegated, expiring credential for the operator's own assistant,
+      // minted per page view rather than stored.
+      const agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
+      if (agent) {
+        recordAudit(
+          {
+            action: "operator_agent_token_issued",
+            actor: principal?.id,
+            objectType: "operator_agent_token",
+            objectId: agent.operator_id,
+            metadata: { expires_at: agent.expires_at, roles: agent.roles },
+          },
+          config,
+        );
+      }
       return new Response(
         renderOperatorConnectPage({
           baseUrl: base,
@@ -3665,6 +3687,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           operatorId: principal?.id || "operator",
           connections,
           availability,
+          providerConfig,
+          agentToken: agent?.token || "",
+          agentExpiresAt: agent?.expires_at || "",
           result,
           locale: connectLocale,
         }),
@@ -3678,17 +3703,44 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         },
       );
     }
-    if (url.pathname === "/api/admin/connections") {
-      const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
-      const availability = providerConnectionAvailability(providerConfig);
+    if (
+      url.pathname === "/api/admin/connections" ||
+      url.pathname === OPERATOR_CONNECTION_DISCONNECT_PATH ||
+      url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH
+    ) {
+      const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
+      const availability = operatorProviderAvailability(providerConfig);
       const storeOptions = {
         credentialSecret: providerConfig.credentialSecret,
         payload: config.providerConnectionPayload || null,
       };
       const readConnections = config.readProviderConnections || readProviderConnections;
-      const readCredentials = config.readProviderCredentials || readProviderCredentials;
-      const saveConnection = config.saveProviderConnection || saveProviderConnection;
-      if (request.method === "GET" && !url.searchParams.get("action")) {
+      const connectionDeps = {
+        fetchImpl: config.providerFetch || fetch,
+        storeOptions,
+        env: config.authEnv || process.env,
+        readProviderCredentials: config.readProviderCredentials || readProviderCredentials,
+        saveProviderConnection: config.saveProviderConnection || saveProviderConnection,
+        deleteProviderConnection: config.deleteProviderConnection || deleteProviderConnection,
+        // Seams the adapter has always exposed so a test can stand in for a
+        // provider without a network. Undefined means "use the real one".
+        completeGoogleOAuth: config.completeGoogleOAuth,
+        completeOperatorProviderOAuth: config.completeOperatorProviderOAuth,
+        completeOperatorTokenConnection: config.completeOperatorTokenConnection,
+        completeWhatsAppEmbeddedSignup: config.completeWhatsAppEmbeddedSignup,
+        registerWhatsAppWebhook: config.registerWhatsAppWebhook,
+        completeViberConnection: config.completeViberConnection,
+        registerViberWebhook: config.registerViberWebhook,
+        verifyOperatorAiProvider: config.verifyOperatorAiProvider,
+        revokeOperatorProvider: config.revokeOperatorProvider,
+      };
+      const connectionRedirect = (query) =>
+        new Response(null, { status: 303, headers: { location: `/admin/connect?${query}`, "cache-control": "no-store" } });
+      const recordConnectionOutcome = (outcome) => {
+        const entry = operatorConnectionAudit(outcome, { actor: principal.id });
+        if (entry) recordAudit(entry, config);
+      };
+      if (request.method === "GET" && url.pathname === "/api/admin/connections" && !url.searchParams.get("action")) {
         return jsonResponse(200, {
           kind: "provider_connections",
           availability,
@@ -3698,105 +3750,136 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       if (!payloadSession || principal.source !== "payload_session" || !principal.roles?.includes("admin")) {
         return adminForbidden("payload_admin_session");
       }
-      if (request.method === "GET" && url.searchParams.get("provider") === "google") {
+      if (url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH) {
+        if (request.method !== "GET") return jsonResponse(405, { kind: "method_not_allowed" });
+        const agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
+        if (!agent) {
+          return jsonResponse(503, {
+            kind: "operator_agent_token_unavailable",
+            message: "Operator agent tokens are not configured",
+          });
+        }
+        const origin =
+          String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
+        recordAudit(
+          {
+            action: "operator_agent_token_issued",
+            actor: principal.id,
+            objectType: "operator_agent_token",
+            objectId: agent.operator_id,
+            metadata: { expires_at: agent.expires_at, roles: agent.roles },
+          },
+          config,
+        );
+        return jsonResponse(200, {
+          kind: "operator_agent_config",
+          operator_id: agent.operator_id,
+          expires_at: agent.expires_at,
+          mcp_url: `${new URL(origin).origin}/mcp`,
+          config: operatorAgentConfigBlock({
+            baseUrl: origin,
+            token: agent.token,
+            operatorId: agent.operator_id,
+            expiresAt: agent.expires_at,
+            locale: url.searchParams.get("locale") || "en",
+          }),
+        });
+      }
+      if (url.pathname === OPERATOR_CONNECTION_DISCONNECT_PATH) {
+        if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
+        const formEncoded = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        const outcome = await runOperatorConnectionAction({
+          intent: "disconnect",
+          provider: input.provider,
+          operatorId: principal.id,
+          config: providerConfig,
+          deps: connectionDeps,
+        });
+        if (outcome.outcome === "rejected") {
+          recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error, config);
+          if (formEncoded) return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`);
+          return jsonResponse(400, { kind: "provider_disconnect_rejected", message: "The connection was not removed" });
+        }
+        recordConnectionOutcome(outcome);
+        if (formEncoded) return connectionRedirect(`disconnected=${encodeURIComponent(outcome.provider)}`);
+        return jsonResponse(200, {
+          kind: "provider_disconnected",
+          provider: outcome.provider,
+          revoked: outcome.revoked,
+          deleted: outcome.deleted,
+        });
+      }
+      const requestedProvider = String(url.searchParams.get("provider") || "").trim().toLowerCase();
+      if (request.method === "GET" && isOperatorOAuthProvider(requestedProvider)) {
         const action = url.searchParams.get("action");
         if (action === "start") {
-          return new Response(null, {
-            status: 303,
-            headers: { location: googleAuthorizationUrl({ config: providerConfig, operatorId: principal.id }), "cache-control": "no-store" },
-          });
+          try {
+            return new Response(null, {
+              status: 303,
+              headers: {
+                location: operatorConnectionStart({
+                  provider: requestedProvider,
+                  config: providerConfig,
+                  operatorId: principal.id,
+                }),
+                "cache-control": "no-store",
+              },
+            });
+          } catch (error) {
+            recordProviderConnectionFailure(requestedProvider, "oauth_start", error, config);
+            return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`);
+          }
         }
         if (action === "callback") {
           if (url.searchParams.get("error")) {
-            recordProviderConnectionFailure("google", "oauth_callback", new Error("provider_rejected"), config);
-            return new Response(null, { status: 303, headers: { location: "/admin/connect?error=google", "cache-control": "no-store" } });
+            recordProviderConnectionFailure(requestedProvider, "oauth_callback", new Error("provider_rejected"), config);
+            return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`);
           }
-          try {
-            const prior = await readCredentials("google", storeOptions);
-            const connection = await (config.completeGoogleOAuth || completeGoogleOAuth)(
-              {
-                code: url.searchParams.get("code"),
-                state: url.searchParams.get("state"),
-                operatorId: principal.id,
-                existingRefreshToken: prior?.refresh_token || "",
-              },
-              { config: providerConfig, fetchImpl: config.providerFetch || fetch },
-            );
-            const saved = await saveConnection(connection, { ...storeOptions, connectedBy: principal.id });
-            recordAudit(
-              {
-                action: "provider_connected",
-                actor: principal.id,
-                objectType: "provider_connection",
-                objectId: saved.provider,
-                metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
-              },
-              config,
-            );
-            return new Response(null, { status: 303, headers: { location: "/admin/connect?connected=google", "cache-control": "no-store" } });
-          } catch (error) {
-            recordProviderConnectionFailure("google", "oauth_callback", error, config);
-            return new Response(null, { status: 303, headers: { location: "/admin/connect?error=google", "cache-control": "no-store" } });
+          const outcome = await runOperatorConnectionAction({
+            intent: "callback",
+            provider: requestedProvider,
+            code: url.searchParams.get("code"),
+            state: url.searchParams.get("state"),
+            operatorId: principal.id,
+            config: providerConfig,
+            deps: connectionDeps,
+          });
+          if (outcome.outcome === "rejected") {
+            recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error, config);
+            return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`);
           }
+          recordConnectionOutcome(outcome);
+          return connectionRedirect(`connected=${encodeURIComponent(outcome.provider)}`);
         }
       }
       if (request.method === "POST") {
         const formEncoded = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
         const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
         const provider = String(input.provider || "").trim().toLowerCase();
-        try {
-          let connection;
-          if (provider === "whatsapp") {
-            const verified = await (config.completeWhatsAppEmbeddedSignup || completeWhatsAppEmbeddedSignup)(
-              { code: input.code, wabaId: input.waba_id, phoneNumberId: input.phone_number_id },
-              { config: providerConfig, fetchImpl: config.providerFetch || fetch },
-            );
-            await saveConnection(verified, { ...storeOptions, connectedBy: principal.id });
-            connection = await (config.registerWhatsAppWebhook || registerWhatsAppWebhook)(verified, {
-              config: providerConfig,
-              fetchImpl: config.providerFetch || fetch,
-            });
-          } else if (provider === "viber") {
-            const verified = await (config.completeViberConnection || completeViberConnection)(
-              { token: input.token },
-              { config: providerConfig, fetchImpl: config.providerFetch || fetch },
-            );
-            await saveConnection(verified, { ...storeOptions, connectedBy: principal.id });
-            connection = await (config.registerViberWebhook || registerViberWebhook)(verified, {
-              config: providerConfig,
-              fetchImpl: config.providerFetch || fetch,
-            });
-          } else {
-            throw new Error("Unsupported provider connection");
-          }
-          const saved = await saveConnection(connection, { ...storeOptions, connectedBy: principal.id });
-          recordAudit(
-            {
-              action: "provider_connected",
-              actor: principal.id,
-              objectType: "provider_connection",
-              objectId: saved.provider,
-              metadata: { external_account_id: saved.external_account_id, scopes: saved.scopes },
-            },
-            config,
-          );
-          if (formEncoded) {
-            return new Response(null, {
-              status: 303,
-              headers: { location: `/admin/connect?connected=${encodeURIComponent(provider)}`, "cache-control": "no-store" },
-            });
-          }
-          return jsonResponse(201, { kind: "provider_connection", connection: saved });
-        } catch (error) {
-          recordProviderConnectionFailure(provider, provider === "viber" ? "account_or_webhook" : "embedded_signup", error, config);
-          if (formEncoded) {
-            return new Response(null, {
-              status: 303,
-              headers: { location: `/admin/connect?error=${encodeURIComponent(provider || "provider")}`, "cache-control": "no-store" },
-            });
-          }
-          return jsonResponse(400, { kind: "provider_connection_rejected", message: "The provider did not confirm the connection" });
+        const outcome = await runOperatorConnectionAction({
+          intent: "submit",
+          provider,
+          input,
+          operatorId: principal.id,
+          config: providerConfig,
+          deps: connectionDeps,
+        });
+        if (outcome.outcome === "rejected") {
+          recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error, config);
+          if (formEncoded) return connectionRedirect(`error=${encodeURIComponent(outcome.provider || "provider")}`);
+          return jsonResponse(400, {
+            kind: "provider_connection_rejected",
+            message: "The provider did not confirm the connection",
+          });
         }
+        recordConnectionOutcome(outcome);
+        const query =
+          outcome.outcome === "verified"
+            ? `verified=${encodeURIComponent(outcome.provider)}`
+            : `connected=${encodeURIComponent(outcome.provider)}`;
+        if (formEncoded) return connectionRedirect(query);
+        return jsonResponse(201, { kind: "provider_connection", connection: outcome.connection });
       }
       return jsonResponse(405, { kind: "method_not_allowed" });
     }

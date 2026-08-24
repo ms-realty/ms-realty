@@ -4,6 +4,7 @@ import { z } from "zod";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "./app-admin-adapter.mjs";
 import { appApiConfigFromEnv, renderAppApiResponse } from "./app-api-adapter.mjs";
 import { canAdminAccess, canAdminMutate, normalizedRoles, operatorId, resolveAdminPrincipal } from "./admin-auth.mjs";
+import { resolveOperatorAgentPrincipal } from "./operator-agent-access.mjs";
 import { applyListingEdits, LISTING_STATUSES, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
@@ -292,6 +293,15 @@ function tokenScopes(payload) {
 async function resolveMcpPrincipal(authHeader, config) {
   const registered = resolveAdminPrincipal(authHeader, config.env);
   if (registered) return registered;
+  // The capability an operator handed to their own desktop AI from
+  // /admin/connect. It is a delegation, not an escalation: it carries the
+  // minting operator's roles and nothing more, it expires on its own, and
+  // rotating MS_REALTY_OPERATOR_AGENT_TOKEN_SECRET withdraws every one of them
+  // at once. Without that secret configured no such token is ever accepted.
+  // Deliberately scoped to /mcp: the assistant works through the tools, not
+  // through the admin REST surface.
+  const delegated = resolveOperatorAgentPrincipal(authHeader, config.env);
+  if (delegated) return delegated;
   if (!config.oidc || !authHeader.startsWith("Bearer ")) return null;
   const token = authHeader.slice(7).trim();
   if (!token) return null;
