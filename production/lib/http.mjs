@@ -115,7 +115,24 @@ import {
   payloadUserForLeadRead,
   persistLeadIntakeDurably,
   readLeadIntakesDurably as readLeadIntakesDurablyStore,
+  readSellerPipelineItemsDurably as readSellerPipelineItemsDurablyStore,
 } from "./lead-durable-store.mjs";
+import {
+  LeadOperationStoreUnavailableError,
+  isLeadOperationsDurableStoreEnabled,
+  leadOperationsDurableStoreConfigFromEnv,
+} from "./lead-ops-durable-store.mjs";
+import {
+  applyLeadBulkOperation,
+  leadJourneyContextFrom,
+  leadOperationLedgers,
+  recordDealCloseOperation,
+  recordLeadAssignmentOperation,
+  recordLeadPipelineOutcomeOperation,
+  recordLeadSnoozeOperation,
+  recordLeadUnsnoozeOperation,
+  recordSellerPipelineOutcomeOperation,
+} from "./lead-ops-workflows.mjs";
 import {
   appendLeadAssignment,
   applyLeadAssignments,
@@ -932,6 +949,11 @@ export function createHttpApp({
   leadContactKey = null,
   leadDurableStore = leadDurableStoreConfigFromEnv(),
   leadDurablePayload = null,
+  leadOperationsDurableStore = leadOperationsDurableStoreConfigFromEnv(),
+  leadOperationsPayload = null,
+  readLeadOperationsDurably = null,
+  appendLeadOperationDurably = null,
+  readSellerPipelineItemsDurably = readSellerPipelineItemsDurablyStore,
   persistLeadIntake = persistLeadIntakeDurably,
   readLeadIntakes = null,
   readLeadIntakesDurably = readLeadIntakesDurablyStore,
@@ -1148,7 +1170,14 @@ export function createHttpApp({
   // B1 lead operations: the snooze ledger and the derived Hermes state both
   // feed the admin lead payload so the screen paints correct controls first
   // time, without probing Hermes.
-  const currentLeadSnoozes = () => (runtimeDataDurableOnly ? [] : readLeadSnoozes(leadSnoozeLedgerPath || undefined));
+  // Read through the ledgers, so a snooze taken before a container restart is
+  // still the snooze the inbox paints. Only a file-backed ledger under the
+  // durable-only authority stays empty, because that disk is already gone.
+  const currentLeadSnoozes = async () => {
+    const ledgers = currentLeadOperationLedgers();
+    if (!ledgers.durable && runtimeDataDurableOnly) return [];
+    return ledgers.snoozes.read();
+  };
   const currentHermesAvailability = () => hermesReplyAvailability({ env: hermesEnv, provider: hermesReplyProvider });
   const currentOperatorViews = (operator, surface = null) => {
     const operatorId = typeof operator === "string" ? operator : operator?.id || null;
@@ -1310,28 +1339,93 @@ export function createHttpApp({
     if (!Array.isArray(viewings)) throw new ViewingStoreUnavailableError("Durable viewing readback returned invalid rows");
     return { durable: true, viewings };
   };
-  const currentLeadJourneyContext = (leads = currentLeads()) => {
+  // Durable lead operations are active only when the operator asked for them AND
+  // the runtime is configured. Anything short of that keeps the file ledgers, and
+  // the boundary keeps refusing the routes rather than writing to a disk that is
+  // about to be wiped.
+  const leadOperationsDurable = () => {
+    if (!leadOperationsDurableStore?.leadOperationsDurableStoreEnabled) return false;
+    if (!isLeadOperationsDurableStoreEnabled(leadOperationsDurableStore)) {
+      throw new LeadOperationStoreUnavailableError("Durable lead operation store is enabled but not fully configured");
+    }
+    return true;
+  };
+  const currentLeadOperationLedgers = () =>
+    leadOperationLedgers({
+      durable: leadOperationsDurable(),
+      payload: leadOperationsPayload || leadDurablePayload || null,
+      workspaceId: leadOperationsDurableStore?.workspaceId,
+      paths: {
+        snooze: leadSnoozeLedgerPath || undefined,
+        assignment: leadAssignmentLedgerPath || undefined,
+        leadPipelineOutcome: leadPipelineOutcomeLedgerPath || undefined,
+        sellerPipelineOutcome: sellerPipelineOutcomeLedgerPath || undefined,
+        deal: dealLedgerPath || undefined,
+      },
+      ...(readLeadOperationsDurably ? { readOperations: readLeadOperationsDurably } : {}),
+      ...(appendLeadOperationDurably ? { appendOperations: appendLeadOperationDurably } : {}),
+    });
+  // The seller pipeline items themselves are created at intake. Durable intake
+  // stores them as seller_pipeline_events, so that is where they come from once
+  // the lead store owns the leads.
+  const currentSellerPipelines = async () => {
+    // Only once the durable operations store owns the seller outcomes does the
+    // pipeline it acts on come from Postgres; otherwise this stays the file read
+    // it has always been.
+    if (!leadOperationsDurable() || !leadDurableStore?.leadDurableStoreEnabled) {
+      return readSellerPipeline(sellerPipelinePath || undefined);
+    }
+    const items = await readSellerPipelineItemsDurably({
+      payload: leadDurablePayload || null,
+      workspaceId: leadDurableStore.workspaceId,
+    });
+    if (!Array.isArray(items)) throw new LeadStoreUnavailableError("Durable seller pipeline readback returned invalid rows");
+    return items;
+  };
+  const currentLeadJourneyContext = async (leads = currentLeads()) => {
     const filterRows = leadScopedRows({ durable: leadDurableStore?.leadDurableStoreEnabled === true, leads });
-    return {
+    const ledgers = currentLeadOperationLedgers();
+    const context = await leadJourneyContextFrom({
+      ledgers,
       leads,
-      outcomes: filterRows(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined)),
       viewings: filterRows(readViewings(viewingLedgerPath || undefined)),
       viewingFollowUps: filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined)),
-      deals: filterRows(readDeals(dealLedgerPath || undefined)),
-      sellerPipelines: filterRows(readSellerPipeline(sellerPipelinePath || undefined)),
-      sellerPipelineOutcomes: filterRows(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined)),
+      sellerPipelines: filterRows(await currentSellerPipelines()),
+    });
+    return {
+      ...context,
+      outcomes: filterRows(context.outcomes),
+      deals: filterRows(context.deals),
+      sellerPipelineOutcomes: filterRows(context.sellerPipelineOutcomes),
     };
   };
-  const currentLeadPipelineQueue = (leads = currentLeads()) =>
-    buildLeadPipelineQueue(currentLeadJourneyContext(leads), {
+  const currentLeadPipelineQueue = async (leads = currentLeads()) =>
+    buildLeadPipelineQueue(await currentLeadJourneyContext(leads), {
       now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
     });
-  const currentAdminLeadPayload = (requestedLocale, operatorId = null, leads = currentLeads()) => {
+  const currentAdminLeadPayload = async (requestedLocale, operatorId = null, leads = currentLeads()) => {
+    // The adapter has always told the inbox whether its leads came from the
+    // durable store; the standalone server never did, which left it rendering
+    // the file-era reply forms against durable leads.
+    const leadSourceDurable = leadDurableStore?.leadDurableStoreEnabled === true;
     if (runtimeDataDurableOnly) {
       const generatedAt = reviewedAt || receivedAt || new Date().toISOString();
+      // Lead operations that now have a durable authority are read back here:
+      // a snooze, an assignment, an outcome or a closed deal survives the
+      // container and still reaches the screen. Everything still file-backed
+      // stays empty, because that storage does not survive.
+      const durableOperations = leadOperationsDurable();
+      const journey = durableOperations
+        ? await currentLeadJourneyContext(leads)
+        : { leads, outcomes: [], viewings: [], viewingFollowUps: [], deals: [], sellerPipelines: [], sellerPipelineOutcomes: [] };
+      const leadPipelineQueue = durableOperations
+        ? buildLeadPipelineQueue(journey, {
+            now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
+          })
+        : undefined;
       return {
         ...renderAdminLeadsPayload(activeRegistry, requestedLocale, {
-          leads,
+          leads: durableOperations ? journey.leads : leads,
           replies: [],
           communicationThreads: [],
           communicationTemplates: {},
@@ -1350,10 +1444,16 @@ export function createHttpApp({
             rows: [],
           },
           operatorId,
+          leadSourceDurable,
+          ...(leadPipelineQueue ? { leadPipelineQueue } : {}),
           viewings: [],
           savedSearches: [],
-          sellerPipeline: [],
-          deals: [],
+          sellerPipeline: journey.sellerPipelines,
+          sellerPipelineQueue: buildSellerPipelineQueue(journey.sellerPipelines, journey.sellerPipelineOutcomes, {
+            now: sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
+          }),
+          deals: journey.deals,
+          leadSnoozes: await currentLeadSnoozes(),
           brokerContacts: [],
           brokerProfiles: [],
           hermes: currentHermesAvailability(),
@@ -1363,7 +1463,10 @@ export function createHttpApp({
         runtime_data_mode: "durable_only",
       };
     }
-    const leadPipelineQueue = currentLeadPipelineQueue(leads);
+    const journey = await currentLeadJourneyContext(leads);
+    const leadPipelineQueue = buildLeadPipelineQueue(journey, {
+      now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
+    });
     const replyData = currentReplyData();
     return renderAdminLeadsPayload(activeRegistry, requestedLocale, {
       leads,
@@ -1391,10 +1494,14 @@ export function createHttpApp({
       savedSearches: currentSavedSearches(),
       publicRequestQueue: currentPublicRequestQueue(),
       savedSearchAlertQueue: currentSavedSearchAlertQueue(),
-      ...currentSellerPipelineData(),
-      deals: readDeals(dealLedgerPath || undefined),
+      leadSourceDurable,
+      sellerPipeline: journey.sellerPipelines,
+      sellerPipelineQueue: buildSellerPipelineQueue(journey.sellerPipelines, journey.sellerPipelineOutcomes, {
+        now: sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
+      }),
+      deals: journey.deals,
       brokerContacts: currentBrokerContacts(),
-      leadSnoozes: currentLeadSnoozes(),
+      leadSnoozes: await currentLeadSnoozes(),
       hermes: currentHermesAvailability(),
       leadOperations: currentLeadOperations(operatorId),
       operatorViews: currentOperatorViews(operatorId),
@@ -1412,15 +1519,16 @@ export function createHttpApp({
       currentDurableViewingSource(),
     ]);
     const filterRows = leadScopedRows(leadSource);
-    const leads = applyLeadAssignments(leadSource.leads, filterRows(readLeadAssignments(leadAssignmentLedgerPath || undefined)));
-    const outcomes = filterRows(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined));
+    const ledgers = currentLeadOperationLedgers();
+    const leads = applyLeadAssignments(leadSource.leads, filterRows(await ledgers.assignments.read()));
+    const outcomes = filterRows(await ledgers.leadPipelineOutcomes.read());
     const viewings = filterRows(viewingSource.viewings);
     const viewingFollowUps = viewingSource.durable
       ? []
       : filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined));
-    const deals = filterRows(readDeals(dealLedgerPath || undefined));
-    const sellerPipelines = filterRows(readSellerPipeline(sellerPipelinePath || undefined));
-    const sellerPipelineOutcomes = filterRows(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined));
+    const deals = filterRows(await ledgers.deals.read());
+    const sellerPipelines = filterRows(await currentSellerPipelines());
+    const sellerPipelineOutcomes = filterRows(await ledgers.sellerPipelineOutcomes.read());
     const leadPipelineQueue = buildLeadPipelineQueue(
       { leads, outcomes, viewings, viewingFollowUps, deals, sellerPipelines, sellerPipelineOutcomes },
       { now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString() },
@@ -1472,7 +1580,7 @@ export function createHttpApp({
       }),
       deals,
       brokerContacts: currentBrokerContacts(),
-      leadSnoozes: currentLeadSnoozes(),
+      leadSnoozes: await currentLeadSnoozes(),
       hermes: currentHermesAvailability(),
       leadOperations: currentLeadOperations(operatorId),
       operatorViews: currentOperatorViews(operatorId),
@@ -1597,24 +1705,24 @@ export function createHttpApp({
       await currentOperationsReport(leads, operatorId, payloadSession),
       operatorId,
     );
-  const currentRequestsPayload = (requestedLocale, operatorId = null, leads) => {
-    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId, leads), {
+  const currentRequestsPayload = async (requestedLocale, operatorId = null, leads) => {
+    return renderAdminOperationalQueuePayload(await currentAdminLeadPayload(requestedLocale, operatorId, leads), {
       kind: "admin_requests",
       path: "/admin/requests",
       titleKey: "requestsWorkspace",
       descriptionKey: "requestsDescription",
     });
   };
-  const currentPipelinePayload = (requestedLocale, operatorId = null, leads) => {
-    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId, leads), {
+  const currentPipelinePayload = async (requestedLocale, operatorId = null, leads) => {
+    return renderAdminOperationalQueuePayload(await currentAdminLeadPayload(requestedLocale, operatorId, leads), {
       kind: "admin_lead_pipeline",
       path: "/admin/pipeline",
       titleKey: "pipelineWorkspace",
       descriptionKey: "pipelineDescription",
     });
   };
-  const currentTodayPayload = (requestedLocale, operatorId = null, leads) =>
-    renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId, leads), {
+  const currentTodayPayload = async (requestedLocale, operatorId = null, leads) =>
+    renderAdminOperationalQueuePayload(await currentAdminLeadPayload(requestedLocale, operatorId, leads), {
       kind: "admin_today",
       path: "/admin/today",
       titleKey: "today",
@@ -2159,6 +2267,7 @@ export function createHttpApp({
     const runtimeDataAdminRequest =
       url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
     if (!runtimeDataAdminRequest && productionRuntimeDataUnavailable({
+      durableLeadOperations: leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
       durableOnly: runtimeDataDurableOnly,
       method: request.method,
       pathname: url.pathname,
@@ -2299,17 +2408,15 @@ export function createHttpApp({
         // The route handler returns the normal bad-request response.
       }
     }
-    if (productionRuntimeDataUnavailable({
-      durableProviderDelivery,
-      durableOnly: runtimeDataDurableOnly,
-      durableViewing: viewingDurableStore?.viewingDurableStoreEnabled === true,
-      method: request.method,
-      pathname: url.pathname,
-    })) {
-      return adminJson(503, runtimeDataUnavailablePayload(url.pathname));
-    }
+    // Check order matches app-admin-adapter.mjs: the lead-store boundary is the
+    // more specific diagnosis for these paths, so both runtimes must answer the
+    // same request with the same kind. Running the generic runtime-data check
+    // first, as this server used to, answered runtime_data_unavailable where the
+    // adapter answered lead_store_read_only.
+    const durableLeadOperations = leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true;
     if (
       isFileBackedLeadMutationBlocked({
+        durableLeadOperations,
         durableProviderDelivery,
         durableStore: leadDurableStore,
         durableViewing: viewingDurableStore?.viewingDurableStoreEnabled === true,
@@ -2321,6 +2428,16 @@ export function createHttpApp({
         kind: "lead_store_read_only",
         message: "This lead operation is disabled until it has durable persistence.",
       });
+    }
+    if (productionRuntimeDataUnavailable({
+      durableLeadOperations,
+      durableProviderDelivery,
+      durableOnly: runtimeDataDurableOnly,
+      durableViewing: viewingDurableStore?.viewingDurableStoreEnabled === true,
+      method: request.method,
+      pathname: url.pathname,
+    })) {
+      return adminJson(503, runtimeDataUnavailablePayload(url.pathname));
     }
     if (
       runtimeDataDurableOnly &&
@@ -3188,129 +3305,29 @@ export function createHttpApp({
 
       // One enquiry deferred to a chosen moment. Reused verbatim by the bulk
       // route, so both paths share one set of rules.
-      const snoozeOne = (leads, input, recordedAt) => {
-        const bound = bindAuthenticatedOperator(input, principal, ["actor"]);
-        const record = createLeadSnooze(leads, readLeadSnoozes(leadSnoozeLedgerPath || undefined), bound, recordedAt);
-        const persisted = appendLeadSnooze(record, { filePath: leadSnoozeLedgerPath || undefined });
-        if (!persisted.idempotent) {
-          auditLeadOperation(
-            {
-              action: "lead_snoozed",
-              actor: persisted.actor,
-              objectType: "lead_snooze",
-              objectId: persisted.id,
-              metadata: { lead_id: persisted.lead_id, until: persisted.until, reason: persisted.reason },
-            },
-            recordedAt,
-          );
-        }
-        return persisted;
-      };
-      const unsnoozeOne = (leads, input, recordedAt) => {
-        const bound = bindAuthenticatedOperator(input, principal, ["actor"]);
-        const record = createLeadUnsnooze(leads, readLeadSnoozes(leadSnoozeLedgerPath || undefined), bound, recordedAt);
-        const persisted = appendLeadSnooze(record, { filePath: leadSnoozeLedgerPath || undefined });
-        if (!persisted.idempotent) {
-          auditLeadOperation(
-            {
-              action: "lead_unsnoozed",
-              actor: persisted.actor,
-              objectType: "lead_snooze",
-              objectId: persisted.id,
-              metadata: { lead_id: persisted.lead_id, snooze_id: persisted.snooze_id, reason: persisted.reason },
-            },
-            recordedAt,
-          );
-        }
-        return persisted;
-      };
-      const assignOne = (leads, input, recordedAt) => {
-        const bound = bindAuthenticatedOperator(input, principal, ["actor"]);
-        const assignment = createLeadAssignment(leads, bound, recordedAt);
-        const persisted = appendLeadAssignment(assignment, { filePath: leadAssignmentLedgerPath || undefined });
-        if (!persisted.idempotent) {
-          auditLeadOperation(
-            {
-              action: "lead_assigned",
-              actor: persisted.assigned_by,
-              objectType: "lead_assignment",
-              objectId: persisted.id,
-              metadata: {
-                lead_id: persisted.lead_id,
-                previous_broker_id: persisted.previous_broker_id,
-                broker_id: persisted.broker_id,
-                assignment_method: persisted.assignment_method,
-              },
-            },
-            recordedAt,
-          );
-        }
-        return persisted;
-      };
-      // "Handled" is recorded on the pipeline the enquiry actually belongs to:
-      // a seller pipeline note, or a buyer/renter pipeline note. Both are
-      // existing single-item paths with their own validation and audit action.
-      const handleOne = (leads, input, recordedAt) => {
-        const bound = bindAuthenticatedOperator(input, principal, ["actor"]);
-        const leadId = String(bound.leadId || bound.lead_id || "").trim();
-        const lead = leads.find((row) => row.lead_id === leadId);
-        if (!lead) throw new Error("Handled requires a known leadId");
-        const sellerPipelines = readSellerPipeline(sellerPipelinePath || undefined);
-        const sellerPipeline = sellerPipelines.find((row) => row.lead_id === leadId);
-        if (sellerPipeline) {
-          const result = appendSellerPipelineOutcome(
-            sellerPipelines,
-            { ...bound, action: "note", note: bound.note || bound.reason, sellerPipelineId: sellerPipeline.id },
-            { filePath: sellerPipelineOutcomeLedgerPath || undefined, recordedAt },
-          );
-          if (!result.idempotent) {
-            auditLeadOperation(
-              {
-                action: "seller_pipeline_outcome_recorded",
-                actor: result.outcome.actor,
-                objectType: "seller_pipeline_outcome",
-                objectId: result.outcome.id,
-                metadata: {
-                  lead_id: result.outcome.lead_id,
-                  seller_pipeline_id: result.outcome.seller_pipeline_id,
-                  outcome_action: result.outcome.action,
-                },
-              },
-              recordedAt,
-            );
-          }
-          return { kind: "seller_pipeline_note", ...result };
-        }
-        const result = appendLeadPipelineOutcome(
-          currentLeadJourneyContext(leads),
-          { ...bound, action: "note", note: bound.note || bound.reason },
-          { filePath: leadPipelineOutcomeLedgerPath || undefined, recordedAt },
-        );
-        if (!result.idempotent) {
-          auditLeadOperation(
-            {
-              action: "lead_pipeline_outcome_recorded",
-              actor: result.outcome.actor,
-              objectType: "lead_pipeline_outcome",
-              objectId: result.outcome.id,
-              metadata: {
-                lead_id: result.outcome.lead_id,
-                pipeline: result.outcome.pipeline,
-                outcome_action: result.outcome.action,
-                from_stage: result.outcome.from_stage,
-                to_stage: result.outcome.to_stage,
-              },
-            },
-            recordedAt,
-          );
-        }
-        return { kind: "lead_pipeline_note", ...result };
+      // Every verb below is the shared workflow, so this server and the Next.js
+      // adapter apply one set of rules and write one set of audit entries — and
+      // both reach whichever ledger the configuration selected.
+      const leadOperationContext = async () => {
+        const ledgers = currentLeadOperationLedgers();
+        return {
+          ledgers,
+          journey: await currentLeadJourneyContext(),
+          principal,
+          audit: auditLeadOperation,
+        };
       };
 
       if (request.method === "POST" && url.pathname === "/api/admin/leads/snooze") {
         try {
           const recordedAt = leadOperationAt();
-          const persisted = snoozeOne(currentLeads(), parseBody(request), recordedAt);
+          const context = await leadOperationContext();
+          const persisted = await recordLeadSnoozeOperation({
+            ...context,
+            leads: context.journey.leads,
+            input: parseBody(request),
+            recordedAt,
+          });
           return adminJson(persisted.idempotent ? 200 : 201, { kind: "lead_snooze", ...persisted });
         } catch (error) {
           return adminJson(400, { kind: "bad_request", message: error.message });
@@ -3320,7 +3337,13 @@ export function createHttpApp({
       if (request.method === "POST" && url.pathname === "/api/admin/leads/unsnooze") {
         try {
           const recordedAt = leadOperationAt();
-          const persisted = unsnoozeOne(currentLeads(), parseBody(request), recordedAt);
+          const context = await leadOperationContext();
+          const persisted = await recordLeadUnsnoozeOperation({
+            ...context,
+            leads: context.journey.leads,
+            input: parseBody(request),
+            recordedAt,
+          });
           return adminJson(persisted.idempotent ? 200 : 201, { kind: "lead_unsnooze", ...persisted });
         } catch (error) {
           return adminJson(400, { kind: "bad_request", message: error.message });
@@ -3329,60 +3352,16 @@ export function createHttpApp({
 
       // One approval, one audit entry PER ENQUIRY. A refusal on one enquiry
       // never discards the rest: the body reports every item's own outcome.
+      // One approval, one audit entry PER ENQUIRY. A refusal on one enquiry
+      // never discards the rest: the body reports every item's own outcome.
       if (request.method === "POST" && url.pathname === "/api/admin/leads/bulk") {
         try {
-          const input = parseBody(request);
-          const action = String(input.action || "").trim();
-          if (!["assign", "snooze", "handle"].includes(action)) {
-            throw new Error("Bulk action must be assign, snooze, or handle");
-          }
-          const submittedIds = input.leadIds ?? input.lead_ids;
-          const leadIds = [
-            ...new Set(
-              (Array.isArray(submittedIds) ? submittedIds : String(submittedIds || "").split(","))
-                .map((value) => String(value || "").trim())
-                .filter(Boolean),
-            ),
-          ];
-          if (!leadIds.length) throw new Error("Bulk actions require at least one leadId");
-          if (leadIds.length > 100) throw new Error("Bulk actions accept 100 enquiries or fewer");
-          const confirmed = input.bulkConfirmed ?? input.bulk_confirmed;
-          if (confirmed !== true && !["true", "on", "1"].includes(String(confirmed || ""))) {
-            throw new Error("Bulk actions require one explicit human confirmation");
-          }
-          const recordedAt = leadOperationAt();
-          const leads = currentLeads();
-          const results = [];
-          for (const leadId of leadIds) {
-            try {
-              const itemInput = { ...input, leadId, leadIds: undefined, lead_ids: undefined };
-              const outcome =
-                action === "assign"
-                  ? assignOne(leads, itemInput, recordedAt)
-                  : action === "snooze"
-                    ? snoozeOne(leads, itemInput, recordedAt)
-                    : handleOne(leads, itemInput, recordedAt);
-              results.push({
-                lead_id: leadId,
-                status: outcome.idempotent ? "unchanged" : "applied",
-                idempotent: Boolean(outcome.idempotent),
-                record_id: outcome.id || outcome.outcome?.id || null,
-              });
-            } catch (error) {
-              results.push({ lead_id: leadId, status: "refused", idempotent: false, record_id: null, message: error.message });
-            }
-          }
-          const applied = results.filter((row) => row.status === "applied").length;
-          const refused = results.filter((row) => row.status === "refused").length;
-          return adminJson(refused ? 207 : applied ? 201 : 200, {
-            kind: "lead_bulk_action",
-            action,
-            requested: leadIds.length,
-            applied,
-            unchanged: results.filter((row) => row.status === "unchanged").length,
-            refused,
-            results,
+          const outcome = await applyLeadBulkOperation({
+            ...(await leadOperationContext()),
+            input: parseBody(request),
+            recordedAt: leadOperationAt(),
           });
+          return adminJson(outcome.status, outcome.body);
         } catch (error) {
           return adminJson(400, { kind: "bad_request", message: error.message });
         }
@@ -4262,7 +4241,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = adminLocaleParam(url);
-      const payload = currentAdminLeadPayload(requestedLocale, principal, requestLeadRows);
+      const payload = await currentAdminLeadPayload(requestedLocale, principal, requestLeadRows);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
@@ -4442,7 +4421,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        adminHtml(currentAdminLeadPayload(adminLocaleParam(url), principal, requestLeadRows)),
+        adminHtml(await currentAdminLeadPayload(adminLocaleParam(url), principal, requestLeadRows)),
         "text/html; charset=utf-8",
       );
     }
@@ -4522,7 +4501,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/today", "/admin/today"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const todayPayload = currentTodayPayload(adminLocaleParam(url), principal, requestLeadRows);
+      const todayPayload = await currentTodayPayload(adminLocaleParam(url), principal, requestLeadRows);
       const payload = withWorkspaceSettings({
         ...todayPayload,
         onboarding: await currentWorkspaceOnboarding(todayPayload, payloadSession),
@@ -4536,7 +4515,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentPipelinePayload(adminLocaleParam(url), principal, requestLeadRows);
+      const payload = await currentPipelinePayload(adminLocaleParam(url), principal, requestLeadRows);
       if (url.pathname === "/admin/pipeline" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -4545,7 +4524,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/requests", "/admin/requests"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentRequestsPayload(adminLocaleParam(url), principal, requestLeadRows);
+      const payload = await currentRequestsPayload(adminLocaleParam(url), principal, requestLeadRows);
       if (url.pathname === "/admin/requests" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -5729,36 +5708,40 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const recordedAt = leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
-        const result = appendLeadPipelineOutcome(
-          currentLeadJourneyContext(),
-          bindAuthenticatedOperator(parseBody(request), principal),
-          { filePath: leadPipelineOutcomeLedgerPath || undefined, recordedAt },
-        );
-        const existingAudit = auditLogPath
-          ? readAuditLog(auditLogPath).some(
-              (row) => row.action === "lead_pipeline_outcome_recorded" && row.object_id === result.outcome.id,
-            )
-          : false;
-        if (!existingAudit) {
-          recordAudit(
-            {
-              action: "lead_pipeline_outcome_recorded",
-              actor: result.outcome.actor,
-              objectType: "lead_pipeline_outcome",
-              objectId: result.outcome.id,
-              locale: result.lead_pipeline.original_language,
-              metadata: {
-                lead_id: result.outcome.lead_id,
-                pipeline: result.outcome.pipeline,
-                action: result.outcome.action,
-                from_stage: result.outcome.from_stage,
-                to_stage: result.outcome.to_stage,
-                next_follow_up_at: result.outcome.next_follow_up_at,
+        const result = await recordLeadPipelineOutcomeOperation({
+          ledgers: currentLeadOperationLedgers(),
+          journey: await currentLeadJourneyContext(),
+          input: bindAuthenticatedOperator(parseBody(request), principal),
+          principal,
+          recordedAt,
+          onRecorded: (recorded) => {
+            // ponytail: separate ledgers are not transactional; an idempotent retry repairs a missing summary audit.
+            const existingAudit = auditLogPath
+              ? readAuditLog(auditLogPath).some(
+                  (row) => row.action === "lead_pipeline_outcome_recorded" && row.object_id === recorded.outcome.id,
+                )
+              : false;
+            if (existingAudit) return;
+            recordAudit(
+              {
+                action: "lead_pipeline_outcome_recorded",
+                actor: recorded.outcome.actor,
+                objectType: "lead_pipeline_outcome",
+                objectId: recorded.outcome.id,
+                locale: recorded.lead_pipeline.original_language,
+                metadata: {
+                  lead_id: recorded.outcome.lead_id,
+                  pipeline: recorded.outcome.pipeline,
+                  action: recorded.outcome.action,
+                  from_stage: recorded.outcome.from_stage,
+                  to_stage: recorded.outcome.to_stage,
+                  next_follow_up_at: recorded.outcome.next_follow_up_at,
+                },
               },
-            },
-            recordedAt,
-          );
-        }
+              recordedAt,
+            );
+          },
+        });
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -5826,23 +5809,15 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
-        const assignment = createLeadAssignment(currentLeads(), input, reviewedAt || receivedAt || new Date().toISOString());
-        const persisted = appendLeadAssignment(assignment, { filePath: leadAssignmentLedgerPath || undefined });
-        if (!persisted.idempotent) {
-          recordAudit({
-            action: "lead_assigned",
-            actor: persisted.assigned_by,
-            objectType: "lead_assignment",
-            objectId: persisted.id,
-            metadata: {
-              lead_id: persisted.lead_id,
-              previous_broker_id: persisted.previous_broker_id,
-              broker_id: persisted.broker_id,
-              assignment_method: persisted.assignment_method,
-            },
-          });
-        }
+        const ledgers = currentLeadOperationLedgers();
+        const persisted = await recordLeadAssignmentOperation({
+          ledgers,
+          leads: currentLeads(),
+          input: parseBody(request),
+          principal,
+          recordedAt: reviewedAt || receivedAt || new Date().toISOString(),
+          audit: (entry, recordedAt) => recordAudit(entry, recordedAt),
+        });
         return adminJson(persisted.idempotent ? 200 : 201, persisted);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -6305,33 +6280,41 @@ export function createHttpApp({
         if ((input.commissionEur ?? input.commission_eur) !== undefined && !canAdminAccess(principal, "financials:write")) {
           return adminForbidden("financials:write");
         }
-        const result = appendSellerPipelineOutcome(readSellerPipeline(sellerPipelinePath || undefined), input, {
-          filePath: sellerPipelineOutcomeLedgerPath || undefined,
+        const result = await recordSellerPipelineOutcomeOperation({
+          ledgers: currentLeadOperationLedgers(),
+          sellerPipelines: await currentSellerPipelines(),
+          input,
+          principal,
           recordedAt,
-        });
-        // ponytail: separate JSONL ledgers are not transactional; an idempotent retry repairs a missing summary audit.
-        if (
-          auditLogPath &&
-          !readAuditLog(auditLogPath).some((row) => row.action === "seller_pipeline_outcome_recorded" && row.object_id === result.outcome.id)
-        ) {
-          recordAudit(
-            {
-              action: "seller_pipeline_outcome_recorded",
-              actor: result.outcome.actor,
-              objectType: "seller_pipeline_outcome",
-              objectId: result.outcome.id,
-              locale: result.seller_pipeline.original_language,
-              metadata: {
-                seller_pipeline_id: result.seller_pipeline.id,
-                lead_id: result.seller_pipeline.lead_id,
-                action: result.outcome.action,
-                stage: result.seller_pipeline.stage,
-                due_at: result.seller_pipeline.next_task?.due_at || null,
+          onRecorded: (recorded) => {
+            // ponytail: separate ledgers are not transactional; an idempotent retry repairs a missing summary audit.
+            if (
+              auditLogPath &&
+              readAuditLog(auditLogPath).some(
+                (row) => row.action === "seller_pipeline_outcome_recorded" && row.object_id === recorded.outcome.id,
+              )
+            ) {
+              return;
+            }
+            recordAudit(
+              {
+                action: "seller_pipeline_outcome_recorded",
+                actor: recorded.outcome.actor,
+                objectType: "seller_pipeline_outcome",
+                objectId: recorded.outcome.id,
+                locale: recorded.seller_pipeline.original_language,
+                metadata: {
+                  seller_pipeline_id: recorded.seller_pipeline.id,
+                  lead_id: recorded.seller_pipeline.lead_id,
+                  action: recorded.outcome.action,
+                  stage: recorded.seller_pipeline.stage,
+                  due_at: recorded.seller_pipeline.next_task?.due_at || null,
+                },
               },
-            },
-            recordedAt,
-          );
-        }
+              recordedAt,
+            );
+          },
+        });
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -6384,21 +6367,14 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["broker"]);
-        const deal = appendClosedDeal(currentLeadJourneyContext(), input, {
-          filePath: dealLedgerPath || undefined,
+        const deal = await recordDealCloseOperation({
+          ledgers: currentLeadOperationLedgers(),
+          journey: await currentLeadJourneyContext(),
+          input: parseJsonBody(request),
+          principal,
           closedAt: dealClosedAt,
+          audit: (entry, recordedAt) => recordAudit(entry, recordedAt),
         });
-        if (!deal.idempotent) {
-          recordAudit({
-            action: "deal_closed",
-            actor: deal.broker,
-            objectType: "deal",
-            objectId: deal.id,
-            locale: deal.original_language,
-            metadata: { lead_id: deal.lead_id, listing_reference: deal.listing_reference, status: deal.status },
-          });
-        }
         return adminJson(deal.idempotent ? 200 : 201, deal);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });

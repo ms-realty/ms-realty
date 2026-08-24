@@ -904,7 +904,12 @@ function leadOperationLedgersFor(config) {
 // from once the lead store owns the leads.
 async function sellerPipelineItems(config, source = null) {
   const durableStore = config.leadDurableStore || {};
-  if (!durableStore.leadDurableStoreEnabled) return readSellerPipeline(config.sellerPipelinePath);
+  // Only once the durable operations store owns the seller outcomes does the
+  // pipeline it acts on come from Postgres; otherwise this stays the file read
+  // it has always been.
+  if (!leadOperationsDurable(config) || !durableStore.leadDurableStoreEnabled) {
+    return readSellerPipeline(config.sellerPipelinePath);
+  }
   const items = await (config.readSellerPipelineItemsDurably || readSellerPipelineItemsDurably)({
     payload: config.leadDurablePayload || null,
     workspaceId: durableStore.workspaceId,
@@ -3430,6 +3435,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         : null;
     if (
       isFileBackedLeadMutationBlocked({
+        durableLeadOperations: config.leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
         durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
         durableStore: config.leadDurableStore,
         durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
@@ -3440,6 +3446,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return leadStoreUnavailable("lead_store_read_only");
     }
     if (productionRuntimeDataUnavailable({
+      durableLeadOperations: config.leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
       durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
       durableOnly: config.runtimeDataDurableOnly,
       durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
