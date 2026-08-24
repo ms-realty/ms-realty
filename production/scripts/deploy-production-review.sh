@@ -43,9 +43,11 @@ reclaim() {
     rm -rf "$candidate" || true
   done < <(find "$releases" -maxdepth 1 -mindepth 1 -type d -name '[0-9a-f]*' -printf '%T@ %p\n' 2>/dev/null |
     sort -rn | tail -n +$((keep_releases + 1)) | cut -d' ' -f2-)
-  # Dangling images and build cache only. Never -a, which would also take the
-  # image the previous release needs in order to come back up.
-  docker image prune --force >/dev/null 2>&1 || true
+  # Build cache only. Images are deliberately left alone: the very next step
+  # backs up the previous release by running a container from that release's
+  # image, and the new image is not built until later, so pruning images here
+  # removes the only image the backup can use. Release directories and build
+  # cache are where the space actually went.
   docker builder prune --force >/dev/null 2>&1 || true
 }
 reclaim
@@ -105,6 +107,7 @@ run_stack() {
 }
 
 switched=false
+backup_skipped=false
 rollback() {
   local status="${1:-1}"
   trap - ERR
@@ -124,7 +127,18 @@ trap 'rollback "$?"' ERR
 run_stack "$release" docker:status "$release_id"
 
 if [[ -n "$previous" && "$previous" != "$release" ]]; then
-  run_stack "$previous" docker:backup "$(basename "$previous")"
+  # The backup quiesces public writes, which stops the running containers, and
+  # it needs the previous release's image to do it. When that image was missing
+  # the backup died with the site already stopped and nothing restarted it: a
+  # safety net became the only thing holding production down, and the edge
+  # served 521 until a human intervened. It must never be able to do that again.
+  # A failure here is loud, restarts what it stopped, and lets the deploy carry
+  # on to build and start the new release, which is what brings the site back.
+  if ! run_stack "$previous" docker:backup "$(basename "$previous")"; then
+    echo "WARNING: pre-deploy backup of $(basename "$previous") failed; continuing without a fresh snapshot" >&2
+    backup_skipped=true
+    run_stack "$previous" docker:up "$(basename "$previous")" || true
+  fi
 fi
 
 activate "$release"
@@ -159,4 +173,8 @@ node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "ut
 trap - ERR
 rm -f "$archive"
 reclaim
-echo "production origin deployed: $release_id"
+if [[ "$backup_skipped" == true ]]; then
+  echo "production origin deployed: $release_id (WITHOUT a pre-deploy snapshot; take one before the next release)" >&2
+else
+  echo "production origin deployed: $release_id"
+fi
