@@ -93,7 +93,7 @@ import {
 import { buildContactRecords } from "./contact-records.mjs";
 import { loadMigrationRecords } from "./content.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
-import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
+import { DEFAULT_DEAL_LEDGER_PATH, readDeals } from "./deal-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, readEventLedger } from "./events.mjs";
 import {
   EventStoreUnavailableError,
@@ -160,24 +160,18 @@ import {
   DEFAULT_CONSENT_LEDGER_PATH,
   appendConsentRecord,
   createConsentRecord,
-  createConsentWithdrawal,
   latestConsentStates,
   readConsentLedger,
 } from "./consent-ledger.mjs";
 import {
   DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
-  appendLeadAssignment,
   applyLeadAssignments,
-  createLeadAssignment,
   readLeadAssignments,
 } from "./lead-assignments.mjs";
 // B1 lead operations: snooze, bulk actions, saved views, Hermes availability.
 import { hermesReplyAvailability } from "./hermes-availability.mjs";
 import {
   DEFAULT_LEAD_SNOOZE_LEDGER_PATH,
-  appendLeadSnooze,
-  createLeadSnooze,
-  createLeadUnsnooze,
   readLeadSnoozes,
 } from "./lead-snoozes.mjs";
 import {
@@ -192,7 +186,6 @@ import {
 import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
   DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
-  appendLeadPipelineOutcome,
   buildLeadPipelineQueue,
   readLeadPipelineOutcomes,
 } from "./lead-pipeline-outcomes.mjs";
@@ -327,7 +320,6 @@ import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import {
   DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH,
-  appendSellerPipelineOutcome,
   buildSellerPipelineQueue,
   readSellerPipelineOutcomes,
 } from "./seller-pipeline-outcomes.mjs";

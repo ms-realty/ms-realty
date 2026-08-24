@@ -138,14 +138,11 @@ import {
   recordSellerPipelineOutcomeOperation,
 } from "./lead-ops-workflows.mjs";
 import {
-  appendLeadAssignment,
   applyLeadAssignments,
-  createLeadAssignment,
   readLeadAssignments,
 } from "./lead-assignments.mjs";
 import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
-  appendLeadPipelineOutcome,
   buildLeadPipelineQueue,
   readLeadPipelineOutcomes,
 } from "./lead-pipeline-outcomes.mjs";
@@ -239,8 +236,8 @@ import {
   readPublicRequestOutcomes,
 } from "./public-request-outcomes.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
-import { appendSellerPipelineOutcome, buildSellerPipelineQueue, readSellerPipelineOutcomes } from "./seller-pipeline-outcomes.mjs";
-import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
+import { buildSellerPipelineQueue, readSellerPipelineOutcomes } from "./seller-pipeline-outcomes.mjs";
+import { readDeals } from "./deal-ledger.mjs";
 import {
   appendRealtyCaseAction,
   buildRealtyCaseQueue,
@@ -277,7 +274,6 @@ import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import {
   appendConsentRecord,
   createConsentRecord,
-  createConsentWithdrawal,
   latestConsentStates,
   readConsentLedger,
 } from "./consent-ledger.mjs";
@@ -418,10 +414,6 @@ import { renderTwoFactorEnrolmentPage, renderWorkspaceExportReadyPage } from "./
 // B1 lead operations: snooze, bulk actions, saved views, Hermes availability.
 import { hermesReplyAvailability } from "./hermes-availability.mjs";
 import {
-  appendLeadSnooze,
-  createLeadSnooze,
-  createLeadUnsnooze,
-  readLeadSnoozes,
 } from "./lead-snoozes.mjs";
 import {
   OPERATOR_VIEW_SURFACES,
