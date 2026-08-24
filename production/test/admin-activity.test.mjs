@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { renderAdminActivityPayload } from "../lib/admin-payloads.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 
 function auditRow(index, metadata = {}) {
   return {
@@ -33,4 +34,14 @@ test("activity payload provides privacy-safe lead and listing timelines with bou
   const listingTimeline = renderAdminActivityPayload(registry, "en", rows, null, { listingId: "MS-CRAWL-0114" });
   assert.equal(listingTimeline.auditLog.length, 1);
   assert.equal(listingTimeline.filters.listingId, "MS-CRAWL-0114");
+
+  const html = renderReactAdminBody(
+    renderAdminActivityPayload(registry, "en", [auditRow(1, { public_enabled: true, object_id: "lead-target" })]),
+  );
+  assert.match(html, /placeholder="e.g. enquiry number"/);
+  assert.match(html, /placeholder="e.g. listing reference"/);
+  assert.match(html, /<dt>Publicly enabled<\/dt>/);
+  assert.match(html, /<dt>Object ID<\/dt>/);
+  assert.doesNotMatch(html, /placeholder="MS-CRAWL-0001"/);
+  assert.doesNotMatch(html, /<dt>public enabled<\/dt>/);
 });
