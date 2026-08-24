@@ -1,4 +1,4 @@
-import { renderAppWorkspaceSecurityResponse } from "../../../../../../_ms-realty/workspace-security.js";
+import { renderAppWorkspaceSecurityResponse } from "../../../../../_ms-realty/workspace-security.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
