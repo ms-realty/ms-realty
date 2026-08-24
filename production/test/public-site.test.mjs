@@ -11,6 +11,7 @@ import { listingFromCmsRecord, loadCmsSeed } from "../lib/runtime.mjs";
 import { PUBLIC_APP_JS } from "../lib/ui/client.mjs";
 import {
   localizedListingValue,
+  localizedSearchFilterValue,
   renderAdminShell,
   renderContactPage,
   renderGuidePage,
@@ -590,6 +591,38 @@ test("official geography filters cover both countries and match reviewed Bulgari
   assert.ok(blagoevgrad.cards.every((card) => sourceById.get(card.id)?.district_code === "BLG"));
 });
 
+test("the region filter names every area in the reader's own language, never a transliteration", () => {
+  // The geography catalog carries only a native and an English name, and its
+  // English name for a Greek region is a bare transliteration ("Kriti",
+  // "Dytiki Elláda"). No public locale may show those to a reader.
+  const expected = {
+    en: { "GR:region:EL43": "Crete", "GR:region:EL63": "Western Greece", "GR:region:EL61": "Thessaly", "BG:district:PDV": "Plovdiv" },
+    de: { "GR:region:EL43": "Kreta", "GR:region:EL63": "Westgriechenland", "GR:region:EL61": "Thessalien", "BG:district:PDV": "Plovdiv" },
+    nl: { "GR:region:EL43": "Kreta", "GR:region:EL63": "West-Griekenland", "GR:region:EL61": "Thessalië", "BG:district:PDV": "Plovdiv" },
+    ru: { "GR:region:EL43": "Крит", "GR:region:EL63": "Западная Греция", "GR:region:EL61": "Фессалия", "BG:district:PDV": "Пловдив" },
+    bg: { "GR:region:EL43": "Крит", "GR:region:EL63": "Западна Гърция", "GR:region:EL61": "Тесалия", "BG:district:PDV": "Пловдив" },
+    el: { "GR:region:EL43": "Κρήτη", "GR:region:EL63": "Δυτική Ελλάδα", "GR:region:EL61": "Θεσσαλία", "BG:district:PDV": "Φιλιππούπολη" },
+    he: { "GR:region:EL43": "כרתים", "GR:region:EL63": "מערב יוון", "GR:region:EL61": "תסליה", "BG:district:PDV": "פלובדיב" },
+  };
+
+  for (const [localeCode, areas] of Object.entries(expected)) {
+    for (const [areaId, label] of Object.entries(areas)) {
+      assert.equal(localizedSearchFilterValue(localeCode, "region_id", areaId), label, `${localeCode} ${areaId}`);
+    }
+  }
+
+  // Every option a reader can actually pick is covered, in every locale.
+  const regions = renderSearchPage({ registry, listings, localeCode: "en" }).search.controls.filter_options.regions;
+  const transliterations = ["Kriti", "Dytiki Elláda", "Sterea Elláda", "Voreio Aigaio", "Notio Aigaio", "Thessalia", "Ionia Nisia", "Peloponnisos", "Attiki"];
+  for (const localeCode of ["bg", "en", "de", "nl", "ru", "el", "he"]) {
+    for (const area of regions) {
+      const label = localizedSearchFilterValue(localeCode, "region_id", area.id);
+      assert.ok(label, `${localeCode} ${area.id} must have a label`);
+      assert.equal(transliterations.includes(label), false, `${localeCode} ${area.id} still shows the transliteration ${label}`);
+    }
+  }
+});
+
 test("municipality search exposes reviewed Bulgarian municipality scope at every known precision", () => {
   const sandanski = renderSearchPage({ registry, listings, localeCode: "ru", filters: { municipality: "Sandanski" }, pageSize: null });
   const html = renderReactPublicBody(sandanski);
@@ -630,7 +663,9 @@ test("district search exposes official Bulgarian administrative areas without in
   );
   assert.equal(blagoevgrad.cards.some((card) => card.id === "MS-CRAWL-0072"), false);
   assert.deepEqual(blagoevgrad.search.controls.active_filter_chips, [{ key: "district", value: "Blagoevgrad", active: true }]);
-  assert.match(html, /<option value="BG:district:BLG" data-country="BG">Blagoevgrad<\/option>/);
+  // The option value stays the official area id; the visible label is the
+  // reader's own exonym, so a Russian page never offers a Latin district name.
+  assert.match(html, /<option value="BG:district:BLG" data-country="BG">Благоевград<\/option>/);
   assert.doesNotMatch(html, /<(?:select|input(?![^>]*type="hidden"))[^>]*name="district"/);
   assert.match(html, /<input type="hidden" name="district" value="Blagoevgrad">/);
 });

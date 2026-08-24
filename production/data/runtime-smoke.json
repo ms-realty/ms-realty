@@ -2834,13 +2834,13 @@
                 }
               },
               {
-                "id": "BG:district:BLG",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "BLG",
+                "id": "GR:region:EL54",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL54",
                 "names": {
-                  "native": "Благоевград",
-                  "en": "Blagoevgrad"
+                  "native": "Ήπειρος",
+                  "en": "Epirus"
                 }
               },
               {
@@ -2854,53 +2854,13 @@
                 }
               },
               {
-                "id": "GR:region:EL52",
-                "country_code": "GR",
-                "level": "region",
-                "official_code": "EL52",
-                "names": {
-                  "native": "Κεντρική Μακεδονία",
-                  "en": "Central Macedonia"
-                }
-              },
-              {
-                "id": "BG:district:DOB",
+                "id": "BG:district:BLG",
                 "country_code": "BG",
                 "level": "district",
-                "official_code": "DOB",
+                "official_code": "BLG",
                 "names": {
-                  "native": "Добрич",
-                  "en": "Dobrich"
-                }
-              },
-              {
-                "id": "GR:region:EL63",
-                "country_code": "GR",
-                "level": "region",
-                "official_code": "EL63",
-                "names": {
-                  "native": "Δυτική Ελλάδα",
-                  "en": "Dytiki Elláda"
-                }
-              },
-              {
-                "id": "GR:region:EL51",
-                "country_code": "GR",
-                "level": "region",
-                "official_code": "EL51",
-                "names": {
-                  "native": "Ανατολική Μακεδονία και Θράκη",
-                  "en": "Eastern Macedonia and Thrace"
-                }
-              },
-              {
-                "id": "GR:region:EL54",
-                "country_code": "GR",
-                "level": "region",
-                "official_code": "EL54",
-                "names": {
-                  "native": "Ήπειρος",
-                  "en": "Epirus"
+                  "native": "Благоевград",
+                  "en": "Blagoevgrad"
                 }
               },
               {
@@ -2914,13 +2874,23 @@
                 }
               },
               {
-                "id": "BG:district:HKV",
+                "id": "BG:district:DOB",
                 "country_code": "BG",
                 "level": "district",
-                "official_code": "HKV",
+                "official_code": "DOB",
                 "names": {
-                  "native": "Хасково",
-                  "en": "Haskovo"
+                  "native": "Добрич",
+                  "en": "Dobrich"
+                }
+              },
+              {
+                "id": "GR:region:EL42",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL42",
+                "names": {
+                  "native": "Νότιο Αιγαίο",
+                  "en": "Notio Aigaio"
                 }
               },
               {
@@ -2934,13 +2904,73 @@
                 }
               },
               {
-                "id": "BG:district:KRZ",
+                "id": "BG:district:VAR",
                 "country_code": "BG",
                 "level": "district",
-                "official_code": "KRZ",
+                "official_code": "VAR",
                 "names": {
-                  "native": "Кърджали",
-                  "en": "Kardzhali"
+                  "native": "Варна",
+                  "en": "Varna"
+                }
+              },
+              {
+                "id": "BG:district:VID",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "VID",
+                "names": {
+                  "native": "Видин",
+                  "en": "Vidin"
+                }
+              },
+              {
+                "id": "BG:district:VTR",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "VTR",
+                "names": {
+                  "native": "Велико Търново",
+                  "en": "Veliko Tarnovo"
+                }
+              },
+              {
+                "id": "BG:district:VRC",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "VRC",
+                "names": {
+                  "native": "Враца",
+                  "en": "Vratsa"
+                }
+              },
+              {
+                "id": "BG:district:HKV",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "HKV",
+                "names": {
+                  "native": "Хасково",
+                  "en": "Haskovo"
+                }
+              },
+              {
+                "id": "BG:district:TGV",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "TGV",
+                "names": {
+                  "native": "Търговище",
+                  "en": "Targovishte"
+                }
+              },
+              {
+                "id": "BG:district:JAM",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "JAM",
+                "names": {
+                  "native": "Ямбол",
+                  "en": "Yambol"
                 }
               },
               {
@@ -2951,16 +2981,6 @@
                 "names": {
                   "native": "Κρήτη",
                   "en": "Kriti"
-                }
-              },
-              {
-                "id": "BG:district:KNL",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "KNL",
-                "names": {
-                  "native": "Кюстендил",
-                  "en": "Kyustendil"
                 }
               },
               {
@@ -2984,123 +3004,53 @@
                 }
               },
               {
-                "id": "GR:region:EL42",
+                "id": "GR:region:EL51",
                 "country_code": "GR",
                 "level": "region",
-                "official_code": "EL42",
+                "official_code": "EL51",
                 "names": {
-                  "native": "Νότιο Αιγαίο",
-                  "en": "Notio Aigaio"
+                  "native": "Ανατολική Μακεδονία και Θράκη",
+                  "en": "Eastern Macedonia and Thrace"
                 }
               },
               {
-                "id": "BG:district:PAZ",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "PAZ",
-                "names": {
-                  "native": "Пазарджик",
-                  "en": "Pazardzhik"
-                }
-              },
-              {
-                "id": "GR:region:EL65",
+                "id": "GR:region:EL63",
                 "country_code": "GR",
                 "level": "region",
-                "official_code": "EL65",
+                "official_code": "EL63",
                 "names": {
-                  "native": "Πελοπόννησος",
-                  "en": "Peloponnisos"
+                  "native": "Δυτική Ελλάδα",
+                  "en": "Dytiki Elláda"
                 }
               },
               {
-                "id": "BG:district:PER",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "PER",
+                "id": "GR:region:EL53",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL53",
                 "names": {
-                  "native": "Перник",
-                  "en": "Pernik"
+                  "native": "Δυτική Μακεδονία",
+                  "en": "Western Macedonia"
                 }
               },
               {
-                "id": "BG:district:PVN",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "PVN",
+                "id": "GR:region:EL64",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL64",
                 "names": {
-                  "native": "Плевен",
-                  "en": "Pleven"
+                  "native": "Στερεά Ελλάδα",
+                  "en": "Sterea Elláda"
                 }
               },
               {
-                "id": "BG:district:PDV",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "PDV",
+                "id": "GR:region:EL52",
+                "country_code": "GR",
+                "level": "region",
+                "official_code": "EL52",
                 "names": {
-                  "native": "Пловдив",
-                  "en": "Plovdiv"
-                }
-              },
-              {
-                "id": "BG:district:RAZ",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "RAZ",
-                "names": {
-                  "native": "Разград",
-                  "en": "Razgrad"
-                }
-              },
-              {
-                "id": "BG:district:RSE",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "RSE",
-                "names": {
-                  "native": "Русе",
-                  "en": "Ruse"
-                }
-              },
-              {
-                "id": "BG:district:SHU",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "SHU",
-                "names": {
-                  "native": "Шумен",
-                  "en": "Shumen"
-                }
-              },
-              {
-                "id": "BG:district:SLS",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "SLS",
-                "names": {
-                  "native": "Силистра",
-                  "en": "Silistra"
-                }
-              },
-              {
-                "id": "BG:district:SLV",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "SLV",
-                "names": {
-                  "native": "Сливен",
-                  "en": "Sliven"
-                }
-              },
-              {
-                "id": "BG:district:SML",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "SML",
-                "names": {
-                  "native": "Смолян",
-                  "en": "Smolyan"
+                  "native": "Κεντρική Μακεδονία",
+                  "en": "Central Macedonia"
                 }
               },
               {
@@ -3134,63 +3084,83 @@
                 }
               },
               {
-                "id": "GR:region:EL64",
+                "id": "BG:district:SLS",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SLS",
+                "names": {
+                  "native": "Силистра",
+                  "en": "Silistra"
+                }
+              },
+              {
+                "id": "BG:district:SLV",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SLV",
+                "names": {
+                  "native": "Сливен",
+                  "en": "Sliven"
+                }
+              },
+              {
+                "id": "BG:district:SML",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SML",
+                "names": {
+                  "native": "Смолян",
+                  "en": "Smolyan"
+                }
+              },
+              {
+                "id": "BG:district:PAZ",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "PAZ",
+                "names": {
+                  "native": "Пазарджик",
+                  "en": "Pazardzhik"
+                }
+              },
+              {
+                "id": "BG:district:PVN",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "PVN",
+                "names": {
+                  "native": "Плевен",
+                  "en": "Pleven"
+                }
+              },
+              {
+                "id": "BG:district:PDV",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "PDV",
+                "names": {
+                  "native": "Пловдив",
+                  "en": "Plovdiv"
+                }
+              },
+              {
+                "id": "GR:region:EL65",
                 "country_code": "GR",
                 "level": "region",
-                "official_code": "EL64",
+                "official_code": "EL65",
                 "names": {
-                  "native": "Στερεά Ελλάδα",
-                  "en": "Sterea Elláda"
+                  "native": "Πελοπόννησος",
+                  "en": "Peloponnisos"
                 }
               },
               {
-                "id": "BG:district:TGV",
+                "id": "BG:district:PER",
                 "country_code": "BG",
                 "level": "district",
-                "official_code": "TGV",
+                "official_code": "PER",
                 "names": {
-                  "native": "Търговище",
-                  "en": "Targovishte"
-                }
-              },
-              {
-                "id": "GR:region:EL61",
-                "country_code": "GR",
-                "level": "region",
-                "official_code": "EL61",
-                "names": {
-                  "native": "Θεσσαλία",
-                  "en": "Thessalia"
-                }
-              },
-              {
-                "id": "BG:district:VAR",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "VAR",
-                "names": {
-                  "native": "Варна",
-                  "en": "Varna"
-                }
-              },
-              {
-                "id": "BG:district:VTR",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "VTR",
-                "names": {
-                  "native": "Велико Търново",
-                  "en": "Veliko Tarnovo"
-                }
-              },
-              {
-                "id": "BG:district:VID",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "VID",
-                "names": {
-                  "native": "Видин",
-                  "en": "Vidin"
+                  "native": "Перник",
+                  "en": "Pernik"
                 }
               },
               {
@@ -3204,33 +3174,63 @@
                 }
               },
               {
-                "id": "BG:district:VRC",
+                "id": "BG:district:KNL",
                 "country_code": "BG",
                 "level": "district",
-                "official_code": "VRC",
+                "official_code": "KNL",
                 "names": {
-                  "native": "Враца",
-                  "en": "Vratsa"
+                  "native": "Кюстендил",
+                  "en": "Kyustendil"
                 }
               },
               {
-                "id": "GR:region:EL53",
+                "id": "BG:district:KRZ",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "KRZ",
+                "names": {
+                  "native": "Кърджали",
+                  "en": "Kardzhali"
+                }
+              },
+              {
+                "id": "BG:district:RAZ",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "RAZ",
+                "names": {
+                  "native": "Разград",
+                  "en": "Razgrad"
+                }
+              },
+              {
+                "id": "BG:district:RSE",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "RSE",
+                "names": {
+                  "native": "Русе",
+                  "en": "Ruse"
+                }
+              },
+              {
+                "id": "BG:district:SHU",
+                "country_code": "BG",
+                "level": "district",
+                "official_code": "SHU",
+                "names": {
+                  "native": "Шумен",
+                  "en": "Shumen"
+                }
+              },
+              {
+                "id": "GR:region:EL61",
                 "country_code": "GR",
                 "level": "region",
-                "official_code": "EL53",
+                "official_code": "EL61",
                 "names": {
-                  "native": "Δυτική Μακεδονία",
-                  "en": "Western Macedonia"
-                }
-              },
-              {
-                "id": "BG:district:JAM",
-                "country_code": "BG",
-                "level": "district",
-                "official_code": "JAM",
-                "names": {
-                  "native": "Ямбол",
-                  "en": "Yambol"
+                  "native": "Θεσσαλία",
+                  "en": "Thessalia"
                 }
               }
             ],
@@ -3273,34 +3273,34 @@
               "Petrich"
             ],
             "districts": [
-              "Dobrich",
+              "Burgas",
+              "Blagoevgrad",
               "Gabrovo",
+              "Dobrich",
+              "Varna",
+              "Vidin",
+              "Veliko Tarnovo",
+              "Vratsa",
               "Haskovo",
-              "Kardzhali",
-              "Kyustendil",
+              "Targovishte",
+              "Yambol",
               "Lovech",
               "Montana",
-              "Pazardzhik",
-              "Pernik",
-              "Pleven",
-              "Plovdiv",
-              "Razgrad",
-              "Ruse",
-              "Shumen",
-              "Silistra",
-              "Sliven",
-              "Smolyan",
               "Sofia",
               "Sofia (stolitsa)",
               "Stara Zagora",
-              "Targovishte",
-              "Varna",
-              "Veliko Tarnovo",
-              "Vidin",
-              "Vratsa",
-              "Yambol",
-              "Burgas",
-              "Blagoevgrad"
+              "Silistra",
+              "Sliven",
+              "Smolyan",
+              "Pazardzhik",
+              "Pleven",
+              "Plovdiv",
+              "Pernik",
+              "Kyustendil",
+              "Kardzhali",
+              "Razgrad",
+              "Ruse",
+              "Shumen"
             ],
             "property_families": [
               "apartment",
@@ -6021,13 +6021,13 @@
               }
             },
             {
-              "id": "BG:district:BLG",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "BLG",
+              "id": "GR:region:EL54",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL54",
               "names": {
-                "native": "Благоевград",
-                "en": "Blagoevgrad"
+                "native": "Ήπειρος",
+                "en": "Epirus"
               }
             },
             {
@@ -6041,53 +6041,13 @@
               }
             },
             {
-              "id": "GR:region:EL52",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL52",
-              "names": {
-                "native": "Κεντρική Μακεδονία",
-                "en": "Central Macedonia"
-              }
-            },
-            {
-              "id": "BG:district:DOB",
+              "id": "BG:district:BLG",
               "country_code": "BG",
               "level": "district",
-              "official_code": "DOB",
+              "official_code": "BLG",
               "names": {
-                "native": "Добрич",
-                "en": "Dobrich"
-              }
-            },
-            {
-              "id": "GR:region:EL63",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL63",
-              "names": {
-                "native": "Δυτική Ελλάδα",
-                "en": "Dytiki Elláda"
-              }
-            },
-            {
-              "id": "GR:region:EL51",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL51",
-              "names": {
-                "native": "Ανατολική Μακεδονία και Θράκη",
-                "en": "Eastern Macedonia and Thrace"
-              }
-            },
-            {
-              "id": "GR:region:EL54",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL54",
-              "names": {
-                "native": "Ήπειρος",
-                "en": "Epirus"
+                "native": "Благоевград",
+                "en": "Blagoevgrad"
               }
             },
             {
@@ -6101,13 +6061,23 @@
               }
             },
             {
-              "id": "BG:district:HKV",
+              "id": "BG:district:DOB",
               "country_code": "BG",
               "level": "district",
-              "official_code": "HKV",
+              "official_code": "DOB",
               "names": {
-                "native": "Хасково",
-                "en": "Haskovo"
+                "native": "Добрич",
+                "en": "Dobrich"
+              }
+            },
+            {
+              "id": "GR:region:EL42",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL42",
+              "names": {
+                "native": "Νότιο Αιγαίο",
+                "en": "Notio Aigaio"
               }
             },
             {
@@ -6121,13 +6091,73 @@
               }
             },
             {
-              "id": "BG:district:KRZ",
+              "id": "BG:district:VAR",
               "country_code": "BG",
               "level": "district",
-              "official_code": "KRZ",
+              "official_code": "VAR",
               "names": {
-                "native": "Кърджали",
-                "en": "Kardzhali"
+                "native": "Варна",
+                "en": "Varna"
+              }
+            },
+            {
+              "id": "BG:district:VID",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VID",
+              "names": {
+                "native": "Видин",
+                "en": "Vidin"
+              }
+            },
+            {
+              "id": "BG:district:VTR",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VTR",
+              "names": {
+                "native": "Велико Търново",
+                "en": "Veliko Tarnovo"
+              }
+            },
+            {
+              "id": "BG:district:VRC",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VRC",
+              "names": {
+                "native": "Враца",
+                "en": "Vratsa"
+              }
+            },
+            {
+              "id": "BG:district:HKV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "HKV",
+              "names": {
+                "native": "Хасково",
+                "en": "Haskovo"
+              }
+            },
+            {
+              "id": "BG:district:TGV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "TGV",
+              "names": {
+                "native": "Търговище",
+                "en": "Targovishte"
+              }
+            },
+            {
+              "id": "BG:district:JAM",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "JAM",
+              "names": {
+                "native": "Ямбол",
+                "en": "Yambol"
               }
             },
             {
@@ -6138,16 +6168,6 @@
               "names": {
                 "native": "Κρήτη",
                 "en": "Kriti"
-              }
-            },
-            {
-              "id": "BG:district:KNL",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "KNL",
-              "names": {
-                "native": "Кюстендил",
-                "en": "Kyustendil"
               }
             },
             {
@@ -6171,123 +6191,53 @@
               }
             },
             {
-              "id": "GR:region:EL42",
+              "id": "GR:region:EL51",
               "country_code": "GR",
               "level": "region",
-              "official_code": "EL42",
+              "official_code": "EL51",
               "names": {
-                "native": "Νότιο Αιγαίο",
-                "en": "Notio Aigaio"
+                "native": "Ανατολική Μακεδονία και Θράκη",
+                "en": "Eastern Macedonia and Thrace"
               }
             },
             {
-              "id": "BG:district:PAZ",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "PAZ",
-              "names": {
-                "native": "Пазарджик",
-                "en": "Pazardzhik"
-              }
-            },
-            {
-              "id": "GR:region:EL65",
+              "id": "GR:region:EL63",
               "country_code": "GR",
               "level": "region",
-              "official_code": "EL65",
+              "official_code": "EL63",
               "names": {
-                "native": "Πελοπόννησος",
-                "en": "Peloponnisos"
+                "native": "Δυτική Ελλάδα",
+                "en": "Dytiki Elláda"
               }
             },
             {
-              "id": "BG:district:PER",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "PER",
+              "id": "GR:region:EL53",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL53",
               "names": {
-                "native": "Перник",
-                "en": "Pernik"
+                "native": "Δυτική Μακεδονία",
+                "en": "Western Macedonia"
               }
             },
             {
-              "id": "BG:district:PVN",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "PVN",
+              "id": "GR:region:EL64",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL64",
               "names": {
-                "native": "Плевен",
-                "en": "Pleven"
+                "native": "Στερεά Ελλάδα",
+                "en": "Sterea Elláda"
               }
             },
             {
-              "id": "BG:district:PDV",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "PDV",
+              "id": "GR:region:EL52",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL52",
               "names": {
-                "native": "Пловдив",
-                "en": "Plovdiv"
-              }
-            },
-            {
-              "id": "BG:district:RAZ",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "RAZ",
-              "names": {
-                "native": "Разград",
-                "en": "Razgrad"
-              }
-            },
-            {
-              "id": "BG:district:RSE",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "RSE",
-              "names": {
-                "native": "Русе",
-                "en": "Ruse"
-              }
-            },
-            {
-              "id": "BG:district:SHU",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "SHU",
-              "names": {
-                "native": "Шумен",
-                "en": "Shumen"
-              }
-            },
-            {
-              "id": "BG:district:SLS",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "SLS",
-              "names": {
-                "native": "Силистра",
-                "en": "Silistra"
-              }
-            },
-            {
-              "id": "BG:district:SLV",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "SLV",
-              "names": {
-                "native": "Сливен",
-                "en": "Sliven"
-              }
-            },
-            {
-              "id": "BG:district:SML",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "SML",
-              "names": {
-                "native": "Смолян",
-                "en": "Smolyan"
+                "native": "Κεντρική Μακεδονία",
+                "en": "Central Macedonia"
               }
             },
             {
@@ -6321,63 +6271,83 @@
               }
             },
             {
-              "id": "GR:region:EL64",
+              "id": "BG:district:SLS",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SLS",
+              "names": {
+                "native": "Силистра",
+                "en": "Silistra"
+              }
+            },
+            {
+              "id": "BG:district:SLV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SLV",
+              "names": {
+                "native": "Сливен",
+                "en": "Sliven"
+              }
+            },
+            {
+              "id": "BG:district:SML",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SML",
+              "names": {
+                "native": "Смолян",
+                "en": "Smolyan"
+              }
+            },
+            {
+              "id": "BG:district:PAZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PAZ",
+              "names": {
+                "native": "Пазарджик",
+                "en": "Pazardzhik"
+              }
+            },
+            {
+              "id": "BG:district:PVN",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PVN",
+              "names": {
+                "native": "Плевен",
+                "en": "Pleven"
+              }
+            },
+            {
+              "id": "BG:district:PDV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PDV",
+              "names": {
+                "native": "Пловдив",
+                "en": "Plovdiv"
+              }
+            },
+            {
+              "id": "GR:region:EL65",
               "country_code": "GR",
               "level": "region",
-              "official_code": "EL64",
+              "official_code": "EL65",
               "names": {
-                "native": "Στερεά Ελλάδα",
-                "en": "Sterea Elláda"
+                "native": "Πελοπόννησος",
+                "en": "Peloponnisos"
               }
             },
             {
-              "id": "BG:district:TGV",
+              "id": "BG:district:PER",
               "country_code": "BG",
               "level": "district",
-              "official_code": "TGV",
+              "official_code": "PER",
               "names": {
-                "native": "Търговище",
-                "en": "Targovishte"
-              }
-            },
-            {
-              "id": "GR:region:EL61",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL61",
-              "names": {
-                "native": "Θεσσαλία",
-                "en": "Thessalia"
-              }
-            },
-            {
-              "id": "BG:district:VAR",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "VAR",
-              "names": {
-                "native": "Варна",
-                "en": "Varna"
-              }
-            },
-            {
-              "id": "BG:district:VTR",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "VTR",
-              "names": {
-                "native": "Велико Търново",
-                "en": "Veliko Tarnovo"
-              }
-            },
-            {
-              "id": "BG:district:VID",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "VID",
-              "names": {
-                "native": "Видин",
-                "en": "Vidin"
+                "native": "Перник",
+                "en": "Pernik"
               }
             },
             {
@@ -6391,33 +6361,63 @@
               }
             },
             {
-              "id": "BG:district:VRC",
+              "id": "BG:district:KNL",
               "country_code": "BG",
               "level": "district",
-              "official_code": "VRC",
+              "official_code": "KNL",
               "names": {
-                "native": "Враца",
-                "en": "Vratsa"
+                "native": "Кюстендил",
+                "en": "Kyustendil"
               }
             },
             {
-              "id": "GR:region:EL53",
+              "id": "BG:district:KRZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "KRZ",
+              "names": {
+                "native": "Кърджали",
+                "en": "Kardzhali"
+              }
+            },
+            {
+              "id": "BG:district:RAZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "RAZ",
+              "names": {
+                "native": "Разград",
+                "en": "Razgrad"
+              }
+            },
+            {
+              "id": "BG:district:RSE",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "RSE",
+              "names": {
+                "native": "Русе",
+                "en": "Ruse"
+              }
+            },
+            {
+              "id": "BG:district:SHU",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SHU",
+              "names": {
+                "native": "Шумен",
+                "en": "Shumen"
+              }
+            },
+            {
+              "id": "GR:region:EL61",
               "country_code": "GR",
               "level": "region",
-              "official_code": "EL53",
+              "official_code": "EL61",
               "names": {
-                "native": "Δυτική Μακεδονία",
-                "en": "Western Macedonia"
-              }
-            },
-            {
-              "id": "BG:district:JAM",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "JAM",
-              "names": {
-                "native": "Ямбол",
-                "en": "Yambol"
+                "native": "Θεσσαλία",
+                "en": "Thessalia"
               }
             }
           ],
@@ -6460,34 +6460,34 @@
             "Petrich"
           ],
           "districts": [
-            "Dobrich",
+            "Burgas",
+            "Blagoevgrad",
             "Gabrovo",
+            "Dobrich",
+            "Varna",
+            "Vidin",
+            "Veliko Tarnovo",
+            "Vratsa",
             "Haskovo",
-            "Kardzhali",
-            "Kyustendil",
+            "Targovishte",
+            "Yambol",
             "Lovech",
             "Montana",
-            "Pazardzhik",
-            "Pernik",
-            "Pleven",
-            "Plovdiv",
-            "Razgrad",
-            "Ruse",
-            "Shumen",
-            "Silistra",
-            "Sliven",
-            "Smolyan",
             "Sofia",
             "Sofia (stolitsa)",
             "Stara Zagora",
-            "Targovishte",
-            "Varna",
-            "Veliko Tarnovo",
-            "Vidin",
-            "Vratsa",
-            "Yambol",
-            "Burgas",
-            "Blagoevgrad"
+            "Silistra",
+            "Sliven",
+            "Smolyan",
+            "Pazardzhik",
+            "Pleven",
+            "Plovdiv",
+            "Pernik",
+            "Kyustendil",
+            "Kardzhali",
+            "Razgrad",
+            "Ruse",
+            "Shumen"
           ],
           "property_families": [
             "apartment",
@@ -8751,13 +8751,13 @@
               }
             },
             {
-              "id": "BG:district:BLG",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "BLG",
+              "id": "GR:region:EL54",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL54",
               "names": {
-                "native": "Благоевград",
-                "en": "Blagoevgrad"
+                "native": "Ήπειρος",
+                "en": "Epirus"
               }
             },
             {
@@ -8771,53 +8771,13 @@
               }
             },
             {
-              "id": "GR:region:EL52",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL52",
-              "names": {
-                "native": "Κεντρική Μακεδονία",
-                "en": "Central Macedonia"
-              }
-            },
-            {
-              "id": "BG:district:DOB",
+              "id": "BG:district:BLG",
               "country_code": "BG",
               "level": "district",
-              "official_code": "DOB",
+              "official_code": "BLG",
               "names": {
-                "native": "Добрич",
-                "en": "Dobrich"
-              }
-            },
-            {
-              "id": "GR:region:EL63",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL63",
-              "names": {
-                "native": "Δυτική Ελλάδα",
-                "en": "Dytiki Elláda"
-              }
-            },
-            {
-              "id": "GR:region:EL51",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL51",
-              "names": {
-                "native": "Ανατολική Μακεδονία και Θράκη",
-                "en": "Eastern Macedonia and Thrace"
-              }
-            },
-            {
-              "id": "GR:region:EL54",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL54",
-              "names": {
-                "native": "Ήπειρος",
-                "en": "Epirus"
+                "native": "Благоевград",
+                "en": "Blagoevgrad"
               }
             },
             {
@@ -8831,13 +8791,23 @@
               }
             },
             {
-              "id": "BG:district:HKV",
+              "id": "BG:district:DOB",
               "country_code": "BG",
               "level": "district",
-              "official_code": "HKV",
+              "official_code": "DOB",
               "names": {
-                "native": "Хасково",
-                "en": "Haskovo"
+                "native": "Добрич",
+                "en": "Dobrich"
+              }
+            },
+            {
+              "id": "GR:region:EL42",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL42",
+              "names": {
+                "native": "Νότιο Αιγαίο",
+                "en": "Notio Aigaio"
               }
             },
             {
@@ -8851,13 +8821,73 @@
               }
             },
             {
-              "id": "BG:district:KRZ",
+              "id": "BG:district:VAR",
               "country_code": "BG",
               "level": "district",
-              "official_code": "KRZ",
+              "official_code": "VAR",
               "names": {
-                "native": "Кърджали",
-                "en": "Kardzhali"
+                "native": "Варна",
+                "en": "Varna"
+              }
+            },
+            {
+              "id": "BG:district:VID",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VID",
+              "names": {
+                "native": "Видин",
+                "en": "Vidin"
+              }
+            },
+            {
+              "id": "BG:district:VTR",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VTR",
+              "names": {
+                "native": "Велико Търново",
+                "en": "Veliko Tarnovo"
+              }
+            },
+            {
+              "id": "BG:district:VRC",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "VRC",
+              "names": {
+                "native": "Враца",
+                "en": "Vratsa"
+              }
+            },
+            {
+              "id": "BG:district:HKV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "HKV",
+              "names": {
+                "native": "Хасково",
+                "en": "Haskovo"
+              }
+            },
+            {
+              "id": "BG:district:TGV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "TGV",
+              "names": {
+                "native": "Търговище",
+                "en": "Targovishte"
+              }
+            },
+            {
+              "id": "BG:district:JAM",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "JAM",
+              "names": {
+                "native": "Ямбол",
+                "en": "Yambol"
               }
             },
             {
@@ -8868,16 +8898,6 @@
               "names": {
                 "native": "Κρήτη",
                 "en": "Kriti"
-              }
-            },
-            {
-              "id": "BG:district:KNL",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "KNL",
-              "names": {
-                "native": "Кюстендил",
-                "en": "Kyustendil"
               }
             },
             {
@@ -8901,123 +8921,53 @@
               }
             },
             {
-              "id": "GR:region:EL42",
+              "id": "GR:region:EL51",
               "country_code": "GR",
               "level": "region",
-              "official_code": "EL42",
+              "official_code": "EL51",
               "names": {
-                "native": "Νότιο Αιγαίο",
-                "en": "Notio Aigaio"
+                "native": "Ανατολική Μακεδονία και Θράκη",
+                "en": "Eastern Macedonia and Thrace"
               }
             },
             {
-              "id": "BG:district:PAZ",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "PAZ",
-              "names": {
-                "native": "Пазарджик",
-                "en": "Pazardzhik"
-              }
-            },
-            {
-              "id": "GR:region:EL65",
+              "id": "GR:region:EL63",
               "country_code": "GR",
               "level": "region",
-              "official_code": "EL65",
+              "official_code": "EL63",
               "names": {
-                "native": "Πελοπόννησος",
-                "en": "Peloponnisos"
+                "native": "Δυτική Ελλάδα",
+                "en": "Dytiki Elláda"
               }
             },
             {
-              "id": "BG:district:PER",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "PER",
+              "id": "GR:region:EL53",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL53",
               "names": {
-                "native": "Перник",
-                "en": "Pernik"
+                "native": "Δυτική Μακεδονία",
+                "en": "Western Macedonia"
               }
             },
             {
-              "id": "BG:district:PVN",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "PVN",
+              "id": "GR:region:EL64",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL64",
               "names": {
-                "native": "Плевен",
-                "en": "Pleven"
+                "native": "Στερεά Ελλάδα",
+                "en": "Sterea Elláda"
               }
             },
             {
-              "id": "BG:district:PDV",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "PDV",
+              "id": "GR:region:EL52",
+              "country_code": "GR",
+              "level": "region",
+              "official_code": "EL52",
               "names": {
-                "native": "Пловдив",
-                "en": "Plovdiv"
-              }
-            },
-            {
-              "id": "BG:district:RAZ",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "RAZ",
-              "names": {
-                "native": "Разград",
-                "en": "Razgrad"
-              }
-            },
-            {
-              "id": "BG:district:RSE",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "RSE",
-              "names": {
-                "native": "Русе",
-                "en": "Ruse"
-              }
-            },
-            {
-              "id": "BG:district:SHU",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "SHU",
-              "names": {
-                "native": "Шумен",
-                "en": "Shumen"
-              }
-            },
-            {
-              "id": "BG:district:SLS",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "SLS",
-              "names": {
-                "native": "Силистра",
-                "en": "Silistra"
-              }
-            },
-            {
-              "id": "BG:district:SLV",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "SLV",
-              "names": {
-                "native": "Сливен",
-                "en": "Sliven"
-              }
-            },
-            {
-              "id": "BG:district:SML",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "SML",
-              "names": {
-                "native": "Смолян",
-                "en": "Smolyan"
+                "native": "Κεντρική Μακεδονία",
+                "en": "Central Macedonia"
               }
             },
             {
@@ -9051,63 +9001,83 @@
               }
             },
             {
-              "id": "GR:region:EL64",
+              "id": "BG:district:SLS",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SLS",
+              "names": {
+                "native": "Силистра",
+                "en": "Silistra"
+              }
+            },
+            {
+              "id": "BG:district:SLV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SLV",
+              "names": {
+                "native": "Сливен",
+                "en": "Sliven"
+              }
+            },
+            {
+              "id": "BG:district:SML",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SML",
+              "names": {
+                "native": "Смолян",
+                "en": "Smolyan"
+              }
+            },
+            {
+              "id": "BG:district:PAZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PAZ",
+              "names": {
+                "native": "Пазарджик",
+                "en": "Pazardzhik"
+              }
+            },
+            {
+              "id": "BG:district:PVN",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PVN",
+              "names": {
+                "native": "Плевен",
+                "en": "Pleven"
+              }
+            },
+            {
+              "id": "BG:district:PDV",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "PDV",
+              "names": {
+                "native": "Пловдив",
+                "en": "Plovdiv"
+              }
+            },
+            {
+              "id": "GR:region:EL65",
               "country_code": "GR",
               "level": "region",
-              "official_code": "EL64",
+              "official_code": "EL65",
               "names": {
-                "native": "Στερεά Ελλάδα",
-                "en": "Sterea Elláda"
+                "native": "Πελοπόννησος",
+                "en": "Peloponnisos"
               }
             },
             {
-              "id": "BG:district:TGV",
+              "id": "BG:district:PER",
               "country_code": "BG",
               "level": "district",
-              "official_code": "TGV",
+              "official_code": "PER",
               "names": {
-                "native": "Търговище",
-                "en": "Targovishte"
-              }
-            },
-            {
-              "id": "GR:region:EL61",
-              "country_code": "GR",
-              "level": "region",
-              "official_code": "EL61",
-              "names": {
-                "native": "Θεσσαλία",
-                "en": "Thessalia"
-              }
-            },
-            {
-              "id": "BG:district:VAR",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "VAR",
-              "names": {
-                "native": "Варна",
-                "en": "Varna"
-              }
-            },
-            {
-              "id": "BG:district:VTR",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "VTR",
-              "names": {
-                "native": "Велико Търново",
-                "en": "Veliko Tarnovo"
-              }
-            },
-            {
-              "id": "BG:district:VID",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "VID",
-              "names": {
-                "native": "Видин",
-                "en": "Vidin"
+                "native": "Перник",
+                "en": "Pernik"
               }
             },
             {
@@ -9121,33 +9091,63 @@
               }
             },
             {
-              "id": "BG:district:VRC",
+              "id": "BG:district:KNL",
               "country_code": "BG",
               "level": "district",
-              "official_code": "VRC",
+              "official_code": "KNL",
               "names": {
-                "native": "Враца",
-                "en": "Vratsa"
+                "native": "Кюстендил",
+                "en": "Kyustendil"
               }
             },
             {
-              "id": "GR:region:EL53",
+              "id": "BG:district:KRZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "KRZ",
+              "names": {
+                "native": "Кърджали",
+                "en": "Kardzhali"
+              }
+            },
+            {
+              "id": "BG:district:RAZ",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "RAZ",
+              "names": {
+                "native": "Разград",
+                "en": "Razgrad"
+              }
+            },
+            {
+              "id": "BG:district:RSE",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "RSE",
+              "names": {
+                "native": "Русе",
+                "en": "Ruse"
+              }
+            },
+            {
+              "id": "BG:district:SHU",
+              "country_code": "BG",
+              "level": "district",
+              "official_code": "SHU",
+              "names": {
+                "native": "Шумен",
+                "en": "Shumen"
+              }
+            },
+            {
+              "id": "GR:region:EL61",
               "country_code": "GR",
               "level": "region",
-              "official_code": "EL53",
+              "official_code": "EL61",
               "names": {
-                "native": "Δυτική Μακεδονία",
-                "en": "Western Macedonia"
-              }
-            },
-            {
-              "id": "BG:district:JAM",
-              "country_code": "BG",
-              "level": "district",
-              "official_code": "JAM",
-              "names": {
-                "native": "Ямбол",
-                "en": "Yambol"
+                "native": "Θεσσαλία",
+                "en": "Thessalia"
               }
             }
           ],
@@ -9190,34 +9190,34 @@
             "Petrich"
           ],
           "districts": [
-            "Dobrich",
+            "Burgas",
+            "Blagoevgrad",
             "Gabrovo",
+            "Dobrich",
+            "Varna",
+            "Vidin",
+            "Veliko Tarnovo",
+            "Vratsa",
             "Haskovo",
-            "Kardzhali",
-            "Kyustendil",
+            "Targovishte",
+            "Yambol",
             "Lovech",
             "Montana",
-            "Pazardzhik",
-            "Pernik",
-            "Pleven",
-            "Plovdiv",
-            "Razgrad",
-            "Ruse",
-            "Shumen",
-            "Silistra",
-            "Sliven",
-            "Smolyan",
             "Sofia",
             "Sofia (stolitsa)",
             "Stara Zagora",
-            "Targovishte",
-            "Varna",
-            "Veliko Tarnovo",
-            "Vidin",
-            "Vratsa",
-            "Yambol",
-            "Burgas",
-            "Blagoevgrad"
+            "Silistra",
+            "Sliven",
+            "Smolyan",
+            "Pazardzhik",
+            "Pleven",
+            "Plovdiv",
+            "Pernik",
+            "Kyustendil",
+            "Kardzhali",
+            "Razgrad",
+            "Ruse",
+            "Shumen"
           ],
           "property_families": [
             "apartment",
@@ -9994,9 +9994,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-b2fbcf35-293c-4307-bdb8-8d71b7f49903",
+    "id": "inbox-lead-draft-39477c43-1d56-4030-8d6f-f51a07dcb12b",
     "lead": {
-      "id": "lead-draft-b2fbcf35-293c-4307-bdb8-8d71b7f49903",
+      "id": "lead-draft-39477c43-1d56-4030-8d6f-f51a07dcb12b",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10097,9 +10097,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-a6933c79-0da8-41ec-a5d9-548aa19db809",
+    "id": "inbox-lead-draft-ed5024f4-b543-4663-aeb2-3283b42c6804",
     "lead": {
-      "id": "lead-draft-a6933c79-0da8-41ec-a5d9-548aa19db809",
+      "id": "lead-draft-ed5024f4-b543-4663-aeb2-3283b42c6804",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10203,9 +10203,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-76d6aa0c-c3f7-42bf-b9de-b77aa28877ca",
+    "id": "inbox-lead-draft-5114dc74-7ae9-4562-9728-91207e30ed11",
     "lead": {
-      "id": "lead-draft-76d6aa0c-c3f7-42bf-b9de-b77aa28877ca",
+      "id": "lead-draft-5114dc74-7ae9-4562-9728-91207e30ed11",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",

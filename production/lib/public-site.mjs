@@ -1483,9 +1483,71 @@ export function humanizeIdentifier(value) {
 }
 
 const LOCATION_NAMES = {
-  en: { "Sofia (stolitsa)": "Sofia (capital city)" },
-  de: { "Sofia (stolitsa)": "Sofia (Hauptstadt)" },
-  nl: { "Sofia (stolitsa)": "Sofia (hoofdstad)" },
+  // Bulgarian districts and settlements keep the Latin transliteration the
+  // catalog already carries (Plovdiv, Varna): that spelling *is* the English,
+  // German and Dutch exonym. Only Sofia city needs the disambiguating suffix.
+  // The Greek regions are the ones the catalog cannot serve on its own — its
+  // `names.en` are raw transliterations ("Kriti", "Dytiki Elláda"), never the
+  // names a reader of these languages knows.
+  en: {
+    "Sofia (stolitsa)": "Sofia (capital city)",
+    Attiki: "Attica",
+    "Nisia Aigaiou, Kriti": "Aegean Islands and Crete",
+    "Northern Greece": "Northern Greece",
+    // EL6 is the NUTS-1 grouping, EL64 the administrative region. English
+    // calls both "Central Greece", so the region carries its Greek name too.
+    "Kentriki Elláda": "Central Greece",
+    "Voreio Aigaio": "North Aegean",
+    "Notio Aigaio": "South Aegean",
+    Kriti: "Crete",
+    "Eastern Macedonia and Thrace": "Eastern Macedonia and Thrace",
+    "Central Macedonia": "Central Macedonia",
+    "Western Macedonia": "Western Macedonia",
+    Epirus: "Epirus",
+    Thessalia: "Thessaly",
+    "Ionia Nisia": "Ionian Islands",
+    "Dytiki Elláda": "Western Greece",
+    "Sterea Elláda": "Central Greece (Sterea Ellada)",
+    Peloponnisos: "Peloponnese",
+  },
+  de: {
+    "Sofia (stolitsa)": "Sofia (Hauptstadt)",
+    Attiki: "Attika",
+    "Nisia Aigaiou, Kriti": "Ägäische Inseln und Kreta",
+    "Northern Greece": "Nordgriechenland",
+    "Kentriki Elláda": "Zentralgriechenland",
+    "Voreio Aigaio": "Nördliche Ägäis",
+    "Notio Aigaio": "Südliche Ägäis",
+    Kriti: "Kreta",
+    "Eastern Macedonia and Thrace": "Ostmakedonien und Thrakien",
+    "Central Macedonia": "Zentralmakedonien",
+    "Western Macedonia": "Westmakedonien",
+    Epirus: "Epirus",
+    Thessalia: "Thessalien",
+    "Ionia Nisia": "Ionische Inseln",
+    "Dytiki Elláda": "Westgriechenland",
+    "Sterea Elláda": "Mittelgriechenland",
+    Peloponnisos: "Peloponnes",
+  },
+  nl: {
+    "Sofia (stolitsa)": "Sofia (hoofdstad)",
+    Attiki: "Attika",
+    "Nisia Aigaiou, Kriti": "Egeïsche Eilanden en Kreta",
+    "Northern Greece": "Noord-Griekenland",
+    "Kentriki Elláda": "Centraal-Griekenland",
+    "Voreio Aigaio": "Noord-Egeïsche Eilanden",
+    "Notio Aigaio": "Zuid-Egeïsche Eilanden",
+    Kriti: "Kreta",
+    "Eastern Macedonia and Thrace": "Oost-Macedonië en Thracië",
+    "Central Macedonia": "Centraal-Macedonië",
+    "Western Macedonia": "West-Macedonië",
+    Epirus: "Epirus",
+    Thessalia: "Thessalië",
+    "Ionia Nisia": "Ionische Eilanden",
+    "Dytiki Elláda": "West-Griekenland",
+    "Sterea Elláda": "Midden-Griekenland",
+    Peloponnisos: "Peloponnesos",
+  },
   bg: {
     Sandanski: "Сандански",
     Petrich: "Петрич",
@@ -1691,6 +1753,13 @@ export function localizedSearchFilterValue(localeCode, key, value) {
       GEOGRAPHY_CATALOG.areas.find((candidate) => candidate.id === value) ||
       geographyRegistryArea(publicGeographyRegistry(), value);
     if (!area) return humanizeIdentifier(value);
+    // The catalog only carries a native and an English name, and its English
+    // name for a Greek region is a transliteration ("Kriti", "Dytiki Elláda").
+    // LOCATION_NAMES is the per-locale exonym table and is keyed by exactly
+    // that English name, so the region filter reads it first — the same
+    // lookup localizedLocationValue() already performs for place names.
+    const exonym = LOCATION_NAMES[localeCode]?.[area.names.en];
+    if (exonym) return exonym;
     return (localeCode === "bg" && area.country_code === "BG") || (localeCode === "el" && area.country_code === "GR")
       ? area.names.native
       : area.names.en;
