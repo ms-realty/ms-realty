@@ -100,8 +100,8 @@ export function operatorAgentConfigBlock({ baseUrl, token, operatorId, expiresAt
   };
   return [
     `MS Realty · ${copy.agentConfigLabel}`,
-    `${copy.statusLabel}: ${operatorId || "operator"}`,
-    expiresAt ? `${copy.agentExpires}: ${expiresAt}` : "",
+    `${copy.agentAccount}: ${operatorId || "operator"}`,
+    expiresAt ? `${copy.agentExpires}: ${verifiedAt(expiresAt, copy)}` : "",
     "",
     `1. ${copy.agentStep1}`,
     `2. ${copy.agentStep2}`,
@@ -158,6 +158,27 @@ export function operatorConnectResult({
 // ---------------------------------------------------------------------------
 
 const PROVIDERS_WITHOUT_REMOTE_REVOKE = new Set(["cloudflare", "neon"]);
+
+const DATE_LOCALES = { bg: "bg-BG", ru: "ru-RU", en: "en-GB" };
+
+// "24 август 2026 г., 09:12" rather than "2026-08-24T09:12:00.000Z". The reader
+// is an estate agent checking whether a connection is still alive, and an ISO
+// timestamp makes them work for an answer they should be able to glance at.
+function verifiedAt(value, copy) {
+  const raw = String(value || "").trim();
+  if (!raw) return copy.noDate;
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return raw;
+  try {
+    return new Intl.DateTimeFormat(DATE_LOCALES[copy.lang] || DATE_LOCALES.en, {
+      dateStyle: "long",
+      timeStyle: "short",
+      timeZone: "UTC",
+    }).format(parsed);
+  } catch {
+    return raw;
+  }
+}
 
 function statusPill(card, copy) {
   const state =
@@ -256,7 +277,7 @@ function connectionCard(card, copy, options) {
     ${
       connected
         ? `<p class="account">${escapeHtml(card.account_label || copy.accountConfirmed)}</p>
-           <p class="verified">${escapeHtml(copy.verifiedAt)}: ${escapeHtml(card.last_verified_at || copy.noDate)}</p>
+           <p class="verified">${escapeHtml(copy.verifiedAt)}: ${escapeHtml(verifiedAt(card.last_verified_at, copy))}</p>
            ${card.kind === "runtime" ? runtimeFacts(card, copy) : ""}
            ${card.kind === "runtime" ? cardAction(card, copy, options) : disconnectForm(card, copy)}`
         : `${card.kind === "runtime" ? runtimeFacts(card, copy) : ""}${cardAction(card, copy, options)}`
@@ -352,7 +373,18 @@ const CONNECT_STYLE = `
     box-shadow: var(--shadow-focus, 0 0 0 3px rgba(219, 62, 62, 0.45));
   }
   .setup { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ink-100, #E6E6E5); }
-  .setup > summary { min-height: 44px; display: flex; align-items: center; color: var(--text-strong, #241F18); font-size: 13px; font-weight: 600; cursor: pointer; }
+  /* list-item keeps the browser's own disclosure triangle, so the row reads as
+     something that opens instead of as a bold paragraph. */
+  .setup > summary {
+    display: list-item;
+    list-style-position: inside;
+    padding: 13px 0;
+    color: var(--text-strong, #241F18);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .setup > summary::marker { color: var(--text-muted, #948263); }
   .setup__intro { margin: 0 0 8px; font-size: 13px; }
   .setup__list, .agent__config {
     margin: 8px 0 0;
@@ -484,10 +516,10 @@ export function renderOperatorConnectPage({
          <ol class="steps">
            <li>${escapeHtml(copy.agentStep1)}</li><li>${escapeHtml(copy.agentStep2)}</li><li>${escapeHtml(copy.agentStep3)}</li>
          </ol>
-         <p class="agent__actions"><button class="button" type="button" data-copy-block="agent-config" data-copy-done="${escapeHtml(copy.agentCopied)}" data-copy-failed="${escapeHtml(copy.agentCopyFailed)}" hidden>${escapeHtml(copy.agentCopy)}</button><button class="button button--quiet" id="agent-reveal" type="button" aria-controls="agent-config" aria-pressed="false" hidden>${escapeHtml(copy.agentReveal)}</button><span class="copy-status" role="status" aria-live="polite" aria-atomic="true" data-copy-status="agent-config"></span></p>
+         <p class="agent__actions"><button class="button" type="button" data-copy-block="agent-config" data-copy-done="${escapeHtml(copy.agentCopied)}" data-copy-failed="${escapeHtml(copy.agentCopyFailed)}" hidden>${escapeHtml(copy.agentCopy)}</button><button class="button button--quiet" id="agent-reveal" type="button" aria-controls="agent-config" aria-pressed="false" data-show-label="${escapeHtml(copy.agentReveal)}" data-hide-label="${escapeHtml(copy.agentHide)}" hidden>${escapeHtml(copy.agentReveal)}</button><span class="copy-status" role="status" aria-live="polite" aria-atomic="true" data-copy-status="agent-config"></span></p>
          <p class="hint" id="agent-config-label">${escapeHtml(copy.agentConfigLabel)}</p>
          <pre class="agent__config" id="agent-config" tabindex="0" aria-labelledby="agent-config-label">${escapeHtml(agentConfig)}</pre>
-         <p class="hint">${escapeHtml(copy.agentWarning)} ${escapeHtml(operatorId || "operator")}.${agentExpiresAt ? ` ${escapeHtml(copy.agentExpires)}: ${escapeHtml(agentExpiresAt)}.` : ""}</p>
+         <p class="hint">${escapeHtml(copy.agentWarning)} ${escapeHtml(operatorId || "operator")}.${agentExpiresAt ? ` ${escapeHtml(copy.agentExpires)}: ${escapeHtml(verifiedAt(agentExpiresAt, copy))}.` : ""}</p>
        </section>`
       : `<section class="agent"><h2>${escapeHtml(copy.agentTitle)}</h2><p class="blocked">${escapeHtml(copy.agentBlocked)}</p></section>`
   }
@@ -551,7 +583,9 @@ export function renderOperatorConnectPage({
     promptArea.select();
     let ok = true;
     try { await navigator.clipboard.writeText(promptArea.value); } catch { ok = document.execCommand("copy"); }
-    if (wasMasked) promptArea.setAttribute("data-masked", "true");
+    // Left readable when the copy failed, because the failure message asks the
+    // operator to select it by hand.
+    if (wasMasked && ok) promptArea.setAttribute("data-masked", "true");
     done.textContent = ok ? text.copied : text.copyFailed;
     done.setAttribute("data-state", ok ? "success" : "error");
     done.style.display = "inline";

@@ -187,6 +187,45 @@ test("a provider nobody has registered an application for shows setup, not a bro
   assert.match(html, /MS_REALTY_GITHUB_OAUTH_CLIENT_ID/);
 });
 
+test("a connected card dates itself in words and offers a disclosure with a marker", () => {
+  const config = fullConfig();
+  const connections = [
+    { provider: "google", status: "connected", account_label: "office@ms-realty.bg", last_verified_at: "2026-08-24T09:12:00.000Z" },
+  ];
+  const english = renderOperatorConnectPage({
+    baseUrl: ORIGIN,
+    operatorId: "connect_operator",
+    connections,
+    availability: operatorProviderAvailability(config),
+    providerConfig: config,
+    locale: "en",
+  });
+  assert.match(english, /Verified: 24 August 2026 at 09:12/);
+  assert.equal(english.includes("2026-08-24T09:12:00.000Z"), false);
+  const bulgarian = renderOperatorConnectPage({
+    baseUrl: ORIGIN,
+    operatorId: "connect_operator",
+    connections,
+    availability: operatorProviderAvailability(config),
+    providerConfig: config,
+    locale: "bg",
+  });
+  assert.match(bulgarian, /Проверено: 24 август 2026 г\./);
+  // A row that opens must look like one, so the summary keeps its marker.
+  assert.match(bulgarian, /\.setup > summary \{\s*display: list-item;/);
+  // An unparseable stored value is shown as-is rather than as "Invalid Date".
+  const broken = renderOperatorConnectPage({
+    baseUrl: ORIGIN,
+    operatorId: "connect_operator",
+    connections: [{ provider: "google", status: "connected", account_label: "x", last_verified_at: "not-a-date" }],
+    availability: operatorProviderAvailability(config),
+    providerConfig: config,
+    locale: "en",
+  });
+  assert.match(broken, /Verified: not-a-date/);
+  assert.equal(broken.includes("Invalid Date"), false);
+});
+
 test("a configured provider offers exactly one primary action per card", () => {
   const config = fullConfig();
   const html = renderOperatorConnectPage({
@@ -440,7 +479,7 @@ test("disconnecting revokes at the provider and then deletes the row", async () 
   );
 });
 
-test("the assistant's configuration is complete, copyable, and readable without JavaScript", () => {
+test("the assistant's configuration is complete, copyable, and readable without JavaScript", async () => {
   const mint = mintOperatorAgentToken(
     { operatorId: "connect_operator", roles: ["admin"] },
     { secret: SECRET, issuedAt: "2026-08-24T00:00:00.000Z", ttlDays: 90 },
@@ -452,6 +491,11 @@ test("the assistant's configuration is complete, copyable, and readable without 
     expiresAt: mint.expires_at,
     locale: "bg",
   });
+  // Names the account it belongs to, and dates it in words rather than as an
+  // ISO timestamp the reader has to decode.
+  assert.match(block, /Акаунт: connect_operator/);
+  assert.match(block, /Валидна до: \d{1,2} \S+ 2026 г\./);
+  assert.equal(block.includes("2026-11-22T"), false);
   // Three numbered steps in the operator's own language.
   assert.match(block, /1\. Натисни „Копирай настройката“\./);
   assert.match(block, /2\. Отвори Claude Code или ChatGPT\./);
@@ -489,6 +533,17 @@ test("the assistant's configuration is complete, copyable, and readable without 
   assert.match(html, /function initCopyBlocks/);
   assert.match(html, /initCopyBlocks\(document\);/);
   assert.ok(html.includes(mint.token));
+
+  // A copy that fails must leave the block readable, because its own failure
+  // message tells the operator to select the text by hand -- which they cannot
+  // do through a blur -- and the show/hide toggle has to agree with what is on
+  // screen rather than claim to be hiding it.
+  const { COPY_BLOCK_JS } = await import("../lib/ui/client.mjs");
+  assert.match(COPY_BLOCK_JS, /if \(wasMasked && ok\) source\.setAttribute\("data-masked", "true"\);/);
+  assert.match(COPY_BLOCK_JS, /if \(wasMasked && !ok\) \{/);
+  assert.match(COPY_BLOCK_JS, /toggle\.setAttribute\("aria-pressed", "true"\)/);
+  assert.match(html, /id="agent-reveal"[^>]*data-show-label="Покажи настройката"[^>]*data-hide-label="Скрий настройката"/);
+  assert.match(html, /if \(wasMasked && ok\) promptArea\.setAttribute\("data-masked", "true"\);/);
 
   // Without a signing secret the card says so instead of offering a dead button.
   const blocked = renderOperatorConnectPage({
