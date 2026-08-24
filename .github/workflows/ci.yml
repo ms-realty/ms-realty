@@ -124,13 +124,19 @@ jobs:
 
       - name: Upload and activate exact origin release
         run: |
+          # Every command names itself and its exit code: two deploys in a row
+          # died inside this step with exit 1 and not one line of output, which
+          # left nothing to debug. Never let this step fail silently again.
+          step() { echo "::group::$1"; shift; "$@" && rc=0 || rc=$?; echo "::endgroup::"; if [ "$rc" -ne 0 ]; then echo "FAILED ($rc): $*" >&2; exit "$rc"; fi; }
           archive="$RUNNER_TEMP/ms-realty-${GITHUB_SHA}.tar.gz"
-          tar --exclude-vcs --exclude=node_modules --exclude=.next --exclude=.local-backups --exclude=.recovery-work -czf "$archive" .
+          step "pack release archive" tar --exclude-vcs --exclude=node_modules --exclude=.next --exclude=.local-backups --exclude=.recovery-work -czf "$archive" .
+          ls -l "$archive"
+          df -h "$RUNNER_TEMP" | tail -1
           ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
-          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" 'install -d -m 0700 /opt/ms-realty/incoming'
-          scp "${ssh_args[@]}" "$archive" "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.tar.gz"
-          scp "${ssh_args[@]}" production/scripts/deploy-production-review.sh "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh"
-          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; trap 'rm -f /opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' EXIT; bash '/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' '$GITHUB_SHA' </dev/null; test \"\$(readlink -f /opt/ms-realty/current)\" = '/opt/ms-realty/releases/${GITHUB_SHA}'"
+          step "prepare incoming dir" ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" 'install -d -m 0700 /opt/ms-realty/incoming; df -h /opt /var/lib/containerd 2>/dev/null | tail -2'
+          step "upload archive" scp "${ssh_args[@]}" "$archive" "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.tar.gz"
+          step "upload deploy script" scp "${ssh_args[@]}" production/scripts/deploy-production-review.sh "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh"
+          step "activate release" ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; trap 'rm -f /opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' EXIT; bash '/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' '$GITHUB_SHA' </dev/null; test \"\$(readlink -f /opt/ms-realty/current)\" = '/opt/ms-realty/releases/${GITHUB_SHA}'"
 
   deploy:
     name: Deploy production
