@@ -111,7 +111,7 @@ import {
 import { buildContactRecords } from "./contact-records.mjs";
 import { loadMigrationRecords } from "./content.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
-import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
+import { DEFAULT_DEAL_LEDGER_PATH, readDeals } from "./deal-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, readEventLedger } from "./events.mjs";
 import {
   EventStoreUnavailableError,
@@ -149,6 +149,8 @@ import {
   leadReadScopeForPrincipal,
   leadDurableStoreConfigFromEnv,
   payloadUserForLeadRead,
+  appendConsentEventDurably,
+  readConsentEventsDurably,
   readLeadIntakesDurably,
   readSellerPipelineItemsDurably,
 } from "./lead-durable-store.mjs";
@@ -159,11 +161,13 @@ import {
 } from "./lead-ops-durable-store.mjs";
 import {
   applyLeadBulkOperation,
+  consentLedgerFor,
   leadJourneyContextFrom,
   leadOperationLedgers,
   recordDealCloseOperation,
   recordLeadAssignmentOperation,
   recordLeadPipelineOutcomeOperation,
+  recordConsentWithdrawalOperation,
   recordLeadSnoozeOperation,
   recordLeadUnsnoozeOperation,
   recordSellerPipelineOutcomeOperation,
@@ -174,24 +178,18 @@ import {
   DEFAULT_CONSENT_LEDGER_PATH,
   appendConsentRecord,
   createConsentRecord,
-  createConsentWithdrawal,
   latestConsentStates,
   readConsentLedger,
 } from "./consent-ledger.mjs";
 import {
   DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
-  appendLeadAssignment,
   applyLeadAssignments,
-  createLeadAssignment,
   readLeadAssignments,
 } from "./lead-assignments.mjs";
 // B1 lead operations: snooze, bulk actions, saved views, Hermes availability.
 import { hermesReplyAvailability } from "./hermes-availability.mjs";
 import {
   DEFAULT_LEAD_SNOOZE_LEDGER_PATH,
-  appendLeadSnooze,
-  createLeadSnooze,
-  createLeadUnsnooze,
   readLeadSnoozes,
 } from "./lead-snoozes.mjs";
 import {
@@ -206,7 +204,6 @@ import {
 import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
   DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
-  appendLeadPipelineOutcome,
   buildLeadPipelineQueue,
   readLeadPipelineOutcomes,
 } from "./lead-pipeline-outcomes.mjs";
@@ -341,7 +338,6 @@ import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import {
   DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH,
-  appendSellerPipelineOutcome,
   buildSellerPipelineQueue,
   readSellerPipelineOutcomes,
 } from "./seller-pipeline-outcomes.mjs";
@@ -982,12 +978,32 @@ function leadOperationLedgersFor(config) {
   });
 }
 
+// Consent withdrawal has a durable home already: the consent_events collection
+// durable intake writes into. It goes durable together with the other lead
+// operations, and only while intake owns the consents.
+function consentLedgerForConfig(config) {
+  const durable = leadOperationsDurable(config) && config.leadDurableStore?.leadDurableStoreEnabled === true;
+  return consentLedgerFor({
+    durable,
+    filePath: config.consentLedgerPath,
+    payload: config.leadDurablePayload || null,
+    workspaceId: config.leadDurableStore?.workspaceId,
+    readConsentEvents: config.readConsentEventsDurably || readConsentEventsDurably,
+    appendConsentEvent: config.appendConsentEventDurably || appendConsentEventDurably,
+  });
+}
+
 // The seller pipeline items themselves are created at intake. Durable intake
 // already stores them as seller_pipeline_events, so that is where they are read
 // from once the lead store owns the leads.
 async function sellerPipelineItems(config, source = null) {
   const durableStore = config.leadDurableStore || {};
-  if (!durableStore.leadDurableStoreEnabled) return readSellerPipeline(config.sellerPipelinePath);
+  // Only once the durable operations store owns the seller outcomes does the
+  // pipeline it acts on come from Postgres; otherwise this stays the file read
+  // it has always been.
+  if (!leadOperationsDurable(config) || !durableStore.leadDurableStoreEnabled) {
+    return readSellerPipeline(config.sellerPipelinePath);
+  }
   const items = await (config.readSellerPipelineItemsDurably || readSellerPipelineItemsDurably)({
     payload: config.leadDurablePayload || null,
     workspaceId: durableStore.workspaceId,
@@ -3111,33 +3127,14 @@ function appendDocumentChecklistOutcomeEntry(input, config) {
   return result;
 }
 
-function appendConsentWithdrawalEntry(input, config) {
-  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
-  const result = createConsentWithdrawal(
-    attributed,
-    readConsentLedger(config.consentLedgerPath),
-    config.reviewedAt || new Date().toISOString(),
-  );
-  if (!result.idempotent) {
-    appendConsentRecord(result.record, { filePath: config.consentLedgerPath });
-    recordAudit(
-      {
-        action: "consent_withdrawn",
-        actor: result.record.actor,
-        objectType: "consent",
-        objectId: result.record.subject_id,
-        locale: result.record.locale,
-        metadata: {
-          consent_type: result.record.consent_type,
-          reason_code: result.record.reason_code,
-          granted: false,
-        },
-      },
-      config,
-      result.record.recorded_at,
-    );
-  }
-  return result;
+async function appendConsentWithdrawalEntry(input, config) {
+  return recordConsentWithdrawalOperation({
+    consents: consentLedgerForConfig(config),
+    input,
+    principal: config.adminPrincipal,
+    recordedAt: config.reviewedAt || new Date().toISOString(),
+    audit: leadOperationAudit(config),
+  });
 }
 
 async function appendDealClose(input, config) {
@@ -3716,6 +3713,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         : null;
     if (
       isFileBackedLeadMutationBlocked({
+        durableLeadOperations: config.leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
         durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
         durableStore: config.leadDurableStore,
         durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
@@ -3726,6 +3724,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return leadStoreUnavailable("lead_store_read_only");
     }
     if (productionRuntimeDataUnavailable({
+      durableLeadOperations: config.leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
       durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
       durableOnly: config.runtimeDataDurableOnly,
       durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
@@ -4609,7 +4608,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/consents/withdraw") {
-      const result = appendConsentWithdrawalEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendConsentWithdrawalEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
