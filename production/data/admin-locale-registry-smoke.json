@@ -69,7 +69,10 @@
         "location": "lokacii",
         "contact": "kontakt",
         "seller": "prodai",
-        "start": "nachalo"
+        "start": "nachalo",
+        "compare": "sravnenie",
+        "about": "za-nas",
+        "alerts": "abonamenti"
       }
     },
     {
@@ -88,7 +91,10 @@
         "location": "locations",
         "contact": "contact",
         "seller": "sell",
-        "start": "start"
+        "start": "start",
+        "compare": "compare",
+        "about": "about",
+        "alerts": "alerts"
       }
     },
     {
@@ -107,7 +113,10 @@
         "location": "orte",
         "contact": "kontakt",
         "seller": "verkaufen",
-        "start": "start"
+        "start": "start",
+        "compare": "vergleich",
+        "about": "ueber-uns",
+        "alerts": "benachrichtigungen"
       }
     },
     {
@@ -126,7 +135,10 @@
         "location": "locaties",
         "contact": "contact",
         "seller": "verkopen",
-        "start": "start"
+        "start": "start",
+        "compare": "vergelijken",
+        "about": "over-ons",
+        "alerts": "meldingen"
       }
     },
     {
@@ -145,7 +157,10 @@
         "location": "locations",
         "contact": "contact",
         "seller": "sell",
-        "start": "start"
+        "start": "start",
+        "compare": "sravnenie",
+        "about": "o-nas",
+        "alerts": "podpiski"
       }
     },
     {
@@ -164,7 +179,10 @@
         "location": "topothesies",
         "contact": "epikoinonia",
         "seller": "polisi",
-        "start": "arxi"
+        "start": "arxi",
+        "compare": "sygkrisi",
+        "about": "sxetika",
+        "alerts": "eidopoiiseis"
       }
     },
     {
@@ -183,7 +201,10 @@
         "location": "locations",
         "contact": "contact",
         "seller": "sell",
-        "start": "start"
+        "start": "start",
+        "compare": "compare",
+        "about": "about",
+        "alerts": "alerts"
       }
     },
     {
@@ -202,7 +223,10 @@
         "location": "lieux",
         "contact": "contact",
         "seller": "vendre",
-        "start": "commencer"
+        "start": "commencer",
+        "compare": "comparer",
+        "about": "a-propos",
+        "alerts": "alertes"
       }
     },
     {
@@ -221,7 +245,10 @@
         "location": "locations",
         "contact": "contact",
         "seller": "sell",
-        "start": "start"
+        "start": "start",
+        "compare": "compare",
+        "about": "about",
+        "alerts": "alerts"
       }
     }
   ]

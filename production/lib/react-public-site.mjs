@@ -1183,7 +1183,7 @@ function HomeBody({ page }) {
         "data-hero-gallery": "true",
         "data-hero-gallery-interval": "7000",
         "data-hero-gallery-label": labels.gallery,
-        "aria-roledescription": "carousel",
+        "aria-roledescription": labels.carousel || "carousel",
         "aria-label": labels.gallery,
       },
       h(

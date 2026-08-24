@@ -67,9 +67,9 @@
         "source": "privacy_events",
         "input_path": "production/data/events.jsonl",
         "status": "imported",
-        "row_count": 87,
-        "matched_rows": 42,
-        "unmatched_rows": 45
+        "row_count": 176,
+        "matched_rows": 65,
+        "unmatched_rows": 111
       }
     }
   },

@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-08-20T19:22:41.099Z
+Generated: 2026-08-24T15:53:34.313Z
 
 Status: blocked
 Blockers: live_services, monitoring_rollback, payload_runtime, production_recovery
@@ -92,7 +92,10 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Runtime report: `production/data/payload-runtime-report.json` (real output stays local and ignored)
 - Runtime report example: `production/data/payload-runtime-report.json.example`
 - Current check evidence:
-- no Payload runtime check rows available
+- payload_secret: missing_env (env PAYLOAD_SECRET)
+- database_url: missing_env (env DATABASE_URL)
+- database_network_scope: missing_env (env DATABASE_URL)
+- database_tcp: missing_env (env DATABASE_URL)
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`
@@ -129,7 +132,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 ## Content Quality Warnings
 
 - Current review evidence:
-- pass (path production/data/launch-freeze.json; expected 165; reviewed 165; missing 0)
+- pass (path production/data/listing-publication-approval.json; expected 165; reviewed 165; missing 0)
 - Pending review sample:
 - none
 - Workbook: `production/data/listing-quality-workbook.csv`
@@ -166,7 +169,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Coverage: 165/165 source rows (pass: 30, review: 75, hold: 52, source unavailable: 8).
 - Broker approvals in this artifact: 0; broker confirmations still required: 165.
 - Broker packet: `production/data/launch-candidate30-broker-packet.json` — 30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6.
-- This evidence grants no publication approval. The exact `MSR-LAUNCH-FREEZE-1` approval clears only the 165-row preservation gate with 0 publish-ready listings; use the packet for later fact, media, availability, and publication review.
+- This evidence classifies the freeze catalog only. `MSR-LISTING-PUBLICATION-1` publishes the 30 freeze-active listings as source-locale inventory; archived freeze rows stay out of active search.
 
 ## Broker Verification
 

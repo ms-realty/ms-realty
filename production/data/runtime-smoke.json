@@ -126,6 +126,32 @@
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "saved": {
+        "href": "/he/search?saved=1",
+        "label": "שמורים",
+        "compare": {
+          "href": "/he/compare",
+          "label": "השוואת נכסים שמורים",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "גלו עוד",
+        "links": [
+          {
+            "id": "about",
+            "href": "/he/about",
+            "label": "אודות MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/he/alerts",
+            "label": "התראות הנכסים שלכם",
+            "active": false
+          }
+        ]
+      },
       "resources": null,
       "footer": {
         "locations": [],
@@ -585,6 +611,58 @@
         ],
         "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
       },
+      "extras": {
+        "brochure": {
+          "title": "שמרו או הדפיסו את הנכס",
+          "label": "שמירה כ PDF",
+          "note": "פותח תצוגת הדפסה של עמוד אחד עם הנתונים שנבדקו, התמונות ומספר הנכס, מוכנה לשמירה כ PDF.",
+          "url": "/he/properties/MS-CRAWL-0001?print=1",
+          "reference": "MS-CRAWL-0001",
+          "pdf_status": "browser_print_ready"
+        },
+        "costs": {
+          "applicable": false,
+          "title": "כמה עולה הרכישה",
+          "intro": "מלבד המחיר, רכישה בבולגריה כרוכה בעלויות האלה. אנחנו מפרסמים שיעור רק אחרי שהסוכנות אישרה אותו, ושורה בלי שיעור מאושר מסומנת ולא מנוחשת.",
+          "buyer_label": "מי קונה",
+          "buyers": {
+            "eu": "אזרח האיחוד האירופי או האזור הכלכלי",
+            "non_eu": "אזרח שאינו מהאיחוד האירופי"
+          },
+          "lines": {
+            "local_transfer_tax": {
+              "label": "מס העברה מקומי",
+              "note": "נקבע על ידי הרשות המקומית שבה נמצא הנכס, ומשולם בעת חתימת השטר."
+            },
+            "notary_fee": {
+              "label": "שכר נוטריון",
+              "note": "מחושב על שווי השטר לפי טבלה ממשלתית."
+            },
+            "registry_entry_fee": {
+              "label": "אגרת רישום",
+              "note": "רישום השטר בפנקס המקרקעין."
+            },
+            "agency_fee": {
+              "label": "עמלת הסוכנות",
+              "note": "שכר הטרחה שלנו, מסוכם בכתב לפני שאתם מגישים הצעה."
+            },
+            "company_route_setup": {
+              "label": "חברה בולגרית, קונים שאינם מהאיחוד האירופי",
+              "note": "אזרחים שאינם מהאיחוד האירופי אינם יכולים להחזיק קרקע על שמם ומחזיקים אותה דרך חברה בולגרית."
+            }
+          },
+          "lines_title": "מה כלול",
+          "missing_label": "טרם אושר",
+          "total_label": "סך הכול",
+          "total_with_price_label": "מחיר בתוספת עלויות",
+          "total_unavailable": "לא זמין עד שטבלת העלויות תאושר",
+          "note": "אף מספר כאן אינו הערכה. השורות הן העלויות שרכישה כרוכה בהן, והשיעורים מגיעים מטבלת עלויות שאדם בסוכנות חייב לאשר לפני שנפרסם אותה.",
+          "cta": {
+            "label": "בקשו מהמתווך את הסכומים",
+            "path": "/he/contact"
+          }
+        }
+      },
       "related_listings": [
         {
           "id": "MS-CRAWL-0006",
@@ -905,6 +983,32 @@
         "path": "/en/contact",
         "label": "Contact",
         "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "saved": {
+        "href": "/en/search?saved=1",
+        "label": "Saved",
+        "compare": {
+          "href": "/en/compare",
+          "label": "Compare saved properties",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "Explore",
+        "links": [
+          {
+            "id": "about",
+            "href": "/en/about",
+            "label": "About MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/en/alerts",
+            "label": "Your property alerts",
+            "active": false
+          }
+        ]
       },
       "resources": {
         "label": "Buyer guides",
@@ -1385,6 +1489,58 @@
         ],
         "notice": "The purchase cost table is not complete, so no total is shown."
       },
+      "extras": {
+        "brochure": {
+          "title": "Save or print this property",
+          "label": "Save as PDF",
+          "note": "Opens a one page print view with the reviewed facts, the photos and the reference number, ready to save as a PDF.",
+          "url": "/en/properties/MS-CRAWL-0001?print=1",
+          "reference": "MS-CRAWL-0001",
+          "pdf_status": "browser_print_ready"
+        },
+        "costs": {
+          "applicable": false,
+          "title": "What this costs to buy",
+          "intro": "Besides the price, a Bulgarian purchase carries these costs. We publish a rate only once the agency has approved it, and a line without an approved rate is marked rather than guessed.",
+          "buyer_label": "Who is buying",
+          "buyers": {
+            "eu": "EU or EEA citizen",
+            "non_eu": "Non-EU citizen"
+          },
+          "lines": {
+            "local_transfer_tax": {
+              "label": "Local property transfer tax",
+              "note": "Set by the municipality the property sits in, and paid when the deed is signed."
+            },
+            "notary_fee": {
+              "label": "Notary fee",
+              "note": "Charged on the deed value on a state scale."
+            },
+            "registry_entry_fee": {
+              "label": "Registry entry fee",
+              "note": "Entering the deed in the property register."
+            },
+            "agency_fee": {
+              "label": "Agency commission",
+              "note": "Our fee, agreed in writing before you make an offer."
+            },
+            "company_route_setup": {
+              "label": "Bulgarian company, non-EU buyers",
+              "note": "Non-EU citizens cannot own land in their own name and hold it through a Bulgarian company."
+            }
+          },
+          "lines_title": "What it covers",
+          "missing_label": "Not approved yet",
+          "total_label": "Total",
+          "total_with_price_label": "Price plus costs",
+          "total_unavailable": "Unavailable until the fee table is approved",
+          "note": "No number here is an estimate. The lines are the costs a purchase involves; the rates come from a fee table a person at the agency has to approve before we publish it.",
+          "cta": {
+            "label": "Ask a broker for the figures",
+            "path": "/en/contact"
+          }
+        }
+      },
       "related_listings": [
         {
           "id": "MS-CRAWL-0006",
@@ -1668,6 +1824,32 @@
         "path": "/ru/contact",
         "label": "Контакты",
         "offices": "Сандански · Банско · Свети-Влас"
+      },
+      "saved": {
+        "href": "/ru/search?saved=1",
+        "label": "Избранное",
+        "compare": {
+          "href": "/ru/sravnenie",
+          "label": "Сравнение сохранённых объектов",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "Обзор",
+        "links": [
+          {
+            "id": "about",
+            "href": "/ru/o-nas",
+            "label": "О компании MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/ru/podpiski",
+            "label": "Ваши подписки на объекты",
+            "active": false
+          }
+        ]
       },
       "resources": null,
       "footer": {
@@ -2079,6 +2261,58 @@
         ],
         "notice": "Таблица расходов неполная, поэтому итог не показывается."
       },
+      "extras": {
+        "brochure": {
+          "title": "Сохраните или распечатайте объект",
+          "label": "Сохранить как PDF",
+          "note": "Открывает одностраничный вид для печати с проверенными фактами, фотографиями и референсным номером, готовый к сохранению в PDF.",
+          "url": "/ru/properties/MS-CRAWL-0114?print=1",
+          "reference": "MS-CRAWL-0114",
+          "pdf_status": "browser_print_ready"
+        },
+        "costs": {
+          "applicable": true,
+          "title": "Во что обойдётся покупка",
+          "intro": "Кроме цены покупка в Болгарии несёт эти расходы. Мы публикуем ставку только после того, как её утвердит агентство, а строка без утверждённой ставки помечается, а не угадывается.",
+          "buyer_label": "Кто покупает",
+          "buyers": {
+            "eu": "Гражданин ЕС или ЕЭП",
+            "non_eu": "Гражданин вне ЕС"
+          },
+          "lines": {
+            "local_transfer_tax": {
+              "label": "Местный налог на переход права",
+              "note": "Устанавливается общиной, где находится объект, и платится при подписании акта."
+            },
+            "notary_fee": {
+              "label": "Нотариальный сбор",
+              "note": "Начисляется на стоимость по акту по государственной шкале."
+            },
+            "registry_entry_fee": {
+              "label": "Сбор за внесение в реестр",
+              "note": "Внесение акта в реестр недвижимости."
+            },
+            "agency_fee": {
+              "label": "Комиссия агентства",
+              "note": "Наше вознаграждение, согласованное письменно до того, как вы сделаете предложение."
+            },
+            "company_route_setup": {
+              "label": "Болгарская компания, покупатели вне ЕС",
+              "note": "Граждане вне ЕС не могут владеть землёй на своё имя и держат её через болгарскую компанию."
+            }
+          },
+          "lines_title": "Что входит",
+          "missing_label": "Ещё не утверждено",
+          "total_label": "Итого",
+          "total_with_price_label": "Цена плюс расходы",
+          "total_unavailable": "Недоступно, пока таблица сборов не утверждена",
+          "note": "Ни одно число здесь не является оценкой. Строки, это расходы, которые несёт покупка; ставки берутся из таблицы сборов, которую человек в агентстве должен утвердить до публикации.",
+          "cta": {
+            "label": "Спросить брокера о суммах",
+            "path": "/ru/contact"
+          }
+        }
+      },
       "related_listings": [
         {
           "id": "MS-CRAWL-0119",
@@ -2420,6 +2654,32 @@
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "saved": {
+        "href": "/he/search?saved=1",
+        "label": "שמורים",
+        "compare": {
+          "href": "/he/compare",
+          "label": "השוואת נכסים שמורים",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "גלו עוד",
+        "links": [
+          {
+            "id": "about",
+            "href": "/he/about",
+            "label": "אודות MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/he/alerts",
+            "label": "התראות הנכסים שלכם",
+            "active": false
+          }
+        ]
       },
       "resources": null,
       "footer": {
@@ -3698,6 +3958,32 @@
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "saved": {
+        "href": "/he/search?saved=1",
+        "label": "שמורים",
+        "compare": {
+          "href": "/he/compare",
+          "label": "השוואת נכסים שמורים",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "גלו עוד",
+        "links": [
+          {
+            "id": "about",
+            "href": "/he/about",
+            "label": "אודות MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/he/alerts",
+            "label": "התראות הנכסים שלכם",
+            "active": false
+          }
+        ]
+      },
       "resources": null,
       "footer": {
         "locations": [],
@@ -3727,6 +4013,40 @@
         }
       },
       "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
+      "photo_upload": {
+        "endpoint": "/api/seller-photos?return=%2Fhe%2Fsell",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "field": "photo",
+        "reference_field": "enquiryId",
+        "accept": [
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+          "image/avif"
+        ],
+        "max_files": 8,
+        "max_file_bytes": 8388608,
+        "max_request_bytes": 10485760,
+        "minimum_tap_target_px": 44,
+        "public": false,
+        "searchable": false,
+        "published_automatically": false,
+        "review_required": true,
+        "copy": {
+          "title": "הוספת תמונות",
+          "intro": "תמונות עוזרות למתווך להכין את ההערכה לפני הביקור.",
+          "privacy": "התמונות שלכם נשארות פרטיות. תמונות שנשלחות על ידי מבקר באתר לעולם אינן מתפרסמות אוטומטית ואינן מופיעות בחיפוש. מתווך בודק אותן יחד אתכם.",
+          "field": "בחרו תמונות",
+          "reference": "מספר הפנייה",
+          "reference_hint": "שלחו קודם את בקשת ההערכה. נמלא כאן את המספר; אם כבר קיבלתם אותו ממתווך, הקלידו אותו.",
+          "submit": "שליחת תמונות",
+          "pending": "שולח…",
+          "success": "התמונות הגיעו לפנייה שלכם. הן נשארות פרטיות עד שמתווך יבדוק אותן.",
+          "failure": "התמונות לא נשלחו.",
+          "limits": "JPEG, PNG, WebP או AVIF. עד 8 תמונות, כל אחת עד 8 MB. נתוני מיקום מוסרים בעת השליחה."
+        }
+      },
       "valuation": null,
       "callback": null
     }
@@ -3893,6 +4213,32 @@
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "saved": {
+        "href": "/he/search?saved=1",
+        "label": "שמורים",
+        "compare": {
+          "href": "/he/compare",
+          "label": "השוואת נכסים שמורים",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "גלו עוד",
+        "links": [
+          {
+            "id": "about",
+            "href": "/he/about",
+            "label": "אודות MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/he/alerts",
+            "label": "התראות הנכסים שלכם",
+            "active": false
+          }
+        ]
       },
       "resources": null,
       "footer": {
@@ -4093,6 +4439,32 @@
         "path": "/en/contact",
         "label": "Contact",
         "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "saved": {
+        "href": "/en/search?saved=1",
+        "label": "Saved",
+        "compare": {
+          "href": "/en/compare",
+          "label": "Compare saved properties",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "Explore",
+        "links": [
+          {
+            "id": "about",
+            "href": "/en/about",
+            "label": "About MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/en/alerts",
+            "label": "Your property alerts",
+            "active": false
+          }
+        ]
       },
       "resources": {
         "label": "Buyer guides",
@@ -4324,6 +4696,32 @@
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "saved": {
+        "href": "/he/search?saved=1",
+        "label": "שמורים",
+        "compare": {
+          "href": "/he/compare",
+          "label": "השוואת נכסים שמורים",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "גלו עוד",
+        "links": [
+          {
+            "id": "about",
+            "href": "/he/about",
+            "label": "אודות MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/he/alerts",
+            "label": "התראות הנכסים שלכם",
+            "active": false
+          }
+        ]
+      },
       "resources": null,
       "footer": {
         "locations": [],
@@ -4545,6 +4943,32 @@
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "saved": {
+        "href": "/he/search?saved=1",
+        "label": "שמורים",
+        "compare": {
+          "href": "/he/compare",
+          "label": "השוואת נכסים שמורים",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "גלו עוד",
+        "links": [
+          {
+            "id": "about",
+            "href": "/he/about",
+            "label": "אודות MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/he/alerts",
+            "label": "התראות הנכסים שלכם",
+            "active": false
+          }
+        ]
       },
       "resources": null,
       "footer": {
@@ -5005,6 +5429,58 @@
         ],
         "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
       },
+      "extras": {
+        "brochure": {
+          "title": "שמרו או הדפיסו את הנכס",
+          "label": "שמירה כ PDF",
+          "note": "פותח תצוגת הדפסה של עמוד אחד עם הנתונים שנבדקו, התמונות ומספר הנכס, מוכנה לשמירה כ PDF.",
+          "url": "/he/properties/MS-CRAWL-0001?print=1",
+          "reference": "MS-CRAWL-0001",
+          "pdf_status": "browser_print_ready"
+        },
+        "costs": {
+          "applicable": false,
+          "title": "כמה עולה הרכישה",
+          "intro": "מלבד המחיר, רכישה בבולגריה כרוכה בעלויות האלה. אנחנו מפרסמים שיעור רק אחרי שהסוכנות אישרה אותו, ושורה בלי שיעור מאושר מסומנת ולא מנוחשת.",
+          "buyer_label": "מי קונה",
+          "buyers": {
+            "eu": "אזרח האיחוד האירופי או האזור הכלכלי",
+            "non_eu": "אזרח שאינו מהאיחוד האירופי"
+          },
+          "lines": {
+            "local_transfer_tax": {
+              "label": "מס העברה מקומי",
+              "note": "נקבע על ידי הרשות המקומית שבה נמצא הנכס, ומשולם בעת חתימת השטר."
+            },
+            "notary_fee": {
+              "label": "שכר נוטריון",
+              "note": "מחושב על שווי השטר לפי טבלה ממשלתית."
+            },
+            "registry_entry_fee": {
+              "label": "אגרת רישום",
+              "note": "רישום השטר בפנקס המקרקעין."
+            },
+            "agency_fee": {
+              "label": "עמלת הסוכנות",
+              "note": "שכר הטרחה שלנו, מסוכם בכתב לפני שאתם מגישים הצעה."
+            },
+            "company_route_setup": {
+              "label": "חברה בולגרית, קונים שאינם מהאיחוד האירופי",
+              "note": "אזרחים שאינם מהאיחוד האירופי אינם יכולים להחזיק קרקע על שמם ומחזיקים אותה דרך חברה בולגרית."
+            }
+          },
+          "lines_title": "מה כלול",
+          "missing_label": "טרם אושר",
+          "total_label": "סך הכול",
+          "total_with_price_label": "מחיר בתוספת עלויות",
+          "total_unavailable": "לא זמין עד שטבלת העלויות תאושר",
+          "note": "אף מספר כאן אינו הערכה. השורות הן העלויות שרכישה כרוכה בהן, והשיעורים מגיעים מטבלת עלויות שאדם בסוכנות חייב לאשר לפני שנפרסם אותה.",
+          "cta": {
+            "label": "בקשו מהמתווך את הסכומים",
+            "path": "/he/contact"
+          }
+        }
+      },
       "related_listings": [
         {
           "id": "MS-CRAWL-0006",
@@ -5323,6 +5799,32 @@
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "saved": {
+        "href": "/he/search?saved=1",
+        "label": "שמורים",
+        "compare": {
+          "href": "/he/compare",
+          "label": "השוואת נכסים שמורים",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "גלו עוד",
+        "links": [
+          {
+            "id": "about",
+            "href": "/he/about",
+            "label": "אודות MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/he/alerts",
+            "label": "התראות הנכסים שלכם",
+            "active": false
+          }
+        ]
       },
       "resources": null,
       "footer": {
@@ -6891,6 +7393,32 @@
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "saved": {
+        "href": "/he/search?saved=1",
+        "label": "שמורים",
+        "compare": {
+          "href": "/he/compare",
+          "label": "השוואת נכסים שמורים",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "גלו עוד",
+        "links": [
+          {
+            "id": "about",
+            "href": "/he/about",
+            "label": "אודות MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/he/alerts",
+            "label": "התראות הנכסים שלכם",
+            "active": false
+          }
+        ]
+      },
       "resources": null,
       "footer": {
         "locations": [],
@@ -7798,6 +8326,32 @@
         "label": "Contact",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
+      "saved": {
+        "href": "/en/search?saved=1",
+        "label": "Saved",
+        "compare": {
+          "href": "/en/compare",
+          "label": "Compare saved properties",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "Explore",
+        "links": [
+          {
+            "id": "about",
+            "href": "/en/about",
+            "label": "About MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/en/alerts",
+            "label": "Your property alerts",
+            "active": false
+          }
+        ]
+      },
       "resources": {
         "label": "Buyer guides",
         "links": [
@@ -7975,6 +8529,32 @@
         "path": "/he/contact",
         "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "saved": {
+        "href": "/he/search?saved=1",
+        "label": "שמורים",
+        "compare": {
+          "href": "/he/compare",
+          "label": "השוואת נכסים שמורים",
+          "active": false
+        }
+      },
+      "company": {
+        "label": "גלו עוד",
+        "links": [
+          {
+            "id": "about",
+            "href": "/he/about",
+            "label": "אודות MS Realty",
+            "active": false
+          },
+          {
+            "id": "alerts",
+            "href": "/he/alerts",
+            "label": "התראות הנכסים שלכם",
+            "active": false
+          }
+        ]
       },
       "resources": null,
       "footer": {
@@ -9414,9 +9994,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-06f91c4d-3ee2-4060-b6e7-51527e32af04",
+    "id": "inbox-lead-draft-b2fbcf35-293c-4307-bdb8-8d71b7f49903",
     "lead": {
-      "id": "lead-draft-06f91c4d-3ee2-4060-b6e7-51527e32af04",
+      "id": "lead-draft-b2fbcf35-293c-4307-bdb8-8d71b7f49903",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -9445,6 +10025,8 @@
         "finance_status": null
       },
       "contact_preference": "whatsapp",
+      "channel": "listing_detail",
+      "first_touch_path": null,
       "message": "Interested in this property.",
       "language": {
         "language": "he",
@@ -9515,9 +10097,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-893aa3b2-9ee4-4e80-ba26-0b0315f55efc",
+    "id": "inbox-lead-draft-a6933c79-0da8-41ec-a5d9-548aa19db809",
     "lead": {
-      "id": "lead-draft-893aa3b2-9ee4-4e80-ba26-0b0315f55efc",
+      "id": "lead-draft-a6933c79-0da8-41ec-a5d9-548aa19db809",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -9549,6 +10131,8 @@
         "finance_status": null
       },
       "contact_preference": "phone",
+      "channel": "listing_detail",
+      "first_touch_path": null,
       "message": "I would like to view this property.",
       "language": {
         "language": "he",
@@ -9619,9 +10203,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-57574e6b-b506-46b6-af57-82baa6ae90c3",
+    "id": "inbox-lead-draft-76d6aa0c-c3f7-42bf-b9de-b77aa28877ca",
     "lead": {
-      "id": "lead-draft-57574e6b-b506-46b6-af57-82baa6ae90c3",
+      "id": "lead-draft-76d6aa0c-c3f7-42bf-b9de-b77aa28877ca",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",
@@ -9645,6 +10229,8 @@
         "finance_status": null
       },
       "contact_preference": "phone",
+      "channel": "contact_page",
+      "first_touch_path": null,
       "message": "Please call me about buying in Sandanski.",
       "language": {
         "language": "he",
