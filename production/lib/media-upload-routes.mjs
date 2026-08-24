@@ -9,6 +9,7 @@
 //
 // Every response says, in the payload, that an upload is not a publication.
 
+import { imageOptimizationFromEnv } from "./image-optimizer.mjs";
 import {
   MediaUploadError,
   appendMediaUpload,
@@ -54,13 +55,40 @@ function failure(error) {
 }
 
 async function storeFiles(files, options) {
-  const { scope, subjectId, kind, limits, storage, ledgerPath, uploadedBy, source, uploadedAt, recordAudit, auditKey } = options;
+  const {
+    scope,
+    subjectId,
+    kind,
+    limits,
+    imageSettings,
+    storage,
+    ledgerPath,
+    uploadedBy,
+    source,
+    uploadedAt,
+    recordAudit,
+    auditKey,
+  } = options;
   const accepted = [];
   const rejected = [];
   for (const [index, file] of files.entries()) {
     try {
-      const prepared = prepareMediaUpload(file, { scope, subjectId, kind, limits, uploadedAt });
+      const prepared = await prepareMediaUpload(file, { scope, subjectId, kind, limits, imageSettings, uploadedAt });
       const stored = await storage.put({ key: prepared.storageKey, bytes: prepared.bytes, contentType: prepared.mime });
+      // The rendition is written after the photo it belongs to. If it fails,
+      // the upload still succeeded — a missing thumbnail costs the reviewer a
+      // larger download, which is not a reason to throw away the photo.
+      if (prepared.rendition) {
+        try {
+          await storage.put({
+            key: prepared.rendition.storageKey,
+            bytes: prepared.rendition.bytes,
+            contentType: prepared.rendition.mime,
+          });
+        } catch {
+          prepared.rendition = null;
+        }
+      }
       const persisted = appendMediaUpload(
         createMediaUploadRecord(prepared, { uploadedBy, source, storageDriver: stored.driver, uploadedAt }),
         { filePath: ledgerPath || undefined },
@@ -76,6 +104,10 @@ async function storeFiles(files, options) {
             kind: persisted.kind,
             format: persisted.format,
             bytes: persisted.bytes,
+            submitted_bytes: persisted.submitted_bytes,
+            width: persisted.width,
+            height: persisted.height,
+            optimized: persisted.optimized,
             storage_driver: persisted.storage_driver,
             metadata_stripped: persisted.metadata_stripped,
             review_status: persisted.review_status,
@@ -120,6 +152,7 @@ export async function handleAdminMediaUpload({
   acceptsHtml = false,
   seed,
   limits = mediaUploadLimitsFromEnv(),
+  imageSettings = imageOptimizationFromEnv(),
   storage,
   ledgerPath = null,
   uploadedBy = "admin",
@@ -140,6 +173,7 @@ export async function handleAdminMediaUpload({
       subjectId: record.id,
       kind,
       limits,
+      imageSettings,
       storage,
       ledgerPath,
       uploadedBy,
@@ -208,18 +242,33 @@ export function listMediaUploads({ ledgerPath = null, listing = "", enquiry = ""
   };
 }
 
-export async function readMediaUploadBytes({ ledgerPath = null, assetId, storage }) {
+/**
+ * Byte preview for a reviewer.
+ *
+ * `rendition` selects a stored derivative instead of the photo itself. It is a
+ * selector on this route rather than a route of its own on purpose: the
+ * permission check, the private cache headers and the "unreviewed media is
+ * admin-only" rule are already correct here, and a second endpoint would be a
+ * second place for them to be got wrong. An unknown rendition name falls back
+ * to the full photo rather than 404ing, so a stale link keeps working.
+ */
+export async function readMediaUploadBytes({ ledgerPath = null, assetId, rendition = "", storage }) {
   const row = readMediaUploads(ledgerPath || undefined).find((item) => item.asset_id === assetId || item.id === assetId);
   if (!row) return { status: 404, body: { kind: "not_found", message: "Unknown upload" } };
+  const wanted = String(rendition || "").trim();
+  const derived = wanted && row.rendition?.kind === wanted ? row.rendition : null;
+  const key = derived ? derived.storage_key : row.storage_key;
+  const contentType = derived ? derived.content_type : row.content_type;
+  const format = derived ? derived.format : row.format;
   try {
-    const bytes = await storage.read(row.storage_key);
+    const bytes = await storage.read(key);
     return {
       status: 200,
       body: bytes,
       headers: {
-        "content-type": row.content_type || "application/octet-stream",
+        "content-type": contentType || "application/octet-stream",
         "content-length": String(bytes.length),
-        "content-disposition": `inline; filename="${row.asset_id}.${row.format === "jpeg" ? "jpg" : row.format}"`,
+        "content-disposition": `inline; filename="${row.asset_id}${derived ? `-${derived.kind}` : ""}.${format === "jpeg" ? "jpg" : format}"`,
       },
     };
   } catch (error) {
@@ -240,6 +289,10 @@ export async function handleSellerPhotoUpload({
   enabled = true,
   sellerEnquiries = null,
   limits = mediaUploadLimitsFromEnv(),
+  // The seller intake optimises through exactly the same settings as the admin
+  // editor. A photo is not treated differently because a member of the public
+  // sent it; only where it is stored differs, and that is the privacy contract.
+  imageSettings = imageOptimizationFromEnv(),
   storage,
   ledgerPath = null,
   uploadedAt = new Date().toISOString(),
@@ -278,6 +331,7 @@ export async function handleSellerPhotoUpload({
       subjectId: enquiryId,
       kind: "photo",
       limits,
+      imageSettings,
       storage,
       ledgerPath,
       uploadedBy: "public_seller_intake",

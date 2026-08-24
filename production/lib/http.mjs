@@ -319,18 +319,16 @@ import { normalizeSearchRequest } from "./search-request.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 // Package B2: approved content.
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
-import { purchaseFeePayload } from "./public-site.mjs";
-import { PURCHASE_FEE_BUYER_SCOPES } from "./purchase-fees.mjs";
+import { purchaseFeeEstimateResponse } from "./purchase-fee-estimate-route.mjs";
 // B3 saved-search self-service: capability links, visitor changes, alert delivery.
 import {
   DEFAULT_SAVED_SEARCH_MANAGE_PATH,
   SAVED_SEARCH_LINK_REFUSAL,
   SavedSearchLinkRefusedError,
   assertSavedSearchAccess,
-  mintSavedSearchAccess,
   readSavedSearchAccessToken,
   savedSearchAccessSecret,
-  savedSearchManageLink,
+  savedSearchManageMinter,
   savedSearchManagePathTemplate,
   savedSearchManageTtlDays,
 } from "./saved-search-access.mjs";
@@ -2878,25 +2876,12 @@ export function createHttpApp({
     // Package B2: approved content (team profiles, area guides, financing
     // partners, purchase fee table).
     if (request.method === "GET" && url.pathname === "/api/purchase-fees/estimate") {
-      const buyerScope = url.searchParams.get("buyer") || url.searchParams.get("buyer_scope") || "eu";
-      const rawPrice = url.searchParams.get("price_eur");
-      if (!PURCHASE_FEE_BUYER_SCOPES.includes(buyerScope)) {
-        return json(400, { kind: "bad_request", message: `buyer must be one of: ${PURCHASE_FEE_BUYER_SCOPES.join(", ")}` });
-      }
-      if (rawPrice !== null && !/^\d+(\.\d{1,2})?$/.test(rawPrice.trim())) {
-        return json(400, { kind: "bad_request", message: "price_eur must be a positive amount in euro" });
-      }
-      const payload = purchaseFeePayload({
-        localeCode: url.searchParams.get("locale") || activeRegistry.source_locale,
-        priceEur: rawPrice === null || rawPrice.trim() === "" ? null : Number(rawPrice),
-        municipality: url.searchParams.get("municipality") || null,
-        buyerScope,
-        filePath: approvedPurchaseFeePath || undefined,
+      const estimate = purchaseFeeEstimateResponse({
+        searchParams: url.searchParams,
+        defaultLocale: activeRegistry.source_locale,
+        filePath: approvedPurchaseFeePath,
       });
-      if (payload.reason === "bad_request") return json(400, { kind: "bad_request", message: payload.message });
-      // A missing or expired fee line is a refusal, not a zero: 409 carries the
-      // exact lines that block the total so the estimator can name them.
-      return json(payload.available ? 200 : 409, { kind: "purchase_fee_estimate", ...payload });
+      return json(estimate.status, estimate.body);
     }
 
     // Package A2: the read-only review screen for the same payload. Approval
@@ -3485,7 +3470,12 @@ export function createHttpApp({
         } catch {
           return adminJson(400, { kind: "bad_request", message: "Malformed upload id" });
         }
-        const preview = await readMediaUploadBytes({ ledgerPath: mediaUploadLedgerPath, assetId, storage: uploadStorage() });
+        const preview = await readMediaUploadBytes({
+          ledgerPath: mediaUploadLedgerPath,
+          assetId,
+          rendition: url.searchParams.get("rendition") || "",
+          storage: uploadStorage(),
+        });
         if (preview.status !== 200) return adminJson(preview.status, preview.body);
         return { status: 200, headers: { ...SECURITY_HEADERS, ...PRIVATE_HEADERS, ...preview.headers }, body: preview.body };
       }
@@ -6595,34 +6585,26 @@ export function createHttpApp({
         // is never written to any ledger.
         const savedSearchSavedAt = savedAt || new Date().toISOString();
         let manageSecret = null;
-        let manageUnavailableReason = null;
+        let manageSecretError = null;
         try {
           manageSecret = savedSearchManageSecret || savedSearchAccessSecret();
         } catch (error) {
-          manageUnavailableReason = error.message;
+          manageSecretError = error.message;
         }
-        const manageTtlDays = savedSearchManageLinkTtlDays || savedSearchManageTtlDays();
         const manageTemplate = savedSearchManageLinkTemplate || savedSearchManagePathTemplate();
-        let mintedToken = null;
-        let mintedId = null;
+        const minter = savedSearchManageMinter({
+          secret: manageSecret,
+          issuedAt: savedSearchSavedAt,
+          ttlDays: savedSearchManageLinkTtlDays || savedSearchManageTtlDays(),
+        });
+        if (manageSecretError) minter.refuse(manageSecretError);
         const savedSearch = createSavedSearch(
           context.registry,
           { ...input, search_intent: intent, priceSnapshot },
           {
             matchCount: search.search.total_matches,
             savedAt,
-            manageAccess: manageSecret
-              ? (recordId) => {
-                  const minted = mintSavedSearchAccess(recordId, {
-                    secret: manageSecret,
-                    issuedAt: savedSearchSavedAt,
-                    ttlDays: manageTtlDays,
-                  });
-                  mintedToken = minted.token;
-                  mintedId = recordId;
-                  return minted.access;
-                }
-              : null,
+            manageAccess: minter.manageAccess,
           },
         );
         if (!publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
@@ -6642,37 +6624,10 @@ export function createHttpApp({
         // A retried submission returns the original record, so the link has to
         // be re-derived for that record from its own stored issue window.
         // Deterministic minting makes that possible without ever storing a token.
-        let manage = null;
-        if (!ledger) {
-          manageUnavailableReason ||= "Saved search storage is not configured";
-        } else if (!ledger.manage_access?.verifier) {
-          manageUnavailableReason ||= "This saved search predates manage links";
-        } else if (ledger.id === mintedId && mintedToken) {
-          manage = savedSearchManageLink(
-            { locale: ledger.locale, token: mintedToken, expiresAt: ledger.manage_access.expires_at },
-            { origin: savedSearchPublicOrigin, template: manageTemplate },
-          );
-        } else if (manageSecret) {
-          const storedTtlDays = Math.round(
-            (Date.parse(ledger.manage_access.expires_at) - Date.parse(ledger.manage_access.issued_at)) / 86_400_000,
-          );
-          const reminted =
-            storedTtlDays >= 1
-              ? mintSavedSearchAccess(ledger.id, {
-                  secret: manageSecret,
-                  issuedAt: ledger.manage_access.issued_at,
-                  ttlDays: storedTtlDays,
-                })
-              : null;
-          if (reminted && reminted.access.verifier === ledger.manage_access.verifier) {
-            manage = savedSearchManageLink(
-              { locale: ledger.locale, token: reminted.token, expiresAt: ledger.manage_access.expires_at },
-              { origin: savedSearchPublicOrigin, template: manageTemplate },
-            );
-          } else {
-            manageUnavailableReason ||= "The manage link for this saved search can no longer be derived";
-          }
-        }
+        const { manage, reason: manageUnavailableReason } = minter.linkFor(ledger, {
+          origin: savedSearchPublicOrigin,
+          template: manageTemplate,
+        });
         const consent = recordConsent({
           consentType: "saved_search_alerts",
           source: "website_saved_search",

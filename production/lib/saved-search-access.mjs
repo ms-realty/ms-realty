@@ -91,6 +91,17 @@ export function savedSearchAccessSecret(env = process.env) {
   return secret;
 }
 
+// The secret, or nothing. A deployment that cannot sign links must still serve
+// the rest of the site: every route that needs the secret refuses on its own
+// terms rather than the process failing to start.
+export function savedSearchManageSecretOrNull(env = process.env) {
+  try {
+    return savedSearchAccessSecret(env);
+  } catch {
+    return null;
+  }
+}
+
 export function savedSearchManageTtlDays(env = process.env) {
   const raw = String(env.MS_REALTY_SAVED_SEARCH_MANAGE_TTL_DAYS || "").trim();
   if (!raw) return DEFAULT_SAVED_SEARCH_MANAGE_TTL_DAYS;

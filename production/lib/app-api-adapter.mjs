@@ -64,6 +64,39 @@ import { publicSeedFor } from "./public-inventory.mjs";
 import { projectListingDraftSeed } from "./listing-draft-service.mjs";
 import { readHeader, requestHost, sameOriginWriteRejection } from "./request-guard.mjs";
 import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
+// Package B2: the approved purchase-fee estimate, decided in one place.
+import { purchaseFeeEstimateResponse } from "./purchase-fee-estimate-route.mjs";
+import { DEFAULT_APPROVED_PURCHASE_FEES_PATH } from "./purchase-fees.mjs";
+// B3 saved-search self-service: capability links and the visitor's own changes.
+import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
+import {
+  DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+  readSavedSearchManageEvents,
+  savedSearchManageRouteResponse,
+} from "./saved-search-manage.mjs";
+import {
+  DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+  readSavedSearchAlertDeliveries,
+} from "./saved-search-alert-deliveries.mjs";
+import {
+  savedSearchManageMinter,
+  savedSearchManagePathTemplate,
+  savedSearchManageSecretOrNull,
+  savedSearchManageTtlDays,
+} from "./saved-search-access.mjs";
+// B5 viewings: the public slot picker and the viewing-trip request.
+import { DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH, readBrokerAvailability } from "./broker-availability.mjs";
+import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
+import { DEFAULT_VIEWING_LEDGER_PATH } from "./viewing-ledger.mjs";
+import { viewingDurableStoreConfigFromEnv } from "./viewing-durable-store.mjs";
+import { DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH } from "./viewing-follow-ups.mjs";
+import { publicViewingSlotsPayload, publicViewingSource } from "./viewing-slots.mjs";
+import {
+  DEFAULT_VIEWING_TRIP_LEDGER_PATH,
+  appendViewingTripRequest,
+  createViewingTripRequest,
+  privacySafeViewingTripRequest,
+} from "./viewing-trip-requests.mjs";
 
 const ERROR_JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -121,9 +154,37 @@ export function appApiConfigFromEnv(env = process.env) {
     privateReview: env.MS_REALTY_PRIVATE_REVIEW_MODE === "true",
     search: publicSearchConfigFromEnv(env),
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
+    // Package B2: the approved purchase-fee table behind the public estimator.
+    approvedPurchaseFeePath: env.MS_REALTY_APPROVED_PURCHASE_FEES_PATH || DEFAULT_APPROVED_PURCHASE_FEES_PATH,
+    // B3 saved-search self-service. The manage link is minted here on create and
+    // verified here on every visit, so the same secret and template that sign a
+    // link have to be the ones that read it back.
+    auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
+    savedSearchManageEventLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH || DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+    savedSearchAlertDeliveryLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH || DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+    savedSearchManageSecret: savedSearchManageSecretOrNull(env),
+    savedSearchManageLinkTemplate: savedSearchManagePathTemplate(env),
+    savedSearchManageLinkTtlDays: savedSearchManageTtlDays(env),
+    savedSearchPublicOrigin: env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com",
+    savedSearchManagedAt: env.MS_REALTY_SAVED_SEARCH_MANAGED_AT,
+    // B5 viewings: the slot picker reads the same availability, calendar and
+    // broker assignment the admin week view does.
+    brokerAvailabilityLedgerPath: env.MS_REALTY_BROKER_AVAILABILITY_LEDGER_PATH || DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH,
+    brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
+    viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
+    viewingDurableStore: viewingDurableStoreConfigFromEnv(env),
+    viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
+    viewingTripLedgerPath: env.MS_REALTY_VIEWING_TRIP_LEDGER_PATH || DEFAULT_VIEWING_TRIP_LEDGER_PATH,
+    brokerAvailabilityAt: env.MS_REALTY_BROKER_AVAILABILITY_AT,
+    viewingTripRequestedAt: env.MS_REALTY_VIEWING_TRIP_REQUESTED_AT,
     receivedAt: env.MS_REALTY_RECEIVED_AT,
     requestedAt: env.MS_REALTY_REQUESTED_AT,
     savedAt: env.MS_REALTY_SAVED_AT,
+    reviewedAt: env.MS_REALTY_REVIEWED_AT,
+    bookedAt: env.MS_REALTY_BOOKED_AT,
+    viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
     sellerPipelineCreatedAt: env.MS_REALTY_SELLER_PIPELINE_CREATED_AT,
     recordSearchEventsToFile: env.NODE_ENV !== "production",
     runtimeDataDurableOnly: durableOnly,
@@ -617,6 +678,16 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       const registry = currentRegistry(config);
       const seed = await currentRequestSeed(config);
       return webResponse(await routeSearch(url, registry, seed, config, request.headers.get("x-ms-realty-preview") === "search-count"));
+    }
+
+    // Package B2: the approved purchase-fee table, totalled for one price.
+    if (request.method === "GET" && url.pathname === "/api/purchase-fees/estimate") {
+      const estimate = purchaseFeeEstimateResponse({
+        searchParams: url.searchParams,
+        defaultLocale: currentRegistry(config).source_locale,
+        filePath: config.approvedPurchaseFeePath,
+      });
+      return webResponse(json(estimate.status, estimate.body));
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {

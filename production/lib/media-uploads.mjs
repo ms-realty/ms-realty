@@ -19,7 +19,7 @@ import path from "node:path";
 import { mediaWorkflow } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
 import { newRecordId } from "./record-ids.mjs";
-import { sanitizeImageUpload } from "./image-sanitizer.mjs";
+import { imageOptimizationFromEnv, optimizeImageUpload } from "./image-optimizer.mjs";
 import { multipartBoundary, multipartForm } from "./multipart.mjs";
 import {
   MEDIA_UPLOAD_SCOPES,
@@ -27,6 +27,7 @@ import {
   mediaUploadContentHash,
   mediaUploadKey,
   mediaUploadPublicUrl,
+  mediaUploadRenditionKey,
 } from "./media-upload-storage.mjs";
 
 export const DEFAULT_MEDIA_UPLOAD_LEDGER_PATH = fromRoot("production", "data", "media-uploads.jsonl");
@@ -132,13 +133,25 @@ export function assertUploadEnquiry(enquiryId, sellerEnquiries) {
 }
 
 /**
- * Validate, sanitise and describe one uploaded file. Throws before anything is
- * written if the bytes are not an allowed image, are oversized, or carry
- * metadata we cannot remove.
+ * Validate, sanitise, optimise and describe one uploaded file. Throws before
+ * anything is written if the bytes are not an allowed image, are oversized,
+ * declare more pixels than we will decode, or carry metadata we cannot remove.
+ *
+ * Asynchronous because the optimisation step decodes the image. Both upload
+ * surfaces await it, so an admin upload and a seller upload get an identically
+ * treated photo.
  */
-export function prepareMediaUpload(
+export async function prepareMediaUpload(
   file,
-  { scope, subjectId, kind = "photo", limits = mediaUploadLimitsFromEnv(), host, uploadedAt = new Date().toISOString() },
+  {
+    scope,
+    subjectId,
+    kind = "photo",
+    limits = mediaUploadLimitsFromEnv(),
+    imageSettings = imageOptimizationFromEnv(),
+    host,
+    uploadedAt = new Date().toISOString(),
+  },
 ) {
   if (!MEDIA_UPLOAD_SCOPES.includes(scope)) throw new MediaUploadError("Upload scope must be listing or enquiry");
   const bytes = Buffer.isBuffer(file?.bytes) ? file.bytes : Buffer.from(file?.bytes || []);
@@ -150,24 +163,37 @@ export function prepareMediaUpload(
     );
   }
 
-  let sanitized;
+  let optimized;
   try {
-    sanitized = sanitizeImageUpload(bytes, { declaredType: file?.contentType, filename: file?.filename });
+    optimized = await optimizeImageUpload(bytes, {
+      declaredType: file?.contentType,
+      filename: file?.filename,
+      settings: imageSettings,
+    });
   } catch (error) {
     throw new MediaUploadError(error.message, { status: 415, code: error.code || "unsupported_image_type" });
   }
 
-  const contentHash = mediaUploadContentHash(sanitized.bytes);
+  // The hash is taken over the bytes we actually store, so an upload that
+  // optimises to the same result as an earlier one is still the same asset.
+  const contentHash = mediaUploadContentHash(optimized.bytes);
   let storageKey;
+  let renditionKey = null;
   try {
     storageKey = mediaUploadKey({
       scope,
       subjectId,
       hash: contentHash,
-      ext: sanitized.ext,
+      ext: optimized.ext,
       ...(host ? { host } : {}),
       at: new Date(uploadedAt),
     });
+    if (optimized.rendition) {
+      renditionKey = mediaUploadRenditionKey(storageKey, {
+        label: optimized.rendition.kind,
+        ext: optimized.rendition.ext,
+      });
+    }
   } catch (error) {
     throw new MediaUploadError(error.message, { status: error instanceof MediaUploadStorageError ? 400 : 500 });
   }
@@ -176,17 +202,33 @@ export function prepareMediaUpload(
     scope,
     subjectId: String(subjectId),
     kind: normalizeUploadKind(kind),
-    bytes: sanitized.bytes,
+    bytes: optimized.bytes,
     contentHash,
     storageKey,
     assetUrl: scope === "listing" ? mediaUploadPublicUrl(storageKey) : null,
     assetId: `media-${contentHash.slice(0, 20)}`,
-    format: sanitized.format,
-    mime: sanitized.mime,
-    storedBytes: sanitized.stored_bytes,
-    originalBytes: sanitized.original_bytes,
-    metadataStripped: sanitized.metadata_stripped,
-    metadataRemovedBytes: sanitized.metadata_removed_bytes,
+    format: optimized.format,
+    mime: optimized.mime,
+    storedBytes: optimized.bytes_after,
+    originalBytes: optimized.bytes_before,
+    metadataStripped: optimized.metadata_stripped,
+    metadataRemovedBytes: optimized.metadata_removed_bytes,
+    width: optimized.width,
+    height: optimized.height,
+    optimized: optimized.optimized,
+    orientationApplied: optimized.orientation_applied,
+    resized: optimized.resized,
+    rendition: optimized.rendition
+      ? {
+          kind: optimized.rendition.kind,
+          bytes: optimized.rendition.bytes,
+          storageKey: renditionKey,
+          mime: optimized.rendition.mime,
+          format: optimized.rendition.format,
+          width: optimized.rendition.width,
+          height: optimized.rendition.height,
+        }
+      : null,
   };
 }
 
@@ -212,6 +254,29 @@ export function createMediaUploadRecord(prepared, { uploadedBy, source, storageD
     content_type: prepared.mime,
     bytes: prepared.storedBytes,
     submitted_bytes: prepared.originalBytes,
+    // The dimensions a viewer sees, after any rotation. These were `null` on
+    // every row until the pipeline learned to decode: a gallery could not lay
+    // out a photo it had no size for.
+    width: prepared.width ?? null,
+    height: prepared.height ?? null,
+    // `bytes`/`submitted_bytes` say the same thing, but the pair below is what
+    // an operator reads when asking "is optimisation actually working".
+    bytes_before: prepared.originalBytes,
+    bytes_after: prepared.storedBytes,
+    optimized: Boolean(prepared.optimized),
+    orientation_applied: Boolean(prepared.orientationApplied),
+    resized: Boolean(prepared.resized),
+    rendition: prepared.rendition
+      ? {
+          kind: prepared.rendition.kind,
+          storage_key: prepared.rendition.storageKey,
+          content_type: prepared.rendition.mime,
+          format: prepared.rendition.format,
+          bytes: prepared.rendition.bytes.length,
+          width: prepared.rendition.width,
+          height: prepared.rendition.height,
+        }
+      : null,
     metadata_stripped: prepared.metadataStripped,
     metadata_removed_bytes: prepared.metadataRemovedBytes,
     uploaded_by: actor,
@@ -262,8 +327,9 @@ export function applyMediaUploads(seed, uploads = []) {
           asset_url: row.asset_url,
           asset_id: row.asset_id,
           alt: row.alt || "",
-          width: null,
-          height: null,
+          width: row.width ?? null,
+          height: row.height ?? null,
+          thumbnail_url: row.rendition?.storage_key ? mediaUploadPublicUrl(row.rendition.storage_key) : null,
           kind: row.kind,
           is_public: false,
           review_status: "needs_media_review",
@@ -375,6 +441,11 @@ export function publicMediaUpload(row) {
     content_type: row.content_type,
     bytes: row.bytes,
     submitted_bytes: row.submitted_bytes,
+    width: row.width ?? null,
+    height: row.height ?? null,
+    bytes_before: row.bytes_before ?? row.submitted_bytes,
+    bytes_after: row.bytes_after ?? row.bytes,
+    optimized: Boolean(row.optimized),
     metadata_stripped: row.metadata_stripped,
     metadata_removed_bytes: row.metadata_removed_bytes,
     uploaded_at: row.uploaded_at,
@@ -385,6 +456,10 @@ export function publicMediaUpload(row) {
     is_public: false,
     review_status: row.review_status,
     preview_path: `/api/admin/media/uploads/${row.asset_id}`,
+    // The same route with a rendition selector rather than a second route, so
+    // the admin surfaces gain thumbnails without a new door into private
+    // bytes. Null when the photo was already small enough to serve as-is.
+    thumbnail_path: row.rendition ? `/api/admin/media/uploads/${row.asset_id}?rendition=${row.rendition.kind}` : null,
   };
 }
 
