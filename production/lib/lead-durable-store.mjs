@@ -389,6 +389,41 @@ export async function readLeadIntakesDurably({ admin = false, contactSecret, pay
   }
 }
 
+/**
+ * The seller pipeline items created at intake, read back from the durable
+ * side-effect collection this module already writes.
+ *
+ * The stored payload is exactly createSellerPipelineItem() minus contact_name,
+ * which is everything deriveSellerPipelineStates() and the seller queue need —
+ * the seller's name stays in the encrypted contact envelope.
+ */
+export async function readSellerPipelineItemsDurably({ payload = null, workspaceId } = {}) {
+  const scope = requiredText(workspaceId, "Durable lead workspace_id");
+  try {
+    const runtime = await runtimePayload(payload);
+    const result = await runtime.find({
+      collection: "seller_pipeline_events",
+      depth: 0,
+      overrideAccess: true,
+      pagination: false,
+      sort: "id",
+      where: { workspace_id: { equals: scope } },
+    });
+    if (!Array.isArray(result?.docs)) throw new Error("Payload seller_pipeline_events query did not return documents");
+    return result.docs.map((document) => {
+      if (requiredText(document?.workspace_id, "seller_pipeline_events workspace_id") !== scope) {
+        throw new Error("Payload seller_pipeline_events query crossed the requested workspace boundary");
+      }
+      const item = document?.payload;
+      if (!item?.id || !item?.lead_id) throw new Error("Payload seller_pipeline_events payload is invalid");
+      return item;
+    });
+  } catch (error) {
+    if (error instanceof LeadStoreUnavailableError) throw error;
+    throw new LeadStoreUnavailableError("Durable seller pipeline read failed", error);
+  }
+}
+
 export async function persistLeadIntakeDurably({
   lead,
   contactSecret,

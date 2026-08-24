@@ -8227,6 +8227,11 @@ function ListingEditorBody({ page }) {
               reviewableMedia.length
                 ? reviewableMedia.map((item) => {
                     const sourceUrl = item.asset_url || item.url || "";
+                    // The preview box is a small 16:10 card. Painting a 2560px
+                    // photo into it downloads the whole photograph to draw a
+                    // thumbnail, which is what the 640px rendition exists to
+                    // stop. The full asset is still one click away below.
+                    const previewUrl = item.thumbnail_url || sourceUrl;
                     const published = item.is_public === true;
                     return h(
                       "article",
@@ -8251,10 +8256,14 @@ function ListingEditorBody({ page }) {
                             "div",
                             { className: "adm-media-asset__preview" },
                             h("img", {
-                              src: sourceUrl,
+                              src: previewUrl,
                               alt: item.alt || fieldText(ui, `media_kind_${item.kind}`),
                               loading: "lazy",
                               decoding: "async",
+                              // Known dimensions let the browser reserve the
+                              // box before the bytes arrive, so a long review
+                              // queue stops jumping as it loads.
+                              ...(item.width && item.height ? { width: item.width, height: item.height } : {}),
                               "data-media-preview": "true",
                             }),
                             h("span", { className: "adm-media-asset__preview-failed" }, ui.mediaPreviewFailed),

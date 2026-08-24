@@ -42,8 +42,8 @@ import { DEFAULT_SAVED_SEARCH_LEDGER_PATH } from "./lib/saved-searches.mjs";
 import { DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH } from "./lib/saved-search-manage.mjs";
 import { DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH } from "./lib/saved-search-alert-deliveries.mjs";
 import {
-  savedSearchAccessSecret,
   savedSearchManagePathTemplate,
+  savedSearchManageSecretOrNull,
   savedSearchManageTtlDays,
 } from "./lib/saved-search-access.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
@@ -68,14 +68,6 @@ import { DEFAULT_WORKSPACE_SETTINGS_PATH } from "./lib/workspace-settings.mjs";
 // A missing or too-short signing secret disables manage links instead of
 // taking the whole server down: the saved search itself still works, and the
 // manage routes refuse with their single generic answer.
-function savedSearchManageSecretOrNull(env) {
-  try {
-    return savedSearchAccessSecret(env);
-  } catch {
-    return null;
-  }
-}
-
 function portFrom(value) {
   const raw = value === undefined || value === "" ? "3000" : String(value);
   if (!/^\d+$/.test(raw)) throw new Error("PORT must be an integer from 0 to 65535");

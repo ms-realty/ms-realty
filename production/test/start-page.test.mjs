@@ -298,6 +298,28 @@ test("the viewing trip control is a real request a broker confirms", () => {
   assert.match(html, /data-start-trip-shortlist="true"/);
   // The copy has to keep saying a person confirms the days.
   assert.match(html, /This is a request\. A person confirms every viewing\./);
+
+  // The status line has to carry the name the client actually wires, and the
+  // form has to carry the server's "area or property" rule so the visitor is
+  // told which field is missing instead of "Request failed".
+  const tripFormHtml = html.slice(html.indexOf('data-start-trip-form="true"'));
+  assert.match(tripFormHtml.slice(0, tripFormHtml.indexOf("</form>")), /data-start-status="true"/);
+  assert.doesNotMatch(html, /data-start-trip-status/);
+  assert.equal(trip.request.scope_required, "Add at least one area or one saved property.");
+  assert.match(html, /data-start-trip-scope-message="Add at least one area or one saved property\."/);
+  assert.match(PUBLIC_APP_JS, /data-start-trip-scope-message/);
+  assert.match(PUBLIC_APP_JS, /wireSubmitStatus\(tripForm\)/);
+});
+
+// Attribution is the same on every lead form or the channel report has a hole
+// exactly where the buyer-onboarding leads are.
+test("the onboarding shortlist lead form carries the same attribution as every other lead form", () => {
+  const html = renderReactPublicBody(render("en", ANSWERED));
+  const form = html.slice(html.indexOf('data-start-lead="true"'));
+  const body = form.slice(0, form.indexOf("</form>"));
+
+  assert.match(body, /name="channel"[^>]*data-lead-channel-field="true"/);
+  assert.match(body, /name="firstTouchPath"[^>]*data-first-touch-field="true"/);
 });
 
 // The onboarding shortlist is a lead like any other, so it must never render a

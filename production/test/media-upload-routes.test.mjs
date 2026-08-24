@@ -6,17 +6,21 @@ import path from "node:path";
 
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
+import { sniffImageFormat } from "../lib/image-sanitizer.mjs";
 import { readMediaUploads } from "../lib/media-uploads.mjs";
 import { approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture.mjs";
 import {
   avifWithExif,
   jpegWithGpsExif,
   multipartBody,
+  orientedPhotoJpeg,
+  photoJpegWithGpsExif,
   textFileNamedJpg,
   tinyJpeg,
   tinyPng,
 } from "./image-upload.fixture.mjs";
 
+const EXIF_HEADER = Buffer.from("Exif\u0000\u0000", "latin1");
 const ADMIN = Object.freeze({ authorization: "Bearer local-admin-smoke", accept: "application/json" });
 const SAME_ORIGIN = Object.freeze({
   host: "localhost",
@@ -84,7 +88,10 @@ test("an admin upload is stored unreviewed, audited, absent from the public payl
   assert.equal(before.status, 200);
   const galleryBefore = before.body.body.media.gallery.map((item) => item.url);
 
-  const created = await post(context.app, "/api/admin/media/uploads", adminUpload([{ name: "kitchen.jpg", bytes: jpegWithGpsExif() }]), ADMIN);
+  // A photograph, not the 1x1 marker: publication is under test here, and the
+  // gallery refuses anything too small to be a real property photo.
+  const photo = await photoJpegWithGpsExif({ width: 800, height: 600 });
+  const created = await post(context.app, "/api/admin/media/uploads", adminUpload([{ name: "kitchen.jpg", bytes: photo }]), ADMIN);
   assert.equal(created.status, 201);
   assert.equal(created.body.kind, "media_upload_accepted");
   assert.equal(created.body.public, false);
@@ -105,7 +112,13 @@ test("an admin upload is stored unreviewed, audited, absent from the public payl
   assert.equal(stored.length, 1);
   const bytesPath = path.join(context.uploadRoot, stored[0].storage_key);
   assert.ok(fs.existsSync(bytesPath));
-  assert.deepEqual(fs.readFileSync(bytesPath), tinyJpeg());
+  // The stored bytes are the *optimised* photo, not the posted file, so the
+  // assertion is that they are a real JPEG of the recorded size rather than
+  // that they are byte-identical to the upload.
+  const onDisk = fs.readFileSync(bytesPath);
+  assert.equal(sniffImageFormat(onDisk).format, "jpeg");
+  assert.equal(onDisk.length, stored[0].bytes, "the ledger records the byte count actually written");
+  assert.equal(onDisk.includes(EXIF_HEADER), false, "no EXIF survives optimisation");
 
   // One audit entry naming the authenticated actor.
   const audit = readAuditLog(context.auditLogPath).filter((row) => row.action === "media_uploaded");
@@ -319,13 +332,96 @@ test("an operator can list uploads and preview the stored bytes privately", asyn
   assert.equal(preview.status, 200);
   assert.equal(preview.headers["content-type"], "image/jpeg");
   assert.equal(preview.headers["cache-control"], "no-store");
-  assert.deepEqual(preview.body, tinyJpeg());
+  const storedRow = readMediaUploads(context.mediaUploadLedgerPath)[0];
+  assert.deepEqual(
+    preview.body,
+    fs.readFileSync(path.join(context.uploadRoot, storedRow.storage_key)),
+    "the preview serves exactly the bytes that were stored",
+  );
+
+  // An unknown rendition name is not an error: a stale link keeps working by
+  // falling back to the photo itself.
+  const bogus = await dispatchHttp(context.app, {
+    url: `/api/admin/media/uploads/${asset.asset_id}?rendition=nonsense`,
+    headers: ADMIN,
+  });
+  assert.equal(bogus.status, 200);
+  assert.deepEqual(bogus.body, preview.body);
 
   const unknown = await dispatchHttp(context.app, { url: "/api/admin/media/uploads/media-0000000000000000000", headers: ADMIN });
   assert.equal(unknown.status, 404);
 
   const anonymous = await dispatchHttp(context.app, { url: `/api/admin/media/uploads/${asset.asset_id}` });
   assert.equal(anonymous.status, 401);
+});
+
+test("a large upload is optimised, stored with a thumbnail, and the thumbnail is served on request", async () => {
+  const context = workspace();
+  // 3200px on the long edge and held sideways, which is what a phone produces.
+  const photo = await orientedPhotoJpeg({ width: 3200, height: 1600, orientation: 6 });
+  const created = await post(context.app, "/api/admin/media/uploads", adminUpload([{ name: "hall.jpg", bytes: photo }]), ADMIN);
+  assert.equal(created.status, 201);
+  const asset = created.body.uploaded[0];
+
+  const row = readMediaUploads(context.mediaUploadLedgerPath)[0];
+
+  // Optimised: fitted to the long edge, turned upright, and much smaller.
+  assert.equal(row.optimized, true);
+  assert.equal(row.resized, true);
+  assert.equal(row.orientation_applied, true);
+  assert.equal(row.width, 1280, "orientation 6 makes the 3200x1600 source a 1600x3200 portrait");
+  assert.equal(row.height, 2560);
+  assert.equal(row.bytes_before, photo.length);
+  assert.equal(row.bytes_after, row.bytes);
+  assert.ok(row.bytes_after < row.bytes_before / 2, "a phone photo must not be stored at full weight");
+
+  // The ledger row names the rendition, and the bytes are on disk beside the
+  // photo, in the same prefix.
+  assert.ok(row.rendition, "a large photo must carry a thumbnail");
+  assert.equal(row.rendition.kind, "thumb");
+  assert.equal(row.rendition.content_type, "image/webp");
+  assert.equal(row.rendition.height, 640);
+  assert.match(row.rendition.storage_key, /^makler-realty\.com\/wp-content\/uploads\/\d{4}\/\d{2}\/ms-[a-f0-9]{32}-thumb\.webp$/);
+  const thumbPath = path.join(context.uploadRoot, row.rendition.storage_key);
+  assert.ok(fs.existsSync(thumbPath), "the rendition bytes must be stored");
+  assert.equal(sniffImageFormat(fs.readFileSync(thumbPath)).format, "webp");
+  assert.ok(fs.readFileSync(thumbPath).length < row.bytes / 5, "a thumbnail worth serving is far smaller");
+
+  // The API tells an admin surface where to fetch it.
+  assert.equal(asset.thumbnail_path, `/api/admin/media/uploads/${asset.asset_id}?rendition=thumb`);
+  assert.equal(asset.width, 1280);
+  assert.equal(asset.height, 2560);
+
+  const thumb = await dispatchHttp(context.app, { url: asset.thumbnail_path, headers: ADMIN });
+  assert.equal(thumb.status, 200);
+  assert.equal(thumb.headers["content-type"], "image/webp");
+  assert.equal(thumb.headers["cache-control"], "no-store", "a rendition of unreviewed media is just as private");
+  assert.deepEqual(thumb.body, fs.readFileSync(thumbPath));
+
+  // And it is admin-only for exactly the same reason the photo is.
+  const anonymous = await dispatchHttp(context.app, { url: asset.thumbnail_path });
+  assert.equal(anonymous.status, 401);
+});
+
+test("a seller's thumbnail stays outside the edge-served prefix", async () => {
+  const context = workspace();
+  const photo = await orientedPhotoJpeg({ width: 2000, height: 1500, orientation: 1 });
+  const body = multipartBody([
+    { name: "enquiryId", value: ENQUIRY_ID },
+    { name: "photo", filename: "front.jpg", contentType: "image/jpeg", value: photo },
+  ]);
+  const response = await post(context.app, "/api/seller-photos", body, SAME_ORIGIN);
+  assert.equal(response.status, 201);
+
+  const row = readMediaUploads(context.mediaUploadLedgerPath)[0];
+  assert.ok(row.rendition, "a seller photo is optimised exactly like an admin one");
+  // The privacy contract is structural: the rendition inherits the private
+  // prefix from the photo it was derived from, so there is no path by which a
+  // thumbnail of someone's home becomes reachable from the edge.
+  assert.match(row.rendition.storage_key, /^makler-realty\.com\/wp-content\/private\/enquiries\//);
+  assert.equal(row.rendition.storage_key.includes("/wp-content/uploads/"), false);
+  assert.equal(row.asset_url, null);
+  assert.ok(fs.existsSync(path.join(context.uploadRoot, row.rendition.storage_key)));
 });
 
 test("a browser form post without JavaScript is answered with a redirect back to the media panel", async () => {
@@ -371,7 +467,10 @@ test("a seller photo reaches the enquiry, stays private, and says so", async () 
   assert.equal(row.asset_url, null, "a public submission never gets a public URL");
   assert.match(row.storage_key, /^makler-realty\.com\/wp-content\/private\/enquiries\//);
   assert.equal(row.storage_key.includes("/wp-content/uploads/"), false, "must sit outside the edge-served prefix");
-  assert.deepEqual(fs.readFileSync(path.join(context.uploadRoot, row.storage_key)), tinyJpeg());
+  const sellerBytes = fs.readFileSync(path.join(context.uploadRoot, row.storage_key));
+  assert.equal(sniffImageFormat(sellerBytes).format, "jpeg");
+  assert.equal(sellerBytes.length, row.bytes);
+  assert.equal(sellerBytes.includes(EXIF_HEADER), false);
 
   const audit = readAuditLog(context.auditLogPath).filter((entry) => entry.action === "media_uploaded");
   assert.equal(audit.length, 1);

@@ -327,28 +327,19 @@ import { normalizeSearchRequest } from "./search-request.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 // Package B2: approved content.
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
-import { purchaseFeePayload } from "./public-site.mjs";
-import { PURCHASE_FEE_BUYER_SCOPES } from "./purchase-fees.mjs";
+import { purchaseFeeEstimateResponse } from "./purchase-fee-estimate-route.mjs";
 // B3 saved-search self-service: capability links, visitor changes, alert delivery.
 import {
   DEFAULT_SAVED_SEARCH_MANAGE_PATH,
-  SAVED_SEARCH_LINK_REFUSAL,
-  SavedSearchLinkRefusedError,
-  assertSavedSearchAccess,
-  mintSavedSearchAccess,
-  readSavedSearchAccessToken,
   savedSearchAccessSecret,
-  savedSearchManageLink,
+  savedSearchManageMinter,
   savedSearchManagePathTemplate,
   savedSearchManageTtlDays,
 } from "./saved-search-access.mjs";
 import {
-  appendSavedSearchManageEvent,
   applySavedSearchManageEvents,
-  normalizeSavedSearchManageEvent,
   readSavedSearchManageEvents,
-  reachableContactChannels,
-  savedSearchManagePayload,
+  savedSearchManageRouteResponse,
 } from "./saved-search-manage.mjs";
 import {
   buildSavedSearchAlertDeliveryQueue,
@@ -401,6 +392,7 @@ import {
   writeWorkspaceExportFile,
 } from "./workspace-export.mjs";
 import { auditRetentionDays, auditRetentionPlan } from "./audit-retention.mjs";
+import { buildWorkspaceSecurityView } from "./workspace-security-view.mjs";
 import { renderTwoFactorEnrolmentPage, renderWorkspaceExportReadyPage } from "./admin-security-handoff.mjs";
 // B1 lead operations: snooze, bulk actions, saved views, Hermes availability.
 import { hermesReplyAvailability } from "./hermes-availability.mjs";
@@ -1910,90 +1902,22 @@ export function createHttpApp({
     }
     return true;
   };
-  // What the Settings screen's Security and Data sections render. Returns null
-  // when the workspace-security ledgers are not configured, which is what keeps
-  // those sections in their honest "not connected" treatment.
-  const workspaceSecurityView = (principal, currentFingerprint = "", notice = null, stepUpActive = false) => {
-    if (!principal?.id) return null;
-    if (!operatorTwoFactorPath && !adminSessionLedgerPath && !workspaceExportLedgerPath) return null;
-    const auditable = Boolean(auditLogPath) && !runtimeDataDurableOnly;
-    const now = Date.parse(securityNow());
-    let twoFactor = null;
-    try {
-      twoFactor = {
-        ...operatorTwoFactorStatus(twoFactorRows(), principal.id),
-        required: principal.require_two_factor === true,
-        step_up_required: principal.source === "credential_registry",
-        step_up_active: stepUpActive === true,
-        step_up_header: "x-ms-admin-2fa",
-        writable: Boolean(operatorTwoFactorPath) && auditable,
-      };
-    } catch {
-      twoFactor = null;
-    }
-    let sessions = null;
-    try {
-      sessions = {
-        writable: Boolean(adminSessionLedgerPath) && auditable,
-        can_manage_team: canAdminAccess(principal, "team:manage"),
-        current_session_id: currentFingerprint
-          ? adminSessionStates(adminSessionRows(), { now }).get(currentFingerprint)?.session_id || null
-          : null,
-        rows: adminSessionList(adminSessionRows(), {
-          operatorId: principal.id,
-          currentFingerprint,
-          now,
-        }),
-      };
-    } catch {
-      sessions = null;
-    }
-    let exports = null;
-    if (canAdminAccess(principal, "data:export")) {
-      try {
-        exports = {
-          writable: Boolean(workspaceExportLedgerPath) && auditable,
-          datasets: [...WORKSPACE_EXPORT_DATASETS],
-          rows: workspaceExportList(workspaceExportRows(), { requestedBy: principal.id, now }).slice(0, 5),
-        };
-      } catch {
-        exports = null;
-      }
-    }
-    let retention = null;
-    if (canAdminAccess(principal, "activity:read")) {
-      try {
-        const plan = auditRetentionPlan(readAuditLog(auditLogPath || undefined), {
-          now: securityNow(),
-          retentionDays: Number(auditRetentionWindowDays) || auditRetentionDays(),
-        });
-        retention = {
-          retention_days: plan.retention_days,
-          cutoff: plan.cutoff,
-          total: plan.total,
-          retained: plan.retained,
-          prunable: plan.prunable,
-          protected_beyond_window: plan.protected_beyond_window,
-          scanned_artifacts: plan.scanned_artifacts,
-          applied_on_read: false,
-          apply_command: "npm run audit:retention -- --apply",
-          unavailable: null,
-        };
-      } catch (error) {
-        // A retention window we cannot verify is reported as unavailable, never
-        // as a number somebody might act on.
-        retention = { unavailable: error.message };
-      }
-    }
-    return {
-      operator_id: principal.id,
-      notice: typeof notice === "string" && /^[a-z_]{1,40}$/.test(notice) ? notice : null,
-      two_factor: twoFactor,
-      sessions,
-      exports,
-      audit_retention: retention,
-    };
-  };
+  // What the Settings screen's Security and Data sections render. The whole
+  // decision lives in the shared builder so the App Router adapter renders the
+  // identical payload; this only supplies the ledgers and the clock.
+  const workspaceSecurityView = (principal, currentFingerprint = "", notice = null, stepUpActive = false) =>
+    buildWorkspaceSecurityView(principal, {
+      currentFingerprint,
+      notice,
+      stepUpActive,
+      now: securityNow(),
+      auditLogPath,
+      adminSessionLedgerPath,
+      operatorTwoFactorPath,
+      workspaceExportLedgerPath,
+      auditRetentionWindowDays,
+      runtimeDataDurableOnly,
+    });
   const writeAudit = (input, recordedAt = reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()) =>
     !runtimeDataDurableOnly && auditLogPath
       ? appendAuditLog(createAuditLogEntry(input, recordedAt), {
@@ -2887,25 +2811,12 @@ export function createHttpApp({
     // Package B2: approved content (team profiles, area guides, financing
     // partners, purchase fee table).
     if (request.method === "GET" && url.pathname === "/api/purchase-fees/estimate") {
-      const buyerScope = url.searchParams.get("buyer") || url.searchParams.get("buyer_scope") || "eu";
-      const rawPrice = url.searchParams.get("price_eur");
-      if (!PURCHASE_FEE_BUYER_SCOPES.includes(buyerScope)) {
-        return json(400, { kind: "bad_request", message: `buyer must be one of: ${PURCHASE_FEE_BUYER_SCOPES.join(", ")}` });
-      }
-      if (rawPrice !== null && !/^\d+(\.\d{1,2})?$/.test(rawPrice.trim())) {
-        return json(400, { kind: "bad_request", message: "price_eur must be a positive amount in euro" });
-      }
-      const payload = purchaseFeePayload({
-        localeCode: url.searchParams.get("locale") || activeRegistry.source_locale,
-        priceEur: rawPrice === null || rawPrice.trim() === "" ? null : Number(rawPrice),
-        municipality: url.searchParams.get("municipality") || null,
-        buyerScope,
-        filePath: approvedPurchaseFeePath || undefined,
+      const estimate = purchaseFeeEstimateResponse({
+        searchParams: url.searchParams,
+        defaultLocale: activeRegistry.source_locale,
+        filePath: approvedPurchaseFeePath,
       });
-      if (payload.reason === "bad_request") return json(400, { kind: "bad_request", message: payload.message });
-      // A missing or expired fee line is a refusal, not a zero: 409 carries the
-      // exact lines that block the total so the estimator can name them.
-      return json(payload.available ? 200 : 409, { kind: "purchase_fee_estimate", ...payload });
+      return json(estimate.status, estimate.body);
     }
 
     // Package A2: the read-only review screen for the same payload. Approval
@@ -2951,7 +2862,6 @@ export function createHttpApp({
     // B3 saved searches: visitor self-service through a capability link, plus
     // the broker-facing alert delivery queue. No public accounts, ever.
     if (url.pathname === "/api/saved-searches/manage" || url.pathname === "/api/admin/saved-search-alerts/run-due") {
-      const savedSearchRefusal = () => privateJson(404, { ...SAVED_SEARCH_LINK_REFUSAL });
       const savedSearchLinkSecret = () => {
         try {
           return savedSearchManageSecret || savedSearchAccessSecret();
@@ -2972,26 +2882,23 @@ export function createHttpApp({
           return { contacts: null, state: "locked" };
         }
       };
-      const savedSearchManageState = (token, now) => {
-        const secret = savedSearchLinkSecret();
-        if (!secret) throw new SavedSearchLinkRefusedError("secret_unavailable");
-        const presented = readSavedSearchAccessToken(token, { secret, now });
-        const records = withSavedSearchAlertState(currentSavedSearches(), currentSavedSearchAlertDeliveries());
-        const record = records.find((row) => row.id === presented.record_id) || null;
-        // A deleted or unknown record is refused exactly like a forged token,
-        // so the route cannot confirm that a saved search exists.
-        assertSavedSearchAccess(record, presented);
-        return { record, presented };
-      };
-      const savedSearchManageBody = (record, presented, now) => {
+      // One shared implementation decides every manage answer; this runtime only
+      // supplies the ledgers, the clock and the audit sink.
+      const savedSearchManageRoute = (method, { token, input } = {}) => {
         const vault = savedSearchContactMap();
-        const contact = vault.contacts?.get(record.id)?.contact || null;
-        return savedSearchManagePayload(record, {
-          contact,
+        const answer = savedSearchManageRouteResponse({
+          method,
+          token,
+          input,
+          secret: savedSearchLinkSecret(),
+          readRecords: () => withSavedSearchAlertState(currentSavedSearches(), currentSavedSearchAlertDeliveries()),
+          contacts: vault.contacts,
           contactState: vault.state,
-          linkExpiresAt: presented.expires_at,
-          now,
+          manageEventLedgerPath: savedSearchManageEventLedgerPath,
+          now: savedSearchManagedAt || receivedAt || new Date().toISOString(),
+          recordAudit: (entry, recordedAt) => writeAudit(entry, recordedAt),
         });
+        return privateJson(answer.status, answer.body);
       };
 
       if (request.method === "GET" && url.pathname === "/api/saved-searches/manage") {
@@ -3006,122 +2913,17 @@ export function createHttpApp({
             });
           }
         }
-        const now = savedSearchManagedAt || receivedAt || new Date().toISOString();
-        try {
-          const { record, presented } = savedSearchManageState(url.searchParams.get("token"), now);
-          return privateJson(200, savedSearchManageBody(record, presented, now));
-        } catch (error) {
-          if (error instanceof SavedSearchLinkRefusedError) return savedSearchRefusal();
-          return privateJson(400, { kind: "bad_request", message: error.message });
-        }
+        return savedSearchManageRoute("GET", { token: url.searchParams.get("token") });
       }
 
       if (request.method === "POST" && url.pathname === "/api/saved-searches/manage") {
-        const now = savedSearchManagedAt || receivedAt || new Date().toISOString();
         let input;
         try {
           input = parseBody(request);
         } catch (error) {
           return privateJson(400, { kind: "bad_request", message: error.message });
         }
-        let record;
-        let presented;
-        try {
-          ({ record, presented } = savedSearchManageState(input.token, now));
-        } catch (error) {
-          if (error instanceof SavedSearchLinkRefusedError) return savedSearchRefusal();
-          return privateJson(400, { kind: "bad_request", message: error.message });
-        }
-        if (!savedSearchManageEventLedgerPath) {
-          return privateJson(503, {
-            kind: "saved_search_manage_unavailable",
-            message: "Saved search changes are unavailable because their storage is not configured.",
-          });
-        }
-        try {
-          const event = normalizeSavedSearchManageEvent({ ...input, savedSearchId: record.id }, now);
-          const vault = savedSearchContactMap();
-          const contact = vault.contacts?.get(record.id)?.contact || null;
-          if (event.action === "update_channel") {
-            // Fail closed: without the vault we cannot prove the requested
-            // channel is one the visitor actually gave us.
-            if (!contact) {
-              return privateJson(409, {
-                kind: "saved_search_channel_unverifiable",
-                message: "The stored contact channels cannot be read, so the alert channel cannot be changed.",
-              });
-            }
-            if (!reachableContactChannels(contact).includes(event.channel)) {
-              return privateJson(400, {
-                kind: "bad_request",
-                message: "channel must be one of the contact channels supplied with this saved search",
-              });
-            }
-          }
-          const currentStatus = record.status || "active";
-          const unchanged =
-            (event.action === "pause" && currentStatus === "paused") ||
-            (event.action === "resume" && currentStatus === "active") ||
-            (event.action === "update_frequency" && record.alert_frequency === event.frequency) ||
-            (event.action === "update_channel" && record.contact_preference === event.channel);
-          if (unchanged) {
-            return privateJson(200, {
-              ...savedSearchManageBody(record, presented, now),
-              action: event.action,
-              idempotent: true,
-            });
-          }
-          appendSavedSearchManageEvent(event, { filePath: savedSearchManageEventLedgerPath });
-          const auditAction = {
-            pause: "saved_search_paused",
-            resume: "saved_search_resumed",
-            update_frequency: "saved_search_frequency_updated",
-            update_channel: "saved_search_channel_updated",
-            delete: "saved_search_deleted",
-          }[event.action];
-          // Every mutation is audited. The actor is the capability link, not an
-          // operator, and the metadata carries no contact data.
-          writeAudit(
-            {
-              action: auditAction,
-              actor: "saved_search_link",
-              objectType: "saved_search",
-              objectId: record.id,
-              locale: record.locale,
-              status: event.action === "delete" ? "deleted" : "recorded",
-              metadata: {
-                source: "manage_link",
-                action: event.action,
-                ...(event.frequency ? { alert_frequency: event.frequency } : {}),
-                ...(event.channel ? { channel: event.channel } : {}),
-              },
-            },
-            now,
-          );
-          if (event.action === "delete") {
-            return privateJson(200, {
-              kind: "saved_search_manage",
-              action: "delete",
-              deleted: true,
-              saved_search: null,
-              idempotent: false,
-              message: "This saved search is deleted and its alerts have stopped. The manage link no longer works.",
-            });
-          }
-          const updated =
-            applySavedSearchManageEvents(
-              withSavedSearchAlertState(currentSavedSearches(), currentSavedSearchAlertDeliveries()),
-              [],
-            ).find((row) => row.id === record.id) || record;
-          return privateJson(200, {
-            ...savedSearchManageBody(updated, presented, now),
-            action: event.action,
-            idempotent: false,
-          });
-        } catch (error) {
-          if (error instanceof SavedSearchLinkRefusedError) return savedSearchRefusal();
-          return privateJson(400, { kind: "bad_request", message: error.message });
-        }
+        return savedSearchManageRoute("POST", { input });
       }
 
       if (request.method === "POST" && url.pathname === "/api/admin/saved-search-alerts/run-due") {
@@ -3494,7 +3296,12 @@ export function createHttpApp({
         } catch {
           return adminJson(400, { kind: "bad_request", message: "Malformed upload id" });
         }
-        const preview = await readMediaUploadBytes({ ledgerPath: mediaUploadLedgerPath, assetId, storage: uploadStorage() });
+        const preview = await readMediaUploadBytes({
+          ledgerPath: mediaUploadLedgerPath,
+          assetId,
+          rendition: url.searchParams.get("rendition") || "",
+          storage: uploadStorage(),
+        });
         if (preview.status !== 200) return adminJson(preview.status, preview.body);
         return { status: 200, headers: { ...SECURITY_HEADERS, ...PRIVATE_HEADERS, ...preview.headers }, body: preview.body };
       }
@@ -6671,34 +6478,26 @@ export function createHttpApp({
         // is never written to any ledger.
         const savedSearchSavedAt = savedAt || new Date().toISOString();
         let manageSecret = null;
-        let manageUnavailableReason = null;
+        let manageSecretError = null;
         try {
           manageSecret = savedSearchManageSecret || savedSearchAccessSecret();
         } catch (error) {
-          manageUnavailableReason = error.message;
+          manageSecretError = error.message;
         }
-        const manageTtlDays = savedSearchManageLinkTtlDays || savedSearchManageTtlDays();
         const manageTemplate = savedSearchManageLinkTemplate || savedSearchManagePathTemplate();
-        let mintedToken = null;
-        let mintedId = null;
+        const minter = savedSearchManageMinter({
+          secret: manageSecret,
+          issuedAt: savedSearchSavedAt,
+          ttlDays: savedSearchManageLinkTtlDays || savedSearchManageTtlDays(),
+        });
+        if (manageSecretError) minter.refuse(manageSecretError);
         const savedSearch = createSavedSearch(
           context.registry,
           { ...input, search_intent: intent, priceSnapshot },
           {
             matchCount: search.search.total_matches,
             savedAt,
-            manageAccess: manageSecret
-              ? (recordId) => {
-                  const minted = mintSavedSearchAccess(recordId, {
-                    secret: manageSecret,
-                    issuedAt: savedSearchSavedAt,
-                    ttlDays: manageTtlDays,
-                  });
-                  mintedToken = minted.token;
-                  mintedId = recordId;
-                  return minted.access;
-                }
-              : null,
+            manageAccess: minter.manageAccess,
           },
         );
         if (!publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
@@ -6718,37 +6517,10 @@ export function createHttpApp({
         // A retried submission returns the original record, so the link has to
         // be re-derived for that record from its own stored issue window.
         // Deterministic minting makes that possible without ever storing a token.
-        let manage = null;
-        if (!ledger) {
-          manageUnavailableReason ||= "Saved search storage is not configured";
-        } else if (!ledger.manage_access?.verifier) {
-          manageUnavailableReason ||= "This saved search predates manage links";
-        } else if (ledger.id === mintedId && mintedToken) {
-          manage = savedSearchManageLink(
-            { locale: ledger.locale, token: mintedToken, expiresAt: ledger.manage_access.expires_at },
-            { origin: savedSearchPublicOrigin, template: manageTemplate },
-          );
-        } else if (manageSecret) {
-          const storedTtlDays = Math.round(
-            (Date.parse(ledger.manage_access.expires_at) - Date.parse(ledger.manage_access.issued_at)) / 86_400_000,
-          );
-          const reminted =
-            storedTtlDays >= 1
-              ? mintSavedSearchAccess(ledger.id, {
-                  secret: manageSecret,
-                  issuedAt: ledger.manage_access.issued_at,
-                  ttlDays: storedTtlDays,
-                })
-              : null;
-          if (reminted && reminted.access.verifier === ledger.manage_access.verifier) {
-            manage = savedSearchManageLink(
-              { locale: ledger.locale, token: reminted.token, expiresAt: ledger.manage_access.expires_at },
-              { origin: savedSearchPublicOrigin, template: manageTemplate },
-            );
-          } else {
-            manageUnavailableReason ||= "The manage link for this saved search can no longer be derived";
-          }
-        }
+        const { manage, reason: manageUnavailableReason } = minter.linkFor(ledger, {
+          origin: savedSearchPublicOrigin,
+          template: manageTemplate,
+        });
         const consent = recordConsent({
           consentType: "saved_search_alerts",
           source: "website_saved_search",
