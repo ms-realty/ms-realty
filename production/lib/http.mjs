@@ -1387,7 +1387,7 @@ export function createHttpApp({
     const ledgers = currentLeadOperationLedgers();
     const context = await leadJourneyContextFrom({
       ledgers,
-      leads,
+      leads: applyLeadAssignments(leads, filterRows(await ledgers.assignments.read())),
       viewings: filterRows(readViewings(viewingLedgerPath || undefined)),
       viewingFollowUps: filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined)),
       sellerPipelines: filterRows(await currentSellerPipelines()),
@@ -3309,10 +3309,10 @@ export function createHttpApp({
       // adapter apply one set of rules and write one set of audit entries — and
       // both reach whichever ledger the configuration selected.
       const leadOperationContext = async () => {
-        const ledgers = currentLeadOperationLedgers();
+        const source = await currentDurableLeadSource(principal, payloadSession);
         return {
-          ledgers,
-          journey: await currentLeadJourneyContext(),
+          ledgers: currentLeadOperationLedgers(),
+          journey: await currentLeadJourneyContext(source.leads),
           principal,
           audit: auditLeadOperation,
         };
@@ -5710,7 +5710,7 @@ export function createHttpApp({
         const recordedAt = leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
         const result = await recordLeadPipelineOutcomeOperation({
           ledgers: currentLeadOperationLedgers(),
-          journey: await currentLeadJourneyContext(),
+          journey: await currentLeadJourneyContext((await currentDurableLeadSource(principal, payloadSession)).leads),
           input: bindAuthenticatedOperator(parseBody(request), principal),
           principal,
           recordedAt,
@@ -5810,9 +5810,10 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const ledgers = currentLeadOperationLedgers();
+        const source = await currentDurableLeadSource(principal, payloadSession);
         const persisted = await recordLeadAssignmentOperation({
           ledgers,
-          leads: currentLeads(),
+          leads: applyLeadAssignments(source.leads, await ledgers.assignments.read()),
           input: parseBody(request),
           principal,
           recordedAt: reviewedAt || receivedAt || new Date().toISOString(),
@@ -6369,7 +6370,7 @@ export function createHttpApp({
       try {
         const deal = await recordDealCloseOperation({
           ledgers: currentLeadOperationLedgers(),
-          journey: await currentLeadJourneyContext(),
+          journey: await currentLeadJourneyContext((await currentDurableLeadSource(principal, payloadSession)).leads),
           input: parseJsonBody(request),
           principal,
           closedAt: dealClosedAt,
