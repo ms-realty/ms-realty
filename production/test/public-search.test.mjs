@@ -20,6 +20,17 @@ import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs
 
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
+
+// A listing the operator publication approval never named: it can only be seen
+// behind private review, never on the public site.
+function seedWithUnapprovedListing() {
+  const source = seed.records.find((record) => record.collection === "listings");
+  const records = [...seed.records, { ...source, id: "MS-CRAWL-9999", routing: null }];
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-unapproved-listing-`);
+  const filePath = `${directory}/cms-seed.json`;
+  fs.writeFileSync(filePath, `${JSON.stringify({ ...seed, records })}\n`);
+  return filePath;
+}
 const hit = {
   id: "MS-CRAWL-0001:bg",
   source_listing_id: "MS-CRAWL-0001",
@@ -234,10 +245,26 @@ test("private review keeps the production Postgres search contract while exposin
     config: reviewConfig,
   });
 
+  // The owner-approved catalog is public, so production serves the listing too.
+  // What private review still adds is inventory the publication gate refuses.
+  const reviewOnlySeedPath = seedWithUnapprovedListing();
+  const gatedInProduction = renderAppRoute({
+    pathname: "/bg/imoti/MS-CRAWL-9999",
+    url: "https://example.test/bg/imoti/MS-CRAWL-9999",
+    config: appRouterConfigFromEnv({ NODE_ENV: "production", MS_REALTY_CMS_SEED_PATH: reviewOnlySeedPath }),
+  });
+  const visibleInReview = renderAppRoute({
+    pathname: "/bg/imoti/MS-CRAWL-9999",
+    url: "https://example.test/bg/imoti/MS-CRAWL-9999",
+    config: appRouterConfigFromEnv({ ...reviewEnv, MS_REALTY_CMS_SEED_PATH: reviewOnlySeedPath }),
+  });
+
   assert.equal(productionConfig.privateReview, false);
   assert.equal(productionListing.status, 200);
-  assert.equal(productionListing.rendered.kind, "listing_preservation");
-  assert.equal(productionListing.rendered.indexable, false);
+  assert.equal(productionListing.rendered.kind, "listing");
+  assert.equal(productionListing.rendered.indexable, true);
+  assert.equal(gatedInProduction.rendered.kind, "not_found");
+  assert.equal(visibleInReview.rendered.kind, "listing");
   assert.equal(reviewConfig.privateReview, true);
   assert.equal(reviewConfig.search.environment, "production");
   assert.equal(reviewConfig.search.engine, "postgres");

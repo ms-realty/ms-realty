@@ -344,7 +344,9 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   assert.equal(sitemap.status, 200);
   assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(sitemap.sitemap.summary.entries, manifest.summary.eligible_routes - blockedListingRoutes.length);
-  assert.equal(blockedListingRoutes.length, 2);
+  // The owner-approved catalog leaves no listing route behind a preservation page.
+  assert.equal(blockedListingRoutes.length, 0);
+  assert.equal(approvedPublicListingIds.size, 165);
   assert.match(sitemap.body, /<loc>https:\/\/makler-realty.com\/he<\/loc>/);
   assert.match(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
   assert.match(sitemap.body, /\/en\/guides\/foreign-buyers/);

@@ -10,7 +10,7 @@ import {
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { buildRuntimeLocalizedSitemap } from "../lib/seo-files.mjs";
 
-test("approved launch freeze drives every legacy response and truthful listing preservation surface", async () => {
+test("approved launch freeze drives every legacy response and the owner-published listing surface", async () => {
   const contract = approvedLaunchFreezeRouteArtifact();
   const app = createHttpApp({ reviewedAt: "2026-08-20T12:29:16Z" });
 
@@ -26,17 +26,19 @@ test("approved launch freeze drives every legacy response and truthful listing p
     if (decision.status === 200) assert.equal(response.body.path, decision.target_path, decision.old_url);
   }
 
+  // The owner's 2026-08-24 directive publishes the whole catalog, so every
+  // approved terminal path now serves the real listing instead of the
+  // preservation stand-in - archived-at-freeze rows included.
   const states = { active: 0, archived: 0 };
   for (const entry of contract.catalog) {
     const response = await dispatchHttp(app, { url: entry.target_path });
     assert.equal(response.status, 200, entry.target_path);
-    assert.equal(response.body.kind, "listing_preservation", entry.target_path);
-    assert.equal(response.body.indexable, false, entry.target_path);
-    assert.equal(response.body.metadata.robots, "noindex,follow", entry.target_path);
-    assert.equal(response.body.schema, null, entry.target_path);
-    assert.deepEqual(response.body.hreflang, [], entry.target_path);
-    assert.equal("facts" in response.body.body, false, entry.target_path);
-    assert.equal("media" in response.body.body, false, entry.target_path);
+    assert.equal(response.body.kind, "listing", entry.target_path);
+    assert.equal(response.body.indexable, true, entry.target_path);
+    assert.equal(response.body.metadata.robots, "index,follow", entry.target_path);
+    assert.notEqual(response.body.schema, null, entry.target_path);
+    assert.equal("facts" in response.body.body, true, entry.target_path);
+    assert.equal("media" in response.body.body, true, entry.target_path);
     states[entry.catalog_state] += 1;
   }
   assert.deepEqual(states, { active: 30, archived: 135 });
@@ -44,8 +46,8 @@ test("approved launch freeze drives every legacy response and truthful listing p
   const publicSeed = publicSeedFor(loadCmsSeed());
   const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), publicSeed, []);
   const sitemapPaths = new Set(sitemap.entries.map((entry) => entry.loc));
-  assert.equal(publicSeed.records.length, 0);
-  assert.equal(contract.catalog.some((entry) => sitemapPaths.has(entry.target_path)), false);
+  assert.equal(publicSeed.records.filter((record) => record.collection === "listings").length, 165);
+  assert.equal(contract.catalog.every((entry) => sitemapPaths.has(entry.target_path)), true);
 
   const forged = structuredClone(contract);
   forged.decisions[0].status = 301;

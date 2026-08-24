@@ -38,10 +38,15 @@ test("admin listing editor quality rail uses a compact status list", () => {
   const html = editorHtml("MS-CRAWL-0001", "bg");
   const rail = html.match(/data-editor-readiness-rail="true"[\s\S]*?<\/aside>/)?.[0] || "";
   assert.match(rail, /class="crm-panel"/);
-  assert.match(rail, /Внесена от източник/);
+  assert.match(rail, /Публикувано/);
   assert.match(rail, /data-quality-panel="true"/);
   assert.match(rail, /data-translation-panel="true"/);
   assert.match(rail, /data-media-review-panel="true"/);
+  // Owner-directed publication does not clear the review work: the rail still
+  // names the outstanding fact gap and the unverified availability check.
+  assert.match(rail, /data-listing-quality-issues="[1-9]/);
+  assert.match(rail, /data-quality-issue="missing_area"/);
+  assert.match(rail, /Не е проверена/);
 });
 
 test("admin listing editor savebar uses workspace copy instead of filter leftovers", () => {
