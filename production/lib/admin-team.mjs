@@ -1,6 +1,6 @@
 import { PAYLOAD_ADMIN_ROLES } from "./payload-admin-auth.mjs";
 import { ADMIN_LOGIN_LOCALES } from "./admin-login.mjs";
-import { DS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
+import { ADMIN_CSS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -373,7 +373,7 @@ export function renderAdminTeamPage({ operators = [], created = false, error = f
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS_URL}">
-<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">
+<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${ADMIN_CSS_HASH}">
 <style>${TEAM_STYLE}</style>
 </head>
 <body class="team-page" data-team-state="${error ? "error" : created ? "created" : "idle"}" data-admin-team-locale="${active}">

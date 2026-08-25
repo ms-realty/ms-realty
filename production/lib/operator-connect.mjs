@@ -16,7 +16,7 @@
 // and lays itself out with the same tokens (literal fallbacks keep it readable
 // if the stylesheet is blocked).
 
-import { DS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
+import { ADMIN_CSS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
 import { COPY_BLOCK_JS } from "./ui/client.mjs";
 import { operatorConnectCopy, providerCopyKey, providerDisplayName } from "./operator-connect-copy.mjs";
 import { operatorProviderCards } from "./operator-provider-catalog.mjs";
@@ -493,7 +493,7 @@ export function renderOperatorConnectPage({
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS_URL}">
-<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">
+<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${ADMIN_CSS_HASH}">
 <style>${CONNECT_STYLE}</style>
 </head>
 <body class="connect-page">

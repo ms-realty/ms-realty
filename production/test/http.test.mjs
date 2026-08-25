@@ -388,7 +388,10 @@ test("HTTP app serves only optimized local hero assets", async () => {
 
   assert.equal(hero.status, 200);
   assert.equal(hero.headers["content-type"], "image/avif");
-  assert.equal(hero.headers["cache-control"], "public, max-age=31536000, immutable");
+  // Long-lived but bustable: hero filenames encode a crop width, not a content
+  // hash, so replacing a photograph reuses its URL and `immutable` would strand
+  // the old bytes in browsers.
+  assert.equal(hero.headers["cache-control"], "public, max-age=604800, stale-while-revalidate=86400");
   assert.equal(Buffer.isBuffer(hero.body), true);
   assert.ok(hero.body.length > 0);
   assert.equal(disallowed.status, 404);

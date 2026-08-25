@@ -24,7 +24,7 @@ const registry = loadLocaleRegistry();
 const listings = loadListings();
 const seed = loadCmsSeed();
 const pagesCss = readFileSync(new URL("../lib/ui/adapter-public-pages.css", import.meta.url), "utf8");
-const vendorCss = readFileSync(new URL("../../public/vendor/ms-realty.css", import.meta.url), "utf8");
+const vendorCss = readFileSync(new URL("../../public/vendor/ms-realty-public.css", import.meta.url), "utf8");
 const PUBLIC_LOCALES = ["bg", "en", "de", "nl", "ru", "el", "he"];
 const NEW_KEYS = [
   "browseByArea", "howBuyingWorks", "buyingStepOneTitle", "buyingStepOneText", "buyingStepTwoTitle", "buyingStepTwoText",
@@ -331,9 +331,28 @@ test("interactive parts of the new pages declare hover, focus, disabled and curr
   for (const pattern of states) assert.match(pagesCss, pattern, String(pattern));
 });
 
+test("the public stylesheet carries no admin CRM chrome", () => {
+  // The two surfaces shared one render-blocking stylesheet, so every public
+  // visitor downloaded and parsed the whole admin CRM design system before the
+  // page could paint. The public bundle now stops at the shared tokens,
+  // components and shell.
+  const adminCss = readFileSync(new URL("../../public/vendor/ms-realty-admin.css", import.meta.url), "utf8");
+  for (const selector of [".crm-sb__brand", ".crm-nav", ".crm-app", ".adm-account-form"]) {
+    assert.ok(adminCss.includes(selector), `${selector} belongs to the admin bundle`);
+    assert.ok(!vendorCss.includes(selector), `${selector} must not ship to public visitors`);
+  }
+  assert.doesNotMatch(vendorCss, /\.crm-/, "no admin CRM selector reaches the public bundle");
+  // Both keep the shared layers they each depend on.
+  for (const shared of ["--font-sans", ".mk-btn", ".skip-link"]) {
+    assert.ok(vendorCss.includes(shared), `${shared} stays in the public bundle`);
+    assert.ok(adminCss.includes(shared), `${shared} stays in the admin bundle`);
+  }
+  assert.ok(vendorCss.length < 260_000, `public bundle is ${vendorCss.length} bytes`);
+});
+
 test("the page styles are part of the built design bundle and use logical properties for RTL", () => {
   for (const selector of [".flow-steps__item", ".hp-trust__in", ".ut-card", ".ct-office", ".guide-toc", ".sell-steps__num"]) {
-    assert.ok(vendorCss.includes(selector), `${selector} is built into public/vendor/ms-realty.css`);
+    assert.ok(vendorCss.includes(selector), `${selector} is built into public/vendor/ms-realty-public.css`);
   }
   assert.match(pagesCss, /\[dir="rtl"\] \.ico-dir \{ transform: scaleX\(-1\); \}/);
   // A phone number must not be reordered by a right-to-left paragraph.

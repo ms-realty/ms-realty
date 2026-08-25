@@ -26,6 +26,10 @@ const DS = path.join(ROOT, "makler-realty-design-system", "project");
 const OUT_DIR = path.join(ROOT, "production", "lib", "ui");
 const VENDOR_DIR = path.join(ROOT, "public", "vendor");
 
+// Emits two stylesheets — ms-realty-public.css and ms-realty-admin.css — each
+// carrying the shared tokens/components plus only its own surface's kit and
+// adapters, so a public visitor never downloads the admin CRM design system.
+//
 // Order mirrors makler-realty-design-system/project/styles.css (fonts.css becomes a <link>).
 const TOKEN_FILES = ["colors.css", "typography.css", "spacing.css", "radius.css", "shadows.css", "motion.css", "media.css", "base.css"];
 
@@ -80,11 +84,17 @@ function jsxFilesUnder(dir) {
   return files.sort();
 }
 
-function fontsUrl() {
+// The Noto Hebrew faces are only worth fetching on the Hebrew locale, so
+// tokens/fonts.css declares two @import urls behind marker comments and the
+// pages pick between them.
+function fontUrls() {
   const source = read(path.join(DS, "tokens", "fonts.css"));
-  const match = source.match(/@import\s+url\(['"]([^'"]+)['"]\)/);
-  if (!match) throw new Error("tokens/fonts.css must contain the webfont @import url");
-  return match[1];
+  const grab = (marker) => {
+    const match = source.match(new RegExp(`/\\*\\s*@fonts\\s+${marker}\\s*\\*/\\s*@import\\s+url\\(['"]([^'"]+)['"]\\)`));
+    if (!match) throw new Error(`tokens/fonts.css must contain a "@fonts ${marker}" @import url`);
+    return match[1];
+  };
+  return { base: grab("base"), hebrew: grab("hebrew") };
 }
 
 function logoExports() {
@@ -118,33 +128,56 @@ function buildIconData() {
   return icons;
 }
 
-function collectCss() {
+// Per-surface extension sheets (adapter-public-*.css, adapter-admin-*.css)
+// follow their base sheet so each screen family can own its own file.
+const adapterExtensions = (prefix) =>
+  readdirSync(OUT_DIR)
+    .filter((name) => name.startsWith(`${prefix}-`) && name.endsWith(".css"))
+    .sort();
+
+const joinCss = (sections) => sections.map(minifyCss).filter(Boolean).join("\n");
+
+// Tokens, components and the shared shell/RTL/print adaptations — everything
+// both surfaces need.
+function sharedSections() {
   const sections = [];
   for (const file of TOKEN_FILES) sections.push(read(path.join(DS, "tokens", file)));
   for (const file of jsxFilesUnder(path.join(DS, "components"))) sections.push(...extractCssBlocks(read(file)));
-  for (const kit of ["website", "crm"]) {
-    for (const file of jsxFilesUnder(path.join(DS, "ui_kits", kit))) sections.push(...extractCssBlocks(read(file)));
-  }
-  // Production-only adaptations, concatenated last so they can override kit rules.
-  // adapter.css = shared shell/RTL/print; adapter-public.css / adapter-admin.css
-  // belong to the public-site and admin rebuilds respectively.
-  // Per-surface extension sheets (adapter-public-*.css, adapter-admin-*.css)
-  // follow their base sheet so each screen family can own its own file.
-  const extensions = (prefix) =>
-    readdirSync(OUT_DIR)
-      .filter((name) => name.startsWith(`${prefix}-`) && name.endsWith(".css"))
-      .sort();
-  for (const file of ["adapter.css", "adapter-public.css", ...extensions("adapter-public"), "adapter-admin.css", ...extensions("adapter-admin")]) {
-    sections.push(read(path.join(OUT_DIR, file)));
-  }
-  return sections.map(minifyCss).filter(Boolean).join("\n");
+  sections.push(read(path.join(OUT_DIR, "adapter.css")));
+  return sections;
 }
 
-const css = collectCss();
-const fonts = fontsUrl();
+// One surface's kit plus its production adaptations, concatenated after the
+// shared sections so they can override kit rules.
+function surfaceSections(kit, adapterPrefix) {
+  const sections = [];
+  for (const file of jsxFilesUnder(path.join(DS, "ui_kits", kit))) sections.push(...extractCssBlocks(read(file)));
+  for (const file of [`${adapterPrefix}.css`, ...adapterExtensions(adapterPrefix)]) {
+    sections.push(read(path.join(OUT_DIR, file)));
+  }
+  return sections;
+}
+
+// The two surfaces used to share one stylesheet, which meant every public
+// visitor downloaded and parsed the entire admin CRM design system on the
+// critical rendering path to reach a login they will never see. They are built
+// separately now, mirroring the split that already existed for the client JS.
+const sharedCss = joinCss(sharedSections());
+const publicSurfaceCss = joinCss(surfaceSections("website", "adapter-public"));
+const adminSurfaceCss = joinCss(surfaceSections("crm", "adapter-admin"));
+const publicCss = [sharedCss, publicSurfaceCss].filter(Boolean).join("\n");
+const adminCss = [sharedCss, adminSurfaceCss].filter(Boolean).join("\n");
+// Kept whole for the QA reports that introspect the design system as one body.
+const css = [sharedCss, publicSurfaceCss, adminSurfaceCss].filter(Boolean).join("\n");
+
+const fonts = fontUrls();
 const logo = logoExports();
 const icons = buildIconData();
-const hash = createHash("sha256").update(css + fonts + JSON.stringify(logo)).digest("hex").slice(0, 12);
+const hash = createHash("sha256").update(css + JSON.stringify(fonts) + JSON.stringify(logo)).digest("hex").slice(0, 12);
+// Each stylesheet carries its own version so an admin-only change does not
+// invalidate the copy every public visitor already holds, and vice versa.
+const publicCssHash = createHash("sha256").update(publicCss + fonts.base).digest("hex").slice(0, 12);
+const adminCssHash = createHash("sha256").update(adminCss + fonts.base).digest("hex").slice(0, 12);
 const publicClientHash = createHash("sha256").update(PUBLIC_APP_JS).digest("hex").slice(0, 12);
 const adminClientHash = createHash("sha256").update(ADMIN_APP_JS).digest("hex").slice(0, 12);
 
@@ -172,12 +205,16 @@ writeFileSync(path.join(VENDOR_DIR, logoFile), decodeLogo(logo.src));
 writeFileSync(path.join(VENDOR_DIR, reversedLogoFile), decodeLogo(logo.reversed));
 writeFileSync(path.join(VENDOR_DIR, "ms-realty-public.js"), `${header}${PUBLIC_APP_JS}\n`);
 writeFileSync(path.join(VENDOR_DIR, "ms-realty-admin.js"), `${header}${ADMIN_APP_JS}\n`);
-writeFileSync(path.join(VENDOR_DIR, "ms-realty.css"), `${cssHeader}${css}\n`);
+writeFileSync(path.join(VENDOR_DIR, "ms-realty-public.css"), `${cssHeader}${publicCss}\n`);
+writeFileSync(path.join(VENDOR_DIR, "ms-realty-admin.css"), `${cssHeader}${adminCss}\n`);
 
 writeFileSync(
   path.join(OUT_DIR, "design-assets.mjs"),
   `${header}export const DS_HASH = ${JSON.stringify(hash)};
-export const FONTS_URL = ${JSON.stringify(fonts)};
+export const PUBLIC_CSS_HASH = ${JSON.stringify(publicCssHash)};
+export const ADMIN_CSS_HASH = ${JSON.stringify(adminCssHash)};
+export const FONTS_URL = ${JSON.stringify(fonts.base)};
+export const FONTS_URL_HEBREW = ${JSON.stringify(fonts.hebrew)};
 export const LOGO_SRC = ${JSON.stringify(logo.src)};
 export const LOGO_SRC_REVERSED = ${JSON.stringify(logo.reversed)};
 export const LOGO_URL = ${JSON.stringify(`/vendor/${logoFile}`)};
@@ -200,7 +237,12 @@ console.log(
     kind: "design_assets",
     hash,
     css_bytes: css.length,
+    shared_css_bytes: sharedCss.length,
+    public_css_bytes: publicCss.length,
+    admin_css_bytes: adminCss.length,
     icons: Object.keys(icons).length,
+    public_css_hash: publicCssHash,
+    admin_css_hash: adminCssHash,
     public_client_hash: publicClientHash,
     admin_client_hash: adminClientHash,
   }),

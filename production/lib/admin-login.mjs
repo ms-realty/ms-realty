@@ -1,4 +1,4 @@
-import { DS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
+import { ADMIN_CSS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
 
 // Browser session transport for the custom admin workbench. The cookie carries
 // a short-lived Payload JWT whose session id is also recorded in Postgres. It
@@ -355,7 +355,7 @@ export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS_URL}">
-<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">
+<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${ADMIN_CSS_HASH}">
 <style>${LOGIN_STYLE}</style>
 </head>
 <body class="login-page" data-login-state="${error ? LOGIN_STATES[error] || "error" : "idle"}" data-admin-login-locale="${active}">
