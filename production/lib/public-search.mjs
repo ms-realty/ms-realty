@@ -219,7 +219,8 @@ export async function executePublicSearch({
   search = {},
   translationTasks = [],
   pageSize = 12,
-  savedView = false
+  savedView = false,
+  view = "list"
 } = {}) {
   let request;
   try {
@@ -239,6 +240,7 @@ export async function executePublicSearch({
     page: request.page,
     pageSize: savedView && pageSize === null ? null : request.intent.page_size,
     savedView,
+    view,
     translationTasks
   };
   const localeContext = searchRuntimeListings(registry, seed, { ...options, query: "" });

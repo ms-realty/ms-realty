@@ -154,6 +154,7 @@ function renderAppRouteWithContext({ pathname, url, config, registry, seed, tran
   const requestUrl = new URL(url, "http://localhost");
   const searchLocale = searchLocaleFor(registry, pathname);
   const savedView = requestUrl.searchParams.get("saved") === "1";
+  const view = requestUrl.searchParams.get("view") || "list";
   const searchRequest = searchLocale
     ? normalizeSearchRequest(requestUrl.searchParams, {
         defaultLocale: searchLocale.code,
@@ -169,6 +170,7 @@ function renderAppRouteWithContext({ pathname, url, config, registry, seed, tran
         page: searchRequest.page,
         pageSize: savedView ? null : 12,
         savedView,
+        view,
         translationTasks,
       })
     : renderRuntimePath(
@@ -223,6 +225,7 @@ export async function renderAppSearchRoute({ pathname, url = pathname, config = 
     translationTasks: context.translationTasks,
     pageSize: savedView ? null : 12,
     savedView,
+    view: requestUrl.searchParams.get("view") || "list",
   });
 
   return renderedHtmlResponse(result, requestUrl);
