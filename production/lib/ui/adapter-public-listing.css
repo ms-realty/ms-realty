@@ -29,15 +29,47 @@
    which outranks a single-class override: the physical offset survived and, in
    RTL, sat alongside the logical one, stretching the badge row across the card.
    Matching the kit's specificity lets document order settle it. */
-.mk-pcard__media .mk-pcard__badges { left: auto; right: auto; inset-inline-start: 12px; }
+/* Both insets are pinned so a second badge wraps inside the photo instead of
+   running out past the rounded corner and being cropped by the media's
+   overflow. The row spans the full width to do that, so it must not swallow a
+   tap meant for the photo link underneath. */
+.mk-pcard__media .mk-pcard__badges {
+  left: auto;
+  right: auto;
+  inset-inline-start: 12px;
+  inset-inline-end: 12px;
+  justify-content: flex-start;
+  pointer-events: none;
+}
 .mk-pcard__badges { display: flex; flex-wrap: wrap; gap: 6px; }
 .mk-pcard__badges:empty { display: none; }
-.mk-pcard__badges .mk-badge { display: inline-flex; align-items: center; }
+/* The kit sizes a badge with `line-height: 1`, which is shorter than the glyph
+   box the uppercase Cyrillic labels actually occupy, so the chip's height —
+   and with it the optical centring of the caps — depended on the font's
+   metrics. A definite height plus a line box that contains the glyphs centres
+   the text on purpose instead of by accident. */
+.mk-pcard__badges .mk-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding-block: 0;
+  line-height: var(--lh-snug);
+}
 .mk-pcard__badges .mk-badge--solid.mk-badge--neutral {
   background: color-mix(in srgb, var(--ink-950) 62%, transparent);
   color: var(--text-on-dark);
   backdrop-filter: blur(3px);
 }
+/* `.mk-badge--solid` fills the chip with the variant's *foreground* token and
+   then hard-codes white text. That pairing only holds while the foreground
+   token is dark. Under `prefers-color-scheme: dark` the offer and reduced
+   tokens invert to near-white ink, so the chip rendered white on white and only
+   survived over whatever part of the photograph happened to be dark — which is
+   why the badge read as cropped against the image corner. Pair each solid chip
+   with its own surface token so it stays legible read from either end. */
+.mk-badge--solid.mk-badge--for-sale { color: var(--for-sale-bg); }
+.mk-badge--solid.mk-badge--for-rent { color: var(--for-rent-bg); }
+.mk-badge--solid.mk-badge--reduced { color: var(--reduced-bg); }
 .mk-pcard__count { left: auto; right: auto; inset-inline-end: 12px; }
 .mk-pcard__body { min-width: 0; flex: 1; gap: 6px; padding: 14px 16px; }
 .mk-pcard__pricerow { gap: 8px; }
