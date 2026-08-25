@@ -74,22 +74,29 @@ function sameIntent(left, right) {
   );
 }
 
-export function appendLeadAssignment(assignment, { filePath = DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH } = {}) {
-  const rows = readLeadAssignments(filePath);
-  const existing = rows.find((row) => sameIntent(row, assignment));
-  if (existing) return { ...existing, idempotent: true };
+// The append decision, without the storage, so a durable writer applies the
+// same idempotency rule and the same id sequence to rows read from Postgres.
+export function resolveLeadAssignmentAppend(rows, assignment) {
+  const existing = (rows || []).find((row) => sameIntent(row, assignment));
+  if (existing) return { record: existing, idempotent: true };
 
   const baseId = `lead-assignment-${assignment.lead_id}`;
   let id = baseId;
   let suffix = 2;
-  while (rows.some((row) => row.id === id)) {
+  while ((rows || []).some((row) => row.id === id)) {
     id = `${baseId}-${suffix}`;
     suffix += 1;
   }
-  const persisted = { ...assignment, id };
+  return { record: { ...assignment, id }, idempotent: false };
+}
+
+export function appendLeadAssignment(assignment, { filePath = DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH } = {}) {
+  const rows = readLeadAssignments(filePath);
+  const resolved = resolveLeadAssignmentAppend(rows, assignment);
+  if (resolved.idempotent) return { ...resolved.record, idempotent: true };
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(persisted)}\n`);
-  return { ...persisted, idempotent: false };
+  fs.appendFileSync(filePath, `${JSON.stringify(resolved.record)}\n`);
+  return { ...resolved.record, idempotent: false };
 }
 
 export function applyLeadAssignments(leads, assignments = []) {

@@ -1,16 +1,16 @@
 import { publicationReadinessFor } from "./listing-facts.mjs";
 import {
-  freezeActiveListingIdSet,
   hasOperatorPublicationListingEvidence,
   operatorPublicationListingEvidence,
+  operatorPublishedListingIdSet,
 } from "./listing-publication-approval.mjs";
 
 const PUBLIC_LISTING_STATUSES = new Set(["available", "reserved"]);
 
-function operatorPublishedAsIs(record, { freezeActive, operatorApproved }) {
+function operatorPublishedAsIs(record, { operatorApprovedListing, operatorApproved }) {
   return (
     operatorApproved === true &&
-    freezeActive === true &&
+    operatorApprovedListing === true &&
     record.cms_status === "published" &&
     record.workflow?.publish_approved === true
   );
@@ -25,13 +25,13 @@ function publicListingStatus(record, operatorPublished) {
 export function publicSeedFor(seed, { now = new Date().toISOString() } = {}) {
   const properties = new Map((seed.properties || []).map((property) => [property.id, property]));
   const operatorApproved = hasOperatorPublicationListingEvidence(operatorPublicationListingEvidence());
-  const freezeActiveIds = operatorApproved ? freezeActiveListingIdSet() : new Set();
+  const operatorApprovedIds = operatorApproved ? operatorPublishedListingIdSet() : new Set();
   return {
     ...seed,
     records: (seed.records || []).filter((record) => {
       if (record.collection !== "listings") return true;
-      const freezeActive = freezeActiveIds.has(record.id);
-      const operatorPublished = operatorPublishedAsIs(record, { freezeActive, operatorApproved });
+      const operatorApprovedListing = operatorApprovedIds.has(record.id);
+      const operatorPublished = operatorPublishedAsIs(record, { operatorApprovedListing, operatorApproved });
       const status = publicListingStatus(record, operatorPublished);
       if (!PUBLIC_LISTING_STATUSES.has(status)) return false;
       if (operatorPublished) return true;

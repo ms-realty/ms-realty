@@ -1753,16 +1753,9 @@ export function localizedSearchFilterValue(localeCode, key, value) {
       GEOGRAPHY_CATALOG.areas.find((candidate) => candidate.id === value) ||
       geographyRegistryArea(publicGeographyRegistry(), value);
     if (!area) return humanizeIdentifier(value);
-    // The catalog only carries a native and an English name, and its English
-    // name for a Greek region is a transliteration ("Kriti", "Dytiki Elláda").
-    // LOCATION_NAMES is the per-locale exonym table and is keyed by exactly
-    // that English name, so the region filter reads it first — the same
-    // lookup localizedLocationValue() already performs for place names.
-    const exonym = LOCATION_NAMES[localeCode]?.[area.names.en];
-    if (exonym) return exonym;
-    return (localeCode === "bg" && area.country_code === "BG") || (localeCode === "el" && area.country_code === "GR")
-      ? area.names.native
-      : area.names.en;
+    // Same rules as every other location surface: a translated name wins, the
+    // native script wins at home, and English is the fallback - not the default.
+    return localizedLocationValue(localeCode, area.names?.en || "") || area.names?.en || humanizeIdentifier(value);
   }
   return humanizeIdentifier(value);
 }
@@ -1978,6 +1971,7 @@ const START_COPY = {
     tripSubmit: "Заявете пътуване за огледи",
     tripSent: "Заявката е получена. Брокер ще се свърже, за да подреди програмата.",
     tripPending: "Това е заявка. Човек потвърждава всеки оглед.",
+    tripScopeRequired: "Добавете поне един район или един запазен имот.",
     financingOptions: "Вижте вариантите за финансиране",
     financingOptionsNote: "Подготвяме списък с партньори за финансиране. Дотогава брокер обсъжда вариантите с вас.",
     sending: "Изпращане...",
@@ -2039,6 +2033,7 @@ const START_COPY = {
     tripSubmit: "Request a viewing trip",
     tripSent: "Request received. A broker will be in touch to line up the days.",
     tripPending: "This is a request. A person confirms every viewing.",
+    tripScopeRequired: "Add at least one area or one saved property.",
     financingOptions: "See financing options",
     financingOptionsNote: "A list of financing partners is in preparation. Until then a broker talks the options through with you.",
     sending: "Sending...",
@@ -2100,6 +2095,7 @@ const START_COPY = {
     tripSubmit: "Besichtigungsreise anfragen",
     tripSent: "Anfrage erhalten. Ein Makler meldet sich, um die Tage abzustimmen.",
     tripPending: "Das ist eine Anfrage. Ein Mensch bestatigt jede Besichtigung.",
+    tripScopeRequired: "Geben Sie mindestens eine Region oder ein gemerktes Objekt an.",
     financingOptions: "Finanzierungsoptionen ansehen",
     financingOptionsNote: "Eine Liste mit Finanzierungspartnern wird vorbereitet. Bis dahin bespricht ein Makler die Optionen mit Ihnen.",
     sending: "Wird gesendet...",
@@ -2161,6 +2157,7 @@ const START_COPY = {
     tripSubmit: "Bezichtigingsreis aanvragen",
     tripSent: "Aanvraag ontvangen. Een makelaar neemt contact op om de dagen te plannen.",
     tripPending: "Dit is een aanvraag. Een mens bevestigt elke bezichtiging.",
+    tripScopeRequired: "Voeg minstens een gebied of een opgeslagen woning toe.",
     financingOptions: "Financieringsopties bekijken",
     financingOptionsNote: "Een lijst met financieringspartners is in voorbereiding. Tot die tijd bespreekt een makelaar de opties met u.",
     sending: "Verzenden...",
@@ -2222,6 +2219,7 @@ const START_COPY = {
     tripSubmit: "Заявка на поездку с просмотрами",
     tripSent: "Заявка получена. Брокер свяжется, чтобы согласовать дни.",
     tripPending: "Это заявка. Каждый просмотр подтверждает человек.",
+    tripScopeRequired: "Укажите хотя бы один район или один сохранённый объект.",
     financingOptions: "Посмотреть варианты финансирования",
     financingOptionsNote: "Список партнёров по финансированию готовится. До этого брокер обсуждает варианты с вами.",
     sending: "Отправка...",
@@ -2283,6 +2281,7 @@ const START_COPY = {
     tripSubmit: "Αίτημα για ταξίδι επισκέψεων",
     tripSent: "Το αίτημα ελήφθη. Ένας μεσίτης θα επικοινωνήσει για τις ημέρες.",
     tripPending: "Αυτό είναι αίτημα. Ένας άνθρωπος επιβεβαιώνει κάθε επίσκεψη.",
+    tripScopeRequired: "Προσθέστε τουλάχιστον μία περιοχή ή ένα αποθηκευμένο ακίνητο.",
     financingOptions: "Δείτε επιλογές χρηματοδότησης",
     financingOptionsNote: "Ετοιμάζεται λίστα συνεργατών χρηματοδότησης. Μέχρι τότε ένας μεσίτης συζητά τις επιλογές μαζί σας.",
     sending: "Αποστολή...",
@@ -2344,6 +2343,7 @@ const START_COPY = {
     tripSubmit: "בקשת נסיעת ביקורים",
     tripSent: "הבקשה התקבלה. מתווך ייצור קשר לתאם את הימים.",
     tripPending: "זו בקשה. אדם מאשר כל ביקור.",
+    tripScopeRequired: "הוסיפו לפחות אזור אחד או נכס שמור אחד.",
     financingOptions: "הצגת אפשרויות מימון",
     financingOptionsNote: "רשימת שותפי מימון נמצאת בהכנה. עד אז מתווך עובר אתכם על האפשרויות.",
     sending: "שולח...",
@@ -4827,6 +4827,11 @@ export function renderStartPage({
             label: copy.tripSubmit,
             success: copy.tripSent,
             pending: copy.tripPending,
+            sending: copy.sending,
+            // The server refuses a trip with neither an area nor a shortlisted
+            // property. The visitor is told that by name before the post, not
+            // through a generic "request failed".
+            scope_required: copy.tripScopeRequired,
             payload: { locale: locale.code },
             areas: area ? [area.location] : [],
             fields: {

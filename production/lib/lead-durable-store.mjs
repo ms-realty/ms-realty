@@ -389,6 +389,97 @@ export async function readLeadIntakesDurably({ admin = false, contactSecret, pay
   }
 }
 
+/**
+ * The consent history, read back from the collection intake already writes.
+ *
+ * Consent rows are privacy-safe by construction: a keyed contact fingerprint,
+ * never a contact. The admin consent screen and the withdrawal route both read
+ * this rather than the JSONL ledger once intake is durable.
+ */
+export async function readConsentEventsDurably({ payload = null, workspaceId } = {}) {
+  const scope = requiredText(workspaceId, "Durable lead workspace_id");
+  try {
+    const runtime = await runtimePayload(payload);
+    const result = await runtime.find({
+      collection: "consent_events",
+      depth: 0,
+      overrideAccess: true,
+      pagination: false,
+      sort: "id",
+      where: { workspace_id: { equals: scope } },
+    });
+    if (!Array.isArray(result?.docs)) throw new Error("Payload consent_events query did not return documents");
+    return result.docs.map((document) => {
+      if (requiredText(document?.workspace_id, "consent_events workspace_id") !== scope) {
+        throw new Error("Payload consent_events query crossed the requested workspace boundary");
+      }
+      const row = document?.payload;
+      if (!row || typeof row !== "object" || Array.isArray(row)) throw new Error("Payload consent_events payload is invalid");
+      if (containsPlaintextContactField(row)) throw new Error("Payload consent_events payload contains plaintext contact data");
+      return row;
+    });
+  } catch (error) {
+    if (error instanceof LeadStoreUnavailableError) throw error;
+    throw new LeadStoreUnavailableError("Durable consent read failed", error);
+  }
+}
+
+/**
+ * Append one consent event — a withdrawal recorded by an operator, or any other
+ * superseding row. The collection is append-only: a withdrawal never rewrites
+ * the grant it supersedes, it records a later row that outranks it.
+ */
+export async function appendConsentEventDurably({ event, payload = null, workspaceId } = {}) {
+  const scope = requiredText(workspaceId, "Durable lead workspace_id");
+  const leadId = requiredText(event?.lead_id, "consent_events lead_id");
+  assertPrivacySafeEvent(event, { collection: "consent_events", leadId, workspaceId: scope });
+  try {
+    const runtime = await runtimePayload(payload);
+    const existing = await findOne(runtime, "consent_events", { event_id: { equals: event.event_id } });
+    if (existing?.payload) return { row: existing.payload, idempotent: true };
+    const created = await runtime.create({ collection: "consent_events", overrideAccess: true, data: event });
+    return { row: created?.payload || event.payload, idempotent: false };
+  } catch (error) {
+    if (error instanceof LeadStoreUnavailableError) throw error;
+    throw new LeadStoreUnavailableError("Durable consent store rejected the withdrawal", error);
+  }
+}
+
+/**
+ * The seller pipeline items created at intake, read back from the durable
+ * side-effect collection this module already writes.
+ *
+ * The stored payload is exactly createSellerPipelineItem() minus contact_name,
+ * which is everything deriveSellerPipelineStates() and the seller queue need —
+ * the seller's name stays in the encrypted contact envelope.
+ */
+export async function readSellerPipelineItemsDurably({ payload = null, workspaceId } = {}) {
+  const scope = requiredText(workspaceId, "Durable lead workspace_id");
+  try {
+    const runtime = await runtimePayload(payload);
+    const result = await runtime.find({
+      collection: "seller_pipeline_events",
+      depth: 0,
+      overrideAccess: true,
+      pagination: false,
+      sort: "id",
+      where: { workspace_id: { equals: scope } },
+    });
+    if (!Array.isArray(result?.docs)) throw new Error("Payload seller_pipeline_events query did not return documents");
+    return result.docs.map((document) => {
+      if (requiredText(document?.workspace_id, "seller_pipeline_events workspace_id") !== scope) {
+        throw new Error("Payload seller_pipeline_events query crossed the requested workspace boundary");
+      }
+      const item = document?.payload;
+      if (!item?.id || !item?.lead_id) throw new Error("Payload seller_pipeline_events payload is invalid");
+      return item;
+    });
+  } catch (error) {
+    if (error instanceof LeadStoreUnavailableError) throw error;
+    throw new LeadStoreUnavailableError("Durable seller pipeline read failed", error);
+  }
+}
+
 export async function persistLeadIntakeDurably({
   lead,
   contactSecret,

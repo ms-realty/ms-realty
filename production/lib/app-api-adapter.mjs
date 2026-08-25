@@ -38,7 +38,7 @@ import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./med
 import { SELLER_PHOTO_UPLOAD_PATH, acceptsHtmlResponse, handleSellerPhotoUpload } from "./media-upload-routes.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
-import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, appendPublicContact } from "./public-contact-vault.mjs";
+import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, appendPublicContact, readPublicContacts } from "./public-contact-vault.mjs";
 import { searchRuntimeListings, loadCmsSeed, submitRuntimeLead, DEFAULT_CMS_SEED_PATH } from "./runtime.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { clientIdentity, createRateLimiter, rateLimitConfigFromEnv } from "./rate-limit.mjs";
@@ -48,6 +48,7 @@ import {
   createSavedSearch,
   normalizeSavedSearchInput,
   privacySafeSavedSearch,
+  readSavedSearches,
   savedSearchIntent,
 } from "./saved-searches.mjs";
 import {
@@ -64,6 +65,41 @@ import { publicSeedFor } from "./public-inventory.mjs";
 import { projectListingDraftSeed } from "./listing-draft-service.mjs";
 import { readHeader, requestHost, sameOriginWriteRejection } from "./request-guard.mjs";
 import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
+// Package B2: the approved purchase-fee estimate, decided in one place.
+import { purchaseFeeEstimateResponse } from "./purchase-fee-estimate-route.mjs";
+import { DEFAULT_APPROVED_PURCHASE_FEES_PATH } from "./purchase-fees.mjs";
+// B3 saved-search self-service: capability links and the visitor's own changes.
+import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
+import {
+  DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+  applySavedSearchManageEvents,
+  readSavedSearchManageEvents,
+  savedSearchManageRouteResponse,
+} from "./saved-search-manage.mjs";
+import {
+  DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+  readSavedSearchAlertDeliveries,
+  withSavedSearchAlertState,
+} from "./saved-search-alert-deliveries.mjs";
+import {
+  savedSearchManageMinter,
+  savedSearchManagePathTemplate,
+  savedSearchManageSecretOrNull,
+  savedSearchManageTtlDays,
+} from "./saved-search-access.mjs";
+// B5 viewings: the public slot picker and the viewing-trip request.
+import { DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH, readBrokerAvailability } from "./broker-availability.mjs";
+import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
+import { DEFAULT_VIEWING_LEDGER_PATH } from "./viewing-ledger.mjs";
+import { viewingDurableStoreConfigFromEnv } from "./viewing-durable-store.mjs";
+import { DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH } from "./viewing-follow-ups.mjs";
+import { publicViewingSlotsPayload, publicViewingSource } from "./viewing-slots.mjs";
+import {
+  DEFAULT_VIEWING_TRIP_LEDGER_PATH,
+  appendViewingTripRequest,
+  createViewingTripRequest,
+  privacySafeViewingTripRequest,
+} from "./viewing-trip-requests.mjs";
 
 const ERROR_JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -114,7 +150,6 @@ export function appApiConfigFromEnv(env = process.env) {
     mediaUploadStorageConfig: mediaUploadStorageConfigFromEnv(env),
     mediaUploadLimits: mediaUploadLimitsFromEnv(env, { maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES) }),
     sellerPhotoUploadEnabled: env.MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED !== "1",
-    sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || LAUNCH_READINESS_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
@@ -122,9 +157,37 @@ export function appApiConfigFromEnv(env = process.env) {
     privateReview: env.MS_REALTY_PRIVATE_REVIEW_MODE === "true",
     search: publicSearchConfigFromEnv(env),
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
+    // Package B2: the approved purchase-fee table behind the public estimator.
+    approvedPurchaseFeePath: env.MS_REALTY_APPROVED_PURCHASE_FEES_PATH || DEFAULT_APPROVED_PURCHASE_FEES_PATH,
+    // B3 saved-search self-service. The manage link is minted here on create and
+    // verified here on every visit, so the same secret and template that sign a
+    // link have to be the ones that read it back.
+    auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
+    savedSearchManageEventLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH || DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH,
+    savedSearchAlertDeliveryLedgerPath:
+      env.MS_REALTY_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH || DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
+    savedSearchManageSecret: savedSearchManageSecretOrNull(env),
+    savedSearchManageLinkTemplate: savedSearchManagePathTemplate(env),
+    savedSearchManageLinkTtlDays: savedSearchManageTtlDays(env),
+    savedSearchPublicOrigin: env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com",
+    savedSearchManagedAt: env.MS_REALTY_SAVED_SEARCH_MANAGED_AT,
+    // B5 viewings: the slot picker reads the same availability, calendar and
+    // broker assignment the admin week view does.
+    brokerAvailabilityLedgerPath: env.MS_REALTY_BROKER_AVAILABILITY_LEDGER_PATH || DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH,
+    brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
+    viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
+    viewingDurableStore: viewingDurableStoreConfigFromEnv(env),
+    viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
+    viewingTripLedgerPath: env.MS_REALTY_VIEWING_TRIP_LEDGER_PATH || DEFAULT_VIEWING_TRIP_LEDGER_PATH,
+    brokerAvailabilityAt: env.MS_REALTY_BROKER_AVAILABILITY_AT,
+    viewingTripRequestedAt: env.MS_REALTY_VIEWING_TRIP_REQUESTED_AT,
     receivedAt: env.MS_REALTY_RECEIVED_AT,
     requestedAt: env.MS_REALTY_REQUESTED_AT,
     savedAt: env.MS_REALTY_SAVED_AT,
+    reviewedAt: env.MS_REALTY_REVIEWED_AT,
+    bookedAt: env.MS_REALTY_BOOKED_AT,
+    viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
     sellerPipelineCreatedAt: env.MS_REALTY_SELLER_PIPELINE_CREATED_AT,
     recordSearchEventsToFile: env.NODE_ENV !== "production",
     runtimeDataDurableOnly: durableOnly,
@@ -143,8 +206,15 @@ function json(status, body, headers = {}) {
   return response(status, body, "application/json; charset=utf-8", headers);
 }
 
+// A private response of any content type. The no-JS seller-photo upload answers
+// a browser form with a 303 and a text/plain body, so this cannot be
+// JSON-only — it was referenced by that branch long before it existed here.
+function privateResponse(status, body, contentType, headers = {}) {
+  return response(status, body, contentType, { ...PRIVATE_HEADERS, ...headers });
+}
+
 function privateJson(status, body) {
-  return response(status, body, "application/json; charset=utf-8", PRIVATE_HEADERS);
+  return privateResponse(status, body, "application/json; charset=utf-8");
 }
 
 // Text routes want a decoded body; a multipart photo upload needs the exact
@@ -245,7 +315,18 @@ function currentTranslationTasks(config) {
 }
 
 // Public (unauthenticated) write endpoints protected by the rate limiter.
-const PUBLIC_WRITE_PATHS = new Set(["/api/leads", "/api/events", "/api/language-requests", "/api/saved-searches", "/api/seller-photos"]);
+const PUBLIC_WRITE_PATHS = new Set([
+  "/api/leads",
+  "/api/events",
+  "/api/language-requests",
+  "/api/saved-searches",
+  "/api/saved-searches/manage",
+  "/api/seller-photos",
+  "/api/viewing-trips",
+]);
+// Reads that spend the same budget as the public writes: both hand a stranger
+// server work bound to one record, so neither may be polled freely.
+const PUBLIC_READ_LIMITED_PATHS = new Set(["/api/saved-searches/manage", "/api/viewing-slots"]);
 
 let sharedPublicWriteLimiter = null;
 
@@ -480,10 +561,18 @@ function routeSavedSearch(request, body, registry, seed, config) {
     const priceSnapshot = Object.fromEntries(
       search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
     );
+    // B3: mint the manage-link capability alongside the record. Only the
+    // derived verifier is stored; the raw token leaves in this response and is
+    // never written to any ledger.
+    const minter = savedSearchManageMinter({
+      secret: config.savedSearchManageSecret,
+      issuedAt: config.savedAt || new Date().toISOString(),
+      ttlDays: config.savedSearchManageLinkTtlDays || savedSearchManageTtlDays(),
+    });
     const savedSearch = createSavedSearch(
       registry,
       { ...input, search_intent: intent, priceSnapshot },
-      { matchCount: search.search.total_matches, savedAt: config.savedAt },
+      { matchCount: search.search.total_matches, savedAt: config.savedAt, manageAccess: minter.manageAccess },
     );
     if (!config.publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
     const contactVault = config.publicContactVaultPath
@@ -499,6 +588,12 @@ function routeSavedSearch(request, body, registry, seed, config) {
       : null;
     const safeSearch = privacySafeSavedSearch(savedSearch);
     const ledger = appendSavedSearch(safeSearch, { filePath: config.savedSearchLedgerPath });
+    // A retried submission returns the original record, so the link has to be
+    // re-derived for that record from its own stored issue window.
+    const { manage, reason: manageUnavailableReason } = minter.linkFor(ledger, {
+      origin: config.savedSearchPublicOrigin,
+      template: config.savedSearchManageLinkTemplate || savedSearchManagePathTemplate(),
+    });
     const consent = recordConsent(
       {
         consentType: "saved_search_alerts",
@@ -512,9 +607,145 @@ function routeSavedSearch(request, body, registry, seed, config) {
       },
       config,
     );
-    return privateJson(201, { ...safeSearch, ledger, contactVault, consent });
+    return privateJson(201, {
+      ...safeSearch,
+      ledger,
+      contactVault,
+      consent,
+      manage,
+      manage_unavailable_reason: manage ? null : manageUnavailableReason,
+    });
   } catch (error) {
-    return privateJson(400, { kind: "bad_request", message: error.message });
+    return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+  }
+}
+
+// B3: the visitor's own saved search, reached through the capability link.
+// Every decision belongs to the shared route contract; this supplies the
+// ledgers, the clock and the audit sink.
+function routeSavedSearchManage(method, { token, input, config }) {
+  const vault = savedSearchContactMap(config);
+  const answer = savedSearchManageRouteResponse({
+    method,
+    token,
+    input,
+    secret: config.savedSearchManageSecret,
+    readRecords: () =>
+      withSavedSearchAlertState(currentSavedSearches(config), currentSavedSearchAlertDeliveries(config)),
+    contacts: vault.contacts,
+    contactState: vault.state,
+    manageEventLedgerPath: config.savedSearchManageEventLedgerPath,
+    now: config.savedSearchManagedAt || config.receivedAt || new Date().toISOString(),
+    recordAudit: (entry, recordedAt) => recordManageAudit(entry, recordedAt, config),
+  });
+  return privateJson(answer.status, answer.body);
+}
+
+function savedSearchContactMap(config) {
+  if (!config.publicContactVaultPath) return { contacts: null, state: "not_configured" };
+  try {
+    return {
+      contacts: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "saved_search"),
+      state: "available",
+    };
+  } catch {
+    return { contacts: null, state: "locked" };
+  }
+}
+
+// The current projection: intake rows with every visitor change folded in.
+// Deleted searches disappear here, which is what stops their alerts.
+function currentSavedSearches(config) {
+  return applySavedSearchManageEvents(
+    readSavedSearches(config.savedSearchLedgerPath || undefined),
+    readSavedSearchManageEvents(config.savedSearchManageEventLedgerPath || undefined),
+  );
+}
+
+function currentSavedSearchAlertDeliveries(config) {
+  return config.savedSearchAlertDeliveryLedgerPath
+    ? readSavedSearchAlertDeliveries(config.savedSearchAlertDeliveryLedgerPath)
+    : [];
+}
+
+function recordManageAudit(entry, recordedAt, config) {
+  if (config.runtimeDataDurableOnly || !config.auditLogPath) return null;
+  return appendAuditLog(createAuditLogEntry(entry, recordedAt), { filePath: config.auditLogPath });
+}
+
+// B5: the free slots a visitor can pick from for one listing's broker.
+async function routeViewingSlots(url, config) {
+  try {
+    const registry = currentRegistry(config);
+    const seed = await currentRequestSeed(config);
+    return privateJson(
+      200,
+      publicViewingSlotsPayload({
+        registry,
+        seed,
+        searchParams: url.searchParams,
+        brokerContacts: config.runtimeDataDurableOnly ? [] : readBrokerContacts(config.brokerContactLedgerPath),
+        availabilityRows: readBrokerAvailability(config.brokerAvailabilityLedgerPath || undefined),
+        viewings: await publicViewingSource(config),
+        now: viewingSlotsNow(config),
+      }),
+    );
+  } catch (error) {
+    if (error?.code === "listing_not_found") {
+      return privateJson(404, { kind: "listing_not_found", listing_reference: error.listingReference });
+    }
+    return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+  }
+}
+
+function viewingSlotsNow(config) {
+  return (
+    config.brokerAvailabilityAt ||
+    config.viewingFollowUpAt ||
+    config.bookedAt ||
+    config.reviewedAt ||
+    config.receivedAt ||
+    new Date().toISOString()
+  );
+}
+
+// B5: a viewing trip is a request for a human to arrange, never a booking.
+function routeViewingTrip(request, body, registry, config) {
+  try {
+    const requestedAt = config.viewingTripRequestedAt || config.savedAt || config.receivedAt || new Date().toISOString();
+    const input = parseBody(request, body);
+    const trip = createViewingTripRequest(registry, input, { requestedAt });
+    if (!config.publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
+    const contactVault = appendPublicContact(
+      {
+        subjectType: "viewing_trip",
+        subjectId: trip.id,
+        contact: trip.contact,
+        contactPreference: trip.contact_preference,
+        message: trip.note,
+      },
+      { filePath: config.publicContactVaultPath, secret: config.publicContactKey, storedAt: requestedAt },
+    );
+    const safeTrip = privacySafeViewingTripRequest(trip);
+    const ledger = config.viewingTripLedgerPath
+      ? appendViewingTripRequest(safeTrip, { filePath: config.viewingTripLedgerPath })
+      : null;
+    const consent = recordConsent(
+      {
+        consentType: "viewing_trip_request",
+        source: "website_viewing_trip",
+        subjectId: trip.id,
+        locale: trip.requested_locale,
+        contact: trip.contact,
+        granted: true,
+        legalBasis: "contract",
+        marketingOptIn: input.marketingOptIn === true,
+      },
+      config,
+    );
+    return privateJson(201, { ...safeTrip, ledger, contactVault, consent });
+  } catch (error) {
+    return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
   }
 }
 
@@ -543,7 +774,10 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       return webResponse(privateJson(503, runtimeDataUnavailablePayload(url.pathname)));
     }
     const limiter = publicWriteLimiterFor(config);
-    if (limiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
+    const rateLimited =
+      (request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) ||
+      (request.method === "GET" && PUBLIC_READ_LIMITED_PATHS.has(url.pathname));
+    if (limiter && rateLimited) {
       // Behind Cloudflare (trustProxy) the verified cf-connecting-ip is used;
       // otherwise there is no socket peer here, so all callers share one bucket
       // rather than letting a spoofed X-Forwarded-For mint fresh identities.
@@ -613,6 +847,16 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       return webResponse(await routeSearch(url, registry, seed, config, request.headers.get("x-ms-realty-preview") === "search-count"));
     }
 
+    // Package B2: the approved purchase-fee table, totalled for one price.
+    if (request.method === "GET" && url.pathname === "/api/purchase-fees/estimate") {
+      const estimate = purchaseFeeEstimateResponse({
+        searchParams: url.searchParams,
+        defaultLocale: currentRegistry(config).source_locale,
+        filePath: config.approvedPurchaseFeePath,
+      });
+      return webResponse(json(estimate.status, estimate.body));
+    }
+
     if (request.method === "POST" && url.pathname === "/api/leads") {
       const registry = currentRegistry(config);
       const seed = await currentRequestSeed(config);
@@ -652,6 +896,35 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       const registry = currentRegistry(config);
       const seed = await currentRequestSeed(config);
       return webResponse(routeSavedSearch(request, body, registry, seed, config));
+    }
+
+    // B3: the visitor's own saved search, through the capability link.
+    if (url.pathname === "/api/saved-searches/manage") {
+      if (request.method === "GET") {
+        return webResponse(routeSavedSearchManage("GET", { token: url.searchParams.get("token"), config }));
+      }
+      if (request.method === "POST") {
+        let input;
+        try {
+          input = parseBody(request, body);
+        } catch (error) {
+          return webResponse(privateJson(400, { kind: "bad_request", message: error.message }));
+        }
+        return webResponse(routeSavedSearchManage("POST", { input, config }));
+      }
+      return webResponse(privateJson(405, { kind: "method_not_allowed" }));
+    }
+
+    // B5: the slots the listing's broker is free for. Nothing here books.
+    if (url.pathname === "/api/viewing-slots") {
+      if (request.method !== "GET") return webResponse(privateJson(405, { kind: "method_not_allowed" }));
+      return webResponse(await routeViewingSlots(url, config));
+    }
+
+    // B5: a viewing trip is a request a human confirms, never a booking.
+    if (url.pathname === "/api/viewing-trips") {
+      if (request.method !== "POST") return webResponse(privateJson(405, { kind: "method_not_allowed" }));
+      return webResponse(routeViewingTrip(request, body, currentRegistry(config), config));
     }
 
     return webResponse(json(405, { kind: "method_not_allowed" }));

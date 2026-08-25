@@ -219,7 +219,9 @@ export function normalizeLeadInput(input = {}) {
   }
   // viewing_slot records the exact instant a visitor picked from the broker's
   // free slots; viewing_date and viewing_time stay the contract the pipeline reads.
-  for (const field of ["callback_time", "viewing_date", "viewing_time", "viewing_slot"]) {
+  // topic is what the contact form's subject select posts: without it here a
+  // form submitted without JavaScript dropped the visitor's chosen subject.
+  for (const field of ["topic", "callback_time", "viewing_date", "viewing_time", "viewing_slot"]) {
     const value = input[`request_details.${field}`];
     if (value !== undefined && String(value).trim()) requestDetails[field] = String(value).trim();
     else if (typeof requestDetails[field] === "string") requestDetails[field] = requestDetails[field].trim();

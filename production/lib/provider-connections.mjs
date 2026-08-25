@@ -1,7 +1,27 @@
 import crypto from "node:crypto";
 import { createPrivateContactEnvelope, openPrivateContactEnvelope } from "./private-contact-vault.mjs";
 
-const PROVIDERS = new Set(["google", "whatsapp", "viber"]);
+// Every channel or account the workbench can hold a credential for. The three
+// original entries are the messaging providers; the rest were added so a
+// non-technical operator can connect the agency's own tools from one screen.
+// Adding an id here only makes the store accept it -- what a connection can
+// actually do still comes from the flow that produced it.
+const PROVIDERS = new Set([
+  "google",
+  "google_drive",
+  "whatsapp",
+  "viber",
+  "facebook",
+  "instagram",
+  "github",
+  "cloudflare",
+  "neon",
+  // The Hermes model provider. Its row deliberately carries an empty credential
+  // envelope: HERMES_API_KEY is on the repo's never-persist list and the
+  // drafting worker only ever reads it from the process environment. The row
+  // exists so the connect screen can show when the endpoint last answered.
+  "ai",
+]);
 const GOOGLE_SCOPES = [
   "openid",
   "email",
@@ -675,4 +695,23 @@ export async function saveProviderConnection(
   }
 }
 
-export { GOOGLE_SCOPES };
+// Disconnecting removes the row outright rather than flipping a status, so the
+// encrypted credential envelope stops existing at the same moment the operator
+// says to stop using it. Revoking the token at the provider is the caller's job
+// and happens first; this is the local half.
+export async function deleteProviderConnection(provider, { payload = null } = {}) {
+  const name = providerName(provider);
+  try {
+    const runtime = await runtimePayload(payload);
+    const existing = await findProvider(runtime, name);
+    if (!existing) return { provider: name, deleted: false };
+    if (typeof runtime.delete !== "function") throw new Error("Payload runtime cannot delete provider connections");
+    await runtime.delete({ collection: "provider_connections", id: existing.id, depth: 0, overrideAccess: true });
+    return { provider: name, deleted: true };
+  } catch (error) {
+    if (error instanceof ProviderConnectionUnavailableError) throw error;
+    throw new ProviderConnectionUnavailableError("Provider connection delete failed", error);
+  }
+}
+
+export { GOOGLE_SCOPES, PROVIDERS, exactOrigin, providerName, responseJson, secret };

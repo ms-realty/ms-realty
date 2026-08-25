@@ -12,6 +12,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fromRoot } from "./paths.mjs";
+import {
+  SAVED_SEARCH_LINK_REFUSAL,
+  SavedSearchLinkRefusedError,
+  assertSavedSearchAccess,
+  readSavedSearchAccessToken,
+} from "./saved-search-access.mjs";
 
 export const DEFAULT_SAVED_SEARCH_MANAGE_EVENT_LEDGER_PATH = fromRoot(
   "production",
@@ -236,6 +242,174 @@ export function savedSearchManagePayload(
     link: { expires_at: linkExpiresAt },
     generated_at: isoTimestamp(now, "now"),
   };
+}
+
+// ---- The /api/saved-searches/manage route, as one contract ----------------
+//
+// Both runtimes serve this route and production only ever runs the App Router
+// adapter, so the capability check, the refusal vocabulary and the audit trail
+// live here rather than in either dispatcher. Callers supply the ledgers and an
+// audit sink; everything decided about the visitor's link is decided below.
+//
+// Every refusal returns the same generic answer, so the route cannot be used to
+// probe whether a given saved search exists.
+
+// Resolves a presented token to the stored record, or throws the single
+// generic refusal.
+function manageState(token, { secret, records, now }) {
+  if (!secret) throw new SavedSearchLinkRefusedError("secret_unavailable");
+  const presented = readSavedSearchAccessToken(token, { secret, now });
+  const record = records.find((row) => row.id === presented.record_id) || null;
+  // A deleted or unknown record is refused exactly like a forged token.
+  assertSavedSearchAccess(record, presented);
+  return { record, presented };
+}
+
+function manageBody(record, presented, { contacts, contactState, now }) {
+  return savedSearchManagePayload(record, {
+    contact: contacts?.get(record.id)?.contact || null,
+    contactState,
+    linkExpiresAt: presented.expires_at,
+    now,
+  });
+}
+
+const AUDIT_ACTIONS = Object.freeze({
+  pause: "saved_search_paused",
+  resume: "saved_search_resumed",
+  update_frequency: "saved_search_frequency_updated",
+  update_channel: "saved_search_channel_updated",
+  delete: "saved_search_deleted",
+});
+
+// Returns { status, body }. `readRecords` returns the current projection with
+// alert state folded in — it is called again after a change is written, because
+// the answer must describe the stored state, not the snapshot we started from.
+// `contacts` is the saved-search contact map (or null when the vault is
+// unreadable), and `contactState` says which of those it is.
+export function savedSearchManageRouteResponse({
+  method,
+  token,
+  input = {},
+  secret = null,
+  readRecords = () => [],
+  contacts = null,
+  contactState = "not_configured",
+  manageEventLedgerPath = null,
+  now = new Date().toISOString(),
+  recordAudit = () => {},
+} = {}) {
+  const refusal = { status: 404, body: { ...SAVED_SEARCH_LINK_REFUSAL } };
+  const contactContext = { contacts, contactState, now };
+
+  if (method === "GET") {
+    try {
+      const { record, presented } = manageState(token, { secret, records: readRecords(), now });
+      return { status: 200, body: manageBody(record, presented, contactContext) };
+    } catch (error) {
+      if (error instanceof SavedSearchLinkRefusedError) return refusal;
+      return { status: 400, body: { kind: "bad_request", message: error.message } };
+    }
+  }
+  if (method !== "POST") return { status: 405, body: { kind: "method_not_allowed" } };
+
+  let record;
+  let presented;
+  try {
+    ({ record, presented } = manageState(input.token, { secret, records: readRecords(), now }));
+  } catch (error) {
+    if (error instanceof SavedSearchLinkRefusedError) return refusal;
+    return { status: 400, body: { kind: "bad_request", message: error.message } };
+  }
+  if (!manageEventLedgerPath) {
+    return {
+      status: 503,
+      body: {
+        kind: "saved_search_manage_unavailable",
+        message: "Saved search changes are unavailable because their storage is not configured.",
+      },
+    };
+  }
+  try {
+    const event = normalizeSavedSearchManageEvent({ ...input, savedSearchId: record.id }, now);
+    const contact = contacts?.get(record.id)?.contact || null;
+    if (event.action === "update_channel") {
+      // Fail closed: without the vault we cannot prove the requested channel is
+      // one the visitor actually gave us.
+      if (!contact) {
+        return {
+          status: 409,
+          body: {
+            kind: "saved_search_channel_unverifiable",
+            message: "The stored contact channels cannot be read, so the alert channel cannot be changed.",
+          },
+        };
+      }
+      if (!reachableContactChannels(contact).includes(event.channel)) {
+        return {
+          status: 400,
+          body: {
+            kind: "bad_request",
+            message: "channel must be one of the contact channels supplied with this saved search",
+          },
+        };
+      }
+    }
+    const currentStatus = record.status || "active";
+    const unchanged =
+      (event.action === "pause" && currentStatus === "paused") ||
+      (event.action === "resume" && currentStatus === "active") ||
+      (event.action === "update_frequency" && record.alert_frequency === event.frequency) ||
+      (event.action === "update_channel" && record.contact_preference === event.channel);
+    if (unchanged) {
+      return {
+        status: 200,
+        body: { ...manageBody(record, presented, contactContext), action: event.action, idempotent: true },
+      };
+    }
+    appendSavedSearchManageEvent(event, { filePath: manageEventLedgerPath });
+    // Every mutation is audited. The actor is the capability link, not an
+    // operator, and the metadata carries no contact data.
+    recordAudit(
+      {
+        action: AUDIT_ACTIONS[event.action],
+        actor: "saved_search_link",
+        objectType: "saved_search",
+        objectId: record.id,
+        locale: record.locale,
+        status: event.action === "delete" ? "deleted" : "recorded",
+        metadata: {
+          source: "manage_link",
+          action: event.action,
+          ...(event.frequency ? { alert_frequency: event.frequency } : {}),
+          ...(event.channel ? { channel: event.channel } : {}),
+        },
+      },
+      now,
+    );
+    if (event.action === "delete") {
+      return {
+        status: 200,
+        body: {
+          kind: "saved_search_manage",
+          action: "delete",
+          deleted: true,
+          saved_search: null,
+          idempotent: false,
+          message: "This saved search is deleted and its alerts have stopped. The manage link no longer works.",
+        },
+      };
+    }
+    // Re-read: the projection has to include the event just written.
+    const updated = applySavedSearchManageEvents(readRecords(), []).find((row) => row.id === record.id) || record;
+    return {
+      status: 200,
+      body: { ...manageBody(updated, presented, contactContext), action: event.action, idempotent: false },
+    };
+  } catch (error) {
+    if (error instanceof SavedSearchLinkRefusedError) return refusal;
+    return { status: 400, body: { kind: "bad_request", message: error.message } };
+  }
 }
 
 export function assertSavedSearchManageEvents(rows) {

@@ -91,6 +91,7 @@
     "payload:bootstrap": "node production/scripts/build-payload-runtime-bootstrap.mjs",
     "payload:migrate": "payload migrate",
     "payload:cms:import": "node production/scripts/run-payload-cms-import.mjs",
+    "payload:publication:sync": "node production/scripts/run-payload-publication-sync.mjs",
     "payload:runtime": "node production/scripts/build-payload-runtime-report.mjs",
     "payload:preflight": "node production/scripts/validate-payload-runtime-report.mjs",
     "audit:retention": "node production/scripts/run-audit-retention.mjs",
@@ -124,6 +125,7 @@
     "payload": "3.87.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
+    "sharp": "0.35.3",
     "zod": "4.2.0"
   },
   "overrides": {

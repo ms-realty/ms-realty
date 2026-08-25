@@ -82,6 +82,33 @@ test("local Docker startup recreates the edge after an app update", () => {
   assert.match(importer, /collection: "listings", depth: 0, draft: true, limit: 1, overrideAccess: true/);
 });
 
+test("the up flow projects the seed's recorded publication state after the import and before search re-seeding", () => {
+  const script = fs.readFileSync(fromRoot("production", "scripts", "local-production.mjs"), "utf8");
+  const packageJson = JSON.parse(fs.readFileSync(fromRoot("package.json"), "utf8"));
+  const start = script.slice(script.indexOf("async function start("), script.indexOf("\ntry {", script.indexOf("async function start(")));
+
+  const importAt = start.indexOf('"payload:cms:import", "--", "--skip-if-initialized"');
+  const publicationAt = start.indexOf('"payload:publication:sync"');
+  const searchAt = start.indexOf('"search-seed"');
+
+  assert.ok(publicationAt >= 0, "the up flow must run the publication projector");
+  assert.ok(importAt >= 0 && publicationAt > importAt, "the projector must run after the CMS import");
+  assert.ok(searchAt > publicationAt, "search must be re-seeded after publication state reaches Postgres");
+
+  // The committed seed's recorded approvals are the authority, so the step is
+  // not hidden behind an environment flag; the projector's own fail-closed
+  // rules are the guard.
+  assert.doesNotMatch(
+    start.slice(publicationAt - 200, publicationAt + 120),
+    /MS_REALTY_[A-Z_]*PUBLICATION[A-Z_]*\s*===|process\.env\.[A-Za-z_]+\s*===/,
+  );
+
+  assert.equal(
+    packageJson.scripts["payload:publication:sync"],
+    "node production/scripts/run-payload-publication-sync.mjs",
+  );
+});
+
 test("production review reuses the tested stack with durable volumes and an authenticated noindex edge", () => {
   const compose = fs.readFileSync(fromRoot("production", "docker-compose.production-review.yml"), "utf8");
   const caddy = fs.readFileSync(fromRoot("production", "Caddyfile.production-review"), "utf8");

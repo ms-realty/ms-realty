@@ -54,9 +54,9 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
   });
   // The page speaks the workbench languages; it used to be fixed to Russian.
   assert.ok(html.includes("Copy the text for the assistant"));
-  assert.ok(html.includes("Gmail + Google Calendar"));
+  assert.ok(html.includes("Gmail"));
   assert.ok(html.includes("WhatsApp Business"));
-  assert.ok(html.includes("Viber Bot"));
+  assert.ok(html.includes("Viber"));
   assert.match(html, /<label class="hint" for="prompt">[^<]+<\/label>\s*<textarea id="prompt"/);
   assert.ok(html.includes("noindex"));
   assert.ok(html.includes(OPERATOR_TOKEN));

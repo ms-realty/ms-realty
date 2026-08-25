@@ -10,6 +10,7 @@ import path from "node:path";
 
 import { renderAppAdminResponse, appAdminConfigFromEnv } from "../lib/app-admin-adapter.mjs";
 import { renderAppApiResponse, appApiConfigFromEnv } from "../lib/app-api-adapter.mjs";
+import { optimizeImageUpload } from "../lib/image-optimizer.mjs";
 import { readMediaUploads } from "../lib/media-uploads.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { jpegWithGpsExif, multipartBody, textFileNamedJpg, tinyJpeg } from "./image-upload.fixture.mjs";
@@ -75,8 +76,12 @@ test("the admin adapter stores an upload unreviewed and refuses a renamed text f
   const rows = readMediaUploads(context.uploadLedger);
   assert.equal(rows.length, 1);
   // The bytes survive the Web Request round trip unchanged, which is the whole
-  // reason the adapter reads raw bytes instead of a decoded string.
-  assert.deepEqual(fs.readFileSync(path.join(context.uploadRoot, rows[0].storage_key)), tinyJpeg());
+  // reason the adapter reads raw bytes instead of a decoded string. What is
+  // stored is now the optimised photo, so the check is that optimising the
+  // source locally lands on exactly the same bytes: any corruption in transit
+  // would decode differently and could not.
+  const expected = await optimizeImageUpload(tinyJpeg());
+  assert.deepEqual(fs.readFileSync(path.join(context.uploadRoot, rows[0].storage_key)), expected.bytes);
 
   const refused = await renderAppAdminResponse(
     uploadRequest(
@@ -105,7 +110,7 @@ test("the admin adapter stores an upload unreviewed and refuses a renamed text f
   );
   assert.equal(preview.status, 200);
   assert.equal(preview.headers.get("cache-control"), "no-store");
-  assert.deepEqual(Buffer.from(await preview.arrayBuffer()), tinyJpeg());
+  assert.deepEqual(Buffer.from(await preview.arrayBuffer()), expected.bytes);
 });
 
 test("the public adapter keeps a seller photo private and bound to the enquiry", async () => {
@@ -168,4 +173,42 @@ test("the public adapter keeps a seller photo private and bound to the enquiry",
     { config },
   );
   assert.equal(crossOrigin.status, 403);
+});
+
+// A browser form post asks for HTML and gets a redirect back to the page it
+// came from. That branch used to reference a helper this module never defined,
+// so every no-JS seller upload answered 500 in production while the JSON path
+// stayed green.
+test("the public adapter redirects a no-JS seller photo form back to the page", async () => {
+  const context = scratch();
+  const config = {
+    ...appApiConfigFromEnv(),
+    mediaUploadLedgerPath: context.uploadLedger,
+    mediaUploadStorageConfig: { driver: "local", root: context.uploadRoot, host: "makler-realty.com" },
+    sellerPipelinePath: context.sellerPipeline,
+    sellerPhotoUploadEnabled: true,
+    rateLimit: null,
+  };
+
+  const redirected = await renderAppApiResponse(
+    uploadRequest(
+      "http://localhost/api/seller-photos?return=%2Fen%2Fsell",
+      multipartBody([
+        { name: "enquiryId", value: ENQUIRY_ID },
+        { name: "photo", filename: "front.jpg", contentType: "image/jpeg", value: jpegWithGpsExif() },
+      ]),
+      {
+        host: "localhost",
+        origin: "http://localhost",
+        "sec-fetch-site": "same-origin",
+        accept: "text/html,application/xhtml+xml",
+      },
+    ),
+    { config },
+  );
+
+  assert.equal(redirected.status, 303);
+  assert.equal(redirected.headers.get("location"), "/en/sell?photos=ok#seller-photos");
+  assert.equal(redirected.headers.get("cache-control"), "no-store");
+  assert.equal(readMediaUploads(context.uploadLedger).length, 1);
 });

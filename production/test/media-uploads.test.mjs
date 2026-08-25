@@ -165,9 +165,9 @@ test("the per-request cap can never exceed the transport body limit", () => {
   assert.throws(() => mediaUploadLimitsFromEnv({ MS_REALTY_MEDIA_UPLOAD_MAX_FILES: "0" }), /positive integer/);
 });
 
-test("an oversized file is refused before any bytes are stored", () => {
+test("an oversized file is refused before any bytes are stored", async () => {
   const limits = mediaUploadLimitsFromEnv({ MS_REALTY_MEDIA_UPLOAD_MAX_FILE_BYTES: "256" }, { maxBodyBytes: 4096 });
-  assert.throws(
+  await assert.rejects(
     () => prepareMediaUpload({ bytes: tinyJpeg(), filename: "big.jpg" }, { scope: "listing", subjectId: "MS-CRAWL-0001", limits }),
     (error) => error.status === 413 && error.code === "file_too_large",
   );
@@ -248,13 +248,13 @@ test("the r2 driver ingests through the Worker route and verifies the echoed siz
 
 /* --------------------------------------------------------------- ledger */
 
-test("an uploaded asset is written unreviewed, is idempotent, and joins the listing media queue", () => {
+test("an uploaded asset is written unreviewed, is idempotent, and joins the listing media queue", async () => {
   const file = path.join(scratch("upload-ledger"), "media-uploads.jsonl");
   resetMediaUploads(file);
   const seed = loadCmsSeed();
   const record = assertUploadListing(seed, "MS-CRAWL-0001");
 
-  const prepared = prepareMediaUpload(
+  const prepared = await prepareMediaUpload(
     { bytes: jpegWithGpsExif(), filename: "kitchen.jpg", contentType: "image/jpeg" },
     { scope: "listing", subjectId: record.id, kind: "photo", uploadedAt: "2026-08-23T10:00:00.000Z" },
   );
@@ -298,7 +298,7 @@ test("an uploaded asset is written unreviewed, is idempotent, and joins the list
   assert.equal((other.media || []).some((item) => item.asset_id === first.asset_id), false);
 });
 
-test("a seller photo is bound to a known enquiry and never reaches a listing", () => {
+test("a seller photo is bound to a known enquiry and never reaches a listing", async () => {
   const file = path.join(scratch("enquiry-ledger"), "media-uploads.jsonl");
   resetMediaUploads(file);
   const enquiries = [{ id: "seller-pipeline-lead-draft-7", lead_id: "lead-draft-7", stage: "valuation_requested" }];
@@ -310,7 +310,7 @@ test("a seller photo is bound to a known enquiry and never reaches a listing", (
   );
   assert.throws(() => assertUploadEnquiry("", enquiries), /enquiryId is required/);
 
-  const prepared = prepareMediaUpload(
+  const prepared = await prepareMediaUpload(
     { bytes: tinyPng(), filename: "front.png" },
     { scope: "enquiry", subjectId: "lead-draft-7", uploadedAt: "2026-08-23T10:00:00.000Z" },
   );

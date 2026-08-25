@@ -2394,7 +2394,9 @@ test("HTTP sitemap ignores editor-only location mutations without removing revie
 
   assert.equal(sitemap.status, 200);
   assert.doesNotMatch(sitemap.body, /\/he\/locations\/runtime-only-city/);
-  assert.doesNotMatch(sitemap.body, /\/he\/locations\/sandanski/);
+  // The reviewed settlement landing pages survive the editor-only mutation.
+  assert.match(sitemap.body, /\/he\/locations\/sandanski/);
+  assert.match(sitemap.body, /\/bg\/lokacii\/sandanski/);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {

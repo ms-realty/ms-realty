@@ -65,9 +65,24 @@ function optionalNote(value) {
   return note || null;
 }
 
+// A form posted without JavaScript arrives flat: contact.name, contact.email
+// and so on are top-level keys, not a nested object. Un-flatten them exactly
+// the way lead intake does, or a native POST fails on "contact.name is
+// required" while the fetch path succeeds.
+function unflattenContact(input) {
+  const contact = input.contact && typeof input.contact === "object" && !Array.isArray(input.contact) ? { ...input.contact } : {};
+  for (const field of ["name", "email", "phone", "whatsapp", "viber", "preferred_channel"]) {
+    const value = input[`contact.${field}`];
+    if (value !== undefined && String(value).trim()) contact[field] = String(value).trim();
+    else if (typeof contact[field] === "string") contact[field] = contact[field].trim();
+  }
+  return contact;
+}
+
 export function normalizeViewingTripInput(input = {}) {
   return {
     ...input,
+    contact: unflattenContact(input),
     locale: input.locale || input.language || null,
     arrival_date: input.arrivalDate ?? input.arrival_date ?? null,
     departure_date: input.departureDate ?? input.departure_date ?? null,

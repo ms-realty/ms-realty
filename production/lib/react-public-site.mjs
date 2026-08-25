@@ -132,7 +132,7 @@ function SiteHeader({ chrome }) {
       },
       h(
         "nav",
-        { className: "site-hd__mobile-nav", "aria-label": copy.menuLabel },
+        { className: "site-hd__mobile-nav" },
         ...chrome.nav.map((item) =>
           h(
             "a",
@@ -734,7 +734,10 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
   const mediaAttrs = {
     href: card.path,
     className: `mk-pcard__media mk-photo mk-photo--${tone}`,
-    "aria-label": `${card.title}; ${mediaCountText}`,
+    // The title link right below is the card's one accessible entry; a second
+    // link with the same destination would double every tab stop.
+    "aria-hidden": "true",
+    tabIndex: -1,
     lang: card.content_locale || undefined,
   };
   const photoPlaceholder = h("span", { key: "noimage", className: "mk-pcard__noimage", "aria-hidden": "true" }, h(Icon, { name: "camera", size: 22 }));
@@ -787,7 +790,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
         card.area_sqm ? h("span", { "data-card-spec": "area" }, h(Icon, { name: "ruler", size: 16 }), ` ${card.area_sqm} m²`) : null,
         card.land_area_sqm ? h("span", { "data-card-spec": "land" }, h(Icon, { name: "map", size: 16 }), ` ${card.land_area_sqm} m²`) : null,
         h("span", { "data-card-spec": "photos" }, h(Icon, { name: "camera", size: 16 }), ` ${imageCount}`),
-        /^MS-CRAWL-/i.test(card.id) ? null : h("span", { className: "mk-pcard__ref", "data-card-spec": "reference" }, card.id),
+         h("span", { className: "mk-pcard__ref", "data-card-spec": "reference" }, card.id),
       ),
       h(
         "nav",
@@ -1805,6 +1808,9 @@ function StartBody({ page }) {
           "data-start-trip-form": "true",
           // The shared JSON submit swaps the form for a success card built from this.
           "data-success-message": item.request.success,
+          "data-sending-message": item.request.sending || copy.sending,
+          // Mirrors the server rule: a trip needs an area or a saved property.
+          "data-start-trip-scope-message": item.request.scope_required || "",
         },
         h("input", { type: "hidden", name: "locale", defaultValue: item.request.payload.locale }),
         // Filled from the visitor's saved listings by the client script.
@@ -1832,7 +1838,7 @@ function StartBody({ page }) {
           "div",
           { className: "st-lead__actions" },
           h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "calendar-days" }, item.request.label),
-          h("p", { className: "st-lead__status", "data-start-trip-status": "true", role: "status", "aria-live": "polite" }),
+          h("p", { className: "st-lead__status", "data-start-status": "true", role: "status", "aria-live": "polite" }),
         ),
         h("p", { className: "st-upcoming__note" }, item.request.pending),
       ),
@@ -1970,6 +1976,11 @@ function StartBody({ page }) {
             leadHidden("source", shortlist.payload.source),
             leadHidden("intent", shortlist.payload.intent),
             leadHidden("leadType", shortlist.payload.leadType, true),
+            // Source and channel attribution. The channel names the surface family,
+            // the first touch path names where the visit started. Both are filled by
+            // the client, neither travels in a URL, and neither identifies a visitor.
+            h("input", { type: "hidden", name: "channel", defaultValue: "", "data-lead-channel-field": "true" }),
+            h("input", { type: "hidden", name: "firstTouchPath", defaultValue: "", "data-first-touch-field": "true" }),
             leadHidden("language", shortlist.payload.language),
             leadHidden("requirements.locations", shortlist.requirements.locations, true),
             leadHidden("requirements.property_types", shortlist.requirements.property_types, true),
@@ -5074,12 +5085,6 @@ function AboutBody({ page }) {
             ),
             h("p", { className: "ab-office__role" }, office.role),
             h("p", { className: "ab-office__note" }, office.note),
-            h(
-              "a",
-              { className: "ab-office__call", href: contact.channels.phone.href },
-              h(Icon, { name: "phone", size: 16 }),
-              h("span", null, contact.channels.phone.label),
-            ),
           ),
         ),
       ),

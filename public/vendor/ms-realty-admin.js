@@ -3,6 +3,71 @@
 // Rebuild with: npm run design:build
 (function () {
   "use strict";
+
+  function msRealtySelectAndCopy(source) {
+    try {
+      if (typeof source.select === "function") {
+        source.select();
+      } else {
+        var range = document.createRange();
+        range.selectNodeContents(source);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      return document.execCommand("copy");
+    } catch (error) {
+      return false;
+    }
+  }
+  function initCopyBlocks(root) {
+    var scope = root || document;
+    var buttons = scope.querySelectorAll("[data-copy-block]");
+    for (var i = 0; i < buttons.length; i += 1) {
+      bindCopyBlock(buttons[i]);
+    }
+  }
+  function bindCopyBlock(button) {
+    var id = button.getAttribute("data-copy-block");
+    var source = document.getElementById(id);
+    if (!source || button.getAttribute("data-copy-bound") === "1") return;
+    button.setAttribute("data-copy-bound", "1");
+    button.hidden = false;
+    button.addEventListener("click", function () {
+      var status = document.querySelector('[data-copy-status="' + id + '"]');
+      var wasMasked = source.getAttribute("data-masked") === "true";
+      if (wasMasked) source.removeAttribute("data-masked");
+      var value = typeof source.value === "string" ? source.value : source.textContent;
+      var settle = function (ok) {
+        // Re-mask only on success. The failure message asks the operator to
+        // select the text and copy it by hand, which they cannot do through a
+        // blur, so a block that failed to copy stays readable -- and any
+        // show/hide toggle for it is told, so it does not claim to be hiding
+        // something that is on screen.
+        if (wasMasked && ok) source.setAttribute("data-masked", "true");
+        if (wasMasked && !ok) {
+          var toggle = document.querySelector('[aria-controls="' + id + '"][aria-pressed]');
+          if (toggle) {
+            toggle.setAttribute("aria-pressed", "true");
+            var hideLabel = toggle.getAttribute("data-hide-label");
+            if (hideLabel) toggle.textContent = hideLabel;
+          }
+        }
+        if (!status) return;
+        status.textContent = button.getAttribute(ok ? "data-copy-done" : "data-copy-failed");
+        status.setAttribute("data-state", ok ? "success" : "error");
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).then(
+          function () { settle(true); },
+          function () { settle(msRealtySelectAndCopy(source)); }
+        );
+        return;
+      }
+      settle(msRealtySelectAndCopy(source));
+    });
+  }
+
   function syncAdminShellOffsets() {
     var topbar = document.querySelector(".crm-top");
     var editorTabs = document.querySelector("[data-editor-tabs]");
@@ -1540,4 +1605,5 @@
   initAdminListFilters();
   initPipelineBoard();
   initLeadInboxPanes();
+  initCopyBlocks(document);
 })();

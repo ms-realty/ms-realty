@@ -1,6 +1,8 @@
 # MS Realty — Production Deployment Plan (no custom domain)
 
-Audited 2026-08-09 against live infrastructure. This is the end-to-end runbook
+Audited 2026-08-09 against live infrastructure; topology and gate state
+re-audited 2026-08-24 (durable origin stage, origin proxy, current gate table).
+This is the end-to-end runbook
 for operating the production deployment on `*.workers.dev` **before** the
 `makler-realty.com` / `makler-realty.ru` domains are attached. Domain cutover
 remains governed by the 12 launch gates (`production/data/launch-readiness.json`,
@@ -20,8 +22,17 @@ GitHub ms-realty/ms-realty (private)
   PR → CI "check" (audit, tests, validate, next build+smoke, container smoke)
      → auto-merge (squash, collaborators only, exact-head)
      → repository_dispatch: auto_merge_deploy
-     → CI "deploy": wrangler 4.117.0 deploy --strict --keep-vars
-         --containers-rollout immediate, image marker = merge SHA
+     → CI "deploy_origin": tarball of the merge SHA over pinned SSH to
+         MS_REALTY_DEPLOY_HOST, activated by
+         production/scripts/deploy-production-review.sh —
+         reclaims disk first (keeps running + incoming + 3 newest releases,
+         prunes build cache, never images), takes a pre-deploy backup that is
+         LOUD but non-fatal on failure (it restarts what it stopped), builds
+         the release's own image, swaps /opt/ms-realty/current atomically,
+         verifies /api/health locally and through the Worker
+     → CI "deploy" (needs deploy_origin): wrangler 4.117.0 deploy --strict
+         --keep-vars --containers-rollout immediate, image marker = merge SHA,
+         pushes MS_REALTY_ORIGIN_TOKEN as a Worker secret
      → /api/health polled until build_marker == SHA (100×10s)
      → automatic `wrangler rollback` to prior version on failure
 
@@ -29,8 +40,14 @@ Cloudflare account 921d0224dcd595c87b7928d2b3c479d1 (ms.realty.bg@gmail.com, Wor
   Worker `ms-realty` (workers/index.js)
     ├─ /wp-content/uploads/*  → R2 `ms-realty-media` at the edge (immutable cache)
     ├─ /__media/* PUT         → R2 ingest (Bearer MEDIA_INGEST_SECRET)
-    ├─ mutation gate          → 503 for all POST/PUT/PATCH/DELETE except the four
-    │                           /api/admin/cases* paths when case authority is enabled
+    ├─ MS_REALTY_ORIGIN_URL set → EVERYTHING ELSE proxies to the durable origin
+    │                           (X-MS-Realty-Origin-Token auth; the Container
+    │                           becomes a fail-closed fallback only)
+    ├─ mutation gate (no origin) → 503 for POST/PUT/PATCH/DELETE except: admin
+    │                           session routes, the lead probe, public leads and
+    │                           events when enabled, provider webhooks, /mcp
+    │                           (writes stripped via MS_REALTY_MCP_WRITES_DISABLED),
+    │                           and the durable listing/case authority routes
     └─ everything else        → Container `MsRealtyContainer` (singleton, basic,
                                 `next start` on :8080, ephemeral disk, sleeps 20m)
   Durable Object namespace MS_REALTY (container lifecycle, SQLite-backed class)
@@ -85,6 +102,7 @@ Worker secrets currently set (dashboard → Workers → ms-realty → Settings):
 | `PAYLOAD_SECRET` | set, unproven (gate requires ≥32 bytes, non-placeholder) |
 | `MEDIA_INGEST_SECRET` | set, working |
 | `MS_REALTY_LEAD_CONTACT_KEY` | set (AES-256-GCM contact-vault key; keep safe — losing it orphans vault data) |
+| `MS_REALTY_OPERATOR_2FA_KEY` | **not set → every two-factor call 400s.** Required, ≥32 characters (`production/lib/operator-two-factor.mjs:43-45`). It encrypts the enrolled TOTP secrets exactly as the contact vault key encrypts contacts, so enrolment, verification, the sign-in second factor and the step-up gate all refuse without it — the fail-closed outcome, not a fallback to "allow". Losing it after operators enrol disables verification for all of them; they must re-enrol. |
 | `MS_REALTY_ADMIN_OPERATORS_JSON` | **dead name — no code reads it.** Code reads `MS_REALTY_ADMIN_CREDENTIALS_JSON`, which is NOT set → every admin request 401s. This is the exact incident documented in `production/test/cloudflare-container-config.test.mjs:45-51`, still unfixed in the dashboard. |
 | `MS_REALTY_SESSION_SECRET` | **dead — nothing in the repo reads it** |
 
@@ -190,10 +208,12 @@ npm run payload:preflight        # asserts all 9 checks incl. real TCP connect
 ```
 
 The report is gitignored evidence, not a commit. Note: CI's
-`validate-foundation.mjs` currently *requires* the committed launch-readiness
-snapshot to stay blocked (with `external_seo_exports`, `live_services`,
-`redirect_reviews` among blockers) — clearing `payload_runtime` evidence is
-CI-safe; do **not** regenerate the committed `launch-readiness.json` today.
+`validate-foundation.mjs` pins the committed launch-readiness snapshot to
+exactly these blockers: `live_services`, `monitoring_rollback`,
+`payload_runtime`, `production_recovery` — with `external_seo_exports`
+recorded as deferred and `listing_quality_review` as pass. Clearing a gate
+means updating both the evidence and that pinned assertion in the same
+change; regenerating `launch-readiness.json` alone will fail CI.
 
 ## 5. Phase 3 — canonical Postgres live search
 
@@ -279,6 +299,46 @@ Cloudflare is configuration, not a rewrite.
 | `MS_REALTY_SELLER_PHOTO_MAX_PER_ENQUIRY` | `12` | photos one enquiry can hold |
 | `MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED` | *(unset)* | `1` removes the public seller photo control and the endpoint |
 
+Every accepted upload is decoded, turned upright, resized and re-encoded by
+`production/lib/image-optimizer.mjs` before it is stored — the admin editor and
+the public seller intake share one step with one set of settings.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `MS_REALTY_IMAGE_MAX_EDGE` | `2560` | long edge in pixels; images are fitted inside it and never enlarged |
+| `MS_REALTY_IMAGE_QUALITY` | `82` | JPEG (mozjpeg) and WebP quality, 1–100 |
+| `MS_REALTY_IMAGE_THUMBNAIL_EDGE` | `640` | long edge of the WebP thumbnail stored beside each photo |
+| `MS_REALTY_IMAGE_MAX_PIXELS` | `50000000` | decode-bomb cap; a header declaring more is refused with 415 before any decode |
+
+All four fail loudly at startup if they are not positive integers (quality must
+also be ≤ 100), because a silently clamped encoder setting is worse than a
+refused boot.
+
+What the pipeline decides, and why it may not be what you expect:
+
+- **Rotation happens before metadata is stripped.** A phone held sideways
+  writes the rotation into EXIF and leaves the pixels alone. Stripping EXIF
+  first discards the tag and keeps the sideways pixels, which is how photos
+  used to end up permanently on their side. The strip still runs, and runs last,
+  on the bytes actually stored.
+- **PNG stays PNG only when it has an alpha channel**, which JPEG cannot
+  represent. An opaque PNG is encoded both ways and the smaller wins, so flat
+  graphics stay PNG and PNG-wrapped photographs become JPEG.
+- **WebP is only recompressed when it saves more than 10%**, since recompressing
+  costs a generation of quality. JPEG and PNG only have to beat break-even.
+  A rotation or a downscale is never declined on size grounds.
+- **AVIF is passed through untouched.** Re-encoding it would turn the
+  sanitiser's "refuse metadata I cannot strip" into a silent acceptance.
+- **A photo already below the thumbnail edge gets no rendition**, because a
+  second copy of an already small image is wasted storage.
+
+The thumbnail is stored beside its photo under the same content hash
+(`ms-<hash>.jpg` gains `ms-<hash>-thumb.webp`) and therefore in the same key
+space — which is what keeps a seller's thumbnail as unreachable from the edge
+as the seller's photo. Admin surfaces fetch it from the existing preview route
+via `?rendition=thumb`; an unknown rendition name falls back to the full photo
+rather than failing.
+
 Two key spaces, and the difference matters:
 
 - `makler-realty.com/wp-content/uploads/<YYYY>/<MM>/ms-<hash>.<ext>` — listing
@@ -300,17 +360,16 @@ route answers 503 and names the reason rather than pretending.
 
 ## 7. Out of scope today — the domain-cutover gates
 
-7 of 12 launch gates remain blocked. None are required to operate workers.dev.
-Tractability, easiest first:
+As of the committed `production/data/launch-readiness.json` (2026-08-24), 7 of
+12 gates pass — `redirect_reviews` and `listing_quality_review` among them —
+`external_seo_exports` is deferred by decision, and 4 remain blocked. None are
+required to operate workers.dev. The blocked four:
 
 | Gate | Needs | Class |
 |---|---|---|
 | `payload_runtime` | Phase 2 of this plan | **cleared by this plan** |
-| `redirect_reviews` | 292 human same-content decisions (pages/posts/taxonomies) in `migration/reviews/redirect-approvals.csv` | repo-only, human judgement |
-| `listing_quality_review` | complete 165-row reviewer CSV (`migration/reviews/listing-quality.csv`) | human (broker/editor) |
 | `live_services` | live Postgres sync/query evidence + self-hosted Hermes on non-local hosts + capture reports | infra + money |
-| `external_seo_exports` | verified GSC + Yandex properties for both legacy domains + backlinks export | **domain-dependent** |
-| `monitoring_rollback` | monitoring provider run + canary + isolated rollback drill, evidence <24 h old; transitively needs SEO exports | domain-dependent, perishable |
+| `monitoring_rollback` | monitoring-drill workflow run (its "failure" at the alert-probe step is the alert being exercised, by design) + the machine-evidence artifact + an alert-delivery receipt (the Message-ID of GitHub's failure email), fed to `npm run monitoring:report`; evidence is perishable | provider + human inbox |
 | `production_recovery` | off-site encrypted backup + isolated restore drill, two distinct named humans | provider + humans |
 
 Also required before cutover: R2 media coverage report (§8) and relaxing the

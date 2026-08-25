@@ -27,7 +27,10 @@ function daysAfter(isoString, days) {
   return new Date(time + days * 24 * 60 * 60 * 1000).toISOString();
 }
 
-export function appendClosedDeal(context, input, { filePath = DEFAULT_DEAL_LEDGER_PATH, closedAt = new Date().toISOString() } = {}) {
+// The whole decision — journey guards, idempotency, and the aftercare tasks —
+// against caller-supplied deal rows, so a durable writer closes a deal under
+// exactly these rules over rows read from Postgres.
+export function resolveClosedDeal(context, rows, input, closedAt = new Date().toISOString()) {
   if (!context || typeof context !== "object" || !Array.isArray(context.leads)) {
     throw new Error("Closed deal requires lead journey context");
   }
@@ -40,8 +43,7 @@ export function appendClosedDeal(context, input, { filePath = DEFAULT_DEAL_LEDGE
   const normalizedClosedAt = new Date(dealClosedAt).toISOString();
   const channel = input.channel || lead.contact_preference || "broker_follow_up";
   const listingReference = input.listingReference || lead.listing_reference || null;
-  const rows = readDeals(filePath);
-  const existingForLead = rows.find((row) => row.lead_id === input.leadId);
+  const existingForLead = (rows || []).find((row) => row.lead_id === input.leadId);
   if (existingForLead) {
     if (
       existingForLead.broker !== input.broker ||
@@ -50,9 +52,9 @@ export function appendClosedDeal(context, input, { filePath = DEFAULT_DEAL_LEDGE
     ) {
       throw new Error("Lead already belongs to another closed deal record");
     }
-    return { ...existingForLead, idempotent: true };
+    return { record: existingForLead, idempotent: true };
   }
-  assertLeadCanCloseDeal({ ...context, deals: rows }, input.leadId, normalizedClosedAt);
+  assertLeadCanCloseDeal({ ...context, deals: rows || [] }, input.leadId, normalizedClosedAt);
   if ((lead.lead_type || lead.leadType) === "seller") {
     assertSellerCanCloseDeal(context.sellerPipelines || [], context.sellerPipelineOutcomes || [], input.leadId);
   }
@@ -60,7 +62,7 @@ export function appendClosedDeal(context, input, { filePath = DEFAULT_DEAL_LEDGE
     throw new Error("closedAt cannot precede the lead received time");
   }
   const requestedId = String(input.id || `deal-${input.leadId}`).trim();
-  if (rows.some((row) => row.id === requestedId)) throw new Error("Deal id already belongs to another lead");
+  if ((rows || []).some((row) => row.id === requestedId)) throw new Error("Deal id already belongs to another lead");
 
   const row = {
     id: requestedId,
@@ -90,9 +92,16 @@ export function appendClosedDeal(context, input, { filePath = DEFAULT_DEAL_LEDGE
     },
   };
 
+  return { record: row, idempotent: false };
+}
+
+export function appendClosedDeal(context, input, { filePath = DEFAULT_DEAL_LEDGER_PATH, closedAt = new Date().toISOString() } = {}) {
+  const rows = readDeals(filePath);
+  const resolved = resolveClosedDeal(context, rows, input, closedAt);
+  if (resolved.idempotent) return { ...resolved.record, idempotent: true };
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`);
-  return { ...row, idempotent: false };
+  fs.appendFileSync(filePath, `${JSON.stringify(resolved.record)}\n`);
+  return { ...resolved.record, idempotent: false };
 }
 
 export function assertDealLedger(rows) {

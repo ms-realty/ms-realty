@@ -442,6 +442,13 @@ async function start(env, { withHermes = false } = {}) {
   ]);
 
   compose(["exec", "-T", "app", "npm", "run", "payload:cms:import", "--", "--skip-if-initialized"], { envOverrides });
+  // The importer never publishes, and it is skipped once the database is
+  // initialized, so the owner's recorded publication decision would otherwise
+  // never reach Postgres. The projector carries it across on every deploy; it
+  // is idempotent and refuses anything the committed seed does not approve.
+  // search-seed runs after it because the search projection only indexes
+  // listings whose row is cms_status=published with publish_approved.
+  compose(["exec", "-T", "app", "npm", "run", "payload:publication:sync"], { envOverrides });
   compose(["--profile", "tools", "run", "--rm", "search-seed"], { envOverrides });
   compose(["exec", "-T", "app", "npm", "run", "payload:runtime"], { envOverrides });
   if (withHermes) {
