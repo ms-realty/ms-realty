@@ -4,7 +4,7 @@
   "approved_by": "agency_owner",
   "approved_at": "2026-08-24T00:00:00.000Z",
   "reason": "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.",
-  "based_on_freeze_sha256": "338ce14fa46c44d35f4afe83e30d75d65a345383c2854c29ab3215ac4397f172",
+  "based_on_freeze_sha256": "48242bcb1af3983b8ceacd8a97cf716c019cbfcd57fc816146022a388d377d14",
   "based_on_freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
   "scope": "full_freeze_catalog",
   "decision": "publish_source_as_is",
@@ -142,7 +142,6 @@
     "MS-CRAWL-0124",
     "MS-CRAWL-0125",
     "MS-CRAWL-0126",
-    "MS-CRAWL-0127",
     "MS-CRAWL-0128",
     "MS-CRAWL-0129",
     "MS-CRAWL-0130",
@@ -182,5 +181,10 @@
     "MS-CRAWL-0164",
     "MS-CRAWL-0165"
   ],
-  "excluded_listings": []
+  "excluded_listings": [
+    {
+      "id": "MS-CRAWL-0127",
+      "reason": "no location relation and an empty title in the frozen catalog; a search document and a titled public page cannot be built from it"
+    }
+  ]
 }

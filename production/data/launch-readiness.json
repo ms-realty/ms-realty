@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-24T21:11:30.779Z",
+  "generated_at": "2026-08-25T03:10:17.969Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
@@ -94,7 +94,7 @@
           "artifact_id": "20260817-deterministic-launch-freeze",
           "approval_id": "MSR-LAUNCH-FREEZE-1",
           "based_on_commit": "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
-          "source_sha256": "338ce14fa46c44d35f4afe83e30d75d65a345383c2854c29ab3215ac4397f172",
+          "source_sha256": "48242bcb1af3983b8ceacd8a97cf716c019cbfcd57fc816146022a388d377d14",
           "approved_homepage_redirects": 5,
           "approved_homepage_decisions": 15
         },
@@ -124,20 +124,20 @@
           "he": 5
         },
         "public": {
-          "listings": 165,
+          "listings": 164,
           "home_pages": 7,
-          "listing_entries": 166,
+          "listing_entries": 165,
           "location_pages": 6,
           "seller_pages": 7,
           "contact_pages": 7,
           "guide_pages": 5,
-          "entries": 198,
+          "entries": 197,
           "byLocale": {
             "bg": 122,
             "en": 5,
             "de": 3,
             "nl": 3,
-            "ru": 57,
+            "ru": 56,
             "el": 3,
             "he": 5
           }
@@ -287,7 +287,7 @@
         "mode": "operator_publication_of_freeze_active",
         "path": "production/data/listing-publication-approval.json",
         "approval_id": "MSR-LISTING-PUBLICATION-1",
-        "freeze_sha256": "338ce14fa46c44d35f4afe83e30d75d65a345383c2854c29ab3215ac4397f172",
+        "freeze_sha256": "48242bcb1af3983b8ceacd8a97cf716c019cbfcd57fc816146022a388d377d14",
         "freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
         "approved_by": "agency_owner",
         "approved_at": "2026-08-24T00:00:00.000Z",
@@ -304,8 +304,8 @@
           "archived_listings": 135,
           "scope": "full_freeze_catalog",
           "catalog_listing_ids": 165,
-          "published_listing_ids": 165,
-          "excluded_listing_ids": 0,
+          "published_listing_ids": 164,
+          "excluded_listing_ids": 1,
           "source_locales_only": true
         }
       }
@@ -561,122 +561,17 @@
       "status": "blocked",
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "status": "blocked_report",
-        "generated_at": "2026-07-06T00:00:00Z",
+        "status": "missing_report",
         "path": "production/data/payload-runtime-report.json",
-        "summary": {
-          "admin_route": "/admin",
-          "checks": 12,
-          "database": {
-            "status": "missing_env"
-          },
-          "identity_collection": "admins",
-          "missing_env": [
-            "PAYLOAD_SECRET",
-            "DATABASE_URL"
-          ],
-          "payload_admin_ui": "edge_hidden",
-          "payload_identity_rest": "edge_hidden",
-          "placeholder_env": [],
-          "weak_env": [],
-          "route_files": 6
-        },
-        "checks": [
-          {
-            "id": "payload_secret",
-            "status": "missing_env",
-            "env": "PAYLOAD_SECRET"
-          },
-          {
-            "id": "database_url",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "route:app/admin/route.js",
-            "status": "pass",
-            "file": "app/admin/route.js"
-          },
-          {
-            "id": "route:app/admin/login/route.js",
-            "status": "pass",
-            "file": "app/admin/login/route.js"
-          },
-          {
-            "id": "route:app/admin/logout/route.js",
-            "status": "pass",
-            "file": "app/admin/logout/route.js"
-          },
-          {
-            "id": "route:app/admin/team/route.js",
-            "status": "pass",
-            "file": "app/admin/team/route.js"
-          },
-          {
-            "id": "route:app/api/admin/team/route.js",
-            "status": "pass",
-            "file": "app/api/admin/team/route.js"
-          },
-          {
-            "id": "route:app/(payload)/api/[...slug]/route.js",
-            "status": "pass",
-            "file": "app/(payload)/api/[...slug]/route.js"
-          },
-          {
-            "id": "payload_edge_boundary",
-            "status": "pass",
-            "custom_admin_route": "/admin",
-            "payload_admin_ui": "edge_hidden",
-            "payload_graphql_encoded_paths": [
-              "/graph%71l",
-              "/graph%2571l",
-              "/graphql%2fquery",
-              "/graphql%252fquery",
-              "/graphql%2dplayground",
-              "/graphql%252dplayground%252f",
-              "/api%2fgraphql",
-              "/api%252fgraphql%252f"
-            ],
-            "payload_graphql_paths": [
-              "/graphql",
-              "/graphql-playground",
-              "/api/graphql"
-            ],
-            "payload_identity_rest": "edge_hidden"
-          },
-          {
-            "id": "payload_config_import",
-            "status": "pass",
-            "collections": 13,
-            "graphql_disabled": true,
-            "graphql_playground_disabled_in_production": true,
-            "identity_collection": "admins",
-            "internal_admin_route": "/payload-admin",
-            "session_max_age_seconds": 7200,
-            "sessions": "database_backed"
-          },
-          {
-            "id": "database_network_scope",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "database_tcp",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          }
+        "next_actions": [
+          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
+          "Run npm run payload:runtime, then npm run payload:preflight."
         ],
         "freshness": {
           "id": "payload_runtime",
-          "status": "stale",
-          "age_ms": 4309890779,
-          "max_age_ms": 604800000
-        },
-        "next_actions": [
-          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
-          "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
-          "Run npm run payload:preflight before launch:preflight."
-        ]
+          "status": "invalid",
+          "error": "generated_at is not a timestamp"
+        }
       },
       "next_actions": [
         "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",

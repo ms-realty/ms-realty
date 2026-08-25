@@ -617,21 +617,37 @@ test("the committed seed and owner approval publish the full 165-listing catalog
   assert.equal(seedRecords.length, 165);
   for (const record of seedRecords) {
     const state = seedPublicationStateFor(record);
+    if (record.id === "MS-CRAWL-0127") {
+      // Recorded exclusion: the seed row exists but the approval deliberately
+      // does not name it, so it must NOT present as owner-approved.
+      assert.equal(state.ok, false, `${record.id} is excluded and must not carry the approval`);
+      continue;
+    }
     assert.equal(state.ok, true, `${record.id} must carry the owner approval`);
     assert.equal(state.state.publish_approved_by, APPROVER);
   }
 
   const rows = importedRows(seedRecords);
   const plan = buildListingPublicationSyncPlan({ ...rows, seedRecords, approval });
-  assert.equal(plan.summary.apply, 165);
-  assert.equal(plan.summary.refused, 0);
+  assert.equal(plan.summary.apply, 164);
+  // The excluded listing is refused with the approval's own recorded reason.
+  assert.equal(plan.summary.refused, 1);
   assert.equal(plan.summary.skipped, 0);
-  assert.equal(plan.summary.translations_apply, 165);
+  assert.equal(plan.summary.translations_apply, 164);
   assert.equal(plan.summary.translations_held, 0);
-  assert.equal(publicationSyncAuditRecords(plan).length, 165);
+  assert.equal(publicationSyncAuditRecords(plan).length, 164);
+  const refusal = plan.entries.find((entry) => entry.listing_id === "MS-CRAWL-0127");
+  assert.equal(refusal?.action, "refuse");
+  // cms:build reads the amended approval and reverts the excluded row's
+  // publication in the seed itself, so the refusal fires on the earliest
+  // honest ground: the seed no longer marks it published.
+  assert.equal(refusal?.reason, "seed_record_is_not_marked_published");
 
   applyPlanToRows(plan, rows);
   const second = buildListingPublicationSyncPlan({ ...rows, seedRecords, approval });
   assert.equal(second.idempotent, true);
-  assert.equal(second.summary.unchanged, 165);
+  // 164 applied stay in sync; the excluded row is refused again, not counted
+  // as unchanged - idempotence over the same honest plan.
+  assert.equal(second.summary.unchanged, 164);
+  assert.equal(second.summary.refused, 1);
 });

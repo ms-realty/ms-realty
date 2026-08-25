@@ -2061,7 +2061,7 @@
             ],
             "total_eur": null,
             "total_including_price_eur": null,
-            "generated_at": "2026-08-24T22:42:54.709Z"
+            "generated_at": "2026-08-25T03:12:30.368Z"
           },
           "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
         },
@@ -2995,7 +2995,7 @@
             ],
             "total_eur": null,
             "total_including_price_eur": null,
-            "generated_at": "2026-08-24T22:42:54.825Z"
+            "generated_at": "2026-08-25T03:12:30.476Z"
           },
           "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
         },
@@ -3948,7 +3948,7 @@
             ],
             "total_eur": null,
             "total_including_price_eur": null,
-            "generated_at": "2026-08-24T22:42:54.841Z"
+            "generated_at": "2026-08-25T03:12:30.492Z"
           },
           "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
         },
@@ -6121,7 +6121,7 @@
     "status": 201,
     "body": {
       "requested_at": "2026-07-04T00:01:00Z",
-      "id": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+      "id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
       "idempotency_key": null,
       "requested_locale": "fr",
       "requested_path": "/fr/",
@@ -6129,12 +6129,12 @@
       "admin_locale": "en",
       "public_indexable": false,
       "notification_requested": true,
-      "contact_ref": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+      "contact_ref": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
       "contact_available": true,
       "message_available": true,
       "ledger": {
         "requested_at": "2026-07-04T00:01:00Z",
-        "id": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+        "id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
         "idempotency_key": null,
         "requested_locale": "fr",
         "requested_path": "/fr/",
@@ -6142,12 +6142,12 @@
         "admin_locale": "en",
         "public_indexable": false,
         "notification_requested": true,
-        "contact_ref": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+        "contact_ref": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
         "contact_available": true,
         "message_available": true
       },
       "contactVault": {
-        "contact_ref": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+        "contact_ref": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
         "stored_at": "2026-07-04T00:01:00Z",
         "encrypted": true
       },
@@ -6155,7 +6155,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "language_request",
         "source": "website_language_request",
-        "subject_id": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+        "subject_id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
         "locale": "fr",
         "contact_fingerprint": "fb10e1238ec5d91e24b350a03b194a1ad82e148c93afd71b4c0976ad42f2ec5f",
         "granted": true,
@@ -6169,7 +6169,7 @@
   },
   "sitemap": {
     "status": 200,
-    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n  <url>\n    <loc>https://makler-realty.com/bg</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/de</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/nl</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0001</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/akinita/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/properties/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el/akinita/MS-CRAWL-0001</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/akinita/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/properties/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he/properties/MS-CRAWL-0001</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/akinita/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/properties/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0002</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0002\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0002\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0003</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0003\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0003\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0004</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0004\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0004\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0005</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0005\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0005\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0006</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0006\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0006\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0007</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0007\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0007\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0008</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0008\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0008\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0009</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0009\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0009\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0010</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0010\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0010\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0011</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0011\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0011\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0012</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0012\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0012\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0013</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0013\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0013\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0014</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0014\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0014\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0015</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0015\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0015\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0016</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0016\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0016\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0017</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0017\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0017\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0018</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0018\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0018\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0019</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0019\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0019\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0020</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0020\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0020\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0021</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0021\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0021\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0022</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0022\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0022\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0023</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0023\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0023\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0024</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0024\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0024\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0025</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0025\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0025\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0026</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0026\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0026\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0027</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0027\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0027\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0028</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0028\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0028\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0029</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0029\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0029\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0030</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0030\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0030\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0031</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0031\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0031\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0032</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0032\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0032\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0033</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0033\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0033\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0034</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0034\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0034\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0035</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0035\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0035\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0036</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0036\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0036\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0037</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0037\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0037\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0038</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0038\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0038\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0039</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0039\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0039\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0040</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0040\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0040\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0041</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0041\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0041\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0042</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0042\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0042\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0043</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0043\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0043\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0044</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0044\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0044\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0045</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0045\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0045\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0046</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0046\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0046\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0047</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0047\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0047\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0048</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0048\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0048\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0049</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0049\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0049\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0050</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0050\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0050\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0051</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0051\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0051\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0052</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0052\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0052\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0053</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0053\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0053\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0054</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0054\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0054\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0055</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0055\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0055\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0056</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0056\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0056\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0057</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0057\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0057\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0058</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0058\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0058\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0059</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0059\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0059\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0060</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0060\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0060\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0061</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0061\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0061\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0062</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0062\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0062\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0063</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0063\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0063\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0064</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0064\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0064\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0065</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0065\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0065\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0066</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0066\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0066\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0067</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0067\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0067\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0068</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0068\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0068\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0069</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0069\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0069\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0070</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0070\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0070\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0071</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0071\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0071\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0072</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0072\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0072\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0073</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0073\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0073\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0074</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0074\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0074\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0075</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0075\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0075\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-3000</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-3000\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-3000\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0077</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0077\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0077\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0078</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0078\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0078\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0079</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0079\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0079\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0080</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0080\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0080\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0081</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0081\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0081\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0082</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0082\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0082\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0083</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0083\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0083\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0084</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0084\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0084\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0085</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0085\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0085\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0086</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0086\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0086\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0087</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0087\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0087\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0088</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0088\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0088\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0089</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0089\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0089\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0090</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0090\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0090\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0091</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0091\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0091\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0092</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0092\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0092\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0093</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0093\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0093\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0094</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0094\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0094\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0095</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0095\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0095\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0096</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0096\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0096\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0097</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0097\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0097\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0098</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0098\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0098\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0099</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0099\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0099\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0100</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0100\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0100\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0101</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0101\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0101\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0102</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0102\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0102\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0103</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0103\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0103\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0104</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0104\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0104\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0105</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0105\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0105\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0106</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0106\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0106\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0107</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0107\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0107\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0108</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0108\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0108\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0109</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0109\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0109\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0110</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0110\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0110\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0111</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0111\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0111\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0112</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0112\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0112\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0113</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0113\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0113\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0114</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0114\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0115</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0115\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0116</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0116\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0117</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0117\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0118</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0118\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0119</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0119\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0120</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0120\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0121</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0121\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0122</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0122\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0123</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0123\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0124</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0124\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0125</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0125\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0126</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0126\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0127</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0127\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0128</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0128\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0129</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0129\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0130</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0130\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0131</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0131\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0132</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0132\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0133</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0133\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0134</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0134\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0135</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0135\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0136</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0136\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0137</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0137\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0138</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0138\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0139</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0139\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0140</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0140\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0141</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0141\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0142</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0142\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0143</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0143\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0144</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0144\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0145</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0145\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0146</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0146\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0147</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0147\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0148</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0148\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0149</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0149\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0150</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0150\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0151</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0151\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0152</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0152\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0153</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0153\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0154</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0154\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0155</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0155\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0156</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0156\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0157</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0157\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0158</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0158\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0159</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0159\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0160</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0160\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0161</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0161\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0162</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0162\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0163</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0163\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0164</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0164\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0165</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0165\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/lokacii/sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/topothesies/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el/topothesies/sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/topothesies/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he/locations/sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/topothesies/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/locations/sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/topothesies/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/lokacii/petrich</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/petrich\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/petrich\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/petrich\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/locations/petrich</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/petrich\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/petrich\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/petrich\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/lokacii/hotovo</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/hotovo\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/hotovo\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/prodai</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en/sell</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/de/verkaufen</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/nl/verkopen</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/sell</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el/polisi</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he/sell</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/kontakt</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en/contact</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/de/kontakt</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/nl/contact</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/contact</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el/epikoinonia</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he/contact</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en/guides/foreign-buyers</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/guides/foreign-buyers\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/en/guides/foreign-buyers\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en/guides/buying-process</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/guides/buying-process\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/en/guides/buying-process\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/guides/proverka-na-imot-sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/guides/proverka-na-imot-sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/guides/proverka-na-imot-sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/guides/petrich-obstinski-kontekst</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/guides/petrich-obstinski-kontekst\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/guides/petrich-obstinski-kontekst\" />\n  </url>\n</urlset>\n"
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n  <url>\n    <loc>https://makler-realty.com/bg</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/de</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/nl</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0001</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/akinita/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/properties/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el/akinita/MS-CRAWL-0001</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/akinita/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/properties/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he/properties/MS-CRAWL-0001</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/akinita/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/properties/MS-CRAWL-0001\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0001\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0002</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0002\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0002\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0003</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0003\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0003\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0004</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0004\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0004\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0005</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0005\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0005\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0006</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0006\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0006\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0007</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0007\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0007\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0008</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0008\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0008\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0009</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0009\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0009\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0010</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0010\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0010\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0011</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0011\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0011\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0012</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0012\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0012\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0013</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0013\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0013\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0014</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0014\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0014\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0015</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0015\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0015\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0016</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0016\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0016\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0017</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0017\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0017\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0018</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0018\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0018\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0019</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0019\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0019\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0020</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0020\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0020\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0021</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0021\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0021\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0022</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0022\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0022\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0023</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0023\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0023\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0024</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0024\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0024\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0025</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0025\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0025\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0026</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0026\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0026\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0027</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0027\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0027\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0028</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0028\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0028\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0029</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0029\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0029\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0030</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0030\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0030\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0031</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0031\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0031\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0032</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0032\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0032\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0033</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0033\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0033\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0034</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0034\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0034\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0035</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0035\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0035\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0036</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0036\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0036\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0037</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0037\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0037\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0038</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0038\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0038\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0039</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0039\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0039\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0040</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0040\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0040\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0041</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0041\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0041\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0042</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0042\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0042\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0043</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0043\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0043\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0044</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0044\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0044\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0045</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0045\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0045\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0046</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0046\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0046\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0047</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0047\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0047\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0048</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0048\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0048\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0049</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0049\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0049\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0050</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0050\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0050\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0051</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0051\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0051\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0052</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0052\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0052\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0053</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0053\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0053\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0054</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0054\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0054\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0055</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0055\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0055\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0056</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0056\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0056\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0057</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0057\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0057\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0058</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0058\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0058\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0059</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0059\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0059\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0060</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0060\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0060\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0061</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0061\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0061\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0062</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0062\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0062\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0063</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0063\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0063\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0064</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0064\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0064\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0065</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0065\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0065\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0066</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0066\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0066\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0067</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0067\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0067\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0068</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0068\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0068\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0069</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0069\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0069\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0070</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0070\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0070\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0071</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0071\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0071\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0072</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0072\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0072\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0073</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0073\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0073\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0074</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0074\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0074\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0075</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0075\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0075\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-3000</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-3000\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-3000\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0077</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0077\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0077\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0078</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0078\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0078\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0079</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0079\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0079\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0080</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0080\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0080\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0081</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0081\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0081\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0082</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0082\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0082\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0083</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0083\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0083\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0084</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0084\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0084\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0085</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0085\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0085\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0086</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0086\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0086\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0087</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0087\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0087\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0088</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0088\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0088\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0089</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0089\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0089\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0090</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0090\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0090\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0091</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0091\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0091\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0092</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0092\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0092\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0093</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0093\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0093\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0094</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0094\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0094\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0095</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0095\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0095\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0096</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0096\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0096\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0097</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0097\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0097\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0098</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0098\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0098\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0099</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0099\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0099\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0100</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0100\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0100\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0101</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0101\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0101\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0102</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0102\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0102\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0103</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0103\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0103\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0104</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0104\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0104\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0105</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0105\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0105\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0106</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0106\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0106\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0107</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0107\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0107\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0108</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0108\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0108\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0109</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0109\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0109\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0110</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0110\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0110\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0111</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0111\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0111\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0112</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0112\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0112\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0113</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0113\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/imoti/MS-CRAWL-0113\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0114</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0114\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0115</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0115\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0116</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0116\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0117</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0117\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0118</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0118\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0119</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0119\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0120</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0120\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0121</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0121\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0122</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0122\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0123</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0123\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0124</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0124\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0125</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0125\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0126</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0126\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0128</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0128\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0129</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0129\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0130</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0130\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0131</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0131\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0132</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0132\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0133</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0133\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0134</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0134\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0135</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0135\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0136</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0136\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0137</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0137\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0138</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0138\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0139</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0139\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0140</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0140\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0141</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0141\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0142</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0142\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0143</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0143\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0144</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0144\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0145</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0145\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0146</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0146\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0147</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0147\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0148</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0148\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0149</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0149\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0150</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0150\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0151</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0151\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0152</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0152\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0153</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0153\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0154</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0154\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0155</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0155\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0156</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0156\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0157</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0157\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0158</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0158\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0159</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0159\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0160</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0160\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0161</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0161\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0162</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0162\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0163</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0163\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0164</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0164\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0165</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/properties/MS-CRAWL-0165\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/lokacii/sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/topothesies/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el/topothesies/sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/topothesies/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he/locations/sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/topothesies/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/locations/sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/topothesies/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/lokacii/petrich</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/petrich\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/petrich\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/petrich\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/locations/petrich</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/petrich\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/locations/petrich\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/petrich\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/lokacii/hotovo</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/lokacii/hotovo\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/lokacii/hotovo\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/prodai</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en/sell</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/de/verkaufen</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/nl/verkopen</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/sell</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el/polisi</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he/sell</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/prodai\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/verkaufen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/verkopen\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/polisi\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/sell\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/prodai\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/kontakt</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en/contact</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/de/kontakt</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/nl/contact</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/ru/contact</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/el/epikoinonia</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/he/contact</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://makler-realty.com/de/kontakt\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"nl\" href=\"https://makler-realty.com/nl/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"ru\" href=\"https://makler-realty.com/ru/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"https://makler-realty.com/el/epikoinonia\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"he\" href=\"https://makler-realty.com/he/contact\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/kontakt\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en/guides/foreign-buyers</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/guides/foreign-buyers\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/en/guides/foreign-buyers\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/en/guides/buying-process</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"https://makler-realty.com/en/guides/buying-process\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/en/guides/buying-process\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/guides/proverka-na-imot-sandanski</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/guides/proverka-na-imot-sandanski\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/guides/proverka-na-imot-sandanski\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst\" />\n  </url>\n  <url>\n    <loc>https://makler-realty.com/bg/guides/petrich-obstinski-kontekst</loc>\n    <xhtml:link rel=\"alternate\" hreflang=\"bg\" href=\"https://makler-realty.com/bg/guides/petrich-obstinski-kontekst\" />\n    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"https://makler-realty.com/bg/guides/petrich-obstinski-kontekst\" />\n  </url>\n</urlset>\n"
   },
   "robots": {
     "status": 200,
@@ -6965,7 +6965,7 @@
     "status": 201,
     "body": {
       "saved_at": "2026-07-04T00:07:00Z",
-      "id": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+      "id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
       "idempotency_key": null,
       "requested_locale": "he",
       "locale": "he",
@@ -7081,21 +7081,21 @@
       "alert_frequency": "weekly",
       "status": "active",
       "alert_task": {
-        "id": "alert-ab65402d-4505-433b-aecc-afc634345a95",
+        "id": "alert-1dc61256-03ce-47b6-9e58-baeed90c635e",
         "status": "open",
         "owner": "broker_en"
       },
       "manage_access": {
         "version": "s1",
-        "verifier": "a0dd18640455e506c6b75763c12a94868e4dd4290f8f7d12674c8fd2745ef71d",
+        "verifier": "c5ca2b02229c4d60beca478f7b3f42c23026e8dbcdb8abe0c518f0bfc7f53e4f",
         "issued_at": "2026-07-04T00:07:00.000Z",
         "expires_at": "2027-07-04T00:07:00.000Z"
       },
-      "contact_ref": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+      "contact_ref": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
       "contact_available": true,
       "ledger": {
         "saved_at": "2026-07-04T00:07:00Z",
-        "id": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+        "id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
         "idempotency_key": null,
         "requested_locale": "he",
         "locale": "he",
@@ -7211,21 +7211,21 @@
         "alert_frequency": "weekly",
         "status": "active",
         "alert_task": {
-          "id": "alert-ab65402d-4505-433b-aecc-afc634345a95",
+          "id": "alert-1dc61256-03ce-47b6-9e58-baeed90c635e",
           "status": "open",
           "owner": "broker_en"
         },
         "manage_access": {
           "version": "s1",
-          "verifier": "a0dd18640455e506c6b75763c12a94868e4dd4290f8f7d12674c8fd2745ef71d",
+          "verifier": "c5ca2b02229c4d60beca478f7b3f42c23026e8dbcdb8abe0c518f0bfc7f53e4f",
           "issued_at": "2026-07-04T00:07:00.000Z",
           "expires_at": "2027-07-04T00:07:00.000Z"
         },
-        "contact_ref": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+        "contact_ref": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
         "contact_available": true
       },
       "contactVault": {
-        "contact_ref": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+        "contact_ref": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
         "stored_at": "2026-07-04T00:07:00Z",
         "encrypted": true
       },
@@ -7233,7 +7233,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "saved_search_alerts",
         "source": "website_saved_search",
-        "subject_id": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+        "subject_id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
         "locale": "he",
         "contact_fingerprint": "3892a38513fa598edf27242ed5fb0172709a023616f6910bb3615124b1109bd8",
         "granted": true,
@@ -7241,9 +7241,9 @@
         "marketing_opt_in": false
       },
       "manage": {
-        "token": "s1.c2F2ZWQtc2VhcmNoLTFmYzVmZmM5LTI0MjMtNGViMy1iZDQ3LWQxN2NhY2Q0YTY3NA.MTgxNDY1OTYyMA.s4qP4VNn0_j4ALkyCJB73QC6LburRUgYNEYJUy21DFs",
-        "path": "/he/alerts?token=s1.c2F2ZWQtc2VhcmNoLTFmYzVmZmM5LTI0MjMtNGViMy1iZDQ3LWQxN2NhY2Q0YTY3NA.MTgxNDY1OTYyMA.s4qP4VNn0_j4ALkyCJB73QC6LburRUgYNEYJUy21DFs",
-        "url": "https://makler-realty.com/he/alerts?token=s1.c2F2ZWQtc2VhcmNoLTFmYzVmZmM5LTI0MjMtNGViMy1iZDQ3LWQxN2NhY2Q0YTY3NA.MTgxNDY1OTYyMA.s4qP4VNn0_j4ALkyCJB73QC6LburRUgYNEYJUy21DFs",
+        "token": "s1.c2F2ZWQtc2VhcmNoLTE5ZDllMzk5LTU3MTUtNDVjOS1iZDcxLWJlNmFiMzBkMTM3OA.MTgxNDY1OTYyMA.ynq9AhnRKvGKh1nNENeslHDiBzkchZ3PqGOTTR6Y-1s",
+        "path": "/he/alerts?token=s1.c2F2ZWQtc2VhcmNoLTE5ZDllMzk5LTU3MTUtNDVjOS1iZDcxLWJlNmFiMzBkMTM3OA.MTgxNDY1OTYyMA.ynq9AhnRKvGKh1nNENeslHDiBzkchZ3PqGOTTR6Y-1s",
+        "url": "https://makler-realty.com/he/alerts?token=s1.c2F2ZWQtc2VhcmNoLTE5ZDllMzk5LTU3MTUtNDVjOS1iZDcxLWJlNmFiMzBkMTM3OA.MTgxNDY1OTYyMA.ynq9AhnRKvGKh1nNENeslHDiBzkchZ3PqGOTTR6Y-1s",
         "expires_at": "2027-07-04T00:07:00.000Z"
       },
       "manage_unavailable_reason": null
@@ -7272,9 +7272,9 @@
   "lead": {
     "status": 201,
     "body": {
-      "id": "inbox-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+      "id": "inbox-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
       "lead": {
-        "id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+        "id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "idempotency_key": null,
         "source": "website_listing_detail",
         "intent": "inquiry",
@@ -7375,8 +7375,8 @@
       },
       "ledger": {
         "received_at": "2026-07-04T00:00:00Z",
-        "id": "inbox-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
-        "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+        "id": "inbox-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "source": "website_listing_detail",
         "intent": "inquiry",
         "channel": "listing_detail",
@@ -7427,14 +7427,14 @@
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
-          "id": "sla-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+          "id": "sla-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "status": "open",
           "owner": "broker_assignment",
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         },
         "qualification_task": {
-          "id": "intake-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+          "id": "intake-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "status": "open",
           "owner": "broker_international",
           "action": "complete_intake_requirements",
@@ -7449,7 +7449,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "inquiry_follow_up",
         "source": "website_listing_detail",
-        "subject_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+        "subject_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "locale": "he",
         "contact_fingerprint": "3892a38513fa598edf27242ed5fb0172709a023616f6910bb3615124b1109bd8",
         "granted": true,
@@ -7465,9 +7465,9 @@
   "viewingLead": {
     "status": 201,
     "body": {
-      "id": "inbox-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+      "id": "inbox-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
       "lead": {
-        "id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+        "id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
         "idempotency_key": null,
         "source": "website_viewing_request",
         "intent": "viewing",
@@ -7571,8 +7571,8 @@
       },
       "ledger": {
         "received_at": "2026-07-04T00:00:00Z",
-        "id": "inbox-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
-        "lead_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+        "id": "inbox-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
+        "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
         "source": "website_viewing_request",
         "intent": "viewing",
         "channel": "listing_detail",
@@ -7626,14 +7626,14 @@
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
-          "id": "sla-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+          "id": "sla-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
           "status": "open",
           "owner": "broker_assignment",
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         },
         "qualification_task": {
-          "id": "intake-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+          "id": "intake-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
           "status": "open",
           "owner": "broker_international",
           "action": "complete_intake_requirements",
@@ -7648,7 +7648,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "inquiry_follow_up",
         "source": "website_viewing_request",
-        "subject_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+        "subject_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
         "locale": "he",
         "contact_fingerprint": "0d4dec6ae276d341b48a87fa491a371529b9b3657e569c3063b2e346300ed08b",
         "granted": true,
@@ -7664,9 +7664,9 @@
   "contactLead": {
     "status": 201,
     "body": {
-      "id": "inbox-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+      "id": "inbox-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
       "lead": {
-        "id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+        "id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "idempotency_key": null,
         "source": "website_contact_callback",
         "intent": "callback",
@@ -7750,8 +7750,8 @@
       },
       "ledger": {
         "received_at": "2026-07-04T00:00:00Z",
-        "id": "inbox-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
-        "lead_id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+        "id": "inbox-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
+        "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "source": "website_contact_callback",
         "intent": "callback",
         "channel": "contact_page",
@@ -7791,14 +7791,14 @@
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
-          "id": "sla-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+          "id": "sla-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "status": "open",
           "owner": "broker_assignment",
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         },
         "qualification_task": {
-          "id": "intake-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+          "id": "intake-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "status": "complete",
           "owner": "broker_international",
           "action": "complete_intake_requirements",
@@ -7810,7 +7810,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "inquiry_follow_up",
         "source": "website_contact_callback",
-        "subject_id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+        "subject_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "locale": "he",
         "contact_fingerprint": "f6ecc0243ece118c297561ecd684bdde9559eed19101235508ed4f11fb5f289e",
         "granted": true,
@@ -7826,9 +7826,9 @@
   "sellerLead": {
     "status": 201,
     "body": {
-      "id": "inbox-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+      "id": "inbox-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
       "lead": {
-        "id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+        "id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
         "idempotency_key": null,
         "source": "website_seller_valuation",
         "intent": "valuation",
@@ -7927,8 +7927,8 @@
       },
       "ledger": {
         "received_at": "2026-07-04T00:00:00Z",
-        "id": "inbox-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
-        "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+        "id": "inbox-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+        "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
         "source": "website_seller_valuation",
         "intent": "valuation",
         "channel": "seller_page",
@@ -7978,14 +7978,14 @@
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
-          "id": "sla-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+          "id": "sla-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "status": "open",
           "owner": "broker_assignment",
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         },
         "qualification_task": {
-          "id": "intake-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+          "id": "intake-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "status": "open",
           "owner": "broker_international",
           "action": "complete_intake_requirements",
@@ -7999,7 +7999,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "inquiry_follow_up",
         "source": "website_seller_valuation",
-        "subject_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+        "subject_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
         "locale": "el",
         "contact_fingerprint": "5605a9456324bb930893ca98393da181627f8399d796aeb0a60316cad7739faf",
         "granted": true,
@@ -8008,8 +8008,8 @@
       },
       "sellerPipeline": {
         "created_at": "2026-07-04T00:08:00Z",
-        "id": "seller-pipeline-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
-        "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+        "id": "seller-pipeline-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+        "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
         "source": "website_seller_valuation",
         "contact_name": "Nikos Papadopoulos",
         "property": {
@@ -8031,7 +8031,7 @@
           "close": "not_started"
         },
         "next_task": {
-          "id": "seller-callback-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+          "id": "seller-callback-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "kind": "seller_callback",
           "owner": "broker_en",
           "status": "open"
@@ -9221,8 +9221,8 @@
       "leads": [
         {
           "received_at": "2026-07-04T00:00:00Z",
-          "id": "inbox-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
-          "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+          "id": "inbox-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
+          "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "source": "website_listing_detail",
           "intent": "inquiry",
           "channel": "listing_detail",
@@ -9273,14 +9273,14 @@
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
-            "id": "sla-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "id": "sla-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "status": "open",
             "owner": "broker_assignment",
             "due_at": "2026-07-04T00:15:00.000Z",
             "action": "broker_response_required"
           },
           "qualification_task": {
-            "id": "intake-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "id": "intake-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "status": "open",
             "owner": "broker_international",
             "action": "complete_intake_requirements",
@@ -9297,8 +9297,8 @@
         },
         {
           "received_at": "2026-07-04T00:00:00Z",
-          "id": "inbox-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
-          "lead_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+          "id": "inbox-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
+          "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
           "source": "website_viewing_request",
           "intent": "viewing",
           "channel": "listing_detail",
@@ -9352,14 +9352,14 @@
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
-            "id": "sla-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+            "id": "sla-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "status": "open",
             "owner": "broker_assignment",
             "due_at": "2026-07-04T00:15:00.000Z",
             "action": "broker_response_required"
           },
           "qualification_task": {
-            "id": "intake-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+            "id": "intake-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "status": "open",
             "owner": "broker_international",
             "action": "complete_intake_requirements",
@@ -9376,8 +9376,8 @@
         },
         {
           "received_at": "2026-07-04T00:00:00Z",
-          "id": "inbox-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
-          "lead_id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+          "id": "inbox-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
+          "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "source": "website_contact_callback",
           "intent": "callback",
           "channel": "contact_page",
@@ -9417,14 +9417,14 @@
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
-            "id": "sla-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+            "id": "sla-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "status": "open",
             "owner": "broker_assignment",
             "due_at": "2026-07-04T00:15:00.000Z",
             "action": "broker_response_required"
           },
           "qualification_task": {
-            "id": "intake-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+            "id": "intake-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "status": "complete",
             "owner": "broker_international",
             "action": "complete_intake_requirements",
@@ -9438,8 +9438,8 @@
         },
         {
           "received_at": "2026-07-04T00:00:00Z",
-          "id": "inbox-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
-          "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+          "id": "inbox-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+          "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "source": "website_seller_valuation",
           "intent": "valuation",
           "channel": "seller_page",
@@ -9489,14 +9489,14 @@
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
-            "id": "sla-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+            "id": "sla-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "status": "open",
             "owner": "broker_assignment",
             "due_at": "2026-07-04T00:15:00.000Z",
             "action": "broker_response_required"
           },
           "qualification_task": {
-            "id": "intake-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+            "id": "intake-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "status": "open",
             "owner": "broker_international",
             "action": "complete_intake_requirements",
@@ -9522,7 +9522,7 @@
         },
         "rows": [
           {
-            "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "lead_type": "renter",
             "original_language": "he",
             "admin_locale": "en",
@@ -9565,14 +9565,14 @@
               }
             ],
             "broker_task": {
-              "id": "inventory-match-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+              "id": "inventory-match-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
               "status": "open",
               "owner": "broker_international",
               "action": "review_matching_inventory"
             }
           },
           {
-            "lead_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "lead_type": "renter",
             "original_language": "he",
             "admin_locale": "en",
@@ -9639,7 +9639,7 @@
               }
             ],
             "broker_task": {
-              "id": "inventory-match-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+              "id": "inventory-match-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
               "status": "open",
               "owner": "broker_international",
               "action": "review_matching_inventory"
@@ -9650,7 +9650,7 @@
       "replies": [
         {
           "id": "reply-server-lead-he-0001",
-          "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+          "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "listing_reference": "MS-CRAWL-0001",
           "original_language": "he",
           "message_original": null,
@@ -9670,15 +9670,15 @@
       ],
       "communicationThreads": [
         {
-          "id": "communication-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
-          "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+          "id": "communication-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
+          "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "listing_reference": "MS-CRAWL-0001",
           "preferred_channel": "whatsapp",
           "event_count": 2,
           "latest_event_at": "2026-07-04T00:05:00Z",
           "events": [
             {
-              "id": "inbound-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+              "id": "inbound-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
               "type": "inbound_request",
               "direction": "inbound",
               "occurred_at": "2026-07-04T00:00:00Z",
@@ -9700,15 +9700,15 @@
           ]
         },
         {
-          "id": "communication-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
-          "lead_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+          "id": "communication-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
+          "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
           "listing_reference": "MS-CRAWL-0001",
           "preferred_channel": "phone",
           "event_count": 1,
           "latest_event_at": "2026-07-04T00:00:00Z",
           "events": [
             {
-              "id": "inbound-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+              "id": "inbound-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
               "type": "inbound_request",
               "direction": "inbound",
               "occurred_at": "2026-07-04T00:00:00Z",
@@ -9720,15 +9720,15 @@
           ]
         },
         {
-          "id": "communication-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
-          "lead_id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+          "id": "communication-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
+          "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "listing_reference": null,
           "preferred_channel": "phone",
           "event_count": 1,
           "latest_event_at": "2026-07-04T00:00:00Z",
           "events": [
             {
-              "id": "inbound-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+              "id": "inbound-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
               "type": "inbound_request",
               "direction": "inbound",
               "occurred_at": "2026-07-04T00:00:00Z",
@@ -9740,15 +9740,15 @@
           ]
         },
         {
-          "id": "communication-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
-          "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+          "id": "communication-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+          "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "listing_reference": null,
           "preferred_channel": "phone",
           "event_count": 1,
           "latest_event_at": "2026-07-04T00:00:00Z",
           "events": [
             {
-              "id": "inbound-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+              "id": "inbound-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
               "type": "inbound_request",
               "direction": "inbound",
               "occurred_at": "2026-07-04T00:00:00Z",
@@ -9761,10 +9761,10 @@
         }
       ],
       "communicationTemplates": {
-        "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be": [
+        "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4": [
           {
             "id": "lead-acknowledgement-he",
-            "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "kind": "acknowledgement",
             "locale": "he",
             "preferred_channel": "whatsapp",
@@ -9779,10 +9779,10 @@
             "can_send_without_approval": false
           }
         ],
-        "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c": [
+        "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c": [
           {
             "id": "lead-viewing-he",
-            "lead_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "kind": "viewing",
             "locale": "he",
             "preferred_channel": "phone",
@@ -9797,10 +9797,10 @@
             "can_send_without_approval": false
           }
         ],
-        "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620": [
+        "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5": [
           {
             "id": "lead-callback-he",
-            "lead_id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+            "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "kind": "callback",
             "locale": "he",
             "preferred_channel": "phone",
@@ -9815,10 +9815,10 @@
             "can_send_without_approval": false
           }
         ],
-        "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef": [
+        "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f": [
           {
             "id": "lead-valuation-el",
-            "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "kind": "valuation",
             "locale": "el",
             "preferred_channel": "phone",
@@ -9837,7 +9837,7 @@
       "languageRequests": [
         {
           "requested_at": "2026-07-04T00:01:00Z",
-          "id": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+          "id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
           "idempotency_key": null,
           "requested_locale": "fr",
           "requested_path": "/fr/",
@@ -9845,7 +9845,7 @@
           "admin_locale": "en",
           "public_indexable": false,
           "notification_requested": true,
-          "contact_ref": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+          "contact_ref": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
           "contact_available": true,
           "message_available": true
         }
@@ -9945,7 +9945,7 @@
       "viewings": [
         {
           "id": "viewing-server-lead-he-0001",
-          "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+          "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "listing_reference": "MS-CRAWL-0001",
           "original_language": "he",
           "admin_locale": "en",
@@ -9973,7 +9973,7 @@
       "savedSearches": [
         {
           "saved_at": "2026-07-04T00:07:00Z",
-          "id": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+          "id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
           "idempotency_key": null,
           "requested_locale": "he",
           "locale": "he",
@@ -10089,17 +10089,17 @@
           "alert_frequency": "weekly",
           "status": "active",
           "alert_task": {
-            "id": "alert-ab65402d-4505-433b-aecc-afc634345a95",
+            "id": "alert-1dc61256-03ce-47b6-9e58-baeed90c635e",
             "status": "open",
             "owner": "broker_en"
           },
           "manage_access": {
             "version": "s1",
-            "verifier": "a0dd18640455e506c6b75763c12a94868e4dd4290f8f7d12674c8fd2745ef71d",
+            "verifier": "c5ca2b02229c4d60beca478f7b3f42c23026e8dbcdb8abe0c518f0bfc7f53e4f",
             "issued_at": "2026-07-04T00:07:00.000Z",
             "expires_at": "2027-07-04T00:07:00.000Z"
           },
-          "contact_ref": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+          "contact_ref": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
           "contact_available": true
         }
       ],
@@ -10118,8 +10118,8 @@
       "sellerPipeline": [
         {
           "created_at": "2026-07-04T00:08:00Z",
-          "id": "seller-pipeline-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
-          "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+          "id": "seller-pipeline-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+          "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "source": "website_seller_valuation",
           "contact_name": "Nikos Papadopoulos",
           "property": {
@@ -10141,7 +10141,7 @@
             "close": "not_started"
           },
           "next_task": {
-            "id": "seller-callback-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+            "id": "seller-callback-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "kind": "seller_callback",
             "owner": "broker_en",
             "status": "open"
@@ -10151,7 +10151,7 @@
       "deals": [
         {
           "id": "deal-server-lead-contact-he-0001",
-          "lead_id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+          "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "listing_reference": null,
           "original_language": "he",
           "admin_locale": "en",
@@ -10160,7 +10160,7 @@
           "stage": "closed",
           "status": "closed",
           "testimonial_request": {
-            "id": "testimonial-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+            "id": "testimonial-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "kind": "testimonial_request",
             "owner": "broker_ru",
             "status": "open",
@@ -10168,7 +10168,7 @@
             "channel": "phone"
           },
           "referral_request": {
-            "id": "referral-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+            "id": "referral-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "kind": "referral_request",
             "owner": "broker_ru",
             "status": "open",
@@ -10223,7 +10223,7 @@
         },
         "rows": [
           {
-            "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "source": "website_listing_detail",
             "assigned_broker": "broker_international",
             "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -10234,13 +10234,13 @@
             "status": "manager_escalation_required",
             "reminder_task": null,
             "manager_escalation": {
-              "id": "manager-escalation-lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+              "id": "manager-escalation-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
               "owner": "manager",
               "status": "open"
             }
           },
           {
-            "lead_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "source": "website_viewing_request",
             "assigned_broker": "broker_international",
             "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -10251,13 +10251,13 @@
             "status": "manager_escalation_required",
             "reminder_task": null,
             "manager_escalation": {
-              "id": "manager-escalation-lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+              "id": "manager-escalation-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
               "owner": "manager",
               "status": "open"
             }
           },
           {
-            "lead_id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+            "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "source": "website_contact_callback",
             "assigned_broker": "broker_international",
             "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -10268,13 +10268,13 @@
             "status": "manager_escalation_required",
             "reminder_task": null,
             "manager_escalation": {
-              "id": "manager-escalation-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+              "id": "manager-escalation-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
               "owner": "manager",
               "status": "open"
             }
           },
           {
-            "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "source": "website_seller_valuation",
             "assigned_broker": "broker_international",
             "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -10285,7 +10285,7 @@
             "status": "manager_escalation_required",
             "reminder_task": null,
             "manager_escalation": {
-              "id": "manager-escalation-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+              "id": "manager-escalation-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
               "owner": "manager",
               "status": "open"
             }
@@ -10295,7 +10295,7 @@
       "leadPipelineQueue": {
         "rows": [
           {
-            "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "lead_type": "renter",
             "pipeline": "renter",
             "stage": "viewing",
@@ -10353,7 +10353,7 @@
             "overdue": false
           },
           {
-            "lead_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "lead_type": "renter",
             "pipeline": "renter",
             "stage": "inquiry",
@@ -10401,7 +10401,7 @@
         ],
         "states": [
           {
-            "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "lead_type": "renter",
             "pipeline": "renter",
             "stage": "viewing",
@@ -10458,7 +10458,7 @@
             "last_recorded_at": "2026-07-06T12:00:00.000Z"
           },
           {
-            "lead_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "lead_type": "renter",
             "pipeline": "renter",
             "stage": "inquiry",
@@ -10518,7 +10518,7 @@
         "rows": [
           {
             "reply_id": "reply-server-lead-he-0001",
-            "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "listing_reference": "MS-CRAWL-0001",
             "reply_language": "he",
             "reviewer": "broker_ru",
@@ -10535,7 +10535,7 @@
         "states": [
           {
             "reply_id": "reply-server-lead-he-0001",
-            "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "listing_reference": "MS-CRAWL-0001",
             "reply_language": "he",
             "reviewer": "broker_ru",
@@ -10561,7 +10561,7 @@
           {
             "id": "feedback-viewing-server-lead-he-0001",
             "viewing_id": "viewing-server-lead-he-0001",
-            "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "listing_reference": "MS-CRAWL-0001",
             "original_language": "he",
             "admin_locale": "en",
@@ -10590,9 +10590,9 @@
       "sellerPipelineQueue": {
         "rows": [
           {
-            "id": "seller-callback-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
-            "seller_pipeline_id": "seller-pipeline-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
-            "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+            "id": "seller-callback-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+            "seller_pipeline_id": "seller-pipeline-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "property": {
               "location": "Sandanski",
               "type": "house"
@@ -10617,8 +10617,8 @@
         "states": [
           {
             "created_at": "2026-07-04T00:08:00Z",
-            "id": "seller-pipeline-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
-            "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+            "id": "seller-pipeline-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "source": "website_seller_valuation",
             "contact_name": "Nikos Papadopoulos",
             "property": {
@@ -10640,7 +10640,7 @@
               "close": "not_started"
             },
             "next_task": {
-              "id": "seller-callback-lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+              "id": "seller-callback-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
               "kind": "seller_callback",
               "owner": "broker_en",
               "status": "open"
@@ -10668,7 +10668,7 @@
         "rows": [
           {
             "request_type": "language_request",
-            "request_id": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+            "request_id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
             "created_at": "2026-07-04T00:01:00Z",
             "requested_locale": "fr",
             "locale": "en",
@@ -10695,7 +10695,7 @@
           },
           {
             "request_type": "saved_search",
-            "request_id": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+            "request_id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
             "created_at": "2026-07-04T00:07:00Z",
             "requested_locale": "he",
             "locale": "he",
@@ -10726,7 +10726,7 @@
         "states": [
           {
             "request_type": "saved_search",
-            "request_id": "saved-search-1fc5ffc9-2423-4eb3-bd47-d17cacd4a674",
+            "request_id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
             "created_at": "2026-07-04T00:07:00Z",
             "requested_locale": "he",
             "locale": "he",
@@ -10754,7 +10754,7 @@
           },
           {
             "request_type": "language_request",
-            "request_id": "language-request-3e35f382-0783-431d-961c-6caf02ac60ea",
+            "request_id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
             "created_at": "2026-07-04T00:01:00Z",
             "requested_locale": "fr",
             "locale": "en",
@@ -10796,7 +10796,7 @@
       "leadBriefs": {
         "rows": [
           {
-            "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "readiness_score": 80,
             "readiness_band": "ready",
             "priority": "critical",
@@ -10858,7 +10858,7 @@
             "hermes_authority": "draft_only"
           },
           {
-            "lead_id": "lead-draft-85c94249-d21c-42f8-8063-d1a26703f80c",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "readiness_score": 45,
             "readiness_band": "developing",
             "priority": "critical",
@@ -10920,7 +10920,7 @@
             "hermes_authority": "draft_only"
           },
           {
-            "lead_id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+            "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "readiness_score": 30,
             "readiness_band": "incomplete",
             "priority": "critical",
@@ -10979,7 +10979,7 @@
             "hermes_authority": "draft_only"
           },
           {
-            "lead_id": "lead-draft-04655ec6-1e44-43c6-8b34-721b106896ef",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "readiness_score": 20,
             "readiness_band": "incomplete",
             "priority": "critical",
@@ -11094,7 +11094,7 @@
     "status": 201,
     "body": {
       "id": "reply-server-lead-he-0001",
-      "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+      "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
       "listing_reference": "MS-CRAWL-0001",
       "original_language": "he",
       "message_original": null,
@@ -11128,7 +11128,7 @@
     "body": {
       "outcome": {
         "id": "qualification-server-lead-he-0001",
-        "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "pipeline": "renter",
         "actor": "broker_ru",
         "action": "qualify",
@@ -11152,7 +11152,7 @@
         }
       },
       "lead_pipeline": {
-        "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "lead_type": "renter",
         "pipeline": "renter",
         "stage": "qualified",
@@ -11215,7 +11215,7 @@
     "status": 201,
     "body": {
       "id": "viewing-server-lead-he-0001",
-      "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+      "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
       "listing_reference": "MS-CRAWL-0001",
       "original_language": "he",
       "admin_locale": "en",
@@ -11246,7 +11246,7 @@
       "follow_up": {
         "id": "viewing-follow-up-server-0001",
         "viewing_id": "viewing-server-lead-he-0001",
-        "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "actor": "broker_ru",
         "task": "follow_up",
         "action": "complete",
@@ -11255,7 +11255,7 @@
       },
       "viewing": {
         "id": "viewing-server-lead-he-0001",
-        "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "listing_reference": "MS-CRAWL-0001",
         "original_language": "he",
         "admin_locale": "en",
@@ -11291,7 +11291,7 @@
       "follow_up": {
         "id": "viewing-follow-up-server-0001",
         "viewing_id": "viewing-server-lead-he-0001",
-        "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "actor": "broker_ru",
         "task": "follow_up",
         "action": "complete",
@@ -11300,7 +11300,7 @@
       },
       "viewing": {
         "id": "viewing-server-lead-he-0001",
-        "lead_id": "lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "listing_reference": "MS-CRAWL-0001",
         "original_language": "he",
         "admin_locale": "en",
@@ -11352,7 +11352,7 @@
   },
   "viewingCalendar": {
     "status": 200,
-    "body": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MS Realty//Viewings//EN\r\nBEGIN:VEVENT\r\nUID:viewing-server-lead-he-0001@ms-realty.local\r\nDTSTAMP:20260704T000600Z\r\nDTSTART:20260706T100000Z\r\nDTEND:20260706T103000Z\r\nSUMMARY:MS Realty viewing MS-CRAWL-0001\r\nDESCRIPTION:Lead lead-draft-ea8c2fb4-7cf8-4f4b-a885-609db856a9be\\; broker broker_ru\\; follow-up open\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+    "body": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MS Realty//Viewings//EN\r\nBEGIN:VEVENT\r\nUID:viewing-server-lead-he-0001@ms-realty.local\r\nDTSTAMP:20260704T000600Z\r\nDTSTART:20260706T100000Z\r\nDTEND:20260706T103000Z\r\nSUMMARY:MS Realty viewing MS-CRAWL-0001\r\nDESCRIPTION:Lead lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4\\; broker broker_ru\\; follow-up open\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
   },
   "viewingCalendarUnauthorized": {
     "status": 401,
@@ -11368,7 +11368,7 @@
     "status": 201,
     "body": {
       "id": "deal-server-lead-contact-he-0001",
-      "lead_id": "lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+      "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
       "listing_reference": null,
       "original_language": "he",
       "admin_locale": "en",
@@ -11377,7 +11377,7 @@
       "stage": "closed",
       "status": "closed",
       "testimonial_request": {
-        "id": "testimonial-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+        "id": "testimonial-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "kind": "testimonial_request",
         "owner": "broker_ru",
         "status": "open",
@@ -11385,7 +11385,7 @@
         "channel": "phone"
       },
       "referral_request": {
-        "id": "referral-lead-draft-335d8a6d-9090-4ffc-8f28-dfb97c932620",
+        "id": "referral-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "kind": "referral_request",
         "owner": "broker_ru",
         "status": "open",
@@ -12352,7 +12352,7 @@
             ],
             "total_eur": null,
             "total_including_price_eur": null,
-            "generated_at": "2026-08-24T22:42:55.155Z"
+            "generated_at": "2026-08-25T03:12:30.784Z"
           },
           "notice": "Ο πίνακας εξόδων δεν είναι πλήρης, επομένως δεν εμφανίζεται σύνολο."
         },

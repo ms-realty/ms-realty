@@ -10,8 +10,12 @@ test("the owner-approved catalog is published in full", () => {
   const approvedIds = operatorPublishedListingIds();
   const publicListings = publicSeedFor(imported).records.filter((record) => record.collection === "listings");
 
-  assert.equal(approvedIds.length, 165);
-  assert.equal(publicListings.length, 165);
+  // 164 named by the approval; MS-CRAWL-0127 is recorded as excluded (no
+  // location, empty title) and therefore deliberately absent from the public
+  // inventory - named plus excluded still accounts for the whole catalog.
+  assert.equal(approvedIds.length, 164);
+  assert.equal(publicListings.length, 164);
+  assert.ok(!approvedIds.includes("MS-CRAWL-0127"));
   assert.deepEqual(
     publicListings.map((listing) => listing.id).sort((left, right) => left.localeCompare(right)),
     approvedIds,

@@ -73,8 +73,13 @@
     "approved_by": "agency_owner",
     "approved_at": "2026-08-24T00:00:00.000Z",
     "reason": "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.",
-    "published_listings": 165,
-    "excluded_listings": []
+    "published_listings": 164,
+    "excluded_listings": [
+      {
+        "id": "MS-CRAWL-0127",
+        "reason": "no location relation and an empty title in the frozen catalog; a search document and a titled public page cannot be built from it"
+      }
+    ]
   },
   "summary": {
     "listings": 165,
@@ -99,8 +104,8 @@
     "mediaReviewGatedAssets": 2,
     "tourFields": 165,
     "publicTours": 0,
-    "publishedListings": 165,
-    "publicationExcludedListings": 0,
+    "publishedListings": 164,
+    "publicationExcludedListings": 1,
     "missingMigrationRecords": 0,
     "missingRouteRows": 0,
     "reviewRequiredRoutes": 165,
@@ -57952,12 +57957,7 @@
     {
       "id": "MS-CRAWL-0127",
       "collection": "listings",
-      "cms_status": "published",
-      "workflow": {
-        "publish_approved": true,
-        "publish_approved_at": "2026-08-24T00:00:00.000Z",
-        "publish_approved_by": "agency_owner"
-      },
+      "cms_status": "source_imported_review_required",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
