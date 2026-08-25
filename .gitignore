@@ -42,3 +42,6 @@ production/data/media-mirror-manifest.json
 production/data/media-upload-manifest.json
 .playwright-mcp/
 .wrangler/
+
+# Payload regenerates this on every runtime boot; it is not part of the source.
+payload-types.ts
