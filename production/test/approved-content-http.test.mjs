@@ -172,8 +172,19 @@ test("the approved-content review surface is admin-gated and reports why each re
   assert.equal(review.body.kind, "admin_approved_content");
   assert.deepEqual(
     review.body.sections.map((section) => section.id),
-    ["team_profiles", "area_guides", "financing_partners", "purchase_fees"],
+    ["team_profiles", "area_guides", "financing_partners", "purchase_fees", "guide_translations"],
   );
+  // Drafted buyer-guide copy is visible to a reviewer and publishable by none
+  // of it: an agent may write a translation, only a human may approve one.
+  const guideTranslations = review.body.sections.find((section) => section.id === "guide_translations");
+  assert.equal(guideTranslations.publishable, 0);
+  assert.equal(guideTranslations.blocked, guideTranslations.total);
+  // Blocked at the first gate -- nobody approved them at all -- and the row
+  // also names the gate that outlasts a plain approval: the translation itself.
+  assert.equal(guideTranslations.rows.every((row) => row.blocked_reason === "not_approved"), true);
+  assert.equal(guideTranslations.rows.every((row) => row.awaiting === "translation_not_approved"), true);
+  assert.equal(guideTranslations.rows.every((row) => row.reviewer === null || row.reviewer === ""), true);
+  assert.equal(guideTranslations.rows.every((row) => row.drafted_by === "claude_translator"), true);
   const team = review.body.sections.find((section) => section.id === "team_profiles");
   assert.equal(team.publishable, 0);
   assert.equal(team.rows.every((row) => row.blocked_reason === "example_record"), true);
@@ -227,6 +238,7 @@ test("the review payload survives a missing approved-content file instead of fai
     areaGuidePath: tempFile("absent-areas.json"),
     financingPartnerPath: tempFile("absent-partners.json"),
     purchaseFeePath: tempFile("absent-fees.json"),
+    guideTranslationPath: tempFile("absent-guide-translations.json"),
     now: "2026-08-23T00:00:00Z",
   });
   assert.equal(payload.summary.total, 0);

@@ -259,6 +259,13 @@ GH_TOKEN=$T gh api repos/ms-realty/ms-realty/dispatches \
 (The deploy job only accepts the exact current `main` SHA. There is
 deliberately no `workflow_dispatch`.)
 
+Observed 2026-08-25: dispatch runs created with a personal access token
+failed before their first step three times in a row (job concludes
+"failure" with an empty steps list within seconds), while the auto-merge
+bot's own dispatches ran normally the same night. If the manual dispatch
+exhibits that signature, do not debug the workflow - merge any pending
+green PR and let the bot's dispatch deploy main.
+
 ### Runbook: manual rollback
 Dashboard → Workers → ms-realty → Deployments → roll back to a prior version;
 or with an MS-Realty-account API token:

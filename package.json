@@ -43,6 +43,7 @@
     "seo:build": "node production/scripts/build-seo-files.mjs",
     "structured:data": "node production/scripts/build-structured-data-report.mjs",
     "cms:build": "node production/scripts/build-cms-seed.mjs",
+    "guides:translations": "node production/scripts/build-guide-translations.mjs",
     "media:mirror": "node production/scripts/run-media-mirror.mjs",
     "listing:quality": "node production/scripts/build-listing-quality-report.mjs",
     "listing:live-audit": "python3 migration/audit_live_listings.py",

@@ -1,0 +1,556 @@
+{
+  "artifact_id": "draft-guide-translations-20260825",
+  "generated_at": "2026-08-25T00:00:00Z",
+  "purpose": "Finished buyer-guide translations for de, nl, ru, el and he, waiting for a human translator to approve them. Nothing here reaches a public page: production/data/approved-cms-content.json admits approved content only, and a translation is publishable there only once a named human sets human_translation_approved.",
+  "publishing_note": "To publish a row: read it beside the English document named in source_document_id, correct it, then move it into approved-cms-content.json with your operator id in reviewer, an approved_at, human_approved and human_translation_approved set to true, and a source_hash recomputed by production/scripts/build-guide-translations.mjs. Legal, tax and process claims are yours to approve, not the drafter's.",
+  "translations": [
+    {
+      "id": "buyer-due-diligence-liens-de",
+      "type": "guide_translation",
+      "source_document_id": "buyer-due-diligence-liens",
+      "guide_key": "buyer-due-diligence-liens",
+      "locale": "de",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Prüfung von Eigentum und Belastungen",
+      "path": "/de/guides/buying-process",
+      "keywords": [
+        "eigentum",
+        "pfandrecht",
+        "hypothek",
+        "belastung",
+        "anzahlung",
+        "due diligence",
+        "grundbuch"
+      ],
+      "facts": [
+        "Auf einer Immobilie können Hypotheken, Pfandrechte oder andere Belastungen liegen, die vor dem Abschluss geprüft werden müssen.",
+        "Bei MS Realty gehört die Prüfung von Eigentum und Belastungen zum Kaufablauf, bevor ein Käufer sich auf das Geschäft verlässt."
+      ],
+      "sources_label": "Offizielle Quellen",
+      "sources": [
+        {
+          "id": "registry-property-register",
+          "publisher": "Registeragentur der Republik Bulgarien (Агенция по вписванията)",
+          "label": "Dienste des Immobilienregisters (Имотен регистър)",
+          "url": "https://portal.registryagency.bg/en/home-pr",
+          "checked_at": "2026-07-29",
+          "claim_ids": [
+            "property-register",
+            "property-certificate"
+          ]
+        }
+      ],
+      "source_hash": "46be0c7a0b2cf3930b57e8ba5890b9965362c88c28e9ceb069b596bc011aa132"
+    },
+    {
+      "id": "buyer-due-diligence-liens-el",
+      "type": "guide_translation",
+      "source_document_id": "buyer-due-diligence-liens",
+      "guide_key": "buyer-due-diligence-liens",
+      "locale": "el",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Έλεγχος τίτλων και βαρών",
+      "path": "/el/guides/buying-process",
+      "keywords": [
+        "τίτλος",
+        "υποθήκη",
+        "βάρος",
+        "βάρη",
+        "προκαταβολή",
+        "έλεγχος",
+        "μητρώο"
+      ],
+      "facts": [
+        "Ένα ακίνητο μπορεί να φέρει υποθήκες, κατασχέσεις ή άλλα βάρη, τα οποία πρέπει να ελεγχθούν πριν από την ολοκλήρωση της αγοράς.",
+        "Για την MS Realty, ο έλεγχος τίτλων και βαρών αποτελεί μέρος της διαδικασίας αγοράς, πριν ο αγοραστής βασιστεί στη συμφωνία."
+      ],
+      "sources_label": "Επίσημες πηγές",
+      "sources": [
+        {
+          "id": "registry-property-register",
+          "publisher": "Υπηρεσία Μητρώων της Δημοκρατίας της Βουλγαρίας (Агенция по вписванията)",
+          "label": "Υπηρεσίες του Κτηματολογικού Μητρώου (Имотен регистър)",
+          "url": "https://portal.registryagency.bg/en/home-pr",
+          "checked_at": "2026-07-29",
+          "claim_ids": [
+            "property-register",
+            "property-certificate"
+          ]
+        }
+      ],
+      "source_hash": "30c2281d6db0462737c3643e723e34238508db1e1ee02067df633d04b392f484"
+    },
+    {
+      "id": "buyer-due-diligence-liens-he",
+      "type": "guide_translation",
+      "source_document_id": "buyer-due-diligence-liens",
+      "guide_key": "buyer-due-diligence-liens",
+      "locale": "he",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "בדיקות זכויות ושעבודים",
+      "path": "/he/guides/buying-process",
+      "keywords": [
+        "זכויות",
+        "שעבוד",
+        "משכנתא",
+        "עיקול",
+        "מקדמה",
+        "בדיקת נאותות",
+        "מרשם"
+      ],
+      "facts": [
+        "על נכס עשויים לרבוץ משכנתאות, עיקולים או שעבודים אחרים, ויש לבדוק אותם לפני השלמת העסקה.",
+        "ב-MS Realty בדיקת הזכויות והשעבודים היא חלק מתהליך הרכישה, לפני שהרוכש מסתמך על העסקה."
+      ],
+      "sources_label": "מקורות רשמיים",
+      "sources": [
+        {
+          "id": "registry-property-register",
+          "publisher": "סוכנות הרישום של הרפובליקה של בולגריה (Агенция по вписванията)",
+          "label": "שירותי מרשם המקרקעין (Имотен регистър)",
+          "url": "https://portal.registryagency.bg/en/home-pr",
+          "checked_at": "2026-07-29",
+          "claim_ids": [
+            "property-register",
+            "property-certificate"
+          ]
+        }
+      ],
+      "source_hash": "a5cd8a698b13da15ad31d4476a1f5bd8d6c4f1ac672109fb5ab09d37b90a1ae3"
+    },
+    {
+      "id": "buyer-due-diligence-liens-nl",
+      "type": "guide_translation",
+      "source_document_id": "buyer-due-diligence-liens",
+      "guide_key": "buyer-due-diligence-liens",
+      "locale": "nl",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Controle van eigendom en lasten",
+      "path": "/nl/guides/buying-process",
+      "keywords": [
+        "eigendom",
+        "beslag",
+        "hypotheek",
+        "last",
+        "aanbetaling",
+        "due diligence",
+        "kadaster"
+      ],
+      "facts": [
+        "Op een woning kunnen hypotheken, beslagen of andere lasten rusten die vóór de levering gecontroleerd moeten worden.",
+        "Bij MS Realty hoort de controle van eigendom en lasten bij het koopproces, voordat een koper op de transactie vertrouwt."
+      ],
+      "sources_label": "Officiële bronnen",
+      "sources": [
+        {
+          "id": "registry-property-register",
+          "publisher": "Registratieagentschap van de Republiek Bulgarije (Агенция по вписванията)",
+          "label": "Diensten van het eigendomsregister (Имотен регистър)",
+          "url": "https://portal.registryagency.bg/en/home-pr",
+          "checked_at": "2026-07-29",
+          "claim_ids": [
+            "property-register",
+            "property-certificate"
+          ]
+        }
+      ],
+      "source_hash": "eccedf7209df0422fe537eef4b1a825cc3daa2fa70e45fc41d4a2ba3be38da49"
+    },
+    {
+      "id": "buyer-due-diligence-liens-ru",
+      "type": "guide_translation",
+      "source_document_id": "buyer-due-diligence-liens",
+      "guide_key": "buyer-due-diligence-liens",
+      "locale": "ru",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Проверка права собственности и обременений",
+      "path": "/ru/guides/buying-process",
+      "keywords": [
+        "право собственности",
+        "залог",
+        "ипотек",
+        "обремен",
+        "задаток",
+        "проверка",
+        "реестр"
+      ],
+      "facts": [
+        "На объект могут быть наложены ипотеки, залоги или иные обременения, которые необходимо проверить до завершения сделки.",
+        "В MS Realty проверка права собственности и обременений — часть процесса покупки, которая проводится до того, как покупатель начнёт рассчитывать на сделку."
+      ],
+      "sources_label": "Официальные источники",
+      "sources": [
+        {
+          "id": "registry-property-register",
+          "publisher": "Регистрационное агентство Республики Болгария (Агенция по вписванията)",
+          "label": "Услуги Имущественного регистра (Имотен регистър)",
+          "url": "https://portal.registryagency.bg/en/home-pr",
+          "checked_at": "2026-07-29",
+          "claim_ids": [
+            "property-register",
+            "property-certificate"
+          ]
+        }
+      ],
+      "source_hash": "2777ee6d778128ad42421cc64a8eb779ad990bdd2722f4fde32a7e5a61c3a042"
+    },
+    {
+      "id": "foreign-buyers-bg-land-ownership-de",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-bg-land-ownership",
+      "guide_key": "foreign-buyers-bg-land-ownership",
+      "locale": "de",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Ausländische Käufer und Grundeigentum in Bulgarien",
+      "path": "/de/guides/foreign-buyers",
+      "keywords": [
+        "ausländisch",
+        "nicht-eu",
+        "nicht eu",
+        "grundstück",
+        "grund und boden",
+        "gesellschaft",
+        "ood",
+        "eigentum"
+      ],
+      "facts": [
+        "Käufer aus Staaten außerhalb der EU können bulgarischen Grund und Boden nicht unmittelbar auf ihren eigenen Namen erwerben.",
+        "Für den Erwerb von Grund und Boden benötigt ein Käufer aus einem Staat außerhalb der EU in der Regel eine bulgarische Gesellschaft, üblicherweise eine OOD (ООД, die Gesellschaft mit beschränkter Haftung bulgarischen Rechts).",
+        "Für Käufer aus der EU und dem EWR gelten andere Regeln; sie sollten die aktuelle Erwerbsstruktur vor der Unterzeichnung mit einem Anwalt klären."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "7aa4c6e2132a7a79ede8fc2d4ba8e014c69ea4849a57ba226d92e670ea3a65cd"
+    },
+    {
+      "id": "foreign-buyers-bg-land-ownership-el",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-bg-land-ownership",
+      "guide_key": "foreign-buyers-bg-land-ownership",
+      "locale": "el",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Αλλοδαποί αγοραστές και ιδιοκτησία γης στη Βουλγαρία",
+      "path": "/el/guides/foreign-buyers",
+      "keywords": [
+        "αλλοδαπ",
+        "εκτός εε",
+        "γη",
+        "εταιρεία",
+        "ood",
+        "ιδιοκτησία"
+      ],
+      "facts": [
+        "Οι αγοραστές εκτός ΕΕ δεν μπορούν να αποκτήσουν βουλγαρική γη απευθείας στο όνομά τους.",
+        "Για την απόκτηση γης, ένας αγοραστής εκτός ΕΕ χρειάζεται συνήθως βουλγαρική εταιρεία, κατά κανόνα μια OOD (ООД, την εταιρεία περιορισμένης ευθύνης του βουλγαρικού δικαίου).",
+        "Για τους αγοραστές από την ΕΕ και τον ΕΟΧ ισχύουν άλλοι κανόνες· καλό είναι να επιβεβαιώσουν με δικηγόρο την ισχύουσα δομή αγοράς πριν υπογράψουν."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "6d27fc67b7c2966bce3611ddf231a0f1dd06b320e9580fa2be83633377b65848"
+    },
+    {
+      "id": "foreign-buyers-bg-land-ownership-he",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-bg-land-ownership",
+      "guide_key": "foreign-buyers-bg-land-ownership",
+      "locale": "he",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "רוכשים זרים ובעלות על קרקע בבולגריה",
+      "path": "/he/guides/foreign-buyers",
+      "keywords": [
+        "זר",
+        "מחוץ לאיחוד",
+        "קרקע",
+        "חברה",
+        "ood",
+        "בעלות"
+      ],
+      "facts": [
+        "רוכשים שאינם אזרחי האיחוד האירופי אינם יכולים להחזיק בקרקע בבולגריה ישירות על שמם.",
+        "לצורך בעלות על קרקע נדרשת לרוכש שאינו אזרח האיחוד האירופי, בדרך כלל, חברה בולגרית — על פי רוב מסוג OOD (ООД, החברה בערבון מוגבל של הדין הבולגרי).",
+        "על רוכשים מן האיחוד האירופי ומן האזור הכלכלי האירופי חלים כללים אחרים, ומומלץ שיאמתו מול עורך דין את מבנה הרכישה העדכני לפני החתימה."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "a0ddb33adc43f20ddf9e11674d87ca361ea4b2f05737ff29f95ed99c1b72b5d6"
+    },
+    {
+      "id": "foreign-buyers-bg-land-ownership-nl",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-bg-land-ownership",
+      "guide_key": "foreign-buyers-bg-land-ownership",
+      "locale": "nl",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Buitenlandse kopers en grondeigendom in Bulgarije",
+      "path": "/nl/guides/foreign-buyers",
+      "keywords": [
+        "buitenlands",
+        "niet-eu",
+        "niet eu",
+        "grond",
+        "vennootschap",
+        "ood",
+        "eigendom"
+      ],
+      "facts": [
+        "Kopers van buiten de EU kunnen Bulgaarse grond niet rechtstreeks op eigen naam in eigendom hebben.",
+        "Voor grondeigendom heeft een koper van buiten de EU normaal gesproken een Bulgaarse vennootschap nodig, meestal een OOD (ООД, de besloten vennootschap naar Bulgaars recht).",
+        "Voor kopers uit de EU en de EER gelden andere regels; zij bespreken de actuele aankoopstructuur het best met een advocaat voordat zij tekenen."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "5acb651d7fa8cb61b8caa2eefce88425632166eac6ec7cc4cadec4f55beb6430"
+    },
+    {
+      "id": "foreign-buyers-bg-land-ownership-ru",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-bg-land-ownership",
+      "guide_key": "foreign-buyers-bg-land-ownership",
+      "locale": "ru",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Иностранные покупатели и право собственности на землю в Болгарии",
+      "path": "/ru/guides/foreign-buyers",
+      "keywords": [
+        "иностран",
+        "не ес",
+        "земл",
+        "компан",
+        "оод",
+        "собственност"
+      ],
+      "facts": [
+        "Покупатели из стран, не входящих в ЕС, не могут владеть болгарской землёй напрямую на своё имя.",
+        "Чтобы приобрести землю, покупателю из страны за пределами ЕС обычно требуется болгарская компания, как правило ООД — общество с ограниченной ответственностью по болгарскому праву.",
+        "Для покупателей из ЕС и ЕЭЗ порядок иной: перед подписанием стоит уточнить у юриста действующую схему покупки."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "803e115b57dc3db63936866a5b9ff449822b2191bf31ebab3d04005ec985692d"
+    },
+    {
+      "id": "foreign-buyers-financing-gap-de",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-financing-gap",
+      "guide_key": "foreign-buyers-financing-gap",
+      "locale": "de",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Finanzierungsprüfung für ausländische Käufer",
+      "path": "/de/guides/foreign-buyers",
+      "keywords": [
+        "ausländisch",
+        "hypothek",
+        "bank",
+        "finanzierung",
+        "darlehen"
+      ],
+      "facts": [
+        "Für ausländische Staatsangehörige kann das Angebot an Hypothekendarlehen in Bulgarien begrenzt sein.",
+        "Für MS Realty gehört die Finanzierung an den Anfang des Gesprächs und nicht zu den späten Überraschungen."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "6f095a76cc0815a225fc69a090357891c1f470c75ccc3ba039d8bae266e07b44"
+    },
+    {
+      "id": "foreign-buyers-financing-gap-el",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-financing-gap",
+      "guide_key": "foreign-buyers-financing-gap",
+      "locale": "el",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Έλεγχος χρηματοδότησης για αλλοδαπούς αγοραστές",
+      "path": "/el/guides/foreign-buyers",
+      "keywords": [
+        "αλλοδαπ",
+        "στεγαστικό",
+        "τράπεζα",
+        "χρηματοδότηση",
+        "δάνειο"
+      ],
+      "facts": [
+        "Η διαθεσιμότητα στεγαστικών δανείων για αλλοδαπούς υπηκόους στη Βουλγαρία μπορεί να είναι περιορισμένη.",
+        "Η MS Realty συζητά τη χρηματοδότηση από την αρχή, ώστε να μην αποτελέσει έκπληξη σε προχωρημένο στάδιο."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "6c9336ac63d4c9c24cd65a8f573d28c84d40c29cc8ea588cfd6ca145c2caf152"
+    },
+    {
+      "id": "foreign-buyers-financing-gap-he",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-financing-gap",
+      "guide_key": "foreign-buyers-financing-gap",
+      "locale": "he",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "בדיקות מימון לרוכשים זרים",
+      "path": "/he/guides/foreign-buyers",
+      "keywords": [
+        "זר",
+        "משכנתא",
+        "בנק",
+        "מימון",
+        "הלוואה"
+      ],
+      "facts": [
+        "זמינות המשכנתאות לאזרחים זרים בבולגריה עשויה להיות מוגבלת.",
+        "ב-MS Realty בוחנים את המימון כבר בתחילת הדרך, כדי שלא יהפוך להפתעה בשלב מאוחר."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "5aee4214f3a7baaccba710982abe1ef306199e26cab1e0a4a9be1b0f3fa8a674"
+    },
+    {
+      "id": "foreign-buyers-financing-gap-nl",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-financing-gap",
+      "guide_key": "foreign-buyers-financing-gap",
+      "locale": "nl",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Financieringscontrole voor buitenlandse kopers",
+      "path": "/nl/guides/foreign-buyers",
+      "keywords": [
+        "buitenlands",
+        "hypotheek",
+        "bank",
+        "financiering",
+        "lening"
+      ],
+      "facts": [
+        "Voor buitenlandse staatsburgers kan het aanbod aan hypotheken in Bulgarije beperkt zijn.",
+        "Bij MS Realty hoort financiering aan het begin van het gesprek en niet bij de late verrassingen."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "bd8c53cf1cb6d0d2af0c8952e3c763254ac10edc5229524fbfec503a603f3791"
+    },
+    {
+      "id": "foreign-buyers-financing-gap-ru",
+      "type": "guide_translation",
+      "source_document_id": "foreign-buyers-financing-gap",
+      "guide_key": "foreign-buyers-financing-gap",
+      "locale": "ru",
+      "source_locale": "en",
+      "status": "draft",
+      "human_approved": false,
+      "reviewer": "",
+      "approved_at": null,
+      "review_due_at": null,
+      "drafted_by": "claude_translator",
+      "drafted_at": "2026-08-25T00:00:00Z",
+      "title": "Проверка финансирования для иностранных покупателей",
+      "path": "/ru/guides/foreign-buyers",
+      "keywords": [
+        "иностран",
+        "ипотек",
+        "банк",
+        "финансирован",
+        "кредит"
+      ],
+      "facts": [
+        "Возможности ипотечного кредитования для иностранных граждан в Болгарии могут быть ограничены.",
+        "MS Realty обсуждает финансирование в самом начале, чтобы оно не стало поздней неожиданностью."
+      ],
+      "sources_label": "",
+      "sources": [],
+      "source_hash": "5d535d6cc8ddddc3c4af85c7f8e4680ed15916f9bbdcfc3ed6e5c174e1c33b74"
+    }
+  ]
+}

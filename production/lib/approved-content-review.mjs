@@ -26,6 +26,11 @@ import {
   readApprovedTeamProfiles,
   teamProfileReviewRows,
 } from "./team-profiles.mjs";
+import {
+  DEFAULT_DRAFT_GUIDE_TRANSLATIONS_PATH,
+  guideTranslationReviewRows,
+  readDraftGuideTranslations,
+} from "./guide-translations.mjs";
 
 // What a human has to do before each surface can publish. Shown next to the
 // blocked rows so an approver is not left guessing.
@@ -38,6 +43,8 @@ const PUBLISH_REQUIREMENTS = {
     "Replace the example rows with lenders the agency actually works with, set review_due_at, and add a rate only together with its effective date, approved_at and your operator id.",
   purchase_fees:
     "Supply the approved municipal transfer tax, notary tariff, registry entry fee, agency fee and company-route cost, each with its official source, effective_from and max_approval_age_days, then approve and rebuild.",
+  guide_translations:
+    "Read each draft beside the approved English document named in source_document_id and correct it. To publish one, move it into production/data/approved-cms-content.json with your operator id in reviewer, an approved_at, and human_approved and human_translation_approved set to true, then rebuild so source_hash covers the words you approved. These are legal-adjacent claims about Bulgarian property law: approving them is a human act, and until you do, the home page keeps pointing readers at the English originals.",
 };
 
 function loadOrEmpty(filePath, loader, collection) {
@@ -53,6 +60,7 @@ export function approvedContentReviewPayload({
   areaGuidePath = null,
   financingPartnerPath = null,
   purchaseFeePath = null,
+  guideTranslationPath = null,
   now = new Date().toISOString(),
 } = {}) {
   const team = loadOrEmpty(teamProfilePath || DEFAULT_APPROVED_TEAM_PROFILES_PATH, readApprovedTeamProfiles, "profiles");
@@ -63,12 +71,21 @@ export function approvedContentReviewPayload({
     "partners",
   );
   const fees = loadOrEmpty(purchaseFeePath || DEFAULT_APPROVED_PURCHASE_FEES_PATH, readApprovedPurchaseFees, "lines");
+  const guideTranslations = loadOrEmpty(
+    guideTranslationPath || DEFAULT_DRAFT_GUIDE_TRANSLATIONS_PATH,
+    readDraftGuideTranslations,
+    "translations",
+  );
 
   const sections = [
     { id: "team_profiles", surface: "/about", rows: teamProfileReviewRows(team, { now }) },
     { id: "area_guides", surface: "/{locale}/locations/{location}", rows: areaGuideReviewRows(areas, { now }) },
     { id: "financing_partners", surface: "/{locale}/start (financing step)", rows: financingPartnerReviewRows(financing, { now }) },
     { id: "purchase_fees", surface: "/{locale}/properties/{id} (cost estimator)", rows: purchaseFeeReviewRows(fees, { now }) },
+    // Drafted buyer-guide copy for the locales that have none. Every row here
+    // is blocked on translation_not_approved by construction; the section
+    // exists so the drafts reach a translator instead of sitting unread.
+    { id: "guide_translations", surface: "/{locale}/guides/{guide}", rows: guideTranslationReviewRows(guideTranslations, { now }) },
   ].map((section) => ({
     ...section,
     publish_requirement: PUBLISH_REQUIREMENTS[section.id],
