@@ -2800,7 +2800,7 @@ function SearchBody({ page }) {
           ),
       h(
         "section",
-        { className: `sr-results${savedView ? " sr-results--saved" : ""}`, "data-search-view": "list" },
+        { className: `sr-results${savedView ? " sr-results--saved" : ""}`, "data-search-view": page.search.view || "list" },
         h(
           "div",
           { className: "sr-toolbar" },
@@ -4177,40 +4177,6 @@ function SellerBody({ page }) {
               h("label", null, labels.area, h("input", { name: "property.area", type: "number", min: "0", inputMode: "decimal" })),
               h("label", null, labels.factLabels?.bedrooms || "Bedrooms", h("input", { name: "property.bedrooms", type: "number", min: "0", inputMode: "numeric" })),
             ),
-            // Photos attach to the enquiry, not to this form: the enquiry has
-            // to exist before anything can be filed against it. The control is
-            // live and leads to the upload block further down the page; it only
-            // ships disabled when the endpoint itself is switched off.
-            photoUpload
-              ? h(
-                  "div",
-                  { className: "sell-form__pending", "data-feature-ready": "photo_upload" },
-                  h(
-                    Btn,
-                    {
-                      tag: "a",
-                      variant: "secondary",
-                      size: "md",
-                      iconStart: "camera",
-                      href: "#seller-photos",
-                      "aria-describedby": "seller-photos-note",
-                      "data-seller-photos-link": "true",
-                    },
-                    labels.addPhotos,
-                  ),
-                  h("p", { id: "seller-photos-note", className: "sell-form__pending-note" }, photoUpload.copy.intro),
-                )
-              : h(
-                  "div",
-                  { className: "sell-form__pending", "data-feature-pending": "photo_upload" },
-                  h(
-                    "button",
-                    { type: "button", className: "mk-btn mk-btn--secondary mk-btn--md", disabled: true, "aria-describedby": "seller-photos-note" },
-                    h(Icon, { name: "camera", size: 18 }),
-                    h("span", null, labels.addPhotos),
-                  ),
-                  h("p", { id: "seller-photos-note", className: "sell-form__pending-note" }, labels.photosUnavailable),
-                ),
             h(
               "div",
               { className: "sell-form__actions sell-form__actions--end" },
@@ -4282,6 +4248,11 @@ function SellerBody({ page }) {
           h("p", null, page.body.form_unavailable),
           channels ? phoneAction(channels.phone, "accent") : null,
         ),
+    // The one photo-upload path on the page. It cannot live inside the intake
+    // form - forms do not nest, and a seller who already holds a reference must
+    // be able to send photos even when the intake form is switched off - so it
+    // is a step of the flow by its styling rather than by its position in the
+    // DOM, and it carries the only "add photos" heading on the page.
     photoUpload
       ? h(
           "section",
@@ -4290,11 +4261,12 @@ function SellerBody({ page }) {
             className: "mk-card mk-card--elevated mk-card--pad-lg ct-form sell-photos",
             "aria-labelledby": "seller-photos-title",
             "data-seller-photos": "true",
+            "data-feature-ready": "photo_upload",
             "data-seller-photos-public": "false",
             "data-seller-photos-searchable": "false",
           },
           h("h2", { id: "seller-photos-title", className: "ct-form__title" }, photoUpload.copy.title),
-          h("p", null, photoUpload.copy.intro),
+          h("p", { id: "seller-photos-note" }, photoUpload.copy.intro),
           h(
             "p",
             { className: "sell-form__note", "data-seller-photos-privacy": "true" },
@@ -4316,18 +4288,29 @@ function SellerBody({ page }) {
               "data-seller-photo-max-bytes": String(photoUpload.max_file_bytes),
               "data-seller-photo-limits": photoUpload.copy.limits,
             },
+            // Sending the valuation request fills the reference in and the
+            // client hides this whole disclosure. It is here for the other
+            // case: a seller who already holds a reference from a broker and is
+            // only coming back to attach photos to it. Closed by default so the
+            // common path stays a file picker and a button, and not `required`,
+            // because a required control inside a closed disclosure cannot be
+            // focused and would silently block the no-JavaScript submit.
             h(
-              "label",
-              { "data-seller-photo-reference-field": "true" },
-              photoUpload.copy.reference,
-              h("input", {
-                name: photoUpload.reference_field,
-                required: true,
-                autoComplete: "off",
-                spellCheck: "false",
-                "data-seller-photo-reference": "true",
-              }),
-              h("small", { className: "sell-photos__hint" }, photoUpload.copy.reference_hint),
+              "details",
+              { className: "sell-photos__reference", "data-seller-photo-reference-field": "true" },
+              h("summary", null, photoUpload.copy.reference_toggle),
+              h(
+                "label",
+                null,
+                photoUpload.copy.reference,
+                h("input", {
+                  name: photoUpload.reference_field,
+                  autoComplete: "off",
+                  spellCheck: "false",
+                  "data-seller-photo-reference": "true",
+                }),
+                h("small", { className: "sell-photos__hint" }, photoUpload.copy.reference_hint),
+              ),
             ),
             h(
               "label",
@@ -4360,7 +4343,31 @@ function SellerBody({ page }) {
             ),
           ),
         )
-      : null,
+      : // Switched off, the affordance still ships - visibly disabled with the
+        // reason beside it - in the same place the working one occupies, rather
+        // than as a hole in the page.
+        h(
+          "section",
+          {
+            id: "seller-photos",
+            className: "mk-card mk-card--elevated mk-card--pad-lg ct-form sell-photos",
+            "aria-labelledby": "seller-photos-title",
+            "data-seller-photos": "true",
+            "data-feature-pending": "photo_upload",
+          },
+          h("h2", { id: "seller-photos-title", className: "ct-form__title" }, labels.addPhotos),
+          h(
+            "div",
+            { className: "sell-form__pending" },
+            h(
+              "button",
+              { type: "button", className: "mk-btn mk-btn--secondary mk-btn--md", disabled: true, "aria-describedby": "seller-photos-note" },
+              h(Icon, { name: "camera", size: 18 }),
+              h("span", null, labels.addPhotos),
+            ),
+            h("p", { id: "seller-photos-note", className: "sell-form__pending-note" }, labels.photosUnavailable),
+          ),
+        ),
     h(
       "section",
       { className: "sell-next", "aria-labelledby": "sell-next-title", "data-seller-next-steps": "true" },

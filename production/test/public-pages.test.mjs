@@ -251,11 +251,18 @@ test("home rails carry an empty state instead of disappearing", () => {
 test("lead forms offer an optional email and the seller flow offers a working photo upload", () => {
   const seller = renderReactPublicBody(renderSellerPage({ registry, localeCode: "en", leadWritesDisabled: false }));
   assert.match(seller, /<label>Email \(optional\)<input name="contact.email" type="email" autocomplete="email" inputmode="email">/);
-  // The control is live and leads to the upload block, which is a real
-  // multipart form that works without JavaScript.
+  // The control is live, and the upload is a real multipart form that works
+  // without JavaScript.
   assert.match(seller, /data-feature-ready="photo_upload"/);
   assert.doesNotMatch(seller, /data-feature-pending="photo_upload"/);
-  assert.match(seller, /href="#seller-photos"/);
+  // Exactly ONE place on the page adds photos. The page used to carry two -
+  // a link in the stepper jumping down to a second, differently styled block
+  // under its own "Add photos" heading - which read as the same task offered
+  // twice. The returning seller who already holds an enquiry reference is the
+  // only case the stepper could not serve, so that field folded into this one
+  // upload as a disclosure instead of justifying a whole second form.
+  assert.equal(seller.match(/ct-form__title">Add photos</g)?.length, 1);
+  assert.match(seller, /<details class="sell-photos__reference"/);
   assert.match(seller, /<form class="sell-photos__form" method="POST" action="\/api\/seller-photos\?return=[^"]+" enctype="multipart\/form-data"/);
   assert.match(seller, /<input type="file" name="photo" multiple required accept="image\/jpeg,image\/png,image\/webp,image\/avif"/);
   assert.match(seller, /data-seller-photo-progress="true"/);

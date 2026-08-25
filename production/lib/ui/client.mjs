@@ -1835,6 +1835,17 @@ export const PUBLIC_APP_JS = `(function () {
 
     form.addEventListener("submit", function (event) {
       var files = input && input.files ? Array.prototype.slice.call(input.files) : [];
+      // The reference lives in a disclosure that is closed unless the visitor
+      // needs it, so the field cannot carry the required attribute: a required
+      // control inside a closed details element is not focusable and the
+      // browser would refuse the submit without saying why. Ask for it here.
+      if (files.length && reference && !reference.value.trim()) {
+        event.preventDefault();
+        if (referenceField && referenceField.tagName === "DETAILS") referenceField.open = true;
+        reference.focus();
+        setStatus(failureText, "error");
+        return;
+      }
       if (!files.length || !reference || !reference.value.trim()) return;
       event.preventDefault();
       clearResults();
