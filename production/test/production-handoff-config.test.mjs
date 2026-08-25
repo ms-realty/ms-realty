@@ -111,7 +111,10 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(deployScript, /mv -Tf "\$base\/\.current-\$release_id" "\$current"/);
   assert.doesNotMatch(deployScript, /docker:reset|docker compose down --volumes/);
   assert.match(ciWorkflow, /scp .*production\/scripts\/deploy-production-review\.sh .*\$\{GITHUB_SHA\}\.deploy\.sh/);
-  assert.match(ciWorkflow, /bash '\/opt\/ms-realty\/incoming\/\$\{GITHUB_SHA\}\.deploy\.sh' '\$GITHUB_SHA' <\/dev\/null/);
+  // -x traces the activation so a failing line names itself in the deploy log;
+  // the script shields its token lines from the trace.
+  assert.match(ciWorkflow, /bash -x '\/opt\/ms-realty\/incoming\/\$\{GITHUB_SHA\}\.deploy\.sh' '\$GITHUB_SHA' <\/dev\/null/);
+  assert.match(deployScript, /set \+x/);
   assert.match(ciWorkflow, /readlink -f \/opt\/ms-realty\/current/);
   assert.doesNotMatch(ciWorkflow, /bash -s --/);
 });
