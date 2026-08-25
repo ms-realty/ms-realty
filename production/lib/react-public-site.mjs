@@ -1015,6 +1015,13 @@ function HeroSearch({ page, labels, chrome }) {
   const rentLabel = chrome.nav?.find((item) => item.id === "rent")?.label || "Rent";
   const offerLabel = labels.factLabels?.offer_type || "Offer";
   const presetData = pricePresetData(presets, page.locale, labels);
+  // The hero opens the same catalogue as the results page, so it offers the
+  // same facets. A control the catalogue cannot answer would send the visitor
+  // straight to an empty page on their first interaction with the site.
+  const availableFilterFields = new Set(controls.applicable_filter_fields || []);
+  const bedroomCounts = [1, 2, 3, 4].filter((count) => (filterOptions.bedrooms || []).some((value) => value >= count));
+  const showBedrooms = availableFilterFields.has("bedrooms_min") && bedroomCounts.length > 0;
+  const showArea = availableFilterFields.has("area_min");
 
   return h(
     "form",
@@ -1129,17 +1136,19 @@ function HeroSearch({ page, labels, chrome }) {
         h(
           "div",
           { className: "hp-search__more-grid" },
-          h(
-            "div",
-            { className: "hp-search__more-field hp-search__more-field--bedrooms" },
-            h("label", { htmlFor: "home-search-bedrooms-min" }, labels.factLabels?.bedrooms || "Bedrooms"),
-            h(
-              "select",
-              { id: "home-search-bedrooms-min", name: "bedrooms_min", "data-hero-bedrooms": "true" },
-              h("option", { value: "" }, labels.any),
-              ...[1, 2, 3, 4].map((count) => h("option", { key: count, value: String(count) }, `${count}+`)),
-            ),
-          ),
+          showBedrooms
+            ? h(
+                "div",
+                { className: "hp-search__more-field hp-search__more-field--bedrooms" },
+                h("label", { htmlFor: "home-search-bedrooms-min" }, labels.factLabels?.bedrooms || "Bedrooms"),
+                h(
+                  "select",
+                  { id: "home-search-bedrooms-min", name: "bedrooms_min", "data-hero-bedrooms": "true" },
+                  h("option", { value: "" }, labels.any),
+                  ...bedroomCounts.map((count) => h("option", { key: count, value: String(count) }, `${count}+`)),
+                ),
+              )
+            : null,
           h(
             "div",
             { className: "hp-search__more-field" },
@@ -1150,18 +1159,22 @@ function HeroSearch({ page, labels, chrome }) {
               ...pricePresetOptions({ values: presets.sale, localeCode: page.locale, labels }),
             ),
           ),
-          h(
-            "div",
-            { className: "hp-search__more-field" },
-            h("label", { htmlFor: "home-search-area-min" }, labels.areaMin),
-            h("input", { id: "home-search-area-min", name: "area_min", type: "number", min: "0", step: "any", inputMode: "decimal" }),
-          ),
-          h(
-            "div",
-            { className: "hp-search__more-field" },
-            h("label", { htmlFor: "home-search-area-max" }, labels.areaMax),
-            h("input", { id: "home-search-area-max", name: "area_max", type: "number", min: "0", step: "any", inputMode: "decimal" }),
-          ),
+          showArea
+            ? h(
+                "div",
+                { className: "hp-search__more-field" },
+                h("label", { htmlFor: "home-search-area-min" }, labels.areaMin),
+                h("input", { id: "home-search-area-min", name: "area_min", type: "number", min: "0", step: "any", inputMode: "decimal" }),
+              )
+            : null,
+          showArea
+            ? h(
+                "div",
+                { className: "hp-search__more-field" },
+                h("label", { htmlFor: "home-search-area-max" }, labels.areaMax),
+                h("input", { id: "home-search-area-max", name: "area_max", type: "number", min: "0", step: "any", inputMode: "decimal" }),
+              )
+            : null,
           h(
             "div",
             { className: "hp-search__more-actions" },
@@ -1603,18 +1616,20 @@ function StartBody({ page }) {
           }),
         ),
       ),
-      h(
-        "fieldset",
-        { className: "st-group", "data-start-bedrooms": "true", hidden: residential ? undefined : true },
-        h("legend", { className: "st-group__legend" }, bedroomsLabel),
-        h(
-          "div",
-          { className: "st-chips" },
-          chip("bedrooms_min", "", labels.any, !answers.bedrooms_min),
-          ...body.bedrooms.map((count) => chip("bedrooms_min", String(count), `${count}+`, answers.bedrooms_min === count)),
-        ),
-        h("p", { className: "st-hint" }, copy.bedroomsHint),
-      ),
+      body.bedrooms.length
+        ? h(
+            "fieldset",
+            { className: "st-group", "data-start-bedrooms": "true", hidden: residential ? undefined : true },
+            h("legend", { className: "st-group__legend" }, bedroomsLabel),
+            h(
+              "div",
+              { className: "st-chips" },
+              chip("bedrooms_min", "", labels.any, !answers.bedrooms_min),
+              ...body.bedrooms.map((count) => chip("bedrooms_min", String(count), `${count}+`, answers.bedrooms_min === count)),
+            ),
+            h("p", { className: "st-hint" }, copy.bedroomsHint),
+          )
+        : null,
     ]),
     step(
       4,
@@ -2535,7 +2550,9 @@ function SearchBody({ page }) {
       applicableFilterFields.has("hotel_rooms_min")
         ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
         : null,
-      rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" }),
+      applicableFilterFields.has("area_min")
+        ? rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" })
+        : null,
       h(
         "details",
         { className: "sr-more", "data-search-more-filters": "true", open: secondaryFiltersActive ? true : undefined },

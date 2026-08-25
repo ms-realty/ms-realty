@@ -182,8 +182,10 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /name="offer_type"/);
   assert.match(searchHtml, /name="price_min"/);
   assert.match(searchHtml, /name="bedrooms_min"/);
-  assert.match(searchHtml, /name="area_min"/);
-  assert.match(searchHtml, /name="area_max"/);
+  // Area is not published for any listing in this catalogue, so the range is
+  // not offered; the panel keeps the filters the inventory can answer.
+  assert.doesNotMatch(searchHtml, /name="area_min"/);
+  assert.doesNotMatch(searchHtml, /name="area_max"/);
   assert.match(searchHtml, /id="sr-geography-options"/);
   assert.match(searchHtml, /id="sr-mobile-geography-options"/);
   assert.match(searchHtml, /data-geography-endpoint="\/api\/geography"/);

@@ -3511,6 +3511,28 @@ export function renderSearchPage({
     if (!selectedFamilies.length) return !familyScopedFacts.has(field);
     return selectedFamilies.every((family) => isFactApplicable(family, field, selectedSubtype));
   };
+  // A facet nothing in the catalogue carries can only ever return an empty
+  // page, because a null value fails every numeric comparison. Offering the
+  // control anyway reads as "no such property exists" rather than "we do not
+  // publish that figure yet", so the control appears when, and only when, some
+  // published listing answers it. The check runs over the whole searchable set
+  // rather than the current results, so narrowing a search never makes a
+  // control disappear under the visitor's hands.
+  const inInventory = (reader) => filterViews.some((listing) => Number.isFinite(Number(reader(listing))));
+  const factInInventory = {
+    bedrooms_count: () => inInventory((listing) => listing.bedrooms ?? listing.bedrooms_count),
+    premises_count: () => inInventory((listing) => listing.premises_count),
+    hotel_room_count: () => inInventory((listing) => listing.hotel_room_count),
+    primary_area_sqm: () => inInventory((listing) => listing.area_sqm ?? listing.primary_area_sqm),
+    land_area_sqm: () => inInventory((listing) => listing.land_area_sqm),
+    floor_number: () => inInventory((listing) => listing.floor ?? listing.floor_number),
+    storeys_count: () => inInventory((listing) => listing.storeys_count),
+  };
+  const inventoryCache = new Map();
+  const published = (fact) => {
+    if (!inventoryCache.has(fact)) inventoryCache.set(fact, factInInventory[fact]());
+    return inventoryCache.get(fact);
+  };
   const applicableFilterFields = [
     "property_subtype",
     "bedrooms_min",
@@ -3530,6 +3552,8 @@ export function renderSearchPage({
       bedrooms_min: "bedrooms_count",
       premises_min: "premises_count",
       hotel_rooms_min: "hotel_room_count",
+      area_min: "primary_area_sqm",
+      area_max: "primary_area_sqm",
       land_area_min: "land_area_sqm",
       land_area_max: "land_area_sqm",
       floor_min: "floor_number",
@@ -3537,7 +3561,8 @@ export function renderSearchPage({
       storeys_min: "storeys_count",
       storeys_max: "storeys_count",
     }[field];
-    return !fact || applicable(fact);
+    if (!fact) return true;
+    return (fact === "primary_area_sqm" || applicable(fact)) && published(fact);
   });
   if (databasePage && (!Number.isSafeInteger(totalMatches) || totalMatches < 0)) {
     throw new Error("Database search page requires a non-negative integer total");
@@ -4649,6 +4674,15 @@ function startEuro(value, localeCode) {
   }
 }
 
+function publishedStartBedrooms(listings, locale) {
+  const published = (Array.isArray(listings) ? listings : [])
+    .filter(isActiveListing)
+    .filter((listing) => listing.locale === locale.code || listing.locale === (locale.fallback_locale || "bg"))
+    .map((listing) => Number(listing.bedrooms ?? listing.bedrooms_count))
+    .filter((value) => Number.isInteger(value) && value >= 0);
+  return START_BEDROOMS.filter((count) => published.some((value) => value >= count));
+}
+
 function startMatchCount(registry, localeCode, listings, params) {
   if (!Array.isArray(listings) || !listings.length) return 0;
   try {
@@ -4794,7 +4828,11 @@ export function renderStartPage({
         search: entry.search,
       })),
       price_presets: START_PRICE_PRESETS,
-      bedrooms: [...START_BEDROOMS],
+      // The wizard promises a shortlist at the end, so it must only ask what
+      // the catalogue can answer. Offering a bedroom count no published listing
+      // carries walks the visitor to "no matching properties yet" and a call to
+      // action that returns nothing.
+      bedrooms: publishedStartBedrooms(listings, locale),
       citizenships: START_CITIZENSHIPS.map((value) => ({
         value,
         label: value === "eu" ? copy.eu : copy.nonEu,

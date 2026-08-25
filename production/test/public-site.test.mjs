@@ -696,6 +696,39 @@ test("search matches Cyrillic listings across Latin and Cyrillic keyboard input"
   assert.ok(cyrillicLatinLocation.search.total_matches > 0);
 });
 
+test("a numeric facet is offered only while some published listing answers it", () => {
+  const asIs = renderSearchPage({ registry, listings, localeCode: "bg" });
+  const withArea = renderSearchPage({
+    registry,
+    listings: listings.map((listing, index) => (index === 0 ? { ...listing, area_sqm: 82 } : listing)),
+    localeCode: "bg",
+  });
+  const withoutBedrooms = renderSearchPage({
+    registry,
+    listings: listings.map((listing) => ({ ...listing, bedrooms: null, bedrooms_count: null })),
+    localeCode: "bg",
+  });
+  const panel = (page) => new Set(page.search.controls.applicable_filter_fields);
+
+  // Nothing in the shipped catalogue publishes an area, a land area, a floor or
+  // a storey count, so none of those ranges is offered.
+  for (const field of ["area_min", "area_max", "land_area_min", "floor_min", "storeys_min"]) {
+    assert.equal(panel(asIs).has(field), false, field);
+  }
+  assert.equal(panel(asIs).has("bedrooms_min"), true);
+  assert.equal(panel(withoutBedrooms).has("bedrooms_min"), false);
+  // One listing with an area is enough to bring the control back, and the
+  // control then returns that listing rather than an empty page.
+  assert.equal(panel(withArea).has("area_min"), true);
+  const filtered = renderSearchPage({
+    registry,
+    listings: listings.map((listing, index) => (index === 0 ? { ...listing, area_sqm: 82 } : listing)),
+    localeCode: "bg",
+    filters: { area_min: "80", area_max: "90" },
+  });
+  assert.equal(filtered.search.total_matches, 1);
+});
+
 test("search paginates without duplicating cards and applies reviewed area facets", () => {
   const withAreas = listings.map((listing, index) => ({ ...listing, area_sqm: 40 + index }));
   const first = renderSearchPage({ registry, listings: withAreas, localeCode: "he", query: "Sandanski", page: 1 });
