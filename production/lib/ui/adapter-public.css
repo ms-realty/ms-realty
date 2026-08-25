@@ -749,12 +749,22 @@ main form label.hp-search__tab { display: inline-flex; gap: 0; }
 .sr-seg {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
+  /* A track can never be narrower than the words in it, so an option keeps its
+     label on one line; the free space beyond that is shared equally, so the
+     control still reads as equal segments whenever the labels do fit. */
+  grid-auto-columns: minmax(max-content, 1fr);
   gap: 4px;
   padding: 4px;
   border-radius: var(--radius-full);
   background: var(--surface-sunken);
+  /* "За продажба" is wider than a third of a narrow filter rail, so the row
+     used to wrap mid-label and burst the pill. It scrolls instead. The 4px
+     inset is deeper than the 3px focus ring, so scrolling never clips it. */
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
 }
+.sr-seg::-webkit-scrollbar { display: none; }
 .sr-seg__option { position: relative; margin: 0; cursor: pointer; }
 main form label.sr-seg__option,
 main form label.sr-pill { display: grid; gap: 0; }
@@ -768,6 +778,7 @@ main form label.sr-pill { display: grid; gap: 0; }
   font-size: var(--text-sm);
   font-weight: var(--fw-semibold);
   text-align: center;
+  white-space: nowrap;
   transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
 }
 .sr-seg__option:hover span { color: var(--text-strong); }
