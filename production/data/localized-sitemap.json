@@ -19,20 +19,20 @@
       "he": 5
     },
     "public": {
-      "listings": 164,
+      "listings": 163,
       "home_pages": 7,
-      "listing_entries": 165,
+      "listing_entries": 164,
       "location_pages": 6,
       "seller_pages": 7,
       "contact_pages": 7,
       "guide_pages": 5,
-      "entries": 197,
+      "entries": 196,
       "byLocale": {
         "bg": 122,
         "en": 5,
         "de": 3,
         "nl": 3,
-        "ru": 56,
+        "ru": 55,
         "el": 3,
         "he": 5
       }
@@ -2701,7 +2701,7 @@
           "href": "/ru/properties/MS-CRAWL-0159"
         }
       ],
-      "public": true
+      "public": false
     },
     {
       "type": "listing",

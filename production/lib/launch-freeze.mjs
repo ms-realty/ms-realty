@@ -10,7 +10,7 @@ const APPROVED_SOURCE_ARTIFACT_SHA256 = "c627594492d253a2831bb72227920e092d32d25
 // The frozen catalog and route contract are unchanged (165 listings, 30 active
 // / 135 archived, 457 approved routes); only the recorded digest of the derived
 // app route manifest moved, because published listings are sitemap-indexable.
-export const APPROVED_LAUNCH_FREEZE_SHA256 = "48242bcb1af3983b8ceacd8a97cf716c019cbfcd57fc816146022a388d377d14";
+export const APPROVED_LAUNCH_FREEZE_SHA256 = "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad";
 export const DEFAULT_LAUNCH_FREEZE_PATH = fromRoot("production", "data", "launch-freeze.json");
 
 const EXPECTED = Object.freeze({

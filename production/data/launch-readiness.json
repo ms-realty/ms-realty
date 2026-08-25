@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T03:10:17.969Z",
+  "generated_at": "2026-08-25T12:00:08.285Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
@@ -94,7 +94,7 @@
           "artifact_id": "20260817-deterministic-launch-freeze",
           "approval_id": "MSR-LAUNCH-FREEZE-1",
           "based_on_commit": "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
-          "source_sha256": "48242bcb1af3983b8ceacd8a97cf716c019cbfcd57fc816146022a388d377d14",
+          "source_sha256": "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad",
           "approved_homepage_redirects": 5,
           "approved_homepage_decisions": 15
         },
@@ -124,20 +124,20 @@
           "he": 5
         },
         "public": {
-          "listings": 164,
+          "listings": 163,
           "home_pages": 7,
-          "listing_entries": 165,
+          "listing_entries": 164,
           "location_pages": 6,
           "seller_pages": 7,
           "contact_pages": 7,
           "guide_pages": 5,
-          "entries": 197,
+          "entries": 196,
           "byLocale": {
             "bg": 122,
             "en": 5,
             "de": 3,
             "nl": 3,
-            "ru": 56,
+            "ru": 55,
             "el": 3,
             "he": 5
           }
@@ -287,7 +287,7 @@
         "mode": "operator_publication_of_freeze_active",
         "path": "production/data/listing-publication-approval.json",
         "approval_id": "MSR-LISTING-PUBLICATION-1",
-        "freeze_sha256": "48242bcb1af3983b8ceacd8a97cf716c019cbfcd57fc816146022a388d377d14",
+        "freeze_sha256": "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad",
         "freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
         "approved_by": "agency_owner",
         "approved_at": "2026-08-24T00:00:00.000Z",
@@ -304,8 +304,8 @@
           "archived_listings": 135,
           "scope": "full_freeze_catalog",
           "catalog_listing_ids": 165,
-          "published_listing_ids": 164,
-          "excluded_listing_ids": 1,
+          "published_listing_ids": 163,
+          "excluded_listing_ids": 2,
           "source_locales_only": true
         }
       }

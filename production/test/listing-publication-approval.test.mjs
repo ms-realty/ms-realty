@@ -41,15 +41,15 @@ test("the owner's full-catalog approval names every catalogued listing", () => {
   // one exclusion with its reason; named plus excluded still accounts for all.
   assert.deepEqual(
     approval.listing_ids,
-    catalogIds.filter((id) => id !== "MS-CRAWL-0127"),
+    catalogIds.filter((id) => id !== "MS-CRAWL-0127" && id !== "MS-CRAWL-0159"),
   );
-  assert.equal(approval.excluded_listings.length, 1);
-  assert.equal(approval.excluded_listings[0].id, "MS-CRAWL-0127");
-  assert.match(approval.excluded_listings[0].reason, /no location relation/);
+  assert.equal(approval.excluded_listings.length, 2);
+  assert.deepEqual(approval.excluded_listings.map((entry) => entry.id).sort(), ["MS-CRAWL-0127", "MS-CRAWL-0159"]);
+  for (const entry of approval.excluded_listings) assert.match(entry.reason, /no location relation/);
   // The narrower freeze-active scope stays a strict subset of the approved set.
   assert.equal(freezeActiveListingIds(freeze).every((id) => approval.listing_ids.includes(id)), true);
   assert.equal(hasOperatorPublicationListingEvidence(operatorPublicationListingEvidence(freeze)), true);
-  assert.equal(operatorPublishedListingIds(freeze).length, 164);
+  assert.equal(operatorPublishedListingIds(freeze).length, 163);
 });
 
 test("full-catalog publication must account for every catalogued listing", () => {
