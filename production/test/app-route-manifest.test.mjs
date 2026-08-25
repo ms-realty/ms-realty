@@ -16,6 +16,7 @@ import {
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLegacyArchive } from "../lib/legacy-archive.mjs";
+import { absolutePublicUrl } from "../lib/public-origin.mjs";
 import { publicSeedFor } from "../lib/public-inventory.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { approvedPublicSeedFixtureEnv, durableLeadStoreFixtureEnv } from "./approved-public-seed.fixture.mjs";
@@ -428,7 +429,7 @@ test("App Router exposes only opaque noindex legacy archive captures", async () 
   assert.equal(archive.rendered.kind, "legacy_archive");
   assert.equal(archive.rendered.indexable, false);
   assert.match(archive.html, /<meta name="robots" content="noindex,nofollow">/);
-  assert.match(archive.html, new RegExp(`<link rel="canonical" href="${entry.archive_id}">`.replace(entry.archive_id, pathname)));
+  assert.ok(archive.html.includes(`<link rel="canonical" href="${absolutePublicUrl(pathname)}">`));
   assert.match(archive.html, /data-react-public-ui="legacy-archive"/);
   assert.match(archive.html, /data-legacy-archive-source="true"/);
   assert.doesNotMatch(archive.html, /data-approved-source="cms"/);

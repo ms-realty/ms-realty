@@ -9,6 +9,7 @@ import { fromRoot } from "../lib/paths.mjs";
 import { renderStartPage, startSearchParams } from "../lib/public-site.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { renderHtmlPage, assertHtmlPage } from "../lib/html.mjs";
+import { absolutePublicUrl } from "../lib/public-origin.mjs";
 import { loadCmsSeed, renderRuntimePath } from "../lib/runtime.mjs";
 import { normalizeSearchRequest } from "../lib/search-request.mjs";
 import { hreflangForStart, startPath } from "../lib/seo.mjs";
@@ -367,8 +368,8 @@ test("the rendered document keeps the public shell in RTL", () => {
   const page = render("he", ANSWERED);
   const html = renderHtmlPage(page, { bodyHtml: renderReactPublicBody(page) });
   assert.equal(assertHtmlPage(html, { lang: "he", dir: "rtl", kind: "start" }), true);
-  assert.match(html, /<link rel="canonical" href="\/he\/start">/);
-  assert.match(html, /hreflang="x-default" href="\/bg\/nachalo"/);
+  assert.ok(html.includes(`<link rel="canonical" href="${absolutePublicUrl("/he/start")}">`));
+  assert.ok(html.includes(`hreflang="x-default" href="${absolutePublicUrl("/bg/nachalo")}"`));
   assert.match(html, /<meta name="robots" content="noindex,follow">/);
 });
 

@@ -5,6 +5,7 @@ import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { publicMediaLibrary } from "../lib/media.mjs";
+import { absolutePublicUrl } from "../lib/public-origin.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { applyListingEdits } from "../lib/listing-edits.mjs";
 import { listingFromCmsRecord, loadCmsSeed } from "../lib/runtime.mjs";
@@ -227,7 +228,10 @@ test("listing SEO includes approved hreflang and excludes unavailable draft loca
   assert.equal(hreflangCodes.includes("fr"), false);
   assert.equal(hreflangCodes.includes("de"), false);
   assert.equal(page.schema["@type"], "RealEstateListing");
-  assert.equal(page.schema.url, page.canonical);
+  // The node still names the canonical page, but as a global identifier: a
+  // relative url/@id cannot be linked to or deduplicated across the site.
+  assert.equal(page.schema.url, absolutePublicUrl(page.canonical));
+  assert.equal(page.schema["@id"], `${absolutePublicUrl(page.canonical)}#listing`);
 });
 
 test("reviewed listing facts, privacy, verification, and SEO reach the public listing", () => {

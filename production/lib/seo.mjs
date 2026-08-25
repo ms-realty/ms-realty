@@ -8,6 +8,53 @@ export const PUBLIC_LOCATION_SCOPES = Object.freeze({
   Hotovo: { settlement_ekatte: "77361" },
 });
 
+// Google rewrites or hard-truncates a snippet past roughly 155-160 characters,
+// so a description longer than this is not a sales pitch, it is an arbitrary
+// mid-sentence fragment chosen by the search engine.
+export const META_DESCRIPTION_LIMIT = 160;
+
+// Trailing connectors, in every language the site publishes. A snippet that
+// ends "…апартамент в…" or "…the property with…" reads as broken, and the word
+// carries no meaning without what follows it. Anything of three characters or
+// fewer is dropped for the same reason, which covers в, на, за, от, до, по, и,
+// of, to, in, at, σε, με, של and their neighbours without listing them all.
+const DANGLING_CONNECTORS = new Set([
+  // bg / ru
+  "или", "като", "след", "около", "върху", "между", "срещу", "заедно", "если", "перед", "через",
+  // en
+  "and", "the", "with", "from", "into", "near", "that", "this", "your", "such", "than", "onto", "upon",
+  "about", "after", "before", "under", "over", "within", "without", "through", "during", "against",
+  "between", "including",
+  // de
+  "und", "der", "die", "das", "mit", "für", "vom", "zum", "beim",
+  // nl
+  "van", "het", "een", "met", "voor", "naar",
+  // el
+  "και", "στο", "στη", "από", "για",
+  // he
+  "של", "עם", "על", "אל", "מן",
+]);
+
+function isDangling(token) {
+  return token.length <= 3 || DANGLING_CONNECTORS.has(token.toLowerCase());
+}
+
+// Word-boundary truncation that leaves the snippet a readable sentence
+// fragment. Operates on whole tokens, never on code units, so Cyrillic, Greek
+// and Hebrew survive intact.
+export function metaDescription(value, { limit = META_DESCRIPTION_LIMIT } = {}) {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  if (text.length <= limit) return text;
+
+  const tokens = text.slice(0, limit - 1).split(" ");
+  // The cut landed inside the last token unless it landed exactly on a space.
+  if (text[limit - 1] !== " ") tokens.pop();
+  while (tokens.length > 1 && isDangling(tokens[tokens.length - 1].replace(/[^\p{L}\p{N}]+$/u, ""))) tokens.pop();
+
+  const truncated = tokens.join(" ").replace(/[\s,;:.!?·—–-]+$/u, "");
+  return truncated ? `${truncated}…` : `${text.slice(0, limit - 1)}…`;
+}
+
 function listingField(listing, field) {
   return listing[field] ?? listing.facts?.[field] ?? "";
 }

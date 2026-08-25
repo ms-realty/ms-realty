@@ -25,6 +25,8 @@ import {
   localeAlternatesForCompare,
   locationPath,
   matchesPublicLocationScope,
+  META_DESCRIPTION_LIMIT,
+  metaDescription,
   publicLocationNames,
   PUBLIC_LOCATION_SCOPES,
   sellerPath,
@@ -75,6 +77,7 @@ import { readThroughCached } from "./file-cache.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { mediaUploadLimitsFromEnv } from "./media-uploads.mjs";
 import { isPublicBrokerContact } from "./broker-contacts.mjs";
+import { absolutePublicUrl } from "./public-origin.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
 import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable } from "./listing-facts.mjs";
@@ -2783,7 +2786,9 @@ function localizedCopy(localeCode, view) {
 function guideDescription(documents) {
   const facts = documents.flatMap((doc) => doc.facts || []);
   const description = facts.join(" ");
-  return documents.length === 1 && description.length > 240 ? facts[0] : description.slice(0, 240);
+  // A single-document guide prefers its own opening fact to a joined blur; the
+  // cap applies either way, on a word boundary rather than mid-word.
+  return metaDescription(documents.length === 1 && description.length > META_DESCRIPTION_LIMIT ? facts[0] : description);
 }
 
 function approvedGuideLinksFor(localeCode, currentPath = null) {
@@ -2807,7 +2812,7 @@ function guideSchema({ path, locale, documents }) {
     "@type": "Article",
     headline: first.title,
     inLanguage: locale.code,
-    url: path,
+    url: absolutePublicUrl(path),
     publisher: {
       "@type": "Organization",
       name: "MS Realty",
@@ -3296,7 +3301,11 @@ export function renderListingPage({
   const sourceSeo = locale.code === view.source_locale && view.seo?.human_approved === true ? view.seo : {};
   const canonical = sourceSeo.canonical_override === path ? sourceSeo.canonical_override : path;
   const metadataTitle = sourceSeo.title || copy.title;
-  const metadataDescription = sourceSeo.description || copy.description;
+  // The head snippet is capped; the structured data keeps the whole approved
+  // text, because schema.org has no length policy and truncating it would throw
+  // away a fact the agency actually published.
+  const listingDescription = sourceSeo.description || copy.description;
+  const metadataDescription = metaDescription(listingDescription);
   const publicMedia = publicMediaLibrary(view.media, {
     fallback: view.thumbnail_url
       ? {
@@ -3330,7 +3339,7 @@ export function renderListingPage({
     },
     hreflang,
     chrome: publicChrome(registry, locale, { hreflang, active: "listing" }),
-    schema: buildListingSchema({ path: canonical, view, copy: { ...copy, title: metadataTitle, description: metadataDescription }, publicMedia }),
+    schema: buildListingSchema({ path: canonical, view, copy: { ...copy, title: metadataTitle, description: listingDescription }, publicMedia }),
     translation: {
       locale: translation?.locale || locale.code,
       status: translation?.status || "missing",
