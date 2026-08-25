@@ -30,7 +30,7 @@ test("approved launch freeze drives every legacy response and the owner-publishe
   // approved terminal path now serves the real listing instead of the
   // preservation stand-in - archived-at-freeze rows included.
   const states = { active: 0, archived: 0 };
-  const excludedIds = new Set(["MS-CRAWL-0127"]);
+  const excludedIds = new Set(["MS-CRAWL-0127", "MS-CRAWL-0159"]);
   for (const entry of contract.catalog) {
     if (excludedIds.has(entry.listing_id || entry.id)) {
       // The recorded exclusion keeps its preservation page: no location and no
@@ -52,12 +52,12 @@ test("approved launch freeze drives every legacy response and the owner-publishe
   }
   // 164 full listing pages: the excluded archived row keeps its preservation
   // page and is counted separately above.
-  assert.deepEqual(states, { active: 30, archived: 134 });
+  assert.deepEqual(states, { active: 30, archived: 133 });
 
   const publicSeed = publicSeedFor(loadCmsSeed());
   const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), publicSeed, []);
   const sitemapPaths = new Set(sitemap.entries.map((entry) => entry.loc));
-  assert.equal(publicSeed.records.filter((record) => record.collection === "listings").length, 164);
+  assert.equal(publicSeed.records.filter((record) => record.collection === "listings").length, 163);
   // Every publicly served catalog route is in the sitemap; the excluded
   // preservation-only route is deliberately not indexed.
   const publiclyServed = contract.catalog.filter((entry) => !excludedIds.has(entry.listing_id || entry.id));

@@ -827,7 +827,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
       artifact_id: "20260817-deterministic-launch-freeze",
       approval_id: "MSR-LAUNCH-FREEZE-1",
       based_on_commit: "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
-      source_sha256: "48242bcb1af3983b8ceacd8a97cf716c019cbfcd57fc816146022a388d377d14",
+      source_sha256: "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad",
       approved_homepage_redirects: 5,
       approved_homepage_decisions: 15,
     },
@@ -857,8 +857,8 @@ test("launch readiness stays blocked until production launch blockers are cleare
     archived_listings: 135,
     scope: "full_freeze_catalog",
     catalog_listing_ids: 165,
-    published_listing_ids: 164,
-    excluded_listing_ids: 1,
+    published_listing_ids: 163,
+    excluded_listing_ids: 2,
     source_locales_only: true,
   });
   assert.equal(listingGate.evidence.reason, "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.");
