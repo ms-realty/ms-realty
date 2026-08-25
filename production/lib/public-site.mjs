@@ -34,6 +34,7 @@ import {
   startPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
+import { savedSearchWritesDisabledFromEnv } from "./runtime-data-boundary.mjs";
 import { isLeadDurableStoreEnabled, leadDurableStoreConfigFromEnv } from "./lead-durable-store.mjs";
 import {
   geographyRegistryAncestors,
@@ -2708,6 +2709,7 @@ function publicChrome(
     currentPath = null,
     languageRoute = null,
     leadWritesDisabled = leadWritesDisabledFromEnv(),
+    savedSearchWritesDisabled = savedSearchWritesDisabledFromEnv(),
   } = {},
 ) {
   const copy = chromeCopyFor(locale.code);
@@ -2727,6 +2729,11 @@ function publicChrome(
   return {
     copy,
     lead_writes_disabled: leadWritesDisabled,
+    // The saved-search endpoint has its own availability: it is a file-backed
+    // public mutation, so a runtime whose authority is Payload refuses it. A
+    // form the endpoint will always reject must not be offered as if it works.
+    saved_search_writes_disabled: savedSearchWritesDisabled,
+    form_unavailable: contactCopy(locale.code).form_unavailable,
     home: { href: homePath(registry, locale.code), label: "MS Realty" },
     nav: [
       { id: "buy", href: searchBase, label: copy.navBuy, active: active === "search" || active === "listing" || active === "location" },
@@ -3453,6 +3460,7 @@ export function renderSearchPage({
   view = "list",
   databasePage = false,
   totalMatches = null,
+  savedSearchWritesDisabled = savedSearchWritesDisabledFromEnv(),
 }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -3676,6 +3684,7 @@ export function renderSearchPage({
     chrome: publicChrome(registry, locale, {
       active: savedView ? "saved" : "search",
       languageRoute: { key: "search", query: languageQueryString ? `?${languageQueryString}` : "" },
+      savedSearchWritesDisabled,
     }),
     search: {
       saved_view: savedView === true,
@@ -4783,6 +4792,7 @@ export function renderStartPage({
   listings = [],
   searchParams = null,
   leadWritesDisabled = leadWritesDisabledFromEnv(),
+  savedSearchWritesDisabled = savedSearchWritesDisabledFromEnv(),
 } = {}) {
   assertStartAreas();
   const resolved = resolvePublicLocale(registry, localeCode);
@@ -4838,7 +4848,7 @@ export function renderStartPage({
       robots: resolved.available && !answered ? "index,follow" : "noindex,follow",
     },
     hreflang,
-    chrome: publicChrome(registry, locale, { hreflang, active: "start", leadWritesDisabled }),
+    chrome: publicChrome(registry, locale, { hreflang, active: "start", leadWritesDisabled, savedSearchWritesDisabled }),
     body: {
       h1: copy.h1,
       intro: copy.intro,

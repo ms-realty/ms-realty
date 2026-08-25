@@ -1696,7 +1696,9 @@ function StartBody({ page }) {
 
   // Saved-search alerts (existing /api/saved-searches contract). The channel
   // select swaps the contact field through the shared initSavedSearchContacts.
-  const alertPanel = alertConfig
+  // The wizard opens this panel by itself when a search returns nothing, so an
+  // endpoint that cannot accept the alert must not be offered as the way out.
+  const alertPanel = alertConfig && !page.chrome?.saved_search_writes_disabled
     ? h(
         "details",
         { className: "st-alert", "data-start-alert": "true", open: zeroMatches ? true : undefined },
@@ -1799,7 +1801,16 @@ function StartBody({ page }) {
           ),
         ),
       )
-    : null;
+    : alertConfig
+      ? h(
+          "div",
+          { className: "st-unavailable", "data-start-alert-unavailable": "true", "data-form-unavailable": "true" },
+          h("p", null, page.chrome?.form_unavailable || ""),
+          body.contact_channels
+            ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "phone", href: body.contact_channels.phone.href }, body.contact_channels.phone.label)
+            : null,
+        )
+      : null;
 
   // A viewing trip is a request a broker arranges, so the control opens a real
   // form. Entries that still have no backend keep the disabled control and the
@@ -2298,6 +2309,7 @@ function SearchBody({ page }) {
   const applicableFilterFields = new Set(controls.applicable_filter_fields || []);
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
   const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
+  const contact = chrome.contact || {};
   const filtersLabel = chrome.copy.filters || labels.activeFilters;
   const offerLabel = labels.factLabels?.offer_type || "Offer";
   const secondaryFilterKeys = ["country_code", "region_id", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min"];
@@ -2613,8 +2625,28 @@ function SearchBody({ page }) {
         activeFilterCount ? h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "x", href: searchHref(page, "*") }, labels.clearFilters) : null,
       ),
     );
-  const saveSearchForm = (idPrefix) =>
+  // The endpoint answers 503 whenever the runtime has no durable authority for
+  // it, and the client turns any failure into "try again", which here is advice
+  // that cannot ever work. Rather than take a name, an email and a consent tick
+  // and lose them, offer the channels that do answer.
+  const saveSearchUnavailable = (idPrefix) =>
     h(
+      "div",
+      { className: "sr-save sr-save--unavailable", "data-save-search-unavailable": idPrefix, "data-form-unavailable": "true" },
+      h("p", null, page.chrome?.form_unavailable || ""),
+      contact.phone
+        ? h(
+            Btn,
+            { tag: "a", variant: "secondary", size: "lg", full: true, iconStart: "phone", href: `tel:${contact.phone}` },
+            contact.phone_display || contact.phone,
+          )
+        : null,
+      contact.email ? h("p", { className: "sr-save__channel" }, h("a", { href: `mailto:${contact.email}` }, contact.email)) : null,
+    );
+  const saveSearchForm = (idPrefix) =>
+    page.chrome?.saved_search_writes_disabled
+      ? saveSearchUnavailable(idPrefix)
+      : h(
       "form",
       {
         className: "sr-save",

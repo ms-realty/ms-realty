@@ -22,6 +22,7 @@ import {
   renderLocationPage,
   renderSearchPage,
   renderSellerPage,
+  renderStartPage,
 } from "../lib/public-site.mjs";
 import { CANONICAL_PROPERTY_FAMILIES } from "../lib/listing-facts.mjs";
 
@@ -724,6 +725,33 @@ test("search matches Cyrillic listings across Latin and Cyrillic keyboard input"
 
   assert.ok(latinRussianTitle.cards.some((card) => card.id === "MS-CRAWL-0114"));
   assert.ok(cyrillicLatinLocation.search.total_matches > 0);
+});
+
+test("the save-search form is withdrawn when its endpoint cannot accept a search", () => {
+  const offered = renderReactPublicBody(
+    renderSearchPage({ registry, listings, localeCode: "bg", savedSearchWritesDisabled: false }),
+  );
+  const withdrawn = renderReactPublicBody(
+    renderSearchPage({ registry, listings, localeCode: "bg", savedSearchWritesDisabled: true }),
+  );
+  const wizardOffered = renderReactPublicBody(
+    renderStartPage({ registry, listings, localeCode: "bg", savedSearchWritesDisabled: false }),
+  );
+  const wizardWithdrawn = renderReactPublicBody(
+    renderStartPage({ registry, listings, localeCode: "bg", savedSearchWritesDisabled: true }),
+  );
+
+  assert.match(offered, /action="\/api\/saved-searches"/);
+  assert.doesNotMatch(withdrawn, /action="\/api\/saved-searches"/);
+  assert.doesNotMatch(withdrawn, /name="alertConsent"/);
+  assert.match(withdrawn, /data-save-search-unavailable="sr"/);
+  assert.match(withdrawn, /data-save-search-unavailable="sr-mobile"/);
+  assert.match(withdrawn, /Формата е временно недостъпна/);
+  assert.match(withdrawn, /href="tel:\+359879696870"/);
+
+  assert.match(wizardOffered, /data-start-alert-form="true"/);
+  assert.doesNotMatch(wizardWithdrawn, /data-start-alert-form="true"/);
+  assert.match(wizardWithdrawn, /data-start-alert-unavailable="true"/);
 });
 
 test("a numeric facet is offered only while some published listing answers it", () => {

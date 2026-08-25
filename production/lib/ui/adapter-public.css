@@ -886,6 +886,8 @@ main .sr-geography-combobox > input[type="search"][role="combobox"][aria-autocom
 .sr-save .sr-fg { padding: 0; border: 0; }
 .sr-save__consent { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--space-2); min-height: 44px; color: var(--text-muted); font-size: var(--text-sm); line-height: var(--lh-snug); }
 .sr-save__consent input { width: 20px; height: 20px; margin: 1px 0 0; }
+.sr-save--unavailable p { margin: 0; color: var(--text-body); font-size: var(--text-sm); line-height: var(--lh-normal); }
+.sr-save__channel { text-align: center; }
 .sr-save-disclosure { margin-top: var(--space-2); border-top: 1px solid var(--border); }
 .sr-save-disclosure > summary {
   display: grid;
