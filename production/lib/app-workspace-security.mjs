@@ -1,4 +1,5 @@
 import { createHttpApp } from "./http.mjs";
+import { signInGuardConfigFromEnv } from "./admin-sign-in-guard.mjs";
 import { DEFAULT_ADMIN_SESSION_LEDGER_PATH } from "./admin-sessions.mjs";
 import { DEFAULT_OPERATOR_TWO_FACTOR_PATH } from "./operator-two-factor.mjs";
 import { DEFAULT_WORKSPACE_EXPORT_DIR, DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
@@ -6,18 +7,21 @@ import { DEFAULT_AUDIT_LOG_PATH } from "./audit-log.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH } from "./lead-ledger.mjs";
 import { DEFAULT_WORKSPACE_SETTINGS_PATH } from "./workspace-settings.mjs";
 
-// App Router handoff for the workspace security and data routes.
+// App Router handoff for the workspace security, data and sign-in routes.
 //
-// The Next admin adapter reimplements each admin route by hand. These ten were
+// The Next admin adapter reimplements each admin route by hand. These were
 // deliberately not copied there: authentication code that exists twice drifts,
 // and the half that drifts is the half nobody notices. The App Router routes
 // delegate to the one implementation in http.mjs instead, so the second-factor
-// gate, the server-side session revocation check and the export redaction are
-// byte-identical on both runtimes.
+// gate, the sign-in throttle, the server-side session revocation check and the
+// export redaction are byte-identical on both runtimes.
 
 const MAX_BODY_BYTES = 10 * 1024 * 1024;
-let cachedApp = null;
-let cachedKey = "";
+// Small enough to stay honest about memory, large enough that the runtime and
+// a test injecting its own auth service never evict each other. The entries
+// hold the sign-in throttle's counters, so churn here would forget failures.
+const APP_CACHE_LIMIT = 4;
+const appCache = [];
 
 function appConfig(env) {
   return {
@@ -33,17 +37,38 @@ function appConfig(env) {
     workspaceExportTtlSeconds: env.MS_REALTY_WORKSPACE_EXPORT_TTL_SECONDS,
     auditRetentionWindowDays: env.MS_REALTY_AUDIT_RETENTION_DAYS,
     runtimeDataDurableOnly: env.NODE_ENV === "production" && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload",
+    // The sign-in throttle needs to know whether a forwarded client address
+    // may be believed; behind Cloudflare it may, and the deployment says so.
+    trustProxy: env.MS_REALTY_TRUST_PROXY === "1",
+    signInRateLimit: signInGuardConfigFromEnv(env),
   };
 }
 
-function workspaceSecurityApp(env) {
-  const config = appConfig(env);
-  const key = JSON.stringify(config);
-  if (!cachedApp || cachedKey !== key) {
-    cachedApp = createHttpApp(config);
-    cachedKey = key;
+function sameFunctions(left, right) {
+  const names = new Set([...Object.keys(left), ...Object.keys(right)]);
+  for (const name of names) if (left[name] !== right[name]) return false;
+  return true;
+}
+
+// One app per distinct configuration. Values that serialize identify the
+// entry; injected functions (an auth service, a pinned clock) are compared by
+// reference, because a caller that keeps the same service must keep the same
+// app or the throttle's memory resets on every request.
+function workspaceSecurityApp(env, overrides = null) {
+  const config = { ...appConfig(env), ...(overrides || {}) };
+  const plain = {};
+  const functions = {};
+  for (const [name, value] of Object.entries(config)) {
+    if (typeof value === "function") functions[name] = value;
+    else plain[name] = value;
   }
-  return cachedApp;
+  const key = JSON.stringify(plain);
+  const hit = appCache.find((entry) => entry.key === key && sameFunctions(entry.functions, functions));
+  if (hit) return hit.app;
+  const app = createHttpApp(config);
+  appCache.unshift({ key, functions, app });
+  if (appCache.length > APP_CACHE_LIMIT) appCache.length = APP_CACHE_LIMIT;
+  return app;
 }
 
 async function bodyText(request) {
@@ -57,7 +82,7 @@ async function bodyText(request) {
   return text;
 }
 
-export async function renderAppWorkspaceSecurityResponse(request, { env = process.env } = {}) {
+export async function renderAppWorkspaceSecurityResponse(request, { env = process.env, overrides = null } = {}) {
   let body;
   try {
     body = await bodyText(request);
@@ -69,7 +94,7 @@ export async function renderAppWorkspaceSecurityResponse(request, { env = proces
     });
   }
   const url = new URL(request.url);
-  const result = await workspaceSecurityApp(env)({
+  const result = await workspaceSecurityApp(env, overrides)({
     method: request.method,
     url: `${url.pathname}${url.search}`,
     headers: Object.fromEntries(request.headers.entries()),

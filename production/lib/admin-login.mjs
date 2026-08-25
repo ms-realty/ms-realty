@@ -48,6 +48,7 @@ const LOGIN_COPY = {
     submitting: "Влизане…",
     error: "Данните не бяха приети. Провери имейла и паролата и опитай отново.",
     errorTwoFactor: "Кодът от приложението не беше приет. Опитай пак с нов код.",
+    errorThrottled: "Твърде много неуспешни опита от тази връзка. Изчакай няколко минути и опитай отново.",
     code: "Код от приложението",
     codeOptional: "(само ако си включил двуфакторна защита)",
     showPassword: "Покажи паролата",
@@ -67,6 +68,7 @@ const LOGIN_COPY = {
     submitting: "Входим…",
     error: "Данные не приняты. Проверь почту и пароль и попробуй снова.",
     errorTwoFactor: "Код из приложения не принят. Попробуй снова с новым кодом.",
+    errorThrottled: "Слишком много неудачных попыток с этого соединения. Подожди несколько минут и попробуй снова.",
     code: "Код из приложения",
     codeOptional: "(только если включена двухфакторная защита)",
     showPassword: "Показать пароль",
@@ -86,6 +88,7 @@ const LOGIN_COPY = {
     submitting: "Signing in…",
     error: "Those details were not accepted. Check the email address and password, then try again.",
     errorTwoFactor: "The authenticator code was not accepted. Try again with a fresh code.",
+    errorThrottled: "Too many failed attempts from this connection. Wait a few minutes, then try again.",
     code: "Authenticator code",
     codeOptional: "(only if you turned on two-factor protection)",
     showPassword: "Show password",
@@ -317,17 +320,24 @@ const ALERT_ICON =
 const SPINNER_ICON =
   '<svg class="login__spinner" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
 
-// B6 workspace security and data: `error` is either a truthy generic flag or
-// the literal "2fa", which is what /admin/login redirects with when the
-// password was right but the operator's second factor was not supplied or not
-// accepted. A plain refusal still says nothing about which half failed.
+// B6 workspace security and data: `error` is a truthy generic flag, the
+// literal "2fa", which is what /admin/login redirects with when the password
+// was right but the operator's second factor was not supplied or not
+// accepted, or the literal "throttled", which the sign-in guard answers with
+// when this address has failed too often. A plain refusal still says nothing
+// about which half failed.
+const LOGIN_STATES = { "2fa": "error-2fa", throttled: "error-throttled" };
+
 export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
   const active = ADMIN_LOGIN_LOCALES.includes(locale) ? locale : "bg";
   const copy = LOGIN_COPY[active];
+  const message = error === "2fa" ? copy.errorTwoFactor : error === "throttled" ? copy.errorThrottled : copy.error;
   const errorBanner = error
-    ? `<p class="login__error" id="admin-login-error" role="alert">${ALERT_ICON}<span>${escapeHtml(error === "2fa" ? copy.errorTwoFactor : copy.error)}</span></p>`
+    ? `<p class="login__error" id="admin-login-error" role="alert">${ALERT_ICON}<span>${escapeHtml(message)}</span></p>`
     : "";
-  const describedBy = error ? ' aria-describedby="admin-login-error"' : "";
+  // A throttle is about the connection, not about either field, so it marks
+  // neither one as the thing to correct.
+  const describedBy = error && error !== "throttled" ? ' aria-describedby="admin-login-error"' : "";
   const credentialDescribedBy = error === "2fa" ? "" : describedBy;
   const codeDescribedBy = error === "2fa" ? describedBy : "";
   const locales = ADMIN_LOGIN_LOCALES.map((code) => {
@@ -348,7 +358,7 @@ export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
 <link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">
 <style>${LOGIN_STYLE}</style>
 </head>
-<body class="login-page" data-login-state="${error ? (error === "2fa" ? "error-2fa" : "error") : "idle"}" data-admin-login-locale="${active}">
+<body class="login-page" data-login-state="${error ? LOGIN_STATES[error] || "error" : "idle"}" data-admin-login-locale="${active}">
 <main class="login" aria-labelledby="admin-login-title">
   <div class="login__top">
     <p class="login__brand"><img src="${LOGO_URL}" alt="MS Realty" height="40" width="${Math.round(40 * LOGO_ASPECT)}"></p>

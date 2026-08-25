@@ -16,14 +16,15 @@ import {
 import { operatorAgentConfigBlock, operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
 import {
   adminSessionClearCookie,
-  adminSessionSetCookie,
   adminTokenFromCookie,
-  renderAdminLoginPage,
 } from "./admin-login.mjs";
 // B6 workspace security and data: the payload the Settings screen renders its
 // Security and Data sections from. The routes themselves are served by
-// app-workspace-security.mjs, which delegates to the one implementation.
+// app-workspace-security.mjs, which delegates to the one implementation —
+// and so, now, are /admin/login and /admin/logout.
 import { buildWorkspaceSecurityView } from "./workspace-security-view.mjs";
+import { renderAppWorkspaceSecurityResponse } from "./app-workspace-security.mjs";
+import { CSP_HEADER } from "./security-headers.mjs";
 import {
   DEFAULT_ADMIN_SESSION_LEDGER_PATH,
   adminSessionFingerprint,
@@ -410,7 +411,17 @@ const SECURITY_HEADERS = {
   "x-frame-options": "DENY",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
 };
-const PRIVATE_HTML_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/html; charset=utf-8", "cache-control": "no-store" };
+// The policy belongs on documents, not on JSON or a CSV download, so it joins
+// the HTML headers rather than SECURITY_HEADERS — the same split http.mjs
+// makes. The workbench needs nothing this policy forbids: every script and
+// stylesheet is same-origin or inline, every fetch is a relative path, and the
+// only third-party origins are the two Google Fonts hosts the policy names.
+const PRIVATE_HTML_HEADERS = {
+  ...SECURITY_HEADERS,
+  ...CSP_HEADER,
+  "content-type": "text/html; charset=utf-8",
+  "cache-control": "no-store",
+};
 const PRIVATE_JSON_HEADERS = {
   ...SECURITY_HEADERS,
   "content-type": "application/json; charset=utf-8",
@@ -680,6 +691,30 @@ async function configuredPayloadAdminAuth(config) {
   const configured = config.payloadAdminAuth;
   if (!configured) return null;
   return typeof configured === "function" ? configured() : configured;
+}
+
+// What /admin/login and /admin/logout need from this adapter's configuration
+// when they are answered by the shared runtime. Everything else that runtime
+// reads it derives from the environment itself; forwarding only these keeps a
+// caller that pins a ledger, a clock or an auth service — a test, or a future
+// runtime — pinning it for the sign-in path too.
+const ADMIN_AUTH_CONFIG_KEYS = [
+  "adminSessionLedgerPath",
+  "auditLogPath",
+  "nowSeconds",
+  "operatorTwoFactorKey",
+  "operatorTwoFactorPath",
+  "payloadAdminAuth",
+  "runtimeDataDurableOnly",
+  "securityAt",
+  "signInRateLimit",
+  "trustProxy",
+];
+
+function adminAuthOverrides(config = {}) {
+  const overrides = {};
+  for (const key of ADMIN_AUTH_CONFIG_KEYS) if (config[key] !== undefined) overrides[key] = config[key];
+  return overrides;
 }
 
 function listingEditorPath(listingId) {
@@ -3581,67 +3616,17 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
   };
   const requestPath = new URL(request.url, "http://localhost").pathname;
   const htmlResponse = (payload) => renderAdminHtmlResponse(withWorkspaceSettings(payload, config));
-  if (requestPath === "/admin/login") {
-    if (request.method === "GET") {
-      let session = null;
-      if (sessionToken) {
-        try {
-          session = await (await payloadAdminAuth())?.resolve(sessionToken);
-        } catch {
-          session = null;
-        }
-      }
-      if ((authHeader && resolveAdminPrincipal(authHeader, authEnv)) || session?.principal) {
-        return new Response(null, { status: 303, headers: { location: "/admin", "cache-control": "no-store" } });
-      }
-      const loginUrl = new URL(request.url, "http://localhost");
-      const error = loginUrl.searchParams.get("error") === "1";
-      return new Response(renderAdminLoginPage({ error, locale: loginUrl.searchParams.get("locale") || "bg" }), {
-        status: 200,
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "cache-control": "no-store",
-          "x-robots-tag": "noindex, nofollow",
-          ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
-        },
-      });
-    }
-    if (request.method === "POST") {
-      try {
-        const service = await payloadAdminAuth();
-        if (!service) throw new Error("Payload admin authentication is unavailable");
-        const form = new URLSearchParams(await readRequestBody(request, config.maxBodyBytes));
-        const login = await service.login({ email: form.get("email"), password: form.get("password") });
-        const nowSeconds = typeof config.nowSeconds === "function" ? config.nowSeconds() : Math.floor(Date.now() / 1000);
-        const maxAgeSeconds = Math.floor(Number(login.exp) - nowSeconds);
-        if (!login.token || maxAgeSeconds <= 0) throw new Error("Payload returned an expired session");
-        return new Response(null, {
-          status: 303,
-          headers: {
-            location: "/admin",
-            "set-cookie": adminSessionSetCookie(login.token, { maxAgeSeconds }),
-            "cache-control": "no-store",
-          },
-        });
-      } catch {
-        return new Response(null, { status: 303, headers: { location: "/admin/login?error=1", "cache-control": "no-store" } });
-      }
-    }
-    return new Response("Method not allowed", { status: 405, headers: { allow: "GET, POST" } });
-  }
-  if (requestPath === "/admin/logout" && request.method === "POST") {
-    if (sessionToken) {
-      try {
-        await (await payloadAdminAuth())?.logout(sessionToken);
-      } catch {
-        // Clearing the browser cookie still terminates this browser session;
-        // the short-lived Payload token expires even if Postgres is unavailable.
-      }
-    }
-    return new Response(null, {
-      status: 303,
-      headers: { location: "/admin/login", "set-cookie": adminSessionClearCookie(), "cache-control": "no-store" },
-    });
+  // The door to the workbench is not reimplemented here. This adapter used to
+  // carry its own copy of /admin/login, and that copy had quietly lost the
+  // second-factor gate: it read the email and the password out of the form and
+  // never looked at the code the operator had typed. Every deployed sign-in
+  // therefore needed a password and nothing else, while the form kept asking
+  // for an authenticator code and the Settings screen kept reporting the
+  // factor as active. Both routes now delegate to the single implementation,
+  // which verifies the second factor, throttles repeated failures by address
+  // and records every attempt.
+  if (requestPath === "/admin/login" || requestPath === "/admin/logout") {
+    return renderAppWorkspaceSecurityResponse(request, { env: authEnv, overrides: adminAuthOverrides(config) });
   }
   let payloadSession = null;
   let principal = config.adminPrincipal || (authHeader ? resolveAdminPrincipal(authHeader, authEnv) : null);

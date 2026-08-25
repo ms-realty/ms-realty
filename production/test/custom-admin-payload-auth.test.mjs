@@ -58,9 +58,15 @@ function fakePayload() {
 }
 
 function adapterConfig(payloadAdminAuth, authEnv = {}) {
+  // A sign-in through the adapter now registers the browser session and
+  // records the attempt, so the ledgers have to be this test's own rather
+  // than the ones the repository ships with.
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-payload-auth-"));
   return {
     ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
     authEnv: { NODE_ENV: "production", ...authEnv },
+    adminSessionLedgerPath: path.join(directory, "admin-sessions.jsonl"),
+    auditLogPath: path.join(directory, "audit-log.jsonl"),
     payloadAdminAuth,
     nowSeconds: () => NOW_SECONDS,
   };
