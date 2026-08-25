@@ -52,7 +52,9 @@ test("listing pages without approved translations still offer every public langu
   assert.equal(page.hreflang.length, 0);
   assert.deepEqual(page.chrome.languages.map((language) => language.code), PUBLIC_LOCALES);
   assert.equal(page.chrome.languages.find((language) => language.code === "en").active, true);
-  assert.equal(page.chrome.languages.find((language) => language.code === "de").href, "/de");
+  // A missing translation is a reason for the source-language badge, not for
+  // dropping the visitor on a home page: the German route renders this listing.
+  assert.equal(page.chrome.languages.find((language) => language.code === "de").href, "/de/immobilien/MS-CRAWL-0003");
   const html = renderReactPublicBody(page);
   assert.match(html, /data-language-switcher="desktop"/);
   assert.equal((html.match(/class="site-hd__mobile-langs"[^>]*>/g) || []).length, 1);

@@ -60,8 +60,10 @@ test("home hero has responsive local imagery and a lean, accessible search contr
   assert.match(form, /<span data-more-label="More filters" data-fewer-label="Fewer filters">More filters<\/span>/);
   assert.match(form, /<select id="home-search-bedrooms-min" name="bedrooms_min" data-hero-bedrooms="true"><option value="">Any<\/option><option value="1">1\+<\/option>/);
   assert.match(form, /<select id="home-search-price-min" name="price_min" data-price-presets="true"/);
-  assert.match(form, /id="home-search-area-min" name="area_min" type="number" min="0" step="any" inputmode="decimal"/);
-  assert.match(form, /id="home-search-area-max" name="area_max" type="number"/);
+  // No listing in this catalogue publishes an area, so the hero does not offer
+  // a control that can only return an empty results page.
+  assert.doesNotMatch(form, /name="area_min"/);
+  assert.doesNotMatch(form, /name="area_max"/);
   assert.match(form, /<button class="mk-btn mk-btn--ghost mk-btn--sm" type="reset">/);
   // Administrative geography, keyword, sort and view controls belong to the results page.
   for (const name of ["q", "country_code", "region_id", "municipality", "district", "sort", "view", "property_type"]) {
@@ -87,6 +89,18 @@ test("home hero has responsive local imagery and a lean, accessible search contr
   assert.match(attribution, /R\.Koch/);
   assert.match(attribution, /CC BY-SA 4\.0/);
   assert.match(attribution, /CC BY-SA 3\.0/);
+});
+
+test("the hero offers a facet again as soon as the catalogue can answer it", () => {
+  const withArea = listings.map((listing, index) =>
+    index === 0 ? { ...listing, property_type: "apartment", area_sqm: 82, primary_area_sqm: 82 } : listing,
+  );
+  const withoutArea = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
+  const restored = renderReactPublicBody(renderHomePage({ registry, listings: withArea, localeCode: "en" }));
+
+  assert.doesNotMatch(withoutArea, /name="area_min"/);
+  assert.match(restored, /id="home-search-area-min" name="area_min" type="number" min="0" step="any" inputmode="decimal"/);
+  assert.match(restored, /id="home-search-area-max" name="area_max" type="number"/);
 });
 
 test("hero enhancement pauses for motion preference, hover, and focus while the search card stays usable without JavaScript", () => {

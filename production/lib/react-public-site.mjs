@@ -1015,6 +1015,13 @@ function HeroSearch({ page, labels, chrome }) {
   const rentLabel = chrome.nav?.find((item) => item.id === "rent")?.label || "Rent";
   const offerLabel = labels.factLabels?.offer_type || "Offer";
   const presetData = pricePresetData(presets, page.locale, labels);
+  // The hero opens the same catalogue as the results page, so it offers the
+  // same facets. A control the catalogue cannot answer would send the visitor
+  // straight to an empty page on their first interaction with the site.
+  const availableFilterFields = new Set(controls.applicable_filter_fields || []);
+  const bedroomCounts = [1, 2, 3, 4].filter((count) => (filterOptions.bedrooms || []).some((value) => value >= count));
+  const showBedrooms = availableFilterFields.has("bedrooms_min") && bedroomCounts.length > 0;
+  const showArea = availableFilterFields.has("area_min");
 
   return h(
     "form",
@@ -1129,17 +1136,19 @@ function HeroSearch({ page, labels, chrome }) {
         h(
           "div",
           { className: "hp-search__more-grid" },
-          h(
-            "div",
-            { className: "hp-search__more-field hp-search__more-field--bedrooms" },
-            h("label", { htmlFor: "home-search-bedrooms-min" }, labels.factLabels?.bedrooms || "Bedrooms"),
-            h(
-              "select",
-              { id: "home-search-bedrooms-min", name: "bedrooms_min", "data-hero-bedrooms": "true" },
-              h("option", { value: "" }, labels.any),
-              ...[1, 2, 3, 4].map((count) => h("option", { key: count, value: String(count) }, `${count}+`)),
-            ),
-          ),
+          showBedrooms
+            ? h(
+                "div",
+                { className: "hp-search__more-field hp-search__more-field--bedrooms" },
+                h("label", { htmlFor: "home-search-bedrooms-min" }, labels.factLabels?.bedrooms || "Bedrooms"),
+                h(
+                  "select",
+                  { id: "home-search-bedrooms-min", name: "bedrooms_min", "data-hero-bedrooms": "true" },
+                  h("option", { value: "" }, labels.any),
+                  ...bedroomCounts.map((count) => h("option", { key: count, value: String(count) }, `${count}+`)),
+                ),
+              )
+            : null,
           h(
             "div",
             { className: "hp-search__more-field" },
@@ -1150,18 +1159,22 @@ function HeroSearch({ page, labels, chrome }) {
               ...pricePresetOptions({ values: presets.sale, localeCode: page.locale, labels }),
             ),
           ),
-          h(
-            "div",
-            { className: "hp-search__more-field" },
-            h("label", { htmlFor: "home-search-area-min" }, labels.areaMin),
-            h("input", { id: "home-search-area-min", name: "area_min", type: "number", min: "0", step: "any", inputMode: "decimal" }),
-          ),
-          h(
-            "div",
-            { className: "hp-search__more-field" },
-            h("label", { htmlFor: "home-search-area-max" }, labels.areaMax),
-            h("input", { id: "home-search-area-max", name: "area_max", type: "number", min: "0", step: "any", inputMode: "decimal" }),
-          ),
+          showArea
+            ? h(
+                "div",
+                { className: "hp-search__more-field" },
+                h("label", { htmlFor: "home-search-area-min" }, labels.areaMin),
+                h("input", { id: "home-search-area-min", name: "area_min", type: "number", min: "0", step: "any", inputMode: "decimal" }),
+              )
+            : null,
+          showArea
+            ? h(
+                "div",
+                { className: "hp-search__more-field" },
+                h("label", { htmlFor: "home-search-area-max" }, labels.areaMax),
+                h("input", { id: "home-search-area-max", name: "area_max", type: "number", min: "0", step: "any", inputMode: "decimal" }),
+              )
+            : null,
           h(
             "div",
             { className: "hp-search__more-actions" },
@@ -1603,18 +1616,20 @@ function StartBody({ page }) {
           }),
         ),
       ),
-      h(
-        "fieldset",
-        { className: "st-group", "data-start-bedrooms": "true", hidden: residential ? undefined : true },
-        h("legend", { className: "st-group__legend" }, bedroomsLabel),
-        h(
-          "div",
-          { className: "st-chips" },
-          chip("bedrooms_min", "", labels.any, !answers.bedrooms_min),
-          ...body.bedrooms.map((count) => chip("bedrooms_min", String(count), `${count}+`, answers.bedrooms_min === count)),
-        ),
-        h("p", { className: "st-hint" }, copy.bedroomsHint),
-      ),
+      body.bedrooms.length
+        ? h(
+            "fieldset",
+            { className: "st-group", "data-start-bedrooms": "true", hidden: residential ? undefined : true },
+            h("legend", { className: "st-group__legend" }, bedroomsLabel),
+            h(
+              "div",
+              { className: "st-chips" },
+              chip("bedrooms_min", "", labels.any, !answers.bedrooms_min),
+              ...body.bedrooms.map((count) => chip("bedrooms_min", String(count), `${count}+`, answers.bedrooms_min === count)),
+            ),
+            h("p", { className: "st-hint" }, copy.bedroomsHint),
+          )
+        : null,
     ]),
     step(
       4,
@@ -1681,7 +1696,9 @@ function StartBody({ page }) {
 
   // Saved-search alerts (existing /api/saved-searches contract). The channel
   // select swaps the contact field through the shared initSavedSearchContacts.
-  const alertPanel = alertConfig
+  // The wizard opens this panel by itself when a search returns nothing, so an
+  // endpoint that cannot accept the alert must not be offered as the way out.
+  const alertPanel = alertConfig && !page.chrome?.saved_search_writes_disabled
     ? h(
         "details",
         { className: "st-alert", "data-start-alert": "true", open: zeroMatches ? true : undefined },
@@ -1784,7 +1801,16 @@ function StartBody({ page }) {
           ),
         ),
       )
-    : null;
+    : alertConfig
+      ? h(
+          "div",
+          { className: "st-unavailable", "data-start-alert-unavailable": "true", "data-form-unavailable": "true" },
+          h("p", null, page.chrome?.form_unavailable || ""),
+          body.contact_channels
+            ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "phone", href: body.contact_channels.phone.href }, body.contact_channels.phone.label)
+            : null,
+        )
+      : null;
 
   // A viewing trip is a request a broker arranges, so the control opens a real
   // form. Entries that still have no backend keep the disabled control and the
@@ -2283,6 +2309,7 @@ function SearchBody({ page }) {
   const applicableFilterFields = new Set(controls.applicable_filter_fields || []);
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
   const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
+  const contact = chrome.contact || {};
   const filtersLabel = chrome.copy.filters || labels.activeFilters;
   const offerLabel = labels.factLabels?.offer_type || "Offer";
   const secondaryFilterKeys = ["country_code", "region_id", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min"];
@@ -2535,7 +2562,9 @@ function SearchBody({ page }) {
       applicableFilterFields.has("hotel_rooms_min")
         ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
         : null,
-      rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" }),
+      applicableFilterFields.has("area_min")
+        ? rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" })
+        : null,
       h(
         "details",
         { className: "sr-more", "data-search-more-filters": "true", open: secondaryFiltersActive ? true : undefined },
@@ -2596,8 +2625,28 @@ function SearchBody({ page }) {
         activeFilterCount ? h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "x", href: searchHref(page, "*") }, labels.clearFilters) : null,
       ),
     );
-  const saveSearchForm = (idPrefix) =>
+  // The endpoint answers 503 whenever the runtime has no durable authority for
+  // it, and the client turns any failure into "try again", which here is advice
+  // that cannot ever work. Rather than take a name, an email and a consent tick
+  // and lose them, offer the channels that do answer.
+  const saveSearchUnavailable = (idPrefix) =>
     h(
+      "div",
+      { className: "sr-save sr-save--unavailable", "data-save-search-unavailable": idPrefix, "data-form-unavailable": "true" },
+      h("p", null, page.chrome?.form_unavailable || ""),
+      contact.phone
+        ? h(
+            Btn,
+            { tag: "a", variant: "secondary", size: "lg", full: true, iconStart: "phone", href: `tel:${contact.phone}` },
+            contact.phone_display || contact.phone,
+          )
+        : null,
+      contact.email ? h("p", { className: "sr-save__channel" }, h("a", { href: `mailto:${contact.email}` }, contact.email)) : null,
+    );
+  const saveSearchForm = (idPrefix) =>
+    page.chrome?.saved_search_writes_disabled
+      ? saveSearchUnavailable(idPrefix)
+      : h(
       "form",
       {
         className: "sr-save",

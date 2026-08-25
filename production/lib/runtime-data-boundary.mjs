@@ -80,6 +80,22 @@ export const FILE_BACKED_ADMIN_READS = new Set([
 // are durable the read has a durable authority behind it too.
 const DURABLE_LEAD_OPERATION_READS = ["/admin/pipeline", "/api/admin/pipeline"];
 
+// A production runtime pointed at Payload refuses every file-backed mutation,
+// because the disk it would write to is not the authority and does not survive
+// a deploy. The public UI has to ask the same question the request boundary
+// asks, or it offers forms that can only fail.
+export function runtimeDataDurableOnlyFromEnv(env = process.env) {
+  return env.NODE_ENV === "production" && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload";
+}
+
+export function savedSearchWritesDisabledFromEnv(env = process.env) {
+  return productionRuntimeDataUnavailable({
+    durableOnly: runtimeDataDurableOnlyFromEnv(env),
+    method: "POST",
+    pathname: "/api/saved-searches",
+  });
+}
+
 export function productionRuntimeDataUnavailable({
   durableEvent = false,
   durableLeadOperations = false,

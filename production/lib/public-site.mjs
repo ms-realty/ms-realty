@@ -24,6 +24,7 @@ import {
   localeAlternatesForAlerts,
   localeAlternatesForCompare,
   locationPath,
+  locationSlug,
   matchesPublicLocationScope,
   META_DESCRIPTION_LIMIT,
   metaDescription,
@@ -33,6 +34,7 @@ import {
   startPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
+import { savedSearchWritesDisabledFromEnv } from "./runtime-data-boundary.mjs";
 import { isLeadDurableStoreEnabled, leadDurableStoreConfigFromEnv } from "./lead-durable-store.mjs";
 import {
   geographyRegistryAncestors,
@@ -2683,6 +2685,20 @@ export function sellerPhotoUploadDisabledFromEnv(env = process.env) {
   return env.MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED === "1";
 }
 
+// The language menu must keep the visitor on the page they are reading. Where
+// the caller names the route it came from, every language is offered at its own
+// spelling of that route, carrying the listing reference, the location slug or
+// the whole search query with it. Falling back to the locale's home page throws
+// away a filtered search a buyer has just built, and on a listing page it left
+// a menu with one language in it. The equivalent pages exist and render, with
+// the same source-language badge the search cards already use where the
+// translation is not approved yet.
+function languageRouteHref(registry, locale, { key, suffix = "", query = "" }) {
+  const segment = locale.route_segments?.[key];
+  if (!segment) return homePath(registry, locale.code);
+  return `/${locale.code}/${segment}${suffix}${query}`;
+}
+
 function publicChrome(
   registry,
   locale,
@@ -2691,7 +2707,9 @@ function publicChrome(
     active = null,
     locations = [],
     currentPath = null,
+    languageRoute = null,
     leadWritesDisabled = leadWritesDisabledFromEnv(),
+    savedSearchWritesDisabled = savedSearchWritesDisabledFromEnv(),
   } = {},
 ) {
   const copy = chromeCopyFor(locale.code);
@@ -2703,13 +2721,19 @@ function publicChrome(
   );
   const indexableLocales = publicIndexableLocales(registry);
   const listingAlternates = indexableLocales.filter((entry) => alternates.has(entry.code));
-  // Listing pages keep visitors on approved translations of the same listing.
-  // A listing without any approved translation must still offer every public
-  // language (at its home page) instead of hiding the switcher altogether.
-  const languageLocales = active === "listing" && listingAlternates.length ? listingAlternates : indexableLocales;
+  // Without a named route the menu still prefers an approved translation of the
+  // same listing, then the locale home page.
+  const languageLocales = !languageRoute && active === "listing" && listingAlternates.length ? listingAlternates : indexableLocales;
+  const languageHref = (entry) =>
+    languageRoute ? languageRouteHref(registry, entry, languageRoute) : alternates.get(entry.code) || homePath(registry, entry.code);
   return {
     copy,
     lead_writes_disabled: leadWritesDisabled,
+    // The saved-search endpoint has its own availability: it is a file-backed
+    // public mutation, so a runtime whose authority is Payload refuses it. A
+    // form the endpoint will always reject must not be offered as if it works.
+    saved_search_writes_disabled: savedSearchWritesDisabled,
+    form_unavailable: contactCopy(locale.code).form_unavailable,
     home: { href: homePath(registry, locale.code), label: "MS Realty" },
     nav: [
       { id: "buy", href: searchBase, label: copy.navBuy, active: active === "search" || active === "listing" || active === "location" },
@@ -2720,7 +2744,7 @@ function publicChrome(
     languages: languageLocales.map((entry) => ({
       code: entry.code,
       label: entry.native_name || entry.code.toUpperCase(),
-      href: alternates.get(entry.code) || homePath(registry, entry.code),
+      href: languageHref(entry),
       active: entry.code === locale.code,
       dir: entry.direction || "ltr",
     })),
@@ -3338,7 +3362,11 @@ export function renderListingPage({
       robots: indexable ? sourceSeo.robots || "index,follow" : "noindex,follow",
     },
     hreflang,
-    chrome: publicChrome(registry, locale, { hreflang, active: "listing" }),
+    chrome: publicChrome(registry, locale, {
+      hreflang,
+      active: "listing",
+      languageRoute: { key: "listing", suffix: `/${listing.id}` },
+    }),
     schema: buildListingSchema({ path: canonical, view, copy: { ...copy, title: metadataTitle, description: listingDescription }, publicMedia }),
     translation: {
       locale: translation?.locale || locale.code,
@@ -3432,6 +3460,7 @@ export function renderSearchPage({
   view = "list",
   databasePage = false,
   totalMatches = null,
+  savedSearchWritesDisabled = savedSearchWritesDisabledFromEnv(),
 }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -3511,6 +3540,28 @@ export function renderSearchPage({
     if (!selectedFamilies.length) return !familyScopedFacts.has(field);
     return selectedFamilies.every((family) => isFactApplicable(family, field, selectedSubtype));
   };
+  // A facet nothing in the catalogue carries can only ever return an empty
+  // page, because a null value fails every numeric comparison. Offering the
+  // control anyway reads as "no such property exists" rather than "we do not
+  // publish that figure yet", so the control appears when, and only when, some
+  // published listing answers it. The check runs over the whole searchable set
+  // rather than the current results, so narrowing a search never makes a
+  // control disappear under the visitor's hands.
+  const inInventory = (reader) => filterViews.some((listing) => Number.isFinite(Number(reader(listing))));
+  const factInInventory = {
+    bedrooms_count: () => inInventory((listing) => listing.bedrooms ?? listing.bedrooms_count),
+    premises_count: () => inInventory((listing) => listing.premises_count),
+    hotel_room_count: () => inInventory((listing) => listing.hotel_room_count),
+    primary_area_sqm: () => inInventory((listing) => listing.area_sqm ?? listing.primary_area_sqm),
+    land_area_sqm: () => inInventory((listing) => listing.land_area_sqm),
+    floor_number: () => inInventory((listing) => listing.floor ?? listing.floor_number),
+    storeys_count: () => inInventory((listing) => listing.storeys_count),
+  };
+  const inventoryCache = new Map();
+  const published = (fact) => {
+    if (!inventoryCache.has(fact)) inventoryCache.set(fact, factInInventory[fact]());
+    return inventoryCache.get(fact);
+  };
   const applicableFilterFields = [
     "property_subtype",
     "bedrooms_min",
@@ -3530,6 +3581,8 @@ export function renderSearchPage({
       bedrooms_min: "bedrooms_count",
       premises_min: "premises_count",
       hotel_rooms_min: "hotel_room_count",
+      area_min: "primary_area_sqm",
+      area_max: "primary_area_sqm",
       land_area_min: "land_area_sqm",
       land_area_max: "land_area_sqm",
       floor_min: "floor_number",
@@ -3537,7 +3590,8 @@ export function renderSearchPage({
       storeys_min: "storeys_count",
       storeys_max: "storeys_count",
     }[field];
-    return !fact || applicable(fact);
+    if (!fact) return true;
+    return (fact === "primary_area_sqm" || applicable(fact)) && published(fact);
   });
   if (databasePage && (!Number.isSafeInteger(totalMatches) || totalMatches < 0)) {
     throw new Error("Database search page requires a non-negative integer total");
@@ -3589,6 +3643,18 @@ export function renderSearchPage({
     .map((key) => ({ key, value: intentFilters[key], active: intentFilters[key] !== undefined && intentFilters[key] !== "" }))
     .filter((chip) => chip.active);
 
+  // Switching language must not discard the search the visitor has built, so
+  // the menu carries the normalized filters, keywords, sort, view and page
+  // across to the other locale's results route.
+  const languageQuery = new URLSearchParams();
+  for (const [key, value] of Object.entries(intentFilters)) languageQuery.set(key, String(value));
+  if (searchIntent.text_query) languageQuery.set("q", searchIntent.text_query);
+  if (selectedSort && selectedSort !== "recommended") languageQuery.set("sort", selectedSort);
+  if (selectedView === "map") languageQuery.set("view", "map");
+  if (savedView) languageQuery.set("saved", "1");
+  if (currentPage > 1) languageQuery.set("page", String(currentPage));
+  const languageQueryString = languageQuery.toString();
+
   return {
     kind: "search",
     status: 200,
@@ -3615,7 +3681,11 @@ export function renderSearchPage({
       sticky_contact_actions: true,
       minimum_tap_target_px: 44,
     },
-    chrome: publicChrome(registry, locale, { active: savedView ? "saved" : "search" }),
+    chrome: publicChrome(registry, locale, {
+      active: savedView ? "saved" : "search",
+      languageRoute: { key: "search", query: languageQueryString ? `?${languageQueryString}` : "" },
+      savedSearchWritesDisabled,
+    }),
     search: {
       saved_view: savedView === true,
       engines: ["postgres"],
@@ -4418,7 +4488,11 @@ export function renderLocationPage({ registry, localeCode, location, listings, a
       robots: indexable ? "index,follow" : "noindex,follow",
     },
     hreflang: indexable ? hreflangForLocation(registry, location, locales) : [],
-    chrome: publicChrome(registry, locale, { hreflang: indexable ? hreflangForLocation(registry, location, locales) : [], active: "location" }),
+    chrome: publicChrome(registry, locale, {
+      hreflang: indexable ? hreflangForLocation(registry, location, locales) : [],
+      active: "location",
+      languageRoute: { key: "location", suffix: `/${locationSlug(location)}` },
+    }),
     body: {
       h1: copy.heading,
       location,
@@ -4649,6 +4723,15 @@ function startEuro(value, localeCode) {
   }
 }
 
+function publishedStartBedrooms(listings, locale) {
+  const published = (Array.isArray(listings) ? listings : [])
+    .filter(isActiveListing)
+    .filter((listing) => listing.locale === locale.code || listing.locale === (locale.fallback_locale || "bg"))
+    .map((listing) => Number(listing.bedrooms ?? listing.bedrooms_count))
+    .filter((value) => Number.isInteger(value) && value >= 0);
+  return START_BEDROOMS.filter((count) => published.some((value) => value >= count));
+}
+
 function startMatchCount(registry, localeCode, listings, params) {
   if (!Array.isArray(listings) || !listings.length) return 0;
   try {
@@ -4709,6 +4792,7 @@ export function renderStartPage({
   listings = [],
   searchParams = null,
   leadWritesDisabled = leadWritesDisabledFromEnv(),
+  savedSearchWritesDisabled = savedSearchWritesDisabledFromEnv(),
 } = {}) {
   assertStartAreas();
   const resolved = resolvePublicLocale(registry, localeCode);
@@ -4764,7 +4848,7 @@ export function renderStartPage({
       robots: resolved.available && !answered ? "index,follow" : "noindex,follow",
     },
     hreflang,
-    chrome: publicChrome(registry, locale, { hreflang, active: "start", leadWritesDisabled }),
+    chrome: publicChrome(registry, locale, { hreflang, active: "start", leadWritesDisabled, savedSearchWritesDisabled }),
     body: {
       h1: copy.h1,
       intro: copy.intro,
@@ -4794,7 +4878,11 @@ export function renderStartPage({
         search: entry.search,
       })),
       price_presets: START_PRICE_PRESETS,
-      bedrooms: [...START_BEDROOMS],
+      // The wizard promises a shortlist at the end, so it must only ask what
+      // the catalogue can answer. Offering a bedroom count no published listing
+      // carries walks the visitor to "no matching properties yet" and a call to
+      // action that returns nothing.
+      bedrooms: publishedStartBedrooms(listings, locale),
       citizenships: START_CITIZENSHIPS.map((value) => ({
         value,
         label: value === "eu" ? copy.eu : copy.nonEu,

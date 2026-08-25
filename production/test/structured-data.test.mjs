@@ -120,7 +120,9 @@ test("missing approved media is a review warning instead of a schema failure", (
     seed: {
       ...seed,
       records: seed.records.map((record) =>
-        record.id === "MS-CRAWL-0114" ? { ...record, media: [] } : record,
+        record.id === "MS-CRAWL-0114"
+          ? { ...record, media: [], facts: { ...record.facts, thumbnail_url: "" } }
+          : record,
       ),
     },
     generatedAt: "2026-07-10T00:00:00Z",

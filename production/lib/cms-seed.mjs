@@ -120,6 +120,19 @@ function mediaEntry(row, fallbackAlt = "") {
   });
 }
 
+// A commercial unit let by the square metre is advertised at its rate, and a
+// review that copies the source's price field lands that rate where a monthly
+// total belongs. The import already detects the phrasing; this is the gate that
+// keeps such a figure off a public page whatever the source of the edit.
+export const IMPLAUSIBLE_MONTHLY_RENT_EUR = 50;
+
+export function withPlausibleRent(snapshot) {
+  const price = Number(snapshot.price_eur);
+  if (snapshot.offer_type !== "rent" || !Number.isFinite(price) || price <= 0) return snapshot;
+  if (price >= IMPLAUSIBLE_MONTHLY_RENT_EUR) return snapshot;
+  return { ...snapshot, price_eur: null, price_on_request: true };
+}
+
 function verificationForImportedValue(field, value, listingId) {
   return {
     field,
@@ -255,7 +268,7 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
 
     const fallbackAlt = listing.h1 || listing.title || listing.id;
     const media = (mediaByUrl.get(listing.url) || []).map((row) => mediaEntry(row, fallbackAlt));
-    const snapshot = listingSourceSnapshot(listing);
+    const snapshot = withPlausibleRent(listingSourceSnapshot(listing));
     if (snapshot.price_on_request) snapshot.price_eur = null;
     const locationId = locationIdForLabel(snapshot.location);
     if (locationId) {

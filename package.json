@@ -49,6 +49,7 @@
     "listing:live-audit": "python3 migration/audit_live_listings.py",
     "listing:manual-audit": "python3 migration/build_manual_listing_audit.py",
     "listing:description:review": "node production/scripts/build-listing-description-review.mjs",
+    "listing:description:restore": "node production/scripts/restore-truncated-listing-descriptions.mjs",
     "listing:publication": "node production/scripts/build-listing-publication-report.mjs",
     "listing:publication:run": "node production/scripts/run-listing-publication-schedules.mjs",
     "case:executor": "node production/scripts/run-realty-case-executor.mjs",

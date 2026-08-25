@@ -147,6 +147,22 @@ test("price-on-request seed records never retain a numeric price projection", ()
   assert.equal(seed.records[0].facts.price_eur, null);
 });
 
+test("a rent below any plausible monthly total is published as price on request", () => {
+  const rentUnitError = listings.map((listing, index) =>
+    index === 0
+      ? { ...listing, offer_type: "rent", price_on_request: false, price_eur: 1 }
+      : index === 1
+        ? { ...listing, offer_type: "rent", price_on_request: false, price_eur: 750 }
+        : listing,
+  );
+  const seed = buildCmsSeed(registry, { listings: rentUnitError, migrationRecords, routeMap, mediaRows });
+
+  assert.equal(seed.records[0].facts.price_eur, null);
+  assert.equal(seed.records[0].facts.price_on_request, true);
+  assert.equal(seed.records[1].facts.price_eur, 750);
+  assert.equal(seed.records[1].facts.price_on_request, false);
+});
+
 test("canonical property backfill keeps physical facts pending review and audits unverified zeroes", () => {
   const physicalFacts = listings.map((listing, index) =>
     index === 0

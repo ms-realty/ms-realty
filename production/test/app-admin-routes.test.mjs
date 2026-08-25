@@ -619,13 +619,24 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingManagerJsonBody.listings[0].listing_status, "unverified");
       assert.ok(listingManagerJsonBody.listings[0].translation_review_required > 0);
 
-      const singularListingManager = await listingManagerRoute.GET(
-        new Request("https://example.test/admin/listings?q=MS-CRAWL-0006", { headers: auth }),
-      );
-      const singularListingManagerHtml = await singularListingManager.text();
-      assert.match(singularListingManagerHtml, />1 issue<\/span>/);
-      assert.match(singularListingManagerHtml, />1 public photo<\/small>/);
-      assert.doesNotMatch(singularListingManagerHtml, />1 issues<\/span>|>1 public photos<\/small>/);
+      // The singular labels are what is under test, so the rows come from the
+      // manager's own payload rather than a hardcoded id whose counts move with
+      // the catalogue.
+      const allListings = await (
+        await listingManagerJsonRoute.GET(new Request("https://example.test/api/admin/listings?pageSize=500", { headers: auth }))
+      ).json();
+      const singleIssueId = allListings.listings.find((row) => row.metadata_gaps === 1).id;
+      const singlePhotoId = allListings.listings.find((row) => row.public_gallery_assets === 1).id;
+      const singularIssueHtml = await (
+        await listingManagerRoute.GET(new Request(`https://example.test/admin/listings?q=${singleIssueId}`, { headers: auth }))
+      ).text();
+      const singularPhotoHtml = await (
+        await listingManagerRoute.GET(new Request(`https://example.test/admin/listings?q=${singlePhotoId}`, { headers: auth }))
+      ).text();
+      assert.match(singularIssueHtml, />1 issue<\/span>/);
+      assert.doesNotMatch(singularIssueHtml, />1 issues<\/span>/);
+      assert.match(singularPhotoHtml, />1 public photo<\/small>/);
+      assert.doesNotMatch(singularPhotoHtml, />1 public photos<\/small>/);
 
       const translationQueue = await translationQueueRoute.GET(
         new Request("https://example.test/admin/translations?locale=ru&targetLocale=en&q=MS-CRAWL-0001", { headers: auth }),

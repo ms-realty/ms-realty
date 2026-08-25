@@ -121,7 +121,11 @@ import {
 } from "./workspace-settings.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
-import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
+import {
+  productionRuntimeDataUnavailable,
+  runtimeDataDurableOnlyFromEnv,
+  runtimeDataUnavailablePayload,
+} from "./runtime-data-boundary.mjs";
 import {
   LeadStoreUnavailableError,
   isLeadDurableStoreEnabled,
@@ -1092,8 +1096,7 @@ export function createHttpApp({
   syncViewingToGoogleCalendar = syncViewingToGoogleCalendarProvider,
   nowSeconds = () => Math.floor(Date.now() / 1000),
   search = {},
-  runtimeDataDurableOnly =
-    process.env.NODE_ENV === "production" && process.env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload",
+  runtimeDataDurableOnly = runtimeDataDurableOnlyFromEnv(),
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeRouteContract = redirects

@@ -99,6 +99,32 @@ def public_upload_image_url(value: str | None) -> str:
     return candidate
 
 
+MINIMUM_THUMBNAIL_RENDER_PX = 120
+
+
+def is_navigation_thumbnail(value: str | None) -> bool:
+    """True for a WordPress sidebar-widget render rather than a listing photo.
+
+    Every crawled listing page carries the theme's "recently added" widget, which
+    renders one foreign property through timthumb at a 45x45 box. Taking the
+    first uploads image on the page therefore gave all 113 Bulgarian listings the
+    same aerial photo. The requested render box separates the two: a gallery
+    image is asked for large, a navigation thumbnail is asked for tiny.
+    """
+    raw = textish(value)
+    if not raw or "timthumb.php" not in raw.lower():
+        return False
+    query = parse_qs(urlparse(raw).query)
+    try:
+        width = int(query.get("w", ["0"])[0])
+        height = int(query.get("h", ["0"])[0])
+    except ValueError:
+        return False
+    if width <= 0 or height <= 0:
+        return False
+    return width < MINIMUM_THUMBNAIL_RENDER_PX or height < MINIMUM_THUMBNAIL_RENDER_PX
+
+
 def load_listing_thumbnails(artifact_dir: Path) -> dict[str, dict[str, str]]:
     media_path = artifact_dir / "media-inventory.csv"
     if not media_path.exists():
@@ -113,6 +139,8 @@ def load_listing_thumbnails(artifact_dir: Path) -> dict[str, dict[str, str]]:
             page_url = textish(row.get("page_url"))
             image_url = public_upload_image_url(row.get("image_url"))
             if not page_url or not image_url or page_url in thumbnails:
+                continue
+            if is_navigation_thumbnail(row.get("image_url")):
                 continue
             thumbnails[page_url] = {
                 "thumbnail_url": image_url,
@@ -390,6 +418,61 @@ def build_index_docs(source_docs: list[dict[str, object]], registry: dict[str, o
             index_docs.append(approved_translation_index_doc(source, locale, registry))
 
     return index_docs
+
+
+# The lev is pegged to the euro, so a per-square-metre rate quoted in leva is
+# comparable with a stored euro figure without a live rate.
+BGN_PER_EUR = 1.95583
+
+# No property in this catalogue lets for a euro or six a month. A rent below
+# this floor is a unit error, not a bargain.
+IMPLAUSIBLE_MONTHLY_RENT_EUR = 50
+
+PER_SQUARE_METRE_PRICE = re.compile(
+    r"(\d+(?:[.,]\d+)?)\s*(лв|лева|лв\.|bgn|евро|евра|eur|€)\b[^.;!?]{0,40}?"
+    r"(?:/\s*|за\s+)(?:кв\.?\s*м|м\s*2|м²|m\s*2|m²|квадратен\s+метър|кв\.?\s*метър)",
+    re.I,
+)
+
+BGN_TOKENS = {"лв", "лева", "лв.", "bgn"}
+
+
+def quoted_per_square_metre_rates_eur(description: str | None) -> list[float]:
+    """Euro-normalised per-square-metre rates stated in a listing's own prose."""
+    rates: list[float] = []
+    for amount, currency in PER_SQUARE_METRE_PRICE.findall(textish(description)):
+        try:
+            value = float(amount.replace(",", "."))
+        except ValueError:
+            continue
+        if value <= 0:
+            continue
+        rates.append(value / BGN_PER_EUR if currency.lower() in BGN_TOKENS else value)
+    return rates
+
+
+def apply_rent_unit_guard(docs: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Refuse to publish a per-square-metre rate as if it were a monthly rent.
+
+    The legacy site puts the rate in its "Цена" field whenever a commercial unit
+    is let by the square metre, and the review that copied those fields carried
+    the rate across as the total. That is how a 1,700 m2 industrial hall came to
+    be advertised at one euro a month. The rate cannot be turned into a total
+    without an area we do not hold, so the listing falls back to price on
+    request and keeps the rate where the source states it, in its description.
+    """
+    for doc in docs:
+        if doc.get("offer_type") != "rent":
+            continue
+        price = doc.get("price_eur")
+        if not isinstance(price, (int, float)) or isinstance(price, bool) or price <= 0:
+            continue
+        rates = quoted_per_square_metre_rates_eur(str(doc.get("description") or ""))
+        quoted_rate = any(abs(price - rate) <= max(1.0, rate * 0.05) for rate in rates)
+        if quoted_rate or price < IMPLAUSIBLE_MONTHLY_RENT_EUR:
+            doc["price_eur"] = None
+            doc["price_on_request"] = True
+    return docs
 
 
 def apply_listing_edits(docs: list[dict[str, object]], edits: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -699,7 +782,9 @@ def main() -> int:
     listing_edits = load_listing_edits(listing_edits_path)
     location_reviews = load_location_reviews(location_reviews_path)
     geography_areas = load_geography_registry(geography_registry_path)
-    source_docs = apply_listing_edits(load_listing_docs(args.artifact_dir, registry, location_reviews, geography_areas), listing_edits)
+    source_docs = apply_rent_unit_guard(
+        apply_listing_edits(load_listing_docs(args.artifact_dir, registry, location_reviews, geography_areas), listing_edits)
+    )
     if not source_docs:
         raise SystemExit(f"No listing records found in {args.artifact_dir}")
     index_docs = build_index_docs(source_docs, registry)

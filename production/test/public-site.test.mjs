@@ -22,6 +22,7 @@ import {
   renderLocationPage,
   renderSearchPage,
   renderSellerPage,
+  renderStartPage,
 } from "../lib/public-site.mjs";
 import { CANONICAL_PROPERTY_FAMILIES } from "../lib/listing-facts.mjs";
 
@@ -72,17 +73,47 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
   );
 });
 
-test("listing language navigation keeps users on an available translation of the same listing", () => {
+test("listing language navigation keeps users on the same listing in every public language", () => {
   const page = renderListingPage({ registry, listing, localeCode: "he" });
 
   assert.deepEqual(
     page.chrome.languages.map(({ code, href }) => ({ code, href })),
     [
       { code: "bg", href: "/bg/imoti/MS-CRAWL-0001" },
+      { code: "en", href: "/en/properties/MS-CRAWL-0001" },
+      { code: "de", href: "/de/immobilien/MS-CRAWL-0001" },
+      { code: "nl", href: "/nl/vastgoed/MS-CRAWL-0001" },
+      { code: "ru", href: "/ru/properties/MS-CRAWL-0001" },
       { code: "el", href: "/el/akinita/MS-CRAWL-0001" },
       { code: "he", href: "/he/properties/MS-CRAWL-0001" },
     ],
   );
+});
+
+test("language navigation carries a built search across to the other locale", () => {
+  const page = renderSearchPage({
+    registry,
+    listings,
+    localeCode: "bg",
+    query: "Sandanski",
+    filters: { offer_type: "rent", property_family: "apartment" },
+    sort: "price_asc",
+    page: 2,
+    pageSize: 5,
+  });
+  const href = (code) => page.chrome.languages.find((language) => language.code === code).href;
+
+  for (const code of ["en", "de", "nl", "ru", "el", "he"]) {
+    const [route, query] = href(code).split("?");
+    const params = new URLSearchParams(query);
+    assert.notEqual(route, `/${code}`);
+    assert.equal(params.get("offer_type"), "rent");
+    assert.equal(params.get("property_family"), "apartment");
+    assert.equal(params.get("q"), "Sandanski");
+    assert.equal(params.get("sort"), "price_asc");
+    assert.equal(params.get("page"), "2");
+  }
+  assert.equal(href("de").startsWith("/de/suche?"), true);
 });
 
 test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct", () => {
@@ -350,8 +381,11 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
   assert.equal(search.cards.every((card) => card.actions.inquiry.endpoint === "/api/leads"), true);
   assert.equal(search.cards.every((card) => card.actions.save.storage_key === "ms-realty:saved-listings"), true);
-  assert.equal(search.cards.every((card) => card.thumbnail?.url.includes("/wp-content/uploads/")), true);
-  assert.equal(search.cards.every((card) => card.thumbnail?.alt), true);
+  // A listing whose crawl captured no photograph of its own shows the design
+  // system's placeholder rather than another property's picture.
+  assert.ok(search.cards.some((card) => card.thumbnail));
+  assert.equal(search.cards.every((card) => !card.thumbnail || card.thumbnail.url.includes("/wp-content/uploads/")), true);
+  assert.equal(search.cards.every((card) => !card.thumbnail || card.thumbnail.alt), true);
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").review_badge, "reviewed_translation");
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));
@@ -410,7 +444,10 @@ test("public UI localizes structured values and excludes operational crawl image
   assert.equal(card.property_type_label, "Апартаменты");
   assert.equal(card.offer_type_label, "Продажа");
   assert.equal(ruPage.body.facts.location, "Сандански");
-  assert.equal(card.thumbnail, null);
+  // The card carries this listing's own photograph, never the 2013 taxi shot
+  // the crawl found in the site header.
+  assert.ok(card.thumbnail.url.includes("/wp-content/uploads/"));
+  assert.ok(!card.thumbnail.url.includes("taxi"));
   assert.equal(card.image_count, ruPage.body.media.gallery_count);
   assert.equal(card.legacy_image_count, ruListing.image_count);
   assert.ok(ruPage.body.media.gallery.every((image) => !image.url.includes("taxi")));
@@ -690,6 +727,66 @@ test("search matches Cyrillic listings across Latin and Cyrillic keyboard input"
   assert.ok(cyrillicLatinLocation.search.total_matches > 0);
 });
 
+test("the save-search form is withdrawn when its endpoint cannot accept a search", () => {
+  const offered = renderReactPublicBody(
+    renderSearchPage({ registry, listings, localeCode: "bg", savedSearchWritesDisabled: false }),
+  );
+  const withdrawn = renderReactPublicBody(
+    renderSearchPage({ registry, listings, localeCode: "bg", savedSearchWritesDisabled: true }),
+  );
+  const wizardOffered = renderReactPublicBody(
+    renderStartPage({ registry, listings, localeCode: "bg", savedSearchWritesDisabled: false }),
+  );
+  const wizardWithdrawn = renderReactPublicBody(
+    renderStartPage({ registry, listings, localeCode: "bg", savedSearchWritesDisabled: true }),
+  );
+
+  assert.match(offered, /action="\/api\/saved-searches"/);
+  assert.doesNotMatch(withdrawn, /action="\/api\/saved-searches"/);
+  assert.doesNotMatch(withdrawn, /name="alertConsent"/);
+  assert.match(withdrawn, /data-save-search-unavailable="sr"/);
+  assert.match(withdrawn, /data-save-search-unavailable="sr-mobile"/);
+  assert.match(withdrawn, /Формата е временно недостъпна/);
+  assert.match(withdrawn, /href="tel:\+359879696870"/);
+
+  assert.match(wizardOffered, /data-start-alert-form="true"/);
+  assert.doesNotMatch(wizardWithdrawn, /data-start-alert-form="true"/);
+  assert.match(wizardWithdrawn, /data-start-alert-unavailable="true"/);
+});
+
+test("a numeric facet is offered only while some published listing answers it", () => {
+  const asIs = renderSearchPage({ registry, listings, localeCode: "bg" });
+  const withArea = renderSearchPage({
+    registry,
+    listings: listings.map((listing, index) => (index === 0 ? { ...listing, area_sqm: 82 } : listing)),
+    localeCode: "bg",
+  });
+  const withoutBedrooms = renderSearchPage({
+    registry,
+    listings: listings.map((listing) => ({ ...listing, bedrooms: null, bedrooms_count: null })),
+    localeCode: "bg",
+  });
+  const panel = (page) => new Set(page.search.controls.applicable_filter_fields);
+
+  // Nothing in the shipped catalogue publishes an area, a land area, a floor or
+  // a storey count, so none of those ranges is offered.
+  for (const field of ["area_min", "area_max", "land_area_min", "floor_min", "storeys_min"]) {
+    assert.equal(panel(asIs).has(field), false, field);
+  }
+  assert.equal(panel(asIs).has("bedrooms_min"), true);
+  assert.equal(panel(withoutBedrooms).has("bedrooms_min"), false);
+  // One listing with an area is enough to bring the control back, and the
+  // control then returns that listing rather than an empty page.
+  assert.equal(panel(withArea).has("area_min"), true);
+  const filtered = renderSearchPage({
+    registry,
+    listings: listings.map((listing, index) => (index === 0 ? { ...listing, area_sqm: 82 } : listing)),
+    localeCode: "bg",
+    filters: { area_min: "80", area_max: "90" },
+  });
+  assert.equal(filtered.search.total_matches, 1);
+});
+
 test("search paginates without duplicating cards and applies reviewed area facets", () => {
   const withAreas = listings.map((listing, index) => ({ ...listing, area_sqm: 40 + index }));
   const first = renderSearchPage({ registry, listings: withAreas, localeCode: "he", query: "Sandanski", page: 1 });
@@ -717,7 +814,7 @@ test("search paginates without duplicating cards and applies reviewed area facet
 });
 
 test("property-card photo counts use reviewed singular and plural labels", () => {
-  const onePhotoListing = findListingById(listings, "MS-CRAWL-0006");
+  const onePhotoListing = findListingById(listings, "MS-CRAWL-0012");
   const englishHtml = renderReactPublicBody(renderSearchPage({ registry, listings: [onePhotoListing], localeCode: "en" }));
   const bulgarianHtml = renderReactPublicBody(renderSearchPage({ registry, listings: [onePhotoListing], localeCode: "bg" }));
 
@@ -757,7 +854,7 @@ test("home page exposes search, seller, location, and featured listing paths", (
   assert.ok(he.body.hero.image?.url.includes("/wp-content/uploads/"));
   assert.ok(he.body.locations.some((location) => location.image?.url.includes("/wp-content/uploads/")));
   assert.ok(he.cards.length > 0);
-  assert.equal(he.cards.every((card) => card.thumbnail?.url.includes("/wp-content/uploads/")), true);
+  assert.equal(he.cards.every((card) => !card.thumbnail || card.thumbnail.url.includes("/wp-content/uploads/")), true);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
   assert.equal(he.body.guides, null);
 });
