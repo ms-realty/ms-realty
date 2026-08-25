@@ -429,6 +429,41 @@ function canonicalPublicSearchDocument(document = {}) {
   );
 }
 
+// The digest comparison is all-or-nothing, and a bare "does not match" costs a
+// full deploy cycle to guess at. Name the difference instead: which side has
+// documents the other lacks, and for a shared document, the first fields whose
+// values disagree. Values are truncated - this string lands in a deploy log.
+export function describeProjectionMismatch(approvedDocuments = [], viewDocuments = []) {
+  const keyOf = (document) => `${document?.id ?? ""}`;
+  const approvedById = new Map((approvedDocuments || []).map((document) => [keyOf(document), document]));
+  const viewById = new Map((viewDocuments || []).map((document) => [keyOf(document), document]));
+
+  const sample = (ids) => [...ids].slice(0, 5).join(", ") + (ids.length > 5 ? `, +${ids.length - 5} more` : "");
+  const missingFromView = [...approvedById.keys()].filter((id) => !viewById.has(id));
+  const extraInView = [...viewById.keys()].filter((id) => !approvedById.has(id));
+
+  const parts = [`authoritative ${approvedById.size} documents, view ${viewById.size}`];
+  if (missingFromView.length) parts.push(`absent from the view: ${sample(missingFromView)}`);
+  if (extraInView.length) parts.push(`present only in the view: ${sample(extraInView)}`);
+
+  for (const [id, approvedDocument] of approvedById) {
+    const viewDocument = viewById.get(id);
+    if (!viewDocument) continue;
+    const fields = [...new Set([...Object.keys(approvedDocument), ...Object.keys(viewDocument)])].filter(
+      (field) => JSON.stringify(approvedDocument[field]) !== JSON.stringify(viewDocument[field]),
+    );
+    if (!fields.length) continue;
+    const shown = fields.slice(0, 3).map((field) => {
+      const cut = (value) => JSON.stringify(value ?? null).slice(0, 60);
+      return `${field} authoritative=${cut(approvedDocument[field])} view=${cut(viewDocument[field])}`;
+    });
+    parts.push(`first differing document ${id}: ${shown.join("; ")}${fields.length > 3 ? `, +${fields.length - 3} more fields` : ""}`);
+    break;
+  }
+
+  return parts.join("; ");
+}
+
 export function buildApprovedSearchProjection(rows = []) {
   if (!Array.isArray(rows)) throw new Error("Approved search projection rows must be an array");
   const documents = [];
@@ -1420,7 +1455,9 @@ export async function runSearchEngineSync({
     const viewDocuments = await readPostgresProjectionDocuments({ postgres: runtimePostgres });
     const digest = crypto.createHash("sha256").update(JSON.stringify(viewDocuments)).digest("hex");
     if (digest !== approved.source.digest) {
-      throw new Error("Payload Postgres search view does not match the authoritative Payload projection");
+      throw new Error(
+        `Payload Postgres search view does not match the authoritative Payload projection: ${describeProjectionMismatch(approved.documents, viewDocuments)}`,
+      );
     }
     const databaseTarget = redactedDatabaseTarget((postgres.env || process.env).DATABASE_URL);
     const engines = [

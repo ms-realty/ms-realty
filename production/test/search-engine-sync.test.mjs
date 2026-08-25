@@ -13,6 +13,7 @@ import {
   buildApprovedSearchProjection,
   createSearchRebuildPlan,
   createSearchRollbackPlan,
+  describeProjectionMismatch,
   enqueueSearchOutbox,
   processSearchOutbox,
   queryMeilisearch,
@@ -1535,4 +1536,22 @@ test("live search engine CLIs do not sync fixtures when only search services are
     assert.equal(fs.existsSync(syncReportPath), false);
     assert.equal(fs.existsSync(queryReportPath), false);
   });
+});
+
+test("a search view mismatch names the difference instead of only announcing one", () => {
+  const shared = { id: "MS-1", locale: "bg", title: "Sandanski house", price_eur: 100000 };
+
+  // Rows present on one side only.
+  const byCount = describeProjectionMismatch(
+    [shared, { id: "MS-2", locale: "bg" }],
+    [shared, { id: "MS-3", locale: "bg" }],
+  );
+  assert.match(byCount, /authoritative 2 documents, view 2/);
+  assert.match(byCount, /absent from the view: MS-2/);
+  assert.match(byCount, /present only in the view: MS-3/);
+
+  // Same ids on both sides, disagreeing content - the case a count check misses.
+  const byContent = describeProjectionMismatch([shared], [{ ...shared, price_eur: 99000 }]);
+  assert.match(byContent, /first differing document MS-1: price_eur authoritative=100000 view=99000/);
+  assert.doesNotMatch(byContent, /absent from the view|present only in the view/);
 });
