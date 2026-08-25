@@ -30,7 +30,17 @@
 // into an acceptance. An AVIF that reaches storage is one that never carried
 // Exif or XMP in the first place.
 
-import sharp from "sharp";
+// sharp is resolved lazily: the origin host runs the operational scripts
+// straight from the release directory, which has no node_modules, and a
+// static import broke every one of them (docker:status died before the
+// containers were even asked). Only the code path that actually optimises
+// bytes needs the module - and that path runs inside the container, where
+// the dependency is installed.
+let sharpModulePromise = null;
+function loadSharp() {
+  if (!sharpModulePromise) sharpModulePromise = import("sharp").then((mod) => mod.default || mod);
+  return sharpModulePromise;
+}
 import { UnsupportedImageError, sanitizeImageUpload, sniffImageFormat } from "./image-sanitizer.mjs";
 
 export const DEFAULT_IMAGE_MAX_EDGE = 2560;
@@ -111,7 +121,7 @@ async function readMetadata(bytes, format) {
   try {
     // metadata() parses the header only; it does not decode pixels, which is
     // what makes it safe to call on a file we have not yet vetted for size.
-    return await sharp(bytes, { limitInputPixels: false }).metadata();
+    return await (await loadSharp())(bytes, { limitInputPixels: false }).metadata();
   } catch (error) {
     throw new UnsupportedImageError(
       `Upload claims to be a ${format.toUpperCase()} but could not be decoded as one: ${error.message.split("\n")[0]}`,
@@ -140,8 +150,8 @@ function assertDecodable(metadata, maxPixels) {
 
 // One decoded, re-oriented, resized pipeline. Every encode below starts from a
 // fresh clone of it so the source is decoded once per output.
-function pipelineFor(bytes, { maxEdge, maxPixels }) {
-  return sharp(bytes, { limitInputPixels: maxPixels })
+async function pipelineFor(bytes, { maxEdge, maxPixels }) {
+  return (await loadSharp())(bytes, { limitInputPixels: maxPixels })
     // No argument: take the angle from EXIF Orientation and bake it in.
     .rotate()
     .resize({ width: maxEdge, height: maxEdge, fit: "inside", withoutEnlargement: true });
@@ -201,7 +211,7 @@ async function encodeThumbnail(bytes, stored, { thumbnailEdge, thumbnailQuality,
   // it is supposed to save the browser from downloading.
   if (Math.max(stored.width, stored.height) <= thumbnailEdge) return null;
 
-  const { data, info } = await sharp(bytes, { limitInputPixels: maxPixels })
+  const { data, info } = await (await loadSharp())(bytes, { limitInputPixels: maxPixels })
     .rotate()
     .resize({ width: thumbnailEdge, height: thumbnailEdge, fit: "inside", withoutEnlargement: true })
     .webp({ quality: thumbnailQuality })
@@ -245,7 +255,7 @@ export async function optimizeImageUpload(
     // even though the bytes are passed through untouched.
     let dimensions = { width: null, height: null };
     try {
-      dimensions = displayDimensions(await sharp(bytes, { limitInputPixels: false }).metadata());
+      dimensions = displayDimensions(await (await loadSharp())(bytes, { limitInputPixels: false }).metadata());
     } catch {
       dimensions = { width: null, height: null };
     }
@@ -269,7 +279,7 @@ export async function optimizeImageUpload(
   assertDecodable(metadata, settings.maxPixels);
 
   const source = displayDimensions(metadata);
-  const pipeline = pipelineFor(bytes, settings);
+  const pipeline = await pipelineFor(bytes, settings);
   const encoded = await encodeBest(pipeline, {
     format: sniffed.format,
     hasAlpha: Boolean(metadata.hasAlpha),
