@@ -561,6 +561,13 @@ main form label.hp-search__tab { display: inline-flex; gap: 0; }
   top: calc(100% + 2px);
   width: max(100%, min(520px, calc(100vw - 64px)));
   display: grid;
+  /* One shared split for the whole list: the name column is as wide as the
+     longest name, the context column takes the rest. Rows subscribe to these
+     tracks instead of sizing their own, so the two columns line up down the
+     list instead of jumping row to row. */
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  align-content: start;
+  column-gap: var(--space-3);
   max-height: min(360px, 52svh);
   padding: var(--space-2);
   overflow-y: auto;
@@ -573,7 +580,8 @@ main form label.hp-search__tab { display: inline-flex; gap: 0; }
 .hp-hero__location-options[hidden] { display: none; }
 .hp-hero__location-option {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, max-content);
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
@@ -591,8 +599,11 @@ main form label.hp-search__tab { display: inline-flex; gap: 0; }
 .hp-hero__location-option[aria-selected="true"] { background: var(--surface-hover); }
 .hp-hero__location-option:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
 .hp-hero__location-option strong { min-width: 0; overflow: hidden; font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
-.hp-hero__location-option span { max-width: 60%; overflow: hidden; color: var(--text-muted); font-size: var(--text-xs); text-overflow: ellipsis; white-space: nowrap; }
-.hp-hero__location-empty { min-height: 52px; padding: var(--space-3); color: var(--text-muted); font-size: var(--text-sm); }
+/* The context line ends the row and shrinks to fit its own track, so it spends
+   the width it actually has and only ellipsises when the text is genuinely
+   longer than the column. */
+.hp-hero__location-option span { min-width: 0; max-width: 100%; justify-self: end; overflow: hidden; color: var(--text-muted); font-size: var(--text-xs); text-overflow: ellipsis; white-space: nowrap; }
+.hp-hero__location-empty { grid-column: 1 / -1; min-height: 52px; padding: var(--space-3); color: var(--text-muted); font-size: var(--text-sm); }
 
 /* "More filters": a native disclosure in the card footer. */
 .hp-search__more { border-top: 1px solid var(--border); }
@@ -657,9 +668,9 @@ main form label.hp-search__tab { display: inline-flex; gap: 0; }
   .hp-search__seg--price::before { inset-block: 12px; }
   .hp-search__go { grid-column: 1 / -1; width: 100%; margin: 4px 0 0; }
   [dir="rtl"] .hp-search__go { margin: 4px 0 0; }
-  .hp-hero__location-options { width: 100%; }
+  .hp-hero__location-options { width: 100%; grid-template-columns: minmax(0, 1fr); }
   .hp-hero__location-option { grid-template-columns: minmax(0, 1fr); gap: 2px; }
-  .hp-hero__location-option span { max-width: 100%; }
+  .hp-hero__location-option span { justify-self: start; }
   .hp-search__more-actions .mk-btn { width: 100%; }}
 @media (prefers-reduced-motion: reduce) {
   .hp-search__go,
