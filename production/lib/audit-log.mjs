@@ -25,6 +25,7 @@ const ADMIN_ACTIONS = new Set([
   "listing_edited",
   "listing_publication_cancelled",
   "listing_publication_executed",
+  "listing_publication_reverted",
   "listing_publication_scheduled",
   "listing_quality_imported",
   "listing_slug_changed",
