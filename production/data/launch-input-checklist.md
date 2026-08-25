@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-08-24T20:59:34.842Z
+Generated: 2026-08-25T02:44:54.977Z
 
 Status: blocked
 Blockers: live_services, monitoring_rollback, payload_runtime, production_recovery
@@ -92,10 +92,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Runtime report: `production/data/payload-runtime-report.json` (real output stays local and ignored)
 - Runtime report example: `production/data/payload-runtime-report.json.example`
 - Current check evidence:
-- payload_secret: missing_env (env PAYLOAD_SECRET)
-- database_url: missing_env (env DATABASE_URL)
-- database_network_scope: missing_env (env DATABASE_URL)
-- database_tcp: missing_env (env DATABASE_URL)
+- no Payload runtime check rows available
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`

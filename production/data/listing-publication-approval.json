@@ -142,7 +142,6 @@
     "MS-CRAWL-0124",
     "MS-CRAWL-0125",
     "MS-CRAWL-0126",
-    "MS-CRAWL-0127",
     "MS-CRAWL-0128",
     "MS-CRAWL-0129",
     "MS-CRAWL-0130",
@@ -182,5 +181,10 @@
     "MS-CRAWL-0164",
     "MS-CRAWL-0165"
   ],
-  "excluded_listings": []
+  "excluded_listings": [
+    {
+      "id": "MS-CRAWL-0127",
+      "reason": "no location relation and an empty title in the frozen catalog; a search document and a titled public page cannot be built from it"
+    }
+  ]
 }

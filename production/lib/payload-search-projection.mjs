@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { buildApprovedSearchProjection } from "./search-engine-sync.mjs";
 import { loadPayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
+import { operatorPublicationListingEvidence } from "./listing-publication-approval.mjs";
 import { listingPath } from "./seo.mjs";
 
 function objectRelation(value) {
@@ -107,10 +108,23 @@ function rowFor(listing, translation, registry) {
   };
 }
 
-export function payloadListingSearchRows(listings = [], { registry = loadLocaleRegistry() } = {}) {
+export function payloadListingSearchRows(listings = [], { registry = loadLocaleRegistry(), publicationEvidence = null, onSkipped = null } = {}) {
+  // The public boundary serves only listings the owner's publication approval
+  // NAMES; the index must agree with the boundary or search links point at
+  // pages the site refuses to serve. A published row the approval excludes is
+  // skipped with its recorded reason, not indexed and not fatal.
+  const named = publicationEvidence && Array.isArray(publicationEvidence.listing_ids) ? new Set(publicationEvidence.listing_ids) : null;
+  const excluded = new Map(
+    (publicationEvidence?.excluded_listings || []).map((entry) => [text(entry?.id), text(entry?.reason) || "excluded by the publication approval"]),
+  );
   const rows = [];
   for (const listing of listings) {
     if (listing?.cms_status !== "published" || listing?.workflow?.publish_approved !== true) continue;
+    const id = text(listing.id);
+    if (named && !named.has(id)) {
+      if (typeof onSkipped === "function") onSkipped({ listing_id: id, reason: excluded.get(id) || "not named by the publication approval" });
+      continue;
+    }
     const sourceLocale = text(objectRelation(listing.source_locale)?.code);
     // ponytail: translation rows currently store approval metadata, not localized copy; index only the source locale until copy fields exist.
     for (const translation of Array.isArray(listing.translations) ? listing.translations : []) {
@@ -146,10 +160,18 @@ async function approvedListings(payload, pageSize) {
   return docs;
 }
 
-export async function buildPayloadApprovedSearchProjection(payload, { pageSize = 100, registry = loadLocaleRegistry() } = {}) {
+export async function buildPayloadApprovedSearchProjection(payload, { pageSize = 100, registry = loadLocaleRegistry(), publicationEvidence = operatorPublicationListingEvidence(), onSkipped = null } = {}) {
   if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 1000) throw new Error("Payload search projection pageSize is invalid");
   const listings = await approvedListings(payload, pageSize);
-  const rows = payloadListingSearchRows(listings, { registry });
+  const skipped = [];
+  const rows = payloadListingSearchRows(listings, {
+    registry,
+    publicationEvidence,
+    onSkipped: (entry) => {
+      skipped.push(entry);
+      if (typeof onSkipped === "function") onSkipped(entry);
+    },
+  });
   const projection = buildApprovedSearchProjection(rows);
   projection.documents.sort((left, right) => left.id.localeCompare(right.id));
   const digest = crypto.createHash("sha256").update(JSON.stringify(projection.documents)).digest("hex");
@@ -161,6 +183,7 @@ export async function buildPayloadApprovedSearchProjection(payload, { pageSize =
       listing_rows: listings.length,
       eligible_translation_rows: rows.length,
       projected_documents: projection.documents.length,
+      skipped_by_publication_approval: skipped,
       locale_codes: [...new Set(projection.documents.map((document) => document.locale))].sort(),
       digest,
     },

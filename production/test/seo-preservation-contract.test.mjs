@@ -30,7 +30,16 @@ test("approved launch freeze drives every legacy response and the owner-publishe
   // approved terminal path now serves the real listing instead of the
   // preservation stand-in - archived-at-freeze rows included.
   const states = { active: 0, archived: 0 };
+  const excludedIds = new Set(["MS-CRAWL-0127"]);
   for (const entry of contract.catalog) {
+    if (excludedIds.has(entry.listing_id || entry.id)) {
+      // The recorded exclusion keeps its preservation page: no location and no
+      // title means the full listing surface cannot exist for it.
+      const preserved = await dispatchHttp(app, { url: entry.target_path });
+      assert.equal(preserved.status, 200, entry.target_path);
+      assert.equal(preserved.body.kind, "listing_preservation", entry.target_path);
+      continue;
+    }
     const response = await dispatchHttp(app, { url: entry.target_path });
     assert.equal(response.status, 200, entry.target_path);
     assert.equal(response.body.kind, "listing", entry.target_path);
@@ -41,13 +50,19 @@ test("approved launch freeze drives every legacy response and the owner-publishe
     assert.equal("media" in response.body.body, true, entry.target_path);
     states[entry.catalog_state] += 1;
   }
-  assert.deepEqual(states, { active: 30, archived: 135 });
+  // 164 full listing pages: the excluded archived row keeps its preservation
+  // page and is counted separately above.
+  assert.deepEqual(states, { active: 30, archived: 134 });
 
   const publicSeed = publicSeedFor(loadCmsSeed());
   const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), publicSeed, []);
   const sitemapPaths = new Set(sitemap.entries.map((entry) => entry.loc));
-  assert.equal(publicSeed.records.filter((record) => record.collection === "listings").length, 165);
-  assert.equal(contract.catalog.every((entry) => sitemapPaths.has(entry.target_path)), true);
+  assert.equal(publicSeed.records.filter((record) => record.collection === "listings").length, 164);
+  // Every publicly served catalog route is in the sitemap; the excluded
+  // preservation-only route is deliberately not indexed.
+  const publiclyServed = contract.catalog.filter((entry) => !excludedIds.has(entry.listing_id || entry.id));
+  assert.equal(publiclyServed.every((entry) => sitemapPaths.has(entry.target_path)), true);
+  assert.equal(contract.catalog.filter((entry) => excludedIds.has(entry.listing_id || entry.id)).every((entry) => !sitemapPaths.has(entry.target_path)), true);
 
   const forged = structuredClone(contract);
   forged.decisions[0].status = 301;

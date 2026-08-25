@@ -857,8 +857,8 @@ test("launch readiness stays blocked until production launch blockers are cleare
     archived_listings: 135,
     scope: "full_freeze_catalog",
     catalog_listing_ids: 165,
-    published_listing_ids: 165,
-    excluded_listing_ids: 0,
+    published_listing_ids: 164,
+    excluded_listing_ids: 1,
     source_locales_only: true,
   });
   assert.equal(listingGate.evidence.reason, "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.");
