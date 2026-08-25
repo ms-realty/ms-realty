@@ -35,6 +35,14 @@
 // (cms_status published + workflow.publish_approved with an approver and a
 // timestamp) AND the signed operator approval artifact names that listing id.
 // Everything else is refused per record with a reason, and the run says so.
+//
+// The one exception is the mirror of an apply: when the approval explicitly
+// EXCLUDES a listing (excluded_listings names it with a reason) and the
+// database row was published by this projector under the same approval
+// authority (workflow.publish_approved_by matches the approval's approved_by),
+// the row is reverted to the importer's pre-publication state. That undoes
+// only what this pipeline itself published and later withdrew; a row published
+// by anyone else keeps its refusal and is never touched.
 
 const PUBLIC_LISTING_STATUSES = new Set(["available", "reserved"]);
 
@@ -271,6 +279,59 @@ function translationPatchFor(current, target) {
   };
 }
 
+// Revert side: the importer's pre-publication state, which is what these rows
+// held before this projector published them. The same publication fields, the
+// same wholesale workflow-group replacement, nothing else.
+
+function listingRevertPatchFor(current) {
+  const currentWorkflow = isRecord(current.workflow) ? current.workflow : {};
+  const changed = [];
+  if (text(current.cms_status) !== "source_imported_review_required") changed.push("cms_status");
+  if (currentWorkflow.publish_approved === true) changed.push("workflow.publish_approved");
+  if (text(currentWorkflow.publish_approved_at)) changed.push("workflow.publish_approved_at");
+  if (text(currentWorkflow.publish_approved_by)) changed.push("workflow.publish_approved_by");
+  if (text(current._status).toLowerCase() !== "draft") changed.push("_status");
+  if (!changed.length) return null;
+
+  return {
+    changed_fields: changed,
+    data: {
+      cms_status: "source_imported_review_required",
+      workflow: {
+        ...currentWorkflow,
+        publish_approved: false,
+        publish_approved_at: null,
+        publish_approved_by: null,
+      },
+      _status: "draft",
+    },
+  };
+}
+
+function translationRevertPatchFor(current, seedTranslation) {
+  const reviewer = text(seedTranslation?.reviewer) || null;
+  const changed = [];
+  if (text(current.status) !== "draft") changed.push("status");
+  if (text(current.translation_state) !== "draft") changed.push("translation_state");
+  if (current.public_indexable !== false) changed.push("public_indexable");
+  if (text(current.reviewer) !== text(reviewer)) changed.push("reviewer");
+  if (text(current.approved_at)) changed.push("approved_at");
+  if (text(current._status).toLowerCase() !== "draft") changed.push("_status");
+  if (!changed.length) return null;
+
+  return {
+    changed_fields: changed,
+    data: {
+      status: "draft",
+      translation_state: "draft",
+      public_indexable: false,
+      reviewer,
+      approved_at: null,
+      _status: "draft",
+    },
+  };
+}
+
 function sourceTranslationRow(listing, translations) {
   const listingId = text(listing.id);
   const sourceLocaleId = relationId(listing.source_locale);
@@ -283,7 +344,7 @@ function sourceTranslationRow(listing, translations) {
 }
 
 function emptySummary() {
-  return { total_seed_listings: 0, apply: 0, unchanged: 0, refused: 0, skipped: 0, translations_apply: 0, translations_held: 0 };
+  return { total_seed_listings: 0, apply: 0, reverted: 0, unchanged: 0, refused: 0, skipped: 0, translations_apply: 0, translations_held: 0 };
 }
 
 /**
@@ -315,21 +376,48 @@ export function buildListingPublicationSyncPlan({
   const summary = emptySummary();
   summary.total_seed_listings = seedRecords.length;
 
+  // A record the plan will not publish is normally just refused. But when the
+  // approval itself excludes the listing AND the database row still carries a
+  // publication written under this same approval authority, leaving it alone
+  // would leave the owner's withdrawal unexecuted forever - so that one narrow
+  // case becomes a revert to the importer's pre-publication state instead.
+  const revertOrRefuse = (record, listingId, reason) => {
+    const exclusionReason = excludedReasons.get(listingId) || null;
+    const refusal = { listing_id: listingId, action: "refuse", reason, detail: exclusionReason };
+    if (!exclusionReason) return refusal;
+
+    const current = listingsById.get(listingId);
+    const currentWorkflow = isRecord(current?.workflow) ? current.workflow : {};
+    const approvedBy = text(approval.approved_by);
+    if (!current || currentWorkflow.publish_approved !== true) return refusal;
+    if (!approvedBy || text(currentWorkflow.publish_approved_by) !== approvedBy) return refusal;
+
+    const listingPatch = listingRevertPatchFor(current);
+    const translationRow = sourceTranslationRow(current, currentTranslations);
+    const translationPatch = translationRow ? translationRevertPatchFor(translationRow, seedSourceTranslation(record)) : null;
+    if (!listingPatch && !translationPatch) return refusal;
+
+    return {
+      listing_id: listingId,
+      action: "revert",
+      reason,
+      detail: exclusionReason,
+      approved_by: approvedBy,
+      listing: listingPatch ? { id: text(current.id), ...listingPatch } : null,
+      translation: translationPatch ? { id: translationRow.id, ...translationPatch } : null,
+    };
+  };
+
   for (const record of seedRecords) {
     const listingId = text(record?.id);
     const seedState = seedPublicationStateFor(record);
 
     if (!seedState.ok) {
-      entries.push({ listing_id: listingId, action: "refuse", reason: seedState.reason, detail: null });
+      entries.push(revertOrRefuse(record, listingId, seedState.reason));
       continue;
     }
     if (!approvedIds.has(listingId)) {
-      entries.push({
-        listing_id: listingId,
-        action: "refuse",
-        reason: PUBLICATION_REFUSAL_REASONS.NOT_IN_APPROVAL,
-        detail: excludedReasons.get(listingId) || null,
-      });
+      entries.push(revertOrRefuse(record, listingId, PUBLICATION_REFUSAL_REASONS.NOT_IN_APPROVAL));
       continue;
     }
 
@@ -390,6 +478,7 @@ export function buildListingPublicationSyncPlan({
     entries.push({ listing_id: listingId, action: "skip", reason: PUBLICATION_SKIP_REASONS.ABSENT_FROM_SEED, detail: null });
   }
 
+  summary.reverted = entries.filter((entry) => entry.action === "revert").length;
   summary.refused = entries.filter((entry) => entry.action === "refuse").length;
   summary.skipped = entries.filter((entry) => entry.action === "skip").length;
 
@@ -407,7 +496,7 @@ export function buildListingPublicationSyncPlan({
     },
     entries,
     summary,
-    idempotent: summary.apply === 0,
+    idempotent: summary.apply === 0 && summary.reverted === 0,
   };
 }
 
@@ -485,7 +574,7 @@ function writeOptions(collection, id, data, req) {
 async function applyOnce(plan, payload, req) {
   const applied = [];
   for (const entry of plan.entries) {
-    if (entry.action !== "apply") continue;
+    if (entry.action !== "apply" && entry.action !== "revert") continue;
     if (entry.listing) await payload.update(writeOptions("listings", entry.listing.id, entry.listing.data, req));
     if (entry.translation) {
       await payload.update(writeOptions("listing_translations", entry.translation.id, entry.translation.data, req));
@@ -500,7 +589,9 @@ async function applyOnce(plan, payload, req) {
 // than reported as a success.
 function verifyApplied(plan, rows) {
   const verification = buildListingPublicationSyncPlan({ ...rows, seedRecords: plan.seedRecords, approval: plan.approvalSource });
-  const stillPending = verification.entries.filter((entry) => entry.action === "apply").map((entry) => entry.listing_id);
+  const stillPending = verification.entries
+    .filter((entry) => entry.action === "apply" || entry.action === "revert")
+    .map((entry) => entry.listing_id);
   return { ok: stillPending.length === 0, still_pending: stillPending };
 }
 
@@ -542,23 +633,24 @@ export async function applyListingPublicationSync({
 // The directive reference is what makes the row reviewable months later.
 export function publicationSyncAuditRecords(plan, recordedAt = new Date().toISOString()) {
   return plan.entries
-    .filter((entry) => entry.action === "apply")
+    .filter((entry) => entry.action === "apply" || entry.action === "revert")
     .map((entry) => ({
       recordedAt,
       input: {
-        action: "listing_publication_executed",
+        action: entry.action === "revert" ? "listing_publication_reverted" : "listing_publication_executed",
         actor: entry.approved_by,
         objectType: "listing",
         objectId: entry.listing_id,
-        status: "published",
+        status: entry.action === "revert" ? "draft" : "published",
         metadata: {
           approval_id: plan.approval.approval_id,
           approval_scope: plan.approval.scope,
           approval_decision: plan.approval.decision,
           approved_by: entry.approved_by,
-          approved_at: entry.approved_at,
+          approved_at: entry.approved_at ?? plan.approval.approved_at,
           directive: plan.approval.directive,
           executed_by: "payload:publication:sync",
+          ...(entry.action === "revert" ? { exclusion_reason: entry.detail } : {}),
           changed_fields: [
             ...(entry.listing?.changed_fields || []).map((field) => `listings.${field}`),
             ...(entry.translation?.changed_fields || []).map((field) => `listing_translations.${field}`),

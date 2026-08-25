@@ -123,10 +123,41 @@ function applyPlanToRows(plan, rows) {
   const listings = new Map(rows.currentListings.map((row) => [row.id, row]));
   const translations = new Map(rows.currentTranslations.map((row) => [row.id, row]));
   for (const entry of plan.entries) {
-    if (entry.action !== "apply") continue;
+    if (entry.action !== "apply" && entry.action !== "revert") continue;
     if (entry.listing) Object.assign(listings.get(entry.listing.id), clone(entry.listing.data));
     if (entry.translation) Object.assign(translations.get(entry.translation.id), clone(entry.translation.data));
   }
+}
+
+// The database exactly as a prior projector run left a published listing.
+function publishRowInDb(rows, record, { approvedBy = APPROVER } = {}) {
+  const listing = rows.currentListings.find((row) => row.id === record.id);
+  listing.cms_status = "published";
+  listing._status = "published";
+  listing.workflow = {
+    ...listing.workflow,
+    publish_approved: true,
+    publish_approved_at: APPROVED_AT,
+    publish_approved_by: approvedBy,
+  };
+  const translation = rows.currentTranslations.find(
+    (row) => row.listing === record.id && row.locale === LOCALE_IDS.get(record.source_locale),
+  );
+  Object.assign(translation, {
+    status: "published",
+    translation_state: "published",
+    public_indexable: true,
+    reviewer: "editor_bg",
+    approved_at: "2026-07-04T00:00:00.000Z",
+    _status: "published",
+  });
+  return { listing, translation };
+}
+
+// A seed record after cms:build executed the owner's exclusion: publication
+// reverted in the seed itself, exactly like MS-CRAWL-0127/0159.
+function excludedSeedRecord(id) {
+  return seedRecord(id, { cms_status: "source_imported_review_required", workflow: null });
 }
 
 test("the projector applies the publication state the seed records for approved listings", () => {
@@ -229,6 +260,82 @@ test("the projector refuses a listing the owner approval does not name, and repo
   assert.equal(entryFor(plan, "MS-OUT").detail, "Owner withdrew this listing");
   assert.equal(entryFor(plan, "MS-UNKNOWN").reason, PUBLICATION_REFUSAL_REASONS.NOT_IN_APPROVAL);
   assert.equal(entryFor(plan, "MS-UNKNOWN").detail, null);
+});
+
+// --- revert side ------------------------------------------------------------
+
+test("an approval-excluded row published under this approval is reverted to the importer state", () => {
+  const records = [seedRecord("MS-1"), excludedSeedRecord("MS-GONE")];
+  const rows = importedRows(records);
+  const { translation } = publishRowInDb(rows, records[1]);
+  const approval = approvalFor(["MS-1"], [{ id: "MS-GONE", reason: "no location relation in the frozen catalog" }]);
+
+  const plan = buildListingPublicationSyncPlan({ ...rows, seedRecords: records, approval });
+  const entry = entryFor(plan, "MS-GONE");
+  assert.equal(entry.action, "revert");
+  assert.equal(entry.reason, PUBLICATION_REFUSAL_REASONS.SEED_NOT_PUBLISHED);
+  assert.equal(entry.detail, "no location relation in the frozen catalog");
+  assert.equal(plan.summary.reverted, 1);
+  assert.equal(plan.summary.apply, 1);
+  assert.equal(plan.summary.refused, 0);
+  assert.equal(plan.idempotent, false);
+
+  // Publication fields only, back to exactly what the importer writes; the
+  // workflow fields the projector does not own are carried through.
+  assert.deepEqual(entry.listing.data, {
+    cms_status: "source_imported_review_required",
+    workflow: { last_editor: "importer", publish_approved: false, publish_approved_at: null, publish_approved_by: null },
+    _status: "draft",
+  });
+  assert.equal(entry.translation.id, translation.id);
+  assert.deepEqual(entry.translation.data, {
+    status: "draft",
+    translation_state: "draft",
+    public_indexable: false,
+    reviewer: "editor_bg",
+    approved_at: null,
+    _status: "draft",
+  });
+});
+
+test("a row published by a different authority keeps its refusal and is never reverted", () => {
+  const records = [seedRecord("MS-1"), excludedSeedRecord("MS-GONE")];
+  const rows = importedRows(records);
+  publishRowInDb(rows, records[1], { approvedBy: "somebody_else" });
+  const approval = approvalFor(["MS-1"], [{ id: "MS-GONE", reason: "withdrawn" }]);
+
+  const plan = buildListingPublicationSyncPlan({ ...rows, seedRecords: records, approval });
+  const entry = entryFor(plan, "MS-GONE");
+  assert.equal(entry.action, "refuse");
+  assert.equal(entry.reason, PUBLICATION_REFUSAL_REASONS.SEED_NOT_PUBLISHED);
+  assert.equal(plan.summary.reverted, 0);
+  assert.equal(entry.listing, undefined);
+});
+
+test("an excluded row that was never published stays a plain refusal", () => {
+  const records = [seedRecord("MS-1"), excludedSeedRecord("MS-GONE")];
+  const rows = importedRows(records);
+  const approval = approvalFor(["MS-1"], [{ id: "MS-GONE", reason: "withdrawn" }]);
+
+  const plan = buildListingPublicationSyncPlan({ ...rows, seedRecords: records, approval });
+  assert.equal(entryFor(plan, "MS-GONE").action, "refuse");
+  assert.equal(plan.summary.reverted, 0);
+});
+
+test("a second run after the revert refuses the row again and plans nothing", () => {
+  const records = [seedRecord("MS-1"), excludedSeedRecord("MS-GONE")];
+  const rows = importedRows(records);
+  publishRowInDb(rows, records[1]);
+  const approval = approvalFor(["MS-1"], [{ id: "MS-GONE", reason: "withdrawn" }]);
+
+  const plan = buildListingPublicationSyncPlan({ ...rows, seedRecords: records, approval });
+  applyPlanToRows(plan, rows);
+
+  const second = buildListingPublicationSyncPlan({ ...rows, seedRecords: records, approval });
+  assert.equal(entryFor(second, "MS-GONE").action, "refuse");
+  assert.equal(second.summary.reverted, 0);
+  assert.equal(second.summary.unchanged, 1);
+  assert.equal(second.idempotent, true);
 });
 
 test("the projector refuses a seed listing that has no row in the database", () => {
@@ -534,6 +641,48 @@ test("applying the plan writes publication state through the Local API and commi
   // Running again over the written rows plans nothing and writes nothing.
   const second = buildListingPublicationSyncPlan({ ...after, seedRecords: records, approval });
   assert.equal(second.idempotent, true);
+});
+
+test("a revert writes through the Local API, verifies, and records its own audit action", async () => {
+  const records = [seedRecord("MS-1"), excludedSeedRecord("MS-GONE")];
+  const rows = importedRows(records);
+  publishRowInDb(rows, records[1]);
+  const approval = approvalFor(["MS-1"], [{ id: "MS-GONE", reason: "no location relation in the frozen catalog" }]);
+  const plan = buildListingPublicationSyncPlan({ ...rows, seedRecords: records, approval });
+  const runtime = fakePayloadRuntime(rows);
+
+  const result = await applyListingPublicationSync({ payload: runtime.payload, plan, seedRecords: records, approval });
+  assert.equal(result.status, "committed");
+  assert.deepEqual(result.applied.sort(), ["MS-1", "MS-GONE"]);
+
+  const after = runtime.currentRows();
+  const gone = after.currentListings.find((row) => row.id === "MS-GONE");
+  assert.equal(gone.cms_status, "source_imported_review_required");
+  assert.equal(gone._status, "draft");
+  assert.equal(gone.workflow.publish_approved, false);
+  assert.equal(gone.workflow.publish_approved_by, null);
+  // content survived untouched
+  assert.equal(gone.facts.price_eur, 100000);
+  const goneTranslation = after.currentTranslations.find(
+    (row) => row.listing === "MS-GONE" && row.locale === LOCALE_IDS.get("bg"),
+  );
+  assert.equal(goneTranslation.public_indexable, false);
+  assert.equal(goneTranslation.status, "draft");
+  assert.equal(goneTranslation._status, "draft");
+
+  const audit = publicationSyncAuditRecords(plan, "2026-08-25T00:00:00.000Z");
+  assert.equal(audit.length, 2);
+  const reverted = audit.find((record) => record.input.objectId === "MS-GONE");
+  assert.equal(reverted.input.action, "listing_publication_reverted");
+  assert.equal(reverted.input.status, "draft");
+  assert.equal(reverted.input.actor, APPROVER);
+  assert.equal(reverted.input.metadata.exclusion_reason, "no location relation in the frozen catalog");
+  assert.ok(reverted.input.metadata.changed_fields.includes("listings.workflow.publish_approved"));
+
+  // Over the written rows the row is a plain refusal again.
+  const second = buildListingPublicationSyncPlan({ ...after, seedRecords: records, approval });
+  assert.equal(second.idempotent, true);
+  assert.equal(entryFor(second, "MS-GONE").action, "refuse");
 });
 
 test("a dry run reads and plans without opening a transaction or writing a row", async () => {
