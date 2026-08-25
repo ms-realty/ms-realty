@@ -827,7 +827,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
       artifact_id: "20260817-deterministic-launch-freeze",
       approval_id: "MSR-LAUNCH-FREEZE-1",
       based_on_commit: "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
-      source_sha256: "338ce14fa46c44d35f4afe83e30d75d65a345383c2854c29ab3215ac4397f172",
+      source_sha256: "48242bcb1af3983b8ceacd8a97cf716c019cbfcd57fc816146022a388d377d14",
       approved_homepage_redirects: 5,
       approved_homepage_decisions: 15,
     },

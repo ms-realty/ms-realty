@@ -2061,7 +2061,7 @@
             ],
             "total_eur": null,
             "total_including_price_eur": null,
-            "generated_at": "2026-08-25T02:55:51.576Z"
+            "generated_at": "2026-08-25T03:12:30.368Z"
           },
           "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
         },
@@ -2995,7 +2995,7 @@
             ],
             "total_eur": null,
             "total_including_price_eur": null,
-            "generated_at": "2026-08-25T02:55:51.710Z"
+            "generated_at": "2026-08-25T03:12:30.476Z"
           },
           "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
         },
@@ -3948,7 +3948,7 @@
             ],
             "total_eur": null,
             "total_including_price_eur": null,
-            "generated_at": "2026-08-25T02:55:51.730Z"
+            "generated_at": "2026-08-25T03:12:30.492Z"
           },
           "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
         },
@@ -6121,7 +6121,7 @@
     "status": 201,
     "body": {
       "requested_at": "2026-07-04T00:01:00Z",
-      "id": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+      "id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
       "idempotency_key": null,
       "requested_locale": "fr",
       "requested_path": "/fr/",
@@ -6129,12 +6129,12 @@
       "admin_locale": "en",
       "public_indexable": false,
       "notification_requested": true,
-      "contact_ref": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+      "contact_ref": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
       "contact_available": true,
       "message_available": true,
       "ledger": {
         "requested_at": "2026-07-04T00:01:00Z",
-        "id": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+        "id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
         "idempotency_key": null,
         "requested_locale": "fr",
         "requested_path": "/fr/",
@@ -6142,12 +6142,12 @@
         "admin_locale": "en",
         "public_indexable": false,
         "notification_requested": true,
-        "contact_ref": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+        "contact_ref": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
         "contact_available": true,
         "message_available": true
       },
       "contactVault": {
-        "contact_ref": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+        "contact_ref": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
         "stored_at": "2026-07-04T00:01:00Z",
         "encrypted": true
       },
@@ -6155,7 +6155,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "language_request",
         "source": "website_language_request",
-        "subject_id": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+        "subject_id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
         "locale": "fr",
         "contact_fingerprint": "fb10e1238ec5d91e24b350a03b194a1ad82e148c93afd71b4c0976ad42f2ec5f",
         "granted": true,
@@ -6965,7 +6965,7 @@
     "status": 201,
     "body": {
       "saved_at": "2026-07-04T00:07:00Z",
-      "id": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+      "id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
       "idempotency_key": null,
       "requested_locale": "he",
       "locale": "he",
@@ -7081,21 +7081,21 @@
       "alert_frequency": "weekly",
       "status": "active",
       "alert_task": {
-        "id": "alert-190407e0-4a1a-4ebd-a604-fe944f6e124d",
+        "id": "alert-1dc61256-03ce-47b6-9e58-baeed90c635e",
         "status": "open",
         "owner": "broker_en"
       },
       "manage_access": {
         "version": "s1",
-        "verifier": "5bfd9a9703273242a857f2e188ecf0c61506567e6a78aa806e87db22ed0b6f60",
+        "verifier": "c5ca2b02229c4d60beca478f7b3f42c23026e8dbcdb8abe0c518f0bfc7f53e4f",
         "issued_at": "2026-07-04T00:07:00.000Z",
         "expires_at": "2027-07-04T00:07:00.000Z"
       },
-      "contact_ref": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+      "contact_ref": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
       "contact_available": true,
       "ledger": {
         "saved_at": "2026-07-04T00:07:00Z",
-        "id": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+        "id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
         "idempotency_key": null,
         "requested_locale": "he",
         "locale": "he",
@@ -7211,21 +7211,21 @@
         "alert_frequency": "weekly",
         "status": "active",
         "alert_task": {
-          "id": "alert-190407e0-4a1a-4ebd-a604-fe944f6e124d",
+          "id": "alert-1dc61256-03ce-47b6-9e58-baeed90c635e",
           "status": "open",
           "owner": "broker_en"
         },
         "manage_access": {
           "version": "s1",
-          "verifier": "5bfd9a9703273242a857f2e188ecf0c61506567e6a78aa806e87db22ed0b6f60",
+          "verifier": "c5ca2b02229c4d60beca478f7b3f42c23026e8dbcdb8abe0c518f0bfc7f53e4f",
           "issued_at": "2026-07-04T00:07:00.000Z",
           "expires_at": "2027-07-04T00:07:00.000Z"
         },
-        "contact_ref": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+        "contact_ref": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
         "contact_available": true
       },
       "contactVault": {
-        "contact_ref": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+        "contact_ref": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
         "stored_at": "2026-07-04T00:07:00Z",
         "encrypted": true
       },
@@ -7233,7 +7233,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "saved_search_alerts",
         "source": "website_saved_search",
-        "subject_id": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+        "subject_id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
         "locale": "he",
         "contact_fingerprint": "3892a38513fa598edf27242ed5fb0172709a023616f6910bb3615124b1109bd8",
         "granted": true,
@@ -7241,9 +7241,9 @@
         "marketing_opt_in": false
       },
       "manage": {
-        "token": "s1.c2F2ZWQtc2VhcmNoLWQ1Njk4NmNhLTlhY2ItNDY2Yi1iOWY0LWU2MzE3Zjk1MDdlNg.MTgxNDY1OTYyMA.VjpydAyn5Rf5Y_79tqS2QSRiwxNYZsTvIkUzSmznJow",
-        "path": "/he/alerts?token=s1.c2F2ZWQtc2VhcmNoLWQ1Njk4NmNhLTlhY2ItNDY2Yi1iOWY0LWU2MzE3Zjk1MDdlNg.MTgxNDY1OTYyMA.VjpydAyn5Rf5Y_79tqS2QSRiwxNYZsTvIkUzSmznJow",
-        "url": "https://makler-realty.com/he/alerts?token=s1.c2F2ZWQtc2VhcmNoLWQ1Njk4NmNhLTlhY2ItNDY2Yi1iOWY0LWU2MzE3Zjk1MDdlNg.MTgxNDY1OTYyMA.VjpydAyn5Rf5Y_79tqS2QSRiwxNYZsTvIkUzSmznJow",
+        "token": "s1.c2F2ZWQtc2VhcmNoLTE5ZDllMzk5LTU3MTUtNDVjOS1iZDcxLWJlNmFiMzBkMTM3OA.MTgxNDY1OTYyMA.ynq9AhnRKvGKh1nNENeslHDiBzkchZ3PqGOTTR6Y-1s",
+        "path": "/he/alerts?token=s1.c2F2ZWQtc2VhcmNoLTE5ZDllMzk5LTU3MTUtNDVjOS1iZDcxLWJlNmFiMzBkMTM3OA.MTgxNDY1OTYyMA.ynq9AhnRKvGKh1nNENeslHDiBzkchZ3PqGOTTR6Y-1s",
+        "url": "https://makler-realty.com/he/alerts?token=s1.c2F2ZWQtc2VhcmNoLTE5ZDllMzk5LTU3MTUtNDVjOS1iZDcxLWJlNmFiMzBkMTM3OA.MTgxNDY1OTYyMA.ynq9AhnRKvGKh1nNENeslHDiBzkchZ3PqGOTTR6Y-1s",
         "expires_at": "2027-07-04T00:07:00.000Z"
       },
       "manage_unavailable_reason": null
@@ -7272,9 +7272,9 @@
   "lead": {
     "status": 201,
     "body": {
-      "id": "inbox-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+      "id": "inbox-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
       "lead": {
-        "id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+        "id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "idempotency_key": null,
         "source": "website_listing_detail",
         "intent": "inquiry",
@@ -7375,8 +7375,8 @@
       },
       "ledger": {
         "received_at": "2026-07-04T00:00:00Z",
-        "id": "inbox-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
-        "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+        "id": "inbox-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "source": "website_listing_detail",
         "intent": "inquiry",
         "channel": "listing_detail",
@@ -7427,14 +7427,14 @@
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
-          "id": "sla-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+          "id": "sla-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "status": "open",
           "owner": "broker_assignment",
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         },
         "qualification_task": {
-          "id": "intake-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+          "id": "intake-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "status": "open",
           "owner": "broker_international",
           "action": "complete_intake_requirements",
@@ -7449,7 +7449,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "inquiry_follow_up",
         "source": "website_listing_detail",
-        "subject_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+        "subject_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "locale": "he",
         "contact_fingerprint": "3892a38513fa598edf27242ed5fb0172709a023616f6910bb3615124b1109bd8",
         "granted": true,
@@ -7465,9 +7465,9 @@
   "viewingLead": {
     "status": 201,
     "body": {
-      "id": "inbox-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+      "id": "inbox-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
       "lead": {
-        "id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+        "id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
         "idempotency_key": null,
         "source": "website_viewing_request",
         "intent": "viewing",
@@ -7571,8 +7571,8 @@
       },
       "ledger": {
         "received_at": "2026-07-04T00:00:00Z",
-        "id": "inbox-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
-        "lead_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+        "id": "inbox-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
+        "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
         "source": "website_viewing_request",
         "intent": "viewing",
         "channel": "listing_detail",
@@ -7626,14 +7626,14 @@
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
-          "id": "sla-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+          "id": "sla-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
           "status": "open",
           "owner": "broker_assignment",
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         },
         "qualification_task": {
-          "id": "intake-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+          "id": "intake-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
           "status": "open",
           "owner": "broker_international",
           "action": "complete_intake_requirements",
@@ -7648,7 +7648,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "inquiry_follow_up",
         "source": "website_viewing_request",
-        "subject_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+        "subject_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
         "locale": "he",
         "contact_fingerprint": "0d4dec6ae276d341b48a87fa491a371529b9b3657e569c3063b2e346300ed08b",
         "granted": true,
@@ -7664,9 +7664,9 @@
   "contactLead": {
     "status": 201,
     "body": {
-      "id": "inbox-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+      "id": "inbox-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
       "lead": {
-        "id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+        "id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "idempotency_key": null,
         "source": "website_contact_callback",
         "intent": "callback",
@@ -7750,8 +7750,8 @@
       },
       "ledger": {
         "received_at": "2026-07-04T00:00:00Z",
-        "id": "inbox-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
-        "lead_id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+        "id": "inbox-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
+        "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "source": "website_contact_callback",
         "intent": "callback",
         "channel": "contact_page",
@@ -7791,14 +7791,14 @@
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
-          "id": "sla-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+          "id": "sla-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "status": "open",
           "owner": "broker_assignment",
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         },
         "qualification_task": {
-          "id": "intake-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+          "id": "intake-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "status": "complete",
           "owner": "broker_international",
           "action": "complete_intake_requirements",
@@ -7810,7 +7810,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "inquiry_follow_up",
         "source": "website_contact_callback",
-        "subject_id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+        "subject_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "locale": "he",
         "contact_fingerprint": "f6ecc0243ece118c297561ecd684bdde9559eed19101235508ed4f11fb5f289e",
         "granted": true,
@@ -7826,9 +7826,9 @@
   "sellerLead": {
     "status": 201,
     "body": {
-      "id": "inbox-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+      "id": "inbox-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
       "lead": {
-        "id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+        "id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
         "idempotency_key": null,
         "source": "website_seller_valuation",
         "intent": "valuation",
@@ -7927,8 +7927,8 @@
       },
       "ledger": {
         "received_at": "2026-07-04T00:00:00Z",
-        "id": "inbox-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
-        "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+        "id": "inbox-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+        "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
         "source": "website_seller_valuation",
         "intent": "valuation",
         "channel": "seller_page",
@@ -7978,14 +7978,14 @@
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
-          "id": "sla-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+          "id": "sla-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "status": "open",
           "owner": "broker_assignment",
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         },
         "qualification_task": {
-          "id": "intake-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+          "id": "intake-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "status": "open",
           "owner": "broker_international",
           "action": "complete_intake_requirements",
@@ -7999,7 +7999,7 @@
         "recorded_at": "2026-07-04T00:00:00Z",
         "consent_type": "inquiry_follow_up",
         "source": "website_seller_valuation",
-        "subject_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+        "subject_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
         "locale": "el",
         "contact_fingerprint": "5605a9456324bb930893ca98393da181627f8399d796aeb0a60316cad7739faf",
         "granted": true,
@@ -8008,8 +8008,8 @@
       },
       "sellerPipeline": {
         "created_at": "2026-07-04T00:08:00Z",
-        "id": "seller-pipeline-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
-        "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+        "id": "seller-pipeline-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+        "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
         "source": "website_seller_valuation",
         "contact_name": "Nikos Papadopoulos",
         "property": {
@@ -8031,7 +8031,7 @@
           "close": "not_started"
         },
         "next_task": {
-          "id": "seller-callback-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+          "id": "seller-callback-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "kind": "seller_callback",
           "owner": "broker_en",
           "status": "open"
@@ -9221,8 +9221,8 @@
       "leads": [
         {
           "received_at": "2026-07-04T00:00:00Z",
-          "id": "inbox-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
-          "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+          "id": "inbox-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
+          "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "source": "website_listing_detail",
           "intent": "inquiry",
           "channel": "listing_detail",
@@ -9273,14 +9273,14 @@
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
-            "id": "sla-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "id": "sla-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "status": "open",
             "owner": "broker_assignment",
             "due_at": "2026-07-04T00:15:00.000Z",
             "action": "broker_response_required"
           },
           "qualification_task": {
-            "id": "intake-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "id": "intake-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "status": "open",
             "owner": "broker_international",
             "action": "complete_intake_requirements",
@@ -9297,8 +9297,8 @@
         },
         {
           "received_at": "2026-07-04T00:00:00Z",
-          "id": "inbox-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
-          "lead_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+          "id": "inbox-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
+          "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
           "source": "website_viewing_request",
           "intent": "viewing",
           "channel": "listing_detail",
@@ -9352,14 +9352,14 @@
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
-            "id": "sla-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+            "id": "sla-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "status": "open",
             "owner": "broker_assignment",
             "due_at": "2026-07-04T00:15:00.000Z",
             "action": "broker_response_required"
           },
           "qualification_task": {
-            "id": "intake-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+            "id": "intake-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "status": "open",
             "owner": "broker_international",
             "action": "complete_intake_requirements",
@@ -9376,8 +9376,8 @@
         },
         {
           "received_at": "2026-07-04T00:00:00Z",
-          "id": "inbox-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
-          "lead_id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+          "id": "inbox-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
+          "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "source": "website_contact_callback",
           "intent": "callback",
           "channel": "contact_page",
@@ -9417,14 +9417,14 @@
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
-            "id": "sla-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+            "id": "sla-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "status": "open",
             "owner": "broker_assignment",
             "due_at": "2026-07-04T00:15:00.000Z",
             "action": "broker_response_required"
           },
           "qualification_task": {
-            "id": "intake-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+            "id": "intake-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "status": "complete",
             "owner": "broker_international",
             "action": "complete_intake_requirements",
@@ -9438,8 +9438,8 @@
         },
         {
           "received_at": "2026-07-04T00:00:00Z",
-          "id": "inbox-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
-          "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+          "id": "inbox-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+          "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "source": "website_seller_valuation",
           "intent": "valuation",
           "channel": "seller_page",
@@ -9489,14 +9489,14 @@
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
-            "id": "sla-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+            "id": "sla-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "status": "open",
             "owner": "broker_assignment",
             "due_at": "2026-07-04T00:15:00.000Z",
             "action": "broker_response_required"
           },
           "qualification_task": {
-            "id": "intake-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+            "id": "intake-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "status": "open",
             "owner": "broker_international",
             "action": "complete_intake_requirements",
@@ -9522,7 +9522,7 @@
         },
         "rows": [
           {
-            "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "lead_type": "renter",
             "original_language": "he",
             "admin_locale": "en",
@@ -9565,14 +9565,14 @@
               }
             ],
             "broker_task": {
-              "id": "inventory-match-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+              "id": "inventory-match-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
               "status": "open",
               "owner": "broker_international",
               "action": "review_matching_inventory"
             }
           },
           {
-            "lead_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "lead_type": "renter",
             "original_language": "he",
             "admin_locale": "en",
@@ -9639,7 +9639,7 @@
               }
             ],
             "broker_task": {
-              "id": "inventory-match-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+              "id": "inventory-match-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
               "status": "open",
               "owner": "broker_international",
               "action": "review_matching_inventory"
@@ -9650,7 +9650,7 @@
       "replies": [
         {
           "id": "reply-server-lead-he-0001",
-          "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+          "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "listing_reference": "MS-CRAWL-0001",
           "original_language": "he",
           "message_original": null,
@@ -9670,15 +9670,15 @@
       ],
       "communicationThreads": [
         {
-          "id": "communication-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
-          "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+          "id": "communication-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
+          "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "listing_reference": "MS-CRAWL-0001",
           "preferred_channel": "whatsapp",
           "event_count": 2,
           "latest_event_at": "2026-07-04T00:05:00Z",
           "events": [
             {
-              "id": "inbound-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+              "id": "inbound-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
               "type": "inbound_request",
               "direction": "inbound",
               "occurred_at": "2026-07-04T00:00:00Z",
@@ -9700,15 +9700,15 @@
           ]
         },
         {
-          "id": "communication-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
-          "lead_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+          "id": "communication-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
+          "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
           "listing_reference": "MS-CRAWL-0001",
           "preferred_channel": "phone",
           "event_count": 1,
           "latest_event_at": "2026-07-04T00:00:00Z",
           "events": [
             {
-              "id": "inbound-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+              "id": "inbound-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
               "type": "inbound_request",
               "direction": "inbound",
               "occurred_at": "2026-07-04T00:00:00Z",
@@ -9720,15 +9720,15 @@
           ]
         },
         {
-          "id": "communication-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
-          "lead_id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+          "id": "communication-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
+          "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "listing_reference": null,
           "preferred_channel": "phone",
           "event_count": 1,
           "latest_event_at": "2026-07-04T00:00:00Z",
           "events": [
             {
-              "id": "inbound-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+              "id": "inbound-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
               "type": "inbound_request",
               "direction": "inbound",
               "occurred_at": "2026-07-04T00:00:00Z",
@@ -9740,15 +9740,15 @@
           ]
         },
         {
-          "id": "communication-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
-          "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+          "id": "communication-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+          "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "listing_reference": null,
           "preferred_channel": "phone",
           "event_count": 1,
           "latest_event_at": "2026-07-04T00:00:00Z",
           "events": [
             {
-              "id": "inbound-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+              "id": "inbound-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
               "type": "inbound_request",
               "direction": "inbound",
               "occurred_at": "2026-07-04T00:00:00Z",
@@ -9761,10 +9761,10 @@
         }
       ],
       "communicationTemplates": {
-        "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91": [
+        "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4": [
           {
             "id": "lead-acknowledgement-he",
-            "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "kind": "acknowledgement",
             "locale": "he",
             "preferred_channel": "whatsapp",
@@ -9779,10 +9779,10 @@
             "can_send_without_approval": false
           }
         ],
-        "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b": [
+        "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c": [
           {
             "id": "lead-viewing-he",
-            "lead_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "kind": "viewing",
             "locale": "he",
             "preferred_channel": "phone",
@@ -9797,10 +9797,10 @@
             "can_send_without_approval": false
           }
         ],
-        "lead-draft-66999971-5ffe-4305-a747-1568de4b9556": [
+        "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5": [
           {
             "id": "lead-callback-he",
-            "lead_id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+            "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "kind": "callback",
             "locale": "he",
             "preferred_channel": "phone",
@@ -9815,10 +9815,10 @@
             "can_send_without_approval": false
           }
         ],
-        "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67": [
+        "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f": [
           {
             "id": "lead-valuation-el",
-            "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "kind": "valuation",
             "locale": "el",
             "preferred_channel": "phone",
@@ -9837,7 +9837,7 @@
       "languageRequests": [
         {
           "requested_at": "2026-07-04T00:01:00Z",
-          "id": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+          "id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
           "idempotency_key": null,
           "requested_locale": "fr",
           "requested_path": "/fr/",
@@ -9845,7 +9845,7 @@
           "admin_locale": "en",
           "public_indexable": false,
           "notification_requested": true,
-          "contact_ref": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+          "contact_ref": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
           "contact_available": true,
           "message_available": true
         }
@@ -9945,7 +9945,7 @@
       "viewings": [
         {
           "id": "viewing-server-lead-he-0001",
-          "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+          "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
           "listing_reference": "MS-CRAWL-0001",
           "original_language": "he",
           "admin_locale": "en",
@@ -9973,7 +9973,7 @@
       "savedSearches": [
         {
           "saved_at": "2026-07-04T00:07:00Z",
-          "id": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+          "id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
           "idempotency_key": null,
           "requested_locale": "he",
           "locale": "he",
@@ -10089,17 +10089,17 @@
           "alert_frequency": "weekly",
           "status": "active",
           "alert_task": {
-            "id": "alert-190407e0-4a1a-4ebd-a604-fe944f6e124d",
+            "id": "alert-1dc61256-03ce-47b6-9e58-baeed90c635e",
             "status": "open",
             "owner": "broker_en"
           },
           "manage_access": {
             "version": "s1",
-            "verifier": "5bfd9a9703273242a857f2e188ecf0c61506567e6a78aa806e87db22ed0b6f60",
+            "verifier": "c5ca2b02229c4d60beca478f7b3f42c23026e8dbcdb8abe0c518f0bfc7f53e4f",
             "issued_at": "2026-07-04T00:07:00.000Z",
             "expires_at": "2027-07-04T00:07:00.000Z"
           },
-          "contact_ref": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+          "contact_ref": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
           "contact_available": true
         }
       ],
@@ -10118,8 +10118,8 @@
       "sellerPipeline": [
         {
           "created_at": "2026-07-04T00:08:00Z",
-          "id": "seller-pipeline-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
-          "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+          "id": "seller-pipeline-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+          "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
           "source": "website_seller_valuation",
           "contact_name": "Nikos Papadopoulos",
           "property": {
@@ -10141,7 +10141,7 @@
             "close": "not_started"
           },
           "next_task": {
-            "id": "seller-callback-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+            "id": "seller-callback-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "kind": "seller_callback",
             "owner": "broker_en",
             "status": "open"
@@ -10151,7 +10151,7 @@
       "deals": [
         {
           "id": "deal-server-lead-contact-he-0001",
-          "lead_id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+          "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
           "listing_reference": null,
           "original_language": "he",
           "admin_locale": "en",
@@ -10160,7 +10160,7 @@
           "stage": "closed",
           "status": "closed",
           "testimonial_request": {
-            "id": "testimonial-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+            "id": "testimonial-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "kind": "testimonial_request",
             "owner": "broker_ru",
             "status": "open",
@@ -10168,7 +10168,7 @@
             "channel": "phone"
           },
           "referral_request": {
-            "id": "referral-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+            "id": "referral-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "kind": "referral_request",
             "owner": "broker_ru",
             "status": "open",
@@ -10223,7 +10223,7 @@
         },
         "rows": [
           {
-            "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "source": "website_listing_detail",
             "assigned_broker": "broker_international",
             "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -10234,13 +10234,13 @@
             "status": "manager_escalation_required",
             "reminder_task": null,
             "manager_escalation": {
-              "id": "manager-escalation-lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+              "id": "manager-escalation-lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
               "owner": "manager",
               "status": "open"
             }
           },
           {
-            "lead_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "source": "website_viewing_request",
             "assigned_broker": "broker_international",
             "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -10251,13 +10251,13 @@
             "status": "manager_escalation_required",
             "reminder_task": null,
             "manager_escalation": {
-              "id": "manager-escalation-lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+              "id": "manager-escalation-lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
               "owner": "manager",
               "status": "open"
             }
           },
           {
-            "lead_id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+            "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "source": "website_contact_callback",
             "assigned_broker": "broker_international",
             "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -10268,13 +10268,13 @@
             "status": "manager_escalation_required",
             "reminder_task": null,
             "manager_escalation": {
-              "id": "manager-escalation-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+              "id": "manager-escalation-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
               "owner": "manager",
               "status": "open"
             }
           },
           {
-            "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "source": "website_seller_valuation",
             "assigned_broker": "broker_international",
             "sla_due_at": "2026-07-04T00:15:00.000Z",
@@ -10285,7 +10285,7 @@
             "status": "manager_escalation_required",
             "reminder_task": null,
             "manager_escalation": {
-              "id": "manager-escalation-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+              "id": "manager-escalation-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
               "owner": "manager",
               "status": "open"
             }
@@ -10295,7 +10295,7 @@
       "leadPipelineQueue": {
         "rows": [
           {
-            "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "lead_type": "renter",
             "pipeline": "renter",
             "stage": "viewing",
@@ -10353,7 +10353,7 @@
             "overdue": false
           },
           {
-            "lead_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "lead_type": "renter",
             "pipeline": "renter",
             "stage": "inquiry",
@@ -10401,7 +10401,7 @@
         ],
         "states": [
           {
-            "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "lead_type": "renter",
             "pipeline": "renter",
             "stage": "viewing",
@@ -10458,7 +10458,7 @@
             "last_recorded_at": "2026-07-06T12:00:00.000Z"
           },
           {
-            "lead_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "lead_type": "renter",
             "pipeline": "renter",
             "stage": "inquiry",
@@ -10518,7 +10518,7 @@
         "rows": [
           {
             "reply_id": "reply-server-lead-he-0001",
-            "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "listing_reference": "MS-CRAWL-0001",
             "reply_language": "he",
             "reviewer": "broker_ru",
@@ -10535,7 +10535,7 @@
         "states": [
           {
             "reply_id": "reply-server-lead-he-0001",
-            "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "listing_reference": "MS-CRAWL-0001",
             "reply_language": "he",
             "reviewer": "broker_ru",
@@ -10561,7 +10561,7 @@
           {
             "id": "feedback-viewing-server-lead-he-0001",
             "viewing_id": "viewing-server-lead-he-0001",
-            "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "listing_reference": "MS-CRAWL-0001",
             "original_language": "he",
             "admin_locale": "en",
@@ -10590,9 +10590,9 @@
       "sellerPipelineQueue": {
         "rows": [
           {
-            "id": "seller-callback-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
-            "seller_pipeline_id": "seller-pipeline-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
-            "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+            "id": "seller-callback-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+            "seller_pipeline_id": "seller-pipeline-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "property": {
               "location": "Sandanski",
               "type": "house"
@@ -10617,8 +10617,8 @@
         "states": [
           {
             "created_at": "2026-07-04T00:08:00Z",
-            "id": "seller-pipeline-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
-            "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+            "id": "seller-pipeline-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "source": "website_seller_valuation",
             "contact_name": "Nikos Papadopoulos",
             "property": {
@@ -10640,7 +10640,7 @@
               "close": "not_started"
             },
             "next_task": {
-              "id": "seller-callback-lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+              "id": "seller-callback-lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
               "kind": "seller_callback",
               "owner": "broker_en",
               "status": "open"
@@ -10668,7 +10668,7 @@
         "rows": [
           {
             "request_type": "language_request",
-            "request_id": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+            "request_id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
             "created_at": "2026-07-04T00:01:00Z",
             "requested_locale": "fr",
             "locale": "en",
@@ -10695,7 +10695,7 @@
           },
           {
             "request_type": "saved_search",
-            "request_id": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+            "request_id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
             "created_at": "2026-07-04T00:07:00Z",
             "requested_locale": "he",
             "locale": "he",
@@ -10726,7 +10726,7 @@
         "states": [
           {
             "request_type": "saved_search",
-            "request_id": "saved-search-d56986ca-9acb-466b-b9f4-e6317f9507e6",
+            "request_id": "saved-search-19d9e399-5715-45c9-bd71-be6ab30d1378",
             "created_at": "2026-07-04T00:07:00Z",
             "requested_locale": "he",
             "locale": "he",
@@ -10754,7 +10754,7 @@
           },
           {
             "request_type": "language_request",
-            "request_id": "language-request-aa08b693-50ef-497f-a901-099e729b3714",
+            "request_id": "language-request-f6e3fc17-4d09-44a2-8a23-d7bcea779ee6",
             "created_at": "2026-07-04T00:01:00Z",
             "requested_locale": "fr",
             "locale": "en",
@@ -10796,7 +10796,7 @@
       "leadBriefs": {
         "rows": [
           {
-            "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+            "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
             "readiness_score": 80,
             "readiness_band": "ready",
             "priority": "critical",
@@ -10858,7 +10858,7 @@
             "hermes_authority": "draft_only"
           },
           {
-            "lead_id": "lead-draft-fbe42d9c-6b52-4376-80bf-40b8b063c31b",
+            "lead_id": "lead-draft-85de0126-baae-43f4-834d-53f2bd26c47c",
             "readiness_score": 45,
             "readiness_band": "developing",
             "priority": "critical",
@@ -10920,7 +10920,7 @@
             "hermes_authority": "draft_only"
           },
           {
-            "lead_id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+            "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
             "readiness_score": 30,
             "readiness_band": "incomplete",
             "priority": "critical",
@@ -10979,7 +10979,7 @@
             "hermes_authority": "draft_only"
           },
           {
-            "lead_id": "lead-draft-d1b3394c-da68-4843-acb6-a395ca6fbe67",
+            "lead_id": "lead-draft-7f254aaf-68a2-46c2-83df-1c017122084f",
             "readiness_score": 20,
             "readiness_band": "incomplete",
             "priority": "critical",
@@ -11094,7 +11094,7 @@
     "status": 201,
     "body": {
       "id": "reply-server-lead-he-0001",
-      "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+      "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
       "listing_reference": "MS-CRAWL-0001",
       "original_language": "he",
       "message_original": null,
@@ -11128,7 +11128,7 @@
     "body": {
       "outcome": {
         "id": "qualification-server-lead-he-0001",
-        "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "pipeline": "renter",
         "actor": "broker_ru",
         "action": "qualify",
@@ -11152,7 +11152,7 @@
         }
       },
       "lead_pipeline": {
-        "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "lead_type": "renter",
         "pipeline": "renter",
         "stage": "qualified",
@@ -11215,7 +11215,7 @@
     "status": 201,
     "body": {
       "id": "viewing-server-lead-he-0001",
-      "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+      "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
       "listing_reference": "MS-CRAWL-0001",
       "original_language": "he",
       "admin_locale": "en",
@@ -11246,7 +11246,7 @@
       "follow_up": {
         "id": "viewing-follow-up-server-0001",
         "viewing_id": "viewing-server-lead-he-0001",
-        "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "actor": "broker_ru",
         "task": "follow_up",
         "action": "complete",
@@ -11255,7 +11255,7 @@
       },
       "viewing": {
         "id": "viewing-server-lead-he-0001",
-        "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "listing_reference": "MS-CRAWL-0001",
         "original_language": "he",
         "admin_locale": "en",
@@ -11291,7 +11291,7 @@
       "follow_up": {
         "id": "viewing-follow-up-server-0001",
         "viewing_id": "viewing-server-lead-he-0001",
-        "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "actor": "broker_ru",
         "task": "follow_up",
         "action": "complete",
@@ -11300,7 +11300,7 @@
       },
       "viewing": {
         "id": "viewing-server-lead-he-0001",
-        "lead_id": "lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91",
+        "lead_id": "lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4",
         "listing_reference": "MS-CRAWL-0001",
         "original_language": "he",
         "admin_locale": "en",
@@ -11352,7 +11352,7 @@
   },
   "viewingCalendar": {
     "status": 200,
-    "body": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MS Realty//Viewings//EN\r\nBEGIN:VEVENT\r\nUID:viewing-server-lead-he-0001@ms-realty.local\r\nDTSTAMP:20260704T000600Z\r\nDTSTART:20260706T100000Z\r\nDTEND:20260706T103000Z\r\nSUMMARY:MS Realty viewing MS-CRAWL-0001\r\nDESCRIPTION:Lead lead-draft-b8423421-2e87-46b6-9dce-7b47f7a66b91\\; broker broker_ru\\; follow-up open\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+    "body": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MS Realty//Viewings//EN\r\nBEGIN:VEVENT\r\nUID:viewing-server-lead-he-0001@ms-realty.local\r\nDTSTAMP:20260704T000600Z\r\nDTSTART:20260706T100000Z\r\nDTEND:20260706T103000Z\r\nSUMMARY:MS Realty viewing MS-CRAWL-0001\r\nDESCRIPTION:Lead lead-draft-b6eccc38-ea96-4c26-9cfe-5aa66bc967a4\\; broker broker_ru\\; follow-up open\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
   },
   "viewingCalendarUnauthorized": {
     "status": 401,
@@ -11368,7 +11368,7 @@
     "status": 201,
     "body": {
       "id": "deal-server-lead-contact-he-0001",
-      "lead_id": "lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+      "lead_id": "lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
       "listing_reference": null,
       "original_language": "he",
       "admin_locale": "en",
@@ -11377,7 +11377,7 @@
       "stage": "closed",
       "status": "closed",
       "testimonial_request": {
-        "id": "testimonial-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+        "id": "testimonial-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "kind": "testimonial_request",
         "owner": "broker_ru",
         "status": "open",
@@ -11385,7 +11385,7 @@
         "channel": "phone"
       },
       "referral_request": {
-        "id": "referral-lead-draft-66999971-5ffe-4305-a747-1568de4b9556",
+        "id": "referral-lead-draft-16da867b-e158-42b7-a02b-cf49defd84c5",
         "kind": "referral_request",
         "owner": "broker_ru",
         "status": "open",
@@ -12352,7 +12352,7 @@
             ],
             "total_eur": null,
             "total_including_price_eur": null,
-            "generated_at": "2026-08-25T02:55:52.080Z"
+            "generated_at": "2026-08-25T03:12:30.784Z"
           },
           "notice": "Ο πίνακας εξόδων δεν είναι πλήρης, επομένως δεν εμφανίζεται σύνολο."
         },
