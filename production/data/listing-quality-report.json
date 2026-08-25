@@ -370,7 +370,7 @@
         "thin_public_gallery"
       ],
       "price_eur": 1,
-      "price_on_request": false,
+      "price_on_request": true,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
@@ -383,7 +383,7 @@
         "blocking_fields": [
           "location_id",
           "primary_area_sqm",
-          "price_amount",
+          "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
         ]
@@ -1206,7 +1206,7 @@
         "missing_area"
       ],
       "price_eur": 6,
-      "price_on_request": false,
+      "price_on_request": true,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
@@ -1223,7 +1223,7 @@
         "blocking_fields": [
           "location_id",
           "primary_area_sqm",
-          "price_amount",
+          "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
         ]
@@ -6052,7 +6052,7 @@
         "missing_area"
       ],
       "price_eur": 1,
-      "price_on_request": false,
+      "price_on_request": true,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
@@ -6069,7 +6069,7 @@
         "blocking_fields": [
           "location_id",
           "primary_area_sqm",
-          "price_amount",
+          "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
         ]
