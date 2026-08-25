@@ -106,6 +106,24 @@ test("large source imagery outranks an inherited 45px homepage thumbnail", () =>
   assert.equal(gallery.gallery.length, 1);
 });
 
+test("a sidebar-widget thumbnail of another property is never a listing's only photo", () => {
+  const media = [
+    normalizeMediaAsset(
+      {
+        image_url:
+          "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg&h=45&w=45&zc=1",
+        alt: "Recently added listing",
+      },
+      { width: 45, height: 45 },
+    ),
+  ];
+
+  const library = publicMediaLibrary(media);
+
+  assert.equal(library.gallery_count, 0);
+  assert.equal(selectPublicThumbnail(media), null);
+});
+
 test("WordPress thumbnail derivatives recover originals without exposing tiny public fallbacks", () => {
   const media = [
     normalizeMediaAsset(

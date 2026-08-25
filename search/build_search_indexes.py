@@ -99,6 +99,32 @@ def public_upload_image_url(value: str | None) -> str:
     return candidate
 
 
+MINIMUM_THUMBNAIL_RENDER_PX = 120
+
+
+def is_navigation_thumbnail(value: str | None) -> bool:
+    """True for a WordPress sidebar-widget render rather than a listing photo.
+
+    Every crawled listing page carries the theme's "recently added" widget, which
+    renders one foreign property through timthumb at a 45x45 box. Taking the
+    first uploads image on the page therefore gave all 113 Bulgarian listings the
+    same aerial photo. The requested render box separates the two: a gallery
+    image is asked for large, a navigation thumbnail is asked for tiny.
+    """
+    raw = textish(value)
+    if not raw or "timthumb.php" not in raw.lower():
+        return False
+    query = parse_qs(urlparse(raw).query)
+    try:
+        width = int(query.get("w", ["0"])[0])
+        height = int(query.get("h", ["0"])[0])
+    except ValueError:
+        return False
+    if width <= 0 or height <= 0:
+        return False
+    return width < MINIMUM_THUMBNAIL_RENDER_PX or height < MINIMUM_THUMBNAIL_RENDER_PX
+
+
 def load_listing_thumbnails(artifact_dir: Path) -> dict[str, dict[str, str]]:
     media_path = artifact_dir / "media-inventory.csv"
     if not media_path.exists():
@@ -113,6 +139,8 @@ def load_listing_thumbnails(artifact_dir: Path) -> dict[str, dict[str, str]]:
             page_url = textish(row.get("page_url"))
             image_url = public_upload_image_url(row.get("image_url"))
             if not page_url or not image_url or page_url in thumbnails:
+                continue
+            if is_navigation_thumbnail(row.get("image_url")):
                 continue
             thumbnails[page_url] = {
                 "thumbnail_url": image_url,

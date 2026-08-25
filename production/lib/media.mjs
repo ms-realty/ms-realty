@@ -142,11 +142,24 @@ function timthumbRenderDimensions(item = {}) {
   }
 }
 
+// A WordPress sidebar widget ("recently added listings") renders a foreign
+// property through timthumb at a navigation-sized box. The crawl recorded that
+// widget on every listing page, so the same aerial shot is attached to the whole
+// catalogue. The rendered box is what distinguishes it: a gallery image is
+// requested large, a widget thumbnail is requested tiny.
+const MINIMUM_GALLERY_RENDER_PX = 120;
+
+function isNavigationThumbnailRender(item = {}) {
+  const render = timthumbRenderDimensions(item);
+  return Boolean(render && (render.width < MINIMUM_GALLERY_RENDER_PX || render.height < MINIMUM_GALLERY_RENDER_PX));
+}
+
 function isPublicPropertyPhoto(item = {}) {
   if (item.kind !== "photo" || !item.is_public || !item.asset_url) return false;
   const source = `${item.asset_url} ${item.alt || ""}`;
   if (NON_PROPERTY_MEDIA.test(source)) return false;
   if (isSmallDerivative(item.asset_url)) return false;
+  if (isNavigationThumbnailRender(item)) return false;
   // Crawl chrome can report a 45px display box for a full WordPress asset.
   // A large size embedded in the filename is more reliable than that box.
   if (!hasLargeDimensions(item.asset_url)) {

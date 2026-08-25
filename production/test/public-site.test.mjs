@@ -350,8 +350,11 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
   assert.equal(search.cards.every((card) => card.actions.inquiry.endpoint === "/api/leads"), true);
   assert.equal(search.cards.every((card) => card.actions.save.storage_key === "ms-realty:saved-listings"), true);
-  assert.equal(search.cards.every((card) => card.thumbnail?.url.includes("/wp-content/uploads/")), true);
-  assert.equal(search.cards.every((card) => card.thumbnail?.alt), true);
+  // A listing whose crawl captured no photograph of its own shows the design
+  // system's placeholder rather than another property's picture.
+  assert.ok(search.cards.some((card) => card.thumbnail));
+  assert.equal(search.cards.every((card) => !card.thumbnail || card.thumbnail.url.includes("/wp-content/uploads/")), true);
+  assert.equal(search.cards.every((card) => !card.thumbnail || card.thumbnail.alt), true);
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").review_badge, "reviewed_translation");
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));
@@ -410,7 +413,10 @@ test("public UI localizes structured values and excludes operational crawl image
   assert.equal(card.property_type_label, "Апартаменты");
   assert.equal(card.offer_type_label, "Продажа");
   assert.equal(ruPage.body.facts.location, "Сандански");
-  assert.equal(card.thumbnail, null);
+  // The card carries this listing's own photograph, never the 2013 taxi shot
+  // the crawl found in the site header.
+  assert.ok(card.thumbnail.url.includes("/wp-content/uploads/"));
+  assert.ok(!card.thumbnail.url.includes("taxi"));
   assert.equal(card.image_count, ruPage.body.media.gallery_count);
   assert.equal(card.legacy_image_count, ruListing.image_count);
   assert.ok(ruPage.body.media.gallery.every((image) => !image.url.includes("taxi")));
@@ -717,7 +723,7 @@ test("search paginates without duplicating cards and applies reviewed area facet
 });
 
 test("property-card photo counts use reviewed singular and plural labels", () => {
-  const onePhotoListing = findListingById(listings, "MS-CRAWL-0006");
+  const onePhotoListing = findListingById(listings, "MS-CRAWL-0012");
   const englishHtml = renderReactPublicBody(renderSearchPage({ registry, listings: [onePhotoListing], localeCode: "en" }));
   const bulgarianHtml = renderReactPublicBody(renderSearchPage({ registry, listings: [onePhotoListing], localeCode: "bg" }));
 
@@ -757,7 +763,7 @@ test("home page exposes search, seller, location, and featured listing paths", (
   assert.ok(he.body.hero.image?.url.includes("/wp-content/uploads/"));
   assert.ok(he.body.locations.some((location) => location.image?.url.includes("/wp-content/uploads/")));
   assert.ok(he.cards.length > 0);
-  assert.equal(he.cards.every((card) => card.thumbnail?.url.includes("/wp-content/uploads/")), true);
+  assert.equal(he.cards.every((card) => !card.thumbnail || card.thumbnail.url.includes("/wp-content/uploads/")), true);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
   assert.equal(he.body.guides, null);
 });
