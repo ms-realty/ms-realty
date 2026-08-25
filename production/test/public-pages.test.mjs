@@ -87,7 +87,10 @@ test("home keeps the hero and orders the sections: areas, how buying works, feat
   assert.match(en, /Start your search/);
   assert.match(en, /class="hp-resort__c">\d+ reviewed listings</);
   assert.doesNotMatch(en, /hp-guide__icon/);
-  assert.match(en, /Local offices: Sandanski · Bansko · Sveti Vlas/);
+  // The agency runs one office, in Sandanski. The chrome must not name Bansko
+  // or Sveti Vlas here: it sells property there, it has no office there.
+  assert.match(en, /Local office: Sandanski</);
+  assert.doesNotMatch(en.match(/<ul class="hp-trust__in">[\s\S]*?<\/ul>/)[0], /Bansko|Sveti Vlas/);
 });
 
 test("seller page keeps its intake contract and adds the promise, step questions, what happens next and channels", () => {
@@ -119,16 +122,19 @@ test("seller page keeps its intake contract and adds the promise, step questions
   assert.match(off, /href="tel:\+359879696870"/);
 });
 
-test("contact page lists the three offices as objects, channels, and a callback form with a topic select", () => {
+test("contact page lists the single Sandanski office as an object, channels, and a callback form with a topic select", () => {
   const page = renderContactPage({ registry, localeCode: "en", leadWritesDisabled: false });
-  assert.deepEqual(page.body.offices.map((office) => office.location), ["Sandanski", "Bansko", "Sveti Vlas"]);
-  assert.equal(page.body.offices[2].search_path, "/en/search?location=Sveti%20Vlas");
+  // The agency has one office, in Sandanski. Bansko and Sveti Vlas are places
+  // it sells property, not places it has a branch.
+  assert.deepEqual(page.body.offices.map((office) => office.location), ["Sandanski"]);
+  assert.equal(page.body.offices[0].search_path, "/en/search?location=Sandanski");
   assert.match(page.body.offices[0].map_href, /^https:\/\/www\.openstreetmap\.org\/search\?query=Sandanski/);
   const html = renderReactPublicBody(page);
   assert.match(html, /data-contact-offices="true"/);
-  assert.equal((html.match(/class="ct-office" data-office="/g) || []).length, 3);
-  assert.match(html, /Properties in Sveti Vlas/);
-  assert.match(html, /href="https:\/\/www\.openstreetmap\.org\/search\?query=Bansko%2C%20Bulgaria" target="_blank" rel="noopener noreferrer"/);
+  assert.equal((html.match(/class="ct-office" data-office="/g) || []).length, 1);
+  assert.match(html, /Properties in Sandanski/);
+  assert.match(html, /href="https:\/\/www\.openstreetmap\.org\/search\?query=Sandanski%2C%20Bulgaria" target="_blank" rel="noopener noreferrer"/);
+  assert.doesNotMatch(html, /Bansko|Sveti Vlas/, "the contact page must not claim an office in Bansko or Sveti Vlas");
   assert.match(html, /<select name="request_details.topic" data-contact-topic="true">/);
   for (const option of ["buying", "renting", "selling", "other"]) assert.match(html, new RegExp(`<option value="${option}">`));
   assert.match(html, /name="contact.phone" type="tel" required/);
