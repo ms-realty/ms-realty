@@ -212,7 +212,7 @@ const ACTION_LABELS = {
     startSearch: "Започнете търсенето",
     trustReviewed: "Всеки факт за имота се проверява от човек, преди да бъде публикуван",
     trustLanguages: "7 езика и брокери, които говорят вашия",
-    trustOffices: "Местни офиси",
+    trustOffices: "Местен офис",
     whatHappensNext: "Какво следва",
     sellerNextOneTitle: "Местен брокер ви се обажда",
     sellerNextOneText: "Уточняваме данните за имота и отговаряме на въпросите ви.",
@@ -232,7 +232,7 @@ const ACTION_LABELS = {
     topicSelling: "Продажба или отдаване на моя имот",
     topicOther: "Друго",
     callOrMessage: "Обадете се или ни пишете",
-    ourOffices: "Нашите офиси",
+    ourOffices: "Нашият офис",
     openMap: "Отвори картата",
     propertiesIn: "Имоти в {area}",
     onThisPage: "На тази страница",
@@ -392,7 +392,7 @@ const ACTION_LABELS = {
     startSearch: "Start your search",
     trustReviewed: "Every listing fact is reviewed by a person before it goes live",
     trustLanguages: "7 languages and brokers who speak yours",
-    trustOffices: "Local offices",
+    trustOffices: "Local office",
     whatHappensNext: "What happens next",
     sellerNextOneTitle: "A local broker calls you back",
     sellerNextOneText: "We confirm the details of your property and answer your questions.",
@@ -412,7 +412,7 @@ const ACTION_LABELS = {
     topicSelling: "Selling or letting my property",
     topicOther: "Something else",
     callOrMessage: "Call or message us",
-    ourOffices: "Our offices",
+    ourOffices: "Our office",
     openMap: "Open map",
     propertiesIn: "Properties in {area}",
     onThisPage: "On this page",
@@ -572,7 +572,7 @@ const ACTION_LABELS = {
     startSearch: "Suche starten",
     trustReviewed: "Jede Angabe zu einer Immobilie wird vor der Veröffentlichung von einer Person geprüft",
     trustLanguages: "7 Sprachen und Makler, die Ihre sprechen",
-    trustOffices: "Lokale Büros",
+    trustOffices: "Lokales Büro",
     whatHappensNext: "Wie es weitergeht",
     sellerNextOneTitle: "Ein lokaler Makler ruft Sie zurück",
     sellerNextOneText: "Wir klären die Details Ihrer Immobilie und beantworten Ihre Fragen.",
@@ -592,7 +592,7 @@ const ACTION_LABELS = {
     topicSelling: "Meine Immobilie verkaufen oder vermieten",
     topicOther: "Etwas anderes",
     callOrMessage: "Rufen Sie an oder schreiben Sie uns",
-    ourOffices: "Unsere Büros",
+    ourOffices: "Unser Büro",
     openMap: "Karte öffnen",
     propertiesIn: "Immobilien in {area}",
     onThisPage: "Auf dieser Seite",
@@ -752,7 +752,7 @@ const ACTION_LABELS = {
     startSearch: "Begin uw zoektocht",
     trustReviewed: "Elk feit over een object wordt door een persoon gecontroleerd voordat het online gaat",
     trustLanguages: "7 talen en makelaars die de uwe spreken",
-    trustOffices: "Lokale kantoren",
+    trustOffices: "Lokaal kantoor",
     whatHappensNext: "Wat gebeurt er daarna",
     sellerNextOneTitle: "Een lokale makelaar belt u terug",
     sellerNextOneText: "We bevestigen de gegevens van uw vastgoed en beantwoorden uw vragen.",
@@ -772,7 +772,7 @@ const ACTION_LABELS = {
     topicSelling: "Mijn vastgoed verkopen of verhuren",
     topicOther: "Iets anders",
     callOrMessage: "Bel of stuur ons een bericht",
-    ourOffices: "Onze kantoren",
+    ourOffices: "Ons kantoor",
     openMap: "Kaart openen",
     propertiesIn: "Vastgoed in {area}",
     onThisPage: "Op deze pagina",
@@ -932,7 +932,7 @@ const ACTION_LABELS = {
     startSearch: "Начать поиск",
     trustReviewed: "Каждый факт об объекте проверяет человек до публикации",
     trustLanguages: "7 языков и брокеры, говорящие на вашем",
-    trustOffices: "Местные офисы",
+    trustOffices: "Местный офис",
     whatHappensNext: "Что дальше",
     sellerNextOneTitle: "Местный брокер перезванивает вам",
     sellerNextOneText: "Мы уточняем данные об объекте и отвечаем на ваши вопросы.",
@@ -952,7 +952,7 @@ const ACTION_LABELS = {
     topicSelling: "Продажа или сдача моего объекта",
     topicOther: "Другое",
     callOrMessage: "Позвоните или напишите нам",
-    ourOffices: "Наши офисы",
+    ourOffices: "Наш офис",
     openMap: "Открыть карту",
     propertiesIn: "Недвижимость в {area}",
     onThisPage: "На этой странице",
@@ -1112,7 +1112,7 @@ const ACTION_LABELS = {
     startSearch: "Ξεκινήστε την αναζήτηση",
     trustReviewed: "Κάθε στοιχείο ακινήτου ελέγχεται από άνθρωπο πριν δημοσιευτεί",
     trustLanguages: "7 γλώσσες και μεσίτες που μιλούν τη δική σας",
-    trustOffices: "Τοπικά γραφεία",
+    trustOffices: "Τοπικό γραφείο",
     whatHappensNext: "Τι ακολουθεί",
     sellerNextOneTitle: "Ένας τοπικός μεσίτης σας καλεί",
     sellerNextOneText: "Επιβεβαιώνουμε τα στοιχεία του ακινήτου σας και απαντάμε στις ερωτήσεις σας.",
@@ -1132,7 +1132,7 @@ const ACTION_LABELS = {
     topicSelling: "Πώληση ή εκμίσθωση του ακινήτου μου",
     topicOther: "Κάτι άλλο",
     callOrMessage: "Καλέστε μας ή στείλτε μήνυμα",
-    ourOffices: "Τα γραφεία μας",
+    ourOffices: "Το γραφείο μας",
     openMap: "Άνοιγμα χάρτη",
     propertiesIn: "Ακίνητα σε {area}",
     onThisPage: "Σε αυτή τη σελίδα",
@@ -1292,7 +1292,7 @@ const ACTION_LABELS = {
     startSearch: "התחילו את החיפוש",
     trustReviewed: "כל פרט על נכס נבדק על ידי אדם לפני הפרסום",
     trustLanguages: "7 שפות ומתווכים שמדברים את שלכם",
-    trustOffices: "משרדים מקומיים",
+    trustOffices: "משרד מקומי",
     whatHappensNext: "מה קורה בהמשך",
     sellerNextOneTitle: "מתווך מקומי חוזר אליכם",
     sellerNextOneText: "אנחנו מאשרים את פרטי הנכס ועונים על השאלות שלכם.",
@@ -1312,7 +1312,7 @@ const ACTION_LABELS = {
     topicSelling: "מכירה או השכרה של הנכס שלי",
     topicOther: "משהו אחר",
     callOrMessage: "התקשרו או שלחו לנו הודעה",
-    ourOffices: "המשרדים שלנו",
+    ourOffices: "המשרד שלנו",
     openMap: "פתיחת מפה",
     propertiesIn: "נכסים ב-{area}",
     onThisPage: "בעמוד הזה",
@@ -1927,7 +1927,7 @@ const START_COPY = {
     whereTitle: "Къде търсите?",
     anywhere: "Навсякъде, където работим",
     areas: { sandanski: "Сандански", bansko: "Банско", blagoevgrad_district: "Област Благоевград", black_sea_coast: "Черноморие", greece: "Гърция" },
-    areaNotes: { sandanski: "Централен офис", bansko: "Местен офис", blagoevgrad_district: "Цялата област", black_sea_coast: "Офис в Свети Влас", greece: "Отвъд границата" },
+    areaNotes: { sandanski: "Тук е нашият офис", bansko: "Ски курортът", blagoevgrad_district: "Цялата област", black_sea_coast: "Свети Влас и плажовете", greece: "Отвъд границата" },
     budgetTitle: "Вашият бюджет",
     bedroomsHint: "Не е нужно за парцели, земя, търговски имоти и хотели.",
     aboutTitle: "За вас",
@@ -1989,7 +1989,7 @@ const START_COPY = {
     whereTitle: "Where are you looking?",
     anywhere: "Anywhere we work",
     areas: { sandanski: "Sandanski", bansko: "Bansko", blagoevgrad_district: "Blagoevgrad district", black_sea_coast: "Black Sea coast", greece: "Greece" },
-    areaNotes: { sandanski: "Head office", bansko: "Local office", blagoevgrad_district: "The whole district", black_sea_coast: "Sveti Vlas office", greece: "Across the border" },
+    areaNotes: { sandanski: "Where we are based", bansko: "The ski resort", blagoevgrad_district: "The whole district", black_sea_coast: "Sveti Vlas and the beaches", greece: "Across the border" },
     budgetTitle: "Your budget",
     bedroomsHint: "Not needed for plots, land, commercial property and hotels.",
     aboutTitle: "About you",
@@ -2051,7 +2051,7 @@ const START_COPY = {
     whereTitle: "Wo suchen Sie?",
     anywhere: "Überall, wo wir tätig sind",
     areas: { sandanski: "Sandanski", bansko: "Bansko", blagoevgrad_district: "Bezirk Blagoevgrad", black_sea_coast: "Schwarzmeerküste", greece: "Griechenland" },
-    areaNotes: { sandanski: "Hauptbüro", bansko: "Lokales Büro", blagoevgrad_district: "Der ganze Bezirk", black_sea_coast: "Büro in Sveti Vlas", greece: "Jenseits der Grenze" },
+    areaNotes: { sandanski: "Hier sitzen wir", bansko: "Das Skigebiet", blagoevgrad_district: "Der ganze Bezirk", black_sea_coast: "Sveti Vlas und die Strände", greece: "Jenseits der Grenze" },
     budgetTitle: "Ihr Budget",
     bedroomsHint: "Entfällt bei Grundstücken, Land, Gewerbeimmobilien und Hotels.",
     aboutTitle: "Über Sie",
@@ -2113,7 +2113,7 @@ const START_COPY = {
     whereTitle: "Waar zoekt u?",
     anywhere: "Overal waar wij werken",
     areas: { sandanski: "Sandanski", bansko: "Bansko", blagoevgrad_district: "District Blagoevgrad", black_sea_coast: "Zwarte Zeekust", greece: "Griekenland" },
-    areaNotes: { sandanski: "Hoofdkantoor", bansko: "Lokaal kantoor", blagoevgrad_district: "Het hele district", black_sea_coast: "Kantoor in Sveti Vlas", greece: "Over de grens" },
+    areaNotes: { sandanski: "Hier zitten wij", bansko: "Het skigebied", blagoevgrad_district: "Het hele district", black_sea_coast: "Sveti Vlas en de stranden", greece: "Over de grens" },
     budgetTitle: "Uw budget",
     bedroomsHint: "Niet nodig voor kavels, grond, commercieel vastgoed en hotels.",
     aboutTitle: "Over u",
@@ -2175,7 +2175,7 @@ const START_COPY = {
     whereTitle: "Где вы ищете?",
     anywhere: "Везде, где мы работаем",
     areas: { sandanski: "Сандански", bansko: "Банско", blagoevgrad_district: "Благоевградская область", black_sea_coast: "Черноморское побережье", greece: "Греция" },
-    areaNotes: { sandanski: "Главный офис", bansko: "Местный офис", blagoevgrad_district: "Вся область", black_sea_coast: "Офис в Свети-Влас", greece: "За границей" },
+    areaNotes: { sandanski: "Здесь наш офис", bansko: "Горнолыжный курорт", blagoevgrad_district: "Вся область", black_sea_coast: "Свети-Влас и пляжи", greece: "За границей" },
     budgetTitle: "Ваш бюджет",
     bedroomsHint: "Не нужно для участков, земли, коммерческой недвижимости и отелей.",
     aboutTitle: "О вас",
@@ -2237,7 +2237,7 @@ const START_COPY = {
     whereTitle: "Πού ψάχνετε;",
     anywhere: "Οπουδήποτε δραστηριοποιούμαστε",
     areas: { sandanski: "Σαντάνσκι", bansko: "Μπάνσκο", blagoevgrad_district: "Περιφέρεια Μπλαγκόεβγκραντ", black_sea_coast: "Ακτές Μαύρης Θάλασσας", greece: "Ελλάδα" },
-    areaNotes: { sandanski: "Κεντρικό γραφείο", bansko: "Τοπικό γραφείο", blagoevgrad_district: "Ολόκληρη η περιφέρεια", black_sea_coast: "Γραφείο στο Σβέτι Βλας", greece: "Πέρα από τα σύνορα" },
+    areaNotes: { sandanski: "Εδώ είναι η έδρα μας", bansko: "Το χιονοδρομικό κέντρο", blagoevgrad_district: "Ολόκληρη η περιφέρεια", black_sea_coast: "Το Σβέτι Βλας και οι παραλίες", greece: "Πέρα από τα σύνορα" },
     budgetTitle: "Ο προϋπολογισμός σας",
     bedroomsHint: "Δεν χρειάζεται για οικόπεδα, γη, επαγγελματικά ακίνητα και ξενοδοχεία.",
     aboutTitle: "Σχετικά με εσάς",
@@ -2299,7 +2299,7 @@ const START_COPY = {
     whereTitle: "איפה אתם מחפשים?",
     anywhere: "בכל מקום שבו אנחנו פועלים",
     areas: { sandanski: "סנדנסקי", bansko: "בנסקו", blagoevgrad_district: "מחוז בלגואבגרד", black_sea_coast: "חוף הים השחור", greece: "יוון" },
-    areaNotes: { sandanski: "המשרד הראשי", bansko: "משרד מקומי", blagoevgrad_district: "המחוז כולו", black_sea_coast: "משרד בסבטי ולאס", greece: "מעבר לגבול" },
+    areaNotes: { sandanski: "כאן נמצא המשרד שלנו", bansko: "אתר הסקי", blagoevgrad_district: "המחוז כולו", black_sea_coast: "סבטי ולאס והחופים", greece: "מעבר לגבול" },
     budgetTitle: "התקציב שלכם",
     bedroomsHint: "לא נדרש למגרשים, קרקע, נכסים מסחריים ומלונות.",
     aboutTitle: "עליכם",
@@ -2359,8 +2359,9 @@ const START_AREAS = Object.freeze([
   { id: "sandanski", search: { geography_id: "BG:municipality:BLG40" }, location: "Sandanski" },
   { id: "bansko", search: { geography_id: "BG:municipality:BLG01" }, location: "Bansko" },
   { id: "blagoevgrad_district", search: { region_id: "BG:district:BLG" }, location: "Blagoevgrad district" },
-  // The agency's coastal office is in Sveti Vlas (Burgas district), which is
-  // the only coastal scope the geography registry can express as one filter.
+  // The coastal property the agency sells sits around Sveti Vlas (Burgas
+  // district), which is the only coastal scope the geography registry can
+  // express as one filter. The agency has no office there.
   { id: "black_sea_coast", search: { region_id: "BG:district:BGS" }, location: "Black Sea coast" },
   { id: "greece", search: { country_code: "GR" }, location: "Greece" },
 ]);
@@ -2493,7 +2494,7 @@ const CHROME_COPY = {
     explore: "Разгледайте",
     getInTouch: "Свържете се",
     tagline:
-      "Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция, с местни офиси и брокери, които говорят вашия език.",
+      "Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция, с местен офис и брокери, които говорят вашия език.",
     copyright: "Всички права запазени.",
     requestSent: "Запитването е изпратено. Брокер ще се свърже с вас.",
     requestFailed: "Изпращането не бе успешно. Опитайте отново.",
@@ -2504,7 +2505,7 @@ const CHROME_COPY = {
     menuLabel: "Основна навигация",
     skipToContent: "Към съдържанието",
     filters: "Филтри",
-    offices: "Сандански · Банско · Свети Влас",
+    offices: "Сандански",
   },
   en: {
     navBuy: "Buy",
@@ -2515,7 +2516,7 @@ const CHROME_COPY = {
     explore: "Explore",
     getInTouch: "Get in touch",
     tagline:
-      "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
+      "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with a local office and brokers who speak your language.",
     copyright: "All rights reserved.",
     requestSent: "Your inquiry was sent. A broker will contact you.",
     requestFailed: "The request could not be sent. Please try again.",
@@ -2526,7 +2527,7 @@ const CHROME_COPY = {
     menuLabel: "Primary navigation",
     skipToContent: "Skip to content",
     filters: "Filters",
-    offices: "Sandanski · Bansko · Sveti Vlas",
+    offices: "Sandanski",
   },
   de: {
     navBuy: "Kaufen",
@@ -2537,7 +2538,7 @@ const CHROME_COPY = {
     explore: "Entdecken",
     getInTouch: "Kontakt aufnehmen",
     tagline:
-      "Immobilien zum Kauf und zur Miete in Sandanski und im Pirin-Gebirge, an der Schwarzmeerküste und im benachbarten Griechenland, mit lokalen Büros und Maklern, die Ihre Sprache sprechen.",
+      "Immobilien zum Kauf und zur Miete in Sandanski und im Pirin-Gebirge, an der Schwarzmeerküste und im benachbarten Griechenland, mit einem lokalen Büro und Maklern, die Ihre Sprache sprechen.",
     copyright: "Alle Rechte vorbehalten.",
     requestSent: "Ihre Anfrage wurde gesendet. Ein Makler meldet sich bei Ihnen.",
     requestFailed: "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
@@ -2548,7 +2549,7 @@ const CHROME_COPY = {
     menuLabel: "Hauptnavigation",
     skipToContent: "Zum Inhalt springen",
     filters: "Filter",
-    offices: "Sandanski · Bansko · Sveti Vlas",
+    offices: "Sandanski",
   },
   nl: {
     navBuy: "Kopen",
@@ -2559,7 +2560,7 @@ const CHROME_COPY = {
     explore: "Ontdekken",
     getInTouch: "Neem contact op",
     tagline:
-      "Vastgoed te koop en te huur in Sandanski en het Pirin-gebergte, aan de Zwarte Zeekust en in buurland Griekenland, met lokale kantoren en makelaars die uw taal spreken.",
+      "Vastgoed te koop en te huur in Sandanski en het Pirin-gebergte, aan de Zwarte Zeekust en in buurland Griekenland, met een lokaal kantoor en makelaars die uw taal spreken.",
     copyright: "Alle rechten voorbehouden.",
     requestSent: "Uw aanvraag is verzonden. Een makelaar neemt contact met u op.",
     requestFailed: "De aanvraag kon niet worden verzonden. Probeer het opnieuw.",
@@ -2570,7 +2571,7 @@ const CHROME_COPY = {
     menuLabel: "Hoofdnavigatie",
     skipToContent: "Naar inhoud",
     filters: "Filters",
-    offices: "Sandanski · Bansko · Sveti Vlas",
+    offices: "Sandanski",
   },
   ru: {
     navBuy: "Купить",
@@ -2581,7 +2582,7 @@ const CHROME_COPY = {
     explore: "Обзор",
     getInTouch: "Связаться с нами",
     tagline:
-      "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции, с местными офисами и брокерами, говорящими на вашем языке.",
+      "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции, с местным офисом и брокерами, говорящими на вашем языке.",
     copyright: "Все права защищены.",
     requestSent: "Запрос отправлен. Брокер свяжется с вами.",
     requestFailed: "Не удалось отправить запрос. Попробуйте ещё раз.",
@@ -2592,7 +2593,7 @@ const CHROME_COPY = {
     menuLabel: "Основная навигация",
     skipToContent: "К содержанию",
     filters: "Фильтры",
-    offices: "Сандански · Банско · Свети-Влас",
+    offices: "Сандански",
   },
   el: {
     navBuy: "Αγορά",
@@ -2603,7 +2604,7 @@ const CHROME_COPY = {
     explore: "Εξερευνήστε",
     getInTouch: "Επικοινωνήστε",
     tagline:
-      "Ακίνητα προς πώληση και ενοικίαση στο Σαντάνσκι και τον Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη γειτονική Ελλάδα, με τοπικά γραφεία και μεσίτες που μιλούν τη γλώσσα σας.",
+      "Ακίνητα προς πώληση και ενοικίαση στο Σαντάνσκι και τον Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη γειτονική Ελλάδα, με τοπικό γραφείο και μεσίτες που μιλούν τη γλώσσα σας.",
     copyright: "Με την επιφύλαξη παντός δικαιώματος.",
     requestSent: "Το αίτημά σας εστάλη. Ένας μεσίτης θα επικοινωνήσει μαζί σας.",
     requestFailed: "Δεν ήταν δυνατή η αποστολή του αιτήματος. Προσπαθήστε ξανά.",
@@ -2614,7 +2615,7 @@ const CHROME_COPY = {
     menuLabel: "Κύρια πλοήγηση",
     skipToContent: "Μετάβαση στο περιεχόμενο",
     filters: "Φίλτρα",
-    offices: "Σαντάνσκι · Μπάνσκο · Σβετί Βλας",
+    offices: "Σαντάνσκι",
   },
   he: {
     navBuy: "קנייה",
@@ -2625,7 +2626,7 @@ const CHROME_COPY = {
     explore: "גלו עוד",
     getInTouch: "יצירת קשר",
     tagline:
-      "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+      "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
     copyright: "כל הזכויות שמורות.",
     requestSent: "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
     requestFailed: "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -2636,7 +2637,7 @@ const CHROME_COPY = {
     menuLabel: "ניווט ראשי",
     skipToContent: "דלגו לתוכן",
     filters: "סינון",
-    offices: "סנדנסקי · בנסקו · סבטי ולאס",
+    offices: "סנדנסקי",
   },
 };
 
@@ -2650,10 +2651,12 @@ const BRAND_CONTACT = {
   viber: "viber://chat?number=%2B359879696870",
 };
 
-// Office towns as listed in the site chrome (CHROME_COPY.offices, verified
-// against the legacy site header/footer). Canonical names feed the location
-// filter; display names are localized per public locale.
-const AGENCY_OFFICES = ["Sandanski", "Bansko", "Sveti Vlas"];
+// The agency runs one office, in Sandanski (confirmed by the owner). The list
+// shape stays so the contact page keeps rendering office cards, and so a second
+// office would only ever need an entry here. The canonical name feeds the
+// location filter; the display name is localized per public locale. Selling in
+// Bansko or on the coast is not an office there.
+const AGENCY_OFFICES = ["Sandanski"];
 
 export function chromeCopyFor(localeCode) {
   return CHROME_COPY[localeCode] || CHROME_COPY.en;
@@ -4916,11 +4919,10 @@ const COMPARE_MAX_COLUMNS = 4;
 const COMPARE_STORAGE_KEY = "ms-realty:saved-listings";
 const ALERTS_STORAGE_KEY = "ms-realty:saved-searches:v1";
 
-// The three offices the agency runs. Verified against the legacy site header
-// and the site chrome ("Sandanski · Bansko · Sveti Vlas"); street addresses are
-// not published anywhere we can cite, so the cards carry the shared agency
-// line instead of an address nobody approved.
-const P4_AGENCY_OFFICES = Object.freeze(["sandanski", "bansko", "sveti_vlas"]);
+// The one office the agency runs, in Sandanski, as the owner confirmed. The
+// street address is not published anywhere we can cite, so the card carries the
+// shared agency line instead of an address nobody approved.
+const P4_AGENCY_OFFICES = Object.freeze(["sandanski"]);
 
 // Fee lines a Bulgarian purchase actually involves. No rate is stated: an
 // approved fee table in the CMS supplies the values, and until then every line
@@ -4968,7 +4970,7 @@ const P4_COPY = {
     },
     about: {
       title: "За MS Realty",
-      description: "MS Realty е семейна агенция за недвижими имоти в Сандански с офиси в Сандански, Банско и Свети Влас, която работи на седем езика.",
+      description: "MS Realty е семейна агенция за недвижими имоти с офис в Сандански, която работи на седем езика.",
       h1: "За MS Realty",
       intro: "Семейна агенция в Сандански, която работи в Пиринския край, по Черноморието и в Северна Гърция.",
       storyTitle: "Кои сме ние",
@@ -4977,12 +4979,10 @@ const P4_COPY = {
         "Повечето от нашите купувачи идват извън България, затова агенцията изгради работата си около една задача: покупката в чужда държава да бъде разбираема. Това означава факти за имота, проверени от брокер, ясно казани местни правила и човек, който отговаря на вашия език.",
         "Публикуваме сайта на български, английски, немски, нидерландски, руски, гръцки и иврит. Пишем първо на български и всеки превод се одобрява от човек, преди да се появи.",
       ],
-      officesTitle: "Нашите офиси",
-      officesIntro: "Три офиса покриват районите, в които работим. Обадете се на общия номер и ще ви свържем с офиса, най-близък до имота.",
+      officesTitle: "Нашият офис",
+      officesIntro: "Един офис в Сандански покрива всички райони, в които работим. Обадете се на общия номер и ще ви свържем с брокера, който отговаря за имота.",
       offices: {
-        sandanski: { town: "Сандански", role: "Централен офис", note: "Градът, полите на Пирин и област Благоевград." },
-        bansko: { town: "Банско", role: "Планински офис", note: "Банско и планинските курорти." },
-        sveti_vlas: { town: "Свети Влас", role: "Крайбрежен офис", note: "Свети Влас и Черноморието." },
+        sandanski: { town: "Сандански", role: "Офис на агенцията", note: "Градът, полите на Пирин и област Благоевград." },
       },
       pillarsTitle: "Какво обещаваме на купувача",
       pillarsIntro: "Пет неща, към които се придържаме. Всяко от тях личи в сайта, не само тук.",
@@ -5000,7 +5000,7 @@ const P4_COPY = {
           text: "Запитването отива директно при брокер заедно с имота, който сте чели, така че първият отговор вече е по същество.",
         },
         multilingual: { title: "На вашия език", text: "Седем езика и брокер, който отговаря на този, на който сте писали." },
-        local: { title: "Местни хора", text: "Три офиса в района, така че някой да отвори вратата, да мине по улицата и да прочете документите с вас." },
+        local: { title: "Местни хора", text: "Брокери от този край, така че някой да отвори вратата, да мине по улицата и да прочете документите с вас." },
       },
       teamTitle: "Екипът",
       teamIntro: "Брокерите, с които ще работите, езиците, на които говорят, и данните за лиценза им.",
@@ -5009,7 +5009,7 @@ const P4_COPY = {
         "Никой още не е одобрил профил на екипа в системата за съдържание, затова не показваме нито един, вместо да ги измисляме. Обадете се и ще ви кажем кой отговаря за имота, който гледате.",
       teamFields: "Всеки профил ще съдържа име, роля, офис, езиците на брокера, снимка и номер на лиценз.",
       contactTitle: "Говорете с брокер",
-      contactText: "Един номер стига до трите офиса, по телефон, WhatsApp или Viber.",
+      contactText: "Един номер стига до офиса, по телефон, WhatsApp или Viber.",
       contactCta: "Свържете се с агенцията",
     },
     alerts: {
@@ -5110,7 +5110,7 @@ const P4_COPY = {
     },
     about: {
       title: "About MS Realty",
-      description: "MS Realty is a family estate agency in Sandanski with offices in Sandanski, Bansko and Sveti Vlas, working in seven languages.",
+      description: "MS Realty is a family estate agency with its office in Sandanski, working in seven languages.",
       h1: "About MS Realty",
       intro: "A family agency in Sandanski, working across the Pirin region, the Black Sea coast and northern Greece.",
       storyTitle: "Who we are",
@@ -5119,12 +5119,10 @@ const P4_COPY = {
         "Most of our buyers come from outside Bulgaria, so the agency grew around one job: making a purchase in a foreign country understandable. That means property facts a broker has checked, the local rules stated plainly, and a person who answers in your language.",
         "We publish the site in Bulgarian, English, German, Dutch, Russian, Greek and Hebrew. Bulgarian is the language we write in first, and a person approves every translation before it appears.",
       ],
-      officesTitle: "Our offices",
-      officesIntro: "Three offices cover the areas we work in. Call the agency line and we will put you through to the office nearest the property.",
+      officesTitle: "Our office",
+      officesIntro: "One office in Sandanski covers every area we work in. Call the agency line and we will put you through to the broker who handles the property.",
       offices: {
-        sandanski: { town: "Sandanski", role: "Head office", note: "The town, the Pirin foothills and the Blagoevgrad district." },
-        bansko: { town: "Bansko", role: "Mountain office", note: "Bansko and the mountain resorts." },
-        sveti_vlas: { town: "Sveti Vlas", role: "Coast office", note: "Sveti Vlas and the Black Sea coast." },
+        sandanski: { town: "Sandanski", role: "Agency office", note: "The town, the Pirin foothills and the Blagoevgrad district." },
       },
       pillarsTitle: "What we promise a buyer",
       pillarsIntro: "Five things we hold ourselves to. Each one is visible on the site, not only stated here.",
@@ -5139,7 +5137,7 @@ const P4_COPY = {
         },
         fast: { title: "Fast", text: "An enquiry goes straight to a broker with the property you were reading, so the first reply already has the context." },
         multilingual: { title: "Multilingual", text: "Seven languages, and a broker who answers in the one you wrote in." },
-        local: { title: "Local", text: "Three offices in the region, so someone can open the door, walk the street and read the paperwork with you." },
+        local: { title: "Local", text: "Brokers from the region, so someone can open the door, walk the street and read the paperwork with you." },
       },
       teamTitle: "The team",
       teamIntro: "The brokers you will deal with, the languages they work in and their licence details.",
@@ -5148,7 +5146,7 @@ const P4_COPY = {
         "Nobody has approved a team profile in the content system yet, so we show none rather than invent them. Call the agency and we will tell you who covers the property you are looking at.",
       teamFields: "Each profile will carry a name, a role, an office, the languages the broker works in, a photo and a licence number.",
       contactTitle: "Talk to a broker",
-      contactText: "One line reaches all three offices, on the phone, WhatsApp or Viber.",
+      contactText: "One line reaches the office, on the phone, WhatsApp or Viber.",
       contactCta: "Contact the agency",
     },
     alerts: {
@@ -5249,7 +5247,7 @@ const P4_COPY = {
     },
     about: {
       title: "Über MS Realty",
-      description: "MS Realty ist ein Familienmaklerbüro in Sandanski mit Büros in Sandanski, Bansko und Sveti Vlas und arbeitet in sieben Sprachen.",
+      description: "MS Realty ist ein Familienmaklerbüro mit Sitz in Sandanski und arbeitet in sieben Sprachen.",
       h1: "Über MS Realty",
       intro: "Ein Familienbüro in Sandanski, tätig in der Pirin-Region, an der Schwarzmeerküste und in Nordgriechenland.",
       storyTitle: "Wer wir sind",
@@ -5258,12 +5256,10 @@ const P4_COPY = {
         "Die meisten unserer Käufer kommen von außerhalb Bulgariens, deshalb ist das Büro um eine Aufgabe herum gewachsen: einen Kauf im Ausland verständlich zu machen. Das bedeutet von einem Makler geprüfte Objektangaben, klar benannte lokale Regeln und einen Menschen, der in Ihrer Sprache antwortet.",
         "Wir veröffentlichen die Website auf Bulgarisch, Englisch, Deutsch, Niederländisch, Russisch, Griechisch und Hebräisch. Wir schreiben zuerst auf Bulgarisch, und ein Mensch gibt jede Übersetzung frei, bevor sie erscheint.",
       ],
-      officesTitle: "Unsere Büros",
-      officesIntro: "Drei Büros decken die Gebiete ab, in denen wir arbeiten. Rufen Sie die Bürolinie an, wir verbinden Sie mit dem Büro in der Nähe der Immobilie.",
+      officesTitle: "Unser Büro",
+      officesIntro: "Ein Büro in Sandanski deckt alle Gebiete ab, in denen wir arbeiten. Rufen Sie die Bürolinie an, wir verbinden Sie mit dem Makler, der die Immobilie betreut.",
       offices: {
-        sandanski: { town: "Sandanski", role: "Hauptbüro", note: "Die Stadt, das Pirin-Vorland und der Bezirk Blagoevgrad." },
-        bansko: { town: "Bansko", role: "Bergbüro", note: "Bansko und die Bergorte." },
-        sveti_vlas: { town: "Sveti Vlas", role: "Küstenbüro", note: "Sveti Vlas und die Schwarzmeerküste." },
+        sandanski: { town: "Sandanski", role: "Büro der Agentur", note: "Die Stadt, das Pirin-Vorland und der Bezirk Blagoevgrad." },
       },
       pillarsTitle: "Was wir einem Käufer zusagen",
       pillarsIntro: "Fünf Punkte, an denen wir uns messen lassen. Jeder ist auf der Website sichtbar, nicht nur hier benannt.",
@@ -5278,7 +5274,7 @@ const P4_COPY = {
         },
         fast: { title: "Schnell", text: "Eine Anfrage geht direkt an einen Makler, samt der Immobilie, die Sie gelesen haben, so hat die erste Antwort schon den Zusammenhang." },
         multilingual: { title: "Mehrsprachig", text: "Sieben Sprachen und ein Makler, der in der Sprache antwortet, in der Sie geschrieben haben." },
-        local: { title: "Vor Ort", text: "Drei Büros in der Region, damit jemand die Tür öffnet, die Straße mit Ihnen abgeht und die Unterlagen mit Ihnen liest." },
+        local: { title: "Vor Ort", text: "Makler aus der Region, damit jemand die Tür öffnet, die Straße mit Ihnen abgeht und die Unterlagen mit Ihnen liest." },
       },
       teamTitle: "Das Team",
       teamIntro: "Die Makler, mit denen Sie zu tun haben, die Sprachen, in denen sie arbeiten, und ihre Lizenzangaben.",
@@ -5287,7 +5283,7 @@ const P4_COPY = {
         "Im Redaktionssystem hat noch niemand ein Team-Profil freigegeben, deshalb zeigen wir keines, statt welche zu erfinden. Rufen Sie an, wir sagen Ihnen, wer die Immobilie betreut, die Sie ansehen.",
       teamFields: "Jedes Profil wird Name, Rolle, Büro, die Sprachen des Maklers, ein Foto und eine Lizenznummer enthalten.",
       contactTitle: "Mit einem Makler sprechen",
-      contactText: "Eine Nummer erreicht alle drei Büros, per Telefon, WhatsApp oder Viber.",
+      contactText: "Eine Nummer erreicht das Büro, per Telefon, WhatsApp oder Viber.",
       contactCta: "Büro kontaktieren",
     },
     alerts: {
@@ -5388,7 +5384,7 @@ const P4_COPY = {
     },
     about: {
       title: "Over MS Realty",
-      description: "MS Realty is een familiemakelaardij in Sandanski met kantoren in Sandanski, Bansko en Sveti Vlas, werkzaam in zeven talen.",
+      description: "MS Realty is een familiemakelaardij met kantoor in Sandanski, werkzaam in zeven talen.",
       h1: "Over MS Realty",
       intro: "Een familiekantoor in Sandanski, werkzaam in de Pirin-regio, aan de Zwarte Zeekust en in Noord-Griekenland.",
       storyTitle: "Wie wij zijn",
@@ -5397,12 +5393,10 @@ const P4_COPY = {
         "De meeste van onze kopers komen van buiten Bulgarije, dus het kantoor groeide rond één taak: een aankoop in het buitenland begrijpelijk maken. Dat betekent woninggegevens die een makelaar heeft gecontroleerd, lokale regels die duidelijk worden benoemd, en een mens die in uw taal antwoordt.",
         "Wij publiceren de site in het Bulgaars, Engels, Duits, Nederlands, Russisch, Grieks en Hebreeuws. Wij schrijven eerst in het Bulgaars, en een mens keurt elke vertaling goed voordat die verschijnt.",
       ],
-      officesTitle: "Onze kantoren",
-      officesIntro: "Drie kantoren dekken de gebieden waarin wij werken. Bel het algemene nummer, dan verbinden wij u met het kantoor het dichtst bij de woning.",
+      officesTitle: "Ons kantoor",
+      officesIntro: "Eén kantoor in Sandanski dekt alle gebieden waarin wij werken. Bel het algemene nummer, dan verbinden wij u met de makelaar die de woning behandelt.",
       offices: {
-        sandanski: { town: "Sandanski", role: "Hoofdkantoor", note: "De stad, de uitlopers van de Pirin en het district Blagoevgrad." },
-        bansko: { town: "Bansko", role: "Bergkantoor", note: "Bansko en de bergplaatsen." },
-        sveti_vlas: { town: "Sveti Vlas", role: "Kustkantoor", note: "Sveti Vlas en de Zwarte Zeekust." },
+        sandanski: { town: "Sandanski", role: "Kantoor van het bureau", note: "De stad, de uitlopers van de Pirin en het district Blagoevgrad." },
       },
       pillarsTitle: "Wat wij een koper beloven",
       pillarsIntro: "Vijf punten waaraan wij ons houden. Elk daarvan is op de site zichtbaar, niet alleen hier genoemd.",
@@ -5417,7 +5411,7 @@ const P4_COPY = {
         },
         fast: { title: "Snel", text: "Een aanvraag gaat rechtstreeks naar een makelaar, met de woning die u las erbij, zodat het eerste antwoord de context al heeft." },
         multilingual: { title: "Meertalig", text: "Zeven talen, en een makelaar die antwoordt in de taal waarin u schreef." },
-        local: { title: "Lokaal", text: "Drie kantoren in de regio, zodat iemand de deur opent, de straat met u afloopt en de papieren met u doorneemt." },
+        local: { title: "Lokaal", text: "Makelaars uit de regio, zodat iemand de deur opent, de straat met u afloopt en de papieren met u doorneemt." },
       },
       teamTitle: "Het team",
       teamIntro: "De makelaars met wie u te maken krijgt, de talen waarin zij werken en hun licentiegegevens.",
@@ -5426,7 +5420,7 @@ const P4_COPY = {
         "Niemand heeft in het contentsysteem al een teamprofiel goedgekeurd, dus tonen wij er geen in plaats van ze te verzinnen. Bel ons en wij vertellen u wie de woning behandelt die u bekijkt.",
       teamFields: "Elk profiel krijgt een naam, een rol, een kantoor, de talen van de makelaar, een foto en een licentienummer.",
       contactTitle: "Spreek een makelaar",
-      contactText: "Eén nummer bereikt alle drie de kantoren, via telefoon, WhatsApp of Viber.",
+      contactText: "Eén nummer bereikt het kantoor, via telefoon, WhatsApp of Viber.",
       contactCta: "Neem contact op",
     },
     alerts: {
@@ -5527,7 +5521,7 @@ const P4_COPY = {
     },
     about: {
       title: "О компании MS Realty",
-      description: "MS Realty, семейное агентство недвижимости в Сандански с офисами в Сандански, Банско и Свети-Власе, работает на семи языках.",
+      description: "MS Realty, семейное агентство недвижимости с офисом в Сандански, работает на семи языках.",
       h1: "О компании MS Realty",
       intro: "Семейное агентство в Сандански, работающее в Пиринском крае, на черноморском побережье и в Северной Греции.",
       storyTitle: "Кто мы",
@@ -5536,12 +5530,10 @@ const P4_COPY = {
         "Большинство наших покупателей приезжают из-за пределов Болгарии, поэтому агентство выросло вокруг одной задачи: сделать покупку в чужой стране понятной. Это значит проверенные брокером факты об объекте, прямо изложенные местные правила и человек, который отвечает на вашем языке.",
         "Мы публикуем сайт на болгарском, английском, немецком, нидерландском, русском, греческом и иврите. Сначала мы пишем по-болгарски, и каждый перевод утверждает человек, прежде чем он появится.",
       ],
-      officesTitle: "Наши офисы",
-      officesIntro: "Три офиса покрывают районы, где мы работаем. Позвоните на общий номер, и мы соединим вас с офисом рядом с объектом.",
+      officesTitle: "Наш офис",
+      officesIntro: "Один офис в Сандански покрывает все районы, где мы работаем. Позвоните на общий номер, и мы соединим вас с брокером, который ведёт объект.",
       offices: {
-        sandanski: { town: "Сандански", role: "Главный офис", note: "Город, предгорья Пирина и Благоевградская область." },
-        bansko: { town: "Банско", role: "Горный офис", note: "Банско и горные курорты." },
-        sveti_vlas: { town: "Свети-Влас", role: "Прибрежный офис", note: "Свети-Влас и черноморское побережье." },
+        sandanski: { town: "Сандански", role: "Офис агентства", note: "Город, предгорья Пирина и Благоевградская область." },
       },
       pillarsTitle: "Что мы обещаем покупателю",
       pillarsIntro: "Пять вещей, которых мы придерживаемся. Каждая видна на сайте, а не только названа здесь.",
@@ -5556,7 +5548,7 @@ const P4_COPY = {
         },
         fast: { title: "Быстро", text: "Запрос идёт прямо к брокеру вместе с объектом, который вы читали, поэтому первый ответ уже по делу." },
         multilingual: { title: "На вашем языке", text: "Семь языков и брокер, который отвечает на том, на котором вы написали." },
-        local: { title: "Местные", text: "Три офиса в регионе, чтобы кто-то открыл дверь, прошёл с вами по улице и прочитал с вами документы." },
+        local: { title: "Местные", text: "Брокеры из этого края, чтобы кто-то открыл дверь, прошёл с вами по улице и прочитал с вами документы." },
       },
       teamTitle: "Команда",
       teamIntro: "Брокеры, с которыми вы будете работать, языки, на которых они говорят, и данные их лицензии.",
@@ -5565,7 +5557,7 @@ const P4_COPY = {
         "В системе контента пока никто не утвердил профиль сотрудника, поэтому мы не показываем ни одного, вместо того чтобы их придумать. Позвоните, и мы скажем, кто ведёт объект, который вы смотрите.",
       teamFields: "В каждом профиле будут имя, роль, офис, языки брокера, фотография и номер лицензии.",
       contactTitle: "Поговорить с брокером",
-      contactText: "Один номер соединяет со всеми тремя офисами: по телефону, в WhatsApp или Viber.",
+      contactText: "Один номер соединяет с офисом: по телефону, в WhatsApp или Viber.",
       contactCta: "Связаться с агентством",
     },
     alerts: {
@@ -5666,7 +5658,7 @@ const P4_COPY = {
     },
     about: {
       title: "Σχετικά με τη MS Realty",
-      description: "Η MS Realty είναι οικογενειακό κτηματομεσιτικό γραφείο στο Σαντάνσκι με γραφεία σε Σαντάνσκι, Μπάνσκο και Σβετί Βλας, που εργάζεται σε επτά γλώσσες.",
+      description: "Η MS Realty είναι οικογενειακό κτηματομεσιτικό γραφείο με έδρα το Σαντάνσκι, που εργάζεται σε επτά γλώσσες.",
       h1: "Σχετικά με τη MS Realty",
       intro: "Οικογενειακό γραφείο στο Σαντάνσκι, με δραστηριότητα στην περιοχή του Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη Βόρεια Ελλάδα.",
       storyTitle: "Ποιοι είμαστε",
@@ -5675,12 +5667,10 @@ const P4_COPY = {
         "Οι περισσότεροι αγοραστές μας έρχονται από άλλες χώρες, οπότε το γραφείο μεγάλωσε γύρω από μία δουλειά: να γίνεται κατανοητή μια αγορά σε ξένη χώρα. Αυτό σημαίνει στοιχεία ακινήτου ελεγμένα από μεσίτη, τοπικούς κανόνες που λέγονται καθαρά και έναν άνθρωπο που απαντά στη γλώσσα σας.",
         "Δημοσιεύουμε τον ιστότοπο στα βουλγαρικά, αγγλικά, γερμανικά, ολλανδικά, ρωσικά, ελληνικά και εβραϊκά. Γράφουμε πρώτα στα βουλγαρικά και κάθε μετάφραση την εγκρίνει άνθρωπος πριν εμφανιστεί.",
       ],
-      officesTitle: "Τα γραφεία μας",
-      officesIntro: "Τρία γραφεία καλύπτουν τις περιοχές όπου εργαζόμαστε. Καλέστε τη γραμμή του γραφείου και θα σας συνδέσουμε με το πλησιέστερο στο ακίνητο.",
+      officesTitle: "Το γραφείο μας",
+      officesIntro: "Ένα γραφείο στο Σαντάνσκι καλύπτει όλες τις περιοχές όπου εργαζόμαστε. Καλέστε τη γραμμή του γραφείου και θα σας συνδέσουμε με τον μεσίτη που έχει το ακίνητο.",
       offices: {
-        sandanski: { town: "Σαντάνσκι", role: "Κεντρικό γραφείο", note: "Η πόλη, οι πρόποδες του Πιρίν και η περιφέρεια Μπλαγκόεβγκραντ." },
-        bansko: { town: "Μπάνσκο", role: "Ορεινό γραφείο", note: "Το Μπάνσκο και τα ορεινά θέρετρα." },
-        sveti_vlas: { town: "Σβετί Βλας", role: "Παράκτιο γραφείο", note: "Το Σβετί Βλας και οι ακτές της Μαύρης Θάλασσας." },
+        sandanski: { town: "Σαντάνσκι", role: "Γραφείο της εταιρείας", note: "Η πόλη, οι πρόποδες του Πιρίν και η περιφέρεια Μπλαγκόεβγκραντ." },
       },
       pillarsTitle: "Τι υποσχόμαστε σε έναν αγοραστή",
       pillarsIntro: "Πέντε πράγματα στα οποία δεσμευόμαστε. Το καθένα φαίνεται στον ιστότοπο, δεν δηλώνεται μόνο εδώ.",
@@ -5695,7 +5685,7 @@ const P4_COPY = {
         },
         fast: { title: "Γρήγορο", text: "Το αίτημα πάει κατευθείαν σε μεσίτη μαζί με το ακίνητο που διαβάζατε, οπότε η πρώτη απάντηση έχει ήδη το πλαίσιο." },
         multilingual: { title: "Πολύγλωσσο", text: "Επτά γλώσσες και ένας μεσίτης που απαντά σε αυτήν που γράψατε." },
-        local: { title: "Ντόπιοι", text: "Τρία γραφεία στην περιοχή, ώστε κάποιος να ανοίξει την πόρτα, να περπατήσει τον δρόμο και να διαβάσει τα χαρτιά μαζί σας." },
+        local: { title: "Ντόπιοι", text: "Μεσίτες από την περιοχή, ώστε κάποιος να ανοίξει την πόρτα, να περπατήσει τον δρόμο και να διαβάσει τα χαρτιά μαζί σας." },
       },
       teamTitle: "Η ομάδα",
       teamIntro: "Οι μεσίτες με τους οποίους θα συνεργαστείτε, οι γλώσσες που μιλούν και τα στοιχεία της άδειάς τους.",
@@ -5704,7 +5694,7 @@ const P4_COPY = {
         "Κανείς δεν έχει εγκρίνει ακόμη προφίλ ομάδας στο σύστημα περιεχομένου, οπότε δεν δείχνουμε κανένα αντί να τα επινοήσουμε. Καλέστε μας και θα σας πούμε ποιος έχει το ακίνητο που βλέπετε.",
       teamFields: "Κάθε προφίλ θα έχει όνομα, ρόλο, γραφείο, τις γλώσσες του μεσίτη, φωτογραφία και αριθμό άδειας.",
       contactTitle: "Μιλήστε με μεσίτη",
-      contactText: "Μία γραμμή φτάνει και στα τρία γραφεία, στο τηλέφωνο, στο WhatsApp ή στο Viber.",
+      contactText: "Μία γραμμή φτάνει στο γραφείο, στο τηλέφωνο, στο WhatsApp ή στο Viber.",
       contactCta: "Επικοινωνήστε με το γραφείο",
     },
     alerts: {
@@ -5805,7 +5795,7 @@ const P4_COPY = {
     },
     about: {
       title: "אודות MS Realty",
-      description: "MS Realty היא סוכנות נדלן משפחתית בסנדנסקי עם משרדים בסנדנסקי, בנסקו וסבטי ולאס, הפועלת בשבע שפות.",
+      description: "MS Realty היא סוכנות נדלן משפחתית שמשרדה בסנדנסקי, הפועלת בשבע שפות.",
       h1: "אודות MS Realty",
       intro: "סוכנות משפחתית בסנדנסקי, הפועלת באזור פירין, לאורך חוף הים השחור ובצפון יוון.",
       storyTitle: "מי אנחנו",
@@ -5814,12 +5804,10 @@ const P4_COPY = {
         "רוב הקונים שלנו מגיעים מחוץ לבולגריה, ולכן הסוכנות גדלה סביב משימה אחת: להפוך רכישה במדינה זרה למובנת. זה אומר נתוני נכס שמתווך בדק, כללים מקומיים שנאמרים בפשטות, ואדם שעונה בשפה שלכם.",
         "אנחנו מפרסמים את האתר בבולגרית, אנגלית, גרמנית, הולנדית, רוסית, יוונית ועברית. אנחנו כותבים קודם בבולגרית, ואדם מאשר כל תרגום לפני שהוא עולה.",
       ],
-      officesTitle: "המשרדים שלנו",
-      officesIntro: "שלושה משרדים מכסים את האזורים שבהם אנחנו פועלים. התקשרו לקו המשרד ונחבר אתכם למשרד הקרוב לנכס.",
+      officesTitle: "המשרד שלנו",
+      officesIntro: "משרד אחד בסנדנסקי מכסה את כל האזורים שבהם אנחנו פועלים. התקשרו לקו המשרד ונחבר אתכם למתווך שמטפל בנכס.",
       offices: {
-        sandanski: { town: "סנדנסקי", role: "משרד ראשי", note: "העיר, מרגלות פירין ומחוז בלגואבגרד." },
-        bansko: { town: "בנסקו", role: "משרד ההרים", note: "בנסקו ואתרי הנופש בהרים." },
-        sveti_vlas: { town: "סבטי ולאס", role: "משרד החוף", note: "סבטי ולאס וחוף הים השחור." },
+        sandanski: { town: "סנדנסקי", role: "משרד הסוכנות", note: "העיר, מרגלות פירין ומחוז בלגואבגרד." },
       },
       pillarsTitle: "מה אנחנו מבטיחים לקונה",
       pillarsIntro: "חמישה דברים שאנחנו מחויבים להם. כל אחד מהם נראה באתר, לא רק נאמר כאן.",
@@ -5834,7 +5822,7 @@ const P4_COPY = {
         },
         fast: { title: "מהיר", text: "פנייה מגיעה ישירות למתווך יחד עם הנכס שקראתם עליו, כך שהתשובה הראשונה כבר בהקשר." },
         multilingual: { title: "רב לשוני", text: "שבע שפות, ומתווך שעונה בשפה שבה כתבתם." },
-        local: { title: "מקומיים", text: "שלושה משרדים באזור, כדי שמישהו יפתח את הדלת, ילך אתכם ברחוב ויקרא אתכם את המסמכים." },
+        local: { title: "מקומיים", text: "מתווכים מהאזור, כדי שמישהו יפתח את הדלת, ילך אתכם ברחוב ויקרא אתכם את המסמכים." },
       },
       teamTitle: "הצוות",
       teamIntro: "המתווכים שתעבדו איתם, השפות שהם עובדים בהן ופרטי הרישיון שלהם.",
@@ -5843,7 +5831,7 @@ const P4_COPY = {
         "אף אחד עדיין לא אישר פרופיל צוות במערכת התוכן, ולכן איננו מציגים אף אחד במקום להמציא. התקשרו ונאמר לכם מי מטפל בנכס שאתם בוחנים.",
       teamFields: "כל פרופיל יכלול שם, תפקיד, משרד, השפות של המתווך, תמונה ומספר רישיון.",
       contactTitle: "דברו עם מתווך",
-      contactText: "קו אחד מגיע לשלושת המשרדים, בטלפון, בוואטסאפ או בוויבר.",
+      contactText: "קו אחד מגיע למשרד, בטלפון, בוואטסאפ או בוויבר.",
       contactCta: "צרו קשר עם הסוכנות",
     },
     alerts: {

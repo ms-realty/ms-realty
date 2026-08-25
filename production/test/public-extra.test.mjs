@@ -254,25 +254,28 @@ test("renting carries none of the purchase fees, so the disclosure is a buy-only
 
 /* ------------------------------------------------------------ about page */
 
-test("the about page states the offices and the five pillars from approved facts", () => {
+test("the about page states the single office and the five pillars from approved facts", () => {
   const page = renderAboutPage({ registry, localeCode: "en" });
   assert.equal(page.indexable, true);
   assert.equal(page.metadata.robots, "index,follow");
-  assert.deepEqual(page.body.offices.items.map((office) => office.id), ["sandanski", "bansko", "sveti_vlas"]);
+  // The agency runs one office, in Sandanski. Bansko and Sveti Vlas are places
+  // it sells property, not places it has a branch.
+  assert.deepEqual(page.body.offices.items.map((office) => office.id), ["sandanski"]);
   assert.deepEqual(page.body.pillars.items.map((pillar) => pillar.id), ["verified", "transparent", "fast", "multilingual", "local"]);
   const html = renderReactPublicBody(page);
   assert.match(html, /data-about-offices="true"/);
-  assert.equal((html.match(/data-about-office="[a-z_]+"/g) || []).length, 3);
+  assert.equal((html.match(/data-about-office="[a-z_]+"/g) || []).length, 1);
   assert.equal((html.match(/data-about-pillar="[a-z]+"/g) || []).length, 5);
-  // Sandanski is inland. The coast belongs to the Sveti Vlas office, so the
-  // Sandanski entry must carry no sea vocabulary in any public locale.
+  assert.doesNotMatch(html, /Bansko|Sveti Vlas/, "the about page must not claim an office in Bansko or Sveti Vlas");
+  // Sandanski is inland, so its entry must carry no sea vocabulary in any
+  // public locale, and no locale may name a second office.
   for (const code of PUBLIC_LOCALES) {
     const offices = renderAboutPage({ registry, localeCode: code }).body.offices.items;
+    assert.equal(offices.length, 1, `${code} must show exactly one office`);
     const sandanski = offices.find((office) => office.id === "sandanski");
     const text = `${sandanski.town} ${sandanski.role} ${sandanski.note}`;
     assert.doesNotMatch(text, /sea|beach|coast|море|морск|плаж|meer|strand|küste|kust|θάλασσ|παραλ|ים |חוף/iu, `${code} must not sell Sandanski as a sea destination`);
-    const coast = offices.find((office) => office.id === "sveti_vlas");
-    assert.ok(coast.note.length > 0, `${code} must describe the coast office`);
+    assert.ok(sandanski.note.length > 0, `${code} must describe the office`);
   }
 });
 

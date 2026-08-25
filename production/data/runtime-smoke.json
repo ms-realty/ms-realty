@@ -49,7 +49,7 @@
         "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -60,7 +60,7 @@
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -124,7 +124,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "saved": {
         "href": "/he/search?saved=1",
@@ -879,7 +879,7 @@
         "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
-        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with a local office and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
@@ -890,7 +890,7 @@
         "menuLabel": "Primary navigation",
         "skipToContent": "Skip to content",
         "filters": "Filters",
-        "offices": "Sandanski · Bansko · Sveti Vlas"
+        "offices": "Sandanski"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -982,7 +982,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/en/contact",
         "label": "Contact",
-        "offices": "Sandanski · Bansko · Sveti Vlas"
+        "offices": "Sandanski"
       },
       "saved": {
         "href": "/en/search?saved=1",
@@ -1762,7 +1762,7 @@
         "buyerGuides": "Руководства для покупателей",
         "explore": "Обзор",
         "getInTouch": "Связаться с нами",
-        "tagline": "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции, с местными офисами и брокерами, говорящими на вашем языке.",
+        "tagline": "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции, с местным офисом и брокерами, говорящими на вашем языке.",
         "copyright": "Все права защищены.",
         "requestSent": "Запрос отправлен. Брокер свяжется с вами.",
         "requestFailed": "Не удалось отправить запрос. Попробуйте ещё раз.",
@@ -1773,7 +1773,7 @@
         "menuLabel": "Основная навигация",
         "skipToContent": "К содержанию",
         "filters": "Фильтры",
-        "offices": "Сандански · Банско · Свети-Влас"
+        "offices": "Сандански"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -1823,7 +1823,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/ru/contact",
         "label": "Контакты",
-        "offices": "Сандански · Банско · Свети-Влас"
+        "offices": "Сандански"
       },
       "saved": {
         "href": "/ru/search?saved=1",
@@ -2550,7 +2550,7 @@
         "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -2561,7 +2561,7 @@
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -2653,7 +2653,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "saved": {
         "href": "/he/search?saved=1",
@@ -3853,7 +3853,7 @@
         "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -3864,7 +3864,7 @@
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -3956,7 +3956,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "saved": {
         "href": "/he/search?saved=1",
@@ -4109,7 +4109,7 @@
         "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -4120,7 +4120,7 @@
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -4212,7 +4212,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "saved": {
         "href": "/he/search?saved=1",
@@ -4275,20 +4275,6 @@
           "name": "סנדנסקי",
           "search_path": "/he/search?location=Sandanski",
           "map_href": "https://www.openstreetmap.org/search?query=Sandanski%2C%20Bulgaria"
-        },
-        {
-          "id": "bansko",
-          "location": "Bansko",
-          "name": "בנסקו",
-          "search_path": "/he/search?location=Bansko",
-          "map_href": "https://www.openstreetmap.org/search?query=Bansko%2C%20Bulgaria"
-        },
-        {
-          "id": "sveti-vlas",
-          "location": "Sveti Vlas",
-          "name": "סבטי ולאס",
-          "search_path": "/he/search?location=Sveti%20Vlas",
-          "map_href": "https://www.openstreetmap.org/search?query=Sveti%20Vlas%2C%20Bulgaria"
         }
       ],
       "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
@@ -4335,7 +4321,7 @@
         "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
-        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with a local office and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
@@ -4346,7 +4332,7 @@
         "menuLabel": "Primary navigation",
         "skipToContent": "Skip to content",
         "filters": "Filters",
-        "offices": "Sandanski · Bansko · Sveti Vlas"
+        "offices": "Sandanski"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -4438,7 +4424,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/en/contact",
         "label": "Contact",
-        "offices": "Sandanski · Bansko · Sveti Vlas"
+        "offices": "Sandanski"
       },
       "saved": {
         "href": "/en/search?saved=1",
@@ -4591,7 +4577,7 @@
         "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -4602,7 +4588,7 @@
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -4694,7 +4680,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "saved": {
         "href": "/he/search?saved=1",
@@ -4867,7 +4853,7 @@
         "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -4878,7 +4864,7 @@
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -4942,7 +4928,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "saved": {
         "href": "/he/search?saved=1",
@@ -5695,7 +5681,7 @@
         "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -5706,7 +5692,7 @@
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -5798,7 +5784,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "saved": {
         "href": "/he/search?saved=1",
@@ -7288,7 +7274,7 @@
         "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -7299,7 +7285,7 @@
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -7391,7 +7377,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "saved": {
         "href": "/he/search?saved=1",
@@ -8221,7 +8207,7 @@
         "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
-        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with local offices and brokers who speak your language.",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece, with a local office and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
@@ -8232,7 +8218,7 @@
         "menuLabel": "Primary navigation",
         "skipToContent": "Skip to content",
         "filters": "Filters",
-        "offices": "Sandanski · Bansko · Sveti Vlas"
+        "offices": "Sandanski"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -8324,7 +8310,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/en/contact",
         "label": "Contact",
-        "offices": "Sandanski · Bansko · Sveti Vlas"
+        "offices": "Sandanski"
       },
       "saved": {
         "href": "/en/search?saved=1",
@@ -8425,7 +8411,7 @@
         "buyerGuides": "מדריכי רוכשים",
         "explore": "גלו עוד",
         "getInTouch": "יצירת קשר",
-        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה, עם משרד מקומי ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
@@ -8436,7 +8422,7 @@
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
       "home": {
@@ -8528,7 +8514,7 @@
         "viber": "viber://chat?number=%2B359879696870",
         "path": "/he/contact",
         "label": "צור קשר",
-        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+        "offices": "סנדנסקי"
       },
       "saved": {
         "href": "/he/search?saved=1",
@@ -9994,9 +9980,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-e6f13f45-02a5-44a6-800b-8d5bf290745f",
+    "id": "inbox-lead-draft-a8bb1653-c5f4-412b-9dcb-987585080eb1",
     "lead": {
-      "id": "lead-draft-e6f13f45-02a5-44a6-800b-8d5bf290745f",
+      "id": "lead-draft-a8bb1653-c5f4-412b-9dcb-987585080eb1",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10097,9 +10083,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-01a197ae-1cba-4dfd-8a75-1bc821a4155a",
+    "id": "inbox-lead-draft-176a25b7-85d9-4fb9-962b-cc47b5893d5a",
     "lead": {
-      "id": "lead-draft-01a197ae-1cba-4dfd-8a75-1bc821a4155a",
+      "id": "lead-draft-176a25b7-85d9-4fb9-962b-cc47b5893d5a",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10203,9 +10189,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-601ef059-4251-4d20-bbb3-5e57d42eb32c",
+    "id": "inbox-lead-draft-79ab49ad-5830-41f0-b71e-dd7273f2ad48",
     "lead": {
-      "id": "lead-draft-601ef059-4251-4d20-bbb3-5e57d42eb32c",
+      "id": "lead-draft-79ab49ad-5830-41f0-b71e-dd7273f2ad48",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",

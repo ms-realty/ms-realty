@@ -85,7 +85,9 @@ const agencyForm = new URLSearchParams({
   email: "office@ms-realty.test",
   whatsapp: "+359 888 123 456",
   viber: "",
-  offices: "Sandanski\nBansko",
+  // Two lines so the textarea parser is exercised. The second name is a
+  // placeholder: the agency runs one office, in Sandanski.
+  offices: "Sandanski\nSecond office",
 }).toString();
 
 test("workspace settings module keeps committed defaults and validates every section", () => {
@@ -291,7 +293,7 @@ test("settings save persists, audits, redirects without JavaScript and stays ide
 
     const stored = readWorkspaceSettings(config.workspaceSettingsPath);
     assert.equal(stored.sections.agency.name, "MS Realty Sandanski");
-    assert.deepEqual(stored.sections.agency.offices, ["Sandanski", "Bansko"]);
+    assert.deepEqual(stored.sections.agency.offices, ["Sandanski", "Second office"]);
     assert.equal(stored.section_updates.agency.updated_by, "operations_lead");
 
     const audit = readAuditLog(config.auditLogPath);
@@ -315,7 +317,7 @@ test("settings save persists, audits, redirects without JavaScript and stays ide
         phone: "+359 888 123 456",
         email: "office@ms-realty.test",
         whatsapp: "+359 888 123 456",
-        offices: ["Sandanski", "Bansko"],
+        offices: ["Sandanski", "Second office"],
       },
     });
     assert.equal(repeat.status, 200);
