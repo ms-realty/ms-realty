@@ -5,7 +5,7 @@ import { loadCmsSeed, renderRuntimePath, renderSearchUnavailablePage, searchRunt
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
-import { normalizeSearchRequest } from "./search-request.mjs";
+import { normalizeSearchRequest, searchParamsFromUrl } from "./search-request.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
@@ -156,7 +156,7 @@ function renderAppRouteWithContext({ pathname, url, config, registry, seed, tran
   const savedView = requestUrl.searchParams.get("saved") === "1";
   const view = requestUrl.searchParams.get("view") || "list";
   const searchRequest = searchLocale
-    ? normalizeSearchRequest(requestUrl.searchParams, {
+    ? normalizeSearchRequest(searchParamsFromUrl(requestUrl.searchParams), {
         defaultLocale: searchLocale.code,
         naturalLanguageEnabled: config.naturalLanguageSearchEnabled === true,
       })

@@ -206,6 +206,26 @@ export function parseNaturalLanguageSearchIntent(value, { defaultLocale = "bg" }
   return { intent: normalizeSearchIntent(fields, { defaultLocale }), mode: structured ? "allowlisted" : "lexical_fallback" };
 }
 
+// A browser URL is not an API call. Ad networks, mail clients and social apps
+// append their own parameters to a link and the visitor never sees them: gclid
+// from Google Ads, fbclid from Facebook and Instagram, utm_* from every
+// newsletter and campaign. Refusing the whole request over one of those turned
+// every paid click and every shared campaign link into a raw JSON error page,
+// which is a far worse answer than ignoring a parameter we do not own.
+//
+// The strict field check stays where it belongs - on the API, where an
+// unrecognised field means the caller and the contract disagree and silence
+// would hide the bug. This narrows a URL to the fields search understands
+// before that check ever runs.
+export function searchParamsFromUrl(searchParams) {
+  const source = searchParams instanceof URLSearchParams ? searchParams : new URLSearchParams(searchParams || "");
+  const known = new URLSearchParams();
+  for (const [key, value] of source.entries()) {
+    if (SEARCH_REQUEST_FIELDS.has(key)) known.append(key, value);
+  }
+  return known;
+}
+
 export function normalizeSearchRequest(input, { defaultLocale = "bg", naturalLanguageEnabled = false } = {}) {
   const raw = objectInput(input);
   assertKnownFields(raw, SEARCH_REQUEST_FIELDS, "search request");

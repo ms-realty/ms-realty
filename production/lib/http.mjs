@@ -340,7 +340,7 @@ import { fromRoot } from "./paths.mjs";
 import { seedForPostgresSearchHits } from "./public-search.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
-import { normalizeSearchRequest } from "./search-request.mjs";
+import { normalizeSearchRequest, searchParamsFromUrl } from "./search-request.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 // Package B2: approved content.
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
@@ -4039,7 +4039,9 @@ export function createHttpApp({
       if (searchLocale) {
         let searchRequest;
         try {
-          searchRequest = normalizeSearchRequest(url.searchParams, {
+          // A page URL carries whatever the referrer appended to it; only
+          // /api/search above holds its callers to the exact field list.
+          searchRequest = normalizeSearchRequest(searchParamsFromUrl(url.searchParams), {
             defaultLocale: searchLocale.code,
             naturalLanguageEnabled: naturalLanguageSearchEnabled,
           });
