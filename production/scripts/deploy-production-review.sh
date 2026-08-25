@@ -59,13 +59,19 @@ reclaim() {
   local kept_pattern keep_dirs
   keep_dirs="$(find "$releases" -maxdepth 1 -mindepth 1 -type d -name '[0-9a-f]*' -printf '%f\n' 2>/dev/null)"
   kept_pattern="$(printf '%s\n%s\n' "$keep_dirs" "$release_id" | sed '/^$/d' | sort -u | paste -sd'|' -)"
-  docker image ls --format '{{.Repository}}:{{.Tag}}' 2>/dev/null |
+  # grep exits 1 on no match, and under pipefail that killed the whole deploy
+  # the moment the image list was already clean - which is the normal state
+  # after the first successful cleanup. Collect the list first, tolerating
+  # emptiness, and only then walk it.
+  local stale_images
+  stale_images="$(docker image ls --format '{{.Repository}}:{{.Tag}}' 2>/dev/null |
     grep -E '^ms-realty-local-app:[0-9a-f]{40}$' |
-    grep -Ev ":(${kept_pattern:-nothing-kept})$" |
-    while read -r stale_image; do
-      echo "reclaiming retired image $stale_image" >&2
-      docker image rm "$stale_image" >/dev/null 2>&1 || true
-    done
+    grep -Ev ":(${kept_pattern:-nothing-kept})$" || true)"
+  local stale_image
+  for stale_image in $stale_images; do
+    echo "reclaiming retired image $stale_image" >&2
+    docker image rm "$stale_image" >/dev/null 2>&1 || true
+  done
   docker builder prune --force >/dev/null 2>&1 || true
 }
 reclaim
