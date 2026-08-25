@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
@@ -19,8 +20,20 @@ const bundleCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty.css")
 const auth = { authorization: "Bearer local-admin-smoke" };
 const registry = loadLocaleRegistry();
 
+// The suite reads the checked-in demo ledgers through private copies so the
+// SQLite mirrors under production/data are never shared with the other test
+// processes the runner spawns in parallel.
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-admin-crm-"));
+function ledgerCopy(name) {
+  const target = path.join(dataDir, name);
+  fs.copyFileSync(path.join(ROOT, "production/data", name), target);
+  return target;
+}
+const leadLedgerPath = ledgerCopy("lead-ledger.jsonl");
+const eventLedgerPath = ledgerCopy("events.jsonl");
+
 function app() {
-  return createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+  return createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z", leadLedgerPath, eventLedgerPath });
 }
 
 test("lead inbox is a two-pane inbox: a list of rows that select a detail article", async () => {
@@ -163,7 +176,7 @@ test("a named operator gets working saved views instead of the planned strip", (
   const previous = process.env.MS_REALTY_ADMIN_ACTOR;
   process.env.MS_REALTY_ADMIN_ACTOR = "operations_lead";
   try {
-    return dispatchHttp(createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" }), {
+    return dispatchHttp(app(), {
       url: "/admin/leads?locale=en",
       headers: auth,
     }).then((inbox) => {

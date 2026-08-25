@@ -30,8 +30,7 @@ export function createLedgerStore({ name, columns = [], indexes = [] }) {
 
   const TABLE = name;
   const INSERT_SQL = `INSERT INTO ${TABLE} (${columns.join(", ")}, row_json) VALUES (${columns.map(() => "?").join(", ")}, ?)`;
-  const SCHEMA = `
-PRAGMA journal_mode = WAL;
+  const TABLE_DDL = `
 CREATE TABLE IF NOT EXISTS ${TABLE} (
   seq INTEGER PRIMARY KEY AUTOINCREMENT,
 ${columns.map((column) => `  ${column} TEXT`).join(",\n")},
@@ -47,6 +46,15 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
 CREATE TRIGGER IF NOT EXISTS ${TABLE}_no_delete BEFORE DELETE ON ${TABLE}
 BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
 `;
+  // busy_timeout keeps concurrent test processes waiting on the write lock
+  // instead of failing with "database is locked"; it must run before the
+  // WAL switch because that switch takes the lock itself. The DDL is kept
+  // separate so rebuilds can re-run it inside a transaction (the journal
+  // mode pragma is not allowed there).
+  const SCHEMA = `
+PRAGMA busy_timeout = 5000;
+PRAGMA journal_mode = WAL;
+${TABLE_DDL}`;
 
   function sqlitePathFor(filePath) {
     return `${String(filePath).replace(/\.jsonl$/i, "")}.sqlite`;
@@ -54,9 +62,20 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
 
   function openDb(dbPath) {
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    const db = new DatabaseSync(dbPath);
-    db.exec(SCHEMA);
-    return db;
+    // Cold-start initialization (empty file -> WAL conversion, first DDL)
+    // races rival processes for short exclusive locks that sidestep the
+    // busy_timeout handler inside SQLite, so the open gets a bounded retry.
+    for (let attempt = 1; ; attempt += 1) {
+      const db = new DatabaseSync(dbPath);
+      try {
+        db.exec(SCHEMA);
+        return db;
+      } catch (error) {
+        db.close();
+        if (attempt >= 25 || !/locked|busy/i.test(String(error?.message))) throw error;
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 20 * attempt);
+      }
+    }
   }
 
   function closeDb(dbPath) {
@@ -107,20 +126,39 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
       .map((row) => JSON.parse(row.row_json));
   }
 
-  function rebuildDbFromRows(dbPath, rows) {
-    closeDb(dbPath);
-    removeDbFiles(dbPath);
-    const db = openDb(dbPath);
-    db.exec("BEGIN");
+  // Replaces the table content under an already-held write transaction.
+  function rebuildInTxn(db, rows, jsonlSignature) {
+    db.exec(`DROP TABLE IF EXISTS ${TABLE}`);
+    db.exec(TABLE_DDL);
+    for (const row of rows) insertRow(db, row);
+    writeMeta(db, "schema_version", String(SCHEMA_VERSION));
+    writeMeta(db, "jsonl_signature", jsonlSignature);
+  }
+
+  // Rebuilds the store in place inside one IMMEDIATE transaction. Concurrent
+  // processes (the test runner spawns one per file) may decide to rebuild the
+  // same ledger at once; the write lock serializes them, drop+reinsert is
+  // idempotent, and the in-transaction signature check lets the losers skip
+  // the work the winner already did. The file is never unlinked or renamed,
+  // so rival connections and their WAL sidecar files stay coherent.
+  function rebuildDbFromRows(dbPath, rows, jsonlSignature = null) {
+    let db = connections.get(dbPath) || null;
+    if (!db) {
+      db = openDb(dbPath);
+      connections.set(dbPath, db);
+    }
+    db.exec("BEGIN IMMEDIATE");
     try {
-      for (const row of rows) insertRow(db, row);
-      writeMeta(db, "schema_version", String(SCHEMA_VERSION));
+      const settled =
+        jsonlSignature !== null &&
+        readMeta(db, "jsonl_signature") === jsonlSignature &&
+        readMeta(db, "schema_version") === String(SCHEMA_VERSION);
+      if (!settled) rebuildInTxn(db, rows, jsonlSignature);
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");
       throw error;
     }
-    connections.set(dbPath, db);
     return db;
   }
 
@@ -134,19 +172,14 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
     }
     if (db && readMeta(db, "schema_version") !== String(SCHEMA_VERSION)) {
       const rows = fs.existsSync(filePath) ? parseJsonl(filePath) : readAllRows(db);
-      db = rebuildDbFromRows(dbPath, rows);
-      writeMeta(db, "jsonl_signature", jsonlSignature);
-      return db;
+      return rebuildDbFromRows(dbPath, rows, jsonlSignature);
     }
     if (jsonlSignature === null) {
       // No JSONL mirror: the SQLite store (if any) is authoritative.
       return db;
     }
     if (db && readMeta(db, "jsonl_signature") === jsonlSignature) return db;
-    const rows = parseJsonl(filePath);
-    db = rebuildDbFromRows(dbPath, rows);
-    writeMeta(db, "jsonl_signature", jsonlSignature);
-    return db;
+    return rebuildDbFromRows(dbPath, parseJsonl(filePath), jsonlSignature);
   }
 
   // JSONL mirror first, then INSERT + signature in one transaction. A crash
@@ -160,12 +193,23 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
       db = openDb(dbPath);
       connections.set(dbPath, db);
     }
+    const preSignature = fileSignature(filePath);
     fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`);
     const mirrorSignature = fileSignature(filePath);
-    db.exec("BEGIN");
+    // IMMEDIATE: take the write lock up front (waiting via busy_timeout); a
+    // deferred BEGIN would start as a reader and its upgrade to writer fails
+    // without retry when a rival process commits in between.
+    db.exec("BEGIN IMMEDIATE");
     try {
-      insertRow(db, row);
-      writeMeta(db, "jsonl_signature", mirrorSignature);
+      if (readMeta(db, "jsonl_signature") === preSignature) {
+        insertRow(db, row);
+        writeMeta(db, "jsonl_signature", mirrorSignature);
+      } else {
+        // A rival process moved the store while we waited for the lock; its
+        // rebuild may have folded our freshly mirrored line in already, so
+        // resync from the JSONL mirror instead of inserting blind.
+        rebuildInTxn(db, parseJsonl(filePath), fileSignature(filePath));
+      }
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");
@@ -194,8 +238,7 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
     const rows = parseJsonl(sourcePath);
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     fs.writeFileSync(filePath, rows.length ? `${rows.map((row) => JSON.stringify(row)).join("\n")}\n` : "");
-    const db = rebuildDbFromRows(sqlitePathFor(filePath), rows);
-    writeMeta(db, "jsonl_signature", fileSignature(filePath));
+    rebuildDbFromRows(sqlitePathFor(filePath), rows, fileSignature(filePath));
     return rows.length;
   }
 
