@@ -380,12 +380,21 @@ export function projectApprovedSearchDocument({ listing = {}, approval = {} } = 
     translation_indexable: true,
   };
   if (description) document.description = description;
-  if (approval.has_approved_tour === true) document.has_approved_tour = true;
+  // Emitted for every document, not only the true case: "this listing has no
+  // approved tour" is a fact the index must carry, and the Postgres view
+  // states it as a plain boolean.
+  document.has_approved_tour = approval.has_approved_tour === true;
 
   for (const field of PROJECTED_FACT_FIELDS) {
     const value = verifiedFact(facts[field], field, verified);
     if (value !== undefined) document[field] = value;
   }
+  // No recorded status means available - the rule publicSeedFor() applies at
+  // the public boundary and the Postgres view spells out as
+  // COALESCE(NULLIF(facts_listing_status, ''), 'available'). Leaving the field
+  // off instead hid the document from every public query, because the search
+  // filter requires listing_status to be available or reserved.
+  if (document.listing_status === undefined) document.listing_status = "available";
   for (const field of TAXONOMY_SEARCH_FIELDS) {
     const value = optionalText(facts[field]);
     if (value) document[field] = value;

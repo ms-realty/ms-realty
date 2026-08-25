@@ -1555,3 +1555,36 @@ test("a search view mismatch names the difference instead of only announcing one
   assert.match(byContent, /first differing document MS-1: price_eur authoritative=100000 view=99000/);
   assert.doesNotMatch(byContent, /absent from the view|present only in the view/);
 });
+
+test("a listing with no recorded status and no tour projects the same defaults as the Postgres view", () => {
+  // Every listing in the committed catalogue is exactly this shape: the crawl
+  // recorded no facts.listing_status, and most carry a tour that is not public.
+  const listing = {
+    id: "MS-3000",
+    listing_reference: "MS-3000",
+    locale: "bg",
+    locale_path: "/bg/imoti/MS-3000",
+    title: "Plot in Strumyani",
+    property_family: "land",
+  };
+  const approval = { publication_state: "published", translation_human_approved: true, locale_indexable: true, locale: "bg" };
+
+  const document = projectApprovedSearchDocument({ listing, approval });
+
+  // COALESCE(NULLIF(l."facts_listing_status", ''), 'available') in the view.
+  // Without this the document fails the public filter and is unfindable.
+  assert.equal(document.listing_status, "available");
+  // (tour."is_public" = true AND tour."review_status" = 'published') in the
+  // view - a boolean on every row, not an absent key.
+  assert.equal(document.has_approved_tour, false);
+
+  const withTour = projectApprovedSearchDocument({ listing, approval: { ...approval, has_approved_tour: true } });
+  assert.equal(withTour.has_approved_tour, true);
+
+  // An explicitly recorded status still wins over the default.
+  const sold = projectApprovedSearchDocument({
+    listing: { ...listing, listing_status: "sold" },
+    approval: { ...approval, fact_verification: [{ field: "listing_status", state: "broker_verified" }] },
+  });
+  assert.equal(sold.listing_status, "sold");
+});
