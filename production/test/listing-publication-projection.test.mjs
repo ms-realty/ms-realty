@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { fromRoot } from "../lib/paths.mjs";
+import { createAuditLogEntry } from "../lib/audit-log.mjs";
 import { loadApprovedLaunchFreeze } from "../lib/launch-freeze.mjs";
 import { operatorPublishedListingApproval } from "../lib/listing-publication-approval.mjs";
 import { loadPayloadCollections } from "../lib/payload-collections.mjs";
@@ -672,6 +673,14 @@ test("a revert writes through the Local API, verifies, and records its own audit
 
   const audit = publicationSyncAuditRecords(plan, "2026-08-25T00:00:00.000Z");
   assert.equal(audit.length, 2);
+  // Every record the projector emits must survive the real audit-log factory.
+  // The sync appends these for real, and an action the ledger does not accept
+  // aborts the whole run - which is how a deploy once failed after a green
+  // unit test that only ever inspected the record shape.
+  for (const record of audit) {
+    const entry = createAuditLogEntry(record.input, record.recordedAt);
+    assert.equal(entry.object_id, record.input.objectId);
+  }
   const reverted = audit.find((record) => record.input.objectId === "MS-GONE");
   assert.equal(reverted.input.action, "listing_publication_reverted");
   assert.equal(reverted.input.status, "draft");
