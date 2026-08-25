@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
 import {
   ADMIN_SESSION_COOKIE,
   adminSessionClearCookie,
@@ -228,6 +230,10 @@ test("Next admin adapter: Payload login, cookie auth, and logout behave identica
     const config = {
       ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
       payloadAdminAuth: service,
+      // A sign-in through the adapter now registers the browser session the
+      // same way the standalone runtime does, so the test needs its own
+      // ledger rather than the committed one.
+      adminSessionLedgerPath: `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-adapter-login-`)}/admin-sessions.jsonl`,
       nowSeconds: () => NOW_SECONDS,
     };
     const base = "https://ms-realty.ms-realty-bg.workers.dev";

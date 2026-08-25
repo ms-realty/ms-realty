@@ -9,6 +9,13 @@ import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { renderMcpProtectedResourceMetadata, renderMcpResponse } from "./mcp-server.mjs";
 import { clientIdentity, createRateLimiter } from "./rate-limit.mjs";
+// Admin sign-in: the address-scoped failure throttle and the attempt record.
+import {
+  createSignInThrottle,
+  recordSignInAttempt,
+  signInClientKey,
+  signInGuardConfigFromEnv,
+} from "./admin-sign-in-guard.mjs";
 import {
   crossOriginWriteRejection,
   readHeader,
@@ -1064,6 +1071,9 @@ export function createHttpApp({
   hermesReplyProvider = null,
   hermesEnv = process.env,
   rateLimit = null,
+  // Unlike the public write limiter, the sign-in throttle is on by default:
+  // an unthrottled password field is the gap this closes.
+  signInRateLimit = signInGuardConfigFromEnv(),
   trustProxy = process.env.MS_REALTY_TRUST_PROXY === "1",
   naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
   payloadAdminAuth = getPayloadAdminAuthService,
@@ -1093,6 +1103,7 @@ export function createHttpApp({
   const preservationCatalog = activeRouteContract.catalog;
   const activeLegacyDecisionByUrl = new Map(activeLegacyDecisions.map((row) => [row.old_url, row]));
   const publicWriteLimiter = rateLimit ? createRateLimiter(rateLimit) : null;
+  const signInThrottle = signInRateLimit ? createSignInThrottle(signInRateLimit) : null;
   let payloadAdminAuthPromise;
   const configuredPayloadAdminAuth = async () => {
     if (!payloadAdminAuthPromise) {
@@ -2020,6 +2031,14 @@ export function createHttpApp({
     }
     return true;
   };
+  // One record per sign-in attempt, success or failure. A ledger that cannot
+  // be written is not a reason to refuse a correctly authenticated operator,
+  // so the recorder contains its own failures.
+  const recordSignIn = (details) =>
+    recordSignInAttempt(
+      { ...details, recordedAt: securityNow() },
+      { auditLogPath, durableOnly: runtimeDataDurableOnly },
+    );
   // What the Settings screen's Security and Data sections render. The whole
   // decision lives in the shared builder so the App Router adapter renders the
   // identical payload; this only supplies the ledgers and the clock.
@@ -2256,13 +2275,49 @@ export function createHttpApp({
         });
       }
       if (request.method === "POST") {
+        const form = new URLSearchParams(request.body || "");
+        const email = form.get("email") || "";
+        // Password guessing is cheap because the account lock Payload applies
+        // is per account: one address can walk a list of operators without
+        // ever tripping it, and can lock every one of them out on purpose.
+        // The throttle counts failures per address instead.
+        const clientKey = signInClientKey(request, { trustProxy });
+        const verdict = signInThrottle ? signInThrottle.check(clientKey) : { allowed: true };
+        if (!verdict.allowed) {
+          recordSignIn({ outcome: "failed", email, clientKey, reason: "throttled" });
+          return response(
+            429,
+            renderAdminLoginPage({ error: "throttled", locale: url.searchParams.get("locale") || "bg" }),
+            "text/html; charset=utf-8",
+            {
+              "cache-control": "no-store",
+              "x-robots-tag": "noindex, nofollow",
+              "retry-after": String(verdict.retryAfterSec),
+            },
+          );
+        }
+        // An outage is not a failed attempt, so it must not fill the bucket
+        // and lock the office out of its own workbench.
+        let outage = false;
         try {
-          const service = await configuredPayloadAdminAuth();
-          if (!service) throw new Error("Payload admin authentication is unavailable");
-          const form = new URLSearchParams(request.body || "");
-          const login = await service.login({ email: form.get("email"), password: form.get("password") });
+          let service = null;
+          try {
+            service = await configuredPayloadAdminAuth();
+          } catch {
+            // An authentication service that cannot even be built is an
+            // outage, never a wrong password.
+            service = null;
+          }
+          if (!service) {
+            outage = true;
+            throw new Error("Payload admin authentication is unavailable");
+          }
+          const login = await service.login({ email, password: form.get("password") });
           const maxAgeSeconds = Math.floor(Number(login.exp) - nowSeconds());
-          if (!login.token || maxAgeSeconds <= 0) throw new Error("Payload returned an expired session");
+          if (!login.token || maxAgeSeconds <= 0) {
+            outage = true;
+            throw new Error("Payload returned an expired session");
+          }
           // B6 workspace security and data: the password is only the first
           // factor. A failed second factor also ends the session Payload just
           // issued, so a rejected sign-in leaves no usable token behind.
@@ -2272,6 +2327,14 @@ export function createHttpApp({
             } catch {
               // The token was never handed to the browser and expires on its own.
             }
+            signInThrottle?.recordFailure(clientKey);
+            recordSignIn({
+              outcome: "failed",
+              email,
+              clientKey,
+              operatorId: login.principal?.id,
+              reason: "second_factor_rejected",
+            });
             return response(303, "", "text/plain; charset=utf-8", {
               location: "/admin/login?error=2fa",
               "cache-control": "no-store",
@@ -2290,12 +2353,15 @@ export function createHttpApp({
               // is not a reason to refuse a correctly authenticated operator.
             }
           }
+          recordSignIn({ outcome: "succeeded", email, clientKey, operatorId: login.principal.id });
           return response(303, "", "text/plain; charset=utf-8", {
             location: "/admin",
             "set-cookie": adminSessionSetCookie(login.token, { maxAgeSeconds }),
             "cache-control": "no-store",
           });
         } catch {
+          if (!outage) signInThrottle?.recordFailure(clientKey);
+          recordSignIn({ outcome: "failed", email, clientKey, reason: outage ? "service_unavailable" : "rejected" });
           return response(303, "", "text/plain; charset=utf-8", { location: "/admin/login?error=1", "cache-control": "no-store" });
         }
       }
