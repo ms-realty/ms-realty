@@ -72,17 +72,47 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
   );
 });
 
-test("listing language navigation keeps users on an available translation of the same listing", () => {
+test("listing language navigation keeps users on the same listing in every public language", () => {
   const page = renderListingPage({ registry, listing, localeCode: "he" });
 
   assert.deepEqual(
     page.chrome.languages.map(({ code, href }) => ({ code, href })),
     [
       { code: "bg", href: "/bg/imoti/MS-CRAWL-0001" },
+      { code: "en", href: "/en/properties/MS-CRAWL-0001" },
+      { code: "de", href: "/de/immobilien/MS-CRAWL-0001" },
+      { code: "nl", href: "/nl/vastgoed/MS-CRAWL-0001" },
+      { code: "ru", href: "/ru/properties/MS-CRAWL-0001" },
       { code: "el", href: "/el/akinita/MS-CRAWL-0001" },
       { code: "he", href: "/he/properties/MS-CRAWL-0001" },
     ],
   );
+});
+
+test("language navigation carries a built search across to the other locale", () => {
+  const page = renderSearchPage({
+    registry,
+    listings,
+    localeCode: "bg",
+    query: "Sandanski",
+    filters: { offer_type: "rent", property_family: "apartment" },
+    sort: "price_asc",
+    page: 2,
+    pageSize: 5,
+  });
+  const href = (code) => page.chrome.languages.find((language) => language.code === code).href;
+
+  for (const code of ["en", "de", "nl", "ru", "el", "he"]) {
+    const [route, query] = href(code).split("?");
+    const params = new URLSearchParams(query);
+    assert.notEqual(route, `/${code}`);
+    assert.equal(params.get("offer_type"), "rent");
+    assert.equal(params.get("property_family"), "apartment");
+    assert.equal(params.get("q"), "Sandanski");
+    assert.equal(params.get("sort"), "price_asc");
+    assert.equal(params.get("page"), "2");
+  }
+  assert.equal(href("de").startsWith("/de/suche?"), true);
 });
 
 test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct", () => {

@@ -24,6 +24,7 @@ import {
   localeAlternatesForAlerts,
   localeAlternatesForCompare,
   locationPath,
+  locationSlug,
   matchesPublicLocationScope,
   META_DESCRIPTION_LIMIT,
   metaDescription,
@@ -2683,6 +2684,20 @@ export function sellerPhotoUploadDisabledFromEnv(env = process.env) {
   return env.MS_REALTY_SELLER_PHOTO_UPLOAD_DISABLED === "1";
 }
 
+// The language menu must keep the visitor on the page they are reading. Where
+// the caller names the route it came from, every language is offered at its own
+// spelling of that route, carrying the listing reference, the location slug or
+// the whole search query with it. Falling back to the locale's home page throws
+// away a filtered search a buyer has just built, and on a listing page it left
+// a menu with one language in it. The equivalent pages exist and render, with
+// the same source-language badge the search cards already use where the
+// translation is not approved yet.
+function languageRouteHref(registry, locale, { key, suffix = "", query = "" }) {
+  const segment = locale.route_segments?.[key];
+  if (!segment) return homePath(registry, locale.code);
+  return `/${locale.code}/${segment}${suffix}${query}`;
+}
+
 function publicChrome(
   registry,
   locale,
@@ -2691,6 +2706,7 @@ function publicChrome(
     active = null,
     locations = [],
     currentPath = null,
+    languageRoute = null,
     leadWritesDisabled = leadWritesDisabledFromEnv(),
   } = {},
 ) {
@@ -2703,10 +2719,11 @@ function publicChrome(
   );
   const indexableLocales = publicIndexableLocales(registry);
   const listingAlternates = indexableLocales.filter((entry) => alternates.has(entry.code));
-  // Listing pages keep visitors on approved translations of the same listing.
-  // A listing without any approved translation must still offer every public
-  // language (at its home page) instead of hiding the switcher altogether.
-  const languageLocales = active === "listing" && listingAlternates.length ? listingAlternates : indexableLocales;
+  // Without a named route the menu still prefers an approved translation of the
+  // same listing, then the locale home page.
+  const languageLocales = !languageRoute && active === "listing" && listingAlternates.length ? listingAlternates : indexableLocales;
+  const languageHref = (entry) =>
+    languageRoute ? languageRouteHref(registry, entry, languageRoute) : alternates.get(entry.code) || homePath(registry, entry.code);
   return {
     copy,
     lead_writes_disabled: leadWritesDisabled,
@@ -2720,7 +2737,7 @@ function publicChrome(
     languages: languageLocales.map((entry) => ({
       code: entry.code,
       label: entry.native_name || entry.code.toUpperCase(),
-      href: alternates.get(entry.code) || homePath(registry, entry.code),
+      href: languageHref(entry),
       active: entry.code === locale.code,
       dir: entry.direction || "ltr",
     })),
@@ -3338,7 +3355,11 @@ export function renderListingPage({
       robots: indexable ? sourceSeo.robots || "index,follow" : "noindex,follow",
     },
     hreflang,
-    chrome: publicChrome(registry, locale, { hreflang, active: "listing" }),
+    chrome: publicChrome(registry, locale, {
+      hreflang,
+      active: "listing",
+      languageRoute: { key: "listing", suffix: `/${listing.id}` },
+    }),
     schema: buildListingSchema({ path: canonical, view, copy: { ...copy, title: metadataTitle, description: listingDescription }, publicMedia }),
     translation: {
       locale: translation?.locale || locale.code,
@@ -3614,6 +3635,18 @@ export function renderSearchPage({
     .map((key) => ({ key, value: intentFilters[key], active: intentFilters[key] !== undefined && intentFilters[key] !== "" }))
     .filter((chip) => chip.active);
 
+  // Switching language must not discard the search the visitor has built, so
+  // the menu carries the normalized filters, keywords, sort, view and page
+  // across to the other locale's results route.
+  const languageQuery = new URLSearchParams();
+  for (const [key, value] of Object.entries(intentFilters)) languageQuery.set(key, String(value));
+  if (searchIntent.text_query) languageQuery.set("q", searchIntent.text_query);
+  if (selectedSort && selectedSort !== "recommended") languageQuery.set("sort", selectedSort);
+  if (selectedView === "map") languageQuery.set("view", "map");
+  if (savedView) languageQuery.set("saved", "1");
+  if (currentPage > 1) languageQuery.set("page", String(currentPage));
+  const languageQueryString = languageQuery.toString();
+
   return {
     kind: "search",
     status: 200,
@@ -3640,7 +3673,10 @@ export function renderSearchPage({
       sticky_contact_actions: true,
       minimum_tap_target_px: 44,
     },
-    chrome: publicChrome(registry, locale, { active: savedView ? "saved" : "search" }),
+    chrome: publicChrome(registry, locale, {
+      active: savedView ? "saved" : "search",
+      languageRoute: { key: "search", query: languageQueryString ? `?${languageQueryString}` : "" },
+    }),
     search: {
       saved_view: savedView === true,
       engines: ["postgres"],
@@ -4443,7 +4479,11 @@ export function renderLocationPage({ registry, localeCode, location, listings, a
       robots: indexable ? "index,follow" : "noindex,follow",
     },
     hreflang: indexable ? hreflangForLocation(registry, location, locales) : [],
-    chrome: publicChrome(registry, locale, { hreflang: indexable ? hreflangForLocation(registry, location, locales) : [], active: "location" }),
+    chrome: publicChrome(registry, locale, {
+      hreflang: indexable ? hreflangForLocation(registry, location, locales) : [],
+      active: "location",
+      languageRoute: { key: "location", suffix: `/${locationSlug(location)}` },
+    }),
     body: {
       h1: copy.heading,
       location,
