@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { approvedContentGuideGroups, readApprovedCmsContent } from "./approved-content.mjs";
 import { fromRoot } from "./paths.mjs";
+import { publicOrigin } from "./public-origin.mjs";
 import { mergeRuntimeTranslations } from "./runtime.mjs";
 import {
   sitemapEntriesForContact,
@@ -12,7 +13,7 @@ import {
   sitemapEntriesForSeller,
 } from "./seo.mjs";
 
-export const DEFAULT_PUBLIC_ORIGIN = process.env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com";
+export const DEFAULT_PUBLIC_ORIGIN = publicOrigin();
 export const DEFAULT_LOCALIZED_SITEMAP_PATH = fromRoot("production", "data", "localized-sitemap.json");
 export const DEFAULT_SITEMAP_XML_OUTPUT = fromRoot("production", "data", "sitemap.xml");
 export const DEFAULT_ROBOTS_OUTPUT = fromRoot("production", "data", "robots.txt");

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { assertStructuredDataReport, buildStructuredDataReport } from "../lib/structured-data-report.mjs";
-import { assertListingSchema, buildListingSchema } from "../lib/structured-data.mjs";
+import { assertListingSchema, buildListingSchema, schemaIssues } from "../lib/structured-data.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -31,6 +31,62 @@ test("listing schema keeps launch-critical listing facts", () => {
     name: "floor_area_sqm",
     value: 86.5,
   });
+});
+
+test("a rent publishes its periodicity instead of a sale price", () => {
+  const schema = buildListingSchema({
+    path: "/bg/imoti/MS-RENT",
+    view: {
+      id: "MS-RENT",
+      location: "Sandanski",
+      property_type: "apartment",
+      offer_type: "rent",
+      price_eur: 600,
+      source_locale: "bg",
+    },
+    copy: { title: "Apartment to rent in Sandanski", description: "Reviewed listing." },
+    publicMedia: { gallery: [] },
+  });
+
+  // A bare 600 EUR Offer says the flat sells for 600 EUR.
+  assert.equal(Object.hasOwn(schema.offers, "price"), false);
+  assert.deepEqual(schema.offers.priceSpecification, {
+    "@type": "UnitPriceSpecification",
+    price: 600,
+    priceCurrency: "EUR",
+    unitCode: "MON",
+    unitText: "MONTH",
+  });
+  assert.equal(schemaIssues(schema).length, 0);
+});
+
+test("schema issues catch a rent that regresses to a sale price or a relative identifier", () => {
+  const rent = buildListingSchema({
+    path: "/bg/imoti/MS-RENT",
+    view: { id: "MS-RENT", property_type: "apartment", offer_type: "rent", price_eur: 600, source_locale: "bg" },
+    copy: { title: "Apartment to rent", description: "Reviewed listing." },
+    publicMedia: { gallery: [] },
+  });
+
+  assert.deepEqual(schemaIssues({ ...rent, offers: { "@type": "Offer", price: 600, priceCurrency: "EUR" } }), [
+    "rent_offer_price",
+  ]);
+  assert.deepEqual(schemaIssues({ ...rent, "@id": "/bg/imoti/MS-RENT#listing", url: "/bg/imoti/MS-RENT" }), [
+    "relative_id",
+    "relative_url",
+  ]);
+});
+
+test("no listing in the reviewed inventory publishes a relative identifier or a rent as a sale price", () => {
+  const report = buildStructuredDataReport({ generatedAt: "2026-08-25T00:00:00Z" });
+  const rows = report.rows.filter((row) => row.page_type === "listing");
+
+  assert.ok(rows.length > 100);
+  assert.equal(report.summary.failing_entries, 0);
+  assert.deepEqual(
+    rows.filter((row) => row.issues.includes("rent_offer_price") || row.issues.includes("relative_url")),
+    [],
+  );
 });
 
 test("listing schema omits crawl placeholder prices and internal source metadata", () => {

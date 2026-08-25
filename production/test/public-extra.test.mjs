@@ -14,6 +14,7 @@ import {
 } from "../lib/public-site.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { renderHtmlPage, assertHtmlPage } from "../lib/html.mjs";
+import { absolutePublicUrl } from "../lib/public-origin.mjs";
 import { loadCmsSeed, renderRuntimePath } from "../lib/runtime.mjs";
 import { aboutPath, alertsPath, comparePath, hreflangForAbout } from "../lib/seo.mjs";
 import { buildAppRouteManifest } from "../lib/app-route-manifest.mjs";
@@ -443,8 +444,10 @@ test("the rendered documents keep the public shell in RTL", () => {
   }
   const about = renderAboutPage({ registry, localeCode: "he" });
   const aboutHtml = renderHtmlPage(about, { bodyHtml: renderReactPublicBody(about) });
-  assert.match(aboutHtml, /<link rel="canonical" href="\/he\/about">/);
-  assert.match(aboutHtml, /hreflang="x-default" href="\/bg\/za-nas"/);
+  // Absolute, because Google drops a relative hreflang and a share card cannot
+  // resolve a relative og:url.
+  assert.ok(aboutHtml.includes(`<link rel="canonical" href="${absolutePublicUrl("/he/about")}">`));
+  assert.ok(aboutHtml.includes(`hreflang="x-default" href="${absolutePublicUrl("/bg/za-nas")}"`));
   // Logical properties only, so Hebrew mirrors without a second stylesheet.
   assert.doesNotMatch(css, /(?:^|[\s;{])(?:margin|padding)-(?:left|right)\s*:/u);
   assert.doesNotMatch(css, /(?:^|[\s;{])(?:left|right)\s*:/u);

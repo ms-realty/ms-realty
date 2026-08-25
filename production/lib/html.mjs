@@ -1,6 +1,7 @@
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { chromeCopyFor, labelsFor, localizedListingValue, uiCopyFor } from "./public-site.mjs";
+import { absolutePublicUrl, isAbsoluteHttpUrl } from "./public-origin.mjs";
 import { ADMIN_CLIENT_HASH, DS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_SRC, PUBLIC_CLIENT_HASH } from "./ui/design-assets.mjs";
 
 function escapeHtml(value) {
@@ -22,29 +23,78 @@ function designSystemStyle() {
   ].join("\n");
 }
 
-function openGraph(page) {
-  const title = page.metadata?.og_title || page.metadata?.title || "MS Realty";
-  const description = page.metadata?.og_description || page.metadata?.description || "";
-  const url = page.canonical || page.path || "/";
+// Facebook, LinkedIn and Viber read a territory locale, not a bare language
+// code; a malformed one makes Facebook assume en_US for a Bulgarian page. These
+// are the values the legacy WordPress site published for the five languages it
+// had (see source_open_graph in the redirect approval workbook); el and he
+// follow the same pattern.
+const OPEN_GRAPH_LOCALES = Object.freeze({
+  bg: "bg_BG",
+  en: "en_US",
+  de: "de_DE",
+  nl: "nl_NL",
+  ru: "ru_RU",
+  el: "el_GR",
+  he: "he_IL",
+  fr: "fr_FR",
+});
+
+function openGraphLocale(code) {
+  return OPEN_GRAPH_LOCALES[String(code || "").trim().toLowerCase().split(/[-_]/)[0]] || null;
+}
+
+// One source for everything a share card reads, so Open Graph and the Twitter
+// card can never drift apart.
+function socialMetadata(page) {
   const image = page.body?.media?.gallery?.find((item) => item.url)?.url || null;
+  return {
+    title: page.metadata?.og_title || page.metadata?.title || "MS Realty",
+    description: page.metadata?.og_description || page.metadata?.description || "",
+    url: absolutePublicUrl(page.canonical || page.path || "/"),
+    image: image ? absolutePublicUrl(image) : null,
+  };
+}
+
+function openGraph(page, social) {
+  const locale = openGraphLocale(page.lang || page.locale);
+  const alternates = (page.hreflang || [])
+    .map((link) => openGraphLocale(link.hreflang))
+    .filter((value) => value && value !== locale);
   return [
     ["og:type", page.kind === "listing" ? "article" : "website"],
     ["og:site_name", "MS Realty"],
-    ["og:title", title],
-    ["og:description", description],
-    ["og:url", url],
-    ["og:locale", page.lang || page.locale || "en"],
-    image ? ["og:image", image] : null,
+    ["og:title", social.title],
+    ["og:description", social.description],
+    ["og:url", social.url],
+    locale ? ["og:locale", locale] : null,
+    ...[...new Set(alternates)].map((value) => ["og:locale:alternate", value]),
+    social.image ? ["og:image", social.image] : null,
   ]
     .filter(Boolean)
     .map(([property, content]) => `<meta property="${escapeHtml(property)}" content="${escapeHtml(content)}">`);
 }
 
+// Without a card declaration X renders every URL, listings included, as a
+// text-only summary. The large-image variant is only honest when the page
+// actually has an approved photo to show.
+function twitterCard(social) {
+  return [
+    ["twitter:card", social.image ? "summary_large_image" : "summary"],
+    ["twitter:title", social.title],
+    ["twitter:description", social.description],
+    social.image ? ["twitter:image", social.image] : null,
+  ]
+    .filter(Boolean)
+    .map(([name, content]) => `<meta name="${escapeHtml(name)}" content="${escapeHtml(content)}">`);
+}
+
 function meta(page, options = {}) {
+  const social = socialMetadata(page);
   const links = [
-    `<link rel="canonical" href="${escapeHtml(page.canonical || page.path || "/")}">`,
+    `<link rel="canonical" href="${escapeHtml(social.url)}">`,
     ...(page.hreflang || []).map(
-      (link) => `<link rel="alternate" hreflang="${escapeHtml(link.hreflang)}" href="${escapeHtml(link.href)}">`,
+      (link) =>
+        `<link rel="alternate" hreflang="${escapeHtml(link.hreflang)}" href="${escapeHtml(absolutePublicUrl(link.href))}">`,
     ),
   ];
   const schema = page.schema
@@ -57,7 +107,8 @@ function meta(page, options = {}) {
     `<title>${escapeHtml(page.metadata?.title || "MS Realty")}</title>`,
     `<meta name="description" content="${escapeHtml(page.metadata?.description || "")}">`,
     `<meta name="robots" content="${escapeHtml(page.metadata?.robots || (page.indexable ? "index,follow" : "noindex,follow"))}">`,
-    ...openGraph(page),
+    ...openGraph(page, social),
+    ...twitterCard(social),
     ...links,
     schema,
   ]
@@ -983,11 +1034,29 @@ ${clientScript(page, options)}
 </html>`;
 }
 
+// Every URL a search engine or a share card resolves must be fully qualified.
+// A relative hreflang is silently dropped by Google, and a relative og:url is
+// unresolvable to Facebook, so a regression here is invisible in the browser
+// and total in the index.
+function assertAbsoluteHeadUrls(html) {
+  const head = html.slice(0, html.indexOf("</head>"));
+  const values = [
+    ...[...head.matchAll(/<link rel="(?:canonical|alternate)"[^>]*href="([^"]*)"/g)].map(([, value]) => value),
+    ...[...head.matchAll(/<meta property="og:(?:url|image)" content="([^"]*)"/g)].map(([, value]) => value),
+  ];
+  const relative = values.filter((value) => !isAbsoluteHttpUrl(value));
+  if (relative.length) {
+    throw new Error(`HTML head must publish absolute URLs, found: ${relative.join(", ")}`);
+  }
+}
+
 export function assertHtmlPage(html, { lang, dir, kind }) {
   if (!html.startsWith("<!doctype html>")) throw new Error("HTML response must be a document");
   if (!html.includes(`<html lang="${lang}" dir="${dir}">`)) throw new Error("HTML response must set lang and dir");
   if (!html.includes(`data-kind="${kind}"`)) throw new Error("HTML response must render the expected page kind");
   if (!html.includes("<link rel=\"canonical\"")) throw new Error("HTML response must include canonical metadata");
   if (!html.includes("property=\"og:title\"")) throw new Error("HTML response must include Open Graph metadata");
+  if (!html.includes("name=\"twitter:card\"")) throw new Error("HTML response must include a Twitter card");
+  assertAbsoluteHeadUrls(html);
   return true;
 }
