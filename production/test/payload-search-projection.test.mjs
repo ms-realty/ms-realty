@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import {
   buildPayloadApprovedSearchProjection,
   payloadListingSearchRows,
+
 } from "../lib/payload-search-projection.mjs";
+import { loadListingPublicationApproval } from "../lib/listing-publication-approval.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 
 function approvedListing(overrides = {}) {
@@ -121,7 +123,7 @@ test("Payload projection treats zero approved listings as a valid authoritative 
       return { docs: [], page: 1, totalPages: 1 };
     },
   };
-  const projection = await buildPayloadApprovedSearchProjection(payload);
+  const projection = await buildPayloadApprovedSearchProjection(payload, { publicationEvidence: null });
   assert.deepEqual(projection.documents, []);
   assert.deepEqual(projection.summary, { input_rows: 0, projected_documents: 0, skipped_rows: 0 });
   assert.equal(projection.source.kind, "payload_postgres");
@@ -159,7 +161,7 @@ test("Payload projection preserves property bedroom and floor facts until listin
       };
     },
   };
-  const projection = await buildPayloadApprovedSearchProjection(payload);
+  const projection = await buildPayloadApprovedSearchProjection(payload, { publicationEvidence: null });
   assert.deepEqual(
     projection.documents.map(({ bedrooms_count, floor_number, total_floors }) => ({ bedrooms_count, floor_number, total_floors })),
     [
@@ -179,9 +181,38 @@ test("Payload projection paginates current database rows without reading fixture
         : { docs: [approvedListing({ id: "MS-CURRENT-0002", routing: { target_path: "/bg/imoti/MS-CURRENT-0002", target_locale: "bg" } })], page: 2, totalPages: 2 };
     },
   };
-  const projection = await buildPayloadApprovedSearchProjection(payload, { pageSize: 1 });
+  const projection = await buildPayloadApprovedSearchProjection(payload, { pageSize: 1, publicationEvidence: null });
   assert.deepEqual(projection.documents.map((document) => document.id), ["MS-CURRENT-0001:bg", "MS-CURRENT-0002:bg"]);
   assert.deepEqual(calls.map((call) => call.page), [1, 2]);
   assert.equal(projection.source.listing_rows, 2);
   assert.equal(projection.source.projected_documents, 2);
+});
+
+
+test("a published row the approval does not name is skipped, not fatal", () => {
+  const registry = loadLocaleRegistry();
+  const listing = approvedListing({ id: "MS-CRAWL-0127" });
+  const evidence = {
+    listing_ids: ["MS-CRAWL-0001"],
+    excluded_listings: [{ id: "MS-CRAWL-0127", reason: "no location relation and an empty title" }],
+  };
+  const skipped = [];
+  const rows = payloadListingSearchRows([listing], {
+    registry,
+    publicationEvidence: evidence,
+    onSkipped: (entry) => skipped.push(entry),
+  });
+  assert.equal(rows.length, 0);
+  assert.equal(skipped.length, 1);
+  assert.equal(skipped[0].listing_id, "MS-CRAWL-0127");
+  assert.match(skipped[0].reason, /no location relation/);
+});
+
+test("the default sync path resolves real listing ids from the approval", () => {
+  // The guard once read the gate-evidence summary, which has no listing_ids,
+  // silently disabling the skip; the approval loader is the id-bearing source.
+  const approval = loadListingPublicationApproval();
+  assert.equal(Array.isArray(approval.listing_ids), true);
+  assert.ok(approval.listing_ids.length >= 1);
+  assert.equal(approval.listing_ids.includes("MS-CRAWL-0127"), false);
 });

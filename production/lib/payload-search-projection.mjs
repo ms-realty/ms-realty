@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { buildApprovedSearchProjection } from "./search-engine-sync.mjs";
 import { loadPayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
-import { operatorPublicationListingEvidence } from "./listing-publication-approval.mjs";
+import { loadListingPublicationApproval } from "./listing-publication-approval.mjs";
 import { listingPath } from "./seo.mjs";
 
 function objectRelation(value) {
@@ -160,7 +160,7 @@ async function approvedListings(payload, pageSize) {
   return docs;
 }
 
-export async function buildPayloadApprovedSearchProjection(payload, { pageSize = 100, registry = loadLocaleRegistry(), publicationEvidence = operatorPublicationListingEvidence(), onSkipped = null } = {}) {
+export async function buildPayloadApprovedSearchProjection(payload, { pageSize = 100, registry = loadLocaleRegistry(), publicationEvidence = loadListingPublicationApproval(), onSkipped = null } = {}) {
   if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 1000) throw new Error("Payload search projection pageSize is invalid");
   const listings = await approvedListings(payload, pageSize);
   const skipped = [];
