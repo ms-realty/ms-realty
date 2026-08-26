@@ -49,7 +49,10 @@ const checks = [
       if (status !== 200 || body.service !== "ms-realty" || body.status !== "ok") throw new Error(`unhealthy: ${status}`);
       if (!SHA_PATTERN.test(String(body.build_marker || ""))) throw new Error("health must report a commit build marker");
       if (expectedBuildMarker && body.build_marker !== expectedBuildMarker) throw new Error("health must report expected build marker");
-      return { build_marker: body.build_marker };
+      if (expectedBuildMarker && body.origin_build_marker && body.origin_build_marker !== expectedBuildMarker) {
+        throw new Error("health origin must report expected build marker");
+      }
+      return { build_marker: body.build_marker, origin_build_marker: body.origin_build_marker || null };
     },
   },
   {

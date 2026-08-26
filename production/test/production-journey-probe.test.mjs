@@ -22,13 +22,15 @@ function runProbe(baseUrl, expectedBuildMarker) {
   });
 }
 
-test("production journey probe fails when health reports a different exact release", async (t) => {
+test("production journey probe fails when either deployed layer reports a different exact release", async (t) => {
   const actualBuildMarker = "a".repeat(40);
+  const expectedBuildMarker = "b".repeat(40);
+  let health = { service: "ms-realty", status: "ok", build_marker: actualBuildMarker };
   const server = http.createServer((request, response) => {
     response.setHeader("content-type", "text/html; charset=utf-8");
     if (request.url === "/api/health") {
       response.setHeader("content-type", "application/json");
-      response.end(JSON.stringify({ service: "ms-realty", status: "ok", build_marker: actualBuildMarker }));
+      response.end(JSON.stringify(health));
     } else if (request.url?.startsWith("/bg/tarsene")) {
       response.statusCode = 503;
       response.end('MS Realty <div class="search-unavailable"></div><a href="tel:+359879696870">Call</a>');
@@ -51,7 +53,8 @@ test("production journey probe fails when health reports a different exact relea
   t.after(() => server.close());
 
   const address = server.address();
-  const result = await runProbe(`http://127.0.0.1:${address.port}`, "b".repeat(40));
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+  const result = await runProbe(baseUrl, expectedBuildMarker);
   assert.equal(result.code, 1, result.stderr);
   const report = JSON.parse(result.stdout);
   assert.equal(report.failed, 1);
@@ -59,5 +62,15 @@ test("production journey probe fails when health reports a different exact relea
     id: "health",
     status: "fail",
     error: "health must report expected build marker",
+  });
+
+  health = { service: "ms-realty", status: "ok", build_marker: expectedBuildMarker, origin_build_marker: actualBuildMarker };
+  const staleOrigin = await runProbe(baseUrl, expectedBuildMarker);
+  assert.equal(staleOrigin.code, 1, staleOrigin.stderr);
+  const staleOriginReport = JSON.parse(staleOrigin.stdout);
+  assert.deepEqual(staleOriginReport.checks.find(({ id }) => id === "health"), {
+    id: "health",
+    status: "fail",
+    error: "health origin must report expected build marker",
   });
 });
