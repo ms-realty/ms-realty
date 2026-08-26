@@ -6,7 +6,7 @@ The agent contact card — sticky panel beside a listing gallery, tile on the te
 <AgentCard
   name="Мария Стоянова"
   role="Старши брокер"
-  office="Свети Влас"
+  office="Сандански"
   phone="+359 88 421 7788"
   langs={['BG', 'EN', 'RU']}
   callLabel="Обади се"
@@ -15,7 +15,7 @@ The agent contact card — sticky panel beside a listing gallery, tile on the te
   onMessage={write}
 />
 
-<AgentCard layout="row" name="Петър Илиев" role="Брокер" office="Банско" langs={['BG','EN','DE']} callLabel="Обади се" onCall={call} />
+<AgentCard layout="row" name="Петър Илиев" role="Брокер" office="Сандански" langs={['BG','EN','DE']} callLabel="Обади се" onCall={call} />
 ```
 
 - The call button is `accent` — this is one of the two sanctioned uses of the brand red. Message stays `secondary`.

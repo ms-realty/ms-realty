@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { fromRoot } from "../lib/paths.mjs";
 import { renderAboutPage, renderContactPage, renderListingPage } from "../lib/public-site.mjs";
 import { loadCmsSeed, renderRuntimePath } from "../lib/runtime.mjs";
 import { aboutPath, startPath } from "../lib/seo.mjs";
@@ -16,6 +18,24 @@ const knownDuplicateGroups = [
   ["MS-CRAWL-0055", "MS-CRAWL-0056", "MS-CRAWL-0088"],
   ["MS-CRAWL-0101", "MS-CRAWL-0109"],
 ];
+const designSystemOfficeFiles = [
+  "makler-realty-design-system/project/_ds_bundle.js",
+  "makler-realty-design-system/project/_ds_manifest.json",
+  "makler-realty-design-system/project/components/people/AgentCard.prompt.md",
+  "makler-realty-design-system/project/components/people/people.card.html",
+  "makler-realty-design-system/project/guidelines/voice-tone.html",
+  "makler-realty-design-system/project/readme.md",
+  "makler-realty-design-system/project/templates/agents/AgentsPage.dc.html",
+  "makler-realty-design-system/project/templates/client-deck/ClientDeck.dc.html",
+  "makler-realty-design-system/project/templates/contact/ContactPage.dc.html",
+  "makler-realty-design-system/project/templates/listing-detail/ListingDetail.dc.html",
+  "makler-realty-design-system/project/ui_kits/crm/crm-data.js",
+  "makler-realty-design-system/project/ui_kits/website/ContactPanel.jsx",
+  "makler-realty-design-system/project/ui_kits/website/HomePage.jsx",
+  "makler-realty-design-system/project/ui_kits/website/SiteChrome.jsx",
+  "makler-realty-design-system/project/ui_kits/website/data.js",
+];
+const falseOfficeClaim = /(?:три\s+офиса|местни\s+офиси|морски\s+офис|пирински\s+офис|централен\s+офис\s*[·—-]\s*(?:банско|свети\s+влас)|офис\s*[·—-]\s*(?:банско|свети\s+влас)|(?:банско|свети\s+влас)\s*(?:·|—|-)\s*офис|three\s+(?:makler\s+)?offices?|local\s+offices?|marine\s+office|mountain\s+office|central\s+office\s*[—-]\s*(?:bansko|sveti\s+vlas)|office\s*[—-]\s*(?:bansko|sveti\s+vlas))/iu;
 
 function listingPath(localeCode, id) {
   const segment = registry.locales.find((locale) => locale.code === localeCode).route_segments.listing;
@@ -73,4 +93,14 @@ test("office claim scan allows real service locations while limiting office fiel
     assert.deepEqual(contact.body.offices.map((office) => office.location), ["Sandanski"], `${localeCode} contact office`);
     assert.doesNotMatch(officeFields, /bansko|sveti\\s+vlas|банско|свети\\s*влас/iu, `${localeCode} false office claim`);
   }
+});
+
+test("design-system office claims stay separate from real service locations", () => {
+  const contents = Object.fromEntries(
+    designSystemOfficeFiles.map((relativePath) => [relativePath, fs.readFileSync(fromRoot(relativePath), "utf8")]),
+  );
+  const designSystem = Object.values(contents).join("\n");
+  assert.match(designSystem, /Сандански|Sandanski/iu, "design system retains the real office location");
+  assert.match(contents["makler-realty-design-system/project/ui_kits/website/data.js"], /location:\s*['"](?:Банско|Свети\s+Влас)['"]/iu, "service locations remain available");
+  assert.doesNotMatch(designSystem, falseOfficeClaim, "design system has no Bansko/coast office claim");
 });

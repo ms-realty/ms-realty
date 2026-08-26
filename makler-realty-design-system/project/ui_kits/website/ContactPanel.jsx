@@ -115,15 +115,13 @@ function ContactPanel({ open, onClose, listing, money }) {
 function ContactPage() {
   const [done, setDone] = React.useState(false);
   const offices = [
-    { name: 'Морски офис — Свети Влас', tone: 'sea', addr: 'Морски квартал, Свети Влас 8256', phone: '+359 88 421 7788', hours: 'Пон–Съб · 9:00–18:00' },
-    { name: 'Струмски офис — Сандански', tone: 'sand', addr: 'ул. Македония 21, Сандански 2800', phone: '+359 88 660 2093', hours: 'Пон–Пет · 9:00–17:30' },
-    { name: 'Пирински офис — Банско', tone: 'pine', addr: 'ул. Пирин 4, Банско 2770', phone: '+359 88 903 1140', hours: 'Зимен сезон · всеки ден' },
+    { name: 'Офис в Сандански', tone: 'sand', addr: 'Сандански — градът, полите на Пирин и област Благоевград', phone: '+359 879 69 68 70', email: 'office@makler-realty.com' },
   ];
   return (
     <main className="ct-page">
       <div className="ct-page__head">
         <h1>Свържете се с местен брокер</h1>
-        <p>Три офиса в България и екип, който работи на български, английски, немски, нидерландски и руски. Кажете ни какво търсите и ние поемаме нещата оттам.</p>
+        <p>Един офис в Сандански и екип, който работи на български, английски, немски, нидерландски и руски. Кажете ни какво търсите и ние поемаме нещата оттам.</p>
       </div>
       <div className="ct-page__cols">
         <div className="ct-offices">
@@ -135,7 +133,7 @@ function ContactPage() {
                 <div className="ct-office__meta">
                   <span><CTIcon name="map-pin" size={16} /> {o.addr}</span>
                   <span><CTIcon name="phone" size={16} /> {o.phone}</span>
-                  <span><CTIcon name="clock" size={16} /> {o.hours}</span>
+                  <span><CTIcon name="mail" size={16} /> {o.email}</span>
                 </div>
               </div>
             </div>

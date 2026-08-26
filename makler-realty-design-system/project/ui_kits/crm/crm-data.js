@@ -9,8 +9,8 @@ const eur = (n) => '€' + Number(n).toLocaleString('en-US');
 /* ---- Agents (the team) ---- */
 const CRM_AGENTS = {
   elena:   { id: 'elena',   name: 'Елена Петрова',  role: 'Старши брокер',  office: 'Сандански', initials: 'ЕП', tone: 'sand',   phone: '+359 879 69 68 70' },
-  dimitar: { id: 'dimitar', name: 'Димитър Колев',  role: 'Брокер',         office: 'Банско',    initials: 'ДК', tone: 'pine',   phone: '+359 88 903 1140' },
-  mila:    { id: 'mila',    name: 'Мила Георгиева', role: 'Брокер',         office: 'Свети Влас', initials: 'МГ', tone: 'sea',    phone: '+359 88 421 7788' },
+  dimitar: { id: 'dimitar', name: 'Димитър Колев',  role: 'Брокер',         office: 'Сандански', initials: 'ДК', tone: 'pine',   phone: '+359 88 903 1140' },
+  mila:    { id: 'mila',    name: 'Мила Георгиева', role: 'Брокер',         office: 'Сандански', initials: 'МГ', tone: 'sea',    phone: '+359 88 421 7788' },
   radoslav:{ id: 'radoslav',name: 'Радослав Иванов',role: 'Управител',      office: 'Сандански', initials: 'РИ', tone: 'sunset', phone: '+359 879 69 68 71' },
 };
 const ME = 'elena';

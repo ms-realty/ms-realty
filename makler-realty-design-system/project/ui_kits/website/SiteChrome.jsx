@@ -89,11 +89,11 @@ function Footer({ onNavigate }) {
           <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('home'); }} aria-label="MS Realty — начало" style={{ display: 'inline-flex' }}>
             <Logo variant="reversed" height={30} />
           </a>
-          <p className="site-ft__intro">Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция — с местни офиси и брокери, които говорят вашия език.</p>
+          <p className="site-ft__intro">Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция — с местен офис и брокери, които говорят вашия език.</p>
           <div className="site-ft__contact">
             <span><Icon name="phone" size={16} /> +359 879 69 68 70</span>
             <span><Icon name="mail" size={16} /> office@makler-realty.com</span>
-            <span><Icon name="map-pin" size={16} /> Сандански · Банско · Свети Влас</span>
+            <span><Icon name="map-pin" size={16} /> Сандански</span>
           </div>
         </div>
         <div>
@@ -120,7 +120,7 @@ function Footer({ onNavigate }) {
           <h4>Компания</h4>
           <ul>
             <li><a onClick={() => onNavigate('contact')}>За нас</a></li>
-            <li><a onClick={() => onNavigate('contact')}>Нашите офиси</a></li>
+            <li><a onClick={() => onNavigate('contact')}>Нашият офис</a></li>
             <li><a onClick={() => onNavigate('contact')}>Продайте с нас</a></li>
             <li><a onClick={() => onNavigate('contact')}>Кариери</a></li>
             <li><a onClick={() => onNavigate('contact')}>Контакти</a></li>
