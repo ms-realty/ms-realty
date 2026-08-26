@@ -59,6 +59,16 @@
 .ct-success p { max-width: 36ch; color: var(--text-body); }
 .site-hd__logo { display: inline-flex; min-height: 44px; align-items: center; flex: none; }
 .site-hd__logo img { height: 40px; width: auto; }
+/* The header logo's <picture> answers prefers-color-scheme, which is the
+   operating system's answer and not the visitor's. When the visitor has pinned
+   a palette the picture steps aside and the matching still takes over, so the
+   charcoal wordmark never lands on a dark header, nor the reversed one on a
+   white header. With no pinned palette both stills stay hidden and the
+   <picture> keeps doing exactly what it did before. */
+.site-hd__logo-pinned { display: none; }
+html[data-theme] .site-hd__logo picture { display: none; }
+html[data-theme="light"] .site-hd__logo-pinned[data-theme-logo="light"],
+html[data-theme="dark"] .site-hd__logo-pinned[data-theme-logo="dark"] { display: inline-block; }
 .site-hd__nav a { cursor: pointer; white-space: nowrap; }
 .site-hd__nav { margin-left: 0; margin-right: 0; margin-inline-start: 8px; }
 .site-hd__right { margin-left: 0; margin-right: 0; margin-inline-start: auto; }
@@ -126,6 +136,51 @@
 .site-language__code { font-size: var(--text-xs); font-weight: var(--fw-bold); letter-spacing: 0.04em; }
 .site-language__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .site-language__menu .mk-icon { color: var(--accent); }
+
+/* ---- Theme switch: system · light · dark ----
+   Three icon targets on one track, sitting next to the language switcher
+   because both answer the same question: how the visitor wants to be shown
+   this site. The group ships hidden and the head script reveals it by stamping
+   data-theme-ready on the root, so a visitor without JavaScript is never
+   offered a control that cannot do anything -- the site simply follows the
+   operating system, exactly as it did before.
+
+   The selected target paints from the root attribute rather than from
+   aria-pressed, so it is right in the first frame: the head script sets the
+   attribute before paint, while the deferred client script that owns
+   aria-pressed only runs once the document is parsed. */
+.site-theme {
+  display: none;
+  align-items: center;
+  flex: none;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button);
+  background: var(--surface-sunken);
+}
+html[data-theme-ready] .site-theme--desktop { display: inline-flex; }
+.site-theme__opt {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--radius-button) - 3px);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.site-theme__opt:hover { color: var(--text-strong); }
+.site-theme__opt:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+html:not([data-theme]) .site-theme__opt[data-theme-option="system"],
+html[data-theme="light"] .site-theme__opt[data-theme-option="light"],
+html[data-theme="dark"] .site-theme__opt[data-theme-option="dark"] {
+  background: var(--surface);
+  color: var(--text-strong);
+  box-shadow: var(--shadow-xs);
+}
 .site-ft__logo { display: inline-flex; }
 .site-ft__logo img { height: 30px; width: auto; }
 .site-ft__contact a { color: inherit; }
@@ -270,7 +325,37 @@
   }
   .site-hd__mobile-langs a[aria-current="true"] { border-color: var(--text-strong); color: var(--text-strong); }
   .site-hd__mobile-langs b { font-size: var(--text-xs); }
-  .site-hd__mobile-langs span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+  .site-hd__mobile-langs span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* At 375px the header bar already carries the logo, the call shortcut and the
+     menu button with nothing to spare, so the theme switch lives in the drawer
+     instead, on the same 44px targets as the languages above it. */
+  html[data-theme-ready] .site-theme--mobile {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+    padding: var(--space-3) 0 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+  }
+  .site-theme--mobile .site-theme__opt {
+    width: auto;
+    height: 44px;
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-body);
+    box-shadow: none;
+  }
+  html:not([data-theme]) .site-theme--mobile .site-theme__opt[data-theme-option="system"],
+  html[data-theme="light"] .site-theme--mobile .site-theme__opt[data-theme-option="light"],
+  html[data-theme="dark"] .site-theme--mobile .site-theme__opt[data-theme-option="dark"] {
+    border-color: var(--text-strong);
+    color: var(--text-strong);
+    background: transparent;
+    box-shadow: none;
+  }}
 @keyframes site-mobile-nav-in {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -286,7 +371,7 @@
 }
 .mk-crumbs,
 .mk-crumbs a,
-.mk-crumbs__sep { color: var(--stone-600); }
+.mk-crumbs__sep { color: var(--text-meta); }
 @media (max-width: 560px) {
   .site-ft__in { grid-template-columns: 1fr; gap: var(--space-5); padding-block: 40px 24px; }
   .site-ft__desktop-links { display: none; }
@@ -1320,9 +1405,31 @@ main .ct-form select {
    Every value below is a token from the design system's own stone/ink/brick
    ramps, so a dark viewer sees the same palette inverted rather than a second
    palette invented for the occasion. Only the surfaces and the two ring
-   colours are literal, because the scale has no step that dark enough. */
+   colours are literal, because the scale has no step that dark enough.
+
+   Three states, and the selector is the whole mechanism. The light palette is
+   the plain default on :root (tokens/colors.css), so it needs no selector at
+   all — it is simply what is left when neither block below matches. The dark
+   values are written twice: once behind the operating system's preference,
+   guarded so an explicit light choice outranks it, and once behind an explicit
+   dark choice, which needs no media query. No colour is defined only inside a
+   media query, so a visitor who pins a palette gets a complete one.
+
+   color-scheme is declared for the light path too. Without it a visitor whose
+   system is dark but who asked for light would keep getting dark native
+   selects, scrollbars and date pickers on a white page. */
+html:has(main[data-react-public-ui]) {
+  color-scheme: light;
+  /* Card and listing meta lines -- location, reference, breadcrumb separators.
+     They sit on white all day, where --text-muted only clears 3.9:1, so they
+     read one rung darker than the muted token. That rung used to be spelled
+     out as --stone-600 wherever it was needed, which meant it stayed a dark
+     brown when the palette flipped and left those lines at 3:1 on a dark card.
+     Naming it once here gives the dark blocks somewhere to answer. */
+  --text-meta: var(--stone-600);
+}
 @media (prefers-color-scheme: dark) {
-  html:has(main[data-react-public-ui]) {
+  html:not([data-theme="light"]):has(main[data-react-public-ui]) {
     color-scheme: dark;
     --canvas: #12110f;
     --surface: #1c1a17;
@@ -1337,6 +1444,7 @@ main .ct-form select {
     --text-on-dark: var(--stone-50);
     --text-on-brand: var(--ink-950);
     --text-link: var(--stone-100);
+    --text-meta: var(--stone-400);
     --border: #443c32;
     --border-strong: #665a49;
     --brand: var(--ink-50);
@@ -1366,15 +1474,71 @@ main .ct-form select {
     --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.46);
   }
 
-  html:has(main[data-react-public-ui]) .site-hd {
+  html:not([data-theme="light"]):has(main[data-react-public-ui]) .site-hd {
     background: color-mix(in srgb, var(--surface) 92%, transparent);
   }
 
   /* The search card sits on the hero photograph, so it keeps its own opacity
      rather than inheriting the header's. */
-  html:has(main[data-react-public-ui]) .hp-search__card {
+  html:not([data-theme="light"]):has(main[data-react-public-ui]) .hp-search__card {
     background: color-mix(in srgb, var(--surface) 96%, transparent);
   }
+}
+
+/* The same palette again, this time because the visitor asked for it. The
+   values are a literal copy of the block above; they have to be, because CSS
+   has no way to reuse a declaration list across two selectors. */
+html[data-theme="dark"]:has(main[data-react-public-ui]) {
+  color-scheme: dark;
+  --canvas: #12110f;
+  --surface: #1c1a17;
+  --surface-sunken: #25221e;
+  --surface-hover: #302b25;
+  --surface-inverse: #0c0c0b;
+  --overlay: rgba(0, 0, 0, 0.68);
+  --text-strong: var(--stone-50);
+  --text-body: var(--stone-200);
+  --text-muted: var(--stone-400);
+  --text-subtle: var(--stone-500);
+  --text-on-dark: var(--stone-50);
+  --text-on-brand: var(--ink-950);
+  --text-link: var(--stone-100);
+  --text-meta: var(--stone-400);
+  --border: #443c32;
+  --border-strong: #665a49;
+  --brand: var(--ink-50);
+  --brand-hover: #ffffff;
+  --brand-active: var(--ink-100);
+  --brand-subtle: #2b2926;
+  --accent: var(--brick-600);
+  --accent-hover: var(--brick-500);
+  --accent-active: var(--brick-700);
+  --accent-subtle: #3b2020;
+  --price: #ffffff;
+  --rating: var(--stone-100);
+  --ring: rgba(237, 132, 132, 0.58);
+  --ring-accent: rgba(244, 244, 243, 0.45);
+  --for-sale-fg: var(--ink-50);
+  --for-sale-bg: var(--ink-600);
+  --for-rent-fg: var(--ink-100);
+  --for-rent-bg: var(--ink-700);
+  --new-fg: var(--stone-100);
+  --new-bg: var(--stone-800);
+  --reduced-fg: var(--brick-200);
+  --reduced-bg: var(--brick-900);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.38);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.46);
+}
+
+html[data-theme="dark"]:has(main[data-react-public-ui]) .site-hd {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+html[data-theme="dark"]:has(main[data-react-public-ui]) .hp-search__card {
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
 }
 
 /* The kit pins the search segment's chevron with a physical right offset, so in

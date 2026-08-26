@@ -416,6 +416,10 @@ const ADMIN_UI_COPY = {
     templateReviewNotice: "Шаблонът е само начална точка. Проверете фактите и редактирайте текста преди одобрение.",
     skipToContent: "Към съдържанието",
     workspaceNavigation: "Навигация в работното пространство",
+    themeLabel: "Тема на работното място",
+    themeSystem: "Като системата",
+    themeLight: "Светла тема",
+    themeDark: "Тъмна тема",
     operationsReports: "Оперативни отчети",
     actualResponses: "Действително изпратени отговори",
     responseRate: "Дял с изпратен отговор",
@@ -1077,6 +1081,10 @@ const ADMIN_UI_COPY = {
     templateReviewNotice: "Шаблон: только отправная точка. Проверьте факты и отредактируйте текст перед одобрением.",
     skipToContent: "К содержанию",
     workspaceNavigation: "Навигация по рабочему пространству",
+    themeLabel: "Тема рабочего места",
+    themeSystem: "Как в системе",
+    themeLight: "Светлая тема",
+    themeDark: "Тёмная тема",
     operationsReports: "Операционные отчеты",
     actualResponses: "Фактически отправленные ответы",
     responseRate: "Доля с отправленным ответом",
@@ -1738,6 +1746,10 @@ const ADMIN_UI_COPY = {
     templateReviewNotice: "Templates are a starting point only. Check the facts and edit the text before approval.",
     skipToContent: "Skip to content",
     workspaceNavigation: "Workspace navigation",
+    themeLabel: "Workbench theme",
+    themeSystem: "Match the system",
+    themeLight: "Light theme",
+    themeDark: "Dark theme",
     operationsReports: "Operations reports",
     actualResponses: "Actual responses sent",
     responseRate: "Response sent rate",
@@ -2703,6 +2715,43 @@ function Sidebar({ page }) {
   );
 }
 
+// The workbench half of the palette control: follow the operating system,
+// light, or dark, with system the default and always returnable. Two copies,
+// because the top bar has no room for a second group on a phone and the
+// navigation drawer does; the stylesheet shows exactly one of them.
+const ADMIN_THEME_OPTIONS = Object.freeze([
+  { value: "system", icon: "monitor" },
+  { value: "light", icon: "sun" },
+  { value: "dark", icon: "moon" },
+]);
+
+function ThemeSwitch({ ui, variant }) {
+  const names = { system: ui.themeSystem, light: ui.themeLight, dark: ui.themeDark };
+  return h(
+    "div",
+    {
+      className: variant === "top" ? "crm-seg adm-theme adm-theme--top" : "adm-theme adm-theme--drawer",
+      role: "group",
+      "aria-label": ui.themeLabel,
+      "data-theme-switch": `admin-${variant}`,
+    },
+    ...ADMIN_THEME_OPTIONS.map((option) =>
+      h(
+        "button",
+        {
+          key: option.value,
+          type: "button",
+          "data-theme-option": option.value,
+          "aria-pressed": option.value === "system" ? "true" : "false",
+          "aria-label": names[option.value],
+          title: names[option.value],
+        },
+        h(Icon, { name: option.icon, size: 16 }),
+      ),
+    ),
+  );
+}
+
 function MobileNavigation({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -2768,12 +2817,14 @@ function MobileNavigation({ page }) {
           ),
         ]),
       ),
+      h(ThemeSwitch, { ui, variant: "drawer" }),
     ),
   );
 }
 
 function Topbar({ page, title }) {
   const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
   const locales = page.workspace?.interface_locales || [];
   return h(
     "header",
@@ -2801,6 +2852,7 @@ function Topbar({ page, title }) {
         ),
       ),
     ),
+    h(ThemeSwitch, { ui, variant: "top" }),
   );
 }
 

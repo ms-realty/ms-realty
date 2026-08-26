@@ -93,6 +93,54 @@ function LanguageMenu({ languages, label }) {
   );
 }
 
+// Three palettes the visitor can pick between: follow the operating system,
+// light, or dark. System is the default and stays a returnable state, so a
+// visitor who tries dark on a light machine can go back to following the
+// machine instead of being pinned to a choice for good.
+//
+// Rendered as pressed buttons rather than links because nothing navigates, and
+// with system pre-marked because that is what an operating-system-driven page
+// is showing. The client script corrects the marking as soon as it runs; the
+// stylesheet paints the selected target from the root attribute, which the head
+// script sets before the first frame.
+const THEME_OPTIONS = Object.freeze([
+  { value: "system", icon: "monitor" },
+  { value: "light", icon: "sun" },
+  { value: "dark", icon: "moon" },
+]);
+
+function ThemeSwitch({ copy, variant }) {
+  const names = {
+    system: copy.themeSystem,
+    light: copy.themeLight,
+    dark: copy.themeDark,
+  };
+  return h(
+    "div",
+    {
+      className: `site-theme site-theme--${variant}`,
+      role: "group",
+      "aria-label": copy.themeLabel,
+      "data-theme-switch": variant,
+    },
+    ...THEME_OPTIONS.map((option) =>
+      h(
+        "button",
+        {
+          key: option.value,
+          type: "button",
+          className: "site-theme__opt",
+          "data-theme-option": option.value,
+          "aria-pressed": option.value === "system" ? "true" : "false",
+          "aria-label": names[option.value],
+          title: names[option.value],
+        },
+        h(Icon, { name: option.icon, size: 16 }),
+      ),
+    ),
+  );
+}
+
 function SiteHeader({ chrome }) {
   const copy = chrome.copy;
   const activeLanguage = chrome.languages.find((language) => language.active) || chrome.languages[0];
@@ -178,6 +226,7 @@ function SiteHeader({ chrome }) {
           ),
         ),
       ),
+      h(ThemeSwitch, { copy, variant: "mobile" }),
       h(Btn, { tag: "a", variant: "accent", size: "md", full: true, iconStart: "message-circle", href: chrome.contact.path }, chrome.contact.label),
     ),
   );
@@ -196,6 +245,11 @@ function SiteHeader({ chrome }) {
           h("source", { media: "(prefers-color-scheme: dark)", srcSet: LOGO_URL_REVERSED }),
           h("img", { src: LOGO_URL, alt: chrome.home.label, height: 40, width: Math.round(40 * LOGO_ASPECT) }),
         ),
+        // The picture above can only answer the operating system. These two
+        // stay hidden until the visitor pins a palette, at which point the
+        // stylesheet hides the picture and shows whichever of them matches.
+        h("img", { className: "site-hd__logo-pinned", "data-theme-logo": "light", src: LOGO_URL, alt: "", "aria-hidden": "true", height: 40, width: Math.round(40 * LOGO_ASPECT) }),
+        h("img", { className: "site-hd__logo-pinned", "data-theme-logo": "dark", src: LOGO_URL_REVERSED, alt: "", "aria-hidden": "true", height: 40, width: Math.round(40 * LOGO_ASPECT) }),
       ),
       h(
         "nav",
@@ -252,6 +306,7 @@ function SiteHeader({ chrome }) {
               h("span", { className: "site-hd__compare-label" }, chrome.saved.compare.label),
             )
           : null,
+        h(ThemeSwitch, { copy, variant: "desktop" }),
         h(LanguageMenu, { languages: chrome.languages, label: copy.languageLabel }),
         h(
           Btn,

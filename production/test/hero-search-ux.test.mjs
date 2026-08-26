@@ -166,7 +166,20 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   // The seller, location and not-found layouts were rebuilt here and are
   // covered by public-pages.test.mjs against this branch's own markup.
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
-  assert.match(css, /@media \(prefers-color-scheme: dark\) \{[\s\S]*?html:has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;/);
+  // Three palettes, and the selector is the whole mechanism: light is the plain
+  // default, the operating system's dark preference applies unless the visitor
+  // pinned light, and an explicit dark choice needs no media query at all. A
+  // colour defined only inside the media query would leave a pinned visitor
+  // with half a palette, so the dark block is written out twice on purpose.
+  // color-scheme must be declared on both paths, not just the dark one: a
+  // visitor whose system is dark but who picked the light theme would
+  // otherwise keep dark native selects, scrollbars and date pickers on a white
+  // page. Asserted by substance rather than by formatting, because the rule
+  // now carries the explanation alongside it.
+  assert.match(css, /html:has\(main\[data-react-public-ui\]\) \{\s*color-scheme: light;/);
+  assert.match(css, /html\[data-theme="dark"\]:has\(main\[data-react-public-ui\]\) \{[^}]*color-scheme: dark;/);
+  assert.match(css, /@media \(prefers-color-scheme: dark\) \{[\s\S]*?html:not\(\[data-theme="light"\]\):has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;/);
+  assert.match(css, /html\[data-theme="dark"\]:has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;[\s\S]*?--canvas: #12110f;/);
   // The rail carries two approved guides, so it is two columns wide and a
   // snap-scrolling carousel on a phone; a third column would leave a hole.
   const pagesCss = readFileSync(new URL("../lib/ui/adapter-public-pages.css", import.meta.url), "utf8");

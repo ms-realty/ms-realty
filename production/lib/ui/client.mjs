@@ -2,8 +2,68 @@
 // build-design-assets.mjs. Pages stay fully server-rendered; this layer wires
 // saved listings, enquiries, the 360 viewer, and admin filters.
 
+// The visitor's palette choice: system (follow the operating system), light or
+// dark. The head script in lib/html.mjs already read the stored value and
+// stamped the root before first paint; this half owns the control itself.
+//
+// The markup is the contract, so the same behaviour serves the public header,
+// the public mobile drawer and both copies of the admin control:
+//
+//   <div data-theme-switch="…" role="group" aria-label="…">
+//     <button data-theme-option="system|light|dark" aria-pressed="…">
+//
+// "system" is stored as the absence of a stored value, so a visitor who
+// returns to it goes back to following the operating system rather than being
+// pinned to whatever the system happened to be on the day they chose.
+export const THEME_SWITCH_JS = `
+  var MS_REALTY_THEME_KEY = "ms-realty:theme";
+  function readThemeChoice() {
+    try {
+      var stored = localStorage.getItem(MS_REALTY_THEME_KEY);
+      if (stored === "light" || stored === "dark") return stored;
+    } catch (error) {
+      // Private browsing and blocked storage both throw here. The root
+      // attribute is then the only record of the choice, and it lasts for
+      // exactly as long as the page does.
+      return document.documentElement.getAttribute("data-theme") || "system";
+    }
+    return "system";
+  }
+  function syncThemeSwitches(choice) {
+    var options = document.querySelectorAll("[data-theme-option]");
+    for (var i = 0; i < options.length; i += 1) {
+      var on = options[i].getAttribute("data-theme-option") === choice;
+      options[i].setAttribute("aria-pressed", on ? "true" : "false");
+      options[i].setAttribute("data-on", on ? "1" : "0");
+    }
+  }
+  function applyThemeChoice(choice) {
+    var root = document.documentElement;
+    if (choice === "light" || choice === "dark") root.setAttribute("data-theme", choice);
+    else root.removeAttribute("data-theme");
+    try {
+      if (choice === "light" || choice === "dark") localStorage.setItem(MS_REALTY_THEME_KEY, choice);
+      else localStorage.removeItem(MS_REALTY_THEME_KEY);
+    } catch (error) {}
+    syncThemeSwitches(choice);
+  }
+  function initThemeSwitch() {
+    var groups = document.querySelectorAll("[data-theme-switch]");
+    if (!groups.length) return;
+    for (var i = 0; i < groups.length; i += 1) {
+      groups[i].addEventListener("click", function (event) {
+        var option = event.target.closest("[data-theme-option]");
+        if (!option) return;
+        applyThemeChoice(option.getAttribute("data-theme-option") || "system");
+      });
+    }
+    syncThemeSwitches(readThemeChoice());
+  }
+`;
+
 export const PUBLIC_APP_JS = `(function () {
   "use strict";
+${THEME_SWITCH_JS}
   var publicClientScript = document.currentScript || document.querySelector("script[data-ms-realty-public-client]");
   var I18N = {
     requestSent: publicClientScript ? publicClientScript.getAttribute("data-request-sent") || "" : "",
@@ -2912,6 +2972,7 @@ export const PUBLIC_APP_JS = `(function () {
  initSellerPhotoUpload();
  initPhotoSphereViewers();
  initPrivacySafeAnalytics();
+ initThemeSwitch();
  firstTouchPath();
 })();`;
 
@@ -2998,6 +3059,7 @@ export const COPY_BLOCK_JS = `
 export const ADMIN_APP_JS = `(function () {
   "use strict";
 ${COPY_BLOCK_JS}
+${THEME_SWITCH_JS}
   function syncAdminShellOffsets() {
     var topbar = document.querySelector(".crm-top");
     var editorTabs = document.querySelector("[data-editor-tabs]");
@@ -4536,4 +4598,5 @@ ${COPY_BLOCK_JS}
   initPipelineBoard();
   initLeadInboxPanes();
   initCopyBlocks(document);
+  initThemeSwitch();
 })();`;
