@@ -299,9 +299,34 @@ export function factVerificationFor(field, verifications = []) {
   return verifications.find((entry) => entry.field === field) || { field, state: "unknown" };
 }
 
+// A figure the source stated but no broker has confirmed. The owner publishes
+// these, because withholding a bedroom count the seller wrote down helps
+// nobody, but the page has to say where the number came from. The public
+// projection therefore reports provenance beside every value it hands out.
+export const SOURCE_STATED_FACT_STATE = "entered_pending_review";
+
+// Placement metadata is not a figure the source stated about the property: a
+// map pin and the precision that governs it are the site's own claim about
+// where it is putting the property, and neither can carry a label a visitor
+// reads. Both stay behind broker verification.
+const BROKER_VERIFIED_ONLY_FACTS = new Set(["public_latitude", "public_longitude", "public_location_precision"]);
+
+export function factProvenanceForState(field, state) {
+  if (state === "broker_verified") return "broker_verified";
+  if (state === SOURCE_STATED_FACT_STATE && !BROKER_VERIFIED_ONLY_FACTS.has(field)) return "source_stated";
+  return null;
+}
+
+export function factProvenanceFor(field, verifications = []) {
+  return factProvenanceForState(field, factVerificationFor(field, verifications).state);
+}
+
 export function publicFactValue(facts, verifications, field) {
-  const verification = factVerificationFor(field, verifications);
-  return verification.state === "broker_verified" ? facts[field] ?? null : null;
+  return factProvenanceFor(field, verifications) ? facts[field] ?? null : null;
+}
+
+export function publicFactIsSourceStated(facts, verifications, field) {
+  return factProvenanceFor(field, verifications) === "source_stated" && publicFactValue(facts, verifications, field) !== null;
 }
 
 export function publicPrimaryAreaSqm(facts, verifications) {

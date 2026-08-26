@@ -111,10 +111,8 @@
           "area_sqm",
           "public_gallery"
         ],
-        "public_gallery_assets": 1,
-        "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Дава под наем промишлена сграда в Сандански]"
-        ]
+        "public_gallery_assets": 0,
+        "public_gallery_sample": []
       },
       {
         "listing_id": "MS-CRAWL-0007",

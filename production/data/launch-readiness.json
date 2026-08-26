@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T12:00:08.285Z",
+  "generated_at": "2026-08-26T17:11:45.367Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
@@ -19,11 +19,11 @@
     },
     {
       "id": "structured_data.missing_bedrooms",
-      "count": 81
+      "count": 10
     },
     {
       "id": "structured_data.missing_public_images",
-      "count": 4
+      "count": 9
     },
     {
       "id": "listing_quality.missing_area",
@@ -153,13 +153,13 @@
         "listing_entries": 166,
         "guide_entries": 5,
         "failing_entries": 0,
-        "entries_with_offer": 135,
+        "entries_with_offer": 134,
         "warnings": {
           "missing_location": 2,
           "missing_price": 0,
           "missing_area": 166,
-          "missing_bedrooms": 81,
-          "missing_public_images": 4,
+          "missing_bedrooms": 10,
+          "missing_public_images": 9,
           "media_review_pending": 0
         },
         "by_locale": {
@@ -561,17 +561,122 @@
       "status": "blocked",
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "status": "missing_report",
+        "status": "blocked_report",
+        "generated_at": "2026-07-06T00:00:00Z",
         "path": "production/data/payload-runtime-report.json",
-        "next_actions": [
-          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
-          "Run npm run payload:runtime, then npm run payload:preflight."
+        "summary": {
+          "admin_route": "/admin",
+          "checks": 12,
+          "database": {
+            "status": "missing_env"
+          },
+          "identity_collection": "admins",
+          "missing_env": [
+            "PAYLOAD_SECRET",
+            "DATABASE_URL"
+          ],
+          "payload_admin_ui": "edge_hidden",
+          "payload_identity_rest": "edge_hidden",
+          "placeholder_env": [],
+          "weak_env": [],
+          "route_files": 6
+        },
+        "checks": [
+          {
+            "id": "payload_secret",
+            "status": "missing_env",
+            "env": "PAYLOAD_SECRET"
+          },
+          {
+            "id": "database_url",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          },
+          {
+            "id": "route:app/admin/route.js",
+            "status": "pass",
+            "file": "app/admin/route.js"
+          },
+          {
+            "id": "route:app/admin/login/route.js",
+            "status": "pass",
+            "file": "app/admin/login/route.js"
+          },
+          {
+            "id": "route:app/admin/logout/route.js",
+            "status": "pass",
+            "file": "app/admin/logout/route.js"
+          },
+          {
+            "id": "route:app/admin/team/route.js",
+            "status": "pass",
+            "file": "app/admin/team/route.js"
+          },
+          {
+            "id": "route:app/api/admin/team/route.js",
+            "status": "pass",
+            "file": "app/api/admin/team/route.js"
+          },
+          {
+            "id": "route:app/(payload)/api/[...slug]/route.js",
+            "status": "pass",
+            "file": "app/(payload)/api/[...slug]/route.js"
+          },
+          {
+            "id": "payload_edge_boundary",
+            "status": "pass",
+            "custom_admin_route": "/admin",
+            "payload_admin_ui": "edge_hidden",
+            "payload_graphql_encoded_paths": [
+              "/graph%71l",
+              "/graph%2571l",
+              "/graphql%2fquery",
+              "/graphql%252fquery",
+              "/graphql%2dplayground",
+              "/graphql%252dplayground%252f",
+              "/api%2fgraphql",
+              "/api%252fgraphql%252f"
+            ],
+            "payload_graphql_paths": [
+              "/graphql",
+              "/graphql-playground",
+              "/api/graphql"
+            ],
+            "payload_identity_rest": "edge_hidden"
+          },
+          {
+            "id": "payload_config_import",
+            "status": "pass",
+            "collections": 13,
+            "graphql_disabled": true,
+            "graphql_playground_disabled_in_production": true,
+            "identity_collection": "admins",
+            "internal_admin_route": "/payload-admin",
+            "session_max_age_seconds": 7200,
+            "sessions": "database_backed"
+          },
+          {
+            "id": "database_network_scope",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          },
+          {
+            "id": "database_tcp",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          }
         ],
         "freshness": {
           "id": "payload_runtime",
-          "status": "invalid",
-          "error": "generated_at is not a timestamp"
-        }
+          "status": "stale",
+          "age_ms": 4468305367,
+          "max_age_ms": 604800000
+        },
+        "next_actions": [
+          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
+          "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
+          "Run npm run payload:preflight before launch:preflight."
+        ]
       },
       "next_actions": [
         "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",

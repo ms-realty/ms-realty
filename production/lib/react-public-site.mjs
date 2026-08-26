@@ -923,6 +923,12 @@ function listingFactRows({ facts, labels, ui, localeCode, verificationDate, veri
   }
   if (reference) rows.reference = { label: labels.reference, value: reference, mono: true };
   if (sourceLanguage) rows.source_language = { label: labels.sourceLanguage, value: sourceLanguage, lang: sourceLanguage.toLowerCase() };
+  // The projection names the rows whose figure the source stated and no broker
+  // confirmed. Marking them here keeps the group renderer free of any opinion
+  // about which fact came from where.
+  for (const key of Array.isArray(facts.source_stated) ? facts.source_stated : []) {
+    if (rows[key]) rows[key] = { ...rows[key], sourceStated: true };
+  }
   return rows;
 }
 
@@ -944,9 +950,30 @@ function ListingFactGroups({ rows, labels }) {
           { "data-listing-facts": "true" },
           ...group.keys.flatMap((key) => [
             h("dt", { key: `${key}-term` }, rows[key].label),
-            h("dd", { key: `${key}-value`, className: rows[key].mono ? "ld-factgroup__mono" : undefined, lang: rows[key].lang }, rows[key].value),
+            h(
+              "dd",
+              {
+                key: `${key}-value`,
+                className: rows[key].mono ? "ld-factgroup__mono" : undefined,
+                lang: rows[key].lang,
+                ...(rows[key].sourceStated ? { "data-fact-provenance": "source_stated" } : {}),
+              },
+              rows[key].value,
+              // The label rides with the figure rather than the group, so a
+              // visitor reading one row still learns where that number came
+              // from - and a screen reader announces it in the same breath.
+              rows[key].sourceStated
+                ? h("span", { className: "ld-factgroup__provenance" }, ` \u00b7 ${labels.sourceStated}`)
+                : null,
+            ),
           ]),
         ),
+        // One note per group, and only where a group actually carries an
+        // unchecked figure: a caveat printed under facts that are all verified
+        // teaches the visitor to ignore it.
+        group.keys.some((key) => rows[key].sourceStated)
+          ? h("p", { className: "ld-factgroup__note", "data-fact-provenance-note": "true" }, labels.sourceStatedNote)
+          : null,
       ),
     ),
   );
@@ -3406,7 +3433,12 @@ function ListingBody({ page }) {
   const sourceLanguageLabel = contentLocale !== page.locale ? contentLocale.toUpperCase() : null;
   const verifiedAt = page.body.verification?.availability_verified_at || null;
   const verificationDate = listingVerificationDate(verifiedAt, page.locale);
-  const factsReviewed = page.body.lifecycle?.publish_approved === true;
+  // Publication approval says the listing may be shown; it says nothing about
+  // whether anybody checked its figures. Claiming reviewed facts beside a
+  // table that carries source-stated ones is the contradiction this page used
+  // to print, so the claim now stands only when every figure on it is checked.
+  const factsReviewed =
+    page.body.lifecycle?.publish_approved === true && !(Array.isArray(facts.source_stated) && facts.source_stated.length);
   const locationPrecision = hasFact(facts.location_precision)
     ? ui.locationPrecisions?.[facts.location_precision] || humanizeIdentifier(facts.location_precision)
     : "";

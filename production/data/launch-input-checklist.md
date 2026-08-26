@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-08-25T12:00:08.504Z
+Generated: 2026-08-26T17:11:45.653Z
 
 Status: blocked
 Blockers: live_services, monitoring_rollback, payload_runtime, production_recovery
@@ -92,7 +92,10 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Runtime report: `production/data/payload-runtime-report.json` (real output stays local and ignored)
 - Runtime report example: `production/data/payload-runtime-report.json.example`
 - Current check evidence:
-- no Payload runtime check rows available
+- payload_secret: missing_env (env PAYLOAD_SECRET)
+- database_url: missing_env (env DATABASE_URL)
+- database_network_scope: missing_env (env DATABASE_URL)
+- database_tcp: missing_env (env DATABASE_URL)
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`
@@ -154,8 +157,8 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
 - structured_data.missing_location: 2
 - structured_data.missing_area: 166
-- structured_data.missing_bedrooms: 81
-- structured_data.missing_public_images: 4
+- structured_data.missing_bedrooms: 10
+- structured_data.missing_public_images: 9
 - listing_quality.missing_area: 165
 - listing_quality.missing_location: 2
 - listing_quality.thin_public_gallery: 18

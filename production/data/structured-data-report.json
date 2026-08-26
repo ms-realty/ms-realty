@@ -4,13 +4,13 @@
     "listing_entries": 166,
     "guide_entries": 5,
     "failing_entries": 0,
-    "entries_with_offer": 135,
+    "entries_with_offer": 134,
     "warnings": {
       "missing_location": 2,
       "missing_price": 0,
       "missing_area": 166,
-      "missing_bedrooms": 81,
-      "missing_public_images": 4,
+      "missing_bedrooms": 10,
+      "missing_public_images": 9,
       "media_review_pending": 0
     },
     "by_locale": {
@@ -74,8 +74,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -89,8 +88,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -104,8 +102,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -115,11 +112,12 @@
       "listing_id": "MS-CRAWL-0006",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 1,
+      "image_count": 0,
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_public_images"
       ]
     },
     {
@@ -133,8 +131,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -148,8 +145,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -163,8 +159,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -178,8 +173,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -235,8 +229,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -250,8 +243,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -265,8 +257,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -280,8 +271,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -306,7 +296,7 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 13,
-      "has_offer": true,
+      "has_offer": false,
       "issues": [],
       "warnings": [
         "missing_area"
@@ -337,8 +327,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -366,8 +355,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -396,8 +384,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -411,8 +398,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -426,8 +412,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -441,8 +426,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -486,8 +470,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -501,8 +484,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -516,8 +498,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -531,8 +512,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -546,8 +526,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -659,8 +638,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -689,8 +667,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -704,8 +681,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -719,8 +695,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -734,8 +709,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -745,11 +719,12 @@
       "listing_id": "MS-CRAWL-0049",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 1,
+      "image_count": 0,
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_public_images"
       ]
     },
     {
@@ -763,8 +738,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -778,8 +752,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -821,8 +794,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -993,8 +965,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1008,8 +979,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1019,11 +989,12 @@
       "listing_id": "MS-CRAWL-0068",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 1,
+      "image_count": 0,
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_public_images"
       ]
     },
     {
@@ -1047,11 +1018,12 @@
       "listing_id": "MS-CRAWL-0070",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 1,
+      "image_count": 0,
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_public_images"
       ]
     },
     {
@@ -1079,8 +1051,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1108,8 +1079,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1166,8 +1136,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1181,8 +1150,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1196,8 +1164,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1221,11 +1188,12 @@
       "listing_id": "MS-CRAWL-0082",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 1,
+      "image_count": 0,
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_public_images"
       ]
     },
     {
@@ -1253,8 +1221,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1268,8 +1235,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1325,8 +1291,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1340,8 +1305,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1355,8 +1319,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1370,8 +1333,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1385,8 +1347,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1470,8 +1431,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1485,8 +1445,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1500,8 +1459,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1515,8 +1473,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1530,8 +1487,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1545,8 +1501,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1589,8 +1544,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1618,8 +1572,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1633,8 +1586,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1676,8 +1628,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1705,8 +1656,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1734,8 +1684,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1749,8 +1698,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1764,8 +1712,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1836,8 +1783,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1851,8 +1797,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1923,8 +1868,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1938,8 +1882,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1953,8 +1896,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -1983,8 +1925,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -2169,8 +2110,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -2184,8 +2124,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -2354,8 +2293,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -2369,8 +2307,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -2384,8 +2321,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -2399,8 +2335,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
@@ -2414,8 +2349,7 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {

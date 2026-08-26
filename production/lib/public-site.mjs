@@ -261,6 +261,8 @@ const ACTION_LABELS = {
     availability: "Наличност",
     listingStatuses: { available: "Наличен", reserved: "Резервиран", sold: "Продаден", rented: "Отдаден под наем" },
     factsReviewed: "Фактите са проверени",
+    sourceStated: "по данни на източника",
+    sourceStatedNote: "Стойностите с тази бележка идват от първоначалната обява и още не са проверени от брокер.",
     sourceLanguage: "Изходен език",
     office: "Офис",
     moreInLocation: "Още имоти в {location}",
@@ -441,6 +443,8 @@ const ACTION_LABELS = {
     availability: "Availability",
     listingStatuses: { available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented" },
     factsReviewed: "Facts reviewed",
+    sourceStated: "as stated by the source",
+    sourceStatedNote: "Figures marked this way come from the original listing and have not been checked by a broker yet.",
     sourceLanguage: "Source language",
     office: "Office",
     moreInLocation: "More properties in {location}",
@@ -621,6 +625,8 @@ const ACTION_LABELS = {
     availability: "Verfügbarkeit",
     listingStatuses: { available: "Verfügbar", reserved: "Reserviert", sold: "Verkauft", rented: "Vermietet" },
     factsReviewed: "Fakten geprüft",
+    sourceStated: "nach Angabe der Quelle",
+    sourceStatedNote: "So gekennzeichnete Angaben stammen aus dem ursprünglichen Inserat und wurden noch nicht von einem Makler geprüft.",
     sourceLanguage: "Ausgangssprache",
     office: "Büro",
     moreInLocation: "Weitere Immobilien in {location}",
@@ -801,6 +807,8 @@ const ACTION_LABELS = {
     availability: "Beschikbaarheid",
     listingStatuses: { available: "Beschikbaar", reserved: "Gereserveerd", sold: "Verkocht", rented: "Verhuurd" },
     factsReviewed: "Feiten gecontroleerd",
+    sourceStated: "volgens opgave van de bron",
+    sourceStatedNote: "Zo gemarkeerde gegevens komen uit de oorspronkelijke advertentie en zijn nog niet door een makelaar gecontroleerd.",
     sourceLanguage: "Brontaal",
     office: "Kantoor",
     moreInLocation: "Meer vastgoed in {location}",
@@ -981,6 +989,8 @@ const ACTION_LABELS = {
     availability: "Доступность",
     listingStatuses: { available: "Доступен", reserved: "Зарезервирован", sold: "Продан", rented: "Сдан" },
     factsReviewed: "Факты проверены",
+    sourceStated: "по данным источника",
+    sourceStatedNote: "Значения с этой пометкой взяты из первоначального объявления и ещё не проверены брокером.",
     sourceLanguage: "Язык оригинала",
     office: "Офис",
     moreInLocation: "Ещё объекты в {location}",
@@ -1161,6 +1171,8 @@ const ACTION_LABELS = {
     availability: "Διαθεσιμότητα",
     listingStatuses: { available: "Διαθέσιμο", reserved: "Κρατημένο", sold: "Πωλήθηκε", rented: "Ενοικιάστηκε" },
     factsReviewed: "Τα στοιχεία ελέγχθηκαν",
+    sourceStated: "σύμφωνα με την πηγή",
+    sourceStatedNote: "Τα μεγέθη με αυτή τη σήμανση προέρχονται από την αρχική αγγελία και δεν έχουν ελεγχθεί ακόμη από μεσίτη.",
     sourceLanguage: "Γλώσσα προέλευσης",
     office: "Γραφείο",
     moreInLocation: "Περισσότερα ακίνητα: {location}",
@@ -1341,6 +1353,8 @@ const ACTION_LABELS = {
     availability: "זמינות",
     listingStatuses: { available: "זמין", reserved: "שמור", sold: "נמכר", rented: "הושכר" },
     factsReviewed: "העובדות נבדקו",
+    sourceStated: "לפי מקור המידע",
+    sourceStatedNote: "נתונים המסומנים כך נלקחו מהמודעה המקורית וטרם נבדקו על ידי מתווך.",
     sourceLanguage: "שפת המקור",
     office: "משרד",
     moreInLocation: "נכסים נוספים ב-{location}",
@@ -3330,6 +3344,17 @@ function listingLocationLinks(locale, view) {
   };
 }
 
+// The price the crawl copied off the legacy page is in the same position as a
+// copied bedroom count: a figure the source stated. It joins the labelled set
+// until a broker dates the price verification, so the page stops showing one
+// unchecked number with a caveat and another without.
+function sourceStatedFactsForView(view) {
+  const rows = [...(Array.isArray(view.source_stated_facts) ? view.source_stated_facts : [])];
+  const showsPrice = view.price_on_request !== true && view.price_eur !== null && view.price_eur !== undefined;
+  if (showsPrice && view.price_verified !== true) rows.push("price");
+  return [...new Set(rows)].sort();
+}
+
 export function renderListingPage({
   registry,
   listing,
@@ -3424,6 +3449,10 @@ export function renderListingPage({
         price_on_request: view.price_on_request,
         listing_status: view.listing_status,
         image_count: view.image_count,
+        // Which rows of the fact table carry a figure the source stated and
+        // nobody has checked. The renderer labels exactly these, so a visitor
+        // can tell a confirmed number from a copied one.
+        source_stated: sourceStatedFactsForView(view),
       },
       lifecycle: {
         status: view.listing_status,

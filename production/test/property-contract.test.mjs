@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { publicPropertyProjection } from "../lib/content.mjs";
 import {
   CANONICAL_PROPERTY_FAMILIES,
+  factProvenanceForState,
   derivePrimaryAreaSqm,
   enrichmentChecklistFor,
   isFactApplicable,
@@ -35,13 +36,26 @@ test("property applicability registry covers all canonical families with explici
     ),
     115,
   );
+  // The owner publishes a figure the source stated rather than withholding it,
+  // so a pending area reaches the page - labelled, so a visitor can tell it
+  // from one a broker confirmed. Withholding helped nobody: the alternative
+  // was a property listing with no area at all.
   assert.equal(
     publicPrimaryAreaSqm(
       { property_family: "house", built_area_sqm: 115 },
       [{ field: "built_area_sqm", state: "entered_pending_review" }],
     ),
-    null,
+    115,
   );
+  assert.equal(factProvenanceForState("built_area_sqm", "entered_pending_review"), "source_stated");
+  assert.equal(factProvenanceForState("built_area_sqm", "broker_verified"), "broker_verified");
+  // Placement is the site's own claim about where it puts a property on a map,
+  // not a figure a seller stated, and no label can explain a wrong pin. It
+  // stays behind broker verification.
+  assert.equal(factProvenanceForState("public_latitude", "entered_pending_review"), null);
+  assert.equal(factProvenanceForState("public_location_precision", "entered_pending_review"), null);
+  // A fact nobody entered at all is still nothing.
+  assert.equal(factProvenanceForState("built_area_sqm", "missing"), null);
 });
 
 test("legacy taxonomy and zero handling preserve evidence without treating zero as verified", () => {

@@ -4,8 +4,8 @@
     "matchable_leads_with_listing_reference": 2,
     "active_matchable_leads": 2,
     "qualified_leads": 1,
-    "leads_with_matches": 1,
-    "open_broker_tasks": 1
+    "leads_with_matches": 2,
+    "open_broker_tasks": 2
   },
   "rows": [
     {
@@ -28,9 +28,25 @@
         "price_max": 160000,
         "bedrooms_min": 2
       },
-      "match_count": 0,
-      "matches": [],
-      "broker_task": null
+      "match_count": 1,
+      "matches": [
+        {
+          "listing_id": "MS-CRAWL-0003",
+          "path": "/he/properties/MS-CRAWL-0003",
+          "title": "Тристаен апартамент под наем в Сандански + паркомясто",
+          "location": "סנדנסקי",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "price_eur": 600,
+          "price_on_request": false
+        }
+      ],
+      "broker_task": {
+        "id": "inventory-match-lead-draft-62c8e259-c555-4583-a2c4-0a1b5be53731",
+        "status": "open",
+        "owner": "broker_international",
+        "action": "review_matching_inventory"
+      }
     },
     {
       "lead_id": "lead-draft-abaea4c2-6f4b-467c-93cc-13f2ffeef65c",
@@ -55,8 +71,8 @@
           "location": "סנדנסקי",
           "property_type": "commercial",
           "offer_type": "rent",
-          "price_eur": 1,
-          "price_on_request": false
+          "price_eur": null,
+          "price_on_request": true
         },
         {
           "listing_id": "MS-CRAWL-0019",
@@ -65,8 +81,8 @@
           "location": "סנדנסקי",
           "property_type": "commercial",
           "offer_type": "rent",
-          "price_eur": 6,
-          "price_on_request": false
+          "price_eur": null,
+          "price_on_request": true
         },
         {
           "listing_id": "MS-CRAWL-0020",
