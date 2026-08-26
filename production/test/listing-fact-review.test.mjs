@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { publicPropertyProjection } from "../lib/content.mjs";
+import { renderListingPage } from "../lib/public-site.mjs";
 import { renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import {
   FACT_REVIEW_COPY,
@@ -15,7 +16,9 @@ import { readAuditLog } from "../lib/audit-log.mjs";
 import { renderAdminListingEditorPayload, renderAdminListingManagerPayload } from "../lib/admin-payloads.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
-import { loadCmsSeed } from "../lib/runtime.mjs";
+import { renderReactPublicBody } from "../lib/react-public-site.mjs";
+import { listingFromCmsRecord, loadCmsSeed } from "../lib/runtime.mjs";
+import { saveListingDraft } from "../lib/listing-draft-service.mjs";
 import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
 const registry = loadLocaleRegistry();
@@ -61,11 +64,16 @@ test("existing listing editor confirmation persists broker verification and remo
     durableListingAuditToFile: true,
     editedAt: "2026-08-27T10:00:00.000Z",
   };
+  const form = new URLSearchParams();
+  form.append("listingId", "MS-CRAWL-0003");
+  form.append("editor", "editor_bg");
+  form.append("bedrooms", "2");
+  form.append("confirmedFacts", "bedrooms");
   const response = await renderAppAdminResponse(
     new Request("https://example.test/api/admin/listings/edit", {
       method: "POST",
-      headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/json" },
-      body: JSON.stringify({ listingId: "MS-CRAWL-0003", patch: { bedrooms: 2 }, confirmedFacts: ["bedrooms"] }),
+      headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
     }),
     { config },
   );
@@ -78,6 +86,17 @@ test("existing listing editor confirmation persists broker verification and remo
   assert.equal(property.facts.bedrooms_count, 2);
   assert.equal(property.fact_verification.find((row) => row.field === "bedrooms_count").state, "broker_verified");
   assert.deepEqual(publicPropertyProjection(property).source_stated_facts, []);
+
+  const currentListing = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0003");
+  const sourceListing = seed.records.find((row) => row.id === "MS-CRAWL-0003");
+  const publicListing = listingFromCmsRecord(
+    { ...sourceListing, facts: currentListing.facts, seo: currentListing.seo, workflow: currentListing.workflow },
+    null,
+    property,
+  );
+  const publicPage = renderListingPage({ registry, listing: publicListing, localeCode: "bg" });
+  assert.deepEqual(publicPage.body.facts.source_stated, ["price"]);
+  assert.doesNotMatch(renderReactPublicBody(publicPage), /data-fact-provenance="source_stated"[^>]*>2/);
 
   const audit = readAuditLog(auditLogPath).find((row) => row.action === "listing_edited");
   assert.ok(audit);
@@ -95,4 +114,30 @@ test("existing listing editor confirmation persists broker verification and remo
   assert.doesNotMatch(editorHtml, /data-fact-review-confirm="bedrooms"/);
   assert.match(editorHtml, /data-fact-review-note="true"/);
   assert.match(editorHtml, /data-fact-review-confirm="price"/);
+});
+
+test("fact review promotion keeps a grouped floor value on its matching canonical field", async () => {
+  const seed = loadCmsSeed();
+  const listing = seed.records.find((record) => record.id === "MS-CRAWL-0003");
+  const property = seed.properties.find((candidate) => candidate.id === listing.property);
+  property.facts.floor_number = 2;
+  property.facts.total_floors = 4;
+  property.fact_verification = property.fact_verification.map((entry) =>
+    ["floor_number", "total_floors"].includes(entry.field)
+      ? { ...entry, state: "entered_pending_review" }
+      : entry,
+  );
+  const runtime = createPayloadDraftRuntime(seed);
+  const result = await saveListingDraft(seed, {
+    payload: runtime.payload,
+    principal: { id: "editor_bg", roles: ["editor"], source: "test" },
+    input: { listingId: listing.id, patch: { floor: 3 }, confirmedFacts: ["floor"] },
+    editedAt: "2026-08-27T10:00:00.000Z",
+  });
+  assert.deepEqual(result.verifiedFactFields, ["floor"]);
+  const updated = runtime.currentRows().properties.find((candidate) => candidate.id === listing.property);
+  assert.equal(updated.facts.floor_number, 3);
+  assert.equal(updated.facts.total_floors, 4);
+  assert.equal(updated.fact_verification.find((entry) => entry.field === "floor_number").state, "broker_verified");
+  assert.equal(updated.fact_verification.find((entry) => entry.field === "total_floors").state, "entered_pending_review");
 });

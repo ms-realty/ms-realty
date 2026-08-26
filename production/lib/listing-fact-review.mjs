@@ -136,6 +136,19 @@ function propertyFieldsForRow(rowKey, property) {
   );
 }
 
+// A grouped public row can contain more than one canonical field.  The editor
+// still submits one legacy input for each of those fields, so never copy one
+// editor value into every canonical field in the group.  In particular,
+// `floor` is the apartment/commercial floor number while `total_floors` is a
+// separate value; a reviewer may confirm either one without silently changing
+// the other.
+function propertyFieldsForEditorField(editorField, propertyFields) {
+  const fields = [...new Set(propertyFields || [])];
+  if (editorField === "floor") return fields.filter((field) => field === "floor_number");
+  if (editorField === "total_floors") return fields.filter((field) => ["total_floors", "storeys_count"].includes(field));
+  return fields;
+}
+
 function priceRow(listing) {
   const facts = listing?.facts || {};
   const value = facts.price_eur;
@@ -190,10 +203,14 @@ export function factPromotionsFor({ listing = {}, property = null, confirmedFiel
     [...confirmedFields, ...changedFields].map((field) => String(field || "").trim()).filter(Boolean),
   );
   const rows = review.rows.filter((row) => requested.has(row.editor_field));
+  const propertyFieldsByEditorField = Object.fromEntries(
+    rows.map((row) => [row.editor_field, propertyFieldsForEditorField(row.editor_field, row.property_fields)]),
+  );
   return {
     rows: rows.map((row) => row.row),
     editor_fields: [...new Set(rows.map((row) => row.editor_field))],
-    property_fields: [...new Set(rows.flatMap((row) => row.property_fields))],
+    property_fields_by_editor_field: propertyFieldsByEditorField,
+    property_fields: [...new Set(Object.values(propertyFieldsByEditorField).flat())],
     verify_price: rows.some((row) => row.row === "price"),
   };
 }

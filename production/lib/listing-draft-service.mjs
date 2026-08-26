@@ -367,8 +367,9 @@ function factReviewInput(seed, listing, patch, input, editedAt) {
   const propertyPatch = {};
   const propertyFactVerification = {};
   for (const row of review.rows) {
-    if (!promotion.editor_fields.includes(row.editor_field) || !row.property_fields.length) continue;
-    for (const field of row.property_fields) {
+    const propertyFields = promotion.property_fields_by_editor_field?.[row.editor_field] || [];
+    if (!promotion.editor_fields.includes(row.editor_field) || !propertyFields.length) continue;
+    for (const field of propertyFields) {
       const value = Object.hasOwn(patch, row.editor_field) ? patch[row.editor_field] : property?.facts?.[field];
       if (value === null || value === undefined || value === "") continue;
       propertyPatch[field] = value;
