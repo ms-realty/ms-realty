@@ -13,23 +13,52 @@ import {
 export const DEFAULT_MANUAL_LISTING_AUDIT_PATH = fromRoot("production", "data", "manual-listing-audit.json");
 export const DEFAULT_LIVE_LISTING_AUDIT_PATH = fromRoot("production", "data", "live-listing-audit.json");
 
-// These pairs were confirmed during the source review.  The comparison is
-// deliberately read-only: the broker still decides which record, price, and
-// scope survives in the existing editor and publication controls.
+// The pair status is the review status of the relationship, not a decision
+// about which listing survives.  Each side therefore stays a neutral record
+// reference; the broker decides price, scope, and publication in the existing
+// editor and publication controls.
 export const DUPLICATE_REVIEW_PAIRS = Object.freeze([
   Object.freeze({
     pair_id: "MS-CRAWL-0083--MS-CRAWL-0159",
-    confirmed_listing_id: "MS-CRAWL-0083",
-    candidate_listing_id: "MS-CRAWL-0159",
+    status: "confirmed",
+    listing_ids: Object.freeze(["MS-CRAWL-0083", "MS-CRAWL-0159"]),
   }),
   Object.freeze({
     pair_id: "MS-CRAWL-0065--MS-CRAWL-0135",
-    confirmed_listing_id: "MS-CRAWL-0135",
-    candidate_listing_id: "MS-CRAWL-0065",
+    status: "confirmed",
+    listing_ids: Object.freeze(["MS-CRAWL-0065", "MS-CRAWL-0135"]),
+  }),
+  ...[
+    ["MS-CRAWL-0087", "MS-CRAWL-0116"],
+    ["MS-CRAWL-0038", "MS-CRAWL-0122"],
+    ["MS-CRAWL-0026", "MS-CRAWL-0125"],
+    ["MS-CRAWL-0088", "MS-CRAWL-0126"],
+    ["MS-CRAWL-0092", "MS-CRAWL-0130"],
+    ["MS-CRAWL-0034", "MS-CRAWL-0131"],
+    ["MS-CRAWL-0023", "MS-CRAWL-0132"],
+    ["MS-CRAWL-0049", "MS-CRAWL-0133"],
+    ["MS-CRAWL-0098", "MS-CRAWL-0139"],
+    ["MS-CRAWL-0069", "MS-CRAWL-0150"],
+    ["MS-CRAWL-0035", "MS-CRAWL-0160"],
+    ["MS-CRAWL-0066", "MS-CRAWL-0164"],
+    ["MS-3000", "MS-CRAWL-0165"],
+  ].map(([recordA, recordB]) =>
+    Object.freeze({
+      pair_id: `${recordA}--${recordB}`,
+      status: "candidate",
+      candidate_source: "algorithm",
+      listing_ids: Object.freeze([recordA, recordB]),
+    }),
+  ),
+  Object.freeze({
+    pair_id: "MS-CRAWL-0095--MS-CRAWL-0123",
+    status: "candidate",
+    candidate_source: "audit_only",
+    listing_ids: Object.freeze(["MS-CRAWL-0095", "MS-CRAWL-0123"]),
   }),
 ]);
 export const DUPLICATE_REVIEW_LISTING_IDS = Object.freeze(
-  [...new Set(DUPLICATE_REVIEW_PAIRS.flatMap((pair) => [pair.confirmed_listing_id, pair.candidate_listing_id]))],
+  [...new Set(DUPLICATE_REVIEW_PAIRS.flatMap((pair) => pair.listing_ids))],
 );
 
 // These are the figures the public listing page can mark as coming from the
@@ -64,14 +93,20 @@ export const FACT_REVIEW_COPY = Object.freeze({
     noRows: "Няма факти за потвърждение.",
     labels: Object.freeze({ bedrooms: "Спални", area_sqm: "Площ", floor: "Етаж", storeys: "Етажи", land_area_sqm: "Площ на земята", condition: "Състояние", price: "Цена" }),
     duplicateTitle: "Сравнение на обяви за ръчен преглед",
-    duplicateDescription: "Потвърдените двойки са показани една до друга. Не обединявайте и не сваляйте обява от този екран.",
+    duplicateDescription: "Потвърдените и кандидат-двойките са показани една до друга. Не обединявайте и не сваляйте обява от този екран.",
     pairConfirmed: "Потвърдена двойка",
-    candidate: "Кандидат",
-    confirmed: "Потвърден запис",
+    pairCandidate: "Кандидатна двойка",
+    pairAuditOnly: "Кандидатна двойка от одит",
+    recordA: "Запис A",
+    recordB: "Запис B",
     price: "Цена",
     area: "Площ",
+    observedArea: "Наблюдавана площ",
+    manualArea: "Площ от ръчния одит",
+    liveArea: "Площ от живия сайт",
     location: "Местоположение",
     photos: "Снимки",
+    openSource: "Отвори източника",
     openPublication: "Отвори контролите за публикуване",
     reviewOnly: "Само за сравнение; решението остава за брокер.",
     areaTitle: "Площи за преглед",
@@ -93,14 +128,20 @@ export const FACT_REVIEW_COPY = Object.freeze({
     noRows: "No facts need confirmation.",
     labels: Object.freeze({ bedrooms: "Bedrooms", area_sqm: "Area", floor: "Floor", storeys: "Storeys", land_area_sqm: "Land area", condition: "Condition", price: "Price" }),
     duplicateTitle: "Manual duplicate comparison",
-    duplicateDescription: "Confirmed pairs are shown side by side. Do not merge or remove a listing from this screen.",
+    duplicateDescription: "Confirmed and candidate pairs are shown side by side. Do not merge or remove a listing from this screen.",
     pairConfirmed: "Confirmed pair",
-    candidate: "Candidate",
-    confirmed: "Confirmed record",
+    pairCandidate: "Candidate pair",
+    pairAuditOnly: "Audit-only candidate pair",
+    recordA: "Record A",
+    recordB: "Record B",
     price: "Price",
     area: "Area",
+    observedArea: "Observed area",
+    manualArea: "Manual audit area",
+    liveArea: "Live area",
     location: "Location",
     photos: "Photos",
+    openSource: "Open source",
     openPublication: "Open publication controls",
     reviewOnly: "Comparison only; the broker keeps the decision.",
     areaTitle: "Areas for review",
@@ -122,14 +163,20 @@ export const FACT_REVIEW_COPY = Object.freeze({
     noRows: "Keine Angaben müssen bestätigt werden.",
     labels: Object.freeze({ bedrooms: "Schlafzimmer", area_sqm: "Fläche", floor: "Etage", storeys: "Geschosse", land_area_sqm: "Grundstücksfläche", condition: "Zustand", price: "Preis" }),
     duplicateTitle: "Manueller Vergleich doppelter Inserate",
-    duplicateDescription: "Bestätigte Paare werden nebeneinander angezeigt. Auf diesem Bildschirm keine Inserate zusammenführen oder entfernen.",
+    duplicateDescription: "Bestätigte und mögliche Paare werden nebeneinander angezeigt. Auf diesem Bildschirm keine Inserate zusammenführen oder entfernen.",
     pairConfirmed: "Bestätigtes Paar",
-    candidate: "Kandidat",
-    confirmed: "Bestätigter Eintrag",
+    pairCandidate: "Kandidatenpaar",
+    pairAuditOnly: "Nur im Audit gefundenes Kandidatenpaar",
+    recordA: "Eintrag A",
+    recordB: "Eintrag B",
     price: "Preis",
     area: "Fläche",
+    observedArea: "Beobachtete Fläche",
+    manualArea: "Fläche aus dem manuellen Audit",
+    liveArea: "Fläche der Live-Seite",
     location: "Ort",
     photos: "Fotos",
+    openSource: "Quelle öffnen",
     openPublication: "Veröffentlichungskontrollen öffnen",
     reviewOnly: "Nur Vergleich; die Entscheidung bleibt beim Makler.",
     areaTitle: "Flächen zur Prüfung",
@@ -151,14 +198,20 @@ export const FACT_REVIEW_COPY = Object.freeze({
     noRows: "Geen gegevens hoeven te worden bevestigd.",
     labels: Object.freeze({ bedrooms: "Slaapkamers", area_sqm: "Oppervlakte", floor: "Verdieping", storeys: "Verdiepingen", land_area_sqm: "Perceeloppervlakte", condition: "Staat", price: "Prijs" }),
     duplicateTitle: "Handmatige vergelijking van dubbele woningen",
-    duplicateDescription: "Bevestigde paren staan naast elkaar. Voeg woningen op dit scherm niet samen en verwijder ze niet.",
+    duplicateDescription: "Bevestigde en mogelijke paren staan naast elkaar. Voeg woningen op dit scherm niet samen en verwijder ze niet.",
     pairConfirmed: "Bevestigd paar",
-    candidate: "Kandidaat",
-    confirmed: "Bevestigde vermelding",
+    pairCandidate: "Kandidaat-paar",
+    pairAuditOnly: "Alleen in audit gevonden kandidaat-paar",
+    recordA: "Vermelding A",
+    recordB: "Vermelding B",
     price: "Prijs",
     area: "Oppervlakte",
+    observedArea: "Waargenomen oppervlakte",
+    manualArea: "Oppervlakte uit handmatige audit",
+    liveArea: "Oppervlakte van live site",
     location: "Locatie",
     photos: "Foto's",
+    openSource: "Bron openen",
     openPublication: "Publicatiebeheer openen",
     reviewOnly: "Alleen vergelijking; de makelaar neemt de beslissing.",
     areaTitle: "Oppervlakten ter beoordeling",
@@ -180,14 +233,20 @@ export const FACT_REVIEW_COPY = Object.freeze({
     noRows: "Нет фактов для подтверждения.",
     labels: Object.freeze({ bedrooms: "Спальни", area_sqm: "Площадь", floor: "Этаж", storeys: "Этажи", land_area_sqm: "Площадь участка", condition: "Состояние", price: "Цена" }),
     duplicateTitle: "Ручное сравнение дублей объявлений",
-    duplicateDescription: "Подтверждённые пары показаны рядом. На этом экране нельзя объединять или снимать объявление.",
+    duplicateDescription: "Подтверждённые и возможные пары показаны рядом. На этом экране нельзя объединять или снимать объявление.",
     pairConfirmed: "Подтверждённая пара",
-    candidate: "Кандидат",
-    confirmed: "Подтверждённая запись",
+    pairCandidate: "Пара-кандидат",
+    pairAuditOnly: "Пара-кандидат только по аудиту",
+    recordA: "Запись A",
+    recordB: "Запись B",
     price: "Цена",
     area: "Площадь",
+    observedArea: "Наблюдаемая площадь",
+    manualArea: "Площадь из ручного аудита",
+    liveArea: "Площадь на живом сайте",
     location: "Местоположение",
     photos: "Фотографии",
+    openSource: "Открыть источник",
     openPublication: "Открыть управление публикацией",
     reviewOnly: "Только сравнение; решение остаётся за брокером.",
     areaTitle: "Площади для проверки",
@@ -209,14 +268,20 @@ export const FACT_REVIEW_COPY = Object.freeze({
     noRows: "Δεν υπάρχουν στοιχεία προς επιβεβαίωση.",
     labels: Object.freeze({ bedrooms: "Υπνοδωμάτια", area_sqm: "Εμβαδόν", floor: "Όροφος", storeys: "Όροφοι", land_area_sqm: "Εμβαδόν γης", condition: "Κατάσταση", price: "Τιμή" }),
     duplicateTitle: "Χειροκίνητη σύγκριση διπλών καταχωρίσεων",
-    duplicateDescription: "Τα επιβεβαιωμένα ζεύγη εμφανίζονται δίπλα-δίπλα. Μην συγχωνεύετε ή αφαιρείτε καταχώριση από αυτή την οθόνη.",
+    duplicateDescription: "Τα επιβεβαιωμένα και υποψήφια ζεύγη εμφανίζονται δίπλα-δίπλα. Μην συγχωνεύετε ή αφαιρείτε καταχώριση από αυτή την οθόνη.",
     pairConfirmed: "Επιβεβαιωμένο ζεύγος",
-    candidate: "Υποψήφια καταχώριση",
-    confirmed: "Επιβεβαιωμένη καταχώριση",
+    pairCandidate: "Υποψήφιο ζεύγος",
+    pairAuditOnly: "Υποψήφιο ζεύγος μόνο από τον έλεγχο",
+    recordA: "Καταχώριση A",
+    recordB: "Καταχώριση B",
     price: "Τιμή",
     area: "Εμβαδόν",
+    observedArea: "Παρατηρημένο εμβαδόν",
+    manualArea: "Εμβαδόν από χειροκίνητο έλεγχο",
+    liveArea: "Εμβαδόν από τη ζωντανή σελίδα",
     location: "Τοποθεσία",
     photos: "Φωτογραφίες",
+    openSource: "Άνοιγμα πηγής",
     openPublication: "Άνοιγμα ελέγχων δημοσίευσης",
     reviewOnly: "Μόνο σύγκριση· η απόφαση παραμένει στον μεσίτη.",
     areaTitle: "Εμβαδά προς έλεγχο",
@@ -238,14 +303,20 @@ export const FACT_REVIEW_COPY = Object.freeze({
     noRows: "אין נתונים שדורשים אישור.",
     labels: Object.freeze({ bedrooms: "חדרי שינה", area_sqm: "שטח", floor: "קומה", storeys: "קומות", land_area_sqm: "שטח הקרקע", condition: "מצב", price: "מחיר" }),
     duplicateTitle: "השוואה ידנית של נכסים כפולים",
-    duplicateDescription: "זוגות שאושרו מוצגים זה לצד זה. אין לאחד או להסיר נכס ממסך זה.",
+    duplicateDescription: "זוגות שאושרו וזוגות מועמדים מוצגים זה לצד זה. אין לאחד או להסיר נכס ממסך זה.",
     pairConfirmed: "זוג שאושר",
-    candidate: "מועמד",
-    confirmed: "רשומה מאושרת",
+    pairCandidate: "זוג מועמד",
+    pairAuditOnly: "זוג מועמד לפי ביקורת בלבד",
+    recordA: "רשומה A",
+    recordB: "רשומה B",
     price: "מחיר",
     area: "שטח",
+    observedArea: "שטח שנצפה",
+    manualArea: "שטח מהביקורת הידנית",
+    liveArea: "שטח מהאתר החי",
     location: "מיקום",
     photos: "תמונות",
+    openSource: "פתיחת המקור",
     openPublication: "פתיחת בקרות פרסום",
     reviewOnly: "השוואה בלבד; ההחלטה נשארת בידי המתווך.",
     areaTitle: "שטחים לבדיקה",
@@ -356,7 +427,15 @@ function observedAreaFor(manualRow, liveRow) {
   return manualValue ?? finiteArea(liveRow?.live_area_sqm);
 }
 
-function listingComparisonCard(record, { role, areaCandidates = areaCandidatesForListing(record) } = {}) {
+function listingAreaEvidence(manualRow, liveRow) {
+  return {
+    observed_sqm: observedAreaFor(manualRow, liveRow),
+    manual_sqm: finiteArea(manualRow?.observed?.area_sqm_or_unknown),
+    live_sqm: finiteArea(liveRow?.live_area_sqm),
+  };
+}
+
+function listingComparisonCard(record, { role, manualRow = null, liveRow = null, areaCandidates = areaCandidatesForListing(record) } = {}) {
   const facts = record?.facts || {};
   const publicMedia = publicMediaLibrary(record?.media || []);
   return {
@@ -367,6 +446,7 @@ function listingComparisonCard(record, { role, areaCandidates = areaCandidatesFo
     price_eur: facts.price_on_request === true ? null : facts.price_eur ?? null,
     price_on_request: facts.price_on_request === true,
     location: facts.location || facts.location_native || "",
+    area_evidence: listingAreaEvidence(manualRow, liveRow),
     area_candidates: areaCandidates,
     photos: {
       count: publicMedia.gallery_count,
@@ -378,22 +458,41 @@ function listingComparisonCard(record, { role, areaCandidates = areaCandidatesFo
   };
 }
 
-export function buildListingDuplicateReview(seed = {}, { pairs = DUPLICATE_REVIEW_PAIRS } = {}) {
+function listingIdsForPair(pair = {}) {
+  return Array.isArray(pair.listing_ids) ? pair.listing_ids.map((id) => String(id || "").trim()).filter(Boolean).slice(0, 2) : [];
+}
+
+export function buildListingDuplicateReview(seed = {}, { pairs = DUPLICATE_REVIEW_PAIRS, manualAudit, liveAudit } = {}) {
+  const evidence = manualAudit === undefined || liveAudit === undefined ? loadListingReviewEvidence() : { manualAudit, liveAudit };
+  const manualById = new Map(auditRows(evidence.manualAudit).map((row) => [row.id, row]));
+  const liveById = new Map(auditRows(evidence.liveAudit).map((row) => [row.id, row]));
   const records = new Map((seed.records || []).filter((record) => record.collection === "listings").map((record) => [record.id, record]));
   const rows = [];
   for (const pair of pairs) {
-    const confirmedRecord = records.get(pair.confirmed_listing_id);
-    const candidateRecord = records.get(pair.candidate_listing_id);
-    if (!confirmedRecord || !candidateRecord) continue;
+    const [recordAId, recordBId] = listingIdsForPair(pair);
+    const recordA = records.get(recordAId);
+    const recordB = records.get(recordBId);
+    if (!recordA || !recordB) continue;
     rows.push({
       pair_id: pair.pair_id,
-      confirmed: listingComparisonCard(confirmedRecord, { role: "confirmed" }),
-      candidate: listingComparisonCard(candidateRecord, { role: "candidate" }),
+      status: pair.status === "confirmed" ? "confirmed" : "candidate",
+      candidate_source: pair.candidate_source || null,
+      record_a: listingComparisonCard(recordA, { role: "record_a", manualRow: manualById.get(recordAId), liveRow: liveById.get(recordAId) }),
+      record_b: listingComparisonCard(recordB, { role: "record_b", manualRow: manualById.get(recordBId), liveRow: liveById.get(recordBId) }),
     });
   }
+  const confirmedPairs = rows.filter((pair) => pair.status === "confirmed").length;
+  const algorithmCandidatePairs = rows.filter((pair) => pair.status === "candidate" && pair.candidate_source === "algorithm").length;
+  const auditOnlyCandidatePairs = rows.filter((pair) => pair.status === "candidate" && pair.candidate_source === "audit_only").length;
   return {
     rows,
-    summary: { confirmed_pairs: rows.length },
+    summary: {
+      confirmed_pairs: confirmedPairs,
+      algorithm_candidate_pairs: algorithmCandidatePairs,
+      audit_only_candidate_pairs: auditOnlyCandidatePairs,
+      candidate_review_pairs: algorithmCandidatePairs + auditOnlyCandidatePairs,
+      total_pairs: rows.length,
+    },
   };
 }
 
@@ -420,13 +519,17 @@ export function buildListingAreaReview(seed = {}, { manualAudit, liveAudit } = {
   const liveById = new Map(liveRows.map((row) => [row.id, row]));
   const properties = new Map((seed.properties || []).map((property) => [property.id, property]));
   const records = (seed.records || []).filter((record) => record.collection === "listings");
-  // A duplicate pair leaves the area queue only when both source pages carry
-  // an independently observed area.  If one page is unavailable (0065), the
-  // surviving source (0135) still needs its own canonical-area review.
+  // A confirmed duplicate relationship leaves the area queue only when both
+  // source pages carry an independently observed area. If one page is
+  // unavailable (0065), the other record (0135) still needs its own review.
   const duplicateAreaExclusions = new Set(
     DUPLICATE_REVIEW_PAIRS
-      .filter((pair) => finiteArea(liveById.get(pair.confirmed_listing_id)?.live_area_sqm) !== null && finiteArea(liveById.get(pair.candidate_listing_id)?.live_area_sqm) !== null)
-      .flatMap((pair) => [pair.confirmed_listing_id, pair.candidate_listing_id]),
+      .filter((pair) => pair.status === "confirmed")
+      .filter((pair) => {
+        const [recordAId, recordBId] = listingIdsForPair(pair);
+        return finiteArea(liveById.get(recordAId)?.live_area_sqm) !== null && finiteArea(liveById.get(recordBId)?.live_area_sqm) !== null;
+      })
+      .flatMap((pair) => listingIdsForPair(pair)),
   );
   const missingCanonicalArea = records
     .filter((record) => manualById.get(record.id)?.review_status === "review")

@@ -7379,16 +7379,37 @@ function areaSuggestionList(candidates, copy, page, scope) {
   );
 }
 
+function areaEvidenceList(evidence, copy, page, scope) {
+  const labels = [
+    ["observed_sqm", copy.observedArea || "Observed area"],
+    ["manual_sqm", copy.manualArea || "Manual audit area"],
+    ["live_sqm", copy.liveArea || "Live area"],
+  ];
+  const rows = labels.filter(([field]) => evidence?.[field] !== null && evidence?.[field] !== undefined);
+  if (!rows.length) return h("p", { className: "adm-note" }, copy.noAreaRows || "No observed area evidence.");
+  return h(
+    "ul",
+    { className: "adm-task-list", "data-area-evidence": scope },
+    ...rows.map(([field, labelText]) =>
+      h(
+        "li",
+        { key: `${scope}-${field}` },
+        h("div", { className: "adm-task-list__body" }, h("strong", null, labelText), h("span", null, adminAreaValue(evidence[field], page))),
+      ),
+    ),
+  );
+}
+
 function duplicateListingCard({ card, copy, page }) {
   const ui = workbenchCopy(page);
-  const roleLabel = card.role === "confirmed" ? copy.confirmed || "Confirmed record" : copy.candidate || "Candidate";
+  const roleLabel = card.role === "record_b" ? copy.recordB || "Record B" : copy.recordA || "Record A";
   return h(
     "article",
     { className: "adm-report-card", "data-duplicate-side": card.role, "data-duplicate-listing": card.listing_id },
     h(
       "header",
       null,
-      h("div", null, h(StatusPill, { tone: card.role === "confirmed" ? "success" : "sun" }, roleLabel), h("h3", null, card.title), h("code", { className: "crm-mono" }, card.listing_id)),
+      h("div", null, h(StatusPill, { tone: "sand" }, roleLabel), h("h3", null, card.title), h("code", { className: "crm-mono" }, card.listing_id)),
       h("small", null, String(card.source_locale || "").toUpperCase()),
     ),
     h(
@@ -7399,6 +7420,7 @@ function duplicateListingCard({ card, copy, page }) {
       h("div", null, h("dt", null, copy.photos || "Photos"), h("dd", null, card.photos?.count ?? 0)),
     ),
     h("h4", null, copy.area || "Area"),
+    areaEvidenceList(card.area_evidence, copy, page, `duplicate-${card.listing_id}`),
     areaSuggestionList(card.area_candidates, copy, page, `duplicate-${card.listing_id}`),
     card.photos?.assets?.length
       ? h(
@@ -7411,6 +7433,9 @@ function duplicateListingCard({ card, copy, page }) {
     h(
       "div",
       { className: "adm-task-list__actions" },
+      card.source_url
+        ? h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: card.source_url, rel: "noreferrer" }, copy.openSource || copy.source || "Open source")
+        : null,
       h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(card.editor_path, page) }, copy.openEditor || label(adminCopy(page), "openEditor", "Open editor")),
       h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(card.publication_path, page) }, copy.openPublication || "Open publication controls"),
     ),
@@ -7418,15 +7443,18 @@ function duplicateListingCard({ card, copy, page }) {
 }
 
 function DuplicateReviewPanel({ page }) {
-  const review = page.duplicateReview || { rows: [], summary: { confirmed_pairs: 0 } };
+  const review = page.duplicateReview || { rows: [], summary: { confirmed_pairs: 0, algorithm_candidate_pairs: 0, audit_only_candidate_pairs: 0, candidate_review_pairs: 0 } };
   const copy = review.copy || {};
+  const summary = review.summary || {};
+  const summaryText = `${copy.pairConfirmed || "Confirmed pairs"}: ${summary.confirmed_pairs || 0} · ${copy.pairCandidate || "Candidate pairs"}: ${summary.algorithm_candidate_pairs || 0} · ${copy.pairAuditOnly || "Audit-only candidate pairs"}: ${summary.audit_only_candidate_pairs || 0}`;
   return h(
     Panel,
     {
-      title: `${copy.duplicateTitle || "Manual duplicate comparison"} · ${review.summary?.confirmed_pairs || 0}`,
+      title: `${copy.duplicateTitle || "Manual duplicate comparison"} · ${summary.total_pairs || 0}`,
       "data-duplicate-review": "true",
     },
     h("p", { className: "adm-note", role: "note" }, copy.duplicateDescription || "Confirmed pairs are shown side by side for manual review."),
+    h("p", { className: "adm-note", role: "status", "data-duplicate-review-summary": "true" }, summaryText),
     review.rows?.length
       ? h(
           "div",
@@ -7434,13 +7462,13 @@ function DuplicateReviewPanel({ page }) {
           ...review.rows.map((pair) =>
             h(
               "article",
-              { key: pair.pair_id, className: "adm-report-card", "data-duplicate-review-pair": pair.pair_id },
-              h("header", null, h("div", null, h("h3", null, copy.pairConfirmed || "Confirmed pair"), h("code", { className: "crm-mono" }, pair.pair_id)), h("small", null, copy.reviewOnly || "Manual comparison")),
+              { key: pair.pair_id, className: "adm-report-card", "data-duplicate-review-pair": pair.pair_id, "data-duplicate-pair-status": pair.status },
+              h("header", null, h("div", null, h(StatusPill, { tone: pair.status === "confirmed" ? "success" : "sun" }, pair.status === "confirmed" ? copy.pairConfirmed || "Confirmed pair" : pair.candidate_source === "audit_only" ? copy.pairAuditOnly || "Audit-only candidate pair" : copy.pairCandidate || "Candidate pair"), h("code", { className: "crm-mono" }, pair.pair_id)), h("small", null, copy.reviewOnly || "Manual comparison")),
               h(
                 "div",
                 { className: "adm-report-grid adm-report-grid--two" },
-                duplicateListingCard({ card: pair.candidate, copy, page }),
-                duplicateListingCard({ card: pair.confirmed, copy, page }),
+                duplicateListingCard({ card: pair.record_a, copy, page }),
+                duplicateListingCard({ card: pair.record_b, copy, page }),
               ),
             ),
           ),

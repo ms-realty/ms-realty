@@ -51,16 +51,43 @@ test("fact review queue is derived from the public source-stated projection", ()
   assert.match(html, /data-fact-review-listing="MS-CRAWL-0003"/);
   assert.match(html, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0003&amp;locale=bg#listing-facts"/);
   const duplicateReview = buildListingDuplicateReview(seed);
-  const expectedDuplicatePairs = DUPLICATE_REVIEW_PAIRS.filter((pair) =>
-    seed.records.some((record) => record.id === pair.confirmed_listing_id) &&
-    seed.records.some((record) => record.id === pair.candidate_listing_id),
-  );
+  const expectedDuplicatePairs = DUPLICATE_REVIEW_PAIRS.filter((pair) => pair.listing_ids.every((listingId) => seed.records.some((record) => record.id === listingId)));
   assert.equal(duplicateReview.rows.length, expectedDuplicatePairs.length);
   assert.equal(duplicateReview.summary.confirmed_pairs, 2);
+  assert.equal(duplicateReview.summary.algorithm_candidate_pairs, 13);
+  assert.equal(duplicateReview.summary.audit_only_candidate_pairs, 1);
+  assert.equal(duplicateReview.summary.candidate_review_pairs, 14);
+  assert.equal(duplicateReview.summary.total_pairs, 16);
+  assert.ok(duplicateReview.rows.every((pair) => pair.record_a.role === "record_a" && pair.record_b.role === "record_b"));
+  assert.ok(duplicateReview.rows.every((pair) => ["confirmed", "candidate"].includes(pair.status)));
+  const excludedCoincidences = [
+    ["MS-CRAWL-0081", "MS-CRAWL-0118"],
+    ["MS-CRAWL-0013", "MS-CRAWL-0142"],
+    ["MS-CRAWL-0068", "MS-CRAWL-0156"],
+  ];
+  for (const excluded of excludedCoincidences) {
+    assert.equal(duplicateReview.rows.some((pair) => excluded.every((listingId) => [pair.record_a.listing_id, pair.record_b.listing_id].includes(listingId))), false);
+  }
+  const confirmedPair = duplicateReview.rows.find((pair) => pair.pair_id === "MS-CRAWL-0083--MS-CRAWL-0159");
+  assert.equal(confirmedPair.status, "confirmed");
+  assert.equal(confirmedPair.record_a.price_eur, 155000);
+  assert.equal(confirmedPair.record_b.price_eur, 185000);
+  for (const card of [confirmedPair.record_a, confirmedPair.record_b]) {
+    assert.ok(card.area_evidence.observed_sqm > 0);
+    assert.ok(card.area_evidence.manual_sqm > 0);
+    assert.ok(card.area_evidence.live_sqm > 0);
+    assert.ok(card.source_url);
+  }
   assert.match(html, /data-duplicate-review="true"/);
   assert.match(html, /data-duplicate-review-pair="MS-CRAWL-0083--MS-CRAWL-0159"/);
-  assert.match(html, /data-duplicate-side="candidate"[^>]*data-duplicate-listing="MS-CRAWL-0159"/);
-  assert.match(html, /data-duplicate-side="confirmed"[^>]*data-duplicate-listing="MS-CRAWL-0083"/);
+  assert.match(html, /data-duplicate-pair-status="confirmed"/);
+  assert.match(html, /data-duplicate-side="record_a"[^>]*data-duplicate-listing="MS-CRAWL-0083"/);
+  assert.match(html, /data-duplicate-side="record_b"[^>]*data-duplicate-listing="MS-CRAWL-0159"/);
+  assert.match(html, /Record A|Запис A/);
+  assert.match(html, /Candidate pair|Кандидатна двойка/);
+  assert.match(html, /data-duplicate-review-summary="true"/);
+  assert.match(html, /data-area-evidence="duplicate-MS-CRAWL-0083"/);
+  assert.match(html, /Open source|Отвори източника/);
   assert.match(html, /href="\/admin\/listings\?locale=bg#listing-publication-schedule"/);
   const areaReview = buildListingAreaReview(seed);
   const evidence = loadListingReviewEvidence();
@@ -75,8 +102,8 @@ test("fact review queue is derived from the public source-stated projection", ()
     .filter((record) => manualById.get(record.id)?.review_status === "review")
     .filter((record) => Number.isFinite(liveById.get(record.id)?.live_area_sqm));
   const duplicateAreaPairs = DUPLICATE_REVIEW_PAIRS.filter((pair) =>
-    Number.isFinite(liveById.get(pair.confirmed_listing_id)?.live_area_sqm) &&
-    Number.isFinite(liveById.get(pair.candidate_listing_id)?.live_area_sqm),
+    pair.status === "confirmed" &&
+    pair.listing_ids.every((listingId) => Number.isFinite(liveById.get(listingId)?.live_area_sqm)),
   );
   assert.equal(areaReview.summary.missing_canonical_area, expectedMissing.length - (duplicateAreaPairs.length * 2));
   assert.equal(areaReview.summary.missing_canonical_area, 65);
@@ -92,6 +119,10 @@ test("fact review queue is derived from the public source-stated projection", ()
     assert.ok(copy.title);
     assert.equal(Object.keys(copy.labels).length, 7);
     assert.ok(Object.values(copy.labels).every((label) => label && !/[_.]/.test(label)));
+    assert.ok(copy.recordA);
+    assert.ok(copy.recordB);
+    assert.ok(copy.pairCandidate);
+    assert.ok(copy.pairAuditOnly);
   }
 });
 
