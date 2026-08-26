@@ -25,14 +25,14 @@
   height: 18px;
   padding: 0 5px;
   border-radius: var(--radius-full);
-  background: var(--ink-100);
-  color: var(--ink-800);
+  background: var(--adm-chip);
+  color: var(--text-strong);
   font-size: var(--text-2xs);
   font-weight: var(--fw-semibold);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
-.crm-seg button[data-on="1"] .adm-seg-count { background: var(--ink-900); color: #fff; }
+.crm-seg button[data-on="1"] .adm-seg-count { background: var(--brand); color: var(--text-on-brand); }
 
 /* The screen's primary action: a native disclosure whose summary reads as
    the primary button at the end of the toolbar. Open, it takes a row of its
@@ -126,7 +126,7 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
   color: inherit;
   text-decoration: none;
 }
-.adm-inbox__row:hover { background: var(--ink-50); text-decoration: none; }
+.adm-inbox__row:hover { background: var(--surface-hover); text-decoration: none; }
 .adm-inbox__row:focus-visible { outline: none; box-shadow: inset var(--shadow-focus); }
 /* Selection uses the workbench's own raised-surface language (as on the
    segmented controls), not a coloured edge bar. */
@@ -277,7 +277,7 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
   min-width: 0;
   padding: var(--space-3);
   border-radius: var(--radius-md);
-  background: var(--stone-100);
+  background: var(--adm-well);
 }
 .adm-board__title {
   display: flex;
@@ -471,7 +471,7 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
 
 /* Hover on the object surfaces: rows, cards, disclosures. */
 .adm-pipeline-inventory > summary:hover,
-.adm-request-history > summary:hover { background: var(--ink-50); }
+.adm-request-history > summary:hover { background: var(--surface-hover); }
 .adm-board .adm-pipeline-card:hover { border-color: var(--border-strong); }
 .adm-contact-card:hover,
 .adm-checklist-card:hover { border-color: var(--border-strong); }
@@ -566,7 +566,7 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
   place-items: center;
   padding: 2px 7px;
   border-radius: var(--radius-full);
-  background: var(--stone-100);
+  background: var(--adm-well);
   color: var(--text-muted);
   font-size: var(--text-2xs);
   font-weight: var(--fw-semibold);
@@ -585,7 +585,7 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
   line-height: var(--lh-snug);
 }
 .adm-planned-note .mk-icon { flex: none; margin-top: 1px; color: var(--text-subtle); }
-.adm-list-tools { border-bottom: 1px solid var(--border); background: var(--ink-50); }
+.adm-list-tools { border-bottom: 1px solid var(--border); background: var(--adm-panel); }
 .adm-list-tools__summary {
   display: flex;
   align-items: center;

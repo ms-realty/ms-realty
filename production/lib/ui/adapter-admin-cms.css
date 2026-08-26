@@ -21,9 +21,9 @@
   letter-spacing: normal;
   white-space: nowrap;
 }
-.adm-cms-filter a:active { background: var(--stone-200); }
+.adm-cms-filter a:active { background: var(--surface-hover); }
 .adm-cms-filter a:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
-.adm-cms-filter a[data-on="1"] .adm-seg-count { background: var(--ink-900); color: #fff; }
+.adm-cms-filter a[data-on="1"] .adm-seg-count { background: var(--brand); color: var(--text-on-brand); }
 
 /* The planned-control strip stands on the canvas here, so it
    needs the panel's own edge; inside a panel it keeps the CRM
@@ -33,7 +33,7 @@
   border-radius: var(--radius-md);
   background: var(--surface);
 }
-.crm-app main > .adm-list-tools[open] { background: var(--ink-50); }
+.crm-app main > .adm-list-tools[open] { background: var(--adm-panel); }
 
 /* An empty note may carry one recovery action. */
 .adm-empty__action {
@@ -65,7 +65,7 @@
   text-decoration: none;
 }
 .adm-filter-chip--removable:hover .mk-icon { color: var(--brick-600); }
-.adm-filter-chip--removable:active { background: var(--stone-100); }
+.adm-filter-chip--removable:active { background: var(--surface-hover); }
 .adm-filter-chip--removable:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
 
 /* The bulk bar is quiet with nothing selected and lights up once
@@ -176,7 +176,7 @@
   aspect-ratio: 16 / 10;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--stone-100);
+  background: var(--adm-well);
 }
 .adm-media-asset__preview img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .adm-media-asset__preview-failed {
@@ -321,7 +321,7 @@
   align-items: center;
   padding: var(--space-2) var(--space-3);
 }
-.adm-route-decision__header:hover { background: var(--stone-100); }
+.adm-route-decision__header:hover { background: var(--surface-hover); }
 .adm-route-decision__header:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
 /* The identity takes the free space so the meta group and the
    chevron line up down the queue. */
@@ -382,7 +382,7 @@
 .adm-approved-howto code {
   padding: 1px 4px;
   border-radius: var(--radius-xs);
-  background: var(--ink-50);
+  background: var(--adm-panel);
   color: var(--text-strong);
 }
 .adm-approved-howto__why { color: var(--text-muted); }
@@ -408,7 +408,7 @@
   margin: 0;
   padding: var(--space-3) var(--space-4);
   border-top: 1px solid var(--border);
-  background: var(--ink-50, var(--surface-sunken));
+  background: var(--adm-panel);
   color: var(--text-body);
   font-size: var(--text-xs);
   line-height: var(--lh-normal);
@@ -475,7 +475,7 @@
   .adm-approved-table tr[data-approved-record] td:first-child {
     grid-template-columns: 1fr;
     gap: 4px;
-    background: var(--ink-50);
+    background: var(--adm-panel);
   }
   .adm-approved-table tr[data-approved-record] td:first-child::before { display: none; }
   .adm-approved-table tr[data-approved-record] td:last-child { border-bottom: 0; }

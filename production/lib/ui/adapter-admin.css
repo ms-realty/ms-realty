@@ -10,17 +10,33 @@
 }
 
 /* Operate surface: neutral charcoal hairlines on the ink-50 canvas. Text,
-   wells and the segmented track keep the warm stone tokens of the kit. */
+   wells and the segmented track keep the warm stone tokens of the kit.
+
+   Every value here is an alias, never a ramp step spent in place, because the
+   dark palette below has to have somewhere to flip it. The workbench is dense
+   -- tables, inbox rows, filter bars, wells, editor panels -- and each of those
+   surfaces used to name its own light ramp step, which is why a dark workbench
+   kept showing near-white rows and mid-grey labels. The four --adm-* aliases
+   carry exactly the light values those rules used to spell out, so the light
+   workbench is unchanged and the dark one finally follows. */
 .crm-app {
   --border: var(--ink-100);
   --border-strong: var(--ink-200);
+  --canvas: var(--ink-50);
   --surface-hover: var(--ink-50);
   /* The workbench sets small text on pale panels all day. stone-500 clears
      3.5:1 against them, which is under the 4.5:1 a reader is owed, so muted
      text steps one rung darker here than it does on the public site. */
   --text-muted: var(--stone-600);
+  /* Wells and inset panels (filter bars, list tools, report tracks). */
+  --adm-well: var(--stone-100);
+  --adm-panel: var(--ink-50);
+  /* Field labels above inputs and above bulk-action controls. */
+  --adm-label: var(--ink-500);
+  /* Count chips riding inside a segmented control. */
+  --adm-chip: var(--ink-100);
   --adm-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background: var(--ink-50);
+  background: var(--canvas);
 }
 
 /* Operate mode uses one family: Commissioner for every heading and figure. */
@@ -195,10 +211,32 @@ main.crm-scroll[data-react-admin-ui="listing-editor"] { overflow: visible; }
 .crm-ph h1 { font-size: var(--text-2xl); font-weight: var(--fw-semibold); }
 .crm-ph p { font-size: var(--text-sm); }
 
-/* Segmented controls: a 36px pill track (locales, lead queues, pipeline stages) */
-.crm-seg { padding: 3px; gap: 2px; border-radius: var(--radius-full); background: var(--stone-100); }
+/* Segmented controls: a 36px pill track (locales, lead queues, pipeline stages).
+   The track reads --surface-sunken, which is --stone-100 in the light palette
+   and a dark well in the dark one. Naming the ramp step directly, as this rule
+   used to, left a cream track under dark type once the palette flipped. */
+.crm-seg { padding: 3px; gap: 2px; border-radius: var(--radius-full); background: var(--surface-sunken); }
 .crm-seg.adm-locales { margin-left: auto; flex: none; }
 [dir="rtl"] .crm-seg.adm-locales { margin-left: 0; margin-right: auto; }
+
+/* ---- Theme switch: system · light · dark ----
+   The workbench twin of the public site's control, riding the same segmented
+   track as the language switcher it sits beside. Both copies ship hidden and
+   the head script reveals them by stamping data-theme-ready on the root, so an
+   operator without JavaScript is never shown a control that cannot act. The
+   selected target paints from the root attribute rather than from aria-pressed
+   so it is correct in the first frame, before the deferred script runs. */
+.adm-theme,
+.crm-seg.adm-theme { display: none; }
+html[data-theme-ready] .crm-seg.adm-theme--top { display: inline-flex; }
+.adm-theme button { width: 36px; min-width: 36px; padding: 0; }
+html:not([data-theme]) .adm-theme--top button[data-theme-option="system"],
+html[data-theme="light"] .adm-theme--top button[data-theme-option="light"],
+html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
+  background: var(--surface);
+  color: var(--text-strong);
+  box-shadow: var(--shadow-xs);
+}
 .crm-seg a,
 .crm-seg button {
   display: inline-flex;
@@ -270,7 +308,7 @@ main.crm-scroll[data-react-admin-ui="listing-editor"] { overflow: visible; }
 .adm-kpis dd { margin: 0; min-width: 0; }
 .adm-kpis .crm-stat__label {
   order: 2;
-  color: var(--ink-500);
+  color: var(--adm-label);
   font-size: var(--text-xs);
   font-weight: var(--fw-medium);
   line-height: var(--lh-snug);
@@ -364,7 +402,7 @@ main.crm-scroll[data-react-admin-ui="listing-editor"] { overflow: visible; }
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
-  color: var(--ink-500);
+  color: var(--adm-label);
   font-size: var(--text-xs);
   font-weight: var(--fw-semibold);
   line-height: var(--lh-snug);
@@ -383,7 +421,7 @@ main.crm-scroll[data-react-admin-ui="listing-editor"] { overflow: visible; }
 .crm-tbl .adm-lead-contact__action { overflow-wrap: anywhere; }
 .crm-tbl .crm-pill { overflow-wrap: normal; }
 .crm-tbl tbody tr { cursor: default; transition: none; }
-.crm-tbl tbody tr:hover { background: var(--ink-50); }
+.crm-tbl tbody tr:hover { background: var(--surface-hover); }
 .crm-tbl td[data-listing-column="action"],
 .crm-tbl td[data-viewing-column="action"],
 .crm-tbl td[data-seller-pipeline-column="action"] { text-align: end; }
@@ -684,7 +722,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   font-weight: var(--fw-semibold);
   box-shadow: inset 0 0 0 1px var(--border-strong);
 }
-.adm-filterbar label { display: grid; flex: 1 1 140px; gap: 4px; min-width: 0; color: var(--ink-500); font-size: var(--text-xs); font-weight: var(--fw-semibold); line-height: var(--lh-snug); }
+.adm-filterbar label { display: grid; flex: 1 1 140px; gap: 4px; min-width: 0; color: var(--adm-label); font-size: var(--text-xs); font-weight: var(--fw-semibold); line-height: var(--lh-snug); }
 .adm-filterbar label:first-of-type { flex: 2 1 220px; }
 .adm-filterbar input,
 .adm-filterbar select { width: 100%; min-width: 0; height: 40px; min-height: 40px; padding-block: 0; font-size: var(--text-sm); }
@@ -708,7 +746,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-listing-bulk__summary { display: grid; flex: 1 1 200px; gap: 2px; min-width: 0; }
 .adm-listing-bulk__summary strong { color: var(--text-strong); font-size: var(--text-sm); }
 .adm-listing-bulk__summary small { color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
-.adm-listing-bulk__bar label { display: flex; align-items: center; gap: var(--space-2); min-width: 0; color: var(--ink-500); font-size: var(--text-xs); font-weight: var(--fw-semibold); white-space: nowrap; }
+.adm-listing-bulk__bar label { display: flex; align-items: center; gap: var(--space-2); min-width: 0; color: var(--adm-label); font-size: var(--text-xs); font-weight: var(--fw-semibold); white-space: nowrap; }
 .adm-listing-bulk__bar select { width: auto; min-width: 180px; font-size: var(--text-sm); }
 .adm-listing-bulk__count { color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--fw-semibold); white-space: nowrap; }
 .adm-listing-bulk__status { flex: 1 0 100%; min-height: 1.25em; margin: 0; color: var(--text-muted); font-size: var(--text-xs); }
@@ -933,7 +971,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   padding: var(--space-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.96);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(14px);
 }
@@ -1149,7 +1187,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-report-bars { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
 .adm-report-bars li { display: grid; grid-template-columns: minmax(100px, 0.85fr) minmax(80px, 1fr) auto; gap: var(--space-2); align-items: center; min-width: 0; }
 .adm-report-bars__label { min-width: 0; color: var(--text-muted); font-size: var(--text-xs); overflow-wrap: anywhere; }
-.adm-report-bars__track { height: 8px; overflow: hidden; border-radius: var(--radius-full); background: var(--stone-100); }
+.adm-report-bars__track { height: 8px; overflow: hidden; border-radius: var(--radius-full); background: var(--adm-well); }
 .adm-report-bars__track > span { display: block; height: 100%; border-radius: inherit; background: var(--sea-500); }
 .adm-report-bars li > strong { min-width: 2ch; text-align: end; font-variant-numeric: tabular-nums; }
 .adm-report-source-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4); padding: var(--space-5); }
@@ -1306,6 +1344,41 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-mobile-nav__link--on { background: rgba(255, 255, 255, 0.1); color: #fff; }
   .adm-mobile-nav__link--on .mk-icon { color: var(--brick-400); }
   .adm-mobile-nav__link .crm-nav__badge { flex: none; }
+  /* The top bar already holds the menu button and the language switcher; a
+     third group overflows a 375px viewport, so the theme switch moves into the
+     drawer. The drawer is an inverse surface in both palettes, so this copy is
+     painted in the drawer's own white-on-ink idiom rather than on the pale
+     segmented track. */
+  html[data-theme-ready] .crm-seg.adm-theme--top { display: none; }
+  html[data-theme-ready] .adm-theme--drawer {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-inverse);
+  }
+  .adm-theme--drawer button {
+    display: grid;
+    width: auto;
+    min-width: 44px;
+    min-height: 44px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: var(--radius-button);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.76);
+    cursor: pointer;
+  }
+  .adm-theme--drawer button:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
+  .adm-theme--drawer button:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+  html:not([data-theme]) .adm-theme--drawer button[data-theme-option="system"],
+  html[data-theme="light"] .adm-theme--drawer button[data-theme-option="light"],
+  html[data-theme="dark"] .adm-theme--drawer button[data-theme-option="dark"] {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
   .adm-checklist-grid { grid-template-columns: 1fr; }
   .adm-checklist-card { padding: var(--space-3); }
   .adm-checklist-item__head { grid-template-columns: 24px minmax(0, 1fr); }
@@ -1850,13 +1923,18 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
    Every admin surface already paints through a token, so redefining the tokens
    is the whole theme. color-scheme on the root is what turns the native
    controls, scrollbars and focus rings dark; without it the browser keeps
-   painting a light select on a dark panel. */
+   painting a light select on a dark panel.
+
+   Selection works exactly as on the public site: light is the plain default on
+   :root, the operating system's dark preference applies unless the operator
+   pinned light, and an explicit dark choice applies on its own. */
+html:has(main[data-react-admin-ui]) { color-scheme: light; }
 @media (prefers-color-scheme: dark) {
-  html:has(main[data-react-admin-ui]) {
+  html:not([data-theme="light"]):has(main[data-react-admin-ui]) {
     color-scheme: dark;
   }
 
-  .crm-app {
+  html:not([data-theme="light"]) .crm-app {
     --canvas: #12110f;
     --surface: #1c1a17;
     --surface-sunken: #25221e;
@@ -1868,6 +1946,13 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
     --text-muted: var(--stone-400);
     --text-subtle: var(--stone-500);
     --text-link: var(--stone-100);
+    /* The brand swatch is near-white in this palette, so the label on a primary
+       button has to invert with it or the button reads as a blank slab. */
+    --text-on-brand: var(--ink-950);
+    --adm-well: var(--surface-sunken);
+    --adm-panel: var(--surface-sunken);
+    --adm-label: var(--stone-400);
+    --adm-chip: var(--surface-hover);
     --border: #443c32;
     --border-strong: #665a49;
     --brand: var(--ink-50);
@@ -1885,7 +1970,50 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
     --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.38);
   }
 
-  .crm-top {
+  html:not([data-theme="light"]) .crm-top {
     background: color-mix(in srgb, var(--surface) 94%, transparent);
   }
+}
+
+/* The same palette again, this time because the operator asked for it. */
+html[data-theme="dark"]:has(main[data-react-admin-ui]) {
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] .crm-app {
+  --canvas: #12110f;
+  --surface: #1c1a17;
+  --surface-sunken: #25221e;
+  --surface-hover: #302b25;
+  --surface-inverse: #0c0c0b;
+  --overlay: rgba(0, 0, 0, 0.68);
+  --text-strong: var(--stone-50);
+  --text-body: var(--stone-200);
+  --text-muted: var(--stone-400);
+  --text-subtle: var(--stone-500);
+  --text-link: var(--stone-100);
+  --text-on-brand: var(--ink-950);
+  --adm-well: var(--surface-sunken);
+  --adm-panel: var(--surface-sunken);
+  --adm-label: var(--stone-400);
+  --adm-chip: var(--surface-hover);
+  --border: #443c32;
+  --border-strong: #665a49;
+  --brand: var(--ink-50);
+  --brand-hover: #ffffff;
+  --brand-active: var(--ink-100);
+  --brand-subtle: #2b2926;
+  --accent: var(--brick-600);
+  --accent-hover: var(--brick-500);
+  --accent-active: var(--brick-700);
+  --accent-subtle: #3b2020;
+  --ring: rgba(237, 132, 132, 0.58);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.38);
+}
+
+html[data-theme="dark"] .crm-top {
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
 }

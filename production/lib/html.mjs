@@ -23,6 +23,18 @@ function escapeHtml(value) {
   });
 }
 
+// The visitor's palette, applied before the stylesheet is even requested.
+// Anything later than this repaints: the page would open in whatever palette
+// the operating system asked for and then swap, which is the flash the control
+// exists to prevent. Reading storage throws in private browsing and with
+// cookies blocked, so the read is wrapped and the readiness flag is set either
+// way -- the control still works for the session, it just cannot remember.
+// Absence of a stored value means "follow the system", so no attribute is set
+// and the stylesheet's prefers-color-scheme block decides, exactly as before.
+function themeBootstrapScript() {
+  return `<script>(function(){var r=document.documentElement;try{var t=localStorage.getItem("ms-realty:theme");if(t==="light"||t==="dark")r.setAttribute("data-theme",t);}catch(error){}r.setAttribute("data-theme-ready","1");})();</script>`;
+}
+
 // The admin CRM and the public site have separate stylesheets so a visitor
 // never pays for the surface they cannot reach, and the Hebrew locale is the
 // only one that asks Google for the Noto Hebrew faces.
@@ -120,6 +132,7 @@ function meta(page, options = {}) {
   return [
     "<meta charset=\"utf-8\">",
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">",
+    options.print ? "" : themeBootstrapScript(),
     options.print ? "" : designSystemStyle(page),
     `<title>${escapeHtml(page.metadata?.title || "MS Realty")}</title>`,
     `<meta name="description" content="${escapeHtml(page.metadata?.description || "")}">`,

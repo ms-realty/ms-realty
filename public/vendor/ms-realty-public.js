@@ -3,6 +3,51 @@
 // Rebuild with: npm run design:build
 (function () {
   "use strict";
+
+  var MS_REALTY_THEME_KEY = "ms-realty:theme";
+  function readThemeChoice() {
+    try {
+      var stored = localStorage.getItem(MS_REALTY_THEME_KEY);
+      if (stored === "light" || stored === "dark") return stored;
+    } catch (error) {
+      // Private browsing and blocked storage both throw here. The root
+      // attribute is then the only record of the choice, and it lasts for
+      // exactly as long as the page does.
+      return document.documentElement.getAttribute("data-theme") || "system";
+    }
+    return "system";
+  }
+  function syncThemeSwitches(choice) {
+    var options = document.querySelectorAll("[data-theme-option]");
+    for (var i = 0; i < options.length; i += 1) {
+      var on = options[i].getAttribute("data-theme-option") === choice;
+      options[i].setAttribute("aria-pressed", on ? "true" : "false");
+      options[i].setAttribute("data-on", on ? "1" : "0");
+    }
+  }
+  function applyThemeChoice(choice) {
+    var root = document.documentElement;
+    if (choice === "light" || choice === "dark") root.setAttribute("data-theme", choice);
+    else root.removeAttribute("data-theme");
+    try {
+      if (choice === "light" || choice === "dark") localStorage.setItem(MS_REALTY_THEME_KEY, choice);
+      else localStorage.removeItem(MS_REALTY_THEME_KEY);
+    } catch (error) {}
+    syncThemeSwitches(choice);
+  }
+  function initThemeSwitch() {
+    var groups = document.querySelectorAll("[data-theme-switch]");
+    if (!groups.length) return;
+    for (var i = 0; i < groups.length; i += 1) {
+      groups[i].addEventListener("click", function (event) {
+        var option = event.target.closest("[data-theme-option]");
+        if (!option) return;
+        applyThemeChoice(option.getAttribute("data-theme-option") || "system");
+      });
+    }
+    syncThemeSwitches(readThemeChoice());
+  }
+
   var publicClientScript = document.currentScript || document.querySelector("script[data-ms-realty-public-client]");
   var I18N = {
     requestSent: publicClientScript ? publicClientScript.getAttribute("data-request-sent") || "" : "",
@@ -2911,5 +2956,6 @@
  initSellerPhotoUpload();
  initPhotoSphereViewers();
  initPrivacySafeAnalytics();
+ initThemeSwitch();
  firstTouchPath();
 })();
