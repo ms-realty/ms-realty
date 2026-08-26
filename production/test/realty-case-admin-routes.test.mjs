@@ -22,13 +22,15 @@ async function withCredentials(fn) {
   process.env.NODE_ENV = "production";
   delete process.env.MS_REALTY_ADMIN_TOKEN;
   process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-    { id: "broker_bg", token: "broker-case-token-012345678901", roles: ["broker"] },
-    { id: "trusted_agent_1", token: "agent-case-token-0123456789012", roles: ["agent"] },
+    { id: "broker_bg", token: "broker-case-token-012345678901", roles: ["broker"], workspace_ids: ["workspace-sandanski"] },
+    { id: "trusted_agent_1", token: "agent-case-token-0123456789012", roles: ["agent"], workspace_ids: ["workspace-sandanski"] },
+    { id: "admin_bg", token: "admin-case-token-01234567890123", roles: ["admin"] },
   ]);
   try {
     await fn({
       human: { authorization: "Bearer broker-case-token-012345678901" },
       agent: { authorization: "Bearer agent-case-token-0123456789012" },
+      admin: { authorization: "Bearer admin-case-token-01234567890123" },
     });
   } finally {
     for (const [key, value] of Object.entries(previous)) {
@@ -66,6 +68,7 @@ test("admin case routes support human manual work and assured autonomous agents 
       MS_REALTY_CASE_LEDGER_PATH: realtyCaseLedgerPath,
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_CASE_RECORDED_AT: "2026-07-30T09:00:00.000Z",
+      MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     });
 
     const manualOpen = await renderAppAdminResponse(
@@ -220,7 +223,7 @@ test("case request projection is opt-in, case-scoped, and retryable from the aut
     const rejected = await renderAppAdminResponse(
       new Request("https://example.test/api/admin/cases", {
         method: "POST",
-        headers: { ...auth.human, "content-type": "application/json" },
+        headers: { ...auth.admin, "content-type": "application/json" },
         body: JSON.stringify(caseInput("projection-misconfigured", "manual")),
       }),
       { config: missingWorkspaceConfig },

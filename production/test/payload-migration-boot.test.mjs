@@ -11,6 +11,7 @@ const durableListingEditMigration = fromRoot("migrations", "20260811_120000_dura
 const publicSearchMigration = fromRoot("migrations", "20260811_153000_postgres_public_search.ts");
 const publicSearchRepairMigration = fromRoot("migrations", "20260813_110000_repair_postgres_search_index.ts");
 const publicSearchViewRepairMigration = fromRoot("migrations", "20260820_190500_repair_postgres_search_view.ts");
+const sourceStatedSearchViewMigration = fromRoot("migrations", "20260826_220000_source_stated_search_view.ts");
 const durableLeadSideEffectsMigration = fromRoot("migrations", "20260813_120000_durable_lead_side_effects.ts");
 
 function tableSql(source, name) {
@@ -153,7 +154,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
 
   const publicSearch = fs.readFileSync(publicSearchMigration, "utf8");
   assert.doesNotMatch(publicSearch, /ms_realty_search_fold"\(concat_ws\(/);
-  assert.match(publicSearch, /SEARCH_TEXT_SQL\(""\)/);
+  assert.match(publicSearch, /INDEX_SEARCH_TEXT_SQL\(""\)/);
   assert.match(publicSearch, /COALESCE\(NULLIF\(\$\{listing\}"facts_title", ''\)/);
 
   const publicSearchRepair = fs.readFileSync(publicSearchRepairMigration, "utf8");
@@ -166,6 +167,12 @@ test("Payload migration boot configuration and generated constraints stay runnab
   assert.match(publicSearchViewRepair, /await ensurePostgresSearchView\(args\)/);
   const publicSearchViewRepairDown = publicSearchViewRepair.match(/export async function down[\s\S]*$/)?.[0] || "";
   assert.doesNotMatch(publicSearchViewRepairDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
+
+  const sourceStatedSearchView = fs.readFileSync(sourceStatedSearchViewMigration, "utf8");
+  assert.match(sourceStatedSearchView, /up as ensurePostgresSearchView/);
+  assert.match(sourceStatedSearchView, /await ensurePostgresSearchView\(args\)/);
+  const sourceStatedSearchViewDown = sourceStatedSearchView.match(/export async function down[\s\S]*$/)?.[0] || "";
+  assert.doesNotMatch(sourceStatedSearchViewDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
 
   const leadSideEffects = fs.readFileSync(durableLeadSideEffectsMigration, "utf8");
   for (const table of ["consent_events", "seller_pipeline_events"]) {

@@ -21,7 +21,7 @@ async function withCredentials(fn) {
   process.env.NODE_ENV = "production";
   delete process.env.MS_REALTY_ADMIN_TOKEN;
   process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-    { id: "broker_bg", token: "broker-authority-token-0123456789", roles: ["broker"] },
+    { id: "broker_bg", token: "broker-authority-token-0123456789", roles: ["broker"], workspace_ids: ["workspace-sandanski"] },
   ]);
   try {
     await fn("Bearer broker-authority-token-0123456789");
@@ -295,6 +295,7 @@ test("local case writes preserve an unavailable audit ledger error", async () =>
       MS_REALTY_CASE_LEDGER_PATH: tempLedger("app-local-case-ledger"),
       MS_REALTY_AUDIT_LOG_PATH: unavailableAuditPath,
       MS_REALTY_CASE_RECORDED_AT: "2026-07-30T09:00:00.000Z",
+      MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     });
 
     const response = await request("/api/admin/cases", {
