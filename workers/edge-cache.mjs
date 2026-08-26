@@ -131,7 +131,7 @@ export async function storeInEdgeCache(response, cacheKey, ctx, cache) {
   if (!cacheKey || !cache || !responseMayBeShared(response)) return response;
   const stored = withEdgeCacheMarker(response, "miss", { normalizeVary: true });
   const write = cache.put(cacheKey, stored.clone());
-  if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(write);
+  if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(Promise.resolve(write).catch(() => undefined));
   else await write;
   return stored;
 }

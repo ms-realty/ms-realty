@@ -131,6 +131,16 @@ test("storing is skipped for anything the gate rejects and marks what it keeps",
   assert.equal(puts.length, 1);
 });
 
+test("a rejected background cache write is observed instead of becoming an unhandled rejection", async () => {
+  const waits = [];
+  const cache = { put: async () => Promise.reject(new Error("cache is unavailable")) };
+  const key = edgeCacheKey(new Request("https://ms-realty.test/bg"));
+  const stored = await storeInEdgeCache(responseWith(PUBLIC_CACHE), key, { waitUntil: (promise) => waits.push(promise) }, cache);
+  assert.equal(stored.headers.get(EDGE_CACHE_HEADER), "miss");
+  assert.equal(waits.length, 1);
+  await waits[0];
+});
+
 test("the Worker consults the edge cache before waking the origin", () => {
   assert.match(workerSource, /requestMayUseEdgeCache\(request\)/);
   assert.match(workerSource, /caches\?\.default/);

@@ -129,6 +129,8 @@ export function appApiConfigFromEnv(env = process.env) {
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
+    payloadListingEnv: env,
+    payloadListingRuntime: null,
     rateLimit: rateLimitConfigFromEnv(env),
     trustProxy: env.MS_REALTY_TRUST_PROXY === "1",
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
@@ -192,6 +194,21 @@ export function appApiConfigFromEnv(env = process.env) {
     recordSearchEventsToFile: env.NODE_ENV !== "production",
     runtimeDataDurableOnly: durableOnly,
   };
+}
+
+async function payloadDependencyHealth(config) {
+  if (config.runtimeDataDurableOnly !== true) return { status: "ok" };
+  try {
+    const seed = readThroughCached(config.cmsSeedPath, () => loadCmsSeed(config.cmsSeedPath));
+    await projectListingDraftSeed(seed, {
+      env: config.payloadListingEnv || process.env,
+      payload: config.payloadListingRuntime || null,
+      requirePayload: true,
+    });
+    return { status: "ok" };
+  } catch (error) {
+    return { status: "unavailable", code: error.code || "payload_draft_unavailable" };
+  }
 }
 
 function response(status, body, contentType, headers = {}) {
@@ -798,15 +815,19 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
 
     if (request.method === "GET" && url.pathname === "/api/health") {
       const readiness = readLaunchReadiness(config.launchReadinessOutputPath);
+      const payload = await payloadDependencyHealth(config);
+      const available = payload.status === "ok";
       return webResponse(
-        json(200, {
+        json(available ? 200 : 503, {
           kind: "health",
           service: "ms-realty",
-          status: "ok",
+          status: available ? "ok" : "degraded",
+          dependency_status: payload.status,
+          dependencies: { payload },
           build_marker: readBuildMarker(),
           launch_ready: readiness.launch_ready,
           blockers: readiness.blockers,
-        }),
+        }, { "cache-control": "no-store" }),
       );
     }
 

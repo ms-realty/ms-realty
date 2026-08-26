@@ -65,6 +65,48 @@ test("Next public entry paths fail closed without Payload instead of serving the
   assert.equal((await api.json()).kind, "payload_draft_unavailable");
 });
 
+test("durable origin refusal is a localized no-store page for browsers and truthful JSON for APIs", async () => {
+  const env = {
+    ...process.env,
+    NODE_ENV: "production",
+    MS_REALTY_RUNTIME_DATA_AUTHORITY: "payload",
+    PAYLOAD_SECRET: "",
+    DATABASE_URL: "",
+  };
+  for (const pathname of ["/bg", "/en", "/bg/tarsene"]) {
+    const response = await renderAppRouteResponse({
+      pathname,
+      url: `https://live.test${pathname}`,
+      accept: "text/html",
+      config: appRouterConfigFromEnv(env),
+    });
+    const html = await response.text();
+    assert.equal(response.status, 503, pathname);
+    assert.equal(response.headers.get("cache-control"), "no-store", pathname);
+    assert.match(response.headers.get("content-type"), /text\/html/, pathname);
+    assert.match(html, /data-react-public-ui="(?:origin|search)-unavailable"/, pathname);
+    assert.match(html, /временно|temporarily unavailable/, pathname);
+    assert.match(html, /\+359/, pathname);
+  }
+
+  const api = await renderAppApiResponse(new Request("https://live.test/api/health", { headers: { accept: "application/json" } }), {
+    config: appApiConfigFromEnv(env),
+  });
+  const health = await api.json();
+  assert.equal(api.status, 503);
+  assert.equal(api.headers.get("cache-control"), "no-store");
+  assert.equal(health.status, "degraded");
+  assert.equal(health.dependency_status, "unavailable");
+
+  const standalone = await dispatchHttp(
+    createHttpApp({ runtimeDataDurableOnly: true, payloadListingRuntime: {}, payloadListingEnv: env }),
+    { url: "/bg/tarsene", headers: { accept: "text/html" } },
+  );
+  assert.equal(standalone.status, 503);
+  assert.equal(standalone.headers["cache-control"], "no-store");
+  assert.match(standalone.body, /data-react-public-ui="(?:origin|search)-unavailable"/);
+});
+
 test("Next and standalone public paths render the complete Payload snapshot", async () => {
   const runtime = createPayloadDraftRuntime(loadCmsSeed());
   const nextConfig = { ...appRouterConfigFromEnv(LIVE_ENV), payloadListingRuntime: runtime.payload };

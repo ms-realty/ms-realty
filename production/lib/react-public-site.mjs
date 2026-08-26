@@ -4693,6 +4693,23 @@ function SearchUnavailableBody({ page }) {
   });
 }
 
+function OriginUnavailableBody({ page }) {
+  const labels = uiLabels(page);
+  const channels = page.body.contact_channels;
+  return h(UtilityPage, {
+    page,
+    kind: "origin-unavailable",
+    icon: "search-x",
+    title: page.body.h1,
+    text: page.body.intro,
+    actions: [
+      phoneAction(channels?.phone, "accent"),
+      h(Btn, { key: "contact", tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: page.body.ctas.contact.path }, labels.contactBroker),
+      h(Btn, { key: "seller", tag: "a", variant: "secondary", size: "lg", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
+    ],
+  });
+}
+
 function LanguageFallbackBody({ page }) {
   const labels = uiLabels(page);
   return h(UtilityPage, {
@@ -5591,6 +5608,7 @@ export function renderReactPublicBody(page) {
   if (page.kind === "alerts") return renderStaticElement(h(AlertsBody, { page }));
   if (page.kind === "contact") return renderStaticElement(h(ContactBody, { page }));
   if (page.kind === "search_unavailable") return renderStaticElement(h(SearchUnavailableBody, { page }));
+  if (page.kind === "origin_unavailable") return renderStaticElement(h(OriginUnavailableBody, { page }));
   if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));
   if (page.kind === "guide") return renderStaticElement(h(GuideBody, { page }));
   if (page.kind === "legacy_archive") return renderStaticElement(h(LegacyArchiveBody, { page }));

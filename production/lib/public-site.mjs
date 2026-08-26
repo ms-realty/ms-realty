@@ -2456,6 +2456,8 @@ const CONTACT_COPY = {
     description: "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty. За обратно обаждане посочете име, телефон и предпочитано време.",
     form_unavailable: "Формата е временно недостъпна. Обадете се или ни пишете, отговаряме бързо.",
     search_unavailable_title: "Търсенето е временно недостъпно",
+    site_unavailable_title: "Сайтът е временно недостъпен",
+    site_unavailable_description: "Работим по възстановяването. Обадете ни се — брокер ще Ви помогне веднага.",
     search_unavailable_description: "Работим по него. Обадете се или разгледайте страниците ни, брокерът ще помогне веднага.",
   },
   en: {
@@ -2464,6 +2466,8 @@ const CONTACT_COPY = {
     description: "Send a question or callback request to the MS Realty team.",
     form_unavailable: "The form is temporarily unavailable. Call or message us instead. We reply quickly.",
     search_unavailable_title: "Search is temporarily unavailable",
+    site_unavailable_title: "The site is temporarily unavailable",
+    site_unavailable_description: "We are restoring it now. Call us and a broker will help you right away.",
     search_unavailable_description: "We are working on it. Call us or browse our pages. A broker will help right away.",
   },
   de: {
@@ -2472,6 +2476,8 @@ const CONTACT_COPY = {
     description: "Senden Sie eine Frage oder Rückrufanfrage an das MS Realty Team.",
     form_unavailable: "Das Formular ist vorübergehend nicht verfügbar. Rufen Sie uns an oder schreiben Sie uns.",
     search_unavailable_title: "Die Suche ist vorübergehend nicht verfügbar",
+    site_unavailable_title: "Die Website ist vorübergehend nicht verfügbar",
+    site_unavailable_description: "Wir stellen sie gerade wieder her. Rufen Sie uns an, ein Makler hilft Ihnen sofort.",
     search_unavailable_description: "Wir arbeiten daran. Rufen Sie uns an, ein Makler hilft sofort.",
   },
   nl: {
@@ -2480,6 +2486,8 @@ const CONTACT_COPY = {
     description: "Stuur een vraag of terugbelverzoek naar het MS Realty team.",
     form_unavailable: "Het formulier is tijdelijk niet beschikbaar. Bel of stuur ons een bericht.",
     search_unavailable_title: "Zoeken is tijdelijk niet beschikbaar",
+    site_unavailable_title: "De website is tijdelijk niet beschikbaar",
+    site_unavailable_description: "We herstellen hem nu. Bel ons en een makelaar helpt u direct.",
     search_unavailable_description: "We werken eraan. Bel ons, een makelaar helpt direct.",
   },
   ru: {
@@ -2488,6 +2496,8 @@ const CONTACT_COPY = {
     description: "Отправьте вопрос или запрос на обратный звонок команде MS Realty.",
     form_unavailable: "Форма временно недоступна. Позвоните или напишите нам, мы быстро отвечаем.",
     search_unavailable_title: "Поиск временно недоступен",
+    site_unavailable_title: "Сайт временно недоступен",
+    site_unavailable_description: "Мы уже восстанавливаем его. Позвоните нам — брокер поможет сразу.",
     search_unavailable_description: "Мы работаем над этим. Позвоните нам, брокер поможет сразу.",
   },
   el: {
@@ -2496,6 +2506,8 @@ const CONTACT_COPY = {
     description: "Στείλτε ερώτηση ή αίτημα επανάκλησης στην ομάδα της MS Realty.",
     form_unavailable: "Η φόρμα δεν είναι προσωρινά διαθέσιμη. Καλέστε μας ή στείλτε μήνυμα.",
     search_unavailable_title: "Η αναζήτηση δεν είναι προσωρινά διαθέσιμη",
+    site_unavailable_title: "Ο ιστότοπος δεν είναι προσωρινά διαθέσιμος",
+    site_unavailable_description: "Τον αποκαθιστούμε τώρα. Καλέστε μας και ένας μεσίτης θα σας βοηθήσει αμέσως.",
     search_unavailable_description: "Εργαζόμαστε πάνω σε αυτό. Καλέστε μας, ένας μεσίτης θα βοηθήσει άμεσα.",
   },
   he: {
@@ -2504,6 +2516,8 @@ const CONTACT_COPY = {
     description: "שלחו שאלה או בקשה לשיחה חוזרת לצוות MS Realty.",
     form_unavailable: "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
     search_unavailable_title: "החיפוש אינו זמין זמנית",
+    site_unavailable_title: "האתר אינו זמין זמנית",
+    site_unavailable_description: "אנחנו משחזרים אותו כעת. התקשרו אלינו ומתווך יעזור לכם מיד.",
     search_unavailable_description: "אנחנו עובדים על זה. התקשרו אלינו, מתווך יעזור מיד.",
   },
 };
@@ -3990,6 +4004,43 @@ export function renderSearchUnavailablePage({ registry, localeCode }) {
     body: {
       h1: copy.search_unavailable_title,
       intro: copy.search_unavailable_description,
+      contact_channels: {
+        phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
+        whatsapp: { href: BRAND_CONTACT.whatsapp, label: "WhatsApp" },
+      },
+      ctas: {
+        contact: { path: contactPath(registry, locale.code) },
+        seller: { path: sellerPath(registry, locale.code) },
+      },
+    },
+  };
+}
+
+export function renderOriginUnavailablePage({ registry, localeCode, path = null }) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const copy = contactCopy(locale.code);
+  const requestedPath = typeof path === "string" && path.startsWith("/") ? path : homePath(registry, locale.code);
+  return {
+    kind: "origin_unavailable",
+    status: 503,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path: requestedPath,
+    canonical: requestedPath,
+    indexable: false,
+    metadata: {
+      title: copy.site_unavailable_title,
+      description: copy.site_unavailable_description,
+      robots: "noindex,follow",
+    },
+    hreflang: [],
+    chrome: publicChrome(registry, locale, { active: null, currentPath: requestedPath }),
+    body: {
+      h1: copy.site_unavailable_title,
+      intro: copy.site_unavailable_description,
       contact_channels: {
         phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
         whatsapp: { href: BRAND_CONTACT.whatsapp, label: "WhatsApp" },
@@ -6809,4 +6860,3 @@ export function renderNotFoundPage({ registry, path = "/" }) {
     },
   };
 }
-

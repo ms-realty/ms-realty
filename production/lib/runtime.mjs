@@ -18,6 +18,7 @@ import {
   renderNotFoundPage,
   renderSearchPage,
   renderSearchUnavailablePage,
+  renderOriginUnavailablePage,
   renderContactPage,
   renderSellerPage,
   renderStartPage,
@@ -27,7 +28,7 @@ import {
   isActiveListing,
 } from "./public-site.mjs";
 
-export { renderSearchUnavailablePage };
+export { renderSearchUnavailablePage, renderOriginUnavailablePage };
 import {
   aboutPath,
   alertsPath,
