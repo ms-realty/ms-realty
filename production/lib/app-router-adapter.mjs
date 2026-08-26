@@ -132,17 +132,28 @@ function currentTranslationTasks(config) {
   return readThroughCached(config.translationLedgerPath, () => readTranslationLedger(config.translationLedgerPath));
 }
 
+// A page is only shared-cacheable when it both belongs to a cacheable kind and
+// actually rendered. Choosing the header on kind alone declared every 404 and
+// every 5xx safe to share for an hour, which meant a transient backend failure
+// froze the error in the CDN and in each visitor's browser and did not heal
+// when the backend came back.
+function htmlCacheControl(kind, status) {
+  if (kind === "search") return "no-store";
+  return status === 200 ? PUBLIC_CACHE : "no-store";
+}
+
 function renderedHtmlResponse(rendered, requestUrl) {
   const print = requestUrl.searchParams.get("print") === "1";
   const reactBody = print ? "" : renderReactPublicBody(rendered);
   const html = renderHtmlPage(rendered, { bodyHtml: reactBody, print });
+  const status = rendered.status || 200;
 
   return {
-    status: rendered.status || 200,
+    status,
     headers: {
       "content-type": HTML,
       ...CSP_HEADER,
-      "cache-control": rendered.kind === "search" ? "no-store" : PUBLIC_CACHE,
+      "cache-control": htmlCacheControl(rendered.kind, status),
     },
     rendered,
     html,

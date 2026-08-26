@@ -153,6 +153,19 @@ main code {
   padding: 0.1em 0.35em;
 }
 
+/* ---- Foreign-script endonyms in the language menu ----
+   Every page prints all seven locale names, so a Bulgarian page asked the
+   browser for a Greek webfont subset to typeset the eight characters of
+   "Ελληνικά" inside a collapsed dropdown — 15 KB from a second origin for a
+   label almost nobody opens. Each link already carries its own `lang`, so a
+   page can hand the scripts it does not otherwise use to the system font and
+   never fetch a face for them. The page's own language is excluded, so the
+   Greek site still sets Greek in the brand face. */
+html:not([lang="el"]) [lang="el"],
+html:not([lang="he"]) [lang="he"] {
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
 /* ---- Print: strip chrome, keep content ---- */
 @media print {
   .site-hd, .site-ft, .skip-link, [data-mobile-sticky-actions] { display: none !important; }

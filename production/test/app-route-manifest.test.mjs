@@ -114,6 +114,14 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(home.html, /data-featured-listings="true"/);
   assert.match(home.html, /data-card-thumbnail="true"/);
 
+  // A page that did not render is never shared-cacheable: the header used to be
+  // chosen from the page kind alone, so a transient 404 was pinned in the CDN
+  // and in every visitor's browser for an hour and did not heal when the
+  // backend recovered.
+  const missing = renderAppRoute({ pathname: "/he/properties/NOPE-9999", url: "https://example.test/he/properties/NOPE-9999", config: approvedConfig });
+  assert.equal(missing.status, 404);
+  assert.equal(missing.headers["cache-control"], "no-store");
+
   const search = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?q=sandanski&property_type=apartment", config: approvedConfig });
   assert.equal(search.status, 200);
   assert.equal(search.headers["cache-control"], "no-store");

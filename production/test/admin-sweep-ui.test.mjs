@@ -7,7 +7,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 import { renderOperatorConnectPage } from "../lib/operator-connect.mjs";
 import { renderAdminTeamPage } from "../lib/admin-team.mjs";
-import { DS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
+import { ADMIN_CSS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 // Contracts from the admin workbench quality sweep: the mobile navigation
 // drawer, required-field markers, empty states for filtered queues, localized
@@ -16,7 +16,7 @@ import { DS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const adminAdapterCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin.css"), "utf8");
-const generatedDesignCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty.css"), "utf8");
+const generatedDesignCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const auth = { authorization: "Bearer local-admin-smoke" };
 
 // The adapter source keeps spaces; the generated bundle is minified.
@@ -105,7 +105,7 @@ test("connect page loads the workbench fonts and design-system bundle without em
     locale: "ru",
   });
   assert.ok(html.includes(`<link rel="stylesheet" href="${FONTS_URL}">`));
-  assert.ok(html.includes(`<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}"`));
+  assert.ok(html.includes(`<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}"`));
   assert.match(html, /<title>Подключения · MS Realty<\/title>/);
   assert.match(html, /<body class="connect-page">/);
   assert.match(html, /\.button \{[^}]*min-height: 44px;[^}]*background: var\(--brand, #222222\)/);

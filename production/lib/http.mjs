@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import { buildAgencyReviewQueue } from "./agency-review-queue.mjs";
+import { HERO_ASSET_CACHE, IMMUTABLE_ASSET_CACHE } from "./asset-cache-headers.mjs";
 import { readBuildMarker } from "./build-marker.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./broker-contacts.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./slug-history.mjs";
@@ -4010,7 +4011,7 @@ export function createHttpApp({
         const heroPath = fromRoot("public", "hero", heroMatch[1]);
         if (fs.existsSync(heroPath)) {
           return response(200, fs.readFileSync(heroPath), `image/${heroMatch[2].toLowerCase()}`, {
-            "cache-control": "public, max-age=31536000, immutable",
+            "cache-control": HERO_ASSET_CACHE,
           });
         }
       }
@@ -4032,7 +4033,7 @@ export function createHttpApp({
             png: "image/png",
           };
           return response(200, fs.readFileSync(vendorPath, extension === "png" ? undefined : "utf8"), vendorTypes[extension], {
-            "cache-control": "public, max-age=31536000, immutable",
+            "cache-control": IMMUTABLE_ASSET_CACHE,
           });
         }
       }

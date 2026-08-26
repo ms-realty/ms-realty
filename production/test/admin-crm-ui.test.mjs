@@ -16,7 +16,7 @@ import { loadLocaleRegistry } from "../lib/locales.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const crmCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-crm.css"), "utf8");
-const bundleCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty.css"), "utf8");
+const bundleCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const auth = { authorization: "Bearer local-admin-smoke" };
 const registry = loadLocaleRegistry();
 

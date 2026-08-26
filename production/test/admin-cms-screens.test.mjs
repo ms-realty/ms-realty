@@ -17,7 +17,7 @@ import { renderOperatorConnectPage } from "../lib/operator-connect.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const cmsCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-cms.css"), "utf8");
-const generatedCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty.css"), "utf8");
+const generatedCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const auth = { authorization: "Bearer local-admin-smoke" };
 
 function app() {
