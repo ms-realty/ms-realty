@@ -276,6 +276,15 @@ function parseBody(request, body) {
   return parseJsonBody(body);
 }
 
+function eventPathForRateLimit(body) {
+  try {
+    const path = String(parseJsonBody(body).path || "").trim();
+    return path.startsWith("/") && !path.startsWith("//") && path.length <= 500 ? path : null;
+  } catch {
+    return null;
+  }
+}
+
 function webResponseBody(response) {
   return typeof response.body === "string" ? response.body : JSON.stringify(response.body);
 }
@@ -794,13 +803,20 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     const rateLimited =
       (request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) ||
       (request.method === "GET" && PUBLIC_READ_LIMITED_PATHS.has(url.pathname));
+    let bodyBytes;
+    let body;
+    if (request.method === "POST" && url.pathname === "/api/events") {
+      bodyBytes = await readRequestBytes(request, config.maxBodyBytes);
+      body = bodyBytes.toString("utf8");
+    }
     if (limiter && rateLimited) {
       // Behind Cloudflare (trustProxy) the verified cf-connecting-ip is used;
       // otherwise there is no socket peer here, so all callers share one bucket
       // rather than letting a spoofed X-Forwarded-For mint fresh identities.
-      const verdict = limiter.allow(
-        `${clientIdentity({ headers: request.headers }, { trustProxy: config.trustProxy })}:${url.pathname}`,
-      );
+      const identity = clientIdentity({ headers: request.headers }, { trustProxy: config.trustProxy });
+      const eventPath = url.pathname === "/api/events" ? eventPathForRateLimit(body) : null;
+      const key = `${identity}:${url.pathname}${eventPath ? `:${eventPath}` : ""}`;
+      const verdict = limiter.allow(key);
       if (!verdict.allowed) {
         return webResponse(
           json(429, { kind: "rate_limited", retry_after: verdict.retryAfterSec }, {
@@ -810,8 +826,10 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
         );
       }
     }
-    const bodyBytes = await readRequestBytes(request, config.maxBodyBytes);
-    const body = bodyBytes.toString("utf8");
+    if (bodyBytes === undefined) {
+      bodyBytes = await readRequestBytes(request, config.maxBodyBytes);
+      body = bodyBytes.toString("utf8");
+    }
 
     if (request.method === "GET" && url.pathname === "/api/health") {
       const readiness = readLaunchReadiness(config.launchReadinessOutputPath);
