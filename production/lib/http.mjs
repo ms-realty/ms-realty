@@ -2460,7 +2460,6 @@ export function createHttpApp({
       return adminJson(503, realtyCasePayloadAuthorityFailure());
     }
     if (
-      principal?.source === "payload_session" &&
       ["cases:read", "cases:write"].includes(requiredCapability) &&
       !canAdminAccessWorkspace(principal, realtyCaseWorkspaceId)
     ) {

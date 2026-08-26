@@ -22,13 +22,15 @@ async function withCredentials(fn) {
   process.env.NODE_ENV = "production";
   delete process.env.MS_REALTY_ADMIN_TOKEN;
   process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-    { id: "broker_bg", token: "broker-condition-token-012345678", roles: ["broker"] },
-    { id: "trusted_agent_1", token: "agent-condition-token-0123456789", roles: ["agent"] },
+    { id: "broker_bg", token: "broker-condition-token-012345678", roles: ["broker"], workspace_ids: ["workspace-sandanski"] },
+    { id: "trusted_agent_1", token: "agent-condition-token-0123456789", roles: ["agent"], workspace_ids: ["workspace-sandanski"] },
+    { id: "admin_bg", token: "admin-condition-token-01234567890", roles: ["admin"] },
   ]);
   try {
     await fn({
       human: { authorization: "Bearer broker-condition-token-012345678" },
       agent: { authorization: "Bearer agent-condition-token-0123456789" },
+      admin: { authorization: "Bearer admin-condition-token-01234567890" },
     });
   } finally {
     for (const [key, value] of Object.entries(previous)) {
@@ -78,6 +80,7 @@ test("Next admin condition routes bind actors and preserve manual and human-cont
       MS_REALTY_CASE_CONDITION_LEDGER_PATH: realtyCaseConditionLedgerPath,
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_CASE_RECORDED_AT: "2026-07-30T09:00:00.000Z",
+      MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     });
     const request = (pathname, method, headers, body) =>
       renderAppAdminResponse(
@@ -151,6 +154,7 @@ test("condition workbench renders unresolved states and validates JSON form evid
       MS_REALTY_CASE_CONDITION_LEDGER_PATH: realtyCaseConditionLedgerPath,
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_CASE_RECORDED_AT: "2026-07-30T09:00:00.000Z",
+      MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     });
     const request = (pathname, method, headers, body, requestConfig = config) =>
       renderAppAdminResponse(
@@ -251,6 +255,7 @@ test("standalone HTTP condition routes match the trusted-agent contract", async 
       realtyCaseConditionLedgerPath,
       auditLogPath,
       realtyCaseRecordedAt: "2026-07-30T09:00:00.000Z",
+      realtyCaseWorkspaceId: "workspace-sandanski",
     });
     const openedCase = await dispatchHttp(app, {
       method: "POST",
@@ -306,6 +311,7 @@ test("Next condition projection is ledger-first, case-scoped, and retryable", as
       MS_REALTY_CASE_CONDITION_LEDGER_PATH: realtyCaseConditionLedgerPath,
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_CASE_RECORDED_AT: "2026-07-30T09:00:00.000Z",
+      MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     });
 
     assert.equal((await post("/api/admin/cases", caseInput("projection-condition-a", "manual"), baseConfig)).status, 201);
@@ -321,10 +327,13 @@ test("Next condition projection is ledger-first, case-scoped, and retryable", as
       }),
       realtyCasePayloadProjector: async () => undefined,
     };
-    const unavailable = await post(
-      "/api/admin/cases/conditions",
-      conditionInput("projection-condition-a", "preflight-unavailable"),
-      unavailableConfig,
+    const unavailable = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/cases/conditions", {
+        method: "POST",
+        headers: { ...auth.admin, "content-type": "application/json" },
+        body: JSON.stringify(conditionInput("projection-condition-a", "preflight-unavailable")),
+      }),
+      { config: unavailableConfig },
     );
     assert.equal(unavailable.status, 503);
     assert.deepEqual(await unavailable.json(), { kind: "realty_case_projection_unavailable", source_recorded: false });

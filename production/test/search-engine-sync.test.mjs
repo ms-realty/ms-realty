@@ -608,16 +608,19 @@ test("Postgres search migration keeps locale routing and index operators aligned
   assert.match(migration, /routing_target_locale[^\n]+source_locale\."code"/);
   assert.match(migration, /SET search_path = pg_catalog, pg_temp/);
   assert.match(migration, /POSTGRES_SEARCH_FOLD_SQL/);
-  assert.match(migration, /const VERIFIED_LOCATION_SQL/);
+  assert.match(migration, /const BROKER_VERIFIED_LOCATION_SQL/);
   assert.equal(migration.match(/workflow_location_verified_at/g)?.length, 1);
   assert.equal(migration.match(/workflow_location_verified_by/g)?.length, 1);
-  assert.match(migration, /VERIFIED_LOCATION_SQL\(`NULLIF\(\$\{listing\}"facts_location"/);
-  assert.match(migration, /VERIFIED_LOCATION_SQL\(`NULLIF\(\$\{listing\}"facts_municipality"/);
-  assert.match(migration, /VERIFIED_LOCATION_SQL\(`NULLIF\(\$\{listing\}"facts_district"/);
-  assert.match(migration, /VERIFIED_LOCATION_SQL\(`NULLIF\(\$\{listing\}"facts_country_code"/);
+  assert.match(migration, /const PUBLISHABLE_FACT_SQL/);
+  assert.match(migration, /pfv\."state" IN \('entered_pending_review', 'broker_verified'\)/);
+  assert.match(migration, /PUBLIC_LOCATION_SQL\('location_label'/);
+  assert.match(migration, /PUBLIC_LOCATION_SQL\('municipality'/);
+  assert.match(migration, /PUBLIC_LOCATION_SQL\('district'/);
+  assert.match(migration, /PUBLIC_LOCATION_SQL\('country_code'/);
+  assert.match(migration, /BROKER_VERIFIED_LOCATION_SQL\(`loc\."public_location_precision"/);
   assert.match(migration, /EXISTS \(\s*SELECT 1\s*FROM "public"\."listing_translations"/);
-  assert.match(migration, /VERIFIED_GEOGRAPHY_PATH_SQL\(""\)\)\}\) jsonb_path_ops/);
-  assert.match(migration, /ms_realty_search_fold"\(\$\{sql\.raw\(SEARCH_TEXT_SQL\(""\)\)\}\) gin_trgm_ops/);
+  assert.match(migration, /INDEX_GEOGRAPHY_PATH_SQL\(""\)\)\}\) jsonb_path_ops/);
+  assert.match(migration, /ms_realty_search_fold"\(\$\{sql\.raw\(INDEX_SEARCH_TEXT_SQL\(""\)\)\}\) gin_trgm_ops/);
 });
 
 test("approved search projection matches the Postgres view lexical and taxonomy fields", () => {

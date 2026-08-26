@@ -2029,6 +2029,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     searchQueryReportPath,
     hermesWorkerReportPath,
     liveServiceProvisioningReportPath,
+    monitoringRollbackReportPath: `${seoEvidenceInputDir}/missing-monitoring-rollback-report.json`,
     payloadRuntimeReportPath,
     reviewedAt: runtimeGeneratedAt,
   });

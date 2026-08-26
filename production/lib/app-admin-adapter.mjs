@@ -11,6 +11,7 @@ import {
   canAdminMutate,
   requiredAdminCapability,
   resolveAdminPrincipal,
+  TWO_FACTOR_SELF_SERVICE_PATHS,
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
 import { operatorAgentConfigBlock, operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
@@ -29,10 +30,11 @@ import {
   DEFAULT_ADMIN_SESSION_LEDGER_PATH,
   adminSessionFingerprint,
   adminSessionStates,
+  isAdminSessionRevoked,
   readAdminSessionEvents,
   stepUpTokenFromCookie,
 } from "./admin-sessions.mjs";
-import { DEFAULT_OPERATOR_TWO_FACTOR_PATH } from "./operator-two-factor.mjs";
+import { DEFAULT_OPERATOR_TWO_FACTOR_PATH, operatorTwoFactorStatus, readOperatorTwoFactorEvents } from "./operator-two-factor.mjs";
 import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
@@ -3628,6 +3630,33 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
   if (requestPath === "/admin/login" || requestPath === "/admin/logout") {
     return renderAppWorkspaceSecurityResponse(request, { env: authEnv, overrides: adminAuthOverrides(config) });
   }
+  if (sessionToken) {
+    let revoked = true;
+    try {
+      revoked = isAdminSessionRevoked(
+        readAdminSessionEvents(config.adminSessionLedgerPath || undefined),
+        adminSessionFingerprint(sessionToken),
+      );
+    } catch {
+      // A ledger that cannot be read is not evidence that the session is safe.
+    }
+    if (revoked) {
+      if ((requestPath === "/admin" || requestPath.startsWith("/admin/")) && request.headers.get("accept")?.includes("text/html")) {
+        return new Response(null, {
+          status: 303,
+          headers: {
+            location: "/admin/login",
+            "cache-control": "no-store",
+            "set-cookie": adminSessionClearCookie(),
+          },
+        });
+      }
+      const response = adminUnauthorized();
+      const headers = new Headers(response.headers);
+      headers.set("set-cookie", adminSessionClearCookie());
+      return new Response(response.body, { status: response.status, headers });
+    }
+  }
   let payloadSession = null;
   let principal = config.adminPrincipal || (authHeader ? resolveAdminPrincipal(authHeader, authEnv) : null);
   if (!principal && sessionToken) {
@@ -3692,6 +3721,42 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     const url = new URL(request.url, "http://localhost");
     const requiredCapability = requiredAdminCapability(request.method, url.pathname);
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
+    // Keep credential-registry step-up parity with the standalone runtime.
+    // Settings and the factor's own self-service routes stay reachable so an
+    // operator can enrol or verify the factor that gates the rest of the app.
+    const b6StepUpExempt =
+      TWO_FACTOR_SELF_SERVICE_PATHS.has(url.pathname) ||
+      (request.method === "GET" && ["/admin/settings", "/api/admin/settings"].includes(url.pathname));
+    const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
+    if (adminRequest && principal?.source === "credential_registry" && !b6StepUpExempt) {
+      const b6Status = operatorTwoFactorStatus(
+        readOperatorTwoFactorEvents(config.operatorTwoFactorPath || undefined),
+        principal.id,
+      );
+      const b6GateRefusal = (kind, message) =>
+        request.headers.get("accept")?.includes("text/html") && !url.pathname.startsWith("/api/")
+          ? new Response(null, {
+              status: 303,
+              headers: {
+                location: `/admin/settings?security=${encodeURIComponent(kind)}#settings-security`,
+                "cache-control": "no-store",
+              },
+            })
+          : jsonResponse(403, { kind, message });
+      if (b6Status.status === "active") {
+        if (!stepUpActive) {
+          return b6GateRefusal(
+            "two_factor_required",
+            "Post a current authenticator code to /api/admin/security/two-factor/verify and send the returned token as x-ms-admin-2fa.",
+          );
+        }
+      } else if (principal.require_two_factor === true) {
+        return b6GateRefusal(
+          "two_factor_enrolment_required",
+          "This operator must enrol a second factor at /api/admin/security/two-factor/enrol before using the workspace.",
+        );
+      }
+    }
     const parsedDeliveryBody =
       request.method === "POST" && url.pathname === "/api/admin/replies/delivery"
         ? parseBody(request, await readRequestBody(request, config.maxBodyBytes))
@@ -3726,7 +3791,6 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(503, realtyCasePayloadAuthorityFailure());
     }
     if (
-      principal.source === "payload_session" &&
       ["cases:read", "cases:write"].includes(requiredCapability) &&
       !canAdminAccessWorkspace(principal, config.realtyCaseWorkspaceId)
     ) {

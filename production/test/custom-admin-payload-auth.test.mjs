@@ -5,12 +5,15 @@ import os from "node:os";
 import path from "node:path";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import { appendAdminSessionEvent, createAdminSessionOpened, createAdminSessionRevoked } from "../lib/admin-sessions.mjs";
+import { activateOperatorEnrolment, appendOperatorTwoFactorEvent, createOperatorEnrolment } from "../lib/operator-two-factor.mjs";
 import {
   createPayloadAdminAuthService,
   payloadAdminPrincipal,
 } from "../lib/payload-admin-auth.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
+import { totpCode } from "../lib/totp.mjs";
 
 const BASE_URL = "https://ms-realty.ms-realty-bg.workers.dev";
 const NOW_SECONDS = 1_786_377_600;
@@ -190,6 +193,172 @@ test("wrong password, tampered cookie, and expired session fail generically", as
     );
     assert.equal(response.status, 401);
     assert.doesNotMatch(await response.text(), /Authentication failed|password|token/i);
+  }
+});
+
+test("the App Router refuses a revoked session before resolving it, while an active session still works", async () => {
+  const service = {
+    resolves: 0,
+    async resolve(token) {
+      service.resolves += 1;
+      if (token !== "active-session") return null;
+      const admin = user();
+      return { user: admin, principal: payloadAdminPrincipal(admin) };
+    },
+  };
+  const config = adapterConfig(service);
+  const recordedAt = "2026-08-26T09:00:00.000Z";
+  const revoked = createAdminSessionOpened(
+    { token: "revoked-session", operatorId: "payload-1", source: "payload_session" },
+    recordedAt,
+  );
+  appendAdminSessionEvent(revoked, { filePath: config.adminSessionLedgerPath });
+  appendAdminSessionEvent(
+    createAdminSessionRevoked(
+      {
+        fingerprint: revoked.fingerprint,
+        operatorId: "payload-1",
+        sessionId: revoked.session_id,
+        revokedBy: "payload-1",
+      },
+      recordedAt,
+    ),
+    { filePath: config.adminSessionLedgerPath },
+  );
+
+  const refused = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/cases/intents`, { headers: { cookie: "ms_admin=revoked-session", accept: "application/json" } }),
+    { config },
+  );
+  assert.equal(refused.status, 401);
+  assert.match(refused.headers.get("set-cookie"), /Max-Age=0/);
+  assert.equal(service.resolves, 0, "a revoked cookie never reaches Payload auth");
+
+  const active = createAdminSessionOpened(
+    { token: "active-session", operatorId: "payload-1", source: "payload_session" },
+    recordedAt,
+  );
+  appendAdminSessionEvent(active, { filePath: config.adminSessionLedgerPath });
+  const allowed = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/cases/intents`, { headers: { cookie: "ms_admin=active-session", accept: "application/json" } }),
+    { config },
+  );
+  assert.equal(allowed.status, 200);
+  assert.equal(service.resolves, 1, "an active registered cookie keeps the admin flow working");
+});
+
+test("the App Router gates credential-registry work behind step-up while leaving settings reachable", async () => {
+  const token = "registry-step-up-token-0123456789abcdef";
+  const operatorId = "broker_melnik";
+  const authEnv = {
+    NODE_ENV: "production",
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: JSON.stringify([
+      { id: operatorId, token, roles: ["broker"], workspace_ids: ["melnik"], require_two_factor: true },
+    ]),
+  };
+  const operatorTwoFactorKey = "app-admin-step-up-key-0123456789abcdef";
+  const operatorTwoFactorPath = path.join(
+    fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-app-step-up-")),
+    "operator-two-factor.jsonl",
+  );
+  const config = {
+    ...adapterConfig(null, authEnv),
+    operatorTwoFactorKey,
+    operatorTwoFactorPath,
+    realtyCaseWorkspaceId: "melnik",
+  };
+  const recordedAt = "2026-08-26T09:00:00.000Z";
+  const enrolment = createOperatorEnrolment(
+    { operatorId, account: "broker@example.test" },
+    { secret: operatorTwoFactorKey, recordedAt, totpSecret: "JBSWY3DPEHPK3PXP" },
+  );
+  appendOperatorTwoFactorEvent(enrolment.row, { filePath: operatorTwoFactorPath });
+  appendOperatorTwoFactorEvent(
+    activateOperatorEnrolment(
+      [enrolment.row],
+      { operatorId, code: totpCode(enrolment.secret, { timestamp: Date.parse(recordedAt) }) },
+      { secret: operatorTwoFactorKey, recordedAt, timestamp: Date.parse(recordedAt) },
+    ),
+    { filePath: operatorTwoFactorPath },
+  );
+
+  const gated = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/activity`, { headers: { authorization: `Bearer ${token}`, accept: "application/json" } }),
+    { config },
+  );
+  assert.equal(gated.status, 403);
+  assert.equal((await gated.json()).kind, "two_factor_required");
+
+  const stepUpToken = "registry-step-up-session-0123456789abcdef";
+  appendAdminSessionEvent(
+    createAdminSessionOpened({ token: stepUpToken, operatorId, source: "credential_registry" }, recordedAt),
+    { filePath: config.adminSessionLedgerPath },
+  );
+  const allowed = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/activity`, {
+      headers: { authorization: `Bearer ${token}`, "x-ms-admin-2fa": stepUpToken, accept: "application/json" },
+    }),
+    { config },
+  );
+  assert.equal(allowed.status, 200);
+
+  const settings = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/settings`, { headers: { authorization: `Bearer ${token}`, accept: "application/json" } }),
+    { config },
+  );
+  assert.equal(settings.status, 200, "the settings exemption remains reachable without step-up");
+});
+
+test("credential-registry case access is workspace-scoped on both admin runtimes", async () => {
+  const token = "registry-broker-token-0123456789abcdef";
+  const authEnv = {
+    NODE_ENV: "production",
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: JSON.stringify([
+      { id: "broker_melnik", token, roles: ["broker"], workspace_ids: ["melnik"] },
+    ]),
+  };
+  const config = {
+    ...adapterConfig(null, authEnv),
+    realtyCaseWorkspaceId: "sandanski",
+  };
+  const denied = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/cases`, { headers: { authorization: `Bearer ${token}`, accept: "application/json" } }),
+    { config },
+  );
+  assert.equal(denied.status, 403);
+  assert.equal((await denied.json()).required_capability, "workspace:access");
+
+  const allowed = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/cases`, { headers: { authorization: `Bearer ${token}`, accept: "application/json" } }),
+    { config: { ...config, realtyCaseWorkspaceId: "melnik" } },
+  );
+  assert.equal(allowed.status, 200);
+
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  try {
+    Object.assign(process.env, authEnv);
+    const app = createHttpApp({ realtyCaseWorkspaceId: "sandanski" });
+    const legacyDenied = await dispatchHttp(app, {
+      url: "/api/admin/cases",
+      headers: { authorization: `Bearer ${token}` },
+    });
+    assert.equal(legacyDenied.status, 403);
+    assert.equal(legacyDenied.body.required_capability, "workspace:access");
+
+    const allowedApp = createHttpApp({ realtyCaseWorkspaceId: "melnik" });
+    const legacyAllowed = await dispatchHttp(allowedApp, {
+      url: "/api/admin/cases",
+      headers: { authorization: `Bearer ${token}` },
+    });
+    assert.equal(legacyAllowed.status, 200);
+  } finally {
+    if (previous.NODE_ENV === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previous.NODE_ENV;
+    if (previous.MS_REALTY_ADMIN_CREDENTIALS_JSON === undefined) delete process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
+    else process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = previous.MS_REALTY_ADMIN_CREDENTIALS_JSON;
   }
 });
 

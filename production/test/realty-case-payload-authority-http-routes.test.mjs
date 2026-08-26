@@ -81,7 +81,7 @@ async function withCredentials(fn) {
   process.env.NODE_ENV = "production";
   delete process.env.MS_REALTY_ADMIN_TOKEN;
   process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-    { id: "broker_bg", token: "broker-authority-token-012345678", roles: ["broker"] },
+    { id: "broker_bg", token: "broker-authority-token-012345678", roles: ["broker"], workspace_ids: ["workspace-sandanski"] },
   ]);
   try {
     await fn({ authorization: "Bearer broker-authority-token-012345678" });
