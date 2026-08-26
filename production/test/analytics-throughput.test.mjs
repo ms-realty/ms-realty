@@ -34,18 +34,20 @@ async function send(config, eventPath) {
   );
 }
 
-test("ordinary page browsing gets one event budget per page while repeated abuse remains capped", async () => {
-  const { config, eventLedgerPath } = eventWorkspace("analytics-throughput");
+test("ordinary browsing fits the shared budget while randomized abuse remains capped", async () => {
+  const { config, eventLedgerPath } = eventWorkspace("analytics-ordinary");
   const crawlResponses = [];
-  for (let index = 0; index < 205; index += 1) crawlResponses.push(await send(config, `/qa/page-${index}`));
-  assert.equal(crawlResponses.filter((response) => response.status === 201).length, 205);
+  for (let index = 0; index < 25; index += 1) crawlResponses.push(await send(config, `/qa/page-${index}`));
+  assert.equal(crawlResponses.filter((response) => response.status === 201).length, 25);
   assert.equal(crawlResponses.filter((response) => response.status === 429).length, 0);
 
+  const abuseWorkspace = eventWorkspace("analytics-abuse");
   const abuseResponses = [];
-  for (let index = 0; index < 500; index += 1) abuseResponses.push(await send(config, "/qa/repeated-abuse"));
-  assert.equal(abuseResponses.filter((response) => response.status === 201).length, 30);
-  assert.equal(abuseResponses.filter((response) => response.status === 429).length, 470);
-  assert.equal(readEventLedger(eventLedgerPath).length, 235);
+  for (let index = 0; index < 500; index += 1) abuseResponses.push(await send(abuseWorkspace.config, `/qa/randomized-abuse-${index}`));
+  assert.equal(abuseResponses.filter((response) => response.status === 201).length, 5);
+  assert.equal(abuseResponses.filter((response) => response.status === 429).length, 495);
+  assert.equal(readEventLedger(eventLedgerPath).length, 25);
+  assert.equal(readEventLedger(abuseWorkspace.eventLedgerPath).length, 5);
 });
 
 test("the default analytics ledger is runtime-only and explicit fixture paths remain readable", () => {
@@ -54,12 +56,12 @@ test("the default analytics ledger is runtime-only and explicit fixture paths re
   assert.equal(readEventLedger(fromRoot("production", "data", "events.jsonl")).length > 0, true);
 });
 
-test("standalone HTTP analytics uses the same path-aware limiter contract", async () => {
+test("standalone HTTP analytics keeps randomized abuse on the shared limiter", async () => {
   const { eventLedgerPath } = eventWorkspace("standalone-analytics");
   const app = createHttpApp({ eventLedgerPath, rateLimit: { windowMs: 60_000, max: 30 } });
   const headers = { host: "ms-realty.test", origin: "https://ms-realty.test", "sec-fetch-site": "same-origin" };
   const crawl = [];
-  for (let index = 0; index < 205; index += 1) {
+  for (let index = 0; index < 25; index += 1) {
     crawl.push(
       await dispatchHttp(app, {
         method: "POST",
@@ -69,16 +71,18 @@ test("standalone HTTP analytics uses the same path-aware limiter contract", asyn
       }),
     );
   }
-  assert.equal(crawl.filter((response) => response.status === 201).length, 205);
+  assert.equal(crawl.filter((response) => response.status === 201).length, 25);
 
+  const abuseWorkspace = eventWorkspace("standalone-analytics-abuse");
+  const abuseApp = createHttpApp({ eventLedgerPath: abuseWorkspace.eventLedgerPath, rateLimit: { windowMs: 60_000, max: 30 } });
   const abuse = [];
   for (let index = 0; index < 500; index += 1) {
     abuse.push(
-      await dispatchHttp(app, {
+      await dispatchHttp(abuseApp, {
         method: "POST",
         url: "https://ms-realty.test/api/events",
         headers,
-        body: { type: "page_view", path: "/qa/standalone-abuse", locale: "bg" },
+        body: { type: "page_view", path: `/qa/standalone-randomized-abuse-${index}`, locale: "bg" },
       }),
     );
   }
