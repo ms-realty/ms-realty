@@ -25,8 +25,8 @@ jobs:
           node-version: 22
 
       # A healthy process can still serve broken pages, so this probes the
-      # real journeys: home, the search fail-closed fallback, admin login and
-      # its 401 boundary, legacy media, the noindex preview guard, and
+      # real journeys: home, the search fail-closed fallback, the public admin
+      # isolation boundary, legacy media, the noindex preview guard, and
       # readiness. No dependencies are installed — the script is stdlib only.
       - name: Probe production journeys
         env:

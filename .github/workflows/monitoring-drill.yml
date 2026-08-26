@@ -53,7 +53,18 @@ jobs:
           test -f Dockerfile
           test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
           node -e 'if (!/^[0-9a-f]{40}$/i.test(process.argv[1])) process.exit(1)' "$RELEASE_SHA"
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_SHA" = "$(git rev-parse origin/main)"
           git merge-base --is-ancestor "$RELEASE_SHA" origin/main
+
+      - name: Materialize the protected monitoring probe
+        run: |
+          control_root="$RUNNER_TEMP/monitoring-control"
+          mkdir -p "$control_root/production/scripts" "$control_root/workers"
+          git show "${GITHUB_SHA}:production/scripts/probe-production-journeys.mjs" > "$control_root/production/scripts/probe-production-journeys.mjs"
+          git show "${GITHUB_SHA}:workers/preview-host.mjs" > "$control_root/workers/preview-host.mjs"
+          node --check "$control_root/production/scripts/probe-production-journeys.mjs"
+          echo "MS_REALTY_MONITORING_PROBE=$control_root/production/scripts/probe-production-journeys.mjs" >> "$GITHUB_ENV"
 
       - name: Allocate isolated Worker identity
         id: identity
@@ -88,7 +99,7 @@ jobs:
           MS_REALTY_PRODUCTION_URL: ${{ vars.MS_REALTY_PRODUCTION_URL }}
         run: |
           test -n "$MS_REALTY_PRODUCTION_URL"
-          node production/scripts/probe-production-journeys.mjs | tee "$RUNNER_TEMP/production-journey.json"
+          node "$MS_REALTY_MONITORING_PROBE" | tee "$RUNNER_TEMP/production-journey.json"
           node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const health=d.checks?.find(({ id }) => id === "health"); if (d.failed !== 0 || health?.status !== "pass" || health.build_marker !== process.argv[2]) process.exit(1)' "$RUNNER_TEMP/production-journey.json" "$RELEASE_SHA"
           echo "url=${MS_REALTY_PRODUCTION_URL%/}/api/health" >> "$GITHUB_OUTPUT"
           echo "checked_at=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> "$GITHUB_OUTPUT"
@@ -131,6 +142,7 @@ jobs:
             --var 'PAYLOAD_SECRET:monitoring-drill-only-secret-not-for-production-0123456789' \
             --var 'DATABASE_URL:postgresql://monitoring:monitoring@db-monitoring.invalid:5432/monitoring' \
             --var "MS_REALTY_PUBLIC_ORIGIN:$DRILL_URL"
+          echo "created=true" >> "$GITHUB_OUTPUT"
           printf '%s' "$MS_REALTY_ORIGIN_TOKEN" |
             npx --yes wrangler@4.117.0 secret put MS_REALTY_ORIGIN_TOKEN --name "$DRILL_WORKER"
           status="$(npx --yes wrangler@4.117.0 deployments status --name "$DRILL_WORKER" --json)"
@@ -155,7 +167,7 @@ jobs:
             sleep 10
           done
           test "$matched" = true
-          node production/scripts/probe-production-journeys.mjs | tee "$RUNNER_TEMP/canary-journey.json"
+          node "$MS_REALTY_MONITORING_PROBE" | tee "$RUNNER_TEMP/canary-journey.json"
           echo "checked_at=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> "$GITHUB_OUTPUT"
 
       - name: Deploy the real artifact with an isolated monitor-fault marker
@@ -207,7 +219,7 @@ jobs:
           MS_REALTY_PRODUCTION_URL: ${{ steps.workers-dev.outputs.url }}
         run: |
           set +e
-          node production/scripts/probe-production-journeys.mjs > "$RUNNER_TEMP/fault-probe-validation.json"
+          node "$MS_REALTY_MONITORING_PROBE" > "$RUNNER_TEMP/fault-probe-validation.json"
           probe_status=$?
           set -e
           cat "$RUNNER_TEMP/fault-probe-validation.json"
@@ -233,7 +245,7 @@ jobs:
         run: |
           echo "Expected production journey failure correlation: $CORRELATION_ID"
           set -o pipefail
-          node production/scripts/probe-production-journeys.mjs | tee "$RUNNER_TEMP/alert-failure-probe.json"
+          node "$MS_REALTY_MONITORING_PROBE" | tee "$RUNNER_TEMP/alert-failure-probe.json"
 
       - name: Roll back the isolated MS Realty artifact
         id: rollback
@@ -262,7 +274,7 @@ jobs:
             sleep 10
           done
           test "$restored_marker" = "$RELEASE_SHA"
-          node production/scripts/probe-production-journeys.mjs | tee "$RUNNER_TEMP/rollback-journey.json"
+          node "$MS_REALTY_MONITORING_PROBE" | tee "$RUNNER_TEMP/rollback-journey.json"
           {
             echo "version=$restored_version"
             echo "build_marker=$restored_marker"
@@ -351,7 +363,7 @@ jobs:
           NODE
 
       - name: Delete only the isolated drill Worker
-        if: always() && steps.identity.outputs.worker != ''
+        if: always() && steps.baseline.outputs.created == 'true'
         env:
           DRILL_WORKER: ${{ steps.identity.outputs.worker }}
         run: |
