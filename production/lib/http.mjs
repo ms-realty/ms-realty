@@ -522,8 +522,8 @@ function response(status, body, contentType, headers = {}) {
   };
 }
 
-function json(status, body) {
-  return response(status, body, "application/json; charset=utf-8");
+function json(status, body, headers = {}) {
+  return response(status, body, "application/json; charset=utf-8", headers);
 }
 
 function privateResponse(status, body, contentType, headers = {}) {
@@ -2171,7 +2171,9 @@ export function createHttpApp({
         return { response: json(503, { kind: error.code || "payload_draft_unavailable", message: error.message }, { "cache-control": "no-store" }) };
       }
       if (!productionSearch) throw error;
-      return { response: json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" }) };
+      return {
+        response: json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" }, { "cache-control": "no-store" }),
+      };
     }
   };
   return async function handle(request) {

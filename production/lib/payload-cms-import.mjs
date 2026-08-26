@@ -1198,7 +1198,16 @@ export async function loadPayloadCmsImportRuntime({ env = process.env, payload }
     throw new Error("Payload runtime is not configured");
   }
   const [{ getPayload }, payloadConfigModule] = await Promise.all([import("payload"), import("../../payload.config.js")]);
-  const runtime = await getPayload({ config: await payloadConfigModule.default });
+  // Payload's Postgres adapter rejects its internal `initializing` promise
+  // without a reason when the first connection fails. The normal getPayload
+  // path does not await that promise, which turns a handled origin failure
+  // into an unhandled rejection. Keep the promise observed, then connect
+  // explicitly so this loader owns the failure and can return a 503 to its
+  // caller.
+  const runtime = await getPayload({ config: await payloadConfigModule.default, disableDBConnect: true });
+  const initializing = runtime.db?.initializing;
+  if (initializing && typeof initializing.catch === "function") initializing.catch(() => undefined);
+  if (typeof runtime.db?.connect === "function" && !runtime.db.drizzle) await runtime.db.connect();
   assertPayload(runtime);
   return runtime;
 }
