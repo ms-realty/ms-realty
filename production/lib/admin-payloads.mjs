@@ -10,6 +10,8 @@ import { publicMediaLibrary } from "./media.mjs";
 import { buildListingQualityReport } from "./listing-quality.mjs";
 import { CANONICAL_PROPERTY_FAMILIES, propertyFamilyFor } from "./listing-facts.mjs";
 import {
+  buildListingAreaReview,
+  buildListingDuplicateReview,
   buildListingFactReviewQueue,
   factReviewCopyFor,
   listingFactReviewFor,
@@ -357,6 +359,8 @@ export function renderAdminListingManagerPayload(
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const factReview = buildListingFactReviewQueue(seed, { row: factRow, query: factQuery });
+  const duplicateReview = buildListingDuplicateReview(seed);
+  const areaReview = buildListingAreaReview(seed);
   const translationCoverage = buildTranslationCoverageReport({ registry, seed, translationTasks, generatedAt });
   const translationReviewByListing = translationCoverage.rows.reduce((counts, row) => {
     counts.set(row.listing_id, (counts.get(row.listing_id) || 0) + 1);
@@ -442,6 +446,8 @@ export function renderAdminListingManagerPayload(
     pagination: paged.pagination,
     publicationSchedules,
     factReview: { ...factReview, copy: factReviewCopyFor(requestedLocale) },
+    duplicateReview: { ...duplicateReview, copy: factReviewCopyFor(requestedLocale) },
+    areaReview: { ...areaReview, copy: factReviewCopyFor(requestedLocale) },
     summary: {
       total: allRows.length,
       visible: filtered.length,

@@ -7225,6 +7225,7 @@ function PublicationSchedulePanel({ page }) {
     {
       title: ui.publicationSchedule,
       action: h(StatusPill, { tone: queue.summary.due ? "brick" : queue.open.length ? "sun" : "sand" }, `${queue.open.length} ${statusText(ui, "open")}`),
+      id: "listing-publication-schedule",
       "data-publication-schedule-panel": "true",
     },
     h(
@@ -7347,6 +7348,167 @@ function PublicationSchedulePanel({ page }) {
             : h("p", { className: "adm-empty" }, ui.noScheduledPublications),
         ),
       ),
+    ),
+  );
+}
+
+function adminAreaValue(value, page) {
+  if (value === null || value === undefined || value === "") return workbenchCopy(page).notSet;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? `${numeric.toLocaleString(page.workspace?.locale || "en", { maximumFractionDigits: 2 })} m²` : String(value);
+}
+
+function areaSuggestionList(candidates, copy, page, scope) {
+  if (!candidates?.length) return h("p", { className: "adm-note" }, copy.noAreaRows || "No area suggestions were found in the source text.");
+  return h(
+    "ul",
+    { className: "adm-task-list", "data-area-suggestions": scope },
+    ...candidates.map((candidate, index) =>
+      h(
+        "li",
+        { key: `${scope}-${candidate.raw}-${index}` },
+        h(
+          "div",
+          { className: "adm-task-list__body" },
+          h("strong", null, `${copy.suggestion || "Suggestion"}: ${adminAreaValue(candidate.value_sqm, page)}`),
+          h("small", null, candidate.raw),
+          h("small", null, `${copy.context || "Context"}: ${candidate.context}`),
+        ),
+      ),
+    ),
+  );
+}
+
+function duplicateListingCard({ card, copy, page }) {
+  const ui = workbenchCopy(page);
+  const roleLabel = card.role === "confirmed" ? copy.confirmed || "Confirmed record" : copy.candidate || "Candidate";
+  return h(
+    "article",
+    { className: "adm-report-card", "data-duplicate-side": card.role, "data-duplicate-listing": card.listing_id },
+    h(
+      "header",
+      null,
+      h("div", null, h(StatusPill, { tone: card.role === "confirmed" ? "success" : "sun" }, roleLabel), h("h3", null, card.title), h("code", { className: "crm-mono" }, card.listing_id)),
+      h("small", null, String(card.source_locale || "").toUpperCase()),
+    ),
+    h(
+      "dl",
+      { className: "adm-kpis" },
+      h("div", null, h("dt", null, copy.price || "Price"), h("dd", null, card.price_on_request ? statusText(ui, "price_on_request") : card.price_eur === null ? ui.notSet : `€${Number(card.price_eur).toLocaleString("en")}`)),
+      h("div", null, h("dt", null, copy.location || "Location"), h("dd", null, card.location || ui.notSet)),
+      h("div", null, h("dt", null, copy.photos || "Photos"), h("dd", null, card.photos?.count ?? 0)),
+    ),
+    h("h4", null, copy.area || "Area"),
+    areaSuggestionList(card.area_candidates, copy, page, `duplicate-${card.listing_id}`),
+    card.photos?.assets?.length
+      ? h(
+          "div",
+          { style: "display:flex;flex-wrap:wrap;gap:8px", "aria-label": copy.photos || "Photos" },
+          ...card.photos.assets.map((asset, index) => h("img", { key: `${card.listing_id}-photo-${index}`, src: asset.url, alt: asset.alt, loading: "lazy", width: 72, height: 54, style: "display:block;object-fit:cover;border-radius:6px" })),
+        )
+      : null,
+    h("p", { className: "adm-note" }, copy.reviewOnly || "Comparison only; the broker keeps the decision."),
+    h(
+      "div",
+      { className: "adm-task-list__actions" },
+      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(card.editor_path, page) }, copy.openEditor || label(adminCopy(page), "openEditor", "Open editor")),
+      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(card.publication_path, page) }, copy.openPublication || "Open publication controls"),
+    ),
+  );
+}
+
+function DuplicateReviewPanel({ page }) {
+  const review = page.duplicateReview || { rows: [], summary: { confirmed_pairs: 0 } };
+  const copy = review.copy || {};
+  return h(
+    Panel,
+    {
+      title: `${copy.duplicateTitle || "Manual duplicate comparison"} · ${review.summary?.confirmed_pairs || 0}`,
+      "data-duplicate-review": "true",
+    },
+    h("p", { className: "adm-note", role: "note" }, copy.duplicateDescription || "Confirmed pairs are shown side by side for manual review."),
+    review.rows?.length
+      ? h(
+          "div",
+          { className: "adm-report-grid", "data-duplicate-review-pairs": String(review.rows.length) },
+          ...review.rows.map((pair) =>
+            h(
+              "article",
+              { key: pair.pair_id, className: "adm-report-card", "data-duplicate-review-pair": pair.pair_id },
+              h("header", null, h("div", null, h("h3", null, copy.pairConfirmed || "Confirmed pair"), h("code", { className: "crm-mono" }, pair.pair_id)), h("small", null, copy.reviewOnly || "Manual comparison")),
+              h(
+                "div",
+                { className: "adm-report-grid adm-report-grid--two" },
+                duplicateListingCard({ card: pair.candidate, copy, page }),
+                duplicateListingCard({ card: pair.confirmed, copy, page }),
+              ),
+            ),
+          ),
+        )
+      : h(EmptyState, { icon: "check", "data-empty-duplicate-review": "true" }, copy.noRows || "No duplicate pairs need review."),
+  );
+}
+
+function areaReviewRow({ row, copy, page, scope }) {
+  const ui = workbenchCopy(page);
+  return h(
+    "li",
+    { key: `${scope}-${row.listing_id}`, "data-area-review-listing": row.listing_id, "data-area-review-scope": scope },
+    h(
+      "div",
+      { className: "adm-task-list__body" },
+      h("strong", null, row.title),
+      h("code", { className: "crm-mono" }, row.listing_id),
+      h("small", null, row.location || ui.notSet),
+      row.observed_area_sqm !== null && row.observed_area_sqm !== undefined
+        ? h("small", null, `${copy.source || "Source"}: ${adminAreaValue(row.observed_area_sqm, page)}`)
+        : null,
+      areaSuggestionList(row.area_candidates, copy, page, `${scope}-${row.listing_id}`),
+    ),
+    h(
+      "div",
+      { className: "adm-task-list__actions" },
+      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, copy.openEditor || label(adminCopy(page), "openEditor", "Open editor")),
+    ),
+  );
+}
+
+function AreaReviewPanel({ page }) {
+  const review = page.areaReview || { missing_canonical_area: [], multiple_prose_candidates: [], summary: {} };
+  const copy = review.copy || {};
+  const missingRows = review.missing_canonical_area || [];
+  const candidateRows = review.multiple_prose_candidates || [];
+  return h(
+    Panel,
+    {
+      title: `${copy.areaTitle || "Areas for review"} · ${review.summary?.missing_canonical_area || 0}`,
+      "data-area-review": "true",
+    },
+    h("p", { className: "adm-note", role: "note" }, copy.areaDescription || "Suggestions below come from source text and are never filled automatically."),
+    review.review_pack?.command
+      ? h("p", { className: "adm-note", "data-area-review-pack": review.review_pack.command }, `${copy.source || "Source"}: ${review.review_pack.command}`)
+      : null,
+    h(
+      "div",
+      { className: "adm-report-grid adm-report-grid--two", "data-area-review-summary": "true" },
+      h("div", { className: "adm-report-card" }, h("h3", null, String(review.summary?.missing_canonical_area || 0)), h("p", null, copy.missingCanonicalArea || "missing canonical area")),
+      h("div", { className: "adm-report-card" }, h("h3", null, String(review.summary?.multiple_prose_candidates || 0)), h("p", null, copy.multipleCandidates || "listings with multiple suggestions")),
+    ),
+    h(
+      "details",
+      { open: true, className: "adm-workbench-disclosure", "data-area-review-missing": String(missingRows.length) },
+      h("summary", null, h("span", null, `${copy.missingCanonicalArea || "Missing canonical area"} · ${missingRows.length}`)),
+      missingRows.length
+        ? h("ul", { className: "adm-task-list" }, ...missingRows.map((row) => areaReviewRow({ row, copy, page, scope: "missing" })))
+        : h("p", { className: "adm-empty" }, copy.noAreaRows || "No areas need review."),
+    ),
+    h(
+      "details",
+      { open: Boolean(candidateRows.length), className: "adm-workbench-disclosure", "data-area-review-candidates": String(candidateRows.length) },
+      h("summary", null, h("span", null, `${copy.multipleCandidates || "Multiple prose suggestions"} · ${candidateRows.length}`)),
+      candidateRows.length
+        ? h("ul", { className: "adm-task-list" }, ...candidateRows.map((row) => areaReviewRow({ row, copy, page, scope: "candidates" })))
+        : h("p", { className: "adm-empty" }, copy.noAreaRows || "No areas need review."),
     ),
   );
 }
@@ -7514,6 +7676,8 @@ function ListingManagerBody({ page }) {
             )
           : h(EmptyState, { icon: "check", "data-empty-fact-review": "true" }, factReviewCopy.noRows || "No facts need confirmation."),
       ),
+      h(DuplicateReviewPanel, { page }),
+      h(AreaReviewPanel, { page }),
       h(
         "form",
         { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },

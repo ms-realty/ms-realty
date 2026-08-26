@@ -1,4 +1,7 @@
+import fs from "node:fs";
 import { publicPropertyProjection } from "./content.mjs";
+import { fromRoot } from "./paths.mjs";
+import { publicMediaLibrary } from "./media.mjs";
 import {
   factVerificationFor,
   primaryAreaFieldFor,
@@ -6,6 +9,28 @@ import {
   propertySubtypeFor,
   publicFactValue,
 } from "./listing-facts.mjs";
+
+export const DEFAULT_MANUAL_LISTING_AUDIT_PATH = fromRoot("production", "data", "manual-listing-audit.json");
+export const DEFAULT_LIVE_LISTING_AUDIT_PATH = fromRoot("production", "data", "live-listing-audit.json");
+
+// These pairs were confirmed during the source review.  The comparison is
+// deliberately read-only: the broker still decides which record, price, and
+// scope survives in the existing editor and publication controls.
+export const DUPLICATE_REVIEW_PAIRS = Object.freeze([
+  Object.freeze({
+    pair_id: "MS-CRAWL-0083--MS-CRAWL-0159",
+    confirmed_listing_id: "MS-CRAWL-0083",
+    candidate_listing_id: "MS-CRAWL-0159",
+  }),
+  Object.freeze({
+    pair_id: "MS-CRAWL-0065--MS-CRAWL-0135",
+    confirmed_listing_id: "MS-CRAWL-0135",
+    candidate_listing_id: "MS-CRAWL-0065",
+  }),
+]);
+export const DUPLICATE_REVIEW_LISTING_IDS = Object.freeze(
+  [...new Set(DUPLICATE_REVIEW_PAIRS.flatMap((pair) => [pair.confirmed_listing_id, pair.candidate_listing_id]))],
+);
 
 // These are the figures the public listing page can mark as coming from the
 // source.  The editor field is deliberately the existing legacy field: the
@@ -38,6 +63,25 @@ export const FACT_REVIEW_COPY = Object.freeze({
     count: "непотвърдени факти",
     noRows: "Няма факти за потвърждение.",
     labels: Object.freeze({ bedrooms: "Спални", area_sqm: "Площ", floor: "Етаж", storeys: "Етажи", land_area_sqm: "Площ на земята", condition: "Състояние", price: "Цена" }),
+    duplicateTitle: "Сравнение на обяви за ръчен преглед",
+    duplicateDescription: "Потвърдените двойки са показани една до друга. Не обединявайте и не сваляйте обява от този екран.",
+    pairConfirmed: "Потвърдена двойка",
+    candidate: "Кандидат",
+    confirmed: "Потвърден запис",
+    price: "Цена",
+    area: "Площ",
+    location: "Местоположение",
+    photos: "Снимки",
+    openPublication: "Отвори контролите за публикуване",
+    reviewOnly: "Само за сравнение; решението остава за брокер.",
+    areaTitle: "Площи за преглед",
+    areaDescription: "Каноничната площ липсва. Стойностите по-долу са предложения от текста и не се попълват автоматично.",
+    missingCanonicalArea: "липсваща канонична площ",
+    multipleCandidates: "обяви с няколко предложения",
+    suggestion: "Предложение",
+    context: "Контекст",
+    source: "Източник",
+    noAreaRows: "Няма площи за преглед.",
   }),
   en: Object.freeze({
     title: "Facts to confirm",
@@ -48,6 +92,25 @@ export const FACT_REVIEW_COPY = Object.freeze({
     count: "unchecked facts",
     noRows: "No facts need confirmation.",
     labels: Object.freeze({ bedrooms: "Bedrooms", area_sqm: "Area", floor: "Floor", storeys: "Storeys", land_area_sqm: "Land area", condition: "Condition", price: "Price" }),
+    duplicateTitle: "Manual duplicate comparison",
+    duplicateDescription: "Confirmed pairs are shown side by side. Do not merge or remove a listing from this screen.",
+    pairConfirmed: "Confirmed pair",
+    candidate: "Candidate",
+    confirmed: "Confirmed record",
+    price: "Price",
+    area: "Area",
+    location: "Location",
+    photos: "Photos",
+    openPublication: "Open publication controls",
+    reviewOnly: "Comparison only; the broker keeps the decision.",
+    areaTitle: "Areas for review",
+    areaDescription: "The canonical area is missing. Values below are suggestions from the text and are never filled in automatically.",
+    missingCanonicalArea: "missing canonical area",
+    multipleCandidates: "listings with multiple suggestions",
+    suggestion: "Suggestion",
+    context: "Context",
+    source: "Source",
+    noAreaRows: "No areas need review.",
   }),
   de: Object.freeze({
     title: "Zu bestätigende Angaben",
@@ -58,6 +121,25 @@ export const FACT_REVIEW_COPY = Object.freeze({
     count: "ungeprüfte Angaben",
     noRows: "Keine Angaben müssen bestätigt werden.",
     labels: Object.freeze({ bedrooms: "Schlafzimmer", area_sqm: "Fläche", floor: "Etage", storeys: "Geschosse", land_area_sqm: "Grundstücksfläche", condition: "Zustand", price: "Preis" }),
+    duplicateTitle: "Manueller Vergleich doppelter Inserate",
+    duplicateDescription: "Bestätigte Paare werden nebeneinander angezeigt. Auf diesem Bildschirm keine Inserate zusammenführen oder entfernen.",
+    pairConfirmed: "Bestätigtes Paar",
+    candidate: "Kandidat",
+    confirmed: "Bestätigter Eintrag",
+    price: "Preis",
+    area: "Fläche",
+    location: "Ort",
+    photos: "Fotos",
+    openPublication: "Veröffentlichungskontrollen öffnen",
+    reviewOnly: "Nur Vergleich; die Entscheidung bleibt beim Makler.",
+    areaTitle: "Flächen zur Prüfung",
+    areaDescription: "Die kanonische Fläche fehlt. Die folgenden Werte sind Vorschläge aus dem Text und werden nie automatisch eingetragen.",
+    missingCanonicalArea: "fehlende kanonische Fläche",
+    multipleCandidates: "Inserate mit mehreren Vorschlägen",
+    suggestion: "Vorschlag",
+    context: "Kontext",
+    source: "Quelle",
+    noAreaRows: "Keine Flächen zur Prüfung.",
   }),
   nl: Object.freeze({
     title: "Te bevestigen gegevens",
@@ -68,6 +150,25 @@ export const FACT_REVIEW_COPY = Object.freeze({
     count: "ongecontroleerde gegevens",
     noRows: "Geen gegevens hoeven te worden bevestigd.",
     labels: Object.freeze({ bedrooms: "Slaapkamers", area_sqm: "Oppervlakte", floor: "Verdieping", storeys: "Verdiepingen", land_area_sqm: "Perceeloppervlakte", condition: "Staat", price: "Prijs" }),
+    duplicateTitle: "Handmatige vergelijking van dubbele woningen",
+    duplicateDescription: "Bevestigde paren staan naast elkaar. Voeg woningen op dit scherm niet samen en verwijder ze niet.",
+    pairConfirmed: "Bevestigd paar",
+    candidate: "Kandidaat",
+    confirmed: "Bevestigde vermelding",
+    price: "Prijs",
+    area: "Oppervlakte",
+    location: "Locatie",
+    photos: "Foto's",
+    openPublication: "Publicatiebeheer openen",
+    reviewOnly: "Alleen vergelijking; de makelaar neemt de beslissing.",
+    areaTitle: "Oppervlakten ter beoordeling",
+    areaDescription: "De canonieke oppervlakte ontbreekt. Deze waarden zijn suggesties uit de tekst en worden nooit automatisch ingevuld.",
+    missingCanonicalArea: "ontbrekende canonieke oppervlakte",
+    multipleCandidates: "vermeldingen met meerdere suggesties",
+    suggestion: "Suggestie",
+    context: "Context",
+    source: "Bron",
+    noAreaRows: "Geen oppervlakten ter beoordeling.",
   }),
   ru: Object.freeze({
     title: "Факты для подтверждения",
@@ -78,6 +179,25 @@ export const FACT_REVIEW_COPY = Object.freeze({
     count: "непроверенных фактов",
     noRows: "Нет фактов для подтверждения.",
     labels: Object.freeze({ bedrooms: "Спальни", area_sqm: "Площадь", floor: "Этаж", storeys: "Этажи", land_area_sqm: "Площадь участка", condition: "Состояние", price: "Цена" }),
+    duplicateTitle: "Ручное сравнение дублей объявлений",
+    duplicateDescription: "Подтверждённые пары показаны рядом. На этом экране нельзя объединять или снимать объявление.",
+    pairConfirmed: "Подтверждённая пара",
+    candidate: "Кандидат",
+    confirmed: "Подтверждённая запись",
+    price: "Цена",
+    area: "Площадь",
+    location: "Местоположение",
+    photos: "Фотографии",
+    openPublication: "Открыть управление публикацией",
+    reviewOnly: "Только сравнение; решение остаётся за брокером.",
+    areaTitle: "Площади для проверки",
+    areaDescription: "Каноническая площадь отсутствует. Значения ниже взяты из текста и никогда не заполняются автоматически.",
+    missingCanonicalArea: "объявлений без канонической площади",
+    multipleCandidates: "объявлений с несколькими вариантами",
+    suggestion: "Вариант",
+    context: "Контекст",
+    source: "Источник",
+    noAreaRows: "Нет площадей для проверки.",
   }),
   el: Object.freeze({
     title: "Στοιχεία προς επιβεβαίωση",
@@ -88,6 +208,25 @@ export const FACT_REVIEW_COPY = Object.freeze({
     count: "μη ελεγμένα στοιχεία",
     noRows: "Δεν υπάρχουν στοιχεία προς επιβεβαίωση.",
     labels: Object.freeze({ bedrooms: "Υπνοδωμάτια", area_sqm: "Εμβαδόν", floor: "Όροφος", storeys: "Όροφοι", land_area_sqm: "Εμβαδόν γης", condition: "Κατάσταση", price: "Τιμή" }),
+    duplicateTitle: "Χειροκίνητη σύγκριση διπλών καταχωρίσεων",
+    duplicateDescription: "Τα επιβεβαιωμένα ζεύγη εμφανίζονται δίπλα-δίπλα. Μην συγχωνεύετε ή αφαιρείτε καταχώριση από αυτή την οθόνη.",
+    pairConfirmed: "Επιβεβαιωμένο ζεύγος",
+    candidate: "Υποψήφια καταχώριση",
+    confirmed: "Επιβεβαιωμένη καταχώριση",
+    price: "Τιμή",
+    area: "Εμβαδόν",
+    location: "Τοποθεσία",
+    photos: "Φωτογραφίες",
+    openPublication: "Άνοιγμα ελέγχων δημοσίευσης",
+    reviewOnly: "Μόνο σύγκριση· η απόφαση παραμένει στον μεσίτη.",
+    areaTitle: "Εμβαδά προς έλεγχο",
+    areaDescription: "Το κανονικό εμβαδόν λείπει. Οι παρακάτω τιμές είναι προτάσεις από το κείμενο και δεν συμπληρώνονται αυτόματα.",
+    missingCanonicalArea: "χωρίς κανονικό εμβαδόν",
+    multipleCandidates: "καταχωρίσεις με πολλές προτάσεις",
+    suggestion: "Πρόταση",
+    context: "Πλαίσιο",
+    source: "Πηγή",
+    noAreaRows: "Δεν υπάρχουν εμβαδά προς έλεγχο.",
   }),
   he: Object.freeze({
     title: "נתונים לאישור",
@@ -98,11 +237,216 @@ export const FACT_REVIEW_COPY = Object.freeze({
     count: "נתונים שלא נבדקו",
     noRows: "אין נתונים שדורשים אישור.",
     labels: Object.freeze({ bedrooms: "חדרי שינה", area_sqm: "שטח", floor: "קומה", storeys: "קומות", land_area_sqm: "שטח הקרקע", condition: "מצב", price: "מחיר" }),
+    duplicateTitle: "השוואה ידנית של נכסים כפולים",
+    duplicateDescription: "זוגות שאושרו מוצגים זה לצד זה. אין לאחד או להסיר נכס ממסך זה.",
+    pairConfirmed: "זוג שאושר",
+    candidate: "מועמד",
+    confirmed: "רשומה מאושרת",
+    price: "מחיר",
+    area: "שטח",
+    location: "מיקום",
+    photos: "תמונות",
+    openPublication: "פתיחת בקרות פרסום",
+    reviewOnly: "השוואה בלבד; ההחלטה נשארת בידי המתווך.",
+    areaTitle: "שטחים לבדיקה",
+    areaDescription: "השטח הקנוני חסר. הערכים הבאים הם הצעות מהטקסט ולעולם אינם מוזנים אוטומטית.",
+    missingCanonicalArea: "שטח קנוני חסר",
+    multipleCandidates: "נכסים עם כמה הצעות",
+    suggestion: "הצעה",
+    context: "הקשר",
+    source: "מקור",
+    noAreaRows: "אין שטחים לבדיקה.",
   }),
 });
 
 export function factReviewCopyFor(locale) {
   return FACT_REVIEW_COPY[String(locale || "en").trim().toLowerCase()] || FACT_REVIEW_COPY.en;
+}
+
+function auditRows(value) {
+  if (Array.isArray(value)) return value;
+  return Array.isArray(value?.listings) ? value.listings : [];
+}
+
+export function loadListingReviewEvidence({
+  manualPath = DEFAULT_MANUAL_LISTING_AUDIT_PATH,
+  livePath = DEFAULT_LIVE_LISTING_AUDIT_PATH,
+} = {}) {
+  const manual = JSON.parse(fs.readFileSync(manualPath, "utf8"));
+  const live = JSON.parse(fs.readFileSync(livePath, "utf8"));
+  return { manualAudit: auditRows(manual), liveAudit: auditRows(live) };
+}
+
+const AREA_TEXT_PATTERN = /(\d[\d\s.,]*\d|\d)\s*(кв\.?\s*м\.?|м2|м²|sqm|m²|дка|гка|га)(?![\p{L}\d])/giu;
+
+function areaNumber(raw, unit) {
+  let normalized = String(raw || "").replace(/\s+/gu, "");
+  if (normalized.includes(",") && normalized.includes(".")) {
+    if (normalized.lastIndexOf(",") > normalized.lastIndexOf(".")) {
+      normalized = normalized.replaceAll(".", "").replace(",", ".");
+    } else {
+      normalized = normalized.replaceAll(",", "");
+    }
+  } else if (normalized.includes(",")) {
+    const parts = normalized.split(",");
+    normalized = parts.at(-1)?.length === 3 && parts[0].length > 1
+      ? normalized.replaceAll(",", "")
+      : normalized.replace(",", ".");
+  } else if (normalized.includes(".")) {
+    const parts = normalized.split(".");
+    if (parts.at(-1)?.length === 3 && parts[0].length > 1) normalized = normalized.replaceAll(".", "");
+  }
+  const value = Number(normalized);
+  if (!Number.isFinite(value) || value <= 0) return null;
+  const normalizedUnit = String(unit || "").toLocaleLowerCase();
+  if (normalizedUnit.includes("дка")) return value * 1000;
+  if (normalizedUnit.includes("га") || normalizedUnit.includes("гка")) return value * 10000;
+  return value;
+}
+
+function comparableArea(value) {
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+function sameAreaValue(left, right) {
+  const a = comparableArea(left);
+  const b = comparableArea(right);
+  return a !== null && b !== null && (Math.abs(a - b) <= 1 || Math.abs(a - b) / Math.max(a, b) <= 0.01);
+}
+
+/**
+ * Pull area phrases out of source copy for broker context only.  Values stay
+ * suggestions: this helper never chooses a canonical field or writes a fact.
+ */
+export function areaCandidatesForListing(listing = {}) {
+  const text = String(listing.facts?.description || listing.description || listing.seo?.description || "");
+  const candidates = [];
+  for (const match of text.matchAll(AREA_TEXT_PATTERN)) {
+    const value_sqm = areaNumber(match[1], match[2]);
+    if (value_sqm === null || candidates.some((candidate) => sameAreaValue(candidate.value_sqm, value_sqm))) continue;
+    const start = Math.max(0, match.index - 72);
+    const end = Math.min(text.length, match.index + match[0].length + 72);
+    candidates.push({
+      value_sqm,
+      raw: match[0].trim(),
+      context: text.slice(start, end).replace(/\s+/gu, " ").trim(),
+    });
+  }
+  return candidates;
+}
+
+function finiteArea(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
+function canonicalAreaPresent(property) {
+  if (!property?.facts) return false;
+  const facts = {
+    ...property.facts,
+    property_family: property.property_family || property.facts.property_family || null,
+    property_subtype: property.property_subtype || property.facts.property_subtype || null,
+  };
+  const primaryField = primaryAreaFieldFor(facts);
+  return primaryField ? finiteArea(facts[primaryField]) !== null : false;
+}
+
+function observedAreaFor(manualRow, liveRow) {
+  const manualValue = finiteArea(manualRow?.observed?.area_sqm_or_unknown);
+  return manualValue ?? finiteArea(liveRow?.live_area_sqm);
+}
+
+function listingComparisonCard(record, { role, areaCandidates = areaCandidatesForListing(record) } = {}) {
+  const facts = record?.facts || {};
+  const publicMedia = publicMediaLibrary(record?.media || []);
+  return {
+    listing_id: record?.id || null,
+    role,
+    title: facts.title || facts.h1 || record?.id || "",
+    source_locale: record?.source_locale || "",
+    price_eur: facts.price_on_request === true ? null : facts.price_eur ?? null,
+    price_on_request: facts.price_on_request === true,
+    location: facts.location || facts.location_native || "",
+    area_candidates: areaCandidates,
+    photos: {
+      count: publicMedia.gallery_count,
+      assets: publicMedia.gallery.slice(0, 4).map((asset) => ({ url: asset.url, alt: asset.alt || facts.title || record?.id || "" })),
+    },
+    source_url: record?.source_url || "",
+    editor_path: `/admin/listings/edit?listingId=${encodeURIComponent(record?.id || "")}`,
+    publication_path: "/admin/listings#listing-publication-schedule",
+  };
+}
+
+export function buildListingDuplicateReview(seed = {}, { pairs = DUPLICATE_REVIEW_PAIRS } = {}) {
+  const records = new Map((seed.records || []).filter((record) => record.collection === "listings").map((record) => [record.id, record]));
+  const rows = [];
+  for (const pair of pairs) {
+    const confirmedRecord = records.get(pair.confirmed_listing_id);
+    const candidateRecord = records.get(pair.candidate_listing_id);
+    if (!confirmedRecord || !candidateRecord) continue;
+    rows.push({
+      pair_id: pair.pair_id,
+      confirmed: listingComparisonCard(confirmedRecord, { role: "confirmed" }),
+      candidate: listingComparisonCard(candidateRecord, { role: "candidate" }),
+    });
+  }
+  return {
+    rows,
+    summary: { confirmed_pairs: rows.length },
+  };
+}
+
+function listingAreaReviewRow(record, manualRow, liveRow) {
+  const facts = record.facts || {};
+  return {
+    listing_id: record.id,
+    title: facts.title || facts.h1 || record.id,
+    source_locale: record.source_locale || "",
+    location: facts.location || facts.location_native || "",
+    source_url: record.source_url || manualRow?.source_url || liveRow?.source_url || "",
+    observed_area_sqm: observedAreaFor(manualRow, liveRow),
+    area_candidates: areaCandidatesForListing(record),
+    editor_path: `/admin/listings/edit?listingId=${encodeURIComponent(record.id)}#listing-facts`,
+    publication_path: "/admin/listings#listing-publication-schedule",
+  };
+}
+
+export function buildListingAreaReview(seed = {}, { manualAudit, liveAudit } = {}) {
+  const evidence = manualAudit === undefined || liveAudit === undefined ? loadListingReviewEvidence() : { manualAudit, liveAudit };
+  const manualRows = auditRows(evidence.manualAudit);
+  const liveRows = auditRows(evidence.liveAudit);
+  const manualById = new Map(manualRows.map((row) => [row.id, row]));
+  const liveById = new Map(liveRows.map((row) => [row.id, row]));
+  const properties = new Map((seed.properties || []).map((property) => [property.id, property]));
+  const records = (seed.records || []).filter((record) => record.collection === "listings");
+  // A duplicate pair leaves the area queue only when both source pages carry
+  // an independently observed area.  If one page is unavailable (0065), the
+  // surviving source (0135) still needs its own canonical-area review.
+  const duplicateAreaExclusions = new Set(
+    DUPLICATE_REVIEW_PAIRS
+      .filter((pair) => finiteArea(liveById.get(pair.confirmed_listing_id)?.live_area_sqm) !== null && finiteArea(liveById.get(pair.candidate_listing_id)?.live_area_sqm) !== null)
+      .flatMap((pair) => [pair.confirmed_listing_id, pair.candidate_listing_id]),
+  );
+  const missingCanonicalArea = records
+    .filter((record) => manualById.get(record.id)?.review_status === "review")
+    .filter((record) => finiteArea(liveById.get(record.id)?.live_area_sqm) !== null)
+    .filter((record) => !duplicateAreaExclusions.has(record.id))
+    .filter((record) => !canonicalAreaPresent(properties.get(record.property)))
+    .map((record) => listingAreaReviewRow(record, manualById.get(record.id), liveById.get(record.id)));
+  const multipleProseCandidates = records
+    .filter((record) => manualById.get(record.id)?.review_status === "hold")
+    .map((record) => listingAreaReviewRow(record, manualById.get(record.id), liveById.get(record.id)))
+    .filter((row) => row.area_candidates.length > 1);
+  return {
+    missing_canonical_area: missingCanonicalArea,
+    multiple_prose_candidates: multipleProseCandidates,
+    summary: {
+      missing_canonical_area: missingCanonicalArea.length,
+      multiple_prose_candidates: multipleProseCandidates.length,
+    },
+    review_pack: { command: "npm run listing:review-pack" },
+  };
 }
 
 function propertyFieldsForRow(rowKey, property) {

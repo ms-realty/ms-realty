@@ -9,8 +9,13 @@ import { renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import {
   FACT_REVIEW_COPY,
   FACT_REVIEW_ROW_KEYS,
+  DUPLICATE_REVIEW_PAIRS,
+  areaCandidatesForListing,
+  buildListingAreaReview,
+  buildListingDuplicateReview,
   buildListingFactReviewQueue,
   factReviewCopyFor,
+  loadListingReviewEvidence,
   listingFactReviewFor,
 } from "../lib/listing-fact-review.mjs";
 import { readAuditLog } from "../lib/audit-log.mjs";
@@ -45,6 +50,43 @@ test("fact review queue is derived from the public source-stated projection", ()
   assert.match(html, /data-fact-review-queue="true"/);
   assert.match(html, /data-fact-review-listing="MS-CRAWL-0003"/);
   assert.match(html, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0003&amp;locale=bg#listing-facts"/);
+  const duplicateReview = buildListingDuplicateReview(seed);
+  const expectedDuplicatePairs = DUPLICATE_REVIEW_PAIRS.filter((pair) =>
+    seed.records.some((record) => record.id === pair.confirmed_listing_id) &&
+    seed.records.some((record) => record.id === pair.candidate_listing_id),
+  );
+  assert.equal(duplicateReview.rows.length, expectedDuplicatePairs.length);
+  assert.equal(duplicateReview.summary.confirmed_pairs, 2);
+  assert.match(html, /data-duplicate-review="true"/);
+  assert.match(html, /data-duplicate-review-pair="MS-CRAWL-0083--MS-CRAWL-0159"/);
+  assert.match(html, /data-duplicate-side="candidate"[^>]*data-duplicate-listing="MS-CRAWL-0159"/);
+  assert.match(html, /data-duplicate-side="confirmed"[^>]*data-duplicate-listing="MS-CRAWL-0083"/);
+  assert.match(html, /href="\/admin\/listings\?locale=bg#listing-publication-schedule"/);
+  const areaReview = buildListingAreaReview(seed);
+  const evidence = loadListingReviewEvidence();
+  const liveById = new Map(evidence.liveAudit.map((row) => [row.id, row]));
+  const manualById = new Map(evidence.manualAudit.map((row) => [row.id, row]));
+  const expectedCandidates = seed.records
+    .filter((record) => record.collection === "listings")
+    .filter((record) => manualById.get(record.id)?.review_status === "hold")
+    .filter((record) => areaCandidatesForListing(record).length > 1);
+  const expectedMissing = seed.records
+    .filter((record) => record.collection === "listings")
+    .filter((record) => manualById.get(record.id)?.review_status === "review")
+    .filter((record) => Number.isFinite(liveById.get(record.id)?.live_area_sqm));
+  const duplicateAreaPairs = DUPLICATE_REVIEW_PAIRS.filter((pair) =>
+    Number.isFinite(liveById.get(pair.confirmed_listing_id)?.live_area_sqm) &&
+    Number.isFinite(liveById.get(pair.candidate_listing_id)?.live_area_sqm),
+  );
+  assert.equal(areaReview.summary.missing_canonical_area, expectedMissing.length - (duplicateAreaPairs.length * 2));
+  assert.equal(areaReview.summary.missing_canonical_area, 65);
+  assert.equal(areaReview.summary.multiple_prose_candidates, expectedCandidates.length);
+  assert.equal(areaReview.summary.multiple_prose_candidates, 21);
+  assert.ok(areaReview.multiple_prose_candidates.every((row) => row.area_candidates.every((candidate) => candidate.context)));
+  assert.match(html, /data-area-review="true"/);
+  assert.match(html, /data-area-review-missing="65"/);
+  assert.match(html, /data-area-review-candidates="21"/);
+  assert.match(html, /data-area-review-pack="npm run listing:review-pack"/);
   for (const locale of ["bg", "en", "de", "nl", "ru", "el", "he"]) {
     const copy = factReviewCopyFor(locale);
     assert.ok(copy.title);
