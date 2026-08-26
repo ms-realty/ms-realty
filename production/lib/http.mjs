@@ -573,18 +573,6 @@ function publicResponse(request, url, rendered) {
   return json(rendered.status || 200, rendered, cacheHeaders);
 }
 
-function publicWriteLimiterKey(request, url, trustProxy) {
-  const identity = clientIdentity(request, { trustProxy });
-  if (url.pathname !== "/api/events") return `${identity}:${url.pathname}`;
-  try {
-    const path = String(parseBody(request).path || "").trim();
-    if (path.startsWith("/") && !path.startsWith("//") && path.length <= 500) return `${identity}:${url.pathname}:${path}`;
-  } catch {
-    // The event route will return its normal invalid-body response below.
-  }
-  return `${identity}:${url.pathname}`;
-}
-
 function activeListingRecord(record) {
   const status = String(record.facts?.listing_status || "available").trim().toLowerCase();
   return record.collection === "listings" && ["available", "reserved"].includes(status);
@@ -3941,7 +3929,7 @@ export function createHttpApp({
       return { ...viewing, calendar_sync: calendarSync };
     };
     if (publicWriteLimiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
-      const verdict = publicWriteLimiter.allow(publicWriteLimiterKey(request, url, trustProxy));
+      const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
       if (!verdict.allowed) {
         return response(429, { kind: "rate_limited", retry_after: verdict.retryAfterSec }, "application/json; charset=utf-8", {
           "retry-after": String(verdict.retryAfterSec),
