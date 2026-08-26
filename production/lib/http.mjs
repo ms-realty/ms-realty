@@ -216,6 +216,7 @@ import {
   readListingEdits,
 } from "./listing-edits.mjs";
 import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
+import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
   appendListingPublicationSchedule,
@@ -1156,7 +1157,7 @@ export function createHttpApp({
   const payloadDependencyHealth = async () => {
     if (!runtimeDataDurableOnly) return { status: "ok" };
     try {
-      await projectListingDraftSeed(seed, { payload: payloadListingRuntime, env: payloadListingEnv, requirePayload: true });
+      await probePayloadCmsImportRuntime({ payload: payloadListingRuntime, env: payloadListingEnv });
       return { status: "ok" };
     } catch (error) {
       return { status: "unavailable", code: error.code || "payload_draft_unavailable" };

@@ -63,6 +63,7 @@ import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./transl
 import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
 import { projectListingDraftSeed } from "./listing-draft-service.mjs";
+import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { readHeader, requestHost, sameOriginWriteRejection } from "./request-guard.mjs";
 import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
 // Package B2: the approved purchase-fee estimate, decided in one place.
@@ -199,11 +200,9 @@ export function appApiConfigFromEnv(env = process.env) {
 async function payloadDependencyHealth(config) {
   if (config.runtimeDataDurableOnly !== true) return { status: "ok" };
   try {
-    const seed = readThroughCached(config.cmsSeedPath, () => loadCmsSeed(config.cmsSeedPath));
-    await projectListingDraftSeed(seed, {
+    await probePayloadCmsImportRuntime({
       env: config.payloadListingEnv || process.env,
       payload: config.payloadListingRuntime || null,
-      requirePayload: true,
     });
     return { status: "ok" };
   } catch (error) {

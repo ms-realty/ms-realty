@@ -207,6 +207,32 @@ test("durable origin refusal is a localized no-store page for browsers and truth
   assert.match(standalone.body, /data-react-public-ui="(?:origin|search)-unavailable"/);
 });
 
+test("durable health performs one lightweight Payload query", async () => {
+  const nextRuntime = createPayloadDraftRuntime(loadCmsSeed());
+  const next = await renderAppApiResponse(new Request("https://live.test/api/health"), {
+    config: {
+      ...appApiConfigFromEnv(LIVE_ENV),
+      payloadListingRuntime: nextRuntime.payload,
+    },
+  });
+  assert.equal(next.status, 200);
+  assert.deepEqual(nextRuntime.payload.calls.find.map(({ collection }) => collection), ["listings"]);
+  assert.equal(nextRuntime.payload.calls.begin, 0);
+
+  const standaloneRuntime = createPayloadDraftRuntime(loadCmsSeed());
+  const standalone = await dispatchHttp(
+    createHttpApp({
+      runtimeDataDurableOnly: true,
+      payloadListingRuntime: standaloneRuntime.payload,
+      payloadListingEnv: LIVE_ENV,
+    }),
+    { url: "/api/health" },
+  );
+  assert.equal(standalone.status, 200);
+  assert.deepEqual(standaloneRuntime.payload.calls.find.map(({ collection }) => collection), ["listings"]);
+  assert.equal(standaloneRuntime.payload.calls.begin, 0);
+});
+
 test("a real refused Postgres origin stays alive and does not leak rejected promises", async () => {
   const origin = await startRefusedOrigin();
   try {

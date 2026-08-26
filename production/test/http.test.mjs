@@ -1625,7 +1625,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(seoPreflight.body.kind, "admin_seo_preflight");
   assert.equal(seoPreflight.body.seo.status, "blocked");
   assert.ok(seoPreflight.body.seo.summary.missing_required_sources.includes("search_console"));
-  assert.equal(seoPreflight.body.seo.summary.sources.privacy_events.status, "imported");
+  assert.equal(seoPreflight.body.seo.summary.sources.privacy_events.status, "missing_export");
   assert.equal(liveServicesUnauthorized.status, 401);
   assert.equal(liveServices.status, 200);
   assert.equal(liveServices.body.kind, "admin_live_services");
@@ -2217,13 +2217,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(backlinks.body.seoImport.ready, true);
   assert.equal(backlinks.body.seoImport.status, "ready");
   assert.deepEqual(backlinks.body.seoImport.missingRequiredSources, []);
-  assert.equal(backlinks.body.report.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
+  assert.equal(backlinks.body.report.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
   assert.equal(backlinks.body.report.blockers.includes("external_seo_exports"), false);
   assert.equal(backlinks.body.exportEndpoint, "/api/admin/seo-evidence/export");
   assert.equal(exportedEvidence.status, 200);
   assert.equal(exportedEvidence.headers["content-disposition"], 'attachment; filename="seo-evidence.json"');
   const exportedEvidenceBody = JSON.parse(exportedEvidence.body);
-  assert.deepEqual(exportedEvidenceBody.summary.missing_required_sources, []);
+  assert.deepEqual(exportedEvidenceBody.summary.missing_required_sources, ["privacy_or_ga4_analytics"]);
   assert.ok(exportedEvidenceBody.url_evidence.length > 0);
   assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
   assert.equal(review.body.seoEvidence.importEndpoint, "/api/admin/seo-evidence/import");
@@ -2231,7 +2231,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(review.body.seoEvidence.exportEndpoint, "/api/admin/seo-evidence/export");
   assert.equal(review.body.seoEvidence.crawlCoverage.urls, 457);
   assert.deepEqual(review.body.seoEvidence.requiredSourceDomains, ["makler-realty.com", "makler-realty.ru"]);
-  assert.deepEqual(review.body.seoEvidence.missingRequiredSources, []);
+  assert.deepEqual(review.body.seoEvidence.missingRequiredSources, ["privacy_or_ga4_analytics"]);
   assert.equal(reviewHtml.body.includes('data-seo-import-endpoint="/api/admin/seo-evidence/import"'), true);
   assert.equal(reviewHtml.body.includes('data-seo-template-endpoint="/api/admin/seo-evidence/template"'), true);
   assert.equal(launchUnauthorized.status, 401);
@@ -2242,7 +2242,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     "payload_runtime",
     "production_recovery",
   ]);
-  assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
+  assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
   assert.equal(launch.body.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
   assert.equal(launch.body.gates.find((gate) => gate.id === "live_services").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "monitoring_rollback").evidence.machine_evidence.status, "missing");

@@ -1211,3 +1211,16 @@ export async function loadPayloadCmsImportRuntime({ env = process.env, payload }
   assertPayload(runtime);
   return runtime;
 }
+
+export async function probePayloadCmsImportRuntime({ env = process.env, payload } = {}) {
+  const runtime = await loadPayloadCmsImportRuntime({ env, payload });
+  await runtime.find({
+    collection: "listings",
+    depth: 0,
+    draft: true,
+    limit: 1,
+    overrideAccess: true,
+    pagination: false,
+  });
+  return runtime;
+}
