@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { derivePrimaryAreaSqm } from "./listing-facts.mjs";
+import { derivePrimaryAreaSqm, factProvenanceForState } from "./listing-facts.mjs";
 import { fromRoot } from "./paths.mjs";
 import { loadPayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { foldSearchText } from "./search-fold.mjs";
@@ -290,8 +290,12 @@ function publicFactSource(listing) {
   return { ...listing, ...(plainObject(listing.facts) ? listing.facts : {}) };
 }
 
+// The index has to agree with the page about which figures exist. A filter
+// that refuses a bedroom count the listing page prints is the fault the
+// catalogue already had the other way round: a control that can only empty the
+// results. Both sides now ask the same question of the same verification state.
 function verifiedFact(value, field, verified) {
-  if (verified.get(field) !== BROKER_VERIFIED || value === null || value === undefined || value === "") return undefined;
+  if (!factProvenanceForState(field, verified.get(field)) || value === null || value === undefined || value === "") return undefined;
   return value;
 }
 

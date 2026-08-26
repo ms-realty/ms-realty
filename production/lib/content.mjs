@@ -1,5 +1,11 @@
 import fs from "node:fs";
-import { factVerificationFor, publicFactValue, publicPrimaryAreaSqm } from "./listing-facts.mjs";
+import {
+  factVerificationFor,
+  primaryAreaFieldFor,
+  publicFactIsSourceStated,
+  publicFactValue,
+  publicPrimaryAreaSqm,
+} from "./listing-facts.mjs";
 import { getLocale } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { contentHash } from "./translations.mjs";
@@ -25,6 +31,25 @@ export function loadMigrationRecords(path = DEFAULT_MIGRATION_RECORDS_PATH) {
 
 export function findMigrationRecord(records, oldUrl) {
   return records.find((record) => record.old_url === oldUrl) || null;
+}
+
+// The listing page groups several property facts under one row: an area lands
+// under `area_sqm` whichever of the four area fields carried it, and a storey
+// count reads as `floor` beside a floor number and as `storeys` without one.
+// The projection resolves that here so the renderer only has to ask which rows
+// carry a figure nobody has checked yet.
+function sourceStatedFactRows(facts, verification) {
+  const stated = (field) => publicFactIsSourceStated(facts, verification, field);
+  const rows = new Set();
+  if (stated("bedrooms_count")) rows.add("bedrooms");
+  const areaField = primaryAreaFieldFor(facts);
+  if (areaField && stated(areaField)) rows.add("area_sqm");
+  if (stated("land_area_sqm")) rows.add("land_area_sqm");
+  if (stated("condition")) rows.add("condition");
+  const floorPublished = publicFactValue(facts, verification, "floor_number") !== null;
+  if (stated("floor_number") || (floorPublished && stated("total_floors"))) rows.add("floor");
+  if (!floorPublished && stated("total_floors")) rows.add("storeys");
+  return [...rows].sort();
 }
 
 export function publicPropertyProjection(property) {
@@ -64,6 +89,7 @@ export function publicPropertyProjection(property) {
     construction_status: publicFactValue(facts, verification, "construction_status"),
     location_precision: publicFactValue(facts, verification, "public_location_precision"),
     public_coordinates: publicCoordinates,
+    source_stated_facts: sourceStatedFactRows(facts, verification),
   };
 }
 
@@ -104,6 +130,7 @@ export function listingSourceSnapshot(listing) {
     thumbnail_alt: listing.thumbnail_alt || "",
     word_count: Number(listing.word_count || 0),
     canonical: listing.canonical || listing.url,
+    source_stated_facts: Array.isArray(listing.source_stated_facts) ? listing.source_stated_facts : [],
   };
 }
 
@@ -170,6 +197,11 @@ export function listingToPublicViewModel(listing) {
     public_coordinates: listing.public_coordinates || null,
     price_eur: snapshot.price_eur,
     price_on_request: snapshot.price_on_request,
+    // The price the crawl lifted off the legacy page is a figure the source
+    // stated, exactly like a bedroom count, and stays one until a broker dates
+    // the workflow field. The page labels it the same way.
+    price_verified: Boolean(listing.workflow?.price_verified_at),
+    source_stated_facts: snapshot.source_stated_facts,
     image_count: snapshot.image_count,
     thumbnail_url: snapshot.thumbnail_url,
     thumbnail_alt: snapshot.thumbnail_alt,

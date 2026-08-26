@@ -90,7 +90,16 @@ test("the broker panel keeps one accent action, the office line, and the trust r
   assert.equal((html.match(/mk-btn--accent[^>]*data-endpoint="\/api\/leads"/g) || []).length >= 1, true);
   assert.match(html, /data-listing-office="true"/);
   assert.match(html, /data-contact-source="broker"/);
-  assert.match(html, /data-listing-trust="facts-reviewed"/);
+  // The reviewed-facts row is no longer a consequence of publication approval:
+  // it stands only while every figure on the page has been checked. This
+  // fixture carries a source-stated one, so the row is absent and the fact
+  // table carries the per-row label instead - the two must never both appear.
+  const claimsReviewed = /data-listing-trust="facts-reviewed"/.test(html);
+  const hasSourceStated = /data-fact-provenance="source_stated"/.test(html);
+  assert.equal(claimsReviewed && hasSourceStated, false, "a page cannot claim reviewed facts while showing an unchecked one");
+  // Not asserting that one of them is always present: a page with no facts to
+  // state, or one that publication approval never touched, honestly says
+  // neither.
   assert.match(html, /data-availability-verification="true"/);
   assert.match(html, /data-listing-tools="true"/);
   assert.match(html, /data-listing-action="save"[^>]*aria-pressed="false"|aria-pressed="false"[^>]*data-listing-action="save"/);

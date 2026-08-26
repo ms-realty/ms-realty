@@ -694,8 +694,16 @@ test("approved search projection omits pending and private facts", () => {
   assert.equal(document.property_family, "apartment");
   assert.equal(document.property_subtype, "studio");
   assert.equal(document.primary_area_sqm, 71);
-  assert.equal(document.bedrooms_count, undefined);
-  assert.equal(document.price_amount, undefined);
+  // A pending bedroom count now reaches the index, because the owner publishes
+  // source-stated figures: leaving it out is what made the bedrooms filter
+  // return nothing for every value on a catalogue that mostly has the number.
+  assert.equal(document.bedrooms_count, 0);
+  // The price the crawl copied is a source-stated figure like any other, and
+  // the page has always shown it. Indexing it keeps search and page telling the
+  // visitor the same thing; the page is what labels it as unchecked.
+  assert.equal(document.price_amount, 123000);
+  // Placement stays private regardless: a map pin nobody verified is a wrong
+  // pin, and no label on a search result can fix that.
   assert.equal(document.internal_latitude, undefined);
   assert.equal(document.internal_longitude, undefined);
   assert.equal(document.public_latitude, undefined);

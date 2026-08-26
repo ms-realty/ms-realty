@@ -110,6 +110,7 @@ export function listingFromCmsRecord(record, approvedTour = null, property = nul
     public_location_precision: canonicalProperty ? publicProperty?.location_precision ?? null : null,
     location_precision: canonicalProperty ? publicProperty?.location_precision ?? null : record.facts.location_precision || "approximate",
     public_coordinates: canonicalProperty ? publicProperty?.public_coordinates || null : null,
+    source_stated_facts: canonicalProperty ? publicProperty?.source_stated_facts || [] : [],
     price_eur: record.facts.price_on_request === true ? null : record.facts.price_eur,
     price_on_request: record.facts.price_on_request === true,
     image_count: record.facts.image_count,
