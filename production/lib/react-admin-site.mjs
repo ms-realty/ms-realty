@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable, propertyFamilyFor } from "./listing-facts.mjs";
+import { FACT_REVIEW_ROW_KEYS } from "./listing-fact-review.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
@@ -7406,6 +7407,15 @@ function ListingManagerBody({ page }) {
     quality: ui.listingChecks,
     action: label(copy, "action", "Action"),
   };
+  const factReview = page.factReview || {};
+  const factReviewCopy = factReview.copy || {};
+  const factReviewRows = factReview.rows || [];
+  const factReviewLabels = factReviewCopy.labels || {};
+  const factReviewSummary = factReview.summary || { unchecked_figures: 0, listings_with_unchecked_facts: 0 };
+  const factReviewRowOptions = FACT_REVIEW_ROW_KEYS.map((row) => ({
+    value: row,
+    label: factReviewLabels[row] || row,
+  }));
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -7446,6 +7456,63 @@ function ListingManagerBody({ page }) {
         }),
         h(CmsPlannedAction, { id: "listing-export", icon: "download", label: ui.exportListingsCsv, note: ui.exportListingsCsvNote }),
         h(CmsPlannedAction, { id: "listing-duplicate", icon: "plus", label: ui.duplicateListing, note: ui.duplicateListingNote }),
+      ),
+      h(
+        Panel,
+        {
+          title: `${factReviewCopy.title || "Facts to confirm"} · ${factReviewSummary.unchecked_figures || 0}`,
+          "data-fact-review-queue": "true",
+        },
+        h("p", { className: "adm-note", role: "note" }, factReviewCopy.description || "These figures came from the source and await a broker’s confirmation."),
+        h(
+          "form",
+          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true" },
+          filterLocaleInput(page),
+          h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "factQ", defaultValue: factReview.filters?.q || "", placeholder: factReviewCopy.title || "Facts to confirm" })),
+          h(
+            "label",
+            null,
+            factReviewCopy.title || "Fact",
+            h(
+              "select",
+              { name: "factRow" },
+              h("option", { value: "" }, label(copy, "all", "All")),
+              ...factReviewRowOptions.map((option) => h("option", { key: option.value, value: option.value, selected: factReview.filters?.row === option.value }, option.label)),
+            ),
+          ),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "filter", "Filter")),
+          h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
+        ),
+        h(
+          "p",
+          { className: "adm-note", "data-fact-review-summary": "true" },
+          `${factReviewSummary.listings_with_unchecked_facts || 0} · ${factReviewSummary.unchecked_figures || 0} ${factReviewCopy.count || "unchecked facts"}`,
+        ),
+        factReviewRows.length
+          ? h(
+              "ul",
+              { className: "adm-task-list", "data-fact-review-rows": String(factReviewRows.length) },
+              ...factReviewRows.map((row) =>
+                h(
+                  "li",
+                  { key: row.listing_id, "data-fact-review-listing": row.listing_id },
+                  h(
+                    "div",
+                    { className: "adm-task-list__body" },
+                    h("strong", null, row.title),
+                    h("code", { className: "crm-mono" }, row.listing_id),
+                    h("small", null, row.location || ui.notSet),
+                    h("small", null, row.unchecked_rows.map((key) => factReviewLabels[key] || key).join(" · ")),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-task-list__actions" },
+                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, factReviewCopy.openEditor || label(copy, "openEditor", "Open editor")),
+                  ),
+                ),
+              ),
+            )
+          : h(EmptyState, { icon: "check", "data-empty-fact-review": "true" }, factReviewCopy.noRows || "No facts need confirmation."),
       ),
       h(
         "form",
@@ -7905,17 +7972,43 @@ function editorField(copy, ui, field, value, disabled = false) {
   return h("label", { key: field }, fieldText(ui, field), editorInputFor(ui, field, value, disabled));
 }
 
-function editorFieldGroup(copy, ui, title, fields, facts, disabled = false) {
+function editorFieldWithReview(copy, ui, field, value, disabled = false, factReview = null) {
+  const reviewRows = (factReview?.rows || []).filter((row) => row.editor_field === field);
+  if (!reviewRows.length) return editorField(copy, ui, field, value, disabled);
+  const reviewCopy = factReview.copy || {};
+  return h(
+    "label",
+    { key: field },
+    fieldText(ui, field),
+    editorInputFor(ui, field, value, disabled),
+    ...reviewRows.map((row) =>
+      h(
+        "span",
+        { key: `${field}-${row.row}`, className: "adm-fact-review-confirm" },
+        h("input", {
+          type: "checkbox",
+          name: "confirmedFacts",
+          value: field,
+          disabled,
+          "data-fact-review-confirm": row.row,
+        }),
+        ` ${reviewCopy.confirm || "I confirm this value"}`,
+      ),
+    ),
+  );
+}
+
+function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, factReview = null) {
   if (!fields.length) return null;
   return h(
     "fieldset",
     { className: "adm-form__group" },
     h("legend", null, title),
-    ...fields.map((field) => editorField(copy, ui, field, facts[field] ?? "", disabled)),
+    ...fields.map((field) => editorFieldWithReview(copy, ui, field, facts[field] ?? "", disabled, factReview)),
   );
 }
 
-function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts" } = {}) {
+function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null } = {}) {
   if (!fields.length) return null;
   return h(
     "details",
@@ -7926,7 +8019,7 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
       h("span", null, title),
       h("small", null, `${fields.length}`),
     ),
-    editorFieldGroup(copy, ui, title, fields, facts, disabled),
+    editorFieldGroup(copy, ui, title, fields, facts, disabled, factReview),
   );
 }
 
@@ -7950,6 +8043,11 @@ function ListingEditorBody({ page }) {
     seo_og_description: seo.og_description || "",
     seo_robots: seo.robots || "index,follow",
   };
+  for (const row of page.factReview?.rows || []) {
+    if ((editorValues[row.editor_field] === null || editorValues[row.editor_field] === undefined || editorValues[row.editor_field] === "") && row.value !== null && row.value !== undefined) {
+      editorValues[row.editor_field] = row.value;
+    }
+  }
   const tour = page.listing.tour || {};
   const tourProvider = tour.provider === "supersplat-viewer" ? "supersplat-viewer" : "photo-sphere-viewer";
   const tourPublished = tour.is_public === true;
@@ -8064,9 +8162,12 @@ function ListingEditorBody({ page }) {
                 defaultValue: currentOperatorId(page, ""),
                 "data-editor-name": "true",
               }),
-              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content" }),
-              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: detailFields.length <= 4, section: "details" }),
-              editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms" }),
+              page.factReview?.rows?.length
+                ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
+                : null,
+              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview }),
+              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: detailFields.length <= 4, section: "details", factReview: page.factReview }),
+              editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
               h(
                 "section",
