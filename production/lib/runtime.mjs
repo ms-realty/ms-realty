@@ -354,13 +354,15 @@ export function renderRuntimePath(
   const listings = () => runtimeListings(seed, translationTasks);
   if (resolved.type === "listing") {
     const view = resolved.listing;
+    const allListings = listings();
     return renderListingPage({
       registry,
       listing: resolved.listing,
       localeCode: resolved.localeCode,
       translations: mergeRuntimeTranslations(resolved.record, translationTasks),
+      allListings,
       brokerContact: latestApprovedBrokerContact(brokerContacts, resolved.record.id),
-      relatedListings: listings().filter((candidate) => {
+      relatedListings: allListings.filter((candidate) => {
         const sameLocation = candidate.location && candidate.location === view.location;
         return sameLocation && candidate.id !== view.id && isActiveListing(candidate);
       }),

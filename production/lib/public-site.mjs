@@ -2924,6 +2924,25 @@ function translationsForSearchListing(registry, listing) {
   return listing.translations || approvedTranslationRecordsForListing(registry, listing);
 }
 
+function listingMetadataTitle(registry, listing, localeCode) {
+  const view = listingToPublicViewModel(listing);
+  const translations = translationsForSearchListing(registry, listing);
+  const translation = translationFor(translations, localeCode);
+  const translationIndexable = translation ? isTranslationIndexable(registry, translation) : false;
+  const copy = localizedCopy(translationIndexable ? localeCode : view.source_locale, view);
+  const sourceSeo = localeCode === view.source_locale && view.seo?.human_approved === true ? view.seo : {};
+  return sourceSeo.title || copy.title;
+}
+
+function uniqueListingMetadataTitle({ registry, listing, localeCode, baseTitle, allListings }) {
+  if (!Array.isArray(allListings) || allListings.length < 2) return baseTitle;
+  const matchingTitles = allListings.reduce(
+    (count, candidate) => count + (listingMetadataTitle(registry, candidate, localeCode) === baseTitle ? 1 : 0),
+    0,
+  );
+  return matchingTitles > 1 ? `${baseTitle} · ${listing.id}` : baseTitle;
+}
+
 const ACTIVE_LISTING_STATUSES = new Set(["available", "reserved"]);
 
 function searchListingPath(registry, localeCode, listing) {
@@ -3374,6 +3393,7 @@ export function renderListingPage({
   listing,
   localeCode,
   translations,
+  allListings = [],
   brokerContact = null,
   relatedListings = [],
   purchaseFees = null,
@@ -3391,7 +3411,15 @@ export function renderListingPage({
   const copy = localizedCopy(translationIndexable ? locale.code : view.source_locale, view);
   const sourceSeo = locale.code === view.source_locale && view.seo?.human_approved === true ? view.seo : {};
   const canonical = sourceSeo.canonical_override === path ? sourceSeo.canonical_override : path;
-  const metadataTitle = sourceSeo.title || copy.title;
+  const metadataTitle = uniqueListingMetadataTitle({
+    registry,
+    listing,
+    localeCode: locale.code,
+    baseTitle: sourceSeo.title || copy.title,
+    allListings,
+  });
+  const ogTitleBase = sourceSeo.og_title || sourceSeo.title || copy.title;
+  const metadataOgTitle = metadataTitle === (sourceSeo.title || copy.title) ? ogTitleBase : `${ogTitleBase} · ${listing.id}`;
   // The head snippet is capped; the structured data keeps the whole approved
   // text, because schema.org has no length policy and truncating it would throw
   // away a fact the agency actually published.
@@ -3424,7 +3452,7 @@ export function renderListingPage({
     metadata: {
       title: metadataTitle,
       description: metadataDescription,
-      og_title: sourceSeo.og_title || metadataTitle,
+      og_title: metadataOgTitle,
       og_description: sourceSeo.og_description || metadataDescription,
       robots: indexable ? sourceSeo.robots || "index,follow" : "noindex,follow",
     },
@@ -4947,15 +4975,17 @@ export function renderStartPage({
     dir: locale.direction,
     path,
     canonical: path,
-    indexable: resolved.available,
+    // The localized onboarding copy has no human approval record yet. Keep the
+    // route available for buyers, but do not present it as an index target.
+    indexable: false,
     metadata: {
       title: copy.title,
       description: copy.description,
       // Query variants (the no-JavaScript finish step) stay out of the index;
       // the canonical points at the clean route.
-      robots: resolved.available && !answered ? "index,follow" : "noindex,follow",
+      robots: "noindex,follow",
     },
-    hreflang,
+    hreflang: [],
     chrome: publicChrome(registry, locale, { hreflang, active: "start", leadWritesDisabled, savedSearchWritesDisabled }),
     body: {
       h1: copy.h1,
@@ -6567,13 +6597,15 @@ export function renderAboutPage({
     dir: locale.direction,
     path,
     canonical: path,
-    indexable: resolved.available,
+    // The localized trust copy has no human approval record yet. Keep the page
+    // reachable while search engines are explicitly told not to index it.
+    indexable: false,
     metadata: {
       title: copy.title,
       description: copy.description,
-      robots: resolved.available ? "index,follow" : "noindex,follow",
+      robots: "noindex,follow",
     },
-    hreflang,
+    hreflang: [],
     chrome: publicChrome(registry, locale, { hreflang, active: "about", currentPath: path, leadWritesDisabled }),
     body: {
       h1: copy.h1,

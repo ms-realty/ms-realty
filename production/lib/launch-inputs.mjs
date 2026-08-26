@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { parseCsv } from "./csv.mjs";
-import { launchBlockerSummary } from "./launch-readiness.mjs";
+import { launchBlockerSummary, listingPublicationMessage } from "./launch-readiness.mjs";
 import { HERMES_LAUNCH_REQUIRED } from "./launch-service-contract.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -232,6 +232,7 @@ export function renderLaunchInputChecklist({
   const liveServiceEvidence = liveServiceGate?.evidence || {};
   const listingQualityGate = launchReadiness.gates.find((gate) => gate.id === "listing_quality_review");
   const listingReviewEvidence = listingQualityGate?.evidence || {};
+  const publicationMessage = listingPublicationMessage(listingReviewEvidence);
   const seoGate = launchReadiness.gates.find((gate) => gate.id === "external_seo_exports");
   const seoGateEvidence = seoGate?.evidence || {};
   const recoveryGate = launchReadiness.gates.find((gate) => gate.id === "production_recovery");
@@ -385,7 +386,7 @@ ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`)
 - Coverage: ${manualListingAudit.listing_count || 0}/165 source rows (pass: ${manualAuditCounts.pass || 0}, review: ${manualAuditCounts.review || 0}, hold: ${manualAuditCounts.hold || 0}, source unavailable: ${manualAuditCounts.source_unavailable || 0}).
 - Broker approvals in this artifact: ${manualListingAudit.broker_approval_granted ? "present (invalid)" : "0"}; broker confirmations still required: ${manualListingAudit.broker_confirmation_required || 0}.
 - Broker packet: \`production/data/launch-candidate30-broker-packet.json\` — ${manualListingAudit.candidate_count || 0} candidates, ${manualListingAudit.publish_ready_count || 0} publish-ready; selection: ${manualListingAudit.selection_basis || "unknown"}; overlap with prior automatic shortlist: ${manualListingAudit.previous_launch_candidate_overlap || 0}.
-- This evidence classifies the freeze catalog only. \`MSR-LISTING-PUBLICATION-1\` publishes the 30 freeze-active listings as source-locale inventory; archived freeze rows stay out of active search.${manualListingAudit.error ? ` Error: ${manualListingAudit.error}` : ""}
+- This evidence classifies the freeze catalog only. ${publicationMessage} Archived freeze rows stay out of active search.${manualListingAudit.error ? ` Error: ${manualListingAudit.error}` : ""}
 
 ## Broker Verification
 

@@ -10,6 +10,7 @@ import {
   assertLiveServicePreflightReport,
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
+  listingPublicationMessage,
   liveServiceImportSummary,
   materializeLocalLaunchReadiness,
   payloadRuntimeState,
@@ -862,6 +863,11 @@ test("launch readiness stays blocked until production launch blockers are cleare
     source_locales_only: true,
   });
   assert.equal(listingGate.evidence.reason, "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.");
+  assert.equal(
+    listingGate.message,
+    listingPublicationMessage(listingGate.evidence),
+  );
+  assert.match(listingGate.message, /publishes 163 listings from the full freeze catalog as source-locale inventory; 2 excluded by the approval\./);
   assert.equal(liveGate.status, "blocked");
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
   assert.ok(liveGate.evidence.provisioning.summary.missing_env.includes("DATABASE_URL"));
@@ -2543,7 +2549,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /production_recovery: Complete an encrypted off-site backup.*durable Payload\/Postgres and CRM\/CMS data/);
   assert.match(markdown, /MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH/);
   assert.match(markdown, /runtime evidence is deterministically regenerated and revalidated after restore/);
-  assert.match(markdown, /MSR-LISTING-PUBLICATION-1. publishes the 30 freeze-active listings/);
+  assert.match(markdown, /MSR-LISTING-PUBLICATION-1 publishes 163 listings from the full freeze catalog as source-locale inventory; 2 excluded by the approval\./);
   assert.match(markdown, /Reviewed one-hop 301 redirects: 179/);
   assert.match(markdown, /Terminal route decisions: 457\/457 \(200: 10, 301: 179, 410: 268\)/);
   assert.match(markdown, /Remaining terminal route decisions: 0/);

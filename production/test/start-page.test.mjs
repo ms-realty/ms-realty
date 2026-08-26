@@ -78,13 +78,13 @@ test("the App Router manifest maps a buyer onboarding entry to the catch-all con
   assert.equal(route.app_module, "app/[locale]/[...slug]/route");
 });
 
-test("the unanswered page is one indexable GET form with four steps", () => {
+test("the unanswered page is one GET form with four steps and stays noindex pending approval", () => {
   const page = render("en");
   assert.equal(page.kind, "start");
   assert.equal(page.path, "/en/start");
   assert.equal(page.canonical, "/en/start");
-  assert.equal(page.indexable, true);
-  assert.equal(page.metadata.robots, "index,follow");
+  assert.equal(page.indexable, false);
+  assert.equal(page.metadata.robots, "noindex,follow");
   assert.equal(page.body.state, "answer");
   assert.equal(page.body.finish, null);
   assert.deepEqual(
@@ -329,7 +329,7 @@ test("the onboarding shortlist lead form carries the same attribution as every o
 test("the shortlist degrades to a phone CTA when lead writes are disabled", () => {
   const disabled = renderStartPage({ registry, localeCode: "bg", listings, leadWritesDisabled: true });
   assert.equal(disabled.status, 200);
-  assert.equal(disabled.indexable, true);
+  assert.equal(disabled.indexable, false);
   assert.equal(disabled.chrome.lead_writes_disabled, true);
   assert.equal(disabled.body.shortlist, null);
   assert.equal(disabled.body.form_unavailable, "Формата е временно недостъпна. Обадете се или ни пишете и брокер ще помогне.");
@@ -369,7 +369,7 @@ test("the rendered document keeps the public shell in RTL", () => {
   const html = renderHtmlPage(page, { bodyHtml: renderReactPublicBody(page) });
   assert.equal(assertHtmlPage(html, { lang: "he", dir: "rtl", kind: "start" }), true);
   assert.ok(html.includes(`<link rel="canonical" href="${absolutePublicUrl("/he/start")}">`));
-  assert.ok(html.includes(`hreflang="x-default" href="${absolutePublicUrl("/bg/nachalo")}"`));
+  assert.ok(!html.includes(`hreflang="x-default" href="${absolutePublicUrl("/bg/nachalo")}"`));
   assert.match(html, /<meta name="robots" content="noindex,follow">/);
 });
 

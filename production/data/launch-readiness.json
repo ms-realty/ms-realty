@@ -281,7 +281,7 @@
     {
       "id": "listing_quality_review",
       "status": "pass",
-      "message": "MSR-LISTING-PUBLICATION-1 publishes the 30 freeze-active listings as source-locale inventory.",
+      "message": "MSR-LISTING-PUBLICATION-1 publishes 163 listings from the full freeze catalog as source-locale inventory; 2 excluded by the approval.",
       "evidence": {
         "status": "pass",
         "mode": "operator_publication_of_freeze_active",
