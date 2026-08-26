@@ -968,11 +968,16 @@ if (leadSla.summary.manager_escalation_required !== 4 || leadSla.summary.custome
 }
 const leadMatching = JSON.parse(fs.readFileSync(fromRoot("production", "data", "lead-matching-report.json"), "utf8"));
 assertLeadMatchingReport(leadMatching);
+// Two open broker tasks, not one: publishing the figures the source stated
+// gave the matcher something to match on, so a rental lead that previously
+// found nothing now surfaces a three-room flat in Sandanski for a broker to
+// review. A lead nobody can match is not a quieter inbox, it is a lost
+// enquiry.
 if (
   leadMatching.summary.matchable_leads_with_listing_reference !== 2 ||
   leadMatching.summary.active_matchable_leads !== 2 ||
   leadMatching.summary.qualified_leads !== 1 ||
-  leadMatching.summary.open_broker_tasks !== 1
+  leadMatching.summary.open_broker_tasks !== 2
 ) {
   throw new Error("Lead matching report must distinguish active, qualified, and referenced buyer or renter leads");
 }

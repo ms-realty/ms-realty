@@ -128,14 +128,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0002",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0002-price-on-request",
-      "edited_at": "2026-07-05T02:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0002",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_on_request"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "a13e6d460f668808e69fab90aa534ab2880b54d1070b973c489f1fb2fd8febf1",
+      "source_hash_after": "f560a0e9841282d339c93c0b445a30f52540dfac14ca8ff8d0bf3a867bc2fa07",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -183,14 +183,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0003",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0003-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0003",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "7645687aef15b82e95c15f05b269bbc1a0ec8f70dc027cf58f9f0b874e18ac2a",
+      "source_hash_after": "337d33938afa74ccb02162cfad2b526cbc0011e1831f5b1f297c379709608303",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -371,7 +371,7 @@
         "blocking_fields": [
           "location_id",
           "primary_area_sqm",
-          "price_amount",
+          "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
         ]
@@ -580,14 +580,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0010",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0010-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0010",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "fad0aff6647e67b2208cfdd901e33a384095c30315b04c6e7a65da268b711992",
+      "source_hash_after": "16d12597318fd1b92765e81a2da8905f4a165d8aef20d6e0c2d5c57a1ca3ad76",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -637,14 +637,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0011",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0011-price-on-request",
-      "edited_at": "2026-07-05T02:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0011",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_on_request"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "85536555d86fb722fae9da12773567381ed352e68ba0e1da861dd244e365fffc",
+      "source_hash_after": "343bb67c694e04a754e6e8db8e1b8804bd6d59e8dfe956876d6ecbb39d6e77a0",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -690,14 +690,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0012",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0012-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0012",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "11cbc3265fde460ae45614b02895d2077e8ccf3f5a4a340308044b8b4d23a63b",
+      "source_hash_after": "16922576eac483aa1023604fb9e74ebc2384b5713df5747cafb5ff1458996752",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -855,14 +855,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0015",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0015-price-on-request",
-      "edited_at": "2026-07-05T02:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0015",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_on_request"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "794ab9ae546e70e9bee472c3f9bcda4a43a8205b363584573cac2ebfe70e3b60",
+      "source_hash_after": "6a01238894a3898b7ee76118fa933792fd552f136b282b1266e629853b7925c5",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -910,14 +910,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0016",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0016-live-price-bedroom-20260705",
-      "edited_at": "2026-07-05T01:00:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0016",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "bedrooms"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "c143a67dc892f6d329c68c036ec882211e1420598da7459e9b900b80d974677a",
+      "source_hash_after": "12ada1acbef700d31395455d16ca674ba697486bc72bfe0da10ac9b1ccae0af4",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -1094,7 +1094,7 @@
         "blocking_fields": [
           "location_id",
           "primary_area_sqm",
-          "price_amount",
+          "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
         ]
@@ -1187,14 +1187,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0021",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0021-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0021",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "77abb4f598a7e488bba75ae58bf0bc35ec6497840f35a9cfdef0de246e58b94f",
+      "source_hash_after": "8d0560f67418280d84d487c7e3568ecb4c06713b4ff15fa3173fa48b7e840829",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -1411,14 +1411,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0025",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0025-live-bedroom-type-20260705",
-      "edited_at": "2026-07-05T00:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0025",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "bedrooms"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "3984134e050c45b1dd5457f6f5a214af6424f1549ed095c7fcf3881cd3ef3ad9",
+      "source_hash_after": "9c6889b493042101e05ef780b5cfb5b0a87a4de624b0eff41dd899f9221ddc1f",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -2146,14 +2146,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0038",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0038-live-price-bedroom-20260705",
-      "edited_at": "2026-07-05T01:00:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0038",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "bedrooms"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "0e487072c780d7fd405644aa25db08e19b1b2c247d027105b3d597134a1fa2d9",
+      "source_hash_after": "d4760fa28644d67c491b6a229572ec48e7731514a40e68ab7b63873864537c09",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -2520,14 +2520,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0045",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0045-live-price-bedroom-20260705",
-      "edited_at": "2026-07-05T01:00:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0045",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "bedrooms"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "cc4381972a8fb4d309a25ffbc4c52990a6bdd3ef8b33d6c482d339bc79cb1dc6",
+      "source_hash_after": "e504fdf9f1e6964c0a04a1f4091d26f8c7d87afa554bdefe19b3ce3ea55ad5af",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -2575,14 +2575,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0046",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0046-live-quality-20260705b",
-      "edited_at": "2026-07-05T01:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0046",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "bedrooms"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "b73fbda6bce6e823d1d4c9dcbb527af008a8b886c14e2029524c50b13b77d12b",
+      "source_hash_after": "1c01164f089e4d7ba8af51add5fac89a8c7a1afd934775e34e44e323653f5cc4",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -2740,14 +2740,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0049",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0049-multi-unit-20260705",
-      "edited_at": "2026-07-05T01:45:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0049",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "property_type"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "6ef866f5bfa887028cfa6f0c1ee4f62eeff9ad387072a61f01495c9004ac7c02",
+      "source_hash_after": "a7baf6028847194e6211f5343d06274f2e8870bc11bc0ae85f3df46f158391a9",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "normal",
@@ -2852,14 +2852,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0051",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0051-live-price-bedroom-20260705",
-      "edited_at": "2026-07-05T01:00:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0051",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "bedrooms"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "551a7e9b1894cdfc3137ed0d29744ad00557e0b249c182d99f5e9c715bd93fde",
+      "source_hash_after": "07bac362726b617c3c7438eed9b6a6a21d6ad6ca9aaf72640352c3d0bf197312",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -3521,14 +3521,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0063",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0063-price-on-request",
-      "edited_at": "2026-07-05T02:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0063",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_on_request"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "b601ec46c6edcc2172b19bd077ba22ba252bae15385b37664032d76e508fd51c",
+      "source_hash_after": "427d95f96066b479becd0899d8d73966d2180d780026274dfd3f547b3135eb6e",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -4025,14 +4025,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0072",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0072-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0072",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "6ff496cbb5f32ae20a55950f9c39c0b411f530a9c8a7f34d24c33600dc46fbd5",
+      "source_hash_after": "ab941f3c928ab33e6cea16e5385fe9c272a3b9f10d6866333026dbd5e3b00823",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -4137,14 +4137,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0074",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0074-live-bedroom-type-20260705",
-      "edited_at": "2026-07-05T00:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0074",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "bedrooms"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "295b6f8f58bb484360b4b147ac5d34fea83ecb6bce54b80114d64e486053cbc6",
+      "source_hash_after": "e1643a038610c10607a243f44deae6d771a911baad250fc2e39cf9195c57782b",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -4247,14 +4247,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0077",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0077-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0077",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "b669d66af46c623098af9fbb01ab61eaa69b734ebbb8382e446c0a918ed2b2ea",
+      "source_hash_after": "741bb41dec5ca3b2ac02e739c85c83dc9ab6051001e05627bdf965ed7a9355a2",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -4923,14 +4923,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0089",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0089-price-on-request",
-      "edited_at": "2026-07-05T02:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0089",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_on_request"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "62e8676ead29d252675486d65a7e4145d2b107b28ff88efdc4dde185e906bf2a",
+      "source_hash_after": "722ffa2f638a731ab50b250810106344cf3171f1c846bb163d36912ccf96a9d2",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -5219,7 +5219,7 @@
         "blocking_fields": [
           "location_id",
           "primary_area_sqm",
-          "price_amount",
+          "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
         ]
@@ -5477,14 +5477,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0099",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0099-live-bedroom-type-20260705",
-      "edited_at": "2026-07-05T00:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0099",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "bedrooms"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "eaa46b5c321bee14fdc9a80767276177063235cb70771e70d205d03535d8ef01",
+      "source_hash_after": "589e5cbf372e11868702d751fc0abe6ded74d6b57ffb01e9208b1ae62ce3dac3",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -5646,14 +5646,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0102",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0102-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0102",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "9a4c2cbe36009ed45477e834055f4ca8b29a237f42b6815970d290a169b432ad",
+      "source_hash_after": "5f9d5d2551e46667d671203cb4c38064052c043de597653540ea4ec21da88680",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -5816,14 +5816,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0105",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0105-price-on-request",
-      "edited_at": "2026-07-05T02:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0105",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_on_request"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "9cb32c675ab2e3ac3d2e5f62115c7ff4a6899126c073a62b8629eb3b0f376f74",
+      "source_hash_after": "031b146269d07218c100990beb6d150788871ec190a477af584e775f694cd18b",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -5926,14 +5926,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0107",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0107-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0107",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "1595a70d281c55988d0275f227f29668e27d16fb5969ac3ae1359a424db985d9",
+      "source_hash_after": "2567e264d805819face025609701a2506eb42c451d86c900fb851e11c4e4bd28",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -6264,14 +6264,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0113",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0113-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0113",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "7334304164295102abfbe1da650312d64edb9fe7eaec2ca0237fc3a91c223932",
+      "source_hash_after": "2611208c9e8cc14e3b2652ec956538edc17ae1892b8db82537fa354adc2fcacb",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -6545,14 +6545,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0118",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0118-live-quality-20260705b",
-      "edited_at": "2026-07-05T01:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0118",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "ru",
       "changed_fields": [
-        "bedrooms"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "fa2136357a11e066b5b98acd612d53d8238d0e94d38fd211df3642fafdfe78e2",
+      "source_hash_after": "2943e746027a985038a47e31cefaad1a2cddd945888b72e9b2494e91897eacd9",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -6765,15 +6765,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0122",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0122-live-price-bedroom-20260705",
-      "edited_at": "2026-07-05T01:00:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0122",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "ru",
       "changed_fields": [
-        "bedrooms",
-        "price_eur"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "8d7fa18da715917697559106c06bf2212c01d5a620634cd7a7abcf238a7e7ab9",
+      "source_hash_after": "36cfc3a247832ae3ef987455af07d3295723a46a4da48aa81b8b8dce0b74d7e6",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -7344,14 +7343,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0133",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0133-multi-unit-20260705",
-      "edited_at": "2026-07-05T01:45:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0133",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "ru",
       "changed_fields": [
-        "property_type"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "840b7e48c3aff5f9c570082b9dd1d2f95264f55d82ea20f736725010abb7e8f4",
+      "source_hash_after": "4f493114ba93a69accc900ecb6d2fb278187a980d723d1649d319c59ad2c9f58",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "normal",
@@ -7625,14 +7624,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0138",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0138-multi-unit-20260705",
-      "edited_at": "2026-07-05T01:45:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0138",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "ru",
       "changed_fields": [
-        "property_type"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "117dddad0e0cd29dc1e0734e3dcf7ce6d4186adea3e54b6e1978abc1a546402a",
+      "source_hash_after": "94fee2f26ccae778e0c3c7185d7c813f4c8e09ea9e595f44f9f0761f22b3db07",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "normal",
@@ -7735,14 +7734,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0140",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0140-price-on-request",
-      "edited_at": "2026-07-05T02:20:00Z",
+      "latest_edit_id": "listing-description-restore-MS-CRAWL-0140",
+      "edited_at": "2026-08-25T00:00:00.000Z",
       "source_locale": "ru",
       "changed_fields": [
-        "price_on_request"
+        "description"
       ],
       "changed_property_fields": [],
-      "source_hash_after": "b1c75617c85929144646af34b03d893c76282c210cfc15884b2da59cde31d29d",
+      "source_hash_after": "e1c45e37f57dd666e1bfa211e45597a52711bed3a6075f846d3f1623fbffbd42",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",

@@ -290,7 +290,7 @@
         "blocking_fields": [
           "location_id",
           "primary_area_sqm",
-          "price_amount",
+          "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
         ]
@@ -891,7 +891,7 @@
         "blocking_fields": [
           "location_id",
           "primary_area_sqm",
-          "price_amount",
+          "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
         ]
@@ -4107,7 +4107,7 @@
         "blocking_fields": [
           "location_id",
           "primary_area_sqm",
-          "price_amount",
+          "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
         ]

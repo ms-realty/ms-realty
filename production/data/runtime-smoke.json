@@ -63,6 +63,8 @@
         "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -98,6 +100,34 @@
           "code": "bg",
           "label": "Български",
           "href": "/bg/imoti/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/properties/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/immobilien/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/vastgoed/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/properties/MS-CRAWL-0001",
           "active": false,
           "dir": "ltr"
         },
@@ -162,8 +192,8 @@
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
-      "@id": "/he/properties/MS-CRAWL-0001#listing",
-      "url": "/he/properties/MS-CRAWL-0001",
+      "@id": "https://makler-realty.com/he/properties/MS-CRAWL-0001#listing",
+      "url": "https://makler-realty.com/he/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
       "name": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
       "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
@@ -226,7 +256,8 @@
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
-        "image_count": 35
+        "image_count": 35,
+        "source_stated": []
       },
       "lifecycle": {
         "status": "available",
@@ -685,18 +716,13 @@
           "bedrooms_not_applicable": true,
           "area_sqm": null,
           "land_area_sqm": null,
-          "price_eur": 1,
-          "price_on_request": false,
+          "price_eur": null,
+          "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 1,
+          "image_count": 0,
           "legacy_image_count": 18,
-          "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Дава под наем промишлена сграда в Сандански",
-            "width": 45,
-            "height": 45
-          },
+          "thumbnail": null,
           "actions": {
             "detail": {
               "label": "פרטים",
@@ -743,8 +769,8 @@
           "bedrooms_not_applicable": true,
           "area_sqm": null,
           "land_area_sqm": null,
-          "price_eur": 6,
-          "price_on_request": false,
+          "price_eur": null,
+          "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
           "image_count": 13,
@@ -864,9 +890,9 @@
     },
     "metadata": {
       "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
+      "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва…",
       "og_title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "og_description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
+      "og_description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва…",
       "robots": "noindex,follow"
     },
     "hreflang": [],
@@ -893,6 +919,8 @@
         "offices": "Sandanski"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "The form is temporarily unavailable. Call or message us instead. We reply quickly.",
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -927,49 +955,49 @@
         {
           "code": "bg",
           "label": "Български",
-          "href": "/bg",
+          "href": "/bg/imoti/MS-CRAWL-0001",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "en",
           "label": "English",
-          "href": "/en",
+          "href": "/en/properties/MS-CRAWL-0001",
           "active": true,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de",
+          "href": "/de/immobilien/MS-CRAWL-0001",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl",
+          "href": "/nl/vastgoed/MS-CRAWL-0001",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru",
+          "href": "/ru/properties/MS-CRAWL-0001",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "el",
           "label": "Ελληνικά",
-          "href": "/el",
+          "href": "/el/akinita/MS-CRAWL-0001",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "he",
           "label": "עברית",
-          "href": "/he",
+          "href": "/he/properties/MS-CRAWL-0001",
           "active": false,
           "dir": "rtl"
         }
@@ -1040,8 +1068,8 @@
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
-      "@id": "/en/properties/MS-CRAWL-0001#listing",
-      "url": "/en/properties/MS-CRAWL-0001",
+      "@id": "https://makler-realty.com/en/properties/MS-CRAWL-0001#listing",
+      "url": "https://makler-realty.com/en/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
       "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
       "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
@@ -1104,7 +1132,8 @@
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
-        "image_count": 35
+        "image_count": 35,
+        "source_stated": []
       },
       "lifecycle": {
         "status": "available",
@@ -1563,18 +1592,13 @@
           "bedrooms_not_applicable": true,
           "area_sqm": null,
           "land_area_sqm": null,
-          "price_eur": 1,
-          "price_on_request": false,
+          "price_eur": null,
+          "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 1,
+          "image_count": 0,
           "legacy_image_count": 18,
-          "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Дава под наем промишлена сграда в Сандански",
-            "width": 45,
-            "height": 45
-          },
+          "thumbnail": null,
           "actions": {
             "detail": {
               "label": "Details",
@@ -1621,8 +1645,8 @@
           "bedrooms_not_applicable": true,
           "area_sqm": null,
           "land_area_sqm": null,
-          "price_eur": 6,
-          "price_on_request": false,
+          "price_eur": null,
+          "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
           "image_count": 13,
@@ -1776,6 +1800,8 @@
         "offices": "Сандански"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "Форма временно недоступна. Позвоните или напишите нам, мы быстро отвечаем.",
       "home": {
         "href": "/ru",
         "label": "MS Realty"
@@ -1808,11 +1834,53 @@
       ],
       "languages": [
         {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/imoti/MS-CRAWL-0114",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/properties/MS-CRAWL-0114",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/immobilien/MS-CRAWL-0114",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/vastgoed/MS-CRAWL-0114",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
           "code": "ru",
           "label": "Русский",
           "href": "/ru/properties/MS-CRAWL-0114",
           "active": true,
           "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/akinita/MS-CRAWL-0114",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/properties/MS-CRAWL-0114",
+          "active": false,
+          "dir": "rtl"
         }
       ],
       "contact": {
@@ -1861,8 +1929,8 @@
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
-      "@id": "/ru/properties/MS-CRAWL-0114#listing",
-      "url": "/ru/properties/MS-CRAWL-0114",
+      "@id": "https://makler-realty.com/ru/properties/MS-CRAWL-0114#listing",
+      "url": "https://makler-realty.com/ru/properties/MS-CRAWL-0114",
       "identifier": "MS-CRAWL-0114",
       "name": "Апартаменты в Парк отеле Пирин — г.Сандански",
       "description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
@@ -1918,7 +1986,8 @@
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
-        "image_count": 33
+        "image_count": 33,
+        "source_stated": []
       },
       "lifecycle": {
         "status": "available",
@@ -2331,7 +2400,7 @@
           "property_type_label": "Квартира",
           "offer_type": "sale",
           "offer_type_label": "Продажа",
-          "bedrooms": null,
+          "bedrooms": 2,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
           "land_area_sqm": null,
@@ -2389,7 +2458,7 @@
           "property_type_label": "Квартира",
           "offer_type": "sale",
           "offer_type_label": "Продажа",
-          "bedrooms": null,
+          "bedrooms": 3,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
           "land_area_sqm": null,
@@ -2564,6 +2633,8 @@
         "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -3351,7 +3422,14 @@
                 2000
               ]
             },
-            "bedrooms": [],
+            "bedrooms": [
+              1,
+              2,
+              3,
+              4,
+              6,
+              7
+            ],
             "premises": [],
             "hotel_rooms": []
           },
@@ -3366,9 +3444,7 @@
             "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
           },
           "applicable_filter_fields": [
-            "bedrooms_min",
-            "area_min",
-            "area_max"
+            "bedrooms_min"
           ]
         }
       },
@@ -3578,7 +3654,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -3636,7 +3712,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -3694,7 +3770,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -3756,18 +3832,13 @@
         "bedrooms_not_applicable": true,
         "area_sqm": null,
         "land_area_sqm": null,
-        "price_eur": 1,
-        "price_on_request": false,
+        "price_eur": null,
+        "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 1,
+        "image_count": 0,
         "legacy_image_count": 18,
-        "thumbnail": {
-          "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Дава под наем промишлена сграда в Сандански",
-          "width": 45,
-          "height": 45
-        },
+        "thumbnail": null,
         "actions": {
           "detail": {
             "label": "פרטים",
@@ -3867,6 +3938,8 @@
         "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4040,6 +4113,7 @@
           "field": "בחרו תמונות",
           "reference": "מספר הפנייה",
           "reference_hint": "שלחו קודם את בקשת ההערכה. נמלא כאן את המספר; אם כבר קיבלתם אותו ממתווך, הקלידו אותו.",
+          "reference_toggle": "כבר יש לכם מספר פנייה?",
           "submit": "שליחת תמונות",
           "pending": "שולח…",
           "success": "התמונות הגיעו לפנייה שלכם. הן נשארות פרטיות עד שמתווך יבדוק אותן.",
@@ -4123,6 +4197,8 @@
         "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4299,7 +4375,7 @@
     "indexable": true,
     "metadata": {
       "title": "Foreign buyers and Bulgarian land ownership",
-      "description": "Non-EU buyers cannot own Bulgarian land directly in their own name. For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD. EU and EEA buyers are handled differently and should confirm the current pur",
+      "description": "Non-EU buyers cannot own Bulgarian land directly in their own name. For land ownership, a Non-EU buyer normally needs a Bulgarian company structure…",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -4335,6 +4411,8 @@
         "offices": "Sandanski"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "The form is temporarily unavailable. Call or message us instead. We reply quickly.",
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -4484,7 +4562,7 @@
       "@type": "Article",
       "headline": "Foreign buyers and Bulgarian land ownership",
       "inLanguage": "en",
-      "url": "/en/guides/foreign-buyers",
+      "url": "https://makler-realty.com/en/guides/foreign-buyers",
       "publisher": {
         "@type": "Organization",
         "name": "MS Realty"
@@ -4492,7 +4570,7 @@
     },
     "body": {
       "h1": "Foreign buyers and Bulgarian land ownership",
-      "intro": "Non-EU buyers cannot own Bulgarian land directly in their own name. For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD. EU and EEA buyers are handled differently and should confirm the current pur",
+      "intro": "Non-EU buyers cannot own Bulgarian land directly in their own name. For land ownership, a Non-EU buyer normally needs a Bulgarian company structure…",
       "sections": [
         {
           "id": "foreign-buyers-bg-land-ownership",
@@ -4591,6 +4669,8 @@
         "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4632,21 +4712,21 @@
         {
           "code": "en",
           "label": "English",
-          "href": "/en",
+          "href": "/en/locations/sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de",
+          "href": "/de/orte/sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl",
+          "href": "/nl/locaties/sandanski",
           "active": false,
           "dir": "ltr"
         },
@@ -4867,6 +4947,8 @@
         "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -4902,6 +4984,34 @@
           "code": "bg",
           "label": "Български",
           "href": "/bg/imoti/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/properties/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/immobilien/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/vastgoed/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/properties/MS-CRAWL-0001",
           "active": false,
           "dir": "ltr"
         },
@@ -4966,8 +5076,8 @@
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
-      "@id": "/he/properties/MS-CRAWL-0001#listing",
-      "url": "/he/properties/MS-CRAWL-0001",
+      "@id": "https://makler-realty.com/he/properties/MS-CRAWL-0001#listing",
+      "url": "https://makler-realty.com/he/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
       "name": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
       "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
@@ -5030,7 +5140,8 @@
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "sold",
-        "image_count": 35
+        "image_count": 35,
+        "source_stated": []
       },
       "lifecycle": {
         "status": "sold",
@@ -5489,18 +5600,13 @@
           "bedrooms_not_applicable": true,
           "area_sqm": null,
           "land_area_sqm": null,
-          "price_eur": 1,
-          "price_on_request": false,
+          "price_eur": null,
+          "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 1,
+          "image_count": 0,
           "legacy_image_count": 18,
-          "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Дава под наем промишлена сграда в Сандански",
-            "width": 45,
-            "height": 45
-          },
+          "thumbnail": null,
           "actions": {
             "detail": {
               "label": "פרטים",
@@ -5547,8 +5653,8 @@
           "bedrooms_not_applicable": true,
           "area_sqm": null,
           "land_area_sqm": null,
-          "price_eur": 6,
-          "price_on_request": false,
+          "price_eur": null,
+          "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
           "image_count": 13,
@@ -5695,6 +5801,8 @@
         "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -5729,49 +5837,49 @@
         {
           "code": "bg",
           "label": "Български",
-          "href": "/bg",
+          "href": "/bg/tarsene?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "en",
           "label": "English",
-          "href": "/en",
+          "href": "/en/search?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de",
+          "href": "/de/suche?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl",
+          "href": "/nl/zoeken?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru",
+          "href": "/ru/search?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "el",
           "label": "Ελληνικά",
-          "href": "/el",
+          "href": "/el/anazitisi?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "he",
           "label": "עברית",
-          "href": "/he",
+          "href": "/he/search?q=Sandanski",
           "active": true,
           "dir": "rtl"
         }
@@ -6524,7 +6632,14 @@
               2000
             ]
           },
-          "bedrooms": [],
+          "bedrooms": [
+            1,
+            2,
+            3,
+            4,
+            6,
+            7
+          ],
           "premises": [],
           "hotel_rooms": []
         },
@@ -6539,9 +6654,7 @@
           "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
         },
         "applicable_filter_fields": [
-          "bedrooms_min",
-          "area_min",
-          "area_max"
+          "bedrooms_min"
         ]
       },
       "fallback": {
@@ -6626,7 +6739,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -6684,7 +6797,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -6742,7 +6855,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -6804,18 +6917,13 @@
         "bedrooms_not_applicable": true,
         "area_sqm": null,
         "land_area_sqm": null,
-        "price_eur": 1,
-        "price_on_request": false,
+        "price_eur": null,
+        "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 1,
+        "image_count": 0,
         "legacy_image_count": 18,
-        "thumbnail": {
-          "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Дава под наем промишлена сграда в Сандански",
-          "width": 45,
-          "height": 45
-        },
+        "thumbnail": null,
         "actions": {
           "detail": {
             "label": "פרטים",
@@ -6858,7 +6966,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -6916,7 +7024,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -6974,7 +7082,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -7032,7 +7140,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -7288,6 +7396,8 @@
         "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -7322,49 +7432,49 @@
         {
           "code": "bg",
           "label": "Български",
-          "href": "/bg",
+          "href": "/bg/lokacii/sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "en",
           "label": "English",
-          "href": "/en",
+          "href": "/en/locations/sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de",
+          "href": "/de/orte/sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl",
+          "href": "/nl/locaties/sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru",
+          "href": "/ru/locations/sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "el",
           "label": "Ελληνικά",
-          "href": "/el",
+          "href": "/el/topothesies/sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "he",
           "label": "עברית",
-          "href": "/he",
+          "href": "/he/locations/sandanski",
           "active": true,
           "dir": "rtl"
         }
@@ -7558,7 +7668,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -7616,7 +7726,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -7674,7 +7784,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -7736,18 +7846,13 @@
         "bedrooms_not_applicable": true,
         "area_sqm": null,
         "land_area_sqm": null,
-        "price_eur": 1,
-        "price_on_request": false,
+        "price_eur": null,
+        "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 1,
+        "image_count": 0,
         "legacy_image_count": 18,
-        "thumbnail": {
-          "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Дава под наем промишлена сграда в Сандански",
-          "width": 45,
-          "height": 45
-        },
+        "thumbnail": null,
         "actions": {
           "detail": {
             "label": "פרטים",
@@ -7790,7 +7895,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -7848,7 +7953,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -7906,7 +8011,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -7964,7 +8069,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -8221,6 +8326,8 @@
         "offices": "Sandanski"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "The form is temporarily unavailable. Call or message us instead. We reply quickly.",
       "home": {
         "href": "/en",
         "label": "MS Realty"
@@ -8425,6 +8532,8 @@
         "offices": "סנדנסקי"
       },
       "lead_writes_disabled": true,
+      "saved_search_writes_disabled": false,
+      "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
       "home": {
         "href": "/he",
         "label": "MS Realty"
@@ -8459,49 +8568,49 @@
         {
           "code": "bg",
           "label": "Български",
-          "href": "/bg",
+          "href": "/bg/tarsene?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "en",
           "label": "English",
-          "href": "/en",
+          "href": "/en/search?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de",
+          "href": "/de/suche?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl",
+          "href": "/nl/zoeken?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru",
+          "href": "/ru/search?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "el",
           "label": "Ελληνικά",
-          "href": "/el",
+          "href": "/el/anazitisi?q=Sandanski",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "he",
           "label": "עברית",
-          "href": "/he",
+          "href": "/he/search?q=Sandanski",
           "active": true,
           "dir": "rtl"
         }
@@ -9254,7 +9363,14 @@
               2000
             ]
           },
-          "bedrooms": [],
+          "bedrooms": [
+            1,
+            2,
+            3,
+            4,
+            6,
+            7
+          ],
           "premises": [],
           "hotel_rooms": []
         },
@@ -9269,9 +9385,7 @@
           "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
         },
         "applicable_filter_fields": [
-          "bedrooms_min",
-          "area_min",
-          "area_max"
+          "bedrooms_min"
         ]
       },
       "fallback": {
@@ -9414,7 +9528,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -9472,7 +9586,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -9530,7 +9644,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -9592,18 +9706,13 @@
         "bedrooms_not_applicable": true,
         "area_sqm": null,
         "land_area_sqm": null,
-        "price_eur": 1,
-        "price_on_request": false,
+        "price_eur": null,
+        "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 1,
+        "image_count": 0,
         "legacy_image_count": 18,
-        "thumbnail": {
-          "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Дава под наем промишлена сграда в Сандански",
-          "width": 45,
-          "height": 45
-        },
+        "thumbnail": null,
         "actions": {
           "detail": {
             "label": "פרטים",
@@ -9646,7 +9755,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -9704,7 +9813,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -9762,7 +9871,7 @@
         "property_type_label": "דירה",
         "offer_type": "rent",
         "offer_type_label": "להשכרה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -9820,7 +9929,7 @@
         "property_type_label": "דירה",
         "offer_type": "sale",
         "offer_type_label": "למכירה",
-        "bedrooms": null,
+        "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "area_sqm": null,
         "land_area_sqm": null,
@@ -9980,9 +10089,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-a8bb1653-c5f4-412b-9dcb-987585080eb1",
+    "id": "inbox-lead-draft-b5a58272-5655-4014-9f7e-b54d17f7501d",
     "lead": {
-      "id": "lead-draft-a8bb1653-c5f4-412b-9dcb-987585080eb1",
+      "id": "lead-draft-b5a58272-5655-4014-9f7e-b54d17f7501d",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10083,9 +10192,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-176a25b7-85d9-4fb9-962b-cc47b5893d5a",
+    "id": "inbox-lead-draft-ab02ee05-eb82-4fcf-8e93-4fdfe31e0413",
     "lead": {
-      "id": "lead-draft-176a25b7-85d9-4fb9-962b-cc47b5893d5a",
+      "id": "lead-draft-ab02ee05-eb82-4fcf-8e93-4fdfe31e0413",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10189,9 +10298,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-79ab49ad-5830-41f0-b71e-dd7273f2ad48",
+    "id": "inbox-lead-draft-ad861327-1d88-4926-86c6-f01e6656c9d2",
     "lead": {
-      "id": "lead-draft-79ab49ad-5830-41f0-b71e-dd7273f2ad48",
+      "id": "lead-draft-ad861327-1d88-4926-86c6-f01e6656c9d2",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",
