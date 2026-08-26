@@ -8,6 +8,7 @@ import { renderListingPage } from "../lib/public-site.mjs";
 import { renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import {
   FACT_REVIEW_COPY,
+  FACT_REVIEW_ROW_KEYS,
   buildListingFactReviewQueue,
   factReviewCopyFor,
   listingFactReviewFor,
@@ -140,4 +141,36 @@ test("fact review promotion keeps a grouped floor value on its matching canonica
   assert.equal(updated.facts.total_floors, 4);
   assert.equal(updated.fact_verification.find((entry) => entry.field === "floor_number").state, "broker_verified");
   assert.equal(updated.fact_verification.find((entry) => entry.field === "total_floors").state, "entered_pending_review");
+});
+
+test("fact review exposes a pending total-floor value when the floor number is already verified", async () => {
+  const seed = loadCmsSeed();
+  const listing = seed.records.find((record) => record.id === "MS-CRAWL-0003");
+  const property = seed.properties.find((candidate) => candidate.id === listing.property);
+  property.facts.floor_number = 2;
+  property.facts.total_floors = 4;
+  property.fact_verification = property.fact_verification.map((entry) =>
+    entry.field === "floor_number"
+      ? { ...entry, state: "broker_verified" }
+      : entry.field === "total_floors"
+        ? { ...entry, state: "entered_pending_review" }
+        : entry,
+  );
+  const review = listingFactReviewFor({ listing, property });
+  assert.deepEqual(review.unchecked_rows, ["floor", "bedrooms", "price"].sort((left, right) => FACT_REVIEW_ROW_KEYS.indexOf(left) - FACT_REVIEW_ROW_KEYS.indexOf(right)));
+  assert.ok(review.rows.some((row) => row.editor_field === "total_floors" && row.property_fields.includes("total_floors")));
+  assert.ok(!review.rows.some((row) => row.editor_field === "floor" && row.property_fields.includes("total_floors")));
+
+  const runtime = createPayloadDraftRuntime(seed);
+  await saveListingDraft(seed, {
+    payload: runtime.payload,
+    principal: { id: "editor_bg", roles: ["editor"], source: "test" },
+    input: { listingId: listing.id, patch: { total_floors: 5 }, confirmedFacts: ["total_floors"] },
+    editedAt: "2026-08-27T10:00:00.000Z",
+  });
+  const updated = runtime.currentRows().properties.find((candidate) => candidate.id === listing.property);
+  assert.equal(updated.facts.floor_number, 2);
+  assert.equal(updated.facts.total_floors, 5);
+  assert.equal(updated.fact_verification.find((entry) => entry.field === "floor_number").state, "broker_verified");
+  assert.equal(updated.fact_verification.find((entry) => entry.field === "total_floors").state, "broker_verified");
 });

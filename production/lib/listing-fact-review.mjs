@@ -168,13 +168,21 @@ export function listingFactReviewFor({ listing = {}, property = null } = {}) {
   for (const rowKey of projection?.source_stated_facts || []) {
     const definition = FACT_REVIEW_ROWS[rowKey];
     if (!definition) continue;
-    rows.push({
-      row: rowKey,
-      editor_field: definition.editor_field,
-      property_fields: propertyFieldsForRow(rowKey, property),
-      value: projection[rowKey] ?? listing.facts?.[definition.editor_field] ?? null,
-      source_stated: true,
-    });
+    const propertyFields = propertyFieldsForRow(rowKey, property);
+    const editorFields = rowKey === "floor" && propertyFields.length > 0
+      ? propertyFields.map((field) => field === "floor_number" ? "floor" : "total_floors")
+      : [definition.editor_field];
+    for (const editorField of [...new Set(editorFields)]) {
+      const editorPropertyFields = propertyFieldsForEditorField(editorField, propertyFields);
+      const fieldValue = editorPropertyFields.length === 1 ? projection[editorPropertyFields[0]] : undefined;
+      rows.push({
+        row: rowKey,
+        editor_field: editorField,
+        property_fields: editorPropertyFields,
+        value: fieldValue ?? projection[rowKey] ?? listing.facts?.[editorField] ?? null,
+        source_stated: true,
+      });
+    }
   }
   const price = priceRow(listing);
   if (price) rows.push({ ...price, source_stated: true });
@@ -183,7 +191,7 @@ export function listingFactReviewFor({ listing = {}, property = null } = {}) {
     listing_id: listing.id || null,
     property_id: property?.id || null,
     rows,
-    unchecked_rows: rows.map((row) => row.row),
+    unchecked_rows: [...new Set(rows.map((row) => row.row))],
     unchecked_editor_fields: [...new Set(rows.map((row) => row.editor_field))],
     unchecked_count: rows.length,
   };
@@ -207,7 +215,7 @@ export function factPromotionsFor({ listing = {}, property = null, confirmedFiel
     rows.map((row) => [row.editor_field, propertyFieldsForEditorField(row.editor_field, row.property_fields)]),
   );
   return {
-    rows: rows.map((row) => row.row),
+    rows: [...new Set(rows.map((row) => row.row))],
     editor_fields: [...new Set(rows.map((row) => row.editor_field))],
     property_fields_by_editor_field: propertyFieldsByEditorField,
     property_fields: [...new Set(Object.values(propertyFieldsByEditorField).flat())],
