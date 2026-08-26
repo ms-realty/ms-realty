@@ -14,7 +14,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { leadWritesDisabledFromEnv, renderContactPage, renderSearchUnavailablePage } from "../lib/public-site.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
-import { DS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
+import { ADMIN_CSS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 const OPERATOR_TOKEN = "login-operator-token-0123456789ab";
 const PAYLOAD_SESSION = "payload.browser.session";
@@ -150,7 +150,7 @@ test("session cookie helpers round-trip and cap the Payload session token", () =
   // title, 48px inputs with an 8px radius and the focus ring, and a 48px
   // accent submit. No em-dashes anywhere in the copy.
   assert.ok(login.includes(`<link rel="stylesheet" href="${FONTS_URL}">`));
-  assert.ok(login.includes(`<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}"`));
+  assert.ok(login.includes(`<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}"`));
   assert.match(login, /\.login-page \{[^}]*background: var\(--ink-50, #F4F4F3\)/);
   assert.match(login, /\.login \{[^}]*max-width: 420px;[^}]*border-radius: 14px/);
   assert.match(login, /\.login__title \{[^}]*font-size: 22px;\s*font-weight: 600/);

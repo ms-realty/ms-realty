@@ -19,6 +19,7 @@ import {
   responseForPublicOrigin,
   responseWithEdgeBuildMarker,
 } from "./origin-proxy.mjs";
+import { edgeCacheHit, edgeCacheKey, requestMayUseEdgeCache, storeInEdgeCache } from "./edge-cache.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
 // process that reads the filesystem — the CMS seed and (for now) the JSONL
@@ -255,8 +256,45 @@ async function proxyDurableOrigin(request, env, url, preview) {
   }
 }
 
+// Container disk resets on sleep, so only the existing Payload/Postgres
+// authority routes can write. Every other mutation remains read-only. MCP is
+// admitted as well: the app authenticates it and the Worker strips its
+// ledger-writing tools (MS_REALTY_MCP_WRITES_DISABLED on the container).
+async function serveFromContainer(request, env, url, preview) {
+  const mutating = MUTATING_METHODS.has(request.method);
+  const leadProbe = mutating && (await allowsLeadProbeMutation({ request, pathname: url.pathname, env }));
+  const publicLead = mutating && allowsPublicLeadMutation({ method: request.method, pathname: url.pathname, env });
+  const publicEvent = mutating && allowsPublicEventMutation({ method: request.method, pathname: url.pathname, env });
+  const providerWebhook = mutating && allowsProviderWebhookMutation({ method: request.method, pathname: url.pathname, env });
+  if (
+    mutating &&
+    !allowsAdminSessionMutation({ request, method: request.method, pathname: url.pathname }) &&
+    !leadProbe &&
+    !publicLead &&
+    !publicEvent &&
+    !providerWebhook &&
+    !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
+    !allowsDurableListingAuthorityMutation({ method: request.method, pathname: url.pathname, env }) &&
+    !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
+  ) {
+    return ephemeralRuntimeDataResponse();
+  }
+
+  // One shared instance: the app keeps in-process state (rate-limit buckets,
+  // the stat-validated file cache) that must not be split across instances.
+  // Fanning out would silently multiply rate limits and desync the caches.
+  let forwardedRequest = request;
+  if (leadProbe) {
+    const headers = new Headers(request.headers);
+    headers.delete(LEAD_PROBE_HEADER);
+    forwardedRequest = new Request(request, { headers });
+  }
+  const response = await getContainer(env.MS_REALTY, "ms-realty-singleton").fetch(forwardedRequest);
+  return preview ? withPreviewNoindex(response) : response;
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (isPayloadPrivatePath(url.pathname)) return payloadPrivateResponse();
     if (url.pathname.startsWith(INGEST_PREFIX)) return ingestMedia(request, env, url);
@@ -277,44 +315,24 @@ export default {
       return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
     }
 
+    // Cloudflare stores nothing for an HTML document on its own, so the
+    // `s-maxage` the runtime prints is inert until we act on it here. Only an
+    // anonymous plain navigation consults the shared cache, and only a response
+    // the runtime itself marked `public` with an `s-maxage` is ever stored.
+    const cache = globalThis.caches?.default ?? null;
+    const cacheKey = cache && requestMayUseEdgeCache(request) ? edgeCacheKey(request) : null;
+    if (cacheKey) {
+      const cached = await cache.match(cacheKey);
+      if (cached) return edgeCacheHit(cached);
+    }
+
     // The durable handoff runtime lives on the agency's fixed origin. Keeping
     // this switch optional preserves the Container as a fail-closed fallback
     // for accounts that have not provisioned that origin.
-    if (env.MS_REALTY_ORIGIN_URL) return proxyDurableOrigin(request, env, url, preview);
+    const response = env.MS_REALTY_ORIGIN_URL
+      ? await proxyDurableOrigin(request, env, url, preview)
+      : await serveFromContainer(request, env, url, preview);
 
-    // Container disk resets on sleep, so only the existing Payload/Postgres
-    // authority routes can write. Every other mutation remains read-only.
-    // MCP is admitted as well: the app authenticates it and the Worker strips
-    // its ledger-writing tools (MS_REALTY_MCP_WRITES_DISABLED below).
-    const mutating = MUTATING_METHODS.has(request.method);
-    const leadProbe = mutating && (await allowsLeadProbeMutation({ request, pathname: url.pathname, env }));
-    const publicLead = mutating && allowsPublicLeadMutation({ method: request.method, pathname: url.pathname, env });
-    const publicEvent = mutating && allowsPublicEventMutation({ method: request.method, pathname: url.pathname, env });
-    const providerWebhook = mutating && allowsProviderWebhookMutation({ method: request.method, pathname: url.pathname, env });
-    if (
-      mutating &&
-      !allowsAdminSessionMutation({ request, method: request.method, pathname: url.pathname }) &&
-      !leadProbe &&
-      !publicLead &&
-      !publicEvent &&
-      !providerWebhook &&
-      !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
-      !allowsDurableListingAuthorityMutation({ method: request.method, pathname: url.pathname, env }) &&
-      !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
-    ) {
-      return ephemeralRuntimeDataResponse();
-    }
-
-    // One shared instance: the app keeps in-process state (rate-limit buckets,
-    // the stat-validated file cache) that must not be split across instances.
-    // Fanning out would silently multiply rate limits and desync the caches.
-    let forwardedRequest = request;
-    if (leadProbe) {
-      const headers = new Headers(request.headers);
-      headers.delete(LEAD_PROBE_HEADER);
-      forwardedRequest = new Request(request, { headers });
-    }
-    const response = await getContainer(env.MS_REALTY, "ms-realty-singleton").fetch(forwardedRequest);
-    return preview ? withPreviewNoindex(response) : response;
+    return storeInEdgeCache(response, cacheKey, ctx, cache);
   },
 };

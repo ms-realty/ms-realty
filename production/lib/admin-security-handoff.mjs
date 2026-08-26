@@ -1,4 +1,4 @@
-import { DS_HASH, FONTS_URL } from "./ui/design-assets.mjs";
+import { ADMIN_CSS_HASH, FONTS_URL } from "./ui/design-assets.mjs";
 
 // Two standalone pages for the only values this workspace ever shows once: an
 // operator's new TOTP secret with its recovery codes, and a workspace export's
@@ -175,7 +175,7 @@ function page(locale, title, body) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS_URL}">
-<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">
+<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${ADMIN_CSS_HASH}">
 <style>${STYLE}</style>
 </head>
 <body class="handoff-page">

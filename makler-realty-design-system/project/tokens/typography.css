@@ -12,9 +12,14 @@
    ============================================================ */
 
 :root {
-  /* ---- Families ---- */
-  --font-display: 'Source Serif 4', 'Noto Serif Hebrew', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
-  --font-sans:    'Commissioner', 'Noto Sans Hebrew', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  /* ---- Families ----
+     The Noto Hebrew fallbacks are named only under :lang(he) below. They used
+     to sit in every locale's stack, which cost a Hebrew webfont subset on
+     Latin and Cyrillic pages just to typeset the five characters of the
+     Hebrew endonym in the language menu. Dropping them here leaves the same
+     system fallbacks every other non-Hebrew glyph already relies on. */
+  --font-display: 'Source Serif 4', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-sans:    'Commissioner', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
   --font-mono:    'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
 
   /* ---- Weights ---- */
@@ -56,6 +61,14 @@
   --display-md: clamp(2.25rem, 1.4rem + 3.6vw, 3.5rem);   /* @kind other */
   --display-lg: clamp(2.75rem, 1.4rem + 5.6vw, 5rem);     /* @kind other */
   --display-xl: clamp(3.25rem, 1.2rem + 8vw, 6.5rem);     /* @kind other */
+}
+
+/* The Hebrew locale is the only one served the Noto Hebrew faces, so it is the
+   only one that names them. Commissioner and Source Serif 4 stay in front for
+   the Latin runs that appear inside Hebrew pages (reference codes, m², URLs). */
+:root:lang(he) {
+  --font-display: 'Source Serif 4', 'Noto Serif Hebrew', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-sans:    'Commissioner', 'Noto Sans Hebrew', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
 }
 
 /* ============================================================

@@ -2,7 +2,16 @@ import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { chromeCopyFor, labelsFor, localizedListingValue, uiCopyFor } from "./public-site.mjs";
 import { absolutePublicUrl, isAbsoluteHttpUrl } from "./public-origin.mjs";
-import { ADMIN_CLIENT_HASH, DS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_SRC, PUBLIC_CLIENT_HASH } from "./ui/design-assets.mjs";
+import {
+  ADMIN_CLIENT_HASH,
+  ADMIN_CSS_HASH,
+  FONTS_URL,
+  FONTS_URL_HEBREW,
+  LOGO_ASPECT,
+  LOGO_SRC,
+  PUBLIC_CLIENT_HASH,
+  PUBLIC_CSS_HASH,
+} from "./ui/design-assets.mjs";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => {
@@ -26,12 +35,20 @@ function themeBootstrapScript() {
   return `<script>(function(){var r=document.documentElement;try{var t=localStorage.getItem("ms-realty:theme");if(t==="light"||t==="dark")r.setAttribute("data-theme",t);}catch(error){}r.setAttribute("data-theme-ready","1");})();</script>`;
 }
 
-function designSystemStyle() {
+// The admin CRM and the public site have separate stylesheets so a visitor
+// never pays for the surface they cannot reach, and the Hebrew locale is the
+// only one that asks Google for the Noto Hebrew faces.
+function designSystemStyle(page) {
+  const admin = String(page?.kind || "").startsWith("admin_");
+  const sheet = admin ? "ms-realty-admin" : "ms-realty-public";
+  const hash = admin ? ADMIN_CSS_HASH : PUBLIC_CSS_HASH;
+  const locale = page?.lang || page?.locale || "en";
+  const fonts = locale === "he" ? FONTS_URL_HEBREW : FONTS_URL;
   return [
     '<link rel="preconnect" href="https://fonts.googleapis.com">',
     '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
-    `<link rel="stylesheet" href="${FONTS_URL}">`,
-    `<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">`,
+    `<link rel="stylesheet" href="${fonts}">`,
+    `<link rel="stylesheet" href="/vendor/${sheet}.css?v=${hash}" data-ms-realty-design-system="external" data-ds-hash="${hash}">`,
   ].join("\n");
 }
 
@@ -116,7 +133,7 @@ function meta(page, options = {}) {
     "<meta charset=\"utf-8\">",
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">",
     options.print ? "" : themeBootstrapScript(),
-    options.print ? "" : designSystemStyle(),
+    options.print ? "" : designSystemStyle(page),
     `<title>${escapeHtml(page.metadata?.title || "MS Realty")}</title>`,
     `<meta name="description" content="${escapeHtml(page.metadata?.description || "")}">`,
     `<meta name="robots" content="${escapeHtml(page.metadata?.robots || (page.indexable ? "index,follow" : "noindex,follow"))}">`,
