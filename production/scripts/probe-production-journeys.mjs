@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { isPreviewHost } from "../../workers/preview-host.mjs";
+
 // Synthetic probe of the deployed site's real operator-visible journeys.
 // /api/health only proves the process answers; a container can be "healthy"
 // while the public pages 500, the search fallback breaks, or media stops
@@ -20,6 +22,7 @@ if (expectedBuildMarker && !SHA_PATTERN.test(expectedBuildMarker)) {
 }
 
 const TIMEOUT_MS = 25_000;
+const previewHost = isPreviewHost(new URL(baseUrl).hostname);
 
 async function fetchPath(path, { method = "GET", headers = {} } = {}) {
   const controller = new AbortController();
@@ -79,6 +82,10 @@ const checks = [
     id: "admin_login_reachable",
     async run() {
       const { status, text } = await fetchPath("/admin/login");
+      if (previewHost) {
+        if (status !== 404) throw new Error(`preview edge exposed admin login with ${status}, expected 404`);
+        return { note: "admin is intentionally hidden on the preview edge" };
+      }
       if (status !== 200) throw new Error(`admin login returned ${status}`);
       if (!text.includes("<form")) throw new Error("admin login page has no form");
       return {};
@@ -88,6 +95,10 @@ const checks = [
     id: "admin_requires_auth",
     async run() {
       const { status } = await fetchPath("/api/admin/launch-readiness");
+      if (previewHost) {
+        if (status !== 404) throw new Error(`preview edge exposed admin API with ${status}, expected 404`);
+        return { note: "admin API is intentionally hidden on the preview edge" };
+      }
       if (status !== 401) throw new Error(`unauthenticated admin API returned ${status}, expected 401`);
       return {};
     },
@@ -105,8 +116,7 @@ const checks = [
     async run() {
       const { headers } = await fetchPath("/bg");
       const robots = String(headers.get("x-robots-tag") || "");
-      const isPreviewHost = /\.workers\.dev$/i.test(new URL(baseUrl).hostname);
-      if (isPreviewHost && !robots.includes("noindex")) {
+      if (previewHost && !robots.includes("noindex")) {
         throw new Error("preview host must serve noindex — search equity protection");
       }
       return { x_robots_tag: robots || null };

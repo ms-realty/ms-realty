@@ -10,6 +10,8 @@ test("monitoring drill gates intentional failure behind an auditable typed dispa
   assert.doesNotMatch(workflow, /environment:\n\s+name: monitoring-alert-drill/);
   assert.match(workflow, /test "\$CONFIRM_ALERT_DRILL" = "true"/);
   assert.match(workflow, /test "\$\{#MS_REALTY_ORIGIN_TOKEN\}" -ge 32/);
+  assert.match(workflow, /test "\$GITHUB_REF" = "refs\/heads\/main"/);
+  assert.match(workflow, /test "\$GITHUB_SHA" = "\$\(git rev-parse origin\/main\)"/);
   assert.match(workflow, /MS_REALTY_EXPECTED_BUILD_MARKER: \$\{\{ inputs\.release_sha \}\}/);
   assert.match(workflow, /mechanism: "workflow_dispatch_typed_confirmation"/);
   assert.match(workflow, /actor: process\.env\.GITHUB_ACTOR/);
@@ -20,7 +22,7 @@ test("monitoring drill gates intentional failure behind an auditable typed dispa
     workflow.indexOf("- name: Roll back the isolated MS Realty artifact"),
   );
   assert.match(failureStep, /inputs\.confirm_alert_drill/);
-  assert.match(failureStep, /node production\/scripts\/probe-production-journeys\.mjs/);
+  assert.match(failureStep, /node "\$MS_REALTY_MONITORING_PROBE"/);
   assert.match(failureStep, /set -o pipefail/);
   assert.doesNotMatch(failureStep, /exit 1/);
 });
@@ -43,6 +45,8 @@ test("monitoring drill deploys and rolls back the real MS Realty Container artif
   assert.match(workflow, /config\.replaceAll\(process\.env\.RELEASE_SHA, process\.env\.FAULT_MARKER\)/);
   assert.match(workflow, /createHash\("sha1"\)/);
   assert.match(workflow, /test "\$fault_marker" != "\$RELEASE_SHA"/);
+  assert.match(workflow, /git show "\$\{GITHUB_SHA\}:production\/scripts\/probe-production-journeys\.mjs"/);
+  assert.match(workflow, /git show "\$\{GITHUB_SHA\}:workers\/preview-host\.mjs"/);
   assert.doesNotMatch(workflow, /worker\.mjs/);
   assert.doesNotMatch(workflow, /return Response\.json\(\{ marker:/);
   assert.match(workflow, /wrangler@4\.117\.0 rollback "\$baseline_version" --name "\$DRILL_WORKER"/);
@@ -51,7 +55,7 @@ test("monitoring drill deploys and rolls back the real MS Realty Container artif
 });
 
 test("monitoring drill records durable runtime, failure, and exact restoration evidence", () => {
-  assert.match(workflow, /node production\/scripts\/probe-production-journeys\.mjs/g);
+  assert.equal(workflow.match(/node "\$MS_REALTY_MONITORING_PROBE"/g)?.length, 5);
   assert.match(workflow, /provider_run_attempt/);
   assert.match(workflow, /correlation_id/);
   assert.match(workflow, /baseline_version_id/);
@@ -60,6 +64,7 @@ test("monitoring drill records durable runtime, failure, and exact restoration e
   assert.match(workflow, /restored_build_marker/);
   assert.match(workflow, /worker: process\.env\.DRILL_WORKER/);
   assert.match(workflow, /url: process\.env\.DRILL_URL/);
-  assert.match(workflow, /Delete only the isolated drill Worker\n\s+if: always\(\) && steps\.identity\.outputs\.worker != ''/);
+  assert.match(workflow, /echo "created=true" >> "\$GITHUB_OUTPUT"/);
+  assert.match(workflow, /Delete only the isolated drill Worker\n\s+if: always\(\) && steps\.baseline\.outputs\.created == 'true'/);
   assert.match(workflow, /wrangler@4\.117\.0 delete "\$DRILL_WORKER" --force/);
 });
