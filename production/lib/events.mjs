@@ -1,7 +1,9 @@
 import { fromRoot } from "./paths.mjs";
 import { createLedgerStore } from "./sqlite-ledger.mjs";
 
-export const DEFAULT_EVENT_LEDGER_PATH = fromRoot("production", "data", "events.jsonl");
+// Analytics is mutable runtime state, not a checked-in fixture. Deployments can
+// still point at an explicit durable path through MS_REALTY_EVENT_LEDGER_PATH.
+export const DEFAULT_EVENT_LEDGER_PATH = fromRoot("production", ".runtime", "events.jsonl");
 
 const store = createLedgerStore({
   name: "events",

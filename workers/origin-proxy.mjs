@@ -95,7 +95,7 @@ export function responseForPublicOrigin(response, { originValue, publicUrl }) {
 }
 
 export async function responseWithEdgeBuildMarker(response, marker, pathname) {
-  if (pathname !== "/api/health" || !/^[0-9a-f]{40}$/i.test(String(marker || "")) || !response.ok) return response;
+  if (pathname !== "/api/health" || !/^[0-9a-f]{40}$/i.test(String(marker || "")) || (![200, 503].includes(response.status))) return response;
 
   let payload;
   try {
@@ -103,7 +103,7 @@ export async function responseWithEdgeBuildMarker(response, marker, pathname) {
   } catch {
     throw new OriginProxyError("Origin health response must be JSON");
   }
-  if (payload?.service !== "ms-realty" || payload?.status !== "ok") {
+  if (payload?.service !== "ms-realty" || !["ok", "degraded"].includes(payload?.status)) {
     throw new OriginProxyError("Origin health response is invalid");
   }
 

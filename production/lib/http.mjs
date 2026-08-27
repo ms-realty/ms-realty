@@ -174,7 +174,7 @@ import {
   readReplyDeliveryOutcomes,
 } from "./reply-delivery-outcomes.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
-import { loadCmsSeed, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
+import { loadCmsSeed, renderOriginUnavailablePage, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
@@ -216,6 +216,7 @@ import {
   readListingEdits,
 } from "./listing-edits.mjs";
 import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
+import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
   appendListingPublicationSchedule,
@@ -522,8 +523,8 @@ function response(status, body, contentType, headers = {}) {
   };
 }
 
-function json(status, body) {
-  return response(status, body, "application/json; charset=utf-8");
+function json(status, body, headers = {}) {
+  return response(status, body, "application/json; charset=utf-8", headers);
 }
 
 function privateResponse(status, body, contentType, headers = {}) {
@@ -558,13 +559,19 @@ function wantsPrint(url, rendered) {
 }
 
 function publicResponse(request, url, rendered) {
+  const cacheHeaders = rendered.status === 200 ? {} : { "cache-control": "no-store" };
   if (wantsPrint(url, rendered)) {
-    return response(rendered.status || 200, renderHtmlPage(rendered, { print: true }), "text/html; charset=utf-8");
+    return response(rendered.status || 200, renderHtmlPage(rendered, { print: true }), "text/html; charset=utf-8", cacheHeaders);
   }
   if (wantsHtml(request, url)) {
-    return response(rendered.status || 200, renderHtmlPage(rendered, { bodyHtml: renderReactPublicBody(rendered) }), "text/html; charset=utf-8");
+    return response(
+      rendered.status || 200,
+      renderHtmlPage(rendered, { bodyHtml: renderReactPublicBody(rendered) }),
+      "text/html; charset=utf-8",
+      cacheHeaders,
+    );
   }
-  return json(rendered.status || 200, rendered);
+  return json(rendered.status || 200, rendered, cacheHeaders);
 }
 
 function activeListingRecord(record) {
@@ -1146,6 +1153,15 @@ export function createHttpApp({
       requirePayload: true,
     });
     return { registry: activeRegistry, seed: publicSeedFor(projected), translationTasks: [] };
+  };
+  const payloadDependencyHealth = async () => {
+    if (!runtimeDataDurableOnly) return { status: "ok" };
+    try {
+      await probePayloadCmsImportRuntime({ payload: payloadListingRuntime, env: payloadListingEnv });
+      return { status: "ok" };
+    } catch (error) {
+      return { status: "unavailable", code: error.code || "payload_draft_unavailable" };
+    }
   };
   const currentTranslationTasks = () =>
     runtimeDataDurableOnly
@@ -2153,10 +2169,12 @@ export function createHttpApp({
       return { result: await currentSearchResult(searchRequest, options) };
     } catch (error) {
       if (error?.status === 503) {
-        return { response: json(503, { kind: error.code || "payload_draft_unavailable", message: error.message }) };
+        return { response: json(503, { kind: error.code || "payload_draft_unavailable", message: error.message }, { "cache-control": "no-store" }) };
       }
       if (!productionSearch) throw error;
-      return { response: json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" }) };
+      return {
+        response: json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" }, { "cache-control": "no-store" }),
+      };
     }
   };
   return async function handle(request) {
@@ -3955,7 +3973,7 @@ export function createHttpApp({
           preservationCatalog,
         );
       } catch (error) {
-        return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+        return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message }, { "cache-control": "no-store" });
       }
       if ((retained.status || 200) >= 400) {
         return response(503, { kind: "legacy_retain_unavailable", old_url: legacyDecision.old_url }, "application/json; charset=utf-8", {
@@ -3985,7 +4003,7 @@ export function createHttpApp({
           "application/xml; charset=utf-8",
         );
       } catch (error) {
-        return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+        return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message }, { "cache-control": "no-store" });
       }
     }
 
@@ -4041,14 +4059,18 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/health") {
       const readiness = currentLaunchReadiness();
-      return json(200, {
+      const payload = await payloadDependencyHealth();
+      const available = payload.status === "ok";
+      return json(available ? 200 : 503, {
         kind: "health",
         service: "ms-realty",
-        status: "ok",
+        status: available ? "ok" : "degraded",
+        dependency_status: payload.status,
+        dependencies: { payload },
         build_marker: readBuildMarker(),
         launch_ready: readiness.launch_ready,
         blockers: readiness.blockers,
-      });
+      }, { "cache-control": "no-store" });
     }
 
     if (request.method === "GET" && url.pathname === "/api/ready") {
@@ -6607,7 +6629,12 @@ export function createHttpApp({
         { searchParams: url.searchParams },
       );
     } catch (error) {
-      return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      if (runtimeDataDurableOnly && wantsHtml(request, url)) {
+        const localeCode = url.pathname.split("/").filter(Boolean)[0] || activeRegistry.source_locale;
+        const unavailable = renderOriginUnavailablePage({ registry: activeRegistry, localeCode, path: url.pathname });
+        return publicResponse(request, url, unavailable);
+      }
+      return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message }, { "cache-control": "no-store" });
     }
     if (rendered.status === 200) {
       recordEvent({

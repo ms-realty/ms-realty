@@ -1353,6 +1353,23 @@ export function liveServiceImportSummary(imported, preflight) {
   };
 }
 
+export function listingPublicationMessage(evidence) {
+  const summary = evidence?.summary || {};
+  if (evidence?.mode !== "operator_publication_of_freeze_active" || evidence?.status !== "pass") {
+    return "Listing publication evidence is not currently available.";
+  }
+  const published = Number.isInteger(summary.published_listing_ids) ? summary.published_listing_ids : 0;
+  const excluded = Number.isInteger(summary.excluded_listing_ids) ? summary.excluded_listing_ids : 0;
+  const scope =
+    summary.scope === "full_freeze_catalog"
+      ? "the full freeze catalog"
+      : summary.scope === "freeze_active_catalog"
+        ? "the freeze-active catalog"
+        : "the approved listing scope";
+  const exclusions = excluded ? `; ${excluded} excluded by the approval` : "";
+  return `MSR-LISTING-PUBLICATION-1 publishes ${published} listings from ${scope} as source-locale inventory${exclusions}.`;
+}
+
 export function buildLaunchReadinessReport({
   generatedAt = new Date().toISOString(),
   migration = readJson(fromRoot("production", "data", "migration-records.json")),
@@ -1553,7 +1570,7 @@ export function buildLaunchReadinessReport({
       listingQualityEvidence,
       listingQualityReady
         ? listingQualityEvidence.mode === "operator_publication_of_freeze_active"
-          ? "MSR-LISTING-PUBLICATION-1 publishes the 30 freeze-active listings as source-locale inventory."
+          ? listingPublicationMessage(listingQualityEvidence)
           : listingQualityEvidence.mode === "approved_launch_freeze_preservation"
             ? "MSR-LAUNCH-FREEZE-1 preserves all 165 accepted listings while publication remains review-gated."
             : "Complete human listing review evidence passed."

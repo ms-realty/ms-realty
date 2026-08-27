@@ -25,7 +25,7 @@ One product — the **public website** (`ui_kits/website/`). Core surfaces:
 - **Home** — hero property search over the coast, browse-by-resort, featured listings, why-MS, sell CTA.
 - **Search results** — filters (deal, price, beds, type, amenities), sortable listing rows, pagination.
 - **Listing detail** — gallery, specs, description, features, what’s-nearby, a sticky agent panel, similar homes.
-- **Contact / call flows** — a “Book a viewing” modal launched from a listing, and a full contact page with the three offices.
+- **Contact / call flows** — a “Book a viewing” modal launched from a listing, and a full contact page with the Sandanski office.
 
 Focus locations: **St Vlas, Sunny Beach, Nesebar** (Burgas coast) · **Bansko** (Pirin) · **Sandanski** (Struma valley) · **Nafplio** (Peloponnese, Greece). The audience is largely **international buyers**, so every public website surface is **multilingual — Bulgarian, English, German, Dutch, Russian, Greek and Hebrew for Israel (BG / EN / DE / NL / RU / EL / HE)**, while internal CRM/CMS chrome is available in **BG / RU / EN**.
 
@@ -35,7 +35,7 @@ Focus locations: **St Vlas, Sunny Beach, Nesebar** (Burgas coast) · **Bansko** 
 
 **Vibe.** Warm, grounded, quietly confident. MS sounds like a knowledgeable local who happens to speak your language — not a hype-driven portal. Estate-agent-professional, never breathless.
 
-**Person.** Speak to the reader as **“you”**; refer to the agency as **“we / our offices / our team.”** e.g. *“Find your place in Sandanski.”* · *“We speak your language.”* · *“Tell us what you’re after and we’ll take it from there.”*
+**Person.** Speak to the reader as **“you”**; refer to the agency as **“we / our office / our team.”** e.g. *“Find your place in Sandanski.”* · *“We speak your language.”* · *“Tell us what you’re after and we’ll take it from there.”*
 
 **Casing.** **Sentence case** for headings, buttons and labels (*“Book a viewing”*, *“Browse by resort”*). Reserve ALL-CAPS for tiny eyebrows, status badges and field labels, always with wide letter-spacing. Never Title Case whole headlines.
 
@@ -168,8 +168,8 @@ Copy-ready screen starts under `templates/<slug>/`, each a Design Component (`.d
 - **Property landing** (`templates/property-landing/`) — hero property search over a featured-listings grid.
 - **Search results** (`templates/search-results/`) — sticky search bar, filter sidebar, listing rows, pagination.
 - **Listing detail** (`templates/listing-detail/`) — gallery, spec strip, description, features, sticky agent panel, similar homes.
-- **Contact** (`templates/contact/`) — the three offices + an enquiry form.
-- **Team & offices** (`templates/agents/`) — agent grid with language chips, the “we speak your language” band, office strip.
+- **Contact** (`templates/contact/`) — the Sandanski office + an enquiry form.
+- **Team & office** (`templates/agents/`) — agent grid with language chips, the “we speak your language” band, office strip.
 - **Client deck** (`templates/client-deck/`) — branded 16:9 presentation (deck-stage shell): cover, agency intro, featured property, curated selection, buying process, next steps.
 
 ---

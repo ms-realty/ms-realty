@@ -5,9 +5,9 @@
    the coast (Sveti Vlas / Greece). `.mk-photo` tones stand in for real photos. */
 
 const AGENTS = {
-  elena:   { name: 'Елена Петрова',   office: 'Централен офис · Сандански', phone: '+359 879 69 68 70', tone: 'sand' },
-  dimitar: { name: 'Димитър Колев',   office: 'Пирински офис · Банско',     phone: '+359 88 903 1140', tone: 'pine' },
-  mila:    { name: 'Мила Георгиева',  office: 'Морски офис · Свети Влас',   phone: '+359 88 421 7788', tone: 'sea' },
+  elena:   { name: 'Елена Петрова',   office: 'Офис в Сандански', phone: '+359 879 69 68 70', tone: 'sand' },
+  dimitar: { name: 'Димитър Колев',   office: 'Офис в Сандански', phone: '+359 88 903 1140', tone: 'pine' },
+  mila:    { name: 'Мила Георгиева',  office: 'Офис в Сандански', phone: '+359 88 421 7788', tone: 'sea' },
 };
 
 const money = (n) => '€' + n.toLocaleString('en-US');

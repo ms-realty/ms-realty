@@ -9,6 +9,7 @@ import {
   renderAboutPage,
   renderAlertsPage,
   renderComparePage,
+  renderContactPage,
   renderListingPage,
   teamProfilesPayload,
 } from "../lib/public-site.mjs";
@@ -257,8 +258,8 @@ test("renting carries none of the purchase fees, so the disclosure is a buy-only
 
 test("the about page states the single office and the five pillars from approved facts", () => {
   const page = renderAboutPage({ registry, localeCode: "en" });
-  assert.equal(page.indexable, true);
-  assert.equal(page.metadata.robots, "index,follow");
+  assert.equal(page.indexable, false);
+  assert.equal(page.metadata.robots, "noindex,follow");
   // The agency runs one office, in Sandanski. Bansko and Sveti Vlas are places
   // it sells property, not places it has a branch.
   assert.deepEqual(page.body.offices.items.map((office) => office.id), ["sandanski"]);
@@ -277,6 +278,27 @@ test("the about page states the single office and the five pillars from approved
     const text = `${sandanski.town} ${sandanski.role} ${sandanski.note}`;
     assert.doesNotMatch(text, /sea|beach|coast|море|морск|плаж|meer|strand|küste|kust|θάλασσ|παραλ|ים |חוף/iu, `${code} must not sell Sandanski as a sea destination`);
     assert.ok(sandanski.note.length > 0, `${code} must describe the office`);
+  }
+});
+
+test("the public truth scan separates service locations from office claims", () => {
+  for (const code of PUBLIC_LOCALES) {
+    const about = renderAboutPage({ registry, localeCode: code });
+    const contact = renderContactPage({ registry, localeCode: code, leadWritesDisabled: true });
+    const startSegment = registry.locales.find((locale) => locale.code === code).route_segments.start || "start";
+    const start = renderRuntimePath(registry, seed, `/${code}/${startSegment}`);
+    const officeClaims = JSON.stringify({
+      about: about.body.offices,
+      contact: contact.body.offices,
+    });
+    assert.deepEqual(about.body.offices.items.map((office) => office.id), ["sandanski"], `${code} about office list`);
+    assert.deepEqual(contact.body.offices.map((office) => office.location), ["Sandanski"], `${code} contact office list`);
+    assert.doesNotMatch(officeClaims, /bansko|sveti\s+vlas|банско|свети\s*влас/iu, `${code} office claims`);
+
+    // These places remain valid service/property locations. The scan must not
+    // ban their use in buyer guidance merely because they are not offices.
+    assert.equal(start.body.areas.some((area) => area.id === "bansko"), true, `${code} Bansko service area`);
+    assert.equal(start.body.areas.some((area) => area.id === "black_sea_coast"), true, `${code} coastal service area`);
   }
 });
 
@@ -447,7 +469,7 @@ test("the rendered documents keep the public shell in RTL", () => {
   // Absolute, because Google drops a relative hreflang and a share card cannot
   // resolve a relative og:url.
   assert.ok(aboutHtml.includes(`<link rel="canonical" href="${absolutePublicUrl("/he/about")}">`));
-  assert.ok(aboutHtml.includes(`hreflang="x-default" href="${absolutePublicUrl("/bg/za-nas")}"`));
+  assert.ok(!aboutHtml.includes(`hreflang="x-default" href="${absolutePublicUrl("/bg/za-nas")}"`));
   // Logical properties only, so Hebrew mirrors without a second stylesheet.
   assert.doesNotMatch(css, /(?:^|[\s;{])(?:margin|padding)-(?:left|right)\s*:/u);
   assert.doesNotMatch(css, /(?:^|[\s;{])(?:left|right)\s*:/u);

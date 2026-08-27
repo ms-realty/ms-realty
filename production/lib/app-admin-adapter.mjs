@@ -1834,6 +1834,8 @@ async function listingManagerPayload(registry, url, config) {
     status: url.searchParams.get("status") || "",
     sourceLocale: url.searchParams.get("sourceLocale") || "",
     propertyFamily: url.searchParams.get("propertyFamily") || "",
+    factRow: url.searchParams.get("factRow") || "",
+    factQuery: url.searchParams.get("factQ") || "",
     page: url.searchParams.get("page") || 1,
   });
   return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
@@ -4683,6 +4685,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
               objectId: result.listingId,
               metadata: {
                 changed_fields: result.changedFields,
+                verified_fact_fields: result.verifiedFactFields || [],
                 source: config.requestChannel === "mcp" ? "mcp_payload_draft" : "admin_payload_draft",
               },
             },
@@ -4693,6 +4696,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           kind: "listing_draft_saved",
           listing_id: result.listingId,
           changed_fields: result.changedFields,
+          verified_fact_fields: result.verifiedFactFields || [],
           staleTranslations: result.staleTranslations,
           editor_url: listingEditorPath(result.listingId),
           draft_only: true,

@@ -82,3 +82,20 @@ test("edge health identifies both the Worker release and durable origin release"
     runtime: "cloudflare_origin_proxy",
   });
 });
+
+test("edge health keeps the release markers when the origin reports a dependency refusal", async () => {
+  const response = await responseWithEdgeBuildMarker(
+    new Response(JSON.stringify({ service: "ms-realty", status: "degraded", dependency_status: "unavailable", build_marker: "b".repeat(40) }), {
+      status: 503,
+      headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    }),
+    "a".repeat(40),
+    "/api/health",
+  );
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  const body = await response.json();
+  assert.equal(body.status, "degraded");
+  assert.equal(body.build_marker, "a".repeat(40));
+  assert.equal(body.origin_build_marker, "b".repeat(40));
+});

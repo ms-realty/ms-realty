@@ -81,7 +81,7 @@ function HomePage({ onNavigate, onOpenListing, onSearch }) {
         <div className="hp-sec__head">
           <div>
             <h2>Разгледайте по курорт</h2>
-            <p>Шест региона, които местните ни офиси познават до всяка улица.</p>
+            <p>Шест региона, които познаваме до всяка улица.</p>
           </div>
           <HPButton variant="secondary" iconEnd="arrow-right" onClick={() => onNavigate('resorts')}>Всички локации</HPButton>
         </div>
@@ -118,8 +118,8 @@ function HomePage({ onNavigate, onOpenListing, onSearch }) {
           </div>
           <div className="hp-value">
             <div className="hp-value__ic"><HPIcon name="map-pin" size={24} /></div>
-            <h3>Местни офиси, истински ключове</h3>
-            <p>Екипи на място в Сандански, Свети Влас и Банско, които могат да отворят вратата още днес следобед.</p>
+            <h3>Местен офис, истински ключове</h3>
+            <p>Брокери от този край, които могат да отворят вратата още днес следобед.</p>
           </div>
           <div className="hp-value">
             <div className="hp-value__ic"><HPIcon name="file-check" size={24} /></div>

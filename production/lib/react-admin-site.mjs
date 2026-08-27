@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable, propertyFamilyFor } from "./listing-facts.mjs";
+import { FACT_REVIEW_ROW_KEYS } from "./listing-fact-review.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
@@ -7224,6 +7225,7 @@ function PublicationSchedulePanel({ page }) {
     {
       title: ui.publicationSchedule,
       action: h(StatusPill, { tone: queue.summary.due ? "brick" : queue.open.length ? "sun" : "sand" }, `${queue.open.length} ${statusText(ui, "open")}`),
+      id: "listing-publication-schedule",
       "data-publication-schedule-panel": "true",
     },
     h(
@@ -7350,6 +7352,195 @@ function PublicationSchedulePanel({ page }) {
   );
 }
 
+function adminAreaValue(value, page) {
+  if (value === null || value === undefined || value === "") return workbenchCopy(page).notSet;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? `${numeric.toLocaleString(page.workspace?.locale || "en", { maximumFractionDigits: 2 })} m²` : String(value);
+}
+
+function areaSuggestionList(candidates, copy, page, scope) {
+  if (!candidates?.length) return h("p", { className: "adm-note" }, copy.noAreaRows || "No area suggestions were found in the source text.");
+  return h(
+    "ul",
+    { className: "adm-task-list", "data-area-suggestions": scope },
+    ...candidates.map((candidate, index) =>
+      h(
+        "li",
+        { key: `${scope}-${candidate.raw}-${index}` },
+        h(
+          "div",
+          { className: "adm-task-list__body" },
+          h("strong", null, `${copy.suggestion || "Suggestion"}: ${adminAreaValue(candidate.value_sqm, page)}`),
+          h("small", null, candidate.raw),
+          h("small", null, `${copy.context || "Context"}: ${candidate.context}`),
+        ),
+      ),
+    ),
+  );
+}
+
+function areaEvidenceList(evidence, copy, page, scope) {
+  const labels = [
+    ["observed_sqm", copy.observedArea || "Observed area"],
+    ["manual_sqm", copy.manualArea || "Manual audit area"],
+    ["live_sqm", copy.liveArea || "Live area"],
+  ];
+  const rows = labels.filter(([field]) => evidence?.[field] !== null && evidence?.[field] !== undefined);
+  if (!rows.length) return h("p", { className: "adm-note" }, copy.noAreaRows || "No observed area evidence.");
+  return h(
+    "ul",
+    { className: "adm-task-list", "data-area-evidence": scope },
+    ...rows.map(([field, labelText]) =>
+      h(
+        "li",
+        { key: `${scope}-${field}` },
+        h("div", { className: "adm-task-list__body" }, h("strong", null, labelText), h("span", null, adminAreaValue(evidence[field], page))),
+      ),
+    ),
+  );
+}
+
+function duplicateListingCard({ card, copy, page }) {
+  const ui = workbenchCopy(page);
+  const roleLabel = card.role === "record_b" ? copy.recordB || "Record B" : copy.recordA || "Record A";
+  return h(
+    "article",
+    { className: "adm-report-card", "data-duplicate-side": card.role, "data-duplicate-listing": card.listing_id },
+    h(
+      "header",
+      null,
+      h("div", null, h(StatusPill, { tone: "sand" }, roleLabel), h("h3", null, card.title), h("code", { className: "crm-mono" }, card.listing_id)),
+      h("small", null, String(card.source_locale || "").toUpperCase()),
+    ),
+    h(
+      "dl",
+      { className: "adm-kpis" },
+      h("div", null, h("dt", null, copy.price || "Price"), h("dd", null, card.price_on_request ? statusText(ui, "price_on_request") : card.price_eur === null ? ui.notSet : `€${Number(card.price_eur).toLocaleString("en")}`)),
+      h("div", null, h("dt", null, copy.location || "Location"), h("dd", null, card.location || ui.notSet)),
+      h("div", null, h("dt", null, copy.photos || "Photos"), h("dd", null, card.photos?.count ?? 0)),
+    ),
+    h("h4", null, copy.area || "Area"),
+    areaEvidenceList(card.area_evidence, copy, page, `duplicate-${card.listing_id}`),
+    areaSuggestionList(card.area_candidates, copy, page, `duplicate-${card.listing_id}`),
+    card.photos?.assets?.length
+      ? h(
+          "div",
+          { style: "display:flex;flex-wrap:wrap;gap:8px", "aria-label": copy.photos || "Photos" },
+          ...card.photos.assets.map((asset, index) => h("img", { key: `${card.listing_id}-photo-${index}`, src: asset.url, alt: asset.alt, loading: "lazy", width: 72, height: 54, style: "display:block;object-fit:cover;border-radius:6px" })),
+        )
+      : null,
+    h("p", { className: "adm-note" }, copy.reviewOnly || "Comparison only; the broker keeps the decision."),
+    h(
+      "div",
+      { className: "adm-task-list__actions" },
+      card.source_url
+        ? h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: card.source_url, rel: "noreferrer" }, copy.openSource || copy.source || "Open source")
+        : null,
+      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(card.editor_path, page) }, copy.openEditor || label(adminCopy(page), "openEditor", "Open editor")),
+      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(card.publication_path, page) }, copy.openPublication || "Open publication controls"),
+    ),
+  );
+}
+
+function DuplicateReviewPanel({ page }) {
+  const review = page.duplicateReview || { rows: [], summary: { confirmed_pairs: 0, algorithm_candidate_pairs: 0, audit_only_candidate_pairs: 0, candidate_review_pairs: 0 } };
+  const copy = review.copy || {};
+  const summary = review.summary || {};
+  const summaryText = `${copy.pairConfirmed || "Confirmed pairs"}: ${summary.confirmed_pairs || 0} · ${copy.pairCandidate || "Candidate pairs"}: ${summary.algorithm_candidate_pairs || 0} · ${copy.pairAuditOnly || "Audit-only candidate pairs"}: ${summary.audit_only_candidate_pairs || 0}`;
+  return h(
+    Panel,
+    {
+      title: `${copy.duplicateTitle || "Manual duplicate comparison"} · ${summary.total_pairs || 0}`,
+      "data-duplicate-review": "true",
+    },
+    h("p", { className: "adm-note", role: "note" }, copy.duplicateDescription || "Confirmed pairs are shown side by side for manual review."),
+    h("p", { className: "adm-note", role: "status", "data-duplicate-review-summary": "true" }, summaryText),
+    review.rows?.length
+      ? h(
+          "div",
+          { className: "adm-report-grid", "data-duplicate-review-pairs": String(review.rows.length) },
+          ...review.rows.map((pair) =>
+            h(
+              "article",
+              { key: pair.pair_id, className: "adm-report-card", "data-duplicate-review-pair": pair.pair_id, "data-duplicate-pair-status": pair.status },
+              h("header", null, h("div", null, h(StatusPill, { tone: pair.status === "confirmed" ? "success" : "sun" }, pair.status === "confirmed" ? copy.pairConfirmed || "Confirmed pair" : pair.candidate_source === "audit_only" ? copy.pairAuditOnly || "Audit-only candidate pair" : copy.pairCandidate || "Candidate pair"), h("code", { className: "crm-mono" }, pair.pair_id)), h("small", null, copy.reviewOnly || "Manual comparison")),
+              h(
+                "div",
+                { className: "adm-report-grid adm-report-grid--two" },
+                duplicateListingCard({ card: pair.record_a, copy, page }),
+                duplicateListingCard({ card: pair.record_b, copy, page }),
+              ),
+            ),
+          ),
+        )
+      : h(EmptyState, { icon: "check", "data-empty-duplicate-review": "true" }, copy.noRows || "No duplicate pairs need review."),
+  );
+}
+
+function areaReviewRow({ row, copy, page, scope }) {
+  const ui = workbenchCopy(page);
+  return h(
+    "li",
+    { key: `${scope}-${row.listing_id}`, "data-area-review-listing": row.listing_id, "data-area-review-scope": scope },
+    h(
+      "div",
+      { className: "adm-task-list__body" },
+      h("strong", null, row.title),
+      h("code", { className: "crm-mono" }, row.listing_id),
+      h("small", null, row.location || ui.notSet),
+      row.observed_area_sqm !== null && row.observed_area_sqm !== undefined
+        ? h("small", null, `${copy.source || "Source"}: ${adminAreaValue(row.observed_area_sqm, page)}`)
+        : null,
+      areaSuggestionList(row.area_candidates, copy, page, `${scope}-${row.listing_id}`),
+    ),
+    h(
+      "div",
+      { className: "adm-task-list__actions" },
+      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, copy.openEditor || label(adminCopy(page), "openEditor", "Open editor")),
+    ),
+  );
+}
+
+function AreaReviewPanel({ page }) {
+  const review = page.areaReview || { missing_canonical_area: [], multiple_prose_candidates: [], summary: {} };
+  const copy = review.copy || {};
+  const missingRows = review.missing_canonical_area || [];
+  const candidateRows = review.multiple_prose_candidates || [];
+  return h(
+    Panel,
+    {
+      title: `${copy.areaTitle || "Areas for review"} · ${review.summary?.missing_canonical_area || 0}`,
+      "data-area-review": "true",
+    },
+    h("p", { className: "adm-note", role: "note" }, copy.areaDescription || "Suggestions below come from source text and are never filled automatically."),
+    review.review_pack?.command
+      ? h("p", { className: "adm-note", "data-area-review-pack": review.review_pack.command }, `${copy.source || "Source"}: ${review.review_pack.command}`)
+      : null,
+    h(
+      "div",
+      { className: "adm-report-grid adm-report-grid--two", "data-area-review-summary": "true" },
+      h("div", { className: "adm-report-card" }, h("h3", null, String(review.summary?.missing_canonical_area || 0)), h("p", null, copy.missingCanonicalArea || "missing canonical area")),
+      h("div", { className: "adm-report-card" }, h("h3", null, String(review.summary?.multiple_prose_candidates || 0)), h("p", null, copy.multipleCandidates || "listings with multiple suggestions")),
+    ),
+    h(
+      "details",
+      { open: true, className: "adm-workbench-disclosure", "data-area-review-missing": String(missingRows.length) },
+      h("summary", null, h("span", null, `${copy.missingCanonicalArea || "Missing canonical area"} · ${missingRows.length}`)),
+      missingRows.length
+        ? h("ul", { className: "adm-task-list" }, ...missingRows.map((row) => areaReviewRow({ row, copy, page, scope: "missing" })))
+        : h("p", { className: "adm-empty" }, copy.noAreaRows || "No areas need review."),
+    ),
+    h(
+      "details",
+      { open: Boolean(candidateRows.length), className: "adm-workbench-disclosure", "data-area-review-candidates": String(candidateRows.length) },
+      h("summary", null, h("span", null, `${copy.multipleCandidates || "Multiple prose suggestions"} · ${candidateRows.length}`)),
+      candidateRows.length
+        ? h("ul", { className: "adm-task-list" }, ...candidateRows.map((row) => areaReviewRow({ row, copy, page, scope: "candidates" })))
+        : h("p", { className: "adm-empty" }, copy.noAreaRows || "No areas need review."),
+    ),
+  );
+}
+
 function ListingManagerBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -7406,6 +7597,15 @@ function ListingManagerBody({ page }) {
     quality: ui.listingChecks,
     action: label(copy, "action", "Action"),
   };
+  const factReview = page.factReview || {};
+  const factReviewCopy = factReview.copy || {};
+  const factReviewRows = factReview.rows || [];
+  const factReviewLabels = factReviewCopy.labels || {};
+  const factReviewSummary = factReview.summary || { unchecked_figures: 0, listings_with_unchecked_facts: 0 };
+  const factReviewRowOptions = FACT_REVIEW_ROW_KEYS.map((row) => ({
+    value: row,
+    label: factReviewLabels[row] || row,
+  }));
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -7447,6 +7647,65 @@ function ListingManagerBody({ page }) {
         h(CmsPlannedAction, { id: "listing-export", icon: "download", label: ui.exportListingsCsv, note: ui.exportListingsCsvNote }),
         h(CmsPlannedAction, { id: "listing-duplicate", icon: "plus", label: ui.duplicateListing, note: ui.duplicateListingNote }),
       ),
+      h(
+        Panel,
+        {
+          title: `${factReviewCopy.title || "Facts to confirm"} · ${factReviewSummary.unchecked_figures || 0}`,
+          "data-fact-review-queue": "true",
+        },
+        h("p", { className: "adm-note", role: "note" }, factReviewCopy.description || "These figures came from the source and await a broker’s confirmation."),
+        h(
+          "form",
+          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true" },
+          filterLocaleInput(page),
+          h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "factQ", defaultValue: factReview.filters?.q || "", placeholder: factReviewCopy.title || "Facts to confirm" })),
+          h(
+            "label",
+            null,
+            factReviewCopy.title || "Fact",
+            h(
+              "select",
+              { name: "factRow" },
+              h("option", { value: "" }, label(copy, "all", "All")),
+              ...factReviewRowOptions.map((option) => h("option", { key: option.value, value: option.value, selected: factReview.filters?.row === option.value }, option.label)),
+            ),
+          ),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "filter", "Filter")),
+          h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
+        ),
+        h(
+          "p",
+          { className: "adm-note", "data-fact-review-summary": "true" },
+          `${factReviewSummary.listings_with_unchecked_facts || 0} · ${factReviewSummary.unchecked_figures || 0} ${factReviewCopy.count || "unchecked facts"}`,
+        ),
+        factReviewRows.length
+          ? h(
+              "ul",
+              { className: "adm-task-list", "data-fact-review-rows": String(factReviewRows.length) },
+              ...factReviewRows.map((row) =>
+                h(
+                  "li",
+                  { key: row.listing_id, "data-fact-review-listing": row.listing_id },
+                  h(
+                    "div",
+                    { className: "adm-task-list__body" },
+                    h("strong", null, row.title),
+                    h("code", { className: "crm-mono" }, row.listing_id),
+                    h("small", null, row.location || ui.notSet),
+                    h("small", null, row.unchecked_rows.map((key) => factReviewLabels[key] || key).join(" · ")),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-task-list__actions" },
+                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, factReviewCopy.openEditor || label(copy, "openEditor", "Open editor")),
+                  ),
+                ),
+              ),
+            )
+          : h(EmptyState, { icon: "check", "data-empty-fact-review": "true" }, factReviewCopy.noRows || "No facts need confirmation."),
+      ),
+      h(DuplicateReviewPanel, { page }),
+      h(AreaReviewPanel, { page }),
       h(
         "form",
         { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },
@@ -7905,17 +8164,43 @@ function editorField(copy, ui, field, value, disabled = false) {
   return h("label", { key: field }, fieldText(ui, field), editorInputFor(ui, field, value, disabled));
 }
 
-function editorFieldGroup(copy, ui, title, fields, facts, disabled = false) {
+function editorFieldWithReview(copy, ui, field, value, disabled = false, factReview = null) {
+  const reviewRows = (factReview?.rows || []).filter((row) => row.editor_field === field);
+  if (!reviewRows.length) return editorField(copy, ui, field, value, disabled);
+  const reviewCopy = factReview.copy || {};
+  return h(
+    "label",
+    { key: field },
+    fieldText(ui, field),
+    editorInputFor(ui, field, value, disabled),
+    ...reviewRows.map((row) =>
+      h(
+        "span",
+        { key: `${field}-${row.row}`, className: "adm-fact-review-confirm" },
+        h("input", {
+          type: "checkbox",
+          name: "confirmedFacts",
+          value: field,
+          disabled,
+          "data-fact-review-confirm": row.row,
+        }),
+        ` ${reviewCopy.confirm || "I confirm this value"}`,
+      ),
+    ),
+  );
+}
+
+function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, factReview = null) {
   if (!fields.length) return null;
   return h(
     "fieldset",
     { className: "adm-form__group" },
     h("legend", null, title),
-    ...fields.map((field) => editorField(copy, ui, field, facts[field] ?? "", disabled)),
+    ...fields.map((field) => editorFieldWithReview(copy, ui, field, facts[field] ?? "", disabled, factReview)),
   );
 }
 
-function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts" } = {}) {
+function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null } = {}) {
   if (!fields.length) return null;
   return h(
     "details",
@@ -7926,7 +8211,7 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
       h("span", null, title),
       h("small", null, `${fields.length}`),
     ),
-    editorFieldGroup(copy, ui, title, fields, facts, disabled),
+    editorFieldGroup(copy, ui, title, fields, facts, disabled, factReview),
   );
 }
 
@@ -7950,6 +8235,11 @@ function ListingEditorBody({ page }) {
     seo_og_description: seo.og_description || "",
     seo_robots: seo.robots || "index,follow",
   };
+  for (const row of page.factReview?.rows || []) {
+    if ((editorValues[row.editor_field] === null || editorValues[row.editor_field] === undefined || editorValues[row.editor_field] === "") && row.value !== null && row.value !== undefined) {
+      editorValues[row.editor_field] = row.value;
+    }
+  }
   const tour = page.listing.tour || {};
   const tourProvider = tour.provider === "supersplat-viewer" ? "supersplat-viewer" : "photo-sphere-viewer";
   const tourPublished = tour.is_public === true;
@@ -8064,9 +8354,12 @@ function ListingEditorBody({ page }) {
                 defaultValue: currentOperatorId(page, ""),
                 "data-editor-name": "true",
               }),
-              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content" }),
-              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: detailFields.length <= 4, section: "details" }),
-              editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms" }),
+              page.factReview?.rows?.length
+                ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
+                : null,
+              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview }),
+              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: detailFields.length <= 4, section: "details", factReview: page.factReview }),
+              editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
               h(
                 "section",

@@ -1,7 +1,7 @@
 import { renderHtmlPage } from "./html.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { loadLocaleRegistry, siteRootRedirectTarget } from "./locales.mjs";
-import { loadCmsSeed, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings } from "./runtime.mjs";
+import { loadCmsSeed, renderOriginUnavailablePage, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings } from "./runtime.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
@@ -160,6 +160,19 @@ function renderedHtmlResponse(rendered, requestUrl) {
   };
 }
 
+function htmlRequested(accept) {
+  return String(accept || "").toLowerCase().includes("text/html");
+}
+
+function originUnavailableResponse({ pathname, url, config }) {
+  const registry = currentRegistry(config);
+  const localeCode = String(pathname || "").split("/").filter(Boolean)[0] || registry.source_locale;
+  const page = renderOriginUnavailablePage({ registry, localeCode, path: pathname });
+  const requestUrl = url instanceof URL ? url : new URL(String(url || pathname), "http://localhost");
+  const out = renderedHtmlResponse(page, requestUrl);
+  return new Response(out.html, { status: 503, headers: { ...out.headers, "cache-control": "no-store" } });
+}
+
 function renderAppRouteWithContext({ pathname, url, config, registry, seed, translationTasks }) {
   if (!pathname) throw new Error("App route pathname is required");
   const requestUrl = new URL(url, "http://localhost");
@@ -242,7 +255,7 @@ export async function renderAppSearchRoute({ pathname, url = pathname, config = 
   return renderedHtmlResponse(result, requestUrl);
 }
 
-export function renderAppRouteResponse({ pathname, url = pathname, host = "", config = appRouterConfigFromEnv() } = {}) {
+export function renderAppRouteResponse({ pathname, url = pathname, host = "", accept = "", config = appRouterConfigFromEnv() } = {}) {
   const legacyDecision = legacyDecisionFor({ pathname, url, host, config });
   if (legacyDecision?.status === 301) {
     return new Response(null, {
@@ -256,7 +269,7 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", co
   if (legacyDecision?.status === 200) {
     pathname = legacyDecision.target_path;
   }
-  if (config.runtimeDataDurableOnly) return renderDurableAppRouteResponse({ pathname, url, config });
+  if (config.runtimeDataDurableOnly) return renderDurableAppRouteResponse({ pathname, url, accept, config });
   let result;
   try {
     result = renderAppRoute({ pathname, url, config });
@@ -275,12 +288,13 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", co
   return new Response(result.html, { status: result.status, headers: result.headers });
 }
 
-async function renderDurableAppRouteResponse({ pathname, url, config }) {
+async function renderDurableAppRouteResponse({ pathname, url, accept, config }) {
   let result;
   try {
     const context = await durablePublicContext(config);
     result = renderAppRouteWithContext({ pathname, url, config, ...context });
   } catch (error) {
+    if (htmlRequested(accept)) return originUnavailableResponse({ pathname, url, config });
     return new Response(JSON.stringify({ kind: error.code || "payload_draft_unavailable", message: error.message }), {
       status: error.status || 503,
       headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
@@ -295,7 +309,7 @@ async function renderDurableAppRouteResponse({ pathname, url, config }) {
   return new Response(result.html, { status: result.status, headers: result.headers });
 }
 
-export async function renderAppSearchRouteResponse({ pathname, url = pathname, host = "", config = appRouterConfigFromEnv() } = {}) {
+export async function renderAppSearchRouteResponse({ pathname, url = pathname, host = "", accept = "", config = appRouterConfigFromEnv() } = {}) {
   const legacyDecision = legacyDecisionFor({ pathname, url, host, config });
   if (legacyDecision?.status === 301) {
     return new Response(null, {
@@ -307,7 +321,7 @@ export async function renderAppSearchRouteResponse({ pathname, url = pathname, h
     return new Response("Gone", { status: 410, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": PUBLIC_CACHE } });
   }
   if (legacyDecision?.status === 200) {
-    return renderAppRouteResponse({ pathname: legacyDecision.target_path, url, config });
+    return renderAppRouteResponse({ pathname: legacyDecision.target_path, url, accept, config });
   }
 
   let result;
@@ -324,6 +338,7 @@ export async function renderAppSearchRouteResponse({ pathname, url = pathname, h
       const out = renderedHtmlResponse(page, requestUrl);
       return new Response(out.html, { status: out.status, headers: { ...out.headers, "cache-control": "no-store" } });
     }
+    if (config.runtimeDataDurableOnly && htmlRequested(accept)) return originUnavailableResponse({ pathname, url, config });
     return new Response(JSON.stringify({ kind: error.code || "bad_request", message: error.message }), {
       status: error.status || 400,
       headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },

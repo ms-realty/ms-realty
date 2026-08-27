@@ -316,7 +316,7 @@ function normalizeScopedListingPatch(patch = {}, { allowEmpty = false } = {}) {
   return normalizePatch(patch, { allowEmpty });
 }
 
-function normalizePropertyPatch(property, patch = {}, { allowEmpty = false } = {}) {
+function normalizePropertyPatch(property, patch = {}, { allowEmpty = false, verificationByField = {} } = {}) {
   const entries = Object.entries(patch);
   if (!entries.length && allowEmpty) return { property_patch: {}, fact_verification: [], zero_value_audit: [] };
   if (!entries.length) throw new Error("Property patch must include editable property fields");
@@ -355,6 +355,10 @@ function normalizePropertyPatch(property, patch = {}, { allowEmpty = false } = {
       field,
       family,
       subtype,
+      verification:
+        verificationByField && typeof verificationByField === "object" && !Array.isArray(verificationByField)
+          ? verificationByField[field] || {}
+          : {},
       source: { source_type: "listing_edit_ledger", source_reference: property.id },
     });
     if (normalized.verification.state === "not_applicable") {
@@ -386,7 +390,10 @@ function normalizeEditPatches(seed, record, input) {
   if (input.propertyPatch && Object.keys(input.propertyPatch).length && !property) {
     throw new Error("Scoped property patch requires a linked property record");
   }
-  const propertyResult = normalizePropertyPatch(property, input.propertyPatch || {}, { allowEmpty: true });
+  const propertyResult = normalizePropertyPatch(property, input.propertyPatch || {}, {
+    allowEmpty: true,
+    verificationByField: input.propertyFactVerification || {},
+  });
   const listingPatch = normalizeScopedListingPatch(input.listingPatch || {}, { allowEmpty: true });
   if (!Object.keys(propertyResult.property_patch).length && !Object.keys(listingPatch).length && !input.mediaReviewer) {
     throw new Error("Scoped listing edit must include a propertyPatch, listingPatch, or media reviewer");

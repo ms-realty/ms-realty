@@ -7,5 +7,6 @@ export async function GET(request) {
     pathname: new URL(request.url).pathname,
     url: request.url,
     host: request.headers.get("x-forwarded-host") || request.headers.get("host"),
+    accept: request.headers.get("accept"),
   });
 }

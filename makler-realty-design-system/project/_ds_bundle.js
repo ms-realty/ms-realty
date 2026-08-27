@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"MaklerRealtyDesignSystem_9b7f1e","components":[{"name":"Button","sourcePath":"components/actions/Button.jsx"},{"name":"IconButton","sourcePath":"components/actions/IconButton.jsx"},{"name":"DataTable","sourcePath":"components/data/DataTable.jsx"},{"name":"Stat","sourcePath":"components/data/Stat.jsx"},{"name":"Timeline","sourcePath":"components/data/Timeline.jsx"},{"name":"Accordion","sourcePath":"components/display/Accordion.jsx"},{"name":"Badge","sourcePath":"components/display/Badge.jsx"},{"name":"Card","sourcePath":"components/display/Card.jsx"},{"name":"PropertyCard","sourcePath":"components/display/PropertyCard.jsx"},{"name":"Rating","sourcePath":"components/display/Rating.jsx"},{"name":"Tag","sourcePath":"components/display/Tag.jsx"},{"name":"Alert","sourcePath":"components/feedback/Alert.jsx"},{"name":"EmptyState","sourcePath":"components/feedback/EmptyState.jsx"},{"name":"Modal","sourcePath":"components/feedback/Modal.jsx"},{"name":"Skeleton","sourcePath":"components/feedback/Skeleton.jsx"},{"name":"Checkbox","sourcePath":"components/forms/Checkbox.jsx"},{"name":"Input","sourcePath":"components/forms/Input.jsx"},{"name":"Radio","sourcePath":"components/forms/Radio.jsx"},{"name":"RangeSlider","sourcePath":"components/forms/RangeSlider.jsx"},{"name":"SearchBar","sourcePath":"components/forms/SearchBar.jsx"},{"name":"Select","sourcePath":"components/forms/Select.jsx"},{"name":"Switch","sourcePath":"components/forms/Switch.jsx"},{"name":"Textarea","sourcePath":"components/forms/Textarea.jsx"},{"name":"Icon","sourcePath":"components/general/Icon.jsx"},{"name":"LOGO_SRC","sourcePath":"components/general/Logo.jsx"},{"name":"LOGO_SRC_REVERSED","sourcePath":"components/general/Logo.jsx"},{"name":"LOGO_ASPECT","sourcePath":"components/general/Logo.jsx"},{"name":"Logo","sourcePath":"components/general/Logo.jsx"},{"name":"Breadcrumb","sourcePath":"components/navigation/Breadcrumb.jsx"},{"name":"LangSwitcher","sourcePath":"components/navigation/LangSwitcher.jsx"},{"name":"Pagination","sourcePath":"components/navigation/Pagination.jsx"},{"name":"Tabs","sourcePath":"components/navigation/Tabs.jsx"},{"name":"AgentCard","sourcePath":"components/people/AgentCard.jsx"},{"name":"Avatar","sourcePath":"components/people/Avatar.jsx"},{"name":"AvatarGroup","sourcePath":"components/people/Avatar.jsx"}],"sourceHashes":{"components/actions/Button.jsx":"0bf4359d88be","components/actions/IconButton.jsx":"b9b4aeae0a37","components/data/DataTable.jsx":"84a8d315291f","components/data/Stat.jsx":"70cb5d9c5a79","components/data/Timeline.jsx":"b4120a8d636d","components/display/Accordion.jsx":"9bbb4ec29f16","components/display/Badge.jsx":"4e22ea2d402d","components/display/Card.jsx":"69c6364dda8a","components/display/PropertyCard.jsx":"10a531d6ade8","components/display/Rating.jsx":"a59125f590bf","components/display/Tag.jsx":"b00169aed26b","components/feedback/Alert.jsx":"3dd2521cde21","components/feedback/EmptyState.jsx":"943c1bc95716","components/feedback/Modal.jsx":"62a9c8f1b906","components/feedback/Skeleton.jsx":"412e207efcad","components/forms/Checkbox.jsx":"a84299acf23f","components/forms/Input.jsx":"baa8f96776c1","components/forms/Radio.jsx":"93ec791e8318","components/forms/RangeSlider.jsx":"cc94b0b8e248","components/forms/SearchBar.jsx":"69924bde7453","components/forms/Select.jsx":"9bef159a60ab","components/forms/Switch.jsx":"7beecdd0f0ec","components/forms/Textarea.jsx":"c29ad33f44e9","components/general/Icon.jsx":"19f024da0a6b","components/general/Logo.jsx":"a50480331c02","components/navigation/Breadcrumb.jsx":"10e226e51e56","components/navigation/LangSwitcher.jsx":"b86f16ca7774","components/navigation/Pagination.jsx":"3c854ceb21b7","components/navigation/Tabs.jsx":"7841855262bf","components/people/AgentCard.jsx":"3e405a8c29d7","components/people/Avatar.jsx":"a6e471abeac9","ui_kits/crm/Calendar.jsx":"c1b6357e6f33","ui_kits/crm/Contacts.jsx":"f5eb81697c09","ui_kits/crm/CrmKit.jsx":"8803bca785eb","ui_kits/crm/Dashboard.jsx":"80c935f99e1b","ui_kits/crm/LeadDetail.jsx":"722e5eb184e3","ui_kits/crm/Listings.jsx":"ab1087f52df2","ui_kits/crm/Messages.jsx":"c4391767c165","ui_kits/crm/Pipeline.jsx":"6073923b21e9","ui_kits/crm/Reports.jsx":"848861132600","ui_kits/crm/crm-data.js":"a1f8fea7a42e","ui_kits/website/ContactPanel.jsx":"896bfb66874e","ui_kits/website/HomePage.jsx":"29ba549c430e","ui_kits/website/ListingDetail.jsx":"2ae7db1af846","ui_kits/website/SearchResults.jsx":"a3429bd85dc8","ui_kits/website/SiteChrome.jsx":"de9737292c14","ui_kits/website/data.js":"9d25f475ed68"},"inlinedExternals":[],"unexposedExports":[]} */
+/* @ds-bundle: {"format":4,"namespace":"MaklerRealtyDesignSystem_9b7f1e","components":[{"name":"Button","sourcePath":"components/actions/Button.jsx"},{"name":"IconButton","sourcePath":"components/actions/IconButton.jsx"},{"name":"DataTable","sourcePath":"components/data/DataTable.jsx"},{"name":"Stat","sourcePath":"components/data/Stat.jsx"},{"name":"Timeline","sourcePath":"components/data/Timeline.jsx"},{"name":"Accordion","sourcePath":"components/display/Accordion.jsx"},{"name":"Badge","sourcePath":"components/display/Badge.jsx"},{"name":"Card","sourcePath":"components/display/Card.jsx"},{"name":"PropertyCard","sourcePath":"components/display/PropertyCard.jsx"},{"name":"Rating","sourcePath":"components/display/Rating.jsx"},{"name":"Tag","sourcePath":"components/display/Tag.jsx"},{"name":"Alert","sourcePath":"components/feedback/Alert.jsx"},{"name":"EmptyState","sourcePath":"components/feedback/EmptyState.jsx"},{"name":"Modal","sourcePath":"components/feedback/Modal.jsx"},{"name":"Skeleton","sourcePath":"components/feedback/Skeleton.jsx"},{"name":"Checkbox","sourcePath":"components/forms/Checkbox.jsx"},{"name":"Input","sourcePath":"components/forms/Input.jsx"},{"name":"Radio","sourcePath":"components/forms/Radio.jsx"},{"name":"RangeSlider","sourcePath":"components/forms/RangeSlider.jsx"},{"name":"SearchBar","sourcePath":"components/forms/SearchBar.jsx"},{"name":"Select","sourcePath":"components/forms/Select.jsx"},{"name":"Switch","sourcePath":"components/forms/Switch.jsx"},{"name":"Textarea","sourcePath":"components/forms/Textarea.jsx"},{"name":"Icon","sourcePath":"components/general/Icon.jsx"},{"name":"LOGO_SRC","sourcePath":"components/general/Logo.jsx"},{"name":"LOGO_SRC_REVERSED","sourcePath":"components/general/Logo.jsx"},{"name":"LOGO_ASPECT","sourcePath":"components/general/Logo.jsx"},{"name":"Logo","sourcePath":"components/general/Logo.jsx"},{"name":"Breadcrumb","sourcePath":"components/navigation/Breadcrumb.jsx"},{"name":"LangSwitcher","sourcePath":"components/navigation/LangSwitcher.jsx"},{"name":"Pagination","sourcePath":"components/navigation/Pagination.jsx"},{"name":"Tabs","sourcePath":"components/navigation/Tabs.jsx"},{"name":"AgentCard","sourcePath":"components/people/AgentCard.jsx"},{"name":"Avatar","sourcePath":"components/people/Avatar.jsx"},{"name":"AvatarGroup","sourcePath":"components/people/Avatar.jsx"}],"sourceHashes":{"components/actions/Button.jsx":"0bf4359d88be","components/actions/IconButton.jsx":"b9b4aeae0a37","components/data/DataTable.jsx":"84a8d315291f","components/data/Stat.jsx":"70cb5d9c5a79","components/data/Timeline.jsx":"b4120a8d636d","components/display/Accordion.jsx":"9bbb4ec29f16","components/display/Badge.jsx":"4e22ea2d402d","components/display/Card.jsx":"69c6364dda8a","components/display/PropertyCard.jsx":"10a531d6ade8","components/display/Rating.jsx":"a59125f590bf","components/display/Tag.jsx":"b00169aed26b","components/feedback/Alert.jsx":"3dd2521cde21","components/feedback/EmptyState.jsx":"943c1bc95716","components/feedback/Modal.jsx":"62a9c8f1b906","components/feedback/Skeleton.jsx":"412e207efcad","components/forms/Checkbox.jsx":"a84299acf23f","components/forms/Input.jsx":"baa8f96776c1","components/forms/Radio.jsx":"93ec791e8318","components/forms/RangeSlider.jsx":"cc94b0b8e248","components/forms/SearchBar.jsx":"69924bde7453","components/forms/Select.jsx":"9bef159a60ab","components/forms/Switch.jsx":"7beecdd0f0ec","components/forms/Textarea.jsx":"c29ad33f44e9","components/general/Icon.jsx":"19f024da0a6b","components/general/Logo.jsx":"a50480331c02","components/navigation/Breadcrumb.jsx":"10e226e51e56","components/navigation/LangSwitcher.jsx":"b86f16ca7774","components/navigation/Pagination.jsx":"3c854ceb21b7","components/navigation/Tabs.jsx":"7841855262bf","components/people/AgentCard.jsx":"3e405a8c29d7","components/people/Avatar.jsx":"a6e471abeac9","ui_kits/crm/Calendar.jsx":"c1b6357e6f33","ui_kits/crm/Contacts.jsx":"f5eb81697c09","ui_kits/crm/CrmKit.jsx":"8803bca785eb","ui_kits/crm/Dashboard.jsx":"80c935f99e1b","ui_kits/crm/LeadDetail.jsx":"722e5eb184e3","ui_kits/crm/Listings.jsx":"ab1087f52df2","ui_kits/crm/Messages.jsx":"c4391767c165","ui_kits/crm/Pipeline.jsx":"6073923b21e9","ui_kits/crm/Reports.jsx":"848861132600","ui_kits/crm/crm-data.js":"05319a2a8e98","ui_kits/website/ContactPanel.jsx":"899fe9cc2c82","ui_kits/website/HomePage.jsx":"d8dffc7e749a","ui_kits/website/ListingDetail.jsx":"2ae7db1af846","ui_kits/website/SearchResults.jsx":"a3429bd85dc8","ui_kits/website/SiteChrome.jsx":"dbd578b87132","ui_kits/website/data.js":"51763c941ef4"},"inlinedExternals":[],"unexposedExports":[]} */
 
 (() => {
 
@@ -5350,7 +5350,7 @@ const CRM_AGENTS = {
     id: 'dimitar',
     name: 'Димитър Колев',
     role: 'Брокер',
-    office: 'Банско',
+    office: 'Сандански',
     initials: 'ДК',
     tone: 'pine',
     phone: '+359 88 903 1140'
@@ -5359,7 +5359,7 @@ const CRM_AGENTS = {
     id: 'mila',
     name: 'Мила Георгиева',
     role: 'Брокер',
-    office: 'Свети Влас',
+    office: 'Сандански',
     initials: 'МГ',
     tone: 'sea',
     phone: '+359 88 421 7788'
@@ -6682,29 +6682,17 @@ function ContactPanel({
 function ContactPage() {
   const [done, setDone] = React.useState(false);
   const offices = [{
-    name: 'Морски офис — Свети Влас',
-    tone: 'sea',
-    addr: 'Морски квартал, Свети Влас 8256',
-    phone: '+359 88 421 7788',
-    hours: 'Пон–Съб · 9:00–18:00'
-  }, {
-    name: 'Струмски офис — Сандански',
+    name: 'Офис в Сандански',
     tone: 'sand',
-    addr: 'ул. Македония 21, Сандански 2800',
-    phone: '+359 88 660 2093',
-    hours: 'Пон–Пет · 9:00–17:30'
-  }, {
-    name: 'Пирински офис — Банско',
-    tone: 'pine',
-    addr: 'ул. Пирин 4, Банско 2770',
-    phone: '+359 88 903 1140',
-    hours: 'Зимен сезон · всеки ден'
+    addr: 'Сандански — градът, полите на Пирин и област Благоевград',
+    phone: '+359 879 69 68 70',
+    email: 'office@makler-realty.com'
   }];
   return /*#__PURE__*/React.createElement("main", {
     className: "ct-page"
   }, /*#__PURE__*/React.createElement("div", {
     className: "ct-page__head"
-  }, /*#__PURE__*/React.createElement("h1", null, "\u0421\u0432\u044A\u0440\u0436\u0435\u0442\u0435 \u0441\u0435 \u0441 \u043C\u0435\u0441\u0442\u0435\u043D \u0431\u0440\u043E\u043A\u0435\u0440"), /*#__PURE__*/React.createElement("p", null, "\u0422\u0440\u0438 \u043E\u0444\u0438\u0441\u0430 \u0432 \u0411\u044A\u043B\u0433\u0430\u0440\u0438\u044F \u0438 \u0435\u043A\u0438\u043F, \u043A\u043E\u0439\u0442\u043E \u0440\u0430\u0431\u043E\u0442\u0438 \u043D\u0430 \u0431\u044A\u043B\u0433\u0430\u0440\u0441\u043A\u0438, \u0430\u043D\u0433\u043B\u0438\u0439\u0441\u043A\u0438, \u043D\u0435\u043C\u0441\u043A\u0438, \u043D\u0438\u0434\u0435\u0440\u043B\u0430\u043D\u0434\u0441\u043A\u0438 \u0438 \u0440\u0443\u0441\u043A\u0438. \u041A\u0430\u0436\u0435\u0442\u0435 \u043D\u0438 \u043A\u0430\u043A\u0432\u043E \u0442\u044A\u0440\u0441\u0438\u0442\u0435 \u0438 \u043D\u0438\u0435 \u043F\u043E\u0435\u043C\u0430\u043C\u0435 \u043D\u0435\u0449\u0430\u0442\u0430 \u043E\u0442\u0442\u0430\u043C.")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h1", null, "\u0421\u0432\u044A\u0440\u0436\u0435\u0442\u0435 \u0441\u0435 \u0441 \u043C\u0435\u0441\u0442\u0435\u043D \u0431\u0440\u043E\u043A\u0435\u0440"), /*#__PURE__*/React.createElement("p", null, "\u0415\u0434\u0438\u043D \u043E\u0444\u0438\u0441 \u0432 \u0421\u0430\u043D\u0434\u0430\u043D\u0441\u043A\u0438 \u0438 \u0435\u043A\u0438\u043F, \u043A\u043E\u0439\u0442\u043E \u0440\u0430\u0431\u043E\u0442\u0438 \u043D\u0430 \u0431\u044A\u043B\u0433\u0430\u0440\u0441\u043A\u0438, \u0430\u043D\u0433\u043B\u0438\u0439\u0441\u043A\u0438, \u043D\u0435\u043C\u0441\u043A\u0438, \u043D\u0438\u0434\u0435\u0440\u043B\u0430\u043D\u0434\u0441\u043A\u0438 \u0438 \u0440\u0443\u0441\u043A\u0438. \u041A\u0430\u0436\u0435\u0442\u0435 \u043D\u0438 \u043A\u0430\u043A\u0432\u043E \u0442\u044A\u0440\u0441\u0438\u0442\u0435 \u0438 \u043D\u0438\u0435 \u043F\u043E\u0435\u043C\u0430\u043C\u0435 \u043D\u0435\u0449\u0430\u0442\u0430 \u043E\u0442\u0442\u0430\u043C.")), /*#__PURE__*/React.createElement("div", {
     className: "ct-page__cols"
   }, /*#__PURE__*/React.createElement("div", {
     className: "ct-offices"
@@ -6722,9 +6710,9 @@ function ContactPage() {
     name: "phone",
     size: 16
   }), " ", o.phone), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(CTIcon, {
-    name: "clock",
+    name: "mail",
     size: 16
-  }), " ", o.hours)))))), /*#__PURE__*/React.createElement(CTCard, {
+  }), " ", o.email)))))), /*#__PURE__*/React.createElement(CTCard, {
     elevated: true,
     padding: "lg"
   }, done ? /*#__PURE__*/React.createElement("div", {
@@ -6862,7 +6850,7 @@ function HomePage({
     className: "hp-sec"
   }, /*#__PURE__*/React.createElement("div", {
     className: "hp-sec__head"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "\u0420\u0430\u0437\u0433\u043B\u0435\u0434\u0430\u0439\u0442\u0435 \u043F\u043E \u043A\u0443\u0440\u043E\u0440\u0442"), /*#__PURE__*/React.createElement("p", null, "\u0428\u0435\u0441\u0442 \u0440\u0435\u0433\u0438\u043E\u043D\u0430, \u043A\u043E\u0438\u0442\u043E \u043C\u0435\u0441\u0442\u043D\u0438\u0442\u0435 \u043D\u0438 \u043E\u0444\u0438\u0441\u0438 \u043F\u043E\u0437\u043D\u0430\u0432\u0430\u0442 \u0434\u043E \u0432\u0441\u044F\u043A\u0430 \u0443\u043B\u0438\u0446\u0430.")), /*#__PURE__*/React.createElement(HPButton, {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "\u0420\u0430\u0437\u0433\u043B\u0435\u0434\u0430\u0439\u0442\u0435 \u043F\u043E \u043A\u0443\u0440\u043E\u0440\u0442"), /*#__PURE__*/React.createElement("p", null, "\u0428\u0435\u0441\u0442 \u0440\u0435\u0433\u0438\u043E\u043D\u0430, \u043A\u043E\u0438\u0442\u043E \u043F\u043E\u0437\u043D\u0430\u0432\u0430\u043C\u0435 \u0434\u043E \u0432\u0441\u044F\u043A\u0430 \u0443\u043B\u0438\u0446\u0430.")), /*#__PURE__*/React.createElement(HPButton, {
     variant: "secondary",
     iconEnd: "arrow-right",
     onClick: () => onNavigate('resorts')
@@ -6920,7 +6908,7 @@ function HomePage({
   }, /*#__PURE__*/React.createElement(HPIcon, {
     name: "map-pin",
     size: 24
-  })), /*#__PURE__*/React.createElement("h3", null, "\u041C\u0435\u0441\u0442\u043D\u0438 \u043E\u0444\u0438\u0441\u0438, \u0438\u0441\u0442\u0438\u043D\u0441\u043A\u0438 \u043A\u043B\u044E\u0447\u043E\u0432\u0435"), /*#__PURE__*/React.createElement("p", null, "\u0415\u043A\u0438\u043F\u0438 \u043D\u0430 \u043C\u044F\u0441\u0442\u043E \u0432 \u0421\u0430\u043D\u0434\u0430\u043D\u0441\u043A\u0438, \u0421\u0432\u0435\u0442\u0438 \u0412\u043B\u0430\u0441 \u0438 \u0411\u0430\u043D\u0441\u043A\u043E, \u043A\u043E\u0438\u0442\u043E \u043C\u043E\u0433\u0430\u0442 \u0434\u0430 \u043E\u0442\u0432\u043E\u0440\u044F\u0442 \u0432\u0440\u0430\u0442\u0430\u0442\u0430 \u043E\u0449\u0435 \u0434\u043D\u0435\u0441 \u0441\u043B\u0435\u0434\u043E\u0431\u0435\u0434.")), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("h3", null, "\u041C\u0435\u0441\u0442\u0435\u043D \u043E\u0444\u0438\u0441, \u0438\u0441\u0442\u0438\u043D\u0441\u043A\u0438 \u043A\u043B\u044E\u0447\u043E\u0432\u0435"), /*#__PURE__*/React.createElement("p", null, "\u0411\u0440\u043E\u043A\u0435\u0440\u0438 \u043E\u0442 \u0442\u043E\u0437\u0438 \u043A\u0440\u0430\u0439, \u043A\u043E\u0438\u0442\u043E \u043C\u043E\u0433\u0430\u0442 \u0434\u0430 \u043E\u0442\u0432\u043E\u0440\u044F\u0442 \u0432\u0440\u0430\u0442\u0430\u0442\u0430 \u043E\u0449\u0435 \u0434\u043D\u0435\u0441 \u0441\u043B\u0435\u0434\u043E\u0431\u0435\u0434.")), /*#__PURE__*/React.createElement("div", {
     className: "hp-value"
   }, /*#__PURE__*/React.createElement("div", {
     className: "hp-value__ic"
@@ -7567,7 +7555,7 @@ function Footer({
     height: 30
   })), /*#__PURE__*/React.createElement("p", {
     className: "site-ft__intro"
-  }, "\u0418\u043C\u043E\u0442\u0438 \u0437\u0430 \u043F\u0440\u043E\u0434\u0430\u0436\u0431\u0430 \u0438 \u043F\u043E\u0434 \u043D\u0430\u0435\u043C \u0432 \u0421\u0430\u043D\u0434\u0430\u043D\u0441\u043A\u0438 \u0438 \u041F\u0438\u0440\u0438\u043D, \u043F\u043E \u0427\u0435\u0440\u043D\u043E\u043C\u043E\u0440\u0438\u0435\u0442\u043E \u0438 \u0432 \u0441\u044A\u0441\u0435\u0434\u043D\u0430 \u0413\u044A\u0440\u0446\u0438\u044F \u2014 \u0441 \u043C\u0435\u0441\u0442\u043D\u0438 \u043E\u0444\u0438\u0441\u0438 \u0438 \u0431\u0440\u043E\u043A\u0435\u0440\u0438, \u043A\u043E\u0438\u0442\u043E \u0433\u043E\u0432\u043E\u0440\u044F\u0442 \u0432\u0430\u0448\u0438\u044F \u0435\u0437\u0438\u043A."), /*#__PURE__*/React.createElement("div", {
+  }, "\u0418\u043C\u043E\u0442\u0438 \u0437\u0430 \u043F\u0440\u043E\u0434\u0430\u0436\u0431\u0430 \u0438 \u043F\u043E\u0434 \u043D\u0430\u0435\u043C \u0432 \u0421\u0430\u043D\u0434\u0430\u043D\u0441\u043A\u0438 \u0438 \u041F\u0438\u0440\u0438\u043D, \u043F\u043E \u0427\u0435\u0440\u043D\u043E\u043C\u043E\u0440\u0438\u0435\u0442\u043E \u0438 \u0432 \u0441\u044A\u0441\u0435\u0434\u043D\u0430 \u0413\u044A\u0440\u0446\u0438\u044F \u2014 \u0441 \u043C\u0435\u0441\u0442\u0435\u043D \u043E\u0444\u0438\u0441 \u0438 \u0431\u0440\u043E\u043A\u0435\u0440\u0438, \u043A\u043E\u0438\u0442\u043E \u0433\u043E\u0432\u043E\u0440\u044F\u0442 \u0432\u0430\u0448\u0438\u044F \u0435\u0437\u0438\u043A."), /*#__PURE__*/React.createElement("div", {
     className: "site-ft__contact"
   }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(Icon, {
     name: "phone",
@@ -7578,7 +7566,7 @@ function Footer({
   }), " office@makler-realty.com"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(Icon, {
     name: "map-pin",
     size: 16
-  }), " \u0421\u0430\u043D\u0434\u0430\u043D\u0441\u043A\u0438 \xB7 \u0411\u0430\u043D\u0441\u043A\u043E \xB7 \u0421\u0432\u0435\u0442\u0438 \u0412\u043B\u0430\u0441"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", null, "\u0420\u0430\u0437\u0433\u043B\u0435\u0434\u0430\u0439\u0442\u0435"), /*#__PURE__*/React.createElement("ul", null, /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
+  }), " \u0421\u0430\u043D\u0434\u0430\u043D\u0441\u043A\u0438"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", null, "\u0420\u0430\u0437\u0433\u043B\u0435\u0434\u0430\u0439\u0442\u0435"), /*#__PURE__*/React.createElement("ul", null, /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
     onClick: () => onNavigate('results')
   }, "\u0418\u043C\u043E\u0442\u0438 \u0437\u0430 \u043F\u0440\u043E\u0434\u0430\u0436\u0431\u0430")), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
     onClick: () => onNavigate('results')
@@ -7602,7 +7590,7 @@ function Footer({
     onClick: () => onNavigate('contact')
   }, "\u0417\u0430 \u043D\u0430\u0441")), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
     onClick: () => onNavigate('contact')
-  }, "\u041D\u0430\u0448\u0438\u0442\u0435 \u043E\u0444\u0438\u0441\u0438")), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
+  }, "\u041D\u0430\u0448\u0438\u044F\u0442 \u043E\u0444\u0438\u0441")), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
     onClick: () => onNavigate('contact')
   }, "\u041F\u0440\u043E\u0434\u0430\u0439\u0442\u0435 \u0441 \u043D\u0430\u0441")), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
     onClick: () => onNavigate('contact')
@@ -7638,19 +7626,19 @@ try { (() => {
 const AGENTS = {
   elena: {
     name: 'Елена Петрова',
-    office: 'Централен офис · Сандански',
+    office: 'Офис в Сандански',
     phone: '+359 879 69 68 70',
     tone: 'sand'
   },
   dimitar: {
     name: 'Димитър Колев',
-    office: 'Пирински офис · Банско',
+    office: 'Офис в Сандански',
     phone: '+359 88 903 1140',
     tone: 'pine'
   },
   mila: {
     name: 'Мила Георгиева',
-    office: 'Морски офис · Свети Влас',
+    office: 'Офис в Сандански',
     phone: '+359 88 421 7788',
     tone: 'sea'
   }

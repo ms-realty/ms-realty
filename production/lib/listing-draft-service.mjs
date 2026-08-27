@@ -7,6 +7,12 @@ import {
   LISTING_WORKFLOW_EDIT_FIELDS,
 } from "./listing-edits.mjs";
 import {
+  factPromotionsFor,
+  listingFactReviewFor,
+  normalizeConfirmedFactFields,
+} from "./listing-fact-review.mjs";
+import { derivePrimaryAreaSqm } from "./listing-facts.mjs";
+import {
   loadPayloadCmsImportRuntime,
   projectPayloadCmsSeed,
   readPayloadCmsSnapshot,
@@ -253,7 +259,7 @@ async function markListingTranslationsStale(
   return { staleTranslations: persisted, localeCodes: codes };
 }
 
-function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "admin") {
+function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "admin", extraChangedFields = []) {
   const actorId = principal.id;
   const patch = { ...(edit.patch || {}), ...(edit.listing_patch || {}) };
   for (const field of Object.keys(VERIFICATION_OWNER_FIELDS)) {
@@ -287,6 +293,10 @@ function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "
       workflow[field] = value;
       changedFields.push(field);
     }
+  }
+
+  for (const field of extraChangedFields) {
+    if (field && !changedFields.includes(field)) changedFields.push(field);
   }
 
   if (!changedFields.length) return { changedFields: [], data: null, idempotent: true };
@@ -328,6 +338,108 @@ function mutationFromEdit(current, edit, principal, editedAt, requestChannel = "
   return { changedFields, data: { facts, seo, workflow }, idempotent: false };
 }
 
+const FACT_REVIEW_PROPERTY_FIELDS = new Set([
+  "bedrooms",
+  "area_sqm",
+  "floor",
+  "total_floors",
+  "land_area_sqm",
+  "condition",
+]);
+
+function propertyForListing(seed, listing) {
+  const propertyId = String(listing?.property || "").trim();
+  return propertyId ? (seed.properties || []).find((property) => property.id === propertyId) || null : null;
+}
+
+function factReviewInput(seed, listing, patch, input, editedAt) {
+  const confirmedFields = normalizeConfirmedFactFields(input.confirmedFacts ?? input.confirmFacts);
+  const property = propertyForListing(seed, listing);
+  const review = listingFactReviewFor({ listing, property });
+  const promotion = factPromotionsFor({
+    listing,
+    property,
+    confirmedFields,
+    changedFields: Object.keys(patch),
+  });
+  if (!promotion.rows.length) return { patch, propertyPatch: {}, propertyFactVerification: {}, promotion };
+
+  const propertyPatch = {};
+  const propertyFactVerification = {};
+  for (const row of review.rows) {
+    const propertyFields = promotion.property_fields_by_editor_field?.[row.editor_field] || [];
+    if (!promotion.editor_fields.includes(row.editor_field) || !propertyFields.length) continue;
+    for (const field of propertyFields) {
+      const value = Object.hasOwn(patch, row.editor_field) ? patch[row.editor_field] : property?.facts?.[field];
+      if (value === null || value === undefined || value === "") continue;
+      propertyPatch[field] = value;
+      propertyFactVerification[field] = { state: "broker_verified" };
+    }
+  }
+  if (promotion.property_fields.some((field) => !Object.hasOwn(propertyPatch, field))) {
+    throw new Error("A confirmed fact needs a current canonical value or an editor value");
+  }
+
+  const listingPatch = { ...patch };
+  for (const field of promotion.editor_fields) {
+    if (FACT_REVIEW_PROPERTY_FIELDS.has(field)) delete listingPatch[field];
+  }
+  if (promotion.verify_price && !Object.hasOwn(listingPatch, "price_verified_at")) {
+    listingPatch.price_verified_at = editedAt;
+  }
+  return {
+    patch,
+    listingPatch,
+    propertyPatch,
+    propertyFactVerification,
+    promotion,
+  };
+}
+
+function propertyMutationFromEdit(current, edit) {
+  const propertyPatch = edit.property_patch || {};
+  const verifications = edit.property_fact_verification || [];
+  if (!Object.keys(propertyPatch).length && !verifications.length) {
+    return { changedFields: [], data: null, idempotent: true };
+  }
+  const facts = { ...(current?.facts || {}) };
+  const currentVerification = [...(current?.fact_verification || [])];
+  const changedFields = [];
+  for (const [field, value] of Object.entries(propertyPatch)) {
+    if (field === "property_family" || field === "property_subtype" || field === "location_id") continue;
+    if (JSON.stringify(facts[field] ?? null) !== JSON.stringify(value ?? null)) {
+      facts[field] = value;
+      changedFields.push(field);
+    }
+  }
+  const data = { facts };
+  for (const field of ["property_family", "property_subtype"]) {
+    if (Object.hasOwn(propertyPatch, field) && JSON.stringify(current?.[field] ?? null) !== JSON.stringify(propertyPatch[field] ?? null)) {
+      data[field] = propertyPatch[field];
+      changedFields.push(field);
+    }
+  }
+  if (Object.hasOwn(propertyPatch, "location_id") && JSON.stringify(current?.location ?? null) !== JSON.stringify(propertyPatch.location_id ?? null)) {
+    data.location = propertyPatch.location_id;
+    changedFields.push("location_id");
+  }
+  for (const verification of verifications) {
+    const index = currentVerification.findIndex((entry) => entry.field === verification.field);
+    const previous = index >= 0 ? currentVerification[index] : null;
+    if (JSON.stringify(previous || null) === JSON.stringify(verification)) continue;
+    if (index >= 0) currentVerification[index] = verification;
+    else currentVerification.push(verification);
+    changedFields.push(verification.field);
+  }
+  const family = data.property_family || current?.property_family || facts.property_family;
+  const subtype = data.property_subtype || current?.property_subtype || facts.property_subtype;
+  facts.primary_area_sqm = derivePrimaryAreaSqm({ ...facts, property_family: family, property_subtype: subtype });
+  data.fact_verification = currentVerification;
+  data.zero_value_audit = [...new Set(current?.zero_value_audit || [])].filter((field) => !Object.hasOwn(propertyPatch, field));
+  if (!changedFields.length) return { changedFields: [], data: null, idempotent: true };
+  return { changedFields: [...new Set(changedFields)], data, idempotent: false };
+}
+
 export async function projectListingDraftSeed(
   seed,
   { env = process.env, payload = null, req = null, requirePayload = false } = {},
@@ -354,12 +466,22 @@ export async function saveListingDraft(
 ) {
   const listingId = listingIdFor(input?.listingId || input?.listing_id);
   const patch = listingDraftPatchFromInput(input);
+  const listing = seed.records.find((record) => record.collection === "listings" && record.id === listingId);
+  if (!listing) throw notFoundError("Known listingId is required");
+  const factReview = factReviewInput(seed, listing, patch, input, editedAt);
+  const scoped = Object.keys(factReview.propertyPatch).length > 0;
   const validated = createListingEdit(
     seed,
     {
       listingId,
       editor: requiredText(principal?.id, "Authenticated operator id", 64),
-      patch,
+      ...(scoped
+        ? {
+            propertyPatch: factReview.propertyPatch,
+            propertyFactVerification: factReview.propertyFactVerification,
+            listingPatch: factReview.listingPatch || patch,
+          }
+        : { patch: factReview.listingPatch || patch }),
     },
     [],
     editedAt,
@@ -381,7 +503,23 @@ export async function saveListingDraft(
       req,
     });
     if (!current) throw notFoundError("Known listingId is required");
-    const mutation = mutationFromEdit(current, validated.edit, principal, editedAt, requestChannel);
+    const currentProperty = current.property
+      ? await runtime.findByID({
+          collection: "properties",
+          id: relationId(current.property),
+          depth: 0,
+          req,
+        })
+      : null;
+    const propertyMutation = propertyMutationFromEdit(currentProperty, validated.edit);
+    const mutation = mutationFromEdit(
+      current,
+      validated.edit,
+      principal,
+      editedAt,
+      requestChannel,
+      propertyMutation.changedFields,
+    );
     let staleTranslations = [];
     if (!mutation.idempotent) {
       await runtime.update({
@@ -407,10 +545,28 @@ export async function saveListingDraft(
       });
       staleTranslations = staleResult.staleTranslations;
     }
+    if (!propertyMutation.idempotent) {
+      if (!currentProperty) throw unavailableError("Listing property record is unavailable");
+      await runtime.update({
+        collection: "properties",
+        id: relationId(current.property),
+        depth: 0,
+        req,
+        data: propertyMutation.data,
+        context: {
+          ms_realty_operator: {
+            id: principal.id,
+            roles: principal.roles,
+            source: principal.source || "admin",
+          },
+        },
+      });
+    }
     const projectedSeed = await projectListingDraftSeed(seed, { payload: runtime, req });
     return {
-      changedFields: mutation.changedFields,
-      idempotent: mutation.idempotent,
+      changedFields: [...new Set([...mutation.changedFields, ...propertyMutation.changedFields])],
+      verifiedFactFields: factReview.promotion.editor_fields,
+      idempotent: mutation.idempotent && propertyMutation.idempotent,
       listingId,
       patch: clone(patch),
       staleTranslations,

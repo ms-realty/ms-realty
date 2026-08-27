@@ -211,6 +211,7 @@ test("main deploys automatically with image-marker rollback", () => {
   assert.match(ciWorkflow, /https:\/\/ms-realty\.\$\{subdomain\}\.workers\.dev\/api\/health/);
   assert.match(ciWorkflow, /--build-arg "MS_REALTY_BUILD_MARKER=\$GITHUB_SHA"/);
   assert.match(ciWorkflow, /d\.build_marker !== expected/);
+  assert.match(ciWorkflow, /d\.origin_build_marker !== expected/);
   const verificationBlock = ciWorkflow.slice(
     ciWorkflow.indexOf("- name: Verify deployed Worker"),
     ciWorkflow.indexOf("- name: Roll back failed deployment"),

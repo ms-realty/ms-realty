@@ -169,7 +169,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Coverage: 165/165 source rows (pass: 30, review: 75, hold: 52, source unavailable: 8).
 - Broker approvals in this artifact: 0; broker confirmations still required: 165.
 - Broker packet: `production/data/launch-candidate30-broker-packet.json` — 30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6.
-- This evidence classifies the freeze catalog only. `MSR-LISTING-PUBLICATION-1` publishes the 30 freeze-active listings as source-locale inventory; archived freeze rows stay out of active search.
+- This evidence classifies the freeze catalog only. MSR-LISTING-PUBLICATION-1 publishes 163 listings from the full freeze catalog as source-locale inventory; 2 excluded by the approval. Archived freeze rows stay out of active search.
 
 ## Broker Verification
 

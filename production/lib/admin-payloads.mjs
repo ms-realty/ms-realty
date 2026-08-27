@@ -10,6 +10,13 @@ import { publicMediaLibrary } from "./media.mjs";
 import { buildListingQualityReport } from "./listing-quality.mjs";
 import { CANONICAL_PROPERTY_FAMILIES, propertyFamilyFor } from "./listing-facts.mjs";
 import {
+  buildListingAreaReview,
+  buildListingDuplicateReview,
+  buildListingFactReviewQueue,
+  factReviewCopyFor,
+  listingFactReviewFor,
+} from "./listing-fact-review.mjs";
+import {
   DEFAULT_BROKER_LEAD_GROUPS,
   WORKSPACE_DATE_FORMATS,
   WORKSPACE_SETTINGS_SECTIONS,
@@ -50,6 +57,8 @@ export function renderAdminListingEditorPayload(
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const record = listingRecord(seed, listingId || "MS-CRAWL-0001");
   if (!record) throw new Error("Known listingId is required");
+  const property = (seed.properties || []).find((candidate) => candidate.id === record.property) || null;
+  const factReview = listingFactReviewFor({ listing: record, property });
   const reviewedTour = latestTourForListing(tourApprovals, record.id);
   const listing = {
     ...record,
@@ -75,6 +84,7 @@ export function renderAdminListingEditorPayload(
     },
     workspace: workspaceWithOperator(workspace, operator),
     listing,
+    factReview: { ...factReview, copy: factReviewCopyFor(requestedLocale) },
     qualityReview,
     edits: edits.filter((edit) => edit.listing_id === record.id),
     translationTasks: translationTasks.filter((task) => task.object_type === "listing" && task.object_id === record.id),
@@ -338,6 +348,8 @@ export function renderAdminListingManagerPayload(
     page = 1,
     generatedAt = new Date().toISOString(),
     operatorId = null,
+    factRow = "",
+    factQuery = "",
     publicationScheduleQueue = {
       rows: [],
       open: [],
@@ -346,6 +358,9 @@ export function renderAdminListingManagerPayload(
   },
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const factReview = buildListingFactReviewQueue(seed, { row: factRow, query: factQuery });
+  const duplicateReview = buildListingDuplicateReview(seed);
+  const areaReview = buildListingAreaReview(seed);
   const translationCoverage = buildTranslationCoverageReport({ registry, seed, translationTasks, generatedAt });
   const translationReviewByListing = translationCoverage.rows.reduce((counts, row) => {
     counts.set(row.listing_id, (counts.get(row.listing_id) || 0) + 1);
@@ -430,6 +445,9 @@ export function renderAdminListingManagerPayload(
     },
     pagination: paged.pagination,
     publicationSchedules,
+    factReview: { ...factReview, copy: factReviewCopyFor(requestedLocale) },
+    duplicateReview: { ...duplicateReview, copy: factReviewCopyFor(requestedLocale) },
+    areaReview: { ...areaReview, copy: factReviewCopyFor(requestedLocale) },
     summary: {
       total: allRows.length,
       visible: filtered.length,

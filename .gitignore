@@ -30,6 +30,7 @@ production/data/monitoring-rollback-report.json
 production/data/*.sqlite
 production/data/*.sqlite-wal
 production/data/*.sqlite-shm
+production/.runtime/
 
 # Local working notes
 deep-end-notes.txt
