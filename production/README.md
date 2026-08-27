@@ -171,9 +171,9 @@ npm run payload:preflight
 npm run launch:preflight
 ```
 
-`redirects:preflight` passes once reviewed 301 approvals are present. `seo:preflight:report` writes the current
-SEO export status without clearing the launch gate, and `seo:preflight` still exits
-non-zero until real external SEO exports are complete. `listing:preflight:report` writes the current
+`redirects:preflight` passes once reviewed 301 approvals are present. `seo:preflight:report` and
+`seo:preflight` remain available for optional historical SEO analytics and source analysis; their
+missing-export status does not clear or block the production-origin readiness gates. `listing:preflight:report` writes the current
 listing review status without clearing the launch gate, and `listing:preflight` still exits non-zero until
 the reviewed listing-quality CSV is present. `listing:review-pack` writes a complete draft review packet
 for editors, but it is not launch evidence until reviewer fields are filled. `launch:preflight` also requires live Postgres search
@@ -524,7 +524,8 @@ Generated production data:
 - `production/data/translation-coverage-report.json`
 - `production/data/listing-edits.jsonl`
 
-The local runtime remains a launch-review environment until the external evidence gates
+The local runtime remains a launch-review environment until the runtime evidence gates
 and operator approvals in `production/data/launch-readiness.json` are complete. Local
 workflow coverage must not be presented as live Payload, search-engine, Hermes-worker,
-Search Console, Yandex Webmaster, backlink, or human listing-review proof.
+Search Console, Yandex Webmaster, backlink, or human listing-review proof; external SEO
+imports are optional historical analytics.

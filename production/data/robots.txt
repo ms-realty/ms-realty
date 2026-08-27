@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://makler-realty.com/sitemap.xml
+Sitemap: https://ms-realty.ms-realty-bg.workers.dev/sitemap.xml

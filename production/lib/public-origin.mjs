@@ -1,16 +1,7 @@
-// The public site has no custom domain attached yet: it runs on a *.workers.dev
-// preview host in front of a review origin, and the domain that is supposed to
-// hold thirteen years of search equity is still configuration. Canonical,
-// hreflang, og:url and the JSON-LD identifiers must nonetheless be absolute
-// URLs -- Google drops relative hreflang, and the Open Graph spec cannot
-// resolve a bare path -- so they all read the origin from here, the same place
-// the sitemap and robots.txt read it, and the two channels can never disagree.
-//
-// This does not weaken the preview posture: *.workers.dev keeps serving
-// `x-robots-tag: noindex` and `Disallow: /` from the worker, so pointing the
-// head at the configured domain is what stops the preview from ever competing
-// with it.
-export const FALLBACK_PUBLIC_ORIGIN = "https://makler-realty.com";
+// Canonical URLs, hreflang, og:url and JSON-LD identifiers all use this one
+// production public origin. Isolated workers.dev drill hosts are handled at the
+// edge and remain noindex; they are never another canonical authority.
+export const FALLBACK_PUBLIC_ORIGIN = "https://ms-realty.ms-realty-bg.workers.dev";
 
 export function publicOrigin(env = process.env) {
   const configured = String(env?.MS_REALTY_PUBLIC_ORIGIN || "").trim();

@@ -7,22 +7,6 @@ import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_INPUT_CHECKLIST_OUTPUT = fromRoot("production", "data", "launch-input-checklist.md");
 
-const SEO_EXPORTS = {
-  search_console: {
-    filename: "search-console.csv",
-    columns: "url,clicks,impressions,position",
-  },
-  yandex_webmaster: {
-    filename: "yandex-webmaster.csv",
-    columns: "url,indexed,issue",
-  },
-  backlinks: {
-    filename: "backlinks.csv",
-    columns: "target_url,source_url,referring_domain",
-  },
-};
-const REQUIRED_SOURCE_DOMAINS = ["makler-realty.com", "makler-realty.ru"];
-
 function rowCount(csvText) {
   return parseCsv(csvText).length;
 }
@@ -63,37 +47,6 @@ function manualListingAuditState() {
   } catch (error) {
     return { status: "missing_or_invalid", error: error.message };
   }
-}
-
-function sourceLine(source, summary) {
-  const state = summary.sources[source];
-  const filename = SEO_EXPORTS[source].filename;
-  const domains = (state.matched_source_domains || []).join(", ") || "none";
-  const signalDomains = (state.signal_source_domains || []).join(", ") || "none";
-  return `- \`migration/external/seo/${filename}\`: ${state.status}, rows ${state.row_count}, matched ${state.matched_rows}, signal ${state.signal_rows}, unmatched ${state.unmatched_rows}, duplicates ${state.duplicate_rows}, placeholders ${state.placeholder_rows}, domains: ${domains}, signal domains: ${signalDomains}`;
-}
-
-function importLine(source) {
-  return `- \`POST /api/admin/seo-evidence/import?source=${source}\`: \`${SEO_EXPORTS[source].columns}\``;
-}
-
-function sourceDomainSampleLines(seoEvidence) {
-  return REQUIRED_SOURCE_DOMAINS.map((domain) => {
-    const sample = (seoEvidence.url_evidence || []).find((row) => row.source_domain === domain)?.old_url || "missing";
-    return `- ${domain}: \`${sample}\``;
-  }).join("\n");
-}
-
-function seoCoverageLine(summary) {
-  const types = Object.entries(summary.url_types || {})
-    .map(([type, count]) => `${type} ${count}`)
-    .join(", ");
-  return `- Crawl coverage: ${summary.crawl_urls} URLs${types ? ` (${types})` : ""}; URLs with any evidence: ${summary.urls_with_any_evidence}`;
-}
-
-function missingSeoSourcesLine(evidence) {
-  const missing = Array.isArray(evidence.missing_required_sources) ? evidence.missing_required_sources : [];
-  return missing.length ? missing.join(", ") : "none";
 }
 
 function liveServiceReportLine(report) {
@@ -195,7 +148,6 @@ function blockedGateActionLines(launchReadiness) {
 export function renderLaunchInputChecklist({
   generatedAt,
   launchReadiness,
-  seoEvidence,
   redirectWorkbookCsv,
   deployableRedirects,
   routeMap,
@@ -233,8 +185,6 @@ export function renderLaunchInputChecklist({
   const listingQualityGate = launchReadiness.gates.find((gate) => gate.id === "listing_quality_review");
   const listingReviewEvidence = listingQualityGate?.evidence || {};
   const publicationMessage = listingPublicationMessage(listingReviewEvidence);
-  const seoGate = launchReadiness.gates.find((gate) => gate.id === "external_seo_exports");
-  const seoGateEvidence = seoGate?.evidence || {};
   const recoveryGate = launchReadiness.gates.find((gate) => gate.id === "production_recovery");
   const recoveryEvidence = recoveryGate?.evidence || {};
   const monitoringGate = launchReadiness.gates.find((gate) => gate.id === "monitoring_rollback");
@@ -265,27 +215,10 @@ ${blockedGateActionLines(launchReadiness)}
 - Admin import endpoint: \`POST /api/admin/redirect-approvals/import\`
 - Admin workbook endpoint: \`GET /api/admin/redirect-approval-workbook?pending=1\`
 - Production adapter path overrides: \`MS_REALTY_REDIRECT_APPROVALS_PATH\`, \`MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH\`
+- Checklist output override: \`MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH\`
 - Review helper columns: \`decision\`, \`target_path\`, \`target_listing_id\`, \`review_status\`, \`same_content_checklist\`
 - Approval import columns: \`old_url\`, \`decision\`, \`target_path\`, \`equivalent_content\`, \`reviewer\`, optional \`approved_at\`, \`reason\`
-- Launch rule: each of all ${totalLegacyUrls} legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set \`equivalent_content=true\` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
-
-## External SEO Exports (Production-Live, Post-DNS)
-
-- Missing required sources: ${missingSeoSourcesLine(seoGateEvidence)}
-${seoCoverageLine(seoEvidence.summary)}
-${["search_console", "yandex_webmaster", "backlinks"].map((source) => sourceLine(source, seoEvidence.summary)).join("\n")}
-
-- Minimum required domain coverage:
-${sourceDomainSampleLines(seoEvidence)}
-- Admin import endpoints:
-${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")}
-- Template endpoints: \`GET /api/admin/seo-evidence/template?source=search_console\`, \`?source=yandex_webmaster\`, \`?source=backlinks\`
-- Joined evidence export endpoint: \`GET /api/admin/seo-evidence/export\`
-- Status report: \`npm run seo:preflight:report\` records current missing/invalid post-DNS evidence without blocking pre-DNS Production-Ready.
-- Admin SEO preflight endpoint: \`GET /api/admin/seo-preflight\`.
-- Production/CLI path overrides: \`MS_REALTY_SEO_EVIDENCE_INPUT_DIR\`, \`MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH\`, \`MS_REALTY_SEO_PREFLIGHT_REPORT_PATH\`, \`MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH\`, \`MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH\`
-- Optional analytics: \`migration/external/seo/analytics.csv\`; privacy events are already imported.
-- Production-Live rule: after canonical DNS cutover, required SEO exports must match crawled URLs from both \`makler-realty.com\` and \`makler-realty.ru\`.
+- Launch rule: each of all ${totalLegacyUrls} legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before the compatibility map is published. Set \`equivalent_content=true\` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
 
 ## Live Service Provisioning
 
@@ -399,6 +332,7 @@ ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`)
 ## Monitoring And Rollback
 
 - Report: \`production/data/launch-readiness.json\`
+- Readiness report override: \`MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH\`
 - Admin endpoint: \`GET /api/admin/launch-readiness\`
 - Monitoring sources: ${launchReadiness.monitoring_plan.map((item) => `${item.source}: ${item.status}`).join(", ")}
 - Rollback steps: ${launchReadiness.rollback_plan.length}
@@ -408,7 +342,7 @@ ${monitoringRollbackEvidenceLine(monitoringEvidence)}
 - Path override: \`MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH\`; validate it with \`npm run monitoring:preflight\`.
 - Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.
 - Release attestation: after every existing gate passes, set \`MS_REALTY_RELEASE_SHA\`, the mounted evidence paths, and the private signing key; run \`npm run launch:evidence:capture\`, then \`npm run launch:evidence:verify\` on the exact release SHA.
-- Launch rule: an evidence bundle records validated inputs; it does not invent publication approvals, post-DNS SEO evidence, or production readiness.
+- Launch rule: an evidence bundle records validated inputs; it does not invent publication approvals, optional historical SEO evidence, or production readiness.
 
 ## Validate After Inputs
 

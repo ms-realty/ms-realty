@@ -10,7 +10,6 @@ import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
 
 const REQUIRED_ARTIFACT_ENV = {
   deployable_redirects: "MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH",
-  seo_evidence: "MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH",
   listing_quality_review: "MS_REALTY_LISTING_QUALITY_REVIEW_PATH",
   live_service_provisioning: "MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH",
   search_sync: ["MS_REALTY_POSTGRES_SEARCH_SYNC_REPORT_PATH", "MS_REALTY_SEARCH_SYNC_REPORT_PATH"],

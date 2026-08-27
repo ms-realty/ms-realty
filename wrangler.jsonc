@@ -5,12 +5,14 @@
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
-  // Serve on the account's *.workers.dev host until the real domains move to
-  // Cloudflare DNS; no custom domain is attached yet.
+  // The exact workers.dev host below is the authoritative public production
+  // origin. Other workers.dev deployments are isolated drills and are marked
+  // noindex by the Worker hostname guard; no custom-domain route is required.
   "workers_dev": true,
   "vars": {
     "MS_REALTY_EVENT_DURABLE_STORE_ENABLED": "true",
     "MS_REALTY_ORIGIN_URL": "https://ms-realty-review.157-230-109-185.sslip.io",
+    "MS_REALTY_PUBLIC_ORIGIN": "https://ms-realty.ms-realty-bg.workers.dev",
     "MS_REALTY_EDGE_BUILD_MARKER": "__MS_REALTY_BUILD_MARKER__"
   },
 

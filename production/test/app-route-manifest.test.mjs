@@ -357,7 +357,7 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   // The one recorded exclusion keeps its route out of the sitemap.
   assert.equal(blockedListingRoutes.length, 2);
   assert.equal(approvedPublicListingIds.size, 163);
-  assert.match(sitemap.body, /<loc>https:\/\/makler-realty.com\/he<\/loc>/);
+  assert.match(sitemap.body, /<loc>https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/he<\/loc>/);
   assert.match(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
   assert.match(sitemap.body, /\/en\/guides\/foreign-buyers/);
   assert.doesNotMatch(sitemap.body, /\/el\/akinita\/MS-CRAWL-0001/);
@@ -366,7 +366,7 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   const robots = renderAppRobots();
   assert.equal(robots.status, 200);
   assert.equal(robots.headers["content-type"], "text/plain; charset=utf-8");
-  assert.match(robots.body, /Sitemap: https:\/\/makler-realty.com\/sitemap.xml/);
+  assert.match(robots.body, /Sitemap: https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/sitemap.xml/);
 
   const favicon = renderAppFavicon();
   assert.equal(favicon.status, 200);

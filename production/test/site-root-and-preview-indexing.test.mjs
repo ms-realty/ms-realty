@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLocaleRegistry, siteRootRedirectTarget } from "../lib/locales.mjs";
 import { renderAppSiteRoot } from "../lib/app-router-adapter.mjs";
-import { PREVIEW_NOINDEX, isPreviewHost } from "../../workers/preview-host.mjs";
+import { PREVIEW_NOINDEX, isPreviewHost, isProductionPublicHost } from "../../workers/preview-host.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 
@@ -28,9 +28,12 @@ test("both runtimes serve the root redirect", () => {
   assert.match(httpSource, /url\.pathname === "\/"\) \{\n\s+const location = siteRootRedirectTarget/);
 });
 
-test("only *.workers.dev counts as a preview host", () => {
-  assert.equal(isPreviewHost("ms-realty.ms-realty-bg.workers.dev"), true);
-  assert.equal(isPreviewHost("MS-REALTY.MS-REALTY-BG.WORKERS.DEV"), true);
+test("only isolated *.workers.dev hosts count as preview hosts", () => {
+  assert.equal(isProductionPublicHost("ms-realty.ms-realty-bg.workers.dev"), true);
+  assert.equal(isProductionPublicHost("MS-REALTY.MS-REALTY-BG.WORKERS.DEV."), true);
+  assert.equal(isPreviewHost("ms-realty.ms-realty-bg.workers.dev"), false);
+  assert.equal(isPreviewHost("MS-REALTY.MS-REALTY-BG.WORKERS.DEV"), false);
+  assert.equal(isPreviewHost("msr-monitoring-drill-123.account.workers.dev"), true);
   assert.equal(isPreviewHost("makler-realty.com"), false);
   assert.equal(isPreviewHost("makler-realty.ru"), false);
   // Not a suffix match on a lookalike domain.
@@ -39,7 +42,7 @@ test("only *.workers.dev counts as a preview host", () => {
   assert.equal(isPreviewHost(undefined), false);
 });
 
-test("the Worker noindexes preview hosts and leaves the real domain alone", () => {
+test("the Worker noindexes isolated drills and leaves the production origin indexable", () => {
   assert.equal(PREVIEW_NOINDEX, "noindex, nofollow, noarchive");
   assert.match(workerSource, /const preview = isPreviewHost\(url\.hostname\);/);
   assert.match(workerSource, /if \(preview && url\.pathname === "\/robots\.txt"\) return previewRobotsResponse\(\);/);

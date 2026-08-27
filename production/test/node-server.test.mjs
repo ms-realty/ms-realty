@@ -342,7 +342,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           body: JSON.stringify({
             id: "node-server-tour-approval-test",
             listingId: "MS-CRAWL-0001",
-            panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
+            panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
             accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
             reviewer: "media_editor",
             reviewConfirmed: true,

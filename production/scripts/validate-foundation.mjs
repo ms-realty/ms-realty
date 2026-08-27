@@ -1254,10 +1254,7 @@ if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocke
 }
 const expectedLaunchBlockers = ["live_services", "monitoring_rollback", "payload_runtime", "production_recovery"];
 if (JSON.stringify(launchReadiness.blockers) !== JSON.stringify(expectedLaunchBlockers)) {
-  throw new Error(`Launch readiness report must expose only current pre-DNS blockers: ${expectedLaunchBlockers.join(", ")}`);
-}
-if (launchReadiness.gates.find((gate) => gate.id === "external_seo_exports")?.status !== "deferred") {
-  throw new Error("External SEO evidence must remain deferred until Production-Live after DNS cutover");
+  throw new Error(`Launch readiness report must expose only current production blockers: ${expectedLaunchBlockers.join(", ")}`);
 }
 if (launchReadiness.gates.find((gate) => gate.id === "listing_quality_review")?.status !== "pass") {
   throw new Error("Approved launch-freeze listing preservation must pass without granting publication approval");

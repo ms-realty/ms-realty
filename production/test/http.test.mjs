@@ -605,7 +605,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       body: {
         id: "tour-approval-test",
         listingId: "MS-CRAWL-0001",
-        panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
+        panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
         accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
         reviewer: "media_editor",
         reviewConfirmed: true,
@@ -1121,7 +1121,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
   assert.match(smoke.listingHtmlAfterTourApproval.body, /data-photo-sphere-viewer="psv-listing-tour"/);
-  assert.match(smoke.listingHtmlAfterTourApproval.body, /data-panorama-url="https:\/\/makler-realty\.com\/tours\/MS-CRAWL-0001\.jpg"/);
+  assert.match(smoke.listingHtmlAfterTourApproval.body, /data-panorama-url="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/tours\/MS-CRAWL-0001\.jpg"/);
   assert.equal(smoke.mediaReview.status, 201);
   assert.equal(smoke.mediaReview.body.review_status, "approved_by_human");
   assert.equal(smoke.listingAfterMediaReview.body.body.media.floor_plans.length, 1);
@@ -1599,7 +1599,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(launchChecklist.status, 200);
   assert.equal(launchChecklist.headers["content-type"], "text/markdown; charset=utf-8");
   assert.match(launchChecklist.body, /POST \/api\/admin\/redirect-approvals\/import/);
-  assert.match(launchChecklist.body, /POST \/api\/admin\/seo-evidence\/import/);
+  assert.doesNotMatch(launchChecklist.body, /POST \/api\/admin\/seo-evidence\/import/);
   assert.match(launchChecklist.body, /POST \/api\/admin\/listing-quality\/import/);
   assert.ok(launchChecklist.body.includes(liveServiceProvisioningReportPath));
   assert.equal(preflightReportsUnauthorized.status, 401);
@@ -2204,7 +2204,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(searchConsole.body.seoImport.status, "blocked");
   assert.equal(searchConsole.body.seoImport.importedSource, "search_console");
   assert.deepEqual(searchConsole.body.seoImport.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
-  assert.equal(searchConsole.body.report.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
+  assert.equal(searchConsole.body.report.gates.some((gate) => gate.id === "external_seo_exports"), false);
   assert.equal(searchConsole.body.report.blockers.includes("external_seo_exports"), false);
   assert.deepEqual(searchConsole.body.sources.search_console.matched_source_domains, [
     "makler-realty.com",
@@ -2217,7 +2217,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(backlinks.body.seoImport.ready, true);
   assert.equal(backlinks.body.seoImport.status, "ready");
   assert.deepEqual(backlinks.body.seoImport.missingRequiredSources, []);
-  assert.equal(backlinks.body.report.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
+  assert.equal(backlinks.body.report.gates.some((gate) => gate.id === "external_seo_exports"), false);
   assert.equal(backlinks.body.report.blockers.includes("external_seo_exports"), false);
   assert.equal(backlinks.body.exportEndpoint, "/api/admin/seo-evidence/export");
   assert.equal(exportedEvidence.status, 200);
@@ -2242,7 +2242,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     "payload_runtime",
     "production_recovery",
   ]);
-  assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
+  assert.equal(launch.body.gates.some((gate) => gate.id === "external_seo_exports"), false);
   assert.equal(launch.body.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
   assert.equal(launch.body.gates.find((gate) => gate.id === "live_services").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "monitoring_rollback").evidence.machine_evidence.status, "missing");
@@ -2775,7 +2775,7 @@ test("HTTP public approval handlers bind reviewers and require confirmation", as
     const tour = {
       id: "credentialed-tour-approval",
       listingId: "MS-CRAWL-0001",
-      panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
+      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
       accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
       reviewConfirmed: true,
     };

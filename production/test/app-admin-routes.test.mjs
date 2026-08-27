@@ -726,7 +726,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const launchReadinessBody = await launchReadiness.json();
       assert.equal(launchReadiness.status, 200);
       assert.equal(launchReadinessBody.status, "blocked");
-      assert.equal(launchReadinessBody.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
+      assert.equal(launchReadinessBody.gates.some((gate) => gate.id === "external_seo_exports"), false);
       assert.equal(launchReadinessBody.blockers.includes("external_seo_exports"), false);
       assert.equal(launchReadinessBody.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
       assert.equal(launchReadinessBody.blockers.includes("listing_quality_review"), false);
@@ -746,7 +746,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(launchChecklist.status, 200);
       assert.equal(launchChecklist.headers.get("content-type"), "text/markdown; charset=utf-8");
       assert.match(launchChecklistBody, /# Launch Input Checklist/);
-      assert.match(launchChecklistBody, /External SEO Exports/);
+      assert.doesNotMatch(launchChecklistBody, /External SEO Exports|external_seo_exports|post-DNS|pre-DNS/);
       assert.match(launchChecklistBody, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
       assert.match(launchChecklistBody, /live-service-report-template/);
       assert.equal(launchChecklistBody.includes(liveServiceProvisioningReportPath), true);
@@ -1320,7 +1320,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(seoImportBody.seoImport.status, "blocked");
       assert.equal(seoImportBody.seoImport.importedSource, "search_console");
       assert.deepEqual(seoImportBody.seoImport.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
-      assert.equal(seoImportBody.report.gates.find((gate) => gate.id === "external_seo_exports").status, "deferred");
+      assert.equal(seoImportBody.report.gates.some((gate) => gate.id === "external_seo_exports"), false);
       assert.equal(seoImportBody.report.blockers.includes("external_seo_exports"), false);
       assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
 
@@ -1329,14 +1329,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       );
       const postSeoReadinessBody = await postSeoReadiness.json();
       assert.equal(postSeoReadiness.status, 200);
-      assert.ok(!postSeoReadinessBody.gates.find((gate) => gate.id === "external_seo_exports").evidence.missing_required_sources.includes("search_console"));
+      assert.equal(postSeoReadinessBody.gates.some((gate) => gate.id === "external_seo_exports"), false);
 
       const postSeoChecklist = await launchInputChecklistRoute.GET(
         new Request("https://example.test/api/admin/launch-input-checklist", { headers: auth }),
       );
       const postSeoChecklistBody = await postSeoChecklist.text();
       assert.equal(postSeoChecklist.status, 200);
-      assert.match(postSeoChecklistBody, /migration\/external\/seo\/search-console\.csv`: imported/);
+      assert.doesNotMatch(postSeoChecklistBody, /migration\/external\/seo\/search-console\.csv|External SEO Exports|external_seo_exports/);
 
       const readinessExport = await launchReadinessExportRoute.POST(
         new Request("https://example.test/api/admin/launch-readiness/export", { method: "POST", headers: auth }),
@@ -1722,8 +1722,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             listingId: "MS-CRAWL-0001",
-            panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
-            thumbnailUrl: "https://makler-realty.com/tours/MS-CRAWL-0001-thumb.jpg",
+            panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
+            thumbnailUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001-thumb.jpg",
             accessibilityCaption: "Reviewed 360 tour of the property.",
             reviewer: "media_reviewer",
             reviewConfirmed: "on",
@@ -1743,7 +1743,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           body: new URLSearchParams({
             listingId: "MS-CRAWL-0001",
             provider: "supersplat-viewer",
-            viewerUrl: "https://makler-realty.com/tours/MS-CRAWL-0001/index.html",
+            viewerUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001/index.html",
             accessibilityCaption: "Reviewed interactive 3D tour of the property.",
             reviewer: "media_reviewer",
             reviewConfirmed: "on",
@@ -1753,7 +1753,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const splatTourApprovalBody = await splatTourApproval.json();
       assert.equal(splatTourApproval.status, 201);
       assert.equal(splatTourApprovalBody.provider, "supersplat-viewer");
-      assert.equal(splatTourApprovalBody.viewer_url, "https://makler-realty.com/tours/MS-CRAWL-0001/index.html");
+      assert.equal(splatTourApprovalBody.viewer_url, "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001/index.html");
       assert.equal(splatTourApprovalBody.panorama_url, null);
       assert.equal(splatTourApprovalBody.is_public, true);
       const operationsLead = await publicLeadRoute.POST(
@@ -2540,7 +2540,7 @@ test("Next admin public approvals bind reviewers and require confirmation", asyn
     const tour = {
       id: "next-credentialed-tour-approval",
       listingId: "MS-CRAWL-0001",
-      panoramaUrl: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
+      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
       accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
       reviewConfirmed: true,
     };

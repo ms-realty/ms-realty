@@ -2,10 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { imageUrlFromMediaItem } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
+import { FALLBACK_PUBLIC_ORIGIN } from "./public-origin.mjs";
 
 export const TOUR_PROVIDER = "photo-sphere-viewer";
 export const TOUR_PROVIDERS = Object.freeze([TOUR_PROVIDER, "supersplat-viewer"]);
-const APPROVED_TOUR_HOSTS = Object.freeze(["makler-realty.com", "makler-realty.ru"]);
+const APPROVED_TOUR_HOSTS = Object.freeze([new URL(FALLBACK_PUBLIC_ORIGIN).hostname]);
 export const TOUR_REVIEW_STATUSES = Object.freeze([
   "needs_panorama_upload",
   "needs_viewer_upload",

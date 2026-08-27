@@ -2,6 +2,10 @@
 
 **Дата:** 30 июля 2026 г.
 
+**Статус документа:** исторический снимок на эту дату. Текущая launch authority находится в
+`production/data/launch-readiness.json` и исполняемом коде; этот отчёт не является актуальным
+списком gate.
+
 **Ветка:** `codex/ms-realty-content-audit`
 
 **Источник сайта:** новый код в текущем workspace; WordPress используется только как
@@ -16,8 +20,10 @@
 - Проверены **205** текущих public routes: 198 sitemap routes и 7 utility search routes.
 - Проверены **108 из 108** сохранённых legacy archive pages.
 - Реестр географии содержит **26 775** официальных территориальных записей.
-- Launch authority остаётся `blocked`: код собирается и тестируется, но семь внешних
-  production gates ещё не подтверждены.
+- На дату отчёта launch authority оставалась `blocked`. Сейчас публичный production origin —
+  `https://ms-realty.ms-realty-bg.workers.dev`; старые домены остаются историческими source/crawl,
+  media и redirect compatibility данными, а custom-domain/DNS шаг не является gate запуска,
+  deployment или readiness.
 - Текущий live visual audit через запрошенный Browser plugin не выполнен: transport
   закрывается до page discovery с ошибкой `Transport closed`. Поэтому этот отчёт не
   называет интерфейс «pixel perfect» без последнего реального browser pass.
@@ -112,18 +118,20 @@ area code хранится как справочная географическ�
 поля должны быть подтверждены сотрудником по документам/владельцу и импортированы
 через human listing-quality review.
 
-## Оставшиеся внешние production gates
+## Исторический снимок production gates
 
-`production/data/launch-readiness.json` содержит семь блокирующих gates:
+На дату отчёта `production/data/launch-readiness.json` содержал семь gate. Впоследствии
+`external_seo_exports` был удалён из launch/readiness gate set: Search Console, Yandex Webmaster,
+backlink и другие SEO importer artifacts остаются доступными для исторической аналитики и
+анализа источников, но не блокируют workers.dev production origin. Текущий список gate всегда
+читается из `production/data/launch-readiness.json`:
 
 1. `redirect_reviews` — индивидуально утвердить оставшиеся legacy URL decisions.
-2. `external_seo_exports` — предоставить реальные Search Console, Yandex Webmaster и
-   backlink exports по обоим legacy-доменам.
-3. `listing_quality_review` — завершить human review CSV для 165 listings.
-4. `live_services` — предоставить live Postgres search sync/query и отдельный Hermes worker report.
-5. `monitoring_rollback` — подтвердить production monitoring и rollback proof.
-6. `payload_runtime` — предоставить реальный Payload/Postgres runtime report.
-7. `production_recovery` — выполнить и подписать recovery drill с разделёнными ролями.
+2. `listing_quality_review` — завершить human review CSV для 165 listings.
+3. `live_services` — предоставить live Postgres search sync/query и отдельный Hermes worker report.
+4. `monitoring_rollback` — подтвердить production monitoring и rollback proof.
+5. `payload_runtime` — предоставить реальный Payload/Postgres runtime report.
+6. `production_recovery` — выполнить и подписать recovery drill с разделёнными ролями.
 
 Отдельно для staff-wide ChatGPT/Codex connector нужны live HTTPS/OIDC credentials,
 workspace app publication/RBAC, mapping реальных staff subjects и live smoke каждой

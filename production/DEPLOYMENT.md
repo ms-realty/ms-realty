@@ -1,17 +1,18 @@
-# MS Realty — Production Deployment Plan (no custom domain)
+# MS Realty — Production Deployment Plan (workers.dev public origin)
 
 Audited 2026-08-09 against live infrastructure; topology and gate state
 re-audited 2026-08-24 (durable origin stage, origin proxy, current gate table).
-This is the end-to-end runbook
-for operating the production deployment on `*.workers.dev` **before** the
-`makler-realty.com` / `makler-realty.ru` domains are attached. Domain cutover
-remains governed by the 12 launch gates (`production/data/launch-readiness.json`,
-see §7); nothing here overrides them.
+This is the end-to-end runbook for operating production at the exact public
+origin `https://ms-realty.ms-realty-bg.workers.dev`. The historical
+`makler-realty.com` / `makler-realty.ru` URLs, media, and redirect records remain
+available for crawl/source compatibility; they are not an active authority or
+a launch prerequisite.
 
-**Key architectural fact:** the launch gates gate *domain cutover and
-indexing*, not the deploy. The Worker deploy pipeline is already live and
-verified; `*.workers.dev` serves `noindex` (keyed on hostname in
-`workers/preview-host.mjs`), so operating it publicly leaks no search equity.
+**Key architectural fact:** launch gates govern runtime, data, recovery, and
+review evidence. The exact production workers.dev origin is indexable and
+serves `/admin`; isolated workers.dev drill hosts stay `noindex` (keyed on
+hostname in `workers/preview-host.mjs`). No custom-domain or DNS step gates
+deployment or readiness.
 
 ---
 
@@ -55,7 +56,7 @@ Cloudflare account 921d0224dcd595c87b7928d2b3c479d1 (ms.realty.bg@gmail.com, Wor
 ```
 
 Live URL: `https://ms-realty.ms-realty-bg.workers.dev`
-(CI resolves the subdomain via the API — never hardcode it in code.)
+(This exact host is pinned in the Worker config and production probes.)
 
 - The Container image bakes the repo (seed data, ledgers' initial state) at the
   merge SHA; `/api/health` reports that SHA as `build_marker`. An old container
@@ -83,9 +84,9 @@ Verified live:
 | Check | Result |
 |---|---|
 | `GET /api/health` | 200, `build_marker` == `main` HEAD (e66378c) |
-| `GET /` | 308 → `/bg`; locale pages 200; `x-robots-tag: noindex` on workers.dev |
-| `GET /robots.txt` | `Disallow: /` (preview host) |
-| `GET /sitemap.xml` | 200, canonical URLs point at makler-realty.com |
+| `GET /` | 308 → `/bg`; locale pages 200; exact production origin is indexable |
+| `GET /robots.txt` | production sitemap is allowed; isolated drill hosts return `Disallow: /` |
+| `GET /sitemap.xml` | 200, canonical URLs point at the exact workers.dev origin |
 | R2 media | 200 for mirrored keys; **some legacy size variants 404** (see §8) |
 | `GET /api/admin/*` | **401 — admin is unusable** (secret name drift, §3) |
 | `POST /api/leads` (any write) | **503 `runtime_data_unavailable`** (durable store absent) |
@@ -210,10 +211,10 @@ npm run payload:preflight        # asserts all 9 checks incl. real TCP connect
 The report is gitignored evidence, not a commit. Note: CI's
 `validate-foundation.mjs` pins the committed launch-readiness snapshot to
 exactly these blockers: `live_services`, `monitoring_rollback`,
-`payload_runtime`, `production_recovery` — with `external_seo_exports`
-recorded as deferred and `listing_quality_review` as pass. Clearing a gate
-means updating both the evidence and that pinned assertion in the same
-change; regenerating `launch-readiness.json` alone will fail CI.
+`payload_runtime`, and `production_recovery`, with
+`listing_quality_review` as pass. Clearing a gate means updating both the
+evidence and that pinned assertion in the same change; regenerating
+`launch-readiness.json` alone will fail CI.
 
 ## 5. Phase 3 — canonical Postgres live search
 
@@ -241,7 +242,7 @@ curl -sS 'https://ms-realty.ms-realty-bg.workers.dev/api/search?q=sandanski&loca
 - **Logs:** Workers Logs already enabled (`observability` in wrangler.jsonc);
   live tail via dashboard → Worker → Logs.
 - **`/api/ready`** stays 503 until all launch gates pass — that is the honest
-  domain-cutover signal, not an outage. Do not "monitor" it as uptime.
+  production-readiness signal, not an outage. Do not "monitor" it as uptime.
 - **Deploy verification:** every deploy self-verifies `build_marker` and
   auto-rolls-back; the deploy job's green check IS the release proof.
 
@@ -298,7 +299,7 @@ Cloudflare is configuration, not a rewrite.
 | `MS_REALTY_MEDIA_UPLOAD_DIR` | `production/data/media-uploads` | local driver root, git-ignored, laid out `<root>/<host>/<key>` like the media mirror |
 | `MS_REALTY_MEDIA_UPLOAD_R2_ENDPOINT` | *(unset)* | e.g. `https://ms-realty.ms-realty-bg.workers.dev/__media/` |
 | `MS_REALTY_MEDIA_INGEST_SECRET` | *(unset)* | the same value as the Worker's `MEDIA_INGEST_SECRET` |
-| `MS_REALTY_MEDIA_UPLOAD_HOST` | `makler-realty.com` | key/URL host prefix |
+| `MS_REALTY_MEDIA_UPLOAD_HOST` | `ms-realty.ms-realty-bg.workers.dev` | key/URL host prefix |
 | `MS_REALTY_MEDIA_UPLOAD_LEDGER_PATH` | `production/data/media-uploads.jsonl` | upload metadata ledger |
 | `MS_REALTY_MEDIA_UPLOAD_MAX_FILE_BYTES` | `8388608` | per file, clamped to `MS_REALTY_MAX_BODY_BYTES` |
 | `MS_REALTY_MEDIA_UPLOAD_MAX_REQUEST_BYTES` | `MS_REALTY_MAX_BODY_BYTES` | per request, never above the transport body limit |
@@ -348,16 +349,19 @@ rather than failing.
 
 Two key spaces, and the difference matters:
 
-- `makler-realty.com/wp-content/uploads/<YYYY>/<MM>/ms-<hash>.<ext>` — listing
-  photos uploaded by an operator. The edge serves `/wp-content/uploads/*` from
+- `ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/<YYYY>/<MM>/ms-<hash>.<ext>` — new
+  listing photos uploaded by an operator. The edge serves `/wp-content/uploads/*` from
   R2, so an approved photo resolves at its public URL like every mirrored asset.
   Being fetchable is **not** being published: the asset stays out of the listing
   payload, gallery, and search until a human approves it in the media review.
-- `makler-realty.com/wp-content/private/enquiries/<enquiry>/ms-<hash>.<ext>` —
+- `ms-realty.ms-realty-bg.workers.dev/wp-content/private/enquiries/<enquiry>/ms-<hash>.<ext>` —
   photos a seller attached to their own enquiry. The ingest route accepts the
   key (it is under `*/wp-content/`), but `serveMedia` in `workers/index.js` only
   routes requests whose path starts with `/wp-content/uploads/`, so the object
   has no edge URL at all. Keep that routing rule if you change the Worker.
+
+Historical `makler-realty.com/` and `makler-realty.ru/` R2 key namespaces remain
+untouched so imported media and legacy crawl URLs continue to resolve.
 
 Set `MS_REALTY_MEDIA_UPLOAD_DRIVER=r2` plus the endpoint and secret to store in
 R2. The driver verifies the echoed `size` for the same reason the bulk runbook
@@ -365,12 +369,11 @@ above does, and refuses to record a write it cannot confirm. Reading bytes back
 for the admin preview only works on the `local` driver; on `r2` the preview
 route answers 503 and names the reason rather than pretending.
 
-## 7. Out of scope today — the domain-cutover gates
+## 7. Remaining production gates and optional historical SEO evidence
 
-As of the committed `production/data/launch-readiness.json` (2026-08-24), 7 of
-12 gates pass — `redirect_reviews` and `listing_quality_review` among them —
-`external_seo_exports` is deferred by decision, and 4 remain blocked. None are
-required to operate workers.dev. The blocked four:
+As of the committed `production/data/launch-readiness.json`, 7 of 11 gates pass
+— `redirect_reviews` and `listing_quality_review` among them — and 4 remain
+blocked. The blocked four are:
 
 | Gate | Needs | Class |
 |---|---|---|
@@ -379,10 +382,11 @@ required to operate workers.dev. The blocked four:
 | `monitoring_rollback` | monitoring-drill workflow run (its "failure" at the alert-probe step is the alert being exercised, by design) + the machine-evidence artifact + an alert-delivery receipt (the Message-ID of GitHub's failure email), fed to `npm run monitoring:report`; evidence is perishable | provider + human inbox |
 | `production_recovery` | off-site encrypted backup + isolated restore drill, two distinct named humans | provider + humans |
 
-Also required before cutover: R2 media coverage report (§8) and relaxing the
-`validate-foundation.mjs` stay-blocked assertion as gates genuinely clear.
+Optional Search Console, Yandex Webmaster, backlink, and other SEO importer
+artifacts remain available for historical analytics and source analysis. They
+do not block this public workers.dev origin.
 
-## 8. Known gaps & accepted risks (current preview state)
+## 8. Known gaps & accepted risks (current production state)
 
 1. **Lead capture is off** (`POST /api/leads` → 503). Leads/consents/audit are
    JSONL-on-disk designs; on ephemeral container disk they would be silently
@@ -395,8 +399,9 @@ Also required before cutover: R2 media coverage report (§8) and relaxing the
    extended (§9.4).
 4. **R2 media mirror is partial**: spot-checks show some legacy size variants
    404 (e.g. `ofis-300x225.jpg`); 1,714 objects mirrored vs 11,859 media rows
-   in the crawl DB. Cosmetic on the noindex preview; build a coverage report
-   (migration DB × R2 listing) before any domain cutover.
+   in the crawl DB. This remains a historical compatibility risk; build a
+   coverage report (migration DB × R2 listing) when media completeness work is
+   funded, not as a public-origin launch gate.
 5. **Search 503** until Phase 3 runs.
 6. **Rate limiting** covers only the four public write paths and is in-process
    (single container instance pinned by design). Admin GETs, `/api/search`,

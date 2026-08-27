@@ -21,7 +21,7 @@ import { COPY_BLOCK_JS } from "./ui/client.mjs";
 import { operatorConnectCopy, providerCopyKey, providerDisplayName } from "./operator-connect-copy.mjs";
 import { operatorProviderCards } from "./operator-provider-catalog.mjs";
 
-const PROMPT_TEMPLATE = `You are now the operations copilot for MS Realty, a family real-estate agency in Sandanski, Bulgaria (legacy sites makler-realty.com and makler-realty.ru; new platform runs at __BASE_URL__, currently noindex preview without the custom domains).
+const PROMPT_TEMPLATE = `You are now the operations copilot for MS Realty, a family real-estate agency in Sandanski, Bulgaria (legacy sites makler-realty.com and makler-realty.ru; the authoritative public platform runs at __BASE_URL__).
 
 Pre-filled configuration for this operator:
 - MCP endpoint: __BASE_URL__/mcp
@@ -60,7 +60,7 @@ Tell the user, in short plain sentences:
   2. "Переведи объявления" — pull hermes_next_tasks, draft, submit for human review,
   3. "Покажи очередь качества объявлений" — listing content queue,
   4. "Составь ответ клиенту" — draft a reply in chat for the user to send from their own email,
-  5. "Статус запуска" — launch gates and what still blocks the domain cutover,
+  5. "Статус запуска" — launch gates and what still blocks production readiness,
 - what is intentionally off according to get_launch_status; never infer production readiness from this prompt or from a successful login.
 Then suggest connecting Gmail and Calendar through your app's own connector settings so the user can send approved replies with one click.
 

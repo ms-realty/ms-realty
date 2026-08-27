@@ -40,14 +40,7 @@ import {
 } from "./production-recovery.mjs";
 import { assertMonitoringRollbackReport, monitoringRollbackState } from "./monitoring-rollback.mjs";
 import { evidenceFreshness } from "./evidence-freshness.mjs";
-import {
-  REQUIRED_EXPORTS,
-  assertSeoEvidence,
-  assertSeoSourceSummary,
-  buildSeoEvidencePreflightReportFromEvidence,
-  missingRequiredExport,
-  missingRequiredSources,
-} from "./seo-evidence-contract.mjs";
+import { assertSeoEvidence } from "./seo-evidence-contract.mjs";
 import {
   approvedLaunchFreezeRouteArtifact,
   isApprovedLaunchFreezeRouteArtifact,
@@ -73,7 +66,7 @@ export const DEFAULT_LOCAL_READINESS_MAX_AGE_MS = 15 * 60 * 1000;
 const LOCAL_PREVIEW_GATE_ID = "local_preview_only";
 const LOCAL_PREVIEW_GATE_NEXT_ACTIONS = [
   "Treat this Docker-only report as local verification, not production launch evidence.",
-  "Complete the external SEO, human-review, and live production evidence gates before launch.",
+  "Complete the human-review and live production evidence gates before launch; optional SEO analytics remain separate.",
 ];
 
 const LIVE_SERVICE_SOURCE_ALIASES = {
@@ -112,7 +105,6 @@ const REQUIRED_LAUNCH_GATE_IDS = [
   "redirect_reviews",
   "localized_sitemap",
   "structured_data",
-  "external_seo_exports",
   "listing_quality_review",
   "runtime_smoke",
   "live_services",
@@ -137,10 +129,6 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   structured_data: [
     "Run npm run structured:data and fix any failing schema entries before launch.",
     "Confirm schema text is sourced from approved CMS/listing content only.",
-  ],
-  external_seo_exports: [
-    "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
-    "Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.",
   ],
   listing_quality_review: [
     "Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.",
@@ -688,37 +676,6 @@ function assertPassListingQualityEvidence(report) {
   }
 }
 
-function assertPassExternalSeoEvidence(report) {
-  const seo = gateById(report, "external_seo_exports");
-  if (!seo || !["pass", "deferred"].includes(seo.status)) return;
-  const evidence = seo.evidence || {};
-  const sourceSummaries = {
-    ...(evidence.sources || {}),
-    ...(evidence.analytics_export ? { analytics_export: evidence.analytics_export } : {}),
-    ...(evidence.privacy_events ? { privacy_events: evidence.privacy_events } : {}),
-  };
-  if (sourceSummaries.analytics_export?.status === "imported") {
-    assertSeoSourceSummary(sourceSummaries.analytics_export, "analytics_export");
-  }
-  for (const source of REQUIRED_EXPORTS) {
-    const sourceSummary = sourceSummaries[source];
-    assertSeoSourceSummary(sourceSummary, source);
-    if (seo.status === "pass" && missingRequiredExport(sourceSummary)) {
-      throw new Error(`Launch readiness external SEO requires complete ${source} evidence`);
-    }
-  }
-  const expectedMissing = missingRequiredSources(sourceSummaries);
-  if (!Array.isArray(evidence.missing_required_sources) || JSON.stringify(evidence.missing_required_sources) !== JSON.stringify(expectedMissing)) {
-    throw new Error("Launch readiness external SEO missing sources must match imported evidence");
-  }
-  if (seo.status === "pass" && expectedMissing.length !== 0) {
-    throw new Error("Launch readiness external SEO pass requires imported privacy or analytics evidence and no missing sources");
-  }
-  if (seo.status === "deferred" && expectedMissing.length === 0) {
-    throw new Error("Launch readiness external SEO cannot remain deferred after all post-DNS evidence is imported");
-  }
-}
-
 function assertPassRuntimeSmokeEvidence(report) {
   const smoke = gateById(report, "runtime_smoke");
   if (smoke?.status !== "pass") return;
@@ -974,7 +931,7 @@ function assertPassMonitoringRollbackEvidence(report) {
   if (monitoring?.status !== "pass") return;
   const sources = new Set(monitoring.evidence?.monitoring_sources || []);
   const sourceStatuses = monitoring.evidence?.monitoring_source_statuses || {};
-  for (const source of ["privacy_events", "analytics_export", "search_console", "yandex_webmaster", "backlinks"]) {
+  for (const source of ["privacy_events", "analytics_export"]) {
     if (!sources.has(source)) throw new Error("Launch readiness monitoring rollback requires source evidence");
   }
   const analyticsReady = sourceStatuses.privacy_events === "imported" || sourceStatuses.analytics_export === "imported";
@@ -1029,14 +986,6 @@ function warningsFrom(structuredData, listingQuality) {
   return Object.entries(warnings)
     .filter(([, count]) => count > 0)
     .map(([id, count]) => ({ id, count }));
-}
-
-function seoLaunchSourceSummaries(sourceSummaries) {
-  return Object.fromEntries(
-    [...REQUIRED_EXPORTS, "analytics_export", "privacy_events"]
-      .filter((source) => sourceSummaries[source])
-      .map((source) => [source, sourceSummaries[source]]),
-  );
 }
 
 export function publicLaunchReadinessPayload(report) {
@@ -1395,7 +1344,6 @@ export function buildLaunchReadinessReport({
   const generatedAtMs = Date.parse(generatedAt);
   if (!Number.isFinite(generatedAtMs)) throw new Error("Launch readiness requires valid generatedAt");
   assertSeoEvidence(seoEvidence);
-  const seoPreflight = buildSeoEvidencePreflightReportFromEvidence(seoEvidence);
 
   const liveServiceEvidence = liveServices.map((item) =>
     withEvidenceFreshness("live_services", item, item.generated_at, generatedAtMs),
@@ -1438,7 +1386,6 @@ export function buildLaunchReadinessReport({
     routeReview.homepageTargetsAllowed &&
     routeReview.redirectSummary.duplicateOldUrls === 0 &&
     routeReview.decisionSummary.duplicateOldUrls === 0;
-  const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const launchFreezeListingEvidence = approvedLaunchFreezeListingEvidence(launchFreeze, sitemap);
   const operatorPublicationEvidence = operatorPublicationListingEvidence(launchFreeze);
   const listingQualityEvidence = hasCompleteListingQualityEvidence(listingQualityReview)
@@ -1462,12 +1409,9 @@ export function buildLaunchReadinessReport({
   const monitoringPlan = [
     { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status, required_for: "production_ready" },
     { source: "analytics_export", status: seoEvidence.summary.sources.analytics_export.status, required_for: "production_ready" },
-    { source: "search_console", status: seoEvidence.summary.sources.search_console.status, required_for: "production_live" },
-    { source: "yandex_webmaster", status: seoEvidence.summary.sources.yandex_webmaster.status, required_for: "production_live" },
-    { source: "backlinks", status: seoEvidence.summary.sources.backlinks.status, required_for: "production_live" },
   ];
   const rollbackPlan = [
-    "Keep legacy DNS/origin rollback available until post-launch crawl is stable.",
+    "Keep the previous origin and release rollback available until post-launch crawl is stable.",
     "Disable reviewed redirect deployment before changing content routes if crawl parity fails.",
     "Republish previous sitemap and robots files if indexable route coverage regresses.",
     "Use migration review queue owners to triage failed old URLs before broad redirects.",
@@ -1546,23 +1490,6 @@ export function buildLaunchReadinessReport({
       structuredData.summary.failing_entries === 0 ? "pass" : "blocked",
       structuredData.summary,
       "Schema can pass while content warnings remain separate.",
-    ),
-    gate(
-      "external_seo_exports",
-      seoExportsReady ? "pass" : "deferred",
-      {
-        crawl_urls: seoEvidence.summary.crawl_urls,
-        url_types: seoEvidence.summary.url_types,
-        urls_with_any_evidence: seoEvidence.summary.urls_with_any_evidence,
-        missing_required_sources: seoEvidence.summary.missing_required_sources,
-        privacy_events: seoEvidence.summary.sources.privacy_events,
-        analytics_export: seoEvidence.summary.sources.analytics_export,
-        sources: seoLaunchSourceSummaries(seoEvidence.summary.sources),
-        next_actions: seoPreflight.next_actions,
-      },
-      seoExportsReady
-        ? "Canonical-domain SEO evidence is complete."
-        : "Deferred until canonical DNS cutover: Search Console, Yandex, and backlink evidence is required for Production-Live, not Production-Ready.",
     ),
     gate(
       "listing_quality_review",
@@ -1674,7 +1601,6 @@ export function assertLaunchReadinessReport(report, {
   assertPassRedirectReviewEvidence(report);
   assertPassLocalizedSitemapEvidence(report);
   assertPassStructuredDataEvidence(report);
-  assertPassExternalSeoEvidence(report);
   assertPassListingQualityEvidence(report);
   assertPassRuntimeSmokeEvidence(report);
   assertPassRuntimeEvidence(report);

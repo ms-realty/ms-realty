@@ -45,7 +45,6 @@ const outPath = writeLaunchInputChecklist(
       seoEvidence,
       deployableRedirects,
     }),
-    seoEvidence,
     redirectWorkbookCsv: renderRedirectApprovalWorkbook(
       buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routeMap.routes, loadMigrationRecords())),
     ),

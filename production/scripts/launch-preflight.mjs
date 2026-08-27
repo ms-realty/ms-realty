@@ -26,9 +26,6 @@ function blockerDetails(report) {
   return report.gates
     .filter((gate) => gate.status === "blocked")
     .flatMap((gate) => {
-      if (gate.id === "external_seo_exports") {
-        return [`external_seo_exports missing: ${(gate.evidence.missing_required_sources || []).join(", ")}`];
-      }
       if (gate.id === "live_services") {
         return (gate.evidence.reports || []).map((item) => `${item.source}: ${item.status} ${item.path || ""}`.trim());
       }

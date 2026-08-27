@@ -64,6 +64,7 @@ import { DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH } from "./lib/broker-availabili
 import { DEFAULT_VIEWING_TRIP_LEDGER_PATH } from "./lib/viewing-trip-requests.mjs";
 import { DEFAULT_LAUNCH_FREEZE_PATH } from "./lib/launch-freeze.mjs";
 import { DEFAULT_WORKSPACE_SETTINGS_PATH } from "./lib/workspace-settings.mjs";
+import { publicOrigin } from "./lib/public-origin.mjs";
 
 // A missing or too-short signing secret disables manage links instead of
 // taking the whole server down: the saved search itself still works, and the
@@ -210,7 +211,7 @@ export function productionServerConfig(env = process.env) {
     savedSearchManageSecret: savedSearchManageSecretOrNull(env),
     savedSearchManageLinkTemplate: savedSearchManagePathTemplate(env),
     savedSearchManageLinkTtlDays: savedSearchManageTtlDays(env),
-    savedSearchPublicOrigin: env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com",
+    savedSearchPublicOrigin: publicOrigin(env),
     publicRequestOutcomeLedgerPath:
       env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH || DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,

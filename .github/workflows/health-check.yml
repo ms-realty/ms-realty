@@ -26,11 +26,11 @@ jobs:
 
       # A healthy process can still serve broken pages, so this probes the
       # real journeys: home, the search fail-closed fallback, the public admin
-      # isolation boundary, legacy media, the noindex preview guard, and
-      # readiness. No dependencies are installed — the script is stdlib only.
+      # route, legacy media, the production indexing posture, and readiness.
+      # No dependencies are installed — the script is stdlib only.
       - name: Probe production journeys
         env:
-          MS_REALTY_PRODUCTION_URL: ${{ vars.MS_REALTY_PRODUCTION_URL }}
+          MS_REALTY_PRODUCTION_URL: https://ms-realty.ms-realty-bg.workers.dev
         run: |
-          test -n "$MS_REALTY_PRODUCTION_URL"
+          test "$MS_REALTY_PRODUCTION_URL" = "https://ms-realty.ms-realty-bg.workers.dev"
           node production/scripts/probe-production-journeys.mjs

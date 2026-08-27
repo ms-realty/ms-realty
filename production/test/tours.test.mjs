@@ -31,7 +31,7 @@ test("tour fields require provider-specific reviewed source, caption, and fallba
     () =>
       createTourField({
         listingId: "MS-CRAWL-0001",
-        panoramaUrl: "https://makler-realty.com/tours/panorama.jpg",
+        panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/panorama.jpg",
         isPublic: true,
         media,
       }),
@@ -40,7 +40,7 @@ test("tour fields require provider-specific reviewed source, caption, and fallba
 
   const approved = createTourField({
     listingId: "MS-CRAWL-0001",
-    panoramaUrl: "https://makler-realty.com/tours/panorama.jpg",
+    panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/panorama.jpg",
     accessibilityCaption: "Reviewed 360 panorama of the property interior.",
     isPublic: true,
     media,
@@ -63,7 +63,7 @@ test("tour fields require provider-specific reviewed source, caption, and fallba
   const splat = createTourField({
     listingId: "MS-CRAWL-0001",
     provider: "supersplat-viewer",
-    viewerUrl: "https://makler-realty.com/splats/MS-CRAWL-0001/",
+    viewerUrl: "https://ms-realty.ms-realty-bg.workers.dev/splats/MS-CRAWL-0001/",
     accessibilityCaption: "Reviewed interactive 3D reconstruction of the property interior.",
     isPublic: true,
     media,
@@ -74,7 +74,7 @@ test("tour fields require provider-specific reviewed source, caption, and fallba
     {
       available: true,
       provider: "supersplat-viewer",
-      viewer_url: "https://makler-realty.com/splats/MS-CRAWL-0001/",
+      viewer_url: "https://ms-realty.ms-realty-bg.workers.dev/splats/MS-CRAWL-0001/",
       thumbnail_url: null,
       accessibility_caption: "Reviewed interactive 3D reconstruction of the property interior.",
       fallback_gallery: splat.fallback_gallery,
@@ -111,7 +111,7 @@ test("360 tour approval rows are tied to known listings and latest public review
     {
       id: "tour-approval-first",
       listingId: "MS-CRAWL-0001",
-      panoramaUrl: "https://makler-realty.com/tours/panorama-first.jpg",
+      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/panorama-first.jpg",
       accessibilityCaption: "First reviewed 360 panorama.",
       reviewer: "media_editor",
       reviewConfirmed: true,
@@ -123,7 +123,7 @@ test("360 tour approval rows are tied to known listings and latest public review
     {
       id: "tour-approval-second",
       listingId: "MS-CRAWL-0001",
-      panoramaUrl: "https://makler-realty.com/tours/panorama-second.jpg",
+      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/panorama-second.jpg",
       accessibilityCaption: "Second reviewed 360 panorama.",
       reviewer: "media_editor",
       reviewConfirmed: true,
@@ -132,7 +132,7 @@ test("360 tour approval rows are tied to known listings and latest public review
   );
 
   assert.equal(assertTourApprovals([first, second]), true);
-  assert.equal(latestTourForListing([first, second], "MS-CRAWL-0001").panorama_url, "https://makler-realty.com/tours/panorama-second.jpg");
+  assert.equal(latestTourForListing([first, second], "MS-CRAWL-0001").panorama_url, "https://ms-realty.ms-realty-bg.workers.dev/tours/panorama-second.jpg");
   assert.equal(
     latestTourForListing([{ ...second, panorama_url: "https://cdn.example.test/panorama-second.jpg" }, first], "MS-CRAWL-0001").id,
     first.id,
@@ -141,7 +141,7 @@ test("360 tour approval rows are tied to known listings and latest public review
     () =>
       createTourApproval(seed, {
         listingId: "MS-CRAWL-0001",
-        panoramaUrl: "https://makler-realty.com/tours/panorama.jpg",
+        panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/panorama.jpg",
         accessibilityCaption: "Reviewed 360 panorama.",
         reviewer: "media_editor",
       }),
@@ -151,7 +151,7 @@ test("360 tour approval rows are tied to known listings and latest public review
     () =>
       createTourApproval(seed, {
         listingId: "missing",
-        panoramaUrl: "https://makler-realty.com/tours/panorama.jpg",
+        panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/panorama.jpg",
         accessibilityCaption: "Reviewed 360 panorama.",
         reviewer: "media_editor",
       }),
@@ -164,7 +164,7 @@ test("360 tour approval rows are tied to known listings and latest public review
       id: "tour-approval-splat",
       listingId: "MS-CRAWL-0001",
       provider: "supersplat-viewer",
-      viewerUrl: "https://makler-realty.com/splats/MS-CRAWL-0001/",
+      viewerUrl: "https://ms-realty.ms-realty-bg.workers.dev/splats/MS-CRAWL-0001/",
       accessibilityCaption: "Reviewed interactive 3D reconstruction of the property interior.",
       reviewer: "media_editor",
       reviewConfirmed: true,
@@ -172,5 +172,5 @@ test("360 tour approval rows are tied to known listings and latest public review
     "2026-07-05T00:02:00Z",
   );
   assert.equal(splat.provider, "supersplat-viewer");
-  assert.equal(splat.viewer_url, "https://makler-realty.com/splats/MS-CRAWL-0001/");
+  assert.equal(splat.viewer_url, "https://ms-realty.ms-realty-bg.workers.dev/splats/MS-CRAWL-0001/");
 });

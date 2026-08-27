@@ -179,13 +179,13 @@ test("the stored filename is a content hash and cannot be steered by the caller"
   assert.deepEqual(MEDIA_UPLOAD_SCOPES, ["listing", "enquiry"]);
   const hash = "a".repeat(64);
   const key = mediaUploadKey({ scope: "listing", hash, ext: "jpg", at: new Date("2026-08-23T00:00:00Z") });
-  assert.equal(key, `makler-realty.com/wp-content/uploads/2026/08/ms-${"a".repeat(32)}.jpg`);
-  assert.equal(mediaUploadPublicUrl(key), `https://makler-realty.com/wp-content/uploads/2026/08/ms-${"a".repeat(32)}.jpg`);
+  assert.equal(key, `ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/ms-${"a".repeat(32)}.jpg`);
+  assert.equal(mediaUploadPublicUrl(key), `https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/ms-${"a".repeat(32)}.jpg`);
 
   // A seller's photo lives outside the prefix the Worker serves, so it has no
   // public URL at all.
   const privateKey = mediaUploadKey({ scope: "enquiry", subjectId: "lead-draft-1", hash, ext: "jpg" });
-  assert.equal(privateKey, `makler-realty.com/wp-content/private/enquiries/lead-draft-1/ms-${"a".repeat(32)}.jpg`);
+  assert.equal(privateKey, `ms-realty.ms-realty-bg.workers.dev/wp-content/private/enquiries/lead-draft-1/ms-${"a".repeat(32)}.jpg`);
   assert.equal(mediaUploadPublicUrl(privateKey), null);
 
   assert.throws(() => mediaUploadKey({ scope: "enquiry", subjectId: "../../etc", hash, ext: "jpg" }), /enquiry id/);
@@ -243,7 +243,7 @@ test("the r2 driver ingests through the Worker route and verifies the echoed siz
 
   const fromEnv = mediaUploadStorageConfigFromEnv({});
   assert.equal(fromEnv.driver, "local");
-  assert.equal(fromEnv.host, "makler-realty.com");
+  assert.equal(fromEnv.host, "ms-realty.ms-realty-bg.workers.dev");
 });
 
 /* --------------------------------------------------------------- ledger */

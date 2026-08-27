@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { isPreviewHost } from "../../workers/preview-host.mjs";
+import { isPreviewHost, isProductionPublicHost } from "../../workers/preview-host.mjs";
 
 // Synthetic probe of the deployed site's real operator-visible journeys.
 // /api/health only proves the process answers; a container can be "healthy"
@@ -22,7 +22,9 @@ if (expectedBuildMarker && !SHA_PATTERN.test(expectedBuildMarker)) {
 }
 
 const TIMEOUT_MS = 25_000;
-const previewHost = isPreviewHost(new URL(baseUrl).hostname);
+const requestHostname = new URL(baseUrl).hostname;
+const previewHost = isPreviewHost(requestHostname);
+const productionPublicHost = isProductionPublicHost(requestHostname);
 
 async function fetchPath(path, { method = "GET", headers = {} } = {}) {
   const controller = new AbortController();
@@ -122,7 +124,7 @@ const checks = [
       if (previewHost && !robots.includes("noindex")) {
         throw new Error("preview host must serve noindex — search equity protection");
       }
-      return { x_robots_tag: robots || null };
+      return { x_robots_tag: robots || null, production_public_host: productionPublicHost };
     },
   },
   {

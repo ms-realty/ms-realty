@@ -26,7 +26,6 @@ export function buildAgencyReviewQueue({
   listingVerification = {},
   translationCoverage = {},
   brokerContacts = [],
-  seoEvidence = {},
   launchReadiness = {},
 } = {}) {
   const qualityRows = listingQuality.rows || [];
@@ -38,7 +37,6 @@ export function buildAgencyReviewQueue({
     brokerContacts.filter(isPublicBrokerContact).map((row) => row.listing_id),
   );
   const contactRows = verificationRows.filter((row) => !approvedContactListings.has(row.listing_id));
-  const missingSeoSources = seoEvidence.missingRequiredSources || seoEvidence.missing_required_sources || [];
   const operationalSignoffs = (launchReadiness.gates || []).filter(
     (gate) => gate.status === "blocked" && ["monitoring_rollback", "production_recovery"].includes(gate.id),
   );
@@ -50,7 +48,7 @@ export function buildAgencyReviewQueue({
       owner: "content_and_seo",
       priority: "high",
       adminPath: "/admin/migration/review",
-      guardrail: "No DNS cutover until every legacy URL has a reviewed terminal decision.",
+      guardrail: "Every legacy URL needs a reviewed terminal decision before its compatibility mapping is published.",
       count: pendingRoutes.length,
       tasks: pendingRoutes.map((row) =>
         task({
@@ -135,24 +133,6 @@ export function buildAgencyReviewQueue({
       ),
     }),
     lane({
-      id: "external_seo",
-      title: "External SEO evidence",
-      owner: "seo_editor",
-      priority: "high",
-      adminPath: "/admin/migration/review",
-      guardrail: "Legacy-domain cutover remains blocked until both domains have reviewed source evidence.",
-      count: missingSeoSources.length,
-      tasks: missingSeoSources.map((source) =>
-        task({
-          id: `seo-${source}`,
-          title: source,
-          owner: "seo_editor",
-          priority: "high",
-          admin_path: "/admin/migration/review",
-        }),
-      ),
-    }),
-    lane({
       id: "operational_signoff",
       title: "Monitoring and recovery sign-off",
       owner: "agency_admin",
@@ -187,7 +167,7 @@ export function buildAgencyReviewQueue({
       unreviewed_translation_indexing: "blocked",
       unapproved_customer_messages: "blocked",
       unverified_direct_contact: "blocked",
-      legacy_domain_cutover: launchReadiness.launch_ready === true ? "allowed" : "blocked",
+      legacy_route_compatibility: "review_required",
     },
     lanes,
   };

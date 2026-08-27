@@ -222,7 +222,7 @@ test("listing quality does not require tour review for approved tour ledger rows
       {
         ...record.tour,
         listing_id: record.id,
-        panorama_url: "https://makler-realty.com/tours/MS-CRAWL-0001.jpg",
+        panorama_url: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
         accessibility_caption: "Reviewed 360 panorama for MS-CRAWL-0001.",
         is_public: true,
         review_status: "approved",

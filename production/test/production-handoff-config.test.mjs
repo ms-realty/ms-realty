@@ -15,7 +15,7 @@ const liveServiceEvidenceCli = fs.readFileSync(fromRoot("production", "scripts",
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 
-test("handoff puts the same governed app behind the private preview and final domains", () => {
+test("handoff keeps the governed app private behind the review host", () => {
   const reviewHost = caddy.indexOf("{$MS_REALTY_REVIEW_HOST}");
   const publicHealth = caddy.indexOf("@edge_health path /api/health", reviewHost);
   const reviewAuth = caddy.indexOf("basic_auth {", reviewHost);
@@ -34,20 +34,18 @@ test("handoff puts the same governed app behind the private preview and final do
   assert.match(workerOrigin, /reverse_proxy app:3000/);
   assert.doesNotMatch(workerOrigin, /MS_REALTY_ADMIN_TOKEN|import app_proxy/);
   for (const domain of ["makler-realty.com", "www.makler-realty.com", "makler-realty.ru", "www.makler-realty.ru"]) {
-    assert.match(caddy, new RegExp(domain.replaceAll(".", "\\.")));
+    assert.doesNotMatch(caddy, new RegExp(`^${domain.replaceAll(".", "\\.")} \\{`, "m"));
   }
-  assert.match(caddy, /@public_operator path \/admin \/admin\/\* \/api\/admin\/\*/);
-  assert.match(caddy, /@payload_private path \/payload-admin/);
+  assert.match(caddy, /@app_operator path \/admin \/admin\/\* \/api\/admin\/\*/);
   assert.match(caddy, /try_files \/makler-realty\.com\{path\} \/makler-realty\.ru\{path\}/);
-  assert.match(caddy, /root \* \/srv\/media\/makler-realty\.com/);
-  assert.match(caddy, /root \* \/srv\/media\/makler-realty\.ru/);
 });
 
-test("production compose runs one durable app before and after DNS cutover", () => {
+test("production compose runs one durable app at the workers.dev public origin", () => {
   assert.doesNotMatch(compose, /review-app:/);
   assert.doesNotMatch(compose, /MS_REALTY_PRIVATE_REVIEW_MODE/);
   assert.equal(compose.match(/MS_REALTY_TRUST_PROXY: "1"/g)?.length, 1);
-  assert.match(compose, /MS_REALTY_PUBLIC_ORIGIN: https:\/\/makler-realty\.com/);
+  assert.match(compose, /MS_REALTY_PUBLIC_ORIGIN: https:\/\/ms-realty\.ms-realty-bg\.workers\.dev/);
+  assert.match(compose, /MS_REALTY_MCP_ALLOWED_ORIGINS: https:\/\/ms-realty\.ms-realty-bg\.workers\.dev/);
   assert.match(compose, /MS_REALTY_BUILD_MARKER: \$\{MS_REALTY_BUILD_MARKER:-unversioned\}/);
   assert.match(compose, /MS_REALTY_RUNTIME_DATA_AUTHORITY: payload/);
   assert.match(compose, /MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true"/);
@@ -91,7 +89,10 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.match(worker, /if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(worker, /requestForOrigin\(request, env\.MS_REALTY_ORIGIN_URL, env\.MS_REALTY_ORIGIN_TOKEN\)/);
   assert.match(worker, /if \(media\) return media;\n\s+if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
+  assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}${url.pathname}`"));
+  assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
+  assert.match(wrangler, /"MS_REALTY_PUBLIC_ORIGIN": "https:\/\/ms-realty\.ms-realty-bg\.workers\.dev"/);
   assert.equal(wrangler.split("__MS_REALTY_BUILD_MARKER__").length - 1, 2);
 });
 
@@ -119,7 +120,7 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.doesNotMatch(ciWorkflow, /bash -s --/);
 });
 
-test("every public CMS media asset is mirrorable under one of the two final hosts", () => {
+test("every public CMS media asset preserves one of the two historical source hosts", () => {
   const seed = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-seed.json"), "utf8"));
   const assets = new Set(
     seed.records.flatMap((record) => (record.media || []).map((item) => item.asset_url).filter(Boolean)),
