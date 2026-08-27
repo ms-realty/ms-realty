@@ -1194,7 +1194,8 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   scroll-margin-top: var(--adm-editor-anchor-offset, 124px);
 }
 .adm-editor-tabs .mk-tab { text-decoration: none; display: inline-flex; align-items: center; gap: 7px; font-size: var(--text-sm); }
-/* Tab labels stay visible on laptops and tablets; phones get icon-only tabs. */
+/* Tab labels stay visible on laptops and tablets; compact phones may use the
+   icon-only treatment when the local section rail cannot fit its labels. */
 @media (max-width: 599px) {
   .adm-editor-tab__label { display: none; }
 }
@@ -2308,4 +2309,250 @@ html[data-theme="dark"] .crm-app {
 
 html[data-theme="dark"] .crm-top {
   background: color-mix(in srgb, var(--surface) 94%, transparent);
+}
+
+/* ============================================================
+   Second-pass owner console polish
+
+   The owner workbench is a review surface, not a collection of floating
+   cards. Keep the existing information architecture and tokens, but reserve
+   borders for boundaries, give the editor a stable local index, and let the
+   content carry more of the visual hierarchy.
+   ============================================================ */
+
+/* Type scale and reading measure. The kit's base remains the source of truth;
+   these rules make the operator-facing labels and page introductions read as
+   a deliberate hierarchy on both light and dark canvases. */
+.crm-app main[data-react-admin-ui] {
+  color: var(--text-body);
+  font-size: var(--text-md);
+  line-height: var(--lh-normal);
+}
+.crm-app main[data-react-admin-ui] .crm-ph { margin-bottom: var(--space-4); }
+.crm-app main[data-react-admin-ui] .crm-ph h1 {
+  font-size: clamp(var(--text-2xl), 1.45rem + 1.1vw, var(--text-3xl));
+  line-height: 1.1;
+}
+.crm-app main[data-react-admin-ui] .crm-ph p {
+  max-width: 72ch;
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  line-height: var(--lh-relaxed);
+}
+.crm-app main[data-react-admin-ui] .adm-note,
+.crm-app main[data-react-admin-ui] .adm-panel-intro,
+.crm-app main[data-react-admin-ui] .adm-hermes-panel-intro {
+  line-height: var(--lh-relaxed);
+}
+.crm-app main[data-react-admin-ui] .adm-form > label:not(.adm-check),
+.crm-app main[data-react-admin-ui] .adm-form__group label,
+.crm-app main[data-react-admin-ui] .adm-media-review-form label,
+.crm-app main[data-react-admin-ui] .adm-tour-form__field,
+.crm-app main[data-react-admin-ui] .adm-human-translation label {
+  color: var(--text-body);
+  font-size: var(--text-sm);
+  line-height: var(--lh-snug);
+}
+.crm-app main[data-react-admin-ui] .adm-form > label:not(.adm-check) > input,
+.crm-app main[data-react-admin-ui] .adm-form > label:not(.adm-check) > select,
+.crm-app main[data-react-admin-ui] .adm-form > label:not(.adm-check) > textarea,
+.crm-app main[data-react-admin-ui] .adm-form__group input,
+.crm-app main[data-react-admin-ui] .adm-form__group select,
+.crm-app main[data-react-admin-ui] .adm-form__group textarea,
+.crm-app main[data-react-admin-ui] .adm-human-translation input,
+.crm-app main[data-react-admin-ui] .adm-human-translation textarea {
+  font-size: var(--text-md);
+}
+
+/* The local editor index stays visible while the operator moves through the
+   long form. A solid surface avoids the fuzzy, stacked-card effect of the
+   previous translucent tab rail. */
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  padding: 0;
+  border-inline: 0;
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: 0 1px 0 var(--border-strong);
+  backdrop-filter: none;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs::-webkit-scrollbar { display: none; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs .mk-tab {
+  justify-content: center;
+  min-width: 0;
+  min-height: 50px;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs .mk-tab:hover {
+  background: var(--surface-hover);
+  color: var(--text-strong);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs .mk-tab[aria-current="location"] {
+  border-bottom-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-subtle) 42%, var(--surface));
+  color: var(--text-strong);
+}
+
+/* Editor disclosures become quiet dividers inside the primary facts panel;
+   the panel boundary is enough to orient the operator. */
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-section {
+  border-inline: 0;
+  border-block: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-section:first-of-type { border-block-start: 0; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-section__summary {
+  min-height: 56px;
+  padding-inline: 0;
+  font-size: var(--text-md);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-section .adm-form__group {
+  padding-inline: 0;
+  padding-block: var(--space-4);
+}
+
+/* Translation review keeps source context in view while the target fields
+   scroll. The source accent is a single orientation cue rather than another
+   rounded card. */
+.crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__source {
+  max-height: min(32rem, calc(100vh - var(--adm-editor-anchor-offset, 124px)));
+  overflow: auto;
+  border: 0;
+  border-inline-start: 3px solid var(--sea-500);
+  border-radius: 0;
+  background: var(--surface-sunken);
+}
+.crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__fields {
+  padding: var(--space-2) 0 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+.crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__facts dt {
+  color: var(--text-muted);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Media review: four useful columns at wide desktop widths, with the card
+   reduced to a work item around its preview. The preview itself carries the
+   signal; nested elevation does not. */
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset {
+  gap: var(--space-2);
+  padding: var(--space-3) !important;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: none;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__preview {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__header strong { font-size: var(--text-sm); }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__header small {
+  color: var(--text-muted);
+  font-size: var(--text-2xs);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__source {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Hermes is one safe operator surface: health, draft queue, and connection
+   recovery. Give a blocked health result a clear edge and put recovery beside
+   the reason, without adding generic chat or infrastructure controls. */
+.crm-app main[data-react-admin-ui="hermes"] .adm-hermes-status-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+}
+.crm-app main[data-react-admin-ui="hermes"] [data-hermes-runtime-card="blocked"] {
+  border-color: var(--sun-300);
+}
+.crm-app main[data-react-admin-ui="hermes"] [data-hermes-runtime-card="blocked"] .adm-hermes-card {
+  border-inline-start: 3px solid var(--sun-500);
+}
+.adm-hermes-recovery {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
+  border: 1px solid var(--sun-300);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--sun-300) 12%, var(--surface));
+}
+.adm-hermes-recovery > svg { color: var(--sun-600); }
+.adm-hermes-recovery__copy { display: grid; gap: 2px; min-width: 0; }
+.adm-hermes-recovery__copy strong { color: var(--text-strong); font-size: var(--text-sm); }
+.adm-hermes-recovery__copy p { margin: 0; color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
+
+/* Settings controls must remain readable when a runtime or role blocks the
+   write. Updated sections get a quiet rail, while blocked sections explain
+   their state through structure rather than low-opacity text. */
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-state="updated"] {
+  border-inline-start: 3px solid var(--sea-500);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] {
+  border-style: dashed;
+  border-color: var(--border-strong);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-grid {
+  opacity: 1;
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-field > input,
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-field > select,
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-field > textarea {
+  opacity: 1;
+  border-style: dashed;
+  color: var(--text-muted);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-actions {
+  background: var(--surface-sunken);
+}
+
+/* Horizontal editor navigation is intentional on narrow screens: labels stay
+   available to sighted and cognitive users, and the scroll is contained in
+   the rail so it can never create page-level overflow. */
+@media (max-width: 767px) {
+  .crm-app main[data-react-admin-ui] .crm-ph h1 { font-size: var(--text-2xl); }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    margin-inline: calc(-1 * var(--space-4));
+    padding-inline: var(--space-3);
+  }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs .mk-tab {
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding-inline: var(--space-4);
+  }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tab__label { display: inline; }
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__source {
+    max-height: none;
+    overflow: visible;
+  }
+  .crm-app main[data-react-admin-ui="hermes"] .adm-hermes-status-grid { grid-template-columns: minmax(0, 1fr); }
+  .adm-hermes-recovery { grid-template-columns: auto minmax(0, 1fr); }
+  .adm-hermes-recovery .mk-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
+}
+
+@media (max-width: 600px) {
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: minmax(0, 1fr); }
 }

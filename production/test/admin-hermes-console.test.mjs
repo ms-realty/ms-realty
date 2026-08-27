@@ -62,6 +62,8 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.match(html, /data-react-admin-ui="hermes"/);
   assert.match(html, /data-hermes-runtime="blocked"/);
   assert.match(html, /HERMES_CHAT_COMPLETIONS_URL/);
+  assert.match(html, /data-hermes-recovery="true"/);
+  assert.match(html, /Recover the connection/);
   assert.match(html, /href="\/admin\/connect"/);
   assert.match(html, /data-hermes-tool="hermes_submit_draft"/);
   assert.match(html, /Hermes cannot publish, send customer messages, or mark content indexable/);

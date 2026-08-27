@@ -300,6 +300,53 @@
   .adm-empty__action { display: block; margin-inline-start: 0; margin-top: var(--space-1); }
 }
 
+/* A media tile always has a deliberate preview state. This keeps an empty
+   source, a video placeholder, a loading image, and a failed image distinct
+   in the review queue instead of leaving the operator with an unexplained
+   blank rectangle. The state text is rendered by the locale-aware source. */
+.adm-media-asset__preview-loading,
+.adm-media-asset__preview-failed,
+.adm-media-asset__preview-empty,
+.adm-media-asset__preview-video {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+  text-align: center;
+}
+.adm-media-asset[data-media-preview-state="loading"] .adm-media-asset__preview-loading {
+  display: grid;
+  background: linear-gradient(110deg, transparent 22%, color-mix(in srgb, var(--surface) 55%, transparent) 48%, transparent 74%);
+  background-size: 220% 100%;
+  animation: adm-media-preview-sheen 1.8s linear infinite;
+}
+.adm-media-asset[data-media-preview-state="loaded"] .adm-media-asset__preview-loading { display: none; }
+.adm-media-asset[data-media-preview-state="failed"] .adm-media-asset__preview-failed,
+.adm-media-asset[data-media-preview-state="empty"] .adm-media-asset__preview-empty,
+.adm-media-asset[data-media-preview-state="video"] .adm-media-asset__preview-video { display: grid; }
+.adm-media-asset[data-media-preview-state="empty"] .adm-media-asset__preview {
+  border-style: dashed;
+  background: var(--surface-sunken);
+}
+.adm-media-asset[data-media-preview-state="video"] .adm-media-asset__preview {
+  background: color-mix(in srgb, var(--ink-900) 86%, var(--surface));
+}
+.adm-media-asset[data-media-preview-state="video"] .adm-media-asset__preview-video { color: var(--text-on-dark); }
+.adm-media-asset[data-media-preview-state="failed"] .adm-media-asset__preview-failed { color: var(--brick-700); }
+@keyframes adm-media-preview-sheen {
+  from { background-position: 200% 0; }
+  to { background-position: -20% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adm-media-asset[data-media-preview-state="loading"] .adm-media-asset__preview-loading { animation: none; }
+}
+
 /* ------------------------------------------------------------
    Migration review
    ------------------------------------------------------------ */

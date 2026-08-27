@@ -132,8 +132,13 @@ test("the editor lists one state per locale, and a stale task wins over the publ
 test("media assets preview and fail out loud", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
   assert.match(page.body, /data-media-preview-state="loading"/);
+  assert.match(page.body, /data-media-preview-frame="true"/);
+  assert.match(page.body, /class="adm-media-asset__preview-loading"/);
   assert.match(page.body, /<img src="[^"]+" alt="[^"]*" loading="lazy" decoding="async" data-media-preview="true">/);
   assert.match(page.body, /class="adm-media-asset__preview-failed"/);
+  assert.match(cmsCss, /\.adm-media-asset__preview-(?:loading|failed|empty|video)/);
+  assert.match(cmsCss, /\[data-media-preview-state="empty"\] \.adm-media-asset__preview/);
+  assert.match(cmsCss, /\[data-media-preview-state="video"\] \.adm-media-asset__preview/);
   assert.match(cmsCss, /\[data-media-preview-state="failed"\] \.adm-media-asset__preview-failed \{ display: grid; \}/);
   // A broken file shows the designed note, not the browser's own fallback of a
   // broken-image glyph plus the whole alt text.
