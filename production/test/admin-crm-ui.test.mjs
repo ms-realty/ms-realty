@@ -19,6 +19,11 @@ const crmCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-
 const bundleCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const auth = { authorization: "Bearer local-admin-smoke" };
 const registry = loadLocaleRegistry();
+const TEST_BROKER_PROFILES = Object.freeze([
+  { id: "broker_bg", languages: ["bg"] },
+  { id: "broker_ru", languages: ["ru"] },
+  { id: "broker_international", languages: ["en"] },
+]);
 
 // The suite reads the checked-in demo ledgers through private copies so the
 // SQLite mirrors under production/data are never shared with the other test
@@ -33,7 +38,12 @@ const leadLedgerPath = ledgerCopy("lead-ledger.jsonl");
 const eventLedgerPath = ledgerCopy("events.jsonl");
 
 function app() {
-  return createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z", leadLedgerPath, eventLedgerPath });
+  return createHttpApp({
+    reviewedAt: "2026-07-19T12:00:00.000Z",
+    leadLedgerPath,
+    eventLedgerPath,
+    brokerProfiles: TEST_BROKER_PROFILES,
+  });
 }
 
 test("lead inbox is a two-pane inbox: a list of rows that select a detail article", async () => {

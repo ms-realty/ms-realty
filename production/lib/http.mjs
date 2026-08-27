@@ -1145,9 +1145,16 @@ export function createHttpApp({
   const configuredBrokerProfiles = Array.isArray(brokerProfiles) ? brokerProfiles : [];
   const currentBrokerProfiles = async (payloadSession) => {
     if (!payloadSession) return configuredBrokerProfiles;
-    const service = await configuredPayloadAdminAuth();
-    if (typeof service?.listOperators !== "function") return configuredBrokerProfiles;
-    return assignableBrokerProfiles(await service.listOperators(payloadSession));
+    try {
+      const service = await configuredPayloadAdminAuth();
+      if (typeof service?.listOperators !== "function") return configuredBrokerProfiles;
+      const profiles = assignableBrokerProfiles(await service.listOperators(payloadSession));
+      return profiles.length ? profiles : configuredBrokerProfiles;
+    } catch {
+      // A Payload directory outage must not erase the server-owned roster or
+      // turn every admin screen that needs broker assignment into a 500.
+      return configuredBrokerProfiles;
+    }
   };
   const currentSeed = () =>
     runtimeDataDurableOnly

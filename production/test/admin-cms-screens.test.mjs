@@ -280,9 +280,9 @@ test("approved content lists every surface with its counts, its route and its wi
   const page = await dispatchHttp(app(), { url: "/admin/approved-content?locale=en", headers: auth });
   assert.equal(page.status, 200);
   assert.match(page.body, /data-kind="admin-approved-content"/);
-  assert.match(page.body, /data-approved-content-total="28"/);
+  assert.match(page.body, /data-approved-content-total="17"/);
   assert.match(page.body, /data-approved-content-publishable="2"/);
-  assert.match(page.body, /data-approved-content-blocked="26"/);
+  assert.match(page.body, /data-approved-content-blocked="15"/);
   for (const section of ["team_profiles", "area_guides", "financing_partners", "purchase_fees", "guide_translations"]) {
     assert.match(page.body, new RegExp(`data-approved-section="${section}"`), section);
   }
@@ -290,9 +290,9 @@ test("approved content lists every surface with its counts, its route and its wi
   assert.match(page.body, /Where it appears/);
   assert.match(page.body, /\/\{locale\}\/locations\/\{location\}/);
   // Every row states publishable or withheld, and the withheld ones say why.
-  assert.match(page.body, /data-approved-record="example-broker-bg" data-approved-state="withheld"/);
+  assert.match(page.body, /data-approved-record="buyer-due-diligence-liens-de" data-approved-state="withheld"/);
   assert.match(page.body, /data-approved-record="hotovo-bg" data-approved-state="ready"/);
-  assert.match(page.body, /Example record, not real content/);
+  assert.doesNotMatch(page.body, /Example record, not real content/);
   assert.match(page.body, /No named approver/);
 });
 
@@ -308,7 +308,7 @@ test("approved content states that approval is a data-file edit plus a rebuild, 
   assert.doesNotMatch(main, /<form[^>]*method="post"/i);
   assert.doesNotMatch(main, /<button[^>]*type="submit"/i);
   // Each withheld surface names what a person must supply to release it.
-  assert.match(page.body, /data-approved-requirement="purchase_fees"/);
+  assert.match(page.body, /data-approved-requirement="guide_translations"/);
   assert.match(page.body, /To release this surface/);
 });
 
@@ -325,7 +325,7 @@ test("the approved content state filter narrows the rows on show and keeps the c
   assert.equal(withheld.status, 200);
   assert.match(withheld.body, /data-approved-content-state="withheld"/);
   // The counts still describe every record, not the filtered view.
-  assert.match(withheld.body, /data-approved-content-total="28"/);
+  assert.match(withheld.body, /data-approved-content-total="17"/);
   assert.match(withheld.body, /href="\/admin\/approved-content\?state=withheld"[^>]*data-on="1" aria-current="true"/);
   assert.doesNotMatch(withheld.body, /data-approved-state="ready"/);
   // A surface with nothing in the current view says so rather than showing an

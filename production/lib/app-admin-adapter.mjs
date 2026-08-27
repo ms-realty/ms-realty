@@ -3786,9 +3786,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       try {
         const service = await payloadAdminAuth();
         if (typeof service?.listOperators !== "function") return fallback;
-        return assignableBrokerProfiles(await service.listOperators(payloadSession));
+        const profiles = assignableBrokerProfiles(await service.listOperators(payloadSession));
+        return profiles.length ? profiles : fallback;
       } catch {
-        return [];
+        return fallback;
       }
     })(),
     adminSessionFingerprint: currentFingerprint,
