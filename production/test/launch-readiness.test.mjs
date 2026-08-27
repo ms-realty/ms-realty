@@ -951,6 +951,8 @@ test("launch readiness validator accepts ready state after required gates are cl
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
+  const r2MediaCoverage = readyR2MediaCoverage();
+  r2MediaCoverage.freshness.age_ms = 17;
 
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
   completeTerminalDecisions(routeMap, deployableRedirects);
@@ -965,7 +967,7 @@ test("launch readiness validator accepts ready state after required gates are cl
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
-    r2MediaCoverage: readyR2MediaCoverage(),
+    r2MediaCoverage,
     productionRecovery: readyProductionRecovery,
     monitoringRollback: readyMonitoringRollback,
   });
@@ -974,6 +976,7 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.equal(report.launch_ready, true);
   assert.equal(report.status, "ready");
   assert.deepEqual(report.blockers, []);
+  assert.equal(report.gates.find((gate) => gate.id === "r2_media_coverage").evidence.freshness.age_ms, 0);
   assert.deepEqual(publicLaunchReadinessPayload(report).blocked_gates, []);
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store" });
 });
