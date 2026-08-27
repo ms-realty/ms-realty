@@ -16,6 +16,14 @@ const liveServiceEvidenceCli = fs.readFileSync(fromRoot("production", "scripts",
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const previewHost = fs.readFileSync(fromRoot("workers", "preview-host.mjs"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
+const packageJson = JSON.parse(fs.readFileSync(fromRoot("package.json"), "utf8"));
+
+test("generic validation preserves live launch authority artifacts", () => {
+  assert.doesNotMatch(packageJson.scripts.validate, /npm run launch:(?:readiness|inputs)/);
+  assert.match(packageJson.scripts.validate, /node production\/scripts\/validate-foundation\.mjs/);
+  assert.match(packageJson.scripts["launch:readiness"], /build-launch-readiness\.mjs/);
+  assert.match(packageJson.scripts["launch:inputs"], /build-launch-input-checklist\.mjs/);
+});
 
 test("handoff keeps the governed app private behind the review host", () => {
   const reviewHost = caddy.indexOf("{$MS_REALTY_REVIEW_HOST}");
