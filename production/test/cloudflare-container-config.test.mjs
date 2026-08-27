@@ -49,7 +49,6 @@ const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_RATE_LIMIT_DISABLED",
   "MS_REALTY_TRUSTED_WRITE_ORIGINS",
   "MS_REALTY_MCP_ALLOWED_ORIGINS",
-  "MS_REALTY_PUBLIC_ORIGIN",
   "MS_REALTY_MAX_BODY_BYTES",
   "MS_REALTY_PROVIDER_TOKEN_KEY",
   "MS_REALTY_PROVIDER_OAUTH_STATE_SECRET",
@@ -95,6 +94,10 @@ test("Cloudflare Container forwards every production runtime binding", () => {
   for (const binding of CONTAINER_RUNTIME_BINDINGS) {
     assert.match(workerSource, new RegExp(`${binding}: this\\.env\\.${binding} \\?\\? ""`));
   }
+  assert.match(
+    workerSource,
+    /MS_REALTY_PUBLIC_ORIGIN: this\.env\.MS_REALTY_WORKER_PUBLIC_ORIGIN \?\? ""/,
+  );
 });
 
 test("Cloudflare Container search depends only on Payload Postgres", () => {
@@ -316,13 +319,20 @@ test("Cloudflare Container admits authenticated MCP without opening ledger write
   );
   assert.doesNotMatch(wranglerConfig, /MS_REALTY_MCP_DURABLE_LISTING_WRITES/);
 
-  const env = { MS_REALTY_PUBLIC_ORIGIN: "https://ms-realty.example.workers.dev" };
+  const env = { MS_REALTY_WORKER_PUBLIC_ORIGIN: "https://ms-realty.example.workers.dev" };
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env }), true);
   assert.equal(allowsMcpRequest({ method: "DELETE", pathname: "/mcp", env }), true);
   assert.equal(allowsMcpRequest({ method: "PATCH", pathname: "/mcp", env }), false);
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp/extra", env }), false);
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/api/leads", env }), false);
-  assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: { MS_REALTY_PUBLIC_ORIGIN: "  " } }), false);
+  assert.equal(
+    allowsMcpRequest({ method: "POST", pathname: "/mcp", env: { MS_REALTY_WORKER_PUBLIC_ORIGIN: "  " } }),
+    false,
+  );
+  assert.equal(
+    allowsMcpRequest({ method: "POST", pathname: "/mcp", env: { MS_REALTY_PUBLIC_ORIGIN: "https://legacy.invalid" } }),
+    false,
+  );
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: {} }), false);
 });
 
