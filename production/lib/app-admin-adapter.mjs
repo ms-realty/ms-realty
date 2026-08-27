@@ -96,6 +96,7 @@ import {
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
   renderAdminRealtyCasesPayload,
+  renderAdminRuntimeUnavailablePayload,
   renderAdminApprovedContentPayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
@@ -3825,7 +3826,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       method: request.method,
       pathname: url.pathname,
     })) {
-      return jsonResponse(503, runtimeDataUnavailablePayload(url.pathname));
+      const unavailable = runtimeDataUnavailablePayload(url.pathname);
+      if (request.method === "GET" && url.pathname.startsWith("/admin/")) {
+        return htmlResponse(
+          renderAdminRuntimeUnavailablePayload(
+            loadLocaleRegistry(config.localeRegistryPath),
+            adminLocaleParam(url, config),
+            unavailable,
+            principal,
+          ),
+        );
+      }
+      return jsonResponse(503, unavailable);
     }
     if (
       config.runtimeDataDurableOnly &&

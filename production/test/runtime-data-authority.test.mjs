@@ -307,6 +307,16 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   assert.match(html, /data-react-admin-ui="listing-manager"/);
   assert.doesNotMatch(html, /data-publication-schedule-panel="true"/);
 
+  const editor = await renderAppAdminResponse(
+    new Request("https://live.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en"),
+    { config },
+  );
+  const editorHtml = await editor.text();
+  assert.equal(editor.status, 200);
+  assert.match(editorHtml, /data-action-unavailable="runtime"/);
+  assert.match(editorHtml, /Your owner permissions are active/);
+  assert.doesNotMatch(editorHtml, /data-read-only-role="true"/);
+
   const translations = await renderAppAdminResponse(
     new Request("https://live.test/api/admin/translations?locale=bg"),
     { config },
@@ -326,9 +336,37 @@ test("durable admin reads use Payload while every remaining file mutation fails 
     assert.equal((await response.json()).kind, "runtime_data_unavailable", pathname);
   }
 
-  for (const pathname of ["/api/admin/locales", "/admin/migration/review", "/api/admin/redirect-approval-workbook"]) {
+  for (const pathname of ["/api/admin/locales", "/api/admin/redirect-approval-workbook"]) {
     const response = await renderAppAdminResponse(new Request(`https://live.test${pathname}`), { config });
     assert.equal(response.status, 503, pathname);
     assert.equal((await response.json()).kind, "runtime_data_unavailable", pathname);
   }
+
+  const blockedPage = await renderAppAdminResponse(
+    new Request("https://live.test/admin/migration/review?locale=en"),
+    { config },
+  );
+  const blockedHtml = await blockedPage.text();
+  assert.equal(blockedPage.status, 503);
+  assert.match(blockedPage.headers.get("content-type"), /text\/html/);
+  assert.match(blockedHtml, /data-react-admin-ui="runtime-unavailable"/);
+  assert.match(blockedHtml, /Your owner permissions are active/);
+  assert.match(blockedHtml, /href="\/admin\/connect"/);
+  assert.match(blockedHtml, /<code>\/admin\/migration\/review<\/code>/);
+
+  const standalone = createHttpApp({ runtimeDataDurableOnly: true });
+  const standalonePage = await dispatchHttp(standalone, {
+    url: "/admin/migration/review?locale=en",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  assert.equal(standalonePage.status, 503);
+  assert.match(standalonePage.headers["content-type"], /text\/html/);
+  assert.match(standalonePage.body, /data-react-admin-ui="runtime-unavailable"/);
+
+  const standaloneApi = await dispatchHttp(standalone, {
+    url: "/api/admin/migration/review?locale=en",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  assert.equal(standaloneApi.status, 503);
+  assert.equal(standaloneApi.body.kind, "runtime_data_unavailable");
 });

@@ -90,6 +90,7 @@ import {
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
+  renderAdminRuntimeUnavailablePayload,
   renderAdminWorkspaceSettingsPayload,
   renderAdminRealtyCasesPayload,
   renderAdminTranslationQueuePayload,
@@ -2548,7 +2549,14 @@ export function createHttpApp({
       method: request.method,
       pathname: url.pathname,
     })) {
-      return adminJson(503, runtimeDataUnavailablePayload(url.pathname));
+      const unavailable = runtimeDataUnavailablePayload(url.pathname);
+      if (request.method === "GET" && url.pathname.startsWith("/admin/")) {
+        const payload = withWorkspaceSettings(
+          renderAdminRuntimeUnavailablePayload(activeRegistry, adminLocaleParam(url), unavailable, principal),
+        );
+        return adminResponse(503, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(503, unavailable);
     }
     if (
       runtimeDataDurableOnly &&

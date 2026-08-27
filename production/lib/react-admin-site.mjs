@@ -2597,6 +2597,16 @@ const OWNER_CONSOLE_COPY = {
       team: ["Екип и достъп", "Оператори, роли и работни пространства"],
       open: "Отвори",
     },
+    runtime: {
+      roleRestricted: "Този профил няма право да изпълни действието.",
+      storageUnavailable: "Правата ви на собственик са активни. Това действие чака връзка с постоянния източник на данни; ролята ви не е ограничена.",
+      title: "Нужна е връзка с данните",
+      description: "Тази секция е защитена, но постоянният ѝ източник на данни още не е достъпен в текущата среда.",
+      requestedPath: "Заявена секция",
+      connect: "Отвори връзките",
+      settings: "Отвори настройките",
+      back: "Към Днес",
+    },
   },
   ru: {
     groups: { overview: "Обзор", crm: "CRM", website: "Сайт и контент", hermes: "Hermes AI", admin: "Администрирование" },
@@ -2626,6 +2636,16 @@ const OWNER_CONSOLE_COPY = {
       integrations: ["Интеграции", "Провайдеры, ChatGPT/Codex и MCP-подключение"],
       team: ["Команда и доступ", "Операторы, роли и рабочие пространства"],
       open: "Открыть",
+    },
+    runtime: {
+      roleRestricted: "У этого профиля нет права выполнить действие.",
+      storageUnavailable: "Ваши права владельца активны. Для этого действия ещё не подключён постоянный источник данных; ваша роль не ограничена.",
+      title: "Нужно подключение к данным",
+      description: "Раздел защищён, но его постоянный источник данных пока недоступен в этой среде.",
+      requestedPath: "Запрошенный раздел",
+      connect: "Открыть подключения",
+      settings: "Открыть настройки",
+      back: "К разделу Сегодня",
     },
   },
   en: {
@@ -2657,11 +2677,48 @@ const OWNER_CONSOLE_COPY = {
       team: ["Team and access", "Operators, roles, and workspace scope"],
       open: "Open",
     },
+    runtime: {
+      roleRestricted: "This profile does not have permission to perform the action.",
+      storageUnavailable: "Your owner permissions are active. This action is waiting for a durable data connection; your role is not restricted.",
+      title: "Data connection required",
+      description: "This section is protected, but its durable data source is not available in the current environment.",
+      requestedPath: "Requested section",
+      connect: "Open connections",
+      settings: "Open settings",
+      back: "Back to Today",
+    },
   },
 };
 
 function ownerConsoleCopy(page) {
   return OWNER_CONSOLE_COPY[page.workspace?.locale] || OWNER_CONSOLE_COPY.en;
+}
+
+function MutationAvailabilityNote({ page, capability, pathname }) {
+  const allowed = pageCan(page, capability);
+  const runtimeReady = durableRuntimeMutationAvailable(page, pathname);
+  if (allowed && runtimeReady) return null;
+  const copy = ownerConsoleCopy(page).runtime;
+  const state = allowed ? "runtime" : "role";
+  return h(
+    "div",
+    {
+      className: `adm-availability-note adm-availability-note--${state}`,
+      role: "note",
+      "data-action-unavailable": state,
+      "data-action-endpoint": pathname,
+    },
+    h(Icon, { name: allowed ? "triangle-alert" : "shield-check", size: 17 }),
+    h("p", null, allowed ? copy.storageUnavailable : copy.roleRestricted),
+    allowed
+      ? h(
+          "a",
+          { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/connect", page) },
+          h("span", null, copy.connect),
+          h(Icon, { name: "arrow-right", size: 15 }),
+        )
+      : null,
+  );
 }
 
 function ownerIdentityName(page) {
@@ -8621,6 +8678,11 @@ function ListingEditorBody({ page }) {
               ],
             }),
             h("p", { className: "adm-note" }, ui.mediaManagerHint),
+            h(MutationAvailabilityNote, {
+              page,
+              capability: "content:write",
+              pathname: "/api/admin/media/uploads",
+            }),
             canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/media/uploads")
               ? h(
                   "form",
@@ -8795,7 +8857,7 @@ function ListingEditorBody({ page }) {
                                 h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, ui.saveMediaReview)),
                             ),
                           )
-                        : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
+                        : null,
                     );
                   })
                 : h(EmptyState, { icon: "camera", "data-media-empty": "true" }, ui.noMediaBody),
@@ -8940,7 +9002,7 @@ function ListingEditorBody({ page }) {
             ),
           ),
                 ]
-              : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
+              : null,
           ),
         ),
       ),
@@ -10946,6 +11008,47 @@ function OwnerProfileSection({ page }) {
   );
 }
 
+function RuntimeUnavailableBody({ page }) {
+  const copy = ownerConsoleCopy(page).runtime;
+  const requestedPath = page.unavailable?.path || page.path || "/admin";
+  return adminShell(page, {
+    title: copy.title,
+    mainAttrs: {
+      "data-kind": "admin-runtime-unavailable",
+      "data-react-admin-ui": "runtime-unavailable",
+      "data-admin-workbench": "recovery",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(PageHeader, { title: copy.title, subtitle: copy.description }),
+      h(
+        "section",
+        { className: "crm-panel adm-runtime-unavailable", role: "status", "data-runtime-unavailable": "true" },
+        h(
+          "div",
+          { className: "adm-runtime-unavailable__message" },
+          h("span", { className: "adm-runtime-unavailable__icon", "aria-hidden": "true" }, h(Icon, { name: "triangle-alert", size: 21 })),
+          h("div", null, h("h2", null, copy.title), h("p", null, copy.storageUnavailable)),
+        ),
+        h(
+          "dl",
+          { className: "adm-runtime-unavailable__details" },
+          h("div", null, h("dt", null, copy.requestedPath), h("dd", null, h("code", null, requestedPath))),
+        ),
+        h(
+          "div",
+          { className: "adm-runtime-unavailable__actions" },
+          pageCan(page, "settings:manage")
+            ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connect))
+            : null,
+          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/settings", page) }, h(Icon, { name: "settings", size: 15 }), h("span", null, copy.settings)),
+          h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/today", page) }, h(Icon, { name: "arrow-left", size: 15 }), h("span", null, copy.back)),
+        ),
+      ),
+    ],
+  });
+}
+
 function SettingsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -11419,6 +11522,7 @@ export function renderReactAdminBody(page) {
 
 function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
+  if (page.kind === "admin_runtime_unavailable") return renderStaticElement(h(RuntimeUnavailableBody, { page }));
   if (page.kind === "admin_workspace_settings") return renderStaticElement(h(SettingsBody, { page }));
   if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
   if (page.kind === "admin_consents") return renderStaticElement(h(ConsentsBody, { page }));

@@ -192,6 +192,36 @@ export function renderAdminOperationalQueuePayload(payload, { kind, path, titleK
   };
 }
 
+export function renderAdminRuntimeUnavailablePayload(
+  registry,
+  requestedLocale,
+  unavailable,
+  operator = null,
+) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const requestedPath = String(unavailable?.path || "/admin");
+  return {
+    kind: "admin_runtime_unavailable",
+    status: 503,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: requestedPath,
+    canonical: requestedPath,
+    indexable: false,
+    metadata: {
+      title: "Data connection required | MS Realty",
+      description: "Authenticated owner recovery page for an unavailable durable data source.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    unavailable: {
+      kind: "runtime_data_unavailable",
+      path: requestedPath,
+    },
+  };
+}
+
 const WORKSPACE_SETTINGS_METADATA = {
   bg: { title: "Настройки", description: "Профил на агенцията, срокове за отговор, известия, работно пространство и публичен сайт." },
   ru: { title: "Настройки", description: "Профиль агентства, сроки ответа, уведомления, рабочее пространство и публичный сайт." },
