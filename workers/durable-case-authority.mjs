@@ -117,11 +117,6 @@ export function isPayloadPrivatePath(pathname) {
   );
 }
 
-export function isPublicAdminPath(pathname) {
-  const [first, second] = securityPathSegments(pathname);
-  return first === "admin" || (first === "api" && second === "admin");
-}
-
 function isExactSecurityPath(pathname, expected) {
   return String(pathname || "") === expected;
 }
