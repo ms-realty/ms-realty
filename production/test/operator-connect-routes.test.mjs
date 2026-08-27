@@ -245,8 +245,8 @@ test("the assistant configuration route hands back a working config and records 
   });
   assert.equal(catalogResponse.status, 200);
   assert.equal(catalogResponse.body.kind, "owner_operator_catalog");
-  assert.equal(catalogResponse.body.summary.total, 115);
-  assert.equal(catalogResponse.body.operations.length, 115);
+  assert.equal(catalogResponse.body.summary.total, 116);
+  assert.equal(catalogResponse.body.operations.length, 116);
   assert.equal(
     catalogResponse.body.operations.filter((row) => row.execution === "browser_session").length,
     OWNER_OPERATOR_BROWSER_OPERATIONS.length,
