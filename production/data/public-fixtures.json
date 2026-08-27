@@ -88,6 +88,10 @@
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
+        "themeLabel": "ערכת נושא",
+        "themeSystem": "לפי הגדרת המערכת",
+        "themeLight": "ערכה בהירה",
+        "themeDark": "ערכה כהה",
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
@@ -178,7 +182,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -1369,6 +1373,10 @@
         "close": "Затвори",
         "callBroker": "Обади се на брокер",
         "languageLabel": "Език",
+        "themeLabel": "Тема на сайта",
+        "themeSystem": "Като системата",
+        "themeLight": "Светла тема",
+        "themeDark": "Тъмна тема",
         "menuLabel": "Основна навигация",
         "skipToContent": "Към съдържанието",
         "filters": "Филтри",
@@ -1459,7 +1467,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -1961,6 +1969,10 @@
         "close": "Κλείσιμο",
         "callBroker": "Καλέστε μεσίτη",
         "languageLabel": "Γλώσσα",
+        "themeLabel": "Θέμα",
+        "themeSystem": "Όπως το σύστημα",
+        "themeLight": "Φωτεινό θέμα",
+        "themeDark": "Σκοτεινό θέμα",
         "menuLabel": "Κύρια πλοήγηση",
         "skipToContent": "Μετάβαση στο περιεχόμενο",
         "filters": "Φίλτρα",
@@ -2051,7 +2063,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -2525,6 +2537,10 @@
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
+        "themeLabel": "ערכת נושא",
+        "themeSystem": "לפי הגדרת המערכת",
+        "themeLight": "ערכה בהירה",
+        "themeDark": "ערכה כהה",
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
@@ -2615,7 +2631,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -3072,6 +3088,10 @@
         "close": "Close",
         "callBroker": "Call a broker",
         "languageLabel": "Language",
+        "themeLabel": "Theme",
+        "themeSystem": "Match the system",
+        "themeLight": "Light theme",
+        "themeDark": "Dark theme",
         "menuLabel": "Primary navigation",
         "skipToContent": "Skip to content",
         "filters": "Filters",
@@ -3162,7 +3182,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -3633,6 +3653,10 @@
         "close": "Close",
         "callBroker": "Call a broker",
         "languageLabel": "Language",
+        "themeLabel": "Theme",
+        "themeSystem": "Match the system",
+        "themeLight": "Light theme",
+        "themeDark": "Dark theme",
         "menuLabel": "Primary navigation",
         "skipToContent": "Skip to content",
         "filters": "Filters",
@@ -3723,7 +3747,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -3839,6 +3863,10 @@
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
+        "themeLabel": "ערכת נושא",
+        "themeSystem": "לפי הגדרת המערכת",
+        "themeLight": "ערכה בהירה",
+        "themeDark": "ערכה כהה",
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
@@ -3929,7 +3957,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -5428,6 +5456,10 @@
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
+        "themeLabel": "ערכת נושא",
+        "themeSystem": "לפי הגדרת המערכת",
+        "themeLight": "ערכה בהירה",
+        "themeDark": "ערכה כהה",
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
@@ -5518,7 +5550,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -5713,6 +5745,10 @@
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
+        "themeLabel": "ערכת נושא",
+        "themeSystem": "לפי הגדרת המערכת",
+        "themeLight": "ערכה בהירה",
+        "themeDark": "ערכה כהה",
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
@@ -5803,7 +5839,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -5862,8 +5898,8 @@
           "label": "Viber"
         },
         "email": {
-          "href": "mailto:office@makler-realty.com",
-          "label": "office@makler-realty.com"
+          "href": "mailto:ms.realty.bg@gmail.com",
+          "label": "ms.realty.bg@gmail.com"
         }
       },
       "form_unavailable": "הטופס אינו זמין זמנית. התקשרו או שלחו לנו הודעה.",
@@ -5972,6 +6008,10 @@
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
+        "themeLabel": "ערכת נושא",
+        "themeSystem": "לפי הגדרת המערכת",
+        "themeLight": "ערכה בהירה",
+        "themeDark": "ערכה כהה",
         "menuLabel": "ניווט ראשי",
         "skipToContent": "דלגו לתוכן",
         "filters": "סינון",
@@ -6062,7 +6102,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
@@ -6121,8 +6161,8 @@
           "label": "Viber"
         },
         "email": {
-          "href": "mailto:office@makler-realty.com",
-          "label": "office@makler-realty.com"
+          "href": "mailto:ms.realty.bg@gmail.com",
+          "label": "ms.realty.bg@gmail.com"
         }
       },
       "offices": [
@@ -6186,6 +6226,10 @@
         "close": "Close",
         "callBroker": "Call a broker",
         "languageLabel": "Language",
+        "themeLabel": "Theme",
+        "themeSystem": "Match the system",
+        "themeLight": "Light theme",
+        "themeDark": "Dark theme",
         "menuLabel": "Primary navigation",
         "skipToContent": "Skip to content",
         "filters": "Filters",
@@ -6276,7 +6320,7 @@
         }
       ],
       "contact": {
-        "email": "office@makler-realty.com",
+        "email": "ms.realty.bg@gmail.com",
         "phone": "+359879696870",
         "phone_display": "+359 879 69 68 70",
         "whatsapp": "https://wa.me/359879696870",
