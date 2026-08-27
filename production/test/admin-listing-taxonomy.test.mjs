@@ -247,7 +247,7 @@ function todayPage(data, locale = "bg") {
   });
 }
 
-test("admin today pipeline CTA is a verb and follow-up due dates stay formatted", () => {
+test("admin Today ranks pipeline and follow-up work in one priority list", () => {
   const html = renderReactAdminBody(
     todayPage({
       leadPipelineQueue: {
@@ -298,24 +298,17 @@ test("admin today pipeline CTA is a verb and follow-up due dates stay formatted"
     }),
   );
 
-  const preview = html.match(/data-pipeline-preview-row="lead-pipe-1"[\s\S]*?<\/li>/)?.[0] || "";
-  assert.match(preview, /class="mk-btn mk-btn--primary mk-btn--sm"[^>]*>Отвори</);
-  assert.doesNotMatch(preview, /class="mk-btn mk-btn--primary mk-btn--sm"[^>]*>Отворено</);
-
-  const dueCell = html.match(/data-viewing-column="due_at"[^>]*>([\s\S]*?)<\/td>/)?.[1] || "";
-  assert.match(dueCell, /<time dateTime="2026-07-06T12:00:00.000Z"/);
-  assert.doesNotMatch(dueCell.replace(/dateTime="[^"]+"|title="[^"]+"/g, ""), /2026-07-06T12:00:00/);
-  const sellerDue = html.match(/data-seller-pipeline-column="due_at"[^>]*>([\s\S]*?)<\/td>/)?.[1] || "";
-  assert.match(sellerDue, /<time dateTime="2026-07-06T12:00:00.000Z"/);
-  assert.doesNotMatch(sellerDue.replace(/dateTime="[^"]+"|title="[^"]+"/g, ""), /2026-07-06T12:00:00/);
-  const viewingTable = html.match(/data-viewing-follow-up-table="true"[\s\S]*?<\/table>/)?.[0] || "";
-  assert.match(viewingTable, /<th scope="col">Статус<\/th>/);
-  assert.match(viewingTable, /<th scope="col">Действие<\/th>/);
-  assert.doesNotMatch(viewingTable, /<th scope="col">Статус на огледа<\/th>/);
-  assert.doesNotMatch(viewingTable, /<th scope="col">Запиши<\/th>/);
-  assert.match(viewingTable, />Запиши</);
-  assert.match(html, /data-readiness-rail="true"/);
-  assert.match(html, /data-today-snapshot="true"/);
+  assert.match(html, /data-next-action="pipeline"/);
+  assert.match(html, /data-next-action="viewing"/);
+  assert.match(html, /data-next-action="seller"/);
+  assert.match(html, /data-next-actions="true"/);
+  assert.match(html, /class="mk-btn mk-btn--primary mk-btn--sm"[^>]*><span>Запиши стъпка за продавача<\/span>/);
+  const dueAction = html.match(/<time dateTime="2026-07-06T12:00:00.000Z"[^>]*>([\s\S]*?)<\/time>/)?.[1] || "";
+  assert.ok(dueAction, "follow-up due time stays in the source-backed priority row");
+  assert.doesNotMatch(dueAction, /2026-07-06T12:00:00/);
+  assert.doesNotMatch(html, /data-pipeline-preview-row=/);
+  assert.doesNotMatch(html, /data-viewing-follow-up-table=/);
+  assert.doesNotMatch(html, /data-readiness-rail=/);
 });
 
 test("admin translation queue localizes reviewer roles and titles results once", () => {

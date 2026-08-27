@@ -4,6 +4,29 @@
  * one family, fixed scale, no decorative motion. */
 
 /* ---- Today: next actions ---- */
+.adm-today-briefing__intro,
+.adm-hermes-entry__description {
+  margin: 0;
+  padding: var(--space-3) var(--space-5) 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--lh-snug);
+}
+.adm-today-briefing__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4) var(--space-5) var(--space-3);
+}
+.adm-today-briefing__facts > div { display: grid; gap: 3px; min-width: 0; }
+.adm-today-briefing__facts dt { color: var(--text-muted); font-size: var(--text-xs); }
+.adm-today-briefing__facts dd { margin: 0; color: var(--text-strong); font-size: var(--text-sm); line-height: var(--lh-snug); overflow-wrap: anywhere; }
+.adm-today-briefing__source { margin: 0; padding: var(--space-3) var(--space-5) var(--space-4); border-top: 1px solid var(--border); color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
+.adm-today-briefing__hermes { display: grid; gap: var(--space-2); margin: 0 var(--space-5) var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+.adm-today-briefing__hermes h3 { margin: 0; color: var(--text-strong); font-size: var(--text-sm); line-height: var(--lh-snug); }
+.adm-today-briefing__hermes .adm-hermes-entry__description { padding: 0; }
+.adm-today-briefing__hermes .mk-btn { justify-self: start; }
 .adm-next-actions__intro {
   margin: 0;
   padding: var(--space-3) var(--space-5) 0;
@@ -279,7 +302,12 @@
   .adm-next-actions__action { justify-content: stretch; }
   .adm-next-actions__action .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
   .adm-next-actions__intro { padding: var(--space-3) var(--space-4) 0; }
-  .adm-next-actions__more { padding: var(--space-3) var(--space-4); }
+  .adm-today-briefing__facts { grid-template-columns: minmax(0, 1fr); padding-inline: var(--space-4); }
+  .adm-today-briefing__source { padding-inline: var(--space-4); }
+  .adm-today-briefing__intro,
+  .adm-hermes-entry__description { padding-inline: var(--space-4); }
+  .adm-today-briefing__hermes { margin-inline: var(--space-4); }
+  .adm-today-briefing__hermes .mk-btn { width: 100%; justify-content: center; }
   .adm-welcome { grid-template-columns: auto minmax(0, 1fr); padding: var(--space-4); }
   .adm-welcome__dismiss { grid-column: 1 / -1; width: 100%; min-height: 44px; justify-content: center; }
   .adm-onboarding { padding: var(--space-4); }

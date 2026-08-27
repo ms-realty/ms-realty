@@ -136,14 +136,16 @@ test("every catalogue provider has a card, a title and a sentence in all three l
         assert.equal(typeof copy[key], "string", `${locale}.${key}`);
         assert.ok(copy[key].length > 0, `${locale}.${key} is empty`);
       }
-      // A card that can be pressed needs a label for its one primary action.
-      const action = card.kind === "runtime" ? "aiProviderVerify" : providerCopyKey(card.id, "Connect");
-      assert.equal(typeof copy[action], "string", `${locale}.${action}`);
+      // Only a provider with an actual owner handoff needs an action label.
+      if (card.kind !== "runtime") {
+        const action = providerCopyKey(card.id, "Connect");
+        assert.equal(typeof copy[action], "string", `${locale}.${action}`);
+      }
     }
   }
 });
 
-test("a provider nobody has registered an application for shows setup, not a broken button", () => {
+test("a provider without an active authorization path stays unavailable without setup fields", () => {
   // Storage configured, but no Google/Meta/GitHub application and no state key.
   const bare = fullConfig({
     googleClientId: "",
@@ -158,20 +160,27 @@ test("a provider nobody has registered an application for shows setup, not a bro
   });
   const cards = operatorProviderCards({ availability: operatorProviderAvailability(bare), config: bare });
   const byId = Object.fromEntries(cards.map((card) => [card.id, card]));
-  for (const id of ["google", "google_drive", "facebook", "instagram", "github", "whatsapp", "viber", "ai"]) {
+  for (const id of ["google", "google_drive", "facebook", "instagram", "github", "whatsapp"]) {
     assert.equal(byId[id].status, "needs_setup", id);
     assert.ok(byId[id].setup_env.length > 0, `${id} names the settings somebody has to add`);
     assert.ok(byId[id].setup_url, `${id} points at where to add them`);
   }
-  // The checklist names real environment variables, not invented ones.
+  assert.equal(byId.ai.status, "disabled");
+  // The catalogue still records source-owned configuration metadata for
+  // diagnostics, but the owner page never exposes those names.
   assert.ok(byId.github.setup_env.includes("MS_REALTY_GITHUB_OAUTH_CLIENT_ID"));
   assert.ok(byId.github.setup_env.includes("MS_REALTY_GITHUB_OAUTH_CLIENT_SECRET"));
   assert.ok(byId.google_drive.setup_env.includes("MS_REALTY_GOOGLE_OAUTH_CLIENT_ID"));
   assert.ok(byId.ai.setup_env.includes("HERMES_API_KEY"));
-  // Cloudflare and Neon only ever needed somewhere safe to put the key, so with
-  // storage configured they are ready to accept one.
-  assert.equal(byId.cloudflare.status, "not_connected");
-  assert.equal(byId.neon.status, "not_connected");
+  // Token-only/direct-API providers stay visible but disabled. Their old
+  // backend verification helpers remain for existing records; this screen
+  // never asks an owner to paste a secret.
+  for (const id of ["viber", "cloudflare", "neon"]) {
+    assert.equal(byId[id].status, "disabled", id);
+    assert.equal(byId[id].supported, false, id);
+    assert.deepEqual(byId[id].setup_env, [], id);
+    assert.equal(byId[id].setup_url, "", id);
+  }
 
   const html = renderOperatorConnectPage({
     baseUrl: ORIGIN,
@@ -184,7 +193,15 @@ test("a provider nobody has registered an application for shows setup, not a bro
   assert.equal(html.includes('href="/api/admin/connections?provider=github&amp;action=start"'), false);
   assert.match(html, /data-provider="github" data-status="needs_setup"/);
   assert.match(html, /Нужна е еднократна настройка/);
-  assert.match(html, /MS_REALTY_GITHUB_OAUTH_CLIENT_ID/);
+  assert.match(html, /Свързването е временно недостъпно/);
+  assert.match(html, /Отговорникът за инфраструктурата трябва/);
+  assert.doesNotMatch(html, /MS_REALTY_[A-Z0-9_]+/);
+  assert.doesNotMatch(html, /<details class="setup"/);
+  assert.match(html, /data-provider="viber" data-status="disabled"/);
+  assert.match(html, /data-provider="cloudflare" data-status="disabled"/);
+  assert.match(html, /data-provider="neon" data-status="disabled"/);
+  assert.doesNotMatch(html, /<input[^>]+type="password"/);
+  assert.doesNotMatch(html, /name="token"/);
 });
 
 test("a connected card dates itself in words and offers a disclosure with a marker", () => {
@@ -211,8 +228,8 @@ test("a connected card dates itself in words and offers a disclosure with a mark
     locale: "bg",
   });
   assert.match(bulgarian, /Проверено: 24 август 2026 г\./);
-  // A row that opens must look like one, so the summary keeps its marker.
-  assert.match(bulgarian, /\.setup > summary \{\s*display: list-item;/);
+  // Misconfigured providers use a plain unavailable state, not a checklist.
+  assert.doesNotMatch(bulgarian, /<details class="setup"/);
   // An unparseable stored value is shown as-is rather than as "Invalid Date".
   const broken = renderOperatorConnectPage({
     baseUrl: ORIGIN,
@@ -238,14 +255,20 @@ test("a configured provider offers exactly one primary action per card", () => {
   for (const id of ["google", "google_drive", "facebook", "instagram", "github"]) {
     assert.ok(html.includes(`href="/api/admin/connections?provider=${id}&amp;action=start"`), id);
   }
-  // Pasted-key providers get one field and one submit, aimed at the shared route.
-  assert.match(html, /<input id="cloudflare-token" name="token" type="password" required autocomplete="off" minlength="20">/);
-  assert.match(html, /<input id="neon-token" name="token" type="password" required autocomplete="off" minlength="20">/);
-  assert.match(html, /https:\/\/dash\.cloudflare\.com\/profile\/api-tokens/);
-  assert.match(html, /https:\/\/console\.neon\.tech\/app\/settings\/api-keys/);
-  // The model provider is checked, never collected.
-  assert.match(html, /<input type="hidden" name="action" value="verify">/);
-  assert.match(html, /never passes through this screen/);
+  // Providers without a live OAuth/partner handoff are disabled with a source
+  // backed explanation, never a client-secret/token/password field.
+  for (const id of ["viber", "cloudflare", "neon"]) {
+    assert.match(html, new RegExp(`data-provider="${id}" data-status="disabled"`));
+    assert.match(html, /data-provider-disabled="true"/);
+  }
+  assert.doesNotMatch(html, /<input[^>]+type="password"/);
+  assert.doesNotMatch(html, /name="token"/);
+  // The model provider is health-only: it is configured by the runtime and
+  // never presents an owner verify/setup action.
+  assert.match(html, /data-provider="ai" data-status="configured"/);
+  assert.match(html, /data-runtime-health="configured"/);
+  assert.match(html, /reports health and model status only/);
+  assert.doesNotMatch(html, /<input type="hidden" name="action" value="verify">/);
   assert.equal(html.includes('id="ai-token"'), false);
 });
 
@@ -479,7 +502,7 @@ test("disconnecting revokes at the provider and then deletes the row", async () 
   );
 });
 
-test("the assistant's configuration is complete, copyable, and readable without JavaScript", async () => {
+test("the assistant's configuration helper stays available as an API, but the owner page never renders its token", async () => {
   const mint = mintOperatorAgentToken(
     { operatorId: "connect_operator", roles: ["admin"] },
     { secret: SECRET, issuedAt: "2026-08-24T00:00:00.000Z", ttlDays: 90 },
@@ -502,18 +525,14 @@ test("the assistant's configuration is complete, copyable, and readable without 
   assert.match(block, /3\. За отдалечен терминален клиент копирай настройката по-долу\./);
   // Claude Code: both the one-line command and a config file that parses.
   assert.match(block, /claude mcp add --transport http ms-realty "https:\/\/ms-realty\.example\/mcp"/);
-  assert.match(block, /--header "Authorization: Bearer \$\{MS_REALTY_OPERATOR_TOKEN\}"/);
-  assert.doesNotMatch(block, /--header 'Authorization: Bearer \$\{MS_REALTY_OPERATOR_TOKEN\}'/);
   const claudeSection = block.slice(block.indexOf("# .mcp.json"), block.indexOf("=== ChatGPT (Codex CLI) ==="));
   const parsed = JSON.parse(claudeSection.slice(claudeSection.indexOf("{"), claudeSection.lastIndexOf("}") + 1));
   assert.equal(parsed.mcpServers["ms-realty"].url, "https://ms-realty.example/mcp");
   assert.equal(parsed.mcpServers["ms-realty"].type, "http");
-  assert.equal(parsed.mcpServers["ms-realty"].headers.Authorization, "Bearer ${MS_REALTY_OPERATOR_TOKEN}");
+  assert.equal(parsed.mcpServers["ms-realty"].headers.Authorization, `Bearer ${mint.token}`);
   // ChatGPT, both ways it can be reached.
   assert.match(block, /\[mcp_servers\.ms-realty\]/);
-  assert.match(block, /bearer_token_env_var = "MS_REALTY_OPERATOR_TOKEN"/);
-  assert.doesNotMatch(block, /http_headers/);
-  assert.equal(block.includes(mint.token), false);
+  assert.match(block, /http_headers = \{ "Authorization" = "Bearer /);
   assert.match(block, /Settings -> Connectors -> Add custom connector/);
   // The local drafting bridge that already exists.
   assert.match(block, /hermes-mcp-server\.mjs/);
@@ -528,33 +547,20 @@ test("the assistant's configuration is complete, copyable, and readable without 
     agentExpiresAt: mint.expires_at,
     locale: "bg",
   });
-  // The block is a plain <pre> that is present and unblurred without scripting;
-  // the copy button ships hidden and is revealed by the shared enhancement.
-  assert.match(html, /<pre class="agent__config" id="agent-config" tabindex="0"/);
-  assert.doesNotMatch(html, /<pre class="agent__config"[^>]*data-masked/);
-  assert.match(html, /data-copy-block="agent-config"[^>]*hidden>/);
-  assert.match(html, /data-copy-status="agent-config"/);
-  assert.match(html, /function initCopyBlocks/);
-  assert.match(html, /initCopyBlocks\(document\);/);
-  assert.match(html, /<label for="agent-credential">Краткотраен ключ за MS_REALTY_OPERATOR_TOKEN<\/label>/);
-  assert.match(html, new RegExp(`<input class="agent__credential" id="agent-credential" type="password" value="${mint.token}" readonly`));
-  assert.match(html, /data-copy-block="agent-credential"[^>]*>Копирай ключа<\/button>/);
-  const renderedConfig = html.match(/<pre class="agent__config"[^>]*>([\s\S]*?)<\/pre>/)?.[1] || "";
-  assert.equal(renderedConfig.includes(mint.token), false);
-  assert.equal(html.split(mint.token).length - 1, 1);
+  // A page can offer the Codex install handoff, but it must not embed the
+  // short-lived bearer in a prompt, textarea, pre, script or copy control.
+  assert.match(html, /data-agent-config="unavailable"/);
+  assert.match(html, /data-codex-plugin-install="ms-realty-operator"/);
+  assert.doesNotMatch(html, /<pre class="agent__config"/);
+  assert.doesNotMatch(html, /id="prompt"/);
+  assert.doesNotMatch(html, /id="agent-reveal"/);
+  assert.doesNotMatch(html, /data-copy-block=/);
+  assert.doesNotMatch(html, /initCopyBlocks/);
+  assert.equal(html.includes(mint.token), false);
+  assert.doesNotMatch(html, /<(?:textarea|pre)[^>]+data-masked="true"/);
 
-  // A copy that fails must leave the block readable, because its own failure
-  // message tells the operator to select the text by hand -- which they cannot
-  // do through a blur -- and the show/hide toggle has to agree with what is on
-  // screen rather than claim to be hiding it.
-  const { COPY_BLOCK_JS } = await import("../lib/ui/client.mjs");
-  assert.match(COPY_BLOCK_JS, /if \(wasMasked && ok\) source\.setAttribute\("data-masked", "true"\);/);
-  assert.match(COPY_BLOCK_JS, /if \(wasMasked && !ok\) \{/);
-  assert.match(COPY_BLOCK_JS, /toggle\.setAttribute\("aria-pressed", "true"\)/);
-  assert.match(html, /id="agent-reveal"[^>]*data-show-label="Покажи настройката"[^>]*data-hide-label="Скрий настройката"/);
-  assert.match(html, /if \(wasMasked && ok\) promptArea\.setAttribute\("data-masked", "true"\);/);
-
-  // Without a signing secret the card says so instead of offering a dead button.
+  // The owner page explains that direct MCP keys are never rendered; the
+  // Codex handoff is the supported next step instead of a dead token button.
   const blocked = renderOperatorConnectPage({
     baseUrl: ORIGIN,
     operatorId: "connect_operator",
@@ -562,9 +568,9 @@ test("the assistant's configuration is complete, copyable, and readable without 
     providerConfig: fullConfig(),
     locale: "bg",
   });
-  assert.match(blocked, /Нужен е ключ за подписване на достъпа на помощника/);
+  assert.match(blocked, /Ключове за директен MCP достъп/);
+  assert.match(blocked, /добавката за Codex/);
   assert.equal(blocked.includes('data-copy-block="agent-config"'), false);
-  assert.equal(blocked.includes('id="agent-credential"'), false);
 });
 
 test("the assistant token delegates the operator's own roles and expires on its own", () => {
@@ -641,7 +647,7 @@ test("no raw copy keys and no English leak into the Bulgarian or Russian screen"
       agentToken: mintOperatorAgentToken({ operatorId: "connect_operator", roles: ["admin"] }, { secret: SECRET }).token,
       locale,
     });
-    const chrome = html.slice(html.indexOf("<body"), html.indexOf('<pre class="agent__config"'));
+    const chrome = html.slice(html.indexOf("<body"), html.indexOf("</main>"));
     for (const phrase of englishOnly) {
       assert.equal(chrome.includes(phrase), false, `${locale} fell back to English: ${phrase}`);
     }

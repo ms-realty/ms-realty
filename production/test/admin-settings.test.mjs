@@ -253,7 +253,7 @@ test("settings screen speaks Bulgarian and Russian and links from the workspace 
 
     const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
     assert.match(today.body, /href="\/admin\/settings"/);
-    assert.match(today.body, />Administration</);
+    assert.match(today.body, />System</);
     for (const route of ["hermes", "connect", "settings", "team", "activity"]) {
       assert.match(today.body, new RegExp(`href="/admin/${route}"`), `${route} is present in the owner navigation`);
     }
@@ -455,7 +455,7 @@ test("a manual broker override still beats the workspace default broker", () => 
   assert.equal(routed.broker_assignment.method, "workspace_default");
 });
 
-test("Today leads with next actions, keeps its queue previews and shows the onboarding checklist", async () => {
+test("Today leads with a source-backed briefing, Hermes entry, and one ranked priority list", async () => {
   await withAdmin(async () => {
     const config = paths();
     const app = createHttpApp(config);
@@ -464,18 +464,31 @@ test("Today leads with next actions, keeps its queue previews and shows the onbo
     assert.match(empty.body, /data-next-actions="true"/);
     assert.match(empty.body, /data-next-actions-empty="true"/);
     assert.match(empty.body, /Nothing is waiting\./);
-    assert.doesNotMatch(empty.body, /data-today-toolbar="true"/);
-    // Next actions come before the queue previews the existing contracts pin.
-    assert.ok(empty.body.indexOf('data-next-actions="true"') < empty.body.indexOf('data-priority-leads="true"'));
-    for (const contract of ["data-today-layout=\"action-rail\"", "data-priority-leads=\"true\"", "data-lead-pipeline-preview=\"true\"", "data-public-request-preview=\"true\"", "data-readiness-rail=\"true\""]) {
-      assert.match(empty.body, new RegExp(contract), contract);
+    assert.match(empty.body, /data-today-briefing="true" data-today-priority-count="0"/);
+    assert.match(empty.body, /data-hermes-entry="today"/);
+    assert.match(empty.body, /data-hermes-open="today"/);
+    assert.match(empty.body, /href="\/admin\/hermes"/);
+    assert.doesNotMatch(empty.body, /name="q"/);
+    assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 10, "five groups in desktop and mobile navigation");
+    assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 7);
+    assert.equal((empty.body.match(/data-admin-nav-primary-mobile="true"/g) || []).length, 7);
+    for (const destination of ["Today", "Work", "Properties", "Content", "Hermes", "Integrations", "Settings"]) {
+      assert.match(empty.body, new RegExp(`>${destination}<`), destination);
     }
-    // Checklist: nothing done yet on a fresh workspace.
-    assert.match(empty.body, /data-workspace-onboarding="open"/);
-    assert.match(empty.body, /data-workspace-onboarding-progress="0\/5"/);
-    assert.equal(empty.body.match(/data-onboarding-done="false"/g).length, 5);
-    assert.match(empty.body, /data-workspace-onboarding-dismiss="true"/);
+    for (const drilldown of ["work", "content", "settings"]) {
+      assert.match(empty.body, new RegExp(`data-admin-nav-drilldown="${drilldown}"`), drilldown);
+    }
+    // Legacy destinations remain reachable through grouped disclosures.
+    for (const route of ["contacts", "consents", "documents", "cases", "pipeline", "requests", "viewings", "reports", "approved-content", "migration/review", "team", "activity"]) {
+      assert.match(empty.body, new RegExp(`href="/admin/${route}"`), route);
+    }
+    assert.doesNotMatch(empty.body, /data-today-toolbar="true"/);
+    assert.doesNotMatch(empty.body, /class="crm-ph"/);
+    for (const contract of ["data-today-layout=\"action-rail\"", "data-priority-leads=\"true\"", "data-lead-pipeline-preview=\"true\"", "data-public-request-preview=\"true\"", "data-readiness-rail=\"true\"", "data-workspace-onboarding=", "data-workspace-welcome=\"true\""]) {
+      assert.doesNotMatch(empty.body, new RegExp(contract), contract);
+    }
     assert.doesNotMatch(empty.body, /data-workspace-welcome="true"/);
+    assert.match(empty.body, /class="adm-today-work-link"/);
 
     await dispatchHttp(app, {
       method: "POST",
@@ -499,23 +512,19 @@ test("Today leads with next actions, keeps its queue previews and shows the onbo
     assert.match(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);
     assert.match(populated.body, /data-next-action-count="2"/);
-    // The shared shell: page header, then a toolbar row of counted filters, then content.
-    assert.match(populated.body, /data-today-toolbar="true"/);
-    assert.match(populated.body, /data-list-filter="next-actions"/);
-    assert.match(populated.body, /data-filter-value="enquiries"[^>]*/);
-    assert.match(populated.body, /data-list-item="next-actions"/);
-    // Both fixture rows are past their deadline, so each carries its kind plus "overdue".
-    assert.match(populated.body, /data-filter-tags="enquiries overdue"/);
-    assert.match(populated.body, /data-filter-tags="opportunities overdue"/);
-    assert.match(populated.body, /data-list-empty="next-actions"/);
-    assert.ok(populated.body.indexOf('data-today-toolbar="true"') < populated.body.indexOf('data-next-actions="true"'));
+    assert.match(populated.body, /data-today-briefing="true" data-today-priority-count="2" data-today-priority-total="2"/);
+    assert.doesNotMatch(populated.body, /data-today-toolbar="true"/);
+    assert.doesNotMatch(populated.body, /data-list-filter="next-actions"/);
+    assert.doesNotMatch(populated.body, /data-list-item="next-actions"/);
+    assert.doesNotMatch(populated.body, /data-filter-tags="/);
     assert.match(populated.body, /data-next-action-priority="(critical|urgent|normal)"/);
-    assert.match(populated.body, /data-priority-lead="today-next-action-lead"/);
     assert.doesNotMatch(populated.body, /data-next-actions-empty="true"/);
-    // The welcome banner only appears on the post-login hop and can be dismissed.
-    assert.match(populated.body, /data-workspace-welcome="true"/);
-    assert.match(populated.body, /data-workspace-welcome-dismiss="true"/);
-    assert.match(populated.body, /Welcome, operations lead\./);
+    assert.doesNotMatch(populated.body, /data-priority-lead=/);
+    assert.doesNotMatch(populated.body, /data-lead-pipeline-preview=/);
+    assert.doesNotMatch(populated.body, /data-public-request-preview=/);
+    assert.doesNotMatch(populated.body, /data-readiness-rail=/);
+    assert.doesNotMatch(populated.body, /data-workspace-welcome=/);
+    assert.doesNotMatch(populated.body, /class="crm-ph"/);
 
     const json = await dispatchHttp(app, { url: "/api/admin/today", headers: HEADERS });
     assert.equal(json.status, 200);

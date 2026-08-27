@@ -693,6 +693,23 @@ const ADMIN_UI_COPY = {
         text: "Следващите действия са най-отгоре. Опашките, готовността и списъкът за настройка са в страничната лента.",
         dismiss: "Затвори",
       },
+      todayBriefing: {
+        title: "Кратка сводка",
+        description: "Само данни от текущите опашки: какво чака, защо и коя е следващата стъпка.",
+        attention: "Какво чака",
+        why: "Защо",
+        next: "Следващо",
+        count: "{count} приоритета",
+        clear: "Няма отворени приоритети",
+        clearWhy: "Текущите опашки не показват причина за действие.",
+        clearNext: "Провери отново по-късно.",
+        source: "Източник: запитвания, последващи действия, заявки от сайта и възможности.",
+      },
+      hermesEntry: {
+        title: "Попитай Hermes",
+        description: "Продължи в защитения работен изглед на Hermes за търсене, сводки и следващи действия.",
+        open: "Отвори Hermes",
+      },
       nextActions: {
         title: "Следващи действия",
         description: "Един списък за запитвания, последващи действия, заявки от сайта и възможности, най-спешните първо.",
@@ -1358,6 +1375,23 @@ const ADMIN_UI_COPY = {
         titleAnonymous: "Добро пожаловать.",
         text: "Следующие действия идут первыми. Очереди, готовность и список настройки находятся в боковой панели.",
         dismiss: "Закрыть",
+      },
+      todayBriefing: {
+        title: "Краткая сводка",
+        description: "Только данные текущих очередей: что ждёт, почему и какой следующий шаг.",
+        attention: "Что ждёт",
+        why: "Почему",
+        next: "Следующее",
+        count: "Приоритетов: {count}",
+        clear: "Открытых приоритетов нет",
+        clearWhy: "Текущие очереди не показывают причины для действий.",
+        clearNext: "Проверьте позже.",
+        source: "Источник: заявки, последующие действия, запросы с сайта и возможности.",
+      },
+      hermesEntry: {
+        title: "Спросить Hermes",
+        description: "Перейдите в защищённый рабочий раздел Hermes для поиска, сводок и следующих действий.",
+        open: "Открыть Hermes",
       },
       nextActions: {
         title: "Следующие действия",
@@ -2025,6 +2059,23 @@ const ADMIN_UI_COPY = {
         text: "Next actions come first. Queues, readiness and your setup checklist sit in the rail.",
         dismiss: "Dismiss",
       },
+      todayBriefing: {
+        title: "Today briefing",
+        description: "A source-backed read of the current queues: what needs attention, why, and the next step.",
+        attention: "Needs attention",
+        why: "Why",
+        next: "Next",
+        count: "{count} priorities",
+        clear: "No open priorities",
+        clearWhy: "The current queues show no reason to act.",
+        clearNext: "Check again later.",
+        source: "Source: enquiries, follow-ups, website requests, and opportunities.",
+      },
+      hermesEntry: {
+        title: "Ask Hermes",
+        description: "Continue to the guarded Hermes work view for search, briefings, and next actions.",
+        open: "Open Hermes",
+      },
       nextActions: {
         title: "Next actions",
         description: "One list across enquiries, follow-ups, website requests and opportunities, most urgent first.",
@@ -2526,8 +2577,9 @@ function ActionDisclosure({ summary, icon = "plus", tone = "primary", className 
 
 const OWNER_CONSOLE_COPY = {
   bg: {
-    groups: { overview: "Обзор", crm: "CRM", website: "Уебсайт и съдържание", hermes: "Hermes AI", admin: "Администрация" },
-    routes: { today: "Днес", hermes: "Hermes", connections: "Връзки", settings: "Настройки", team: "Екип", activity: "Дневник" },
+    groups: { today: "Днес", work: "Работа", properties: "Имоти и съдържание", hermes: "Hermes", system: "Система" },
+    routes: { today: "Днес", work: "Работа", properties: "Имоти", content: "Съдържание", hermes: "Hermes", integrations: "Интеграции", connections: "Връзки", settings: "Настройки", team: "Екип", activity: "Дневник" },
+    navMore: "Още в {group}",
     profile: {
       title: "Профил на собственика",
       open: "Отвори профила и настройките",
@@ -2611,8 +2663,9 @@ const OWNER_CONSOLE_COPY = {
     },
   },
   ru: {
-    groups: { overview: "Обзор", crm: "CRM", website: "Сайт и контент", hermes: "Hermes AI", admin: "Администрирование" },
-    routes: { today: "Сегодня", hermes: "Hermes", connections: "Подключения", settings: "Настройки", team: "Команда", activity: "Журнал" },
+    groups: { today: "Сегодня", work: "Работа", properties: "Объекты и контент", hermes: "Hermes", system: "Система" },
+    routes: { today: "Сегодня", work: "Работа", properties: "Объекты", content: "Контент", hermes: "Hermes", integrations: "Интеграции", connections: "Подключения", settings: "Настройки", team: "Команда", activity: "Журнал" },
+    navMore: "Ещё в группе {group}",
     profile: {
       title: "Профиль владельца",
       open: "Открыть профиль и настройки",
@@ -2696,8 +2749,9 @@ const OWNER_CONSOLE_COPY = {
     },
   },
   en: {
-    groups: { overview: "Overview", crm: "CRM", website: "Website and content", hermes: "Hermes AI", admin: "Administration" },
-    routes: { today: "Today", hermes: "Hermes", connections: "Connections", settings: "Settings", team: "Team", activity: "Audit log" },
+    groups: { today: "Today", work: "Work", properties: "Properties & content", hermes: "Hermes", system: "System" },
+    routes: { today: "Today", work: "Work", properties: "Properties", content: "Content", hermes: "Hermes", integrations: "Integrations", connections: "Connections", settings: "Settings", team: "Team", activity: "Audit log" },
+    navMore: "More in {group}",
     profile: {
       title: "Owner profile",
       open: "Open profile and settings",
@@ -2877,70 +2931,152 @@ function adminNavigationGroups(page) {
     return module?.screens?.find((screen) => screen.id === screenId)?.label || fallback;
   };
   const route = (id) => NAV_ROUTES.find((entry) => entry.id === id);
-  const groups = [
+  const destinations = [
     {
-      label: owner.groups.overview,
-      items: [{ ...route("today"), label: screenLabel("crm", "today", owner.routes.today) }],
+      id: "today",
+      label: owner.routes.today,
+      route: { ...route("today"), label: owner.routes.today },
     },
     {
-      label: modules.find((module) => module.id === "crm")?.label || owner.groups.crm,
-      items: [
-        {
-          ...route("lead_inbox"),
-          label: screenLabel("crm", "lead_inbox", "Lead inbox"),
-          badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
-        },
+      id: "work",
+      label: owner.routes.work,
+      route: {
+        ...route("lead_inbox"),
+        label: owner.routes.work,
+        badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
+      },
+      children: [
         { ...route("contacts"), label: screenLabel("crm", "contacts", "Contacts and accounts") },
         { ...route("consents"), label: screenLabel("crm", "consents", "Consent and preferences") },
         { ...route("documents"), label: screenLabel("crm", "documents", "Documents and process") },
-        {
-          ...route("realty_cases"),
-          label: caseCopy(page).title,
-          badge: page.realtyCaseQueue?.summary?.open,
-        },
+        { ...route("realty_cases"), label: caseCopy(page).title, badge: page.realtyCaseQueue?.summary?.open },
         {
           ...route("lead_pipeline"),
           label: screenLabel("crm", "lead_pipeline", "Buyers and renters"),
           badge: page.leadPipelineQueue?.summary?.open,
         },
-        {
-          ...route("requests"),
-          label: screenLabel("crm", "requests", "Requests and alerts"),
-          badge: page.publicRequestQueue?.summary?.open,
-        },
+        { ...route("requests"), label: screenLabel("crm", "requests", "Requests and alerts"), badge: page.publicRequestQueue?.summary?.open },
         { ...route("viewings"), label: screenLabel("crm", "viewings", "Viewings") },
         { ...route("reports"), label: screenLabel("crm", "reports", workbenchCopy(page).operationsReports) },
       ],
     },
     {
-      label: owner.groups.website,
-      items: [
-        { ...route("listing_manager"), label: screenLabel("cms", "listing_manager", "Listings") },
-        { ...route("translation_queue"), label: screenLabel("cms", "translation_queue", "Translation review") },
+      id: "properties",
+      label: owner.routes.properties,
+      route: { ...route("listing_manager"), label: owner.routes.properties },
+      children: [],
+    },
+    {
+      id: "content",
+      label: owner.routes.content,
+      route: { ...route("translation_queue"), label: owner.routes.content },
+      children: [
         { ...route("approved_content"), label: workbenchCopy(page).approvedContent.title },
         { ...route("migration_review"), label: label(copy, "migrationReview", "Migration review") },
       ],
     },
     {
-      label: owner.groups.hermes,
-      items: [{ ...route("hermes"), label: owner.routes.hermes }],
+      id: "hermes",
+      label: owner.routes.hermes,
+      route: { ...route("hermes"), label: owner.routes.hermes },
+      children: [],
     },
     {
-      label: owner.groups.admin,
-      items: [
-        { ...route("connections"), label: owner.routes.connections },
-        { ...route("settings"), label: owner.routes.settings },
+      id: "integrations",
+      label: owner.routes.integrations,
+      route: { ...route("connections"), label: owner.routes.integrations },
+      children: [],
+    },
+    {
+      id: "settings",
+      label: owner.routes.settings,
+      route: { ...route("settings"), label: owner.routes.settings },
+      children: [
         { ...route("team"), label: owner.routes.team },
         { ...route("activity"), label: owner.routes.activity },
       ],
     },
   ];
+  const visibleDestination = (destination) => {
+    const items = [destination.route, ...(destination.children || [])].filter((item) => pageCan(page, item.capability));
+    if (!items.length) return null;
+    const routeItem = items.find((item) => item.id === destination.route.id) || items[0];
+    return {
+      ...destination,
+      route: { ...routeItem, label: destination.label },
+      children: items.filter((item) => item.id !== routeItem.id),
+      items,
+    };
+  };
+  const groups = [
+    { id: "today", label: owner.groups.today, destinations: [destinations[0]] },
+    { id: "work", label: owner.groups.work, destinations: [destinations[1]] },
+    { id: "properties-content", label: owner.groups.properties, destinations: destinations.slice(2, 4) },
+    { id: "hermes", label: owner.groups.hermes, destinations: [destinations[4]] },
+    { id: "system", label: owner.groups.system, destinations: destinations.slice(5) },
+  ];
   return groups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => pageCan(page, item.capability)),
+      destinations: group.destinations.map(visibleDestination).filter(Boolean),
     }))
-    .filter((group) => group.items.length);
+    .filter((group) => group.destinations.length);
+}
+
+function navigationLink(item, page, { mobile = false, primary = false, key } = {}) {
+  const className = mobile
+    ? `adm-mobile-nav__link${page.kind === item.kind ? " adm-mobile-nav__link--on" : ""}`
+    : `crm-nav${page.kind === item.kind ? " crm-nav--on" : ""}`;
+  return h(
+    "a",
+    {
+      key,
+      className,
+      href: adminHref(item.path, page),
+      "aria-current": page.kind === item.kind ? "page" : undefined,
+      "data-admin-nav-route": item.id,
+      "data-admin-nav-primary": primary && !mobile ? "true" : undefined,
+      "data-admin-nav-primary-mobile": primary && mobile ? "true" : undefined,
+    },
+    h(Icon, { name: item.icon, size: 18 }),
+    h("span", null, item.label),
+    item.badge ? h("span", { className: "crm-nav__badge" }, item.badge) : null,
+  );
+}
+
+function navigationDestination(destination, page, { mobile = false } = {}) {
+  const moreLabel = ownerConsoleCopy(page).navMore.replace("{group}", destination.label);
+  const nested = destination.children?.length
+    ? h(
+        "details",
+        {
+          className: mobile ? "adm-mobile-nav__more" : "crm-sb__more",
+          open: destination.children.some((item) => page.kind === item.kind) ? true : undefined,
+          "data-admin-nav-drilldown": destination.id,
+        },
+        h("summary", { className: mobile ? "adm-mobile-nav__more-summary" : "crm-sb__more-summary" }, moreLabel),
+        h(
+          "div",
+          { className: mobile ? "adm-mobile-nav__nested" : "crm-sb__nested" },
+          ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
+        ),
+      )
+    : null;
+  return h(
+    "div",
+    { key: `${mobile ? "mobile-" : ""}destination-${destination.id}`, className: mobile ? "adm-mobile-nav__destination" : "crm-sb__destination" },
+    navigationLink(destination.route, page, { mobile, primary: true, key: `${mobile ? "mobile-" : ""}primary-${destination.id}` }),
+    nested,
+  );
+}
+
+function navigationGroup(group, page, { mobile = false } = {}) {
+  return h(
+    "section",
+    { key: `${mobile ? "mobile-" : ""}group-${group.id}`, className: mobile ? "adm-mobile-nav__group-wrap" : "crm-sb__group-wrap", "data-admin-nav-group": group.id },
+    h("div", { className: mobile ? "adm-mobile-nav__group" : "crm-sb__group" }, group.label),
+    ...group.destinations.map((destination) => navigationDestination(destination, page, { mobile })),
+  );
 }
 
 function Sidebar({ page }) {
@@ -2960,23 +3096,7 @@ function Sidebar({ page }) {
     h(
       "nav",
       { className: "crm-sb__nav", "aria-label": page.workspace?.title || "Admin" },
-      ...visibleGroups.flatMap((group) => [
-        h("div", { key: `group-${group.label}`, className: "crm-sb__group" }, group.label),
-        ...group.items.map((item) =>
-          h(
-            "a",
-            {
-              key: item.id,
-              className: `crm-nav${page.kind === item.kind ? " crm-nav--on" : ""}`,
-              href: adminHref(item.path, page),
-              "aria-current": page.kind === item.kind ? "page" : undefined,
-            },
-            h(Icon, { name: item.icon, size: 18 }),
-            h("span", null, item.label),
-            item.badge ? h("span", { className: "crm-nav__badge" }, item.badge) : null,
-          ),
-        ),
-      ]),
+      ...visibleGroups.map((group) => navigationGroup(group, page)),
     ),
     h("div", { className: "crm-sb__me" }, h(OwnerIdentity, { page })),
   );
@@ -3066,23 +3186,7 @@ function MobileNavigation({ page }) {
       h(
         "nav",
         { className: "adm-mobile-nav__links", "aria-label": menuLabel },
-        ...visibleGroups.flatMap((group) => [
-          h("div", { key: `mobile-group-${group.label}`, className: "adm-mobile-nav__group" }, group.label),
-          ...group.items.map((item) =>
-            h(
-              "a",
-              {
-                key: `mobile-${item.id}`,
-                className: `adm-mobile-nav__link${page.kind === item.kind ? " adm-mobile-nav__link--on" : ""}`,
-                href: adminHref(item.path, page),
-                "aria-current": page.kind === item.kind ? "page" : undefined,
-              },
-              h(Icon, { name: item.icon, size: 18 }),
-              h("span", null, item.label),
-              item.badge ? h("span", { className: "crm-nav__badge" }, item.badge) : null,
-            ),
-          ),
-        ]),
+        ...visibleGroups.map((group) => navigationGroup(group, page, { mobile: true })),
       ),
       h(OwnerIdentity, { page, mobile: true }),
       h(ThemeSwitch, { ui, variant: "drawer" }),
@@ -3290,22 +3394,62 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
   });
 }
 
-function nextActionFilterOptions(rows, na) {
-  const count = (tag) => rows.filter((row) => row.tags === tag).length;
-  return [
-    { value: "all", label: na.filters.all, count: rows.length },
-    { value: "overdue", label: na.filters.overdue, count: rows.filter((row) => row.overdue).length },
-    { value: "enquiries", label: na.filters.enquiries, count: count("enquiries") },
-    { value: "follow-ups", label: na.filters.followUps, count: count("follow-ups") },
-    { value: "requests", label: na.filters.requests, count: count("requests") },
-    { value: "opportunities", label: na.filters.opportunities, count: count("opportunities") },
-  ].filter((option) => option.value === "all" || option.count > 0);
+function TodayBriefingPanel({ page, rows }) {
+  const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
+  const hermes = workbenchCopy(page).workspaceSettings.hermesEntry;
+  const first = rows[0];
+  const total = rows.length;
+  const count = copy.count.replace("{count}", String(total));
+  return h(
+    Panel,
+    {
+      title: copy.title,
+      "data-today-briefing": "true",
+      "data-today-priority-count": String(Math.min(total, 7)),
+      "data-today-priority-total": String(total),
+    },
+    h("p", { className: "adm-today-briefing__intro" }, copy.description),
+    h(
+      "dl",
+      { className: "adm-today-briefing__facts" },
+      h(
+        "div",
+        null,
+        h("dt", null, copy.attention),
+        h("dd", null, first ? `${count} · ${first.title}` : copy.clear),
+      ),
+      h(
+        "div",
+        null,
+        h("dt", null, copy.why),
+        h("dd", null, first ? first.context : copy.clearWhy),
+      ),
+      h(
+        "div",
+        null,
+        h("dt", null, copy.next),
+        h("dd", null, first ? first.action : copy.clearNext),
+      ),
+    ),
+    h("p", { className: "adm-today-briefing__source" }, copy.source),
+    h(
+      "div",
+      { className: "adm-today-briefing__hermes", "data-hermes-entry": "today" },
+      h("h3", null, hermes.title),
+      h("p", { className: "adm-hermes-entry__description" }, hermes.description),
+      h(
+        "a",
+        { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes", page), "data-hermes-open": "today" },
+        h("span", null, hermes.open),
+        h(Icon, { name: "arrow-right", size: 15 }),
+      ),
+    ),
+  );
 }
 
-function NextActionsPanel({ page, copy, ui, rows, inboxHref }) {
+function NextActionsPanel({ page, rows }) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
-  const visible = rows.slice(0, 8);
-  const remaining = rows.length - visible.length;
+  const visible = rows.slice(0, 7);
   return h(
     Panel,
     {
@@ -3326,8 +3470,6 @@ function NextActionsPanel({ page, copy, ui, rows, inboxHref }) {
                 "data-next-action": row.kind,
                 "data-next-action-priority": row.priority,
                 "data-overdue": row.overdue ? "true" : "false",
-                "data-list-item": "next-actions",
-                "data-filter-tags": `${row.tags}${row.overdue ? " overdue" : ""}`,
               },
               h(
                 "div",
@@ -3363,12 +3505,8 @@ function NextActionsPanel({ page, copy, ui, rows, inboxHref }) {
               ),
             ),
           ),
-        )
+      )
       : h("p", { className: "adm-empty", "data-next-actions-empty": "true" }, na.empty),
-    h(ListEmptyNote, { scope: "next-actions" }, na.emptyFiltered),
-    remaining > 0
-      ? h("p", { className: "adm-next-actions__more", "data-next-actions-more": String(remaining) }, na.more.replace("{count}", String(remaining)))
-      : null,
   );
 }
 
@@ -3554,17 +3692,6 @@ function TodayBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const queue = leadQueueState(page);
-  const openTasks =
-    (page.summary?.viewingFollowUpsOpen || 0) +
-    (page.summary?.sellerPipelineOpen || 0) +
-    (page.summary?.publicRequestsOpen || 0) +
-    (page.summary?.buyerPipelineOpen || 0) +
-    (page.summary?.renterPipelineOpen || 0);
-  const overdueTasks =
-    (page.summary?.viewingFollowUpsOverdue || 0) +
-    (page.summary?.sellerPipelineOverdue || 0) +
-    (page.summary?.publicRequestsOverdue || 0) +
-    (page.summary?.leadPipelineOverdue || 0);
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
@@ -3578,130 +3705,17 @@ function TodayBody({ page }) {
       "data-admin-locale": page.workspace.locale,
     },
     children: [
-      h(WorkspaceWelcomeBanner, { page }),
+      h(TodayBriefingPanel, { page, rows: nextActions }),
+      h(NextActionsPanel, { page, rows: nextActions }),
       h(
-        PageHeader,
-        { title, subtitle: page.metadata?.description },
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
-      ),
-      nextActions.length
-        ? h(
-            PageToolbar,
-            { "data-today-toolbar": "true" },
-            h(ListFilterTabs, {
-              scope: "next-actions",
-              label: workbenchCopy(page).workspaceSettings.nextActions.title,
-              options: nextActionFilterOptions(nextActions, workbenchCopy(page).workspaceSettings.nextActions),
-            }),
-          )
-        : null,
-      h(
-        "div",
-        { className: "adm-workbench-shell adm-workbench-shell--today", "data-today-layout": "action-rail" },
+        "p",
+        { className: "adm-today-work-link" },
         h(
-          "div",
-          { className: "adm-workbench-main" },
-          h(NextActionsPanel, { page, copy, ui, rows: nextActions, inboxHref }),
-          h(
-            Panel,
-            { title: label(copy, "priorityLeads", "Priority leads"), "data-priority-leads": "true" },
-            queue.pending.length
-              ? h(
-                  "ul",
-                  { className: "adm-task-list" },
-                  ...queue.pending.map((lead) => {
-                    const sla = queue.leadSlaById.get(lead.lead_id);
-                    const status = sla?.status || "pending";
-                    return h(
-                      "li",
-                      { key: lead.lead_id, "data-priority-lead": lead.lead_id },
-                      h(
-                        "div",
-                        { className: "adm-task-list__body" },
-                        leadContactActions(lead, ui),
-                        h("strong", null, [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source)),
-                        requestDetailsText(lead) ? h("small", { className: "adm-lead-context" }, requestDetailsText(lead)) : null,
-                        h("code", { className: "crm-mono adm-task-list__reference" }, lead.lead_id),
-                      ),
-                      h(
-                        "div",
-                        { className: "adm-task-list__actions" },
-                        h(StatusPill, { tone: queueTone(status) }, statusText(ui, status)),
-                        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}` }, label(copy, "openAndReply", "Open and reply")),
-                      ),
-                    );
-                  }),
-                )
-              : h("p", { className: "adm-empty" }, label(copy, "noPriorityLeads", "No leads are waiting for a reply.")),
-          ),
-          h(
-            Panel,
-            {
-              title: label(copy, "pipelineWorkspace", "Buyers and renters"),
-              action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "openPipeline", "Open opportunities")),
-              "data-lead-pipeline-preview": "true",
-            },
-            page.leadPipelineQueue?.rows?.length
-              ? h(
-                  "ul",
-                  { className: "adm-task-list" },
-                  ...page.leadPipelineQueue.rows.slice(0, 3).map((state) =>
-                    h(
-                      "li",
-                      { key: state.lead_id, "data-pipeline-preview-row": state.lead_id },
-                      h(
-                        "div",
-                        { className: "adm-task-list__body" },
-                        h("code", { className: "crm-mono adm-id-caption" }, state.lead_id),
-                        h("strong", null, `${statusText(ui, state.lead_type)} · ${statusText(ui, state.stage)}`),
-                        h("small", { className: "adm-lead-context" }, state.next_action ? statusText(ui, state.next_action) : ""),
-                      ),
-                      h(
-                        "div",
-                        { className: "adm-task-list__actions" },
-                        h(StatusPill, { tone: state.overdue ? "brick" : "sea" }, state.overdue ? statusText(ui, "overdue") : statusText(ui, state.status)),
-                        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "viewRecord", "Open")),
-                      ),
-                    ),
-                  ),
-                )
-              : h("p", { className: "adm-empty" }, label(copy, "noOpenPipeline", "No open buyer or renter opportunities.")),
-          ),
-          h(ViewingFollowUpQueue, { page, copy, ui }),
-          h(SellerPipelineQueue, { page, copy, ui }),
-          h(
-            Panel,
-            {
-              title: label(copy, "publicRequests", "Website requests"),
-              action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page) }, label(copy, "requestsWorkspace", "Requests and alerts")),
-              "data-public-request-preview": "true",
-            },
-            page.publicRequestQueue?.rows?.length
-              ? h(
-                  "ul",
-                  { className: "adm-task-list" },
-                  ...page.publicRequestQueue.rows.slice(0, 3).map((row) =>
-                    h(
-                      "li",
-                      { key: `${row.request_type}:${row.request_id}` },
-                      h(
-                        "div",
-                        { className: "adm-task-list__body" },
-                        h("code", { className: "crm-mono" }, row.request_id),
-                        h("strong", null, row.request_type === "saved_search" ? label(copy, "savedSearchRequest", "Saved search") : label(copy, "languageRequest", "Language request")),
-                      ),
-                      h(
-                        "div",
-                        { className: "adm-task-list__actions" },
-                        h(StatusPill, { tone: row.overdue ? "brick" : "sea" }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
-                      ),
-                    ),
-                  ),
-                )
-              : h("p", { className: "adm-empty" }, label(copy, "noOpenRequests", "No open website requests.")),
-          ),
+          "a",
+          { href: inboxHref },
+          h("span", null, ownerConsoleCopy(page).routes.work),
+          h(Icon, { name: "arrow-right", size: 15 }),
         ),
-        h(TodayReadinessRail, { page, copy, ui, queue, openTasks, overdueTasks, inboxHref }),
       ),
     ],
   });
@@ -10954,20 +10968,24 @@ function HermesBody({ page }) {
       "data-hermes-queue": queue.status,
     },
     children: [
-      h(
-        PageHeader,
-        { title: copy.title, subtitle: copy.description },
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, h(Icon, { name: "loader-circle", size: 15 }), h("span", null, copy.retry)),
-        pageCan(page, "settings:manage")
-          ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections))
-          : null,
-      ),
+      h("p", { className: "adm-hermes-panel-intro adm-hermes-page-intro" }, copy.description),
       h(
         "div",
         { className: "adm-hermes-status-grid" },
         h(
           Panel,
-          { title: copy.hosted, "data-hermes-runtime-card": runtime.status },
+          {
+            title: copy.hosted,
+            "data-hermes-runtime-card": runtime.status,
+            action: h(
+              "div",
+              { className: "adm-hermes-panel-actions" },
+              h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, h(Icon, { name: "loader-circle", size: 15 }), h("span", null, copy.retry)),
+              pageCan(page, "settings:manage")
+                ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections))
+                : null,
+            ),
+          },
           h(
             "div",
             { className: "adm-hermes-card" },
@@ -11030,7 +11048,6 @@ function HermesBody({ page }) {
                 [copy.withheld, queue.withheld_sensitive || 0],
               ],
             }),
-            h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm adm-hermes-card__action", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections)),
           ),
         ),
       ),

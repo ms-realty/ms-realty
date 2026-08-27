@@ -9,6 +9,7 @@ import {
   OWNER_OPERATOR_ADMIN_WRITE_TOOL,
   OWNER_OPERATOR_BROWSER_OPERATIONS,
   OWNER_OPERATOR_HERMES_TOOL,
+  OWNER_OPERATOR_OPERATIONS,
   OWNER_OPERATOR_REMOTE_OPERATIONS,
   OWNER_OPERATOR_WRITE_CONFIRMATION,
   assertOwnerOperatorCatalog,
@@ -50,6 +51,17 @@ test("owner/operator catalog covers every admin route method exactly once", () =
     ownerOperatorConfirmation("admin_post_listings_status"),
   );
 });
+
+test("owner/operator operations include each Hermes tool exactly once", () => {
+  const hermes = OWNER_OPERATOR_OPERATIONS.filter((row) => row.source_kind === "hermes_tool");
+  assert.equal(hermes.length, HERMES_TOOL_COVERAGE.length);
+  assert.equal(new Set(hermes.map((row) => row.operation)).size, hermes.length);
+  assert.deepEqual(
+    hermes.map((row) => row.operation),
+    HERMES_TOOL_COVERAGE.map((row) => row.operation),
+  );
+});
+
 test("generated matrix is source-derived and includes Hermes tool coverage", () => {
   const coverage = buildOwnerOperatorCoverage();
   const artifact = JSON.parse(fs.readFileSync(fromRoot("production", "data", "owner-operator-coverage.json"), "utf8"));

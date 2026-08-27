@@ -18,8 +18,8 @@
 //                    could not make anything do.
 //
 // A provider whose application has not been registered yet renders as
-// "needs one-time setup" with the exact environment variable names, never as a
-// button that would fail.
+// "needs one-time setup" with a plain unavailable/recovery explanation, never
+// as a button that would fail or a credential checklist for the owner.
 
 import { hermesProviderConfigFromEnv } from "./hermes-provider-provisioning.mjs";
 import {
@@ -94,6 +94,9 @@ const DEFINITIONS = Object.freeze([
     id: "viber",
     kind: "token",
     family: "viber",
+    // Viber's official Bot API is token-only. The owner console is OAuth-first,
+    // so this provider is deliberately visible but not connectable here.
+    supported: false,
     setupEnv: ["MS_REALTY_PUBLIC_ORIGIN", "MS_REALTY_VIBER_COMMERCIAL_READY"],
     setupUrl: "https://partners.viber.com/",
   },
@@ -142,6 +145,9 @@ const DEFINITIONS = Object.freeze([
     id: "cloudflare",
     kind: "token",
     family: "cloudflare",
+    // Cloudflare documents OAuth, but this runtime has no OAuth route yet. Do
+    // not fall back to an API-token field or imply that one will work here.
+    supported: false,
     setupEnv: [],
     setupUrl: "https://dash.cloudflare.com/profile/api-tokens",
   },
@@ -149,6 +155,9 @@ const DEFINITIONS = Object.freeze([
     id: "neon",
     kind: "token",
     family: "neon",
+    // Neon exposes OAuth through its managed remote MCP path, not a direct
+    // third-party API client in this runtime. Keep direct API connection off.
+    supported: false,
     setupEnv: [],
     setupUrl: "https://console.neon.tech/app/settings/api-keys",
   },
@@ -287,17 +296,31 @@ export function operatorProviderCards({
     const connection = stored.get(definition.id) || null;
     const ready = availability[definition.id]?.ready === true;
     const connected = connection?.status === "connected";
+    const supported = definition.supported !== false;
     return {
       id: definition.id,
       kind: definition.kind,
       family: definition.family,
-      status: connected ? "connected" : ready ? "not_connected" : "needs_setup",
+      status: !supported
+        ? "disabled"
+        : definition.kind === "runtime"
+          ? ready
+            ? "configured"
+            : "disabled"
+          : connected
+            ? "connected"
+            : ready
+              ? "not_connected"
+              : "needs_setup",
+      supported,
       ready,
       scopes: definition.scopes ? [...definition.scopes] : [],
-      setup_env: [...definition.setupEnv, ...(definition.kind === "runtime" ? [] : STORE_ENV)].filter(
-        (name, index, all) => all.indexOf(name) === index,
-      ),
-      setup_url: definition.setupUrl,
+      setup_env: supported
+        ? [...definition.setupEnv, ...(definition.kind === "runtime" ? [] : STORE_ENV)].filter(
+            (name, index, all) => all.indexOf(name) === index,
+          )
+        : [],
+      setup_url: supported ? definition.setupUrl : "",
       missing: availability[definition.id]?.missing || [],
       account_label: connection?.account_label || "",
       last_verified_at: connection?.last_verified_at || null,
