@@ -274,7 +274,10 @@ test("settings screen speaks Bulgarian and Russian and links from the workspace 
 
     const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
     assert.match(today.body, /href="\/admin\/settings"/);
-    assert.match(today.body, />Workspace</);
+    assert.match(today.body, />Administration</);
+    for (const route of ["hermes", "connect", "settings", "team", "activity"]) {
+      assert.match(today.body, new RegExp(`href="/admin/${route}"`), `${route} is present in the owner navigation`);
+    }
   });
 });
 

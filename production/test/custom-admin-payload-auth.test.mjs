@@ -440,6 +440,41 @@ test("the App Router refuses a revoked session before resolving it, while an act
   assert.equal(service.resolves, 1, "an active registered cookie keeps the admin flow working");
 });
 
+test("the App Router renders the full owner navigation and a privacy-safe owner profile", async () => {
+  const admin = user({ name: "Ivan Peychev", workspace_ids: [] });
+  const service = {
+    async resolve(token) {
+      return token === "owner-session" ? { user: admin, principal: payloadAdminPrincipal(admin) } : null;
+    },
+  };
+  const config = adapterConfig(service);
+  appendAdminSessionEvent(
+    createAdminSessionOpened(
+      { token: "owner-session", operatorId: "payload-1", source: "payload_session" },
+      "2026-08-27T12:00:00.000Z",
+    ),
+    { filePath: config.adminSessionLedgerPath },
+  );
+
+  const response = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/settings?locale=ru`, {
+      headers: { cookie: "ms_admin=owner-session", accept: "text/html" },
+    }),
+    { config },
+  );
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  assert.match(html, /data-owner-profile="true"/);
+  assert.match(html, /data-owner-hub="true"/);
+  assert.match(html, /Ivan Peychev/);
+  assert.match(html, /peycheff\.com@gmail\.com/);
+  assert.match(html, /Все рабочие пространства/);
+  for (const route of ["today", "leads", "listings", "hermes", "connect", "settings", "team", "activity"]) {
+    assert.match(html, new RegExp(`href="/admin/${route}\\?locale=ru`), `${route} appears in the owner navigation`);
+  }
+  assert.doesNotMatch(html, /owner-session|payload\.jwt\.session|correct-password/);
+});
+
 test("the App Router gates credential-registry work behind step-up while leaving settings reachable", async () => {
   const token = "registry-step-up-token-0123456789abcdef";
   const operatorId = "broker_melnik";

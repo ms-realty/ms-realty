@@ -610,6 +610,27 @@ function withWorkspaceSettings(payload, config) {
     : payload;
 }
 
+function withOwnerProfile(payload, config) {
+  if (!payload || typeof payload !== "object" || payload.owner_profile) return payload;
+  const principal = config.adminPrincipal || {};
+  const user = config.payloadAdminSession?.user || {};
+  const roles = Array.isArray(principal.roles) ? principal.roles.map(String).filter(Boolean) : [];
+  const workspaceIds = Array.isArray(principal.workspace_ids)
+    ? principal.workspace_ids.map(String).filter(Boolean)
+    : [];
+  return {
+    ...payload,
+    owner_profile: {
+      id: String(principal.id || ""),
+      name: String(user.name || principal.name || "").trim(),
+      email: String(user.email || principal.email || "").trim().toLowerCase(),
+      roles,
+      workspace_ids: workspaceIds,
+      full_workspace_access: roles.includes("admin") && workspaceIds.length === 0,
+    },
+  };
+}
+
 function adminLocaleParam(url, config = {}) {
   return url.searchParams.get("locale") || workspaceSettingsFor(config).sections.workspace.default_locale || "en";
 }
@@ -3628,7 +3649,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     return payloadAdminAuthPromise;
   };
   const requestPath = new URL(request.url, "http://localhost").pathname;
-  const htmlResponse = (payload) => renderAdminHtmlResponse(withWorkspaceSettings(payload, config));
+  const htmlResponse = (payload) => renderAdminHtmlResponse(withOwnerProfile(withWorkspaceSettings(payload, config), config));
   // The door to the workbench is not reimplemented here. This adapter used to
   // carry its own copy of /admin/login, and that copy had quietly lost the
   // second-factor gate: it read the email and the password out of the form and

@@ -19,15 +19,6 @@ function pageCan(page, capability) {
   return capabilities.includes("*") || capabilities.includes(capability);
 }
 
-const DURABLE_ONLY_NAV_IDS = new Set([
-  "today",
-  "lead_inbox",
-  "realty_cases",
-  "listing_manager",
-  "translation_queue",
-  "approved_content",
-]);
-
 function durableRuntimeMutationAvailable(page, pathname) {
   if (page.runtime_data_mode !== "durable_only") return true;
   return [
@@ -2576,6 +2567,137 @@ function ActionDisclosure({ summary, icon = "plus", tone = "primary", className 
   );
 }
 
+const OWNER_CONSOLE_COPY = {
+  bg: {
+    groups: { overview: "Обзор", crm: "CRM", website: "Уебсайт и съдържание", hermes: "Hermes AI", admin: "Администрация" },
+    routes: { today: "Днес", hermes: "Hermes", connections: "Връзки", settings: "Настройки", team: "Екип", activity: "Дневник" },
+    profile: {
+      title: "Профил на собственика",
+      open: "Отвори профила и настройките",
+      name: "Име",
+      email: "Имейл",
+      role: "Роля",
+      scope: "Достъп",
+      operatorId: "Оператор",
+      administrator: "Администратор",
+      owner: "Собственик",
+      fullAccess: "Всички работни пространства",
+      scopedAccess: "Ограничен достъп до {count} работни пространства",
+      changePassword: "Смяна на парола",
+      manageTeam: "Управление на екипа",
+      manageConnections: "Връзки и интеграции",
+    },
+    hub: {
+      title: "Единен център за управление",
+      description: "Всички основни системи използват един и същ собственик, права и одит.",
+      cms: ["Уебсайт и CMS", "Обяви, медии, преводи и одобрено съдържание"],
+      crm: ["CRM", "Запитвания, контакти, сделки и огледи"],
+      hermes: ["Hermes", "Безопасни чернови, задачи и състояние на агента"],
+      integrations: ["Интеграции", "Доставчици, ChatGPT/Codex и MCP връзки"],
+      team: ["Екип и достъп", "Оператори, роли и работни пространства"],
+      open: "Отвори",
+    },
+  },
+  ru: {
+    groups: { overview: "Обзор", crm: "CRM", website: "Сайт и контент", hermes: "Hermes AI", admin: "Администрирование" },
+    routes: { today: "Сегодня", hermes: "Hermes", connections: "Подключения", settings: "Настройки", team: "Команда", activity: "Журнал" },
+    profile: {
+      title: "Профиль владельца",
+      open: "Открыть профиль и настройки",
+      name: "Имя",
+      email: "Email",
+      role: "Роль",
+      scope: "Доступ",
+      operatorId: "Оператор",
+      administrator: "Администратор",
+      owner: "Владелец",
+      fullAccess: "Все рабочие пространства",
+      scopedAccess: "Доступ к {count} рабочим пространствам",
+      changePassword: "Изменить пароль",
+      manageTeam: "Управление командой",
+      manageConnections: "Подключения и интеграции",
+    },
+    hub: {
+      title: "Единый центр управления",
+      description: "Все основные системы используют одного владельца, общие права и аудит.",
+      cms: ["Сайт и CMS", "Объекты, медиа, переводы и утвержденный контент"],
+      crm: ["CRM", "Заявки, контакты, сделки и просмотры"],
+      hermes: ["Hermes", "Безопасные черновики, задачи и состояние агента"],
+      integrations: ["Интеграции", "Провайдеры, ChatGPT/Codex и MCP-подключение"],
+      team: ["Команда и доступ", "Операторы, роли и рабочие пространства"],
+      open: "Открыть",
+    },
+  },
+  en: {
+    groups: { overview: "Overview", crm: "CRM", website: "Website and content", hermes: "Hermes AI", admin: "Administration" },
+    routes: { today: "Today", hermes: "Hermes", connections: "Connections", settings: "Settings", team: "Team", activity: "Audit log" },
+    profile: {
+      title: "Owner profile",
+      open: "Open profile and settings",
+      name: "Name",
+      email: "Email",
+      role: "Role",
+      scope: "Access",
+      operatorId: "Operator",
+      administrator: "Administrator",
+      owner: "Owner",
+      fullAccess: "All workspaces",
+      scopedAccess: "Access to {count} workspaces",
+      changePassword: "Change password",
+      manageTeam: "Manage team",
+      manageConnections: "Connections and integrations",
+    },
+    hub: {
+      title: "Unified operations",
+      description: "Every core system uses the same owner identity, permissions, and audit trail.",
+      cms: ["Website and CMS", "Listings, media, translations, and approved content"],
+      crm: ["CRM", "Enquiries, contacts, deals, and viewings"],
+      hermes: ["Hermes", "Guarded drafts, tasks, and agent health"],
+      integrations: ["Integrations", "Providers, ChatGPT/Codex, and MCP connections"],
+      team: ["Team and access", "Operators, roles, and workspace scope"],
+      open: "Open",
+    },
+  },
+};
+
+function ownerConsoleCopy(page) {
+  return OWNER_CONSOLE_COPY[page.workspace?.locale] || OWNER_CONSOLE_COPY.en;
+}
+
+function ownerIdentityName(page) {
+  const profile = page.owner_profile || {};
+  return profile.name || profile.email || profile.id || page.workspace?.title || "MS Realty";
+}
+
+function ownerInitials(value) {
+  const parts = String(value || "").trim().split(/[\s@._-]+/u).filter(Boolean);
+  return (parts.slice(0, 2).map((part) => [...part][0]).join("") || "MS").toUpperCase();
+}
+
+function OwnerIdentity({ page, mobile = false }) {
+  const profile = page.owner_profile || {};
+  const copy = ownerConsoleCopy(page).profile;
+  const name = ownerIdentityName(page);
+  const role = profile.roles?.includes("admin") ? copy.administrator : profile.roles?.join(", ") || copy.owner;
+  return h(
+    "a",
+    {
+      className: `adm-owner-identity${mobile ? " adm-owner-identity--mobile" : ""}`,
+      href: adminHref("/admin/settings#owner-profile", page),
+      "aria-label": copy.open,
+      title: copy.open,
+    },
+    h("span", { className: "adm-owner-identity__avatar", "aria-hidden": "true" }, ownerInitials(name)),
+    h(
+      "span",
+      { className: "adm-owner-identity__copy" },
+      h("strong", null, name),
+      h("small", null, profile.email ? h("bdi", null, profile.email) : role),
+    ),
+    h("span", { className: "adm-owner-identity__role" }, role),
+  );
+}
+
 const NAV_ROUTES = [
   { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today", capability: "operations:read" },
   { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox", capability: "operations:read" },
@@ -2592,11 +2714,15 @@ const NAV_ROUTES = [
   { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
   { id: "approved_content", module: "cms", path: "/admin/approved-content", icon: "check-circle-2", kind: "admin_approved_content_review", capability: "content:read" },
   { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
+  { id: "hermes", module: "hermes", path: "/admin/hermes", icon: "sparkles", kind: "admin_hermes", capability: "administration:read" },
+  { id: "connections", module: "workspace", path: "/admin/connect", icon: "link", kind: "admin_connections", capability: "settings:manage" },
   { id: "settings", module: "workspace", path: "/admin/settings", icon: "settings", kind: "admin_workspace_settings", capability: "workspace:read" },
+  { id: "team", module: "workspace", path: "/admin/team", icon: "users", kind: "admin_team", capability: "team:manage" },
 ];
 
 function adminNavigationGroups(page) {
   const copy = adminCopy(page);
+  const owner = ownerConsoleCopy(page);
   const modules = page.workspace?.modules || [];
   const screenLabel = (moduleId, screenId, fallback) => {
     const module = modules.find((entry) => entry.id === moduleId);
@@ -2605,12 +2731,12 @@ function adminNavigationGroups(page) {
   const route = (id) => NAV_ROUTES.find((entry) => entry.id === id);
   const groups = [
     {
-      label: modules.find((module) => module.id === "crm")?.label || "CRM",
+      label: owner.groups.overview,
+      items: [{ ...route("today"), label: screenLabel("crm", "today", owner.routes.today) }],
+    },
+    {
+      label: modules.find((module) => module.id === "crm")?.label || owner.groups.crm,
       items: [
-        {
-          ...route("today"),
-          label: screenLabel("crm", "today", "Today"),
-        },
         {
           ...route("lead_inbox"),
           label: screenLabel("crm", "lead_inbox", "Lead inbox"),
@@ -2636,33 +2762,35 @@ function adminNavigationGroups(page) {
         },
         { ...route("viewings"), label: screenLabel("crm", "viewings", "Viewings") },
         { ...route("reports"), label: screenLabel("crm", "reports", workbenchCopy(page).operationsReports) },
-        { ...route("activity"), label: screenLabel("crm", "activity", "Activity") },
       ],
     },
     {
-      label: modules.find((module) => module.id === "cms")?.label || "CMS",
+      label: owner.groups.website,
       items: [
         { ...route("listing_manager"), label: screenLabel("cms", "listing_manager", "Listings") },
         { ...route("translation_queue"), label: screenLabel("cms", "translation_queue", "Translation review") },
         { ...route("approved_content"), label: workbenchCopy(page).approvedContent.title },
+        { ...route("migration_review"), label: label(copy, "migrationReview", "Migration review") },
       ],
     },
     {
-      label: label(copy, "launchEvidence", "Launch"),
-      items: [{ ...route("migration_review"), label: label(copy, "migrationReview", "Migration review") }],
+      label: owner.groups.hermes,
+      items: [{ ...route("hermes"), label: owner.routes.hermes }],
     },
     {
-      label: workbenchCopy(page).workspaceSettings.navGroup,
-      items: [{ ...route("settings"), label: workbenchCopy(page).workspaceSettings.title }],
+      label: owner.groups.admin,
+      items: [
+        { ...route("connections"), label: owner.routes.connections },
+        { ...route("settings"), label: owner.routes.settings },
+        { ...route("team"), label: owner.routes.team },
+        { ...route("activity"), label: owner.routes.activity },
+      ],
     },
   ];
   return groups
     .map((group) => ({
       ...group,
-      items: group.items.filter(
-        (item) => pageCan(page, item.capability) &&
-          (page.runtime_data_mode !== "durable_only" || DURABLE_ONLY_NAV_IDS.has(item.id)),
-      ),
+      items: group.items.filter((item) => pageCan(page, item.capability)),
     }))
     .filter((group) => group.items.length);
 }
@@ -2702,11 +2830,7 @@ function Sidebar({ page }) {
         ),
       ]),
     ),
-    h(
-      "div",
-      { className: "crm-sb__me" },
-      h("div", { style: "min-width:0" }, h("b", null, page.workspace?.title || "MS Realty"), h("span", null, (page.workspace?.locale || "en").toUpperCase())),
-    ),
+    h("div", { className: "crm-sb__me" }, h(OwnerIdentity, { page })),
   );
 }
 
@@ -2812,6 +2936,7 @@ function MobileNavigation({ page }) {
           ),
         ]),
       ),
+      h(OwnerIdentity, { page, mobile: true }),
       h(ThemeSwitch, { ui, variant: "drawer" }),
     ),
   );
@@ -10749,10 +10874,83 @@ function SettingsPendingList({ page }) {
   );
 }
 
+function OwnerOperationsHub({ page }) {
+  const copy = ownerConsoleCopy(page).hub;
+  const items = [
+    { id: "cms", icon: "building-2", href: "/admin/listings", capability: "content:read" },
+    { id: "crm", icon: "inbox", href: "/admin/leads", capability: "operations:read" },
+    { id: "hermes", icon: "sparkles", href: "/admin/hermes", capability: "administration:read" },
+    { id: "integrations", icon: "link", href: "/admin/connect", capability: "settings:manage" },
+    { id: "team", icon: "users", href: "/admin/team", capability: "team:manage" },
+  ].filter((item) => pageCan(page, item.capability));
+  return h(
+    "section",
+    { className: "adm-owner-hub", "aria-labelledby": "owner-hub-title", "data-owner-hub": "true" },
+    h("div", { className: "adm-owner-hub__heading" }, h("h2", { id: "owner-hub-title" }, copy.title), h("p", null, copy.description)),
+    h(
+      "nav",
+      { className: "adm-owner-hub__grid", "aria-label": copy.title },
+      ...items.map((item) =>
+        h(
+          "a",
+          { key: item.id, className: "adm-owner-hub__card", href: adminHref(item.href, page) },
+          h(Icon, { name: item.icon, size: 19 }),
+          h("span", null, h("strong", null, copy[item.id][0]), h("small", null, copy[item.id][1])),
+          h("span", { className: "adm-owner-hub__action" }, copy.open, h(Icon, { name: "arrow-right", size: 15 })),
+        ),
+      ),
+    ),
+  );
+}
+
+function OwnerProfileSection({ page }) {
+  const profile = page.owner_profile || {};
+  const copy = ownerConsoleCopy(page).profile;
+  const roles = Array.isArray(profile.roles) ? profile.roles : [];
+  const workspaceIds = Array.isArray(profile.workspace_ids) ? profile.workspace_ids : [];
+  const scope = profile.full_workspace_access
+    ? copy.fullAccess
+    : fillTemplate(copy.scopedAccess, { count: workspaceIds.length });
+  const role = roles.includes("admin") ? copy.administrator : roles.join(", ") || copy.owner;
+  const fields = [
+    [copy.name, profile.name || ownerIdentityName(page)],
+    [copy.email, profile.email],
+    [copy.role, role],
+    [copy.scope, scope],
+    [copy.operatorId, profile.id],
+  ].filter(([, value]) => value);
+  return h(
+    "section",
+    { className: "crm-panel adm-owner-profile", id: "owner-profile", "data-owner-profile": "true" },
+    h(
+      "div",
+      { className: "crm-panel__hd adm-owner-profile__heading" },
+      h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, scope)),
+    ),
+    h(
+      "dl",
+      { className: "adm-owner-profile__details" },
+      ...fields.map(([term, value]) => h("div", { key: term }, h("dt", null, term), h("dd", null, h("bdi", null, value)))),
+    ),
+    h(
+      "div",
+      { className: "adm-owner-profile__actions" },
+      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/admin/login?change=1" }, h(Icon, { name: "key", size: 15 }), h("span", null, copy.changePassword)),
+      pageCan(page, "team:manage")
+        ? h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/team", page) }, h(Icon, { name: "users", size: 15 }), h("span", null, copy.manageTeam))
+        : null,
+      pageCan(page, "settings:manage")
+        ? h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.manageConnections))
+        : null,
+    ),
+  );
+}
+
 function SettingsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const settings = settingsCopy(page);
+  const owner = ownerConsoleCopy(page);
   const options = page.settingsOptions || { admin_locales: ["bg", "ru", "en"], timezones: [], date_formats: [], broker_groups: [] };
   const brokers = page.brokerProfiles || [];
   const title = settings.title;
@@ -10783,6 +10981,16 @@ function SettingsBody({ page }) {
     h(
       "ul",
       { className: "adm-readiness-list" },
+      h(
+        "li",
+        { key: "owner-profile", "data-settings-index-row": "owner-profile" },
+        h(
+          "a",
+          { className: "adm-readiness-link", href: "#owner-profile" },
+          h("span", { className: "adm-readiness-copy" }, h("strong", null, owner.profile.title), h("small", null, owner.profile.fullAccess)),
+          h("span", { className: "adm-readiness-value" }, h(StatusPill, { tone: "sea" }, owner.profile.owner)),
+        ),
+      ),
       ...["agency", "leads", "notifications", "workspace", "public_site"].map((section) => {
         const meta = page.workspace_settings?.section_updates?.[section] || null;
         return h(
@@ -10853,6 +11061,7 @@ function SettingsBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: settings.description }),
+      h(OwnerOperationsHub, { page }),
       // The store being unconfigured is one fact about the environment, said
       // once - not restated under every section.
       storeMissing
@@ -10869,6 +11078,7 @@ function SettingsBody({ page }) {
         h(
           "div",
           { className: "adm-workbench-main" },
+          h(OwnerProfileSection, { page }),
           h(SettingsSection, {
             page,
             section: "agency",
