@@ -5,14 +5,15 @@
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
-  // The authoritative public workers.dev origin is injected at runtime via
-  // MS_REALTY_PUBLIC_ORIGIN. Other workers.dev deployments are isolated drills
-  // and are marked noindex by the Worker hostname guard; no custom-domain
-  // route is required.
+  // The authoritative public workers.dev origin is a checked-in edge binding.
+  // It is mapped to the app's MS_REALTY_PUBLIC_ORIGIN inside the Container.
+  // Other workers.dev deployments are isolated drills and are marked noindex
+  // by the Worker hostname guard; no custom-domain route is required.
   "workers_dev": true,
   "vars": {
     "MS_REALTY_EVENT_DURABLE_STORE_ENABLED": "true",
     "MS_REALTY_ORIGIN_URL": "https://ms-realty-review.157-230-109-185.sslip.io",
+    "MS_REALTY_WORKER_PUBLIC_ORIGIN": "https://ms-realty.ms-realty-bg.workers.dev",
     "MS_REALTY_EDGE_BUILD_MARKER": "__MS_REALTY_BUILD_MARKER__"
   },
 

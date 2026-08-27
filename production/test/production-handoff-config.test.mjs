@@ -105,13 +105,13 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.ok(previewHost.includes("`${PRODUCTION_PUBLIC_HOST}${pathname}`"));
   assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
+  assert.match(wrangler, /"MS_REALTY_WORKER_PUBLIC_ORIGIN": "https:\/\/ms-realty\.ms-realty-bg\.workers\.dev"/);
   assert.doesNotMatch(wrangler, /"MS_REALTY_PUBLIC_ORIGIN"\s*:/);
   assert.equal(wrangler.split("__MS_REALTY_BUILD_MARKER__").length - 1, 2);
 });
 
-test("production deploy removes the obsolete public-origin secret before strict upload", () => {
-  assert.match(ciWorkflow, /secret list --name ms-realty --format json/);
-  assert.match(ciWorkflow, /secret delete MS_REALTY_PUBLIC_ORIGIN --name ms-realty/);
+test("production deploy leaves the obsolete public-origin secret inert during strict upload", () => {
+  assert.doesNotMatch(ciWorkflow, /secret (?:list|delete) .*MS_REALTY_PUBLIC_ORIGIN/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy[\s\S]*--strict/);
 });
 
