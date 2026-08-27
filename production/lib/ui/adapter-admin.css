@@ -2328,17 +2328,29 @@ html[data-theme="dark"] .crm-top {
   font-size: var(--text-md);
   line-height: var(--lh-normal);
 }
-.crm-app main[data-react-admin-ui] .crm-ph { margin-bottom: var(--space-4); }
+.crm-app main[data-react-admin-ui] .crm-ph {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3) var(--space-4);
+  align-items: end;
+  margin-bottom: var(--space-4);
+}
 .crm-app main[data-react-admin-ui] .crm-ph h1 {
-  font-size: clamp(var(--text-2xl), 1.45rem + 1.1vw, var(--text-3xl));
-  line-height: 1.1;
+  font-size: clamp(1.9rem, 1.3rem + 1vw, 2.45rem);
+  line-height: 1.05;
 }
 .crm-app main[data-react-admin-ui] .crm-ph p {
-  max-width: 72ch;
-  margin-top: var(--space-2);
+  max-width: 64ch;
+  margin-top: var(--space-1);
   color: var(--text-muted);
-  font-size: var(--text-base);
-  line-height: var(--lh-relaxed);
+  font-size: var(--text-sm);
+  line-height: var(--lh-normal);
+}
+.crm-app main[data-react-admin-ui] .crm-ph__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
 }
 .crm-app main[data-react-admin-ui] .adm-note,
 .crm-app main[data-react-admin-ui] .adm-panel-intro,
@@ -2368,6 +2380,18 @@ html[data-theme="dark"] .crm-top {
 /* The local editor index stays visible while the operator moves through the
    long form. A solid surface avoids the fuzzy, stacked-card effect of the
    previous translucent tab rail. */
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph {
+  gap: var(--space-2) var(--space-4);
+  align-items: start;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph h1 {
+  font-size: clamp(1.7rem, 1.15rem + 0.8vw, 2.15rem);
+  line-height: 1.08;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph p {
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+}
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -2450,7 +2474,7 @@ html[data-theme="dark"] .crm-top {
    reduced to a work item around its preview. The preview itself carries the
    signal; nested elevation does not. */
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
   gap: var(--space-3);
 }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset {
@@ -2462,13 +2486,23 @@ html[data-theme="dark"] .crm-top {
   box-shadow: none;
 }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__preview {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 5 / 4;
   border-radius: var(--radius-md);
 }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__header strong { font-size: var(--text-sm); }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__header small {
   color: var(--text-muted);
   font-size: var(--text-2xs);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-review > summary {
+  min-height: 36px;
+  font-size: var(--text-xs);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-review[open] > summary {
+  margin-bottom: var(--space-2);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-review-form {
+  gap: var(--space-3);
 }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__source {
   min-width: 0;
@@ -2525,12 +2559,76 @@ html[data-theme="dark"] .crm-top {
 .crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-actions {
   background: var(--surface-sunken);
 }
+.crm-app main[data-react-admin-ui="settings"] .adm-workbench-shell--settings {
+  grid-template-columns: minmax(0, 1.7fr) minmax(250px, 0.68fr);
+  gap: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-workbench-main,
+.crm-app main[data-react-admin-ui="settings"] .adm-workbench-rail {
+  gap: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-owner-hub {
+  padding: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-owner-hub__grid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel__hd {
+  padding-block: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-grid {
+  gap: var(--space-3) var(--space-4);
+  padding-top: var(--space-4);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-note {
+  line-height: var(--lh-normal);
+}
+.crm-app main[data-react-admin-ui="settings"] [data-settings-rail="true"] .crm-panel {
+  box-shadow: none;
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-history {
+  gap: var(--space-2);
+}
+
+/* Translation task filters become a wrapped control on phones so every label
+   remains readable without horizontal dragging. */
+@media (max-width: 767px) {
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-toolbar > .adm-cms-filter[data-cms-filter="translations"] {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    width: 100%;
+    overflow: visible;
+    scrollbar-width: auto;
+  }
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-toolbar > .adm-cms-filter[data-cms-filter="translations"] a {
+    min-width: 0;
+    min-height: 44px;
+    justify-content: center;
+    padding-inline: 8px;
+    white-space: normal;
+    text-align: center;
+  }
+}
 
 /* Horizontal editor navigation is intentional on narrow screens: labels stay
    available to sighted and cognitive users, and the scroll is contained in
    the rail so it can never create page-level overflow. */
 @media (max-width: 767px) {
+  .crm-app main[data-react-admin-ui] .crm-ph {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
   .crm-app main[data-react-admin-ui] .crm-ph h1 { font-size: var(--text-2xl); }
+  .crm-app main[data-react-admin-ui] .crm-ph__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .crm-app main[data-react-admin-ui] .crm-ph__actions .mk-btn {
+    flex: 1 1 auto;
+    min-height: 44px;
+    justify-content: center;
+  }
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2556,6 +2654,9 @@ html[data-theme="dark"] .crm-top {
     order: 2;
     gap: var(--space-2);
   }
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-filterbar {
+    gap: var(--space-2);
+  }
   .crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__source {
     max-height: none;
     overflow: visible;
@@ -2567,6 +2668,9 @@ html[data-theme="dark"] .crm-top {
   .crm-app main[data-react-admin-ui="hermes"] .adm-hermes-status-grid { grid-template-columns: minmax(0, 1fr); }
   .adm-hermes-recovery { grid-template-columns: auto minmax(0, 1fr); }
   .adm-hermes-recovery .mk-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
+  .crm-app main[data-react-admin-ui="settings"] .adm-workbench-shell--settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 600px) {
