@@ -49,7 +49,6 @@ const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_RATE_LIMIT_DISABLED",
   "MS_REALTY_TRUSTED_WRITE_ORIGINS",
   "MS_REALTY_MCP_ALLOWED_ORIGINS",
-  "MS_REALTY_PUBLIC_ORIGIN",
   "MS_REALTY_MAX_BODY_BYTES",
   "MS_REALTY_PROVIDER_TOKEN_KEY",
   "MS_REALTY_PROVIDER_OAUTH_STATE_SECRET",
@@ -95,6 +94,10 @@ test("Cloudflare Container forwards every production runtime binding", () => {
   for (const binding of CONTAINER_RUNTIME_BINDINGS) {
     assert.match(workerSource, new RegExp(`${binding}: this\\.env\\.${binding} \\?\\? ""`));
   }
+  assert.match(
+    workerSource,
+    /MS_REALTY_PUBLIC_ORIGIN: this\.env\.MS_REALTY_WORKER_PUBLIC_ORIGIN \?\? ""/,
+  );
 });
 
 test("Cloudflare Container search depends only on Payload Postgres", () => {
@@ -206,7 +209,9 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(deployJob, /needs: \[check, deploy_origin\]/);
   assert.match(ciWorkflow, /previous_release: \$\{\{ steps\.previous_origin\.outputs\.release \}\}/);
   assert.match(ciWorkflow, /Capture active origin release/);
-  assert.match(deployJob, /wrangler@4\.117\.0 secret put MS_REALTY_ORIGIN_TOKEN/);
+  assert.match(deployJob, /secret list --name ms-realty --format json/);
+  assert.match(deployJob, /name === "MS_REALTY_ORIGIN_TOKEN"/);
+  assert.doesNotMatch(deployJob, /secret put MS_REALTY_ORIGIN_TOKEN/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
   assert.match(ciWorkflow, /accounts\/\$\{CLOUDFLARE_ACCOUNT_ID\}\/workers\/subdomain/);
   assert.match(ciWorkflow, /https:\/\/ms-realty\.\$\{subdomain\}\.workers\.dev\/api\/health/);
@@ -321,13 +326,20 @@ test("Cloudflare Container admits authenticated MCP without opening ledger write
     "strict deploy must not shadow the live remote secret",
   );
 
-  const env = { MS_REALTY_PUBLIC_ORIGIN: "https://ms-realty.example.workers.dev" };
+  const env = { MS_REALTY_WORKER_PUBLIC_ORIGIN: "https://ms-realty.example.workers.dev" };
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env }), true);
   assert.equal(allowsMcpRequest({ method: "DELETE", pathname: "/mcp", env }), true);
   assert.equal(allowsMcpRequest({ method: "PATCH", pathname: "/mcp", env }), false);
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp/extra", env }), false);
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/api/leads", env }), false);
-  assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: { MS_REALTY_PUBLIC_ORIGIN: "  " } }), false);
+  assert.equal(
+    allowsMcpRequest({ method: "POST", pathname: "/mcp", env: { MS_REALTY_WORKER_PUBLIC_ORIGIN: "  " } }),
+    false,
+  );
+  assert.equal(
+    allowsMcpRequest({ method: "POST", pathname: "/mcp", env: { MS_REALTY_PUBLIC_ORIGIN: "https://legacy.invalid" } }),
+    false,
+  );
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env: {} }), false);
 });
 

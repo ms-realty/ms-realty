@@ -34,6 +34,8 @@ test("monitoring drill deploys and rolls back the real MS Realty Container artif
   assert.match(workflow, /--config wrangler\.jsonc/);
   assert.match(workflow, /--strict/);
   assert.match(workflow, /--containers-rollout immediate/);
+  assert.equal(workflow.match(/--var "MS_REALTY_WORKER_PUBLIC_ORIGIN:\$DRILL_URL"/g)?.length, 2);
+  assert.doesNotMatch(workflow, /--var "MS_REALTY_PUBLIC_ORIGIN:/);
   assert.match(workflow, /wrangler@4\.117\.0 secret put MS_REALTY_ORIGIN_TOKEN --name "\$DRILL_WORKER"/);
   assert.doesNotMatch(workflow, /--var [^\n]*MS_REALTY_ORIGIN_TOKEN/);
   assert.match(workflow, /Dockerfile/);

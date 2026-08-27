@@ -139,13 +139,13 @@ export function allowsAdminSessionMutation({ request, method, pathname }) {
 // It is safe to admit through the edge mutation gate because the app 401s
 // unauthenticated calls and the Worker disables ledger-writing MCP tools via
 // MS_REALTY_MCP_WRITES_DISABLED, so nothing can write to the ephemeral disk.
-// MS_REALTY_PUBLIC_ORIGIN doubles as the operator's deliberate "MCP is
+// MS_REALTY_WORKER_PUBLIC_ORIGIN is the operator's deliberate "MCP is
 // configured" switch — unset, the endpoint stays 503 like every mutation.
 export function allowsMcpRequest({ method, pathname, env }) {
   return (
     (method === "POST" || method === "DELETE") &&
     pathname === "/mcp" &&
-    Boolean(env.MS_REALTY_PUBLIC_ORIGIN?.trim())
+    Boolean(env.MS_REALTY_WORKER_PUBLIC_ORIGIN?.trim())
   );
 }
 

@@ -274,10 +274,10 @@ jobs:
           fs.writeFileSync(configPath, config.replaceAll(placeholder, marker));
           NODE
 
-      - name: Set durable origin credential
-        run: >-
-          printf '%s' "$MS_REALTY_ORIGIN_TOKEN" |
-          npx --yes wrangler@4.117.0 secret put MS_REALTY_ORIGIN_TOKEN --name ms-realty
+      - name: Require durable origin credential binding
+        run: |
+          secrets="$(npx --yes wrangler@4.117.0 secret list --name ms-realty --format json)"
+          node -e 'const rows=JSON.parse(process.argv[1]); if (!Array.isArray(rows) || !rows.some(({ name }) => name === "MS_REALTY_ORIGIN_TOKEN")) throw new Error("MS_REALTY_ORIGIN_TOKEN Worker secret is required")' "$secrets"
 
       - name: Deploy exact main commit
         id: deploy
