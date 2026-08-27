@@ -98,6 +98,7 @@ test("production search evidence uses one migrated Payload runtime", () => {
 });
 
 test("workers.dev delegates dynamic traffic to the fixed origin and carries an exact edge marker", () => {
+  assert.match(worker, /PRODUCTION_PUBLIC_HOST/);
   assert.match(worker, /if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(worker, /requestForOrigin\(request, env\.MS_REALTY_ORIGIN_URL, env\.MS_REALTY_ORIGIN_TOKEN\)/);
   assert.match(worker, /if \(media\) return media;\n\s+if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
