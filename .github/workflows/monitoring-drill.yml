@@ -141,7 +141,7 @@ jobs:
             --message "Monitoring drill baseline ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}" \
             --var 'PAYLOAD_SECRET:monitoring-drill-only-secret-not-for-production-0123456789' \
             --var 'DATABASE_URL:postgresql://monitoring:monitoring@db-monitoring.invalid:5432/monitoring' \
-            --var "MS_REALTY_PUBLIC_ORIGIN:$DRILL_URL"
+            --var "MS_REALTY_WORKER_PUBLIC_ORIGIN:$DRILL_URL"
           echo "created=true" >> "$GITHUB_OUTPUT"
           printf '%s' "$MS_REALTY_ORIGIN_TOKEN" |
             npx --yes wrangler@4.117.0 secret put MS_REALTY_ORIGIN_TOKEN --name "$DRILL_WORKER"
@@ -195,7 +195,7 @@ jobs:
             --message "Monitoring drill fault ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}" \
             --var 'PAYLOAD_SECRET:monitoring-drill-only-secret-not-for-production-0123456789' \
             --var 'DATABASE_URL:postgresql://monitoring:monitoring@db-monitoring.invalid:5432/monitoring' \
-            --var "MS_REALTY_PUBLIC_ORIGIN:$DRILL_URL"
+            --var "MS_REALTY_WORKER_PUBLIC_ORIGIN:$DRILL_URL"
           status="$(npx --yes wrangler@4.117.0 deployments status --name "$DRILL_WORKER" --json)"
           fault_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v?.version_id) process.exit(1); process.stdout.write(v.version_id)' "$status")"
           test "$fault_version" != "$BASELINE_VERSION"
