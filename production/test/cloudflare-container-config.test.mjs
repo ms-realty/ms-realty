@@ -54,6 +54,8 @@ const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_PROVIDER_OAUTH_STATE_SECRET",
   "MS_REALTY_GOOGLE_OAUTH_CLIENT_ID",
   "MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET",
+  "MS_REALTY_GITHUB_OAUTH_CLIENT_ID",
+  "MS_REALTY_GITHUB_OAUTH_CLIENT_SECRET",
   "MS_REALTY_META_APP_ID",
   "MS_REALTY_META_APP_SECRET",
   "MS_REALTY_META_EMBEDDED_SIGNUP_CONFIG_ID",
@@ -98,6 +100,7 @@ test("Cloudflare Container forwards every production runtime binding", () => {
     workerSource,
     /MS_REALTY_PUBLIC_ORIGIN: this\.env\.MS_REALTY_WORKER_PUBLIC_ORIGIN \?\? ""/,
   );
+  assert.doesNotMatch(workerSource, /OPENROUTER_API_KEY/);
 });
 
 test("Cloudflare Container search depends only on Payload Postgres", () => {
