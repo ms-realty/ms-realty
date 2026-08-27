@@ -289,16 +289,35 @@ test("admin lead values are localized without exposing raw workflow codes", () =
   assert.match(html, /Возможный дубликат контакта/);
   assert.match(html, /data-lead-assignment-control="lead-ru-1"/);
   assert.match(html, /action="\/api\/admin\/leads\/assign"/);
-  assert.match(html, /data-viewing-follow-up-queue="true"/);
-  assert.match(html, /data-empty-viewing-follow-ups="true"/);
-  assert.match(html, /data-seller-pipeline-queue="true"/);
-  assert.match(html, /data-empty-seller-pipeline="true"/);
+  assert.doesNotMatch(html, /data-lead-secondary-queues="true"/);
+  assert.doesNotMatch(html, /data-viewing-follow-up-queue="true"/);
+  assert.doesNotMatch(html, /data-seller-pipeline-queue="true"/);
   assert.match(ADMIN_APP_JS, /data-viewing-follow-up-form/);
   assert.match(ADMIN_APP_JS, /data-seller-pipeline-outcome-form/);
   assert.match(ADMIN_APP_JS, /commitEditorFormState\(form\)/);
   assert.doesNotMatch(ADMIN_APP_JS, /window\.location\.reload/);
   assert.doesNotMatch(html, />website_listing_detail</);
   assert.doesNotMatch(html, />manager escalation required</);
+});
+
+test("admin today keeps empty viewing and seller queues compact and explicit", () => {
+  const page = renderAdminLeadsPayload(registry, "en", {
+    leads: [],
+    replies: [],
+    languageRequests: [],
+    viewings: [],
+    savedSearches: [],
+    sellerPipeline: [],
+    deals: [],
+    leadSla: { rows: [], summary: { manager_escalation_required: 0, reminder_required: 0 } },
+    viewingFollowUpQueue: { rows: [], summary: {} },
+    sellerPipelineQueue: { rows: [], summary: {} },
+  });
+  const html = renderHtmlPage({ ...page, kind: "admin_today", path: "/admin/today", canonical: "/admin/today" });
+
+  assert.equal((html.match(/crm-panel crm-panel--compact-empty/g) || []).length, 2);
+  assert.match(html, /data-empty-viewing-follow-ups="true"[^>]*>.*No open viewing follow-ups\./);
+  assert.match(html, /data-empty-seller-pipeline="true"[^>]*>.*No open seller valuation tasks\./);
 });
 
 test("admin viewing follow-up queue formats due dates and keeps action header distinct", () => {

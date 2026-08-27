@@ -16,6 +16,8 @@ import { renderOperatorConnectPage } from "../lib/operator-connect.mjs";
 // exist yet.
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const adminCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin.css"), "utf8");
+const crmCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-crm.css"), "utf8");
 const cmsCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-cms.css"), "utf8");
 const generatedCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const auth = { authorization: "Bearer local-admin-smoke" };
@@ -24,19 +26,15 @@ function app() {
   return createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
 }
 
-test("listing manager leads with the shell the CRM screens use: header action, counted filters, list tools", async () => {
+test("listing manager leads with the shell the CRM screens use and no dead list tools", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/listings?locale=en", headers: auth });
   assert.equal(page.status, 200);
-  // Page action, then a toolbar of counted status filters, then the planned
-  // controls in one closed strip, then the queue.
+  // Page action and counted status filters lead directly to the working queue.
   assert.match(page.body, /class="crm-ph__actions"/);
   assert.match(page.body, /<nav class="crm-seg adm-cms-filter"[^>]*data-cms-filter="listings"/);
   assert.match(page.body, /data-filter-value=""[^>]*data-on="1"/);
   assert.match(page.body, /<span class="adm-seg-count">165<\/span>/);
-  assert.match(page.body, /data-planned-control="listing_list_tools"/);
-  for (const planned of ["listing-saved-views", "listing-export", "listing-duplicate"]) {
-    assert.match(page.body, new RegExp(`data-planned-control="${planned}"`), planned);
-  }
+  assert.doesNotMatch(page.body, /data-planned-control=/);
   // The queue itself keeps its contracts.
   assert.match(page.body, /data-listing-manager-row="MS-CRAWL-0001"/);
   assert.match(page.body, /data-listing-bulk-bar="true" data-selection="empty"/);
@@ -78,10 +76,20 @@ test("translation review groups its rows by listing so one title is not repeated
   // The first row of a group carries the identity, the rest a quiet reference.
   assert.match(page.body, /data-translation-group-start="true"/);
   assert.match(page.body, /class="adm-translation-continued"/);
+  assert.match(page.body, /data-translation-editor-row="translation-MS-CRAWL-0001-en"/);
+  assert.match(page.body, /<td colSpan="5"><details class="adm-reply adm-translation-editor" data-translation-editor-workspace="true">/);
+  assert.match(page.body, /class="adm-human-translation__context"/);
+  assert.match(page.body, /class="adm-human-translation__fields"/);
+  assert.match(page.body, /class="adm-human-translation__facts"/);
+  assert.match(adminCss, /\.adm-human-translation\s*\{[^}]*grid-template-columns:\s*minmax\(260px,\s*0\.88fr\)\s+minmax\(0,\s*1\.12fr\)/);
+  assert.match(adminCss, /\.adm-human-translation__context\s*\{[^}]*position:\s*sticky/);
+  assert.match(adminCss, /\.adm-human-translation__fields\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(crmCss, /\.adm-toolbar > \.crm-seg:not\(\.adm-cms-filter\)\s*\{[^}]*overflow:\s*visible/);
+  assert.match(cmsCss, /\.adm-cms-filter a\s*\{[^}]*flex:\s*none/);
+  assert.match(adminCss, /\.adm-translation-editor-row > td\s*\{[^}]*padding:\s*0/);
   const titles = page.body.match(/Автосервиз|Автöремонтна/g) || [];
   assert.ok(titles.length <= 1, "the listing title appears at most once per group");
-  assert.match(page.body, /data-planned-control="translation_list_tools"/);
-  assert.match(page.body, /data-planned-control="translation-bulk-assign"/);
+  assert.doesNotMatch(page.body, /data-planned-control=/);
 });
 
 test("an empty translation queue says nothing is waiting rather than showing a bare table head", async () => {
@@ -108,6 +116,10 @@ test("the listing editor names the listing, hides the operator field and carries
   for (const state of ["saving", "saved", "error", "conflict"]) {
     assert.match(cmsCss, new RegExp(`\\[data-save-state="${state}"\\]`), state);
   }
+  assert.match(adminCss, /\.adm-editor-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(adminCss, /\.adm-editor-rail\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);[^}]*position:\s*static;/s);
+  assert.match(adminCss, /\.adm-editor-rail > \[data-media-review-panel\]\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;/);
+  assert.match(adminCss, /\.adm-editor-tabs\s*\{[^}]*position:\s*sticky;[^}]*backdrop-filter:\s*blur\(14px\)/s);
   assert.match(cmsCss, /\.adm-editor-conflict\[hidden\] \{ display: none; \}/);
 });
 
@@ -154,8 +166,7 @@ test("operations reports drop the nested cards and give every empty region a not
   // A plot is a region of a panel, not a card inside a card.
   assert.doesNotMatch(page.body, /data-report-section="website-funnel"[\s\S]{0,400}adm-report-card/);
   assert.match(page.body, /class="adm-report-plot"/);
-  assert.match(page.body, /data-planned-control="report_tools"/);
-  assert.match(page.body, /data-planned-control="report-period"/);
+  assert.doesNotMatch(page.body, /data-planned-control=/);
   assert.match(page.body, /data-zero="true"/);
   assert.match(page.body, /class="adm-report-chips" data-popular-filters="true"|adm-report-nodata/);
 });
@@ -182,8 +193,7 @@ test("the CMS sheet ships after the shared admin sheet and reuses the CRM vocabu
   const adminIndex = generatedCss.indexOf(".adm-route-decisions{");
   const cmsIndex = generatedCss.indexOf(".adm-cms-filter{");
   assert.ok(adminIndex >= 0 && cmsIndex > adminIndex, "the CMS extension follows the shared admin sheet");
-  // Package A1 owns .adm-planned, .adm-planned-note, .adm-planned-badge and
-  // .adm-list-tools; this sheet must not restate them.
+  // The CMS sheet must not revive the removed planned-control treatment.
   assert.doesNotMatch(cmsCss, /^\.adm-planned \{/m);
   assert.doesNotMatch(cmsCss, /^\.adm-planned-note \{/m);
   assert.doesNotMatch(cmsCss, /^\.adm-planned-badge \{/m);

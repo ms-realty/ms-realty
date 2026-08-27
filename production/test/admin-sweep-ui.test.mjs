@@ -16,6 +16,7 @@ import { ADMIN_CSS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const adminAdapterCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin.css"), "utf8");
+const adminSettingsCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-settings.css"), "utf8");
 const generatedDesignCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const auth = { authorization: "Bearer local-admin-smoke" };
 
@@ -41,6 +42,23 @@ test("mobile navigation drawer: solid top bar, full-height panel, styled header 
   }
 });
 
+test("admin skip link targets a programmatically focusable main landmark", async () => {
+  const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+  const page = await dispatchHttp(app, { url: "/admin/today?locale=en", headers: auth });
+  assert.equal(page.status, 200);
+  assert.match(page.body, /<a class="skip-link" href="#main">Skip to content<\/a>/);
+  assert.match(page.body, /<main id="main" tabindex="-1" class="crm-scroll"/);
+});
+
+test("fallback owner profile does not invent a zero-workspace scope", async () => {
+  const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+  const page = await dispatchHttp(app, { url: "/admin/settings?locale=en", headers: auth });
+  assert.equal(page.status, 200);
+  assert.match(page.body, /Workspace scope was not provided by this runtime/);
+  assert.doesNotMatch(page.body, /Access to 0 workspaces/);
+  assert.doesNotMatch(page.body, /All workspaces/);
+});
+
 test("required fields carry a decorative accent marker and inline alerts default to the information tone", () => {
   assert.match(adminAdapterCss, /label:has\(> :required[^)]*\)[^{]*::after\s*\{[^}]*content:\s*"\*" \/ ""/);
   assert.match(adminAdapterCss, /:not\(\[readonly\]\)/);
@@ -49,6 +67,19 @@ test("required fields carry a decorative accent marker and inline alerts default
   assert.match(adminAdapterCss, /\.adm-family-checks\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fill, minmax\(170px, 1fr\)\)/);
   assert.match(adminAdapterCss, /\.adm-reply > summary::after/);
   assert.match(adminAdapterCss, /\.adm-reply\[open\] > summary::after/);
+});
+
+test("critical next actions tint the active surface instead of forcing a light-only palette", () => {
+  assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*background:\s*color-mix\(in srgb, var\(--brick-600\) 12%, var\(--surface\)\)/);
+  assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*\.adm-next-actions__meta time\s*\{[^}]*color:\s*color-mix\(in srgb, var\(--brick-600\) 45%, var\(--text-strong\)\)/);
+  assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*\.adm-task-list__reference\s*\{[^}]*color:\s*color-mix\(in srgb, var\(--text-muted\) 55%, var\(--text-strong\)\)/);
+});
+
+test("warning surfaces tint the active theme instead of forcing a light-only palette", () => {
+  assert.match(adminAdapterCss, /\.adm-availability-note\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\)/);
+  assert.match(adminAdapterCss, /\.adm-hermes-missing\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\)/);
+  assert.match(adminAdapterCss, /\.adm-hermes-empty--blocked\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\)/);
+  assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-checks ul\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
 });
 
 test("queue filters reveal an empty note when no row matches", () => {

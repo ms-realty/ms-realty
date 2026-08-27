@@ -667,7 +667,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(russianEditor.status, 200);
       const russianEditorHtml = await russianEditor.text();
       assert.match(russianEditorHtml, /data-admin-mutation-form="listing"/);
-      assert.match(russianEditorHtml, /data-editor-layout="split-rail"/);
+      assert.match(russianEditorHtml, /data-editor-layout="stacked-workflow"/);
       assert.match(russianEditorHtml, /data-editor-tabs="true"/);
       assert.match(russianEditorHtml, /data-editor-savebar="true"/);
       assert.match(russianEditorHtml, /data-editor-dirty-message="[^"]+"/);

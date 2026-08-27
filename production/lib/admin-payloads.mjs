@@ -192,6 +192,76 @@ export function renderAdminOperationalQueuePayload(payload, { kind, path, titleK
   };
 }
 
+export function renderAdminRuntimeUnavailablePayload(
+  registry,
+  requestedLocale,
+  unavailable,
+  operator = null,
+) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const requestedPath = String(unavailable?.path || "/admin");
+  return {
+    kind: "admin_runtime_unavailable",
+    status: 503,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: requestedPath,
+    canonical: requestedPath,
+    indexable: false,
+    metadata: {
+      title: "Data connection required | MS Realty",
+      description: "Authenticated owner recovery page for an unavailable durable data source.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    unavailable: {
+      kind: "runtime_data_unavailable",
+      path: requestedPath,
+    },
+  };
+}
+
+export function renderAdminHermesPayload(
+  registry,
+  requestedLocale,
+  {
+    availability,
+    bridge,
+    generatedAt,
+    operator = null,
+    queue,
+    runtime,
+    runtimeDataMode = "file_backed",
+    tools = [],
+  } = {},
+) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    kind: "admin_hermes",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/hermes",
+    canonical: "/admin/hermes",
+    indexable: false,
+    metadata: {
+      title: "Hermes | MS Realty",
+      description: "Authenticated Hermes runtime, task queue, desktop bridge, and safety controls.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    generated_at: generatedAt,
+    runtime_data_mode: runtimeDataMode,
+    runtime,
+    availability,
+    bridge,
+    queue,
+    tools,
+  };
+}
+
 const WORKSPACE_SETTINGS_METADATA = {
   bg: { title: "Настройки", description: "Профил на агенцията, срокове за отговор, известия, работно пространство и публичен сайт." },
   ru: { title: "Настройки", description: "Профиль агентства, сроки ответа, уведомления, рабочее пространство и публичный сайт." },
@@ -208,6 +278,20 @@ function settingsFormEcho(values) {
     else echo[key] = String(value ?? "").slice(0, 500);
   }
   return echo;
+}
+
+function adminBrokerProfile(profile, locale) {
+  const language = profile.languages?.includes("bg") ? "bg" : profile.languages?.includes("ru") ? "ru" : "international";
+  const deskLabels = {
+    bg: { bg: "Екип на български", ru: "Екип на руски", international: "Международен екип" },
+    ru: { bg: "Болгароязычная команда", ru: "Русскоязычная команда", international: "Международная команда" },
+    en: { bg: "Bulgarian desk", ru: "Russian desk", international: "International desk" },
+  };
+  return {
+    id: profile.id,
+    label: profile.labels?.[locale] || profile.display_name || profile.name || deskLabels[locale]?.[language] || profile.id,
+    languages: profile.languages || [],
+  };
 }
 
 export function renderAdminWorkspaceSettingsPayload(
@@ -242,7 +326,7 @@ export function renderAdminWorkspaceSettingsPayload(
     workspace: workspaceWithOperator(workspace, operator),
     workspace_settings: workspaceSettingsView(settings),
     settings_writable: writable !== false,
-    brokerProfiles: brokerProfiles.map((profile) => ({ id: profile.id, languages: profile.languages || [] })),
+    brokerProfiles: brokerProfiles.map((profile) => adminBrokerProfile(profile, workspace.locale)),
     settingsOptions: {
       admin_locales: [...locales],
       timezones: [...WORKSPACE_TIMEZONES],
@@ -665,10 +749,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       robots: "noindex,nofollow",
     },
     workspace: workspaceWithOperator(workspace, operatorId),
-    brokerProfiles: (data.brokerProfiles || DEFAULT_BROKER_PROFILES).map((profile) => ({
-      id: profile.id,
-      languages: profile.languages || [],
-    })),
+    brokerProfiles: (data.brokerProfiles || DEFAULT_BROKER_PROFILES).map((profile) => adminBrokerProfile(profile, workspace.locale)),
     ...payloadData,
     leadSla,
     leadPipelineQueue,

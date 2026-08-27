@@ -38,6 +38,7 @@ import {
 import { DEFAULT_OPERATOR_TWO_FACTOR_PATH, operatorTwoFactorStatus, readOperatorTwoFactorEvents } from "./operator-two-factor.mjs";
 import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
+import { buildAdminHermesPayload } from "./admin-hermes.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
 import { adminCredentials } from "./admin-auth.mjs";
@@ -96,6 +97,7 @@ import {
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
   renderAdminRealtyCasesPayload,
+  renderAdminRuntimeUnavailablePayload,
   renderAdminApprovedContentPayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
@@ -608,6 +610,27 @@ function withWorkspaceSettings(payload, config) {
   return payload && typeof payload === "object" && !payload.workspace_settings
     ? { ...payload, workspace_settings: workspaceSettingsView(workspaceSettingsFor(config)) }
     : payload;
+}
+
+function withOwnerProfile(payload, config) {
+  if (!payload || typeof payload !== "object" || payload.owner_profile) return payload;
+  const principal = config.adminPrincipal || {};
+  const user = config.payloadAdminSession?.user || {};
+  const roles = Array.isArray(principal.roles) ? principal.roles.map(String).filter(Boolean) : [];
+  const workspaceIds = Array.isArray(principal.workspace_ids)
+    ? principal.workspace_ids.map(String).filter(Boolean)
+    : [];
+  return {
+    ...payload,
+    owner_profile: {
+      id: String(principal.id || ""),
+      name: String(user.name || principal.name || "").trim(),
+      email: String(user.email || principal.email || "").trim().toLowerCase(),
+      roles,
+      workspace_ids: workspaceIds,
+      full_workspace_access: roles.includes("admin") && workspaceIds.length === 0,
+    },
+  };
 }
 
 function adminLocaleParam(url, config = {}) {
@@ -1885,6 +1908,24 @@ async function translationQueuePayload(registry, url, config) {
     page: url.searchParams.get("page") || 1,
   });
   return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+}
+
+async function hermesConsolePayload(registry, url, config) {
+  const env = config.authEnv || process.env;
+  return buildAdminHermesPayload({
+    registry,
+    requestedLocale: adminLocaleParam(url, config),
+    seed: currentSeed(config),
+    operator: config.adminPrincipal,
+    hermesEnv: env,
+    listingEnv: env,
+    payload: config.payloadListingRuntime || null,
+    requirePayload: config.runtimeDataDurableOnly,
+    provider: config.hermesReplyProvider || null,
+    fetchImpl: config.hermesAgentFetch || globalThis.fetch,
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+    probeTimeoutMs: config.hermesAgentProbeTimeoutMs || 5_000,
+  });
 }
 
 function readJsonData(filename) {
@@ -3628,7 +3669,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     return payloadAdminAuthPromise;
   };
   const requestPath = new URL(request.url, "http://localhost").pathname;
-  const htmlResponse = (payload) => renderAdminHtmlResponse(withWorkspaceSettings(payload, config));
+  const htmlResponse = (payload) => renderAdminHtmlResponse(withOwnerProfile(withWorkspaceSettings(payload, config), config));
   // The door to the workbench is not reimplemented here. This adapter used to
   // carry its own copy of /admin/login, and that copy had quietly lost the
   // second-factor gate: it read the email and the password out of the form and
@@ -3804,7 +3845,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       method: request.method,
       pathname: url.pathname,
     })) {
-      return jsonResponse(503, runtimeDataUnavailablePayload(url.pathname));
+      const unavailable = runtimeDataUnavailablePayload(url.pathname);
+      if (request.method === "GET" && url.pathname.startsWith("/admin/")) {
+        return htmlResponse(
+          renderAdminRuntimeUnavailablePayload(
+            loadLocaleRegistry(config.localeRegistryPath),
+            adminLocaleParam(url, config),
+            unavailable,
+            principal,
+          ),
+        );
+      }
+      return jsonResponse(503, unavailable);
     }
     if (
       config.runtimeDataDurableOnly &&
@@ -3942,6 +3994,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       });
     }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
+    if (request.method === "GET" && ["/admin/hermes", "/api/admin/hermes"].includes(url.pathname)) {
+      const payload = await hermesConsolePayload(registry, url, config);
+      return url.pathname === "/admin/hermes" ? htmlResponse(payload) : jsonResponse(200, payload);
+    }
     if (request.method === "GET" && url.pathname === "/admin/connect") {
       const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
       let availability = operatorProviderAvailability(providerConfig);

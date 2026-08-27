@@ -44,6 +44,7 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/deployable-redirects/export"],
   ["POST", "/api/admin/documents/outcome"],
   ["GET", "/api/admin/documents"],
+  ["GET", "/api/admin/hermes"],
   ["GET", "/api/admin/launch-input-checklist"],
   ["POST", "/api/admin/launch-readiness/export"],
   ["GET", "/api/admin/launch-readiness"],
@@ -169,6 +170,7 @@ function operationSlug(method, pathname) {
 }
 
 function operationFamily(pathname) {
+  if (/\/hermes(?:\/|$)/.test(pathname)) return "hermes";
   if (/\/security\/|\/data-exports/.test(pathname)) return "security";
   if (/\/cases(?:\/|$)/.test(pathname)) return "cases";
   if (
