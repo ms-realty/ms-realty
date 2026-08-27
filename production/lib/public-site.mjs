@@ -2710,7 +2710,7 @@ const CHROME_COPY = {
 };
 
 const BRAND_CONTACT = {
-  email: "office@makler-realty.com",
+  email: "ms.realty.bg@gmail.com",
   // Agency line verified against the live legacy site (makler-realty.com
   // header/footer, 2026-08-09); reachable on WhatsApp and Viber.
   phone: "+359879696870",

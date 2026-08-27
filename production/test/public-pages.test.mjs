@@ -108,7 +108,7 @@ test("seller page keeps its intake contract and adds the promise, step questions
   assert.match(html, /data-seller-next-steps="true"/);
   assert.match(html, /A local broker calls you back/);
   assert.match(html, /<section class="sell-channels"[^>]*data-contact-channels="true"/);
-  for (const href of ["tel:+359879696870", "https://wa.me/359879696870", "viber://chat?number=%2B359879696870", "mailto:office@makler-realty.com"]) {
+  for (const href of ["tel:+359879696870", "https://wa.me/359879696870", "viber://chat?number=%2B359879696870", "mailto:ms.realty.bg@gmail.com"]) {
     assert.ok(html.includes(`href="${href}"`), href);
   }
   const he = renderReactPublicBody(renderSellerPage({ registry, localeCode: "he", leadWritesDisabled: false }));
