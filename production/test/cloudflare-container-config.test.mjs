@@ -212,11 +212,19 @@ test("main deploys automatically with image-marker rollback", () => {
   assert.match(ciWorkflow, /--build-arg "MS_REALTY_BUILD_MARKER=\$GITHUB_SHA"/);
   assert.match(ciWorkflow, /d\.build_marker !== expected/);
   assert.match(ciWorkflow, /d\.origin_build_marker !== expected/);
+  const captureBlock = ciWorkflow.slice(
+    ciWorkflow.indexOf("- name: Capture active Worker version and image marker"),
+    ciWorkflow.indexOf("- name: Set exact Container image marker"),
+  );
+  assert.doesNotMatch(captureBlock, /origin_build_marker/, "the old Worker is captured after the new origin activates");
   const verificationBlock = ciWorkflow.slice(
     ciWorkflow.indexOf("- name: Verify deployed Worker"),
     ciWorkflow.indexOf("- name: Roll back failed deployment"),
   );
   assert.match(verificationBlock, /for attempt in \$\(seq 1 100\); do/);
+  assert.match(verificationBlock, /d\.origin_build_marker !== expected/);
+  const rollbackBlock = ciWorkflow.slice(ciWorkflow.indexOf("- name: Roll back failed deployment"));
+  assert.doesNotMatch(rollbackBlock, /d\.origin_build_marker !== expected/, "Worker rollback cannot roll back the origin");
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
 });
 
