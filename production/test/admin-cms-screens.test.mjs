@@ -92,6 +92,21 @@ test("translation review groups its rows by listing so one title is not repeated
   assert.doesNotMatch(page.body, /data-planned-control=/);
 });
 
+test("mobile editors keep all section controls visible and put translation inputs before source context", () => {
+  assert.match(
+    adminCss,
+    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs \{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);[\s\S]*?overflow:\s*visible;/,
+  );
+  assert.match(
+    adminCss,
+    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs \{[\s\S]*?scrollbar-width:\s*auto;[\s\S]*?\}[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs::\-webkit-scrollbar \{ display:\s*initial; \}/,
+  );
+  assert.match(
+    adminCss,
+    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-human-translation__fields \{[\s\S]*?order:\s*1;[\s\S]*?\}[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-human-translation__context \{[\s\S]*?order:\s*2;/,
+  );
+});
+
 test("an empty translation queue says nothing is waiting rather than showing a bare table head", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/translations?locale=en&q=zzzz-no-such-listing", headers: auth });
   assert.equal(page.status, 200);
