@@ -13,6 +13,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { renderMcpResponse, mcpConfigFromEnv } from "../lib/mcp-server.mjs";
 import { OPERATOR_PROVIDERS } from "../lib/operator-provider-catalog.mjs";
 import { OPERATOR_AGENT_SECRET_ENV, mintOperatorAgentToken } from "../lib/operator-agent-access.mjs";
+import { OWNER_OPERATOR_BROWSER_OPERATIONS } from "../lib/owner-operator-catalog.mjs";
 import { payloadAdminPrincipal } from "../lib/payload-admin-auth.mjs";
 
 const ORIGIN = "https://ms-realty.example";
@@ -235,6 +236,22 @@ test("the assistant configuration route hands back a working config and records 
   assert.match(body.config, /claude mcp add --transport http ms-realty/);
   assert.match(body.config, /\[mcp_servers\.ms-realty\]/);
   assert.ok(body.expires_at > "2026-08-24");
+
+  const catalogResponse = await dispatchHttp(app, {
+    method: "GET",
+    url: "/api/admin/connections/agent-config?catalog=1",
+    headers,
+  });
+  assert.equal(catalogResponse.status, 200);
+  assert.equal(catalogResponse.body.kind, "owner_operator_catalog");
+  assert.equal(catalogResponse.body.summary.total, 115);
+  assert.equal(catalogResponse.body.operations.length, 115);
+  assert.equal(
+    catalogResponse.body.operations.filter((row) => row.execution === "browser_session").length,
+    OWNER_OPERATOR_BROWSER_OPERATIONS.length,
+  );
+  assert.equal("config" in catalogResponse.body, false);
+  assert.equal(JSON.stringify(catalogResponse.body).includes("a1."), false);
 
   const issued = readAuditLog(auditLogPath).filter((row) => row.action === "operator_agent_token_issued");
   assert.ok(issued.length >= 1);

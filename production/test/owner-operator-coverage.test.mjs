@@ -12,6 +12,8 @@ import {
   OWNER_OPERATOR_REMOTE_OPERATIONS,
   OWNER_OPERATOR_WRITE_CONFIRMATION,
   assertOwnerOperatorCatalog,
+  ownerOperatorCatalog,
+  ownerOperatorConfirmation,
 } from "../lib/owner-operator-catalog.mjs";
 import { buildOwnerOperatorCoverage, discoverAdminRoutes } from "../scripts/build-owner-operator-coverage.mjs";
 
@@ -39,6 +41,14 @@ test("owner/operator catalog covers every admin route method exactly once", () =
   assert.ok(OWNER_OPERATOR_BROWSER_OPERATIONS.some((row) => row.pathname === "/api/admin/security/two-factor"));
   assert.ok(OWNER_OPERATOR_BROWSER_OPERATIONS.some((row) => row.pathname === "/api/admin/connections/agent-config"));
   assert.ok(OWNER_OPERATOR_REMOTE_OPERATIONS.some((row) => row.pathname === "/api/admin/listings"));
+  assert.equal(OWNER_OPERATOR_BROWSER_OPERATIONS.every((row) => row.ui_path?.startsWith("/admin")), true);
+  const adminCatalog = ownerOperatorCatalog({ id: "owner", roles: ["admin"] });
+  assert.equal(adminCatalog.summary.total, discovered.length);
+  assert.equal(adminCatalog.operations.length, discovered.length);
+  assert.equal(
+    adminCatalog.operations.find((row) => row.operation === "admin_post_listings_status").confirmation,
+    ownerOperatorConfirmation("admin_post_listings_status"),
+  );
 });
 test("generated matrix is source-derived and includes Hermes tool coverage", () => {
   const coverage = buildOwnerOperatorCoverage();

@@ -1,4 +1,4 @@
-import { requiredAdminCapability } from "./admin-auth.mjs";
+import { canAdminAccess, requiredAdminCapability } from "./admin-auth.mjs";
 
 /**
  * The owner/operator surface is deliberately an operation registry rather
@@ -220,10 +220,20 @@ function executionBoundary(pathname) {
   return "mcp_delegated";
 }
 
+function browserUiPath(pathname) {
+  if (/\/connections(?:\/|$)/.test(pathname)) return "/admin/connect";
+  if (/\/security\/|\/data-exports/.test(pathname)) return "/admin/settings#settings-security";
+  if (pathname === "/api/admin/team") return "/admin/team";
+  if (/\/media\/uploads(?:\/|$)/.test(pathname)) return "/admin/listings/edit";
+  if (/\/import$/.test(pathname)) return "/admin/migration/review";
+  return "/admin";
+}
+
 export const ADMIN_ROUTE_COVERAGE = Object.freeze(
   ADMIN_ROUTE_METHODS.map(([method, pathname]) => {
     const readOnly = method === "GET";
     const operation = `admin_${operationSlug(method, pathname)}`;
+    const execution = executionBoundary(pathname);
     return Object.freeze({
       operation,
       method,
@@ -236,7 +246,8 @@ export const ADMIN_ROUTE_COVERAGE = Object.freeze(
       confirmation: readOnly ? null : OWNER_OPERATOR_WRITE_CONFIRMATION,
       idempotency: "existing_admin_route",
       hermes_access: hermesAccess(method, pathname),
-      execution: executionBoundary(pathname),
+      execution,
+      ...(execution === "browser_session" ? { ui_path: browserUiPath(pathname) } : {}),
       source: "app/api/admin/**/route.js",
     });
   }),
@@ -272,6 +283,33 @@ export function ownerOperatorConfirmation(operation) {
   const row = ownerOperatorOperationById(operation);
   if (!row || row.read_only) return null;
   return `${OWNER_OPERATOR_WRITE_CONFIRMATION}:${row.operation}`;
+}
+
+export function ownerOperatorCatalog(principal) {
+  const operations = ADMIN_ROUTE_COVERAGE.filter((row) => canAdminAccess(principal, row.capability)).map((row) => ({
+    operation: row.operation,
+    method: row.method,
+    pathname: row.pathname,
+    capability: row.capability,
+    family: row.family,
+    read_only: row.read_only,
+    sensitive: row.sensitive,
+    execution: row.execution,
+    ...(row.ui_path ? { ui_path: row.ui_path } : {}),
+    ...(row.read_only ? {} : { confirmation: ownerOperatorConfirmation(row.operation) }),
+  }));
+  return {
+    kind: "owner_operator_catalog",
+    schema_version: 1,
+    operator_id: principal.id,
+    roles: principal.roles,
+    summary: {
+      total: operations.length,
+      mcp_delegated: operations.filter((row) => row.execution === "mcp_delegated").length,
+      browser_session: operations.filter((row) => row.execution === "browser_session").length,
+    },
+    operations,
+  };
 }
 
 export function validateOwnerOperatorInput(input, { allowEmpty = true, maxKeys = 48 } = {}) {

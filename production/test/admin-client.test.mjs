@@ -7,6 +7,19 @@ test("admin progressive-enhancement bundle remains valid JavaScript", () => {
   assert.doesNotThrow(() => new vm.Script(ADMIN_APP_JS));
 });
 
+test("admin bundle registers route-aware WebMCP tools through the signed-in session", () => {
+  assert.match(ADMIN_APP_JS, /function initAdminWebMcp\(\)/);
+  assert.match(ADMIN_APP_JS, /document\.modelContext/);
+  assert.match(ADMIN_APP_JS, /agent-config\?catalog=1/);
+  assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_context"/);
+  assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_read"/);
+  assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_write"/);
+  assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_open"/);
+  assert.match(ADMIN_APP_JS, /credentials: "same-origin"/);
+  assert.match(ADMIN_APP_JS, /args\.confirmation !== row\.confirmation/);
+  assert.match(ADMIN_APP_JS, /row\.execution !== "browser_session"/);
+});
+
 test("admin reply client submits broker-only drafts and reviewed replies as JSON", () => {
   assert.match(ADMIN_APP_JS, /function initReplyForms\(\)/);
   assert.match(ADMIN_APP_JS, /data-hermes-draft-request/);
@@ -54,7 +67,6 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /data-admin-mobile-nav-close/);
   assert.match(ADMIN_APP_JS, /var target = returnFocusTarget && returnFocusTarget\.isConnected \? returnFocusTarget : summary/);
 });
-
 
 
 

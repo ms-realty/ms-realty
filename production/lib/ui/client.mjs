@@ -4567,8 +4567,145 @@ ${THEME_SWITCH_JS}
         .then(function () {
           form.removeAttribute("aria-busy");
           for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = false;
-        });
+      });
     });
+  }
+  function initAdminWebMcp() {
+    var modelContext = document.modelContext;
+    if (!modelContext || typeof modelContext.registerTool !== "function") return;
+    fetch("/api/admin/connections/agent-config?catalog=1", {
+      credentials: "same-origin",
+      headers: { accept: "application/json" },
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error("Owner/operator catalog unavailable");
+        return response.json();
+      })
+      .then(function (catalog) {
+        var rows = Array.isArray(catalog.operations) ? catalog.operations : [];
+        var byOperation = {};
+        for (var i = 0; i < rows.length; i += 1) byOperation[rows[i].operation] = rows[i];
+        var remoteReads = rows.filter(function (row) { return row.execution === "mcp_delegated" && row.read_only; });
+        var remoteWrites = rows.filter(function (row) { return row.execution === "mcp_delegated" && !row.read_only; });
+        var browserRows = rows.filter(function (row) { return row.execution === "browser_session"; });
+        var operationSchema = function (source) {
+          return { type: "string", enum: source.map(function (row) { return row.operation; }) };
+        };
+        var querySchema = {
+          type: "object",
+          description: "Endpoint query values. Use only fields documented by the selected operation.",
+          additionalProperties: { type: ["string", "number", "boolean", "array"] },
+        };
+        var operationUrl = function (row, query) {
+          var url = new URL(row.pathname, location.origin);
+          var values = query && typeof query === "object" ? query : {};
+          for (var key in values) {
+            if (!Object.prototype.hasOwnProperty.call(values, key)) continue;
+            var items = Array.isArray(values[key]) ? values[key] : [values[key]];
+            for (var j = 0; j < items.length; j += 1) url.searchParams.append(key, String(items[j]));
+          }
+          return url;
+        };
+        var run = function (row, args) {
+          var url = operationUrl(row, args.query);
+          var options = { method: row.method, credentials: "same-origin", headers: { accept: "application/json" } };
+          if (!row.read_only) {
+            if (args.confirmation !== row.confirmation) throw new Error("The operation-specific owner confirmation is missing or incorrect.");
+            options.headers["content-type"] = "application/json";
+            options.body = JSON.stringify(args.input && typeof args.input === "object" ? args.input : {});
+          }
+          return fetch(url, options).then(function (response) {
+            var contentType = response.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) {
+              return {
+                operation: row.operation,
+                http_status: response.status,
+                content_type: contentType,
+                url: url.pathname + url.search,
+                note: "Use the visible browser page to inspect or download this response.",
+              };
+            }
+            return response.json().catch(function () { return {}; }).then(function (payload) {
+              if (!response.ok) throw new Error(payload.message || payload.kind || "The admin operation was rejected.");
+              return { operation: row.operation, http_status: response.status, result: payload };
+            });
+          });
+        };
+        var register = function (tool) {
+          return modelContext.registerTool(tool).catch(function () {});
+        };
+        register({
+          name: "ms_realty_admin_context",
+          description: "Read the current MS Realty admin page and the complete role-authorized operation catalog.",
+          inputSchema: { type: "object", properties: {}, additionalProperties: false },
+          annotations: { readOnlyHint: true },
+          execute: function () {
+            return {
+              page: { title: document.title, path: location.pathname, locale: document.documentElement.lang || "en" },
+              operator_id: catalog.operator_id,
+              roles: catalog.roles,
+              summary: catalog.summary,
+              operations: rows,
+            };
+          },
+        });
+        if (remoteReads.length) register({
+          name: "ms_realty_admin_read",
+          description: "Run one allowlisted read through the signed-in admin session and existing RBAC/workspace validation.",
+          inputSchema: {
+            type: "object",
+            properties: { operation: operationSchema(remoteReads), query: querySchema },
+            required: ["operation"],
+            additionalProperties: false,
+          },
+          annotations: { readOnlyHint: true },
+          execute: function (args) {
+            var row = byOperation[args.operation];
+            if (!row || row.execution !== "mcp_delegated" || !row.read_only) throw new Error("Unknown admin read operation.");
+            return run(row, args);
+          },
+        });
+        if (remoteWrites.length) register({
+          name: "ms_realty_admin_write",
+          description: "Run one explicit owner-confirmed admin mutation through the signed-in session. Existing RBAC, 2FA, workspace scope, validation, persistence, and audit controls remain authoritative.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              operation: operationSchema(remoteWrites),
+              input: { type: "object", description: "Body fields accepted by the selected existing admin route." },
+              query: querySchema,
+              confirmation: { type: "string", description: "Exact operation-specific confirmation returned by ms_realty_admin_context." },
+            },
+            required: ["operation", "confirmation"],
+            additionalProperties: false,
+          },
+          annotations: { readOnlyHint: false, destructiveHint: true },
+          execute: function (args) {
+            var row = byOperation[args.operation];
+            if (!row || row.execution !== "mcp_delegated" || row.read_only) throw new Error("Unknown admin write operation.");
+            return run(row, args);
+          },
+        });
+        if (browserRows.length) register({
+          name: "ms_realty_admin_open",
+          description: "Open the correct signed-in admin screen for a second-factor, file, secret, connection, team, export, or import operation that must remain human-visible.",
+          inputSchema: {
+            type: "object",
+            properties: { operation: operationSchema(browserRows) },
+            required: ["operation"],
+            additionalProperties: false,
+          },
+          annotations: { readOnlyHint: false, destructiveHint: false },
+          execute: function (args) {
+            var row = byOperation[args.operation];
+            if (!row || row.execution !== "browser_session") throw new Error("Unknown browser-session operation.");
+            var target = row.ui_path || "/admin";
+            location.assign(target);
+            return { operation: row.operation, opened: target, requires_visible_owner_session: true };
+          },
+        });
+      })
+      .catch(function () {});
   }
   initLeadQueueFilters();
   initAdminMobileNavigation();
@@ -4597,6 +4734,7 @@ ${THEME_SWITCH_JS}
   initAdminListFilters();
   initPipelineBoard();
   initLeadInboxPanes();
+  initAdminWebMcp();
   initCopyBlocks(document);
   initThemeSwitch();
 })();`;
