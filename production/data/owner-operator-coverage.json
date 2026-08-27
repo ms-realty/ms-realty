@@ -20,6 +20,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/views/route.js"
     },
@@ -35,6 +36,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/activity/route.js"
     },
@@ -50,6 +52,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/approved-content/route.js"
     },
@@ -65,6 +68,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/availability/route.js"
     },
@@ -80,6 +84,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/route.js"
     },
@@ -95,6 +100,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/conditions/route.js"
     },
@@ -110,6 +116,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/intents/route.js"
     },
@@ -125,6 +132,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cms-collections/route.js"
     },
@@ -140,6 +148,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/route.js"
     },
@@ -155,6 +164,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/agent-config/route.js"
     },
@@ -170,6 +180,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/consents/route.js"
     },
@@ -185,6 +196,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/contacts/route.js"
     },
@@ -200,6 +212,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/data-exports/route.js"
     },
@@ -215,6 +228,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/data-exports/download/route.js"
     },
@@ -230,6 +244,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/documents/route.js"
     },
@@ -245,6 +260,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/launch-input-checklist/route.js"
     },
@@ -260,6 +276,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/launch-readiness/route.js"
     },
@@ -275,6 +292,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/route.js"
     },
@@ -290,6 +308,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality/route.js"
     },
@@ -305,6 +324,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality-review-draft/route.js"
     },
@@ -320,6 +340,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality-review-packet/route.js"
     },
@@ -335,6 +356,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality-workbook/route.js"
     },
@@ -350,6 +372,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/route.js"
     },
@@ -365,6 +388,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-provisioning/route.js"
     },
@@ -380,6 +404,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-report-template/route.js"
     },
@@ -395,6 +420,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-services/route.js"
     },
@@ -410,6 +436,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/locales/route.js"
     },
@@ -425,6 +452,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/uploads/route.js"
     },
@@ -440,6 +468,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/uploads/[assetId]/route.js"
     },
@@ -455,6 +484,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/migration/review/route.js"
     },
@@ -470,6 +500,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/payload-collections/route.js"
     },
@@ -485,6 +516,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/payload-runtime/route.js"
     },
@@ -500,6 +532,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/payload-runtime-bootstrap/route.js"
     },
@@ -515,6 +548,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/pipeline/route.js"
     },
@@ -530,6 +564,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/preflight-reports/route.js"
     },
@@ -545,6 +580,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/production-recovery/route.js"
     },
@@ -560,6 +596,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/production-recovery-template/route.js"
     },
@@ -575,6 +612,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/redirect-approval-workbook/route.js"
     },
@@ -590,6 +628,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/reports/route.js"
     },
@@ -605,6 +644,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/reports/export/route.js"
     },
@@ -620,6 +660,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/requests/route.js"
     },
@@ -635,6 +676,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/audit-retention/route.js"
     },
@@ -650,6 +692,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/sessions/route.js"
     },
@@ -665,6 +708,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/route.js"
     },
@@ -680,6 +724,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-evidence/route.js"
     },
@@ -695,6 +740,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-evidence/export/route.js"
     },
@@ -710,6 +756,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-evidence/template/route.js"
     },
@@ -725,6 +772,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-preflight/route.js"
     },
@@ -740,6 +788,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/settings/route.js"
     },
@@ -755,6 +804,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/team/route.js"
     },
@@ -770,6 +820,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/today/route.js"
     },
@@ -785,6 +836,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/translations/route.js"
     },
@@ -800,6 +852,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings/route.js"
     },
@@ -815,6 +868,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings.ics/route.js"
     },
@@ -830,6 +884,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings/week/route.js"
     },
@@ -845,6 +900,7 @@
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/views/route.js"
     },
@@ -860,6 +916,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/accounts/route.js"
     },
@@ -875,6 +932,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/accounts/link/route.js"
     },
@@ -890,6 +948,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/availability/route.js"
     },
@@ -905,6 +964,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/broker-contacts/route.js"
     },
@@ -920,6 +980,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/route.js"
     },
@@ -935,6 +996,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/actions/route.js"
     },
@@ -950,6 +1012,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/conditions/route.js"
     },
@@ -965,6 +1028,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/conditions/actions/route.js"
     },
@@ -980,6 +1044,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/route.js"
     },
@@ -995,6 +1060,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/disconnect/route.js"
     },
@@ -1010,6 +1076,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/consents/withdraw/route.js"
     },
@@ -1025,6 +1092,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/data-exports/route.js"
     },
@@ -1040,6 +1108,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/deals/close/route.js"
     },
@@ -1055,6 +1124,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/deployable-redirects/export/route.js"
     },
@@ -1070,6 +1140,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/documents/outcome/route.js"
     },
@@ -1085,6 +1156,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/launch-readiness/export/route.js"
     },
@@ -1100,6 +1172,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/lead-pipeline/outcome/route.js"
     },
@@ -1115,6 +1188,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/route.js"
     },
@@ -1130,6 +1204,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/assign/route.js"
     },
@@ -1145,6 +1220,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/bulk/route.js"
     },
@@ -1160,6 +1236,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/snooze/route.js"
     },
@@ -1175,6 +1252,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/unsnooze/route.js"
     },
@@ -1190,6 +1268,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality/import/route.js"
     },
@@ -1205,6 +1284,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/edit/route.js"
     },
@@ -1220,6 +1300,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/publication-schedules/route.js"
     },
@@ -1235,6 +1316,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/publication-schedules/cancel/route.js"
     },
@@ -1250,6 +1332,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/publication-schedules/run-due/route.js"
     },
@@ -1265,6 +1348,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/slug/route.js"
     },
@@ -1280,6 +1364,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/status/route.js"
     },
@@ -1295,6 +1380,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-provisioning/import/route.js"
     },
@@ -1310,6 +1396,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-reports/import/route.js"
     },
@@ -1325,6 +1412,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/locales/route.js"
     },
@@ -1340,6 +1428,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/reviews/route.js"
     },
@@ -1355,6 +1444,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/uploads/route.js"
     },
@@ -1370,6 +1460,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/payload-runtime/import/route.js"
     },
@@ -1385,6 +1476,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/production-recovery/import/route.js"
     },
@@ -1400,6 +1492,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/public-requests/outcome/route.js"
     },
@@ -1415,6 +1508,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/redirect-approvals/route.js"
     },
@@ -1430,6 +1524,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/redirect-approvals/import/route.js"
     },
@@ -1445,6 +1540,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/replies/route.js"
     },
@@ -1460,6 +1556,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/replies/delivery/route.js"
     },
@@ -1475,6 +1572,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "draft_only",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/replies/draft/route.js"
     },
@@ -1490,6 +1588,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/saved-search-alerts/run-due/route.js"
     },
@@ -1505,6 +1604,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/sessions/revoke/route.js"
     },
@@ -1520,6 +1620,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/activate/route.js"
     },
@@ -1535,6 +1636,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/disable/route.js"
     },
@@ -1550,6 +1652,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/enrol/route.js"
     },
@@ -1565,6 +1668,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/verify/route.js"
     },
@@ -1580,6 +1684,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seller-pipeline/outcome/route.js"
     },
@@ -1595,6 +1700,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-evidence/import/route.js"
     },
@@ -1610,6 +1716,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/settings/route.js"
     },
@@ -1625,6 +1732,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "browser_session",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/team/route.js"
     },
@@ -1640,6 +1748,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/tours/approve/route.js"
     },
@@ -1655,6 +1764,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/translations/approve/route.js"
     },
@@ -1670,6 +1780,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "draft_only",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/translations/draft/route.js"
     },
@@ -1685,6 +1796,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/translations/publish/route.js"
     },
@@ -1700,6 +1812,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings/route.js"
     },
@@ -1715,6 +1828,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings/follow-up/route.js"
     },
@@ -1730,6 +1844,7 @@
       "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
+      "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/views/route.js"
     }

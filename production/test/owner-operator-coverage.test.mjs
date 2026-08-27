@@ -7,7 +7,9 @@ import {
   HERMES_TOOL_COVERAGE,
   OWNER_OPERATOR_ADMIN_READ_TOOL,
   OWNER_OPERATOR_ADMIN_WRITE_TOOL,
+  OWNER_OPERATOR_BROWSER_OPERATIONS,
   OWNER_OPERATOR_HERMES_TOOL,
+  OWNER_OPERATOR_REMOTE_OPERATIONS,
   OWNER_OPERATOR_WRITE_CONFIRMATION,
   assertOwnerOperatorCatalog,
 } from "../lib/owner-operator-catalog.mjs";
@@ -31,7 +33,12 @@ test("owner/operator catalog covers every admin route method exactly once", () =
     assert.ok(row.capability, `${row.operation} must carry its existing admin capability`);
     if (row.read_only) assert.equal(row.confirmation, null);
     else assert.equal(row.confirmation, OWNER_OPERATOR_WRITE_CONFIRMATION);
+    assert.ok(["browser_session", "mcp_delegated"].includes(row.execution));
   }
+  assert.equal(OWNER_OPERATOR_BROWSER_OPERATIONS.length + OWNER_OPERATOR_REMOTE_OPERATIONS.length, discovered.length);
+  assert.ok(OWNER_OPERATOR_BROWSER_OPERATIONS.some((row) => row.pathname === "/api/admin/security/two-factor"));
+  assert.ok(OWNER_OPERATOR_BROWSER_OPERATIONS.some((row) => row.pathname === "/api/admin/connections/agent-config"));
+  assert.ok(OWNER_OPERATOR_REMOTE_OPERATIONS.some((row) => row.pathname === "/api/admin/listings"));
 });
 test("generated matrix is source-derived and includes Hermes tool coverage", () => {
   const coverage = buildOwnerOperatorCoverage();

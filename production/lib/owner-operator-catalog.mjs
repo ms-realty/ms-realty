@@ -201,6 +201,25 @@ function hermesAccess(method, pathname) {
   return "none";
 }
 
+function executionBoundary(pathname) {
+  // These routes intentionally go through the workspace-security or Payload
+  // session implementation, or carry file/secret material. A delegated MCP
+  // bearer must not pretend it can satisfy an interactive browser session or
+  // a step-up challenge. The same operation remains available to WebMCP on
+  // the authenticated admin origin.
+  if (
+    /\/security\//.test(pathname) ||
+    /\/data-exports/.test(pathname) ||
+    /\/connections(?:\/|$)/.test(pathname) ||
+    pathname === "/api/admin/team" ||
+    /\/media\/uploads(?:\/|$)/.test(pathname) ||
+    /\/import$/.test(pathname)
+  ) {
+    return "browser_session";
+  }
+  return "mcp_delegated";
+}
+
 export const ADMIN_ROUTE_COVERAGE = Object.freeze(
   ADMIN_ROUTE_METHODS.map(([method, pathname]) => {
     const readOnly = method === "GET";
@@ -217,6 +236,7 @@ export const ADMIN_ROUTE_COVERAGE = Object.freeze(
       confirmation: readOnly ? null : OWNER_OPERATOR_WRITE_CONFIRMATION,
       idempotency: "existing_admin_route",
       hermes_access: hermesAccess(method, pathname),
+      execution: executionBoundary(pathname),
       source: "app/api/admin/**/route.js",
     });
   }),
@@ -226,6 +246,14 @@ export const OWNER_OPERATOR_OPERATIONS = Object.freeze([
   ...ADMIN_ROUTE_COVERAGE,
   ...HERMES_TOOL_COVERAGE.map((row) => Object.freeze({ ...row, family: "hermes", source_kind: "hermes_tool" })),
 ]);
+
+export const OWNER_OPERATOR_BROWSER_OPERATIONS = Object.freeze(
+  ADMIN_ROUTE_COVERAGE.filter((row) => row.execution === "browser_session"),
+);
+
+export const OWNER_OPERATOR_REMOTE_OPERATIONS = Object.freeze(
+  ADMIN_ROUTE_COVERAGE.filter((row) => row.execution === "mcp_delegated"),
+);
 
 export { HERMES_TOOL_COVERAGE };
 
