@@ -234,6 +234,11 @@ export function renderAdminHermesPayload(
     runtime,
     runtimeDataMode = "file_backed",
     tools = [],
+    command_form = null,
+    command_result = null,
+    command_error = null,
+    receipt_store = null,
+    receipts = [],
   } = {},
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
@@ -259,6 +264,11 @@ export function renderAdminHermesPayload(
     bridge,
     queue,
     tools,
+    command_form,
+    command_result,
+    command_error,
+    receipt_store,
+    receipts,
   };
 }
 

@@ -4,7 +4,7 @@
   "generated_by": "production/scripts/build-owner-operator-coverage.mjs",
   "summary": {
     "admin_route_files": 103,
-    "admin_methods": 116,
+    "admin_methods": 117,
     "hermes_tools": 3
   },
   "admin_routes": [
@@ -260,7 +260,7 @@
       "tool": "ms_realty_admin_read",
       "capability": "administration:read",
       "read_only": true,
-      "sensitive": false,
+      "sensitive": true,
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
@@ -1172,6 +1172,22 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/documents/outcome/route.js"
+    },
+    {
+      "operation": "admin_post_hermes",
+      "method": "POST",
+      "pathname": "/api/admin/hermes",
+      "family": "hermes",
+      "tool": "ms_realty_admin_write",
+      "capability": "administration:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "idempotency": "existing_admin_route",
+      "hermes_access": "draft_only",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/hermes/route.js"
     },
     {
       "operation": "admin_post_launch_readiness_export",

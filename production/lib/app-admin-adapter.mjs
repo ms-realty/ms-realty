@@ -44,6 +44,7 @@ import { DEFAULT_OPERATOR_TWO_FACTOR_PATH, operatorTwoFactorStatus, readOperator
 import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
+import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-command.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
 import { adminCredentials } from "./admin-auth.mjs";
@@ -1915,7 +1916,7 @@ async function translationQueuePayload(registry, url, config) {
   return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
 }
 
-async function hermesConsolePayload(registry, url, config) {
+async function hermesConsolePayload(registry, url, config, { commandResult = null, commandError = null } = {}) {
   const env = config.authEnv || process.env;
   return buildAdminHermesPayload({
     registry,
@@ -1927,9 +1928,14 @@ async function hermesConsolePayload(registry, url, config) {
     payload: config.payloadListingRuntime || null,
     requirePayload: config.runtimeDataDurableOnly,
     provider: config.hermesReplyProvider || null,
+    commandProvider: config.hermesOwnerCommandProvider || null,
     fetchImpl: config.hermesAgentFetch || globalThis.fetch,
     generatedAt: config.reviewedAt || new Date().toISOString(),
     probeTimeoutMs: config.hermesAgentProbeTimeoutMs || 5_000,
+    receiptPayload: config.hermesReceiptPayload || config.payloadListingRuntime || null,
+    receiptSecret: config.hermesReceiptSecret || env.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+    commandResult,
+    commandError,
   });
 }
 
@@ -4016,9 +4022,49 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       });
     }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
-    if (request.method === "GET" && ["/admin/hermes", "/api/admin/hermes"].includes(url.pathname)) {
-      const payload = await hermesConsolePayload(registry, url, config);
-      return url.pathname === "/admin/hermes" ? htmlResponse(payload) : jsonResponse(200, payload);
+    if (["/admin/hermes", "/api/admin/hermes"].includes(url.pathname)) {
+      if (request.method === "GET") {
+        const payload = await hermesConsolePayload(registry, url, config);
+        return url.pathname === "/admin/hermes" ? htmlResponse(payload) : jsonResponse(200, payload);
+      }
+      if (request.method === "POST") {
+        try {
+          const receipt = await runHermesOwnerCommand(
+            parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+            {
+              operator: principal,
+              payload: config.hermesReceiptPayload || config.payloadListingRuntime || null,
+              secret: config.hermesReceiptSecret || authEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+              env: authEnv,
+              fetchImpl: config.hermesCommandFetch || config.hermesAgentFetch || globalThis.fetch,
+              provider: config.hermesOwnerCommandProvider || null,
+              now: () => config.reviewedAt || new Date().toISOString(),
+            },
+          );
+          if (url.pathname === "/api/admin/hermes") {
+            return jsonResponse(201, { kind: "hermes_owner_receipt", receipt });
+          }
+          return htmlResponse(await hermesConsolePayload(registry, url, config, { commandResult: receipt }));
+        } catch (cause) {
+          const error =
+            cause instanceof HermesOwnerCommandError
+              ? cause
+              : new HermesOwnerCommandError("hermes_unavailable", { status: 503, cause });
+          if (url.pathname === "/api/admin/hermes") {
+            return jsonResponse(error.status, {
+              kind: error.code,
+              message: error.message,
+              ...(error.receipt ? { receipt: error.receipt } : {}),
+            });
+          }
+          return htmlResponse(
+            await hermesConsolePayload(registry, url, config, {
+              commandError: { kind: error.code, message: error.message, receipt: error.receipt || null },
+            }),
+          );
+        }
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
     }
     if (request.method === "GET" && url.pathname === "/admin/connect") {
       const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);

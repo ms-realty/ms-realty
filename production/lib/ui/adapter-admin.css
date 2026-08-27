@@ -426,6 +426,27 @@ main.crm-scroll[data-react-admin-ui="listing-editor"] { overflow: visible; }
 .adm-hermes-checks li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-sunken); }
 .adm-hermes-missing { margin: 0; padding: var(--space-3); border-radius: var(--radius-md); background: color-mix(in srgb, var(--sun-300) 12%, var(--surface)); color: var(--text-strong); font-family: var(--font-mono); font-size: var(--text-xs); overflow-wrap: anywhere; }
 .adm-hermes-panel-intro { margin: 0; padding: 0 var(--space-5) var(--space-4); color: var(--text-muted); font-size: var(--text-sm); }
+.adm-hermes-command { display: grid; gap: var(--space-4); padding: 0 var(--space-5) var(--space-5); }
+.adm-hermes-command > .adm-hermes-panel-intro { padding: 0; }
+.adm-hermes-command__form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2) var(--space-4); align-items: end; }
+.adm-hermes-command__form label { grid-column: 1 / -1; color: var(--text-strong); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-hermes-command__form textarea { width: 100%; min-height: 112px; resize: vertical; }
+.adm-hermes-command__actions { display: grid; gap: var(--space-3); align-content: end; max-width: 280px; }
+.adm-hermes-command__actions small { color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-relaxed); }
+.adm-hermes-command__error { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3); border: 1px solid var(--brick-300); border-radius: var(--radius-md); background: var(--brick-50); color: var(--text-strong); }
+.adm-hermes-plan { display: grid; gap: var(--space-4); padding: var(--space-4); border: 1px solid var(--sun-300); border-radius: var(--radius-card); background: color-mix(in srgb, var(--sun-300) 8%, var(--surface)); }
+.adm-hermes-plan > header { display: flex; justify-content: space-between; gap: var(--space-3); align-items: flex-start; }
+.adm-hermes-plan h3, .adm-hermes-plan p, .adm-hermes-receipts h3 { margin: 0; }
+.adm-hermes-plan > ol, .adm-hermes-plan__questions ul, .adm-hermes-receipts ul { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.adm-hermes-plan > ol > li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--space-3); align-items: center; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+.adm-hermes-plan > ol > li > div { display: grid; gap: 3px; }
+.adm-hermes-plan > ol p, .adm-hermes-plan > ol small, .adm-hermes-plan__questions, .adm-hermes-plan__receipt { color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-relaxed); }
+.adm-hermes-plan__questions { display: grid; gap: var(--space-2); }
+.adm-hermes-plan__questions ul { padding-inline-start: var(--space-5); list-style: disc; }
+.adm-hermes-receipts { display: grid; gap: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--border); }
+.adm-hermes-receipts li { display: flex; justify-content: space-between; gap: var(--space-3); align-items: center; }
+.adm-hermes-receipts li > span { display: grid; gap: 2px; min-width: 0; }
+.adm-hermes-receipts li small, .adm-hermes-receipts__empty { margin: 0; color: var(--text-muted); font-size: var(--text-xs); }
 .adm-hermes-tasks { border-top: 1px solid var(--border); }
 .adm-hermes-tasks > li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); }
 .adm-hermes-tasks > li:last-child { border-bottom: 0; }
@@ -2273,6 +2294,13 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-hermes-card { padding: var(--space-4); }
   .adm-hermes-checks ul { grid-template-columns: minmax(0, 1fr); }
   .adm-hermes-panel-intro { padding-inline: var(--space-4); }
+  .adm-hermes-command { padding-inline: var(--space-4); }
+  .adm-hermes-command__form { grid-template-columns: minmax(0, 1fr); }
+  .adm-hermes-command__actions { max-width: none; }
+  .adm-hermes-command__actions .mk-btn { width: 100%; justify-content: center; }
+  .adm-hermes-plan > header { align-items: stretch; flex-direction: column; }
+  .adm-hermes-plan > ol > li { grid-template-columns: minmax(0, 1fr); }
+  .adm-hermes-plan > ol > li .mk-btn { width: 100%; justify-content: center; }
   .adm-hermes-tasks > li { grid-template-columns: auto minmax(0, 1fr); padding-inline: var(--space-4); }
   .adm-hermes-tasks > li > .crm-pill { grid-column: 2; justify-self: start; }
   .adm-hermes-tasks > li > .mk-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }

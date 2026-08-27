@@ -2620,6 +2620,28 @@ const OWNER_CONSOLE_COPY = {
     hermes: {
       title: "Hermes AI",
       description: "Състояние на агента, безопасни задачи за чернови и връзката с ChatGPT/Codex на едно място.",
+      command: "Какво да подготви Hermes?",
+      commandDescription: "Опишете желания резултат. Hermes ще върне план от текущата защитена карта на системата и ще попита, ако липсват факти.",
+      commandLabel: "Задача за Hermes",
+      commandPlaceholder: "Например: Подготви план за днешните запитвания и обяви, които изискват преглед.",
+      preparePlan: "Подготви план",
+      commandDisabled: "Свържете Hermes и постоянния журнал за разписки, за да подготвяте планове.",
+      planReady: "План за преглед",
+      recentReceipts: "Последни разписки",
+      noReceipts: "Още няма записани команди.",
+      questions: "Въпроси преди работа",
+      reviewStep: "Преглед",
+      draftStep: "Чернова",
+      receipt: "Разписка",
+      notExecuted: "Нищо не е изпълнено автоматично.",
+      commandErrors: {
+        bad_request: "Опишете ясна задача до 2000 знака.",
+        hermes_receipt_unavailable: "Постоянният журнал за Hermes не е достъпен.",
+        hermes_unavailable: "Hermes не успя да подготви план. Проверете връзката и опитайте отново.",
+        hermes_invalid_plan: "Hermes върна план извън защитения договор.",
+        idempotency_conflict: "Тази разписка вече е използвана за друга задача.",
+        hermes_command_in_progress: "Тази задача вече е записана и няма да бъде повторена автоматично.",
+      },
       retry: "Провери отново",
       connections: "Връзки и настройка",
       hosted: "Hermes Agent runtime",
@@ -2706,6 +2728,28 @@ const OWNER_CONSOLE_COPY = {
     hermes: {
       title: "Hermes AI",
       description: "Состояние агента, безопасные задачи для черновиков и подключение ChatGPT/Codex в одном месте.",
+      command: "Что подготовить Hermes?",
+      commandDescription: "Опишите нужный результат. Hermes вернёт план из текущей защищённой карты системы и задаст вопрос, если фактов недостаточно.",
+      commandLabel: "Задача для Hermes",
+      commandPlaceholder: "Например: Подготовь план по сегодняшним заявкам и объектам, которым нужна проверка.",
+      preparePlan: "Подготовить план",
+      commandDisabled: "Подключите Hermes и постоянный журнал квитанций, чтобы готовить планы.",
+      planReady: "План на проверку",
+      recentReceipts: "Последние квитанции",
+      noReceipts: "Записанных команд пока нет.",
+      questions: "Вопросы перед работой",
+      reviewStep: "Проверка",
+      draftStep: "Черновик",
+      receipt: "Квитанция",
+      notExecuted: "Ничего не выполнено автоматически.",
+      commandErrors: {
+        bad_request: "Опишите ясную задачу длиной до 2000 знаков.",
+        hermes_receipt_unavailable: "Постоянный журнал Hermes недоступен.",
+        hermes_unavailable: "Hermes не смог подготовить план. Проверьте подключение и повторите попытку.",
+        hermes_invalid_plan: "Hermes вернул план вне защищённого контракта.",
+        idempotency_conflict: "Эта квитанция уже использована для другой задачи.",
+        hermes_command_in_progress: "Эта задача уже записана и не будет повторена автоматически.",
+      },
       retry: "Проверить снова",
       connections: "Подключения и настройка",
       hosted: "Hermes Agent runtime",
@@ -2792,6 +2836,28 @@ const OWNER_CONSOLE_COPY = {
     hermes: {
       title: "Hermes AI",
       description: "Agent health, safe draft tasks, and the owner's ChatGPT/Codex connection in one place.",
+      command: "What should Hermes prepare?",
+      commandDescription: "Describe the outcome. Hermes returns a plan from the current guarded operating map and asks when facts are missing.",
+      commandLabel: "Task for Hermes",
+      commandPlaceholder: "For example: Prepare a plan for today's enquiries and listings that need review.",
+      preparePlan: "Prepare plan",
+      commandDisabled: "Connect Hermes and its durable receipt store before preparing plans.",
+      planReady: "Plan for review",
+      recentReceipts: "Recent receipts",
+      noReceipts: "No commands have been recorded yet.",
+      questions: "Questions before work",
+      reviewStep: "Review",
+      draftStep: "Draft",
+      receipt: "Receipt",
+      notExecuted: "Nothing was executed automatically.",
+      commandErrors: {
+        bad_request: "Describe one clear task in 2,000 characters or fewer.",
+        hermes_receipt_unavailable: "The durable Hermes receipt store is unavailable.",
+        hermes_unavailable: "Hermes could not prepare a plan. Check the connection and try again.",
+        hermes_invalid_plan: "Hermes returned a plan outside the guarded contract.",
+        idempotency_conflict: "This receipt was already used for different work.",
+        hermes_command_in_progress: "This task is already recorded and will not be repeated automatically.",
+      },
       retry: "Check again",
       connections: "Connections and setup",
       hosted: "Hermes Agent runtime",
@@ -10947,6 +11013,9 @@ function hermesStateLabel(copy, state) {
     fail: copy.fail,
     missing_env: copy.missingEnv,
     not_run: copy.notRun,
+    requested: copy.notRun,
+    planned: copy.planReady,
+    failed: copy.fail,
   }[state] || state || copy.blocked;
 }
 
@@ -10958,6 +11027,10 @@ function HermesBody({ page }) {
   const tasks = Array.isArray(queue.rows) ? queue.rows : [];
   const tools = Array.isArray(page.tools) ? page.tools : [];
   const runtimeTone = runtime.ready ? "success" : "brick";
+  const commandForm = page.command_form || { enabled: false, idempotency_key: "", max_length: 2000 };
+  const commandResult = page.command_result?.plan ? page.command_result : null;
+  const commandError = page.command_error?.kind ? copy.commandErrors[page.command_error.kind] || copy.commandErrors.hermes_unavailable : null;
+  const receipts = Array.isArray(page.receipts) ? page.receipts : [];
   return adminShell(page, {
     title: copy.title,
     titleAsHeading: true,
@@ -10971,6 +11044,109 @@ function HermesBody({ page }) {
     },
     children: [
       h("p", { className: "adm-hermes-panel-intro adm-hermes-page-intro" }, copy.description),
+      h(
+        Panel,
+        {
+          title: copy.command,
+          "data-hermes-command-panel": commandForm.enabled ? "ready" : "blocked",
+        },
+        h(
+          "div",
+          { className: "adm-hermes-command" },
+          h("p", { className: "adm-hermes-panel-intro" }, copy.commandDescription),
+          h(
+            "form",
+            { className: "adm-hermes-command__form", method: "post", action: adminHref("/admin/hermes", page) },
+            h("input", { type: "hidden", name: "idempotencyKey", value: commandForm.idempotency_key }),
+            h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
+            h("label", { htmlFor: "hermes-owner-command" }, copy.commandLabel),
+            h("textarea", {
+              id: "hermes-owner-command",
+              name: "command",
+              rows: 4,
+              maxLength: commandForm.max_length,
+              required: true,
+              disabled: commandForm.enabled ? undefined : true,
+              placeholder: copy.commandPlaceholder,
+              "aria-describedby": "hermes-owner-command-note",
+              autoComplete: "off",
+            }),
+            h(
+              "div",
+              { className: "adm-hermes-command__actions" },
+              h("small", { id: "hermes-owner-command-note" }, commandForm.enabled ? copy.notExecuted : copy.commandDisabled),
+              h(
+                "button",
+                { className: "mk-btn mk-btn--primary", type: "submit", disabled: commandForm.enabled ? undefined : true },
+                h(Icon, { name: "sparkles", size: 16 }),
+                h("span", null, copy.preparePlan),
+              ),
+            ),
+          ),
+          commandError
+            ? h(
+                "div",
+                { className: "adm-hermes-command__error", role: "alert", "data-hermes-command-error": page.command_error.kind },
+                h(Icon, { name: "triangle-alert", size: 18 }),
+                h("span", null, commandError),
+              )
+            : null,
+          commandResult
+            ? h(
+                "section",
+                { className: "adm-hermes-plan", "data-hermes-command-result": commandResult.status },
+                h(
+                  "header",
+                  null,
+                  h("div", null, h("h3", null, copy.planReady), h("p", null, commandResult.plan.summary)),
+                  h(StatusPill, { tone: "sun" }, copy.notExecuted),
+                ),
+                h(
+                  "ol",
+                  null,
+                  ...commandResult.plan.steps.map((step, index) =>
+                    h(
+                      "li",
+                      { key: `${commandResult.idempotency_key}-${index}` },
+                      h(
+                        "div",
+                        null,
+                        h("strong", null, step.title),
+                        h("p", null, step.why),
+                        h("small", null, step.evidence.join(" · ")),
+                      ),
+                      h(StatusPill, { tone: step.mode === "draft" ? "sun" : "sea" }, step.mode === "draft" ? copy.draftStep : copy.reviewStep),
+                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(step.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                    ),
+                  ),
+                ),
+                commandResult.plan.questions.length
+                  ? h("div", { className: "adm-hermes-plan__questions" }, h("strong", null, copy.questions), h("ul", null, ...commandResult.plan.questions.map((question) => h("li", { key: question }, question))))
+                  : null,
+                h("small", { className: "adm-hermes-plan__receipt" }, `${copy.receipt}: ${commandResult.idempotency_key}`),
+              )
+            : null,
+          h(
+            "section",
+            { className: "adm-hermes-receipts", "data-hermes-receipts": receipts.length },
+            h("h3", null, copy.recentReceipts),
+            receipts.length
+              ? h(
+                  "ul",
+                  null,
+                  ...receipts.map((receipt) =>
+                    h(
+                      "li",
+                      { key: receipt.idempotency_key },
+                      h("span", null, h("strong", null, receipt.plan?.summary || receipt.failure_code || receipt.status), h("small", null, formatAdminDateTime(receipt.completed_at || receipt.started_at, page.workspace.locale))),
+                      h(StatusPill, { tone: receipt.status === "planned" ? "success" : receipt.status === "failed" ? "brick" : "sand" }, hermesStateLabel(copy, receipt.status)),
+                    ),
+                  ),
+                )
+              : h("p", { className: "adm-hermes-receipts__empty" }, copy.noReceipts),
+          ),
+        ),
+      ),
       h(
         "div",
         { className: "adm-hermes-status-grid" },

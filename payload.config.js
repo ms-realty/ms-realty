@@ -11,6 +11,7 @@ import { LEAD_OPERATION_COLLECTION } from "./production/lib/lead-ops-durable-sto
 import { FUNNEL_EVENT_COLLECTION } from "./production/lib/event-durable-store.mjs";
 import { PROVIDER_CONNECTION_COLLECTION } from "./production/lib/provider-connections.mjs";
 import { PROVIDER_DELIVERY_RECEIPT_COLLECTION } from "./production/lib/provider-delivery.mjs";
+import { HERMES_OWNER_RECEIPT_COLLECTION } from "./production/lib/hermes-owner-command.mjs";
 import { PROVIDER_WEBHOOK_EVENT_COLLECTION } from "./production/lib/provider-webhooks.mjs";
 import { VIEWING_COLLECTION } from "./production/lib/viewing-durable-store.mjs";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
@@ -323,6 +324,11 @@ const providerDeliveryReceiptCollectionWithAccess = {
   access: { ...serverOwnedCollectionAccess, read: () => false },
 };
 
+const hermesOwnerReceiptCollectionWithAccess = {
+  ...HERMES_OWNER_RECEIPT_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
 // Request-time lead side effects share the lead transaction. They remain
 // append-only, server-owned event records; brokers can inspect their
 // privacy-safe payloads but cannot forge or rewrite them.
@@ -380,6 +386,7 @@ export default buildConfig({
     providerConnectionCollectionWithAccess,
     providerWebhookEventCollectionWithAccess,
     providerDeliveryReceiptCollectionWithAccess,
+    hermesOwnerReceiptCollectionWithAccess,
     VIEWING_COLLECTION,
     LEAD_OPERATION_COLLECTION,
     ...durableLeadSideEffectCollections,

@@ -54,6 +54,7 @@ import {
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
+import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-command.mjs";
 import {
   assignableBrokerProfiles,
   getPayloadAdminAuthService,
@@ -1098,9 +1099,13 @@ export function createHttpApp({
   leadSlaGeneratedAt,
   leadSnoozeAt,
   hermesReplyProvider = null,
+  hermesOwnerCommandProvider = null,
   hermesEnv = process.env,
   hermesAgentFetch = fetch,
+  hermesCommandFetch = null,
   hermesAgentProbeTimeoutMs = 5_000,
+  hermesReceiptPayload = null,
+  hermesReceiptSecret = null,
   rateLimit = null,
   // Unlike the public write limiter, the sign-in throttle is on by default:
   // an unthrottled password field is the gap this closes.
@@ -3796,9 +3801,10 @@ export function createHttpApp({
       return adminJson(405, { kind: "method_not_allowed" });
     }
     const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
-    if (request.method === "GET" && ["/admin/hermes", "/api/admin/hermes"].includes(url.pathname)) {
-      const payload = withWorkspaceSettings(
-        await buildAdminHermesPayload({
+    if (["/admin/hermes", "/api/admin/hermes"].includes(url.pathname)) {
+      const currentHermesPayload = async ({ commandResult = null, commandError = null } = {}) =>
+        withWorkspaceSettings(
+          await buildAdminHermesPayload({
           registry: activeRegistry,
           requestedLocale: adminLocaleParam(url),
           seed: currentSeed(),
@@ -3808,15 +3814,63 @@ export function createHttpApp({
           payload: payloadListingRuntime,
           requirePayload: runtimeDataDurableOnly,
           provider: hermesReplyProvider,
+          commandProvider: hermesOwnerCommandProvider,
           fetchImpl: hermesAgentFetch,
           generatedAt: reviewedAt || new Date().toISOString(),
           probeTimeoutMs: hermesAgentProbeTimeoutMs,
+          receiptPayload: hermesReceiptPayload || payloadListingRuntime,
+          receiptSecret:
+            hermesReceiptSecret || providerConnection?.credentialSecret || hermesEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+          commandResult,
+          commandError,
         }),
-      );
-      if (url.pathname === "/admin/hermes") {
-        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        );
+      if (request.method === "GET") {
+        const payload = await currentHermesPayload();
+        if (url.pathname === "/admin/hermes") {
+          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        }
+        return adminJson(200, payload);
       }
-      return adminJson(200, payload);
+      if (request.method === "POST") {
+        try {
+          const receipt = await runHermesOwnerCommand(parseBody(request), {
+            operator: principal,
+            payload: hermesReceiptPayload || payloadListingRuntime,
+            secret: hermesReceiptSecret || providerConnection?.credentialSecret || hermesEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+            env: hermesEnv,
+            fetchImpl: hermesCommandFetch || hermesAgentFetch,
+            provider: hermesOwnerCommandProvider,
+            now: () => reviewedAt || new Date().toISOString(),
+          });
+          if (url.pathname === "/api/admin/hermes") {
+            return adminJson(201, { kind: "hermes_owner_receipt", receipt });
+          }
+          return adminResponse(200, adminHtml(await currentHermesPayload({ commandResult: receipt })), "text/html; charset=utf-8");
+        } catch (cause) {
+          const error =
+            cause instanceof HermesOwnerCommandError
+              ? cause
+              : new HermesOwnerCommandError("hermes_unavailable", { status: 503, cause });
+          if (url.pathname === "/api/admin/hermes") {
+            return adminJson(error.status, {
+              kind: error.code,
+              message: error.message,
+              ...(error.receipt ? { receipt: error.receipt } : {}),
+            });
+          }
+          return adminResponse(
+            200,
+            adminHtml(
+              await currentHermesPayload({
+                commandError: { kind: error.code, message: error.message, receipt: error.receipt || null },
+              }),
+            ),
+            "text/html; charset=utf-8",
+          );
+        }
+      }
+      return adminJson(405, { kind: "method_not_allowed" });
     }
     if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
       const adminBrokerProfiles = await currentBrokerProfiles(payloadSession);

@@ -45,6 +45,7 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/documents/outcome"],
   ["GET", "/api/admin/documents"],
   ["GET", "/api/admin/hermes"],
+  ["POST", "/api/admin/hermes"],
   ["GET", "/api/admin/launch-input-checklist"],
   ["POST", "/api/admin/launch-readiness/export"],
   ["GET", "/api/admin/launch-readiness"],
@@ -191,13 +192,13 @@ function operationFamily(pathname) {
 }
 
 function isSensitivePath(pathname) {
-  return /\/accounts?|\/broker-contacts|\/consents|\/contacts|\/data-exports|\/documents|\/leads?|\/replies|\/security\/|\/team/.test(
+  return /\/accounts?|\/broker-contacts|\/consents|\/contacts|\/data-exports|\/documents|\/hermes|\/leads?|\/replies|\/security\/|\/team/.test(
     pathname,
   );
 }
 
 function hermesAccess(method, pathname) {
-  if (method === "POST" && ["/api/admin/replies/draft", "/api/admin/translations/draft"].includes(pathname)) {
+  if (method === "POST" && ["/api/admin/hermes", "/api/admin/replies/draft", "/api/admin/translations/draft"].includes(pathname)) {
     return "draft_only";
   }
   return "none";

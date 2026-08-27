@@ -20,6 +20,7 @@ import * as migration_20260820_190500_repair_postgres_search_view from './202608
 import * as migration_20260825_120000_durable_lead_operations from './20260825_120000_durable_lead_operations';
 import * as migration_20260826_220000_source_stated_search_view from './20260826_220000_source_stated_search_view';
 import * as migration_20260827_120000_admin_password_change_required from './20260827_120000_admin_password_change_required';
+import * as migration_20260828_120000_hermes_owner_receipts from './20260828_120000_hermes_owner_receipts';
 
 export const migrations = [
   {
@@ -131,5 +132,10 @@ export const migrations = [
     up: migration_20260827_120000_admin_password_change_required.up,
     down: migration_20260827_120000_admin_password_change_required.down,
     name: '20260827_120000_admin_password_change_required',
+  },
+  {
+    up: migration_20260828_120000_hermes_owner_receipts.up,
+    down: migration_20260828_120000_hermes_owner_receipts.down,
+    name: '20260828_120000_hermes_owner_receipts',
   },
 ];
