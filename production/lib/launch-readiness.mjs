@@ -1415,7 +1415,12 @@ export function buildLaunchReadinessReport({
       ? productionRecoveryFreshness(productionRecovery.report, { now: generatedAtMs, publicKey: productionRecoveryPublicKey })
       : evidenceFreshnessAt("production_recovery", null, generatedAtMs),
   };
-  const r2MediaCoverageEvidence = { ...r2MediaCoverage };
+  const r2MediaCoverageEvidence = withEvidenceFreshness(
+    R2_MEDIA_COVERAGE_SOURCE,
+    r2MediaCoverage,
+    r2MediaCoverage.generated_at,
+    generatedAtMs,
+  );
 
   const crawlPass =
     migration.summary.total === 457 &&
