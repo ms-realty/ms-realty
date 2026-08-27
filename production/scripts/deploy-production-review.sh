@@ -200,7 +200,9 @@ node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "ut
 
 trap - ERR
 rm -f "$archive"
-reclaim
+# The Worker job captures the release that was active before this script ran and
+# owns the coordinated rollback. Keep that release and its image until the next
+# deployment starts; reclaiming here would delete the downstream rollback target.
 if [[ "$backup_skipped" == true ]]; then
   echo "production origin deployed: $release_id (WITHOUT a pre-deploy snapshot; take one before the next release)" >&2
 else

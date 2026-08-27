@@ -102,6 +102,7 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.match(worker, /requestForOrigin\(request, env\.MS_REALTY_ORIGIN_URL, env\.MS_REALTY_ORIGIN_TOKEN\)/);
   assert.match(worker, /if \(media\) return media;\n\s+if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(worker, /mediaCandidateKeys\(url\.hostname, url\.pathname\)/);
+  assert.match(worker, /import \{ PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, isPreviewHost, mediaCandidateKeys \} from "\.\/preview-host\.mjs"/);
   assert.ok(previewHost.includes("`${PRODUCTION_PUBLIC_HOST}${pathname}`"));
   assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
@@ -131,6 +132,7 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(deployScript, /run_stack "\$release" docker:hermes:up "\$release_id" \|\| rollback "\$\?"/);
   assert.match(deployScript, /d\.build_marker !== process\.argv\[2\]/);
   assert.match(deployScript, /deployment failed; restoring \$previous/);
+  assert.equal(deployScript.match(/^reclaim$/gm)?.length, 1);
   assert.match(deployScript, /local status="\$\{1:-1\}"/);
   assert.match(deployScript, /trap 'rollback "\$\?"' ERR/);
   assert.match(deployScript, /mv -Tf "\$base\/\.current-\$release_id" "\$current"/);
