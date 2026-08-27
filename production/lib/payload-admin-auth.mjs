@@ -35,6 +35,21 @@ function safeOperator(value) {
   };
 }
 
+export function assignableBrokerProfiles(operators) {
+  return (Array.isArray(operators) ? operators : [])
+    .filter(
+      (operator) =>
+        ["admin", "broker"].includes(String(operator?.role || "").trim().toLowerCase()) &&
+        String(operator?.id ?? "").trim(),
+    )
+    .map((operator) => ({
+      id: String(operator.id),
+      name: String(operator.name || operator.email || operator.id),
+      email: String(operator.email || ""),
+      languages: [],
+    }));
+}
+
 export function payloadAdminPrincipal(value) {
   if (!value || value.collection !== PAYLOAD_ADMIN_COLLECTION || !PAYLOAD_ADMIN_ROLES.includes(value.role)) return null;
   const id = String(value.id ?? "").trim();

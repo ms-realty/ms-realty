@@ -11,7 +11,6 @@
 // broker resolution, the date window and the response shape here is what stops
 // the two from offering a visitor different times for the same listing.
 
-import { assignLeadBroker } from "./leads.mjs";
 import { brokerAvailabilityFor, officeTimeZone } from "./broker-availability.mjs";
 import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
 import {
@@ -61,23 +60,11 @@ export async function publicViewingSource({
   return viewings;
 }
 
-// Which broker a visitor would be talking to about this listing: the approved
-// broker contact if there is one, otherwise the same assignment the lead router
-// would make. Never a guess.
+// Which broker a visitor would be talking to about this listing. Without an
+// approved broker contact there is no source-backed calendar to expose.
 export function viewingSlotBroker({ brokerContacts = [], listing, listingReference, localeCode }) {
   const brokerContact = latestApprovedBrokerContact(brokerContacts, listingReference);
-  return (
-    brokerContact?.broker ||
-    assignLeadBroker(
-      { language: { language: localeCode, adminLocale: "en" }, leadType: "buyer" },
-      {
-        listingContext: {
-          location: listing.facts?.location || null,
-          property_type: listing.facts?.property_type || null,
-        },
-      },
-    ).broker_id
-  );
+  return brokerContact?.broker || null;
 }
 
 // Throws a 404-shaped error when the listing is not published: fail closed, no
@@ -118,13 +105,30 @@ export function publicViewingSlotsPayload({
   const timeZone = officeTimeZone(env);
   const firstDay = searchParams.get("from") || addDays(zonedParts(Date.parse(now), timeZone).date, 1);
   const lastDay = searchParams.get("to") || addDays(firstDay, 13);
+  const durationMinutes = wholeNumberSlotParam(searchParams.get("duration"), DEFAULT_VIEWING_DURATION_MINUTES);
+  if (!brokerId) {
+    return {
+      kind: "viewing_slots",
+      listing_reference: listingReference,
+      locale: resolvedLocale.locale.code,
+      broker_id: null,
+      availability_source: "broker_confirmation_required",
+      confirmation: "human_required",
+      timezone: timeZone,
+      from: firstDay,
+      to: lastDay,
+      duration_minutes: durationMinutes,
+      slots: [],
+      summary: { days: 0, open_days: 0, candidate_slots: 0, available_slots: 0, returned_slots: 0, blocked_by_viewings: 0 },
+    };
+  }
   const availability = brokerAvailabilityFor(availabilityRows, brokerId, { now, env });
   const slots = computeFreeSlots({
     availability,
     viewings,
     from: firstDay,
     to: lastDay,
-    durationMinutes: wholeNumberSlotParam(searchParams.get("duration"), DEFAULT_VIEWING_DURATION_MINUTES),
+    durationMinutes,
     stepMinutes: DEFAULT_SLOT_STEP_MINUTES,
     now,
     // A visitor cannot pick a slot a broker has no time to prepare for.

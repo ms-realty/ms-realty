@@ -655,16 +655,18 @@ if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") 
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
 if (
-  httpSmoke.lead.body.broker_assignment?.broker_id !== "broker_international" ||
+  httpSmoke.lead.body.broker_assignment?.broker_id !== null ||
+  httpSmoke.lead.body.broker_assignment?.method !== "manager_queue" ||
   httpSmoke.lead.body.broker_assignment?.criteria?.location !== "Sandanski"
 ) {
-  throw new Error("HTTP smoke must assign listing leads by language and listing facts");
+  throw new Error("HTTP smoke must keep listing leads unassigned until a real broker is configured");
 }
 if (
   httpSmoke.viewingLead.status !== 201 ||
   httpSmoke.viewingLead.body.lead.source !== "website_viewing_request" ||
   httpSmoke.viewingLead.body.contact_preference !== "phone" ||
-  httpSmoke.viewingLead.body.broker_assignment?.broker_id !== "broker_international"
+  httpSmoke.viewingLead.body.broker_assignment?.broker_id !== null ||
+  httpSmoke.viewingLead.body.broker_assignment?.method !== "manager_queue"
 ) {
   throw new Error("HTTP smoke must accept public viewing request leads");
 }
@@ -813,7 +815,8 @@ if (
   nodeServerSmoke.viewingLead.status !== 201 ||
   nodeServerSmoke.viewingLead.body.lead.source !== "website_viewing_request" ||
   nodeServerSmoke.viewingLead.body.contact_preference !== "phone" ||
-  nodeServerSmoke.viewingLead.body.broker_assignment?.broker_id !== "broker_international"
+  nodeServerSmoke.viewingLead.body.broker_assignment?.broker_id !== null ||
+  nodeServerSmoke.viewingLead.body.broker_assignment?.method !== "manager_queue"
 ) {
   throw new Error("Node server smoke must accept public viewing request leads");
 }

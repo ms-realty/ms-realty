@@ -1,62 +1,7 @@
 {
   "artifact_id": "approved-financing-partners-20260823",
   "purpose": "Human-approved financing routes for the onboarding financing step. A partner publishes only when a named reviewer approved that exact content and the review date has not passed.",
-  "publishing_note": "This repository holds no approved lender relationships. Every row below is marked example_record and can never publish, and none of them carries a rate. A rate may only be stored together with the approval that covers it: a value, a unit, an effective date, an approved_at, and a named reviewer. Replace the rows, set status to approved with a reviewer, approved_at and review_due_at, remove example_record, then recompute source_hash with production/scripts/build-approved-content.mjs.",
+  "publishing_note": "This repository holds no approved lender relationships. Add only a real relationship with its exact scope, a named reviewer, approved_at and review_due_at, then recompute source_hash with production/scripts/build-approved-content.mjs.",
   "generated_at": "2026-08-23T00:00:00Z",
-  "partners": [
-    {
-      "id": "example-bg-bank-bg",
-      "type": "financing_partner",
-      "partner_key": "example-bg-bank",
-      "locale": "bg",
-      "source_locale": "bg",
-      "status": "draft",
-      "human_approved": false,
-      "reviewer": "",
-      "approved_at": null,
-      "review_due_at": "2026-12-31T00:00:00Z",
-      "example_record": true,
-      "name": "EXAMPLE LENDER - replace with a real partner",
-      "serves": "eu",
-      "offering": [
-        "EXAMPLE TEXT - not publishable. State exactly what this partner does: which products, for which residency status, and which property types."
-      ],
-      "contact_route": {
-        "kind": "agency_introduction",
-        "detail": "EXAMPLE TEXT - not publishable. Describe how the buyer actually reaches this partner.",
-        "url": ""
-      },
-      "rates": [],
-      "sources": [],
-      "display_order": 10,
-      "source_hash": "67be6f36d3ddbd71fbcf25f1ca3f8ae038a84a32a69e62e3e2a64495812f1197"
-    },
-    {
-      "id": "example-cross-border-broker-bg",
-      "type": "financing_partner",
-      "partner_key": "example-cross-border-broker",
-      "locale": "bg",
-      "source_locale": "bg",
-      "status": "draft",
-      "human_approved": false,
-      "reviewer": "",
-      "approved_at": null,
-      "review_due_at": "2026-12-31T00:00:00Z",
-      "example_record": true,
-      "name": "EXAMPLE NON-EU ROUTE - replace with a real partner",
-      "serves": "non_eu",
-      "offering": [
-        "EXAMPLE TEXT - not publishable. The approved CMS guide records that foreign-national mortgage availability in Bulgaria can be limited, so a non-EU route must say what it can and cannot do."
-      ],
-      "contact_route": {
-        "kind": "agency_introduction",
-        "detail": "EXAMPLE TEXT - not publishable. Describe how the buyer actually reaches this partner.",
-        "url": ""
-      },
-      "rates": [],
-      "sources": [],
-      "display_order": 20,
-      "source_hash": "87b106072c113439876d81476406eb3b169d3720e18faf79adfd78dc2423d00d"
-    }
-  ]
+  "partners": []
 }

@@ -55,6 +55,11 @@ const SAME_ORIGIN_LEAD_HEADERS = Object.freeze({
   origin: "http://localhost",
   "sec-fetch-site": "same-origin",
 });
+const TEST_BROKER_PROFILES = Object.freeze([
+  { id: "broker_bg", languages: ["bg"] },
+  { id: "broker_ru", languages: ["ru"] },
+  { id: "broker_international", languages: ["en"] },
+]);
 const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
 const RECOVERY_PUBLIC_KEY = RECOVERY_KEYPAIR.publicKey.export({ format: "der", type: "spki" }).toString("base64");
 
@@ -462,6 +467,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     // process-level durable env above is only for the public UI contract.
     leadDurableStore: { leadDurableStoreEnabled: false },
     payloadListingEnv: {},
+    brokerProfiles: TEST_BROKER_PROFILES,
     leadLedgerPath,
     leadAssignmentLedgerPath,
     leadContactVaultPath,
@@ -1081,7 +1087,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.hermesChatDisabled.headers["cache-control"], "no-store");
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
   assert.equal(smoke.lead.body.contactVault.encrypted, true);
-  assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
+  assert.equal(smoke.lead.body.broker_assignment.broker_id, null);
+  assert.equal(smoke.lead.body.broker_assignment.method, "manager_queue");
   assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");
   assert.equal(smoke.lead.headers["cache-control"], "no-store");
   assert.equal(smoke.replyDraft.status, 201);
@@ -1091,7 +1098,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.replyDraftUnauthorized.status, 401);
   assert.equal(hermesReplyPrompts[0].capabilities.can_send_customer_messages, false);
   assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
-  assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
+  assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, null);
+  assert.equal(smoke.viewingLead.body.broker_assignment.method, "manager_queue");
   assert.equal(smoke.viewing.body.feedback_request.status, "open");
   assert.equal(smoke.viewing.body.feedback_request.channel, "phone");
   assert.equal(smoke.viewingFollowUp.status, 201);
@@ -1131,7 +1139,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.match(smoke.listingHtmlAfterMediaReview.body, /data-floor-plan-gallery="true"/);
   assert.match(smoke.listingHtmlAfterMediaReview.body, /MS-CRAWL-0001-floor-plan\.webp/);
   assert.equal(smoke.leadAssignment.status, 201);
-  assert.equal(smoke.leadAssignment.body.previous_broker_id, "broker_international");
+  assert.equal(smoke.leadAssignment.body.previous_broker_id, null);
   assert.equal(smoke.adminAfterLeadAssignment.body.leads.find((lead) => lead.lead_id === leadId).assigned_broker, "broker_ru");
   assert.equal(smoke.slugChange.body.new_path, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");

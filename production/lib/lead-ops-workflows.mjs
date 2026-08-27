@@ -351,7 +351,7 @@ export async function recordDealCloseOperation({ ledgers, journey, input, princi
  * discards the rest: every item reports its own outcome, and the caller turns
  * the tally into 200 / 201 / 207.
  */
-export async function applyLeadBulkOperation({ ledgers, journey, input, principal, recordedAt, audit } = {}) {
+export async function applyLeadBulkOperation({ ledgers, journey, input, principal, recordedAt, brokerProfiles, audit } = {}) {
   const action = String(input.action || "").trim();
   if (!BULK_ACTIONS.has(action)) throw new Error("Bulk action must be assign, snooze, or handle");
   const submittedIds = input.leadIds ?? input.lead_ids;
@@ -373,7 +373,7 @@ export async function applyLeadBulkOperation({ ledgers, journey, input, principa
   for (const leadId of leadIds) {
     try {
       const itemInput = { ...input, leadId, leadIds: undefined, lead_ids: undefined };
-      const shared = { ledgers, input: itemInput, principal, recordedAt, audit };
+      const shared = { ledgers, input: itemInput, principal, recordedAt, brokerProfiles, audit };
       const outcome =
         action === "assign"
           ? await recordLeadAssignmentOperation({ ...shared, leads: journey.leads })

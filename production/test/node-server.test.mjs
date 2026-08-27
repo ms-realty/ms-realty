@@ -649,10 +649,12 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.hermesChatDisabled.body.kind, "not_found");
       assert.equal(smoke.hermesChatDisabled.headers["cache-control"], "no-store");
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");
-      assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
+      assert.equal(smoke.lead.body.broker_assignment.broker_id, null);
+      assert.equal(smoke.lead.body.broker_assignment.method, "manager_queue");
       assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");
       assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
-      assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
+      assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, null);
+      assert.equal(smoke.viewingLead.body.broker_assignment.method, "manager_queue");
       assert.equal(smoke.viewing.body.feedback_request.status, "open");
       assert.equal(smoke.viewing.body.feedback_request.channel, "phone");
       assert.equal(smoke.viewingFollowUp.status, 201);

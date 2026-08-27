@@ -49,19 +49,10 @@ export const BROKER_INTAKE_SOURCES = Object.freeze([
   "partner_referral",
 ]);
 const BROKER_INTAKE_SOURCE_SET = new Set(BROKER_INTAKE_SOURCES);
-const LOCAL_LOCATIONS = ["Sandanski", "Petrich", "Bansko", "Blagoevgrad", "Sveti Vlas", "Sunny Beach", "Melnik"];
-const PROPERTY_TYPES = ["apartment", "house", "villa", "land", "commercial", "hotel", "office", "industrial"];
-export const DEFAULT_BROKER_PROFILES = [
-  { id: "broker_bg", languages: ["bg"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: LEAD_TYPES },
-  { id: "broker_ru", languages: ["ru"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: LEAD_TYPES },
-  {
-    id: "broker_international",
-    languages: ["en", "de", "nl", "el", "he"],
-    locations: LOCAL_LOCATIONS,
-    property_types: PROPERTY_TYPES,
-    lead_types: LEAD_TYPES,
-  },
-];
+// Broker profiles are operational records, not seed data. Production starts
+// empty and keeps new leads in the manager queue until an eligible, real
+// operator directory is supplied by the runtime.
+export const DEFAULT_BROKER_PROFILES = Object.freeze([]);
 
 export function normalizeLeadLanguage(registry, languageCode) {
   const locale = getLocale(registry, languageCode);
@@ -387,7 +378,20 @@ export function assignLeadBroker(lead, { manualBrokerId = null, brokerProfiles =
     .map((profile) => ({ profile, score: scoreBroker(profile, lead, listingContext) }))
     .sort((a, b) => b.score - a.score || a.profile.id.localeCompare(b.profile.id));
   const best = ranked[0]?.profile;
-  if (!best) throw new Error("At least one broker profile is required");
+  if (!best) {
+    return {
+      status: "unassigned",
+      method: "manager_queue",
+      broker_id: null,
+      criteria: {
+        language: lead.language.language,
+        admin_locale: lead.language.adminLocale,
+        location: listingContext.location || null,
+        property_type: listingContext.property_type || null,
+        lead_type: lead.leadType,
+      },
+    };
+  }
   return {
     status: "assigned",
     method: "rules",
