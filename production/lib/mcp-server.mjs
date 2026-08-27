@@ -8,6 +8,18 @@ import { resolveOperatorAgentPrincipal } from "./operator-agent-access.mjs";
 import { applyListingEdits, LISTING_STATUSES, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
+import {
+  ADMIN_ROUTE_COVERAGE,
+  HERMES_TOOL_COVERAGE,
+  OWNER_OPERATOR_ADMIN_READ_TOOL,
+  OWNER_OPERATOR_ADMIN_WRITE_TOOL,
+  OWNER_OPERATOR_CONTEXT_TOOL,
+  OWNER_OPERATOR_HERMES_TOOL,
+  ownerOperatorConfirmation,
+  ownerOperatorOperationById,
+  validateOwnerOperatorInput,
+} from "./owner-operator-catalog.mjs";
+import { BRIDGE_GUARDRAILS, bridgeNextTasks, bridgeStatus, bridgeSubmitDraft } from "./hermes-desktop-bridge.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
 import { listingPath } from "./seo.mjs";
 import { readTourApprovals } from "./tours.mjs";
@@ -137,6 +149,14 @@ const OPERATOR_WORKFLOW_INPUT = z
     confirmation: z.literal("RUN_OPERATOR_WORKFLOW"),
   })
   .strict();
+const OWNER_OPERATOR_QUERY_VALUE = z.union([
+  z.string().max(20_000),
+  z.number().finite(),
+  z.boolean(),
+  z.array(z.union([z.string().max(20_000), z.number().finite(), z.boolean()])).max(100),
+]);
+const OWNER_OPERATOR_QUERY = z.record(z.string(), OWNER_OPERATOR_QUERY_VALUE).optional();
+const OWNER_OPERATOR_BODY = z.record(z.string(), z.unknown()).optional();
 const OIDC_ALGORITHMS = ["RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "EdDSA"];
 const OIDC_ENV = {
   issuer: "MS_REALTY_MCP_OIDC_ISSUER",
@@ -464,6 +484,25 @@ async function adminJson(config, principal, pathname, { method = "GET", body } =
   return { response, payload };
 }
 
+function ownerOperatorPath(row, query = {}) {
+  validateOwnerOperatorInput(query);
+  const url = new URL(row.pathname, "http://mcp.local");
+  for (const [key, value] of Object.entries(query)) {
+    for (const item of Array.isArray(value) ? value : [value]) url.searchParams.append(key, String(item));
+  }
+  return `${url.pathname}${url.search}`;
+}
+
+function ownerOperatorResult(row, response, payload) {
+  return {
+    operation: row.operation,
+    method: row.method,
+    pathname: row.pathname,
+    http_status: response.status,
+    result: payload,
+  };
+}
+
 function compactObject(value) {
   return Object.fromEntries(Object.entries(value).filter(([, field]) => field !== undefined));
 }
@@ -770,6 +809,159 @@ function publicToolDefinitions(server, config) {
       }
     },
   );
+}
+
+function ownerOperatorToolDefinitions(server, config, principal) {
+  const available = ADMIN_ROUTE_COVERAGE.filter((row) => canAdminAccess(principal, row.capability));
+  const remote = available.filter((row) => row.execution === "mcp_delegated");
+  const browser = available.filter((row) => row.execution === "browser_session");
+  const reads = remote.filter((row) => row.read_only);
+  const writes = remote.filter((row) => !row.read_only);
+
+  server.registerTool(
+    OWNER_OPERATOR_CONTEXT_TOOL,
+    {
+      description:
+        "List every admin operation this operator may use, including which operations run through this delegated MCP and which intentionally require the signed-in WebMCP browser session.",
+      inputSchema: z.object({}).strict(),
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+    },
+    async () =>
+      textResult({
+        operator_id: principal.id,
+        roles: principal.roles,
+        writes_enabled: !config.writesDisabled,
+        summary: { total: available.length, mcp_delegated: remote.length, browser_session: browser.length },
+        operations: available.map((row) => ({
+          operation: row.operation,
+          method: row.method,
+          pathname: row.pathname,
+          capability: row.capability,
+          family: row.family,
+          execution: row.execution,
+          sensitive: row.sensitive,
+          ...(row.read_only ? {} : { confirmation: ownerOperatorConfirmation(row.operation) }),
+        })),
+        browser_session_note:
+          "Open /admin in the ChatGPT/Codex built-in browser for file, secret, connection, team, export, import, and second-factor operations. The signed-in page exposes the same registry through WebMCP.",
+      }),
+  );
+
+  if (reads.length) {
+    server.registerTool(
+      OWNER_OPERATOR_ADMIN_READ_TOOL,
+      {
+        description:
+          "Run one allowlisted read-only admin operation through the existing RBAC, workspace-scope, validation, and audit-aware admin adapter. Call ms_realty_admin_context first to discover operation IDs.",
+        inputSchema: z
+          .object({ operation: z.enum(reads.map((row) => row.operation)), query: OWNER_OPERATOR_QUERY })
+          .strict(),
+        annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      },
+      async ({ operation, query }) => {
+        try {
+          const row = ownerOperatorOperationById(operation);
+          if (!row || !reads.includes(row)) return errorResult("That admin read operation is not available to this operator.");
+          const { response, payload } = await adminJson(config, principal, ownerOperatorPath(row, query), { method: row.method });
+          if (!response.ok) return errorResult(payload?.message || payload?.kind || "The admin read operation was rejected.");
+          return textResult(ownerOperatorResult(row, response, payload));
+        } catch (error) {
+          return errorResult(error?.message || "The admin read operation was rejected.");
+        }
+      },
+    );
+  }
+
+  if (!config.writesDisabled && canAdminMutate(principal) && writes.length) {
+    server.registerTool(
+      OWNER_OPERATOR_ADMIN_WRITE_TOOL,
+      {
+        description:
+          "Run one allowlisted owner-confirmed admin mutation through the existing RBAC, workspace-scope, validation, persistence, and audit adapter. The confirmation must exactly match the operation-specific value returned by ms_realty_admin_context. Hermes is never the approving actor.",
+        inputSchema: z
+          .object({
+            operation: z.enum(writes.map((row) => row.operation)),
+            input: OWNER_OPERATOR_BODY,
+            query: OWNER_OPERATOR_QUERY,
+            confirmation: z.string().min(1).max(180),
+          })
+          .strict(),
+        annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false },
+      },
+      async ({ operation, input, query, confirmation }) => {
+        try {
+          const row = ownerOperatorOperationById(operation);
+          if (!row || !writes.includes(row)) return errorResult("That admin write operation is not available to this operator.");
+          if (confirmation !== ownerOperatorConfirmation(operation)) {
+            return errorResult("The operation-specific owner confirmation is missing or incorrect.");
+          }
+          const body = validateOwnerOperatorInput(input);
+          const { response, payload } = await adminJson(config, principal, ownerOperatorPath(row, query), {
+            method: row.method,
+            body,
+          });
+          if (!response.ok) return errorResult(payload?.message || payload?.kind || "The admin write operation was rejected.");
+          return textResult(ownerOperatorResult(row, response, payload));
+        } catch (error) {
+          return errorResult(error?.message || "The admin write operation was rejected.");
+        }
+      },
+    );
+  }
+
+  if (canAdminAccess(principal, "translations:read")) {
+    const hermesOperations = HERMES_TOOL_COVERAGE.filter(
+      (row) => row.read_only || (!config.writesDisabled && canAdminMutate(principal) && canAdminAccess(principal, "translations:write")),
+    ).map((row) => row.operation);
+    server.registerTool(
+      OWNER_OPERATOR_HERMES_TOOL,
+      {
+        description:
+          "Operate the complete Hermes desktop drafting loop: inspect safe queue status, pull non-sensitive translation tasks, or submit a fact-checked draft for human review. Hermes cannot approve, publish, mark indexable, or send messages.",
+        inputSchema: z
+          .object({
+            operation: z.enum(hermesOperations),
+            limit: z.number().int().min(1).max(10).optional(),
+            target_locale: LOCALE.optional(),
+            id: z.string().min(1).max(240).optional(),
+            draft: z
+              .object({
+                title: z.string().min(1),
+                body: z.string().min(1),
+                seo_title: z.string().min(1),
+                meta_description: z.string().min(1),
+                citations: z.array(z.unknown()).optional(),
+              })
+              .passthrough()
+              .optional(),
+            model: z.string().min(1).max(120).optional(),
+            confirmation: z.string().max(80).optional(),
+          })
+          .strict(),
+        annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+      },
+      async ({ operation, limit, target_locale: targetLocale, id, draft, model, confirmation }) => {
+        try {
+          if (operation === "hermes_status") return textResult(bridgeStatus());
+          if (operation === "hermes_next_tasks") return textResult(bridgeNextTasks({ limit, targetLocale }));
+          if (operation !== "hermes_submit_draft" || confirmation !== "SUBMIT_HERMES_DRAFT") {
+            return errorResult("Hermes draft submission requires the exact SUBMIT_HERMES_DRAFT confirmation.");
+          }
+          return textResult(
+            await bridgeSubmitDraft({
+              id,
+              draft,
+              model,
+              filePath: config.adminConfig.translationLedgerPath,
+              auditLogPath: config.adminConfig.auditLogPath,
+            }),
+          );
+        } catch (error) {
+          return errorResult(`${error?.message || "Hermes rejected the request."}\n${BRIDGE_GUARDRAILS.join("\n")}`);
+        }
+      },
+    );
+  }
 }
 
 function authenticatedToolDefinitions(server, config, principal) {
@@ -1233,6 +1425,7 @@ function authenticatedToolDefinitions(server, config, principal) {
       },
     );
   }
+  ownerOperatorToolDefinitions(server, config, principal);
 }
 
 function createServer(config, principal) {

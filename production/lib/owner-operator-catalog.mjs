@@ -255,11 +255,23 @@ export const OWNER_OPERATOR_REMOTE_OPERATIONS = Object.freeze(
   ADMIN_ROUTE_COVERAGE.filter((row) => row.execution === "mcp_delegated"),
 );
 
+const OWNER_OPERATOR_OPERATION_INDEX = new Map(ADMIN_ROUTE_COVERAGE.map((row) => [row.operation, row]));
+
 export { HERMES_TOOL_COVERAGE };
 
 export function ownerOperatorOperation(method, pathname) {
   const operation = `admin_${operationSlug(String(method || "GET").toUpperCase(), pathname)}`;
   return ADMIN_ROUTE_COVERAGE.find((row) => row.operation === operation) || null;
+}
+
+export function ownerOperatorOperationById(operation) {
+  return OWNER_OPERATOR_OPERATION_INDEX.get(String(operation || "")) || null;
+}
+
+export function ownerOperatorConfirmation(operation) {
+  const row = ownerOperatorOperationById(operation);
+  if (!row || row.read_only) return null;
+  return `${OWNER_OPERATOR_WRITE_CONFIRMATION}:${row.operation}`;
 }
 
 export function validateOwnerOperatorInput(input, { allowEmpty = true, maxKeys = 48 } = {}) {
