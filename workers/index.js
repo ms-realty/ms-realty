@@ -12,7 +12,7 @@ import {
   isPayloadPrivatePath,
   secretMatches,
 } from "./durable-case-authority.mjs";
-import { PREVIEW_NOINDEX, isPreviewHost, mediaCandidateKeys } from "./preview-host.mjs";
+import { PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, isPreviewHost, mediaCandidateKeys } from "./preview-host.mjs";
 import {
   OriginProxyError,
   requestForOrigin,
