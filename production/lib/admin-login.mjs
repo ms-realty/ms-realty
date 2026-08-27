@@ -42,6 +42,17 @@ const LOGIN_COPY = {
     documentTitle: "Вход за екипа · MS Realty",
     title: "Вход за екипа на MS Realty",
     hint: "Използвай служебния си имейл и парола.",
+    changed: "Паролата е сменена. Влез с новата парола.",
+    changeDocumentTitle: "Смяна на парола · MS Realty",
+    changeTitle: "Смени временната парола",
+    changeHint: "Преди да продължиш, избери нова парола за този акаунт.",
+    changeError: "Паролата не беше сменена. Провери трите полета и опитай отново.",
+    currentPassword: "Временна парола",
+    newPassword: "Нова парола",
+    confirmPassword: "Повтори новата парола",
+    passwordHint: "Поне 12 знака и различна от временната парола.",
+    changeSubmit: "Смени паролата",
+    changing: "Запазване…",
     email: "Имейл",
     password: "Парола",
     submit: "Влез",
@@ -62,6 +73,17 @@ const LOGIN_COPY = {
     documentTitle: "Вход для команды · MS Realty",
     title: "Вход для команды MS Realty",
     hint: "Используй рабочую почту и пароль.",
+    changed: "Пароль изменён. Войди с новым паролем.",
+    changeDocumentTitle: "Смена пароля · MS Realty",
+    changeTitle: "Смени временный пароль",
+    changeHint: "Перед продолжением выбери новый пароль для этой учётной записи.",
+    changeError: "Пароль не изменён. Проверь три поля и попробуй снова.",
+    currentPassword: "Временный пароль",
+    newPassword: "Новый пароль",
+    confirmPassword: "Повтори новый пароль",
+    passwordHint: "Не менее 12 знаков и не совпадает с временным паролем.",
+    changeSubmit: "Сменить пароль",
+    changing: "Сохраняем…",
     email: "Почта",
     password: "Пароль",
     submit: "Войти",
@@ -82,6 +104,17 @@ const LOGIN_COPY = {
     documentTitle: "Team sign-in · MS Realty",
     title: "Sign in to MS Realty",
     hint: "Use your work email address and password.",
+    changed: "Password changed. Sign in with your new password.",
+    changeDocumentTitle: "Change password · MS Realty",
+    changeTitle: "Change the temporary password",
+    changeHint: "Choose a new password for this account before continuing.",
+    changeError: "The password was not changed. Check all three fields and try again.",
+    currentPassword: "Temporary password",
+    newPassword: "New password",
+    confirmPassword: "Confirm new password",
+    passwordHint: "At least 12 characters and different from the temporary password.",
+    changeSubmit: "Change password",
+    changing: "Saving…",
     email: "Email",
     password: "Password",
     submit: "Sign in",
@@ -196,6 +229,17 @@ const LOGIN_STYLE = `
     line-height: 1.4;
   }
   .login__error svg { flex: none; margin-top: 1px; }
+  .login__notice {
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border: 1px solid var(--success-500, #2F7D57);
+    border-radius: 8px;
+    background: var(--success-50, #E7F3EC);
+    color: var(--success-700, #1F5A3E);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
   .login__form { display: grid; gap: 0; }
   .login__form label {
     display: block;
@@ -209,7 +253,9 @@ const LOGIN_STYLE = `
   .login__field { position: relative; margin: 0 0 16px; }
   .login #admin-email,
   .login #admin-password,
-  .login #admin-code {
+  .login #admin-code,
+  .login #admin-new-password,
+  .login #admin-password-confirmation {
     display: block;
     width: 100%;
     height: 48px;
@@ -227,16 +273,22 @@ const LOGIN_STYLE = `
   }
   .login #admin-password { padding-inline-end: 104px; }
   .login #admin-email:hover,
-  .login #admin-password:hover { border-color: var(--ink-300, #A8A8A6); }
+  .login #admin-password:hover,
+  .login #admin-new-password:hover,
+  .login #admin-password-confirmation:hover { border-color: var(--ink-300, #A8A8A6); }
   .login #admin-email:focus-visible,
   .login #admin-password:focus-visible,
-  .login #admin-code:focus-visible {
+  .login #admin-code:focus-visible,
+  .login #admin-new-password:focus-visible,
+  .login #admin-password-confirmation:focus-visible {
     outline: none;
     border-color: var(--ink-500, #545453);
     box-shadow: var(--shadow-focus, 0 0 0 3px rgba(219, 62, 62, 0.45));
   }
   .login-page[data-login-state="error"] #admin-email,
-  .login-page[data-login-state="error"] #admin-password { border-color: var(--danger-500, #C42E44); }
+  .login-page[data-login-state="error"] #admin-password,
+  .login-page[data-login-state="error"] #admin-new-password,
+  .login-page[data-login-state="error"] #admin-password-confirmation { border-color: var(--danger-500, #C42E44); }
   /* A rejected second factor means the password was right, so only the code
      field is marked. */
   .login-page[data-login-state="error-2fa"] #admin-code { border-color: var(--danger-500, #C42E44); }
@@ -328,13 +380,14 @@ const SPINNER_ICON =
 // about which half failed.
 const LOGIN_STATES = { "2fa": "error-2fa", throttled: "error-throttled" };
 
-export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
+export function renderAdminLoginPage({ error = false, locale = "bg", changed = false } = {}) {
   const active = ADMIN_LOGIN_LOCALES.includes(locale) ? locale : "bg";
   const copy = LOGIN_COPY[active];
   const message = error === "2fa" ? copy.errorTwoFactor : error === "throttled" ? copy.errorThrottled : copy.error;
   const errorBanner = error
     ? `<p class="login__error" id="admin-login-error" role="alert">${ALERT_ICON}<span>${escapeHtml(message)}</span></p>`
     : "";
+  const noticeBanner = changed ? `<p class="login__notice" role="status">${escapeHtml(copy.changed)}</p>` : "";
   // A throttle is about the connection, not about either field, so it marks
   // neither one as the thing to correct.
   const describedBy = error && error !== "throttled" ? ' aria-describedby="admin-login-error"' : "";
@@ -366,6 +419,7 @@ export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
   </div>
   <h1 id="admin-login-title" class="login__title">${escapeHtml(copy.title)}</h1>
   <p class="login__hint">${escapeHtml(copy.hint)}</p>
+  ${noticeBanner}
   ${errorBanner}
   <form method="POST" action="/admin/login" class="login__form" data-admin-login-form="true">
     <label for="admin-email">${escapeHtml(copy.email)}</label>
@@ -400,6 +454,73 @@ export function renderAdminLoginPage({ error = false, locale = "bg" } = {}) {
         // second Space or Enter instead of tabbing backwards for it.
       });
     }
+    var form = document.querySelector("[data-admin-login-form]");
+    var submit = document.querySelector("[data-login-submit]");
+    var label = document.querySelector("[data-login-submit-label]");
+    if (form && submit && label) {
+      form.addEventListener("submit", function () {
+        if (!form.checkValidity()) return;
+        document.body.setAttribute("data-login-state", "submitting");
+        submit.disabled = true;
+        label.textContent = submit.getAttribute("data-busy-label");
+      });
+    }
+  })();
+</script>
+</body>
+</html>`;
+}
+
+export function renderAdminPasswordChangePage({ error = false, locale = "bg" } = {}) {
+  const active = ADMIN_LOGIN_LOCALES.includes(locale) ? locale : "bg";
+  const copy = LOGIN_COPY[active];
+  const errorBanner = error
+    ? `<p class="login__error" id="admin-login-error" role="alert">${ALERT_ICON}<span>${escapeHtml(copy.changeError)}</span></p>`
+    : "";
+  const describedBy = error ? ' aria-describedby="admin-login-error"' : "";
+  const newPasswordDescribedBy = ` aria-describedby="admin-password-hint${error ? " admin-login-error" : ""}"`;
+  const locales = ADMIN_LOGIN_LOCALES.map((code) => {
+    const href = `/admin/login?change=1${code === "bg" ? "" : `&locale=${code}`}`;
+    const current = code === active ? ' aria-current="page"' : "";
+    return `<a class="login__locale" href="${href}" lang="${code}"${current}>${LOCALE_NAMES[code]}</a>`;
+  }).join("");
+  return `<!doctype html>
+<html lang="${active}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>${escapeHtml(copy.changeDocumentTitle)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="${FONTS_URL}">
+<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${ADMIN_CSS_HASH}">
+<style>${LOGIN_STYLE}</style>
+</head>
+<body class="login-page" data-login-state="${error ? "error" : "idle"}" data-admin-password-change-locale="${active}">
+<main class="login" aria-labelledby="admin-login-title">
+  <div class="login__top">
+    <p class="login__brand"><img src="${LOGO_URL}" alt="MS Realty" height="40" width="${Math.round(40 * LOGO_ASPECT)}"></p>
+    <nav class="login__locales" aria-label="${escapeHtml(copy.languageLabel)}">${locales}</nav>
+  </div>
+  <h1 id="admin-login-title" class="login__title">${escapeHtml(copy.changeTitle)}</h1>
+  <p class="login__hint">${escapeHtml(copy.changeHint)}</p>
+  ${errorBanner}
+  <form method="POST" action="/admin/login" class="login__form" data-admin-login-form="true">
+    <input type="hidden" name="action" value="change-password">
+    <input type="hidden" name="locale" value="${active}">
+    <label for="admin-password">${escapeHtml(copy.currentPassword)}</label>
+    <div class="login__field"><input id="admin-password" name="current_password" type="password" autocomplete="current-password" required autofocus${describedBy}></div>
+    <label for="admin-new-password">${escapeHtml(copy.newPassword)}</label>
+    <div class="login__field"><input id="admin-new-password" name="password" type="password" autocomplete="new-password" minlength="12" required${newPasswordDescribedBy}></div>
+    <label for="admin-password-confirmation">${escapeHtml(copy.confirmPassword)}</label>
+    <div class="login__field"><input id="admin-password-confirmation" name="password_confirmation" type="password" autocomplete="new-password" minlength="12" required${describedBy}></div>
+    <p class="login__support" id="admin-password-hint">${escapeHtml(copy.passwordHint)}</p>
+    <button type="submit" class="login__submit" data-login-submit="true" data-idle-label="${escapeHtml(copy.changeSubmit)}" data-busy-label="${escapeHtml(copy.changing)}">${SPINNER_ICON}<span data-login-submit-label="true">${escapeHtml(copy.changeSubmit)}</span></button>
+  </form>
+</main>
+<script>
+  (function () {
     var form = document.querySelector("[data-admin-login-form]");
     var submit = document.querySelector("[data-login-submit]");
     var label = document.querySelector("[data-login-submit-label]");

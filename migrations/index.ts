@@ -19,6 +19,7 @@ import * as migration_20260813_160000_durable_viewings from './20260813_160000_d
 import * as migration_20260820_190500_repair_postgres_search_view from './20260820_190500_repair_postgres_search_view';
 import * as migration_20260825_120000_durable_lead_operations from './20260825_120000_durable_lead_operations';
 import * as migration_20260826_220000_source_stated_search_view from './20260826_220000_source_stated_search_view';
+import * as migration_20260827_120000_admin_password_change_required from './20260827_120000_admin_password_change_required';
 
 export const migrations = [
   {
@@ -125,5 +126,10 @@ export const migrations = [
     up: migration_20260826_220000_source_stated_search_view.up,
     down: migration_20260826_220000_source_stated_search_view.down,
     name: '20260826_220000_source_stated_search_view',
+  },
+  {
+    up: migration_20260827_120000_admin_password_change_required.up,
+    down: migration_20260827_120000_admin_password_change_required.down,
+    name: '20260827_120000_admin_password_change_required',
   },
 ];

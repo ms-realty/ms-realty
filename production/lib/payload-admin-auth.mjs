@@ -14,6 +14,7 @@ function safeOperator(value) {
     name: typeof value.name === "string" ? value.name : "",
     role: typeof value.role === "string" ? value.role : "",
     workspace_ids: workspaceIds(value.workspace_ids),
+    password_change_required: value.password_change_required === true,
     createdAt: value.createdAt || null,
     updatedAt: value.updatedAt || null,
   };
@@ -32,6 +33,7 @@ export function payloadAdminPrincipal(value) {
     workspace_ids: workspaceIds(value.workspace_ids),
     payload_user_id: value.id,
     email,
+    password_change_required: value.password_change_required === true,
   };
 }
 
@@ -50,7 +52,25 @@ function normalizedOperatorInput(input) {
   if (!email || !password) throw new Error("Email and password are required");
   if (password.length < 12) throw new Error("Password must be at least 12 characters");
   if (!PAYLOAD_ADMIN_ROLES.includes(role)) throw new Error("A valid operator role is required");
-  return { email, password, name, role, workspace_ids: workspaceIds(input?.workspace_ids) };
+  return {
+    email,
+    password,
+    name,
+    role,
+    workspace_ids: workspaceIds(input?.workspace_ids),
+    password_change_required: true,
+  };
+}
+
+function normalizedPasswordChangeInput(input) {
+  const currentPassword = typeof input?.current_password === "string" ? input.current_password : "";
+  const password = typeof input?.password === "string" ? input.password : "";
+  const confirmation = typeof input?.password_confirmation === "string" ? input.password_confirmation : "";
+  if (!currentPassword || !password || !confirmation) throw new Error("All password fields are required");
+  if (password.length < 12) throw new Error("Password must be at least 12 characters");
+  if (password !== confirmation) throw new Error("Password confirmation does not match");
+  if (password === currentPassword) throw new Error("The new password must be different");
+  return { currentPassword, password };
 }
 
 async function revokePayloadSessionWithLocalApi({ payload, token, user }) {
@@ -64,7 +84,7 @@ export function createPayloadAdminAuthService(
   payload,
   { revokePayloadSession = revokePayloadSessionWithLocalApi } = {},
 ) {
-  if (!payload?.login || !payload?.auth || !payload?.find || !payload?.create) {
+  if (!payload?.login || !payload?.auth || !payload?.find || !payload?.create || !payload?.update) {
     throw new Error("Payload admin authentication requires the Payload Local API");
   }
 
@@ -102,6 +122,39 @@ export function createPayloadAdminAuthService(
       if (!session) return false;
       await revokePayloadSession({ payload, token: sessionToken, user: session.user });
       return true;
+    },
+
+    async changePassword(session, input) {
+      if (!session?.user) throw new Error("An authenticated Payload session is required");
+      const { currentPassword, password } = normalizedPasswordChangeInput(input);
+      const email = String(session.user.email || "").trim().toLowerCase();
+      if (!email) throw new Error("The authenticated Payload user has no email address");
+      let verification = null;
+      try {
+        verification = await payload.login({
+          collection: PAYLOAD_ADMIN_COLLECTION,
+          data: { email, password: currentPassword },
+        });
+        if (String(verification?.user?.id ?? "") !== String(session.user.id ?? "")) {
+          throw new Error("Current password verification failed");
+        }
+        const operator = await payload.update({
+          collection: PAYLOAD_ADMIN_COLLECTION,
+          id: session.user.id,
+          data: { password, password_change_required: false, sessions: [] },
+          depth: 0,
+          overrideAccess: true,
+        });
+        return safeOperator(operator);
+      } finally {
+        if (verification?.token && verification?.user) {
+          try {
+            await revokePayloadSession({ payload, token: verification.token, user: verification.user });
+          } catch {
+            // The update clears every session; a second revocation may find none.
+          }
+        }
+      }
     },
 
     async listOperators(session) {

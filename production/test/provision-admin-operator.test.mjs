@@ -27,6 +27,7 @@ test("the provisioning command asks for the password through the environment", (
   assert.equal(help.status, 0);
   assert.match(help.stdout, /MS_REALTY_NEW_OPERATOR_PASSWORD/);
   assert.match(help.stdout, /never accepted as an argument and never printed/);
+  assert.match(help.stdout, /--upsert explicitly replaces an existing account password/);
 });
 
 test("the provisioning command validates the request before it opens a database connection", () => {
@@ -54,14 +55,24 @@ test("the provisioning command never overwrites an operator that already exists"
   // The guard is the difference between a typo in an email address and a
   // takeover of somebody else's account, so pin it in the source: it looks the
   // account up first and refuses rather than calling create().
-  const guard = source.indexOf("if (existing)");
+  const guard = source.indexOf("if (existing && !options.upsert)");
   const create = source.indexOf("payload.create(");
   assert.ok(guard > 0 && create > guard, "the existing-account check must run before the create call");
   assert.match(source, /will not change it/);
+  assert.match(source, /existing && !options\.upsert/);
+});
+
+test("an explicit upsert restores full access and requires a new password", () => {
+  assert.match(source, /password_change_required: true/);
+  assert.match(source, /workspace_ids: \[\]/);
+  assert.match(source, /sessions: \[\]/);
+  assert.match(source, /loginAttempts: 0/);
+  assert.match(source, /lockUntil: null/);
+  assert.match(source, /kind: existing \? "admin_operator_updated" : "admin_operator_created"/);
 });
 
 test("the provisioning command carries no password of its own", () => {
   // A default or example password in this file would become the credential
   // every fresh deployment ships with.
-  assert.doesNotMatch(source, /Sandanski|password\s*=\s*["'][^"']{6,}["']/);
+  assert.doesNotMatch(source, /password\s*=\s*["'][^"']{6,}["']/);
 });

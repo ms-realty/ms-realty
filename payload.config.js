@@ -94,6 +94,13 @@ const admins = {
       access: adminRoleFieldAccess,
       admin: { description: "Workspaces this operator may access. Empty = admin-wide. Only admins may edit." },
     },
+    {
+      name: "password_change_required",
+      type: "checkbox",
+      defaultValue: false,
+      access: adminRoleFieldAccess,
+      admin: { hidden: true },
+    },
   ],
 };
 

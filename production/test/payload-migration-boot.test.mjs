@@ -12,6 +12,7 @@ const publicSearchMigration = fromRoot("migrations", "20260811_153000_postgres_p
 const publicSearchRepairMigration = fromRoot("migrations", "20260813_110000_repair_postgres_search_index.ts");
 const publicSearchViewRepairMigration = fromRoot("migrations", "20260820_190500_repair_postgres_search_view.ts");
 const sourceStatedSearchViewMigration = fromRoot("migrations", "20260826_220000_source_stated_search_view.ts");
+const adminPasswordChangeMigration = fromRoot("migrations", "20260827_120000_admin_password_change_required.ts");
 const durableLeadSideEffectsMigration = fromRoot("migrations", "20260813_120000_durable_lead_side_effects.ts");
 
 function tableSql(source, name) {
@@ -40,12 +41,18 @@ test("Payload migration boot configuration and generated constraints stay runnab
     "20260813_110000_repair_postgres_search_index.ts",
     "20260813_120000_durable_funnel_events.ts",
     "20260813_120000_durable_lead_side_effects.ts",
+    "20260827_120000_admin_password_change_required.ts",
   ]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
       /import \{ sql, type MigrateDownArgs, type MigrateUpArgs \} from '@payloadcms\/db-postgres'/,
     );
   }
+
+  const adminPasswordChange = fs.readFileSync(adminPasswordChangeMigration, "utf8");
+  assert.match(adminPasswordChange, /ALTER TABLE "admins"/);
+  assert.match(adminPasswordChange, /ADD COLUMN IF NOT EXISTS "password_change_required" boolean DEFAULT false NOT NULL/);
+  assert.match(adminPasswordChange, /export async function down[\s\S]*void db/);
 
   const migration = fs.readFileSync(propertySearchMigration, "utf8");
   const requiredColumns = {

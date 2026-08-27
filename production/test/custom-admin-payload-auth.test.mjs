@@ -26,19 +26,21 @@ function user(overrides = {}) {
     name: "MS Realty Admin",
     role: "admin",
     workspace_ids: ["sandanski"],
+    password_change_required: false,
     ...overrides,
   };
 }
 
-function fakePayload() {
+function fakePayload(overrides = {}) {
   const calls = [];
-  const admin = user();
+  let admin = user(overrides);
+  let adminPassword = "correct-password";
   return {
     calls,
     collections: { admins: { config: { slug: "admins" } } },
     async login(options) {
       calls.push(["login", options]);
-      if (options.data.email !== admin.email || options.data.password !== "correct-password") {
+      if (options.data.email !== admin.email || options.data.password !== adminPassword) {
         throw new Error("Authentication failed for a secret reason");
       }
       return { token: "payload.jwt.session", exp: NOW_SECONDS + 3600, user: admin };
@@ -56,6 +58,12 @@ function fakePayload() {
     async create(options) {
       calls.push(["create", options]);
       return user({ id: 2, ...options.data });
+    },
+    async update(options) {
+      calls.push(["update", options]);
+      if (typeof options.data.password === "string") adminPassword = options.data.password;
+      admin = user({ ...admin, ...options.data });
+      return admin;
     },
   };
 }
@@ -88,6 +96,7 @@ test("Payload identity maps to the custom principal without exposing auth secret
     workspace_ids: ["sandanski"],
     payload_user_id: 1,
     email: "peycheff.com@gmail.com",
+    password_change_required: false,
   });
   assert.equal(payloadAdminPrincipal(user({ collection: "customers" })), null);
   assert.equal(payloadAdminPrincipal(user({ role: "unknown" })), null);
@@ -123,6 +132,7 @@ test("Payload Local API backs login, validation, revocation, and access-controll
     workspace_ids: ["sandanski"],
   });
   assert.equal(created.email, "broker@example.com");
+  assert.equal(created.password_change_required, true);
   for (const operation of ["find", "create"]) {
     const options = payload.calls.find(([name]) => name === operation)[1];
     assert.equal(options.collection, "admins");
@@ -130,8 +140,19 @@ test("Payload Local API backs login, validation, revocation, and access-controll
     assert.equal(options.user.id, 1);
   }
 
+  const changed = await service.changePassword(session, {
+    current_password: "correct-password",
+    password: "a-different-password",
+    password_confirmation: "a-different-password",
+  });
+  assert.equal(changed.password_change_required, false);
+  const update = payload.calls.find(([name]) => name === "update")[1];
+  assert.equal(update.id, 1);
+  assert.equal(update.overrideAccess, true);
+  assert.equal(update.data.password_change_required, false);
+  assert.deepEqual(update.data.sessions, []);
   assert.equal(await service.logout("payload.jwt.session"), true);
-  assert.equal(revoked.length, 1);
+  assert.equal(revoked.length, 2);
   assert.equal(revoked[0].user.id, 1);
   assert.equal(await service.logout("tampered"), false);
 });
@@ -167,6 +188,83 @@ test("custom login uses email/password and issues only a short-lived Payload ses
   assert.match(setCookie, /Secure/);
   assert.match(setCookie, /SameSite=Lax/);
   assert.doesNotMatch(setCookie, /correct-password|login-operator-token/);
+});
+
+test("a temporary-password account must replace it before any admin page or API is reachable", async () => {
+  const payload = fakePayload({ password_change_required: true });
+  const revoked = [];
+  const service = createPayloadAdminAuthService(payload, {
+    revokePayloadSession: async (args) => revoked.push(args),
+  });
+  const config = adapterConfig(service);
+
+  const login = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/login`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ email: "peycheff.com@gmail.com", password: "correct-password" }),
+    }),
+    { config },
+  );
+  assert.equal(login.status, 303);
+  assert.equal(login.headers.get("location"), "/admin/login?change=1");
+  const cookie = cookieFrom(login);
+
+  const changePage = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/login?change=1&locale=en`, { headers: { cookie } }),
+    { config },
+  );
+  const changeHtml = await changePage.text();
+  assert.equal(changePage.status, 200);
+  assert.match(changeHtml, /name="current_password"/);
+  assert.match(changeHtml, /name="password_confirmation"/);
+  assert.match(changeHtml, /Change the temporary password/);
+
+  const blockedPage = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/today`, { headers: { accept: "text/html", cookie } }),
+    { config },
+  );
+  assert.equal(blockedPage.status, 303);
+  assert.equal(blockedPage.headers.get("location"), "/admin/login?change=1");
+
+  const blockedApi = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/team`, { headers: { accept: "application/json", cookie } }),
+    { config },
+  );
+  assert.equal(blockedApi.status, 403);
+  assert.equal((await blockedApi.json()).kind, "password_change_required");
+
+  const changed = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/login`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded", cookie },
+      body: new URLSearchParams({
+        action: "change-password",
+        locale: "en",
+        current_password: "correct-password",
+        password: "a-different-password",
+        password_confirmation: "a-different-password",
+      }),
+    }),
+    { config },
+  );
+  assert.equal(changed.status, 303);
+  assert.equal(changed.headers.get("location"), "/admin/login?password=changed&locale=en");
+  assert.match(changed.headers.get("set-cookie"), /Max-Age=0/);
+  assert.ok(revoked.length >= 1);
+
+  const notice = await renderAppAdminResponse(new Request(`${BASE_URL}/admin/login?password=changed&locale=en`), { config });
+  assert.match(await notice.text(), /Password changed\. Sign in with your new password/);
+
+  const oldPassword = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/login`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ email: "peycheff.com@gmail.com", password: "correct-password" }),
+    }),
+    { config },
+  );
+  assert.equal(oldPassword.headers.get("location"), "/admin/login?error=1");
 });
 
 test("wrong password, tampered cookie, and expired session fail generically", async () => {
