@@ -237,7 +237,14 @@ main.crm-scroll[data-react-admin-ui="listing-editor"] { overflow: visible; }
 .crm-top__title { font-size: var(--text-lg); font-weight: var(--fw-semibold); }
 .crm-top__sub { font-size: var(--text-xs); }
 .crm-scroll { padding: var(--space-6); }
-.crm-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); min-width: 0; }
+.crm-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  width: min(100%, 1600px);
+  max-width: none;
+  min-width: 0;
+}
 .crm-wrap > * { min-width: 0; }
 .crm-ph { margin-bottom: var(--space-1); }
 .crm-ph h1 { font-size: var(--text-2xl); font-weight: var(--fw-semibold); }
@@ -428,6 +435,9 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
   color: var(--text-strong);
 }
 .crm-panel__hd a.mk-btn { font-size: var(--text-sm); line-height: 1; }
+.crm-panel--compact-empty > .crm-panel__hd { padding-bottom: var(--space-2); border-bottom: 0; }
+.crm-panel--compact-empty > .adm-empty { margin: 0; padding: 0 var(--space-5) var(--space-5); }
+.crm-panel--compact-empty > .adm-empty .mk-icon { color: var(--text-muted); }
 
 /* KPI strip: one white band, stats in a row separated by hairlines, still a real <dl> */
 .adm-kpis {

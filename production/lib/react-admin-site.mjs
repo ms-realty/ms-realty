@@ -2266,10 +2266,10 @@ function StatusPill({ tone = "ink", children, ...attrs }) {
   );
 }
 
-function Panel({ title, action, children, ...attrs }) {
+function Panel({ title, action, children, className = "", ...attrs }) {
   return h(
     "section",
-    { className: "crm-panel", ...attrs },
+    { className: ["crm-panel", className].filter(Boolean).join(" "), ...attrs },
     title ? h("div", { className: "crm-panel__hd" }, h("h2", null, title), action || null) : null,
     children,
   );
@@ -7092,7 +7092,11 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
   };
   return h(
     Panel,
-    { title: label(copy, "viewingFollowUpQueue", "Post-viewing follow-ups"), "data-viewing-follow-up-queue": "true" },
+    {
+      title: label(copy, "viewingFollowUpQueue", "Post-viewing follow-ups"),
+      className: queue.rows.length ? "" : "crm-panel--compact-empty",
+      "data-viewing-follow-up-queue": "true",
+    },
     queue.rows.length
       ? h(
           "div",
@@ -7196,7 +7200,7 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
             ),
           ),
         )
-      : h("p", { className: "crm-tbl__muted", "data-empty-viewing-follow-ups": "true" }, label(copy, "noOpenFollowUps", "No open viewing follow-ups.")),
+      : h(EmptyState, { icon: "calendar-check", "data-empty-viewing-follow-ups": "true" }, label(copy, "noOpenFollowUps", "No open viewing follow-ups.")),
   );
 }
 
@@ -7246,7 +7250,11 @@ function SellerPipelineQueue({ page, copy, ui }) {
   };
   return h(
     Panel,
-    { title: label(copy, "sellerPipelineQueue", "Seller valuation queue"), "data-seller-pipeline-queue": "true" },
+    {
+      title: label(copy, "sellerPipelineQueue", "Seller valuation queue"),
+      className: queue.rows.length ? "" : "crm-panel--compact-empty",
+      "data-seller-pipeline-queue": "true",
+    },
     queue.rows.length
       ? h(
           "div",
@@ -7364,7 +7372,7 @@ function SellerPipelineQueue({ page, copy, ui }) {
             ),
           ),
         )
-      : h("p", { className: "crm-tbl__muted", "data-empty-seller-pipeline": "true" }, label(copy, "noOpenSellerTasks", "No open seller valuation tasks.")),
+      : h(EmptyState, { icon: "landmark", "data-empty-seller-pipeline": "true" }, label(copy, "noOpenSellerTasks", "No open seller valuation tasks.")),
   );
 }
 
