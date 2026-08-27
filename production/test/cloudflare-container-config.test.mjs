@@ -315,6 +315,11 @@ test("Cloudflare Container admits authenticated MCP without opening ledger write
     /MS_REALTY_MCP_DURABLE_LISTING_WRITES: this\.env\.MS_REALTY_MCP_DURABLE_LISTING_WRITES \?\? ""/,
   );
   assert.doesNotMatch(wranglerConfig, /MS_REALTY_MCP_DURABLE_LISTING_WRITES/);
+  assert.doesNotMatch(
+    wranglerConfig,
+    /"MS_REALTY_PUBLIC_ORIGIN"\s*:/,
+    "strict deploy must not shadow the live remote secret",
+  );
 
   const env = { MS_REALTY_PUBLIC_ORIGIN: "https://ms-realty.example.workers.dev" };
   assert.equal(allowsMcpRequest({ method: "POST", pathname: "/mcp", env }), true);
