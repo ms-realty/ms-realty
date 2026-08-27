@@ -112,6 +112,7 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
 
 test("production deploy leaves the obsolete public-origin secret inert during strict upload", () => {
   assert.doesNotMatch(ciWorkflow, /secret (?:list|delete) .*MS_REALTY_PUBLIC_ORIGIN/);
+  assert.doesNotMatch(ciWorkflow, /secret put MS_REALTY_ORIGIN_TOKEN/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy[\s\S]*--strict/);
 });
 

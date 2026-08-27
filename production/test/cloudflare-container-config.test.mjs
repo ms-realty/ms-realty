@@ -209,7 +209,9 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(deployJob, /needs: \[check, deploy_origin\]/);
   assert.match(ciWorkflow, /previous_release: \$\{\{ steps\.previous_origin\.outputs\.release \}\}/);
   assert.match(ciWorkflow, /Capture active origin release/);
-  assert.match(deployJob, /wrangler@4\.117\.0 secret put MS_REALTY_ORIGIN_TOKEN/);
+  assert.match(deployJob, /secret list --name ms-realty --format json/);
+  assert.match(deployJob, /name === "MS_REALTY_ORIGIN_TOKEN"/);
+  assert.doesNotMatch(deployJob, /secret put MS_REALTY_ORIGIN_TOKEN/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
   assert.match(ciWorkflow, /accounts\/\$\{CLOUDFLARE_ACCOUNT_ID\}\/workers\/subdomain/);
   assert.match(ciWorkflow, /https:\/\/ms-realty\.\$\{subdomain\}\.workers\.dev\/api\/health/);
