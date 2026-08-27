@@ -279,6 +279,14 @@ jobs:
           printf '%s' "$MS_REALTY_ORIGIN_TOKEN" |
           npx --yes wrangler@4.117.0 secret put MS_REALTY_ORIGIN_TOKEN --name ms-realty
 
+      - name: Remove obsolete public-origin secret
+        run: |
+          secrets="$(npx --yes wrangler@4.117.0 secret list --name ms-realty --format json)"
+          state="$(node -e 'const rows=JSON.parse(process.argv[1]); if (!Array.isArray(rows)) throw new Error("Wrangler secret list must be an array"); process.stdout.write(rows.some(({ name }) => name === "MS_REALTY_PUBLIC_ORIGIN") ? "delete" : "absent")' "$secrets")"
+          if [ "$state" = "delete" ]; then
+            npx --yes wrangler@4.117.0 secret delete MS_REALTY_PUBLIC_ORIGIN --name ms-realty
+          fi
+
       - name: Deploy exact main commit
         id: deploy
         run: >-

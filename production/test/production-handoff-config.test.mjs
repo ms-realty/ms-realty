@@ -109,6 +109,12 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.equal(wrangler.split("__MS_REALTY_BUILD_MARKER__").length - 1, 2);
 });
 
+test("production deploy removes the obsolete public-origin secret before strict upload", () => {
+  assert.match(ciWorkflow, /secret list --name ms-realty --format json/);
+  assert.match(ciWorkflow, /secret delete MS_REALTY_PUBLIC_ORIGIN --name ms-realty/);
+  assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy[\s\S]*--strict/);
+});
+
 test("origin deployment is immutable, backup-first, and rolls back the active release", () => {
   const r2Capture = ciWorkflow.slice(
     ciWorkflow.indexOf("Capture exact-release R2 media coverage"),
