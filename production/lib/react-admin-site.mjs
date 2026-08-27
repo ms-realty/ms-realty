@@ -3129,7 +3129,7 @@ function adminShell(page, { title, mainAttrs, children }) {
         "div",
         { className: "crm-main" },
         h(Topbar, { page, title }),
-        h("main", { id: "main", className: "crm-scroll", ...mainAttrs }, h("div", { className: "crm-wrap" }, ...children)),
+        h("main", { id: "main", tabIndex: -1, className: "crm-scroll", ...mainAttrs }, h("div", { className: "crm-wrap" }, ...children)),
       ),
     ),
   ];

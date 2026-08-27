@@ -30,7 +30,9 @@
 }
 /* Priority is carried by the row's own overdue time and type chip; an edge bar
    repeated it and, with most rows overdue, read as noise. */
-.adm-next-actions > li[data-next-action-priority="critical"] { background: var(--brick-50); }
+.adm-next-actions > li[data-next-action-priority="critical"] {
+  background: color-mix(in srgb, var(--brick-600) 12%, var(--surface));
+}
 .adm-next-actions__body { display: grid; gap: 3px; min-width: 0; }
 .adm-next-actions__meta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
 .adm-next-actions__meta time {
@@ -39,6 +41,12 @@
   font-variant-numeric: tabular-nums;
 }
 .adm-next-actions > li[data-overdue="true"] .adm-next-actions__meta time { color: var(--brick-600); font-weight: var(--fw-semibold); }
+.adm-next-actions > li[data-next-action-priority="critical"] .adm-next-actions__meta time {
+  color: color-mix(in srgb, var(--brick-600) 45%, var(--text-strong));
+}
+.adm-next-actions > li[data-next-action-priority="critical"] .adm-task-list__reference {
+  color: color-mix(in srgb, var(--text-muted) 55%, var(--text-strong));
+}
 .adm-next-actions__body > strong { color: var(--text-strong); font-size: var(--text-sm); overflow-wrap: anywhere; }
 .adm-next-actions__action { display: flex; justify-content: flex-end; flex: none; }
 .adm-next-actions__more {
