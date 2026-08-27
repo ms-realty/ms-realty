@@ -325,6 +325,7 @@ import {
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { monitoringRollbackState } from "./monitoring-rollback.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
+import { r2MediaCoverageState } from "./r2-media-coverage.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
 import {
   productionRecoveryState,
@@ -1056,6 +1057,7 @@ export function createHttpApp({
   liveServiceProvisioningReportPath = null,
   monitoringRollbackReportPath = null,
   payloadRuntimeReportPath = null,
+  r2MediaCoverageReportPath = null,
   productionRecoveryReportPath = null,
   // Freshness is measured against the wall clock in production; tests pin it.
   productionRecoveryAt = null,
@@ -1908,6 +1910,9 @@ export function createHttpApp({
       liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
       monitoringRollback: monitoringRollbackState(monitoringRollbackReportPath || undefined),
       payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
+      r2MediaCoverage: r2MediaCoverageState(r2MediaCoverageReportPath || undefined, {
+        now: reviewedAt || new Date().toISOString(),
+      }),
       productionRecovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
         publicKey: productionRecoverySigningPublicKey,
         ...(productionRecoveryAt ? { now: productionRecoveryAt } : {}),
@@ -1964,6 +1969,7 @@ export function createHttpApp({
         }),
         live_service_provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
         payload_runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
+        r2_media_coverage: r2MediaCoverageState(r2MediaCoverageReportPath || undefined),
         production_recovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
           publicKey: productionRecoverySigningPublicKey,
           ...(productionRecoveryAt ? { now: productionRecoveryAt } : {}),
@@ -6750,6 +6756,7 @@ export function assertHttpSmoke(smoke) {
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "r2_media_coverage",
     "production_recovery",
   ];
   if (

@@ -618,6 +618,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         "live_services",
         "monitoring_rollback",
         "payload_runtime",
+        "r2_media_coverage",
         "production_recovery",
       ]);
       assert.equal(smoke.ready.status, 503);
@@ -628,6 +629,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           "live_services",
           "monitoring_rollback",
           "payload_runtime",
+          "r2_media_coverage",
           "production_recovery",
         ],
       );

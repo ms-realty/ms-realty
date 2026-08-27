@@ -4,7 +4,12 @@ import fs from "node:fs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLocaleRegistry, siteRootRedirectTarget } from "../lib/locales.mjs";
 import { renderAppSiteRoot } from "../lib/app-router-adapter.mjs";
-import { PREVIEW_NOINDEX, isPreviewHost, isProductionPublicHost } from "../../workers/preview-host.mjs";
+import {
+  PREVIEW_NOINDEX,
+  isPreviewHost,
+  isProductionPublicHost,
+  mediaCandidateKeys,
+} from "../../workers/preview-host.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 
@@ -48,4 +53,12 @@ test("the Worker noindexes isolated drills and leaves the production origin inde
   assert.match(workerSource, /if \(preview && url\.pathname === "\/robots\.txt"\) return previewRobotsResponse\(\);/);
   assert.match(workerSource, /return preview \? withPreviewNoindex\(response\) : response;/);
   assert.match(workerSource, /"User-agent: \*\\nDisallow: \/\\n"/);
+});
+
+test("the normalized production host reads newly uploaded workers.dev media first", () => {
+  assert.deepEqual(mediaCandidateKeys("MS-REALTY.MS-REALTY-BG.WORKERS.DEV.", "/wp-content/uploads/new.jpg"), [
+    "ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/new.jpg",
+    "makler-realty.com/wp-content/uploads/new.jpg",
+    "makler-realty.ru/wp-content/uploads/new.jpg",
+  ]);
 });

@@ -27,6 +27,7 @@
         "live_services",
         "monitoring_rollback",
         "payload_runtime",
+        "r2_media_coverage",
         "production_recovery"
       ]
     }
@@ -52,6 +53,7 @@
         "live_services",
         "monitoring_rollback",
         "payload_runtime",
+        "r2_media_coverage",
         "production_recovery"
       ],
       "blocked_gates": [
@@ -69,6 +71,11 @@
           "id": "payload_runtime",
           "status": "blocked",
           "message": "Payload runtime report must pass before final production readiness."
+        },
+        {
+          "id": "r2_media_coverage",
+          "status": "blocked",
+          "message": "A fresh exact-release workers.dev R2 coverage report with zero missing runtime assets is required before launch."
         },
         {
           "id": "production_recovery",

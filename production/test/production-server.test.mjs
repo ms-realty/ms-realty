@@ -275,6 +275,7 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
     MS_REALTY_META_GRAPH_VERSION: "v22.0",
     MS_REALTY_META_WEBHOOK_VERIFY_TOKEN: "meta-webhook-verify-token-at-least-24",
     MS_REALTY_PROVIDER_WEBHOOK_RECEIVED_AT: "2026-08-13T17:00:00.000Z",
+    MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: "/tmp/r2-media-coverage-report.json",
     MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
     PAYLOAD_SECRET: "test-payload-secret",
     DATABASE_URL: "postgres://payload:payload@127.0.0.1:5432/payload",
@@ -302,6 +303,7 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   assert.equal(config.providerConnection.metaWebhookVerifyToken, "meta-webhook-verify-token-at-least-24");
   assert.equal(config.providerConnection.metaGraphVersion, "v22.0");
   assert.equal(config.providerWebhookReceivedAt, "2026-08-13T17:00:00.000Z");
+  assert.equal(config.r2MediaCoverageReportPath, "/tmp/r2-media-coverage-report.json");
   assert.equal(config.leadDurableStore.workspaceId, "workspace-sandanski");
   assert.equal(productionServerConfig({}).localeRegistryPath, undefined);
   assert.equal(productionServerConfig({ HOST: "" }).host, "127.0.0.1");

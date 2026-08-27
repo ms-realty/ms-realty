@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { readBuildMarker } from "./build-marker.mjs";
 import { DEFAULT_MEDIA_INVENTORY_PATH, loadMediaInventory } from "./cms-seed.mjs";
 import { imageUrlFromMediaItem } from "./media.mjs";
 import { evidenceFreshness } from "./evidence-freshness.mjs";
@@ -435,7 +436,10 @@ export function r2MediaCoverageState(reportPath = DEFAULT_R2_MEDIA_COVERAGE_REPO
   }
   try {
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
-    assertR2MediaCoverageReport(report, { expectedReleaseSha });
+    const runtimeReleaseSha = expectedReleaseSha ?? readBuildMarker();
+    assertR2MediaCoverageReport(report, {
+      expectedReleaseSha: runtimeReleaseSha === "unversioned" ? undefined : runtimeReleaseSha,
+    });
     const freshness = evidenceFreshness(R2_MEDIA_COVERAGE_SOURCE, report.generated_at, { now: typeof now === "number" ? now : Date.parse(now) });
     if (freshness.status !== "fresh") {
       return { status: freshness.status === "stale" ? "expired_report" : "invalid_report", path: normalizedPath, generated_at: report.generated_at, freshness, report, next_actions: [...R2_MEDIA_COVERAGE_NEXT_ACTIONS] };

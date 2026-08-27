@@ -190,7 +190,7 @@ test("Cloudflare Container allows only configured durable case-authority writes"
   );
 });
 
-test("main deploys automatically with image-marker rollback", () => {
+test("main deploys automatically with coordinated Worker and origin rollback", () => {
   assert.match(ciWorkflow, /repository_dispatch:\n\s+types: \[auto_merge_deploy\]/);
   assert.doesNotMatch(ciWorkflow, /workflow_dispatch:/);
   assert.match(ciWorkflow, /github\.event_name == 'repository_dispatch'/);
@@ -204,6 +204,8 @@ test("main deploys automatically with image-marker rollback", () => {
   assert.doesNotMatch(deployJob, /secrets\.DATABASE_URL|secrets\.PAYLOAD_SECRET|payload:migrate/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
   assert.match(deployJob, /needs: \[check, deploy_origin\]/);
+  assert.match(ciWorkflow, /previous_release: \$\{\{ steps\.previous_origin\.outputs\.release \}\}/);
+  assert.match(ciWorkflow, /Capture active origin release/);
   assert.match(deployJob, /wrangler@4\.117\.0 secret put MS_REALTY_ORIGIN_TOKEN/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 rollback/);
   assert.match(ciWorkflow, /accounts\/\$\{CLOUDFLARE_ACCOUNT_ID\}\/workers\/subdomain/);
@@ -222,8 +224,16 @@ test("main deploys automatically with image-marker rollback", () => {
   );
   assert.match(verificationBlock, /for attempt in \$\(seq 1 100\); do/);
   assert.match(verificationBlock, /d\.origin_build_marker !== expected/);
+  assert.match(verificationBlock, /\/api\/ready/);
+  assert.match(verificationBlock, /d\.launch_ready !== true/);
+  assert.match(verificationBlock, /d\.blockers\.length !== 0/);
   const rollbackBlock = ciWorkflow.slice(ciWorkflow.indexOf("- name: Roll back failed deployment"));
-  assert.doesNotMatch(rollbackBlock, /d\.origin_build_marker !== expected/, "Worker rollback cannot roll back the origin");
+  assert.match(rollbackBlock, /needs\.deploy_origin\.outputs\.previous_release/);
+  assert.match(rollbackBlock, /if \[ "\$version" != "\$previous_version" \]/);
+  assert.match(rollbackBlock, /mv -Tf .*link.*\/opt\/ms-realty\/current/);
+  assert.match(rollbackBlock, /d\.origin_build_marker !== origin/);
+  assert.match(rollbackBlock, /rollback-ready\.json/);
+  assert.match(rollbackBlock, /d\.launch_ready !== true/);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
 });
 

@@ -1033,6 +1033,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "r2_media_coverage",
     "production_recovery",
   ]);
   assert.equal(smoke.ready.status, 503);
@@ -1043,6 +1044,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       "live_services",
       "monitoring_rollback",
       "payload_runtime",
+      "r2_media_coverage",
       "production_recovery",
     ],
   );
@@ -2240,6 +2242,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "r2_media_coverage",
     "production_recovery",
   ]);
   assert.equal(launch.body.gates.some((gate) => gate.id === "external_seo_exports"), false);
@@ -2254,6 +2257,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "r2_media_coverage",
     "production_recovery",
   ]);
   assert.equal(liveTemplateUnauthorized.status, 401);
@@ -2309,6 +2313,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
   assert.deepEqual(launchAfterLive.body.blockers, [
     "monitoring_rollback",
+    "r2_media_coverage",
     "production_recovery",
   ]);
   assert.equal(launchAfterLive.body.status, "blocked");

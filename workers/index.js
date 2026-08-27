@@ -12,7 +12,7 @@ import {
   isPayloadPrivatePath,
   secretMatches,
 } from "./durable-case-authority.mjs";
-import { PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, isPreviewHost } from "./preview-host.mjs";
+import { PREVIEW_NOINDEX, isPreviewHost, mediaCandidateKeys } from "./preview-host.mjs";
 import {
   OriginProxyError,
   requestForOrigin,
@@ -111,19 +111,7 @@ async function serveMedia(request, env, url) {
   // Mirror keys are host-prefixed so the two legacy domains cannot collide on a
   // shared upload path. The public workers.dev origin is a read-through for
   // both historical host namespaces; direct legacy hosts retain their own key.
-  const host = url.hostname.replace(/^www\./, "");
-  const candidates =
-    host === PRODUCTION_PUBLIC_HOST
-      ? [
-          `${PRODUCTION_PUBLIC_HOST}${url.pathname}`,
-          `makler-realty.com${url.pathname}`,
-          `makler-realty.ru${url.pathname}`,
-        ]
-      : host.endsWith("makler-realty.ru")
-        ? [`makler-realty.ru${url.pathname}`]
-        : host.endsWith("makler-realty.com")
-          ? [`makler-realty.com${url.pathname}`]
-          : [`makler-realty.com${url.pathname}`, `makler-realty.ru${url.pathname}`];
+  const candidates = mediaCandidateKeys(url.hostname, url.pathname);
 
   for (const key of candidates) {
     // The runtime rejects malformed percent-encoding before we run, but a

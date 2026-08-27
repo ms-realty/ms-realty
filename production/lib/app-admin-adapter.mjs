@@ -140,6 +140,7 @@ import {
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { monitoringRollbackState } from "./monitoring-rollback.mjs";
+import { r2MediaCoverageState } from "./r2-media-coverage.mjs";
 import {
   productionRecoveryState,
   readProductionRecoveryTemplate,
@@ -490,6 +491,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
     monitoringRollbackReportPath: env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
+    r2MediaCoverageReportPath: env.MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH,
     productionRecoveryReportPath: env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH,
     productionRecoverySigningPublicKey: env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
@@ -1971,6 +1973,9 @@ function launchReadiness(config) {
     liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
     monitoringRollback: monitoringRollbackState(config.monitoringRollbackReportPath || undefined),
     payloadRuntime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
+    r2MediaCoverage: r2MediaCoverageState(config.r2MediaCoverageReportPath || undefined, {
+      now: config.reviewedAt || new Date().toISOString(),
+    }),
     productionRecovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
       publicKey: config.productionRecoverySigningPublicKey,
     }),
@@ -2027,6 +2032,7 @@ function preflightReports(config) {
       }),
       live_service_provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
       payload_runtime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
+      r2_media_coverage: r2MediaCoverageState(config.r2MediaCoverageReportPath || undefined),
       production_recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
         publicKey: config.productionRecoverySigningPublicKey,
       }),

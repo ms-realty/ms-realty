@@ -3,6 +3,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
+import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import {
   assertR2MediaCoverageReport,
   buildR2MediaCoverageReport,
@@ -108,6 +110,52 @@ test("R2 media coverage marks a valid but stale report expired", () => {
   });
   assert.equal(state.status, "expired_report");
   assert.equal(state.freshness.status, "stale");
+});
+
+test("mounted R2 coverage clears the gate in both production readiness builders", async () => {
+  const reportPath = writeListing(
+    buildR2MediaCoverageReport({
+      listingPath: writeListing(expectedKeys()),
+      releaseSha: RELEASE_SHA,
+      generatedAt: GENERATED_AT,
+    }),
+  );
+
+  const httpApp = createHttpApp({ r2MediaCoverageReportPath: reportPath, reviewedAt: GENERATED_AT });
+  const httpReadiness = await dispatchHttp(httpApp, {
+    url: "/api/admin/launch-readiness",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  const httpPreflight = await dispatchHttp(httpApp, {
+    url: "/api/admin/preflight-reports",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  assert.equal(httpReadiness.body.gates.find((gate) => gate.id === "r2_media_coverage").status, "pass");
+  assert.equal(httpReadiness.body.blockers.includes("r2_media_coverage"), false);
+  assert.equal(httpPreflight.body.reports.r2_media_coverage.status, "pass");
+
+  const appConfig = {
+    ...appAdminConfigFromEnv({
+      NODE_ENV: "test",
+      MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: reportPath,
+      MS_REALTY_REVIEWED_AT: GENERATED_AT,
+    }),
+    adminPrincipal: { id: "r2-test-admin", roles: ["admin"], source: "credential_registry" },
+  };
+  const appReadiness = await renderAppAdminResponse(
+    new Request("https://example.test/api/admin/launch-readiness"),
+    { config: appConfig },
+  );
+  const appPreflight = await renderAppAdminResponse(
+    new Request("https://example.test/api/admin/preflight-reports"),
+    { config: appConfig },
+  );
+  const appReadinessBody = await appReadiness.json();
+  const appPreflightBody = await appPreflight.json();
+  assert.equal(appConfig.r2MediaCoverageReportPath, reportPath);
+  assert.equal(appReadinessBody.gates.find((gate) => gate.id === "r2_media_coverage").status, "pass");
+  assert.equal(appReadinessBody.blockers.includes("r2_media_coverage"), false);
+  assert.equal(appPreflightBody.reports.r2_media_coverage.status, "pass");
 });
 
 test("R2 media coverage fails closed on malformed and duplicate listing input", () => {

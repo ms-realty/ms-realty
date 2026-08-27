@@ -23,6 +23,7 @@
         "live_services",
         "monitoring_rollback",
         "payload_runtime",
+        "r2_media_coverage",
         "production_recovery"
       ]
     }
@@ -38,6 +39,7 @@
         "live_services",
         "monitoring_rollback",
         "payload_runtime",
+        "r2_media_coverage",
         "production_recovery"
       ],
       "blocked_gates": [
@@ -57,6 +59,11 @@
           "message": "Payload runtime report must pass before final production readiness."
         },
         {
+          "id": "r2_media_coverage",
+          "status": "blocked",
+          "message": "A fresh exact-release workers.dev R2 coverage report with zero missing runtime assets is required before launch."
+        },
+        {
           "id": "production_recovery",
           "status": "blocked",
           "message": "Encrypted off-site backup and isolated production restore evidence are required before launch."
@@ -66,7 +73,7 @@
     "headers": {
       "cache-control": "no-store",
       "connection": "keep-alive",
-      "content-length": "764",
+      "content-length": "955",
       "content-type": "application/json; charset=utf-8",
       "keep-alive": "timeout=5",
       "origin-agent-cluster": "?1",

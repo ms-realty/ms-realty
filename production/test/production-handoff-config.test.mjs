@@ -14,6 +14,7 @@ const searchSyncCli = fs.readFileSync(fromRoot("production", "scripts", "run-sea
 const searchQueryCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-query.mjs"), "utf8");
 const liveServiceEvidenceCli = fs.readFileSync(fromRoot("production", "scripts", "run-live-service-evidence.mjs"), "utf8");
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
+const previewHost = fs.readFileSync(fromRoot("workers", "preview-host.mjs"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 
 test("handoff keeps the governed app private behind the review host", () => {
@@ -92,7 +93,8 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.match(worker, /if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(worker, /requestForOrigin\(request, env\.MS_REALTY_ORIGIN_URL, env\.MS_REALTY_ORIGIN_TOKEN\)/);
   assert.match(worker, /if \(media\) return media;\n\s+if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
-  assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}${url.pathname}`"));
+  assert.match(worker, /mediaCandidateKeys\(url\.hostname, url\.pathname\)/);
+  assert.ok(previewHost.includes("`${PRODUCTION_PUBLIC_HOST}${pathname}`"));
   assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
   assert.match(wrangler, /"MS_REALTY_PUBLIC_ORIGIN": "https:\/\/ms-realty\.ms-realty-bg\.workers\.dev"/);
@@ -130,6 +132,13 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(ciWorkflow, /deploy_origin:[\s\S]*actions\/setup-node@v4[\s\S]*Capture exact-release R2 media coverage/);
   assert.match(ciWorkflow, /r2-media-coverage-\$\{\{ github\.sha \}\}/);
   assert.match(ciWorkflow, /Restore exact R2 report from the origin release/);
+  assert.match(ciWorkflow, /previous_release: \$\{\{ steps\.previous_origin\.outputs\.release \}\}/);
+  assert.match(ciWorkflow, /Capture active origin release/);
+  assert.match(ciWorkflow, /ready_url="\$\{health_url%\/api\/health\}\/api\/ready"/);
+  assert.match(ciWorkflow, /d\.launch_ready !== true/);
+  assert.match(ciWorkflow, /needs\.deploy_origin\.outputs\.previous_release/);
+  assert.match(ciWorkflow, /mv -Tf .*link.*\/opt\/ms-realty\/current/);
+  assert.match(ciWorkflow, /d\.origin_build_marker !== origin/);
 });
 
 test("every public CMS media asset preserves one of the two historical source hosts", () => {

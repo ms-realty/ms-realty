@@ -9,6 +9,20 @@ function normalizedHostname(hostname) {
   return String(hostname || "").trim().toLowerCase().replace(/\.$/, "");
 }
 
+export function mediaCandidateKeys(hostname, pathname) {
+  const host = normalizedHostname(hostname);
+  if (host === PRODUCTION_PUBLIC_HOST) {
+    return [
+      `${PRODUCTION_PUBLIC_HOST}${pathname}`,
+      `makler-realty.com${pathname}`,
+      `makler-realty.ru${pathname}`,
+    ];
+  }
+  if (host.endsWith("makler-realty.ru")) return [`makler-realty.ru${pathname}`];
+  if (host.endsWith("makler-realty.com")) return [`makler-realty.com${pathname}`];
+  return [`makler-realty.com${pathname}`, `makler-realty.ru${pathname}`];
+}
+
 export function isProductionPublicHost(hostname) {
   return normalizedHostname(hostname) === PRODUCTION_PUBLIC_HOST;
 }
