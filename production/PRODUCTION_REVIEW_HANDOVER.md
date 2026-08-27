@@ -1,8 +1,10 @@
 # Production review handover
 
-This deployment is the agency's durable decision workspace. It is intentionally **not the
-public domain cutover**: pending listing facts, translations, customer messages, broker
-contacts, legacy URLs, and launch evidence remain behind their existing approval gates.
+This deployment is the agency's durable decision workspace behind the private review host.
+The public production authority is the exact workers.dev origin
+`https://ms-realty.ms-realty-bg.workers.dev`; pending listing facts, translations,
+customer messages, broker contacts, legacy URLs, and launch evidence remain behind
+their existing approval gates.
 
 ## Agency entry point
 
@@ -11,7 +13,7 @@ contacts, legacy URLs, and launch evidence remain behind their existing approval
 2. Start with **Agency decision queue**. Each lane links to the existing specialist
    workbench and shows its remaining decision count.
 3. Record decisions in the workbench. Do not edit JSONL, CSV, or database files directly.
-4. `/api/ready` returning `503` is expected until the public-launch gates are complete.
+4. `/api/ready` returning `503` is expected until the production-readiness gates are complete.
 
 The review host is protected by HTTPS and Basic Authentication and sends
 `X-Robots-Tag: noindex, nofollow, noarchive`. The loopback port remains available only on
@@ -49,8 +51,9 @@ storage. A production recovery gate still requires an isolated restore drill, ch
 a named operator, and a different named reviewer; import that signed evidence through the
 production-recovery panel in the admin workspace.
 
-## Public cutover
+## Public production authority
 
-Do not point `makler-realty.com` or `makler-realty.ru` at this host until
-`production/data/launch-readiness.json` and the live `/api/ready` endpoint both show ready.
-The agency may review after this production-review deployment without weakening that rule.
+Use `https://ms-realty.ms-realty-bg.workers.dev` for the public site and direct `/admin`
+access. Isolated workers.dev drill hosts remain noindex. The historical
+`makler-realty.com` and `makler-realty.ru` URLs and media remain source/crawl compatibility
+data; no custom-domain or DNS cutover is required for deployment or readiness.

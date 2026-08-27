@@ -40,14 +40,7 @@ import {
 } from "./production-recovery.mjs";
 import { assertMonitoringRollbackReport, monitoringRollbackState } from "./monitoring-rollback.mjs";
 import { evidenceFreshness } from "./evidence-freshness.mjs";
-import {
-  REQUIRED_EXPORTS,
-  assertSeoEvidence,
-  assertSeoSourceSummary,
-  buildSeoEvidencePreflightReportFromEvidence,
-  missingRequiredExport,
-  missingRequiredSources,
-} from "./seo-evidence-contract.mjs";
+import { assertSeoEvidence } from "./seo-evidence-contract.mjs";
 import {
   approvedLaunchFreezeRouteArtifact,
   isApprovedLaunchFreezeRouteArtifact,
@@ -65,6 +58,11 @@ import {
   operatorPublicationListingEvidence,
 } from "./listing-publication-approval.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
+import {
+  assertR2MediaCoverageReport,
+  r2MediaCoverageState,
+  R2_MEDIA_COVERAGE_SOURCE,
+} from "./r2-media-coverage.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
 export const DEFAULT_LIVE_SERVICE_PREFLIGHT_REPORT = fromRoot("production", "data", "live-service-preflight-report.json");
@@ -73,7 +71,7 @@ export const DEFAULT_LOCAL_READINESS_MAX_AGE_MS = 15 * 60 * 1000;
 const LOCAL_PREVIEW_GATE_ID = "local_preview_only";
 const LOCAL_PREVIEW_GATE_NEXT_ACTIONS = [
   "Treat this Docker-only report as local verification, not production launch evidence.",
-  "Complete the external SEO, human-review, and live production evidence gates before launch.",
+  "Complete the human-review and live production evidence gates before launch; optional SEO analytics remain separate.",
 ];
 
 const LIVE_SERVICE_SOURCE_ALIASES = {
@@ -112,13 +110,13 @@ const REQUIRED_LAUNCH_GATE_IDS = [
   "redirect_reviews",
   "localized_sitemap",
   "structured_data",
-  "external_seo_exports",
   "listing_quality_review",
   "runtime_smoke",
   "live_services",
   "monitoring_rollback",
   "production_app_layer",
   "payload_runtime",
+  "r2_media_coverage",
   "production_recovery",
 ];
 const BLOCKED_GATE_NEXT_ACTIONS = {
@@ -137,10 +135,6 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   structured_data: [
     "Run npm run structured:data and fix any failing schema entries before launch.",
     "Confirm schema text is sourced from approved CMS/listing content only.",
-  ],
-  external_seo_exports: [
-    "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
-    "Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.",
   ],
   listing_quality_review: [
     "Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.",
@@ -168,6 +162,10 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   payload_runtime: [
     "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
     "Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.",
+  ],
+  r2_media_coverage: [
+    "Run npm run r2:media:coverage with the credential-free workers.dev R2 ListObjectsV2 JSON and the exact release SHA.",
+    "Backfill every public missing key reported by the coverage artifact, then mount the fresh report and rerun npm run launch:preflight.",
   ],
   production_recovery: [
     "Complete an encrypted off-site backup and isolated restore drill for durable Payload/Postgres and CRM/CMS data.",
@@ -688,37 +686,6 @@ function assertPassListingQualityEvidence(report) {
   }
 }
 
-function assertPassExternalSeoEvidence(report) {
-  const seo = gateById(report, "external_seo_exports");
-  if (!seo || !["pass", "deferred"].includes(seo.status)) return;
-  const evidence = seo.evidence || {};
-  const sourceSummaries = {
-    ...(evidence.sources || {}),
-    ...(evidence.analytics_export ? { analytics_export: evidence.analytics_export } : {}),
-    ...(evidence.privacy_events ? { privacy_events: evidence.privacy_events } : {}),
-  };
-  if (sourceSummaries.analytics_export?.status === "imported") {
-    assertSeoSourceSummary(sourceSummaries.analytics_export, "analytics_export");
-  }
-  for (const source of REQUIRED_EXPORTS) {
-    const sourceSummary = sourceSummaries[source];
-    assertSeoSourceSummary(sourceSummary, source);
-    if (seo.status === "pass" && missingRequiredExport(sourceSummary)) {
-      throw new Error(`Launch readiness external SEO requires complete ${source} evidence`);
-    }
-  }
-  const expectedMissing = missingRequiredSources(sourceSummaries);
-  if (!Array.isArray(evidence.missing_required_sources) || JSON.stringify(evidence.missing_required_sources) !== JSON.stringify(expectedMissing)) {
-    throw new Error("Launch readiness external SEO missing sources must match imported evidence");
-  }
-  if (seo.status === "pass" && expectedMissing.length !== 0) {
-    throw new Error("Launch readiness external SEO pass requires imported privacy or analytics evidence and no missing sources");
-  }
-  if (seo.status === "deferred" && expectedMissing.length === 0) {
-    throw new Error("Launch readiness external SEO cannot remain deferred after all post-DNS evidence is imported");
-  }
-}
-
 function assertPassRuntimeSmokeEvidence(report) {
   const smoke = gateById(report, "runtime_smoke");
   if (smoke?.status !== "pass") return;
@@ -974,7 +941,7 @@ function assertPassMonitoringRollbackEvidence(report) {
   if (monitoring?.status !== "pass") return;
   const sources = new Set(monitoring.evidence?.monitoring_sources || []);
   const sourceStatuses = monitoring.evidence?.monitoring_source_statuses || {};
-  for (const source of ["privacy_events", "analytics_export", "search_console", "yandex_webmaster", "backlinks"]) {
+  for (const source of ["privacy_events", "analytics_export"]) {
     if (!sources.has(source)) throw new Error("Launch readiness monitoring rollback requires source evidence");
   }
   const analyticsReady = sourceStatuses.privacy_events === "imported" || sourceStatuses.analytics_export === "imported";
@@ -997,11 +964,43 @@ function assertPassProductionRecoveryEvidence(report, publicKey) {
   if (recovery?.status === "pass") assertProductionRecoveryReport(recovery.evidence?.report, { publicKey });
 }
 
+function assertR2MediaCoverageEvidence(report) {
+  const gate = gateById(report, R2_MEDIA_COVERAGE_SOURCE);
+  if (!gate) return;
+  const evidence = gate.evidence || {};
+  const allowedStates = new Set(["missing_report", "invalid_report", "expired_report", "blocked_report", "pass"]);
+  if (!allowedStates.has(evidence.status)) throw new Error("R2 media coverage gate must expose a known report state");
+  if (evidence.report) assertR2MediaCoverageReport(evidence.report);
+  if (gate.status === "pass") {
+    if (evidence.status !== "pass" || evidence.report?.status !== "pass" || evidence.report?.missing_count !== 0) {
+      throw new Error("R2 media coverage pass gate requires a complete workers.dev report");
+    }
+  }
+  if (gate.status === "blocked" && evidence.status === "pass") {
+    throw new Error("R2 media coverage pass evidence cannot remain behind a blocked gate");
+  }
+}
+
 function assertPassEvidenceFreshness(report, now, publicKey) {
+  let productionEvidenceNow = now;
+  const localPreviewGate = gateById(report, LOCAL_PREVIEW_GATE_ID);
+  if (localPreviewGate) {
+    if (
+      localPreviewGate.status !== "blocked" ||
+      report.local_preview?.production_launch_evidence !== false ||
+      !sameJson(localPreviewGate.evidence, report.local_preview)
+    ) {
+      throw new Error("Local preview readiness must remain blocked and expose one consistent evidence snapshot");
+    }
+    productionEvidenceNow = Date.parse(report.local_preview.source_launch_readiness?.generated_at);
+    if (!Number.isFinite(productionEvidenceNow) || productionEvidenceNow > now + 60_000) {
+      throw new Error("Local preview readiness requires a valid non-future source readiness timestamp");
+    }
+  }
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
     for (const item of requiredLiveServiceReports(liveServices.evidence?.reports || [])) {
-      assertFreshEvidence("live_services", item.generated_at, item.freshness, now);
+      assertFreshEvidence("live_services", item.generated_at, item.freshness, productionEvidenceNow);
     }
   }
   const payloadRuntime = gateById(report, "payload_runtime");
@@ -1010,10 +1009,22 @@ function assertPassEvidenceFreshness(report, now, publicKey) {
   }
   const productionRecovery = gateById(report, "production_recovery");
   if (productionRecovery?.status === "pass") {
-    const expectedFreshness = productionRecoveryFreshness(productionRecovery.evidence?.report, { now, publicKey });
+    const expectedFreshness = productionRecoveryFreshness(productionRecovery.evidence?.report, {
+      now: productionEvidenceNow,
+      publicKey,
+    });
     if (expectedFreshness.status !== "fresh" || !sameJson(productionRecovery.evidence?.freshness, expectedFreshness)) {
       throw new Error("Launch readiness requires fresh production_recovery evidence");
     }
+  }
+  const r2MediaCoverage = gateById(report, R2_MEDIA_COVERAGE_SOURCE);
+  if (r2MediaCoverage?.status === "pass") {
+    assertFreshEvidence(
+      R2_MEDIA_COVERAGE_SOURCE,
+      r2MediaCoverage.evidence?.generated_at,
+      r2MediaCoverage.evidence?.freshness,
+      productionEvidenceNow,
+    );
   }
 }
 
@@ -1029,14 +1040,6 @@ function warningsFrom(structuredData, listingQuality) {
   return Object.entries(warnings)
     .filter(([, count]) => count > 0)
     .map(([id, count]) => ({ id, count }));
-}
-
-function seoLaunchSourceSummaries(sourceSummaries) {
-  return Object.fromEntries(
-    [...REQUIRED_EXPORTS, "analytics_export", "privacy_events"]
-      .filter((source) => sourceSummaries[source])
-      .map((source) => [source, sourceSummaries[source]]),
-  );
 }
 
 export function publicLaunchReadinessPayload(report) {
@@ -1387,6 +1390,7 @@ export function buildLaunchReadinessReport({
   liveServiceProvisioning = liveServiceProvisioningState(),
   appState = packageState(),
   payloadRuntime = payloadRuntimeState(undefined, { now: generatedAt }),
+  r2MediaCoverage = r2MediaCoverageState(null, { now: generatedAt }),
   productionRecoveryPublicKey = process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY,
   productionRecovery = productionRecoveryState(undefined, { now: generatedAt, publicKey: productionRecoveryPublicKey }),
   monitoringRollback = monitoringRollbackState(undefined, { now: generatedAt }),
@@ -1395,7 +1399,6 @@ export function buildLaunchReadinessReport({
   const generatedAtMs = Date.parse(generatedAt);
   if (!Number.isFinite(generatedAtMs)) throw new Error("Launch readiness requires valid generatedAt");
   assertSeoEvidence(seoEvidence);
-  const seoPreflight = buildSeoEvidencePreflightReportFromEvidence(seoEvidence);
 
   const liveServiceEvidence = liveServices.map((item) =>
     withEvidenceFreshness("live_services", item, item.generated_at, generatedAtMs),
@@ -1412,6 +1415,7 @@ export function buildLaunchReadinessReport({
       ? productionRecoveryFreshness(productionRecovery.report, { now: generatedAtMs, publicKey: productionRecoveryPublicKey })
       : evidenceFreshnessAt("production_recovery", null, generatedAtMs),
   };
+  const r2MediaCoverageEvidence = { ...r2MediaCoverage };
 
   const crawlPass =
     migration.summary.total === 457 &&
@@ -1438,7 +1442,6 @@ export function buildLaunchReadinessReport({
     routeReview.homepageTargetsAllowed &&
     routeReview.redirectSummary.duplicateOldUrls === 0 &&
     routeReview.decisionSummary.duplicateOldUrls === 0;
-  const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const launchFreezeListingEvidence = approvedLaunchFreezeListingEvidence(launchFreeze, sitemap);
   const operatorPublicationEvidence = operatorPublicationListingEvidence(launchFreeze);
   const listingQualityEvidence = hasCompleteListingQualityEvidence(listingQualityReview)
@@ -1459,15 +1462,14 @@ export function buildLaunchReadinessReport({
   const payloadRuntimeReady = payloadRuntimeEvidence.status === "pass" && payloadRuntimeEvidence.freshness.status === "fresh";
   const productionRecoveryReady =
     productionRecoveryEvidence.status === "pass" && productionRecoveryEvidence.freshness.status === "fresh";
+  const r2MediaCoverageReady =
+    r2MediaCoverageEvidence.status === "pass" && r2MediaCoverageEvidence.freshness?.status === "fresh";
   const monitoringPlan = [
     { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status, required_for: "production_ready" },
     { source: "analytics_export", status: seoEvidence.summary.sources.analytics_export.status, required_for: "production_ready" },
-    { source: "search_console", status: seoEvidence.summary.sources.search_console.status, required_for: "production_live" },
-    { source: "yandex_webmaster", status: seoEvidence.summary.sources.yandex_webmaster.status, required_for: "production_live" },
-    { source: "backlinks", status: seoEvidence.summary.sources.backlinks.status, required_for: "production_live" },
   ];
   const rollbackPlan = [
-    "Keep legacy DNS/origin rollback available until post-launch crawl is stable.",
+    "Keep the previous workers.dev release/origin rollback available until the post-release crawl is stable.",
     "Disable reviewed redirect deployment before changing content routes if crawl parity fails.",
     "Republish previous sitemap and robots files if indexable route coverage regresses.",
     "Use migration review queue owners to triage failed old URLs before broad redirects.",
@@ -1548,23 +1550,6 @@ export function buildLaunchReadinessReport({
       "Schema can pass while content warnings remain separate.",
     ),
     gate(
-      "external_seo_exports",
-      seoExportsReady ? "pass" : "deferred",
-      {
-        crawl_urls: seoEvidence.summary.crawl_urls,
-        url_types: seoEvidence.summary.url_types,
-        urls_with_any_evidence: seoEvidence.summary.urls_with_any_evidence,
-        missing_required_sources: seoEvidence.summary.missing_required_sources,
-        privacy_events: seoEvidence.summary.sources.privacy_events,
-        analytics_export: seoEvidence.summary.sources.analytics_export,
-        sources: seoLaunchSourceSummaries(seoEvidence.summary.sources),
-        next_actions: seoPreflight.next_actions,
-      },
-      seoExportsReady
-        ? "Canonical-domain SEO evidence is complete."
-        : "Deferred until canonical DNS cutover: Search Console, Yandex, and backlink evidence is required for Production-Live, not Production-Ready.",
-    ),
-    gate(
       "listing_quality_review",
       listingQualityReady ? "pass" : "blocked",
       listingQualityEvidence,
@@ -1626,6 +1611,14 @@ export function buildLaunchReadinessReport({
         : "Payload runtime report must pass before final production readiness.",
     ),
     gate(
+      R2_MEDIA_COVERAGE_SOURCE,
+      r2MediaCoverageReady ? "pass" : "blocked",
+      r2MediaCoverageEvidence,
+      r2MediaCoverageReady
+        ? "The workers.dev release has complete R2 coverage for every runtime-normalized media asset."
+        : "A fresh exact-release workers.dev R2 coverage report with zero missing runtime assets is required before launch.",
+    ),
+    gate(
       "production_recovery",
       productionRecoveryReady ? "pass" : "blocked",
       productionRecoveryEvidence,
@@ -1674,13 +1667,13 @@ export function assertLaunchReadinessReport(report, {
   assertPassRedirectReviewEvidence(report);
   assertPassLocalizedSitemapEvidence(report);
   assertPassStructuredDataEvidence(report);
-  assertPassExternalSeoEvidence(report);
   assertPassListingQualityEvidence(report);
   assertPassRuntimeSmokeEvidence(report);
   assertPassRuntimeEvidence(report);
   assertPassAppLayerEvidence(report);
   assertPassMonitoringRollbackEvidence(report);
   assertPassProductionRecoveryEvidence(report, productionRecoveryPublicKey);
+  assertR2MediaCoverageEvidence(report);
   assertPassEvidenceFreshness(report, generatedAtMs, productionRecoveryPublicKey);
   if (
     report.launch_ready &&

@@ -115,12 +115,12 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
     `${JSON.stringify({
       status: "blocked",
       launch_ready: false,
-      blockers: ["external_seo_exports"],
+      blockers: ["live_services"],
       gates: [
         {
-          id: "external_seo_exports",
+          id: "live_services",
           status: "blocked",
-          message: "Search Console, Yandex, and backlink exports are required before launch.",
+          message: "Live search and Hermes service evidence is required before launch.",
           evidence: {},
         },
       ],
@@ -156,7 +156,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(healthBody.status, "ok");
       assert.equal(healthBody.build_marker, "unversioned");
       assert.equal(healthBody.launch_ready, false);
-      assert.deepEqual(healthBody.blockers, ["external_seo_exports"]);
+      assert.deepEqual(healthBody.blockers, ["live_services"]);
 
       const ready = await readyRoute.GET(new Request("https://example.test/api/ready"));
       const readyBody = await ready.json();
@@ -164,9 +164,9 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(readyBody.status, "blocked");
       assert.deepEqual(readyBody.blocked_gates, [
         {
-          id: "external_seo_exports",
+          id: "live_services",
           status: "blocked",
-          message: "Search Console, Yandex, and backlink exports are required before launch.",
+          message: "Live search and Hermes service evidence is required before launch.",
         },
       ]);
       assert.equal(ready.headers.get("cache-control"), "no-store");

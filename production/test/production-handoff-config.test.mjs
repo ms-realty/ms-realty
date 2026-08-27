@@ -7,15 +7,25 @@ const caddy = fs.readFileSync(fromRoot("production", "Caddyfile.production-revie
 const compose = fs.readFileSync(fromRoot("production", "docker-compose.production-review.yml"), "utf8");
 const localCompose = fs.readFileSync(fromRoot("production", "docker-compose.local-production.yml"), "utf8");
 const dockerfile = fs.readFileSync(fromRoot("production", "Dockerfile"), "utf8");
+const cloudflareDockerfile = fs.readFileSync(fromRoot("Dockerfile"), "utf8");
 const deployScript = fs.readFileSync(fromRoot("production", "scripts", "deploy-production-review.sh"), "utf8");
 const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
 const searchSyncCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-sync.mjs"), "utf8");
 const searchQueryCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-query.mjs"), "utf8");
 const liveServiceEvidenceCli = fs.readFileSync(fromRoot("production", "scripts", "run-live-service-evidence.mjs"), "utf8");
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
+const previewHost = fs.readFileSync(fromRoot("workers", "preview-host.mjs"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
+const packageJson = JSON.parse(fs.readFileSync(fromRoot("package.json"), "utf8"));
 
-test("handoff puts the same governed app behind the private preview and final domains", () => {
+test("generic validation preserves live launch authority artifacts", () => {
+  assert.doesNotMatch(packageJson.scripts.validate, /npm run launch:(?:readiness|inputs)/);
+  assert.match(packageJson.scripts.validate, /node production\/scripts\/validate-foundation\.mjs/);
+  assert.match(packageJson.scripts["launch:readiness"], /build-launch-readiness\.mjs/);
+  assert.match(packageJson.scripts["launch:inputs"], /build-launch-input-checklist\.mjs/);
+});
+
+test("handoff keeps the governed app private behind the review host", () => {
   const reviewHost = caddy.indexOf("{$MS_REALTY_REVIEW_HOST}");
   const publicHealth = caddy.indexOf("@edge_health path /api/health", reviewHost);
   const reviewAuth = caddy.indexOf("basic_auth {", reviewHost);
@@ -34,20 +44,18 @@ test("handoff puts the same governed app behind the private preview and final do
   assert.match(workerOrigin, /reverse_proxy app:3000/);
   assert.doesNotMatch(workerOrigin, /MS_REALTY_ADMIN_TOKEN|import app_proxy/);
   for (const domain of ["makler-realty.com", "www.makler-realty.com", "makler-realty.ru", "www.makler-realty.ru"]) {
-    assert.match(caddy, new RegExp(domain.replaceAll(".", "\\.")));
+    assert.doesNotMatch(caddy, new RegExp(`^${domain.replaceAll(".", "\\.")} \\{`, "m"));
   }
-  assert.match(caddy, /@public_operator path \/admin \/admin\/\* \/api\/admin\/\*/);
-  assert.match(caddy, /@payload_private path \/payload-admin/);
+  assert.match(caddy, /@app_operator path \/admin \/admin\/\* \/api\/admin\/\*/);
   assert.match(caddy, /try_files \/makler-realty\.com\{path\} \/makler-realty\.ru\{path\}/);
-  assert.match(caddy, /root \* \/srv\/media\/makler-realty\.com/);
-  assert.match(caddy, /root \* \/srv\/media\/makler-realty\.ru/);
 });
 
-test("production compose runs one durable app before and after DNS cutover", () => {
+test("production compose runs one durable app at the workers.dev public origin", () => {
   assert.doesNotMatch(compose, /review-app:/);
   assert.doesNotMatch(compose, /MS_REALTY_PRIVATE_REVIEW_MODE/);
   assert.equal(compose.match(/MS_REALTY_TRUST_PROXY: "1"/g)?.length, 1);
-  assert.match(compose, /MS_REALTY_PUBLIC_ORIGIN: https:\/\/makler-realty\.com/);
+  assert.match(compose, /MS_REALTY_PUBLIC_ORIGIN: https:\/\/ms-realty\.ms-realty-bg\.workers\.dev/);
+  assert.match(compose, /MS_REALTY_MCP_ALLOWED_ORIGINS: https:\/\/ms-realty\.ms-realty-bg\.workers\.dev/);
   assert.match(compose, /MS_REALTY_BUILD_MARKER: \$\{MS_REALTY_BUILD_MARKER:-unversioned\}/);
   assert.match(compose, /MS_REALTY_RUNTIME_DATA_AUTHORITY: payload/);
   assert.match(compose, /MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true"/);
@@ -60,8 +68,10 @@ test("production compose runs one durable app before and after DNS cutover", () 
   assert.match(compose, /MS_REALTY_PROVIDER_TOKEN_KEY: \$\{MS_REALTY_PROVIDER_TOKEN_KEY:\?/);
   assert.match(compose, /MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: \$\{MS_REALTY_PROVIDER_OAUTH_STATE_SECRET:\?/);
   assert.match(compose, /MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: \$\{MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY:\?/);
+  assert.match(compose, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: \/app\/production\/data\/r2-media-coverage-report\.json/);
   assert.match(compose, /MS_REALTY_ORIGIN_TOKEN: \$\{MS_REALTY_ORIGIN_TOKEN:\?MS_REALTY_ORIGIN_TOKEN is required\}/);
   assert.match(dockerfile, /ARG MS_REALTY_BUILD_MARKER=unversioned[\s\S]*\.ms-realty-build-marker/);
+  assert.match(cloudflareDockerfile, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH=\/app\/production\/data\/r2-media-coverage-report\.json/);
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);
 });
 
@@ -91,11 +101,19 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.match(worker, /if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(worker, /requestForOrigin\(request, env\.MS_REALTY_ORIGIN_URL, env\.MS_REALTY_ORIGIN_TOKEN\)/);
   assert.match(worker, /if \(media\) return media;\n\s+if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
+  assert.match(worker, /mediaCandidateKeys\(url\.hostname, url\.pathname\)/);
+  assert.ok(previewHost.includes("`${PRODUCTION_PUBLIC_HOST}${pathname}`"));
+  assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
+  assert.match(wrangler, /"MS_REALTY_PUBLIC_ORIGIN": "https:\/\/ms-realty\.ms-realty-bg\.workers\.dev"/);
   assert.equal(wrangler.split("__MS_REALTY_BUILD_MARKER__").length - 1, 2);
 });
 
 test("origin deployment is immutable, backup-first, and rolls back the active release", () => {
+  const r2Capture = ciWorkflow.slice(
+    ciWorkflow.indexOf("Capture exact-release R2 media coverage"),
+    ciWorkflow.indexOf("Preserve exact R2 report for the Worker image"),
+  );
   assert.match(deployScript, /^set -euo pipefail$/m);
   assert.doesNotMatch(deployScript, /^set -E/m);
   assert.match(deployScript, /\^\[0-9a-f\]\{40\}\$/);
@@ -117,9 +135,21 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(deployScript, /set \+x/);
   assert.match(ciWorkflow, /readlink -f \/opt\/ms-realty\/current/);
   assert.doesNotMatch(ciWorkflow, /bash -s --/);
+  assert.match(r2Capture, /--list-only/);
+  assert.doesNotMatch(r2Capture, /--execute/);
+  assert.match(ciWorkflow, /deploy_origin:[\s\S]*actions\/setup-node@v4[\s\S]*Capture exact-release R2 media coverage/);
+  assert.match(ciWorkflow, /r2-media-coverage-\$\{\{ github\.sha \}\}/);
+  assert.match(ciWorkflow, /Restore exact R2 report from the origin release/);
+  assert.match(ciWorkflow, /previous_release: \$\{\{ steps\.previous_origin\.outputs\.release \}\}/);
+  assert.match(ciWorkflow, /Capture active origin release/);
+  assert.match(ciWorkflow, /ready_url="\$\{health_url%\/api\/health\}\/api\/ready"/);
+  assert.match(ciWorkflow, /d\.launch_ready !== true/);
+  assert.match(ciWorkflow, /needs\.deploy_origin\.outputs\.previous_release/);
+  assert.match(ciWorkflow, /mv -Tf .*link.*\/opt\/ms-realty\/current/);
+  assert.match(ciWorkflow, /d\.origin_build_marker !== origin/);
 });
 
-test("every public CMS media asset is mirrorable under one of the two final hosts", () => {
+test("every public CMS media asset preserves one of the two historical source hosts", () => {
   const seed = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-seed.json"), "utf8"));
   const assets = new Set(
     seed.records.flatMap((record) => (record.media || []).map((item) => item.asset_url).filter(Boolean)),

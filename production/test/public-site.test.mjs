@@ -206,14 +206,14 @@ test("approved Supersplat tours link to the self-hosted viewer without loading t
   page.body.media.tour = {
     available: true,
     provider: "supersplat-viewer",
-    viewer_url: "https://makler-realty.com/tours/MS-CRAWL-0001/index.html",
+    viewer_url: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001/index.html",
     accessibility_caption: "Reviewed 3D tour of the property.",
     fallback_gallery: [page.body.media.gallery[0]],
   };
   const html = renderReactPublicBody(page);
 
   assert.match(html, /data-tour-provider="supersplat-viewer"/);
-  assert.match(html, /href="https:\/\/makler-realty\.com\/tours\/MS-CRAWL-0001\/index\.html" target="_blank" rel="noopener" data-supersplat-viewer-link="true"/);
+  assert.match(html, /href="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/tours\/MS-CRAWL-0001\/index\.html" target="_blank" rel="noopener" data-supersplat-viewer-link="true"/);
   assert.match(html, /data-tour-gallery-fallback="true"/);
   assert.match(html, /href="#listing-gallery"/);
   assert.doesNotMatch(html, /data-photo-sphere-viewer=/);

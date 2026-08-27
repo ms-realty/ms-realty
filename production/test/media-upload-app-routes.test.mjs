@@ -53,7 +53,7 @@ test("the admin adapter stores an upload unreviewed and refuses a renamed text f
     ...appAdminConfigFromEnv(),
     adminPrincipal: { id: "operations_lead", source: "credential_registry", can_mutate: true, roles: ["admin"] },
     mediaUploadLedgerPath: context.uploadLedger,
-    mediaUploadStorageConfig: { driver: "local", root: context.uploadRoot, host: "makler-realty.com" },
+    mediaUploadStorageConfig: { driver: "local", root: context.uploadRoot, host: "ms-realty.ms-realty-bg.workers.dev" },
     auditLogPath: context.auditLog,
   };
 
@@ -118,7 +118,7 @@ test("the public adapter keeps a seller photo private and bound to the enquiry",
   const config = {
     ...appApiConfigFromEnv(),
     mediaUploadLedgerPath: context.uploadLedger,
-    mediaUploadStorageConfig: { driver: "local", root: context.uploadRoot, host: "makler-realty.com" },
+    mediaUploadStorageConfig: { driver: "local", root: context.uploadRoot, host: "ms-realty.ms-realty-bg.workers.dev" },
     sellerPipelinePath: context.sellerPipeline,
     sellerPhotoUploadEnabled: true,
     rateLimit: null,
@@ -184,7 +184,7 @@ test("the public adapter redirects a no-JS seller photo form back to the page", 
   const config = {
     ...appApiConfigFromEnv(),
     mediaUploadLedgerPath: context.uploadLedger,
-    mediaUploadStorageConfig: { driver: "local", root: context.uploadRoot, host: "makler-realty.com" },
+    mediaUploadStorageConfig: { driver: "local", root: context.uploadRoot, host: "ms-realty.ms-realty-bg.workers.dev" },
     sellerPipelinePath: context.sellerPipeline,
     sellerPhotoUploadEnabled: true,
     rateLimit: null,

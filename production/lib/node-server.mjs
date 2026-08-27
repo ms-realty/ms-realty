@@ -166,6 +166,7 @@ export function assertServerSmoke(smoke) {
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "r2_media_coverage",
     "production_recovery",
   ];
   if (

@@ -26,9 +26,6 @@ function blockerDetails(report) {
   return report.gates
     .filter((gate) => gate.status === "blocked")
     .flatMap((gate) => {
-      if (gate.id === "external_seo_exports") {
-        return [`external_seo_exports missing: ${(gate.evidence.missing_required_sources || []).join(", ")}`];
-      }
       if (gate.id === "live_services") {
         return (gate.evidence.reports || []).map((item) => `${item.source}: ${item.status} ${item.path || ""}`.trim());
       }
@@ -42,6 +39,12 @@ function blockerDetails(report) {
         const failed = (gate.evidence.checks || []).filter((check) => check.status !== "pass").map((check) => check.id);
         return [
           `payload_runtime: ${gate.evidence.status} ${gate.evidence.path || ""} ${missing.length ? `missing ${missing.join(", ")}` : ""} ${failed.length ? `failed ${failed.join(", ")}` : ""}`.trim(),
+        ];
+      }
+      if (gate.id === "r2_media_coverage") {
+        const summary = gate.evidence.summary || gate.evidence.report || {};
+        return [
+          `r2_media_coverage: ${gate.evidence.status || "blocked"} ${gate.evidence.path || ""} expected ${summary.expected_count ?? "unknown"}, listed ${summary.listed_count ?? "unknown"}, present ${summary.present_count ?? "unknown"}, missing ${summary.missing_count ?? "unknown"}, unexpected ${summary.unexpected_count ?? "unknown"}`.trim(),
         ];
       }
       return [gate.message ? `${gate.id}: ${gate.message}` : `${gate.id}: blocked`];

@@ -18,6 +18,7 @@ services:
       MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true"
       MS_REALTY_DEPLOYMENT_SCOPE: production
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: /runtime-evidence/production-launch-readiness.json
+      MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: /app/production/data/r2-media-coverage-report.json
       MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1"
       MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: ${MS_REALTY_PROVIDER_OAUTH_STATE_SECRET:?MS_REALTY_PROVIDER_OAUTH_STATE_SECRET is required}
       MS_REALTY_PROVIDER_TOKEN_KEY: ${MS_REALTY_PROVIDER_TOKEN_KEY:?MS_REALTY_PROVIDER_TOKEN_KEY is required}
@@ -27,8 +28,8 @@ services:
       MS_REALTY_TRUST_PROXY: "1"
       MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true"
       MS_REALTY_WORKSPACE_ID: ${MS_REALTY_WORKSPACE_ID:-workspace-sandanski}
-      MS_REALTY_PUBLIC_ORIGIN: https://makler-realty.com
-      MS_REALTY_MCP_ALLOWED_ORIGINS: https://makler-realty.com,https://makler-realty.ru,https://ms-realty.ms-realty-bg.workers.dev
+      MS_REALTY_PUBLIC_ORIGIN: https://ms-realty.ms-realty-bg.workers.dev
+      MS_REALTY_MCP_ALLOWED_ORIGINS: https://ms-realty.ms-realty-bg.workers.dev
 
   ollama:
     image: ollama/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad

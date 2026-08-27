@@ -1,6 +1,8 @@
 # MS Realty — Source of Truth
 
-**Single canonical document for the MS Realty rebuild** (`makler-realty.com` + `makler-realty.ru`).
+**Single canonical document for the MS Realty rebuild** (historical `makler-realty.com` +
+`makler-realty.ru` sources; public production at
+`https://ms-realty.ms-realty-bg.workers.dev`).
 Last updated: 2026-08-09.
 
 > **Precedence.** Running code, crawl artifacts, generated `production/data/*`, and the
@@ -19,8 +21,10 @@ the Greek border). The rebuild turns a 13-year-old WordPress/qTranslate-X site i
 **multilingual, SEO-safe, phone-first property-search and broker-operations platform** — a real
 operating system for buyers, sellers, and brokers, not a redesigned brochure site.
 
-The single hard constraint: **the domains' 13-year search equity is the asset.** The rebuild must
-preserve every indexed URL first, then add product on top.
+The single hard constraint: **the historical domains' 13-year search equity is the asset.** The
+rebuild must preserve every indexed URL first, then add product on top. The exact workers.dev
+origin is the sole authoritative public production origin; legacy domains remain source, crawl,
+media, and redirect compatibility data rather than a cutover prerequisite.
 
 ---
 
@@ -383,10 +387,11 @@ property evidence → commercial/market work → offer/conditions/agreement → 
 handover/aftercare. BG and GR opening events contain the applicable workflow snapshot so a later code
 or rule-pack deployment cannot silently change an in-flight case.
 
-**Integrations — required:** Google Search Console · Yandex Webmaster · GA4 or privacy-aware analytics
-· CRM email inbox · WhatsApp/Viber/phone click tracking · SMTP/email delivery · map provider · image
-CDN · backup/restore. **Useful:** calendar sync · SMS · e-signature/document collection ·
-accounting/commission export · portal exports where commercially useful · SEO monitoring.
+**Integrations — required:** GA4 or privacy-aware analytics · CRM email inbox · WhatsApp/Viber/phone
+click tracking · SMTP/email delivery · map provider · image CDN · backup/restore. **Optional
+historical analytics:** Google Search Console · Yandex Webmaster · backlink exports. **Useful:**
+calendar sync · SMS · e-signature/document collection · accounting/commission export · portal
+exports where commercially useful · SEO monitoring.
 
 **n8n** is for private internal experiments only, behind strict access controls — never critical
 workflow truth. **Excluded on purpose:** public AVM widget (no honest local data; a wrong number
@@ -410,14 +415,16 @@ homepage or search page.**
 4. Preserve `.ru` as Russian content unless an explicit consolidation decision is made.
 5. Preserve metadata (title, description, canonical, robots, OG, hreflang, structured data) and all
    media assets + image alt text that drive image SEO.
-6. Launch only after a crawl comparison proves URL, metadata, and content parity.
+6. Keep the exact workers.dev production origin indexable only after a crawl comparison proves URL,
+   metadata, and content parity; isolated drill hosts remain noindex.
 
 ### Inventory (authoritative URL universe)
 Union of: both domains' full sitemap trees (`.com/sitemap.html` + `.ru/sitemap_index.xml` and every
-sub-sitemap); **Google Search Console + Yandex Webmaster** exports; GA4/server-log landing pages;
-backlink export; a full crawl. Getting GSC/Yandex access is a hard precondition. External export
-templates live in `migration/external/seo/`; real exports stay local and are **required** to clear the
-SEO launch gate. Store as versioned migration snapshots (`migration/artifacts/`).
+sub-sitemap); GA4/server-log landing pages; a full crawl; and optional **Google Search Console,
+Yandex Webmaster, and backlink** exports when available. External export templates live in
+`migration/external/seo/`; real exports stay local for historical analytics and source analysis and
+are not a production-origin or readiness prerequisite. Store as versioned migration snapshots
+(`migration/artifacts/`).
 
 ### Classification & mapping (per URL)
 Classify: active listing · sold/rented/archived listing · page · post · taxonomy · location · type ·
@@ -438,17 +445,19 @@ point to a real, non-home, non-search public route; `approved_410` must carry an
 reason. Only reviewed `redirect_301` rows become deployable redirects
 (`production/data/deployable-redirects.json`), while reviewed `200` and `410` rows remain as terminal
 decisions in the same artifact. Everything else stays unresolved until reviewed. Prefer literal
-exact-match rules and keep chains to a single hop. Keep sitemap URLs stable where possible (`.com`
-`/sitemap.html`, `.ru` `/sitemap_index.xml` + `/sitemap.xml` behavior); preserve robots allowances
-for `/wp-content/uploads/`. Export preserves the append-only approval ledger; it must never erase
-earlier terminal decisions. Launch readiness is evaluated against the deployed decision artifact, so
-ledger changes do not clear the gate until export and the serving deployment have been updated.
+exact-match rules and keep chains to a single hop. Keep historical sitemap and media paths stable
+where possible (`.com` `/sitemap.html`, `.ru` `/sitemap_index.xml` + `/sitemap.xml` behavior);
+preserve robots allowances for `/wp-content/uploads/`. Export preserves the append-only approval
+ledger; it must never erase earlier terminal decisions. Launch readiness is evaluated against the
+deployed decision artifact, so ledger changes do not clear the gate until export and the serving
+deployment have been updated.
 
-### Launch validation (before cutover)
-Crawl old `.com` + `.ru`; crawl new staging; diff URL counts by type; verify every old URL returns
+### Production validation
+Crawl old `.com` + `.ru`; crawl the exact workers.dev production origin; diff URL counts by type; verify every old URL returns
 `200` / `301` / approved `410`; **zero redirect chains > 1 hop**; **zero accidental `noindex`** on
-indexable pages; no canonical pointing to the wrong language/domain; no important page losing title,
-description, H1, body, or images; all forms and CTAs work; sitemaps submitted in GSC + Yandex.
+indexable pages (isolated drill hosts must remain noindex); no canonical pointing to the wrong
+language/origin; no important page losing title, description, H1, body, or images; all forms and
+CTAs work; submit sitemaps to GSC/Yandex when those optional properties are used.
 
 ### Post-launch monitoring (first 30 days minimum)
 Daily: 404s, redirect misses, crawl errors, indexing drops, top-landing-page traffic, organic
@@ -462,15 +471,16 @@ Yandex coverage, ranking/traffic changes, sitemap discovered/indexed counts.
 | Dropping sold/ancient listings | Keep-live archive policy; deletion needs per-URL review sign-off |
 | Shipping fewer languages than today | Every existing translation ported before launch; per-locale word-count diff |
 | `.ru` treated as redundant | Dedicated `.ru` preservation lane; RU-geo clicks watched vs baseline |
-| `noindex`/robots leak on launch | Staging gated by auth, not meta; launch checks grep rendered pages before cutover |
+| `noindex`/robots leak on launch | Review host and isolated drills are gated by auth/noindex; exact production checks grep rendered pages before release |
 | hreflang cannibalizes BG rankings | hreflang only for real approved translations; no auto-translated shells |
 | `/wp-content/uploads/` 404s | Preserve media paths or 301 old uploads; verify image sample at launch |
-| DNS/email breakage at cutover | Full DNS/MX/SPF/DKIM inventory; email records untouched |
+| Legacy source or media drift | Keep the reviewed compatibility map and historical R2 namespaces; verify representative old URLs and uploads |
 
 ### Definition of done (migration)
-Done only when: full old URL inventory captured; redirect/content map reviewed; new site passes crawl
-parity; both domains have valid sitemaps; GSC/Yandex properties configured; and **no high-value URL,
-listing, image, metadata, or language route is lost** — not when the redesign "looks good."
+Done only when: full old URL inventory captured; redirect/content map reviewed; the exact production
+origin passes crawl parity; and **no high-value URL, listing, image, metadata, or language route is
+lost** — not when the redesign "looks good." GSC/Yandex properties and backlink exports remain
+optional historical analytics inputs.
 
 ---
 
@@ -513,12 +523,12 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | Phase | Scope | Status |
 |---|---|---|
 | **P0 · Local evidence pack** | Crawl/export pack, search fixtures, design-system screens, 360 CMS field prototype, CRM intake fixtures, static mobile/elderly QA gate | **Complete locally** |
-| **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Operator workflow implemented; human evidence incomplete.** The SQLite inventory, reviewer UI/API, import/export workbooks, terminal-decision validator, and evidence join are built. All 165 listing redirects are reviewed; 292 page/post/taxonomy decisions and the external exports remain blocked inputs. |
-| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Implemented and browser-audited locally** across phone/desktop and BG/EN/DE/NL/RU/EL/HE; only human-approved translations index, fallback-language content is labelled/noindex, and listing claims use reviewed facts/media only. Production cutover remains gated by P6. |
+| **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; optional GSC/Yandex/backlink/analytics joins | **Operator workflow implemented; human evidence incomplete.** The SQLite inventory, reviewer UI/API, import/export workbooks, terminal-decision validator, and evidence join are built. All 165 listing redirects are reviewed; 292 page/post/taxonomy decisions remain blocked inputs, while external exports remain optional historical evidence. |
+| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Implemented and browser-audited locally** across phone/desktop and BG/EN/DE/NL/RU/EL/HE; only human-approved translations index, fallback-language content is labelled/noindex, and listing claims use reviewed facts/media only. Production readiness remains gated by P6. |
 | **P3 · CMS & CRM** | Payload content runtime, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, contacts/accounts, consent/documents, buyer/seller pipelines, viewing/calendar/tasks | **Implemented and browser-audited locally** with encrypted contact vaults, attributable role-scoped mutations, append-only audit/activity, assignment, matching, distinct communication threads, delivery outcomes, publication schedules, and operations reports. Payload/Postgres migrations and admin runtime are proven locally **and, as of 2026-08-09, in production**: managed Postgres (Neon, `aws-eu-central-1`) is provisioned with all migrations applied, the first operator admin is seeded, Worker credentials/case-authority flags are live, and `payload:preflight` passes against the production DSN (runbook + evidence trail in `production/DEPLOYMENT.md`). |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer and static SuperSplat 3D-tour handoff; video/floor-plan; media fallback/captions | Both engines sync/query 167 reviewed locale documents locally; facets, pagination, cross-keyboard Cyrillic/Latin matching, saved-search matching, human-reviewed media, gallery fallbacks, and gated 360 / 3D tour publishing are implemented. A real phone-video reconstruction still requires an authorized GPU worker and broker review. Final live engine provisioning and geo/map behavior remain blocked on provider credentials and reviewed coordinates. |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Deterministic workflow truth, human approval boundaries, translation coverage/rollout, draft dispatch/worker validation, and audit contracts are implemented. Hermes still has no public/customer write capability; a real self-hosted Hermes/private-model endpoint and live worker report remain required. |
-| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; backup/rollback plan | Local build/runtime, mobile/RTL/browser QA, privacy analytics, and a checksummed backup/restore drill across Payload/Postgres plus CRM/CMS/evidence volumes are proven. The 457-row workbook still has 292 unresolved page/post/taxonomy URLs; **launch remains blocked on those reviews, Search Console/Yandex/backlink exports, the complete 165-row human listing review, provisioned live search/Hermes reports, and a real encrypted off-site backup/DR policy** (the production Payload runtime itself passes preflight as of 2026-08-09). |
+| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; backup/rollback plan | Local build/runtime, mobile/RTL/browser QA, privacy analytics, and a checksummed backup/restore drill across Payload/Postgres plus CRM/CMS/evidence volumes are proven. The 457-row workbook still has 292 unresolved page/post/taxonomy URLs; **launch remains blocked on those reviews, the complete 165-row human listing review, provisioned live search/Hermes reports, and a real encrypted off-site backup/DR policy** (external SEO exports remain optional historical analytics). |
 
 **What is proven in code right now** (see `production/README.md` and git history):
 crawl pack for both domains (457 URLs), SQLite migration DB + review dashboards, Typesense/Meilisearch
@@ -543,8 +553,7 @@ listing-publication workflow that proves sitemap paths and internal-link suggest
 mobile/elderly QA report, a Next production runtime, and a private checksummed local backup/restore
 path with an automatic pre-restore rollback snapshot.
 
-**Blocked until launch:** real external SEO exports (Search Console / Yandex / backlinks) under
-`migration/external/seo/`, explicit route decisions for the 292 non-listing legacy URLs, reviewed listing-quality fixes under `migration/reviews/listing-quality.csv`,
+**Blocked until launch:** explicit route decisions for the 292 non-listing legacy URLs, reviewed listing-quality fixes under `migration/reviews/listing-quality.csv`,
 live Typesense/Meilisearch URLs/API keys, Hermes/vLLM endpoint, sync/query and Hermes draft-worker
 reports, plus encrypted off-site backup/restore evidence (production Payload secrets, database, and
 operator setup were completed 2026-08-09 — see `production/DEPLOYMENT.md`). Only the 165 mapped listing redirects are covered by the reviewed deployable 301 export; the
@@ -595,7 +604,7 @@ contact a broker, save/share, and request viewings on mobile; sellers can reques
 broker pipeline; brokers can work leads, tasks, viewings, and property drafts inside the CRM; media
 supports photos, video, floor plans, and accessible 360 tours; accessibility QA passes before visual
 polish; AI and automation improve broker/editor speed without bypassing human review; and the launch
-crawl proves parity before production cutover.
+crawl proves parity on the exact workers.dev production origin.
 
 ---
 

@@ -12,7 +12,7 @@ import {
   isPayloadPrivatePath,
   secretMatches,
 } from "./durable-case-authority.mjs";
-import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
+import { PREVIEW_NOINDEX, isPreviewHost, mediaCandidateKeys } from "./preview-host.mjs";
 import {
   OriginProxyError,
   requestForOrigin,
@@ -109,14 +109,9 @@ const MEDIA_TYPES = {
 
 async function serveMedia(request, env, url) {
   // Mirror keys are host-prefixed so the two legacy domains cannot collide on a
-  // shared upload path. Until the real domains are attached everything arrives
-  // on workers.dev, so .com is the default and .ru is tried as a fallback.
-  const host = url.hostname.replace(/^www\./, "");
-  const candidates = host.endsWith("makler-realty.ru")
-    ? [`makler-realty.ru${url.pathname}`]
-    : host.endsWith("makler-realty.com")
-      ? [`makler-realty.com${url.pathname}`]
-      : [`makler-realty.com${url.pathname}`, `makler-realty.ru${url.pathname}`];
+  // shared upload path. The public workers.dev origin is a read-through for
+  // both historical host namespaces; direct legacy hosts retain their own key.
+  const candidates = mediaCandidateKeys(url.hostname, url.pathname);
 
   for (const key of candidates) {
     // The runtime rejects malformed percent-encoding before we run, but a
@@ -160,10 +155,14 @@ const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 const isSafeKey = (key) => key.length > 0 && key.length <= 1024 && !CONTROL_CHARS.test(key) && !key.includes("..");
 
-// Uploads may only land under the two legacy-host media trees. Even with the
+// Uploads may only land under the production or legacy-host media trees. Even with the
 // secret, the endpoint cannot plant objects at arbitrary keys — a leaked
 // credential defaces images, it does not gain a free file host.
-const INGEST_KEY_PREFIXES = ["makler-realty.com/wp-content/", "makler-realty.ru/wp-content/"];
+const INGEST_KEY_PREFIXES = [
+  `${PRODUCTION_PUBLIC_HOST}/wp-content/`,
+  "makler-realty.com/wp-content/",
+  "makler-realty.ru/wp-content/",
+];
 // Largest mirrored file is 9.8MB; the cap bounds Worker memory, not R2.
 const MAX_INGEST_BYTES = 32 * 1024 * 1024;
 

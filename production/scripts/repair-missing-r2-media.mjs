@@ -126,7 +126,9 @@ export function assertRecoveredObjects(objects, entries = MISSING_R2_MEDIA) {
 
 async function main() {
   const execute = process.argv.includes("--execute");
-  if (!execute) {
+  const listOnly = process.argv.includes("--list-only");
+  if (execute && listOnly) throw new Error("Choose either --execute or --list-only");
+  if (!execute && !listOnly) {
     console.log(JSON.stringify({ execute, objects: MISSING_R2_MEDIA.length, bytes: MISSING_R2_MEDIA.reduce((n, item) => n + item.size, 0) }));
     return;
   }
@@ -134,18 +136,15 @@ async function main() {
     accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
     apiToken: process.env.CLOUDFLARE_API_TOKEN,
   };
-  const repaired = await repairMissingR2Media({ storage: createCloudflareR2Storage(cloudflare) });
+  const repaired = execute ? await repairMissingR2Media({ storage: createCloudflareR2Storage(cloudflare) }) : [];
   const listingOutput = option("listing-output");
+  if (!listingOutput) throw new Error("--listing-output is required for R2 listing capture");
   let listed = null;
-  if (listingOutput) {
-    const objects = await listR2Objects({
-      ...cloudflare,
-    });
-    assertRecoveredObjects(objects);
-    fs.mkdirSync(path.dirname(path.resolve(listingOutput)), { recursive: true });
-    fs.writeFileSync(listingOutput, `${JSON.stringify(objects, null, 2)}\n`, "utf8");
-    listed = objects.length;
-  }
+  const objects = await listR2Objects({ ...cloudflare });
+  assertRecoveredObjects(objects);
+  fs.mkdirSync(path.dirname(path.resolve(listingOutput)), { recursive: true });
+  fs.writeFileSync(listingOutput, `${JSON.stringify(objects, null, 2)}\n`, "utf8");
+  listed = objects.length;
   console.log(JSON.stringify({ repaired: repaired.length, bytes: repaired.reduce((n, item) => n + item.size, 0), listed, objects: repaired }));
 }
 

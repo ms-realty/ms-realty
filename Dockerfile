@@ -33,6 +33,7 @@ FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     HOSTNAME=0.0.0.0 \
+    MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH=/app/production/data/r2-media-coverage-report.json \
     PORT=8080
 WORKDIR /app
 

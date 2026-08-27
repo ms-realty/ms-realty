@@ -40,6 +40,11 @@ import {
   summarizeLegacyRouteDecisions,
 } from "../lib/redirect-approvals.mjs";
 import { signProductionRecoveryReport } from "../lib/production-recovery.mjs";
+import {
+  buildR2MediaCoverageReport,
+  expectedRuntimeR2Media,
+  R2_MEDIA_COVERAGE_MAX_AGE_MS,
+} from "../lib/r2-media-coverage.mjs";
 
 const RECOVERY_KEYPAIR = crypto.generateKeyPairSync("ed25519");
 process.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY = RECOVERY_KEYPAIR.publicKey
@@ -109,6 +114,46 @@ function completeTerminalDecisions(routeMap, deployableRedirects) {
 
 function writeJson(path, value) {
   fs.writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+const READY_R2_MEDIA_COVERAGE_REPORT = (() => {
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-ready-r2-`);
+  const listingPath = `${directory}/objects.json`;
+  fs.writeFileSync(listingPath, `${JSON.stringify([...expectedRuntimeR2Media().keys].sort())}\n`);
+  return buildR2MediaCoverageReport({
+    listingPath,
+    releaseSha: "a".repeat(40),
+    generatedAt: "2026-07-05T00:00:00.000Z",
+  });
+})();
+
+function readyR2MediaCoverage(generatedAt = "2026-07-05T00:00:00Z") {
+  const report = structuredClone(READY_R2_MEDIA_COVERAGE_REPORT);
+  report.generated_at = new Date(generatedAt).toISOString();
+  return {
+    status: "pass",
+    path: "fixture/r2-media-coverage-report.json",
+    generated_at: report.generated_at,
+    freshness: {
+      id: "r2_media_coverage",
+      status: "fresh",
+      age_ms: 0,
+      max_age_ms: R2_MEDIA_COVERAGE_MAX_AGE_MS,
+    },
+    report,
+    summary: {
+      expected_count: report.expected_count,
+      listed_count: report.listed_count,
+      present_count: report.present_count,
+      missing_count: report.missing_count,
+      unexpected_count: report.unexpected_count,
+      missing_keys: [],
+      unexpected_keys: [],
+      expected_digest: report.expected_digest,
+      listing_digest: report.listing_digest,
+    },
+    next_actions: report.next_actions,
+  };
 }
 
 async function localPayloadRuntimeReport(generatedAt) {
@@ -804,6 +849,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "r2_media_coverage",
     "production_recovery",
   ]);
   const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
@@ -834,16 +880,10 @@ test("launch readiness stays blocked until production launch blockers are cleare
     },
     duplicate_old_urls: 0,
   });
-  const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
   const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
   const liveGate = report.gates.find((gate) => gate.id === "live_services");
-  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
-  assert.equal(seoGate.evidence.crawl_urls, 457);
-  assert.deepEqual(seoGate.evidence.url_types, { page: 104, post: 42, taxonomy: 146, listing: 165 });
-  assert.equal(seoGate.evidence.urls_with_any_evidence, seoEvidence.summary.urls_with_any_evidence);
-  assert.ok(seoGate.evidence.next_actions.some((action) => action.includes("seo:preflight")));
-  assert.equal(seoGate.status, "deferred");
-  assert.match(seoGate.message, /Production-Live, not Production-Ready/);
+  assert.equal(report.gates.some((gate) => gate.id === "external_seo_exports"), false);
+  assert.deepEqual(report.monitoring_plan.map((item) => item.source), ["privacy_events", "analytics_export"]);
   assert.equal(listingGate.status, "pass");
   assert.equal(listingGate.evidence.mode, "operator_publication_of_freeze_active");
   assert.equal(listingGate.evidence.approval_id, "MSR-LISTING-PUBLICATION-1");
@@ -878,6 +918,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "r2_media_coverage",
     "production_recovery",
   ]) {
     const blockedGate = report.gates.find((gate) => gate.id === id);
@@ -897,6 +938,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
       "live_services",
       "monitoring_rollback",
       "payload_runtime",
+      "r2_media_coverage",
       "production_recovery",
     ],
   );
@@ -923,6 +965,7 @@ test("launch readiness validator accepts ready state after required gates are cl
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    r2MediaCoverage: readyR2MediaCoverage(),
     productionRecovery: readyProductionRecovery,
     monitoringRollback: readyMonitoringRollback,
   });
@@ -1103,7 +1146,7 @@ test("launch readiness validator requires blocked gate next actions", () => {
   }
 });
 
-test("launch readiness rejects hand-cleared external SEO blockers", () => {
+test("launch readiness rejects malformed optional historical SEO evidence", () => {
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
@@ -1129,7 +1172,7 @@ test("launch readiness rejects hand-cleared external SEO blockers", () => {
   );
 });
 
-test("launch readiness validator rejects weak external SEO pass evidence", () => {
+test("launch readiness keeps external SEO evidence outside the launch gate set", () => {
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
@@ -1148,13 +1191,8 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
     productionRecovery: readyProductionRecovery,
     monitoringRollback: readyMonitoringRollback,
   });
-  const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
-  seoGate.evidence.sources.search_console.input_sha256 = "not-a-digest";
-
-  assert.throws(() => assertLaunchReadinessReport(report), /input hash/);
-  seoGate.evidence.sources.search_console.input_sha256 = "a".repeat(64);
-  seoGate.evidence.sources.search_console.row_count = 99;
-  assert.throws(() => assertLaunchReadinessReport(report), /row counts/);
+  assert.equal(report.gates.some((gate) => gate.id === "external_seo_exports"), false);
+  assert.equal(assertLaunchReadinessReport(report), true);
 });
 
 test("launch readiness validator rejects weak crawl inventory pass evidence", () => {
@@ -1590,6 +1628,7 @@ test("launch readiness blocks live services until provisioning passes", () => {
     },
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    r2MediaCoverage: readyR2MediaCoverage(),
     productionRecovery: readyProductionRecovery,
     monitoringRollback: readyMonitoringRollback,
   });
@@ -1679,7 +1718,7 @@ test("launch readiness accepts reviewed location page growth", () => {
   assert.equal(report.gates.find((gate) => gate.id === "localized_sitemap").status, "pass");
 });
 
-test("launch readiness accepts imported analytics before canonical SEO evidence exists", () => {
+test("launch readiness accepts imported analytics without external SEO evidence", () => {
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
@@ -1705,12 +1744,13 @@ test("launch readiness accepts imported analytics before canonical SEO evidence 
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    r2MediaCoverage: readyR2MediaCoverage(),
     productionRecovery: readyProductionRecovery,
     monitoringRollback: readyMonitoringRollback,
   });
 
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
-  assert.equal(report.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
+  assert.equal(report.gates.some((gate) => gate.id === "external_seo_exports"), false);
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.deepEqual(report.blockers, []);
 });
@@ -1735,6 +1775,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    r2MediaCoverage: readyR2MediaCoverage(),
     productionRecovery: readyProductionRecovery,
     monitoringRollback: readyMonitoringRollback,
   });
@@ -1753,6 +1794,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    r2MediaCoverage: readyR2MediaCoverage(),
     productionRecovery: readyProductionRecovery,
     monitoringRollback: readyMonitoringRollback,
   });
@@ -1786,6 +1828,7 @@ test("launch readiness build honors output path override", () => {
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "r2_media_coverage",
     "production_recovery",
   ]);
 });
@@ -1807,11 +1850,12 @@ test("launch readiness build honors an explicit generated timestamp", () => {
   assert.equal(JSON.parse(fs.readFileSync(outputPath, "utf8")).generated_at, generatedAt);
 });
 
-test("local readiness materializer promotes only fresh local Payload proof and preserves external blockers", async () => {
+test("local readiness materializer promotes only fresh local Payload proof and preserves production blockers", async () => {
   const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-local-readiness-`);
   const sourcePath = fromRoot("production", "data", "launch-readiness.json");
   const source = JSON.parse(fs.readFileSync(sourcePath, "utf8"));
-  const generatedAt = "2026-07-10T12:00:00.000Z";
+  const generatedAtMs = Date.parse(source.generated_at) + 5 * 60 * 1000;
+  const generatedAt = new Date(generatedAtMs).toISOString();
   const syncPath = `${directory}/postgres-search-sync-report.json`;
   const queryPath = `${directory}/postgres-search-query-report.json`;
   const payloadPath = `${directory}/payload-runtime-report.json`;
@@ -1820,11 +1864,11 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   const query = readJson(["production", "data", "postgres-search-query-report.json.example"]);
   delete sync.example;
   delete query.example;
-  sync.generated_at = "2026-07-10T11:59:00.000Z";
-  query.generated_at = "2026-07-10T11:59:30.000Z";
+  sync.generated_at = new Date(generatedAtMs - 60_000).toISOString();
+  query.generated_at = new Date(generatedAtMs - 30_000).toISOString();
   writeJson(syncPath, sync);
   writeJson(queryPath, query);
-  const payload = await localPayloadRuntimeReport("2026-07-10T11:59:45.000Z");
+  const payload = await localPayloadRuntimeReport(new Date(generatedAtMs - 15_000).toISOString());
   writeJson(payloadPath, payload);
 
   const result = materializeLocalLaunchReadiness({
@@ -1847,6 +1891,7 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   ]);
   assert.equal(result.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
   assert.equal(result.report.gates.find((gate) => gate.id === "local_preview_only").status, "blocked");
+  assert.equal(result.report.local_preview.source_launch_readiness.generated_at, source.generated_at);
   assert.deepEqual(
     result.report.local_preview.reports.map((report) => [report.id, report.status]),
     [
@@ -1861,7 +1906,7 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   }
   assert.deepEqual(JSON.parse(fs.readFileSync(outputPath, "utf8")), result.report);
 
-  payload.generated_at = "2026-07-10T11:40:00.000Z";
+  payload.generated_at = new Date(generatedAtMs - 20 * 60 * 1000).toISOString();
   writeJson(payloadPath, payload);
   const stale = materializeLocalLaunchReadiness({
     sourceReadinessPath: sourcePath,
@@ -1895,7 +1940,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.notEqual(result.status, 0);
   assert.match(
     result.stderr,
-    /LAUNCH BLOCKED: live_services, monitoring_rollback, payload_runtime, production_recovery/,
+    /LAUNCH BLOCKED: live_services, monitoring_rollback, payload_runtime, r2_media_coverage, production_recovery/,
   );
   assert.match(result.stderr, /postgres_search_sync: missing_report .*postgres-search-sync-report\.json/);
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
@@ -1928,7 +1973,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.notEqual(withReviewPath.status, 0);
   assert.match(
     withReviewPath.stderr,
-    /LAUNCH BLOCKED: live_services, monitoring_rollback, payload_runtime, production_recovery/,
+    /LAUNCH BLOCKED: live_services, monitoring_rollback, payload_runtime, r2_media_coverage, production_recovery/,
   );
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review next:/);
@@ -2527,14 +2572,12 @@ test("live service report import writes only validated source reports", () => {
 test("launch input checklist names remaining operator-owned blockers", async () => {
   const payloadRuntimeReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-checklist-payload-runtime-`)}/payload-runtime-report.json`;
   writeJson(payloadRuntimeReportPath, await buildPayloadRuntimeReport({ env: {}, generatedAt: "2026-07-05T00:00:00Z" }));
-  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
     launchReadiness: buildLaunchReadinessReport({
       generatedAt: "2026-07-05T00:00:00Z",
       payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath),
     }),
-    seoEvidence,
     redirectWorkbookCsv: fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8"),
     deployableRedirects: approvedLaunchFreezeRouteArtifact(),
     routeMap: readJson(["production", "data", "legacy-route-map.json"]),
@@ -2563,29 +2606,11 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /target_listing_id/);
   assert.match(markdown, /same_content_checklist/);
   assert.match(markdown, /Approval import columns: `old_url`, `decision`, `target_path`, `equivalent_content`, `reviewer`/);
-  assert.match(markdown, /Missing required sources: search_console, yandex_webmaster, backlinks/);
-  assert.match(markdown, /External SEO Exports \(Production-Live, Post-DNS\)/);
-  assert.match(markdown, /without blocking pre-DNS Production-Ready/);
-  assert.match(
-    markdown,
-    new RegExp(`Crawl coverage: 457 URLs \\(page 104, post 42, taxonomy 146, listing 165\\); URLs with any evidence: ${seoEvidence.summary.urls_with_any_evidence}`),
-  );
-  assert.match(markdown, /migration\/external\/seo\/search-console\.csv`: missing_export/);
-  assert.match(markdown, /rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0/);
-  assert.match(markdown, /migration\/external\/seo\/yandex-webmaster\.csv`: missing_export/);
-  assert.match(markdown, /migration\/external\/seo\/backlinks\.csv`: missing_export/);
-  assert.match(markdown, /Minimum required domain coverage/);
-  assert.match(markdown, /makler-realty\.com: `https:\/\/makler-realty\.com/);
-  assert.match(markdown, /makler-realty\.ru: `https:\/\/makler-realty\.ru/);
-  assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=search_console`: `url,clicks,impressions,position/);
-  assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=yandex_webmaster`: `url,indexed,issue/);
-  assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=backlinks`: `target_url,source_url,referring_domain/);
-  assert.match(markdown, /GET \/api\/admin\/seo-evidence\/template\?source=search_console/);
-  assert.match(markdown, /GET \/api\/admin\/seo-evidence\/export/);
-  assert.match(markdown, /MS_REALTY_SEO_EVIDENCE_INPUT_DIR/);
-  assert.match(markdown, /npm run seo:preflight:report/);
-  assert.match(markdown, /GET \/api\/admin\/seo-preflight/);
-  assert.match(markdown, /MS_REALTY_SEO_PREFLIGHT_REPORT_PATH/);
+  assert.doesNotMatch(markdown, /External SEO Exports|external_seo_exports|post-DNS|pre-DNS/);
+  assert.match(markdown, /## R2 Media Coverage \(workers\.dev\)/);
+  assert.match(markdown, /Runtime source contract: `1725` unique keys/);
+  assert.match(markdown, /MS_REALTY_R2_MEDIA_LISTING_INPUT_PATH/);
+  assert.match(markdown, /missing unknown/);
   assert.match(markdown, /MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH/);
   assert.match(markdown, /Live Service Provisioning/);
   assert.match(markdown, /postgres_search_sync: missing_report .*postgres-search-sync-report\.json/);
@@ -2681,7 +2706,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /Monitoring And Rollback/);
   assert.match(markdown, /GET \/api\/admin\/launch-readiness/);
   assert.match(markdown, /privacy_events: imported/);
-  assert.match(markdown, /search_console: missing_export/);
+  assert.match(markdown, /analytics_export: missing_export/);
   assert.match(markdown, /Rollback steps: 4/);
   assert.match(markdown, /GET \/api\/admin\/preflight-reports/);
   assert.match(

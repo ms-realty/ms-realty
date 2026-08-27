@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-08-26T17:11:45.653Z
+Generated: 2026-08-27T14:16:20.632Z
 
 Status: blocked
 Blockers: live_services, monitoring_rollback, payload_runtime, production_recovery
@@ -29,32 +29,10 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Admin import endpoint: `POST /api/admin/redirect-approvals/import`
 - Admin workbook endpoint: `GET /api/admin/redirect-approval-workbook?pending=1`
 - Production adapter path overrides: `MS_REALTY_REDIRECT_APPROVALS_PATH`, `MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH`
+- Checklist output override: `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`
 - Review helper columns: `decision`, `target_path`, `target_listing_id`, `review_status`, `same_content_checklist`
 - Approval import columns: `old_url`, `decision`, `target_path`, `equivalent_content`, `reviewer`, optional `approved_at`, `reason`
-- Launch rule: each of all 457 legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set `equivalent_content=true` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
-
-## External SEO Exports (Production-Live, Post-DNS)
-
-- Missing required sources: search_console, yandex_webmaster, backlinks
-- Crawl coverage: 457 URLs (page 104, post 42, taxonomy 146, listing 165); URLs with any evidence: 4
-- `migration/external/seo/search-console.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none, signal domains: none
-- `migration/external/seo/yandex-webmaster.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none, signal domains: none
-- `migration/external/seo/backlinks.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none, signal domains: none
-
-- Minimum required domain coverage:
-- makler-realty.com: `https://makler-realty.com`
-- makler-realty.ru: `https://makler-realty.ru`
-- Admin import endpoints:
-- `POST /api/admin/seo-evidence/import?source=search_console`: `url,clicks,impressions,position`
-- `POST /api/admin/seo-evidence/import?source=yandex_webmaster`: `url,indexed,issue`
-- `POST /api/admin/seo-evidence/import?source=backlinks`: `target_url,source_url,referring_domain`
-- Template endpoints: `GET /api/admin/seo-evidence/template?source=search_console`, `?source=yandex_webmaster`, `?source=backlinks`
-- Joined evidence export endpoint: `GET /api/admin/seo-evidence/export`
-- Status report: `npm run seo:preflight:report` records current missing/invalid post-DNS evidence without blocking pre-DNS Production-Ready.
-- Admin SEO preflight endpoint: `GET /api/admin/seo-preflight`.
-- Production/CLI path overrides: `MS_REALTY_SEO_EVIDENCE_INPUT_DIR`, `MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH`, `MS_REALTY_SEO_PREFLIGHT_REPORT_PATH`, `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`
-- Optional analytics: `migration/external/seo/analytics.csv`; privacy events are already imported.
-- Production-Live rule: after canonical DNS cutover, required SEO exports must match crawled URLs from both `makler-realty.com` and `makler-realty.ru`.
+- Launch rule: each of all 457 legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before the compatibility map is published. Set `equivalent_content=true` only after same-content human review; broad home/search fallbacks stay blocked, while the exact mappings in the locked launch freeze are allowed.
 
 ## Live Service Provisioning
 
@@ -92,10 +70,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Runtime report: `production/data/payload-runtime-report.json` (real output stays local and ignored)
 - Runtime report example: `production/data/payload-runtime-report.json.example`
 - Current check evidence:
-- payload_secret: missing_env (env PAYLOAD_SECRET)
-- database_url: missing_env (env DATABASE_URL)
-- database_network_scope: missing_env (env DATABASE_URL)
-- database_tcp: missing_env (env DATABASE_URL)
+- no Payload runtime check rows available
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`
@@ -113,6 +88,20 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Production/CLI path overrides: `MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH`.
 - Real Payload runtime reports stay local and ignored; examples do not count as launch evidence.
 - Launch rule: custom `/admin` session, edge-boundary, Payload identity/config, and database evidence must all pass; the hidden Payload Admin UI is not a launch requirement.
+
+## R2 Media Coverage (workers.dev)
+
+- Current gate: pass
+- Runtime source contract: `1725` unique keys from `loadMediaInventory + imageUrlFromMediaItem`; expected digest: `ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28`.
+- Coverage report: `production/data/r2-media-coverage-report.json` (real report stays local and ignored).
+- ListObjectsV2 input: set `MS_REALTY_R2_MEDIA_LISTING_INPUT_PATH` to the credential-free flattened JSON array (or simple `Contents` response).
+- Build command: `MS_REALTY_RELEASE_SHA=<workers.dev release SHA> npm run r2:media:coverage`.
+- Current counts: expected 1725, listed 1727, present 1725, missing 0, unexpected 2.
+- Expected/listing digests: ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28 / e32d4e34c775a81220c6f43d0619f53a1f3529339430c1016665fd3fec7f02b1.
+- Public missing keys: none recorded until a listing report is mounted.
+- Release binding: the report `release_sha` must equal `MS_REALTY_RELEASE_SHA` for the workers.dev release under review.
+- Launch rule: R2 coverage passes only when `missing_count=0`; unexpected keys remain visible and do not substitute for missing runtime assets.
+- Next actions: Backfill every public missing key from the credential-free R2 listing, including the page/post assets, then rerun npm run r2:media:coverage. Mount the resulting report at MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH and rerun npm run launch:preflight for the exact workers.dev release SHA.
 
 ## Production Recovery
 
@@ -182,8 +171,9 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 ## Monitoring And Rollback
 
 - Report: `production/data/launch-readiness.json`
+- Readiness report override: `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`
 - Admin endpoint: `GET /api/admin/launch-readiness`
-- Monitoring sources: privacy_events: imported, analytics_export: missing_export, search_console: missing_export, yandex_webmaster: missing_export, backlinks: missing_export
+- Monitoring sources: privacy_events: imported, analytics_export: missing_export
 - Rollback steps: 4
 - Current machine evidence:
 - missing (path production/data/monitoring-rollback-report.json)
@@ -191,7 +181,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Path override: `MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH`; validate it with `npm run monitoring:preflight`.
 - Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.
 - Release attestation: after every existing gate passes, set `MS_REALTY_RELEASE_SHA`, the mounted evidence paths, and the private signing key; run `npm run launch:evidence:capture`, then `npm run launch:evidence:verify` on the exact release SHA.
-- Launch rule: an evidence bundle records validated inputs; it does not invent publication approvals, post-DNS SEO evidence, or production readiness.
+- Launch rule: an evidence bundle records validated inputs; it does not invent publication approvals, optional historical SEO evidence, or production readiness.
 
 ## Validate After Inputs
 
@@ -212,6 +202,7 @@ npm run monitoring:preflight
 npm run payload:bootstrap
 npm run payload:runtime
 npm run payload:preflight
+npm run r2:media:coverage
 npm run listing:review-pack
 npm run listing:preflight
 npm run launch:readiness

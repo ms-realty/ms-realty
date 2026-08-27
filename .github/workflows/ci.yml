@@ -101,18 +101,28 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    outputs:
+      previous_release: ${{ steps.previous_origin.outputs.release }}
     env:
       MS_REALTY_DEPLOY_HOST: ${{ vars.MS_REALTY_DEPLOY_HOST }}
       MS_REALTY_DEPLOY_KNOWN_HOSTS: ${{ secrets.MS_REALTY_DEPLOY_KNOWN_HOSTS }}
       MS_REALTY_DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.MS_REALTY_DEPLOY_SSH_PRIVATE_KEY }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - name: Require origin deployment credentials
         run: |
           test -n "$MS_REALTY_DEPLOY_HOST"
           test -n "$MS_REALTY_DEPLOY_KNOWN_HOSTS"
           test -n "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
           test "${#GITHUB_SHA}" = 40
 
       - name: Prepare pinned SSH identity
@@ -121,6 +131,33 @@ jobs:
           printf '%s\n' "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/ssh/id_ed25519"
           printf '%s\n' "$MS_REALTY_DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
           chmod 0600 "$RUNNER_TEMP/ssh/id_ed25519" "$RUNNER_TEMP/ssh/known_hosts"
+
+      - name: Capture active origin release
+        id: previous_origin
+        run: |
+          ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
+          release="$(ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" 'set -e; target="$(readlink -f /opt/ms-realty/current)"; case "$target" in /opt/ms-realty/releases/*) basename "$target" ;; *) exit 1 ;; esac')"
+          [[ "$release" =~ ^[0-9a-f]{40}$ ]]
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+
+      - name: Capture exact-release R2 media coverage
+        run: |
+          node production/scripts/repair-missing-r2-media.mjs \
+            --list-only \
+            --listing-output "$RUNNER_TEMP/r2-media-objects.json"
+          node production/scripts/build-r2-media-coverage.mjs \
+            --input "$RUNNER_TEMP/r2-media-objects.json" \
+            --output production/data/r2-media-coverage-report.json \
+            --release-sha "$GITHUB_SHA"
+          node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.status !== "pass" || d.release_sha !== process.argv[2] || d.missing_count !== 0) process.exit(1)' production/data/r2-media-coverage-report.json "$GITHUB_SHA"
+
+      - name: Preserve exact R2 report for the Worker image
+        uses: actions/upload-artifact@v4
+        with:
+          name: r2-media-coverage-${{ github.sha }}
+          path: production/data/r2-media-coverage-report.json
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Upload and activate exact origin release
         run: |
@@ -153,6 +190,9 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       MS_REALTY_ORIGIN_TOKEN: ${{ secrets.MS_REALTY_ORIGIN_TOKEN }}
+      MS_REALTY_DEPLOY_HOST: ${{ vars.MS_REALTY_DEPLOY_HOST }}
+      MS_REALTY_DEPLOY_KNOWN_HOSTS: ${{ secrets.MS_REALTY_DEPLOY_KNOWN_HOSTS }}
+      MS_REALTY_DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.MS_REALTY_DEPLOY_SSH_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -163,6 +203,27 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Prepare pinned SSH identity for coordinated rollback
+        run: |
+          test -n "$MS_REALTY_DEPLOY_HOST"
+          test -n "$MS_REALTY_DEPLOY_KNOWN_HOSTS"
+          test -n "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY"
+          install -d -m 0700 "$RUNNER_TEMP/ssh"
+          printf '%s\n' "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/ssh/id_ed25519"
+          printf '%s\n' "$MS_REALTY_DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/ssh/id_ed25519" "$RUNNER_TEMP/ssh/known_hosts"
+
+      - name: Restore exact R2 report from the origin release
+        uses: actions/download-artifact@v4
+        with:
+          name: r2-media-coverage-${{ github.sha }}
+          path: production/data
+
+      - name: Verify exact R2 report for the Worker image
+        run: >-
+          node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.status !== "pass" || d.release_sha !== process.argv[2] || d.missing_count !== 0) process.exit(1)'
+          production/data/r2-media-coverage-report.json "$GITHUB_SHA"
 
       - name: Require deployment credentials
         run: |
@@ -231,37 +292,61 @@ jobs:
       - name: Verify deployed Worker
         run: |
           health_url="${{ steps.workers_dev.outputs.url }}"
+          ready_url="${health_url%/api/health}/api/ready"
           for attempt in $(seq 1 100); do
             if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/health.json" &&
-              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const expected=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== expected || d.origin_build_marker !== expected) process.exit(1)' "$RUNNER_TEMP/health.json" "$GITHUB_SHA"; then
+              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const expected=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== expected || d.origin_build_marker !== expected) process.exit(1)' "$RUNNER_TEMP/health.json" "$GITHUB_SHA" &&
+              curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$ready_url" --output "$RUNNER_TEMP/ready.json" &&
+              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ready" || d.launch_ready !== true || !Array.isArray(d.blockers) || d.blockers.length !== 0) process.exit(1)' "$RUNNER_TEMP/ready.json"; then
               exit 0
             fi
-            echo "Expected image marker $GITHUB_SHA; attempt $attempt/100 did not match."
+            echo "Expected exact markers $GITHUB_SHA and ready status; attempt $attempt/100 did not match."
             sleep 10
           done
           exit 1
 
       - name: Roll back failed deployment
-        if: failure() && steps.deploy.outcome == 'success' && steps.previous.outputs.version != ''
+        if: failure() && needs.deploy_origin.outputs.previous_release != ''
         run: |
-          npx --yes wrangler@4.117.0 rollback "${{ steps.previous.outputs.version }}" --name ms-realty --message "Automatic rollback after failed health check for $GITHUB_SHA" --yes
-          status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
-          version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
-          test "$version" = "${{ steps.previous.outputs.version }}"
+          previous_version="${{ steps.previous.outputs.version }}"
+          previous_origin="${{ needs.deploy_origin.outputs.previous_release }}"
+          install -d -m 0700 "$RUNNER_TEMP/ssh"
+          printf '%s\n' "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/ssh/id_ed25519"
+          printf '%s\n' "$MS_REALTY_DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/ssh/id_ed25519" "$RUNNER_TEMP/ssh/known_hosts"
+          if [ -n "$previous_version" ]; then
+            status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
+            version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
+            if [ "$version" != "$previous_version" ]; then
+              npx --yes wrangler@4.117.0 rollback "$previous_version" --name ms-realty --message "Automatic rollback after failed release verification for $GITHUB_SHA" --yes
+              status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
+              version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
+            fi
+            test "$version" = "$previous_version"
+          fi
+          [[ "$previous_origin" =~ ^[0-9a-f]{40}$ ]]
+          ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
+          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; release='$previous_origin'; target='/opt/ms-realty/releases/$previous_origin'; test -f \"\$target/.ms-realty-release-sha\"; test \"\$(cat \"\$target/.ms-realty-release-sha\")\" = \"\$release\"; link='/opt/ms-realty/.current-rollback-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}'; ln -s \"\$target\" \"\$link\"; mv -Tf \"\$link\" /opt/ms-realty/current; cd \"\$target\"; MS_REALTY_ENV_FILE=/opt/ms-realty/shared/.env.production-review MS_REALTY_COMPOSE_OVERRIDE=production/docker-compose.production-review.yml MS_REALTY_BUILD_MARKER=\"\$release\" npm run docker:up; test \"\$(readlink -f /opt/ms-realty/current)\" = \"\$target\""
           health_url="${{ steps.workers_dev.outputs.url }}"
+          if [ -z "$health_url" ]; then health_url="https://ms-realty.ms-realty-bg.workers.dev/api/health"; fi
+          ready_url="${health_url%/api/health}/api/ready"
           expected_marker="${{ steps.previous.outputs.marker }}"
           for attempt in $(seq 1 100); do
             if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/rollback-health.json"; then
               if [ -n "$expected_marker" ]; then
-                if node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const expected=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== expected) process.exit(1)' "$RUNNER_TEMP/rollback-health.json" "$expected_marker"; then
-                  exit 0
+                if node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const edge=process.argv[2], origin=process.argv[3]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== edge || d.origin_build_marker !== origin) process.exit(1)' "$RUNNER_TEMP/rollback-health.json" "$expected_marker" "$previous_origin" &&
+                  curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$ready_url" --output "$RUNNER_TEMP/rollback-ready.json" &&
+                  node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ready" || d.launch_ready !== true || d.blockers?.length !== 0) process.exit(1)' "$RUNNER_TEMP/rollback-ready.json"; then
+                    exit 0
                 fi
-              elif node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok" || (d.build_marker !== undefined && d.build_marker !== "unversioned")) process.exit(1)' "$RUNNER_TEMP/rollback-health.json"; then
+              elif node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const origin=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || (d.build_marker !== undefined && d.build_marker !== "unversioned") || d.origin_build_marker !== origin) process.exit(1)' "$RUNNER_TEMP/rollback-health.json" "$previous_origin" &&
+                curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$ready_url" --output "$RUNNER_TEMP/rollback-ready.json" &&
+                node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ready" || d.launch_ready !== true || !Array.isArray(d.blockers) || d.blockers.length !== 0) process.exit(1)' "$RUNNER_TEMP/rollback-ready.json"; then
                 echo "Rollback target predates exact image markers; confirmed its legacy unversioned health response."
                 exit 0
               fi
             fi
-            echo "Rollback health check attempt $attempt/100 did not match the prior image marker."
+            echo "Rollback verification attempt $attempt/100 did not match the prior edge/origin markers and readiness."
             sleep 10
           done
           exit 1

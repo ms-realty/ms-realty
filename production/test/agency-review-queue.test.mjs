@@ -27,12 +27,12 @@ test("agency review queue defers decisions without weakening public guardrails",
   assert.equal(queue.deployment_mode, "production_review");
   assert.equal(queue.review_after_deploy, true);
   assert.equal(queue.public_launch_ready, false);
-  assert.equal(queue.summary.open_lanes, 7);
-  assert.equal(queue.summary.open_tasks, 7);
+  assert.equal(queue.summary.open_lanes, 6);
+  assert.equal(queue.summary.open_tasks, 6);
   assert.equal(queue.guardrails.unreviewed_listing_publication, "blocked");
   assert.equal(queue.guardrails.unreviewed_translation_indexing, "blocked");
   assert.equal(queue.guardrails.unapproved_customer_messages, "blocked");
-  assert.equal(queue.guardrails.legacy_domain_cutover, "blocked");
+  assert.equal(queue.guardrails.legacy_route_compatibility, "review_required");
   assert.equal(queue.lanes.find((laneItem) => laneItem.id === "broker_contacts").count, 1);
 });
 

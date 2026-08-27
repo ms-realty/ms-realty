@@ -196,8 +196,8 @@
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
-      "@id": "https://makler-realty.com/he/properties/MS-CRAWL-0001#listing",
-      "url": "https://makler-realty.com/he/properties/MS-CRAWL-0001",
+      "@id": "https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001#listing",
+      "url": "https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
       "name": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
       "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
@@ -1076,8 +1076,8 @@
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
-      "@id": "https://makler-realty.com/en/properties/MS-CRAWL-0001#listing",
-      "url": "https://makler-realty.com/en/properties/MS-CRAWL-0001",
+      "@id": "https://ms-realty.ms-realty-bg.workers.dev/en/properties/MS-CRAWL-0001#listing",
+      "url": "https://ms-realty.ms-realty-bg.workers.dev/en/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
       "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
       "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
@@ -1941,8 +1941,8 @@
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
-      "@id": "https://makler-realty.com/ru/properties/MS-CRAWL-0114#listing",
-      "url": "https://makler-realty.com/ru/properties/MS-CRAWL-0114",
+      "@id": "https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0114#listing",
+      "url": "https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0114",
       "identifier": "MS-CRAWL-0114",
       "name": "Апартаменты в Парк отеле Пирин — г.Сандански",
       "description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
@@ -4590,7 +4590,7 @@
       "@type": "Article",
       "headline": "Foreign buyers and Bulgarian land ownership",
       "inLanguage": "en",
-      "url": "https://makler-realty.com/en/guides/foreign-buyers",
+      "url": "https://ms-realty.ms-realty-bg.workers.dev/en/guides/foreign-buyers",
       "publisher": {
         "@type": "Organization",
         "name": "MS Realty"
@@ -5112,8 +5112,8 @@
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
-      "@id": "https://makler-realty.com/he/properties/MS-CRAWL-0001#listing",
-      "url": "https://makler-realty.com/he/properties/MS-CRAWL-0001",
+      "@id": "https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001#listing",
+      "url": "https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
       "name": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
       "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
@@ -10141,9 +10141,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-e06ebf8c-7289-42b2-83b8-2fdf80dde1b0",
+    "id": "inbox-lead-draft-9bfdd5e1-dd04-466c-a8ad-cc462c6672da",
     "lead": {
-      "id": "lead-draft-e06ebf8c-7289-42b2-83b8-2fdf80dde1b0",
+      "id": "lead-draft-9bfdd5e1-dd04-466c-a8ad-cc462c6672da",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10244,9 +10244,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-4660d8bf-2772-47e9-b567-d94490027be6",
+    "id": "inbox-lead-draft-2c8aa42f-9e6a-4b24-b0bd-b49cabb95c8d",
     "lead": {
-      "id": "lead-draft-4660d8bf-2772-47e9-b567-d94490027be6",
+      "id": "lead-draft-2c8aa42f-9e6a-4b24-b0bd-b49cabb95c8d",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10350,9 +10350,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-2d947be4-8f95-40b4-9d30-c52cdfa21e19",
+    "id": "inbox-lead-draft-c939e628-6a7a-4b1b-bb54-e97ee964039d",
     "lead": {
-      "id": "lead-draft-2d947be4-8f95-40b4-9d30-c52cdfa21e19",
+      "id": "lead-draft-c939e628-6a7a-4b1b-bb54-e97ee964039d",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",

@@ -64,6 +64,7 @@ import { DEFAULT_BROKER_AVAILABILITY_LEDGER_PATH } from "./lib/broker-availabili
 import { DEFAULT_VIEWING_TRIP_LEDGER_PATH } from "./lib/viewing-trip-requests.mjs";
 import { DEFAULT_LAUNCH_FREEZE_PATH } from "./lib/launch-freeze.mjs";
 import { DEFAULT_WORKSPACE_SETTINGS_PATH } from "./lib/workspace-settings.mjs";
+import { publicOrigin } from "./lib/public-origin.mjs";
 
 // A missing or too-short signing secret disables manage links instead of
 // taking the whole server down: the saved search itself still works, and the
@@ -210,7 +211,7 @@ export function productionServerConfig(env = process.env) {
     savedSearchManageSecret: savedSearchManageSecretOrNull(env),
     savedSearchManageLinkTemplate: savedSearchManagePathTemplate(env),
     savedSearchManageLinkTtlDays: savedSearchManageTtlDays(env),
-    savedSearchPublicOrigin: env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com",
+    savedSearchPublicOrigin: publicOrigin(env),
     publicRequestOutcomeLedgerPath:
       env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH || DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
@@ -247,6 +248,7 @@ export function productionServerConfig(env = process.env) {
     liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
     monitoringRollbackReportPath: env.MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
+    r2MediaCoverageReportPath: env.MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH,
     productionRecoveryReportPath: env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH,
     providerConnection: providerConnectionConfigFromEnv(env),
     providerConnectionPayload: undefined,
@@ -356,6 +358,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     liveServiceProvisioningReportPath: config.liveServiceProvisioningReportPath,
     monitoringRollbackReportPath: config.monitoringRollbackReportPath,
     payloadRuntimeReportPath: config.payloadRuntimeReportPath,
+    r2MediaCoverageReportPath: config.r2MediaCoverageReportPath,
     productionRecoveryReportPath: config.productionRecoveryReportPath,
     providerConnection: config.providerConnection,
     providerConnectionPayload: config.providerConnectionPayload,

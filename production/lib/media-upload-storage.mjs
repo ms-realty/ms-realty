@@ -31,7 +31,7 @@ import path from "node:path";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_MEDIA_UPLOAD_DIR = fromRoot("production", "data", "media-uploads");
-export const DEFAULT_MEDIA_UPLOAD_HOST = "makler-realty.com";
+export const DEFAULT_MEDIA_UPLOAD_HOST = "ms-realty.ms-realty-bg.workers.dev";
 export const MEDIA_UPLOAD_SCOPES = Object.freeze(["listing", "enquiry"]);
 
 const PUBLIC_PREFIX = "wp-content/uploads";

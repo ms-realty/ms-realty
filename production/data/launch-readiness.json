@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-26T17:11:45.367Z",
+  "generated_at": "2026-08-27T14:16:20.632Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
@@ -168,114 +168,6 @@
           "ru": 52,
           "en": 2
         }
-      }
-    },
-    {
-      "id": "external_seo_exports",
-      "status": "deferred",
-      "message": "Deferred until canonical DNS cutover: Search Console, Yandex, and backlink evidence is required for Production-Live, not Production-Ready.",
-      "evidence": {
-        "crawl_urls": 457,
-        "url_types": {
-          "page": 104,
-          "post": 42,
-          "taxonomy": 146,
-          "listing": 165
-        },
-        "urls_with_any_evidence": 4,
-        "missing_required_sources": [
-          "search_console",
-          "yandex_webmaster",
-          "backlinks"
-        ],
-        "privacy_events": {
-          "source": "privacy_events",
-          "input_path": "production/data/events.jsonl",
-          "status": "imported",
-          "row_count": 176,
-          "matched_rows": 65,
-          "unmatched_rows": 111
-        },
-        "analytics_export": {
-          "source": "analytics_export",
-          "input_path": "migration/external/seo/analytics.csv",
-          "status": "missing_export",
-          "row_count": 0,
-          "matched_rows": 0,
-          "signal_rows": 0,
-          "unmatched_rows": 0,
-          "duplicate_rows": 0,
-          "placeholder_rows": 0,
-          "matched_source_domains": [],
-          "signal_source_domains": []
-        },
-        "sources": {
-          "search_console": {
-            "source": "search_console",
-            "input_path": "migration/external/seo/search-console.csv",
-            "status": "missing_export",
-            "row_count": 0,
-            "matched_rows": 0,
-            "signal_rows": 0,
-            "unmatched_rows": 0,
-            "duplicate_rows": 0,
-            "placeholder_rows": 0,
-            "matched_source_domains": [],
-            "signal_source_domains": []
-          },
-          "yandex_webmaster": {
-            "source": "yandex_webmaster",
-            "input_path": "migration/external/seo/yandex-webmaster.csv",
-            "status": "missing_export",
-            "row_count": 0,
-            "matched_rows": 0,
-            "signal_rows": 0,
-            "unmatched_rows": 0,
-            "duplicate_rows": 0,
-            "placeholder_rows": 0,
-            "matched_source_domains": [],
-            "signal_source_domains": []
-          },
-          "backlinks": {
-            "source": "backlinks",
-            "input_path": "migration/external/seo/backlinks.csv",
-            "status": "missing_export",
-            "row_count": 0,
-            "matched_rows": 0,
-            "signal_rows": 0,
-            "unmatched_rows": 0,
-            "duplicate_rows": 0,
-            "placeholder_rows": 0,
-            "matched_source_domains": [],
-            "signal_source_domains": []
-          },
-          "analytics_export": {
-            "source": "analytics_export",
-            "input_path": "migration/external/seo/analytics.csv",
-            "status": "missing_export",
-            "row_count": 0,
-            "matched_rows": 0,
-            "signal_rows": 0,
-            "unmatched_rows": 0,
-            "duplicate_rows": 0,
-            "placeholder_rows": 0,
-            "matched_source_domains": [],
-            "signal_source_domains": []
-          },
-          "privacy_events": {
-            "source": "privacy_events",
-            "input_path": "production/data/events.jsonl",
-            "status": "imported",
-            "row_count": 176,
-            "matched_rows": 65,
-            "unmatched_rows": 111
-          }
-        },
-        "next_actions": [
-          "Export Search Console, Yandex Webmaster, and backlink CSVs for both legacy domains.",
-          "Place them in migration/external/seo or set MS_REALTY_SEO_EVIDENCE_INPUT_DIR.",
-          "Run npm run seo:preflight before launch:preflight."
-        ]
       }
     },
     {
@@ -510,24 +402,15 @@
       "evidence": {
         "monitoring_sources": [
           "privacy_events",
-          "analytics_export",
-          "search_console",
-          "yandex_webmaster",
-          "backlinks"
+          "analytics_export"
         ],
         "monitoring_source_statuses": {
           "privacy_events": "imported",
-          "analytics_export": "missing_export",
-          "search_console": "missing_export",
-          "yandex_webmaster": "missing_export",
-          "backlinks": "missing_export"
+          "analytics_export": "missing_export"
         },
         "monitoring_source_requirements": {
           "privacy_events": "production_ready",
-          "analytics_export": "production_ready",
-          "search_console": "production_live",
-          "yandex_webmaster": "production_live",
-          "backlinks": "production_live"
+          "analytics_export": "production_ready"
         },
         "privacy_events_status": "imported",
         "analytics_export_status": "missing_export",
@@ -561,127 +444,132 @@
       "status": "blocked",
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "status": "blocked_report",
-        "generated_at": "2026-07-06T00:00:00Z",
+        "status": "missing_report",
         "path": "production/data/payload-runtime-report.json",
-        "summary": {
-          "admin_route": "/admin",
-          "checks": 12,
-          "database": {
-            "status": "missing_env"
-          },
-          "identity_collection": "admins",
-          "missing_env": [
-            "PAYLOAD_SECRET",
-            "DATABASE_URL"
-          ],
-          "payload_admin_ui": "edge_hidden",
-          "payload_identity_rest": "edge_hidden",
-          "placeholder_env": [],
-          "weak_env": [],
-          "route_files": 6
-        },
-        "checks": [
-          {
-            "id": "payload_secret",
-            "status": "missing_env",
-            "env": "PAYLOAD_SECRET"
-          },
-          {
-            "id": "database_url",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "route:app/admin/route.js",
-            "status": "pass",
-            "file": "app/admin/route.js"
-          },
-          {
-            "id": "route:app/admin/login/route.js",
-            "status": "pass",
-            "file": "app/admin/login/route.js"
-          },
-          {
-            "id": "route:app/admin/logout/route.js",
-            "status": "pass",
-            "file": "app/admin/logout/route.js"
-          },
-          {
-            "id": "route:app/admin/team/route.js",
-            "status": "pass",
-            "file": "app/admin/team/route.js"
-          },
-          {
-            "id": "route:app/api/admin/team/route.js",
-            "status": "pass",
-            "file": "app/api/admin/team/route.js"
-          },
-          {
-            "id": "route:app/(payload)/api/[...slug]/route.js",
-            "status": "pass",
-            "file": "app/(payload)/api/[...slug]/route.js"
-          },
-          {
-            "id": "payload_edge_boundary",
-            "status": "pass",
-            "custom_admin_route": "/admin",
-            "payload_admin_ui": "edge_hidden",
-            "payload_graphql_encoded_paths": [
-              "/graph%71l",
-              "/graph%2571l",
-              "/graphql%2fquery",
-              "/graphql%252fquery",
-              "/graphql%2dplayground",
-              "/graphql%252dplayground%252f",
-              "/api%2fgraphql",
-              "/api%252fgraphql%252f"
-            ],
-            "payload_graphql_paths": [
-              "/graphql",
-              "/graphql-playground",
-              "/api/graphql"
-            ],
-            "payload_identity_rest": "edge_hidden"
-          },
-          {
-            "id": "payload_config_import",
-            "status": "pass",
-            "collections": 13,
-            "graphql_disabled": true,
-            "graphql_playground_disabled_in_production": true,
-            "identity_collection": "admins",
-            "internal_admin_route": "/payload-admin",
-            "session_max_age_seconds": 7200,
-            "sessions": "database_backed"
-          },
-          {
-            "id": "database_network_scope",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "database_tcp",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          }
+        "next_actions": [
+          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
+          "Run npm run payload:runtime, then npm run payload:preflight."
         ],
         "freshness": {
           "id": "payload_runtime",
-          "status": "stale",
-          "age_ms": 4468305367,
-          "max_age_ms": 604800000
-        },
-        "next_actions": [
-          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
-          "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
-          "Run npm run payload:preflight before launch:preflight."
-        ]
+          "status": "invalid",
+          "error": "generated_at is not a timestamp"
+        }
       },
       "next_actions": [
         "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
         "Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight."
       ]
+    },
+    {
+      "id": "r2_media_coverage",
+      "status": "pass",
+      "message": "The workers.dev release has complete R2 coverage for every runtime-normalized media asset.",
+      "evidence": {
+        "status": "pass",
+        "path": "/private/tmp/msr-r2-redownload-33074900327/r2-media-coverage-40695ab-integrated.json",
+        "generated_at": "2026-08-27T14:16:20.632Z",
+        "freshness": {
+          "id": "r2_media_coverage",
+          "status": "fresh",
+          "age_ms": 0,
+          "max_age_ms": 86400000
+        },
+        "report": {
+          "schema_version": 1,
+          "kind": "r2_media_coverage",
+          "environment": "production",
+          "generated_at": "2026-08-27T14:16:20.632Z",
+          "release_sha": "40695ab0ac2228ddb4293b35a9bbe251543af9aa",
+          "source_contract": {
+            "canonical_artifact_path": "migration/artifacts/20260704-211155/media-inventory.csv",
+            "canonical_artifact_blob_sha1": "3597e3638dd36e823339c732a6ac052051cd2f25",
+            "canonical_artifact_content_sha256": "79b4633951c057252ddd7cdc42ab6f709c91b2d98957bcc1589b5908b01f8b13",
+            "canonical_inventory_rows": 11859,
+            "runtime_helper_contract": [
+              "production/lib/cms-seed.mjs#loadMediaInventory",
+              "production/lib/media.mjs#imageUrlFromMediaItem"
+            ],
+            "runtime_accepted_reference_count": 5442,
+            "runtime_expected_count": 1725,
+            "runtime_expected_digest": "ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28"
+          },
+          "canonical_artifact": {
+            "path": "migration/artifacts/20260704-211155/media-inventory.csv",
+            "blob_sha1": "3597e3638dd36e823339c732a6ac052051cd2f25",
+            "content_sha256": "79b4633951c057252ddd7cdc42ab6f709c91b2d98957bcc1589b5908b01f8b13",
+            "rows": 11859
+          },
+          "listing_artifact": {
+            "path": "/private/tmp/msr-r2-redownload-33074900327/r2-media-objects-40695ab0ac2228ddb4293b35a9bbe251543af9aa/r2-media-objects.json",
+            "content_sha256": "04932b1eb1166efebfe742635fa43afe85fc4e0e63518aeaf414d0989e00714a",
+            "bytes": 171825
+          },
+          "expected_count": 1725,
+          "listed_count": 1727,
+          "present_count": 1725,
+          "missing_count": 0,
+          "unexpected_count": 2,
+          "expected_digest": "ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28",
+          "listing_digest": "e32d4e34c775a81220c6f43d0619f53a1f3529339430c1016665fd3fec7f02b1",
+          "expected_by_host": {
+            "makler-realty.com": 1246,
+            "makler-realty.ru": 479
+          },
+          "listed_by_host": {
+            "makler-realty.com": 1247,
+            "makler-realty.ru": 480
+          },
+          "present_by_host": {
+            "makler-realty.com": 1246,
+            "makler-realty.ru": 479
+          },
+          "missing_by_host": {
+            "makler-realty.com": 0,
+            "makler-realty.ru": 0
+          },
+          "unexpected_by_host": {
+            "makler-realty.com": 1,
+            "makler-realty.ru": 1
+          },
+          "listed_bytes": 473110547,
+          "missing_keys": [],
+          "unexpected_keys": [
+            "makler-realty.com/wp-content/uploads/wv.png",
+            "makler-realty.ru/wp-content/uploads/wv.png"
+          ],
+          "missing_context": [],
+          "previous_mirror_plan": {
+            "listed_count": 1727,
+            "present_count": 1725,
+            "missing_count": 0,
+            "unexpected_count": 2,
+            "runtime_delta_count": 0
+          },
+          "status": "pass",
+          "pass": true,
+          "next_actions": [
+            "Mount this report for the exact workers.dev release SHA, then rerun npm run launch:preflight."
+          ]
+        },
+        "summary": {
+          "expected_count": 1725,
+          "listed_count": 1727,
+          "present_count": 1725,
+          "missing_count": 0,
+          "unexpected_count": 2,
+          "missing_keys": [],
+          "unexpected_keys": [
+            "makler-realty.com/wp-content/uploads/wv.png",
+            "makler-realty.ru/wp-content/uploads/wv.png"
+          ],
+          "expected_digest": "ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28",
+          "listing_digest": "e32d4e34c775a81220c6f43d0619f53a1f3529339430c1016665fd3fec7f02b1"
+        },
+        "next_actions": [
+          "Mount this report for the exact workers.dev release SHA, then rerun npm run launch:preflight."
+        ]
+      }
     },
     {
       "id": "production_recovery",
@@ -744,25 +632,10 @@
       "source": "analytics_export",
       "status": "missing_export",
       "required_for": "production_ready"
-    },
-    {
-      "source": "search_console",
-      "status": "missing_export",
-      "required_for": "production_live"
-    },
-    {
-      "source": "yandex_webmaster",
-      "status": "missing_export",
-      "required_for": "production_live"
-    },
-    {
-      "source": "backlinks",
-      "status": "missing_export",
-      "required_for": "production_live"
     }
   ],
   "rollback_plan": [
-    "Keep legacy DNS/origin rollback available until post-launch crawl is stable.",
+    "Keep the previous workers.dev release/origin rollback available until the post-release crawl is stable.",
     "Disable reviewed redirect deployment before changing content routes if crawl parity fails.",
     "Republish previous sitemap and robots files if indexable route coverage regresses.",
     "Use migration review queue owners to triage failed old URLs before broad redirects."

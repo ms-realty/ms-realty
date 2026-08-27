@@ -6,7 +6,6 @@ export const LAUNCH_EVIDENCE_SCHEMA_VERSION = 1;
 export const PRODUCTION_ENVIRONMENT = "production";
 export const REQUIRED_LAUNCH_EVIDENCE_ARTIFACT_IDS = Object.freeze([
   "deployable_redirects",
-  "seo_evidence",
   "listing_quality_review",
   "live_service_provisioning",
   "search_sync",
@@ -14,6 +13,7 @@ export const REQUIRED_LAUNCH_EVIDENCE_ARTIFACT_IDS = Object.freeze([
   "hermes_worker",
   "monitoring_rollback",
   "payload_runtime",
+  "r2_media_coverage",
   "production_recovery",
 ]);
 

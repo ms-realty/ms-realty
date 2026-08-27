@@ -60,7 +60,7 @@ function workspace(extra = {}) {
     mediaReviewLedgerPath: paths.mediaReviewLedgerPath,
     auditLogPath: paths.auditLogPath,
     sellerPipelinePath: paths.sellerPipelinePath,
-    mediaUploadStorageConfig: { driver: "local", root: paths.uploadRoot, host: "makler-realty.com" },
+    mediaUploadStorageConfig: { driver: "local", root: paths.uploadRoot, host: "ms-realty.ms-realty-bg.workers.dev" },
     reviewedAt: "2026-08-23T10:00:00.000Z",
     receivedAt: "2026-08-23T10:00:00.000Z",
     ...extra,
@@ -105,7 +105,7 @@ test("an admin upload is stored unreviewed, audited, absent from the public payl
   assert.equal(asset.review_status, "needs_media_review");
   assert.equal(asset.metadata_stripped, true);
   assert.ok(asset.submitted_bytes > asset.bytes, "the GPS block must be gone from the stored bytes");
-  assert.match(asset.asset_url, /^https:\/\/makler-realty\.com\/wp-content\/uploads\/\d{4}\/\d{2}\/ms-[a-f0-9]{32}\.jpg$/);
+  assert.match(asset.asset_url, /^https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/wp-content\/uploads\/\d{4}\/\d{2}\/ms-[a-f0-9]{32}\.jpg$/);
 
   // Bytes on disk, under the configured root, named from the content hash.
   const stored = readMediaUploads(context.mediaUploadLedgerPath);
@@ -381,7 +381,7 @@ test("a large upload is optimised, stored with a thumbnail, and the thumbnail is
   assert.equal(row.rendition.kind, "thumb");
   assert.equal(row.rendition.content_type, "image/webp");
   assert.equal(row.rendition.height, 640);
-  assert.match(row.rendition.storage_key, /^makler-realty\.com\/wp-content\/uploads\/\d{4}\/\d{2}\/ms-[a-f0-9]{32}-thumb\.webp$/);
+  assert.match(row.rendition.storage_key, /^ms-realty\.ms-realty-bg\.workers\.dev\/wp-content\/uploads\/\d{4}\/\d{2}\/ms-[a-f0-9]{32}-thumb\.webp$/);
   const thumbPath = path.join(context.uploadRoot, row.rendition.storage_key);
   assert.ok(fs.existsSync(thumbPath), "the rendition bytes must be stored");
   assert.equal(sniffImageFormat(fs.readFileSync(thumbPath)).format, "webp");
@@ -418,7 +418,7 @@ test("a seller's thumbnail stays outside the edge-served prefix", async () => {
   // The privacy contract is structural: the rendition inherits the private
   // prefix from the photo it was derived from, so there is no path by which a
   // thumbnail of someone's home becomes reachable from the edge.
-  assert.match(row.rendition.storage_key, /^makler-realty\.com\/wp-content\/private\/enquiries\//);
+  assert.match(row.rendition.storage_key, /^ms-realty\.ms-realty-bg\.workers\.dev\/wp-content\/private\/enquiries\//);
   assert.equal(row.rendition.storage_key.includes("/wp-content/uploads/"), false);
   assert.equal(row.asset_url, null);
   assert.ok(fs.existsSync(path.join(context.uploadRoot, row.rendition.storage_key)));
@@ -465,7 +465,7 @@ test("a seller photo reaches the enquiry, stays private, and says so", async () 
   assert.equal(row.subject_type, "enquiry");
   assert.equal(row.subject_id, ENQUIRY_ID);
   assert.equal(row.asset_url, null, "a public submission never gets a public URL");
-  assert.match(row.storage_key, /^makler-realty\.com\/wp-content\/private\/enquiries\//);
+  assert.match(row.storage_key, /^ms-realty\.ms-realty-bg\.workers\.dev\/wp-content\/private\/enquiries\//);
   assert.equal(row.storage_key.includes("/wp-content/uploads/"), false, "must sit outside the edge-served prefix");
   const sellerBytes = fs.readFileSync(path.join(context.uploadRoot, row.storage_key));
   assert.equal(sniffImageFormat(sellerBytes).format, "jpeg");

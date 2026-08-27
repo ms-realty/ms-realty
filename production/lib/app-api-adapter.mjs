@@ -66,6 +66,7 @@ import { projectListingDraftSeed } from "./listing-draft-service.mjs";
 import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { readHeader, requestHost, sameOriginWriteRejection } from "./request-guard.mjs";
 import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
+import { publicOrigin } from "./public-origin.mjs";
 // Package B2: the approved purchase-fee estimate, decided in one place.
 import { purchaseFeeEstimateResponse } from "./purchase-fee-estimate-route.mjs";
 import { DEFAULT_APPROVED_PURCHASE_FEES_PATH } from "./purchase-fees.mjs";
@@ -173,7 +174,7 @@ export function appApiConfigFromEnv(env = process.env) {
     savedSearchManageSecret: savedSearchManageSecretOrNull(env),
     savedSearchManageLinkTemplate: savedSearchManagePathTemplate(env),
     savedSearchManageLinkTtlDays: savedSearchManageTtlDays(env),
-    savedSearchPublicOrigin: env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com",
+    savedSearchPublicOrigin: publicOrigin(env),
     savedSearchManagedAt: env.MS_REALTY_SAVED_SEARCH_MANAGED_AT,
     // B5 viewings: the slot picker reads the same availability, calendar and
     // broker assignment the admin week view does.

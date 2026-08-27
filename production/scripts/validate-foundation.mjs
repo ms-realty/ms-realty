@@ -35,6 +35,7 @@ import { assertSearchEngineQueryReport, assertSearchEngineSyncReport } from "../
 import { assertAppRouteFiles, assertAppRouteManifest } from "../lib/app-route-manifest.mjs";
 import { assertCmsCollections } from "../lib/cms-seed.mjs";
 import { assertTourApprovals } from "../lib/tours.mjs";
+import { assertLaunchReadinessReport } from "../lib/launch-readiness.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -1249,18 +1250,19 @@ for (const id of ["mobile_search_form", "listing_sticky_actions", "admin_and_mar
 }
 
 const launchReadiness = JSON.parse(fs.readFileSync(fromRoot("production", "data", "launch-readiness.json"), "utf8"));
+assertLaunchReadinessReport(launchReadiness);
 if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocked") {
   throw new Error("Launch readiness report must stay blocked until production blockers are cleared");
 }
 const expectedLaunchBlockers = ["live_services", "monitoring_rollback", "payload_runtime", "production_recovery"];
 if (JSON.stringify(launchReadiness.blockers) !== JSON.stringify(expectedLaunchBlockers)) {
-  throw new Error(`Launch readiness report must expose only current pre-DNS blockers: ${expectedLaunchBlockers.join(", ")}`);
-}
-if (launchReadiness.gates.find((gate) => gate.id === "external_seo_exports")?.status !== "deferred") {
-  throw new Error("External SEO evidence must remain deferred until Production-Live after DNS cutover");
+  throw new Error(`Launch readiness report must expose only current production blockers: ${expectedLaunchBlockers.join(", ")}`);
 }
 if (launchReadiness.gates.find((gate) => gate.id === "listing_quality_review")?.status !== "pass") {
   throw new Error("Approved launch-freeze listing preservation must pass without granting publication approval");
+}
+if (launchReadiness.gates.find((gate) => gate.id === "r2_media_coverage")?.status !== "pass") {
+  throw new Error("Workers.dev R2 media coverage must pass with exact-release proof");
 }
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");
