@@ -2057,7 +2057,7 @@ function reviewerRoleText(copy, ui, value) {
 function brokerProfileText(page, brokerId) {
   const id = String(brokerId || "").trim();
   if (!id) return workbenchCopy(page).notSet;
-  return (page.brokerProfiles || []).find((profile) => profile.id === id)?.label || valueText(workbenchCopy(page), id);
+  return (page.brokerProfiles || []).find((profile) => profile.id === id)?.label || statusText(workbenchCopy(page), id);
 }
 
 const LISTING_EDITOR_FACT_FIELDS = Object.freeze({
