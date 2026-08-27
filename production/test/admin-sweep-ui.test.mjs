@@ -66,6 +66,13 @@ test("critical next actions tint the active surface instead of forcing a light-o
   assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*\.adm-task-list__reference\s*\{[^}]*color:\s*color-mix\(in srgb, var\(--text-muted\) 55%, var\(--text-strong\)\)/);
 });
 
+test("warning surfaces tint the active theme instead of forcing a light-only palette", () => {
+  assert.match(adminAdapterCss, /\.adm-availability-note\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\)/);
+  assert.match(adminAdapterCss, /\.adm-hermes-missing\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\)/);
+  assert.match(adminAdapterCss, /\.adm-hermes-empty--blocked\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\)/);
+  assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-checks ul\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+});
+
 test("queue filters reveal an empty note when no row matches", () => {
   assert.match(ADMIN_APP_JS, /var empty = document\.querySelector\("\[data-lead-queue-empty\]"\);\s*if \(empty\) empty\.hidden = visible > 0 \|\| rows\.length === 0;/);
   assert.match(ADMIN_APP_JS, /var empty = document\.querySelector\("\[data-pipeline-empty\]"\);/);

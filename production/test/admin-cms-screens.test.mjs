@@ -16,6 +16,7 @@ import { renderOperatorConnectPage } from "../lib/operator-connect.mjs";
 // exist yet.
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const adminCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin.css"), "utf8");
 const cmsCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-cms.css"), "utf8");
 const generatedCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const auth = { authorization: "Bearer local-admin-smoke" };
@@ -74,6 +75,12 @@ test("translation review groups its rows by listing so one title is not repeated
   // The first row of a group carries the identity, the rest a quiet reference.
   assert.match(page.body, /data-translation-group-start="true"/);
   assert.match(page.body, /class="adm-translation-continued"/);
+  assert.match(page.body, /data-translation-editor-row="translation-MS-CRAWL-0001-en"/);
+  assert.match(page.body, /<td colSpan="5"><details class="adm-reply adm-translation-editor" data-translation-editor-workspace="true">/);
+  assert.match(page.body, /class="adm-human-translation__source"/);
+  assert.match(adminCss, /\.adm-translation-actions\s*\{[^}]*min-width:\s*0/);
+  assert.doesNotMatch(adminCss, /\.adm-translation-actions\s*\{[^}]*min-width:\s*min\(34rem/);
+  assert.match(adminCss, /\.adm-translation-editor-row > td\s*\{[^}]*padding:\s*0/);
   const titles = page.body.match(/Автосервиз|Автöремонтна/g) || [];
   assert.ok(titles.length <= 1, "the listing title appears at most once per group");
   assert.doesNotMatch(page.body, /data-planned-control=/);
@@ -103,6 +110,9 @@ test("the listing editor names the listing, hides the operator field and carries
   for (const state of ["saving", "saved", "error", "conflict"]) {
     assert.match(cmsCss, new RegExp(`\\[data-save-state="${state}"\\]`), state);
   }
+  assert.match(adminCss, /\.adm-editor-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.28fr\)\s+minmax\(340px,\s*0\.92fr\)/);
+  assert.match(adminCss, /\.adm-editor-rail\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);[^}]*position:\s*sticky;/s);
+  assert.match(adminCss, /\.adm-editor-tabs\s*\{[^}]*position:\s*sticky;[^}]*backdrop-filter:\s*blur\(14px\)/s);
   assert.match(cmsCss, /\.adm-editor-conflict\[hidden\] \{ display: none; \}/);
 });
 

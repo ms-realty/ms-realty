@@ -6954,6 +6954,9 @@ function LeadInboxBody({ page }) {
   const ui = workbenchCopy(page);
   const copy = { ...ui, ...adminCopy(page) };
   const locale = page.workspace?.locale;
+  const viewingQueue = page.viewingFollowUpQueue || { rows: [] };
+  const sellerQueue = page.sellerPipelineQueue || { rows: [] };
+  const hasSecondaryQueue = Boolean(viewingQueue.rows?.length || sellerQueue.rows?.length);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
@@ -7061,8 +7064,14 @@ function LeadInboxBody({ page }) {
           h("p", { className: "adm-inbox__hint" }, ui.selectLead),
         ),
       ),
-      h(ViewingFollowUpQueue, { page, copy, ui }),
-      h(SellerPipelineQueue, { page, copy, ui }),
+      hasSecondaryQueue
+        ? h(
+            "section",
+            { className: "adm-secondary-grid", "data-lead-secondary-queues": "true" },
+            viewingQueue.rows?.length ? h(ViewingFollowUpQueue, { page, copy, ui }) : null,
+            sellerQueue.rows?.length ? h(SellerPipelineQueue, { page, copy, ui }) : null,
+          )
+        : null,
     ],
   });
 }
@@ -8147,7 +8156,7 @@ function TranslationQueueBody({ page }) {
             h(
               "tbody",
               { key: group.listingId, "data-translation-group": group.listingId, "data-translation-group-size": group.rows.length },
-              ...group.rows.map((row, groupIndex) => {
+              ...group.rows.flatMap((row, groupIndex) => {
                 const task = row.existing_task;
                 const canApprove =
                   pageCan(page, "translations:write") &&
@@ -8158,7 +8167,60 @@ function TranslationQueueBody({ page }) {
                 const canEnterHumanDraft =
                   pageCan(page, "translations:write") && !task && ["human", "external_import"].includes(row.provider_mode);
                 const opensGroup = groupIndex === 0;
-                return h(
+                const humanEditor = canEnterHumanDraft
+                  ? h(
+                      "tr",
+                      { key: `${row.listing_id}-${row.target_locale}-editor`, "data-translation-editor-row": row.task.id },
+                      h(
+                        "td",
+                        { colSpan: Object.keys(columns).length },
+                        h(
+                          "details",
+                          { className: "adm-reply adm-translation-editor", "data-translation-editor-workspace": "true" },
+                          h(
+                            "summary",
+                            { className: "adm-translation-editor__summary" },
+                            h("span", null, label(copy, "enterHumanTranslation", "Enter human translation")),
+                            h("span", { className: "crm-lang" }, `${row.source_locale.toUpperCase()} → ${row.target_locale.toUpperCase()}`),
+                          ),
+                          h(
+                            "form",
+                            {
+                              method: "post",
+                              action: "/api/admin/translations/draft",
+                              className: "adm-human-translation",
+                              "data-translation-workflow-form": "human",
+                              "data-success-message": label(copy, "translationDraftSaved", "Translation draft saved."),
+                              "data-failure-message": label(copy, "translationSaveFailed", "Could not save translation."),
+                            },
+                            h("input", { type: "hidden", name: "draftSource", defaultValue: "human" }),
+                            h("input", { type: "hidden", name: "targetLocale", defaultValue: row.target_locale }),
+                            h("input", { type: "hidden", name: "sourceLocale", defaultValue: row.source_locale }),
+                            h("input", { type: "hidden", name: "objectType", defaultValue: "listing" }),
+                            h("input", { type: "hidden", name: "objectId", defaultValue: row.listing_id }),
+                            h("input", { type: "hidden", name: "sourceTitle", defaultValue: row.source_title }),
+                            h("input", { type: "hidden", name: "sourceDescription", defaultValue: row.source_description }),
+                            h("input", { type: "hidden", name: "propertyFactsJson", defaultValue: JSON.stringify(row.property_facts) }),
+                            h("input", { type: "hidden", name: "reviewer", defaultValue: currentOperatorId(page, row.reviewer_role) }),
+                            h(
+                              "div",
+                              { className: "adm-human-translation__source" },
+                              h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()),
+                              h("strong", null, row.source_title),
+                              row.source_description ? h("p", null, row.source_description) : null,
+                            ),
+                            h("label", null, label(copy, "translatedTitle", "Translated title"), h("input", { name: "translatedTitle", required: true })),
+                            h("label", null, label(copy, "translatedBody", "Translated description"), h("textarea", { name: "translatedBody", required: true, rows: 5 })),
+                            h("label", null, label(copy, "translatedSeoTitle", "SEO title"), h("input", { name: "translatedSeoTitle", required: true, maxLength: 80 })),
+                            h("label", null, label(copy, "translatedMetaDescription", "Meta description"), h("textarea", { name: "translatedMetaDescription", required: true, rows: 3, maxLength: 220 })),
+                            h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "saveDraft", "Save draft")),
+                            h("span", { role: "status", "aria-live": "polite", "data-translation-workflow-status": "true" }),
+                          ),
+                        ),
+                      ),
+                    )
+                  : null;
+                const taskRow = h(
                   "tr",
                   {
                     key: `${row.listing_id}-${row.target_locale}`,
@@ -8212,38 +8274,7 @@ function TranslationQueueBody({ page }) {
                             h("span", { role: "status", "aria-live": "polite", "data-translation-workflow-status": "true" }),
                           )
                         : canEnterHumanDraft
-                          ? h(
-                              "details",
-                              { className: "adm-reply" },
-                              h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "enterHumanTranslation", "Enter human translation")),
-                              h(
-                                "form",
-                                {
-                                  method: "post",
-                                  action: "/api/admin/translations/draft",
-                                  className: "adm-human-translation",
-                                  "data-translation-workflow-form": "human",
-                                  "data-success-message": label(copy, "translationDraftSaved", "Translation draft saved."),
-                                  "data-failure-message": label(copy, "translationSaveFailed", "Could not save translation."),
-                                },
-                                h("input", { type: "hidden", name: "draftSource", defaultValue: "human" }),
-                                h("input", { type: "hidden", name: "targetLocale", defaultValue: row.target_locale }),
-                                h("input", { type: "hidden", name: "sourceLocale", defaultValue: row.source_locale }),
-                                h("input", { type: "hidden", name: "objectType", defaultValue: "listing" }),
-                                h("input", { type: "hidden", name: "objectId", defaultValue: row.listing_id }),
-                                h("input", { type: "hidden", name: "sourceTitle", defaultValue: row.source_title }),
-                                h("input", { type: "hidden", name: "sourceDescription", defaultValue: row.source_description }),
-                                h("input", { type: "hidden", name: "propertyFactsJson", defaultValue: JSON.stringify(row.property_facts) }),
-                                h("input", { type: "hidden", name: "reviewer", defaultValue: currentOperatorId(page, row.reviewer_role) }),
-                                h("p", { className: "adm-human-translation__source" }, row.source_title),
-                                h("label", null, label(copy, "translatedTitle", "Translated title"), h("input", { name: "translatedTitle", required: true })),
-                                h("label", null, label(copy, "translatedBody", "Translated description"), h("textarea", { name: "translatedBody", required: true, rows: 5 })),
-                                h("label", null, label(copy, "translatedSeoTitle", "SEO title"), h("input", { name: "translatedSeoTitle", required: true, maxLength: 80 })),
-                                h("label", null, label(copy, "translatedMetaDescription", "Meta description"), h("textarea", { name: "translatedMetaDescription", required: true, rows: 3, maxLength: 220 })),
-                                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "saveDraft", "Save draft")),
-                                h("span", { role: "status", "aria-live": "polite", "data-translation-workflow-status": "true" }),
-                              ),
-                            )
+                          ? null
                           : h("span", { className: "crm-tbl__muted" }, task ? label(copy, "awaitingHermesDraft", "Awaiting Hermes draft") : statusText(ui, row.task_type)),
                     h(
                       "a",
@@ -8256,6 +8287,7 @@ function TranslationQueueBody({ page }) {
                     ),
                   ),
                 );
+                return humanEditor ? [taskRow, humanEditor] : [taskRow];
               }),
             ),
             ),
