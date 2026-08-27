@@ -9,6 +9,7 @@ import { appendAdminSessionEvent, createAdminSessionOpened, createAdminSessionRe
 import { activateOperatorEnrolment, appendOperatorTwoFactorEvent, createOperatorEnrolment } from "../lib/operator-two-factor.mjs";
 import {
   createPayloadAdminAuthService,
+  payloadAdminPasswordChangeFailureCode,
   payloadAdminPrincipal,
 } from "../lib/payload-admin-auth.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
@@ -41,7 +42,10 @@ function fakePayload(overrides = {}) {
     async login(options) {
       calls.push(["login", options]);
       if (options.data.email !== admin.email || options.data.password !== adminPassword) {
-        throw new Error("Authentication failed for a secret reason");
+        const error = new Error("Authentication failed for a secret reason");
+        error.name = "AuthenticationError";
+        error.status = 401;
+        throw error;
       }
       return { token: "payload.jwt.session", exp: NOW_SECONDS + 3600, user: admin };
     },
@@ -157,6 +161,27 @@ test("Payload Local API backs login, validation, revocation, and access-controll
   assert.equal(await service.logout("tampered"), false);
 });
 
+test("password-change failures expose only fixed safe reason codes", async () => {
+  const service = createPayloadAdminAuthService(fakePayload({ password_change_required: true }), {
+    revokePayloadSession: async () => true,
+  });
+  const session = await service.resolve("payload.jwt.session");
+  const cases = [
+    [{ current_password: "", password: "replacement-password", password_confirmation: "replacement-password" }, "missing_fields"],
+    [{ current_password: "correct-password", password: "short", password_confirmation: "short" }, "password_too_short"],
+    [{ current_password: "correct-password", password: "replacement-password", password_confirmation: "different-password" }, "confirmation_mismatch"],
+    [{ current_password: "correct-password", password: "correct-password", password_confirmation: "correct-password" }, "same_password"],
+    [{ current_password: "wrong-password", password: "replacement-password", password_confirmation: "replacement-password" }, "current_password_rejected"],
+  ];
+  for (const [input, expected] of cases) {
+    await assert.rejects(() => service.changePassword(session, input), (error) => {
+      assert.equal(payloadAdminPasswordChangeFailureCode(error), expected);
+      return true;
+    });
+  }
+  assert.equal(payloadAdminPasswordChangeFailureCode(new Error("database detail")), "service_unavailable");
+});
+
 test("custom login uses email/password and issues only a short-lived Payload session cookie", async () => {
   const service = createPayloadAdminAuthService(fakePayload(), {
     revokePayloadSession: async () => true,
@@ -265,6 +290,76 @@ test("a temporary-password account must replace it before any admin page or API 
     { config },
   );
   assert.equal(oldPassword.headers.get("location"), "/admin/login?error=1");
+});
+
+test("a failed password change redirects with an actionable safe code and logs no credential values", async () => {
+  const payload = fakePayload({ password_change_required: true });
+  const logs = [];
+  const service = createPayloadAdminAuthService(payload, { revokePayloadSession: async () => true });
+  const config = { ...adapterConfig(service), adminAuthLogger: (line) => logs.push(line) };
+  const login = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/login`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ email: "peycheff.com@gmail.com", password: "correct-password" }),
+    }),
+    { config },
+  );
+  const response = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/login`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded", cookie: cookieFrom(login) },
+      body: new URLSearchParams({
+        action: "change-password",
+        locale: "bg",
+        current_password: "wrong-current-password",
+        password: "replacement-password",
+        password_confirmation: "replacement-password",
+      }),
+    }),
+    { config },
+  );
+  assert.equal(response.headers.get("location"), "/admin/login?change=1&error=current_password_rejected");
+  assert.equal(logs.length, 1);
+  assert.deepEqual(JSON.parse(logs[0]), {
+    kind: "admin_password_change_failed",
+    operator_id: "payload-1",
+    reason: "current_password_rejected",
+  });
+  assert.doesNotMatch(logs[0], /wrong-current-password|replacement-password|peycheff\.com/);
+  const page = await renderAppAdminResponse(
+    new Request(`${BASE_URL}${response.headers.get("location")}`, { headers: { cookie: cookieFrom(login) } }),
+    { config },
+  );
+  assert.match(await page.text(), /Временната парола не беше приета/);
+});
+
+test("a password-change runtime failure exposes and logs only the fixed service code", async () => {
+  const payload = fakePayload({ password_change_required: true });
+  payload.update = async () => {
+    throw new Error("private database failure detail");
+  };
+  const logs = [];
+  const config = {
+    ...adapterConfig(createPayloadAdminAuthService(payload, { revokePayloadSession: async () => true })),
+    adminAuthLogger: (line) => logs.push(line),
+  };
+  const response = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/login`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded", cookie: "ms_admin=payload.jwt.session" },
+      body: new URLSearchParams({
+        action: "change-password",
+        current_password: "correct-password",
+        password: "replacement-password",
+        password_confirmation: "replacement-password",
+      }),
+    }),
+    { config },
+  );
+  assert.equal(response.headers.get("location"), "/admin/login?change=1&error=service_unavailable");
+  assert.equal(JSON.parse(logs[0]).reason, "service_unavailable");
+  assert.doesNotMatch(logs[0], /private database failure detail|correct-password|replacement-password/);
 });
 
 test("wrong password, tampered cookie, and expired session fail generically", async () => {
