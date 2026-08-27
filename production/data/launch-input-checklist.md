@@ -98,10 +98,10 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Build command: `MS_REALTY_RELEASE_SHA=<workers.dev release SHA> npm run r2:media:coverage`.
 - Current counts: expected 1725, listed 1727, present 1725, missing 0, unexpected 2.
 - Expected/listing digests: ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28 / e32d4e34c775a81220c6f43d0619f53a1f3529339430c1016665fd3fec7f02b1.
-- Public missing keys: none recorded until a listing report is mounted.
+- Public missing keys: none.
 - Release binding: the report `release_sha` must equal `MS_REALTY_RELEASE_SHA` for the workers.dev release under review.
 - Launch rule: R2 coverage passes only when `missing_count=0`; unexpected keys remain visible and do not substitute for missing runtime assets.
-- Next actions: Backfill every public missing key from the credential-free R2 listing, including the page/post assets, then rerun npm run r2:media:coverage. Mount the resulting report at MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH and rerun npm run launch:preflight for the exact workers.dev release SHA.
+- Next actions: Mount this report for the exact workers.dev release SHA, then rerun npm run launch:preflight.
 
 ## Production Recovery
 

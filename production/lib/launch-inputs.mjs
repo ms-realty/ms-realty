@@ -199,6 +199,11 @@ export function renderLaunchInputChecklist({
   const r2Report = r2Evidence.report || {};
   const r2Summary = r2Evidence.summary || r2Report;
   const r2MissingKeys = Array.isArray(r2Summary.missing_keys) ? r2Summary.missing_keys : [];
+  const r2NextActions = Array.isArray(r2Evidence.next_actions) && r2Evidence.next_actions.length
+    ? r2Evidence.next_actions
+    : Array.isArray(r2Report.next_actions) && r2Report.next_actions.length
+      ? r2Report.next_actions
+      : R2_MEDIA_COVERAGE_NEXT_ACTIONS;
   const manualAuditCounts = manualListingAudit.review_status_counts || {};
 
   return `# Launch Input Checklist
@@ -289,10 +294,10 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 - Build command: \`MS_REALTY_RELEASE_SHA=<workers.dev release SHA> npm run r2:media:coverage\`.
 - Current counts: expected ${r2Summary.expected_count ?? EXPECTED_RUNTIME_R2_MEDIA_COUNT}, listed ${r2Summary.listed_count ?? "unknown"}, present ${r2Summary.present_count ?? "unknown"}, missing ${r2Summary.missing_count ?? "unknown"}, unexpected ${r2Summary.unexpected_count ?? "unknown"}.
 - Expected/listing digests: ${r2Summary.expected_digest || EXPECTED_RUNTIME_R2_MEDIA_DIGEST} / ${r2Summary.listing_digest || "unknown"}.
-- Public missing keys${r2MissingKeys.length ? `: ${r2MissingKeys.join(", ")}` : ": none recorded until a listing report is mounted."}
+- Public missing keys${r2MissingKeys.length ? `: ${r2MissingKeys.join(", ")}` : r2Summary.missing_count === 0 ? ": none." : ": unavailable until a coverage report is mounted."}
 - Release binding: the report \`release_sha\` must equal \`MS_REALTY_RELEASE_SHA\` for the workers.dev release under review.
 - Launch rule: R2 coverage passes only when \`missing_count=0\`; unexpected keys remain visible and do not substitute for missing runtime assets.
-- Next actions: ${R2_MEDIA_COVERAGE_NEXT_ACTIONS.join(" ")}
+- Next actions: ${r2NextActions.join(" ")}
 
 ## Production Recovery
 

@@ -16,6 +16,7 @@ const liveServiceEvidenceCli = fs.readFileSync(fromRoot("production", "scripts",
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 const previewHost = fs.readFileSync(fromRoot("workers", "preview-host.mjs"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
+const deploymentGuide = fs.readFileSync(fromRoot("production", "DEPLOYMENT.md"), "utf8");
 const packageJson = JSON.parse(fs.readFileSync(fromRoot("package.json"), "utf8"));
 
 test("generic validation preserves live launch authority artifacts", () => {
@@ -23,6 +24,18 @@ test("generic validation preserves live launch authority artifacts", () => {
   assert.match(packageJson.scripts.validate, /node production\/scripts\/validate-foundation\.mjs/);
   assert.match(packageJson.scripts["launch:readiness"], /build-launch-readiness\.mjs/);
   assert.match(packageJson.scripts["launch:inputs"], /build-launch-input-checklist\.mjs/);
+});
+
+test("deployment guide names the workers.dev authority and separates baseline from runtime proof", () => {
+  assert.match(deploymentGuide, /sole public authority is `https:\/\/ms-realty\.ms-realty-bg\.workers\.dev`/);
+  assert.match(deploymentGuide, /Committed baseline/);
+  assert.match(deploymentGuide, /Runtime materialized evidence/);
+  assert.match(deploymentGuide, /`build_marker` and `origin_build_marker` must both equal the exact[\s\S]*40-character release SHA/);
+  assert.match(deploymentGuide, /`GET \/api\/ready` must return HTTP 200 with `status: "ready"` and[\s\S]*`blockers: \[\]`/);
+  assert.doesNotMatch(
+    deploymentGuide,
+    /Audited state \(2026-08-09\)|Phase 1 .*repair Worker secrets|MS_REALTY_ADMIN_CREDENTIALS_JSON|Payload admin unreachable|Known gaps & accepted risks|Fast-follow code changes|Definition of "shipped today"|custom-domain|\bDNS\b/,
+  );
 });
 
 test("handoff keeps the governed app private behind the review host", () => {
