@@ -3194,7 +3194,7 @@ function MobileNavigation({ page }) {
   );
 }
 
-function Topbar({ page, title }) {
+function Topbar({ page, title, titleAsHeading = false }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const locales = page.workspace?.interface_locales || [];
@@ -3204,7 +3204,7 @@ function Topbar({ page, title }) {
     h(
       "div",
       { style: "min-width:0" },
-      h("div", { className: "crm-top__title" }, title),
+      h(titleAsHeading ? "h1" : "div", { className: "crm-top__title" }, title),
       h("div", { className: "crm-top__sub" }, page.workspace?.title || ""),
     ),
     h(MobileNavigation, { page }),
@@ -3228,7 +3228,7 @@ function Topbar({ page, title }) {
   );
 }
 
-function adminShell(page, { title, mainAttrs, children }) {
+function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }) {
   const ui = workbenchCopy(page);
   return [
     h("a", { key: "skip", className: "skip-link", href: "#main" }, ui.skipToContent),
@@ -3239,7 +3239,7 @@ function adminShell(page, { title, mainAttrs, children }) {
       h(
         "div",
         { className: "crm-main" },
-        h(Topbar, { page, title }),
+        h(Topbar, { page, title, titleAsHeading }),
         h("main", { id: "main", tabIndex: -1, className: "crm-scroll", ...mainAttrs }, h("div", { className: "crm-wrap" }, ...children)),
       ),
     ),
@@ -3697,6 +3697,7 @@ function TodayBody({ page }) {
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
   return adminShell(page, {
     title,
+    titleAsHeading: true,
     mainAttrs: {
       "data-kind": "admin-today",
       "data-react-admin-ui": "today",
@@ -10959,6 +10960,7 @@ function HermesBody({ page }) {
   const runtimeTone = runtime.ready ? "success" : "brick";
   return adminShell(page, {
     title: copy.title,
+    titleAsHeading: true,
     mainAttrs: {
       "data-kind": "admin-hermes",
       "data-react-admin-ui": "hermes",

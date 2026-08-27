@@ -60,6 +60,10 @@ function paths(overrides = {}) {
   };
 }
 
+function headingCount(html) {
+  return (html.match(/<h1(?:\s|>)/g) || []).length;
+}
+
 async function withAdmin(fn, { roles = "admin", actor = "operations_lead" } = {}) {
   const previous = {
     NODE_ENV: process.env.NODE_ENV,
@@ -257,6 +261,18 @@ test("settings screen speaks Bulgarian and Russian and links from the workspace 
     for (const route of ["hermes", "connect", "settings", "team", "activity"]) {
       assert.match(today.body, new RegExp(`href="/admin/${route}"`), `${route} is present in the owner navigation`);
     }
+  });
+});
+
+test("Today and Hermes use the shell heading while PageHeader views keep one heading", async () => {
+  await withAdmin(async () => {
+    const app = createHttpApp(paths());
+    const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
+    const hermes = await dispatchHttp(app, { url: "/admin/hermes", headers: HEADERS });
+    const settings = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
+    assert.equal(headingCount(today.body), 1, "Today has exactly one h1");
+    assert.equal(headingCount(hermes.body), 1, "Hermes has exactly one h1");
+    assert.equal(headingCount(settings.body), 1, "PageHeader view has exactly one h1");
   });
 });
 
