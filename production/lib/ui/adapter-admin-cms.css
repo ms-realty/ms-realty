@@ -125,16 +125,16 @@
   line-height: var(--lh-snug);
   overflow-wrap: anywhere;
 }
-.adm-editor-facts > div[data-tone="success"] dd { color: var(--success-600); }
-.adm-editor-facts > div[data-tone="sun"] dd { color: var(--sun-600); }
-.adm-editor-facts > div[data-tone="brick"] dd { color: var(--brick-700); }
+.adm-editor-facts > div[data-tone="success"] dd { color: var(--adm-editor-fact-success); }
+.adm-editor-facts > div[data-tone="sun"] dd { color: var(--adm-editor-fact-sun); }
+.adm-editor-facts > div[data-tone="brick"] dd { color: var(--adm-editor-fact-brick); }
 
 /* The save bar carries one state at a time. Dirty is watcher
    driven; saving, saved, error and conflict are mirrored from the
    mutation status line. */
 .adm-editor-savebar__actor {
   display: block;
-  color: var(--text-subtle);
+  color: var(--text-muted);
   font-size: var(--text-xs);
   line-height: var(--lh-snug);
 }
@@ -197,7 +197,7 @@
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--sun-300);
   border-radius: var(--radius-md);
-  background: var(--warning-50);
+  background: var(--adm-tour-surface);
 }
 .adm-tour-state__icon { color: var(--sun-600); }
 .adm-tour-state strong { display: block; color: var(--text-strong); font-size: var(--text-sm); }

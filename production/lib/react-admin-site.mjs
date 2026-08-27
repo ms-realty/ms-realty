@@ -2244,15 +2244,6 @@ function requestDetailsText(lead) {
    CRM shell (ui_kits/crm/CrmKit — Sidebar, Topbar, Panel, StatTile)
    ============================================================ */
 
-const STAT_TONES = {
-  ink: { bg: "var(--ink-50)", fg: "var(--ink-800)" },
-  sea: { bg: "var(--sea-50)", fg: "var(--sea-600)" },
-  sun: { bg: "var(--sun-100)", fg: "var(--sun-600)" },
-  brick: { bg: "var(--brick-50)", fg: "var(--brick-600)" },
-  success: { bg: "var(--success-50)", fg: "var(--success-500)" },
-  sand: { bg: "var(--stone-100)", fg: "var(--stone-500)" },
-};
-
 const PILL_TONES = {
   published: "success",
   approved: "sea",
@@ -2266,11 +2257,10 @@ const PILL_TONES = {
 };
 
 function StatusPill({ tone = "ink", children, ...attrs }) {
-  const palette = STAT_TONES[tone] || STAT_TONES.ink;
   return h(
     "span",
-    { className: "crm-pill", style: `color:${palette.fg};background:${palette.bg}`, ...attrs },
-    h("span", { className: "crm-pill__dot", style: `background:${palette.fg}`, "aria-hidden": "true" }),
+    { className: "crm-pill", "data-tone": tone, ...attrs },
+    h("span", { className: "crm-pill__dot", "aria-hidden": "true" }),
     children,
   );
 }
@@ -2843,7 +2833,6 @@ function OwnerIdentity({ page, mobile = false }) {
     {
       className: `adm-owner-identity${mobile ? " adm-owner-identity--mobile" : ""}`,
       href: adminHref("/admin/settings#owner-profile", page),
-      "aria-label": copy.open,
       title: copy.open,
     },
     h("span", { className: "adm-owner-identity__avatar", "aria-hidden": "true" }, ownerInitials(name)),

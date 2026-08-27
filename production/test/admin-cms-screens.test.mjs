@@ -146,6 +146,35 @@ test("the listing editor names the listing, hides the operator field and carries
   assert.match(cmsCss, /\.adm-editor-conflict\[hidden\] \{ display: none; \}/);
 });
 
+test("shared admin status tokens keep dark surfaces legible and owner identity nameable", async () => {
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
+  const ownerIdentity = page.body.match(/<a class="adm-owner-identity"[\s\S]*?<\/a>/)?.[0];
+  assert.ok(ownerIdentity, "the owner identity is rendered as a link");
+  assert.doesNotMatch(ownerIdentity, /aria-label=/, "visible owner identity text supplies the accessible name");
+  assert.match(ownerIdentity, /title="Open profile and settings"/);
+  assert.match(ownerIdentity, /<strong>MS Realty Admin<\/strong>/);
+  assert.match(ownerIdentity, /class="adm-owner-identity__role">Owner<\/span>/);
+  // StatusPill exposes its tone to CSS instead of freezing a light-ramp color
+  // in an inline style that cannot follow the dark workbench palette.
+  assert.match(page.body, /<span class="crm-pill" data-tone="brick"[^>]*>/);
+  for (const tone of ["ink", "sea", "sun", "brick", "success", "sand"]) {
+    assert.match(adminCss, new RegExp(`\\.crm-app \\.crm-pill\\[data-tone="${tone}"\\] \\{ color: var\\(--adm-pill-${tone}-fg\\); background: var\\(--adm-pill-${tone}-bg\\); \\}`), tone);
+  }
+  assert.match(adminCss, /\.crm-app \.crm-sb__group \{\s*color: var\(--adm-sidebar-group\);/);
+  assert.match(adminCss, /\.crm-app \.adm-owner-identity__copy strong \{ color: var\(--adm-owner-primary\); \}/);
+  assert.match(adminCss, /\.crm-app \.adm-owner-identity__copy small,\s*\.crm-app \.adm-owner-identity__role \{ color: var\(--adm-owner-secondary\); opacity: 1; \}/);
+  // The dark aliases cover the same shared roles used by the listing facts,
+  // media source, tour empty state and Hermes checks.
+  assert.match(adminCss, /--adm-pill-success-fg: var\(--success-50\);/);
+  assert.match(adminCss, /--adm-pill-sun-fg: var\(--sun-300\);/);
+  assert.match(adminCss, /--adm-pill-sand-fg: var\(--stone-300\);/);
+  assert.match(adminCss, /--adm-media-source: var\(--sea-200\);/);
+  assert.match(adminCss, /--adm-tour-surface: color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\);/);
+  assert.match(cmsCss, /\.adm-editor-facts > div\[data-tone="success"\] dd \{ color: var\(--adm-editor-fact-success\); \}/);
+  assert.match(cmsCss, /\.adm-editor-savebar__actor \{[\s\S]*?color: var\(--text-muted\);/);
+  assert.match(cmsCss, /\.adm-tour-state \{[\s\S]*?background: var\(--adm-tour-surface\);/);
+});
+
 test("the editor lists one state per locale, and a stale task wins over the published state", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
   const locales = [...page.body.matchAll(/data-translation-locale="([a-z]{2})"/g)].map(([, code]) => code);

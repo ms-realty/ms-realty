@@ -35,6 +35,28 @@
   --adm-label: var(--ink-500);
   /* Count chips riding inside a segmented control. */
   --adm-chip: var(--ink-100);
+  /* Shared owner-console status roles. These aliases keep rendered text and
+     its surface paired when the workbench switches to the dark theme. */
+  --adm-sidebar-group: var(--stone-400);
+  --adm-owner-primary: var(--text-on-dark);
+  --adm-owner-secondary: var(--stone-400);
+  --adm-pill-ink-fg: var(--ink-800);
+  --adm-pill-ink-bg: var(--ink-50);
+  --adm-pill-sea-fg: var(--sea-600);
+  --adm-pill-sea-bg: var(--sea-50);
+  --adm-pill-sun-fg: color-mix(in srgb, var(--sun-600) 70%, var(--stone-900));
+  --adm-pill-sun-bg: var(--sun-100);
+  --adm-pill-brick-fg: var(--brick-700);
+  --adm-pill-brick-bg: var(--brick-50);
+  --adm-pill-success-fg: var(--success-600);
+  --adm-pill-success-bg: var(--success-50);
+  --adm-pill-sand-fg: var(--stone-600);
+  --adm-pill-sand-bg: var(--stone-100);
+  --adm-editor-fact-success: var(--success-600);
+  --adm-editor-fact-sun: var(--adm-pill-sun-fg);
+  --adm-editor-fact-brick: var(--brick-700);
+  --adm-media-source: var(--sea-700);
+  --adm-tour-surface: var(--warning-50);
   --adm-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background: var(--canvas);
 }
@@ -53,7 +75,21 @@
 .crm-app .adm-form__group legend,
 .crm-app .crm-sb__group,
 .crm-app .adm-mobile-nav__group { letter-spacing: normal; text-transform: none; }
-.crm-app .crm-sb__group { font-size: var(--text-2xs); letter-spacing: 0.02em; }
+.crm-app .crm-sb__group {
+  color: var(--adm-sidebar-group);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.02em;
+}
+
+/* Status pills use semantic classes instead of inline ramp colors so one
+   dark-theme override can keep every queue, editor and Hermes state legible. */
+.crm-app .crm-pill[data-tone="ink"] { color: var(--adm-pill-ink-fg); background: var(--adm-pill-ink-bg); }
+.crm-app .crm-pill[data-tone="sea"] { color: var(--adm-pill-sea-fg); background: var(--adm-pill-sea-bg); }
+.crm-app .crm-pill[data-tone="sun"] { color: var(--adm-pill-sun-fg); background: var(--adm-pill-sun-bg); }
+.crm-app .crm-pill[data-tone="brick"] { color: var(--adm-pill-brick-fg); background: var(--adm-pill-brick-bg); }
+.crm-app .crm-pill[data-tone="success"] { color: var(--adm-pill-success-fg); background: var(--adm-pill-success-bg); }
+.crm-app .crm-pill[data-tone="sand"] { color: var(--adm-pill-sand-fg); background: var(--adm-pill-sand-bg); }
+.crm-app .crm-pill[data-tone] .crm-pill__dot { background: currentColor; }
 
 /* Native selects: one chevron and one height (40px desktop, 44px touch). */
 .crm-app select:not([multiple]):not([size]) {
@@ -214,8 +250,11 @@ a.crm-nav:hover { text-decoration: none; }
 .adm-owner-identity__copy strong,
 .adm-owner-identity__copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .adm-owner-identity__copy strong { font-size: var(--text-xs); }
-.adm-owner-identity__copy small { color: var(--text-on-dark); font-size: var(--text-2xs); opacity: 0.72; }
-.adm-owner-identity__role { grid-column: 2; color: var(--text-on-dark); font-size: var(--text-2xs); opacity: 0.72; }
+.adm-owner-identity__copy small { font-size: var(--text-2xs); }
+.adm-owner-identity__role { grid-column: 2; font-size: var(--text-2xs); }
+.crm-app .adm-owner-identity__copy strong { color: var(--adm-owner-primary); }
+.crm-app .adm-owner-identity__copy small,
+.crm-app .adm-owner-identity__role { color: var(--adm-owner-secondary); opacity: 1; }
 .adm-mobile-nav { display: none; }
 .adm-mobile-nav > summary { list-style: none; }
 .adm-mobile-nav > summary::-webkit-details-marker { display: none; }
@@ -1252,7 +1291,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-media-asset__header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
 .adm-media-asset__header > div { display: grid; min-width: 0; gap: 3px; }
 .adm-media-asset__header small { overflow: hidden; text-overflow: ellipsis; }
-.adm-media-asset__source { width: max-content; max-width: 100%; color: var(--sea-700); font-size: var(--text-sm); text-decoration: none; }
+.adm-media-asset__source { width: max-content; max-width: 100%; color: var(--adm-media-source); font-size: var(--text-sm); text-decoration: none; }
 .adm-media-review { min-width: 0; border-top: 1px solid var(--border); }
 .adm-media-review > summary { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; color: var(--text-link); cursor: pointer; font-size: var(--text-sm); font-weight: var(--fw-semibold); list-style: none; }
 .adm-media-review > summary::-webkit-details-marker { display: none; }
@@ -2242,6 +2281,26 @@ html:has(main[data-react-admin-ui]) { color-scheme: light; }
     /* The brand swatch is near-white in this palette, so the label on a primary
        button has to invert with it or the button reads as a blank slab. */
     --text-on-brand: var(--ink-950);
+    --adm-sidebar-group: var(--stone-400);
+    --adm-owner-primary: var(--stone-50);
+    --adm-owner-secondary: var(--stone-400);
+    --adm-pill-ink-fg: var(--ink-100);
+    --adm-pill-ink-bg: var(--surface-hover);
+    --adm-pill-sea-fg: var(--sea-200);
+    --adm-pill-sea-bg: var(--sea-800);
+    --adm-pill-sun-fg: var(--sun-300);
+    --adm-pill-sun-bg: color-mix(in srgb, var(--sun-600) 24%, var(--surface));
+    --adm-pill-brick-fg: var(--brick-300);
+    --adm-pill-brick-bg: var(--accent-subtle);
+    --adm-pill-success-fg: var(--success-50);
+    --adm-pill-success-bg: color-mix(in srgb, var(--success-500) 24%, var(--surface));
+    --adm-pill-sand-fg: var(--stone-300);
+    --adm-pill-sand-bg: var(--surface-hover);
+    --adm-editor-fact-success: var(--success-50);
+    --adm-editor-fact-sun: var(--sun-300);
+    --adm-editor-fact-brick: var(--brick-300);
+    --adm-media-source: var(--sea-200);
+    --adm-tour-surface: color-mix(in srgb, var(--sun-300) 12%, var(--surface));
     --adm-well: var(--surface-sunken);
     --adm-panel: var(--surface-sunken);
     --adm-label: var(--stone-400);
@@ -2286,6 +2345,26 @@ html[data-theme="dark"] .crm-app {
   --text-subtle: var(--stone-500);
   --text-link: var(--stone-100);
   --text-on-brand: var(--ink-950);
+  --adm-sidebar-group: var(--stone-400);
+  --adm-owner-primary: var(--stone-50);
+  --adm-owner-secondary: var(--stone-400);
+  --adm-pill-ink-fg: var(--ink-100);
+  --adm-pill-ink-bg: var(--surface-hover);
+  --adm-pill-sea-fg: var(--sea-200);
+  --adm-pill-sea-bg: var(--sea-800);
+  --adm-pill-sun-fg: var(--sun-300);
+  --adm-pill-sun-bg: color-mix(in srgb, var(--sun-600) 24%, var(--surface));
+  --adm-pill-brick-fg: var(--brick-300);
+  --adm-pill-brick-bg: var(--accent-subtle);
+  --adm-pill-success-fg: var(--success-50);
+  --adm-pill-success-bg: color-mix(in srgb, var(--success-500) 24%, var(--surface));
+  --adm-pill-sand-fg: var(--stone-300);
+  --adm-pill-sand-bg: var(--surface-hover);
+  --adm-editor-fact-success: var(--success-50);
+  --adm-editor-fact-sun: var(--sun-300);
+  --adm-editor-fact-brick: var(--brick-300);
+  --adm-media-source: var(--sea-200);
+  --adm-tour-surface: color-mix(in srgb, var(--sun-300) 12%, var(--surface));
   --adm-well: var(--surface-sunken);
   --adm-panel: var(--surface-sunken);
   --adm-label: var(--stone-400);
