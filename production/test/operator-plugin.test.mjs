@@ -16,7 +16,9 @@ test("owner plugin packages production MCP, Hermes, skill, and marketplace insta
 
   assert.equal(manifest.name, "ms-realty-operator");
   assert.equal(manifest.mcpServers, "./.mcp.json");
-  assert.match(mcp.mcpServers["ms-realty"].url, /ms-realty\.ms-realty-bg\.workers\.dev\/mcp/);
+  assert.equal(mcp.mcpServers["ms-realty"].url, "https://ms-realty.ms-realty-bg.workers.dev/mcp");
+  assert.equal(mcp.mcpServers["ms-realty"].bearer_token_env_var, "MS_REALTY_OPERATOR_TOKEN");
+  assert.equal("headers" in mcp.mcpServers["ms-realty"], false);
   assert.equal(mcp.mcpServers["ms-realty-hermes"].command, "./scripts/run-ms-realty-hermes.sh");
   assert.equal(marketplace.plugins[0].source.path, "./plugins/ms-realty-operator");
   assert.match(skill, /ms_realty_admin_context/);
