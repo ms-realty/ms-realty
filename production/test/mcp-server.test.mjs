@@ -21,6 +21,10 @@ import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 const EDITOR_TOKEN = "mcp-editor-token-0123456789abcdef";
 const BROKER_TOKEN = "mcp-broker-token-0123456789abcdef";
 const TRANSLATOR_TOKEN = "mcp-translator-token-0123456789abcd";
+const BROKER_PROFILES = [
+  { id: "mcp_broker", languages: ["en"] },
+  { id: "broker_ru", languages: ["ru"] },
+];
 
 function jsonl(directory, name, rows = []) {
   const filePath = path.join(directory, `${name}.jsonl`);
@@ -71,6 +75,8 @@ function fixture({ durableListingWrites = false } = {}) {
     ...(durableListingWrites ? { MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1" } : {}),
   };
   const config = mcpConfigFromEnv(env);
+  config.brokerProfiles = BROKER_PROFILES;
+  config.adminConfig.brokerProfiles = BROKER_PROFILES;
   const runtime = createPayloadDraftRuntime();
   const durableListingAudits = [];
   config.payloadListingRuntime = runtime.payload;

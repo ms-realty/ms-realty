@@ -561,22 +561,22 @@
               {
                 "line_key": "local_transfer_tax",
                 "municipality": "Sandanski",
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "notary_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "registry_entry_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "agency_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               }
             ]
           },
@@ -594,27 +594,27 @@
               {
                 "line_key": "local_transfer_tax",
                 "municipality": "Sandanski",
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "notary_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "registry_entry_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "agency_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "company_route_setup",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               }
             ]
           }
@@ -626,22 +626,22 @@
           {
             "line_key": "local_transfer_tax",
             "municipality": "Sandanski",
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "notary_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "registry_entry_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "agency_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           }
         ],
         "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
@@ -1441,22 +1441,22 @@
               {
                 "line_key": "local_transfer_tax",
                 "municipality": "Sandanski",
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "notary_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "registry_entry_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "agency_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               }
             ]
           },
@@ -1474,27 +1474,27 @@
               {
                 "line_key": "local_transfer_tax",
                 "municipality": "Sandanski",
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "notary_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "registry_entry_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "agency_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "company_route_setup",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               }
             ]
           }
@@ -1506,22 +1506,22 @@
           {
             "line_key": "local_transfer_tax",
             "municipality": "Sandanski",
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "notary_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "registry_entry_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "agency_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           }
         ],
         "notice": "The purchase cost table is not complete, so no total is shown."
@@ -2257,22 +2257,22 @@
               {
                 "line_key": "local_transfer_tax",
                 "municipality": "Sandanski",
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "notary_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "registry_entry_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "agency_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               }
             ]
           },
@@ -2290,27 +2290,27 @@
               {
                 "line_key": "local_transfer_tax",
                 "municipality": "Sandanski",
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "notary_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "registry_entry_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "agency_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "company_route_setup",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               }
             ]
           }
@@ -2322,22 +2322,22 @@
           {
             "line_key": "local_transfer_tax",
             "municipality": "Sandanski",
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "notary_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "registry_entry_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "agency_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           }
         ],
         "notice": "Таблица расходов неполная, поэтому итог не показывается."
@@ -5477,22 +5477,22 @@
               {
                 "line_key": "local_transfer_tax",
                 "municipality": "Sandanski",
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "notary_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "registry_entry_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "agency_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               }
             ]
           },
@@ -5510,27 +5510,27 @@
               {
                 "line_key": "local_transfer_tax",
                 "municipality": "Sandanski",
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "notary_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "registry_entry_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "agency_fee",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               },
               {
                 "line_key": "company_route_setup",
                 "municipality": null,
-                "reason": "not_approved"
+                "reason": "no_approved_record"
               }
             ]
           }
@@ -5542,22 +5542,22 @@
           {
             "line_key": "local_transfer_tax",
             "municipality": "Sandanski",
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "notary_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "registry_entry_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           },
           {
             "line_key": "agency_fee",
             "municipality": null,
-            "reason": "not_approved"
+            "reason": "no_approved_record"
           }
         ],
         "notice": "טבלת העלויות אינה מלאה, ולכן לא מוצג סכום כולל."
@@ -10141,9 +10141,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-9bfdd5e1-dd04-466c-a8ad-cc462c6672da",
+    "id": "inbox-lead-draft-604af9ae-189b-4b40-b761-e55189bd9406",
     "lead": {
-      "id": "lead-draft-9bfdd5e1-dd04-466c-a8ad-cc462c6672da",
+      "id": "lead-draft-604af9ae-189b-4b40-b761-e55189bd9406",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10214,9 +10214,9 @@
     },
     "message_original": "Interested in this property.",
     "broker_assignment": {
-      "status": "assigned",
-      "method": "rules",
-      "broker_id": "broker_international",
+      "status": "unassigned",
+      "method": "manager_queue",
+      "broker_id": null,
       "criteria": {
         "language": "he",
         "admin_locale": "en",
@@ -10244,9 +10244,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-2c8aa42f-9e6a-4b24-b0bd-b49cabb95c8d",
+    "id": "inbox-lead-draft-077fadea-751f-4caf-ab9f-4a2845569f06",
     "lead": {
-      "id": "lead-draft-2c8aa42f-9e6a-4b24-b0bd-b49cabb95c8d",
+      "id": "lead-draft-077fadea-751f-4caf-ab9f-4a2845569f06",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10320,9 +10320,9 @@
     },
     "message_original": "I would like to view this property.",
     "broker_assignment": {
-      "status": "assigned",
-      "method": "rules",
-      "broker_id": "broker_international",
+      "status": "unassigned",
+      "method": "manager_queue",
+      "broker_id": null,
       "criteria": {
         "language": "he",
         "admin_locale": "en",
@@ -10350,9 +10350,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-c939e628-6a7a-4b1b-bb54-e97ee964039d",
+    "id": "inbox-lead-draft-cf81f20d-229d-4689-baf9-af26335d74df",
     "lead": {
-      "id": "lead-draft-c939e628-6a7a-4b1b-bb54-e97ee964039d",
+      "id": "lead-draft-cf81f20d-229d-4689-baf9-af26335d74df",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",
@@ -10406,9 +10406,9 @@
     },
     "message_original": "Please call me about buying in Sandanski.",
     "broker_assignment": {
-      "status": "assigned",
-      "method": "rules",
-      "broker_id": "broker_international",
+      "status": "unassigned",
+      "method": "manager_queue",
+      "broker_id": null,
       "criteria": {
         "language": "he",
         "admin_locale": "en",

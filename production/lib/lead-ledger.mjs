@@ -180,7 +180,12 @@ export function assertLeadLedger(rows) {
     if (row.confirmation_status !== "ready" || row.confirmation_message_key !== "lead_received") {
       throw new Error("Lead ledger must preserve the instant confirmation contract");
     }
-    if (!row.assigned_broker || !row.assignment_method) throw new Error("Lead ledger must preserve broker assignment");
+    if (!row.assignment_method) throw new Error("Lead ledger must preserve broker routing");
+    if (row.assignment_method === "manager_queue") {
+      if (row.assigned_broker !== null) throw new Error("Manager-queue leads must not name an assigned broker");
+    } else if (!row.assigned_broker) {
+      throw new Error("Broker-assigned leads must preserve the assigned broker");
+    }
     if ("contact" in row || "email" in row || "phone" in row) throw new Error("Lead ledger must not persist raw contact data");
     if (containsPlaintextMessageField(row)) throw new Error("Lead ledger must not persist plaintext messages");
     if (row.duplicate_status === "possible_duplicate" && !row.possible_duplicate_of) {

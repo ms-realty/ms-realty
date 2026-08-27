@@ -472,11 +472,10 @@ export function submitRuntimeLead(registry, seed, input) {
   if (!record && ["website_listing_detail", "website_search_result", "website_callback_request", "website_viewing_request"].includes(source)) {
     throw new Error("Listing lead requires a known listingReference");
   }
-  return createCrmInboxItem(registry, {
-    ...leadInput,
+  return createCrmInboxItem(registry, leadInput, {
     listingContext: record
       ? { location: record.facts.location, property_type: record.facts.property_type, offer_type: record.facts.offer_type }
-      : leadInput.listingContext,
+      : null,
   });
 }
 
@@ -628,16 +627,18 @@ export function assertRuntimeSmoke(smoke) {
   }
   if (smoke.lead_he.contact_preference !== "whatsapp") throw new Error("Runtime lead must preserve contact preference");
   if (
-    smoke.lead_he.broker_assignment?.broker_id !== "broker_international" ||
+    smoke.lead_he.broker_assignment?.broker_id !== null ||
+    smoke.lead_he.broker_assignment?.method !== "manager_queue" ||
     smoke.lead_he.broker_assignment?.criteria?.location !== "Sandanski"
   ) {
-    throw new Error("Runtime lead must assign broker using language and listing facts");
+    throw new Error("Runtime lead must remain in the manager queue until a real broker is configured");
   }
   if (
     smoke.viewingLead_he.lead.source !== "website_viewing_request" ||
     smoke.viewingLead_he.lead.request_details?.viewing_date !== "2026-07-20" ||
     smoke.viewingLead_he.contact_preference !== "phone" ||
-    smoke.viewingLead_he.broker_assignment?.broker_id !== "broker_international" ||
+    smoke.viewingLead_he.broker_assignment?.broker_id !== null ||
+    smoke.viewingLead_he.broker_assignment?.method !== "manager_queue" ||
     smoke.viewingLead_he.hermes_reply_draft.broker_approval_required !== true
   ) {
     throw new Error("Runtime viewing request lead must stay review-gated in CRM");
@@ -647,7 +648,8 @@ export function assertRuntimeSmoke(smoke) {
     smoke.contactLead_he.lead.intent !== "callback" ||
     smoke.contactLead_he.lead.leadType !== "general" ||
     smoke.contactLead_he.contact_preference !== "phone" ||
-    smoke.contactLead_he.broker_assignment?.broker_id !== "broker_international" ||
+    smoke.contactLead_he.broker_assignment?.broker_id !== null ||
+    smoke.contactLead_he.broker_assignment?.method !== "manager_queue" ||
     smoke.contactLead_he.hermes_reply_draft.broker_approval_required !== true
   ) {
     throw new Error("Runtime contact callback lead must stay review-gated in CRM");

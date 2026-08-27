@@ -49,7 +49,11 @@ import {
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
-import { getPayloadAdminAuthService, payloadAdminPasswordChangeFailureCode } from "./payload-admin-auth.mjs";
+import {
+  assignableBrokerProfiles,
+  getPayloadAdminAuthService,
+  payloadAdminPasswordChangeFailureCode,
+} from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
   deleteProviderConnection,
@@ -478,7 +482,7 @@ import {
   privacySafeViewingTripRequest,
   readViewingTripRequests,
 } from "./viewing-trip-requests.mjs";
-import { assignLeadBroker } from "./leads.mjs";
+import { publicViewingSlotsPayload } from "./viewing-slots.mjs";
 import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
 import { resolvePublicLocale } from "./locales.mjs";
 
@@ -1099,6 +1103,7 @@ export function createHttpApp({
   trustProxy = process.env.MS_REALTY_TRUST_PROXY === "1",
   naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
   payloadAdminAuth = getPayloadAdminAuthService,
+  brokerProfiles = DEFAULT_BROKER_PROFILES,
   providerConnection = operatorProviderConfigFromEnv(),
   operatorAgentEnv = process.env,
   providerConnectionPayload = null,
@@ -1135,6 +1140,20 @@ export function createHttpApp({
     } catch (error) {
       payloadAdminAuthPromise = undefined;
       throw error;
+    }
+  };
+  const configuredBrokerProfiles = Array.isArray(brokerProfiles) ? brokerProfiles : [];
+  const currentBrokerProfiles = async (payloadSession) => {
+    if (!payloadSession) return configuredBrokerProfiles;
+    try {
+      const service = await configuredPayloadAdminAuth();
+      if (typeof service?.listOperators !== "function") return configuredBrokerProfiles;
+      const profiles = assignableBrokerProfiles(await service.listOperators(payloadSession));
+      return profiles.length ? profiles : configuredBrokerProfiles;
+    } catch {
+      // A Payload directory outage must not erase the server-owned roster or
+      // turn every admin screen that needs broker assignment into a 500.
+      return configuredBrokerProfiles;
     }
   };
   const currentSeed = () =>
@@ -1455,7 +1474,13 @@ export function createHttpApp({
     buildLeadPipelineQueue(await currentLeadJourneyContext(leads), {
       now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
     });
-  const currentAdminLeadPayload = async (requestedLocale, operatorId = null, leads = currentLeads()) => {
+  const currentAdminLeadPayload = async (
+    requestedLocale,
+    operatorId = null,
+    leads = currentLeads(),
+    payloadSession = null,
+  ) => {
+    const adminBrokerProfiles = await currentBrokerProfiles(payloadSession);
     // The adapter has always told the inbox whether its leads came from the
     // durable store; the standalone server never did, which left it rendering
     // the file-era reply forms against durable leads.
@@ -1507,7 +1532,7 @@ export function createHttpApp({
           deals: journey.deals,
           leadSnoozes: await currentLeadSnoozes(),
           brokerContacts: [],
-          brokerProfiles: [],
+          brokerProfiles: adminBrokerProfiles,
           hermes: currentHermesAvailability(),
           leadOperations: currentLeadOperations(operatorId),
           operatorViews: [],
@@ -1553,6 +1578,7 @@ export function createHttpApp({
       }),
       deals: journey.deals,
       brokerContacts: currentBrokerContacts(),
+      brokerProfiles: adminBrokerProfiles,
       leadSnoozes: await currentLeadSnoozes(),
       hermes: currentHermesAvailability(),
       leadOperations: currentLeadOperations(operatorId),
@@ -1566,6 +1592,7 @@ export function createHttpApp({
     payloadSession = null,
     viewingWeekOptions = {},
   ) => {
+    const adminBrokerProfiles = await currentBrokerProfiles(payloadSession);
     const [leadSource, viewingSource] = await Promise.all([
       currentDurableLeadSource(operatorId, payloadSession, scopedLeads),
       currentDurableViewingSource(),
@@ -1617,7 +1644,7 @@ export function createHttpApp({
       // B5: the week the viewings screen draws its grid from.
       viewingWeek: buildViewingWeekView({
         availabilityRows: readBrokerAvailability(brokerAvailabilityLedgerPath || undefined),
-        brokers: DEFAULT_BROKER_PROFILES.map((profile) => profile.id),
+        brokers: adminBrokerProfiles.map((profile) => profile.id),
         viewings: viewingSource.durable ? viewings : deriveViewingFollowUpStates(viewings, viewingFollowUps),
         viewingFollowUpQueue: viewingsFollowUpQueue,
         week: viewingWeekOptions.week || null,
@@ -1632,6 +1659,7 @@ export function createHttpApp({
       }),
       deals,
       brokerContacts: currentBrokerContacts(),
+      brokerProfiles: adminBrokerProfiles,
       leadSnoozes: await currentLeadSnoozes(),
       hermes: currentHermesAvailability(),
       leadOperations: currentLeadOperations(operatorId),
@@ -1757,24 +1785,24 @@ export function createHttpApp({
       await currentOperationsReport(leads, operatorId, payloadSession),
       operatorId,
     );
-  const currentRequestsPayload = async (requestedLocale, operatorId = null, leads) => {
-    return renderAdminOperationalQueuePayload(await currentAdminLeadPayload(requestedLocale, operatorId, leads), {
+  const currentRequestsPayload = async (requestedLocale, operatorId = null, leads, payloadSession = null) => {
+    return renderAdminOperationalQueuePayload(await currentAdminLeadPayload(requestedLocale, operatorId, leads, payloadSession), {
       kind: "admin_requests",
       path: "/admin/requests",
       titleKey: "requestsWorkspace",
       descriptionKey: "requestsDescription",
     });
   };
-  const currentPipelinePayload = async (requestedLocale, operatorId = null, leads) => {
-    return renderAdminOperationalQueuePayload(await currentAdminLeadPayload(requestedLocale, operatorId, leads), {
+  const currentPipelinePayload = async (requestedLocale, operatorId = null, leads, payloadSession = null) => {
+    return renderAdminOperationalQueuePayload(await currentAdminLeadPayload(requestedLocale, operatorId, leads, payloadSession), {
       kind: "admin_lead_pipeline",
       path: "/admin/pipeline",
       titleKey: "pipelineWorkspace",
       descriptionKey: "pipelineDescription",
     });
   };
-  const currentTodayPayload = async (requestedLocale, operatorId = null, leads) =>
-    renderAdminOperationalQueuePayload(await currentAdminLeadPayload(requestedLocale, operatorId, leads), {
+  const currentTodayPayload = async (requestedLocale, operatorId = null, leads, payloadSession = null) =>
+    renderAdminOperationalQueuePayload(await currentAdminLeadPayload(requestedLocale, operatorId, leads, payloadSession), {
       kind: "admin_today",
       path: "/admin/today",
       titleKey: "today",
@@ -3359,6 +3387,7 @@ export function createHttpApp({
             ...(await leadOperationContext()),
             input: parseBody(request),
             recordedAt: leadOperationAt(),
+            brokerProfiles: await currentBrokerProfiles(payloadSession),
           });
           return adminJson(outcome.status, outcome.body);
         } catch (error) {
@@ -3537,7 +3566,8 @@ export function createHttpApp({
     // produce requests that a human confirms.
     if (["/api/admin/availability", "/api/admin/viewings/week", "/api/viewing-slots", "/api/viewing-trips"].includes(url.pathname)) {
       const availabilityRows = () => readBrokerAvailability(brokerAvailabilityLedgerPath || undefined);
-      const knownBrokerIds = () => DEFAULT_BROKER_PROFILES.map((profile) => profile.id);
+      const adminBrokerProfiles = url.pathname.startsWith("/api/admin/") ? await currentBrokerProfiles(payloadSession) : [];
+      const knownBrokerIds = () => adminBrokerProfiles.map((profile) => profile.id);
       const availabilityNow = () =>
         brokerAvailabilityAt || viewingFollowUpAt || bookedAt || reviewedAt || receivedAt || new Date().toISOString();
       // Viewings already on a calendar, with their current state: a rescheduled
@@ -3657,68 +3687,20 @@ export function createHttpApp({
           }
         }
         try {
-          const listingReference = String(url.searchParams.get("listing") || url.searchParams.get("listingReference") || "").trim();
-          if (!listingReference) throw new Error("listing is required");
           const context = await currentPublicContext();
-          const listing = context.seed.records.find(
-            (record) => record.collection === "listings" && record.id === listingReference,
-          );
-          // Fail closed: no published listing, no slots. Never guess a broker.
-          if (!listing) return privateJson(404, { kind: "listing_not_found", listing_reference: listingReference });
-          const requestedLocale = String(url.searchParams.get("locale") || context.registry.source_locale).trim();
-          const resolvedLocale = resolvePublicLocale(context.registry, requestedLocale);
-          const brokerContact = latestApprovedBrokerContact(currentBrokerContacts(), listingReference);
-          const brokerId =
-            brokerContact?.broker ||
-            assignLeadBroker(
-              { language: { language: resolvedLocale.locale.code, adminLocale: "en" }, leadType: "buyer" },
-              {
-                listingContext: {
-                  location: listing.facts?.location || null,
-                  property_type: listing.facts?.property_type || null,
-                },
-              },
-            ).broker_id;
-          const now = availabilityNow();
-          const timeZone = officeTimeZone();
-          const firstDay = url.searchParams.get("from") || addDays(zonedParts(Date.parse(now), timeZone).date, 1);
-          const lastDay = url.searchParams.get("to") || addDays(firstDay, 13);
-          const availability = brokerAvailabilityFor(availabilityRows(), brokerId, { now });
-          const slots = computeFreeSlots({
-            availability,
+          return privateJson(200, publicViewingSlotsPayload({
+            registry: context.registry,
+            seed: context.seed,
+            searchParams: url.searchParams,
+            brokerContacts: currentBrokerContacts(),
+            availabilityRows: availabilityRows(),
             viewings: await scheduledViewings(),
-            from: firstDay,
-            to: lastDay,
-            durationMinutes: wholeNumberParam(url.searchParams.get("duration"), DEFAULT_VIEWING_DURATION_MINUTES),
-            stepMinutes: DEFAULT_SLOT_STEP_MINUTES,
-            now,
-            // A visitor cannot pick a slot a broker has no time to prepare for.
-            leadTimeMinutes: wholeNumberParam(url.searchParams.get("leadTime"), 24 * 60),
-            limit: wholeNumberParam(url.searchParams.get("limit"), 24),
-          });
-          return privateJson(200, {
-            kind: "viewing_slots",
-            listing_reference: listingReference,
-            locale: resolvedLocale.locale.code,
-            broker_id: brokerId,
-            // Office hours are the agency's published week, not a claim about
-            // this broker's diary, so the visitor is told a broker confirms.
-            availability_source: availability.source,
-            confirmation: "human_required",
-            timezone: slots.timezone,
-            from: slots.from,
-            to: slots.to,
-            duration_minutes: slots.duration_minutes,
-            slots: slots.slots.map((slot) => ({
-              starts_at: slot.starts_at,
-              ends_at: slot.ends_at,
-              local_date: slot.local_date,
-              local_start: slot.local_start,
-              local_end: slot.local_end,
-            })),
-            summary: slots.summary,
-          });
+            now: availabilityNow(),
+          }));
         } catch (error) {
+          if (error?.code === "listing_not_found") {
+            return privateJson(404, { kind: "listing_not_found", listing_reference: error.listingReference });
+          }
           return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
         }
       }
@@ -3832,12 +3814,13 @@ export function createHttpApp({
       return adminJson(200, payload);
     }
     if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
+      const adminBrokerProfiles = await currentBrokerProfiles(payloadSession);
       const settingsPage = (requestedLocale, form = null) =>
         withWorkspaceSettings(
           renderAdminWorkspaceSettingsPayload(activeRegistry, requestedLocale, {
             settings: currentWorkspaceSettings(),
             operator: principal,
-            brokerProfiles: DEFAULT_BROKER_PROFILES,
+            brokerProfiles: adminBrokerProfiles,
             adminLocales: adminLocales(activeRegistry),
             saved: url.searchParams.get("saved"),
             form,
@@ -3883,7 +3866,7 @@ export function createHttpApp({
             values: input,
             actor: principal?.id || "admin",
             recordedAt: reviewedAt || new Date().toISOString(),
-            brokerIds: DEFAULT_BROKER_PROFILES.map((profile) => profile.id),
+            brokerIds: adminBrokerProfiles.map((profile) => profile.id),
             adminLocales: adminLocales(activeRegistry),
           });
           if (!result.idempotent) {
@@ -4273,7 +4256,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = adminLocaleParam(url);
-      const payload = await currentAdminLeadPayload(requestedLocale, principal, requestLeadRows);
+      const payload = await currentAdminLeadPayload(requestedLocale, principal, requestLeadRows, payloadSession);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
@@ -4524,7 +4507,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        adminHtml(await currentAdminLeadPayload(adminLocaleParam(url), principal, requestLeadRows)),
+        adminHtml(await currentAdminLeadPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession)),
         "text/html; charset=utf-8",
       );
     }
@@ -4604,7 +4587,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/today", "/admin/today"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const todayPayload = await currentTodayPayload(adminLocaleParam(url), principal, requestLeadRows);
+      const todayPayload = await currentTodayPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession);
       const payload = withWorkspaceSettings({
         ...todayPayload,
         onboarding: await currentWorkspaceOnboarding(todayPayload, payloadSession),
@@ -4618,7 +4601,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = await currentPipelinePayload(adminLocaleParam(url), principal, requestLeadRows);
+      const payload = await currentPipelinePayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession);
       if (url.pathname === "/admin/pipeline" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -4627,7 +4610,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/requests", "/admin/requests"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = await currentRequestsPayload(adminLocaleParam(url), principal, requestLeadRows);
+      const payload = await currentRequestsPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession);
       if (url.pathname === "/admin/requests" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -5862,9 +5845,12 @@ export function createHttpApp({
         if (existing) return adminJson(200, { lead: existing, idempotent: true });
         const workspaceSettings = currentWorkspaceSettings();
         const lead = applyWorkspaceDefaultBroker(
-          createCrmInboxItem(activeRegistry, input, { assignedId: leadId }),
+          createCrmInboxItem(activeRegistry, input, {
+            assignedId: leadId,
+            brokerProfiles: await currentBrokerProfiles(payloadSession),
+          }),
           workspaceSettings,
-          DEFAULT_BROKER_PROFILES,
+          await currentBrokerProfiles(payloadSession),
         );
         const contactVault = appendLeadContact(lead, {
           filePath: leadContactVaultPath,
@@ -5920,6 +5906,7 @@ export function createHttpApp({
           input: parseBody(request),
           principal,
           recordedAt: reviewedAt || receivedAt || new Date().toISOString(),
+          brokerProfiles: await currentBrokerProfiles(payloadSession),
           audit: (entry, recordedAt) => recordAudit(entry, recordedAt),
         });
         return adminJson(persisted.idempotent ? 200 : 201, persisted);
@@ -6891,16 +6878,18 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must preserve lead contact preference");
   }
   if (
-    smoke.lead.body.broker_assignment?.broker_id !== "broker_international" ||
+    smoke.lead.body.broker_assignment?.broker_id !== null ||
+    smoke.lead.body.broker_assignment?.method !== "manager_queue" ||
     smoke.lead.body.broker_assignment?.criteria?.location !== "Sandanski"
   ) {
-    throw new Error("HTTP smoke must assign listing leads by language and listing facts");
+    throw new Error("HTTP smoke must keep listing leads unassigned until a real broker is configured");
   }
   if (
     smoke.viewingLead.status !== 201 ||
     smoke.viewingLead.body.lead.source !== "website_viewing_request" ||
     smoke.viewingLead.body.contact_preference !== "phone" ||
-    smoke.viewingLead.body.broker_assignment?.broker_id !== "broker_international" ||
+    smoke.viewingLead.body.broker_assignment?.broker_id !== null ||
+    smoke.viewingLead.body.broker_assignment?.method !== "manager_queue" ||
     smoke.viewingLead.body.hermes_reply_draft.broker_approval_required !== true
   ) {
     throw new Error("HTTP smoke must accept public viewing request leads into the gated CRM flow");

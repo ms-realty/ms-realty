@@ -73,7 +73,7 @@ test("the fee API refuses to total the shipped, unapproved table and names every
     refused.body.missing.map((line) => line.line_key),
     ["local_transfer_tax", "notary_fee", "registry_entry_fee", "agency_fee", "company_route_setup"],
   );
-  assert.equal(refused.body.missing.every((line) => line.reason === "not_approved"), true);
+  assert.equal(refused.body.missing.every((line) => line.reason === "no_approved_record"), true);
   assert.equal(typeof refused.body.notice, "string");
 });
 
@@ -187,10 +187,12 @@ test("the approved-content review surface is admin-gated and reports why each re
   assert.equal(guideTranslations.rows.every((row) => row.drafted_by === "claude_translator"), true);
   const team = review.body.sections.find((section) => section.id === "team_profiles");
   assert.equal(team.publishable, 0);
-  assert.equal(team.rows.every((row) => row.blocked_reason === "example_record"), true);
+  assert.equal(team.total, 0);
+  assert.deepEqual(team.rows, []);
   assert.equal(typeof team.publish_requirement, "string");
   const areas = review.body.sections.find((section) => section.id === "area_guides");
   assert.equal(areas.publishable, areas.total);
+  assert.equal(review.body.sections.some((section) => section.rows.some((row) => row.example_record === true)), false);
   assert.equal(review.body.purchase_fee_table.every((row) => row.available === false), true);
 });
 

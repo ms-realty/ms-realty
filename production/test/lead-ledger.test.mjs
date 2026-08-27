@@ -17,7 +17,7 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
       admin_locale: "en",
       contact_preference: "whatsapp",
       confirmation: { status: "ready", message_key: "lead_received" },
-      broker_assignment: { broker_id: "broker_international", method: "rules" },
+      broker_assignment: { broker_id: null, method: "manager_queue" },
       lead: {
         id: "lead-test",
         source: "website_listing_detail",
@@ -80,8 +80,10 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
   assert.deepEqual(rows[0].qualification_task.missing_fields, ["budget_max_eur", "timeline"]);
   assert.equal(rows[0].confirmation_status, "ready");
   assert.equal(rows[0].confirmation_message_key, "lead_received");
-  assert.equal(rows[0].assigned_broker, "broker_international");
-  assert.equal(rows[0].assignment_method, "rules");
+  assert.equal(rows[0].assigned_broker, null);
+  assert.equal(rows[0].assignment_method, "manager_queue");
+  assert.equal(rows[1].assigned_broker, "broker_international");
+  assert.equal(rows[1].assignment_method, "rules");
   assert.equal(
     rows[0].contact_fingerprint,
     crypto.createHmac("sha256", CONTACT_SECRET).update("email:noa@example.com").digest("hex"),

@@ -132,6 +132,11 @@ const slugHistoryPath = path.join(smokeDir, "slug-history.jsonl");
 const publicContactVaultPath = path.join(smokeDir, "public-contacts.jsonl");
 const publicContactKey = "http-smoke-public-contact-key-2026";
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
+const brokerProfiles = [
+  { id: "broker_bg", languages: ["bg"] },
+  { id: "broker_ru", languages: ["ru"] },
+  { id: "broker_international", languages: ["en"] },
+];
 
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
@@ -153,6 +158,7 @@ resetSlugHistory(slugHistoryPath);
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
   seed: approvedPublicSeedFixture(),
+  brokerProfiles,
   leadLedgerPath,
   replyOutboxPath,
   languageRequestPath,

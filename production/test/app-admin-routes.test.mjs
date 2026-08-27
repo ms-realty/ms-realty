@@ -555,7 +555,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const documentsAfter = await documentsJsonRoute.GET(new Request("https://example.test/api/admin/documents?locale=ru", { headers: auth }));
       assert.equal((await documentsAfter.json()).documentChecklistQueue.rows[0].completed_count, 1);
 
-      const leadAssignment = await leadAssignmentRoute.POST(
+      const leadAssignment = await renderAppAdminResponse(
         new Request("https://example.test/api/admin/leads/assign", {
           method: "POST",
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
@@ -567,10 +567,16 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
             assignmentConfirmed: "on",
           }),
         }),
+        {
+          config: {
+            ...appAdminConfigFromEnv(),
+            brokerProfiles: [{ id: "broker_ru", languages: ["ru"] }],
+          },
+        },
       );
       const leadAssignmentBody = await leadAssignment.json();
       assert.equal(leadAssignment.status, 201);
-      assert.equal(leadAssignmentBody.previous_broker_id, "broker_international");
+      assert.equal(leadAssignmentBody.previous_broker_id, null);
       assert.equal(leadAssignmentBody.broker_id, "broker_ru");
 
       const inboxAfterAssignment = await leadInboxJsonRoute.GET(

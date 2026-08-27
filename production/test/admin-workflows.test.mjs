@@ -181,10 +181,12 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
     leadType: "buyer",
     language: "he",
     listingReference: listing.id,
-    listingContext: { location: listing.location, property_type: listing.property_type },
+    listingContext: { location: "Injected location", property_type: "injected_type" },
     contact: { name: "Noa Levi" },
     contact_preference: "whatsapp",
     message: "Interested in the listing.",
+  }, {
+    listingContext: { location: listing.location, property_type: listing.property_type },
   });
   const greek = createCrmInboxItem(registry, {
     id: "lead-el-seller-test",
@@ -199,8 +201,9 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
   assert.equal(hebrew.original_direction, "rtl");
   assert.equal(hebrew.admin_locale, "en");
   assert.equal(hebrew.contact_preference, "whatsapp");
-  assert.equal(hebrew.broker_assignment.broker_id, "broker_international");
-  assert.equal(hebrew.broker_assignment.method, "rules");
+  assert.equal(hebrew.broker_assignment.broker_id, null);
+  assert.equal(hebrew.broker_assignment.status, "unassigned");
+  assert.equal(hebrew.broker_assignment.method, "manager_queue");
   assert.deepEqual(hebrew.broker_assignment.criteria, {
     language: "he",
     admin_locale: "en",
@@ -219,30 +222,39 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
   assert.equal(greek.original_language, "el");
   assert.equal(greek.admin_locale, "en");
   assert.equal(greek.lead.leadType, "seller");
-  assert.equal(greek.broker_assignment.broker_id, "broker_international");
+  assert.equal(greek.broker_assignment.broker_id, null);
+  assert.equal(greek.broker_assignment.method, "manager_queue");
   assert.equal(greek.confirmation.channel, "broker_follow_up");
 
-  const manual = createCrmInboxItem(registry, {
-    id: "lead-bg-manual-test",
-    source: "website_listing_detail",
-    leadType: "buyer",
-    language: "bg",
-    listingReference: listing.id,
-    manualBrokerId: "broker_ru",
-    contact: { name: "Manual Owner" },
-  });
-  assert.equal(manual.broker_assignment.broker_id, "broker_ru");
+  const manual = createCrmInboxItem(
+    registry,
+    {
+      id: "lead-bg-manual-test",
+      source: "website_listing_detail",
+      leadType: "buyer",
+      language: "bg",
+      listingReference: listing.id,
+      manualBrokerId: "untrusted-body-value",
+      brokerProfiles: [{ id: "untrusted-body-value" }],
+      contact: { name: "Manual Owner" },
+    },
+    { manualBrokerId: "broker-fixture", brokerProfiles: [{ id: "broker-fixture" }] },
+  );
+  assert.equal(manual.broker_assignment.broker_id, "broker-fixture");
   assert.equal(manual.broker_assignment.method, "manual_override");
   assert.throws(
     () =>
-      createCrmInboxItem(registry, {
-        id: "lead-bg-bad-manual-test",
-        source: "website_listing_detail",
-        leadType: "buyer",
-        language: "bg",
-        manualBrokerId: "missing_broker",
-        contact: { name: "Manual Owner" },
-      }),
+      createCrmInboxItem(
+        registry,
+        {
+          id: "lead-bg-bad-manual-test",
+          source: "website_listing_detail",
+          leadType: "buyer",
+          language: "bg",
+          contact: { name: "Manual Owner" },
+        },
+        { manualBrokerId: "missing-broker", brokerProfiles: [{ id: "broker-fixture" }] },
+      ),
     /manualBrokerId/,
   );
 });
@@ -267,7 +279,8 @@ test("admin workflow fixture combines CMS translation review and CRM lead intake
   assert.equal(fixture.translation_tasks.el_published.status, "published");
   assert.equal(fixture.crm_inbox.buyer_he.original_language, "he");
   assert.equal(fixture.crm_inbox.buyer_he.contact_preference, "whatsapp");
-  assert.equal(fixture.crm_inbox.buyer_he.broker_assignment.broker_id, "broker_international");
+  assert.equal(fixture.crm_inbox.buyer_he.broker_assignment.broker_id, null);
+  assert.equal(fixture.crm_inbox.buyer_he.broker_assignment.method, "manager_queue");
   assert.equal(fixture.crm_inbox.buyer_he.confirmation.message_key, "lead_received");
   assert.equal(fixture.crm_inbox.seller_el.lead.leadType, "seller");
 });

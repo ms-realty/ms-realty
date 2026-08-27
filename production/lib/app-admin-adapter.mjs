@@ -43,7 +43,6 @@ import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
 import { adminCredentials } from "./admin-auth.mjs";
 import { readThroughCached } from "./file-cache.mjs";
-import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
 import { adminLocales } from "./locales.mjs";
 import {
   DEFAULT_WORKSPACE_SETTINGS_PATH,
@@ -54,7 +53,7 @@ import {
   updateWorkspaceSettings,
   workspaceSettingsView,
 } from "./workspace-settings.mjs";
-import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
+import { assignableBrokerProfiles, getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
   deleteProviderConnection,
@@ -700,7 +699,7 @@ function workspaceSettingsPayload(registry, url, config, { requestedLocale = adm
     renderAdminWorkspaceSettingsPayload(registry, requestedLocale, {
       settings: workspaceSettingsFor(config),
       operator: config.adminPrincipal,
-      brokerProfiles: DEFAULT_BROKER_PROFILES,
+      brokerProfiles: config.brokerProfiles || [],
       adminLocales: adminLocales(registry),
       saved: url.searchParams.get("saved"),
       form,
@@ -1287,8 +1286,8 @@ function availabilityRows(config) {
   return readBrokerAvailability(config.brokerAvailabilityLedgerPath || undefined);
 }
 
-function knownBrokerIds() {
-  return DEFAULT_BROKER_PROFILES.map((profile) => profile.id);
+function knownBrokerIds(config) {
+  return (config.brokerProfiles || []).map((profile) => profile.id);
 }
 
 // Viewings already on a calendar, with their current state: a rescheduled
@@ -1302,7 +1301,7 @@ async function scheduledViewings(config) {
 function brokerAvailabilityPayload(url, config) {
   const rows = availabilityRows(config);
   const requested = String(url.searchParams.get("broker") || "").trim();
-  const brokerIds = requested ? [requested] : knownBrokerIds();
+  const brokerIds = requested ? [requested] : knownBrokerIds(config);
   return {
     kind: "admin_broker_availability",
     timezone: officeTimeZone(),
@@ -1361,7 +1360,7 @@ async function viewingWeekPayload(url, config) {
     kind: "admin_viewing_week",
     week: buildViewingWeekView({
       availabilityRows: availabilityRows(config),
-      brokers: knownBrokerIds(),
+      brokers: knownBrokerIds(config),
       viewings,
       viewingFollowUpQueue: buildViewingFollowUpQueue(
         viewings,
@@ -1539,7 +1538,7 @@ async function leadInboxPayload(registry, url, config) {
         sellerPipeline: [],
         deals: [],
         brokerContacts: [],
-        brokerProfiles: [],
+        brokerProfiles: config.brokerProfiles || [],
         hermes: hermesReplyAvailability({ env: config.authEnv || process.env }),
         leadOperations: leadOperationsFor(config),
         operatorViews: [],
@@ -1602,6 +1601,7 @@ async function leadInboxPayload(registry, url, config) {
     }),
     deals,
     brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
+    brokerProfiles: config.brokerProfiles || [],
     leadSnoozes: readLeadSnoozes(config.leadSnoozeLedgerPath),
     hermes: hermesReplyAvailability({ env: config.authEnv || process.env }),
     leadOperations: leadOperationsFor(config),
@@ -3021,9 +3021,12 @@ function appendBrokerLeadEntry(input, registry, config) {
   const recordedAt = config.reviewedAt || new Date().toISOString();
   const workspaceSettings = workspaceSettingsFor(config);
   const lead = applyWorkspaceDefaultBroker(
-    createCrmInboxItem(registry, normalized, { assignedId: leadId }),
+    createCrmInboxItem(registry, normalized, {
+      assignedId: leadId,
+      brokerProfiles: config.brokerProfiles || [],
+    }),
     workspaceSettings,
-    DEFAULT_BROKER_PROFILES,
+    config.brokerProfiles || [],
   );
   const contactVault = appendLeadContact(lead, {
     filePath: config.leadContactVaultPath,
@@ -3125,6 +3128,7 @@ async function applyLeadBulkAction(input, config) {
     input,
     principal: config.adminPrincipal,
     recordedAt: config.leadSnoozeAt || config.reviewedAt || new Date().toISOString(),
+    brokerProfiles: config.brokerProfiles || [],
     audit: leadOperationAudit(config),
   });
 }
@@ -3138,6 +3142,7 @@ async function appendLeadAssignmentEntry(input, config) {
     input,
     principal: config.adminPrincipal,
     recordedAt: config.reviewedAt || new Date().toISOString(),
+    brokerProfiles: config.brokerProfiles || [],
     audit: leadOperationAudit(config),
   });
 }
@@ -3778,6 +3783,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     ...config,
     adminPrincipal: principal,
     payloadAdminSession: payloadSession,
+    brokerProfiles: await (async () => {
+      const fallback = Array.isArray(config.brokerProfiles) ? config.brokerProfiles : [];
+      if (!payloadSession) return fallback;
+      try {
+        const service = await payloadAdminAuth();
+        if (typeof service?.listOperators !== "function") return fallback;
+        const profiles = assignableBrokerProfiles(await service.listOperators(payloadSession));
+        return profiles.length ? profiles : fallback;
+      } catch {
+        return fallback;
+      }
+    })(),
     adminSessionFingerprint: currentFingerprint,
     adminStepUpActive: stepUpActive,
   };
@@ -3938,7 +3955,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             values: input,
             actor: principal?.id || "admin",
             recordedAt: auditRecordedAt(config),
-            brokerIds: DEFAULT_BROKER_PROFILES.map((profile) => profile.id),
+            brokerIds: knownBrokerIds(config),
             adminLocales: adminLocales(registry),
           });
           if (!result.idempotent) {

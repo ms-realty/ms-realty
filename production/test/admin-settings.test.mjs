@@ -21,6 +21,11 @@ const TOKEN = "workspace-settings-token-0123456789abcdef";
 const CONTACT_KEY = "workspace-settings-contact-key-0123456789";
 const HEADERS = { authorization: `Bearer ${TOKEN}` };
 const FORM_HEADERS = { ...HEADERS, "content-type": "application/x-www-form-urlencoded" };
+const TEST_BROKER_PROFILES = Object.freeze([
+  { id: "broker_bg", languages: ["bg"] },
+  { id: "broker_ru", languages: ["ru"] },
+  { id: "broker_international", languages: ["en"] },
+]);
 
 function tempFile(name, extension = "jsonl") {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${name}-`)}/${name}.${extension}`;
@@ -48,6 +53,7 @@ function paths(overrides = {}) {
     replyDeliveryOutcomeLedgerPath: tempFile("workspace-settings-reply-deliveries"),
     dealLedgerPath: tempFile("workspace-settings-deals"),
     leadContactKey: CONTACT_KEY,
+    brokerProfiles: TEST_BROKER_PROFILES,
     receivedAt: "2026-07-19T09:00:00.000Z",
     reviewedAt: "2026-07-19T10:00:00.000Z",
     ...overrides,

@@ -13,6 +13,7 @@ import {
 } from "../lib/broker-availability.mjs";
 import { assertViewingTripRequests, readViewingTripRequests, resetViewingTripRequests } from "../lib/viewing-trip-requests.mjs";
 import { readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
+import { appendBrokerContact, createBrokerContact, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { readPublicContacts } from "../lib/public-contact-vault.mjs";
 import { readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
 import { resetPublicRequestOutcomes } from "../lib/public-request-outcomes.mjs";
@@ -21,6 +22,11 @@ import { approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture
 const ADMIN = { authorization: "Bearer local-admin-smoke" };
 const SAME_ORIGIN = { host: "localhost", origin: "http://localhost", "sec-fetch-site": "same-origin" };
 const PUBLIC_CONTACT_KEY = "b5-public-contact-key-at-least-32-bytes";
+const TEST_BROKER_PROFILES = Object.freeze([
+  { id: "broker_bg", languages: ["bg"] },
+  { id: "broker_ru", languages: ["ru"] },
+  { id: "broker_international", languages: ["en"] },
+]);
 
 function workspace() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-b5-"));
@@ -28,6 +34,7 @@ function workspace() {
   resetBrokerAvailability(at("broker-availability.jsonl"));
   resetViewingTripRequests(at("viewing-trip-requests.jsonl"));
   resetAuditLog(at("audit-log.jsonl"));
+  resetBrokerContacts(at("broker-contacts.jsonl"));
   resetConsentLedger(at("consent-ledger.jsonl"));
   resetPublicRequestOutcomes(at("public-request-outcomes.jsonl"));
   fs.writeFileSync(at("viewings.jsonl"), "");
@@ -47,11 +54,31 @@ function workspace() {
       publicRequestOutcomeLedgerPath: at("public-request-outcomes.jsonl"),
       publicContactVaultPath: at("public-contact-vault.jsonl"),
       publicContactKey: PUBLIC_CONTACT_KEY,
+      brokerContactLedgerPath: at("broker-contacts.jsonl"),
+      brokerProfiles: TEST_BROKER_PROFILES,
       brokerAvailabilityAt: "2026-08-23T09:00:00.000Z",
       viewingTripRequestedAt: "2026-08-23T09:00:00.000Z",
       receivedAt: "2026-08-23T09:00:00.000Z",
     },
   };
+}
+
+function seedApprovedBrokerContact(space, listingId, broker = "broker_bg") {
+  appendBrokerContact(
+    createBrokerContact(
+      {
+        listingId,
+        broker,
+        phone: "+44 7700 900001",
+        reviewer: "owner",
+        sourceReference: `test://broker-contact/${listingId}`,
+        validationStatus: "broker_verified",
+        approved: true,
+      },
+      { reviewedAt: "2026-07-04T00:09:00Z" },
+    ),
+    { filePath: space.at("broker-contacts.jsonl") },
+  );
 }
 
 const WEEKLY_HOURS = [
@@ -234,8 +261,32 @@ test("the admin week view carries days, slots, viewings and the follow-ups due",
   assert.equal(listScreen.body.viewingLayout, "list", "the list stays the default");
 });
 
+test("the public slot route stays confirmation-required without an approved broker contact", async () => {
+  const space = workspace();
+  const app = createHttpApp(space.options);
+
+  const slots = await dispatchHttp(app, {
+    url: "/api/viewing-slots?listing=MS-CRAWL-0001&locale=bg&from=2026-08-25&to=2026-08-25&limit=50",
+  });
+  assert.equal(slots.status, 200);
+  assert.equal(slots.body.kind, "viewing_slots");
+  assert.equal(slots.body.broker_id, null);
+  assert.equal(slots.body.availability_source, "broker_confirmation_required");
+  assert.equal(slots.body.confirmation, "human_required");
+  assert.deepEqual(slots.body.slots, []);
+  assert.deepEqual(slots.body.summary, {
+    days: 0,
+    open_days: 0,
+    candidate_slots: 0,
+    available_slots: 0,
+    returned_slots: 0,
+    blocked_by_viewings: 0,
+  });
+});
+
 test("the public slot route offers a listing broker's real free slots and never books", async () => {
   const space = workspace();
+  seedApprovedBrokerContact(space, "MS-CRAWL-0001");
   const app = createHttpApp(space.options);
   await dispatchHttp(app, {
     method: "POST",
@@ -276,6 +327,7 @@ test("the public slot route offers a listing broker's real free slots and never 
 
 test("a booked viewing disappears from the slots the public route offers", async () => {
   const space = workspace();
+  seedApprovedBrokerContact(space, "MS-CRAWL-0001");
   fs.writeFileSync(
     space.at("viewings.jsonl"),
     JSON.stringify({

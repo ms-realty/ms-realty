@@ -8,6 +8,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { appendAdminSessionEvent, createAdminSessionOpened, createAdminSessionRevoked } from "../lib/admin-sessions.mjs";
 import { activateOperatorEnrolment, appendOperatorTwoFactorEvent, createOperatorEnrolment } from "../lib/operator-two-factor.mjs";
 import {
+  assignableBrokerProfiles,
   createPayloadAdminAuthService,
   payloadAdminPasswordChangeFailureCode,
   payloadAdminPrincipal,
@@ -18,6 +19,21 @@ import { totpCode } from "../lib/totp.mjs";
 
 const BASE_URL = "https://ms-realty.ms-realty-bg.workers.dev";
 const NOW_SECONDS = 1_786_377_600;
+
+test("assignable broker profiles include only identified admins and brokers", () => {
+  assert.deepEqual(
+    assignableBrokerProfiles([
+      { id: 1, email: "owner@example.test", name: "Owner", role: "admin" },
+      { id: 2, email: "broker@example.test", role: "broker" },
+      { id: 3, email: "editor@example.test", role: "editor" },
+      { email: "missing-id@example.test", role: "broker" },
+    ]),
+    [
+      { id: "1", email: "owner@example.test", name: "Owner", languages: [] },
+      { id: "2", email: "broker@example.test", name: "broker@example.test", languages: [] },
+    ],
+  );
+});
 
 function user(overrides = {}) {
   return {

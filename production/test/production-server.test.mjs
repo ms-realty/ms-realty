@@ -779,7 +779,8 @@ test("production server persists public leads and reviewed admin replies", async
       }),
     });
     assert.equal(lead.status, 201);
-    assert.equal(lead.body.broker_assignment.broker_id, "broker_international");
+    assert.equal(lead.body.broker_assignment.broker_id, null);
+    assert.equal(lead.body.broker_assignment.method, "manager_queue");
     assert.equal(readLeadLedger(leadLedgerPath).length, 1);
     assert.deepEqual(
       readConsentLedger(consentLedgerPath).map((row) => row.consent_type),

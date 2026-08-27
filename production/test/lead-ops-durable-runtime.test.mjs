@@ -200,6 +200,7 @@ function httpApp(store, paths, overrides = {}) {
       workspaceId: WORKSPACE,
     },
     readLeadIntakes: async () => [buyerLead],
+    brokerProfiles: [{ id: "broker_ru", languages: ["ru"] }],
     readSellerPipelineItemsDurably: async () => [],
     readLeadOperationsDurably: store.readOperations,
     appendLeadOperationDurably: store.appendOperations,

@@ -11,6 +11,12 @@ import {
   resetLeadAssignments,
 } from "../lib/lead-assignments.mjs";
 
+const BROKER_PROFILES = [
+  { id: "broker_bg", languages: ["bg"] },
+  { id: "broker_ru", languages: ["ru"] },
+  { id: "broker_international", languages: ["en", "de", "he"] },
+];
+
 function fixture() {
   return [{ lead_id: "lead-1", assigned_broker: "broker_bg", assignment_method: "rules" }];
 }
@@ -28,6 +34,7 @@ test("human-confirmed lead assignment overrides rule ownership without mutating 
       assignmentConfirmed: true,
     },
     "2026-07-19T12:00:00Z",
+    BROKER_PROFILES,
   );
   const persisted = appendLeadAssignment(assignment, { filePath: file });
   const retry = appendLeadAssignment(assignment, { filePath: file });
@@ -45,15 +52,33 @@ test("human-confirmed lead assignment overrides rule ownership without mutating 
 
 test("lead assignment rejects unknown leads, brokers, and unconfirmed changes", () => {
   assert.throws(
-    () => createLeadAssignment(fixture(), { leadId: "missing", brokerId: "broker_bg", actor: "manager", reason: "Manual routing", assignmentConfirmed: true }),
+    () =>
+      createLeadAssignment(
+        fixture(),
+        { leadId: "missing", brokerId: "broker_bg", actor: "manager", reason: "Manual routing", assignmentConfirmed: true },
+        "2026-07-19T12:00:00Z",
+        BROKER_PROFILES,
+      ),
     /Known leadId/,
   );
   assert.throws(
-    () => createLeadAssignment(fixture(), { leadId: "lead-1", brokerId: "missing", actor: "manager", reason: "Manual routing", assignmentConfirmed: true }),
+    () =>
+      createLeadAssignment(
+        fixture(),
+        { leadId: "lead-1", brokerId: "missing", actor: "manager", reason: "Manual routing", assignmentConfirmed: true },
+        "2026-07-19T12:00:00Z",
+        BROKER_PROFILES,
+      ),
     /Known brokerId/,
   );
   assert.throws(
-    () => createLeadAssignment(fixture(), { leadId: "lead-1", brokerId: "broker_ru", actor: "manager", reason: "Manual routing" }),
+    () =>
+      createLeadAssignment(
+        fixture(),
+        { leadId: "lead-1", brokerId: "broker_ru", actor: "manager", reason: "Manual routing" },
+        "2026-07-19T12:00:00Z",
+        BROKER_PROFILES,
+      ),
     /explicit human confirmation/,
   );
 });
