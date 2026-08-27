@@ -1,9 +1,11 @@
 import fs from "node:fs";
+import { readBuildMarker } from "../lib/build-marker.mjs";
 import { liveServiceReports, payloadRuntimeState } from "../lib/launch-readiness.mjs";
 import { liveServiceProvisioningState } from "../lib/live-service-provisioning.mjs";
 import { monitoringRollbackState } from "../lib/monitoring-rollback.mjs";
 import { productionRecoveryState } from "../lib/production-recovery.mjs";
 import { buildSeoEvidence } from "../lib/seo-evidence.mjs";
+import { r2MediaCoverageState } from "../lib/r2-media-coverage.mjs";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -39,6 +41,14 @@ export function launchReadinessInputsFromEnv(env = process.env) {
   }
   if (env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH) {
     inputs.payloadRuntime = payloadRuntimeState(env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH, { now });
+  }
+  if (env.MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH) {
+    const buildMarker = readBuildMarker();
+    inputs.r2MediaCoverage = r2MediaCoverageState(env.MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH, {
+      now,
+      expectedReleaseSha:
+        env.MS_REALTY_RELEASE_SHA || env.GITHUB_SHA || (buildMarker === "unversioned" ? undefined : buildMarker),
+    });
   }
   if (env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH) {
     inputs.productionRecovery = productionRecoveryState(env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH, {

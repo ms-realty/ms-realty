@@ -18,6 +18,8 @@ export const EVIDENCE_CLASS_MAX_AGE_MS = Object.freeze({
   payload_runtime: 7 * DAY_MS,
   // Backup + restore drill: a monthly cadence is the operational promise.
   production_recovery: 30 * DAY_MS,
+  // R2 coverage is release-bound and must be refreshed before a launch decision.
+  r2_media_coverage: DAY_MS,
   // Human review of content is durable until the content itself changes.
   listing_quality_review: 90 * DAY_MS,
   external_seo_exports: 30 * DAY_MS,

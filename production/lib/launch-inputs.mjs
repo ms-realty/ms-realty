@@ -4,6 +4,11 @@ import { launchBlockerSummary, listingPublicationMessage } from "./launch-readin
 import { HERMES_LAUNCH_REQUIRED } from "./launch-service-contract.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { fromRoot } from "./paths.mjs";
+import {
+  EXPECTED_RUNTIME_R2_MEDIA_COUNT,
+  EXPECTED_RUNTIME_R2_MEDIA_DIGEST,
+  R2_MEDIA_COVERAGE_NEXT_ACTIONS,
+} from "./r2-media-coverage.mjs";
 
 export const DEFAULT_LAUNCH_INPUT_CHECKLIST_OUTPUT = fromRoot("production", "data", "launch-input-checklist.md");
 
@@ -189,6 +194,11 @@ export function renderLaunchInputChecklist({
   const recoveryEvidence = recoveryGate?.evidence || {};
   const monitoringGate = launchReadiness.gates.find((gate) => gate.id === "monitoring_rollback");
   const monitoringEvidence = monitoringGate?.evidence?.machine_evidence || {};
+  const r2Gate = launchReadiness.gates.find((gate) => gate.id === "r2_media_coverage");
+  const r2Evidence = r2Gate?.evidence || {};
+  const r2Report = r2Evidence.report || {};
+  const r2Summary = r2Evidence.summary || r2Report;
+  const r2MissingKeys = Array.isArray(r2Summary.missing_keys) ? r2Summary.missing_keys : [];
   const manualAuditCounts = manualListingAudit.review_status_counts || {};
 
   return `# Launch Input Checklist
@@ -269,6 +279,20 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 - Production/CLI path overrides: \`MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH\`, \`MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH\`, \`MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH\`.
 - Real Payload runtime reports stay local and ignored; examples do not count as launch evidence.
 - Launch rule: custom \`/admin\` session, edge-boundary, Payload identity/config, and database evidence must all pass; the hidden Payload Admin UI is not a launch requirement.
+
+## R2 Media Coverage (workers.dev)
+
+- Current gate: ${r2Gate?.status || "unknown"}
+- Runtime source contract: \`${EXPECTED_RUNTIME_R2_MEDIA_COUNT}\` unique keys from \`loadMediaInventory + imageUrlFromMediaItem\`; expected digest: \`${EXPECTED_RUNTIME_R2_MEDIA_DIGEST}\`.
+- Coverage report: \`production/data/r2-media-coverage-report.json\` (real report stays local and ignored).
+- ListObjectsV2 input: set \`MS_REALTY_R2_MEDIA_LISTING_INPUT_PATH\` to the credential-free flattened JSON array (or simple \`Contents\` response).
+- Build command: \`MS_REALTY_RELEASE_SHA=<workers.dev release SHA> npm run r2:media:coverage\`.
+- Current counts: expected ${r2Summary.expected_count ?? EXPECTED_RUNTIME_R2_MEDIA_COUNT}, listed ${r2Summary.listed_count ?? "unknown"}, present ${r2Summary.present_count ?? "unknown"}, missing ${r2Summary.missing_count ?? "unknown"}, unexpected ${r2Summary.unexpected_count ?? "unknown"}.
+- Expected/listing digests: ${r2Summary.expected_digest || EXPECTED_RUNTIME_R2_MEDIA_DIGEST} / ${r2Summary.listing_digest || "unknown"}.
+- Public missing keys${r2MissingKeys.length ? `: ${r2MissingKeys.join(", ")}` : ": none recorded until a listing report is mounted."}
+- Release binding: the report \`release_sha\` must equal \`MS_REALTY_RELEASE_SHA\` for the workers.dev release under review.
+- Launch rule: R2 coverage passes only when \`missing_count=0\`; unexpected keys remain visible and do not substitute for missing runtime assets.
+- Next actions: ${R2_MEDIA_COVERAGE_NEXT_ACTIONS.join(" ")}
 
 ## Production Recovery
 
@@ -363,6 +387,7 @@ npm run monitoring:preflight
 npm run payload:bootstrap
 npm run payload:runtime
 npm run payload:preflight
+npm run r2:media:coverage
 npm run listing:review-pack
 npm run listing:preflight
 npm run launch:readiness

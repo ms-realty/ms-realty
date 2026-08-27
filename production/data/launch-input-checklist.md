@@ -1,6 +1,6 @@
 # Launch Input Checklist
 
-Generated: 2026-08-26T17:11:45.367Z
+Generated: 2026-08-27T14:16:20.632Z
 
 Status: blocked
 Blockers: live_services, monitoring_rollback, payload_runtime, production_recovery
@@ -88,6 +88,20 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Production/CLI path overrides: `MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH`.
 - Real Payload runtime reports stay local and ignored; examples do not count as launch evidence.
 - Launch rule: custom `/admin` session, edge-boundary, Payload identity/config, and database evidence must all pass; the hidden Payload Admin UI is not a launch requirement.
+
+## R2 Media Coverage (workers.dev)
+
+- Current gate: pass
+- Runtime source contract: `1725` unique keys from `loadMediaInventory + imageUrlFromMediaItem`; expected digest: `ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28`.
+- Coverage report: `production/data/r2-media-coverage-report.json` (real report stays local and ignored).
+- ListObjectsV2 input: set `MS_REALTY_R2_MEDIA_LISTING_INPUT_PATH` to the credential-free flattened JSON array (or simple `Contents` response).
+- Build command: `MS_REALTY_RELEASE_SHA=<workers.dev release SHA> npm run r2:media:coverage`.
+- Current counts: expected 1725, listed 1727, present 1725, missing 0, unexpected 2.
+- Expected/listing digests: ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28 / e32d4e34c775a81220c6f43d0619f53a1f3529339430c1016665fd3fec7f02b1.
+- Public missing keys: none recorded until a listing report is mounted.
+- Release binding: the report `release_sha` must equal `MS_REALTY_RELEASE_SHA` for the workers.dev release under review.
+- Launch rule: R2 coverage passes only when `missing_count=0`; unexpected keys remain visible and do not substitute for missing runtime assets.
+- Next actions: Backfill every public missing key from the credential-free R2 listing, including the page/post assets, then rerun npm run r2:media:coverage. Mount the resulting report at MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH and rerun npm run launch:preflight for the exact workers.dev release SHA.
 
 ## Production Recovery
 
@@ -188,6 +202,7 @@ npm run monitoring:preflight
 npm run payload:bootstrap
 npm run payload:runtime
 npm run payload:preflight
+npm run r2:media:coverage
 npm run listing:review-pack
 npm run listing:preflight
 npm run launch:readiness

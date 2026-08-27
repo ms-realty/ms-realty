@@ -87,7 +87,7 @@ Verified live:
 | `GET /` | 308 → `/bg`; locale pages 200; exact production origin is indexable |
 | `GET /robots.txt` | production sitemap is allowed; isolated drill hosts return `Disallow: /` |
 | `GET /sitemap.xml` | 200, canonical URLs point at the exact workers.dev origin |
-| R2 media | 200 for mirrored keys; **some legacy size variants 404** (see §8) |
+| R2 media | 1,725/1,725 runtime-normalized keys present; zero missing; two unrelated `wv.png` objects remain visible |
 | `GET /api/admin/*` | **401 — admin is unusable** (secret name drift, §3) |
 | `POST /api/leads` (any write) | **503 `runtime_data_unavailable`** (durable store absent) |
 | `/{locale}/search`, `/api/search` | **503 — fail-closed**, no engine configured |
@@ -212,8 +212,10 @@ The report is gitignored evidence, not a commit. Note: CI's
 `validate-foundation.mjs` pins the committed launch-readiness snapshot to
 exactly these blockers: `live_services`, `monitoring_rollback`,
 `payload_runtime`, and `production_recovery`, with
-`listing_quality_review` as pass. Clearing a gate means updating both the
-evidence and that pinned assertion in the same change; regenerating
+`listing_quality_review` and `r2_media_coverage` as pass. The deployment jobs
+generate one exact-SHA R2 report and embed that same artifact in the durable
+origin and Worker images. Clearing another gate means updating both its
+evidence and the pinned assertion in the same change; regenerating
 `launch-readiness.json` alone will fail CI.
 
 ## 5. Phase 3 — canonical Postgres live search
@@ -371,8 +373,8 @@ route answers 503 and names the reason rather than pretending.
 
 ## 7. Remaining production gates and optional historical SEO evidence
 
-As of the committed `production/data/launch-readiness.json`, 7 of 11 gates pass
-— `redirect_reviews` and `listing_quality_review` among them — and 4 remain
+As of the committed `production/data/launch-readiness.json`, 8 of 12 gates pass
+— `redirect_reviews`, `listing_quality_review`, and `r2_media_coverage` among them — and 4 remain
 blocked. The blocked four are:
 
 | Gate | Needs | Class |
@@ -397,13 +399,8 @@ do not block this public workers.dev origin.
 3. **Payload admin unreachable through the edge** (login POST is blocked);
    operate it locally against the prod DSN (§4) until the edge allowlist is
    extended (§9.4).
-4. **R2 media mirror is partial**: spot-checks show some legacy size variants
-   404 (e.g. `ofis-300x225.jpg`); 1,714 objects mirrored vs 11,859 media rows
-   in the crawl DB. This remains a historical compatibility risk; build a
-   coverage report (migration DB × R2 listing) when media completeness work is
-   funded, not as a public-origin launch gate.
-5. **Search 503** until Phase 3 runs.
-6. **Rate limiting** covers only the four public write paths and is in-process
+4. **Search 503** until Phase 3 runs.
+5. **Rate limiting** covers only the four public write paths and is in-process
    (single container instance pinned by design). Admin GETs, `/api/search`,
    and page renders are unlimited — a cheap wake-the-container DoS surface.
 

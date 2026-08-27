@@ -7,6 +7,7 @@ const caddy = fs.readFileSync(fromRoot("production", "Caddyfile.production-revie
 const compose = fs.readFileSync(fromRoot("production", "docker-compose.production-review.yml"), "utf8");
 const localCompose = fs.readFileSync(fromRoot("production", "docker-compose.local-production.yml"), "utf8");
 const dockerfile = fs.readFileSync(fromRoot("production", "Dockerfile"), "utf8");
+const cloudflareDockerfile = fs.readFileSync(fromRoot("Dockerfile"), "utf8");
 const deployScript = fs.readFileSync(fromRoot("production", "scripts", "deploy-production-review.sh"), "utf8");
 const ciWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");
 const searchSyncCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-sync.mjs"), "utf8");
@@ -58,8 +59,10 @@ test("production compose runs one durable app at the workers.dev public origin",
   assert.match(compose, /MS_REALTY_PROVIDER_TOKEN_KEY: \$\{MS_REALTY_PROVIDER_TOKEN_KEY:\?/);
   assert.match(compose, /MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: \$\{MS_REALTY_PROVIDER_OAUTH_STATE_SECRET:\?/);
   assert.match(compose, /MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: \$\{MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY:\?/);
+  assert.match(compose, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: \/app\/production\/data\/r2-media-coverage-report\.json/);
   assert.match(compose, /MS_REALTY_ORIGIN_TOKEN: \$\{MS_REALTY_ORIGIN_TOKEN:\?MS_REALTY_ORIGIN_TOKEN is required\}/);
   assert.match(dockerfile, /ARG MS_REALTY_BUILD_MARKER=unversioned[\s\S]*\.ms-realty-build-marker/);
+  assert.match(cloudflareDockerfile, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH=\/app\/production\/data\/r2-media-coverage-report\.json/);
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);
 });
 
@@ -97,6 +100,10 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
 });
 
 test("origin deployment is immutable, backup-first, and rolls back the active release", () => {
+  const r2Capture = ciWorkflow.slice(
+    ciWorkflow.indexOf("Capture exact-release R2 media coverage"),
+    ciWorkflow.indexOf("Preserve exact R2 report for the Worker image"),
+  );
   assert.match(deployScript, /^set -euo pipefail$/m);
   assert.doesNotMatch(deployScript, /^set -E/m);
   assert.match(deployScript, /\^\[0-9a-f\]\{40\}\$/);
@@ -118,6 +125,11 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(deployScript, /set \+x/);
   assert.match(ciWorkflow, /readlink -f \/opt\/ms-realty\/current/);
   assert.doesNotMatch(ciWorkflow, /bash -s --/);
+  assert.match(r2Capture, /--list-only/);
+  assert.doesNotMatch(r2Capture, /--execute/);
+  assert.match(ciWorkflow, /deploy_origin:[\s\S]*actions\/setup-node@v4[\s\S]*Capture exact-release R2 media coverage/);
+  assert.match(ciWorkflow, /r2-media-coverage-\$\{\{ github\.sha \}\}/);
+  assert.match(ciWorkflow, /Restore exact R2 report from the origin release/);
 });
 
 test("every public CMS media asset preserves one of the two historical source hosts", () => {

@@ -13,6 +13,7 @@ export const REQUIRED_LAUNCH_EVIDENCE_ARTIFACT_IDS = Object.freeze([
   "hermes_worker",
   "monitoring_rollback",
   "payload_runtime",
+  "r2_media_coverage",
   "production_recovery",
 ]);
 

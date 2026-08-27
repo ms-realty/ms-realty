@@ -27,6 +27,8 @@ production/data/payload-runtime-report.json
 production/data/listing-quality-source-snapshot.json
 production/data/production-recovery-report.json
 production/data/monitoring-rollback-report.json
+production/data/r2-media-list-objects.json
+production/data/r2-media-coverage-report.json
 production/data/*.sqlite
 production/data/*.sqlite-wal
 production/data/*.sqlite-shm

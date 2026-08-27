@@ -41,6 +41,12 @@ function blockerDetails(report) {
           `payload_runtime: ${gate.evidence.status} ${gate.evidence.path || ""} ${missing.length ? `missing ${missing.join(", ")}` : ""} ${failed.length ? `failed ${failed.join(", ")}` : ""}`.trim(),
         ];
       }
+      if (gate.id === "r2_media_coverage") {
+        const summary = gate.evidence.summary || gate.evidence.report || {};
+        return [
+          `r2_media_coverage: ${gate.evidence.status || "blocked"} ${gate.evidence.path || ""} expected ${summary.expected_count ?? "unknown"}, listed ${summary.listed_count ?? "unknown"}, present ${summary.present_count ?? "unknown"}, missing ${summary.missing_count ?? "unknown"}, unexpected ${summary.unexpected_count ?? "unknown"}`.trim(),
+        ];
+      }
       return [gate.message ? `${gate.id}: ${gate.message}` : `${gate.id}: blocked`];
     });
 }

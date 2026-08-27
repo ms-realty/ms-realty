@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-26T17:11:45.367Z",
+  "generated_at": "2026-08-27T14:16:20.632Z",
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
@@ -462,6 +462,116 @@
       ]
     },
     {
+      "id": "r2_media_coverage",
+      "status": "pass",
+      "message": "The workers.dev release has complete R2 coverage for every runtime-normalized media asset.",
+      "evidence": {
+        "status": "pass",
+        "path": "/private/tmp/msr-r2-redownload-33074900327/r2-media-coverage-40695ab-integrated.json",
+        "generated_at": "2026-08-27T14:16:20.632Z",
+        "freshness": {
+          "id": "r2_media_coverage",
+          "status": "fresh",
+          "age_ms": 0,
+          "max_age_ms": 86400000
+        },
+        "report": {
+          "schema_version": 1,
+          "kind": "r2_media_coverage",
+          "environment": "production",
+          "generated_at": "2026-08-27T14:16:20.632Z",
+          "release_sha": "40695ab0ac2228ddb4293b35a9bbe251543af9aa",
+          "source_contract": {
+            "canonical_artifact_path": "migration/artifacts/20260704-211155/media-inventory.csv",
+            "canonical_artifact_blob_sha1": "3597e3638dd36e823339c732a6ac052051cd2f25",
+            "canonical_artifact_content_sha256": "79b4633951c057252ddd7cdc42ab6f709c91b2d98957bcc1589b5908b01f8b13",
+            "canonical_inventory_rows": 11859,
+            "runtime_helper_contract": [
+              "production/lib/cms-seed.mjs#loadMediaInventory",
+              "production/lib/media.mjs#imageUrlFromMediaItem"
+            ],
+            "runtime_accepted_reference_count": 5442,
+            "runtime_expected_count": 1725,
+            "runtime_expected_digest": "ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28"
+          },
+          "canonical_artifact": {
+            "path": "migration/artifacts/20260704-211155/media-inventory.csv",
+            "blob_sha1": "3597e3638dd36e823339c732a6ac052051cd2f25",
+            "content_sha256": "79b4633951c057252ddd7cdc42ab6f709c91b2d98957bcc1589b5908b01f8b13",
+            "rows": 11859
+          },
+          "listing_artifact": {
+            "path": "/private/tmp/msr-r2-redownload-33074900327/r2-media-objects-40695ab0ac2228ddb4293b35a9bbe251543af9aa/r2-media-objects.json",
+            "content_sha256": "04932b1eb1166efebfe742635fa43afe85fc4e0e63518aeaf414d0989e00714a",
+            "bytes": 171825
+          },
+          "expected_count": 1725,
+          "listed_count": 1727,
+          "present_count": 1725,
+          "missing_count": 0,
+          "unexpected_count": 2,
+          "expected_digest": "ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28",
+          "listing_digest": "e32d4e34c775a81220c6f43d0619f53a1f3529339430c1016665fd3fec7f02b1",
+          "expected_by_host": {
+            "makler-realty.com": 1246,
+            "makler-realty.ru": 479
+          },
+          "listed_by_host": {
+            "makler-realty.com": 1247,
+            "makler-realty.ru": 480
+          },
+          "present_by_host": {
+            "makler-realty.com": 1246,
+            "makler-realty.ru": 479
+          },
+          "missing_by_host": {
+            "makler-realty.com": 0,
+            "makler-realty.ru": 0
+          },
+          "unexpected_by_host": {
+            "makler-realty.com": 1,
+            "makler-realty.ru": 1
+          },
+          "listed_bytes": 473110547,
+          "missing_keys": [],
+          "unexpected_keys": [
+            "makler-realty.com/wp-content/uploads/wv.png",
+            "makler-realty.ru/wp-content/uploads/wv.png"
+          ],
+          "missing_context": [],
+          "previous_mirror_plan": {
+            "listed_count": 1727,
+            "present_count": 1725,
+            "missing_count": 0,
+            "unexpected_count": 2,
+            "runtime_delta_count": 0
+          },
+          "status": "pass",
+          "pass": true,
+          "next_actions": [
+            "Mount this report for the exact workers.dev release SHA, then rerun npm run launch:preflight."
+          ]
+        },
+        "summary": {
+          "expected_count": 1725,
+          "listed_count": 1727,
+          "present_count": 1725,
+          "missing_count": 0,
+          "unexpected_count": 2,
+          "missing_keys": [],
+          "unexpected_keys": [
+            "makler-realty.com/wp-content/uploads/wv.png",
+            "makler-realty.ru/wp-content/uploads/wv.png"
+          ],
+          "expected_digest": "ada013ef6b48892b877a58490799f2b029b0b13856121529aecbfa2b599d4b28",
+          "listing_digest": "e32d4e34c775a81220c6f43d0619f53a1f3529339430c1016665fd3fec7f02b1"
+        },
+        "next_actions": [
+          "Mount this report for the exact workers.dev release SHA, then rerun npm run launch:preflight."
+        ]
+      }
+    },
+    {
       "id": "production_recovery",
       "status": "blocked",
       "message": "Encrypted off-site backup and isolated production restore evidence are required before launch.",
@@ -525,7 +635,7 @@
     }
   ],
   "rollback_plan": [
-    "Keep the previous origin and release rollback available until post-launch crawl is stable.",
+    "Keep the previous workers.dev release/origin rollback available until the post-release crawl is stable.",
     "Disable reviewed redirect deployment before changing content routes if crawl parity fails.",
     "Republish previous sitemap and robots files if indexable route coverage regresses.",
     "Use migration review queue owners to triage failed old URLs before broad redirects."
