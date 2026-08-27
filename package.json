@@ -45,6 +45,7 @@
     "cms:build": "node production/scripts/build-cms-seed.mjs",
     "guides:translations": "node production/scripts/build-guide-translations.mjs",
     "media:mirror": "node production/scripts/run-media-mirror.mjs",
+    "media:r2:repair": "node production/scripts/repair-missing-r2-media.mjs",
     "listing:quality": "node production/scripts/build-listing-quality-report.mjs",
     "listing:live-audit": "python3 migration/audit_live_listings.py",
     "listing:manual-audit": "python3 migration/build_manual_listing_audit.py",
