@@ -88,11 +88,39 @@ test("production compose runs one durable app at the workers.dev public origin",
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);
 });
 
+test("production compose forwards provider setup and canonical Hermes configuration", () => {
+  const optionalBindings = [
+    "MS_REALTY_GOOGLE_OAUTH_CLIENT_ID",
+    "MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET",
+    "MS_REALTY_GITHUB_OAUTH_CLIENT_ID",
+    "MS_REALTY_GITHUB_OAUTH_CLIENT_SECRET",
+    "MS_REALTY_META_APP_ID",
+    "MS_REALTY_META_APP_SECRET",
+    "MS_REALTY_META_EMBEDDED_SIGNUP_CONFIG_ID",
+    "MS_REALTY_META_GRAPH_VERSION",
+    "MS_REALTY_META_WEBHOOK_VERIFY_TOKEN",
+    "MS_REALTY_VIBER_COMMERCIAL_READY",
+  ];
+  for (const binding of optionalBindings) {
+    assert.ok(compose.includes(`${binding}: $` + `{${binding}:-}`), binding);
+  }
+  assert.ok(
+    compose.includes("MS_REALTY_PROVIDER_WEBHOOK_MAX_BYTES: $" + "{MS_REALTY_PROVIDER_WEBHOOK_MAX_BYTES:-1048576}"),
+  );
+  assert.match(compose, /HERMES_API_KEY: \$\{HERMES_API_KEY:-\$\{HERMES_AGENT_API_SERVER_KEY:\?/);
+  assert.match(compose, /HERMES_CHAT_COMPLETIONS_URL: \$\{HERMES_CHAT_COMPLETIONS_URL:-http:\/\/hermes-agent:8642\/v1\/chat\/completions\}/);
+  const managedModel = compose.match(/HERMES_AGENT_MODEL: ([^\s]+)/)?.[1];
+  assert.ok(managedModel, "managed Hermes model must be configured");
+  assert.ok(compose.includes(`HERMES_MODEL: $` + `{HERMES_MODEL:-${managedModel}}`), "app and agent Hermes models must match");
+  assert.match(compose, /HERMES_PROVIDER_MODE: \$\{HERMES_PROVIDER_MODE:-self_hosted\}/);
+  assert.doesNotMatch(compose, /OPENROUTER_API_KEY/);
+});
+
 test("production handoff runs Hermes drafts against one private local model", () => {
   assert.match(compose, /image: ollama\/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad/);
   assert.match(compose, /command: \["pull", "qwen3\.5:0\.8b"\]/);
   assert.match(compose, /HERMES_AGENT_MODEL: qwen3\.5:0\.8b/);
-  assert.match(compose, /HERMES_CHAT_COMPLETIONS_URL: http:\/\/hermes-agent:8642\/v1\/chat\/completions/);
+  assert.match(compose, /HERMES_CHAT_COMPLETIONS_URL: \$\{HERMES_CHAT_COMPLETIONS_URL:-http:\/\/hermes-agent:8642\/v1\/chat\/completions\}/);
   assert.match(compose, /HERMES_AGENT_LLM_BASE_URL: http:\/\/ollama:11434\/v1/);
   assert.match(compose, /MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE: live/);
   assert.match(compose, /mem_limit: 2200m/);
