@@ -24,19 +24,15 @@ function app() {
   return createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
 }
 
-test("listing manager leads with the shell the CRM screens use: header action, counted filters, list tools", async () => {
+test("listing manager leads with the shell the CRM screens use and no dead list tools", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/listings?locale=en", headers: auth });
   assert.equal(page.status, 200);
-  // Page action, then a toolbar of counted status filters, then the planned
-  // controls in one closed strip, then the queue.
+  // Page action and counted status filters lead directly to the working queue.
   assert.match(page.body, /class="crm-ph__actions"/);
   assert.match(page.body, /<nav class="crm-seg adm-cms-filter"[^>]*data-cms-filter="listings"/);
   assert.match(page.body, /data-filter-value=""[^>]*data-on="1"/);
   assert.match(page.body, /<span class="adm-seg-count">165<\/span>/);
-  assert.match(page.body, /data-planned-control="listing_list_tools"/);
-  for (const planned of ["listing-saved-views", "listing-export", "listing-duplicate"]) {
-    assert.match(page.body, new RegExp(`data-planned-control="${planned}"`), planned);
-  }
+  assert.doesNotMatch(page.body, /data-planned-control=/);
   // The queue itself keeps its contracts.
   assert.match(page.body, /data-listing-manager-row="MS-CRAWL-0001"/);
   assert.match(page.body, /data-listing-bulk-bar="true" data-selection="empty"/);
@@ -80,8 +76,7 @@ test("translation review groups its rows by listing so one title is not repeated
   assert.match(page.body, /class="adm-translation-continued"/);
   const titles = page.body.match(/Автосервиз|Автöремонтна/g) || [];
   assert.ok(titles.length <= 1, "the listing title appears at most once per group");
-  assert.match(page.body, /data-planned-control="translation_list_tools"/);
-  assert.match(page.body, /data-planned-control="translation-bulk-assign"/);
+  assert.doesNotMatch(page.body, /data-planned-control=/);
 });
 
 test("an empty translation queue says nothing is waiting rather than showing a bare table head", async () => {
@@ -154,8 +149,7 @@ test("operations reports drop the nested cards and give every empty region a not
   // A plot is a region of a panel, not a card inside a card.
   assert.doesNotMatch(page.body, /data-report-section="website-funnel"[\s\S]{0,400}adm-report-card/);
   assert.match(page.body, /class="adm-report-plot"/);
-  assert.match(page.body, /data-planned-control="report_tools"/);
-  assert.match(page.body, /data-planned-control="report-period"/);
+  assert.doesNotMatch(page.body, /data-planned-control=/);
   assert.match(page.body, /data-zero="true"/);
   assert.match(page.body, /class="adm-report-chips" data-popular-filters="true"|adm-report-nodata/);
 });
@@ -182,8 +176,7 @@ test("the CMS sheet ships after the shared admin sheet and reuses the CRM vocabu
   const adminIndex = generatedCss.indexOf(".adm-route-decisions{");
   const cmsIndex = generatedCss.indexOf(".adm-cms-filter{");
   assert.ok(adminIndex >= 0 && cmsIndex > adminIndex, "the CMS extension follows the shared admin sheet");
-  // Package A1 owns .adm-planned, .adm-planned-note, .adm-planned-badge and
-  // .adm-list-tools; this sheet must not restate them.
+  // The CMS sheet must not revive the removed planned-control treatment.
   assert.doesNotMatch(cmsCss, /^\.adm-planned \{/m);
   assert.doesNotMatch(cmsCss, /^\.adm-planned-note \{/m);
   assert.doesNotMatch(cmsCss, /^\.adm-planned-badge \{/m);

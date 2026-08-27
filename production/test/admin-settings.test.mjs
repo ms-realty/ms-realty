@@ -192,7 +192,7 @@ test("workspace onboarding is computed from real workspace state", () => {
   assert.ok(complete.items.every((item) => item.done));
 });
 
-test("settings screen renders every section, its states and the pending backlog", async () => {
+test("settings screen renders working sections and omits the unconnected backlog", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const page = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
@@ -214,47 +214,20 @@ test("settings screen renders every section, its states and the pending backlog"
     // Every form posts to the same endpoint and works without JavaScript.
     assert.equal(page.body.match(/action="\/api\/admin\/settings"/g).length, 5);
     assert.equal(page.body.match(/method="post"/g).length, 5);
-    // Designed but unconnected settings sit in one closed strip, in the same
-    // planned-control vocabulary the CRM screens use, and every control is inert.
-    assert.match(page.body, /data-settings-pending-panel="true"/);
-    assert.match(page.body, /<details class="adm-list-tools adm-settings-pending-tools"/);
-    assert.match(page.body, /data-planned-control="workspace_settings_pending"/);
-    assert.doesNotMatch(page.body, /<details class="adm-list-tools adm-settings-pending-tools"[^>]*\sopen/);
-    for (const pending of ["messaging_credentials", "working_hours", "routing_rules"]) {
-      assert.match(page.body, new RegExp(`data-settings-pending="${pending}"`), `${pending} row`);
-      assert.match(page.body, new RegExp(`id="settings-pending-${pending}-note"`), `${pending} note`);
-    }
-    assert.match(page.body, /Needs a provider credential vault/);
-
-    // Security and Data are designed sections with no backend: same shape as a
-    // live section, every control inert, one line each on what is missing.
-    for (const planned of ["security", "data"]) {
-      assert.match(page.body, new RegExp(`data-settings-section="${planned}" data-settings-planned="true"`), `${planned} section`);
-      assert.match(page.body, new RegExp(`data-planned-control="workspace_settings_${planned}"`), `${planned} planned marker`);
-    }
-    assert.match(page.body, /id="settings-security-two_factor-note"/);
-    assert.match(page.body, /id="settings-security-sessions-note"/);
-    assert.match(page.body, /id="settings-data-export-note"/);
-    assert.match(page.body, /id="settings-data-audit_retention-note"/);
-    assert.match(page.body, /Needs Payload to list and revoke operator sessions\./);
-    assert.match(page.body, /Needs an export job that writes an audit entry/);
-    assert.match(page.body, /Revoke other sessions/);
-    assert.match(page.body, /id="settings-notification-centre-note"/);
-    assert.match(page.body, /Needs an in-app notification store/);
-    // Nothing in a planned section can be submitted: controls are disabled
-    // themselves, or grouped in a disabled fieldset the way the CRM screens do.
-    const plannedMarkup = page.body.slice(page.body.indexOf('data-settings-section="security"'), page.body.indexOf('data-settings-pending-panel'));
-    assert.match(plannedMarkup, /<fieldset class="adm-planned__group" disabled/);
-    const outsideGroups = plannedMarkup.replace(/<fieldset class="adm-planned__group" disabled[\s\S]*?<\/fieldset>/g, "");
-    assert.equal(/<input(?![^>]*\bdisabled\b)/.test(outsideGroups), false, "planned inputs stay disabled");
-    assert.equal(/<button(?![^>]*\bdisabled\b)/.test(outsideGroups), false, "planned buttons stay disabled");
-    assert.equal(/<select(?![^>]*\bdisabled\b)/.test(outsideGroups), false, "planned selects stay disabled");
-    assert.equal((page.body.match(/adm-planned-note/g) || []).length >= 6, true);
+    // Unconnected settings are absent rather than consuming the owner task
+    // flow with inert controls. The integrations hub remains the recovery path.
+    assert.doesNotMatch(page.body, /data-settings-pending-panel=/);
+    assert.doesNotMatch(page.body, /data-settings-planned=/);
+    assert.doesNotMatch(page.body, /data-planned-control=/);
+    assert.doesNotMatch(page.body, /Coming soon/);
+    assert.doesNotMatch(page.body, /data-settings-section="(?:security|data)"/);
+    assert.match(page.body, /href="\/admin\/connect"/);
 
     const json = await dispatchHttp(app, { url: "/api/admin/settings", headers: HEADERS });
     assert.equal(json.status, 200);
     assert.equal(json.body.kind, "admin_workspace_settings");
     assert.equal(json.body.settings_writable, true);
+    assert.deepEqual(json.body.brokerProfiles.map(({ label }) => label), ["Bulgarian desk", "Russian desk", "International desk"]);
     assert.equal(json.body.workspace_settings.sections.leads.first_reply_target_minutes, 15);
     assert.equal(json.headers["cache-control"], "no-store");
   });

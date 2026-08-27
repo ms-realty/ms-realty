@@ -4,8 +4,8 @@
    review, migration review, operations reports, activity
    history. Loaded after adapter-admin.css and the CRM sheet, so
    it extends the shared workbench vocabulary rather than
-   restating it: the shell, the planned-control strip and the
-   empty note all come from the CRM screens.
+   restating it: the shell and compact empty states come from the
+   shared admin and CRM screens.
    ============================================================ */
 
 /* ------------------------------------------------------------
@@ -24,16 +24,6 @@
 .adm-cms-filter a:active { background: var(--surface-hover); }
 .adm-cms-filter a:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
 .adm-cms-filter a[data-on="1"] .adm-seg-count { background: var(--brand); color: var(--text-on-brand); }
-
-/* The planned-control strip stands on the canvas here, so it
-   needs the panel's own edge; inside a panel it keeps the CRM
-   treatment. */
-.crm-app main > .adm-list-tools {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-}
-.crm-app main > .adm-list-tools[open] { background: var(--adm-panel); }
 
 /* An empty note may carry one recovery action. */
 .adm-empty__action {

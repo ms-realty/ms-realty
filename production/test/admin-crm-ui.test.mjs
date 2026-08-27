@@ -146,14 +146,13 @@ test("the list tools strip and the snooze control are wired to their routes", as
   assert.match(ADMIN_APP_JS, /function initSavedViews\(\)/);
 });
 
-test("what is still planned keeps its disabled, badged treatment", async () => {
-  // The shared local token carries no operator identity, and a saved view has
-  // to belong to somebody, so this half stays honestly marked.
+test("unavailable CRM affordances stay out of the owner task flow", async () => {
+  // The shared local token carries no operator identity, so per-operator saved
+  // views are unavailable and must not appear as dead controls.
   const inbox = await dispatchHttp(app(), { url: "/admin/leads?locale=en", headers: auth });
-  assert.match(inbox.body, /data-planned-control="saved_views"/);
-  assert.match(inbox.body, /<select id="saved-view-leads" name="savedView" disabled/);
-  assert.match(inbox.body, /Saved views are waiting for a stored per-operator filter/);
-  assert.match(inbox.body, /class="adm-planned-badge">Coming soon<\/span>/);
+  assert.doesNotMatch(inbox.body, /data-planned-control=/);
+  assert.doesNotMatch(inbox.body, /Coming soon/);
+  assert.match(inbox.body, /class="adm-inbox__broker">(?:Bulgarian|Russian|International) desk<\/span>/);
 
   // B5 built broker availability and the free-slot calculation, so the week
   // view is no longer planned: the segmented control is two real links and the
@@ -294,9 +293,9 @@ test("the lead inbox panes stay usable without JavaScript and enhance with it", 
 test("the new CRM copy exists in Bulgarian, Russian and English", async () => {
   const server = app();
   const expected = {
-    bg: ["Изберете запитване", "Инструменти за списъка", "Очаква се", "Нови запитвания"],
-    ru: ["Выберите заявку", "Инструменты списка", "Скоро", "Новые заявки"],
-    en: ["Select an enquiry", "List tools", "Coming soon", "New enquiries"],
+    bg: ["Изберете запитване", "Нови запитвания"],
+    ru: ["Выберите заявку", "Новые заявки"],
+    en: ["Select an enquiry", "New enquiries"],
   };
   for (const [locale, phrases] of Object.entries(expected)) {
     const inbox = await dispatchHttp(server, { url: `/admin/leads?locale=${locale}`, headers: auth });

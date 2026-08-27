@@ -520,15 +520,16 @@ test("the settings screen renders the Security and Data sections from live state
   });
 });
 
-test("without the workspace-security ledgers the sections keep their disabled treatment", async () => {
+test("without the workspace-security ledgers unavailable sections stay out of the task flow", async () => {
   await withWorkspace(async ({ directory }) => {
     const settingsPath = `${directory}/workspace-settings-bare.json`;
     fs.copyFileSync(fromRoot("production", "data", "workspace-settings.json"), settingsPath);
     const bare = createHttpApp({ workspaceSettingsPath: settingsPath, securityAt: () => START });
     const page = await dispatchHttp(bare, { url: "/admin/settings", headers: headers(TOKENS.owner, { accept: "text/html" }) });
     assert.equal(page.status, 200);
-    assert.match(page.body, /data-planned-control="workspace_settings_security"/);
-    assert.match(page.body, /data-planned-control="workspace_settings_data"/);
+    assert.doesNotMatch(page.body, /data-settings-section="security"/);
+    assert.doesNotMatch(page.body, /data-settings-section="data"/);
+    assert.doesNotMatch(page.body, /data-planned-control=/);
     assert.doesNotMatch(page.body, /data-settings-live="true"/);
     assert.doesNotMatch(page.body, /action="\/api\/admin\/security\/two-factor\/enrol"/);
   });

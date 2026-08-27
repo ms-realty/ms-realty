@@ -2054,6 +2054,12 @@ function reviewerRoleText(copy, ui, value) {
   return `${role} \u00b7 ${match[2].replaceAll("_", "-").toUpperCase()}`;
 }
 
+function brokerProfileText(page, brokerId) {
+  const id = String(brokerId || "").trim();
+  if (!id) return workbenchCopy(page).notSet;
+  return (page.brokerProfiles || []).find((profile) => profile.id === id)?.label || valueText(workbenchCopy(page), id);
+}
+
 const LISTING_EDITOR_FACT_FIELDS = Object.freeze({
   bedrooms: "bedrooms_count",
   bedrooms_not_applicable: "bedrooms_count",
@@ -2345,41 +2351,12 @@ function ListEmptyNote({ scope, children }) {
   return h("p", { className: "adm-empty", role: "status", "data-list-empty": scope, hidden: true }, children);
 }
 
-// A control whose front end is designed and reachable but whose backend does
-// not exist yet. It renders disabled, names itself as planned, and explains
-// what it is waiting for, so the screen has no silent hole.
-function PlannedNote({ children, ...attrs }) {
-  return h("p", { className: "adm-planned-note", ...attrs }, children);
-}
-
-function PlannedBadge({ ui }) {
-  return h("span", { className: "adm-planned-badge" }, ui.comingSoon);
-}
-
-// Saved views and bulk actions live in one closed strip above the queue:
-// discoverable and honest, never competing with the leads themselves. Each
-// half turns into a working control only when the payload says its route is
-// reachable; otherwise it keeps the disabled, badged treatment.
+// Saved views and bulk actions live in one closed strip above the queue when
+// their routes are reachable. Unsupported controls stay out of the task flow.
 function SavedViewsTool({ page, ui, copy, surface = "leads" }) {
   const writable = page.leadOperations?.savedViewsWritable === true;
   const views = (page.operatorViews || []).filter((view) => view.surface === surface);
-  if (!writable) {
-    return h(
-      "div",
-      { className: "adm-planned", "data-planned-control": "saved_views" },
-      h(
-        "label",
-        { className: "adm-planned__field", htmlFor: `saved-view-${surface}` },
-        h("span", null, ui.savedViews, h(PlannedBadge, { ui })),
-        h(
-          "select",
-          { id: `saved-view-${surface}`, name: "savedView", disabled: true, "aria-describedby": `saved-view-${surface}-note` },
-          h("option", null, ui.savedViewsDefault),
-        ),
-      ),
-      h(PlannedNote, { id: `saved-view-${surface}-note` }, ui.savedViewsNote),
-    );
-  }
+  if (!writable) return null;
   return h(
     "div",
     { className: "adm-list-tools__group", "data-saved-views-control": surface },
@@ -2438,26 +2415,7 @@ function SavedViewsTool({ page, ui, copy, surface = "leads" }) {
 
 function LeadBulkActionsTool({ page, ui, copy }) {
   const writable = page.leadOperations?.bulkWritable === true;
-  if (!writable) {
-    return h(
-      "div",
-      { className: "adm-planned", "data-planned-control": "lead_bulk_actions" },
-      h(
-        "fieldset",
-        { className: "adm-planned__group", disabled: true, "aria-describedby": "lead-bulk-note" },
-        h("legend", null, ui.bulkActions),
-        h(
-          "label",
-          { className: "adm-check" },
-          h("input", { type: "checkbox", name: "selectAllLeads" }),
-          h("span", null, ui.selectAllLeads),
-        ),
-        h("button", { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm" }, ui.bulkAssign),
-        h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--sm" }, ui.snooze),
-      ),
-      h(PlannedNote, { id: "lead-bulk-note" }, ui.bulkActionsNote),
-    );
-  }
+  if (!writable) return null;
   return h(
     "form",
     {
@@ -2502,7 +2460,7 @@ function LeadBulkActionsTool({ page, ui, copy }) {
         h(
           "select",
           { name: "brokerId" },
-          ...(page.brokerProfiles || []).map((profile) => h("option", { key: profile.id, value: profile.id }, profile.id.replaceAll("_", " "))),
+          ...(page.brokerProfiles || []).map((profile) => h("option", { key: profile.id, value: profile.id }, profile.label || profile.id)),
         ),
       ),
       h("label", { "data-lead-bulk-field": "snooze" }, ui.snoozeUntil, h("input", { type: "datetime-local", name: "until" })),
@@ -2527,15 +2485,15 @@ function LeadBulkActionsTool({ page, ui, copy }) {
 
 function LeadListTools({ page, ui, copy }) {
   const live = page.leadOperations?.bulkWritable === true || page.leadOperations?.savedViewsWritable === true;
+  if (!live) return null;
   return h(
     "details",
-    { className: "adm-list-tools", ...(live ? { "data-list-tools": "lead_list_tools" } : { "data-planned-control": "lead_list_tools" }) },
+    { className: "adm-list-tools", "data-list-tools": "lead_list_tools" },
     h(
       "summary",
       { className: "adm-list-tools__summary adm-disclosure-chevron" },
       h(Icon, { name: "sliders-horizontal", size: 15 }),
       h("span", null, ui.listTools),
-      live ? null : h(PlannedBadge, { ui }),
     ),
     h(
       "div",
@@ -3835,7 +3793,7 @@ function ViewingWeekPanel({ page, copy, ui }) {
                     { key: viewing.id, "data-week-viewing": viewing.id },
                     h("time", { dateTime: viewing.starts_at }, viewing.local_start),
                     h("span", null, viewing.listing_reference || viewing.lead_id),
-                    h("small", null, viewing.broker),
+                    h("small", null, brokerProfileText(page, viewing.broker)),
                   ),
                 ),
               )
@@ -3858,7 +3816,7 @@ function ViewingWeekPanel({ page, copy, ui }) {
         h(
           "li",
           { key: broker.broker_id, "data-week-broker": broker.broker_id },
-          h("strong", null, broker.broker_id),
+          h("strong", null, brokerProfileText(page, broker.broker_id)),
           h(
             StatusPill,
             { tone: broker.availability_source === "broker_recorded" ? "sea" : "sand" },
@@ -4183,41 +4141,6 @@ function CmsFilterLinks({ label: navLabel, options, scope }) {
   );
 }
 
-// Controls the CMS screens need whose backend does not exist yet. They live in
-// one closed strip above the queue, in the same shape the CRM screens use, so
-// they stay discoverable without pushing the real work below the fold.
-function CmsListTools({ ui, scope, summary, children }) {
-  return h(
-    "details",
-    { className: "adm-list-tools", "data-planned-control": scope },
-    h(
-      "summary",
-      { className: "adm-list-tools__summary adm-disclosure-chevron" },
-      h(Icon, { name: "sliders-horizontal", size: 15 }),
-      h("span", null, summary || ui.listTools),
-      h(PlannedBadge, { ui }),
-    ),
-    h("div", { className: "adm-list-tools__body" }, children),
-  );
-}
-
-// One planned control inside that strip: a real, disabled control and one
-// sentence naming what it is waiting for.
-function CmsPlannedAction({ id, icon, label: controlLabel, note, children }) {
-  return h(
-    "div",
-    { className: "adm-planned", "data-planned-control": id },
-    children ||
-      h(
-        "button",
-        { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: true, "aria-describedby": `${id}-note` },
-        icon ? h(Icon, { name: icon, size: 16 }) : null,
-        h("span", null, controlLabel),
-      ),
-    h(PlannedNote, { id: `${id}-note` }, note),
-  );
-}
-
 function auditMetadataValue(value, ui) {
   if (value === null || value === undefined || value === "") return ui.notSet;
   if (Array.isArray(value)) return value.join(", ");
@@ -4408,24 +4331,6 @@ function OperationsReportsBody({ page }) {
         PageHeader,
         { title, subtitle: page.metadata?.description },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/reports/export" }, h(Icon, { name: "download", size: 16 }), ui.downloadSourceReport),
-      ),
-      h(
-        CmsListTools,
-        { ui, scope: "report_tools", summary: ui.reportTools },
-        h(CmsPlannedAction, {
-          id: "report-period",
-          note: ui.reportPeriodNote,
-          children: h(
-            "label",
-            { className: "adm-planned__field", htmlFor: "report-period-select" },
-            h("span", null, ui.reportPeriod),
-            h(
-              "select",
-              { id: "report-period-select", name: "period", disabled: true, "aria-describedby": "report-period-note" },
-              h("option", null, ui.reportPeriodAll),
-            ),
-          ),
-        }),
       ),
       h("p", { className: "adm-report-privacy" }, h(Icon, { name: "shield-check", size: 17 }), ui.privacySafeReport),
       h(StatGrid, { metrics }),
@@ -4997,7 +4902,7 @@ function PipelineCard({ page, state, lead }) {
       h("div", null, h("dt", null, label(copy, "listing", "Listing")), h("dd", null, state.listing_reference || ui.notSet)),
       h("div", null, h("dt", null, label(copy, "nextAction", "Next action")), h("dd", null, state.next_action ? statusText(ui, state.next_action) : ui.notSet)),
       h("div", null, h("dt", null, label(copy, "nextFollowUp", "Next follow-up")), h("dd", null, formatAdminDateTime(state.next_follow_up_at, page.workspace.locale) || ui.notSet)),
-      h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, state.assigned_broker || ui.notSet)),
+      h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, brokerProfileText(page, state.assigned_broker))),
     ),
     requirements
       ? h(
@@ -5866,7 +5771,7 @@ function LeadAssignmentControl({ page, lead, copy }) {
       "summary",
       null,
       h(Icon, { name: "users", size: 15 }),
-      h("span", null, `${label(copy, "assignedBroker", "Assigned broker")}: ${brokerId || workbenchCopy(page).notSet}`),
+      h("span", null, `${label(copy, "assignedBroker", "Assigned broker")}: ${brokerProfileText(page, brokerId)}`),
     ),
     canAssign
       ? h(
@@ -5889,7 +5794,7 @@ function LeadAssignmentControl({ page, lead, copy }) {
               "select",
               { name: "brokerId", defaultValue: brokerId, required: true },
               ...(page.brokerProfiles || []).map((profile) =>
-                h("option", { key: profile.id, value: profile.id, selected: profile.id === brokerId ? true : undefined }, profile.id.replaceAll("_", " ")),
+                h("option", { key: profile.id, value: profile.id, selected: profile.id === brokerId ? true : undefined }, profile.label || profile.id),
               ),
             ),
           ),
@@ -6503,7 +6408,7 @@ function ContactsBody({ page }) {
                   { className: "adm-contact-facts" },
                   h("div", null, h("dt", null, label(copy, "leads", "Enquiries")), h("dd", null, contact.lead_count)),
                   h("div", null, h("dt", null, label(copy, "duplicateEnquiries", "Linked repeats")), h("dd", null, contact.duplicate_leads)),
-                  h("div", null, h("dt", null, label(copy, "owners", "Owners")), h("dd", null, contact.assigned_brokers.map((broker) => statusText(ui, broker)).join(", ") || ui.notSet)),
+                  h("div", null, h("dt", null, label(copy, "owners", "Owners")), h("dd", null, contact.assigned_brokers.map((broker) => brokerProfileText(page, broker)).join(", ") || ui.notSet)),
                   h("div", null, h("dt", null, label(copy, "language", "Language")), h("dd", null, contact.languages.join(", ").toUpperCase() || ui.notSet)),
                   h("div", null, h("dt", null, label(copy, "communicationEvents", "Communication events")), h("dd", null, contact.communication_event_count)),
                   h("div", null, h("dt", null, label(copy, "latestEnquiry", "Latest enquiry")), h("dd", null, contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, page.workspace?.locale) : ui.notSet)),
@@ -6751,7 +6656,7 @@ function LeadInboxRow({ page, row, ui, locale }) {
           ? h(StatusPill, { tone: "sand", "data-lead-snooze-until": snooze.until }, `${ui.snoozedUntil} ${formatAdminDateTime(snooze.until, locale)}`)
           : null,
         delivery && !delivered ? h(StatusPill, { tone: delivery.status === "failed" ? "brick" : "sun" }, statusText(ui, delivery.status)) : null,
-        h("span", { className: "adm-inbox__broker" }, brokerId || ui.notSet),
+        h("span", { className: "adm-inbox__broker" }, brokerProfileText(page, brokerId)),
       ),
     ),
   );
@@ -6759,33 +6664,12 @@ function LeadInboxRow({ page, row, ui, locale }) {
 
 // Snooze defers one enquiry to a chosen moment. The SLA clock moves with it
 // by exactly the same window, so nothing is lost; un-snoozing puts the
-// original clock back. Without a reachable route the control keeps its
-// disabled, badged treatment instead of pretending.
+// original clock back. Without a reachable route the control is absent.
 function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
   const writable = page.leadOperations?.snoozeWritable === true && pageCan(page, "operations:write");
   const snooze = leadSla?.snooze || null;
   const active = snooze?.status === "active";
-  if (!writable) {
-    return h(
-      "div",
-      { className: "adm-lead-snooze" },
-      h(
-        "button",
-        {
-          type: "button",
-          className: "mk-btn mk-btn--ghost mk-btn--sm",
-          disabled: true,
-          "data-planned-control": "lead_snooze",
-          "aria-describedby": `snooze-note-${lead.lead_id}`,
-          title: ui.snoozeNote,
-        },
-        h(Icon, { name: "clock", size: 15 }),
-        h("span", null, ui.snooze),
-        h(PlannedBadge, { ui }),
-      ),
-      h(PlannedNote, { id: `snooze-note-${lead.lead_id}`, className: "adm-planned-note adm-visually-hidden" }, ui.snoozeNote),
-    );
-  }
+  if (!writable) return null;
   return h(
     "details",
     { className: "adm-lead-snooze", "data-lead-snooze-control": lead.lead_id, "data-snooze-state": active ? "active" : "open" },
@@ -6916,7 +6800,7 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
         h("div", null, h("dt", null, ui.received), h("dd", null, lead.received_at ? h("time", { dateTime: lead.received_at }, formatAdminDateTime(lead.received_at, locale)) : ui.notSet)),
         h("div", null, h("dt", null, label(copy, "listing", "Listing")), h("dd", null, leadContext || ui.notSet)),
         requestDetails ? h("div", null, h("dt", null, label(copy, "details", "Details")), h("dd", null, requestDetails)) : null,
-        h("div", null, h("dt", null, label(copy, "assignedBroker", "Assigned broker")), h("dd", null, brokerId || ui.notSet)),
+        h("div", null, h("dt", null, label(copy, "assignedBroker", "Assigned broker")), h("dd", null, brokerProfileText(page, brokerId))),
       ),
       h(LeadBrief, { brief, intake, copy, ui, locale, open: true }),
       lead.duplicate_status === "possible_duplicate"
@@ -7930,26 +7814,6 @@ function ListingManagerBody({ page }) {
         h(CmsFilterLinks, { scope: "listings", label: label(copy, "qualityStatus", "Status"), options: statusFilterOptions }),
       ),
       h(
-        CmsListTools,
-        { ui, scope: "listing_list_tools" },
-        h(CmsPlannedAction, {
-          id: "listing-saved-views",
-          note: ui.savedViewsNote,
-          children: h(
-            "label",
-            { className: "adm-planned__field", htmlFor: "saved-view-listings" },
-            h("span", null, ui.savedViews),
-            h(
-              "select",
-              { id: "saved-view-listings", name: "savedView", disabled: true, "aria-describedby": "listing-saved-views-note" },
-              h("option", null, label(copy, "all", "All")),
-            ),
-          ),
-        }),
-        h(CmsPlannedAction, { id: "listing-export", icon: "download", label: ui.exportListingsCsv, note: ui.exportListingsCsvNote }),
-        h(CmsPlannedAction, { id: "listing-duplicate", icon: "plus", label: ui.duplicateListing, note: ui.duplicateListingNote }),
-      ),
-      h(
         Panel,
         {
           title: `${factReviewCopy.title || "Facts to confirm"} · ${factReviewSummary.unchecked_figures || 0}`,
@@ -8240,21 +8104,6 @@ function TranslationQueueBody({ page }) {
         PageToolbar,
         null,
         h(CmsFilterLinks, { scope: "translations", label: label(copy, "taskType", "Task type"), options: taskFilterOptions }),
-      ),
-      h(
-        CmsListTools,
-        { ui, scope: "translation_list_tools" },
-        h(CmsPlannedAction, {
-          id: "translation-bulk-assign",
-          note: ui.assignReviewerNote,
-          children: h(
-            "fieldset",
-            { className: "adm-planned__group", disabled: true, "aria-describedby": "translation-bulk-assign-note" },
-            h("legend", null, ui.bulkActions),
-            h("label", { className: "adm-check" }, h("input", { type: "checkbox", name: "selectAllTranslations" }), h("span", null, ui.selectAllVisible)),
-            h("button", { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm" }, ui.assignReviewer),
-          ),
-        }),
       ),
       h(
         "form",
@@ -8587,7 +8436,7 @@ function ListingEditorBody({ page }) {
       "data-kind": "admin-listing-editor",
       "data-react-admin-ui": "listing-editor",
       "data-admin-workbench": "cms",
-      "data-editor-layout": "split-rail",
+      "data-editor-layout": "stacked-workflow",
       "data-cms-status": page.listing.cms_status,
       "data-schema-ready": page.listing.seo?.schema_present ? "true" : "false",
       "data-publish-approved": workflow.publish_approved ? "true" : "false",
@@ -8608,13 +8457,6 @@ function ListingEditorBody({ page }) {
           ? null
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
-      canEditContent
-        ? h(
-            CmsListTools,
-            { ui, scope: "listing_editor_tools", summary: ui.editorTools },
-            h(CmsPlannedAction, { id: "editor-duplicate", icon: "plus", label: ui.duplicateListing, note: ui.duplicateListingNote }),
-          )
-        : null,
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
@@ -10486,129 +10328,10 @@ function SettingsSection({ page, section, icon, fields }) {
   );
 }
 
-const SETTINGS_PENDING_CONTROLS = {
-  messaging_credentials: { kind: "input", type: "text" },
-  working_hours: { kind: "input", type: "text" },
-  routing_rules: { kind: "select" },
-  data_export: { kind: "button", icon: "download" },
-  two_factor: { kind: "check" },
-  audit_retention: { kind: "select" },
-};
-
-// A settings section that is designed and reachable but has no backend: same
-// header, spacing and field vocabulary as a live section, every control inert,
-// and one line per control saying what it is waiting for.
-function SettingsPlannedSection({ page, section, icon }) {
-  const ui = workbenchCopy(page);
-  const copy = ui.workspaceSettings.plannedSections[section];
-  const items = copy.items;
-  const control = (id) => {
-    if (id === "two_factor") {
-      return h(
-        "div",
-        { className: "adm-settings-check" },
-        h(
-          "label",
-          null,
-          h("input", { type: "checkbox", disabled: true, "aria-describedby": `settings-${section}-${id}-note` }),
-          h("span", null, items[id].control),
-        ),
-      );
-    }
-    if (id === "sessions") {
-      return h(
-        "div",
-        { className: "adm-settings-planned__stack" },
-        h("p", { className: "adm-empty" }, items[id].empty),
-        h(
-          "button",
-          { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: true, "aria-describedby": `settings-${section}-${id}-note` },
-          h(Icon, { name: "x", size: 15 }),
-          h("span", null, items[id].action),
-        ),
-      );
-    }
-    if (id === "export") {
-      return h(
-        "div",
-        { className: "adm-settings-planned__stack" },
-        h(
-          "fieldset",
-          { className: "adm-planned__group", disabled: true, "aria-describedby": `settings-${section}-${id}-note` },
-          ...Object.entries(items[id].options).map(([value, optionLabel]) =>
-            h(
-              "label",
-              { key: value, className: "adm-check" },
-              h("input", { type: "checkbox", name: `export_${value}` }),
-              h("span", null, optionLabel),
-            ),
-          ),
-        ),
-        h(
-          "button",
-          { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: true },
-          h(Icon, { name: "download", size: 15 }),
-          h("span", null, items[id].action),
-        ),
-      );
-    }
-    return h(
-      "select",
-      { disabled: true, "aria-label": items[id].label, "aria-describedby": `settings-${section}-${id}-note` },
-      h("option", null, items[id].sample || ""),
-    );
-  };
-  return h(
-    "section",
-    {
-      className: "crm-panel adm-settings-panel adm-settings-panel--planned",
-      id: `settings-${section}`,
-      "data-settings-section": section,
-      "data-settings-planned": "true",
-      "data-planned-control": `workspace_settings_${section}`,
-      "data-settings-disabled": "true",
-    },
-    h(
-      "div",
-      { className: "crm-panel__hd adm-settings-panel__hd" },
-      h(
-        "div",
-        { className: "adm-settings-panel__title" },
-        h("h2", null, h(Icon, { name: icon, size: 17 }), h("span", null, copy.title)),
-        h("p", null, copy.description),
-      ),
-      h(PlannedBadge, { ui }),
-    ),
-    h(
-      "div",
-      { className: "adm-settings-planned" },
-      ...Object.keys(items).map((id) =>
-        h(
-          "div",
-          { key: id, className: "adm-planned adm-settings-planned__row", "data-planned-control": id },
-          h(
-            "div",
-            { className: "adm-settings-pending__copy" },
-            h("strong", null, items[id].label),
-            h(PlannedNote, { id: `settings-${section}-${id}-note` }, items[id].note),
-          ),
-          h("div", { className: "adm-settings-pending__control" }, control(id)),
-        ),
-      ),
-    ),
-    h(
-      "p",
-      { className: "adm-settings-note adm-settings-note--blocked" },
-      h(Icon, { name: "info", size: 15 }),
-      h("span", null, copy.note),
-    ),
-  );
-}
-
 // ==== B6 workspace security and data =========================================
 // The live Security and Data sections. They render only when the request
-// carried a workspace-security block; without one the planned (disabled)
-// treatment below stays, so an unconfigured runtime never pretends to work.
+// carried a workspace-security block; unavailable sections stay out of the
+// task flow so the console never presents dead controls as future work.
 
 function fillTemplate(text, values) {
   return Object.entries(values).reduce((output, [key, value]) => output.replaceAll(`{${key}}`, String(value)), String(text || ""));
@@ -11005,63 +10728,6 @@ function SettingsDataSection({ page, icon }) {
 }
 // ==== end B6 workspace security and data =====================================
 
-// Settings whose front end is designed but whose backend does not exist yet.
-// They live in one closed strip, so they stay discoverable without pushing the
-// working sections down the screen.
-function SettingsPendingList({ page }) {
-  const ui = workbenchCopy(page);
-  const pending = ui.workspaceSettings.pending;
-  return h(
-    "details",
-    { className: "adm-list-tools adm-settings-pending-tools", id: "settings-pending", "data-planned-control": "workspace_settings_pending", "data-settings-pending-panel": "true" },
-    h(
-      "summary",
-      { className: "adm-list-tools__summary adm-disclosure-chevron" },
-      h(Icon, { name: "clock", size: 15 }),
-      h("span", null, pending.title),
-      h(PlannedBadge, { ui }),
-    ),
-    h(
-      "div",
-      { className: "adm-list-tools__body" },
-      h("p", { className: "adm-planned-note" }, pending.description),
-    h(
-      "ul",
-      { className: "adm-settings-pending" },
-      ...Object.entries(pending.items).map(([id, item]) => {
-        const control = SETTINGS_PENDING_CONTROLS[id] || { kind: "input", type: "text" };
-        return h(
-          "li",
-          { key: id, className: "adm-planned", "data-settings-pending": id, "data-planned-control": id },
-          h(
-            "div",
-            { className: "adm-settings-pending__copy" },
-            h("strong", null, item.label),
-            h(PlannedNote, { id: `settings-pending-${id}-note` }, item.note),
-          ),
-          h(
-            "div",
-            { className: "adm-settings-pending__control" },
-            control.kind === "select"
-              ? h("select", { disabled: true, "aria-label": item.label }, h("option", null, item.sample || ""))
-              : control.kind === "button"
-                ? h(
-                    "button",
-                    { type: "button", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: true },
-                    h(Icon, { name: control.icon, size: 15 }),
-                    h("span", null, item.sample || item.label),
-                  )
-                : control.kind === "check"
-                  ? h("input", { type: "checkbox", disabled: true, "aria-label": item.label })
-                  : h("input", { type: control.type, disabled: true, placeholder: item.sample || "", "aria-label": item.label }),
-          ),
-        );
-      }),
-    ),
-    ),
-  );
-}
-
 function OwnerOperationsHub({ page }) {
   const copy = ownerConsoleCopy(page).hub;
   const items = [
@@ -11366,7 +11032,7 @@ function SettingsBody({ page }) {
         h(
           "option",
           { key: profile.id, value: profile.id, selected: leads.nested("default_brokers", group) === profile.id ? true : undefined },
-          profile.id.replaceAll("_", " "),
+          profile.label || profile.id,
         ),
       ),
     );
@@ -11416,14 +11082,14 @@ function SettingsBody({ page }) {
           ),
         );
       }),
-      // B6 workspace security and data: the rail only says "coming soon" while
-      // the section really is still the planned panel.
-      ...["security", "data"].map((section) => {
-        const live =
+      ...["security", "data"]
+        .filter((section) =>
           section === "security"
             ? Boolean(page.workspace_security?.two_factor)
-            : Boolean(page.workspace_security?.exports || page.workspace_security?.audit_retention);
-        const sectionTitle = live ? settings.liveSections[section].title : settings.plannedSections[section].title;
+            : Boolean(page.workspace_security?.exports || page.workspace_security?.audit_retention),
+        )
+        .map((section) => {
+        const sectionTitle = settings.liveSections[section].title;
         return h(
           "li",
           { key: section, "data-settings-index-row": section },
@@ -11434,12 +11100,12 @@ function SettingsBody({ page }) {
               "span",
               { className: "adm-readiness-copy" },
               h("strong", null, sectionTitle),
-              h("small", null, live ? settings.sectionState.updated : ui.comingSoon),
+              h("small", null, settings.sectionState.updated),
             ),
             h(
               "span",
               { className: "adm-readiness-value" },
-              h(StatusPill, { tone: live ? "sea" : "ink" }, live ? settings.sectionState.updated : ui.comingSoon),
+              h(StatusPill, { tone: "sea" }, settings.sectionState.updated),
             ),
           ),
         );
@@ -11651,17 +11317,6 @@ function SettingsBody({ page }) {
                   "aria-invalid": fieldError("notifications", "daily_digest_recipients") ? "true" : undefined,
                 }),
               }),
-              h(
-                "div",
-                { key: "centre", className: "adm-planned adm-settings-check adm-settings-field--wide", "data-planned-control": "notification_centre" },
-                h(
-                  "label",
-                  null,
-                  h("input", { type: "checkbox", disabled: true, "aria-describedby": "settings-notification-centre-note" }),
-                  h("span", null, settings.plannedRows.notification_centre.label),
-                ),
-                h(PlannedNote, { id: "settings-notification-centre-note" }, settings.plannedRows.notification_centre.note),
-              ),
             ],
           }),
           h(SettingsSection, {
@@ -11756,15 +11411,8 @@ function SettingsBody({ page }) {
               }),
             ],
           }),
-          // B6 workspace security and data: live when the request carried a
-          // workspace-security block, otherwise the honest "not connected" panel.
-          page.workspace_security?.two_factor
-            ? h(SettingsSecuritySection, { page, icon: "shield-check" })
-            : h(SettingsPlannedSection, { page, section: "security", icon: "shield-check" }),
-          page.workspace_security?.exports || page.workspace_security?.audit_retention
-            ? h(SettingsDataSection, { page, icon: "download" })
-            : h(SettingsPlannedSection, { page, section: "data", icon: "download" }),
-          h(SettingsPendingList, { page }),
+          page.workspace_security?.two_factor ? h(SettingsSecuritySection, { page, icon: "shield-check" }) : null,
+          page.workspace_security?.exports || page.workspace_security?.audit_retention ? h(SettingsDataSection, { page, icon: "download" }) : null,
         ),
         h(
           "aside",

@@ -280,6 +280,20 @@ function settingsFormEcho(values) {
   return echo;
 }
 
+function adminBrokerProfile(profile, locale) {
+  const language = profile.languages?.includes("bg") ? "bg" : profile.languages?.includes("ru") ? "ru" : "international";
+  const deskLabels = {
+    bg: { bg: "Екип на български", ru: "Екип на руски", international: "Международен екип" },
+    ru: { bg: "Болгароязычная команда", ru: "Русскоязычная команда", international: "Международная команда" },
+    en: { bg: "Bulgarian desk", ru: "Russian desk", international: "International desk" },
+  };
+  return {
+    id: profile.id,
+    label: profile.labels?.[locale] || profile.display_name || profile.name || deskLabels[locale]?.[language] || profile.id,
+    languages: profile.languages || [],
+  };
+}
+
 export function renderAdminWorkspaceSettingsPayload(
   registry,
   requestedLocale,
@@ -312,7 +326,7 @@ export function renderAdminWorkspaceSettingsPayload(
     workspace: workspaceWithOperator(workspace, operator),
     workspace_settings: workspaceSettingsView(settings),
     settings_writable: writable !== false,
-    brokerProfiles: brokerProfiles.map((profile) => ({ id: profile.id, languages: profile.languages || [] })),
+    brokerProfiles: brokerProfiles.map((profile) => adminBrokerProfile(profile, workspace.locale)),
     settingsOptions: {
       admin_locales: [...locales],
       timezones: [...WORKSPACE_TIMEZONES],
@@ -735,10 +749,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       robots: "noindex,nofollow",
     },
     workspace: workspaceWithOperator(workspace, operatorId),
-    brokerProfiles: (data.brokerProfiles || DEFAULT_BROKER_PROFILES).map((profile) => ({
-      id: profile.id,
-      languages: profile.languages || [],
-    })),
+    brokerProfiles: (data.brokerProfiles || DEFAULT_BROKER_PROFILES).map((profile) => adminBrokerProfile(profile, workspace.locale)),
     ...payloadData,
     leadSla,
     leadPipelineQueue,
