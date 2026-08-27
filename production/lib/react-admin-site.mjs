@@ -2607,6 +2607,48 @@ const OWNER_CONSOLE_COPY = {
       settings: "Отвори настройките",
       back: "Към Днес",
     },
+    hermes: {
+      title: "Hermes AI",
+      description: "Състояние на агента, безопасни задачи за чернови и връзката с ChatGPT/Codex на едно място.",
+      retry: "Провери отново",
+      connections: "Връзки и настройка",
+      hosted: "Hermes Agent runtime",
+      hostedDescription: "Проверка на защитения health endpoint и декларираните възможности.",
+      desktop: "Desktop bridge",
+      desktopDescription: "Задачи за ChatGPT/Codex на компютъра на собственика, без достъп до чувствителни клиентски данни.",
+      queue: "Следващи задачи",
+      queueDescription: "Само чернови за превод от одобрени CMS източници; всяка минава през човешки преглед.",
+      tools: "Възможности на Hermes",
+      toolsDescription: "Точните операции, които MCP пакетът предоставя на собственика.",
+      guardrails: "Задължителни ограничения",
+      ready: "Готово",
+      blocked: "Блокирано",
+      pass: "Успешно",
+      fail: "Неуспешно",
+      missingEnv: "Липсва настройка",
+      notRun: "Не е изпълнено",
+      endpoint: "Endpoint",
+      model: "Модел",
+      checks: "Проверки",
+      eligible: "Готови задачи",
+      withheld: "Задържани чувствителни задачи",
+      noTasks: "Няма чакащи безопасни задачи.",
+      noTasksDescription: "Опашката е свързана. Новите задачи ще се появят тук след промяна в изходното съдържание.",
+      taskSourceUnavailable: "Източникът на задачи не е достъпен. Проверете CMS/Payload връзката и опитайте отново.",
+      openReview: "Отвори прегледа",
+      target: "Целеви език",
+      readOnly: "Само четене",
+      draftWrite: "Запис на чернова",
+      confirmationRequired: "Изисква потвърждение",
+      prohibited: "Забранено",
+      generatedAt: "Проверено",
+      guardrailItems: [
+        "Hermes създава само чернови; човек ги одобрява в админ панела.",
+        "Цена, площ, спални, локация, референция и източник се запазват точно.",
+        "Hermes не публикува, не изпраща съобщения и не маркира съдържание за индексиране.",
+        "Чувствителни клиентски данни не се изпращат към desktop AI bridge.",
+      ],
+    },
   },
   ru: {
     groups: { overview: "Обзор", crm: "CRM", website: "Сайт и контент", hermes: "Hermes AI", admin: "Администрирование" },
@@ -2647,6 +2689,48 @@ const OWNER_CONSOLE_COPY = {
       settings: "Открыть настройки",
       back: "К разделу Сегодня",
     },
+    hermes: {
+      title: "Hermes AI",
+      description: "Состояние агента, безопасные задачи для черновиков и подключение ChatGPT/Codex в одном месте.",
+      retry: "Проверить снова",
+      connections: "Подключения и настройка",
+      hosted: "Hermes Agent runtime",
+      hostedDescription: "Проверка защищённого health endpoint и заявленных возможностей.",
+      desktop: "Desktop bridge",
+      desktopDescription: "Задачи для ChatGPT/Codex на компьютере владельца без доступа к чувствительным данным клиентов.",
+      queue: "Следующие задачи",
+      queueDescription: "Только черновики переводов из утверждённых источников CMS; каждый проходит ручную проверку.",
+      tools: "Возможности Hermes",
+      toolsDescription: "Точные операции, доступные владельцу через MCP-пакет.",
+      guardrails: "Обязательные ограничения",
+      ready: "Готово",
+      blocked: "Заблокировано",
+      pass: "Успешно",
+      fail: "Ошибка",
+      missingEnv: "Нет настройки",
+      notRun: "Не запускалось",
+      endpoint: "Endpoint",
+      model: "Модель",
+      checks: "Проверки",
+      eligible: "Готовые задачи",
+      withheld: "Скрытые чувствительные задачи",
+      noTasks: "Нет ожидающих безопасных задач.",
+      noTasksDescription: "Очередь подключена. Новые задачи появятся после изменения исходного контента.",
+      taskSourceUnavailable: "Источник задач недоступен. Проверьте подключение CMS/Payload и повторите попытку.",
+      openReview: "Открыть проверку",
+      target: "Целевой язык",
+      readOnly: "Только чтение",
+      draftWrite: "Запись черновика",
+      confirmationRequired: "Нужно подтверждение",
+      prohibited: "Запрещено",
+      generatedAt: "Проверено",
+      guardrailItems: [
+        "Hermes создаёт только черновики; человек утверждает их в админ-панели.",
+        "Цена, площадь, спальни, локация, референция и источник сохраняются точно.",
+        "Hermes не публикует, не отправляет сообщения и не помечает контент для индексации.",
+        "Чувствительные данные клиентов не передаются в desktop AI bridge.",
+      ],
+    },
   },
   en: {
     groups: { overview: "Overview", crm: "CRM", website: "Website and content", hermes: "Hermes AI", admin: "Administration" },
@@ -2686,6 +2770,48 @@ const OWNER_CONSOLE_COPY = {
       connect: "Open connections",
       settings: "Open settings",
       back: "Back to Today",
+    },
+    hermes: {
+      title: "Hermes AI",
+      description: "Agent health, safe draft tasks, and the owner's ChatGPT/Codex connection in one place.",
+      retry: "Check again",
+      connections: "Connections and setup",
+      hosted: "Hermes Agent runtime",
+      hostedDescription: "Authenticated health and declared-capability checks for the configured agent service.",
+      desktop: "Desktop bridge",
+      desktopDescription: "Tasks for ChatGPT/Codex on the owner's computer, without sensitive customer data.",
+      queue: "Next tasks",
+      queueDescription: "Translation drafts from approved CMS sources only; every result requires human review.",
+      tools: "Hermes capabilities",
+      toolsDescription: "The exact operations exposed to the owner by the MCP package.",
+      guardrails: "Mandatory guardrails",
+      ready: "Ready",
+      blocked: "Blocked",
+      pass: "Pass",
+      fail: "Failed",
+      missingEnv: "Configuration missing",
+      notRun: "Not run",
+      endpoint: "Endpoint",
+      model: "Model",
+      checks: "Checks",
+      eligible: "Ready tasks",
+      withheld: "Withheld sensitive tasks",
+      noTasks: "No safe tasks are waiting.",
+      noTasksDescription: "The queue is connected. New tasks will appear after source content changes.",
+      taskSourceUnavailable: "The task source is unavailable. Check the CMS/Payload connection and try again.",
+      openReview: "Open review",
+      target: "Target language",
+      readOnly: "Read only",
+      draftWrite: "Draft write",
+      confirmationRequired: "Confirmation required",
+      prohibited: "Prohibited",
+      generatedAt: "Checked",
+      guardrailItems: [
+        "Hermes creates drafts only; a human approves them in the admin workbench.",
+        "Price, area, bedrooms, location, reference, and source remain exact.",
+        "Hermes cannot publish, send customer messages, or mark content indexable.",
+        "Sensitive customer data never enters the desktop AI bridge.",
+      ],
     },
   },
 };
@@ -11049,6 +11175,172 @@ function RuntimeUnavailableBody({ page }) {
   });
 }
 
+function hermesStateLabel(copy, state) {
+  return {
+    ready: copy.ready,
+    blocked: copy.blocked,
+    pass: copy.pass,
+    fail: copy.fail,
+    missing_env: copy.missingEnv,
+    not_run: copy.notRun,
+  }[state] || state || copy.blocked;
+}
+
+function HermesBody({ page }) {
+  const copy = ownerConsoleCopy(page).hermes;
+  const runtime = page.runtime || { ready: false, status: "blocked", checks: [], missing: [] };
+  const queue = page.queue || { status: "blocked", summary: {}, rows: [] };
+  const bridgeReady = queue.status === "ready";
+  const tasks = Array.isArray(queue.rows) ? queue.rows : [];
+  const tools = Array.isArray(page.tools) ? page.tools : [];
+  const runtimeTone = runtime.ready ? "success" : "brick";
+  return adminShell(page, {
+    title: copy.title,
+    mainAttrs: {
+      "data-kind": "admin-hermes",
+      "data-react-admin-ui": "hermes",
+      "data-admin-workbench": "hermes",
+      "data-admin-locale": page.workspace.locale,
+      "data-hermes-runtime": runtime.status,
+      "data-hermes-queue": queue.status,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title: copy.title, subtitle: copy.description },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, h(Icon, { name: "loader-circle", size: 15 }), h("span", null, copy.retry)),
+        pageCan(page, "settings:manage")
+          ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections))
+          : null,
+      ),
+      h(
+        "div",
+        { className: "adm-hermes-status-grid" },
+        h(
+          Panel,
+          { title: copy.hosted, "data-hermes-runtime-card": runtime.status },
+          h(
+            "div",
+            { className: "adm-hermes-card" },
+            h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)), h("p", null, copy.hostedDescription)),
+            h(
+              "dl",
+              { className: "adm-hermes-facts" },
+              runtime.endpoint ? h("div", null, h("dt", null, copy.endpoint), h("dd", null, h("code", null, runtime.endpoint))) : null,
+              h("div", null, h("dt", null, copy.model), h("dd", null, runtime.model || "—")),
+              h("div", null, h("dt", null, copy.generatedAt), h("dd", null, formatAdminDateTime(runtime.generated_at || page.generated_at, page.workspace.locale))),
+            ),
+            h(
+              "div",
+              { className: "adm-hermes-checks", "aria-label": copy.checks },
+              h("strong", null, copy.checks),
+              h(
+                "ul",
+                null,
+                ...(runtime.checks || []).map((check) =>
+                  h(
+                    "li",
+                    { key: check.id, "data-hermes-check": check.id, "data-check-state": check.status },
+                    h("code", null, check.id),
+                    h(StatusPill, { tone: check.status === "pass" ? "success" : check.status === "fail" ? "brick" : "sand" }, hermesStateLabel(copy, check.status)),
+                  ),
+                ),
+              ),
+            ),
+            runtime.missing?.length
+              ? h("p", { className: "adm-hermes-missing", "data-hermes-missing": runtime.missing.join(",") }, runtime.missing.join(" · "))
+              : null,
+          ),
+        ),
+        h(
+          Panel,
+          { title: copy.desktop, "data-hermes-desktop-card": bridgeReady ? "ready" : "blocked" },
+          h(
+            "div",
+            { className: "adm-hermes-card" },
+            h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked), h("p", null, copy.desktopDescription)),
+            h(StatGrid, {
+              metrics: [
+                [copy.eligible, queue.eligible_for_desktop || 0],
+                [copy.withheld, queue.withheld_sensitive || 0],
+              ],
+            }),
+            h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm adm-hermes-card__action", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections)),
+          ),
+        ),
+      ),
+      h(
+        Panel,
+        {
+          title: copy.queue,
+          action: h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 15 }), h("span", null, copy.openReview)),
+          "data-hermes-task-queue": queue.status,
+        },
+        h("p", { className: "adm-hermes-panel-intro" }, copy.queueDescription),
+        queue.status !== "ready"
+          ? h("div", { className: "adm-hermes-empty adm-hermes-empty--blocked", role: "status" }, h(Icon, { name: "triangle-alert", size: 18 }), h("span", null, copy.taskSourceUnavailable))
+          : tasks.length
+            ? h(
+                "ul",
+                { className: "adm-hermes-tasks" },
+                ...tasks.map((task) =>
+                  h(
+                    "li",
+                    { key: task.id, "data-hermes-task": task.id },
+                    h("span", { className: "adm-hermes-task__icon", "aria-hidden": "true" }, h(Icon, { name: "languages", size: 17 })),
+                    h(
+                      "span",
+                      { className: "adm-hermes-task__copy" },
+                      h("strong", null, task.object_id),
+                      h("small", null, `${task.source_locale.toUpperCase()} → ${task.target_locale.toUpperCase()} · ${task.task_type}`),
+                    ),
+                    h(StatusPill, { tone: "sun" }, copy.draftWrite),
+                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(task.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                  ),
+                ),
+              )
+            : h(
+                "div",
+                { className: "adm-hermes-empty", role: "status" },
+                h(Icon, { name: "check-circle-2", size: 18 }),
+                h("span", null, h("strong", null, copy.noTasks), h("small", null, copy.noTasksDescription)),
+              ),
+      ),
+      h(
+        "div",
+        { className: "adm-hermes-bottom-grid" },
+        h(
+          Panel,
+          { title: copy.tools, "data-hermes-tool-coverage": tools.length },
+          h("p", { className: "adm-hermes-panel-intro" }, copy.toolsDescription),
+          h(
+            "ul",
+            { className: "adm-hermes-tools" },
+            ...tools.map((tool) =>
+              h(
+                "li",
+                { key: tool.operation, "data-hermes-tool": tool.operation },
+                h("div", null, h("strong", null, h("code", null, tool.operation)), h(StatusPill, { tone: tool.read_only ? "sea" : "sun" }, tool.read_only ? copy.readOnly : copy.draftWrite)),
+                tool.confirmation ? h("small", null, `${copy.confirmationRequired}: ${tool.confirmation}`) : null,
+                h("small", null, `${copy.prohibited}: ${(tool.prohibited_actions || []).join(", ")}`),
+              ),
+            ),
+          ),
+        ),
+        h(
+          Panel,
+          { title: copy.guardrails, "data-hermes-guardrails": "true" },
+          h(
+            "ul",
+            { className: "adm-hermes-guardrails" },
+            ...copy.guardrailItems.map((item) => h("li", { key: item }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, item))),
+          ),
+        ),
+      ),
+    ],
+  });
+}
+
 function SettingsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -11523,6 +11815,7 @@ export function renderReactAdminBody(page) {
 function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
   if (page.kind === "admin_runtime_unavailable") return renderStaticElement(h(RuntimeUnavailableBody, { page }));
+  if (page.kind === "admin_hermes") return renderStaticElement(h(HermesBody, { page }));
   if (page.kind === "admin_workspace_settings") return renderStaticElement(h(SettingsBody, { page }));
   if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
   if (page.kind === "admin_consents") return renderStaticElement(h(ConsentsBody, { page }));

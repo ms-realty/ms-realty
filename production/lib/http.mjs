@@ -48,6 +48,7 @@ import {
   renderAdminPasswordChangePage,
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
+import { buildAdminHermesPayload } from "./admin-hermes.mjs";
 import { getPayloadAdminAuthService, payloadAdminPasswordChangeFailureCode } from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
@@ -1089,6 +1090,8 @@ export function createHttpApp({
   leadSnoozeAt,
   hermesReplyProvider = null,
   hermesEnv = process.env,
+  hermesAgentFetch = fetch,
+  hermesAgentProbeTimeoutMs = 5_000,
   rateLimit = null,
   // Unlike the public write limiter, the sign-in throttle is on by default:
   // an unthrottled password field is the gap this closes.
@@ -3806,6 +3809,28 @@ export function createHttpApp({
       return adminJson(405, { kind: "method_not_allowed" });
     }
     const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
+    if (request.method === "GET" && ["/admin/hermes", "/api/admin/hermes"].includes(url.pathname)) {
+      const payload = withWorkspaceSettings(
+        await buildAdminHermesPayload({
+          registry: activeRegistry,
+          requestedLocale: adminLocaleParam(url),
+          seed: currentSeed(),
+          operator: principal,
+          hermesEnv,
+          listingEnv: payloadListingEnv,
+          payload: payloadListingRuntime,
+          requirePayload: runtimeDataDurableOnly,
+          provider: hermesReplyProvider,
+          fetchImpl: hermesAgentFetch,
+          generatedAt: reviewedAt || new Date().toISOString(),
+          probeTimeoutMs: hermesAgentProbeTimeoutMs,
+        }),
+      );
+      if (url.pathname === "/admin/hermes") {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
     if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
       const settingsPage = (requestedLocale, form = null) =>
         withWorkspaceSettings(

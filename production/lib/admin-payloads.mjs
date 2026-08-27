@@ -222,6 +222,46 @@ export function renderAdminRuntimeUnavailablePayload(
   };
 }
 
+export function renderAdminHermesPayload(
+  registry,
+  requestedLocale,
+  {
+    availability,
+    bridge,
+    generatedAt,
+    operator = null,
+    queue,
+    runtime,
+    runtimeDataMode = "file_backed",
+    tools = [],
+  } = {},
+) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    kind: "admin_hermes",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/hermes",
+    canonical: "/admin/hermes",
+    indexable: false,
+    metadata: {
+      title: "Hermes | MS Realty",
+      description: "Authenticated Hermes runtime, task queue, desktop bridge, and safety controls.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    generated_at: generatedAt,
+    runtime_data_mode: runtimeDataMode,
+    runtime,
+    availability,
+    bridge,
+    queue,
+    tools,
+  };
+}
+
 const WORKSPACE_SETTINGS_METADATA = {
   bg: { title: "Настройки", description: "Профил на агенцията, срокове за отговор, известия, работно пространство и публичен сайт." },
   ru: { title: "Настройки", description: "Профиль агентства, сроки ответа, уведомления, рабочее пространство и публичный сайт." },

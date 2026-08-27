@@ -298,25 +298,67 @@ main.crm-scroll[data-react-admin-ui="listing-editor"] { overflow: visible; }
   gap: var(--space-2);
   margin: 0 var(--space-5) var(--space-3);
   padding: var(--space-3);
-  border: 1px solid var(--sun-200);
+  border: 1px solid var(--sun-300);
   border-radius: var(--radius-md);
-  background: var(--sun-50);
+  background: var(--sun-100);
   color: var(--text-strong);
 }
 .adm-availability-note--role { border-color: var(--border); background: var(--surface-sunken); }
-.adm-availability-note > svg { color: var(--sun-700); }
+.adm-availability-note > svg { color: var(--sun-600); }
 .adm-availability-note--role > svg { color: var(--text-muted); }
 .adm-availability-note p { margin: 0; font-size: var(--text-sm); line-height: var(--lh-relaxed); }
 .adm-runtime-unavailable { display: grid; overflow: hidden; }
 .adm-runtime-unavailable__message { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-5); }
 .adm-runtime-unavailable__message h2 { margin: 0; font-size: var(--text-lg); }
 .adm-runtime-unavailable__message p { max-width: 68ch; margin: var(--space-1) 0 0; color: var(--text-muted); }
-.adm-runtime-unavailable__icon { display: grid; width: 40px; height: 40px; flex: none; place-items: center; border-radius: var(--radius-full); background: var(--sun-100); color: var(--sun-700); }
+.adm-runtime-unavailable__icon { display: grid; width: 40px; height: 40px; flex: none; place-items: center; border-radius: var(--radius-full); background: var(--sun-100); color: var(--sun-600); }
 .adm-runtime-unavailable__details { margin: 0; padding: 0 var(--space-5) var(--space-4); }
 .adm-runtime-unavailable__details > div { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-3); }
 .adm-runtime-unavailable__details dt { color: var(--text-muted); font-size: var(--text-xs); }
 .adm-runtime-unavailable__details dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
 .adm-runtime-unavailable__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-4) var(--space-5); border-top: 1px solid var(--border); background: var(--surface-sunken); }
+
+.adm-hermes-status-grid,
+.adm-hermes-bottom-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
+.adm-hermes-status-grid > .crm-panel,
+.adm-hermes-bottom-grid > .crm-panel { margin: 0; overflow: hidden; }
+.adm-hermes-card { display: grid; gap: var(--space-4); padding: var(--space-4) var(--space-5) var(--space-5); }
+.adm-hermes-card__state { display: flex; align-items: flex-start; gap: var(--space-3); }
+.adm-hermes-card__state p { margin: 0; color: var(--text-muted); font-size: var(--text-sm); line-height: var(--lh-relaxed); }
+.adm-hermes-card__action { justify-self: start; }
+.adm-hermes-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); margin: 0; }
+.adm-hermes-facts > div { display: grid; gap: 3px; min-width: 0; }
+.adm-hermes-facts dt { color: var(--text-muted); font-size: var(--text-xs); }
+.adm-hermes-facts dd { min-width: 0; margin: 0; color: var(--text-strong); font-size: var(--text-sm); overflow-wrap: anywhere; }
+.adm-hermes-facts code { white-space: normal; word-break: break-all; }
+.adm-hermes-checks { display: grid; gap: var(--space-2); }
+.adm-hermes-checks > strong { font-size: var(--text-sm); }
+.adm-hermes-checks ul,
+.adm-hermes-tasks,
+.adm-hermes-tools,
+.adm-hermes-guardrails { display: grid; margin: 0; padding: 0; list-style: none; }
+.adm-hermes-checks ul { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-2); }
+.adm-hermes-checks li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-sunken); }
+.adm-hermes-missing { margin: 0; padding: var(--space-3); border-radius: var(--radius-md); background: var(--sun-100); color: var(--text-strong); font-family: var(--font-mono); font-size: var(--text-xs); overflow-wrap: anywhere; }
+.adm-hermes-panel-intro { margin: 0; padding: 0 var(--space-5) var(--space-4); color: var(--text-muted); font-size: var(--text-sm); }
+.adm-hermes-tasks { border-top: 1px solid var(--border); }
+.adm-hermes-tasks > li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); }
+.adm-hermes-tasks > li:last-child { border-bottom: 0; }
+.adm-hermes-task__icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: var(--radius-full); background: var(--sea-50); color: var(--sea-700); }
+.adm-hermes-task__copy { display: grid; gap: 3px; min-width: 0; }
+.adm-hermes-task__copy strong { overflow-wrap: anywhere; }
+.adm-hermes-task__copy small { color: var(--text-muted); font-size: var(--text-xs); }
+.adm-hermes-empty { display: flex; align-items: flex-start; gap: var(--space-3); margin: 0 var(--space-5) var(--space-5); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-sunken); color: var(--text-muted); }
+.adm-hermes-empty > span { display: grid; gap: 3px; }
+.adm-hermes-empty strong { color: var(--text-strong); }
+.adm-hermes-empty small { line-height: var(--lh-relaxed); }
+.adm-hermes-empty--blocked { border-color: var(--sun-300); background: var(--sun-100); color: var(--text-strong); }
+.adm-hermes-tools > li { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); }
+.adm-hermes-tools > li > div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.adm-hermes-tools small { color: var(--text-muted); font-size: var(--text-xs); overflow-wrap: anywhere; }
+.adm-hermes-guardrails { gap: 0; }
+.adm-hermes-guardrails > li { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); color: var(--text-muted); font-size: var(--text-sm); line-height: var(--lh-relaxed); }
+.adm-hermes-guardrails svg { flex: none; margin-top: 2px; color: var(--sea-700); }
 
 /* Segmented controls: a 36px pill track (locales, lead queues, pipeline stages).
    The track reads --surface-sunken, which is --stone-100 in the light palette
@@ -2021,6 +2063,16 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-runtime-unavailable__details > div { grid-template-columns: 1fr; gap: var(--space-1); }
   .adm-runtime-unavailable__actions { align-items: stretch; flex-direction: column; padding: var(--space-4); }
   .adm-runtime-unavailable__actions .mk-btn { width: 100%; justify-content: center; }
+  .adm-hermes-status-grid,
+  .adm-hermes-bottom-grid { grid-template-columns: minmax(0, 1fr); }
+  .adm-hermes-card { padding: var(--space-4); }
+  .adm-hermes-panel-intro { padding-inline: var(--space-4); }
+  .adm-hermes-tasks > li { grid-template-columns: auto minmax(0, 1fr); padding-inline: var(--space-4); }
+  .adm-hermes-tasks > li > .crm-pill { grid-column: 2; justify-self: start; }
+  .adm-hermes-tasks > li > .mk-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
+  .adm-hermes-empty { margin-inline: var(--space-4); }
+  .adm-hermes-tools > li,
+  .adm-hermes-guardrails > li { padding-inline: var(--space-4); }
 }
 
 /* ---- Listing photo upload (media manager) ---- */

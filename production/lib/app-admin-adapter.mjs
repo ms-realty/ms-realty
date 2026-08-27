@@ -38,6 +38,7 @@ import {
 import { DEFAULT_OPERATOR_TWO_FACTOR_PATH, operatorTwoFactorStatus, readOperatorTwoFactorEvents } from "./operator-two-factor.mjs";
 import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
+import { buildAdminHermesPayload } from "./admin-hermes.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
 import { adminCredentials } from "./admin-auth.mjs";
@@ -1907,6 +1908,24 @@ async function translationQueuePayload(registry, url, config) {
     page: url.searchParams.get("page") || 1,
   });
   return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+}
+
+async function hermesConsolePayload(registry, url, config) {
+  const env = config.authEnv || process.env;
+  return buildAdminHermesPayload({
+    registry,
+    requestedLocale: adminLocaleParam(url, config),
+    seed: currentSeed(config),
+    operator: config.adminPrincipal,
+    hermesEnv: env,
+    listingEnv: env,
+    payload: config.payloadListingRuntime || null,
+    requirePayload: config.runtimeDataDurableOnly,
+    provider: config.hermesReplyProvider || null,
+    fetchImpl: config.hermesAgentFetch || globalThis.fetch,
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+    probeTimeoutMs: config.hermesAgentProbeTimeoutMs || 5_000,
+  });
 }
 
 function readJsonData(filename) {
@@ -3975,6 +3994,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       });
     }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
+    if (request.method === "GET" && ["/admin/hermes", "/api/admin/hermes"].includes(url.pathname)) {
+      const payload = await hermesConsolePayload(registry, url, config);
+      return url.pathname === "/admin/hermes" ? htmlResponse(payload) : jsonResponse(200, payload);
+    }
     if (request.method === "GET" && url.pathname === "/admin/connect") {
       const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
       let availability = operatorProviderAvailability(providerConfig);
