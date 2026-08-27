@@ -45,6 +45,7 @@ import {
   adminSessionSetCookie,
   adminTokenFromCookie,
   renderAdminLoginPage,
+  renderAdminPasswordChangePage,
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
@@ -2289,10 +2290,28 @@ export function createHttpApp({
           }
         }
         if ((auth && resolveAdminPrincipal(auth)) || session?.principal) {
+          if (session?.principal?.password_change_required === true) {
+            if (url.searchParams.get("change") === "1") {
+              return response(
+                200,
+                renderAdminPasswordChangePage({
+                  error: url.searchParams.get("error") || false,
+                  locale: url.searchParams.get("locale") || "bg",
+                }),
+                "text/html; charset=utf-8",
+                { "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" },
+              );
+            }
+            return response(303, "", "text/plain; charset=utf-8", { location: "/admin/login?change=1" });
+          }
           return response(303, "", "text/plain; charset=utf-8", { location: "/admin" });
         }
         // The raw value matters: "2fa" selects the second-factor refusal.
-        return response(200, renderAdminLoginPage({ error: url.searchParams.get("error") || false, locale: url.searchParams.get("locale") || "bg" }), "text/html; charset=utf-8", {
+        return response(200, renderAdminLoginPage({
+          changed: url.searchParams.get("password") === "changed",
+          error: url.searchParams.get("error") || false,
+          locale: url.searchParams.get("locale") || "bg",
+        }), "text/html; charset=utf-8", {
           "cache-control": "no-store",
           "x-robots-tag": "noindex, nofollow",
           ...(sessionToken ? { "set-cookie": adminSessionClearCookie() } : {}),
@@ -2300,6 +2319,39 @@ export function createHttpApp({
       }
       if (request.method === "POST") {
         const form = new URLSearchParams(request.body || "");
+        if (form.get("action") === "change-password") {
+          const locale = ["bg", "ru", "en"].includes(form.get("locale")) ? form.get("locale") : "bg";
+          const localeQuery = locale === "bg" ? "" : `&locale=${encodeURIComponent(locale)}`;
+          let service = null;
+          let session = null;
+          try {
+            service = await configuredPayloadAdminAuth();
+            session = sessionToken ? await service?.resolve(sessionToken) : null;
+            if (!service || session?.principal?.password_change_required !== true) {
+              return response(303, "", "text/plain; charset=utf-8", {
+                location: "/admin/login?error=1",
+                "set-cookie": adminSessionClearCookie(),
+                "cache-control": "no-store",
+              });
+            }
+            await service.changePassword(session, Object.fromEntries(form));
+            try {
+              await service.logout(sessionToken);
+            } catch {
+              // Password replacement already cleared every Payload session.
+            }
+            return response(303, "", "text/plain; charset=utf-8", {
+              location: `/admin/login?password=changed${localeQuery}`,
+              "set-cookie": adminSessionClearCookie(),
+              "cache-control": "no-store",
+            });
+          } catch {
+            return response(303, "", "text/plain; charset=utf-8", {
+              location: `/admin/login?change=1&error=1${localeQuery}`,
+              "cache-control": "no-store",
+            });
+          }
+        }
         const email = form.get("email") || "";
         // Password guessing is cheap because the account lock Payload applies
         // is per account: one address can walk a list of operators without
@@ -2379,7 +2431,7 @@ export function createHttpApp({
           }
           recordSignIn({ outcome: "succeeded", email, clientKey, operatorId: login.principal.id });
           return response(303, "", "text/plain; charset=utf-8", {
-            location: "/admin",
+            location: login.principal.password_change_required === true ? "/admin/login?change=1" : "/admin",
             "set-cookie": adminSessionSetCookie(login.token, { maxAgeSeconds }),
             "cache-control": "no-store",
           });
@@ -2428,6 +2480,15 @@ export function createHttpApp({
       const unauthorized = adminUnauthorized();
       if (sessionToken) unauthorized.headers["set-cookie"] = adminSessionClearCookie();
       return unauthorized;
+    }
+    if (adminRequest && principal?.source === "payload_session" && principal.password_change_required === true) {
+      if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && wantsHtml(request, url)) {
+        return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/login?change=1" });
+      }
+      return adminJson(403, {
+        kind: "password_change_required",
+        message: "Change the temporary password before using the admin workspace.",
+      });
     }
     if (adminRequest && request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
     const requiredCapability = adminRequest ? requiredAdminCapability(request.method, url.pathname) : null;

@@ -3688,6 +3688,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     headers.set("set-cookie", adminSessionClearCookie());
     return new Response(response.body, { status: response.status, headers });
   }
+  if (principal.source === "payload_session" && principal.password_change_required === true) {
+    if ((requestPath === "/admin" || requestPath.startsWith("/admin/")) && request.headers.get("accept")?.includes("text/html")) {
+      return new Response(null, {
+        status: 303,
+        headers: { location: "/admin/login?change=1", "cache-control": "no-store" },
+      });
+    }
+    return jsonResponse(403, {
+      kind: "password_change_required",
+      message: "Change the temporary password before using the admin workspace.",
+    });
+  }
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
   // B6: which session is "this" one, so the settings screen can mark it and
   // refuse to present a revoke that would sign the operator out silently. A

@@ -92,7 +92,7 @@ function Footer({ onNavigate }) {
           <p className="site-ft__intro">Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция — с местен офис и брокери, които говорят вашия език.</p>
           <div className="site-ft__contact">
             <span><Icon name="phone" size={16} /> +359 879 69 68 70</span>
-            <span><Icon name="mail" size={16} /> office@makler-realty.com</span>
+            <span><Icon name="mail" size={16} /> ms.realty.bg@gmail.com</span>
             <span><Icon name="map-pin" size={16} /> Сандански</span>
           </div>
         </div>

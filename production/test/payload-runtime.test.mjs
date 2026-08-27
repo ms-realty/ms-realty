@@ -25,6 +25,12 @@ test("Payload config keeps admins as the internal identity engine for the custom
   assert.equal(admins.auth.cookies.sameSite, "Lax");
   assert.equal(admins.auth.tokenExpiration, 2 * 60 * 60);
   assert.equal(admins.auth.maxLoginAttempts, 5);
+  const passwordChangeRequired = admins.fields.find((field) => field.name === "password_change_required");
+  const role = admins.fields.find((field) => field.name === "role");
+  assert.equal(passwordChangeRequired.type, "checkbox");
+  assert.equal(passwordChangeRequired.defaultValue, false);
+  assert.equal(passwordChangeRequired.admin.hidden, true);
+  assert.deepEqual(passwordChangeRequired.access, role.access);
   assert.ok(slugs.includes("admins"));
   assert.ok(slugs.includes("locales"));
   assert.ok(slugs.includes("listings"));

@@ -115,7 +115,7 @@ function ContactPanel({ open, onClose, listing, money }) {
 function ContactPage() {
   const [done, setDone] = React.useState(false);
   const offices = [
-    { name: 'Офис в Сандански', tone: 'sand', addr: 'Сандански — градът, полите на Пирин и област Благоевград', phone: '+359 879 69 68 70', email: 'office@makler-realty.com' },
+    { name: 'Офис в Сандански', tone: 'sand', addr: 'Сандански — градът, полите на Пирин и област Благоевград', phone: '+359 879 69 68 70', email: 'ms.realty.bg@gmail.com' },
   ];
   return (
     <main className="ct-page">

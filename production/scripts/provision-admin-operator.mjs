@@ -24,11 +24,12 @@ const MIN_PASSWORD_LENGTH = 12;
 const PASSWORD_ENV = "MS_REALTY_NEW_OPERATOR_PASSWORD";
 
 function parseArgs(argv = process.argv.slice(2)) {
-  const options = { list: false, help: false, email: "", role: "admin", name: "" };
+  const options = { list: false, help: false, upsert: false, email: "", role: "admin", name: "" };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--list") options.list = true;
     else if (arg === "--help" || arg === "-h") options.help = true;
+    else if (arg === "--upsert") options.upsert = true;
     else if (arg === "--email") options.email = String(argv[++index] || "").trim().toLowerCase();
     else if (arg === "--role") options.role = String(argv[++index] || "").trim().toLowerCase();
     else if (arg === "--name") options.name = String(argv[++index] || "").trim();
@@ -42,11 +43,12 @@ function parseArgs(argv = process.argv.slice(2)) {
 function printHelp() {
   console.log("Usage:");
   console.log("  node production/scripts/provision-admin-operator.mjs --list");
-  console.log("  node production/scripts/provision-admin-operator.mjs --email <address> [--role admin] [--name \"Full Name\"]");
+  console.log("  node production/scripts/provision-admin-operator.mjs --email <address> [--role admin] [--name \"Full Name\"] [--upsert]");
   console.log("");
   console.log("Requires DATABASE_URL and PAYLOAD_SECRET in the environment.");
   console.log(`The password is read from ${PASSWORD_ENV}; it is never accepted as an argument and never printed.`);
   console.log(`Roles: ${PAYLOAD_ADMIN_ROLES.join(", ")}. Passwords must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+  console.log("--upsert explicitly replaces an existing account password, role and workspace scope, then requires a password change.");
 }
 
 async function findByEmail(payload, email) {
@@ -101,10 +103,16 @@ async function main() {
         limit: 0,
         overrideAccess: true,
         pagination: false,
-        select: { email: true, name: true, role: true },
+        select: { email: true, name: true, role: true, workspace_ids: true, password_change_required: true },
         sort: "email",
       });
-      const operators = (result?.docs || []).map((row) => ({ email: row.email, name: row.name || null, role: row.role }));
+      const operators = (result?.docs || []).map((row) => ({
+        email: row.email,
+        name: row.name || null,
+        role: row.role,
+        workspace_ids: row.workspace_ids || [],
+        password_change_required: row.password_change_required === true,
+      }));
       console.log(JSON.stringify({ kind: "admin_operators", total: operators.length, operators }, null, 2));
       // An empty collection is the bootstrap case and worth saying out loud,
       // because /admin/login cannot help anybody until one account exists.
@@ -118,23 +126,52 @@ async function main() {
 
     // Never silently reset a password on an account that already exists: that
     // would turn a typo in an email address into a takeover of somebody else's
-    // account.
+    // account. The explicit flag is reserved for an authorized recovery/reset.
     const existing = await findByEmail(payload, options.email);
-    if (existing) {
+    if (existing && !options.upsert) {
       console.error(`${options.email} already has an operator account (role ${existing.role}); this command will not change it.`);
-      console.error("Change its password from /admin/team while signed in, or delete the account first.");
+      console.error("Run again with --upsert only when an authorized password reset is intended.");
       return 1;
     }
 
-    const created = await payload.create({
-      collection: COLLECTION,
-      data: { email: options.email, password, name: options.name, role: options.role, workspace_ids: [] },
-      depth: 0,
-      overrideAccess: true,
-    });
+    const data = {
+      email: options.email,
+      password,
+      role: options.role,
+      workspace_ids: [],
+      password_change_required: true,
+      sessions: [],
+      loginAttempts: 0,
+      lockUntil: null,
+      ...(options.name || !existing ? { name: options.name } : {}),
+    };
+    const operator = existing
+      ? await payload.update({
+          collection: COLLECTION,
+          id: existing.id,
+          data,
+          depth: 0,
+          overrideAccess: true,
+        })
+      : await payload.create({
+          collection: COLLECTION,
+          data,
+          depth: 0,
+          overrideAccess: true,
+        });
 
     console.log(
-      JSON.stringify({ kind: "admin_operator_created", email: created.email, role: created.role, name: created.name || null }, null, 2),
+      JSON.stringify(
+        {
+          kind: existing ? "admin_operator_updated" : "admin_operator_created",
+          email: operator.email,
+          role: operator.role,
+          name: operator.name || null,
+          password_change_required: operator.password_change_required === true,
+        },
+        null,
+        2,
+      ),
     );
     return 0;
   } finally {

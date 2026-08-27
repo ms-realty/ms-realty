@@ -6686,7 +6686,7 @@ function ContactPage() {
     tone: 'sand',
     addr: 'Сандански — градът, полите на Пирин и област Благоевград',
     phone: '+359 879 69 68 70',
-    email: 'office@makler-realty.com'
+    email: 'ms.realty.bg@gmail.com'
   }];
   return /*#__PURE__*/React.createElement("main", {
     className: "ct-page"
@@ -7563,7 +7563,7 @@ function Footer({
   }), " +359 879 69 68 70"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(Icon, {
     name: "mail",
     size: 16
-  }), " office@makler-realty.com"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(Icon, {
+  }), " ms.realty.bg@gmail.com"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(Icon, {
     name: "map-pin",
     size: 16
   }), " \u0421\u0430\u043D\u0434\u0430\u043D\u0441\u043A\u0438"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", null, "\u0420\u0430\u0437\u0433\u043B\u0435\u0434\u0430\u0439\u0442\u0435"), /*#__PURE__*/React.createElement("ul", null, /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {

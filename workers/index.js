@@ -9,12 +9,10 @@ import {
   allowsProviderWebhookMutation,
   allowsPublicEventMutation,
   allowsPublicLeadMutation,
-  isPublicAdminPath,
   isPayloadPrivatePath,
   secretMatches,
 } from "./durable-case-authority.mjs";
 import { PREVIEW_NOINDEX, isPreviewHost } from "./preview-host.mjs";
-import { previewAdminGate } from "./preview-admin-gate.mjs";
 import {
   OriginProxyError,
   requestForOrigin,
@@ -300,10 +298,6 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const preview = isPreviewHost(url.hostname);
-    if (preview && isPublicAdminPath(url.pathname)) {
-      const refusal = await previewAdminGate(request, env, url, payloadPrivateResponse);
-      if (refusal) return refusal;
-    }
     if (isPayloadPrivatePath(url.pathname)) return payloadPrivateResponse();
     if (url.pathname.startsWith(INGEST_PREFIX)) return ingestMedia(request, env, url);
     if (preview && url.pathname === "/robots.txt") return previewRobotsResponse();
