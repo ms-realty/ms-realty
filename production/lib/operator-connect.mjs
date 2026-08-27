@@ -21,6 +21,11 @@ import { COPY_BLOCK_JS } from "./ui/client.mjs";
 import { operatorConnectCopy, providerCopyKey, providerDisplayName } from "./operator-connect-copy.mjs";
 import { operatorProviderCards } from "./operator-provider-catalog.mjs";
 
+// ChatGPT does not document a connector-install deep link. Keep this a plain
+// app URL so the owner makes the connection decision in ChatGPT itself; the
+// page never places a token in the URL or claims to install silently.
+export const CHATGPT_APP_URL = "https://chatgpt.com/";
+
 const PROMPT_TEMPLATE = `You are now the operations copilot for MS Realty, a family real-estate agency in Sandanski, Bulgaria (legacy sites makler-realty.com and makler-realty.ru; the authoritative public platform runs at __BASE_URL__).
 
 Pre-filled configuration for this operator:
@@ -494,6 +499,8 @@ export function renderOperatorConnectPage({
   const codexPluginUrl = operatorCodexPluginUrl({ marketplacePath: codexMarketplacePath });
   const codexInstall = `<p class="agent__actions"><a class="button" href="${escapeHtml(codexPluginUrl)}" rel="noopener" data-codex-plugin-install="ms-realty-operator">${escapeHtml(copy.agentInstall)}</a></p>
          <p class="hint" id="codex-plugin-install-hint">${escapeHtml(copy.agentInstallHint)}</p>`;
+  const chatGptOpen = `<p class="agent__actions"><a class="button button--quiet" href="${CHATGPT_APP_URL}" target="_blank" rel="noopener noreferrer" data-chatgpt-open="ms-realty-operator">${escapeHtml(copy.agentChatGpt)}</a></p>
+         <p class="hint" id="chatgpt-open-hint">${escapeHtml(copy.agentChatGptHint)}</p>`;
   const cards = operatorProviderCards({ connections, availability, config: providerConfig });
   const whatsapp = cards.find((card) => card.id === "whatsapp");
   const whatsappReady = whatsapp?.status === "not_connected";
@@ -528,6 +535,7 @@ export function renderOperatorConnectPage({
          <h2>${escapeHtml(copy.agentTitle)}</h2>
          <p>${escapeHtml(copy.agentDescription)}</p>
          ${codexInstall}
+         ${chatGptOpen}
          <ol class="steps">
            <li>${escapeHtml(copy.agentStep1)}</li><li>${escapeHtml(copy.agentStep2)}</li><li>${escapeHtml(copy.agentStep3)}</li>
          </ol>
@@ -536,7 +544,7 @@ export function renderOperatorConnectPage({
          <pre class="agent__config" id="agent-config" tabindex="0" aria-labelledby="agent-config-label">${escapeHtml(agentConfig)}</pre>
          <p class="hint">${escapeHtml(copy.agentWarning)} ${escapeHtml(operatorId || "operator")}.${agentExpiresAt ? ` ${escapeHtml(copy.agentExpires)}: ${escapeHtml(verifiedAt(agentExpiresAt, copy))}.` : ""}</p>
        </section>`
-      : `<section class="agent"><h2>${escapeHtml(copy.agentTitle)}</h2><p>${escapeHtml(copy.agentDescription)}</p>${codexInstall}<p class="blocked">${escapeHtml(copy.agentBlocked)}</p></section>`
+      : `<section class="agent"><h2>${escapeHtml(copy.agentTitle)}</h2><p>${escapeHtml(copy.agentDescription)}</p>${codexInstall}${chatGptOpen}<p class="blocked">${escapeHtml(copy.agentBlocked)}</p></section>`
   }
   ${
     token

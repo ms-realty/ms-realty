@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import {
+  CHATGPT_APP_URL,
   DEFAULT_CODEX_MARKETPLACE_PATH,
   operatorBootstrapPrompt,
   operatorCodexPluginUrl,
@@ -66,6 +67,8 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
   assert.ok(html.includes("noindex"));
   assert.ok(html.includes('data-codex-plugin-install="ms-realty-operator"'));
   assert.ok(html.includes(operatorCodexPluginUrl()));
+  assert.ok(html.includes(`href="${CHATGPT_APP_URL}" target="_blank" rel="noopener noreferrer" data-chatgpt-open="ms-realty-operator"`));
+  assert.ok(html.includes("nothing installs in the background"));
   assert.ok(html.includes(OPERATOR_TOKEN));
   assert.equal(html.includes("<script>alert"), false);
   for (const [locale, marker, lang] of [
@@ -91,6 +94,13 @@ test("Codex plugin link targets the owner marketplace without carrying credentia
   );
   assert.equal(url.includes(OPERATOR_TOKEN), false);
   assert.throws(() => operatorCodexPluginUrl({ marketplacePath: "relative/marketplace.json" }), /absolute local path/);
+});
+
+test("ChatGPT action opens the supported app entry point without credentials", () => {
+  assert.equal(CHATGPT_APP_URL, "https://chatgpt.com/");
+  const html = renderOperatorConnectPage({ baseUrl: "https://ms-realty.example.workers.dev", operatorId: "connect_operator" });
+  assert.ok(html.includes(`href="${CHATGPT_APP_URL}" target="_blank"`));
+  assert.equal(html.includes(`${CHATGPT_APP_URL}?token=`), false);
 });
 
 test("standalone HTTP runtime serves /admin/connect behind admin auth", async () => {

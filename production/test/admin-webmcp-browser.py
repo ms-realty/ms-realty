@@ -91,6 +91,19 @@ def main():
             "ms_realty_admin_open",
         ], {"page_errors": errors, "names": names}
 
+        annotations = page.evaluate("window.__webmcpTools.map(tool => tool.annotations)")
+        assert annotations == [
+            {"readOnlyHint": True},
+            {"readOnlyHint": True, "untrustedContentHint": True},
+            {"readOnlyHint": False, "destructiveHint": True, "untrustedContentHint": True},
+            {"readOnlyHint": False, "destructiveHint": False},
+        ], annotations
+
+        browser_operation = page.evaluate(
+            "window.__webmcpTools[3].inputSchema.properties.operation.enum"
+        )
+        assert browser_operation == ["admin_post_security_two_factor_verify"]
+
         context = page.evaluate("window.__webmcpTools[0].execute({})")
         assert context["summary"]["total"] == 3
 
