@@ -16,7 +16,10 @@ test("admin bundle registers route-aware WebMCP tools through the signed-in sess
   assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_write"/);
   assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_open"/);
   assert.match(ADMIN_APP_JS, /credentials: "same-origin"/);
-  assert.match(ADMIN_APP_JS, /untrustedContentHint: true/);
+  assert.match(
+    ADMIN_APP_JS,
+    /name: "ms_realty_admin_read"[\s\S]*?annotations: \{ readOnlyHint: true, untrustedContentHint: true \}/,
+  );
   assert.match(ADMIN_APP_JS, /args\.confirmation !== row\.confirmation/);
   assert.match(ADMIN_APP_JS, /row\.execution !== "browser_session"/);
 });
@@ -68,6 +71,5 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /data-admin-mobile-nav-close/);
   assert.match(ADMIN_APP_JS, /var target = returnFocusTarget && returnFocusTarget\.isConnected \? returnFocusTarget : summary/);
 });
-
 
 
