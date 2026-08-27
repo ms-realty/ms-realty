@@ -105,7 +105,7 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.ok(previewHost.includes("`${PRODUCTION_PUBLIC_HOST}${pathname}`"));
   assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
-  assert.match(wrangler, /"MS_REALTY_PUBLIC_ORIGIN": "https:\/\/ms-realty\.ms-realty-bg\.workers\.dev"/);
+  assert.doesNotMatch(wrangler, /"MS_REALTY_PUBLIC_ORIGIN"\s*:/);
   assert.equal(wrangler.split("__MS_REALTY_BUILD_MARKER__").length - 1, 2);
 });
 
