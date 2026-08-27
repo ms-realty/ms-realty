@@ -703,6 +703,7 @@ async function configuredPayloadAdminAuth(config) {
 // caller that pins a ledger, a clock or an auth service — a test, or a future
 // runtime — pinning it for the sign-in path too.
 const ADMIN_AUTH_CONFIG_KEYS = [
+  "adminAuthLogger",
   "adminSessionLedgerPath",
   "auditLogPath",
   "nowSeconds",

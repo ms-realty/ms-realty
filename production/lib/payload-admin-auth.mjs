@@ -1,5 +1,20 @@
 const PAYLOAD_ADMIN_COLLECTION = "admins";
 export const PAYLOAD_ADMIN_ROLES = ["admin", "broker", "editor", "translator"];
+const PASSWORD_CHANGE_FAILURE_CODES = new Set([
+  "missing_fields",
+  "password_too_short",
+  "confirmation_mismatch",
+  "same_password",
+  "current_password_rejected",
+]);
+
+function passwordChangeError(code, message) {
+  return Object.assign(new Error(message), { code });
+}
+
+export function payloadAdminPasswordChangeFailureCode(error) {
+  return PASSWORD_CHANGE_FAILURE_CODES.has(error?.code) ? error.code : "service_unavailable";
+}
 
 function workspaceIds(value) {
   const raw = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
@@ -66,10 +81,12 @@ function normalizedPasswordChangeInput(input) {
   const currentPassword = typeof input?.current_password === "string" ? input.current_password : "";
   const password = typeof input?.password === "string" ? input.password : "";
   const confirmation = typeof input?.password_confirmation === "string" ? input.password_confirmation : "";
-  if (!currentPassword || !password || !confirmation) throw new Error("All password fields are required");
-  if (password.length < 12) throw new Error("Password must be at least 12 characters");
-  if (password !== confirmation) throw new Error("Password confirmation does not match");
-  if (password === currentPassword) throw new Error("The new password must be different");
+  if (!currentPassword || !password || !confirmation) {
+    throw passwordChangeError("missing_fields", "All password fields are required");
+  }
+  if (password.length < 12) throw passwordChangeError("password_too_short", "Password must be at least 12 characters");
+  if (password !== confirmation) throw passwordChangeError("confirmation_mismatch", "Password confirmation does not match");
+  if (password === currentPassword) throw passwordChangeError("same_password", "The new password must be different");
   return { currentPassword, password };
 }
 
@@ -131,12 +148,19 @@ export function createPayloadAdminAuthService(
       if (!email) throw new Error("The authenticated Payload user has no email address");
       let verification = null;
       try {
-        verification = await payload.login({
-          collection: PAYLOAD_ADMIN_COLLECTION,
-          data: { email, password: currentPassword },
-        });
+        try {
+          verification = await payload.login({
+            collection: PAYLOAD_ADMIN_COLLECTION,
+            data: { email, password: currentPassword },
+          });
+        } catch (error) {
+          if (error?.status === 401 || error?.statusCode === 401 || error?.name === "AuthenticationError") {
+            throw passwordChangeError("current_password_rejected", "Current password verification failed");
+          }
+          throw error;
+        }
         if (String(verification?.user?.id ?? "") !== String(session.user.id ?? "")) {
-          throw new Error("Current password verification failed");
+          throw passwordChangeError("current_password_rejected", "Current password verification failed");
         }
         const operator = await payload.update({
           collection: PAYLOAD_ADMIN_COLLECTION,

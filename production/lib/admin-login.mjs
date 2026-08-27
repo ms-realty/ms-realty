@@ -47,6 +47,14 @@ const LOGIN_COPY = {
     changeTitle: "Смени временната парола",
     changeHint: "Преди да продължиш, избери нова парола за този акаунт.",
     changeError: "Паролата не беше сменена. Провери трите полета и опитай отново.",
+    changeErrors: {
+      missing_fields: "Попълни и трите полета.",
+      password_too_short: "Новата парола трябва да е поне 12 знака.",
+      confirmation_mismatch: "Двете нови пароли не съвпадат.",
+      same_password: "Новата парола трябва да е различна от временната.",
+      current_password_rejected: "Временната парола не беше приета. Въведи я отново.",
+      service_unavailable: "Паролата не беше сменена поради временен проблем. Опитай отново.",
+    },
     currentPassword: "Временна парола",
     newPassword: "Нова парола",
     confirmPassword: "Повтори новата парола",
@@ -78,6 +86,14 @@ const LOGIN_COPY = {
     changeTitle: "Смени временный пароль",
     changeHint: "Перед продолжением выбери новый пароль для этой учётной записи.",
     changeError: "Пароль не изменён. Проверь три поля и попробуй снова.",
+    changeErrors: {
+      missing_fields: "Заполни все три поля.",
+      password_too_short: "Новый пароль должен содержать не менее 12 знаков.",
+      confirmation_mismatch: "Два новых пароля не совпадают.",
+      same_password: "Новый пароль должен отличаться от временного.",
+      current_password_rejected: "Временный пароль не принят. Введи его ещё раз.",
+      service_unavailable: "Пароль не изменён из-за временной ошибки. Попробуй снова.",
+    },
     currentPassword: "Временный пароль",
     newPassword: "Новый пароль",
     confirmPassword: "Повтори новый пароль",
@@ -109,6 +125,14 @@ const LOGIN_COPY = {
     changeTitle: "Change the temporary password",
     changeHint: "Choose a new password for this account before continuing.",
     changeError: "The password was not changed. Check all three fields and try again.",
+    changeErrors: {
+      missing_fields: "Complete all three fields.",
+      password_too_short: "The new password must be at least 12 characters.",
+      confirmation_mismatch: "The two new passwords do not match.",
+      same_password: "The new password must be different from the temporary password.",
+      current_password_rejected: "The temporary password was not accepted. Enter it again.",
+      service_unavailable: "The password was not changed because of a temporary problem. Try again.",
+    },
     currentPassword: "Temporary password",
     newPassword: "New password",
     confirmPassword: "Confirm new password",
@@ -474,8 +498,9 @@ export function renderAdminLoginPage({ error = false, locale = "bg", changed = f
 export function renderAdminPasswordChangePage({ error = false, locale = "bg" } = {}) {
   const active = ADMIN_LOGIN_LOCALES.includes(locale) ? locale : "bg";
   const copy = LOGIN_COPY[active];
+  const errorMessage = copy.changeErrors[error] || copy.changeError;
   const errorBanner = error
-    ? `<p class="login__error" id="admin-login-error" role="alert">${ALERT_ICON}<span>${escapeHtml(copy.changeError)}</span></p>`
+    ? `<p class="login__error" id="admin-login-error" role="alert">${ALERT_ICON}<span>${escapeHtml(errorMessage)}</span></p>`
     : "";
   const describedBy = error ? ' aria-describedby="admin-login-error"' : "";
   const newPasswordDescribedBy = ` aria-describedby="admin-password-hint${error ? " admin-login-error" : ""}"`;

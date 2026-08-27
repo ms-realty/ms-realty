@@ -48,7 +48,7 @@ import {
   renderAdminPasswordChangePage,
 } from "./admin-login.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
-import { getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
+import { getPayloadAdminAuthService, payloadAdminPasswordChangeFailureCode } from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
   deleteProviderConnection,
@@ -1031,6 +1031,7 @@ export function createHttpApp({
   eventLedgerPath = null,
   consentLedgerPath = null,
   auditLogPath = null,
+  adminAuthLogger = console.warn,
   // B6 workspace security and data
   securityAt = null,
   adminSessionLedgerPath = null,
@@ -2345,9 +2346,19 @@ export function createHttpApp({
               "set-cookie": adminSessionClearCookie(),
               "cache-control": "no-store",
             });
-          } catch {
+          } catch (error) {
+            const reason = payloadAdminPasswordChangeFailureCode(error);
+            try {
+              adminAuthLogger(JSON.stringify({
+                kind: "admin_password_change_failed",
+                operator_id: session?.principal?.id || "unknown",
+                reason,
+              }));
+            } catch {
+              // A logging failure must not replace the safe password-change response.
+            }
             return response(303, "", "text/plain; charset=utf-8", {
-              location: `/admin/login?change=1&error=1${localeQuery}`,
+              location: `/admin/login?change=1&error=${encodeURIComponent(reason)}${localeQuery}`,
               "cache-control": "no-store",
             });
           }
