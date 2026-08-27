@@ -153,6 +153,7 @@ test("both servers render every provider card on /admin/connect", async (t) => {
       // Both surfaces mint the assistant's configuration, not the raw operator
       // bearer token, for the copy block.
       assert.ok(body.includes('data-copy-block="agent-config"'), "assistant config block");
+      assert.ok(body.includes('data-codex-plugin-install="ms-realty-operator"'), "Codex plugin install link");
       assert.ok(body.includes("<html lang=\"bg\">"));
     }
   });

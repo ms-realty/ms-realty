@@ -3979,6 +3979,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           providerConfig,
           agentToken: agent?.token || "",
           agentExpiresAt: agent?.expires_at || "",
+          codexMarketplacePath: (config.authEnv || process.env).MS_REALTY_CODEX_MARKETPLACE_PATH,
           result,
           locale: connectLocale,
         }),

@@ -4219,6 +4219,7 @@ export function createHttpApp({
           providerConfig: providerConnection,
           agentToken: agent?.token || "",
           agentExpiresAt: agent?.expires_at || "",
+          codexMarketplacePath: operatorAgentEnv.MS_REALTY_CODEX_MARKETPLACE_PATH,
           result,
           locale: connectLocale,
         }),

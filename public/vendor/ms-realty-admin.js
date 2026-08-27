@@ -1691,7 +1691,7 @@
           name: "ms_realty_admin_context",
           description: "Read the current MS Realty admin page and the complete role-authorized operation catalog.",
           inputSchema: { type: "object", properties: {}, additionalProperties: false },
-          annotations: { readOnlyHint: true },
+          annotations: { readOnlyHint: true, untrustedContentHint: true },
           execute: function () {
             return {
               page: { title: document.title, path: location.pathname, locale: document.documentElement.lang || "en" },
@@ -1732,7 +1732,7 @@
             required: ["operation", "confirmation"],
             additionalProperties: false,
           },
-          annotations: { readOnlyHint: false, destructiveHint: true },
+          annotations: { readOnlyHint: false, destructiveHint: true, untrustedContentHint: true },
           execute: function (args) {
             var row = byOperation[args.operation];
             if (!row || row.execution !== "mcp_delegated" || row.read_only) throw new Error("Unknown admin write operation.");
