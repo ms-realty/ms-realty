@@ -2719,3 +2719,26 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /npm run launch:inputs/);
   assert.match(markdown, /npm run launch:preflight/);
 });
+
+test("launch input checklist reports complete R2 coverage without stale backfill instructions", async () => {
+  const payloadRuntimeReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-checklist-r2-payload-runtime-`)}/payload-runtime-report.json`;
+  writeJson(payloadRuntimeReportPath, await buildPayloadRuntimeReport({ env: {}, generatedAt: "2026-07-05T00:00:00Z" }));
+  const markdown = renderLaunchInputChecklist({
+    generatedAt: "2026-07-05T00:00:00Z",
+    launchReadiness: buildLaunchReadinessReport({
+      generatedAt: "2026-07-05T00:00:00Z",
+      payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath),
+      r2MediaCoverage: readyR2MediaCoverage(),
+    }),
+    redirectWorkbookCsv: fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8"),
+    deployableRedirects: approvedLaunchFreezeRouteArtifact(),
+    routeMap: readJson(["production", "data", "legacy-route-map.json"]),
+  });
+
+  assert.match(markdown, /## R2 Media Coverage \(workers\.dev\)[\s\S]*Current gate: pass/);
+  assert.match(markdown, /Current counts: expected 1725, listed 1725, present 1725, missing 0, unexpected 0/);
+  assert.match(markdown, /Public missing keys: none\./);
+  assert.match(markdown, /Next actions: Mount this report for the exact workers\.dev release SHA/);
+  assert.doesNotMatch(markdown, /none recorded until a listing report is mounted/);
+  assert.doesNotMatch(markdown, /Backfill every public missing key/);
+});
