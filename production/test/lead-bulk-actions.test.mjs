@@ -18,6 +18,11 @@ const AUTH = { authorization: "Bearer local-admin-smoke" };
 const JSON_AUTH = { ...AUTH, "content-type": "application/json" };
 const RECEIVED_AT = "2026-07-04T00:00:00.000Z";
 const NOW = "2026-07-04T00:05:00.000Z";
+const BROKER_PROFILES = [
+  { id: "broker_bg", languages: ["bg"] },
+  { id: "broker_ru", languages: ["ru"] },
+  { id: "broker_international", languages: ["en", "de", "he"] },
+];
 
 function tempFile(prefix) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
@@ -61,6 +66,7 @@ function workspace() {
   appendLead(leadFixture("lead-bulk-3", "seller"), { filePath: paths.leadLedgerPath, receivedAt: RECEIVED_AT });
   const app = createHttpApp({
     leadDurableStore: { leadDurableStoreEnabled: false },
+    brokerProfiles: BROKER_PROFILES,
     ...paths,
     receivedAt: RECEIVED_AT,
     reviewedAt: NOW,

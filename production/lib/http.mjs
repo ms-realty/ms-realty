@@ -5845,7 +5845,10 @@ export function createHttpApp({
         if (existing) return adminJson(200, { lead: existing, idempotent: true });
         const workspaceSettings = currentWorkspaceSettings();
         const lead = applyWorkspaceDefaultBroker(
-          createCrmInboxItem(activeRegistry, input, { assignedId: leadId }),
+          createCrmInboxItem(activeRegistry, input, {
+            assignedId: leadId,
+            brokerProfiles: await currentBrokerProfiles(payloadSession),
+          }),
           workspaceSettings,
           await currentBrokerProfiles(payloadSession),
         );

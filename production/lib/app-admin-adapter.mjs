@@ -3021,7 +3021,10 @@ function appendBrokerLeadEntry(input, registry, config) {
   const recordedAt = config.reviewedAt || new Date().toISOString();
   const workspaceSettings = workspaceSettingsFor(config);
   const lead = applyWorkspaceDefaultBroker(
-    createCrmInboxItem(registry, normalized, { assignedId: leadId }),
+    createCrmInboxItem(registry, normalized, {
+      assignedId: leadId,
+      brokerProfiles: config.brokerProfiles || [],
+    }),
     workspaceSettings,
     config.brokerProfiles || [],
   );
