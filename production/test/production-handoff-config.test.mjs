@@ -132,6 +132,7 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(deployScript, /run_stack "\$release" docker:hermes:up "\$release_id" \|\| rollback "\$\?"/);
   assert.match(deployScript, /d\.build_marker !== process\.argv\[2\]/);
   assert.match(deployScript, /deployment failed; restoring \$previous/);
+  assert.equal(deployScript.match(/^reclaim$/gm)?.length, 1);
   assert.match(deployScript, /local status="\$\{1:-1\}"/);
   assert.match(deployScript, /trap 'rollback "\$\?"' ERR/);
   assert.match(deployScript, /mv -Tf "\$base\/\.current-\$release_id" "\$current"/);
