@@ -50,6 +50,15 @@ test("admin skip link targets a programmatically focusable main landmark", async
   assert.match(page.body, /<main id="main" tabindex="-1" class="crm-scroll"/);
 });
 
+test("fallback owner profile does not invent a zero-workspace scope", async () => {
+  const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+  const page = await dispatchHttp(app, { url: "/admin/settings?locale=en", headers: auth });
+  assert.equal(page.status, 200);
+  assert.match(page.body, /Workspace scope was not provided by this runtime/);
+  assert.doesNotMatch(page.body, /Access to 0 workspaces/);
+  assert.doesNotMatch(page.body, /All workspaces/);
+});
+
 test("required fields carry a decorative accent marker and inline alerts default to the information tone", () => {
   assert.match(adminAdapterCss, /label:has\(> :required[^)]*\)[^{]*::after\s*\{[^}]*content:\s*"\*" \/ ""/);
   assert.match(adminAdapterCss, /:not\(\[readonly\]\)/);

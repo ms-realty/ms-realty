@@ -2541,6 +2541,7 @@ const OWNER_CONSOLE_COPY = {
       owner: "Собственик",
       fullAccess: "Всички работни пространства",
       scopedAccess: "Ограничен достъп до {count} работни пространства",
+      scopeUnavailable: "Тази среда не е предоставила обхвата на работните пространства",
       changePassword: "Смяна на парола",
       manageTeam: "Управление на екипа",
       manageConnections: "Връзки и интеграции",
@@ -2623,6 +2624,7 @@ const OWNER_CONSOLE_COPY = {
       owner: "Владелец",
       fullAccess: "Все рабочие пространства",
       scopedAccess: "Доступ к {count} рабочим пространствам",
+      scopeUnavailable: "Эта среда не передала доступ к рабочим пространствам",
       changePassword: "Изменить пароль",
       manageTeam: "Управление командой",
       manageConnections: "Подключения и интеграции",
@@ -2705,6 +2707,7 @@ const OWNER_CONSOLE_COPY = {
       owner: "Owner",
       fullAccess: "All workspaces",
       scopedAccess: "Access to {count} workspaces",
+      scopeUnavailable: "Workspace scope was not provided by this runtime",
       changePassword: "Change password",
       manageTeam: "Manage team",
       manageConnections: "Connections and integrations",
@@ -8204,17 +8207,38 @@ function TranslationQueueBody({ page }) {
                             h("input", { type: "hidden", name: "reviewer", defaultValue: currentOperatorId(page, row.reviewer_role) }),
                             h(
                               "div",
-                              { className: "adm-human-translation__source" },
-                              h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()),
-                              h("strong", null, row.source_title),
-                              row.source_description ? h("p", null, row.source_description) : null,
+                              { className: "adm-human-translation__context" },
+                              h(
+                                "div",
+                                { className: "adm-human-translation__source" },
+                                h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()),
+                                h("strong", null, row.source_title),
+                                row.source_description ? h("p", null, row.source_description) : null,
+                              ),
+                              h(
+                                "dl",
+                                { className: "adm-human-translation__facts" },
+                                h("div", null, h("dt", null, ui.listing), h("dd", null, row.listing_id)),
+                                row.listing_location ? h("div", null, h("dt", null, fieldText(ui, "location")), h("dd", null, row.listing_location)) : null,
+                                h("div", null, h("dt", null, label(copy, "targetLocale", "Target locale")), h("dd", null, `${row.source_locale.toUpperCase()} → ${row.target_locale.toUpperCase()}`)),
+                                h("div", null, h("dt", null, label(copy, "reviewer", "Reviewer")), h("dd", null, reviewerRoleText(copy, ui, row.reviewer_role))),
+                                h("div", null, h("dt", null, label(copy, "translationState", "Translation state")), h("dd", null, statusText(ui, row.task_type))),
+                              ),
                             ),
-                            h("label", null, label(copy, "translatedTitle", "Translated title"), h("input", { name: "translatedTitle", required: true })),
-                            h("label", null, label(copy, "translatedBody", "Translated description"), h("textarea", { name: "translatedBody", required: true, rows: 5 })),
-                            h("label", null, label(copy, "translatedSeoTitle", "SEO title"), h("input", { name: "translatedSeoTitle", required: true, maxLength: 80 })),
-                            h("label", null, label(copy, "translatedMetaDescription", "Meta description"), h("textarea", { name: "translatedMetaDescription", required: true, rows: 3, maxLength: 220 })),
-                            h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "saveDraft", "Save draft")),
-                            h("span", { role: "status", "aria-live": "polite", "data-translation-workflow-status": "true" }),
+                            h(
+                              "div",
+                              { className: "adm-human-translation__fields" },
+                              h("label", null, label(copy, "translatedTitle", "Translated title"), h("input", { name: "translatedTitle", required: true })),
+                              h("label", null, label(copy, "translatedSeoTitle", "SEO title"), h("input", { name: "translatedSeoTitle", required: true, maxLength: 80 })),
+                              h("label", null, label(copy, "translatedBody", "Translated description"), h("textarea", { name: "translatedBody", required: true, rows: 5 })),
+                              h("label", null, label(copy, "translatedMetaDescription", "Meta description"), h("textarea", { name: "translatedMetaDescription", required: true, rows: 3, maxLength: 220 })),
+                              h(
+                                "div",
+                                { className: "adm-human-translation__actions" },
+                                h("span", { role: "status", "aria-live": "polite", "data-translation-workflow-status": "true" }),
+                                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "saveDraft", "Save draft")),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -10797,14 +10821,22 @@ function OwnerOperationsHub({ page }) {
   );
 }
 
+function ownerWorkspaceScope(page, copy = ownerConsoleCopy(page).profile) {
+  const profile = page.owner_profile || {};
+  const hasWorkspaceScope = Array.isArray(profile.workspace_ids);
+  const workspaceIds = hasWorkspaceScope ? profile.workspace_ids : [];
+  return profile.full_workspace_access
+    ? copy.fullAccess
+    : hasWorkspaceScope
+      ? fillTemplate(copy.scopedAccess, { count: workspaceIds.length })
+      : copy.scopeUnavailable;
+}
+
 function OwnerProfileSection({ page }) {
   const profile = page.owner_profile || {};
   const copy = ownerConsoleCopy(page).profile;
   const roles = Array.isArray(profile.roles) ? profile.roles : [];
-  const workspaceIds = Array.isArray(profile.workspace_ids) ? profile.workspace_ids : [];
-  const scope = profile.full_workspace_access
-    ? copy.fullAccess
-    : fillTemplate(copy.scopedAccess, { count: workspaceIds.length });
+  const scope = ownerWorkspaceScope(page, copy);
   const role = roles.includes("admin") ? copy.administrator : roles.join(", ") || copy.owner;
   const fields = [
     [copy.name, profile.name || ownerIdentityName(page)],
@@ -11052,6 +11084,7 @@ function SettingsBody({ page }) {
   const ui = workbenchCopy(page);
   const settings = settingsCopy(page);
   const owner = ownerConsoleCopy(page);
+  const ownerScope = ownerWorkspaceScope(page, owner.profile);
   const options = page.settingsOptions || { admin_locales: ["bg", "ru", "en"], timezones: [], date_formats: [], broker_groups: [] };
   const brokers = page.brokerProfiles || [];
   const title = settings.title;
@@ -11088,7 +11121,7 @@ function SettingsBody({ page }) {
         h(
           "a",
           { className: "adm-readiness-link", href: "#owner-profile" },
-          h("span", { className: "adm-readiness-copy" }, h("strong", null, owner.profile.title), h("small", null, owner.profile.fullAccess)),
+          h("span", { className: "adm-readiness-copy" }, h("strong", null, owner.profile.title), h("small", null, ownerScope)),
           h("span", { className: "adm-readiness-value" }, h(StatusPill, { tone: "sea" }, owner.profile.owner)),
         ),
       ),

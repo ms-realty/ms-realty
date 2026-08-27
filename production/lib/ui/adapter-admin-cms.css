@@ -17,6 +17,7 @@
 .adm-toolbar > .adm-cms-filter { overflow-x: auto; scrollbar-width: none; }
 .adm-toolbar > .adm-cms-filter::-webkit-scrollbar { display: none; }
 .adm-cms-filter a {
+  flex: none;
   gap: 6px;
   letter-spacing: normal;
   white-space: nowrap;
