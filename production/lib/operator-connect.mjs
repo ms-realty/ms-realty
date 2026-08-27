@@ -74,6 +74,16 @@ NON-NEGOTIABLE GUARDRAILS
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
 
+export const DEFAULT_CODEX_MARKETPLACE_PATH = "/Users/ivan/.agents/plugins/marketplace.json";
+
+export function operatorCodexPluginUrl({ marketplacePath = DEFAULT_CODEX_MARKETPLACE_PATH } = {}) {
+  const resolved = String(marketplacePath || DEFAULT_CODEX_MARKETPLACE_PATH).trim();
+  if (!resolved.startsWith("/") || resolved.includes("\0")) {
+    throw new Error("The Codex marketplace path must be an absolute local path");
+  }
+  return `codex://plugins/ms-realty-operator?marketplacePath=${encodeURIComponent(resolved)}`;
+}
+
 export function operatorBootstrapPrompt({ baseUrl, token, operatorId }) {
   const origin = new URL(String(baseUrl)).origin;
   if (!token || typeof token !== "string") throw new Error("An operator token is required");
@@ -472,6 +482,7 @@ export function renderOperatorConnectPage({
   providerConfig = null,
   agentToken = "",
   agentExpiresAt = "",
+  codexMarketplacePath = DEFAULT_CODEX_MARKETPLACE_PATH,
   result = "",
   locale = "en",
 }) {
@@ -480,6 +491,9 @@ export function renderOperatorConnectPage({
   const agentConfig = agentToken
     ? operatorAgentConfigBlock({ baseUrl, token: agentToken, operatorId, expiresAt: agentExpiresAt, locale: copy.lang })
     : "";
+  const codexPluginUrl = operatorCodexPluginUrl({ marketplacePath: codexMarketplacePath });
+  const codexInstall = `<p class="agent__actions"><a class="button" href="${escapeHtml(codexPluginUrl)}" rel="noopener" data-codex-plugin-install="ms-realty-operator">${escapeHtml(copy.agentInstall)}</a></p>
+         <p class="hint" id="codex-plugin-install-hint">${escapeHtml(copy.agentInstallHint)}</p>`;
   const cards = operatorProviderCards({ connections, availability, config: providerConfig });
   const whatsapp = cards.find((card) => card.id === "whatsapp");
   const whatsappReady = whatsapp?.status === "not_connected";
@@ -513,6 +527,7 @@ export function renderOperatorConnectPage({
       ? `<section class="agent" data-agent-config="true">
          <h2>${escapeHtml(copy.agentTitle)}</h2>
          <p>${escapeHtml(copy.agentDescription)}</p>
+         ${codexInstall}
          <ol class="steps">
            <li>${escapeHtml(copy.agentStep1)}</li><li>${escapeHtml(copy.agentStep2)}</li><li>${escapeHtml(copy.agentStep3)}</li>
          </ol>
@@ -521,7 +536,7 @@ export function renderOperatorConnectPage({
          <pre class="agent__config" id="agent-config" tabindex="0" aria-labelledby="agent-config-label">${escapeHtml(agentConfig)}</pre>
          <p class="hint">${escapeHtml(copy.agentWarning)} ${escapeHtml(operatorId || "operator")}.${agentExpiresAt ? ` ${escapeHtml(copy.agentExpires)}: ${escapeHtml(verifiedAt(agentExpiresAt, copy))}.` : ""}</p>
        </section>`
-      : `<section class="agent"><h2>${escapeHtml(copy.agentTitle)}</h2><p class="blocked">${escapeHtml(copy.agentBlocked)}</p></section>`
+      : `<section class="agent"><h2>${escapeHtml(copy.agentTitle)}</h2><p>${escapeHtml(copy.agentDescription)}</p>${codexInstall}<p class="blocked">${escapeHtml(copy.agentBlocked)}</p></section>`
   }
   ${
     token

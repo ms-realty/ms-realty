@@ -1,0 +1,20 @@
+{
+  "name": "ms-realty",
+  "interface": {
+    "displayName": "MS Realty"
+  },
+  "plugins": [
+    {
+      "name": "ms-realty-operator",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ms-realty-operator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

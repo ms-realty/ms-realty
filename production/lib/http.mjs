@@ -39,6 +39,7 @@ import {
   adminCredentials,
 } from "./admin-auth.mjs";
 import { operatorAgentConfigBlock, operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
+import { ownerOperatorCatalog } from "./owner-operator-catalog.mjs";
 import {
   adminSessionClearCookie,
   adminSessionSetCookie,
@@ -481,6 +482,7 @@ const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
   "referrer-policy": "strict-origin-when-cross-origin",
   "x-frame-options": "DENY",
+  "origin-agent-cluster": "?1",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
 };
 const PRIVATE_HEADERS = { "cache-control": "no-store" };
@@ -4217,6 +4219,7 @@ export function createHttpApp({
           providerConfig: providerConnection,
           agentToken: agent?.token || "",
           agentExpiresAt: agent?.expires_at || "",
+          codexMarketplacePath: operatorAgentEnv.MS_REALTY_CODEX_MARKETPLACE_PATH,
           result,
           locale: connectLocale,
         }),
@@ -4264,6 +4267,9 @@ export function createHttpApp({
         // rather than as the copy block on the page.
         if (url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH) {
           if (request.method !== "GET") return adminJson(405, { kind: "method_not_allowed" });
+          if (url.searchParams.get("catalog") === "1") {
+            return adminJson(200, ownerOperatorCatalog(principal));
+          }
           const agent = issueOperatorAgentToken({ principal, env: operatorAgentEnv });
           if (!agent) {
             return adminJson(503, {

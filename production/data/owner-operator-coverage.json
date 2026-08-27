@@ -149,6 +149,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/route.js"
     },
@@ -165,6 +166,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/agent-config/route.js"
     },
@@ -213,6 +215,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/data-exports/route.js"
     },
@@ -229,6 +232,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/data-exports/download/route.js"
     },
@@ -453,6 +457,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/listings/edit",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/uploads/route.js"
     },
@@ -469,6 +474,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/listings/edit",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/uploads/[assetId]/route.js"
     },
@@ -677,6 +683,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/audit-retention/route.js"
     },
@@ -693,6 +700,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/sessions/route.js"
     },
@@ -709,6 +717,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/route.js"
     },
@@ -805,6 +814,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/team",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/team/route.js"
     },
@@ -1045,6 +1055,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/route.js"
     },
@@ -1061,6 +1072,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/disconnect/route.js"
     },
@@ -1093,6 +1105,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/data-exports/route.js"
     },
@@ -1269,6 +1282,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality/import/route.js"
     },
@@ -1381,6 +1395,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-provisioning/import/route.js"
     },
@@ -1397,6 +1412,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-reports/import/route.js"
     },
@@ -1445,6 +1461,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/listings/edit",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/uploads/route.js"
     },
@@ -1461,6 +1478,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/payload-runtime/import/route.js"
     },
@@ -1477,6 +1495,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/production-recovery/import/route.js"
     },
@@ -1525,6 +1544,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/redirect-approvals/import/route.js"
     },
@@ -1605,6 +1625,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/sessions/revoke/route.js"
     },
@@ -1621,6 +1642,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/activate/route.js"
     },
@@ -1637,6 +1659,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/disable/route.js"
     },
@@ -1653,6 +1676,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/enrol/route.js"
     },
@@ -1669,6 +1693,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/verify/route.js"
     },
@@ -1701,6 +1726,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-evidence/import/route.js"
     },
@@ -1733,6 +1759,7 @@
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
+      "ui_path": "/admin/team",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/team/route.js"
     },

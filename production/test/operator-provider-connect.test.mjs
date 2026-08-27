@@ -497,9 +497,9 @@ test("the assistant's configuration is complete, copyable, and readable without 
   assert.match(block, /Валидна до: \d{1,2} \S+ 2026 г\./);
   assert.equal(block.includes("2026-11-22T"), false);
   // Three numbered steps in the operator's own language.
-  assert.match(block, /1\. Натисни „Копирай настройката“\./);
-  assert.match(block, /2\. Отвори Claude Code или ChatGPT\./);
-  assert.match(block, /3\. Постави текста и изпрати\./);
+  assert.match(block, /1\. Отвори в Codex и потвърди инсталирането\./);
+  assert.match(block, /2\. В ChatGPT отвори тази влязла страница във вградения браузър\./);
+  assert.match(block, /3\. За отдалечен терминален клиент копирай настройката по-долу\./);
   // Claude Code: both the one-line command and a config file that parses.
   assert.match(block, /claude mcp add --transport http ms-realty "https:\/\/ms-realty\.example\/mcp"/);
   const claudeSection = block.slice(block.indexOf("# .mcp.json"), block.indexOf("=== ChatGPT (Codex CLI) ==="));

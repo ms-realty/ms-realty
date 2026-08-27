@@ -8,6 +8,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readListingEdits } from "../lib/listing-edits.mjs";
 import { readLeadAssignments } from "../lib/lead-assignments.mjs";
 import { readReplyOutbox } from "../lib/lead-replies.mjs";
+import { ownerOperatorConfirmation } from "../lib/owner-operator-catalog.mjs";
 import {
   mcpConfigFromEnv,
   mcpOidcConfigFromEnv,
@@ -124,6 +125,10 @@ test("MCP separates anonymous public discovery from role-bound operator tools", 
     "get_listing_content_queue",
     "get_translation_queue",
     "save_translation_draft",
+    "ms_realty_admin_context",
+    "ms_realty_admin_read",
+    "ms_realty_admin_write",
+    "ms_realty_hermes",
   ]);
 
   const brokerTools = await listTools(config, { authorization: `Bearer ${BROKER_TOKEN}` });
@@ -136,6 +141,9 @@ test("MCP separates anonymous public discovery from role-bound operator tools", 
     "get_listing_content_queue",
     "queue_reviewed_reply",
     "run_operator_workflow",
+    "ms_realty_admin_context",
+    "ms_realty_admin_read",
+    "ms_realty_admin_write",
   ]);
 
   const translatorTools = await listTools(config, { authorization: `Bearer ${TRANSLATOR_TOKEN}` });
@@ -146,7 +154,78 @@ test("MCP separates anonymous public discovery from role-bound operator tools", 
     "get_listing_content_queue",
     "get_translation_queue",
     "save_translation_draft",
+    "ms_realty_admin_context",
+    "ms_realty_admin_read",
+    "ms_realty_admin_write",
+    "ms_realty_hermes",
   ]);
+});
+
+test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and adapter-audited", async () => {
+  const { config, paths, runtime } = fixture();
+  const auth = { authorization: `Bearer ${EDITOR_TOKEN}` };
+  const context = await callTool(config, "ms_realty_admin_context", {}, auth);
+  assert.equal(context.operator_id, "mcp_editor");
+  assert.equal(context.summary.total, context.operations.length);
+  assert.ok(context.operations.some((row) => row.operation === "admin_get_listings" && row.execution === "mcp_delegated"));
+  assert.ok(context.operations.some((row) => row.operation === "admin_get_security_two_factor" && row.execution === "browser_session"));
+
+  const listings = await callTool(
+    config,
+    "ms_realty_admin_read",
+    { operation: "admin_get_listings", query: { locale: "en", q: "MS-CRAWL-0001" } },
+    auth,
+  );
+  assert.equal(listings.operation, "admin_get_listings");
+  assert.equal(listings.http_status, 200);
+  assert.equal(listings.result.listings[0].id, "MS-CRAWL-0001");
+
+  const unconfirmed = await mcpCall(
+    config,
+    {
+      jsonrpc: "2.0",
+      id: 21,
+      method: "tools/call",
+      params: {
+        name: "ms_realty_admin_write",
+        arguments: {
+          operation: "admin_post_listings_status",
+          input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
+          confirmation: "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+        },
+      },
+    },
+    auth,
+  );
+  assert.equal(unconfirmed.payload.result.isError, true);
+  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
+
+  const status = await callTool(
+    config,
+    "ms_realty_admin_write",
+    {
+      operation: "admin_post_listings_status",
+      input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
+      confirmation: ownerOperatorConfirmation("admin_post_listings_status"),
+    },
+    auth,
+  );
+  assert.equal(status.operation, "admin_post_listings_status");
+  assert.equal(status.result.kind, "bulk_listing_status_update");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
+  assert.equal(readAuditLog(paths.auditLogPath).every((row) => row.actor === "mcp_editor"), true);
+
+  const browserOnly = await mcpCall(
+    config,
+    {
+      jsonrpc: "2.0",
+      id: 22,
+      method: "tools/call",
+      params: { name: "ms_realty_admin_read", arguments: { operation: "admin_get_connections" } },
+    },
+    auth,
+  );
+  assert.equal(browserOnly.payload.result.isError, true);
 });
 
 test("MCP returns only public listing data and rejects untrusted origins", async () => {
@@ -546,6 +625,9 @@ test("ephemeral runtimes mask every ledger-writing MCP tool", async () => {
     "edit_listing_content",
     "bulk_update_listing_status",
     "get_translation_queue",
+    "ms_realty_admin_context",
+    "ms_realty_admin_read",
+    "ms_realty_hermes",
   ]);
   for (const name of ["save_translation_draft"]) {
     assert.equal(editorTools.includes(name), false, `${name} must not register on ephemeral runtimes`);
@@ -559,6 +641,8 @@ test("ephemeral runtimes mask every ledger-writing MCP tool", async () => {
     "get_operator_brief",
     "get_broker_work_queue",
     "get_listing_content_queue",
+    "ms_realty_admin_context",
+    "ms_realty_admin_read",
   ]);
   const translatorTools = await listTools(masked, { authorization: `Bearer ${TRANSLATOR_TOKEN}` });
   assert.deepEqual(translatorTools, [
@@ -567,6 +651,9 @@ test("ephemeral runtimes mask every ledger-writing MCP tool", async () => {
     "get_launch_status",
     "get_listing_content_queue",
     "get_translation_queue",
+    "ms_realty_admin_context",
+    "ms_realty_admin_read",
+    "ms_realty_hermes",
   ]);
 
   const flagged = mcpConfigFromEnv({ NODE_ENV: "test", MS_REALTY_MCP_WRITES_DISABLED: "1", MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1" });

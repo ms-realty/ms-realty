@@ -15,6 +15,7 @@ import {
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
 import { operatorAgentConfigBlock, operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
+import { ownerOperatorCatalog } from "./owner-operator-catalog.mjs";
 import {
   adminSessionClearCookie,
   adminTokenFromCookie,
@@ -411,6 +412,7 @@ const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
   "referrer-policy": "strict-origin-when-cross-origin",
   "x-frame-options": "DENY",
+  "origin-agent-cluster": "?1",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
 };
 // The policy belongs on documents, not on JSON or a CSV download, so it joins
@@ -3977,6 +3979,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           providerConfig,
           agentToken: agent?.token || "",
           agentExpiresAt: agent?.expires_at || "",
+          codexMarketplacePath: (config.authEnv || process.env).MS_REALTY_CODEX_MARKETPLACE_PATH,
           result,
           locale: connectLocale,
         }),
@@ -4039,6 +4042,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       }
       if (url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH) {
         if (request.method !== "GET") return jsonResponse(405, { kind: "method_not_allowed" });
+        if (url.searchParams.get("catalog") === "1") {
+          return jsonResponse(200, ownerOperatorCatalog(principal));
+        }
         const agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
         if (!agent) {
           return jsonResponse(503, {

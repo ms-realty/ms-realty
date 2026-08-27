@@ -2,7 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
-import { operatorBootstrapPrompt, renderOperatorConnectPage } from "../lib/operator-connect.mjs";
+import {
+  DEFAULT_CODEX_MARKETPLACE_PATH,
+  operatorBootstrapPrompt,
+  operatorCodexPluginUrl,
+  renderOperatorConnectPage,
+} from "../lib/operator-connect.mjs";
 
 const OPERATOR_TOKEN = "connect-operator-token-0123456789";
 
@@ -59,6 +64,8 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
   assert.ok(html.includes("Viber"));
   assert.match(html, /<label class="hint" for="prompt">[^<]+<\/label>\s*<textarea id="prompt"/);
   assert.ok(html.includes("noindex"));
+  assert.ok(html.includes('data-codex-plugin-install="ms-realty-operator"'));
+  assert.ok(html.includes(operatorCodexPluginUrl()));
   assert.ok(html.includes(OPERATOR_TOKEN));
   assert.equal(html.includes("<script>alert"), false);
   for (const [locale, marker, lang] of [
@@ -74,6 +81,16 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
     assert.ok(localised.includes(marker), locale);
     assert.ok(localised.includes(`<html lang="${lang}">`), locale);
   }
+});
+
+test("Codex plugin link targets the owner marketplace without carrying credentials", () => {
+  const url = operatorCodexPluginUrl();
+  assert.equal(
+    url,
+    `codex://plugins/ms-realty-operator?marketplacePath=${encodeURIComponent(DEFAULT_CODEX_MARKETPLACE_PATH)}`,
+  );
+  assert.equal(url.includes(OPERATOR_TOKEN), false);
+  assert.throws(() => operatorCodexPluginUrl({ marketplacePath: "relative/marketplace.json" }), /absolute local path/);
 });
 
 test("standalone HTTP runtime serves /admin/connect behind admin auth", async () => {

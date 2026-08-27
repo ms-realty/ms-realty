@@ -1,0 +1,38 @@
+{
+  "name": "ms-realty-operator",
+  "version": "1.0.0",
+  "description": "Operate the authorized MS Realty admin and guarded Hermes drafting workflows from ChatGPT or Codex.",
+  "author": {
+    "name": "MS Realty",
+    "url": "https://github.com/ms-realty"
+  },
+  "homepage": "https://github.com/ms-realty/ms-realty",
+  "repository": "https://github.com/ms-realty/ms-realty",
+  "keywords": [
+    "ms-realty",
+    "admin",
+    "hermes",
+    "mcp",
+    "webmcp"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "MS Realty Operator",
+    "shortDescription": "Run authorized admin and guarded Hermes workflows",
+    "longDescription": "MS Realty Operator connects Codex to the role-scoped production MCP, the signed-in admin WebMCP tools, and the local or SSH Hermes drafting bridge. Existing workspace scope, 2FA, validation, explicit mutation confirmations, audit attribution, and human review remain authoritative.",
+    "developerName": "MS Realty",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/ms-realty/ms-realty",
+    "defaultPrompt": [
+      "Show my authorized MS Realty admin operations and current launch status.",
+      "Give me the owner morning brief and the guarded Hermes queue.",
+      "Open the correct signed-in admin screen for this sensitive operation."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}
