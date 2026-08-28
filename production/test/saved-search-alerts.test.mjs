@@ -54,7 +54,7 @@ test("saved-search alert report creates open tasks when current matches increase
   assert.equal(report.summary.new_match_alerts, 1);
   assert.equal(report.rows[0].status, "new_matches");
   assert.equal(report.rows[0].alert_task.status, "open");
-  assert.equal(report.rows[0].alert_task.owner, "broker_en");
+  assert.equal(report.rows[0].alert_task.owner, "unassigned");
   assert.ok(report.rows[0].sample_listing_ids.length > 0);
 });
 

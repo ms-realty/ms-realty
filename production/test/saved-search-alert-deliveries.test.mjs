@@ -95,7 +95,7 @@ test("a due saved search becomes a queued, human-sent alert record", () => {
   assert.equal(delivery.status, "queued");
   assert.equal(delivery.human_approval_required, true);
   assert.equal(delivery.sent_at, null);
-  assert.equal(delivery.owner, "broker_en");
+  assert.equal(delivery.owner, "unassigned");
   assert.equal(delivery.channel, "whatsapp");
   assert.equal(delivery.reason, "new_matches");
   assert.deepEqual(delivery.listing_ids, ["MS-CRAWL-0001", "MS-CRAWL-0002"]);

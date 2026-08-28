@@ -68,6 +68,7 @@ test("saved search stores criteria and creates alert task", () => {
           contact: { name: "Claire Martin", whatsapp: "+33600000000" },
           contact_preference: "whatsapp",
           alertConsent: true,
+          owner: "caller-supplied-owner-must-be-ignored",
           priceSnapshot: { "MS-CRAWL-0001": 120000, ignored: "not-a-number" },
         },
         { matchCount: 12, savedAt: "2026-07-04T00:07:00Z" },
@@ -90,6 +91,7 @@ test("saved search stores criteria and creates alert task", () => {
   assert.equal(rows[0].contact_preference, "whatsapp");
   assert.deepEqual(rows[0].price_snapshot, { "MS-CRAWL-0001": 120000 });
   assert.equal(rows[0].alert_task.status, "open");
+  assert.equal(rows[0].alert_task.owner, "unassigned");
   assert.equal(rows[0].search_intent.schema_version, 1);
   assert.equal(assertSavedSearches(rows), true);
 });

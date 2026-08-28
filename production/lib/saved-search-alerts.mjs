@@ -21,8 +21,8 @@ function activeSavedSearches(rows, outcomes) {
   return rows.filter((row) => row.status === "active" && !["completed", "closed"].includes(stateById.get(row.id)?.status));
 }
 
-function ownerForSearch(row) {
-  return row.alert_task?.owner || "broker_en";
+function ownerForSearch() {
+  return "unassigned";
 }
 
 function changedPrices(cards, snapshot = {}) {

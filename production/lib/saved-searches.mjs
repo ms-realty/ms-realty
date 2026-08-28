@@ -137,7 +137,9 @@ export function createSavedSearch(
     alert_task: {
       id: newRecordId("alert"),
       status: "open",
-      owner: savedSearchInput.owner || "broker_en",
+      // Public input cannot assign work to an operator. A real owner is chosen
+      // later by an authenticated workflow.
+      owner: "unassigned",
     },
     // Only the derived verifier is stored. The raw manage token is returned to
     // the visitor once and never written anywhere.
