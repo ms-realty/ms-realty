@@ -177,6 +177,8 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
   assert.equal(context.summary.total, context.operations.length);
   assert.ok(context.operations.some((row) => row.operation === "admin_get_listings" && row.execution === "mcp_delegated"));
   assert.ok(context.operations.some((row) => row.operation === "admin_get_security_two_factor" && row.execution === "browser_session"));
+  assert.match(context.browser_session_note, /read\/open registry entries through WebMCP/);
+  assert.match(context.browser_session_note, /mutations remain signed delegated MCP or human admin forms/);
 
   const listings = await callTool(
     config,

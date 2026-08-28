@@ -874,7 +874,7 @@ function ownerOperatorToolDefinitions(server, config, principal, sessionId) {
           ...(row.read_only ? {} : { confirmation: ownerOperatorConfirmation(row.operation) }),
         })),
         browser_session_note:
-          "Open /admin in the ChatGPT/Codex built-in browser for file, secret, connection, team, export, import, and second-factor operations. The signed-in page exposes the same registry through WebMCP.",
+          "Open /admin in the ChatGPT/Codex built-in browser for file, secret, connection, team, export, import, and second-factor operations. The signed-in page exposes read/open registry entries through WebMCP; mutations remain signed delegated MCP or human admin forms.",
       };
       if (!challengeFor) return textResult(result);
       try {
