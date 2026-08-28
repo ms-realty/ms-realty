@@ -73,7 +73,10 @@ const ADMIN_UI_COPY = {
     uploadMedia: "Качване на медия",
     uploadMediaNote: "Качването изисква крайна точка за приемане на медия. Внасянето минава през огледалото на медиите.",
     uploadMediaHint: "Пусни файловете тук или ги избери.",
+    mediaPreviewLoading: "Зареждане на прегледа…",
     mediaPreviewFailed: "Прегледът не се зареди.",
+    mediaPreviewUnavailable: "Няма преглед за този файл.",
+    mediaPreviewVideo: "Видео файл · отвори изходния файл",
     editingAs: "Редактира",
     saveConflictTitle: "Обявата е променена, докато я редактираше",
     saveConflictBody: "Презареди обявата, за да видиш текущите данни, и приложи промяната отново.",
@@ -736,7 +739,10 @@ const ADMIN_UI_COPY = {
     uploadMedia: "Загрузить медиа",
     uploadMediaNote: "Загрузка требует точки приёма медиа. Импорт идёт через зеркало медиа.",
     uploadMediaHint: "Перетащи файлы сюда или выбери их.",
+    mediaPreviewLoading: "Загрузка предпросмотра…",
     mediaPreviewFailed: "Предпросмотр не загрузился.",
+    mediaPreviewUnavailable: "Для этого файла нет предпросмотра.",
+    mediaPreviewVideo: "Видео · откройте исходный файл",
     editingAs: "Редактирует",
     saveConflictTitle: "Объект изменился, пока ты его редактировал",
     saveConflictBody: "Перезагрузи объект, чтобы увидеть текущие данные, и примени изменение снова.",
@@ -1399,7 +1405,10 @@ const ADMIN_UI_COPY = {
     uploadMedia: "Upload media",
     uploadMediaNote: "Uploads need a media ingest endpoint. Import runs through the media mirror.",
     uploadMediaHint: "Drop files here or choose them.",
+    mediaPreviewLoading: "Loading preview…",
     mediaPreviewFailed: "The preview could not be loaded.",
+    mediaPreviewUnavailable: "No preview is available for this file.",
+    mediaPreviewVideo: "Video file · open the source asset",
     editingAs: "Editing as",
     saveConflictTitle: "This listing changed while you were editing",
     saveConflictBody: "Reload the listing to see the current facts, then apply your change again.",
@@ -2235,15 +2244,6 @@ function requestDetailsText(lead) {
    CRM shell (ui_kits/crm/CrmKit — Sidebar, Topbar, Panel, StatTile)
    ============================================================ */
 
-const STAT_TONES = {
-  ink: { bg: "var(--ink-50)", fg: "var(--ink-800)" },
-  sea: { bg: "var(--sea-50)", fg: "var(--sea-600)" },
-  sun: { bg: "var(--sun-100)", fg: "var(--sun-600)" },
-  brick: { bg: "var(--brick-50)", fg: "var(--brick-600)" },
-  success: { bg: "var(--success-50)", fg: "var(--success-500)" },
-  sand: { bg: "var(--stone-100)", fg: "var(--stone-500)" },
-};
-
 const PILL_TONES = {
   published: "success",
   approved: "sea",
@@ -2257,11 +2257,10 @@ const PILL_TONES = {
 };
 
 function StatusPill({ tone = "ink", children, ...attrs }) {
-  const palette = STAT_TONES[tone] || STAT_TONES.ink;
   return h(
     "span",
-    { className: "crm-pill", style: `color:${palette.fg};background:${palette.bg}`, ...attrs },
-    h("span", { className: "crm-pill__dot", style: `background:${palette.fg}`, "aria-hidden": "true" }),
+    { className: "crm-pill", "data-tone": tone, ...attrs },
+    h("span", { className: "crm-pill__dot", "aria-hidden": "true" }),
     children,
   );
 }
@@ -2594,6 +2593,8 @@ const OWNER_CONSOLE_COPY = {
       noTasks: "Няма чакащи безопасни задачи.",
       noTasksDescription: "Опашката е свързана. Новите задачи ще се появят тук след промяна в изходното съдържание.",
       taskSourceUnavailable: "Източникът на задачи не е достъпен. Проверете CMS/Payload връзката и опитайте отново.",
+      recoveryTitle: "Възстановяване на връзката",
+      recoveryDescription: "Отворете връзките и настройката, за да възстановите Hermes Agent runtime, след което проверете отново.",
       openReview: "Отвори прегледа",
       target: "Целеви език",
       readOnly: "Само четене",
@@ -2677,6 +2678,8 @@ const OWNER_CONSOLE_COPY = {
       noTasks: "Нет ожидающих безопасных задач.",
       noTasksDescription: "Очередь подключена. Новые задачи появятся после изменения исходного контента.",
       taskSourceUnavailable: "Источник задач недоступен. Проверьте подключение CMS/Payload и повторите попытку.",
+      recoveryTitle: "Восстановить подключение",
+      recoveryDescription: "Откройте подключения и настройку, чтобы восстановить Hermes Agent runtime, затем проверьте снова.",
       openReview: "Открыть проверку",
       target: "Целевой язык",
       readOnly: "Только чтение",
@@ -2760,6 +2763,8 @@ const OWNER_CONSOLE_COPY = {
       noTasks: "No safe tasks are waiting.",
       noTasksDescription: "The queue is connected. New tasks will appear after source content changes.",
       taskSourceUnavailable: "The task source is unavailable. Check the CMS/Payload connection and try again.",
+      recoveryTitle: "Recover the connection",
+      recoveryDescription: "Open Connections and setup to restore the Hermes Agent runtime, then check again.",
       openReview: "Open review",
       target: "Target language",
       readOnly: "Read only",
@@ -2828,7 +2833,6 @@ function OwnerIdentity({ page, mobile = false }) {
     {
       className: `adm-owner-identity${mobile ? " adm-owner-identity--mobile" : ""}`,
       href: adminHref("/admin/settings#owner-profile", page),
-      "aria-label": copy.open,
       title: copy.open,
     },
     h("span", { className: "adm-owner-identity__avatar", "aria-hidden": "true" }, ownerInitials(name)),
@@ -8791,6 +8795,8 @@ function ListingEditorBody({ page }) {
                     // stop. The full asset is still one click away below.
                     const previewUrl = item.thumbnail_url || sourceUrl;
                     const published = item.is_public === true;
+                    const hasImagePreview = Boolean(sourceUrl && item.kind !== "video");
+                    const previewState = hasImagePreview ? "loading" : sourceUrl ? "video" : "empty";
                     return h(
                       "article",
                       {
@@ -8799,7 +8805,7 @@ function ListingEditorBody({ page }) {
                         "data-media-asset": item.asset_id,
                         "data-media-kind": item.kind,
                         "data-media-public": published ? "true" : "false",
-                        "data-media-preview-state": sourceUrl && item.kind !== "video" ? "loading" : "none",
+                        "data-media-preview-state": previewState,
                       },
                       h(
                         "header",
@@ -8807,13 +8813,15 @@ function ListingEditorBody({ page }) {
                         h("div", null, h("strong", null, fieldText(ui, `media_kind_${item.kind}`)), h("small", { className: "crm-mono" }, item.asset_id)),
                         h(StatusPill, { tone: published ? "success" : "sun" }, statusText(ui, item.review_status)),
                       ),
-                      // An asset whose file has gone missing says so instead of
-                      // leaving a broken image in a review queue.
-                      sourceUrl && item.kind !== "video"
-                        ? h(
-                            "div",
-                            { className: "adm-media-asset__preview" },
-                            h("img", {
+                      // Every asset gets a deliberate state: loading and failed
+                      // image previews, an explicit video hand-off, or a
+                      // missing-source state. Nothing in the review queue is a
+                      // blank rectangle whose meaning has to be guessed.
+                      h(
+                        "div",
+                        { className: "adm-media-asset__preview", "data-media-preview-frame": "true" },
+                        hasImagePreview
+                          ? h("img", {
                               src: previewUrl,
                               alt: item.alt || fieldText(ui, `media_kind_${item.kind}`),
                               loading: "lazy",
@@ -8823,10 +8831,13 @@ function ListingEditorBody({ page }) {
                               // queue stops jumping as it loads.
                               ...(item.width && item.height ? { width: item.width, height: item.height } : {}),
                               "data-media-preview": "true",
-                            }),
-                            h("span", { className: "adm-media-asset__preview-failed" }, ui.mediaPreviewFailed),
-                          )
-                        : null,
+                            })
+                          : null,
+                        h("span", { className: "adm-media-asset__preview-loading" }, ui.mediaPreviewLoading),
+                        h("span", { className: "adm-media-asset__preview-failed" }, ui.mediaPreviewFailed),
+                        h("span", { className: "adm-media-asset__preview-empty" }, ui.mediaPreviewUnavailable),
+                        h("span", { className: "adm-media-asset__preview-video" }, ui.mediaPreviewVideo),
+                      ),
                       sourceUrl
                         ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
                         : null,
@@ -10987,6 +10998,22 @@ function HermesBody({ page }) {
             ),
             runtime.missing?.length
               ? h("p", { className: "adm-hermes-missing", "data-hermes-missing": runtime.missing.join(",") }, runtime.missing.join(" · "))
+              : null,
+            !runtime.ready
+              ? h(
+                  "div",
+                  { className: "adm-hermes-recovery", role: "note", "data-hermes-recovery": "true" },
+                  h(Icon, { name: "link", size: 17 }),
+                  h(
+                    "div",
+                    { className: "adm-hermes-recovery__copy" },
+                    h("strong", null, copy.recoveryTitle),
+                    h("p", null, copy.recoveryDescription),
+                  ),
+                  pageCan(page, "settings:manage")
+                    ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, copy.connections)
+                    : null,
+                )
               : null,
           ),
         ),

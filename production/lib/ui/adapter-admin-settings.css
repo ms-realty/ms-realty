@@ -295,3 +295,43 @@
   .adm-settings-pending__control { justify-content: flex-start; }
   .adm-settings-history { padding: var(--space-4); }
 }
+
+/* Second-pass settings polish: the section index and panel boundary do the
+   orientation work, while the form controls stay readable in blocked states. */
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel__hd {
+  padding-block: var(--space-4);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel__title h2 {
+  font-size: var(--text-md);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel__title p {
+  max-width: 68ch;
+  font-size: var(--text-sm);
+  line-height: var(--lh-relaxed);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-grid {
+  gap: var(--space-4) var(--space-5);
+  padding-top: var(--space-5);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-field__label {
+  font-size: var(--text-sm);
+  line-height: var(--lh-snug);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-field > input,
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-field > select,
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-field > textarea {
+  font-size: var(--text-md);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-field > input:disabled,
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-field > select:disabled,
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-field > textarea:disabled {
+  opacity: 1;
+  border-style: dashed;
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-actions {
+  background: var(--surface-sunken);
+}
+
+@media (max-width: 767px) {
+  .crm-app main[data-react-admin-ui="settings"] .adm-settings-grid { padding-top: var(--space-4); }
+}

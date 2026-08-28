@@ -35,6 +35,28 @@
   --adm-label: var(--ink-500);
   /* Count chips riding inside a segmented control. */
   --adm-chip: var(--ink-100);
+  /* Shared owner-console status roles. These aliases keep rendered text and
+     its surface paired when the workbench switches to the dark theme. */
+  --adm-sidebar-group: var(--stone-400);
+  --adm-owner-primary: var(--text-on-dark);
+  --adm-owner-secondary: var(--stone-400);
+  --adm-pill-ink-fg: var(--ink-800);
+  --adm-pill-ink-bg: var(--ink-50);
+  --adm-pill-sea-fg: var(--sea-600);
+  --adm-pill-sea-bg: var(--sea-50);
+  --adm-pill-sun-fg: color-mix(in srgb, var(--sun-600) 70%, var(--stone-900));
+  --adm-pill-sun-bg: var(--sun-100);
+  --adm-pill-brick-fg: var(--brick-700);
+  --adm-pill-brick-bg: var(--brick-50);
+  --adm-pill-success-fg: var(--success-600);
+  --adm-pill-success-bg: var(--success-50);
+  --adm-pill-sand-fg: var(--stone-600);
+  --adm-pill-sand-bg: var(--stone-100);
+  --adm-editor-fact-success: var(--success-600);
+  --adm-editor-fact-sun: var(--adm-pill-sun-fg);
+  --adm-editor-fact-brick: var(--brick-700);
+  --adm-media-source: var(--sea-700);
+  --adm-tour-surface: var(--warning-50);
   --adm-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background: var(--canvas);
 }
@@ -53,7 +75,21 @@
 .crm-app .adm-form__group legend,
 .crm-app .crm-sb__group,
 .crm-app .adm-mobile-nav__group { letter-spacing: normal; text-transform: none; }
-.crm-app .crm-sb__group { font-size: var(--text-2xs); letter-spacing: 0.02em; }
+.crm-app .crm-sb__group {
+  color: var(--adm-sidebar-group);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.02em;
+}
+
+/* Status pills use semantic classes instead of inline ramp colors so one
+   dark-theme override can keep every queue, editor and Hermes state legible. */
+.crm-app .crm-pill[data-tone="ink"] { color: var(--adm-pill-ink-fg); background: var(--adm-pill-ink-bg); }
+.crm-app .crm-pill[data-tone="sea"] { color: var(--adm-pill-sea-fg); background: var(--adm-pill-sea-bg); }
+.crm-app .crm-pill[data-tone="sun"] { color: var(--adm-pill-sun-fg); background: var(--adm-pill-sun-bg); }
+.crm-app .crm-pill[data-tone="brick"] { color: var(--adm-pill-brick-fg); background: var(--adm-pill-brick-bg); }
+.crm-app .crm-pill[data-tone="success"] { color: var(--adm-pill-success-fg); background: var(--adm-pill-success-bg); }
+.crm-app .crm-pill[data-tone="sand"] { color: var(--adm-pill-sand-fg); background: var(--adm-pill-sand-bg); }
+.crm-app .crm-pill[data-tone] .crm-pill__dot { background: currentColor; }
 
 /* Native selects: one chevron and one height (40px desktop, 44px touch). */
 .crm-app select:not([multiple]):not([size]) {
@@ -214,8 +250,11 @@ a.crm-nav:hover { text-decoration: none; }
 .adm-owner-identity__copy strong,
 .adm-owner-identity__copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .adm-owner-identity__copy strong { font-size: var(--text-xs); }
-.adm-owner-identity__copy small { color: var(--text-on-dark); font-size: var(--text-2xs); opacity: 0.72; }
-.adm-owner-identity__role { grid-column: 2; color: var(--text-on-dark); font-size: var(--text-2xs); opacity: 0.72; }
+.adm-owner-identity__copy small { font-size: var(--text-2xs); }
+.adm-owner-identity__role { grid-column: 2; font-size: var(--text-2xs); }
+.crm-app .adm-owner-identity__copy strong { color: var(--adm-owner-primary); }
+.crm-app .adm-owner-identity__copy small,
+.crm-app .adm-owner-identity__role { color: var(--adm-owner-secondary); opacity: 1; }
 .adm-mobile-nav { display: none; }
 .adm-mobile-nav > summary { list-style: none; }
 .adm-mobile-nav > summary::-webkit-details-marker { display: none; }
@@ -1194,7 +1233,8 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   scroll-margin-top: var(--adm-editor-anchor-offset, 124px);
 }
 .adm-editor-tabs .mk-tab { text-decoration: none; display: inline-flex; align-items: center; gap: 7px; font-size: var(--text-sm); }
-/* Tab labels stay visible on laptops and tablets; phones get icon-only tabs. */
+/* Tab labels stay visible on laptops and tablets; compact phones may use the
+   icon-only treatment when the local section rail cannot fit its labels. */
 @media (max-width: 599px) {
   .adm-editor-tab__label { display: none; }
 }
@@ -1251,7 +1291,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-media-asset__header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
 .adm-media-asset__header > div { display: grid; min-width: 0; gap: 3px; }
 .adm-media-asset__header small { overflow: hidden; text-overflow: ellipsis; }
-.adm-media-asset__source { width: max-content; max-width: 100%; color: var(--sea-700); font-size: var(--text-sm); text-decoration: none; }
+.adm-media-asset__source { width: max-content; max-width: 100%; color: var(--adm-media-source); font-size: var(--text-sm); text-decoration: none; }
 .adm-media-review { min-width: 0; border-top: 1px solid var(--border); }
 .adm-media-review > summary { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; color: var(--text-link); cursor: pointer; font-size: var(--text-sm); font-weight: var(--fw-semibold); list-style: none; }
 .adm-media-review > summary::-webkit-details-marker { display: none; }
@@ -2241,6 +2281,26 @@ html:has(main[data-react-admin-ui]) { color-scheme: light; }
     /* The brand swatch is near-white in this palette, so the label on a primary
        button has to invert with it or the button reads as a blank slab. */
     --text-on-brand: var(--ink-950);
+    --adm-sidebar-group: var(--stone-400);
+    --adm-owner-primary: var(--stone-50);
+    --adm-owner-secondary: var(--stone-400);
+    --adm-pill-ink-fg: var(--ink-100);
+    --adm-pill-ink-bg: var(--surface-hover);
+    --adm-pill-sea-fg: var(--sea-200);
+    --adm-pill-sea-bg: var(--sea-800);
+    --adm-pill-sun-fg: var(--sun-300);
+    --adm-pill-sun-bg: color-mix(in srgb, var(--sun-600) 24%, var(--surface));
+    --adm-pill-brick-fg: var(--brick-300);
+    --adm-pill-brick-bg: var(--accent-subtle);
+    --adm-pill-success-fg: var(--success-50);
+    --adm-pill-success-bg: color-mix(in srgb, var(--success-500) 24%, var(--surface));
+    --adm-pill-sand-fg: var(--stone-300);
+    --adm-pill-sand-bg: var(--surface-hover);
+    --adm-editor-fact-success: var(--success-50);
+    --adm-editor-fact-sun: var(--sun-300);
+    --adm-editor-fact-brick: var(--brick-300);
+    --adm-media-source: var(--sea-200);
+    --adm-tour-surface: color-mix(in srgb, var(--sun-300) 12%, var(--surface));
     --adm-well: var(--surface-sunken);
     --adm-panel: var(--surface-sunken);
     --adm-label: var(--stone-400);
@@ -2285,6 +2345,26 @@ html[data-theme="dark"] .crm-app {
   --text-subtle: var(--stone-500);
   --text-link: var(--stone-100);
   --text-on-brand: var(--ink-950);
+  --adm-sidebar-group: var(--stone-400);
+  --adm-owner-primary: var(--stone-50);
+  --adm-owner-secondary: var(--stone-400);
+  --adm-pill-ink-fg: var(--ink-100);
+  --adm-pill-ink-bg: var(--surface-hover);
+  --adm-pill-sea-fg: var(--sea-200);
+  --adm-pill-sea-bg: var(--sea-800);
+  --adm-pill-sun-fg: var(--sun-300);
+  --adm-pill-sun-bg: color-mix(in srgb, var(--sun-600) 24%, var(--surface));
+  --adm-pill-brick-fg: var(--brick-300);
+  --adm-pill-brick-bg: var(--accent-subtle);
+  --adm-pill-success-fg: var(--success-50);
+  --adm-pill-success-bg: color-mix(in srgb, var(--success-500) 24%, var(--surface));
+  --adm-pill-sand-fg: var(--stone-300);
+  --adm-pill-sand-bg: var(--surface-hover);
+  --adm-editor-fact-success: var(--success-50);
+  --adm-editor-fact-sun: var(--sun-300);
+  --adm-editor-fact-brick: var(--brick-300);
+  --adm-media-source: var(--sea-200);
+  --adm-tour-surface: color-mix(in srgb, var(--sun-300) 12%, var(--surface));
   --adm-well: var(--surface-sunken);
   --adm-panel: var(--surface-sunken);
   --adm-label: var(--stone-400);
@@ -2308,4 +2388,370 @@ html[data-theme="dark"] .crm-app {
 
 html[data-theme="dark"] .crm-top {
   background: color-mix(in srgb, var(--surface) 94%, transparent);
+}
+
+/* ============================================================
+   Second-pass owner console polish
+
+   The owner workbench is a review surface, not a collection of floating
+   cards. Keep the existing information architecture and tokens, but reserve
+   borders for boundaries, give the editor a stable local index, and let the
+   content carry more of the visual hierarchy.
+   ============================================================ */
+
+/* Type scale and reading measure. The kit's base remains the source of truth;
+   these rules make the operator-facing labels and page introductions read as
+   a deliberate hierarchy on both light and dark canvases. */
+.crm-app main[data-react-admin-ui] {
+  color: var(--text-body);
+  font-size: var(--text-md);
+  line-height: var(--lh-normal);
+}
+.crm-app main[data-react-admin-ui] .crm-ph {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3) var(--space-4);
+  align-items: end;
+  margin-bottom: var(--space-4);
+}
+.crm-app main[data-react-admin-ui] .crm-ph h1 {
+  font-size: clamp(1.9rem, 1.3rem + 1vw, 2.45rem);
+  line-height: 1.05;
+}
+.crm-app main[data-react-admin-ui] .crm-ph p {
+  max-width: 64ch;
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--lh-normal);
+}
+.crm-app main[data-react-admin-ui] .crm-ph__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.crm-app main[data-react-admin-ui] .adm-note,
+.crm-app main[data-react-admin-ui] .adm-panel-intro,
+.crm-app main[data-react-admin-ui] .adm-hermes-panel-intro {
+  line-height: var(--lh-relaxed);
+}
+.crm-app main[data-react-admin-ui] .adm-form > label:not(.adm-check),
+.crm-app main[data-react-admin-ui] .adm-form__group label,
+.crm-app main[data-react-admin-ui] .adm-media-review-form label,
+.crm-app main[data-react-admin-ui] .adm-tour-form__field,
+.crm-app main[data-react-admin-ui] .adm-human-translation label {
+  color: var(--text-body);
+  font-size: var(--text-sm);
+  line-height: var(--lh-snug);
+}
+.crm-app main[data-react-admin-ui] .adm-form > label:not(.adm-check) > input,
+.crm-app main[data-react-admin-ui] .adm-form > label:not(.adm-check) > select,
+.crm-app main[data-react-admin-ui] .adm-form > label:not(.adm-check) > textarea,
+.crm-app main[data-react-admin-ui] .adm-form__group input,
+.crm-app main[data-react-admin-ui] .adm-form__group select,
+.crm-app main[data-react-admin-ui] .adm-form__group textarea,
+.crm-app main[data-react-admin-ui] .adm-human-translation input,
+.crm-app main[data-react-admin-ui] .adm-human-translation textarea {
+  font-size: var(--text-md);
+}
+
+/* The local editor index stays visible while the operator moves through the
+   long form. A solid surface avoids the fuzzy, stacked-card effect of the
+   previous translucent tab rail. */
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph {
+  gap: var(--space-2) var(--space-4);
+  align-items: start;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph h1 {
+  font-size: clamp(1.7rem, 1.15rem + 0.8vw, 2.15rem);
+  line-height: 1.08;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph p {
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  padding: 0;
+  border-inline: 0;
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: 0 1px 0 var(--border-strong);
+  backdrop-filter: none;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs::-webkit-scrollbar { display: none; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs .mk-tab {
+  justify-content: center;
+  min-width: 0;
+  min-height: 50px;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs .mk-tab:hover {
+  background: var(--surface-hover);
+  color: var(--text-strong);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs .mk-tab[aria-current="location"] {
+  border-bottom-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-subtle) 42%, var(--surface));
+  color: var(--text-strong);
+}
+
+/* Editor disclosures become quiet dividers inside the primary facts panel;
+   the panel boundary is enough to orient the operator. */
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-section {
+  border-inline: 0;
+  border-block: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-section:first-of-type { border-block-start: 0; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-section__summary {
+  min-height: 56px;
+  padding-inline: 0;
+  font-size: var(--text-md);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-section .adm-form__group {
+  padding-inline: 0;
+  padding-block: var(--space-4);
+}
+
+/* Translation review keeps source context in view while the target fields
+   scroll. The source accent is a single orientation cue rather than another
+   rounded card. */
+.crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__source {
+  max-height: min(32rem, calc(100vh - var(--adm-editor-anchor-offset, 124px)));
+  overflow: auto;
+  border: 0;
+  border-inline-start: 3px solid var(--sea-500);
+  border-radius: 0;
+  background: var(--surface-sunken);
+}
+.crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__fields {
+  padding: var(--space-2) 0 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+.crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__facts dt {
+  color: var(--text-muted);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Media review: four useful columns at wide desktop widths, with the card
+   reduced to a work item around its preview. The preview itself carries the
+   signal; nested elevation does not. */
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset {
+  gap: var(--space-2);
+  padding: var(--space-3) !important;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: none;
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__preview {
+  aspect-ratio: 5 / 4;
+  border-radius: var(--radius-md);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__header strong { font-size: var(--text-sm); }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__header small {
+  color: var(--text-muted);
+  font-size: var(--text-2xs);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-review > summary {
+  min-height: 36px;
+  font-size: var(--text-xs);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-review[open] > summary {
+  margin-bottom: var(--space-2);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-review-form {
+  gap: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__source {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Hermes is one safe operator surface: health, draft queue, and connection
+   recovery. Give a blocked health result a clear edge and put recovery beside
+   the reason, without adding generic chat or infrastructure controls. */
+.crm-app main[data-react-admin-ui="hermes"] .adm-hermes-status-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+}
+.crm-app main[data-react-admin-ui="hermes"] [data-hermes-runtime-card="blocked"] {
+  border-color: var(--sun-300);
+}
+.crm-app main[data-react-admin-ui="hermes"] [data-hermes-runtime-card="blocked"] .adm-hermes-card {
+  border-inline-start: 3px solid var(--sun-500);
+}
+.adm-hermes-recovery {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
+  border: 1px solid var(--sun-300);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--sun-300) 12%, var(--surface));
+}
+.adm-hermes-recovery > svg { color: var(--sun-600); }
+.adm-hermes-recovery__copy { display: grid; gap: 2px; min-width: 0; }
+.adm-hermes-recovery__copy strong { color: var(--text-strong); font-size: var(--text-sm); }
+.adm-hermes-recovery__copy p { margin: 0; color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
+
+/* Settings controls must remain readable when a runtime or role blocks the
+   write. Updated sections get a quiet rail, while blocked sections explain
+   their state through structure rather than low-opacity text. */
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-state="updated"] {
+  border-inline-start: 3px solid var(--sea-500);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] {
+  border-style: dashed;
+  border-color: var(--border-strong);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-grid {
+  opacity: 1;
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-field > input,
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-field > select,
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-field > textarea {
+  opacity: 1;
+  border-style: dashed;
+  color: var(--text-muted);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-actions {
+  background: var(--surface-sunken);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-workbench-shell--settings {
+  grid-template-columns: minmax(0, 1.7fr) minmax(250px, 0.68fr);
+  gap: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-workbench-main,
+.crm-app main[data-react-admin-ui="settings"] .adm-workbench-rail {
+  gap: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-owner-hub {
+  padding: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-owner-hub__grid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-panel__hd {
+  padding-block: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-grid {
+  gap: var(--space-3) var(--space-4);
+  padding-top: var(--space-4);
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-note {
+  line-height: var(--lh-normal);
+}
+.crm-app main[data-react-admin-ui="settings"] [data-settings-rail="true"] .crm-panel {
+  box-shadow: none;
+}
+.crm-app main[data-react-admin-ui="settings"] .adm-settings-history {
+  gap: var(--space-2);
+}
+
+/* Translation task filters become a wrapped control on phones so every label
+   remains readable without horizontal dragging. */
+@media (max-width: 767px) {
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-toolbar > .adm-cms-filter[data-cms-filter="translations"] {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    width: 100%;
+    overflow: visible;
+    scrollbar-width: auto;
+  }
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-toolbar > .adm-cms-filter[data-cms-filter="translations"] a {
+    min-width: 0;
+    min-height: 44px;
+    justify-content: center;
+    padding-inline: 8px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* Horizontal editor navigation is intentional on narrow screens: labels stay
+   available to sighted and cognitive users, and the scroll is contained in
+   the rail so it can never create page-level overflow. */
+@media (max-width: 767px) {
+  .crm-app main[data-react-admin-ui] .crm-ph {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  .crm-app main[data-react-admin-ui] .crm-ph h1 { font-size: var(--text-2xl); }
+  .crm-app main[data-react-admin-ui] .crm-ph__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .crm-app main[data-react-admin-ui] .crm-ph__actions .mk-btn {
+    flex: 1 1 auto;
+    min-height: 44px;
+    justify-content: center;
+  }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+    scrollbar-width: auto;
+  }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs::-webkit-scrollbar { display: initial; }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs .mk-tab {
+    min-width: 0;
+    padding-inline: var(--space-3);
+    white-space: normal;
+    text-align: center;
+  }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tab__label { display: inline; }
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__fields {
+    order: 1;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__context {
+    order: 2;
+    gap: var(--space-2);
+  }
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-filterbar {
+    gap: var(--space-2);
+  }
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__source {
+    max-height: none;
+    overflow: visible;
+    padding: var(--space-3);
+  }
+  .crm-app main[data-react-admin-ui="translation-queue"] .adm-human-translation__facts {
+    padding: var(--space-3);
+  }
+  .crm-app main[data-react-admin-ui="hermes"] .adm-hermes-status-grid { grid-template-columns: minmax(0, 1fr); }
+  .adm-hermes-recovery { grid-template-columns: auto minmax(0, 1fr); }
+  .adm-hermes-recovery .mk-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
+  .crm-app main[data-react-admin-ui="settings"] .adm-workbench-shell--settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: minmax(0, 1fr); }
 }

@@ -92,6 +92,29 @@ test("translation review groups its rows by listing so one title is not repeated
   assert.doesNotMatch(page.body, /data-planned-control=/);
 });
 
+test("mobile editors keep all section controls visible and put translation inputs before source context", () => {
+  assert.match(
+    adminCss,
+    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs \{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);[\s\S]*?overflow:\s*visible;/,
+  );
+  assert.match(
+    adminCss,
+    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs \{[\s\S]*?scrollbar-width:\s*auto;[\s\S]*?\}[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs::\-webkit-scrollbar \{ display:\s*initial; \}/,
+  );
+  assert.match(
+    adminCss,
+    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-human-translation__fields \{[\s\S]*?order:\s*1;[\s\S]*?\}[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-human-translation__context \{[\s\S]*?order:\s*2;/,
+  );
+  assert.match(
+    adminCss,
+    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-toolbar > \.adm-cms-filter\[data-cms-filter="translations"\] \{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);[\s\S]*?overflow:\s*visible;/,
+  );
+  assert.match(
+    adminCss,
+    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui\] \.crm-ph__actions \{[\s\S]*?width:\s*100%;[\s\S]*?justify-content:\s*flex-start;[\s\S]*?\}[\s\S]*?main\[data-react-admin-ui\] \.crm-ph__actions \.mk-btn \{[\s\S]*?min-height:\s*44px;[\s\S]*?justify-content:\s*center;/,
+  );
+});
+
 test("an empty translation queue says nothing is waiting rather than showing a bare table head", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/translations?locale=en&q=zzzz-no-such-listing", headers: auth });
   assert.equal(page.status, 200);
@@ -123,6 +146,35 @@ test("the listing editor names the listing, hides the operator field and carries
   assert.match(cmsCss, /\.adm-editor-conflict\[hidden\] \{ display: none; \}/);
 });
 
+test("shared admin status tokens keep dark surfaces legible and owner identity nameable", async () => {
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
+  const ownerIdentity = page.body.match(/<a class="adm-owner-identity"[\s\S]*?<\/a>/)?.[0];
+  assert.ok(ownerIdentity, "the owner identity is rendered as a link");
+  assert.doesNotMatch(ownerIdentity, /aria-label=/, "visible owner identity text supplies the accessible name");
+  assert.match(ownerIdentity, /title="Open profile and settings"/);
+  assert.match(ownerIdentity, /<strong>MS Realty Admin<\/strong>/);
+  assert.match(ownerIdentity, /class="adm-owner-identity__role">Owner<\/span>/);
+  // StatusPill exposes its tone to CSS instead of freezing a light-ramp color
+  // in an inline style that cannot follow the dark workbench palette.
+  assert.match(page.body, /<span class="crm-pill" data-tone="brick"[^>]*>/);
+  for (const tone of ["ink", "sea", "sun", "brick", "success", "sand"]) {
+    assert.match(adminCss, new RegExp(`\\.crm-app \\.crm-pill\\[data-tone="${tone}"\\] \\{ color: var\\(--adm-pill-${tone}-fg\\); background: var\\(--adm-pill-${tone}-bg\\); \\}`), tone);
+  }
+  assert.match(adminCss, /\.crm-app \.crm-sb__group \{\s*color: var\(--adm-sidebar-group\);/);
+  assert.match(adminCss, /\.crm-app \.adm-owner-identity__copy strong \{ color: var\(--adm-owner-primary\); \}/);
+  assert.match(adminCss, /\.crm-app \.adm-owner-identity__copy small,\s*\.crm-app \.adm-owner-identity__role \{ color: var\(--adm-owner-secondary\); opacity: 1; \}/);
+  // The dark aliases cover the same shared roles used by the listing facts,
+  // media source, tour empty state and Hermes checks.
+  assert.match(adminCss, /--adm-pill-success-fg: var\(--success-50\);/);
+  assert.match(adminCss, /--adm-pill-sun-fg: var\(--sun-300\);/);
+  assert.match(adminCss, /--adm-pill-sand-fg: var\(--stone-300\);/);
+  assert.match(adminCss, /--adm-media-source: var\(--sea-200\);/);
+  assert.match(adminCss, /--adm-tour-surface: color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\);/);
+  assert.match(cmsCss, /\.adm-editor-facts > div\[data-tone="success"\] dd \{ color: var\(--adm-editor-fact-success\); \}/);
+  assert.match(cmsCss, /\.adm-editor-savebar__actor \{[\s\S]*?color: var\(--text-muted\);/);
+  assert.match(cmsCss, /\.adm-tour-state \{[\s\S]*?background: var\(--adm-tour-surface\);/);
+});
+
 test("the editor lists one state per locale, and a stale task wins over the published state", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
   const locales = [...page.body.matchAll(/data-translation-locale="([a-z]{2})"/g)].map(([, code]) => code);
@@ -132,8 +184,13 @@ test("the editor lists one state per locale, and a stale task wins over the publ
 test("media assets preview and fail out loud", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
   assert.match(page.body, /data-media-preview-state="loading"/);
+  assert.match(page.body, /data-media-preview-frame="true"/);
+  assert.match(page.body, /class="adm-media-asset__preview-loading"/);
   assert.match(page.body, /<img src="[^"]+" alt="[^"]*" loading="lazy" decoding="async" data-media-preview="true">/);
   assert.match(page.body, /class="adm-media-asset__preview-failed"/);
+  assert.match(cmsCss, /\.adm-media-asset__preview-(?:loading|failed|empty|video)/);
+  assert.match(cmsCss, /\[data-media-preview-state="empty"\] \.adm-media-asset__preview/);
+  assert.match(cmsCss, /\[data-media-preview-state="video"\] \.adm-media-asset__preview/);
   assert.match(cmsCss, /\[data-media-preview-state="failed"\] \.adm-media-asset__preview-failed \{ display: grid; \}/);
   // A broken file shows the designed note, not the browser's own fallback of a
   // broken-image glyph plus the whole alt text.
