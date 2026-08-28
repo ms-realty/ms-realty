@@ -24,7 +24,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1003,7 +1014,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1020,7 +1042,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1037,7 +1070,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1054,7 +1098,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1071,7 +1126,18 @@
       "capability": "cases:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1088,7 +1154,18 @@
       "capability": "cases:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1105,7 +1182,18 @@
       "capability": "cases:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1122,7 +1210,18 @@
       "capability": "cases:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1139,7 +1238,18 @@
       "capability": "settings:manage",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1157,7 +1267,18 @@
       "capability": "settings:manage",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1175,7 +1296,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1192,7 +1324,18 @@
       "capability": "data:export",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1210,7 +1353,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1227,7 +1381,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1244,7 +1409,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1261,7 +1437,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "draft_only",
       "execution": "mcp_delegated",
@@ -1278,7 +1465,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1295,7 +1493,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1312,7 +1521,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1329,7 +1549,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1346,7 +1577,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1363,7 +1605,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1380,7 +1633,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1397,7 +1661,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1415,7 +1690,18 @@
       "capability": "content:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1432,7 +1718,18 @@
       "capability": "content:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1449,7 +1746,18 @@
       "capability": "content:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1466,7 +1774,18 @@
       "capability": "content:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1483,7 +1802,18 @@
       "capability": "content:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1500,7 +1830,18 @@
       "capability": "content:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1517,7 +1858,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1535,7 +1887,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1553,7 +1916,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1570,7 +1944,18 @@
       "capability": "content:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1587,7 +1972,18 @@
       "capability": "content:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1605,7 +2001,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1623,7 +2030,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1641,7 +2059,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1658,7 +2087,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1675,7 +2115,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1693,7 +2144,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1710,7 +2172,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1727,7 +2200,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "draft_only",
       "execution": "mcp_delegated",
@@ -1744,7 +2228,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1761,7 +2256,18 @@
       "capability": "security:self",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1779,7 +2285,18 @@
       "capability": "security:self",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1797,7 +2314,18 @@
       "capability": "security:self",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1815,7 +2343,18 @@
       "capability": "security:self",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1833,7 +2372,18 @@
       "capability": "security:self",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1851,7 +2401,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1868,7 +2429,18 @@
       "capability": "administration:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1886,7 +2458,18 @@
       "capability": "settings:manage",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1903,7 +2486,18 @@
       "capability": "team:manage",
       "read_only": false,
       "sensitive": true,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "browser_session",
@@ -1921,7 +2515,18 @@
       "capability": "content:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1938,7 +2543,18 @@
       "capability": "translations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1955,7 +2571,18 @@
       "capability": "translations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "draft_only",
       "execution": "mcp_delegated",
@@ -1972,7 +2599,18 @@
       "capability": "translations:publish",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -1989,7 +2627,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -2006,7 +2655,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -2023,7 +2683,18 @@
       "capability": "operations:write",
       "read_only": false,
       "sensitive": false,
-      "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
       "execution": "mcp_delegated",
@@ -2067,7 +2738,19 @@
       "source": "production/scripts/hermes-mcp-server.mjs",
       "read_only": false,
       "draft_only": true,
-      "confirmation": "SUBMIT_HERMES_DRAFT",
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ],
+        "operation": "hermes_submit_draft"
+      },
       "prohibited_actions": [
         "publish",
         "send",
