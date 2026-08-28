@@ -7778,18 +7778,23 @@ function DuplicateReviewPanel({ page }) {
     h("p", { className: "adm-note", role: "status", "data-duplicate-review-summary": "true" }, summaryText),
     review.rows?.length
       ? h(
-          "div",
-          { className: "adm-report-grid", "data-duplicate-review-pairs": String(review.rows.length) },
-          ...review.rows.map((pair) =>
-            h(
-              "article",
-              { key: pair.pair_id, className: "adm-report-card", "data-duplicate-review-pair": pair.pair_id, "data-duplicate-pair-status": pair.status },
-              h("header", null, h("div", null, h(StatusPill, { tone: pair.status === "confirmed" ? "success" : "sun" }, pair.status === "confirmed" ? copy.pairConfirmed || "Confirmed pair" : pair.candidate_source === "audit_only" ? copy.pairAuditOnly || "Audit-only candidate pair" : copy.pairCandidate || "Candidate pair"), h("code", { className: "crm-mono" }, pair.pair_id)), h("small", null, copy.reviewOnly || "Manual comparison")),
+          "details",
+          { className: "adm-workbench-disclosure", "data-duplicate-review-results": String(review.rows.length) },
+          h("summary", null, h("span", null, `${label(adminCopy(page), "results", "Results")} · ${review.rows.length}`)),
+          h(
+            "div",
+            { className: "adm-report-grid", "data-duplicate-review-pairs": String(review.rows.length) },
+            ...review.rows.map((pair) =>
               h(
-                "div",
-                { className: "adm-report-grid adm-report-grid--two" },
-                duplicateListingCard({ card: pair.record_a, copy, page }),
-                duplicateListingCard({ card: pair.record_b, copy, page }),
+                "article",
+                { key: pair.pair_id, className: "adm-report-card", "data-duplicate-review-pair": pair.pair_id, "data-duplicate-pair-status": pair.status },
+                h("header", null, h("div", null, h(StatusPill, { tone: pair.status === "confirmed" ? "success" : "sun" }, pair.status === "confirmed" ? copy.pairConfirmed || "Confirmed pair" : pair.candidate_source === "audit_only" ? copy.pairAuditOnly || "Audit-only candidate pair" : copy.pairCandidate || "Candidate pair"), h("code", { className: "crm-mono" }, pair.pair_id)), h("small", null, copy.reviewOnly || "Manual comparison")),
+                h(
+                  "div",
+                  { className: "adm-report-grid adm-report-grid--two" },
+                  duplicateListingCard({ card: pair.record_a, copy, page }),
+                  duplicateListingCard({ card: pair.record_b, copy, page }),
+                ),
               ),
             ),
           ),
@@ -7845,7 +7850,7 @@ function AreaReviewPanel({ page }) {
     ),
     h(
       "details",
-      { open: true, className: "adm-workbench-disclosure", "data-area-review-missing": String(missingRows.length) },
+      { className: "adm-workbench-disclosure", "data-area-review-missing": String(missingRows.length) },
       h("summary", null, h("span", null, `${copy.missingCanonicalArea || "Missing canonical area"} · ${missingRows.length}`)),
       missingRows.length
         ? h("ul", { className: "adm-task-list" }, ...missingRows.map((row) => areaReviewRow({ row, copy, page, scope: "missing" })))
@@ -7853,7 +7858,7 @@ function AreaReviewPanel({ page }) {
     ),
     h(
       "details",
-      { open: Boolean(candidateRows.length), className: "adm-workbench-disclosure", "data-area-review-candidates": String(candidateRows.length) },
+      { className: "adm-workbench-disclosure", "data-area-review-candidates": String(candidateRows.length) },
       h("summary", null, h("span", null, `${copy.multipleCandidates || "Multiple prose suggestions"} · ${candidateRows.length}`)),
       candidateRows.length
         ? h("ul", { className: "adm-task-list" }, ...candidateRows.map((row) => areaReviewRow({ row, copy, page, scope: "candidates" })))
@@ -7981,24 +7986,33 @@ function ListingManagerBody({ page }) {
         ),
         factReviewRows.length
           ? h(
-              "ul",
-              { className: "adm-task-list", "data-fact-review-rows": String(factReviewRows.length) },
-              ...factReviewRows.map((row) =>
-                h(
-                  "li",
-                  { key: row.listing_id, "data-fact-review-listing": row.listing_id },
+              "details",
+              {
+                open: Boolean(factReview.filters?.row || factReview.filters?.q),
+                className: "adm-workbench-disclosure",
+                "data-fact-review-results": String(factReviewRows.length),
+              },
+              h("summary", null, h("span", null, `${label(copy, "results", "Results")} · ${factReviewRows.length}`)),
+              h(
+                "ul",
+                { className: "adm-task-list", "data-fact-review-rows": String(factReviewRows.length) },
+                ...factReviewRows.map((row) =>
                   h(
-                    "div",
-                    { className: "adm-task-list__body" },
-                    h("strong", null, row.title),
-                    h("code", { className: "crm-mono" }, row.listing_id),
-                    h("small", null, row.location || ui.notSet),
-                    h("small", null, row.unchecked_rows.map((key) => factReviewLabels[key] || key).join(" · ")),
-                  ),
-                  h(
-                    "div",
-                    { className: "adm-task-list__actions" },
-                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, factReviewCopy.openEditor || label(copy, "openEditor", "Open editor")),
+                    "li",
+                    { key: row.listing_id, "data-fact-review-listing": row.listing_id },
+                    h(
+                      "div",
+                      { className: "adm-task-list__body" },
+                      h("strong", null, row.title),
+                      h("code", { className: "crm-mono" }, row.listing_id),
+                      h("small", null, row.location || ui.notSet),
+                      h("small", null, row.unchecked_rows.map((key) => factReviewLabels[key] || key).join(" · ")),
+                    ),
+                    h(
+                      "div",
+                      { className: "adm-task-list__actions" },
+                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, factReviewCopy.openEditor || label(copy, "openEditor", "Open editor")),
+                    ),
                   ),
                 ),
               ),

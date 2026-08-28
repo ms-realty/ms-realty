@@ -35,6 +35,12 @@ test("listing manager leads with the shell the CRM screens use and no dead list 
   assert.match(page.body, /data-filter-value=""[^>]*data-on="1"/);
   assert.match(page.body, /<span class="adm-seg-count">165<\/span>/);
   assert.doesNotMatch(page.body, /data-planned-control=/);
+  // Secondary QA inventories stay complete but do not bury the paginated
+  // listing table under hundreds of expanded actions.
+  assert.match(page.body, /<details class="adm-workbench-disclosure" data-fact-review-results="145">/);
+  assert.match(page.body, /<details class="adm-workbench-disclosure" data-duplicate-review-results="/);
+  assert.match(page.body, /<details class="adm-workbench-disclosure" data-area-review-missing="/);
+  assert.doesNotMatch(page.body, /<details open class="adm-workbench-disclosure" data-(?:fact|duplicate|area)-review/);
   // The queue itself keeps its contracts.
   assert.match(page.body, /data-listing-manager-row="MS-CRAWL-0001"/);
   assert.match(page.body, /data-listing-bulk-bar="true" data-selection="empty"/);
