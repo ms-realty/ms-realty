@@ -41,7 +41,6 @@ async function withNamedOperator(fn) {
 test("bootstrap prompt references the operator token environment without persisting it", () => {
   const prompt = operatorBootstrapPrompt({
     baseUrl: "https://ms-realty.example.workers.dev/some/path",
-    token: OPERATOR_TOKEN,
     operatorId: "connect_operator",
   });
   assert.ok(prompt.includes("https://ms-realty.example.workers.dev/mcp"));
@@ -53,7 +52,6 @@ test("bootstrap prompt references the operator token environment without persist
   assert.ok(prompt.includes("hermes-mcp-server.mjs"));
   assert.ok(prompt.includes("Never describe Sandanski as a sea destination"));
   assert.ok(prompt.includes("humans approve"));
-  assert.throws(() => operatorBootstrapPrompt({ baseUrl: "https://x.test", token: "" }), /operator token/i);
 });
 
 test("assistant config never persists the issued token in headers", () => {
@@ -73,6 +71,7 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
   const html = renderOperatorConnectPage({
     baseUrl: "https://ms-realty.example.workers.dev",
     token: OPERATOR_TOKEN,
+    agentToken: OPERATOR_TOKEN,
     operatorId: "connect_operator",
   });
   // The page speaks the workbench languages; it used to be fixed to Russian.
@@ -87,7 +86,14 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
   assert.ok(html.includes(`href="${CHATGPT_APP_URL}" target="_blank" rel="noopener noreferrer" data-chatgpt-open="ms-realty-operator"`));
   assert.ok(html.includes("Open ChatGPT Home"));
   assert.ok(html.includes("this link does not install or connect anything"));
-  assert.equal(html.includes(OPERATOR_TOKEN), false);
+  assert.match(html, /<label for="agent-credential">Short-lived key for MS_REALTY_OPERATOR_TOKEN<\/label>/);
+  assert.match(html, new RegExp(`<input class="agent__credential" id="agent-credential" type="password" value="${OPERATOR_TOKEN}" readonly`));
+  assert.match(html, /data-copy-block="agent-credential"[^>]*>Copy the key<\/button>/);
+  const configBlock = html.match(/<pre class="agent__config"[^>]*>([\s\S]*?)<\/pre>/)?.[1] || "";
+  const promptBlock = html.match(/<textarea id="prompt"[^>]*>([\s\S]*?)<\/textarea>/)?.[1] || "";
+  assert.equal(configBlock.includes(OPERATOR_TOKEN), false);
+  assert.equal(promptBlock.includes(OPERATOR_TOKEN), false);
+  assert.equal(html.split(OPERATOR_TOKEN).length - 1, 1);
   assert.equal(html.includes("<script>alert"), false);
   for (const [locale, marker, chatGptLabel, lang] of [
     ["bg", "Копирай текста за помощника", "Отвори началната страница на ChatGPT", "bg"],
@@ -96,6 +102,7 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
     const localised = renderOperatorConnectPage({
       baseUrl: "https://ms-realty.example.workers.dev",
       token: OPERATOR_TOKEN,
+      agentToken: OPERATOR_TOKEN,
       operatorId: "connect_operator",
       locale,
     });

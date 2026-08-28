@@ -804,7 +804,9 @@ test("Payload browser sessions see provider connections without becoming MCP bea
     },
   );
   assert.equal(bearerResponse.status, 200);
-  assert.match(await bearerResponse.text(), new RegExp(token));
+  const bearerBody = await bearerResponse.text();
+  assert.match(bearerBody, /MS_REALTY_OPERATOR_TOKEN/);
+  assert.doesNotMatch(bearerBody, new RegExp(token));
 });
 
 test("Payload admin can approve and send a durable lead reply without the file outbox", async () => {

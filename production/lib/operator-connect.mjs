@@ -26,7 +26,7 @@ import { operatorProviderCards } from "./operator-provider-catalog.mjs";
 // page never places a token in the URL or claims to install silently.
 export const CHATGPT_APP_URL = "https://chatgpt.com/";
 
-const OPERATOR_TOKEN_ENV = "MS_REALTY_OPERATOR_TOKEN";
+export const OPERATOR_TOKEN_ENV = "MS_REALTY_OPERATOR_TOKEN";
 const OPERATOR_TOKEN_PLACEHOLDER = `\${${OPERATOR_TOKEN_ENV}}`;
 
 const PROMPT_TEMPLATE = `You are now the operations copilot for MS Realty, a family real-estate agency in Sandanski, Bulgaria (legacy sites makler-realty.com and makler-realty.ru; the authoritative public platform runs at __BASE_URL__).
@@ -92,9 +92,8 @@ export function operatorCodexPluginUrl({ marketplacePath = DEFAULT_CODEX_MARKETP
   return `codex://plugins/ms-realty-operator?marketplacePath=${encodeURIComponent(resolved)}`;
 }
 
-export function operatorBootstrapPrompt({ baseUrl, token, operatorId }) {
+export function operatorBootstrapPrompt({ baseUrl, operatorId }) {
   const origin = new URL(String(baseUrl)).origin;
-  if (!token || typeof token !== "string") throw new Error("An operator token is required");
   return PROMPT_TEMPLATE.replaceAll("__BASE_URL__", origin).replaceAll("__OPERATOR_ID__", operatorId || "operator");
 }
 
@@ -103,6 +102,8 @@ export function operatorBootstrapPrompt({ baseUrl, token, operatorId }) {
 // their assistant, and nothing they have to assemble themselves.
 export function operatorAgentConfigBlock({ baseUrl, token, operatorId, expiresAt = "", locale = "en" }) {
   const origin = new URL(String(baseUrl)).origin;
+  // The token is deliberately an authorization gate, not template material:
+  // callers may generate this block only after owner-only issuance succeeds.
   if (!token || typeof token !== "string") throw new Error("An operator agent token is required");
   const copy = operatorConnectCopy(locale);
   const claudeConfig = {
@@ -431,6 +432,9 @@ const CONNECT_STYLE = `
   .ai p, .agent p { margin: 0; }
   .ai .button, .agent .button { margin-top: 16px; }
   .ai__actions, .agent__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .agent__credential-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 6px; }
+  .agent__credential { width: min(100%, 520px); font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace) !important; }
+  .agent__credential-row .button { margin-top: 0; }
   .button--quiet { background: var(--surface, #FFFFFF); border: 1px solid var(--ink-200, #C9C9C7); color: var(--text-strong, #241F18); }
   .button--quiet:hover { background: var(--ink-50, #F4F4F3); }
   .connect-page main textarea[data-masked="true"], .connect-page main pre[data-masked="true"] { filter: blur(4px); user-select: none; }
@@ -494,7 +498,9 @@ export function renderOperatorConnectPage({
   locale = "en",
 }) {
   const copy = operatorConnectCopy(locale);
-  const prompt = token ? operatorBootstrapPrompt({ baseUrl, token, operatorId }) : "";
+  // The authenticated token gates whether the prompt exists, but it never
+  // enters the prompt. The delegated credential has its own masked control.
+  const prompt = token ? operatorBootstrapPrompt({ baseUrl, operatorId }) : "";
   const agentConfig = agentToken
     ? operatorAgentConfigBlock({ baseUrl, token: agentToken, operatorId, expiresAt: agentExpiresAt, locale: copy.lang })
     : "";
@@ -541,6 +547,13 @@ export function renderOperatorConnectPage({
          <ol class="steps">
            <li>${escapeHtml(copy.agentStep1)}</li><li>${escapeHtml(copy.agentStep2)}</li><li>${escapeHtml(copy.agentStep3)}</li>
          </ol>
+         <label for="agent-credential">${escapeHtml(copy.agentCredentialLabel)}</label>
+         <div class="agent__credential-row">
+           <input class="agent__credential" id="agent-credential" type="password" value="${escapeHtml(agentToken)}" readonly autocomplete="off" spellcheck="false" aria-describedby="agent-credential-hint">
+           <button class="button button--quiet" type="button" data-copy-block="agent-credential" data-copy-done="${escapeHtml(copy.agentCredentialCopied)}" data-copy-failed="${escapeHtml(copy.agentCopyFailed)}" hidden>${escapeHtml(copy.agentCredentialCopy)}</button>
+           <span class="copy-status" role="status" aria-live="polite" aria-atomic="true" data-copy-status="agent-credential"></span>
+         </div>
+         <p class="hint" id="agent-credential-hint">${escapeHtml(copy.agentCredentialHint)}</p>
          <p class="agent__actions"><button class="button" type="button" data-copy-block="agent-config" data-copy-done="${escapeHtml(copy.agentCopied)}" data-copy-failed="${escapeHtml(copy.agentCopyFailed)}" hidden>${escapeHtml(copy.agentCopy)}</button><button class="button button--quiet" id="agent-reveal" type="button" aria-controls="agent-config" aria-pressed="false" data-show-label="${escapeHtml(copy.agentReveal)}" data-hide-label="${escapeHtml(copy.agentHide)}" hidden>${escapeHtml(copy.agentReveal)}</button><span class="copy-status" role="status" aria-live="polite" aria-atomic="true" data-copy-status="agent-config"></span></p>
          <p class="hint" id="agent-config-label">${escapeHtml(copy.agentConfigLabel)}</p>
          <pre class="agent__config" id="agent-config" tabindex="0" aria-labelledby="agent-config-label">${escapeHtml(agentConfig)}</pre>
