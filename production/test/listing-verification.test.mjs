@@ -3,7 +3,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
-import { assertListingVerificationReport, buildListingVerificationReport } from "../lib/listing-verification.mjs";
+import {
+  assertListingVerificationReport,
+  buildListingVerificationReport,
+  UNASSIGNED_REVIEW_OWNER,
+} from "../lib/listing-verification.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -50,10 +54,34 @@ test("listing verification report creates broker tasks from latest listing edits
   assert.equal(report.summary.high_priority, 1);
   assert.equal(report.summary.stale_translation_tasks, 1);
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").latest_edit_id, "latest-edit");
-  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").verification_task.owner, "broker_bg");
-  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0116").verification_task.owner, "broker_ru");
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").verification_task.owner, UNASSIGNED_REVIEW_OWNER);
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0116").verification_task.owner, UNASSIGNED_REVIEW_OWNER);
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").publication_readiness.ready, false);
   assert.ok(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").publication_readiness.blocking_fields.includes("location_id"));
+});
+
+test("listing verification resolves a configured real broker without inventing fixture identities", () => {
+  const report = buildListingVerificationReport({
+    seed: loadCmsSeed(),
+    edits: [
+      {
+        id: "configured-edit",
+        listing_id: "MS-CRAWL-0001",
+        edited_at: "2026-07-05T00:00:00Z",
+        source_locale: "bg",
+        patch: { price_eur: 123000 },
+        source_hash_after: "configured-hash",
+      },
+    ],
+    brokerProfiles: [
+      { id: "broker_bg", languages: ["bg"] },
+      { id: "real-broker-bg", languages: ["bg"] },
+    ],
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+
+  assert.equal(report.rows[0].verification_task.owner, "real-broker-bg");
+  assert.doesNotMatch(JSON.stringify(report), /broker_bg|broker_ru|broker_international/);
 });
 
 test("later legacy description restorations retain the immediately preceding factual verification priority", () => {

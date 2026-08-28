@@ -1,4 +1,9 @@
 import { isPublicBrokerContact } from "./broker-contacts.mjs";
+import {
+  listingVerificationOwnerForRow,
+  resolveListingVerificationOwner,
+  UNASSIGNED_REVIEW_OWNER,
+} from "./listing-verification.mjs";
 
 const SAMPLE_LIMIT = 20;
 
@@ -27,6 +32,7 @@ export function buildAgencyReviewQueue({
   translationCoverage = {},
   brokerContacts = [],
   launchReadiness = {},
+  brokerProfiles = [],
 } = {}) {
   const qualityRows = listingQuality.rows || [];
   const qualityCount = listingQuality.review_queue?.summary?.pending_review_rows ?? qualityRows.length;
@@ -72,7 +78,7 @@ export function buildAgencyReviewQueue({
         task({
           id: `listing-quality-${row.listing_id}`,
           title: row.title || row.listing_id,
-          owner: row.source_locale === "ru" ? "broker_ru" : "broker_bg",
+          owner: resolveListingVerificationOwner(row.source_locale, brokerProfiles),
           priority: "high",
           admin_path: row.editor_path,
         }),
@@ -90,7 +96,7 @@ export function buildAgencyReviewQueue({
         task({
           id: row.verification_task?.id || `verify-${row.listing_id}`,
           title: row.listing_id,
-          owner: row.verification_task?.owner || (row.source_locale === "ru" ? "broker_ru" : "broker_bg"),
+          owner: listingVerificationOwnerForRow(row, brokerProfiles),
           priority: row.priority || "high",
           admin_path: row.admin_path,
         }),
@@ -108,7 +114,7 @@ export function buildAgencyReviewQueue({
         task({
           id: `broker-contact-${row.listing_id}`,
           title: row.listing_id,
-          owner: row.verification_task?.owner || "broker",
+          owner: listingVerificationOwnerForRow(row, brokerProfiles) || UNASSIGNED_REVIEW_OWNER,
           priority: "high",
           admin_path: row.admin_path,
         }),

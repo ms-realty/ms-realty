@@ -849,7 +849,7 @@ function renderMigrationReviewPayload(
   seoEvidence,
   listingQuality,
   launchReadiness,
-  { listingVerification, translationCoverage, brokerContacts } = {},
+  { listingVerification, translationCoverage, brokerContacts, brokerProfiles = [] } = {},
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
   const decisions = buildLegacyRouteDecisions(routes, approvals);
@@ -928,6 +928,7 @@ function renderMigrationReviewPayload(
       listingVerification,
       translationCoverage,
       brokerContacts,
+      brokerProfiles,
       seoEvidence: seoPayload,
       launchReadiness,
     }),
@@ -1285,11 +1286,12 @@ export function createHttpApp({
     const reviewQueue = buildListingQualityReviewQueue(report, { reviewCsv, limit: 20 });
     return { ...report, rows: reviewQueue.rows, review_queue: reviewQueue };
   };
-  const currentListingVerification = () =>
+  const currentListingVerification = ({ brokerProfiles: profiles = configuredBrokerProfiles } = {}) =>
     buildListingVerificationReport({
       seed: currentSeed(),
       edits: readListingEdits(listingEditLedgerPath || undefined),
       generatedAt: listingQualityGeneratedAt || new Date().toISOString(),
+      brokerProfiles: profiles,
     });
   const currentTranslationCoverage = () =>
     buildTranslationCoverageReport({
@@ -4802,9 +4804,10 @@ export function createHttpApp({
         currentListingQualityReviewQueue({ generatedAt: listingQualityGeneratedAt }),
         currentLaunchReadiness(),
         {
-          listingVerification: currentListingVerification(),
+          listingVerification: currentListingVerification({ brokerProfiles: await currentBrokerProfiles(payloadSession) }),
           translationCoverage: currentTranslationCoverage(),
           brokerContacts: currentBrokerContacts(),
+          brokerProfiles: await currentBrokerProfiles(payloadSession),
         },
       );
       return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -4823,9 +4826,10 @@ export function createHttpApp({
         currentListingQualityReviewQueue({ generatedAt: listingQualityGeneratedAt }),
         currentLaunchReadiness(),
         {
-          listingVerification: currentListingVerification(),
+          listingVerification: currentListingVerification({ brokerProfiles: await currentBrokerProfiles(payloadSession) }),
           translationCoverage: currentTranslationCoverage(),
           brokerContacts: currentBrokerContacts(),
+          brokerProfiles: await currentBrokerProfiles(payloadSession),
         },
       );
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");

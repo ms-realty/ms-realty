@@ -2116,6 +2116,7 @@ function migrationReviewPayload(registry, url, config) {
     seed: currentSeed(config),
     edits: readListingEdits(config.listingEditLedgerPath),
     generatedAt: config.reviewedAt || new Date().toISOString(),
+    brokerProfiles: config.brokerProfiles || [],
   });
   const translationCoverage = buildTranslationCoverageReport({
     registry,
@@ -2177,6 +2178,7 @@ function migrationReviewPayload(registry, url, config) {
       listingVerification,
       translationCoverage,
       brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
+      brokerProfiles: config.brokerProfiles || [],
       seoEvidence,
       launchReadiness: readiness,
     }),

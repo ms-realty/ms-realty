@@ -2703,7 +2703,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /production\/data\/listing-verification-report\.json/);
   assert.match(markdown, /Broker verification tasks: 165/);
   assert.match(markdown, /High priority tasks: 74/);
-  assert.match(markdown, /broker_bg: 113, broker_ru: 52/);
+  assert.match(markdown, /unassigned: 165/);
   assert.match(markdown, /MS_REALTY_LISTING_PUBLICATION_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_LISTING_VERIFICATION_REPORT_PATH/);
   assert.match(markdown, /Monitoring And Rollback/);
