@@ -1623,6 +1623,72 @@
       });
     });
   }
+  function initWhatsAppEmbeddedSignup() {
+    var root = document.querySelector('[data-whatsapp-embedded-signup="true"]');
+    if (!root) return;
+    var button = root.querySelector("[data-whatsapp-connect]");
+    var status = root.querySelector("[data-whatsapp-result]");
+    var appId = root.getAttribute("data-whatsapp-app-id");
+    var configId = root.getAttribute("data-whatsapp-config-id");
+    var version = root.getAttribute("data-whatsapp-version");
+    if (!button || !status || !appId || !configId || !version) return;
+    var copy = function (name, fallback) { return root.getAttribute("data-meta-" + name) || fallback; };
+    var signup = null;
+    var code = null;
+    var fail = function (message) {
+      status.textContent = message;
+      status.removeAttribute("aria-busy");
+      button.disabled = false;
+    };
+    var finish = function () {
+      if (!signup || !code) return;
+      button.disabled = true;
+      status.setAttribute("aria-busy", "true");
+      status.textContent = copy("checking", "Checking the Meta account…");
+      fetch("/api/admin/connections", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ provider: "whatsapp", code: code, waba_id: signup.waba_id, phone_number_id: signup.phone_number_id }),
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error("provider_rejected");
+          location.assign("/admin/connect?connected=whatsapp");
+        })
+        .catch(function (error) {
+          fail(copy(error.message === "provider_rejected" ? "rejected" : "no-server", "Could not connect WhatsApp."));
+        });
+    };
+    addEventListener("message", function (event) {
+      if (["https://www.facebook.com", "https://web.facebook.com"].indexOf(event.origin) === -1) return;
+      var data = event.data;
+      try { if (typeof data === "string") data = JSON.parse(data); } catch (error) { return; }
+      if (data && data.type === "WA_EMBEDDED_SIGNUP" && data.event === "FINISH") {
+        signup = data.data;
+        finish();
+      }
+    });
+    window.fbAsyncInit = function () {
+      window.FB.init({ appId: appId, autoLogAppEvents: true, xfbml: false, version: version });
+      button.disabled = false;
+      status.textContent = copy("ready", "Ready to open Meta.");
+    };
+    var script = document.createElement("script");
+    script.async = true;
+    script.src = "https://connect.facebook.net/en_US/sdk.js";
+    script.onerror = function () { fail(copy("sdk-failed", "The Meta SDK did not load.")); };
+    document.head.append(script);
+    button.addEventListener("click", function () {
+      if (!window.FB) return fail(copy("sdk-not-ready", "Meta is not ready yet."));
+      button.disabled = true;
+      status.textContent = copy("opening", "Opening Meta…");
+      window.FB.login(function (response) {
+        code = response && response.authResponse ? response.authResponse.code : null;
+        if (!code) return fail(copy("cancelled", "The connection was cancelled."));
+        finish();
+      }, { config_id: configId, response_type: "code", override_default_response_type: true, extras: { setup: {} } });
+    });
+  }
   function initAdminWebMcp() {
     var modelContext = document.modelContext;
     if (!modelContext || typeof modelContext.registerTool !== "function") return;
@@ -1787,6 +1853,7 @@
   initAdminListFilters();
   initPipelineBoard();
   initLeadInboxPanes();
+  initWhatsAppEmbeddedSignup();
   initAdminWebMcp();
   initCopyBlocks(document);
   initThemeSwitch();
