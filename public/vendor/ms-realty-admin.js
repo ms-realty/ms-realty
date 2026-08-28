@@ -1705,7 +1705,6 @@
         var byOperation = {};
         for (var i = 0; i < rows.length; i += 1) byOperation[rows[i].operation] = rows[i];
         var remoteReads = rows.filter(function (row) { return row.execution === "mcp_delegated" && row.read_only; });
-        var remoteWrites = rows.filter(function (row) { return row.execution === "mcp_delegated" && !row.read_only; });
         var browserRows = rows.filter(function (row) { return row.execution === "browser_session"; });
         var operationSchema = function (source) {
           return { type: "string", enum: source.map(function (row) { return row.operation; }) };
@@ -1728,14 +1727,6 @@
         var run = function (row, args) {
           var url = operationUrl(row, args.query);
           var options = { method: row.method, credentials: "same-origin", headers: { accept: "application/json" } };
-          if (!row.read_only) {
-            // Delegated MCP writes use a signed challenge. The browser-session
-            // WebMCP surface still keeps an explicit confirmation field, but
-            // must not compare it with a deterministic/replayable string.
-            if (typeof args.confirmation !== "string" || !args.confirmation.trim()) throw new Error("Explicit owner confirmation is required.");
-            options.headers["content-type"] = "application/json";
-            options.body = JSON.stringify(args.input && typeof args.input === "object" ? args.input : {});
-          }
           return fetch(url, options).then(function (response) {
             var contentType = response.headers.get("content-type") || "";
             if (!contentType.includes("application/json")) {
@@ -1784,27 +1775,6 @@
           execute: function (args) {
             var row = byOperation[args.operation];
             if (!row || row.execution !== "mcp_delegated" || !row.read_only) throw new Error("Unknown admin read operation.");
-            return run(row, args);
-          },
-        });
-        if (remoteWrites.length) register({
-          name: "ms_realty_admin_write",
-          description: "Run one explicit owner-confirmed admin mutation through the signed-in session. Existing RBAC, 2FA, workspace scope, validation, persistence, and audit controls remain authoritative.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              operation: operationSchema(remoteWrites),
-              input: { type: "object", description: "Body fields accepted by the selected existing admin route." },
-              query: querySchema,
-              confirmation: { type: "string", description: "Explicit owner confirmation for this signed-in browser-session operation." },
-            },
-            required: ["operation", "confirmation"],
-            additionalProperties: false,
-          },
-          annotations: { readOnlyHint: false, destructiveHint: true, untrustedContentHint: true },
-          execute: function (args) {
-            var row = byOperation[args.operation];
-            if (!row || row.execution !== "mcp_delegated" || row.read_only) throw new Error("Unknown admin write operation.");
             return run(row, args);
           },
         });
