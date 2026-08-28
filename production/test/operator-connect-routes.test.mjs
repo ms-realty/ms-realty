@@ -166,6 +166,7 @@ test("both servers render only working one-click connections in the persistent o
       assert.match(body, /id="agent-credential" type="password"[^>]*readonly/);
       assert.equal((body.match(/data-copy-block="agent-credential"/g) || []).length, 1, "one credential copy action");
       assert.equal((body.match(/data-copy-block="agent-config"/g) || []).length, 1, "one assistant config action");
+      assert.match(body, /<details class="adm-assistant-connection__config" data-assistant-config-disclosure="true">/);
       assert.match(body, /MS_REALTY_OPERATOR_TOKEN/);
       assert.equal(body.includes(BEARER), false, "no operator bearer in owner HTML");
       assert.ok(body.includes('data-codex-plugin-install="ms-realty-operator"'), "Codex plugin install link");

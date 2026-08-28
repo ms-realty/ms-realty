@@ -82,6 +82,13 @@ test("warning surfaces tint the active theme instead of forcing a light-only pal
   assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-checks ul\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
 });
 
+test("technical Hermes and assistant setup content is collapsed without JavaScript", () => {
+  assert.match(adminAdapterCss, /\.adm-hermes-diagnostics\s*,\s*\.adm-hermes-safeguards\s*\{[^}]*overflow:\s*hidden/);
+  assert.match(adminAdapterCss, /\.adm-hermes-diagnostics > summary/);
+  assert.match(adminAdapterCss, /\.adm-hermes-safeguards\[open\] > summary::after/);
+  assert.match(adminAdapterCss, /\.adm-assistant-connection__config-label::after/);
+});
+
 test("panel header links do not override primary button contrast", () => {
   for (const css of [generatedDesignCss]) {
     assert.match(css, /\.crm-panel__hd a:not\(\.mk-btn\)/);
