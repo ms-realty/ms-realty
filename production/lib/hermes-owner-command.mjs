@@ -41,18 +41,52 @@ const EVIDENCE_REFS = new Set(["authenticated_owner_scope", "admin_destination_m
 const INPUT_KEYS = new Set(["command", "idempotencyKey", "locale"]);
 const PLAN_KEYS = new Set(["summary", "steps", "questions"]);
 const STEP_KEYS = new Set(["title", "why", "destination", "mode", "evidence"]);
+const BUSINESS_CONTEXT_KEYS = new Set(["generated_at", "authoritative_state", "counts", "providers"]);
+const BUSINESS_CONTEXT_AUTHORITY_KEYS = new Set(["status", "source", "authoritative", "reason_key"]);
+const BUSINESS_CONTEXT_COUNT_KEYS = new Set(["leads", "pipeline", "tasks", "listings"]);
+const BUSINESS_CONTEXT_PROVIDER_KEYS = new Set(["id", "status", "scopes", "last_verified_at"]);
 const PLAN_MODES = new Set(["review", "draft"]);
 const STATUSES = new Set(["requested", "planned", "failed"]);
 const LOCALES = new Set(["bg", "ru", "en"]);
+const COMMAND_CONTACT_LABEL = /\b(?:email|e-mail|phone|mobile|tel|telephone|contact|whatsapp|viber|telegram|signal)\b\s*[:=]\s*\S+/i;
+const EMAIL_ADDRESS = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+const PHONE_NUMBER = /(?:\+|00)\s*\d(?:[\s().-]*\d){6,}|\b\d{10,}\b|\b\d{3,}[\s().-]\d(?:[\s().-]*\d){4,}\b/;
+const PROVIDER_NETWORK_ERROR_CODES = new Set(["ECONNABORTED", "ECONNREFUSED", "ECONNRESET", "ENETDOWN", "ENETUNREACH", "ENOTFOUND", "EHOSTDOWN", "EHOSTUNREACH"]);
 
 const FAILURE_MESSAGES = Object.freeze({
   bad_request: "Tell Hermes what you want to prepare.",
   hermes_receipt_unavailable: "Hermes cannot run until its durable receipt store is available.",
+  hermes_context_unavailable: "Hermes cannot plan until authoritative business context is available.",
+  hermes_command_contains_sensitive_data: "Hosted Hermes planning accepts only privacy-safe owner commands.",
   hermes_unavailable: "Hermes could not prepare a plan. Check the agent connection and try again.",
   hermes_invalid_plan: "Hermes returned a plan that did not satisfy the safety contract.",
+  hermes_provider_unauthorized: "Hermes provider authorization needs attention before planning can continue.",
+  hermes_provider_payment_required: "Hermes provider billing needs attention before planning can continue.",
+  hermes_provider_rate_limited: "Hermes provider is rate limited. Try again shortly.",
+  hermes_provider_timeout: "Hermes provider timed out before returning a plan.",
+  hermes_provider_network: "Hermes provider could not be reached from this runtime.",
+  hermes_provider_service_unavailable: "Hermes provider is temporarily unavailable.",
   idempotency_conflict: "This Hermes request identifier was already used for different work.",
   hermes_command_in_progress: "This Hermes request is already recorded and will not be repeated automatically.",
   hermes_command_expired: "This Hermes request expired before a plan was recorded and will not be repeated automatically.",
+});
+
+const FAILURE_STATUS = Object.freeze({
+  bad_request: 400,
+  hermes_receipt_unavailable: 503,
+  hermes_context_unavailable: 503,
+  hermes_command_contains_sensitive_data: 400,
+  hermes_unavailable: 503,
+  hermes_invalid_plan: 502,
+  hermes_provider_unauthorized: 503,
+  hermes_provider_payment_required: 503,
+  hermes_provider_rate_limited: 503,
+  hermes_provider_timeout: 503,
+  hermes_provider_network: 503,
+  hermes_provider_service_unavailable: 503,
+  idempotency_conflict: 409,
+  hermes_command_in_progress: 409,
+  hermes_command_expired: 502,
 });
 
 export class HermesOwnerCommandError extends Error {
@@ -79,6 +113,14 @@ function requiredText(value, label, maxLength) {
   return text;
 }
 
+function requiredContextText(value, label, maxLength) {
+  try {
+    return requiredText(value, label, maxLength);
+  } catch (cause) {
+    throw new HermesOwnerCommandError("hermes_context_unavailable", { status: 503, cause });
+  }
+}
+
 function onlyKeys(value, allowed, code) {
   if (!value || typeof value !== "object" || Array.isArray(value) || Object.getPrototypeOf(value) !== Object.prototype) {
     throw new HermesOwnerCommandError(code, { status: 502 });
@@ -91,6 +133,14 @@ function isoTimestamp(value) {
   const text = String(value || "").trim();
   if (!text || Number.isNaN(Date.parse(text))) throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
   return new Date(text).toISOString();
+}
+
+function contextTimestamp(value) {
+  try {
+    return isoTimestamp(value);
+  } catch (cause) {
+    throw new HermesOwnerCommandError("hermes_context_unavailable", { status: 503, cause });
+  }
 }
 
 function normalizeInput(input) {
@@ -111,6 +161,77 @@ function normalizeInput(input) {
 
 function commandDigest(command) {
   return `sha256:${crypto.createHash("sha256").update(command).digest("hex")}`;
+}
+
+function ownerReceiptDigest(command, locale, contextDigest) {
+  return commandDigest(JSON.stringify({ command, locale, contextDigest }));
+}
+
+function nonNegativeCount(value, label) {
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new HermesOwnerCommandError("hermes_context_unavailable", { status: 503, cause: new Error(`${label} must be a non-negative integer`) });
+  }
+  return value;
+}
+
+function privacySafeProvider(provider) {
+  const normalized = onlyKeys(provider, BUSINESS_CONTEXT_PROVIDER_KEYS, "hermes_context_unavailable");
+  const scopes = Array.isArray(normalized.scopes)
+    ? [...new Set(normalized.scopes.map((scope) => requiredContextText(scope, "provider scope", 160)))]
+    : null;
+  if (scopes === null) throw new HermesOwnerCommandError("hermes_context_unavailable", { status: 503 });
+  const lastVerifiedAt = normalized.last_verified_at == null ? null : contextTimestamp(normalized.last_verified_at);
+  return {
+    id: requiredContextText(normalized.id, "provider id", 120),
+    status: requiredContextText(normalized.status, "provider status", 80),
+    scopes: scopes.sort((left, right) => left.localeCompare(right)),
+    last_verified_at: lastVerifiedAt,
+  };
+}
+
+function normalizeBusinessContext(context, { required = false } = {}) {
+  if (context == null) {
+    if (!required) return null;
+    throw new HermesOwnerCommandError("hermes_context_unavailable", { status: 503 });
+  }
+  const normalized = onlyKeys(context, BUSINESS_CONTEXT_KEYS, "hermes_context_unavailable");
+  const authority = onlyKeys(normalized.authoritative_state, BUSINESS_CONTEXT_AUTHORITY_KEYS, "hermes_context_unavailable");
+  const counts = onlyKeys(normalized.counts, BUSINESS_CONTEXT_COUNT_KEYS, "hermes_context_unavailable");
+  const providers = Array.isArray(normalized.providers)
+    ? normalized.providers.map((provider) => privacySafeProvider(provider)).sort((left, right) => left.id.localeCompare(right.id))
+    : null;
+  if (providers === null) throw new HermesOwnerCommandError("hermes_context_unavailable", { status: 503 });
+  const authorityStatus = requiredContextText(authority.status, "context authority status", 40);
+  const authoritative = authority.authoritative === true;
+  const safe = {
+    generated_at: contextTimestamp(normalized.generated_at),
+    authoritative_state: {
+      status: authorityStatus,
+      source: requiredContextText(authority.source, "context authority source", 120),
+      authoritative,
+      ...(authority.reason_key === undefined ? {} : { reason_key: requiredContextText(authority.reason_key, "context authority reason", 120) }),
+    },
+    counts: {
+      leads: nonNegativeCount(counts.leads, "Business-context leads count"),
+      pipeline: nonNegativeCount(counts.pipeline, "Business-context pipeline count"),
+      tasks: nonNegativeCount(counts.tasks, "Business-context tasks count"),
+      listings: nonNegativeCount(counts.listings, "Business-context listings count"),
+    },
+    providers,
+  };
+  if (authorityStatus !== "available" || authoritative !== true) {
+    throw new HermesOwnerCommandError("hermes_context_unavailable", { status: 503 });
+  }
+  return safe;
+}
+
+function businessContextDigest(context) {
+  return commandDigest(JSON.stringify(context));
+}
+
+function commandContainsSensitiveData(command) {
+  const text = String(command || "").trim();
+  return COMMAND_CONTACT_LABEL.test(text) || EMAIL_ADDRESS.test(text) || PHONE_NUMBER.test(text);
 }
 
 function evidenceFor(operator) {
@@ -135,6 +256,10 @@ function evidenceFor(operator) {
       prohibited: ["publish", "send", "mark_indexable", "approve_legal", "change_credentials"],
     },
   ];
+}
+
+function failureStatus(code) {
+  return FAILURE_STATUS[code] || 502;
 }
 
 function normalizedPlan(value) {
@@ -201,10 +326,37 @@ function ownerCommandRequestBody(input, evidence, model) {
       },
       {
         role: "user",
-        content: JSON.stringify({ kind: "hermes_owner_plan", command: input.command, locale: input.locale, evidence }),
+        content: JSON.stringify({
+          kind: "hermes_owner_plan",
+          command: input.command,
+          locale: input.locale,
+          evidence,
+          business_context: input.businessContext,
+        }),
       },
     ],
   };
+}
+
+function providerResponseCode(status) {
+  if (status === 401) return "hermes_provider_unauthorized";
+  if (status === 402) return "hermes_provider_payment_required";
+  if (status === 429) return "hermes_provider_rate_limited";
+  if (status >= 500 && status <= 599) return "hermes_provider_service_unavailable";
+  return "hermes_unavailable";
+}
+
+function providerTransportCode(cause) {
+  const name = String(cause?.name || "");
+  const code = String(cause?.code || "");
+  const message = String(cause?.message || "");
+  if (name === "TimeoutError" || (name === "AbortError" && /timeout/i.test(message)) || /timed?\s*out|timeout/i.test(message)) {
+    return "hermes_provider_timeout";
+  }
+  if (PROVIDER_NETWORK_ERROR_CODES.has(code) || /network|fetch failed|socket hang up|connect/i.test(message)) {
+    return "hermes_provider_network";
+  }
+  return "hermes_unavailable";
 }
 
 function openAiCompatibleOwnerCommandProvider({ env, fetchImpl }) {
@@ -218,6 +370,7 @@ function openAiCompatibleOwnerCommandProvider({ env, fetchImpl }) {
   assertHermesChatCompletionsEndpoint(config.endpoint);
   return {
     model: config.model,
+    mode: config.mode,
     async call(input, evidence) {
       let response;
       try {
@@ -228,9 +381,9 @@ function openAiCompatibleOwnerCommandProvider({ env, fetchImpl }) {
           signal: AbortSignal.timeout(HERMES_OWNER_COMMAND_TIMEOUT_MS),
         });
       } catch (cause) {
-        throw new HermesOwnerCommandError("hermes_unavailable", { status: 503, cause });
+        throw new HermesOwnerCommandError(providerTransportCode(cause), { status: 503, cause });
       }
-      if (!response?.ok) throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
+      if (!response?.ok) throw new HermesOwnerCommandError(providerResponseCode(response.status), { status: 503 });
       const payload = await response.json().catch((cause) => {
         throw new HermesOwnerCommandError("hermes_invalid_plan", { status: 502, cause });
       });
@@ -273,12 +426,12 @@ async function findReceipt(runtime, idempotencyKey) {
   return result.docs[0] || null;
 }
 
-function receiptEnvelope(idempotencyKey, command, evidence, plan, { secret, storedAt } = {}) {
+function receiptEnvelope(idempotencyKey, command, evidence, plan, { secret, storedAt, locale, contextDigest } = {}) {
   return createPrivateContactEnvelope(
     {
       subjectType: "hermes_owner_command",
       subjectId: idempotencyKey,
-      payload: { command, evidence, plan },
+      payload: { command, evidence, plan, locale, context_digest: contextDigest || null },
     },
     { secret, secretName: "MS_REALTY_PROVIDER_TOKEN_KEY", storedAt },
   );
@@ -299,6 +452,8 @@ function openedReceipt(document, secret) {
     Array.isArray(payload) ||
     typeof payload.command !== "string" ||
     !Array.isArray(payload.evidence) ||
+    (payload.locale !== undefined && typeof payload.locale !== "string") ||
+    (payload.context_digest !== undefined && payload.context_digest !== null && typeof payload.context_digest !== "string") ||
     !("plan" in payload)
   ) {
     throw new Error("Hermes owner receipt envelope payload is invalid");
@@ -329,7 +484,14 @@ function safeReceipt(document, secret, { idempotent = false } = {}) {
   };
 }
 
-async function updateReceipt(runtime, document, command, evidence, status, { secret, recordedAt, plan = null, failureCode = null } = {}) {
+async function updateReceipt(
+  runtime,
+  document,
+  command,
+  evidence,
+  status,
+  { secret, recordedAt, plan = null, failureCode = null, locale, contextDigest } = {},
+) {
   if (!STATUSES.has(status) || status === "requested") throw new Error("Invalid Hermes owner receipt transition");
   const result = await runtime.update({
     collection: "hermes_owner_receipts",
@@ -347,6 +509,8 @@ async function updateReceipt(runtime, document, command, evidence, status, { sec
       receipt_envelope: receiptEnvelope(document.idempotency_key, command, evidence, plan, {
         secret,
         storedAt: recordedAt,
+        locale,
+        contextDigest,
       }),
     },
   });
@@ -369,7 +533,7 @@ function terminalFailure(document, secret) {
     ? document.failure_code
     : "hermes_receipt_unavailable";
   throw new HermesOwnerCommandError(code, {
-    status: code === "hermes_receipt_unavailable" ? 503 : 502,
+    status: failureStatus(code),
     receipt: safeReceiptOrUnavailable(document, secret, { idempotent: true }),
   });
 }
@@ -394,8 +558,10 @@ async function existingReceipt(runtime, document, input, secret, operatorId, { n
     throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
   }
   if (
-    document.command_digest !== commandDigest(input.command) ||
-    opened.command !== input.command
+    document.command_digest !== ownerReceiptDigest(input.command, input.locale, input.contextDigest) ||
+    opened.command !== input.command ||
+    String(opened.locale || "") !== input.locale ||
+    String(opened.context_digest || "") !== input.contextDigest
   ) {
     throw new HermesOwnerCommandError("idempotency_conflict", { status: 409 });
   }
@@ -466,6 +632,9 @@ export async function runHermesOwnerCommand(
     env = process.env,
     fetchImpl = globalThis.fetch,
     provider = null,
+    providerMetadata = null,
+    businessContext = null,
+    requireBusinessContext = false,
     now = () => new Date().toISOString(),
   } = {},
 ) {
@@ -477,6 +646,9 @@ export async function runHermesOwnerCommand(
   }
   if (String(secret || "").length < 32) throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
   const startedAt = isoTimestamp(typeof now === "function" ? now() : now);
+  const normalizedBusiness = normalizeBusinessContext(businessContext, { required: requireBusinessContext });
+  const contextDigest = normalizedBusiness ? businessContextDigest(normalizedBusiness) : "sha256:none";
+  const receiptIdentity = { ...normalized, contextDigest };
   const evidence = evidenceFor(operator);
   const runtime = await runtimePayload(payload);
   let existing;
@@ -486,25 +658,31 @@ export async function runHermesOwnerCommand(
     throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
   }
   if (existing) {
-    return existingReceipt(runtime, existing, normalized, secret, operatorId, { now });
+    return existingReceipt(runtime, existing, receiptIdentity, secret, operatorId, { now });
   }
 
   let model = "injected";
   let callProvider;
+  let providerMode = typeof providerMetadata?.mode === "string" ? providerMetadata.mode : null;
   if (provider) {
     if (typeof provider !== "function") throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
+    providerMode = providerMode || String(env.HERMES_PROVIDER_MODE || "").trim().toLowerCase() || "injected_provider";
     callProvider = provider;
   } else {
     const resolved = openAiCompatibleOwnerCommandProvider({ env, fetchImpl });
     model = resolved.model;
+    providerMode = resolved.mode;
     callProvider = (request) => resolved.call(request, evidence);
+  }
+  if (providerMode === "openrouter" && commandContainsSensitiveData(normalized.command)) {
+    throw new HermesOwnerCommandError("hermes_command_contains_sensitive_data", { status: 400 });
   }
 
   const requested = {
     idempotency_key: normalized.idempotencyKey,
     operator_id: operatorId,
     status: "requested",
-    command_digest: commandDigest(normalized.command),
+    command_digest: ownerReceiptDigest(normalized.command, normalized.locale, contextDigest),
     model,
     evidence_refs: evidence.map((row) => row.id),
     started_at: startedAt,
@@ -513,6 +691,8 @@ export async function runHermesOwnerCommand(
     receipt_envelope: receiptEnvelope(normalized.idempotencyKey, normalized.command, evidence, null, {
       secret,
       storedAt: startedAt,
+      locale: normalized.locale,
+      contextDigest,
     }),
   };
   let document;
@@ -526,7 +706,7 @@ export async function runHermesOwnerCommand(
   } catch (cause) {
     try {
       const raced = await findReceipt(runtime, normalized.idempotencyKey);
-      if (raced) return existingReceipt(runtime, raced, normalized, secret, operatorId, { now });
+      if (raced) return existingReceipt(runtime, raced, receiptIdentity, secret, operatorId, { now });
     } catch {
       // The fixed store error below is the only response exposed to the owner.
     }
@@ -535,7 +715,15 @@ export async function runHermesOwnerCommand(
 
   let plan;
   try {
-    plan = normalizedPlan(await callProvider({ ...normalized, evidence, destinations: HERMES_OWNER_DESTINATIONS }));
+    plan = normalizedPlan(
+      await callProvider({
+        ...normalized,
+        contextDigest,
+        evidence,
+        businessContext: normalizedBusiness,
+        destinations: HERMES_OWNER_DESTINATIONS,
+      }),
+    );
   } catch (cause) {
     const error = cause instanceof HermesOwnerCommandError ? cause : new HermesOwnerCommandError("hermes_unavailable", { status: 503, cause });
     const completedAt = isoTimestamp(typeof now === "function" ? now() : now);
@@ -544,6 +732,8 @@ export async function runHermesOwnerCommand(
         secret,
         recordedAt: completedAt,
         failureCode: error.code,
+        locale: normalized.locale,
+        contextDigest,
       });
     } catch (storeCause) {
       let raced;
@@ -570,6 +760,8 @@ export async function runHermesOwnerCommand(
       secret,
       recordedAt: completedAt,
       plan,
+      locale: normalized.locale,
+      contextDigest,
     });
     return safeReceiptOrUnavailable(document, secret);
   } catch (cause) {

@@ -80,12 +80,28 @@ function safePlan() {
   };
 }
 
-function storedReceipt(input, { status = "requested", failureCode = null, startedAt = STARTED_AT, plan = null, envelope = null } = {}) {
+function safeBusinessContext(overrides = {}) {
+  return {
+    generated_at: "2026-08-28T11:59:00.000Z",
+    authoritative_state: { status: "available", source: "payload_postgres", authoritative: true },
+    counts: { leads: 12, pipeline: 5, tasks: 9, listings: 144 },
+    providers: [
+      { id: "google", status: "connected", scopes: ["gmail.send", "calendar.events"], last_verified_at: "2026-08-28T11:00:00.000Z" },
+      { id: "openrouter", status: "connected", scopes: ["chat.completions"], last_verified_at: "2026-08-28T11:30:00.000Z" },
+    ],
+    ...overrides,
+  };
+}
+
+function storedReceipt(
+  input,
+  { status = "requested", failureCode = null, startedAt = STARTED_AT, plan = null, envelope = null, contextDigest = "sha256:none" } = {},
+) {
   return {
     idempotency_key: input.idempotencyKey,
     operator_id: operator.id,
     status,
-    command_digest: `sha256:${cryptoDigest(input.command)}`,
+    command_digest: `sha256:${cryptoDigest(JSON.stringify({ command: input.command, locale: input.locale || "en", contextDigest }))}`,
     model: "injected",
     evidence_refs: [],
     started_at: startedAt,
@@ -97,7 +113,7 @@ function storedReceipt(input, { status = "requested", failureCode = null, starte
         {
           subjectType: "hermes_owner_command",
           subjectId: input.idempotencyKey,
-          payload: { command: input.command, evidence: [], plan },
+          payload: { command: input.command, evidence: [], plan, locale: input.locale || "en", context_digest: contextDigest },
         },
         { secret: SECRET, secretName: "MS_REALTY_PROVIDER_TOKEN_KEY", storedAt: startedAt },
       ),
@@ -417,4 +433,255 @@ test("OpenRouter owner-command planning uses the provisioned hosted endpoint", a
   assert.equal(result.status, "planned");
   assert.equal(calledUrl, "https://openrouter.ai/api/v1/chat/completions");
   assert.equal(result.model, "openrouter/test-model");
+});
+
+test("Hermes owner command passes privacy-safe business context to the provider and binds it into the receipt", async () => {
+  const payload = fakePayload();
+  const timestamps = [STARTED_AT, COMPLETED_AT];
+  const context = safeBusinessContext();
+  let providerInput = null;
+
+  const result = await runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-context" }), {
+    operator,
+    payload,
+    secret: SECRET,
+    provider: async (input) => {
+      providerInput = input;
+      return safePlan();
+    },
+    businessContext: context,
+    requireBusinessContext: true,
+    now: () => timestamps.shift() || COMPLETED_AT,
+  });
+
+  assert.equal(result.status, "planned");
+  assert.deepEqual(providerInput.businessContext, {
+    generated_at: context.generated_at,
+    authoritative_state: context.authoritative_state,
+    counts: context.counts,
+    providers: [
+      { id: "google", status: "connected", scopes: ["calendar.events", "gmail.send"], last_verified_at: "2026-08-28T11:00:00.000Z" },
+      { id: "openrouter", status: "connected", scopes: ["chat.completions"], last_verified_at: "2026-08-28T11:30:00.000Z" },
+    ],
+  });
+  assert.equal(providerInput.contextDigest.startsWith("sha256:"), true);
+  assert.doesNotMatch(JSON.stringify(providerInput.businessContext), /office@|\\+359|peycheff/i);
+  const opened = openPrivateContactEnvelope(payload.docs[0].receipt_envelope, {
+    secret: SECRET,
+    secretName: "MS_REALTY_PROVIDER_TOKEN_KEY",
+  });
+  assert.equal(opened.payload.locale, "en");
+  assert.equal(opened.payload.context_digest, providerInput.contextDigest);
+});
+
+test("Hermes owner command fails before the model when authoritative business context is unavailable", async () => {
+  const payload = fakePayload();
+  let providerCalls = 0;
+
+  await assert.rejects(
+    runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-no-context" }), {
+      operator,
+      payload,
+      secret: SECRET,
+      provider: async () => {
+        providerCalls += 1;
+        return safePlan();
+      },
+      requireBusinessContext: true,
+    }),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "hermes_context_unavailable" && error.status === 503,
+  );
+  assert.equal(providerCalls, 0);
+  assert.equal(payload.docs.length, 0);
+
+  await assert.rejects(
+    runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-bad-context" }), {
+      operator,
+      payload: fakePayload(),
+      secret: SECRET,
+      provider: async () => safePlan(),
+      businessContext: safeBusinessContext({
+        authoritative_state: { status: "unavailable", source: "payload_postgres", authoritative: false, reason_key: "runtime_unavailable" },
+      }),
+      requireBusinessContext: true,
+    }),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "hermes_context_unavailable" && error.status === 503,
+  );
+});
+
+test("malformed business-context text and timestamps fail as hermes_context_unavailable", async () => {
+  await assert.rejects(
+    runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-bad-context-text" }), {
+      operator,
+      payload: fakePayload(),
+      secret: SECRET,
+      provider: async () => safePlan(),
+      businessContext: safeBusinessContext({
+        authoritative_state: { status: "", source: "payload_postgres", authoritative: true },
+      }),
+      requireBusinessContext: true,
+    }),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "hermes_context_unavailable" && error.status === 503,
+  );
+
+  await assert.rejects(
+    runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-bad-context-time" }), {
+      operator,
+      payload: fakePayload(),
+      secret: SECRET,
+      provider: async () => safePlan(),
+      businessContext: safeBusinessContext({
+        providers: [{ id: "google", status: "connected", scopes: ["gmail.send"], last_verified_at: "not-a-date" }],
+      }),
+      requireBusinessContext: true,
+    }),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "hermes_context_unavailable" && error.status === 503,
+  );
+});
+
+test("OpenRouter owner-command planning rejects raw contact data before provider execution", async () => {
+  let providerCalls = 0;
+  await assert.rejects(
+    runHermesOwnerCommand(
+      command({
+        idempotencyKey: "hermes-owner-pii",
+        command: "Email peycheff.com@gmail.com and call +359 888 123 456 about the lead.",
+      }),
+      {
+        operator,
+        payload: fakePayload(),
+        secret: SECRET,
+        env: {
+          HERMES_PROVIDER_MODE: "openrouter",
+          HERMES_API_KEY: "openrouter-test-key",
+          HERMES_MODEL: "openrouter/test-model",
+        },
+        provider: async () => {
+          providerCalls += 1;
+          return safePlan();
+        },
+        providerMetadata: { mode: "openrouter" },
+      },
+    ),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "hermes_command_contains_sensitive_data" && error.status === 400,
+  );
+  assert.equal(providerCalls, 0);
+});
+
+test("OpenRouter owner-command planning does not misclassify bare listing references as phone numbers", async () => {
+  let providerCalls = 0;
+  const result = await runHermesOwnerCommand(
+    command({
+      idempotencyKey: "hermes-owner-listing-ref",
+      command: "Prepare a review plan for listing reference 12345678 and its translation queue.",
+    }),
+    {
+      operator,
+      payload: fakePayload(),
+      secret: SECRET,
+      provider: async () => {
+        providerCalls += 1;
+        return safePlan();
+      },
+      providerMetadata: { mode: "openrouter" },
+      businessContext: safeBusinessContext(),
+      requireBusinessContext: true,
+    },
+  );
+  assert.equal(result.status, "planned");
+  assert.equal(providerCalls, 1);
+});
+
+test("Hermes owner command idempotency conflicts when locale or business context changes", async () => {
+  const payload = fakePayload();
+  const timestamps = [STARTED_AT, COMPLETED_AT];
+  const input = command({ idempotencyKey: "hermes-owner-context-conflict" });
+  const context = safeBusinessContext();
+
+  await runHermesOwnerCommand(input, {
+    operator,
+    payload,
+    secret: SECRET,
+    provider: async () => safePlan(),
+    businessContext: context,
+    requireBusinessContext: true,
+    now: () => timestamps.shift() || COMPLETED_AT,
+  });
+
+  await assert.rejects(
+    runHermesOwnerCommand({ ...input, locale: "bg" }, {
+      operator,
+      payload,
+      secret: SECRET,
+      provider: async () => safePlan(),
+      businessContext: context,
+      requireBusinessContext: true,
+      now: () => COMPLETED_AT,
+    }),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "idempotency_conflict" && error.status === 409,
+  );
+
+  await assert.rejects(
+    runHermesOwnerCommand(input, {
+      operator,
+      payload,
+      secret: SECRET,
+      provider: async () => safePlan(),
+      businessContext: safeBusinessContext({ counts: { leads: 13, pipeline: 5, tasks: 9, listings: 144 } }),
+      requireBusinessContext: true,
+      now: () => COMPLETED_AT,
+    }),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "idempotency_conflict" && error.status === 409,
+  );
+});
+
+test("OpenRouter owner-command planning maps provider status and transport failures to typed safe errors", async () => {
+  const cases = [
+    { idempotencyKey: "hermes-owner-401", fetchImpl: async () => new Response("nope", { status: 401 }), code: "hermes_provider_unauthorized" },
+    { idempotencyKey: "hermes-owner-402", fetchImpl: async () => new Response("nope", { status: 402 }), code: "hermes_provider_payment_required" },
+    { idempotencyKey: "hermes-owner-429", fetchImpl: async () => new Response("nope", { status: 429 }), code: "hermes_provider_rate_limited" },
+    { idempotencyKey: "hermes-owner-503", fetchImpl: async () => new Response("nope", { status: 503 }), code: "hermes_provider_service_unavailable" },
+    {
+      idempotencyKey: "hermes-owner-timeout",
+      fetchImpl: async () => {
+        const error = new Error("request timed out");
+        error.name = "TimeoutError";
+        throw error;
+      },
+      code: "hermes_provider_timeout",
+    },
+    {
+      idempotencyKey: "hermes-owner-network",
+      fetchImpl: async () => {
+        const error = new Error("fetch failed");
+        error.code = "ENOTFOUND";
+        throw error;
+      },
+      code: "hermes_provider_network",
+    },
+  ];
+
+  for (const entry of cases) {
+    const payload = fakePayload();
+    const timestamps = [STARTED_AT, COMPLETED_AT];
+    await assert.rejects(
+      runHermesOwnerCommand(command({ idempotencyKey: entry.idempotencyKey }), {
+        operator,
+        payload,
+        secret: SECRET,
+        env: {
+          HERMES_PROVIDER_MODE: "openrouter",
+          HERMES_API_KEY: "openrouter-test-key",
+          HERMES_MODEL: "openrouter/test-model",
+        },
+        fetchImpl: entry.fetchImpl,
+        businessContext: safeBusinessContext(),
+        requireBusinessContext: true,
+        now: () => timestamps.shift() || COMPLETED_AT,
+      }),
+      (error) => error instanceof HermesOwnerCommandError && error.code === entry.code && error.status === 503,
+    );
+    assert.equal(payload.docs[0].status, "failed");
+    assert.equal(payload.docs[0].failure_code, entry.code);
+  }
 });
