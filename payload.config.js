@@ -15,6 +15,7 @@ import { HERMES_OWNER_RECEIPT_COLLECTION } from "./production/lib/hermes-owner-c
 import { PROVIDER_WEBHOOK_EVENT_COLLECTION } from "./production/lib/provider-webhooks.mjs";
 import { VIEWING_COLLECTION } from "./production/lib/viewing-durable-store.mjs";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
+import { WORKSPACE_SETTINGS_COLLECTION } from "./production/lib/workspace-settings.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 import { payloadCmsImportContextEnabled } from "./production/lib/payload-cms-import.mjs";
 import {
@@ -329,6 +330,11 @@ const hermesOwnerReceiptCollectionWithAccess = {
   access: { ...serverOwnedCollectionAccess, read: () => false },
 };
 
+const workspaceSettingsCollectionWithAccess = {
+  ...WORKSPACE_SETTINGS_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
+};
+
 // Request-time lead side effects share the lead transaction. They remain
 // append-only, server-owned event records; brokers can inspect their
 // privacy-safe payloads but cannot forge or rewrite them.
@@ -387,6 +393,7 @@ export default buildConfig({
     providerWebhookEventCollectionWithAccess,
     providerDeliveryReceiptCollectionWithAccess,
     hermesOwnerReceiptCollectionWithAccess,
+    workspaceSettingsCollectionWithAccess,
     VIEWING_COLLECTION,
     LEAD_OPERATION_COLLECTION,
     ...durableLeadSideEffectCollections,

@@ -35,6 +35,7 @@ export const DEFAULT_BROKER_LEAD_GROUPS = Object.freeze({
   landlord: Object.freeze(["landlord"]),
 });
 export const MAX_WORKSPACE_SETTINGS_REVISIONS = 200;
+export const WORKSPACE_SETTINGS_COLLECTION_SLUG = "workspace_settings";
 
 const MAX_OFFICES = 10;
 const MAX_DIGEST_RECIPIENTS = 10;
@@ -43,6 +44,27 @@ const MAX_FIRST_REPLY_MINUTES = 24 * 60;
 const MAX_ESCALATION_MINUTES = 7 * 24 * 60;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE = /^\+?[0-9][0-9 ()./-]{5,23}$/;
+const immutablePayloadField = {
+  access: { update: () => false },
+  admin: { readOnly: true },
+};
+
+export const WORKSPACE_SETTINGS_COLLECTION = {
+  slug: WORKSPACE_SETTINGS_COLLECTION_SLUG,
+  admin: {
+    useAsTitle: "workspace_id",
+    defaultColumns: ["workspace_id", "revision", "updated_by"],
+  },
+  fields: [
+    { name: "workspace_id", type: "text", required: true, unique: true, index: true, maxLength: 160, ...immutablePayloadField },
+    { name: "version", type: "number", required: true, defaultValue: WORKSPACE_SETTINGS_VERSION, ...immutablePayloadField },
+    { name: "revision", type: "number", required: true, defaultValue: 0, ...immutablePayloadField },
+    { name: "updated_by", type: "text", maxLength: 120, ...immutablePayloadField },
+    { name: "sections", type: "json", required: true, ...immutablePayloadField },
+    { name: "section_updates", type: "json", required: true, ...immutablePayloadField },
+    { name: "revisions", type: "json", required: true, ...immutablePayloadField },
+  ],
+};
 
 function deepFreeze(value) {
   if (value && typeof value === "object") {
@@ -173,6 +195,10 @@ function emptyDocument() {
   };
 }
 
+export function emptyWorkspaceSettingsDocument() {
+  return emptyDocument();
+}
+
 function normalizeDocument(raw) {
   const document = emptyDocument();
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return document;
@@ -206,6 +232,184 @@ export function readWorkspaceSettings(filePath = DEFAULT_WORKSPACE_SETTINGS_PATH
     // A damaged ledger must not take the workbench down; defaults apply until
     // the next successful save rewrites the document.
     return emptyDocument();
+  }
+}
+
+export class WorkspaceSettingsStoreUnavailableError extends Error {
+  constructor(message, cause = null) {
+    super(message);
+    this.name = "WorkspaceSettingsStoreUnavailableError";
+    this.code = "workspace_settings_unavailable";
+    this.status = 503;
+    if (cause) this.cause = cause;
+  }
+}
+
+export function workspaceSettingsStoreConfigured({
+  filePath = null,
+  payload = null,
+  payloadRuntimeConfigured = false,
+  workspaceId = "",
+} = {}) {
+  return Boolean(filePath || (String(workspaceId || "").trim() && (payload || payloadRuntimeConfigured)));
+}
+
+function requiredWorkspaceId(value) {
+  const workspaceId = text(value, { max: 160 });
+  if (!workspaceId) throw new WorkspaceSettingsStoreUnavailableError("Workspace settings storage is not configured on this runtime.");
+  return workspaceId;
+}
+
+function assertPayloadRuntime(payload) {
+  if (!payload || typeof payload.find !== "function" || typeof payload.create !== "function" || typeof payload.update !== "function") {
+    throw new Error("Payload runtime cannot read and write workspace settings");
+  }
+  return payload;
+}
+
+async function runtimePayload(payload) {
+  try {
+    if (payload) return assertPayloadRuntime(payload);
+    const [{ getPayload }, payloadConfigModule] = await Promise.all([import("payload"), import("../../payload.config.js")]);
+    return assertPayloadRuntime(await getPayload({ config: await payloadConfigModule.default }));
+  } catch (error) {
+    throw new WorkspaceSettingsStoreUnavailableError("Workspace settings storage is temporarily unavailable.", error);
+  }
+}
+
+async function findWorkspaceSettingsDocument(payload, workspaceId) {
+  const result = await payload.find({
+    collection: WORKSPACE_SETTINGS_COLLECTION_SLUG,
+    depth: 0,
+    overrideAccess: true,
+    pagination: false,
+    limit: 1,
+    where: { workspace_id: { equals: workspaceId } },
+  });
+  if (!Array.isArray(result?.docs)) throw new Error("Payload workspace settings query did not return documents");
+  return result.docs[0] || null;
+}
+
+function timestampValue(value) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}
+
+function documentFromPayloadRow(row) {
+  if (!row || typeof row !== "object") return emptyDocument();
+  return normalizeDocument({
+    kind: "workspace_settings",
+    version: Number.isInteger(row.version) && row.version > 0 ? row.version : WORKSPACE_SETTINGS_VERSION,
+    revision: Number.isInteger(row.revision) && row.revision >= 0 ? row.revision : 0,
+    updated_at: timestampValue(row.updatedAt || row.updated_at),
+    updated_by: typeof row.updated_by === "string" ? row.updated_by : null,
+    sections: row.sections,
+    section_updates: row.section_updates,
+    revisions: row.revisions,
+  });
+}
+
+function payloadRowFromDocument(document, workspaceId) {
+  const normalized = normalizeDocument(document);
+  return {
+    workspace_id: requiredWorkspaceId(workspaceId),
+    version: normalized.version,
+    revision: normalized.revision,
+    updated_by: normalized.updated_by,
+    sections: normalized.sections,
+    section_updates: normalized.section_updates,
+    revisions: normalized.revisions,
+  };
+}
+
+export async function readWorkspaceSettingsStore({
+  filePath = null,
+  payload = null,
+  payloadRuntimeConfigured = false,
+  workspaceId = "",
+} = {}) {
+  if (filePath) return readWorkspaceSettings(filePath);
+  if (!workspaceSettingsStoreConfigured({ filePath, payload, payloadRuntimeConfigured, workspaceId })) {
+    throw new WorkspaceSettingsStoreUnavailableError("Workspace settings storage is not configured on this runtime.");
+  }
+  const runtime = await runtimePayload(payload);
+  try {
+    const row = await findWorkspaceSettingsDocument(runtime, requiredWorkspaceId(workspaceId));
+    return documentFromPayloadRow(row);
+  } catch (error) {
+    if (error instanceof WorkspaceSettingsStoreUnavailableError) throw error;
+    throw new WorkspaceSettingsStoreUnavailableError("Workspace settings storage is temporarily unavailable.", error);
+  }
+}
+
+export async function updateWorkspaceSettingsStore({
+  filePath = null,
+  payload = null,
+  payloadRuntimeConfigured = false,
+  workspaceId = "",
+  section,
+  values,
+  actor,
+  recordedAt = new Date().toISOString(),
+  brokerIds = [],
+  adminLocales = WORKSPACE_ADMIN_LOCALES,
+} = {}) {
+  if (filePath) return updateWorkspaceSettings({ filePath, section, values, actor, recordedAt, brokerIds, adminLocales });
+  if (!workspaceSettingsStoreConfigured({ filePath, payload, payloadRuntimeConfigured, workspaceId })) {
+    throw new WorkspaceSettingsStoreUnavailableError("Workspace settings storage is not configured on this runtime.");
+  }
+  const runtime = await runtimePayload(payload);
+  const name = assertSection(section);
+  const operator = text(actor, { max: 80 });
+  if (!operator) throw settingsError("Settings changes require an attributable operator", "actor");
+  const normalized = normalizeWorkspaceSettingsSection(name, values, { brokerIds, adminLocales });
+  const scope = requiredWorkspaceId(workspaceId);
+  try {
+    const currentRow = await findWorkspaceSettingsDocument(runtime, scope);
+    const current = documentFromPayloadRow(currentRow);
+    const changes = changedFields(current.sections[name], normalized);
+    if (!changes.length && current.section_updates[name]) {
+      return { settings: current, section: name, values: normalized, changed_fields: [], revision: current.revision, idempotent: true };
+    }
+    const revision = current.revision + 1;
+    const next = {
+      ...current,
+      revision,
+      updated_at: recordedAt,
+      updated_by: operator,
+      sections: { ...current.sections, [name]: normalized },
+      section_updates: { ...current.section_updates, [name]: { updated_at: recordedAt, updated_by: operator } },
+      revisions: [
+        ...current.revisions,
+        { revision, recorded_at: recordedAt, actor: operator, section: name, changed_fields: changes },
+      ].slice(-MAX_WORKSPACE_SETTINGS_REVISIONS),
+    };
+    const saved = currentRow?.id
+      ? await runtime.update({
+          collection: WORKSPACE_SETTINGS_COLLECTION_SLUG,
+          id: currentRow.id,
+          data: payloadRowFromDocument(next, scope),
+          depth: 0,
+          overrideAccess: true,
+        })
+      : await runtime.create({
+          collection: WORKSPACE_SETTINGS_COLLECTION_SLUG,
+          data: payloadRowFromDocument(next, scope),
+          depth: 0,
+          overrideAccess: true,
+        });
+    return {
+      settings: documentFromPayloadRow(saved),
+      section: name,
+      values: normalized,
+      changed_fields: changes,
+      revision,
+      idempotent: false,
+    };
+  } catch (error) {
+    if (error instanceof WorkspaceSettingsStoreUnavailableError || error?.status === 400) throw error;
+    throw new WorkspaceSettingsStoreUnavailableError("Workspace settings storage rejected the update.", error);
   }
 }
 

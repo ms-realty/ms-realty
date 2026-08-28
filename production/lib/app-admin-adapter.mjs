@@ -55,10 +55,14 @@ import {
   DEFAULT_WORKSPACE_SETTINGS_PATH,
   applyWorkspaceDefaultBroker,
   buildWorkspaceOnboarding,
+  emptyWorkspaceSettingsDocument,
   leadSlaOptions,
   readWorkspaceSettings,
-  updateWorkspaceSettings,
+  readWorkspaceSettingsStore,
+  updateWorkspaceSettingsStore,
   workspaceSettingsView,
+  workspaceSettingsStoreConfigured,
+  WorkspaceSettingsStoreUnavailableError,
 } from "./workspace-settings.mjs";
 import { assignableBrokerProfiles, getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import {
@@ -473,7 +477,9 @@ export function appAdminConfigFromEnv(env = process.env) {
     eventDurableStore: eventDurableStoreConfigFromEnv(env),
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
-    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || DEFAULT_WORKSPACE_SETTINGS_PATH,
+    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || null,
+    workspaceSettingsWorkspaceId: env.MS_REALTY_WORKSPACE_ID || "",
+    workspaceSettingsPayloadRuntimeConfigured: Boolean(String(env.PAYLOAD_SECRET || "").trim() && String(env.DATABASE_URL || "").trim()),
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
@@ -701,16 +707,26 @@ function workspaceSecurityFor(url, config) {
   });
 }
 
-function workspaceSettingsPayload(registry, url, config, { requestedLocale = adminLocaleParam(url, config), form = null } = {}) {
+function workspaceSettingsPayload(
+  registry,
+  url,
+  config,
+  {
+    requestedLocale = adminLocaleParam(url, config),
+    form = null,
+    settings = workspaceSettingsFor(config),
+    writable = Boolean(config.workspaceSettingsPath) && !config.runtimeDataDurableOnly,
+  } = {},
+) {
   return withWorkspaceSettings(
     renderAdminWorkspaceSettingsPayload(registry, requestedLocale, {
-      settings: workspaceSettingsFor(config),
+      settings,
       operator: config.adminPrincipal,
       brokerProfiles: config.brokerProfiles || [],
       adminLocales: adminLocales(registry),
       saved: url.searchParams.get("saved"),
       form,
-      writable: Boolean(config.workspaceSettingsPath) && !config.runtimeDataDurableOnly,
+      writable,
       // B6 workspace security and data
       security: workspaceSecurityFor(url, config),
     }),
@@ -3946,25 +3962,55 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
       const registry = loadLocaleRegistry(config.localeRegistryPath);
+      const settingsStore = {
+        filePath: config.workspaceSettingsPath,
+        payload: config.workspaceSettingsPayload || config.payloadListingRuntime || null,
+        payloadRuntimeConfigured: config.workspaceSettingsPayloadRuntimeConfigured === true,
+        workspaceId: config.workspaceSettingsWorkspaceId || "",
+      };
+      const settingsStoreReady = workspaceSettingsStoreConfigured(settingsStore);
       if (request.method === "GET") {
-        const payload = workspaceSettingsPayload(registry, url, config);
-        if (url.pathname === "/admin/settings") return htmlResponse(payload);
-        return jsonResponse(200, payload);
+        if (!settingsStoreReady && config.runtimeDataDurableOnly) {
+          if (url.pathname === "/admin/settings") {
+            return htmlResponse(renderAdminRuntimeUnavailablePayload(registry, url.searchParams.get("locale") || "en", { path: url.pathname }, principal));
+          }
+          return jsonResponse(503, {
+            kind: "workspace_settings_unavailable",
+            message: "Workspace settings storage is not configured on this runtime.",
+          });
+        }
+        try {
+          const settings = settingsStoreReady ? await readWorkspaceSettingsStore(settingsStore) : emptyWorkspaceSettingsDocument();
+          const requestedLocale = url.searchParams.get("locale") || settings.sections.workspace.default_locale || "en";
+          const payload = workspaceSettingsPayload(registry, url, config, {
+            requestedLocale,
+            settings,
+            writable: settingsStoreReady,
+          });
+          if (url.pathname === "/admin/settings") return htmlResponse(payload);
+          return jsonResponse(200, payload);
+        } catch (error) {
+          if (!(error instanceof WorkspaceSettingsStoreUnavailableError)) throw error;
+          if (url.pathname === "/admin/settings") {
+            return htmlResponse(renderAdminRuntimeUnavailablePayload(registry, url.searchParams.get("locale") || "en", { path: url.pathname }, principal));
+          }
+          return jsonResponse(error.status || 503, { kind: error.code, message: error.message });
+        }
       }
       if (request.method === "POST" && url.pathname === "/api/admin/settings") {
         const formRequest = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
         const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes)) || {};
         const section = String(input.section || "").trim();
         const requestedLocale = String(input.locale || "").trim() || adminLocaleParam(url, config);
-        if (config.runtimeDataDurableOnly || !config.workspaceSettingsPath) {
+        if (!settingsStoreReady) {
           return jsonResponse(503, {
-            kind: "workspace_settings_read_only",
+            kind: "workspace_settings_unavailable",
             message: "Workspace settings storage is not configured on this runtime.",
           });
         }
         try {
-          const result = updateWorkspaceSettings({
-            filePath: config.workspaceSettingsPath,
+          const result = await updateWorkspaceSettingsStore({
+            ...settingsStore,
             section,
             values: input,
             actor: principal?.id || "admin",
@@ -4004,10 +4050,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         } catch (error) {
           const status = error.status || 400;
           if (formRequest && status === 400) {
+            const settings = await readWorkspaceSettingsStore(settingsStore).catch(() => emptyWorkspaceSettingsDocument());
             return htmlResponse(
               workspaceSettingsPayload(registry, url, config, {
                 requestedLocale,
                 form: { section, error: error.message, field: error.field || null, values: input },
+                settings,
+                writable: settingsStoreReady,
               }),
             );
           }

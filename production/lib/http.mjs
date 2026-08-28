@@ -130,9 +130,13 @@ import {
   DEFAULT_WORKSPACE_SETTINGS_PATH,
   applyWorkspaceDefaultBroker,
   buildWorkspaceOnboarding,
+  emptyWorkspaceSettingsDocument,
   leadSlaOptions,
   readWorkspaceSettings,
-  updateWorkspaceSettings,
+  readWorkspaceSettingsStore,
+  updateWorkspaceSettingsStore,
+  workspaceSettingsStoreConfigured,
+  WorkspaceSettingsStoreUnavailableError,
   workspaceSettingsView,
 } from "./workspace-settings.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
@@ -1063,6 +1067,11 @@ export function createHttpApp({
   deployableRedirectOutputPath = null,
   launchFreezePath = DEFAULT_LAUNCH_FREEZE_PATH,
   workspaceSettingsPath = null,
+  workspaceSettingsPayload = null,
+  workspaceSettingsWorkspaceId = process.env.MS_REALTY_WORKSPACE_ID,
+  workspaceSettingsPayloadRuntimeConfigured = Boolean(
+    String(process.env.PAYLOAD_SECRET || "").trim() && String(process.env.DATABASE_URL || "").trim(),
+  ),
   launchReadinessOutputPath = null,
   listingQualityReviewPath = null,
   searchSyncReportPath = null,
@@ -2141,6 +2150,14 @@ export function createHttpApp({
   const workspaceSettingsReadPath = workspaceSettingsPath || DEFAULT_WORKSPACE_SETTINGS_PATH;
   const currentWorkspaceSettings = () =>
     readThroughCached(workspaceSettingsReadPath, () => readWorkspaceSettings(workspaceSettingsReadPath));
+  const workspaceSettingsStore = {
+    filePath: workspaceSettingsPath,
+    payload: workspaceSettingsPayload || payloadListingRuntime || null,
+    payloadRuntimeConfigured: workspaceSettingsPayloadRuntimeConfigured === true,
+    workspaceId: workspaceSettingsWorkspaceId || "",
+  };
+  const workspaceSettingsStoreReady = workspaceSettingsStoreConfigured(workspaceSettingsStore);
+  const currentDurableWorkspaceSettings = () => readWorkspaceSettingsStore(workspaceSettingsStore);
   const withWorkspaceSettings = (page) =>
     page && typeof page === "object" && !page.workspace_settings
       ? { ...page, workspace_settings: workspaceSettingsView(currentWorkspaceSettings()) }
@@ -3877,16 +3894,16 @@ export function createHttpApp({
     }
     if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
       const adminBrokerProfiles = await currentBrokerProfiles(payloadSession);
-      const settingsPage = (requestedLocale, form = null) =>
+      const settingsPage = (requestedLocale, settings, form = null, writable = workspaceSettingsStoreReady) =>
         withWorkspaceSettings(
           renderAdminWorkspaceSettingsPayload(activeRegistry, requestedLocale, {
-            settings: currentWorkspaceSettings(),
+            settings,
             operator: principal,
             brokerProfiles: adminBrokerProfiles,
             adminLocales: adminLocales(activeRegistry),
             saved: url.searchParams.get("saved"),
             form,
-            writable: Boolean(workspaceSettingsPath) && !runtimeDataDurableOnly,
+            writable,
             // B6 workspace security and data
             security: workspaceSecurityView(
               principal,
@@ -3897,11 +3914,52 @@ export function createHttpApp({
           }),
         );
       if (request.method === "GET") {
-        const payload = settingsPage(adminLocaleParam(url));
-        if (url.pathname === "/admin/settings" || wantsHtml(request, url)) {
-          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        if (!workspaceSettingsStoreReady && runtimeDataDurableOnly) {
+          if (url.pathname === "/admin/settings" || wantsHtml(request, url)) {
+            return adminResponse(
+              503,
+              adminHtml(
+                renderAdminRuntimeUnavailablePayload(
+                  activeRegistry,
+                  url.searchParams.get("locale") || adminLocaleParam(url),
+                  { path: url.pathname },
+                  principal,
+                ),
+              ),
+              "text/html; charset=utf-8",
+            );
+          }
+          return adminJson(503, {
+            kind: "workspace_settings_unavailable",
+            message: "Workspace settings storage is not configured on this runtime.",
+          });
         }
-        return adminJson(200, payload);
+        try {
+          const settings = workspaceSettingsStoreReady ? await currentDurableWorkspaceSettings() : emptyWorkspaceSettingsDocument();
+          const requestedLocale = String(url.searchParams.get("locale") || settings.sections.workspace.default_locale || "en");
+          const payload = settingsPage(requestedLocale, settings, null, workspaceSettingsStoreReady);
+          if (url.pathname === "/admin/settings" || wantsHtml(request, url)) {
+            return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+          }
+          return adminJson(200, payload);
+        } catch (error) {
+          if (!(error instanceof WorkspaceSettingsStoreUnavailableError)) throw error;
+          if (url.pathname === "/admin/settings" || wantsHtml(request, url)) {
+            return adminResponse(
+              error.status || 503,
+              adminHtml(
+                renderAdminRuntimeUnavailablePayload(
+                  activeRegistry,
+                  url.searchParams.get("locale") || adminLocaleParam(url),
+                  { path: url.pathname },
+                  principal,
+                ),
+              ),
+              "text/html; charset=utf-8",
+            );
+          }
+          return adminJson(error.status || 503, { kind: error.code, message: error.message });
+        }
       }
       if (request.method === "POST" && url.pathname === "/api/admin/settings") {
         const formRequest = String(request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes(
@@ -3915,15 +3973,15 @@ export function createHttpApp({
         }
         const section = String(input.section || "").trim();
         const requestedLocale = String(input.locale || "").trim() || adminLocaleParam(url);
-        if (runtimeDataDurableOnly || !workspaceSettingsPath) {
+        if (!workspaceSettingsStoreReady) {
           return adminJson(503, {
-            kind: "workspace_settings_read_only",
+            kind: "workspace_settings_unavailable",
             message: "Workspace settings storage is not configured on this runtime.",
           });
         }
         try {
-          const result = updateWorkspaceSettings({
-            filePath: workspaceSettingsPath,
+          const result = await updateWorkspaceSettingsStore({
+            ...workspaceSettingsStore,
             section,
             values: input,
             actor: principal?.id || "admin",
@@ -3959,7 +4017,11 @@ export function createHttpApp({
         } catch (error) {
           const status = error.status || 400;
           if (formRequest && status === 400) {
-            const payload = settingsPage(requestedLocale, { section, error: error.message, field: error.field || null, values: input });
+            const payload = settingsPage(
+              requestedLocale,
+              await currentDurableWorkspaceSettings().catch(() => emptyWorkspaceSettingsDocument()),
+              { section, error: error.message, field: error.field || null, values: input },
+            );
             return adminResponse(400, adminHtml(payload), "text/html; charset=utf-8");
           }
           return adminJson(status, { kind: error.code || "bad_request", message: error.message, field: error.field || null });
@@ -5915,7 +5977,10 @@ export function createHttpApp({
         const leadId = String(input.id || `broker-lead-${randomUUID()}`).trim();
         const existing = currentLeads().find((row) => row.lead_id === leadId);
         if (existing) return adminJson(200, { lead: existing, idempotent: true });
-        const workspaceSettings = currentWorkspaceSettings();
+        const workspaceSettings =
+          workspaceSettingsStoreReady || runtimeDataDurableOnly
+            ? await currentDurableWorkspaceSettings()
+            : emptyWorkspaceSettingsDocument();
         const lead = applyWorkspaceDefaultBroker(
           createCrmInboxItem(activeRegistry, input, {
             assignedId: leadId,
@@ -6565,6 +6630,9 @@ export function createHttpApp({
         });
         return adminJson(201, tour);
       } catch (error) {
+        if (error instanceof WorkspaceSettingsStoreUnavailableError) {
+          return adminJson(error.status || 503, { kind: error.code, message: error.message });
+        }
         return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
@@ -6573,7 +6641,10 @@ export function createHttpApp({
       try {
         const input = parseBody(request);
         const context = await currentPublicContext();
-        const workspaceSettings = currentWorkspaceSettings();
+        const workspaceSettings =
+          workspaceSettingsStoreReady || runtimeDataDurableOnly
+            ? await currentDurableWorkspaceSettings()
+            : emptyWorkspaceSettingsDocument();
         const lead = applyWorkspaceDefaultBroker(
           submitRuntimeLead(context.registry, context.seed, input),
           workspaceSettings,
@@ -6634,6 +6705,9 @@ export function createHttpApp({
         }
         return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline });
       } catch (error) {
+        if (error instanceof WorkspaceSettingsStoreUnavailableError) {
+          return privateJson(error.status || 503, { kind: error.code, message: "Workspace settings are temporarily unavailable" });
+        }
         if (error instanceof LeadStoreUnavailableError) {
           return privateJson(503, { kind: error.code, message: "Lead storage is temporarily unavailable" });
         }

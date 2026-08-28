@@ -14,9 +14,12 @@ const publicSearchViewRepairMigration = fromRoot("migrations", "20260820_190500_
 const sourceStatedSearchViewMigration = fromRoot("migrations", "20260826_220000_source_stated_search_view.ts");
 const adminPasswordChangeMigration = fromRoot("migrations", "20260827_120000_admin_password_change_required.ts");
 const durableLeadSideEffectsMigration = fromRoot("migrations", "20260813_120000_durable_lead_side_effects.ts");
+const workspaceSettingsMigration = fromRoot("migrations", "20260828_130000_workspace_settings.ts");
 
 function tableSql(source, name) {
-  const start = source.indexOf(`CREATE TABLE "${name}" (`);
+  const start = [`CREATE TABLE "${name}" (`, `CREATE TABLE IF NOT EXISTS "${name}" (`]
+    .map((marker) => source.indexOf(marker))
+    .find((index) => index !== -1) ?? -1;
   const end = source.indexOf("\n    );", start);
   assert.notEqual(start, -1, `missing ${name} table`);
   assert.notEqual(end, -1, `missing end of ${name} table`);
@@ -42,6 +45,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     "20260813_120000_durable_funnel_events.ts",
     "20260813_120000_durable_lead_side_effects.ts",
     "20260827_120000_admin_password_change_required.ts",
+    "20260828_130000_workspace_settings.ts",
   ]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
@@ -53,6 +57,23 @@ test("Payload migration boot configuration and generated constraints stay runnab
   assert.match(adminPasswordChange, /ALTER TABLE "admins"/);
   assert.match(adminPasswordChange, /ADD COLUMN IF NOT EXISTS "password_change_required" boolean DEFAULT false NOT NULL/);
   assert.match(adminPasswordChange, /export async function down[\s\S]*void db/);
+
+  const workspaceSettings = fs.readFileSync(workspaceSettingsMigration, "utf8");
+  const workspaceSettingsTable = tableSql(workspaceSettings, "workspace_settings");
+  for (const column of [
+    '"workspace_id" varchar NOT NULL',
+    '"version" numeric DEFAULT 1 NOT NULL',
+    '"revision" numeric DEFAULT 0 NOT NULL',
+    '"sections" jsonb NOT NULL',
+    '"section_updates" jsonb NOT NULL',
+    '"revisions" jsonb NOT NULL',
+  ]) {
+    assert.ok(workspaceSettingsTable.includes(column), `workspace_settings.${column} must be required`);
+  }
+  assert.match(workspaceSettings, /CREATE UNIQUE INDEX IF NOT EXISTS "workspace_settings_workspace_id_idx"/);
+  assert.match(workspaceSettings, /payload_locked_documents_rels_workspace_settings_id_idx/);
+  assert.match(workspaceSettings, /payload_locked_documents_rels_workspace_settings_fk/);
+  assert.match(workspaceSettings, /export async function down[\s\S]*void db/);
 
   const migration = fs.readFileSync(propertySearchMigration, "utf8");
   const requiredColumns = {

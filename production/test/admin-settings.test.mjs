@@ -9,6 +9,7 @@ import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 import {
   DEFAULT_WORKSPACE_SETTINGS_PATH,
   WORKSPACE_SETTINGS_DEFAULTS,
+  WORKSPACE_SETTINGS_COLLECTION_SLUG,
   applyWorkspaceDefaultBroker,
   buildWorkspaceOnboarding,
   leadSlaOptions,
@@ -57,6 +58,71 @@ function paths(overrides = {}) {
     receivedAt: "2026-07-19T09:00:00.000Z",
     reviewedAt: "2026-07-19T10:00:00.000Z",
     ...overrides,
+  };
+}
+
+function createWorkspaceSettingsPayloadStore(initial = null, { workspaceId = "workspace-sandanski" } = {}) {
+  let row = initial
+    ? {
+        id: 1,
+        workspace_id: workspaceId,
+        version: initial.version,
+        revision: initial.revision,
+        updated_by: initial.updated_by,
+        sections: structuredClone(initial.sections),
+        section_updates: structuredClone(initial.section_updates),
+        revisions: structuredClone(initial.revisions),
+        updatedAt: initial.updated_at,
+        createdAt: initial.updated_at || "2026-07-19T09:00:00.000Z",
+      }
+    : null;
+  const calls = [];
+  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const current = () => (row ? clone(row) : null);
+  return {
+    calls,
+    payload: {
+      async find(input) {
+        calls.push({ method: "find", input: clone(input) });
+        assert.equal(input.collection, WORKSPACE_SETTINGS_COLLECTION_SLUG);
+        const scope =
+          input.where?.workspace_id?.equals || input.where?.and?.find((clause) => clause.workspace_id)?.workspace_id?.equals;
+        return { docs: row && scope === row.workspace_id ? [current()] : [] };
+      },
+      async create(input) {
+        calls.push({ method: "create", input: clone(input) });
+        assert.equal(input.collection, WORKSPACE_SETTINGS_COLLECTION_SLUG);
+        const updatedAt =
+          Object.values(input.data.section_updates || {})
+            .map((entry) => entry?.updated_at)
+            .filter(Boolean)
+            .at(-1) || "2026-07-19T10:00:00.000Z";
+        row = {
+          id: 1,
+          ...clone(input.data),
+          updatedAt,
+          createdAt: updatedAt,
+        };
+        return current();
+      },
+      async update(input) {
+        calls.push({ method: "update", input: clone(input) });
+        assert.equal(input.collection, WORKSPACE_SETTINGS_COLLECTION_SLUG);
+        assert.equal(input.id, row?.id);
+        const updatedAt =
+          Object.values(input.data.section_updates || {})
+            .map((entry) => entry?.updated_at)
+            .filter(Boolean)
+            .at(-1) || row?.updatedAt || "2026-07-19T10:00:00.000Z";
+        row = {
+          id: row?.id || 1,
+          ...clone(input.data),
+          updatedAt,
+          createdAt: row?.createdAt || updatedAt,
+        };
+        return current();
+      },
+    },
   };
 }
 
@@ -360,19 +426,17 @@ test("settings validation reports the field for JSON and re-renders the form wit
   });
 });
 
-test("settings stay read-only without a configured ledger and for operators without the capability", async () => {
+test("settings reject missing durable authority explicitly in durable-only runtimes and stay read-only for operators without the capability", async () => {
   await withAdmin(async () => {
-    const app = createHttpApp({ ...paths(), workspaceSettingsPath: null });
+    const app = createHttpApp({ ...paths(), runtimeDataDurableOnly: true, workspaceSettingsPath: null });
     const page = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
-    assert.equal(page.status, 200);
-    // The unconfigured store is one page-level banner now, not a note under
-    // every section; the per-section note is reserved for the role case.
-    assert.match(page.body, /data-settings-store-missing="true"/);
-    assert.equal([...page.body.matchAll(/Settings storage is not configured on this runtime\./g)].length, 1);
-    assert.match(page.body, /data-settings-disabled="true"/);
+    assert.equal(page.status, 503);
+    assert.match(page.body, /data-react-admin-ui="runtime-unavailable"/);
+    assert.match(page.body, /Data connection required/);
     const blocked = await dispatchHttp(app, { method: "POST", url: "/api/admin/settings", headers: HEADERS, body: { section: "agency", name: "X" } });
     assert.equal(blocked.status, 503);
-    assert.equal(blocked.body.kind, "workspace_settings_read_only");
+    assert.equal(blocked.body.kind, "workspace_settings_unavailable");
+
   });
 
   await withAdmin(
@@ -396,6 +460,64 @@ test("settings stay read-only without a configured ledger and for operators with
     },
     { roles: "broker", actor: "broker_ivan" },
   );
+});
+
+test("Payload-backed workspace settings round-trip and drive lead routing without a file ledger", async () => {
+  await withAdmin(async () => {
+    const store = createWorkspaceSettingsPayloadStore();
+    const config = {
+      ...paths({ workspaceSettingsPath: null }),
+      workspaceSettingsPayload: store.payload,
+      workspaceSettingsPayloadRuntimeConfigured: true,
+      workspaceSettingsWorkspaceId: "workspace-sandanski",
+    };
+    const app = createHttpApp(config);
+
+    const initial = await dispatchHttp(app, { url: "/api/admin/settings", headers: HEADERS });
+    assert.equal(initial.status, 200);
+    assert.equal(initial.body.kind, "admin_workspace_settings");
+    assert.equal(initial.body.settings_writable, true);
+    assert.equal(initial.body.workspace_settings.revision, 0);
+
+    const saved = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/settings",
+      headers: HEADERS,
+      body: {
+        section: "leads",
+        first_reply_target_minutes: 25,
+        manager_escalation_minutes: 95,
+        default_brokers: { buyer: "broker_ru" },
+      },
+    });
+    assert.equal(saved.status, 200);
+    assert.equal(saved.body.revision, 1);
+    assert.equal(saved.body.settings.sections.leads.first_reply_target_minutes, 25);
+    assert.equal(store.calls.filter((call) => call.method === "create").length, 1);
+
+    const lead = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/leads",
+      headers: HEADERS,
+      body: {
+        id: "payload-workspace-settings-lead",
+        source: "broker_whatsapp",
+        leadType: "buyer",
+        language: "en",
+        contact_preference: "whatsapp",
+        contact: { name: "Payload Routed Buyer", phone: "+359880000222" },
+        requirements: { locations: ["Sandanski"], property_types: ["apartment"], budget_max_eur: 150000, timeline: "This year" },
+        message: "Please route me with payload settings.",
+        humanConfirmed: true,
+      },
+    });
+    assert.equal(lead.status, 201);
+
+    const rows = readLeadLedger(config.leadLedgerPath);
+    assert.equal(rows[0].assigned_broker, "broker_ru");
+    assert.equal(rows[0].sla_due_at, "2026-07-19T09:25:00.000Z");
+    assert.equal(rows[0].manager_escalation_due_at, "2026-07-19T10:35:00.000Z");
+  });
 });
 
 test("workspace settings drive the reply clock, the default broker and the workbench defaults", async () => {

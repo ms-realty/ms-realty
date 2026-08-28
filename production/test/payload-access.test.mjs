@@ -115,6 +115,22 @@ test("reference data (locales) is admin-write, all-read", () => {
   assert.equal(referenceCollectionAccess.read(req(translator)), true);
 });
 
+test("workspace settings collection is server-owned for writes and workspace-scoped for reads", async () => {
+  const { default: config } = await import(`../../payload.config.js?workspace-settings-access=${Date.now()}`);
+  const resolved = await config;
+  const collection = resolved.collections.find((item) => item.slug === "workspace_settings");
+  assert.ok(collection);
+
+  assert.equal(collection.access.create(req(admin)), false);
+  assert.equal(collection.access.update(req(admin)), false);
+  assert.equal(collection.access.delete(req(admin)), false);
+  assert.equal(collection.access.read(req(admin)), true);
+  assert.deepEqual(collection.access.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });
+  assert.equal(collection.access.read(req(brokerNoScope)), false);
+  assert.equal(collection.access.read(req(editor)), false);
+  assert.equal(collection.access.read(req(undefined)), false);
+});
+
 test("cases are workspace-scoped: admin sees all, broker sees only assigned, others none", () => {
   assert.equal(caseCollectionAccess.read(req(admin)), true);
   assert.deepEqual(caseCollectionAccess.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });
