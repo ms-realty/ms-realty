@@ -113,15 +113,16 @@ test("R2 media coverage marks a valid but stale report expired", () => {
 });
 
 test("mounted R2 coverage clears the gate in both production readiness builders", async () => {
+  const freshGeneratedAt = new Date().toISOString();
   const reportPath = writeListing(
     buildR2MediaCoverageReport({
       listingPath: writeListing(expectedKeys()),
       releaseSha: RELEASE_SHA,
-      generatedAt: GENERATED_AT,
+      generatedAt: freshGeneratedAt,
     }),
   );
 
-  const httpApp = createHttpApp({ r2MediaCoverageReportPath: reportPath, reviewedAt: GENERATED_AT });
+  const httpApp = createHttpApp({ r2MediaCoverageReportPath: reportPath, reviewedAt: freshGeneratedAt });
   const httpReadiness = await dispatchHttp(httpApp, {
     url: "/api/admin/launch-readiness",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -138,7 +139,7 @@ test("mounted R2 coverage clears the gate in both production readiness builders"
     ...appAdminConfigFromEnv({
       NODE_ENV: "test",
       MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: reportPath,
-      MS_REALTY_REVIEWED_AT: GENERATED_AT,
+      MS_REALTY_REVIEWED_AT: freshGeneratedAt,
     }),
     adminPrincipal: { id: "r2-test-admin", roles: ["admin"], source: "credential_registry" },
   };

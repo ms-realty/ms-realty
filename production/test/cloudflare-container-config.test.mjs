@@ -14,6 +14,7 @@ import {
   allowsProviderWebhookMutation,
   allowsPublicLeadMutation,
   hasAdminSessionCookie,
+  isPublicAdminPath,
   isPayloadPrivatePath,
 } from "../../workers/durable-case-authority.mjs";
 
@@ -516,9 +517,24 @@ test("Cloudflare Container hides every external Payload UI, identity REST, and G
   assert.match(workerSource, /isPayloadPrivatePath\(url\.pathname\)/);
 });
 
-test("the workers.dev channel forwards the custom admin while keeping Payload internals private", () => {
-  assert.doesNotMatch(workerSource, /MS_REALTY_PREVIEW_ADMIN_KEY|previewAdminGate|isPublicAdminPath/);
+test("production workers.dev forwards the custom admin while isolated drill hosts hide it", () => {
+  assert.doesNotMatch(workerSource, /MS_REALTY_PREVIEW_ADMIN_KEY|previewAdminGate/);
+  assert.match(workerSource, /if \(preview && isPublicAdminPath\(url\.pathname\)\) return payloadPrivateResponse\(\);/);
   assert.match(workerSource, /isPayloadPrivatePath\(url\.pathname\)/);
+  for (const pathname of [
+    "/admin",
+    "/admin/login",
+    "/admin%2Flogin",
+    "/admin\\login",
+    "/api/admin",
+    "/api/admin/launch-readiness",
+    "/api%2Fadmin%2Flaunch-readiness",
+  ]) {
+    assert.equal(isPublicAdminPath(pathname), true, pathname);
+  }
+  for (const pathname of ["/", "/bg", "/api/ready", "/api/admins", "/administrator"]) {
+    assert.equal(isPublicAdminPath(pathname), false, pathname);
+  }
 });
 
 test("Cloudflare Container admits only the secret-backed durable lead probe", async () => {
