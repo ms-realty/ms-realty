@@ -89,6 +89,11 @@ test("technical Hermes and assistant setup content is collapsed without JavaScri
   assert.match(adminAdapterCss, /\.adm-assistant-connection__config-label::after/);
 });
 
+test("mobile owner pages retain their title and use a dense media review grid", () => {
+  assert.match(adminAdapterCss, /\.crm-top > div:first-child\s*\{[^}]*display:\s*grid/);
+  assert.match(adminAdapterCss, /data-react-admin-ui="listing-editor"\]\s+\.adm-media-manager\s*\{[^}]*grid-template-columns:\s*repeat\(2/);
+});
+
 test("panel header links do not override primary button contrast", () => {
   for (const css of [generatedDesignCss]) {
     assert.match(css, /\.crm-panel__hd a:not\(\.mk-btn\)/);

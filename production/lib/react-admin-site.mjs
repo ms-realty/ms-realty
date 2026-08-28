@@ -3477,7 +3477,7 @@ function TodayBriefingPanel({ page, rows }) {
     {
       title: copy.title,
       "data-today-briefing": "true",
-      "data-today-priority-count": String(Math.min(total, 7)),
+      "data-today-priority-count": String(Math.min(total, 5)),
       "data-today-priority-total": String(total),
     },
     h("p", { className: "adm-today-briefing__intro" }, copy.description),
@@ -3521,7 +3521,7 @@ function TodayBriefingPanel({ page, rows }) {
 
 function NextActionsPanel({ page, rows }) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
-  const visible = rows.slice(0, 7);
+  const visible = rows.slice(0, 5);
   return h(
     Panel,
     {
@@ -11298,6 +11298,7 @@ function HermesBody({ page }) {
   const queue = page.queue || { status: "blocked", summary: {}, rows: [] };
   const bridgeReady = queue.status === "ready";
   const tasks = Array.isArray(queue.rows) ? queue.rows : [];
+  const visibleTasks = tasks.slice(0, 5);
   const tools = Array.isArray(page.tools) ? page.tools : [];
   const runtimeTone = runtime.ready ? "success" : "brick";
   const commandForm = page.command_form || { enabled: false, idempotency_key: "", max_length: 2000 };
@@ -11439,8 +11440,12 @@ function HermesBody({ page }) {
               : tasks.length
                 ? h(
                     "ul",
-                    { className: "adm-hermes-tasks" },
-                    ...tasks.map((task) =>
+                    {
+                      className: "adm-hermes-tasks",
+                      "data-hermes-task-count": String(tasks.length),
+                      "data-hermes-task-visible": String(visibleTasks.length),
+                    },
+                    ...visibleTasks.map((task) =>
                       h(
                         "li",
                         { key: task.id, "data-hermes-task": task.id },

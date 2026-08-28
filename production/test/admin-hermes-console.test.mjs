@@ -116,6 +116,7 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.match(html, /data-hermes-runtime="blocked"/);
   assert.match(html, /<details class="adm-hermes-diagnostics" data-hermes-diagnostics="collapsed">/);
   assert.match(html, /<details class="adm-hermes-safeguards" data-hermes-safeguards="collapsed">/);
+  assert.match(html, /data-hermes-task-count="[0-9]+" data-hermes-task-visible="[0-5]"/);
   assert.match(html, /HERMES_CHAT_COMPLETIONS_URL/);
   assert.match(html, /data-hermes-recovery="true"/);
   assert.match(html, /Recover the connection/);

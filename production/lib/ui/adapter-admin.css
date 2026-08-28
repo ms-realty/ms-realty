@@ -1629,11 +1629,14 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-seo-sources a { display: inline-flex; min-height: 44px; align-items: center; }
   /* A solid top bar: the kit's backdrop-filter would otherwise become the
      containing block of the fixed navigation drawer and collapse it. */
-  .crm-top { justify-content: flex-end; gap: var(--space-2); padding-inline: var(--space-4); background: var(--surface); backdrop-filter: none; }
-  .crm-top > div:first-child { display: none; }
+  .crm-top { justify-content: flex-start; gap: var(--space-2); padding-inline: var(--space-4); background: var(--surface); backdrop-filter: none; }
+  .crm-top > div:first-child { order: 2; display: grid; flex: 1 1 auto; min-width: 0; }
+  .crm-top__title { overflow: hidden; font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
+  .crm-top__sub { display: none; }
   .crm-scroll { padding: var(--space-5); }
-  .adm-mobile-nav { display: block; margin: 0 auto 0 0; }
+  .adm-mobile-nav { order: 1; display: block; margin: 0; }
   [dir="rtl"] .adm-mobile-nav { margin: 0 0 0 auto; }
+  .crm-seg.adm-locales { order: 3; margin-inline-start: auto; }
   .adm-mobile-nav__summary {
     display: grid;
     width: 44px;
@@ -1764,6 +1767,15 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-contact-card > header { align-items: stretch; flex-direction: column; }
   .adm-workbench-shell { grid-template-columns: minmax(0, 1fr); }
   .adm-workbench-rail { position: static; }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+    padding-inline: var(--space-3);
+  }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset { padding: var(--space-2) !important; }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__header { align-items: stretch; flex-direction: column; gap: var(--space-1); }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__header .crm-pill { width: fit-content; max-width: 100%; }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-asset__preview { aspect-ratio: 4 / 3; }
   .adm-public-request { grid-template-columns: 1fr; gap: var(--space-4); padding: var(--space-4); }
   .adm-public-request__facts { grid-template-columns: 1fr; }
   .adm-public-request__outcome > summary { min-height: 44px; }
@@ -2902,5 +2914,5 @@ html[data-theme="dark"] .crm-top {
 }
 
 @media (max-width: 600px) {
-  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: minmax(0, 1fr); }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
