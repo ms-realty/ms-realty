@@ -588,6 +588,16 @@ function safeConnection(document) {
   };
 }
 
+function uniqueProviderConflict(error) {
+  const message = String(error?.message || error || "");
+  if (/duplicate key|unique constraint|already exists/i.test(message)) return true;
+  const entries = [
+    ...(Array.isArray(error?.data?.errors) ? error.data.errors : []),
+    ...(Array.isArray(error?.errors) ? error.errors : []),
+  ];
+  return entries.some((entry) => String(entry?.path || entry?.field || "").trim() === "provider");
+}
+
 async function findProvider(runtime, provider) {
   const result = await runtime.find({
     collection: "provider_connections",
@@ -674,7 +684,7 @@ export async function saveProviderConnection(
   try {
     const runtime = await runtimePayload(payload);
     const existing = await findProvider(runtime, provider);
-    const document = existing
+    let document = existing
       ? await runtime.update({
           collection: "provider_connections",
           id: existing.id,
@@ -682,12 +692,28 @@ export async function saveProviderConnection(
           depth: 0,
           overrideAccess: true,
         })
-      : await runtime.create({
+      : null;
+    if (!document) {
+      try {
+        document = await runtime.create({
           collection: "provider_connections",
           data,
           depth: 0,
           overrideAccess: true,
         });
+      } catch (error) {
+        if (!uniqueProviderConflict(error)) throw error;
+        const winner = await findProvider(runtime, provider);
+        if (!winner) throw error;
+        document = await runtime.update({
+          collection: "provider_connections",
+          id: winner.id,
+          data,
+          depth: 0,
+          overrideAccess: true,
+        });
+      }
+    }
     return safeConnection(document);
   } catch (error) {
     if (error instanceof ProviderConnectionUnavailableError) throw error;

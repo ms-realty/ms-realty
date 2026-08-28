@@ -249,6 +249,21 @@ test("a connected card dates itself in words and offers a disclosure with a mark
   assert.equal(broken.includes("Invalid Date"), false);
 });
 
+test("stored provider rows keep truthful intermediate and unavailable status", () => {
+  const config = fullConfig();
+  const cards = operatorProviderCards({
+    availability: operatorProviderAvailability(config),
+    config,
+    connections: [
+      { provider: "whatsapp", status: "connecting", account_label: "MS Realty" },
+      { provider: "google", status: "unavailable", account_label: "office@ms-realty.bg" },
+    ],
+  });
+  const byId = Object.fromEntries(cards.map((card) => [card.id, card]));
+  assert.equal(byId.whatsapp.status, "connecting");
+  assert.equal(byId.google.status, "unavailable");
+});
+
 test("a configured owner page offers exactly the two working one-click handoffs", () => {
   const config = fullConfig();
   const html = renderOperatorConnectPage({
@@ -495,6 +510,26 @@ test("disconnecting revokes at the provider and then deletes the row", async () 
   assert.equal(manual.revoked, false);
   assert.equal(manual.deleted, true);
   assert.deepEqual(cloudflare.deleted, ["cloudflare"]);
+
+  const unavailable = storeDeps({
+    readProviderCredentials: async () => {
+      const error = new Error("provider store unavailable");
+      error.code = "provider_connection_unavailable";
+      throw error;
+    },
+  });
+  await assert.rejects(
+    () =>
+      runOperatorConnectionAction({
+        intent: "disconnect",
+        provider: "google",
+        operatorId: "connect_operator",
+        config,
+        deps: unavailable.deps,
+      }),
+    /provider store unavailable/,
+  );
+  assert.deepEqual(unavailable.deleted, []);
 
   // A provider that refuses the revoke must not strand the row either.
   const failing = stubFetch({ "https://oauth2.googleapis.com/revoke": { ok: false, status: 400, body: {} } });

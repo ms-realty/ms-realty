@@ -320,3 +320,61 @@ test("credentials stay unavailable until webhook registration marks the provider
   );
   assert.equal(await readProviderCredentials("viber", { credentialSecret: SECRET, payload }), null);
 });
+
+test("provider save retries a concurrent unique-provider race by updating the winning row", async () => {
+  const docs = [];
+  let createCalls = 0;
+  const payload = {
+    async find(query) {
+      const provider = query.where?.provider?.equals;
+      return { docs: provider ? docs.filter((doc) => doc.provider === provider) : [...docs] };
+    },
+    async create({ data }) {
+      createCalls += 1;
+      if (createCalls === 1) {
+        docs.push({
+          id: 1,
+          provider: data.provider,
+          status: "connected",
+          connected_by: "other-owner",
+          account_label: "stale@example.com",
+          external_account_id: "google-user-stale",
+          scopes: [],
+          metadata: {},
+          credential_envelope: data.credential_envelope,
+          last_verified_at: "2026-08-12T10:00:00.000Z",
+        });
+        throw new Error("duplicate key value violates unique constraint");
+      }
+      throw new Error("saveProviderConnection should not retry create after the conflict");
+    },
+    async update({ id, data }) {
+      const index = docs.findIndex((doc) => doc.id === id);
+      docs[index] = { ...docs[index], ...data };
+      return docs[index];
+    },
+  };
+  const saved = await saveProviderConnection(
+    {
+      provider: "google",
+      status: "connected",
+      accountLabel: "owner@example.com",
+      externalAccountId: "google-user-1",
+      scopes: GOOGLE_SCOPES,
+      metadata: { email: "owner@example.com" },
+      credentials: { refresh_token: "google-refresh-token-plain" },
+    },
+    {
+      connectedBy: "payload-42",
+      credentialSecret: SECRET,
+      payload,
+      verifiedAt: "2026-08-13T12:00:00.000Z",
+    },
+  );
+  assert.equal(createCalls, 1);
+  assert.equal(docs.length, 1);
+  assert.equal(saved.account_label, "owner@example.com");
+  assert.equal(saved.external_account_id, "google-user-1");
+  const credentials = await readProviderCredentials("google", { credentialSecret: SECRET, payload });
+  assert.equal(credentials.refresh_token, "google-refresh-token-plain");
+});

@@ -15,6 +15,7 @@ import { OWNER_CONNECTABLE_PROVIDERS, OPERATOR_PROVIDERS } from "../lib/operator
 import { OPERATOR_AGENT_SECRET_ENV, mintOperatorAgentToken } from "../lib/operator-agent-access.mjs";
 import { OWNER_OPERATOR_BROWSER_OPERATIONS } from "../lib/owner-operator-catalog.mjs";
 import { payloadAdminPrincipal } from "../lib/payload-admin-auth.mjs";
+import { saveProviderConnection } from "../lib/provider-connections.mjs";
 
 const ORIGIN = "https://ms-realty.example";
 const SECRET = "operator-routes-secret-that-is-longer-than-thirty-two-characters";
@@ -198,20 +199,19 @@ test("a signed-in Payload owner gets the real Google and WhatsApp one-click acti
 
 test("disconnect revokes, deletes, redirects and writes one audit row", async (t) => {
   const auditLogPath = auditFile(t);
-  const payload = providerPayload([
+  const payload = providerPayload();
+  await saveProviderConnection(
     {
-      id: "provider-neon",
       provider: "neon",
       status: "connected",
-      connected_by: "payload-1",
-      account_label: "ms-realty",
-      external_account_id: "neon-1",
+      accountLabel: "ms-realty",
+      externalAccountId: "neon-1",
       scopes: [],
       metadata: {},
-      credential_envelope: { ciphertext: "ENCRYPTED" },
-      last_verified_at: "2026-08-24T12:00:00.000Z",
+      credentials: { api_key: "neon-provider-test-key" },
     },
-  ]);
+    { connectedBy: "payload-1", credentialSecret: SECRET, payload, verifiedAt: "2026-08-24T12:00:00.000Z" },
+  );
   const app = createHttpApp({
     reviewedAt: "2026-08-24T12:00:00.000Z",
     auditLogPath,
@@ -248,6 +248,46 @@ test("disconnect revokes, deletes, redirects and writes one audit row", async (t
   assert.equal(rows[0].metadata.deleted, true);
   // No credential material anywhere in the trail.
   assert.equal(JSON.stringify(rows).includes("ENCRYPTED"), false);
+});
+
+test("disconnect preserves the row when encrypted credentials cannot be read", async (t) => {
+  const payload = providerPayload([
+    {
+      id: "provider-google",
+      provider: "google",
+      status: "connected",
+      connected_by: "payload-1",
+      account_label: "owner@example.com",
+      external_account_id: "google-1",
+      scopes: [],
+      metadata: {},
+      credential_envelope: { ciphertext: "invalid-envelope" },
+      last_verified_at: "2026-08-24T12:00:00.000Z",
+    },
+  ]);
+  const response = await dispatchHttp(
+    createHttpApp({
+      reviewedAt: "2026-08-24T12:00:00.000Z",
+      auditLogPath: auditFile(t),
+      payloadAdminAuth: payloadAdminAuth(),
+      providerConnection: PROVIDER_CONFIG,
+      providerConnectionPayload: payload,
+    }),
+    {
+      method: "POST",
+      url: "/api/admin/connections/disconnect",
+      headers: {
+        cookie: `ms_admin=${SESSION}`,
+        "content-type": "application/x-www-form-urlencoded",
+        host: "ms-realty.example",
+        origin: ORIGIN,
+        "sec-fetch-site": "same-origin",
+      },
+      body: "provider=google",
+    },
+  );
+  assert.equal(response.status, 503);
+  assert.equal(payload.rows.length, 1);
 });
 
 test("the assistant configuration route hands back a working config and records the issue", async (t) => {

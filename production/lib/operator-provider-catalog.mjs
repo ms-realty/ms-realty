@@ -423,23 +423,28 @@ export function operatorProviderCards({
   return DEFINITIONS.map((definition) => {
     const connection = stored.get(definition.id) || null;
     const ready = availability[definition.id]?.ready === true;
-    const connected = connection?.status === "connected";
+    const storedStatus = trimmed(connection?.status);
+    const connected = storedStatus === "connected";
     const supported = definition.supported !== false;
+    const status =
+      storedStatus === "connecting" || storedStatus === "unavailable"
+        ? storedStatus
+        : !supported
+          ? "disabled"
+          : definition.kind === "runtime"
+            ? ready
+              ? "configured"
+              : "disabled"
+            : connected
+              ? "connected"
+              : ready
+                ? "not_connected"
+                : "needs_setup";
     return {
       id: definition.id,
       kind: definition.kind,
       family: definition.family,
-      status: !supported
-        ? "disabled"
-        : definition.kind === "runtime"
-          ? ready
-            ? "configured"
-            : "disabled"
-          : connected
-            ? "connected"
-            : ready
-              ? "not_connected"
-              : "needs_setup",
+      status,
       supported,
       owner_connectable: definition.ownerConnectable === true,
       ready,
