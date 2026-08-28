@@ -181,10 +181,17 @@ test("live capture reuses only validated desktop subscription reports", async ()
       toolCallParser: "hermes",
       sensitiveDataAllowed: false,
     },
+    generatedAt: new Date().toISOString(),
   });
 
   fs.writeFileSync(reportPath, `${JSON.stringify(report)}\n`);
   assert.deepEqual(readReusableHermesDraftWorkerReport(reportPath), report);
+
+  fs.writeFileSync(
+    reportPath,
+    `${JSON.stringify({ ...report, generated_at: "2020-01-01T00:00:00.000Z" })}\n`,
+  );
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath), null);
 
   fs.writeFileSync(
     reportPath,
@@ -375,6 +382,13 @@ test("Hermes draft worker rejects outputs that omit protected facts", () => {
       }),
     /property fact/,
   );
+});
+
+test("Hermes worker attaches the dispatch's authoritative citations", () => {
+  const row = dispatchRow();
+  const task = taskFromHermesDraft(row, { ...validDraft(), citations: undefined });
+  assert.deepEqual(task.hermes.output.citations, row.citations);
+  assert.deepEqual(task.hermes.citations, row.citations);
 });
 
 test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => {
