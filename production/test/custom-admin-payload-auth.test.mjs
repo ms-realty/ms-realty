@@ -481,7 +481,7 @@ test("the App Router renders the full owner navigation and a privacy-safe owner 
   const html = await response.text();
   assert.equal(response.status, 200);
   assert.match(html, /data-owner-profile="true"/);
-  assert.match(html, /data-owner-hub="true"/);
+  assert.doesNotMatch(html, /data-owner-hub="true"/);
   assert.match(html, /Ivan Peychev/);
   assert.match(html, /peycheff\.com@gmail\.com/);
   assert.match(html, /Все рабочие пространства/);

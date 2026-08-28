@@ -257,7 +257,7 @@ test("settings screen speaks Bulgarian and Russian and links from the workspace 
 
     const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
     assert.match(today.body, /href="\/admin\/settings"/);
-    assert.match(today.body, />System</);
+    assert.match(today.body, />Workspace</);
     for (const route of ["hermes", "connect", "settings", "team", "activity"]) {
       assert.match(today.body, new RegExp(`href="/admin/${route}"`), `${route} is present in the owner navigation`);
     }
@@ -488,10 +488,10 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 10, "five groups in desktop and mobile navigation");
     assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 7);
     assert.equal((empty.body.match(/data-admin-nav-primary-mobile="true"/g) || []).length, 7);
-    for (const destination of ["Today", "Work", "Properties", "Content", "Hermes", "Integrations", "Settings"]) {
+    for (const destination of ["Today", "Leads", "Listings", "Translations", "Hermes", "Integrations", "Settings"]) {
       assert.match(empty.body, new RegExp(`>${destination}<`), destination);
     }
-    for (const drilldown of ["work", "content", "settings"]) {
+    for (const drilldown of ["leads", "translations", "settings"]) {
       assert.match(empty.body, new RegExp(`data-admin-nav-drilldown="${drilldown}"`), drilldown);
     }
     // Legacy destinations remain reachable through grouped disclosures.
@@ -500,11 +500,13 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     }
     assert.doesNotMatch(empty.body, /data-today-toolbar="true"/);
     assert.doesNotMatch(empty.body, /class="crm-ph"/);
-    for (const contract of ["data-today-layout=\"action-rail\"", "data-priority-leads=\"true\"", "data-lead-pipeline-preview=\"true\"", "data-public-request-preview=\"true\"", "data-readiness-rail=\"true\"", "data-workspace-onboarding=", "data-workspace-welcome=\"true\""]) {
+    for (const contract of ["data-priority-leads=\"true\"", "data-lead-pipeline-preview=\"true\"", "data-public-request-preview=\"true\""]) {
       assert.doesNotMatch(empty.body, new RegExp(contract), contract);
     }
+    assert.match(empty.body, /data-today-layout="action-rail"/);
+    assert.match(empty.body, /data-readiness-rail="true"/);
+    assert.match(empty.body, /data-workspace-onboarding="open"/);
     assert.doesNotMatch(empty.body, /data-workspace-welcome="true"/);
-    assert.match(empty.body, /class="adm-today-work-link"/);
 
     await dispatchHttp(app, {
       method: "POST",
@@ -538,8 +540,9 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.doesNotMatch(populated.body, /data-priority-lead=/);
     assert.doesNotMatch(populated.body, /data-lead-pipeline-preview=/);
     assert.doesNotMatch(populated.body, /data-public-request-preview=/);
-    assert.doesNotMatch(populated.body, /data-readiness-rail=/);
-    assert.doesNotMatch(populated.body, /data-workspace-welcome=/);
+    assert.match(populated.body, /data-readiness-rail="true"/);
+    assert.match(populated.body, /data-workspace-welcome="true"/);
+    assert.match(populated.body, /data-workspace-onboarding="open"/);
     assert.doesNotMatch(populated.body, /class="crm-ph"/);
 
     const json = await dispatchHttp(app, { url: "/api/admin/today", headers: HEADERS });
