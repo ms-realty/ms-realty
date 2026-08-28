@@ -82,6 +82,13 @@ test("warning surfaces tint the active theme instead of forcing a light-only pal
   assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-checks ul\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
 });
 
+test("panel header links do not override primary button contrast", () => {
+  for (const css of [generatedDesignCss]) {
+    assert.match(css, /\.crm-panel__hd a:not\(\.mk-btn\)/);
+    assert.doesNotMatch(css, /\.crm-panel__hd a\{/);
+  }
+});
+
 test("queue filters reveal an empty note when no row matches", () => {
   assert.match(ADMIN_APP_JS, /var empty = document\.querySelector\("\[data-lead-queue-empty\]"\);\s*if \(empty\) empty\.hidden = visible > 0 \|\| rows\.length === 0;/);
   assert.match(ADMIN_APP_JS, /var empty = document\.querySelector\("\[data-pipeline-empty\]"\);/);

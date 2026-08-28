@@ -119,6 +119,8 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.match(html, /Recover the connection/);
   assert.match(html, /href="\/admin\/connect"/);
   assert.match(html, /data-hermes-tool="hermes_submit_draft"/);
+  assert.match(html, />Confirmation required</);
+  assert.doesNotMatch(html, /\[object Object\]/);
   assert.match(html, /Hermes cannot publish, send customer messages, or mark content indexable/);
   assert.doesNotMatch(html, /password|payload-secret|database detail/i);
 

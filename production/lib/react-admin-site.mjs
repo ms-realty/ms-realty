@@ -11514,7 +11514,7 @@ function HermesBody({ page }) {
                 "li",
                 { key: tool.operation, "data-hermes-tool": tool.operation },
                 h("div", null, h("strong", null, h("code", null, tool.operation)), h(StatusPill, { tone: tool.read_only ? "sea" : "sun" }, tool.read_only ? copy.readOnly : copy.draftWrite)),
-                tool.confirmation ? h("small", null, `${copy.confirmationRequired}: ${tool.confirmation}`) : null,
+                tool.confirmation ? h("small", null, copy.confirmationRequired) : null,
                 h("small", null, `${copy.prohibited}: ${(tool.prohibited_actions || []).join(", ")}`),
               ),
             ),
