@@ -19,9 +19,10 @@ export function readSellerPipeline(filePath = DEFAULT_SELLER_PIPELINE_PATH) {
     .map((line) => JSON.parse(line));
 }
 
-export function createSellerPipelineItem(lead, { createdAt = new Date().toISOString(), owner = "broker_en" } = {}) {
+export function createSellerPipelineItem(lead, { createdAt = new Date().toISOString(), owner = "unassigned" } = {}) {
   if (lead.lead?.leadType !== "seller") throw new Error("Seller pipeline requires a seller lead");
   if (!lead.lead?.id || !lead.lead?.contact?.name) throw new Error("Seller lead id and contact.name are required");
+  const assignedOwner = String(owner || "").trim() || "unassigned";
 
   return {
     created_at: createdAt,
@@ -34,7 +35,7 @@ export function createSellerPipelineItem(lead, { createdAt = new Date().toISOStr
     admin_locale: lead.admin_locale,
     stage: "valuation_requested",
     status: "open",
-    owner,
+    owner: assignedOwner,
     checklist: {
       callback: "open",
       appraisal: "not_started",
@@ -47,7 +48,7 @@ export function createSellerPipelineItem(lead, { createdAt = new Date().toISOStr
     next_task: {
       id: `seller-callback-${lead.lead.id}`,
       kind: "seller_callback",
-      owner,
+      owner: assignedOwner,
       status: "open",
     },
   };

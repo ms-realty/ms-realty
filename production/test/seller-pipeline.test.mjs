@@ -31,6 +31,12 @@ test("seller pipeline requires seller lead and creates callback task", () => {
   const rows = readSellerPipeline(file);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].stage, "valuation_requested");
+  assert.equal(rows[0].owner, "unassigned");
+  assert.equal(rows[0].next_task.owner, "unassigned");
   assert.equal(rows[0].next_task.status, "open");
   assert.equal(assertSellerPipeline(rows), true);
+
+  const assigned = createSellerPipelineItem(sellerLead, { owner: "payload-admin-123" });
+  assert.equal(assigned.owner, "payload-admin-123");
+  assert.equal(assigned.next_task.owner, "payload-admin-123");
 });
