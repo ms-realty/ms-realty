@@ -12,6 +12,8 @@ import {
 } from "../lib/operator-connect.mjs";
 
 const OPERATOR_TOKEN = "connect-operator-token-0123456789";
+const EXPANDABLE_CLAUDE_HEADER = '--header "Authorization: Bearer ${MS_REALTY_OPERATOR_TOKEN}"';
+const LITERAL_CLAUDE_HEADER = "--header 'Authorization: Bearer ${MS_REALTY_OPERATOR_TOKEN}'";
 
 async function withNamedOperator(fn) {
   const previous = {
@@ -46,6 +48,8 @@ test("bootstrap prompt references the operator token environment without persist
   assert.ok(prompt.includes("https://ms-realty.example.workers.dev/mcp"));
   assert.ok(prompt.includes("MS_REALTY_OPERATOR_TOKEN"));
   assert.ok(prompt.includes('bearer_token_env_var = "MS_REALTY_OPERATOR_TOKEN"'));
+  assert.ok(prompt.includes(EXPANDABLE_CLAUDE_HEADER));
+  assert.equal(prompt.includes(LITERAL_CLAUDE_HEADER), false);
   assert.equal(prompt.includes(OPERATOR_TOKEN), false);
   assert.equal(prompt.includes("http_headers"), false);
   assert.ok(prompt.includes("connect_operator"));
@@ -62,6 +66,8 @@ test("assistant config never persists the issued token in headers", () => {
   });
   assert.ok(config.includes("MS_REALTY_OPERATOR_TOKEN"));
   assert.ok(config.includes('bearer_token_env_var = "MS_REALTY_OPERATOR_TOKEN"'));
+  assert.ok(config.includes(EXPANDABLE_CLAUDE_HEADER));
+  assert.equal(config.includes(LITERAL_CLAUDE_HEADER), false);
   assert.equal(config.includes(OPERATOR_TOKEN), false);
   assert.equal(config.includes(`Authorization: Bearer ${OPERATOR_TOKEN}`), false);
   assert.equal(config.includes("http_headers"), false);

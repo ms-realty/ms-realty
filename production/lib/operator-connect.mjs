@@ -42,7 +42,7 @@ PHASE 1 — CONNECT THE BUSINESS (remote MCP)
 1. Detect your own environment: can you run terminal commands? Is the \`claude\` CLI or \`codex\` CLI available?
 2. Preferred (terminal available):
    - Claude Code / Claude Desktop with Code: run
-     claude mcp add --transport http ms-realty "__BASE_URL__/mcp" --header 'Authorization: Bearer ${OPERATOR_TOKEN_PLACEHOLDER}'
+     claude mcp add --transport http ms-realty "__BASE_URL__/mcp" --header "Authorization: Bearer ${OPERATOR_TOKEN_PLACEHOLDER}"
    - Codex / ChatGPT with terminal: add to ~/.codex/config.toml:
      [mcp_servers.ms-realty]
      url = "__BASE_URL__/mcp"
@@ -125,7 +125,7 @@ export function operatorAgentConfigBlock({ baseUrl, token, operatorId, expiresAt
     `3. ${copy.agentStep3}`,
     "",
     "=== Claude Code ===",
-    `claude mcp add --transport http ms-realty "${origin}/mcp" --header 'Authorization: Bearer ${OPERATOR_TOKEN_PLACEHOLDER}'`,
+    `claude mcp add --transport http ms-realty "${origin}/mcp" --header "Authorization: Bearer ${OPERATOR_TOKEN_PLACEHOLDER}"`,
     "",
     "# .mcp.json / claude_desktop_config.json",
     JSON.stringify(claudeConfig, null, 2),

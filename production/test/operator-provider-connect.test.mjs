@@ -502,6 +502,8 @@ test("the assistant's configuration is complete, copyable, and readable without 
   assert.match(block, /3\. За отдалечен терминален клиент копирай настройката по-долу\./);
   // Claude Code: both the one-line command and a config file that parses.
   assert.match(block, /claude mcp add --transport http ms-realty "https:\/\/ms-realty\.example\/mcp"/);
+  assert.match(block, /--header "Authorization: Bearer \$\{MS_REALTY_OPERATOR_TOKEN\}"/);
+  assert.doesNotMatch(block, /--header 'Authorization: Bearer \$\{MS_REALTY_OPERATOR_TOKEN\}'/);
   const claudeSection = block.slice(block.indexOf("# .mcp.json"), block.indexOf("=== ChatGPT (Codex CLI) ==="));
   const parsed = JSON.parse(claudeSection.slice(claudeSection.indexOf("{"), claudeSection.lastIndexOf("}") + 1));
   assert.equal(parsed.mcpServers["ms-realty"].url, "https://ms-realty.example/mcp");
