@@ -227,6 +227,7 @@ export function renderAdminHermesPayload(
   requestedLocale,
   {
     availability,
+    command_availability = null,
     bridge,
     generatedAt,
     operator = null,
@@ -261,6 +262,7 @@ export function renderAdminHermesPayload(
     runtime_data_mode: runtimeDataMode,
     runtime,
     availability,
+    command_availability,
     bridge,
     queue,
     tools,

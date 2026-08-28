@@ -207,7 +207,9 @@ function ownerCommandRequestBody(input, evidence, model) {
 
 function openAiCompatibleOwnerCommandProvider({ env, fetchImpl }) {
   const config = hermesProviderConfigFromEnv(env);
-  if (config.mode !== "self_hosted") throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
+  if (!["self_hosted", "openrouter"].includes(config.mode)) {
+    throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
+  }
   if (!config.endpoint || !config.has_api_key || typeof fetchImpl !== "function") {
     throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
   }

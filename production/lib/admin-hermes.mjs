@@ -1,5 +1,5 @@
 import { renderAdminHermesPayload } from "./admin-payloads.mjs";
-import { hermesReplyAvailability } from "./hermes-availability.mjs";
+import { hermesOwnerCommandAvailability, hermesReplyAvailability } from "./hermes-availability.mjs";
 import { probeHermesAgentRuntime } from "./hermes-agent-runtime.mjs";
 import { bridgeNextTasks, bridgeStatus } from "./hermes-desktop-bridge.mjs";
 import { buildHermesDraftDispatch } from "./hermes-draft-dispatch.mjs";
@@ -67,7 +67,8 @@ export async function buildAdminHermesPayload({
   commandResult = null,
   commandError = null,
 } = {}) {
-  const availability = hermesReplyAvailability({ env: hermesEnv, provider: commandProvider || provider, fetchImpl });
+  const availability = hermesReplyAvailability({ env: hermesEnv, provider, fetchImpl });
+  const commandAvailability = hermesOwnerCommandAvailability({ env: hermesEnv, provider: commandProvider, fetchImpl });
   const runtime = await probeHermesAgentRuntime({
     endpoint: hermesEnv.HERMES_CHAT_COMPLETIONS_URL,
     apiKey: hermesEnv.HERMES_API_KEY,
@@ -121,6 +122,7 @@ export async function buildAdminHermesPayload({
 
   return renderAdminHermesPayload(registry, requestedLocale, {
     availability,
+    command_availability: commandAvailability,
     bridge,
     generatedAt,
     operator,
@@ -129,7 +131,7 @@ export async function buildAdminHermesPayload({
     runtimeDataMode: requirePayload ? "durable_only" : "file_backed",
     tools: HERMES_TOOL_COVERAGE,
     command_form: {
-      enabled: availability.available === true && receiptStore.status === "ready" && operator?.roles?.includes("admin"),
+      enabled: commandAvailability.available === true && receiptStore.status === "ready" && operator?.roles?.includes("admin"),
       idempotency_key: createHermesOwnerCommandIdempotencyKey(),
       max_length: HERMES_OWNER_COMMAND_MAX_LENGTH,
     },
