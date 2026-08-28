@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
+import { evidenceFreshness } from "./evidence-freshness.mjs";
 import { validateHermesTranslationDraft } from "./hermes.mjs";
 import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH, HERMES_NON_SENSITIVE_LISTING_TRANSLATION } from "./hermes-draft-dispatch.mjs";
 import {
@@ -272,7 +273,7 @@ export function openAiCompatibleHermesProvider({
 
 export function taskFromHermesDraft(row, draft) {
   const output = validateHermesTranslationDraft({
-    draft,
+    draft: { ...draft, citations: row.citations },
     propertyFacts: row.prompt.propertyFacts || {},
     sourceSnapshot: row.source_snapshot,
   });
@@ -486,6 +487,7 @@ export function readReusableHermesDraftWorkerReport(filePath = DEFAULT_HERMES_DR
   const report = JSON.parse(fs.readFileSync(filePath, "utf8"));
   if (report.provider?.mode !== "desktop_subscription") return null;
   assertHermesDraftWorkerReport(report);
+  if (evidenceFreshness("live_services", report.generated_at).status !== "fresh") return null;
   return report;
 }
 
