@@ -4,11 +4,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { readAuditLog } from "../lib/audit-log.mjs";
+import { adminSessionFingerprint } from "../lib/admin-sessions.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readListingEdits } from "../lib/listing-edits.mjs";
 import { readLeadAssignments } from "../lib/lead-assignments.mjs";
 import { readReplyOutbox } from "../lib/lead-replies.mjs";
-import { ownerOperatorConfirmation } from "../lib/owner-operator-catalog.mjs";
 import {
   mcpConfigFromEnv,
   mcpOidcConfigFromEnv,
@@ -16,6 +16,7 @@ import {
   renderMcpResponse,
 } from "../lib/mcp-server.mjs";
 import { readTranslationLedger } from "../lib/translation-ledger.mjs";
+import { operatorChallengeSecret, verifyOperatorChallenge } from "../lib/operator-challenge.mjs";
 import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
 const EDITOR_TOKEN = "mcp-editor-token-0123456789abcdef";
@@ -72,6 +73,7 @@ function fixture({ durableListingWrites = false } = {}) {
     MS_REALTY_REPLY_OUTBOX_PATH: paths.replyOutboxPath,
     MS_REALTY_TRANSLATION_LEDGER_PATH: paths.translationLedgerPath,
     MS_REALTY_REVIEWED_AT: "2026-07-29T10:05:00.000Z",
+    MS_REALTY_OPERATOR_CHALLENGE_SECRET: "mcp-operator-challenge-test-secret-longer-than-thirty-two-characters",
     ...(durableListingWrites ? { MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1" } : {}),
   };
   const config = mcpConfigFromEnv(env);
@@ -206,13 +208,89 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
   assert.equal(unconfirmed.payload.result.isError, true);
   assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
 
+  const challenge = await callTool(
+    config,
+    "ms_realty_admin_context",
+    {
+      challenge_for: {
+        operation: "admin_post_listings_status",
+        input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
+      },
+    },
+    auth,
+  );
+  assert.equal(challenge.challenge.operation, "admin_post_listings_status");
+  const mismatchedInput = await mcpCall(
+    config,
+    {
+      jsonrpc: "2.0",
+      id: 23,
+      method: "tools/call",
+      params: {
+        name: "ms_realty_admin_write",
+        arguments: {
+          operation: "admin_post_listings_status",
+          input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "sold" },
+          confirmation: challenge.challenge.token,
+        },
+      },
+    },
+    auth,
+  );
+  assert.equal(mismatchedInput.payload.result.isError, true);
+  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "sold");
+  config.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+    { id: "mcp_editor", token: EDITOR_TOKEN, roles: ["editor"] },
+    { id: "mcp_editor_other", token: "mcp-editor-other-token-0123456789abcdef", roles: ["editor"] },
+    { id: "mcp_broker", token: BROKER_TOKEN, roles: ["broker"] },
+    { id: "mcp_translator", token: TRANSLATOR_TOKEN, roles: ["translator"] },
+  ]);
+  const crossSessionReplay = await mcpCall(
+    config,
+    {
+      jsonrpc: "2.0",
+      id: 24,
+      method: "tools/call",
+      params: {
+        name: "ms_realty_admin_write",
+        arguments: {
+          operation: "admin_post_listings_status",
+          input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
+          confirmation: challenge.challenge.token,
+        },
+      },
+    },
+    { authorization: "Bearer mcp-editor-other-token-0123456789abcdef" },
+  );
+  assert.equal(crossSessionReplay.payload.result.isError, true);
+  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
+  const hermesInput = {
+    id: "translation-listing-MS-CRAWL-0001-el",
+    draft: { title: "Draft title", body: "Draft body", seo_title: "Draft SEO", meta_description: "Draft description" },
+  };
+  const hermesChallenge = await callTool(
+    config,
+    "ms_realty_admin_context",
+    { challenge_for: { operation: "hermes_submit_draft", input: hermesInput } },
+    auth,
+  );
+  assert.equal(
+    verifyOperatorChallenge(hermesChallenge.challenge.token, {
+      operatorId: "mcp_editor",
+      sessionId: adminSessionFingerprint(auth.authorization),
+      operation: "hermes_submit_draft",
+      input: { ...hermesInput, model: null, target_locale: null },
+      secret: operatorChallengeSecret(config.env),
+    }).operation,
+    "hermes_submit_draft",
+  );
   const status = await callTool(
     config,
     "ms_realty_admin_write",
     {
       operation: "admin_post_listings_status",
       input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
-      confirmation: ownerOperatorConfirmation("admin_post_listings_status"),
+      confirmation: challenge.challenge.token,
     },
     auth,
   );

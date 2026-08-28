@@ -4,6 +4,7 @@ import { z } from "zod";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "./app-admin-adapter.mjs";
 import { appApiConfigFromEnv, renderAppApiResponse } from "./app-api-adapter.mjs";
 import { canAdminAccess, canAdminMutate, normalizedRoles, operatorId, resolveAdminPrincipal } from "./admin-auth.mjs";
+import { adminSessionFingerprint } from "./admin-sessions.mjs";
 import { resolveOperatorAgentPrincipal } from "./operator-agent-access.mjs";
 import { applyListingEdits, LISTING_STATUSES, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
@@ -19,6 +20,11 @@ import {
   ownerOperatorOperationById,
   validateOwnerOperatorInput,
 } from "./owner-operator-catalog.mjs";
+import {
+  issueOperatorChallenge,
+  operatorChallengeSecret,
+  verifyOperatorChallenge,
+} from "./operator-challenge.mjs";
 import { BRIDGE_GUARDRAILS, bridgeNextTasks, bridgeStatus, bridgeSubmitDraft } from "./hermes-desktop-bridge.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
 import { listingPath } from "./seo.mjs";
@@ -493,6 +499,18 @@ function ownerOperatorPath(row, query = {}) {
   return `${url.pathname}${url.search}`;
 }
 
+function hermesSubmitInput({ id, draft, model, target_locale: targetLocale } = {}) {
+  return {
+    // Keep challenge issuance and verification byte-for-byte aligned. The
+    // MCP schema omits optional fields, while the verifier receives the
+    // destructured callback values, so both sides normalize them to null.
+    id: id || null,
+    draft: draft || null,
+    model: model || null,
+    target_locale: targetLocale || null,
+  };
+}
+
 function ownerOperatorResult(row, response, payload) {
   return {
     operation: row.operation,
@@ -811,23 +829,36 @@ function publicToolDefinitions(server, config) {
   );
 }
 
-function ownerOperatorToolDefinitions(server, config, principal) {
+function ownerOperatorToolDefinitions(server, config, principal, sessionId) {
   const available = ADMIN_ROUTE_COVERAGE.filter((row) => canAdminAccess(principal, row.capability));
   const remote = available.filter((row) => row.execution === "mcp_delegated");
   const browser = available.filter((row) => row.execution === "browser_session");
   const reads = remote.filter((row) => row.read_only);
   const writes = remote.filter((row) => !row.read_only);
+  const hermesSubmitAvailable =
+    !config.writesDisabled && canAdminMutate(principal) && canAdminAccess(principal, "translations:read") && canAdminAccess(principal, "translations:write");
 
   server.registerTool(
     OWNER_OPERATOR_CONTEXT_TOOL,
     {
       description:
-        "List every admin operation this operator may use, including which operations run through this delegated MCP and which intentionally require the signed-in WebMCP browser session.",
-      inputSchema: z.object({}).strict(),
+        "List every admin operation this operator may use. For a delegated write, call this tool with challenge_for containing the exact operation input to receive a short-lived signed confirmation.",
+      inputSchema: z
+        .object({
+          challenge_for: z
+            .object({
+              operation: z.string().trim().min(1).max(200),
+              input: OWNER_OPERATOR_BODY,
+              query: OWNER_OPERATOR_QUERY,
+            })
+            .strict()
+            .optional(),
+        })
+        .strict(),
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
     },
-    async () =>
-      textResult({
+    async ({ challenge_for: challengeFor }) => {
+      const result = {
         operator_id: principal.id,
         roles: principal.roles,
         writes_enabled: !config.writesDisabled,
@@ -844,7 +875,33 @@ function ownerOperatorToolDefinitions(server, config, principal) {
         })),
         browser_session_note:
           "Open /admin in the ChatGPT/Codex built-in browser for file, secret, connection, team, export, import, and second-factor operations. The signed-in page exposes the same registry through WebMCP.",
-      }),
+      };
+      if (!challengeFor) return textResult(result);
+      try {
+        const operation = String(challengeFor.operation);
+        const row = ownerOperatorOperationById(operation);
+        const isAdminWrite = row && writes.includes(row);
+        const isHermesSubmit = operation === "hermes_submit_draft" && hermesSubmitAvailable;
+        if (!isAdminWrite && !isHermesSubmit) return errorResult("That signed challenge operation is not available to this operator.");
+        const candidate = challengeFor.input || {};
+        const query = challengeFor.query || {};
+        if (isAdminWrite) {
+          validateOwnerOperatorInput(candidate);
+          ownerOperatorPath(row, query);
+        }
+        const boundInput = isAdminWrite ? { input: candidate, query } : hermesSubmitInput(candidate);
+        const challenge = issueOperatorChallenge({
+          operatorId: principal.id,
+          sessionId,
+          operation,
+          input: boundInput,
+          secret: operatorChallengeSecret(config.env),
+        });
+        return textResult({ ...result, challenge });
+      } catch {
+        return errorResult("A signed operator challenge could not be issued for that operation.");
+      }
+    },
   );
 
   if (reads.length) {
@@ -877,13 +934,13 @@ function ownerOperatorToolDefinitions(server, config, principal) {
       OWNER_OPERATOR_ADMIN_WRITE_TOOL,
       {
         description:
-          "Run one allowlisted owner-confirmed admin mutation through the existing RBAC, workspace-scope, validation, persistence, and audit adapter. The confirmation must exactly match the operation-specific value returned by ms_realty_admin_context. Hermes is never the approving actor.",
+          "Run one allowlisted owner-confirmed admin mutation through the existing RBAC, workspace-scope, validation, persistence, and audit adapter. The confirmation must be the short-lived signed challenge returned by ms_realty_admin_context for the exact operation input. Hermes is never the approving actor.",
         inputSchema: z
           .object({
             operation: z.enum(writes.map((row) => row.operation)),
             input: OWNER_OPERATOR_BODY,
             query: OWNER_OPERATOR_QUERY,
-            confirmation: z.string().min(1).max(180),
+            confirmation: z.string().min(1).max(2_048),
           })
           .strict(),
         annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false },
@@ -892,10 +949,14 @@ function ownerOperatorToolDefinitions(server, config, principal) {
         try {
           const row = ownerOperatorOperationById(operation);
           if (!row || !writes.includes(row)) return errorResult("That admin write operation is not available to this operator.");
-          if (confirmation !== ownerOperatorConfirmation(operation)) {
-            return errorResult("The operation-specific owner confirmation is missing or incorrect.");
-          }
           const body = validateOwnerOperatorInput(input);
+          verifyOperatorChallenge(confirmation, {
+            operatorId: principal.id,
+            sessionId,
+            operation,
+            input: { input: body, query: query || {} },
+            secret: operatorChallengeSecret(config.env),
+          });
           const { response, payload } = await adminJson(config, principal, ownerOperatorPath(row, query), {
             method: row.method,
             body,
@@ -935,7 +996,7 @@ function ownerOperatorToolDefinitions(server, config, principal) {
               .passthrough()
               .optional(),
             model: z.string().min(1).max(120).optional(),
-            confirmation: z.string().max(80).optional(),
+            confirmation: z.string().max(2_048).optional(),
           })
           .strict(),
         annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
@@ -944,9 +1005,16 @@ function ownerOperatorToolDefinitions(server, config, principal) {
         try {
           if (operation === "hermes_status") return textResult(bridgeStatus());
           if (operation === "hermes_next_tasks") return textResult(bridgeNextTasks({ limit, targetLocale }));
-          if (operation !== "hermes_submit_draft" || confirmation !== "SUBMIT_HERMES_DRAFT") {
-            return errorResult("Hermes draft submission requires the exact SUBMIT_HERMES_DRAFT confirmation.");
+          if (operation !== "hermes_submit_draft") {
+            return errorResult("Unknown Hermes operation.");
           }
+          verifyOperatorChallenge(confirmation, {
+            operatorId: principal.id,
+            sessionId,
+            operation,
+            input: hermesSubmitInput({ id, draft, model, target_locale: targetLocale }),
+            secret: operatorChallengeSecret(config.env),
+          });
           return textResult(
             await bridgeSubmitDraft({
               id,
@@ -964,7 +1032,7 @@ function ownerOperatorToolDefinitions(server, config, principal) {
   }
 }
 
-function authenticatedToolDefinitions(server, config, principal) {
+function authenticatedToolDefinitions(server, config, principal, sessionId) {
   if (canAdminAccess(principal, "operations:read")) {
     server.registerTool(
       "get_operator_brief",
@@ -1425,13 +1493,13 @@ function authenticatedToolDefinitions(server, config, principal) {
       },
     );
   }
-  ownerOperatorToolDefinitions(server, config, principal);
+  ownerOperatorToolDefinitions(server, config, principal, sessionId);
 }
 
-function createServer(config, principal) {
+function createServer(config, principal, sessionId) {
   const server = new McpServer({ name: "ms-realty-operator", version: "1.0.0" });
   publicToolDefinitions(server, config);
-  if (principal) authenticatedToolDefinitions(server, config, principal);
+  if (principal) authenticatedToolDefinitions(server, config, principal, sessionId);
   return server;
 }
 
@@ -1442,7 +1510,8 @@ export async function renderMcpResponse(request, { config = mcpConfigFromEnv() }
     const authHeader = request.headers.get("authorization") || "";
     const principal = authHeader ? await resolveMcpPrincipal(authHeader, config) : null;
     if ((config.oidc && !principal) || (authHeader && !principal)) return mcpUnauthorized(request, config);
-    const handler = createMcpHandler(() => createServer(config, principal), { onerror: () => {} });
+    const sessionId = authHeader ? adminSessionFingerprint(authHeader) : "anonymous";
+    const handler = createMcpHandler(() => createServer(config, principal, sessionId), { onerror: () => {} });
     return secured(await handler.fetch(request));
   } catch {
     return mcpResponse(500, { jsonrpc: "2.0", error: { code: -32603, message: "Internal server error" }, id: null });

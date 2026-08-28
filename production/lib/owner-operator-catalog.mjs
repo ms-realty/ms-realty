@@ -12,7 +12,13 @@ export const OWNER_OPERATOR_ADMIN_READ_TOOL = "ms_realty_admin_read";
 export const OWNER_OPERATOR_ADMIN_WRITE_TOOL = "ms_realty_admin_write";
 export const OWNER_OPERATOR_HERMES_TOOL = "ms_realty_hermes";
 export const OWNER_OPERATOR_CONTEXT_TOOL = "ms_realty_admin_context";
-export const OWNER_OPERATOR_WRITE_CONFIRMATION = "CONFIRM_MS_REALTY_ADMIN_OPERATION";
+export const OWNER_OPERATOR_CHALLENGE = Object.freeze({
+  kind: "signed_expiring_challenge",
+  version: "c1",
+  algorithm: "HMAC-SHA256",
+  ttl_seconds: 120,
+  binds: ["operator_id", "session_id", "operation", "input_hash"],
+});
 
 const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/accounts/link"],
@@ -157,7 +163,7 @@ const HERMES_TOOL_COVERAGE = [
     source: "production/scripts/hermes-mcp-server.mjs",
     read_only: false,
     draft_only: true,
-    confirmation: "SUBMIT_HERMES_DRAFT",
+    confirmation: Object.freeze({ ...OWNER_OPERATOR_CHALLENGE, operation: "hermes_submit_draft" }),
     prohibited_actions: ["publish", "send", "mark_indexable", "approve_legal"],
   },
 ];
@@ -246,7 +252,7 @@ export const ADMIN_ROUTE_COVERAGE = Object.freeze(
       capability: requiredAdminCapability(method, pathname),
       read_only: readOnly,
       sensitive: isSensitivePath(pathname),
-      confirmation: readOnly ? null : OWNER_OPERATOR_WRITE_CONFIRMATION,
+      confirmation: readOnly ? null : OWNER_OPERATOR_CHALLENGE,
       idempotency: "existing_admin_route",
       hermes_access: hermesAccess(method, pathname),
       execution,
@@ -285,7 +291,7 @@ export function ownerOperatorOperationById(operation) {
 export function ownerOperatorConfirmation(operation) {
   const row = ownerOperatorOperationById(operation);
   if (!row || row.read_only) return null;
-  return `${OWNER_OPERATOR_WRITE_CONFIRMATION}:${row.operation}`;
+  return Object.freeze({ ...OWNER_OPERATOR_CHALLENGE, operation: row.operation });
 }
 
 export function ownerOperatorCatalog(principal) {
@@ -363,7 +369,12 @@ export function assertOwnerOperatorCatalog() {
     seen.add(row.operation);
     if (!row.capability) throw new Error(`Missing capability for owner/operator operation: ${row.operation}`);
     if (!row.pathname.startsWith("/api/admin/")) throw new Error(`Non-admin route in owner/operator catalog: ${row.pathname}`);
-    if (!row.read_only && row.confirmation !== OWNER_OPERATOR_WRITE_CONFIRMATION) {
+    if (
+      !row.read_only &&
+      (row.confirmation?.kind !== OWNER_OPERATOR_CHALLENGE.kind ||
+        row.confirmation?.version !== OWNER_OPERATOR_CHALLENGE.version ||
+        row.confirmation?.algorithm !== OWNER_OPERATOR_CHALLENGE.algorithm)
+    ) {
       throw new Error(`Mutating operation lacks confirmation: ${row.operation}`);
     }
   }

@@ -3,6 +3,7 @@ import { createPrivateContactEnvelope, openPrivateContactEnvelope } from "./priv
 import { assertHermesChatCompletionsEndpoint, hermesProviderConfigFromEnv } from "./hermes-provider-provisioning.mjs";
 
 export const HERMES_OWNER_COMMAND_MAX_LENGTH = 2_000;
+export const HERMES_OWNER_RECEIPT_REQUEST_TTL_MS = 60_000;
 const HERMES_OWNER_COMMAND_TIMEOUT_MS = 60_000;
 export const HERMES_OWNER_RECEIPT_COLLECTION = {
   slug: "hermes_owner_receipts",
@@ -51,6 +52,7 @@ const FAILURE_MESSAGES = Object.freeze({
   hermes_invalid_plan: "Hermes returned a plan that did not satisfy the safety contract.",
   idempotency_conflict: "This Hermes request identifier was already used for different work.",
   hermes_command_in_progress: "This Hermes request is already recorded and will not be repeated automatically.",
+  hermes_command_expired: "This Hermes request expired before a plan was recorded and will not be repeated automatically.",
 });
 
 export class HermesOwnerCommandError extends Error {
@@ -290,11 +292,31 @@ function openedReceipt(document, secret) {
   if (opened.subject_type !== "hermes_owner_command" || opened.subject_id !== document.idempotency_key) {
     throw new Error("Hermes owner receipt envelope does not match its document");
   }
-  return opened.payload;
+  const payload = opened.payload;
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    Array.isArray(payload) ||
+    typeof payload.command !== "string" ||
+    !Array.isArray(payload.evidence) ||
+    !("plan" in payload)
+  ) {
+    throw new Error("Hermes owner receipt envelope payload is invalid");
+  }
+  return payload;
 }
 
 function safeReceipt(document, secret, { idempotent = false } = {}) {
+  if (!document || !STATUSES.has(String(document.status))) {
+    throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
+  }
   const opened = openedReceipt(document, secret);
+  if (document.status === "failed" && !String(document.failure_code || "").trim()) {
+    throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
+  }
+  if (document.status === "planned" && (!opened.plan || typeof opened.plan !== "object" || Array.isArray(opened.plan))) {
+    throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
+  }
   return {
     idempotency_key: String(document.idempotency_key),
     status: String(document.status),
@@ -309,9 +331,13 @@ function safeReceipt(document, secret, { idempotent = false } = {}) {
 
 async function updateReceipt(runtime, document, command, evidence, status, { secret, recordedAt, plan = null, failureCode = null } = {}) {
   if (!STATUSES.has(status) || status === "requested") throw new Error("Invalid Hermes owner receipt transition");
-  return runtime.update({
+  const result = await runtime.update({
     collection: "hermes_owner_receipts",
-    id: document.id,
+    // A receipt may only leave requested once. The conditional update keeps a
+    // stale worker from overwriting a plan or failure recorded by a race.
+    where: {
+      and: [{ id: { equals: document.id } }, { status: { equals: "requested" } }],
+    },
     depth: 0,
     overrideAccess: true,
     data: {
@@ -324,13 +350,49 @@ async function updateReceipt(runtime, document, command, evidence, status, { sec
       }),
     },
   });
+  const updated = Array.isArray(result?.docs) ? result.docs[0] : result;
+  if (!updated) throw new Error("Hermes owner receipt transition lost a race");
+  return updated;
 }
 
-async function existingReceipt(document, input, secret, operatorId) {
+function safeReceiptOrUnavailable(document, secret, options = {}) {
+  try {
+    return safeReceipt(document, secret, options);
+  } catch (cause) {
+    if (cause instanceof HermesOwnerCommandError && cause.code === "hermes_receipt_unavailable") throw cause;
+    throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
+  }
+}
+
+function terminalFailure(document, secret) {
+  const code = Object.prototype.hasOwnProperty.call(FAILURE_MESSAGES, document.failure_code)
+    ? document.failure_code
+    : "hermes_receipt_unavailable";
+  throw new HermesOwnerCommandError(code, {
+    status: code === "hermes_receipt_unavailable" ? 503 : 502,
+    receipt: safeReceiptOrUnavailable(document, secret, { idempotent: true }),
+  });
+}
+
+function requestedReceiptIsStale(document, now) {
+  const startedAt = Date.parse(String(document.started_at || ""));
+  const nowAt = Date.parse(String(now || ""));
+  if (!Number.isFinite(startedAt) || !Number.isFinite(nowAt)) {
+    throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
+  }
+  return nowAt - startedAt > HERMES_OWNER_RECEIPT_REQUEST_TTL_MS;
+}
+
+async function existingReceipt(runtime, document, input, secret, operatorId, { now } = {}) {
   if (document.operator_id !== operatorId) {
     throw new HermesOwnerCommandError("idempotency_conflict", { status: 409 });
   }
-  const opened = openedReceipt(document, secret);
+  let opened;
+  try {
+    opened = openedReceipt(document, secret);
+  } catch (cause) {
+    throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
+  }
   if (
     document.command_digest !== commandDigest(input.command) ||
     opened.command !== input.command
@@ -338,9 +400,38 @@ async function existingReceipt(document, input, secret, operatorId) {
     throw new HermesOwnerCommandError("idempotency_conflict", { status: 409 });
   }
   if (document.status === "planned") return safeReceipt(document, secret, { idempotent: true });
+  if (document.status === "failed") terminalFailure(document, secret);
+  if (document.status !== "requested") {
+    throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
+  }
+  const currentTime = isoTimestamp(typeof now === "function" ? now() : now);
+  if (requestedReceiptIsStale(document, currentTime)) {
+    let expired;
+    try {
+      expired = await updateReceipt(runtime, document, opened.command, opened.evidence, "failed", {
+        secret,
+        recordedAt: currentTime,
+        failureCode: "hermes_command_expired",
+      });
+    } catch (cause) {
+      let raced;
+      try {
+        raced = await findReceipt(runtime, input.idempotencyKey);
+      } catch (readCause) {
+        throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause: readCause });
+      }
+      if (!raced || raced.status === "requested") {
+        throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
+      }
+      expired = raced;
+    }
+    if (expired.status === "failed") terminalFailure(expired, secret);
+    if (expired.status === "planned") return safeReceiptOrUnavailable(expired, secret, { idempotent: true });
+    throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
+  }
   throw new HermesOwnerCommandError("hermes_command_in_progress", {
     status: 409,
-    receipt: safeReceipt(document, secret, { idempotent: true }),
+    receipt: safeReceiptOrUnavailable(document, secret, { idempotent: true }),
   });
 }
 
@@ -394,7 +485,9 @@ export async function runHermesOwnerCommand(
   } catch (cause) {
     throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
   }
-  if (existing) return existingReceipt(existing, normalized, secret, operatorId);
+  if (existing) {
+    return existingReceipt(runtime, existing, normalized, secret, operatorId, { now });
+  }
 
   let model = "injected";
   let callProvider;
@@ -433,7 +526,7 @@ export async function runHermesOwnerCommand(
   } catch (cause) {
     try {
       const raced = await findReceipt(runtime, normalized.idempotencyKey);
-      if (raced) return existingReceipt(raced, normalized, secret, operatorId);
+      if (raced) return existingReceipt(runtime, raced, normalized, secret, operatorId, { now });
     } catch {
       // The fixed store error below is the only response exposed to the owner.
     }
@@ -453,13 +546,22 @@ export async function runHermesOwnerCommand(
         failureCode: error.code,
       });
     } catch (storeCause) {
-      throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause: storeCause });
+      let raced;
+      try {
+        raced = await findReceipt(runtime, normalized.idempotencyKey);
+      } catch (readCause) {
+        throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause: readCause });
+      }
+      if (!raced || raced.status === "requested") {
+        throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause: storeCause });
+      }
+      document = raced;
     }
-    throw new HermesOwnerCommandError(error.code, {
-      status: error.status,
-      cause: error,
-      receipt: safeReceipt(document, secret),
-    });
+    if (document.status === "planned") return safeReceiptOrUnavailable(document, secret);
+    if (document.status !== "failed") {
+      throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
+    }
+    terminalFailure(document, secret);
   }
 
   const completedAt = isoTimestamp(typeof now === "function" ? now() : now);
@@ -469,8 +571,16 @@ export async function runHermesOwnerCommand(
       recordedAt: completedAt,
       plan,
     });
-    return safeReceipt(document, secret);
+    return safeReceiptOrUnavailable(document, secret);
   } catch (cause) {
+    let raced;
+    try {
+      raced = await findReceipt(runtime, normalized.idempotencyKey);
+    } catch (readCause) {
+      throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause: readCause });
+    }
+    if (raced?.status === "planned") return safeReceiptOrUnavailable(raced, secret);
+    if (raced?.status === "failed") terminalFailure(raced, secret);
     throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
   }
 }

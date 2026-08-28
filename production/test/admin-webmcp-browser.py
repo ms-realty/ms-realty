@@ -24,7 +24,13 @@ CATALOG = {
             "pathname": "/api/admin/listings/status",
             "read_only": False,
             "execution": "mcp_delegated",
-            "confirmation": "CONFIRM_MS_REALTY_ADMIN_OPERATION:admin_post_listings_status",
+            "confirmation": {
+                "kind": "signed_expiring_challenge",
+                "version": "c1",
+                "algorithm": "HMAC-SHA256",
+                "ttl_seconds": 120,
+                "binds": ["operator_id", "session_id", "operation", "input_hash"],
+            },
         },
         {
             "operation": "admin_post_security_two_factor_verify",
@@ -116,7 +122,7 @@ def main():
             """window.__webmcpTools[2].execute({
               operation: 'admin_post_listings_status',
               input: { reference: 'MS-CRAWL-0001', status: 'reviewed' },
-              confirmation: 'CONFIRM_MS_REALTY_ADMIN_OPERATION:admin_post_listings_status'
+              confirmation: 'owner-confirmed-in-browser'
             })"""
         )
         assert write["http_status"] == 200

@@ -60,8 +60,21 @@ function fakeHermesReceiptPayload() {
       docs.push(doc);
       return doc;
     },
-    async update({ id, data }) {
-      const index = docs.findIndex((doc) => doc.id === id);
+    async update({ id, where, data }) {
+      const conditions = Array.isArray(where?.and) ? where.and : [];
+      const idCondition = conditions.find((condition) => condition.id)?.id?.equals;
+      const statusCondition = conditions.find((condition) => condition.status)?.status?.equals;
+      const indexes = docs
+        .map((doc, index) => ({ doc, index }))
+        .filter(({ doc }) => (id === undefined ? idCondition === undefined || doc.id === idCondition : doc.id === id))
+        .filter(({ doc }) => statusCondition === undefined || doc.status === statusCondition)
+        .map(({ index }) => index);
+      if (where) {
+        for (const index of indexes) docs[index] = { ...docs[index], ...data };
+        return { docs: indexes.map((index) => docs[index]), errors: [] };
+      }
+      const index = indexes[0];
+      if (index === undefined) throw new Error("missing receipt");
       docs[index] = { ...docs[index], ...data };
       return docs[index];
     },
@@ -117,7 +130,14 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.deepEqual(body.runtime.missing, ["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
   assert.equal(body.queue.status, "ready");
   assert.equal(body.tools.length, 3);
-  assert.equal(body.tools.find((tool) => tool.operation === "hermes_submit_draft").confirmation, "SUBMIT_HERMES_DRAFT");
+  assert.deepEqual(body.tools.find((tool) => tool.operation === "hermes_submit_draft").confirmation, {
+    kind: "signed_expiring_challenge",
+    version: "c1",
+    algorithm: "HMAC-SHA256",
+    ttl_seconds: 120,
+    binds: ["operator_id", "session_id", "operation", "input_hash"],
+    operation: "hermes_submit_draft",
+  });
 });
 
 test("Hermes console proves authenticated runtime capabilities without exposing the API key", async () => {

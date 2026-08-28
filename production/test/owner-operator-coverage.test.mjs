@@ -11,7 +11,7 @@ import {
   OWNER_OPERATOR_HERMES_TOOL,
   OWNER_OPERATOR_OPERATIONS,
   OWNER_OPERATOR_REMOTE_OPERATIONS,
-  OWNER_OPERATOR_WRITE_CONFIRMATION,
+  OWNER_OPERATOR_CHALLENGE,
   assertOwnerOperatorCatalog,
   ownerOperatorCatalog,
   ownerOperatorConfirmation,
@@ -40,7 +40,7 @@ test("owner/operator catalog covers every admin route method exactly once", () =
     assert.ok([OWNER_OPERATOR_ADMIN_READ_TOOL, OWNER_OPERATOR_ADMIN_WRITE_TOOL].includes(row.tool));
     assert.ok(row.capability, `${row.operation} must carry its existing admin capability`);
     if (row.read_only) assert.equal(row.confirmation, null);
-    else assert.equal(row.confirmation, OWNER_OPERATOR_WRITE_CONFIRMATION);
+    else assert.deepEqual(row.confirmation, OWNER_OPERATOR_CHALLENGE);
     assert.ok(["browser_session", "mcp_delegated"].includes(row.execution));
   }
   assert.equal(OWNER_OPERATOR_BROWSER_OPERATIONS.length + OWNER_OPERATOR_REMOTE_OPERATIONS.length, discovered.length);
@@ -51,7 +51,7 @@ test("owner/operator catalog covers every admin route method exactly once", () =
   const adminCatalog = ownerOperatorCatalog({ id: "owner", roles: ["admin"] });
   assert.equal(adminCatalog.summary.total, discovered.length);
   assert.equal(adminCatalog.operations.length, discovered.length);
-  assert.equal(
+  assert.deepEqual(
     adminCatalog.operations.find((row) => row.operation === "admin_post_listings_status").confirmation,
     ownerOperatorConfirmation("admin_post_listings_status"),
   );
