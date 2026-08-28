@@ -172,9 +172,124 @@ const DEFINITIONS = Object.freeze([
   },
 ]);
 
+const OWNER_CONNECTION_LIFECYCLE = Object.freeze([
+  "authorizing",
+  "connected",
+  "reauthorize",
+  "error",
+  "disconnected",
+]);
+
+// Executable product truth for the owner connection surface. A provider is
+// enabled only when its provider-authorized handoff powers a real MS Realty
+// consumer. Everything else is managed infrastructure or a named gap, never a
+// decorative connection button or a secret-entry form.
+const PROVIDER_COVERAGE = Object.freeze({
+  google: {
+    state: "enabled",
+    ownerSurface: "one_click",
+    authorization: "oauth_authorization_code",
+    ownerAction: { kind: "oauth_redirect", method: "GET", pathname: "/api/admin/connections", action: "start" },
+    consumers: [
+      { workflow: "approved_email_delivery", source_file: "production/lib/provider-delivery.mjs", symbol: "deliverApprovedProviderMessage" },
+      { workflow: "viewing_calendar_sync", source_file: "production/lib/provider-connections.mjs", symbol: "syncViewingToGoogleCalendar" },
+    ],
+  },
+  google_drive: {
+    state: "disabled",
+    ownerSurface: "hidden",
+    authorization: "oauth_authorization_code",
+    reason: "no_approved_runtime_consumer",
+    consumers: [],
+  },
+  whatsapp: {
+    state: "enabled",
+    ownerSurface: "one_click",
+    authorization: "provider_embedded_signup",
+    ownerAction: { kind: "embedded_signup", method: "POST", pathname: "/api/admin/connections" },
+    consumers: [
+      { workflow: "approved_whatsapp_delivery", source_file: "production/lib/provider-delivery.mjs", symbol: "deliverApprovedProviderMessage" },
+      { workflow: "verified_inbound_webhooks", source_file: "production/lib/provider-webhooks.mjs", symbol: "renderProviderWebhookResponse" },
+    ],
+  },
+  viber: {
+    state: "disabled",
+    ownerSurface: "hidden",
+    authorization: "token_only",
+    reason: "provider_has_no_supported_oauth_or_partner_handoff",
+    consumers: [
+      { workflow: "approved_viber_delivery", source_file: "production/lib/provider-delivery.mjs", symbol: "deliverApprovedProviderMessage" },
+      { workflow: "verified_inbound_webhooks", source_file: "production/lib/provider-webhooks.mjs", symbol: "renderProviderWebhookResponse" },
+    ],
+  },
+  facebook: {
+    state: "disabled",
+    ownerSurface: "hidden",
+    authorization: "oauth_authorization_code",
+    reason: "no_approved_runtime_consumer",
+    consumers: [],
+  },
+  instagram: {
+    state: "disabled",
+    ownerSurface: "hidden",
+    authorization: "oauth_authorization_code",
+    reason: "no_approved_runtime_consumer",
+    consumers: [],
+  },
+  github: {
+    state: "disabled",
+    ownerSurface: "hidden",
+    authorization: "oauth_authorization_code",
+    reason: "no_approved_runtime_consumer",
+    consumers: [],
+  },
+  cloudflare: {
+    state: "managed",
+    ownerSurface: "infrastructure_status",
+    authorization: "managed_runtime",
+    reason: "infrastructure_managed_outside_owner_connections",
+    consumers: [],
+  },
+  neon: {
+    state: "managed",
+    ownerSurface: "data_status",
+    authorization: "managed_runtime",
+    reason: "database_managed_outside_owner_connections",
+    consumers: [],
+  },
+  ai: {
+    state: "managed",
+    ownerSurface: "hermes_status",
+    authorization: "managed_self_hosted_runtime",
+    reason: "hermes_runtime_managed_outside_owner_connections",
+    consumers: [
+      { workflow: "guarded_hermes_owner_plans", source_file: "production/lib/admin-hermes.mjs", symbol: "buildAdminHermesPayload" },
+    ],
+  },
+});
+
 export const OPERATOR_PROVIDERS = Object.freeze(DEFINITIONS.map((definition) => definition.id));
 export const OWNER_CONNECTABLE_PROVIDERS = Object.freeze(
   DEFINITIONS.filter((definition) => definition.ownerConnectable === true).map((definition) => definition.id),
+);
+export const OPERATOR_PROVIDER_COVERAGE = Object.freeze(
+  DEFINITIONS.map((definition) => {
+    const coverage = PROVIDER_COVERAGE[definition.id];
+    if (!coverage) throw new Error(`Missing provider coverage for ${definition.id}`);
+    return Object.freeze({
+      provider: definition.id,
+      state: coverage.state,
+      enabled: coverage.state === "enabled",
+      owner_surface: coverage.ownerSurface,
+      authorization: coverage.authorization,
+      owner_action: coverage.ownerAction ? Object.freeze({ ...coverage.ownerAction, provider: definition.id }) : null,
+      lifecycle: coverage.state === "enabled" ? OWNER_CONNECTION_LIFECYCLE : [],
+      downstream_consumers: Object.freeze(coverage.consumers.map((consumer) => Object.freeze({ ...consumer }))),
+      reason: coverage.reason || null,
+      owner_secret_fields: false,
+      source_file: "production/lib/operator-provider-catalog.mjs",
+    });
+  }),
 );
 // Everything except the runtime card is a row in the connection store.
 export const OPERATOR_STORED_PROVIDERS = Object.freeze(

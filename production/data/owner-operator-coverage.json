@@ -1,11 +1,18 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "plugin_id": "ms-realty-operator",
   "generated_by": "production/scripts/build-owner-operator-coverage.mjs",
   "summary": {
     "admin_route_files": 103,
     "admin_methods": 117,
-    "hermes_tools": 3
+    "hermes_tools": 3,
+    "authorized_workflows": 120,
+    "reachable_workflows": 120,
+    "reachability_percent": 100,
+    "providers": 10,
+    "enabled_integrations": 2,
+    "managed_systems": 3,
+    "disabled_integrations": 5
   },
   "admin_routes": [
     {
@@ -22,7 +29,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/views/route.js"
+      "source_file": "app/api/admin/views/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_activity",
@@ -38,7 +46,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/activity/route.js"
+      "source_file": "app/api/admin/activity/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_approved_content",
@@ -54,7 +63,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/approved-content/route.js"
+      "source_file": "app/api/admin/approved-content/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_availability",
@@ -70,7 +80,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/availability/route.js"
+      "source_file": "app/api/admin/availability/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_cases",
@@ -86,7 +97,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/cases/route.js"
+      "source_file": "app/api/admin/cases/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_cases_conditions",
@@ -102,7 +114,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/cases/conditions/route.js"
+      "source_file": "app/api/admin/cases/conditions/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_cases_intents",
@@ -118,7 +131,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/cases/intents/route.js"
+      "source_file": "app/api/admin/cases/intents/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_cms_collections",
@@ -134,7 +148,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/cms-collections/route.js"
+      "source_file": "app/api/admin/cms-collections/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_connections",
@@ -151,7 +166,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/connections/route.js"
+      "source_file": "app/api/admin/connections/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_connections_agent_config",
@@ -168,7 +184,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/connections/agent-config/route.js"
+      "source_file": "app/api/admin/connections/agent-config/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_consents",
@@ -184,7 +201,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/consents/route.js"
+      "source_file": "app/api/admin/consents/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_contacts",
@@ -200,7 +218,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/contacts/route.js"
+      "source_file": "app/api/admin/contacts/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_data_exports",
@@ -217,7 +236,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/data-exports/route.js"
+      "source_file": "app/api/admin/data-exports/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_data_exports_download",
@@ -234,7 +254,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/data-exports/download/route.js"
+      "source_file": "app/api/admin/data-exports/download/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_documents",
@@ -250,7 +271,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/documents/route.js"
+      "source_file": "app/api/admin/documents/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_hermes",
@@ -266,7 +288,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/hermes/route.js"
+      "source_file": "app/api/admin/hermes/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_launch_input_checklist",
@@ -282,7 +305,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/launch-input-checklist/route.js"
+      "source_file": "app/api/admin/launch-input-checklist/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_launch_readiness",
@@ -298,7 +322,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/launch-readiness/route.js"
+      "source_file": "app/api/admin/launch-readiness/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_leads",
@@ -314,7 +339,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/leads/route.js"
+      "source_file": "app/api/admin/leads/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_listing_quality",
@@ -330,7 +356,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listing-quality/route.js"
+      "source_file": "app/api/admin/listing-quality/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_listing_quality_review_draft",
@@ -346,7 +373,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listing-quality-review-draft/route.js"
+      "source_file": "app/api/admin/listing-quality-review-draft/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_listing_quality_review_packet",
@@ -362,7 +390,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listing-quality-review-packet/route.js"
+      "source_file": "app/api/admin/listing-quality-review-packet/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_listing_quality_workbook",
@@ -378,7 +407,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listing-quality-workbook/route.js"
+      "source_file": "app/api/admin/listing-quality-workbook/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_listings",
@@ -394,7 +424,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listings/route.js"
+      "source_file": "app/api/admin/listings/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_live_service_provisioning",
@@ -410,7 +441,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/live-service-provisioning/route.js"
+      "source_file": "app/api/admin/live-service-provisioning/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_live_service_report_template",
@@ -426,7 +458,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/live-service-report-template/route.js"
+      "source_file": "app/api/admin/live-service-report-template/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_live_services",
@@ -442,7 +475,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/live-services/route.js"
+      "source_file": "app/api/admin/live-services/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_locales",
@@ -458,7 +492,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/locales/route.js"
+      "source_file": "app/api/admin/locales/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_media_uploads",
@@ -475,7 +510,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/listings/edit",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/media/uploads/route.js"
+      "source_file": "app/api/admin/media/uploads/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_media_uploads_by_assetId",
@@ -492,7 +528,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/listings/edit",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/media/uploads/[assetId]/route.js"
+      "source_file": "app/api/admin/media/uploads/[assetId]/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_migration_review",
@@ -508,7 +545,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/migration/review/route.js"
+      "source_file": "app/api/admin/migration/review/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_payload_collections",
@@ -524,7 +562,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/payload-collections/route.js"
+      "source_file": "app/api/admin/payload-collections/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_payload_runtime",
@@ -540,7 +579,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/payload-runtime/route.js"
+      "source_file": "app/api/admin/payload-runtime/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_payload_runtime_bootstrap",
@@ -556,7 +596,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/payload-runtime-bootstrap/route.js"
+      "source_file": "app/api/admin/payload-runtime-bootstrap/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_pipeline",
@@ -572,7 +613,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/pipeline/route.js"
+      "source_file": "app/api/admin/pipeline/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_preflight_reports",
@@ -588,7 +630,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/preflight-reports/route.js"
+      "source_file": "app/api/admin/preflight-reports/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_production_recovery",
@@ -604,7 +647,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/production-recovery/route.js"
+      "source_file": "app/api/admin/production-recovery/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_production_recovery_template",
@@ -620,7 +664,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/production-recovery-template/route.js"
+      "source_file": "app/api/admin/production-recovery-template/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_redirect_approval_workbook",
@@ -636,7 +681,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/redirect-approval-workbook/route.js"
+      "source_file": "app/api/admin/redirect-approval-workbook/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_reports",
@@ -652,7 +698,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/reports/route.js"
+      "source_file": "app/api/admin/reports/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_reports_export",
@@ -668,7 +715,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/reports/export/route.js"
+      "source_file": "app/api/admin/reports/export/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_requests",
@@ -684,7 +732,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/requests/route.js"
+      "source_file": "app/api/admin/requests/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_security_audit_retention",
@@ -701,7 +750,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/security/audit-retention/route.js"
+      "source_file": "app/api/admin/security/audit-retention/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_security_sessions",
@@ -718,7 +768,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/security/sessions/route.js"
+      "source_file": "app/api/admin/security/sessions/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_security_two_factor",
@@ -735,7 +786,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/security/two-factor/route.js"
+      "source_file": "app/api/admin/security/two-factor/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_seo_evidence",
@@ -751,7 +803,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/seo-evidence/route.js"
+      "source_file": "app/api/admin/seo-evidence/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_seo_evidence_export",
@@ -767,7 +820,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/seo-evidence/export/route.js"
+      "source_file": "app/api/admin/seo-evidence/export/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_seo_evidence_template",
@@ -783,7 +837,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/seo-evidence/template/route.js"
+      "source_file": "app/api/admin/seo-evidence/template/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_seo_preflight",
@@ -799,7 +854,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/seo-preflight/route.js"
+      "source_file": "app/api/admin/seo-preflight/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_settings",
@@ -815,7 +871,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/settings/route.js"
+      "source_file": "app/api/admin/settings/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_team",
@@ -832,7 +889,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/team",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/team/route.js"
+      "source_file": "app/api/admin/team/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_today",
@@ -848,7 +906,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/today/route.js"
+      "source_file": "app/api/admin/today/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_translations",
@@ -864,7 +923,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/translations/route.js"
+      "source_file": "app/api/admin/translations/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_viewings",
@@ -880,7 +940,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/viewings/route.js"
+      "source_file": "app/api/admin/viewings/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_viewings_ics",
@@ -896,7 +957,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/viewings.ics/route.js"
+      "source_file": "app/api/admin/viewings.ics/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_viewings_week",
@@ -912,7 +974,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/viewings/week/route.js"
+      "source_file": "app/api/admin/viewings/week/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_get_views",
@@ -928,7 +991,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/views/route.js"
+      "source_file": "app/api/admin/views/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_accounts",
@@ -944,7 +1008,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/accounts/route.js"
+      "source_file": "app/api/admin/accounts/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_accounts_link",
@@ -960,7 +1025,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/accounts/link/route.js"
+      "source_file": "app/api/admin/accounts/link/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_availability",
@@ -976,7 +1042,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/availability/route.js"
+      "source_file": "app/api/admin/availability/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_broker_contacts",
@@ -992,7 +1059,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/broker-contacts/route.js"
+      "source_file": "app/api/admin/broker-contacts/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_cases",
@@ -1008,7 +1076,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/cases/route.js"
+      "source_file": "app/api/admin/cases/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_cases_actions",
@@ -1024,7 +1093,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/cases/actions/route.js"
+      "source_file": "app/api/admin/cases/actions/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_cases_conditions",
@@ -1040,7 +1110,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/cases/conditions/route.js"
+      "source_file": "app/api/admin/cases/conditions/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_cases_conditions_actions",
@@ -1056,7 +1127,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/cases/conditions/actions/route.js"
+      "source_file": "app/api/admin/cases/conditions/actions/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_connections",
@@ -1073,7 +1145,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/connections/route.js"
+      "source_file": "app/api/admin/connections/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_connections_disconnect",
@@ -1090,7 +1163,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/connections/disconnect/route.js"
+      "source_file": "app/api/admin/connections/disconnect/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_consents_withdraw",
@@ -1106,7 +1180,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/consents/withdraw/route.js"
+      "source_file": "app/api/admin/consents/withdraw/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_data_exports",
@@ -1123,7 +1198,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/data-exports/route.js"
+      "source_file": "app/api/admin/data-exports/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_deals_close",
@@ -1139,7 +1215,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/deals/close/route.js"
+      "source_file": "app/api/admin/deals/close/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_deployable_redirects_export",
@@ -1155,7 +1232,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/deployable-redirects/export/route.js"
+      "source_file": "app/api/admin/deployable-redirects/export/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_documents_outcome",
@@ -1171,7 +1249,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/documents/outcome/route.js"
+      "source_file": "app/api/admin/documents/outcome/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_hermes",
@@ -1187,7 +1266,8 @@
       "hermes_access": "draft_only",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/hermes/route.js"
+      "source_file": "app/api/admin/hermes/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_launch_readiness_export",
@@ -1203,7 +1283,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/launch-readiness/export/route.js"
+      "source_file": "app/api/admin/launch-readiness/export/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_lead_pipeline_outcome",
@@ -1219,7 +1300,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/lead-pipeline/outcome/route.js"
+      "source_file": "app/api/admin/lead-pipeline/outcome/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_leads",
@@ -1235,7 +1317,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/leads/route.js"
+      "source_file": "app/api/admin/leads/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_leads_assign",
@@ -1251,7 +1334,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/leads/assign/route.js"
+      "source_file": "app/api/admin/leads/assign/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_leads_bulk",
@@ -1267,7 +1351,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/leads/bulk/route.js"
+      "source_file": "app/api/admin/leads/bulk/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_leads_snooze",
@@ -1283,7 +1368,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/leads/snooze/route.js"
+      "source_file": "app/api/admin/leads/snooze/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_leads_unsnooze",
@@ -1299,7 +1385,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/leads/unsnooze/route.js"
+      "source_file": "app/api/admin/leads/unsnooze/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_listing_quality_import",
@@ -1316,7 +1403,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listing-quality/import/route.js"
+      "source_file": "app/api/admin/listing-quality/import/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_listings_edit",
@@ -1332,7 +1420,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listings/edit/route.js"
+      "source_file": "app/api/admin/listings/edit/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_listings_publication_schedules",
@@ -1348,7 +1437,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listings/publication-schedules/route.js"
+      "source_file": "app/api/admin/listings/publication-schedules/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_listings_publication_schedules_cancel",
@@ -1364,7 +1454,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listings/publication-schedules/cancel/route.js"
+      "source_file": "app/api/admin/listings/publication-schedules/cancel/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_listings_publication_schedules_run_due",
@@ -1380,7 +1471,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listings/publication-schedules/run-due/route.js"
+      "source_file": "app/api/admin/listings/publication-schedules/run-due/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_listings_slug",
@@ -1396,7 +1488,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listings/slug/route.js"
+      "source_file": "app/api/admin/listings/slug/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_listings_status",
@@ -1412,7 +1505,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/listings/status/route.js"
+      "source_file": "app/api/admin/listings/status/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_live_service_provisioning_import",
@@ -1429,7 +1523,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/live-service-provisioning/import/route.js"
+      "source_file": "app/api/admin/live-service-provisioning/import/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_live_service_reports_import",
@@ -1446,7 +1541,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/live-service-reports/import/route.js"
+      "source_file": "app/api/admin/live-service-reports/import/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_locales",
@@ -1462,7 +1558,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/locales/route.js"
+      "source_file": "app/api/admin/locales/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_media_reviews",
@@ -1478,7 +1575,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/media/reviews/route.js"
+      "source_file": "app/api/admin/media/reviews/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_media_uploads",
@@ -1495,7 +1593,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/listings/edit",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/media/uploads/route.js"
+      "source_file": "app/api/admin/media/uploads/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_payload_runtime_import",
@@ -1512,7 +1611,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/payload-runtime/import/route.js"
+      "source_file": "app/api/admin/payload-runtime/import/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_production_recovery_import",
@@ -1529,7 +1629,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/production-recovery/import/route.js"
+      "source_file": "app/api/admin/production-recovery/import/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_public_requests_outcome",
@@ -1545,7 +1646,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/public-requests/outcome/route.js"
+      "source_file": "app/api/admin/public-requests/outcome/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_redirect_approvals",
@@ -1561,7 +1663,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/redirect-approvals/route.js"
+      "source_file": "app/api/admin/redirect-approvals/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_redirect_approvals_import",
@@ -1578,7 +1681,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/redirect-approvals/import/route.js"
+      "source_file": "app/api/admin/redirect-approvals/import/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_replies",
@@ -1594,7 +1698,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/replies/route.js"
+      "source_file": "app/api/admin/replies/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_replies_delivery",
@@ -1610,7 +1715,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/replies/delivery/route.js"
+      "source_file": "app/api/admin/replies/delivery/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_replies_draft",
@@ -1626,7 +1732,8 @@
       "hermes_access": "draft_only",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/replies/draft/route.js"
+      "source_file": "app/api/admin/replies/draft/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_saved_search_alerts_run_due",
@@ -1642,7 +1749,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/saved-search-alerts/run-due/route.js"
+      "source_file": "app/api/admin/saved-search-alerts/run-due/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_security_sessions_revoke",
@@ -1659,7 +1767,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/security/sessions/revoke/route.js"
+      "source_file": "app/api/admin/security/sessions/revoke/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_security_two_factor_activate",
@@ -1676,7 +1785,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/security/two-factor/activate/route.js"
+      "source_file": "app/api/admin/security/two-factor/activate/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_security_two_factor_disable",
@@ -1693,7 +1803,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/security/two-factor/disable/route.js"
+      "source_file": "app/api/admin/security/two-factor/disable/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_security_two_factor_enrol",
@@ -1710,7 +1821,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/security/two-factor/enrol/route.js"
+      "source_file": "app/api/admin/security/two-factor/enrol/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_security_two_factor_verify",
@@ -1727,7 +1839,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/security/two-factor/verify/route.js"
+      "source_file": "app/api/admin/security/two-factor/verify/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_seller_pipeline_outcome",
@@ -1743,7 +1856,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/seller-pipeline/outcome/route.js"
+      "source_file": "app/api/admin/seller-pipeline/outcome/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_seo_evidence_import",
@@ -1760,7 +1874,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/seo-evidence/import/route.js"
+      "source_file": "app/api/admin/seo-evidence/import/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_settings",
@@ -1776,7 +1891,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/settings/route.js"
+      "source_file": "app/api/admin/settings/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_team",
@@ -1793,7 +1909,8 @@
       "execution": "browser_session",
       "ui_path": "/admin/team",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/team/route.js"
+      "source_file": "app/api/admin/team/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_tours_approve",
@@ -1809,7 +1926,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/tours/approve/route.js"
+      "source_file": "app/api/admin/tours/approve/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_translations_approve",
@@ -1825,7 +1943,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/translations/approve/route.js"
+      "source_file": "app/api/admin/translations/approve/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_translations_draft",
@@ -1841,7 +1960,8 @@
       "hermes_access": "draft_only",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/translations/draft/route.js"
+      "source_file": "app/api/admin/translations/draft/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_translations_publish",
@@ -1857,7 +1977,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/translations/publish/route.js"
+      "source_file": "app/api/admin/translations/publish/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_viewings",
@@ -1873,7 +1994,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/viewings/route.js"
+      "source_file": "app/api/admin/viewings/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_viewings_follow_up",
@@ -1889,7 +2011,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/viewings/follow-up/route.js"
+      "source_file": "app/api/admin/viewings/follow-up/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     },
     {
       "operation": "admin_post_views",
@@ -1905,7 +2028,8 @@
       "hermes_access": "none",
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
-      "source_file": "app/api/admin/views/route.js"
+      "source_file": "app/api/admin/views/route.js",
+      "reachability": "delegated_mcp_and_signed_in_webmcp"
     }
   ],
   "hermes_tools": [
@@ -1920,7 +2044,8 @@
         "send",
         "mark_indexable",
         "approve_legal"
-      ]
+      ],
+      "reachability": "owner_plugin_mcp"
     },
     {
       "operation": "hermes_next_tasks",
@@ -1933,7 +2058,8 @@
         "send",
         "mark_indexable",
         "approve_legal"
-      ]
+      ],
+      "reachability": "owner_plugin_mcp"
     },
     {
       "operation": "hermes_submit_draft",
@@ -1947,7 +2073,202 @@
         "send",
         "mark_indexable",
         "approve_legal"
-      ]
+      ],
+      "reachability": "owner_plugin_mcp"
+    }
+  ],
+  "provider_matrix": [
+    {
+      "provider": "google",
+      "state": "enabled",
+      "enabled": true,
+      "owner_surface": "one_click",
+      "authorization": "oauth_authorization_code",
+      "owner_action": {
+        "kind": "oauth_redirect",
+        "method": "GET",
+        "pathname": "/api/admin/connections",
+        "action": "start",
+        "provider": "google"
+      },
+      "lifecycle": [
+        "authorizing",
+        "connected",
+        "reauthorize",
+        "error",
+        "disconnected"
+      ],
+      "downstream_consumers": [
+        {
+          "workflow": "approved_email_delivery",
+          "source_file": "production/lib/provider-delivery.mjs",
+          "symbol": "deliverApprovedProviderMessage"
+        },
+        {
+          "workflow": "viewing_calendar_sync",
+          "source_file": "production/lib/provider-connections.mjs",
+          "symbol": "syncViewingToGoogleCalendar"
+        }
+      ],
+      "reason": null,
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
+    },
+    {
+      "provider": "google_drive",
+      "state": "disabled",
+      "enabled": false,
+      "owner_surface": "hidden",
+      "authorization": "oauth_authorization_code",
+      "owner_action": null,
+      "lifecycle": [],
+      "downstream_consumers": [],
+      "reason": "no_approved_runtime_consumer",
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
+    },
+    {
+      "provider": "whatsapp",
+      "state": "enabled",
+      "enabled": true,
+      "owner_surface": "one_click",
+      "authorization": "provider_embedded_signup",
+      "owner_action": {
+        "kind": "embedded_signup",
+        "method": "POST",
+        "pathname": "/api/admin/connections",
+        "provider": "whatsapp"
+      },
+      "lifecycle": [
+        "authorizing",
+        "connected",
+        "reauthorize",
+        "error",
+        "disconnected"
+      ],
+      "downstream_consumers": [
+        {
+          "workflow": "approved_whatsapp_delivery",
+          "source_file": "production/lib/provider-delivery.mjs",
+          "symbol": "deliverApprovedProviderMessage"
+        },
+        {
+          "workflow": "verified_inbound_webhooks",
+          "source_file": "production/lib/provider-webhooks.mjs",
+          "symbol": "renderProviderWebhookResponse"
+        }
+      ],
+      "reason": null,
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
+    },
+    {
+      "provider": "viber",
+      "state": "disabled",
+      "enabled": false,
+      "owner_surface": "hidden",
+      "authorization": "token_only",
+      "owner_action": null,
+      "lifecycle": [],
+      "downstream_consumers": [
+        {
+          "workflow": "approved_viber_delivery",
+          "source_file": "production/lib/provider-delivery.mjs",
+          "symbol": "deliverApprovedProviderMessage"
+        },
+        {
+          "workflow": "verified_inbound_webhooks",
+          "source_file": "production/lib/provider-webhooks.mjs",
+          "symbol": "renderProviderWebhookResponse"
+        }
+      ],
+      "reason": "provider_has_no_supported_oauth_or_partner_handoff",
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
+    },
+    {
+      "provider": "facebook",
+      "state": "disabled",
+      "enabled": false,
+      "owner_surface": "hidden",
+      "authorization": "oauth_authorization_code",
+      "owner_action": null,
+      "lifecycle": [],
+      "downstream_consumers": [],
+      "reason": "no_approved_runtime_consumer",
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
+    },
+    {
+      "provider": "instagram",
+      "state": "disabled",
+      "enabled": false,
+      "owner_surface": "hidden",
+      "authorization": "oauth_authorization_code",
+      "owner_action": null,
+      "lifecycle": [],
+      "downstream_consumers": [],
+      "reason": "no_approved_runtime_consumer",
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
+    },
+    {
+      "provider": "github",
+      "state": "disabled",
+      "enabled": false,
+      "owner_surface": "hidden",
+      "authorization": "oauth_authorization_code",
+      "owner_action": null,
+      "lifecycle": [],
+      "downstream_consumers": [],
+      "reason": "no_approved_runtime_consumer",
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
+    },
+    {
+      "provider": "cloudflare",
+      "state": "managed",
+      "enabled": false,
+      "owner_surface": "infrastructure_status",
+      "authorization": "managed_runtime",
+      "owner_action": null,
+      "lifecycle": [],
+      "downstream_consumers": [],
+      "reason": "infrastructure_managed_outside_owner_connections",
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
+    },
+    {
+      "provider": "neon",
+      "state": "managed",
+      "enabled": false,
+      "owner_surface": "data_status",
+      "authorization": "managed_runtime",
+      "owner_action": null,
+      "lifecycle": [],
+      "downstream_consumers": [],
+      "reason": "database_managed_outside_owner_connections",
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
+    },
+    {
+      "provider": "ai",
+      "state": "managed",
+      "enabled": false,
+      "owner_surface": "hermes_status",
+      "authorization": "managed_self_hosted_runtime",
+      "owner_action": null,
+      "lifecycle": [],
+      "downstream_consumers": [
+        {
+          "workflow": "guarded_hermes_owner_plans",
+          "source_file": "production/lib/admin-hermes.mjs",
+          "symbol": "buildAdminHermesPayload"
+        }
+      ],
+      "reason": "hermes_runtime_managed_outside_owner_connections",
+      "owner_secret_fields": false,
+      "source_file": "production/lib/operator-provider-catalog.mjs"
     }
   ]
 }
