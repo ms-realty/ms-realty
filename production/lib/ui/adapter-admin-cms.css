@@ -520,6 +520,6 @@
   .adm-approved-ready { margin-inline-start: 0; flex-basis: 100%; }
 }
 
-/* The editor rail pins its stat strips to two columns, so an odd last stat
+/* The editor support grid pins its stat strips to two columns, so an odd last stat
    would leave a dead cell next to it. Let it take the full row instead. */
-.adm-editor-rail .adm-kpis > .crm-stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.adm-editor-support .adm-kpis > .crm-stat:last-child:nth-child(odd) { grid-column: 1 / -1; }

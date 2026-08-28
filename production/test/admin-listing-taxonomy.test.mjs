@@ -36,17 +36,17 @@ function emptyLeads() {
 
 test("admin listing editor quality rail uses a compact status list", () => {
   const html = editorHtml("MS-CRAWL-0001", "bg");
-  const rail = html.match(/data-editor-readiness-rail="true"[\s\S]*?<\/aside>/)?.[0] || "";
-  assert.match(rail, /class="crm-panel"/);
-  assert.match(rail, /Публикувано/);
-  assert.match(rail, /data-quality-panel="true"/);
-  assert.match(rail, /data-translation-panel="true"/);
-  assert.match(rail, /data-media-review-panel="true"/);
+  assert.match(html, /<section class="adm-editor-support"[^>]*data-editor-readiness-rail="true"/);
+  assert.match(html, /class="crm-panel"/);
+  assert.match(html, /Публикувано/);
+  assert.match(html, /data-quality-panel="true"/);
+  assert.match(html, /data-translation-panel="true"/);
+  assert.match(html, /data-media-review-panel="true"/);
   // Owner-directed publication does not clear the review work: the rail still
   // names the outstanding fact gap and the unverified availability check.
-  assert.match(rail, /data-listing-quality-issues="[1-9]/);
-  assert.match(rail, /data-quality-issue="missing_area"/);
-  assert.match(rail, /Не е проверена/);
+  assert.match(html, /data-listing-quality-issues="[1-9]/);
+  assert.match(html, /data-quality-issue="missing_area"/);
+  assert.match(html, /Не е проверена/);
 });
 
 test("admin listing editor savebar uses workspace copy instead of filter leftovers", () => {
@@ -308,7 +308,7 @@ test("admin Today ranks pipeline and follow-up work in one priority list", () =>
   assert.doesNotMatch(dueAction, /2026-07-06T12:00:00/);
   assert.doesNotMatch(html, /data-pipeline-preview-row=/);
   assert.doesNotMatch(html, /data-viewing-follow-up-table=/);
-  assert.doesNotMatch(html, /data-readiness-rail=/);
+  assert.match(html, /data-readiness-rail="true"/);
 });
 
 test("admin translation queue localizes reviewer roles and titles results once", () => {

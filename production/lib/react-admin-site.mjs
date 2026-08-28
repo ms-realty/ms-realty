@@ -2654,6 +2654,7 @@ const OWNER_CONSOLE_COPY = {
       tools: "Възможности на Hermes",
       toolsDescription: "Точните операции, които MCP пакетът предоставя на собственика.",
       guardrails: "Задължителни ограничения",
+      technicalDetails: "Технически детайли и защити",
       ready: "Готово",
       blocked: "Блокирано",
       pass: "Успешно",
@@ -2763,6 +2764,7 @@ const OWNER_CONSOLE_COPY = {
       tools: "Возможности Hermes",
       toolsDescription: "Точные операции, доступные владельцу через MCP-пакет.",
       guardrails: "Обязательные ограничения",
+      technicalDetails: "Технические детали и ограничения",
       ready: "Готово",
       blocked: "Заблокировано",
       pass: "Успешно",
@@ -2872,6 +2874,7 @@ const OWNER_CONSOLE_COPY = {
       tools: "Hermes capabilities",
       toolsDescription: "The exact operations exposed to the owner by the MCP package.",
       guardrails: "Mandatory guardrails",
+      technicalDetails: "Technical details and safeguards",
       ready: "Ready",
       blocked: "Blocked",
       pass: "Pass",
@@ -8318,14 +8321,18 @@ function TranslationQueueBody({ page }) {
                             h("input", { type: "hidden", name: "propertyFactsJson", defaultValue: JSON.stringify(row.property_facts) }),
                             h("input", { type: "hidden", name: "reviewer", defaultValue: currentOperatorId(page, row.reviewer_role) }),
                             h(
-                              "div",
-                              { className: "adm-human-translation__context" },
+                              "section",
+                              { className: "adm-human-translation__overview", "data-translation-overview": "true" },
                               h(
                                 "div",
-                                { className: "adm-human-translation__source" },
-                                h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()),
-                                h("strong", null, row.source_title),
-                                row.source_description ? h("p", null, row.source_description) : null,
+                                { className: "adm-human-translation__context" },
+                                h(
+                                  "div",
+                                  { className: "adm-human-translation__source" },
+                                  h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()),
+                                  h("strong", null, row.source_title),
+                                  row.source_description ? h("p", null, row.source_description) : null,
+                                ),
                               ),
                               h(
                                 "dl",
@@ -8744,8 +8751,8 @@ function ListingEditorBody({ page }) {
           ),
         ),
         h(
-          "aside",
-          { className: "adm-editor-rail", "data-editor-readiness-rail": "true" },
+          "section",
+          { className: "adm-editor-support", "data-editor-readiness-rail": "true" },
           h(
             Panel,
             {
@@ -11107,9 +11114,9 @@ function AssistantAccess({ assistant, copy }) {
       : null,
     config
       ? h(
-          "div",
-          { className: "adm-assistant-connection__config" },
-          h("p", { className: "adm-assistant-connection__config-label", id: "agent-config-label" }, copy.agentConfigLabel),
+          "details",
+          { className: "adm-assistant-connection__config", "data-assistant-config-disclosure": "true" },
+          h("summary", { className: "adm-assistant-connection__config-label", id: "agent-config-label" }, copy.agentConfigLabel),
           h("pre", { className: "adm-assistant-connection__config-block", id: "agent-config", tabIndex: 0, "aria-labelledby": "agent-config-label" }, config),
           h(
             "div",
@@ -11479,25 +11486,34 @@ function HermesBody({ page }) {
               { className: "adm-hermes-card" },
               h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)), h("p", null, copy.hostedDescription)),
               h(
-                "dl",
-                { className: "adm-hermes-facts" },
-                runtime.endpoint ? h("div", null, h("dt", null, copy.endpoint), h("dd", null, h("code", null, runtime.endpoint))) : null,
-                h("div", null, h("dt", null, copy.model), h("dd", null, runtime.model || "—")),
-                h("div", null, h("dt", null, copy.generatedAt), h("dd", null, formatAdminDateTime(runtime.generated_at || page.generated_at, page.workspace.locale))),
-              ),
-              h(
-                "div",
-                { className: "adm-hermes-checks", "aria-label": copy.checks },
-                h("strong", null, copy.checks),
+                "details",
+                { className: "adm-hermes-diagnostics", "data-hermes-diagnostics": "collapsed" },
+                h("summary", null, h(Icon, { name: "settings", size: 16 }), h("span", null, copy.technicalDetails)),
                 h(
-                  "ul",
-                  null,
-                  ...(runtime.checks || []).map((check) =>
+                  "div",
+                  { className: "adm-hermes-diagnostics__body" },
+                  h(
+                    "dl",
+                    { className: "adm-hermes-facts" },
+                    runtime.endpoint ? h("div", null, h("dt", null, copy.endpoint), h("dd", null, h("code", null, runtime.endpoint))) : null,
+                    h("div", null, h("dt", null, copy.model), h("dd", null, runtime.model || "—")),
+                    h("div", null, h("dt", null, copy.generatedAt), h("dd", null, formatAdminDateTime(runtime.generated_at || page.generated_at, page.workspace.locale))),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-hermes-checks", "aria-label": copy.checks },
+                    h("strong", null, copy.checks),
                     h(
-                      "li",
-                      { key: check.id, "data-hermes-check": check.id, "data-check-state": check.status },
-                      h("code", null, check.id),
-                      h(StatusPill, { tone: check.status === "pass" ? "success" : check.status === "fail" ? "brick" : "sand" }, hermesStateLabel(copy, check.status)),
+                      "ul",
+                      null,
+                      ...(runtime.checks || []).map((check) =>
+                        h(
+                          "li",
+                          { key: check.id, "data-hermes-check": check.id, "data-check-state": check.status },
+                          h("code", null, check.id),
+                          h(StatusPill, { tone: check.status === "pass" ? "success" : check.status === "fail" ? "brick" : "sand" }, hermesStateLabel(copy, check.status)),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -11539,30 +11555,39 @@ function HermesBody({ page }) {
             ),
           ),
           h(
-            Panel,
-            { title: copy.tools, "data-hermes-tool-coverage": tools.length },
-            h("p", { className: "adm-hermes-panel-intro" }, copy.toolsDescription),
+            "details",
+            { className: "adm-hermes-safeguards", "data-hermes-safeguards": "collapsed" },
+            h("summary", null, h(Icon, { name: "shield-check", size: 16 }), h("span", null, copy.technicalDetails)),
             h(
-              "ul",
-              { className: "adm-hermes-tools" },
-              ...tools.map((tool) =>
+              "div",
+              { className: "adm-hermes-safeguards__body" },
+              h(
+                Panel,
+                { title: copy.tools, "data-hermes-tool-coverage": tools.length },
+                h("p", { className: "adm-hermes-panel-intro" }, copy.toolsDescription),
                 h(
-                  "li",
-                  { key: tool.operation, "data-hermes-tool": tool.operation },
-                  h("div", null, h("strong", null, h("code", null, tool.operation)), h(StatusPill, { tone: tool.read_only ? "sea" : "sun" }, tool.read_only ? copy.readOnly : copy.draftWrite)),
-                  tool.confirmation ? h("small", null, copy.confirmationRequired) : null,
-                  h("small", null, `${copy.prohibited}: ${(tool.prohibited_actions || []).join(", ")}`),
+                  "ul",
+                  { className: "adm-hermes-tools" },
+                  ...tools.map((tool) =>
+                    h(
+                      "li",
+                      { key: tool.operation, "data-hermes-tool": tool.operation },
+                      h("div", null, h("strong", null, h("code", null, tool.operation)), h(StatusPill, { tone: tool.read_only ? "sea" : "sun" }, tool.read_only ? copy.readOnly : copy.draftWrite)),
+                      tool.confirmation ? h("small", null, copy.confirmationRequired) : null,
+                      h("small", null, `${copy.prohibited}: ${(tool.prohibited_actions || []).join(", ")}`),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          h(
-            Panel,
-            { title: copy.guardrails, "data-hermes-guardrails": "true" },
-            h(
-              "ul",
-              { className: "adm-hermes-guardrails" },
-              ...copy.guardrailItems.map((item) => h("li", { key: item }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, item))),
+              h(
+                Panel,
+                { title: copy.guardrails, "data-hermes-guardrails": "true" },
+                h(
+                  "ul",
+                  { className: "adm-hermes-guardrails" },
+                  ...copy.guardrailItems.map((item) => h("li", { key: item }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, item))),
+                ),
+              ),
             ),
           ),
         ),

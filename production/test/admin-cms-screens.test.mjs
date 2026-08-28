@@ -78,11 +78,12 @@ test("translation review groups its rows by listing so one title is not repeated
   assert.match(page.body, /class="adm-translation-continued"/);
   assert.match(page.body, /data-translation-editor-row="translation-MS-CRAWL-0001-en"/);
   assert.match(page.body, /<td colSpan="5"><details class="adm-reply adm-translation-editor" data-translation-editor-workspace="true">/);
+  assert.match(page.body, /data-translation-overview="true"/);
   assert.match(page.body, /class="adm-human-translation__context"/);
   assert.match(page.body, /class="adm-human-translation__fields"/);
   assert.match(page.body, /class="adm-human-translation__facts"/);
-  assert.match(adminCss, /\.adm-human-translation\s*\{[^}]*grid-template-columns:\s*minmax\(260px,\s*0\.88fr\)\s+minmax\(0,\s*1\.12fr\)/);
-  assert.match(adminCss, /\.adm-human-translation__context\s*\{[^}]*position:\s*sticky/);
+  assert.match(adminCss, /\.adm-human-translation\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(adminCss, /\.adm-human-translation__overview\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.18fr\)\s+minmax\(260px,\s*0\.82fr\)/);
   assert.match(adminCss, /\.adm-human-translation__fields\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(crmCss, /\.adm-toolbar > \.crm-seg:not\(\.adm-cms-filter\)\s*\{[^}]*overflow:\s*visible/);
   assert.match(cmsCss, /\.adm-cms-filter a\s*\{[^}]*flex:\s*none/);
@@ -101,10 +102,7 @@ test("mobile editors keep all section controls visible and put translation input
     adminCss,
     /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs \{[\s\S]*?scrollbar-width:\s*auto;[\s\S]*?\}[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs::\-webkit-scrollbar \{ display:\s*initial; \}/,
   );
-  assert.match(
-    adminCss,
-    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-human-translation__fields \{[\s\S]*?order:\s*1;[\s\S]*?\}[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-human-translation__context \{[\s\S]*?order:\s*2;/,
-  );
+  assert.match(adminCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-human-translation__overview \{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\);/);
   assert.match(
     adminCss,
     /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-toolbar > \.adm-cms-filter\[data-cms-filter="translations"\] \{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);[\s\S]*?overflow:\s*visible;/,
@@ -140,8 +138,8 @@ test("the listing editor names the listing, hides the operator field and carries
     assert.match(cmsCss, new RegExp(`\\[data-save-state="${state}"\\]`), state);
   }
   assert.match(adminCss, /\.adm-editor-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
-  assert.match(adminCss, /\.adm-editor-rail\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);[^}]*position:\s*static;/s);
-  assert.match(adminCss, /\.adm-editor-rail > \[data-media-review-panel\]\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;/);
+  assert.match(adminCss, /\.adm-editor-support\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);[^}]*position:\s*static;/s);
+  assert.match(adminCss, /\.adm-editor-support > \[data-media-review-panel\]\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;/);
   assert.match(adminCss, /\.adm-editor-tabs\s*\{[^}]*position:\s*sticky;[^}]*backdrop-filter:\s*blur\(14px\)/s);
   assert.match(cmsCss, /\.adm-editor-conflict\[hidden\] \{ display: none; \}/);
 });

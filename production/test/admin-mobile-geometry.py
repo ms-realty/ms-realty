@@ -45,14 +45,14 @@ def main():
               const intersects = (left, right) =>
                 left.x < right.right && left.right > right.x && left.y < right.bottom && left.bottom > right.y;
               const main = document.querySelector('[data-editor-shell] .adm-editor-main');
-              const rail = document.querySelector('[data-editor-shell] .adm-editor-rail');
+              const support = document.querySelector('[data-editor-shell] .adm-editor-support');
               const mainPanels = [...(main?.querySelectorAll(':scope > .crm-panel') || [])].filter(visible);
-              const railPanels = [...(rail?.querySelectorAll(':scope > .crm-panel') || [])].filter(visible);
+              const supportPanels = [...(support?.querySelectorAll(':scope > .crm-panel') || [])].filter(visible);
               const panelIntersections = [];
               for (const mainPanel of mainPanels) {
-                for (const railPanel of railPanels) {
-                  if (intersects(rect(mainPanel), rect(railPanel))) {
-                    panelIntersections.push({main: rect(mainPanel), rail: rect(railPanel)});
+                for (const supportPanel of supportPanels) {
+                  if (intersects(rect(mainPanel), rect(supportPanel))) {
+                    panelIntersections.push({main: rect(mainPanel), support: rect(supportPanel)});
                   }
                 }
               }
@@ -66,8 +66,8 @@ def main():
                 viewport: {width: window.innerWidth, height: window.innerHeight},
                 shell: rect(document.querySelector('[data-editor-shell]')),
                 main: rect(main),
-                rail: rect(rail),
-                railPosition: getComputedStyle(rail).position,
+                support: rect(support),
+                supportPosition: getComputedStyle(support).position,
                 savebar: rect(savebar),
                 savebarPosition: getComputedStyle(savebar).position,
                 panelIntersections,
@@ -76,7 +76,7 @@ def main():
             }
             """
         )
-        assert geometry["railPosition"] == "static", geometry
+        assert geometry["supportPosition"] == "static", geometry
         assert geometry["savebarPosition"] == "static", geometry
         assert not geometry["panelIntersections"], geometry
         assert not geometry["savebarIntersections"], geometry
