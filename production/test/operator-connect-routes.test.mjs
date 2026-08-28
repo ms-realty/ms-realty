@@ -150,10 +150,18 @@ test("both servers render every provider card on /admin/connect", async (t) => {
       for (const id of OPERATOR_PROVIDERS) {
         assert.ok(body.includes(`data-provider="${id}"`), id);
       }
-      // Both surfaces mint the assistant's configuration, not the raw operator
-      // bearer token, for the copy block.
+      // Both surfaces keep the reusable configuration token-free and hand the
+      // short-lived credential through one separate masked owner-only field.
       assert.ok(body.includes('data-copy-block="agent-config"'), "assistant config block");
+      assert.match(body, /<label for="agent-credential">Краткотраен ключ за MS_REALTY_OPERATOR_TOKEN<\/label>/);
+      const credential = body.match(/id="agent-credential" type="password" value="([^"]+)" readonly/)?.[1] || "";
+      assert.match(credential, /^a1\./);
+      assert.match(body, /data-copy-block="agent-credential"[^>]*>Копирай ключа<\/button>/);
+      const configBlock = body.match(/<pre class="agent__config"[^>]*>([\s\S]*?)<\/pre>/)?.[1] || "";
+      assert.equal(configBlock.includes(credential), false);
+      assert.equal(body.split(credential).length - 1, 1);
       assert.ok(body.includes('data-codex-plugin-install="ms-realty-operator"'), "Codex plugin install link");
+      assert.ok(body.includes('data-chatgpt-open="ms-realty-operator"'), "ChatGPT open link");
       assert.ok(body.includes("<html lang=\"bg\">"));
     }
   });
@@ -231,11 +239,41 @@ test("the assistant configuration route hands back a working config and records 
   };
   const response = await dispatchHttp(app, { method: "GET", url: "/api/admin/connections/agent-config", headers });
   assert.equal(response.status, 200);
+  assert.equal(response.headers["cache-control"], "no-store");
   const body = response.body;
+  const adapterConfig = {
+    ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
+    auditLogPath: auditFile(t),
+    payloadAdminAuth: payloadAdminAuth(),
+    authEnv: {
+      NODE_ENV: "production",
+      MS_REALTY_PUBLIC_ORIGIN: ORIGIN,
+      [OPERATOR_AGENT_SECRET_ENV]: SECRET,
+    },
+    providerConnection: PROVIDER_CONFIG,
+  };
+  const adapterResponse = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/connections/agent-config`, { headers }),
+    { config: adapterConfig },
+  );
+  assert.equal(adapterResponse.status, 200);
+  assert.equal(adapterResponse.headers.get("cache-control"), "no-store");
+  const adapterBody = await adapterResponse.json();
+
+  for (const configBody of [body, adapterBody]) {
+    assert.equal(configBody.kind, "operator_agent_config");
+    assert.equal(configBody.mcp_url, `${ORIGIN}/mcp`);
+    assert.equal(configBody.credential_env, "MS_REALTY_OPERATOR_TOKEN");
+    assert.match(configBody.credential, /^a1\./);
+    assert.match(configBody.config, /claude mcp add --transport http ms-realty/);
+    assert.match(configBody.config, /\[mcp_servers\.ms-realty\]/);
+    assert.match(configBody.config, /MS_REALTY_OPERATOR_TOKEN/);
+    assert.match(configBody.config, /bearer_token_env_var = "MS_REALTY_OPERATOR_TOKEN"/);
+    assert.equal(configBody.config.includes("http_headers"), false);
+    assert.equal(configBody.config.includes(configBody.credential), false);
+  }
   assert.equal(body.kind, "operator_agent_config");
   assert.equal(body.mcp_url, `${ORIGIN}/mcp`);
-  assert.match(body.config, /claude mcp add --transport http ms-realty/);
-  assert.match(body.config, /\[mcp_servers\.ms-realty\]/);
   assert.ok(body.expires_at > "2026-08-24");
 
   const catalogResponse = await dispatchHttp(app, {
@@ -304,6 +342,8 @@ test("connection writes need a Payload admin session on both servers", async (t)
         body,
       });
       assert.equal(response.status, 403, `${method} ${url}`);
+      assert.equal("credential" in response.body, false);
+      assert.equal(JSON.stringify(response.body).includes("a1."), false);
       // A named bearer token is a real operator, but connecting the agency's
       // tools is deliberately behind the browser session, not a bearer.
       assert.equal(response.body.required_capability, "payload_admin_session");
@@ -317,6 +357,27 @@ test("connection writes need a Payload admin session on both servers", async (t)
       body: "provider=neon",
     });
     assert.equal(anonymous.status, 401);
+
+    const anonymousCredential = await dispatchHttp(app, {
+      method: "GET",
+      url: "/api/admin/connections/agent-config",
+      headers: {},
+    });
+    assert.equal(anonymousCredential.status, 401);
+    assert.equal("credential" in anonymousCredential.body, false);
+
+    const adapterDenied = await renderAppAdminResponse(
+      new Request(`${ORIGIN}/api/admin/connections/agent-config`),
+      {
+        config: {
+          ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
+          authEnv: { NODE_ENV: "production", [OPERATOR_AGENT_SECRET_ENV]: SECRET },
+          providerConnection: PROVIDER_CONFIG,
+        },
+      },
+    );
+    assert.equal(adapterDenied.status, 401);
+    assert.equal("credential" in (await adapterDenied.json()), false);
   });
 });
 

@@ -502,14 +502,18 @@ test("the assistant's configuration is complete, copyable, and readable without 
   assert.match(block, /3\. За отдалечен терминален клиент копирай настройката по-долу\./);
   // Claude Code: both the one-line command and a config file that parses.
   assert.match(block, /claude mcp add --transport http ms-realty "https:\/\/ms-realty\.example\/mcp"/);
+  assert.match(block, /--header "Authorization: Bearer \$\{MS_REALTY_OPERATOR_TOKEN\}"/);
+  assert.doesNotMatch(block, /--header 'Authorization: Bearer \$\{MS_REALTY_OPERATOR_TOKEN\}'/);
   const claudeSection = block.slice(block.indexOf("# .mcp.json"), block.indexOf("=== ChatGPT (Codex CLI) ==="));
   const parsed = JSON.parse(claudeSection.slice(claudeSection.indexOf("{"), claudeSection.lastIndexOf("}") + 1));
   assert.equal(parsed.mcpServers["ms-realty"].url, "https://ms-realty.example/mcp");
   assert.equal(parsed.mcpServers["ms-realty"].type, "http");
-  assert.equal(parsed.mcpServers["ms-realty"].headers.Authorization, `Bearer ${mint.token}`);
+  assert.equal(parsed.mcpServers["ms-realty"].headers.Authorization, "Bearer ${MS_REALTY_OPERATOR_TOKEN}");
   // ChatGPT, both ways it can be reached.
   assert.match(block, /\[mcp_servers\.ms-realty\]/);
-  assert.match(block, /http_headers = \{ "Authorization" = "Bearer /);
+  assert.match(block, /bearer_token_env_var = "MS_REALTY_OPERATOR_TOKEN"/);
+  assert.doesNotMatch(block, /http_headers/);
+  assert.equal(block.includes(mint.token), false);
   assert.match(block, /Settings -> Connectors -> Add custom connector/);
   // The local drafting bridge that already exists.
   assert.match(block, /hermes-mcp-server\.mjs/);
@@ -532,7 +536,12 @@ test("the assistant's configuration is complete, copyable, and readable without 
   assert.match(html, /data-copy-status="agent-config"/);
   assert.match(html, /function initCopyBlocks/);
   assert.match(html, /initCopyBlocks\(document\);/);
-  assert.ok(html.includes(mint.token));
+  assert.match(html, /<label for="agent-credential">Краткотраен ключ за MS_REALTY_OPERATOR_TOKEN<\/label>/);
+  assert.match(html, new RegExp(`<input class="agent__credential" id="agent-credential" type="password" value="${mint.token}" readonly`));
+  assert.match(html, /data-copy-block="agent-credential"[^>]*>Копирай ключа<\/button>/);
+  const renderedConfig = html.match(/<pre class="agent__config"[^>]*>([\s\S]*?)<\/pre>/)?.[1] || "";
+  assert.equal(renderedConfig.includes(mint.token), false);
+  assert.equal(html.split(mint.token).length - 1, 1);
 
   // A copy that fails must leave the block readable, because its own failure
   // message tells the operator to select the text by hand -- which they cannot
@@ -555,6 +564,7 @@ test("the assistant's configuration is complete, copyable, and readable without 
   });
   assert.match(blocked, /Нужен е ключ за подписване на достъпа на помощника/);
   assert.equal(blocked.includes('data-copy-block="agent-config"'), false);
+  assert.equal(blocked.includes('id="agent-credential"'), false);
 });
 
 test("the assistant token delegates the operator's own roles and expires on its own", () => {

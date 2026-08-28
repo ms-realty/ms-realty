@@ -2,10 +2,8 @@
   "mcpServers": {
     "ms-realty": {
       "type": "http",
-      "url": "${MS_REALTY_MCP_URL:-https://ms-realty.ms-realty-bg.workers.dev/mcp}",
-      "headers": {
-        "Authorization": "Bearer ${MS_REALTY_OPERATOR_TOKEN:-}"
-      },
+      "url": "https://ms-realty.ms-realty-bg.workers.dev/mcp",
+      "bearer_token_env_var": "MS_REALTY_OPERATOR_TOKEN",
       "note": "MS Realty production MCP. Anonymous tools work without a token; owner operations require the short-lived token issued on /admin/connect or configured OAuth."
     },
     "ms-realty-hermes": {

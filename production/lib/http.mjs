@@ -38,7 +38,12 @@ import {
   withAuthenticatedAuditActor,
   adminCredentials,
 } from "./admin-auth.mjs";
-import { operatorAgentConfigBlock, operatorConnectResult, renderOperatorConnectPage } from "./operator-connect.mjs";
+import {
+  OPERATOR_TOKEN_ENV,
+  operatorAgentConfigBlock,
+  operatorConnectResult,
+  renderOperatorConnectPage,
+} from "./operator-connect.mjs";
 import { ownerOperatorCatalog } from "./owner-operator-catalog.mjs";
 import {
   adminSessionClearCookie,
@@ -4386,6 +4391,8 @@ export function createHttpApp({
             operator_id: agent.operator_id,
             expires_at: agent.expires_at,
             mcp_url: `${new URL(origin).origin}/mcp`,
+            credential_env: OPERATOR_TOKEN_ENV,
+            credential: agent.token,
             config: operatorAgentConfigBlock({
               baseUrl: origin,
               token: agent.token,

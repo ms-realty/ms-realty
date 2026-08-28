@@ -28,6 +28,8 @@
       "Write"
     ],
     "websiteURL": "https://github.com/ms-realty/ms-realty",
+    "logo": "./assets/ms-realty-logo.png",
+    "logoDark": "./assets/ms-realty-logo-reversed.png",
     "defaultPrompt": [
       "Show my authorized MS Realty admin operations and current launch status.",
       "Give me the owner morning brief and the guarded Hermes queue.",
