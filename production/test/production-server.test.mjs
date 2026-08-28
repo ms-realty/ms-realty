@@ -14,6 +14,7 @@ import { dispatchHttp } from "../lib/http.mjs";
 import { saveProviderConnection } from "../lib/provider-connections.mjs";
 import { providerWebhookSignature } from "../lib/provider-webhooks.mjs";
 import { persistViewingDurably } from "../lib/viewing-durable-store.mjs";
+import { emptyWorkspaceSettingsDocument } from "../lib/workspace-settings.mjs";
 import { createProductionHttpApp, createProductionServer, productionServerConfig } from "../server.mjs";
 import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
@@ -295,6 +296,8 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   assert.equal(config.viewingDurableStore.viewingDurableStoreEnabled, true);
   assert.equal(config.viewingDurableStore.payloadSecret, "test-payload-secret");
   assert.equal(config.viewingDurableStore.databaseUrl, "postgres://payload:payload@127.0.0.1:5432/payload");
+  assert.equal(config.viewingDurableStore.contactSecret, "test-only-production-contact-key-32-characters");
+  assert.equal(config.viewingDurableStore.workspaceId, "workspace-sandanski");
   assert.equal(config.providerConnection.publicOrigin, "https://ms-realty.example");
   assert.equal(config.providerConnection.credentialSecret, PROVIDER_CREDENTIAL_SECRET);
   assert.equal(config.providerConnection.googleClientId, "google-client-id");
@@ -386,8 +389,12 @@ test("production server HTTP app forwards provider runtimes and durable viewing 
       viewingDurableStoreEnabled: true,
       payloadSecret: "payload-secret",
       databaseUrl: "postgres://payload.example/ms_realty",
+      contactSecret: LEAD_CONTACT_SECRET,
+      workspaceId: "workspace-sandanski",
     },
     viewingDurablePayload: payload,
+    readViewingTripRequestsDurably: async () => [],
+    readViewingTripContactsDurably: async () => new Map(),
   };
 
   appendLeadContact(
@@ -560,6 +567,7 @@ test("production server routes seller intake through one durable write with zero
       idempotent: false,
     };
   };
+  config.readWorkspaceSettingsDurably = async () => emptyWorkspaceSettingsDocument();
 
   const server = createProductionServer(config);
   const address = await listen(server, 0, "127.0.0.1");

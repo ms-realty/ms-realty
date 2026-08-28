@@ -127,8 +127,12 @@ test("standalone durable viewing booking uses durable leads, persists calendar r
       viewingDurableStoreEnabled: true,
       payloadSecret: "payload-secret-for-test",
       databaseUrl: "postgres://test.invalid/ms_realty",
+      contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+      workspaceId: "workspace-sandanski",
     },
     readViewingsDurably: async () => durableRows,
+    readViewingTripRequestsDurably: async () => [],
+    readViewingTripContactsDurably: async () => new Map(),
     persistViewingDurably: async (viewing) => {
       durableRows.push({ ...viewing, durable: true });
       return { ...viewing, durable: true };
@@ -239,6 +243,8 @@ test("standalone durable viewings map booking conflicts to 409", async (t) => {
       viewingDurableStoreEnabled: true,
       payloadSecret: "payload-secret-for-test",
       databaseUrl: "postgres://test.invalid/ms_realty",
+      contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+      workspaceId: "workspace-sandanski",
     },
     readViewingsDurably: async () => [],
     persistViewingDurably: async () => {
@@ -289,6 +295,8 @@ test("standalone durable viewings fail closed when enabled but incomplete or una
         viewingDurableStoreEnabled: true,
         payloadSecret: "payload-secret-for-test",
         databaseUrl: "postgres://test.invalid/ms_realty",
+        contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+        workspaceId: "workspace-sandanski",
       },
       readViewingsDurably: async () => {
         throw new ViewingStoreUnavailableError("read failed");

@@ -131,6 +131,22 @@ test("workspace settings collection is server-owned for writes and workspace-sco
   assert.equal(collection.access.read(req(undefined)), false);
 });
 
+test("viewing trip request collection is server-owned for writes and workspace-scoped for reads", async () => {
+  const { default: config } = await import(`../../payload.config.js?viewing-trip-access=${Date.now()}`);
+  const resolved = await config;
+  const collection = resolved.collections.find((item) => item.slug === "viewing_trip_requests");
+  assert.ok(collection);
+
+  assert.equal(collection.access.create(req(admin)), false);
+  assert.equal(collection.access.update(req(admin)), false);
+  assert.equal(collection.access.delete(req(admin)), false);
+  assert.equal(collection.access.read(req(admin)), true);
+  assert.deepEqual(collection.access.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });
+  assert.equal(collection.access.read(req(brokerNoScope)), false);
+  assert.equal(collection.access.read(req(editor)), false);
+  assert.equal(collection.access.read(req(undefined)), false);
+});
+
 test("cases are workspace-scoped: admin sees all, broker sees only assigned, others none", () => {
   assert.equal(caseCollectionAccess.read(req(admin)), true);
   assert.deepEqual(caseCollectionAccess.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });
@@ -265,7 +281,7 @@ test("config wires shared access onto admins, content, and case collections", as
     assert.equal(bySlug.search_outbox.access.create(req(admin)), false);
     assert.equal(bySlug.search_outbox.access.update(req(editor)), false);
     assert.equal(bySlug.listing_enrichment_tasks.access.delete(req(admin)), false);
-    for (const slug of ["public_leads", "lead_contacts", "consent_events", "seller_pipeline_events"]) {
+    for (const slug of ["public_leads", "lead_contacts", "consent_events", "seller_pipeline_events", "viewing_trip_requests"]) {
       for (const user of [admin, broker, editor, translator]) {
         assert.equal(bySlug[slug].access.create(req(user)), false, `${slug} REST create must remain server-owned`);
         assert.equal(bySlug[slug].access.update(req(user)), false, `${slug} REST update must remain server-owned`);
@@ -284,7 +300,7 @@ test("config wires shared access onto admins, content, and case collections", as
         assert.equal(bySlug[slug].access[operation](req(admin)), false, `${slug} ${operation} must stay server-only`);
       }
     }
-    for (const slug of ["consent_events", "seller_pipeline_events"]) {
+    for (const slug of ["consent_events", "seller_pipeline_events", "viewing_trip_requests"]) {
       assert.equal(bySlug[slug].access.read(req(admin)), true);
       assert.deepEqual(bySlug[slug].access.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });
       assert.equal(bySlug[slug].access.read(req(brokerNoScope)), false);

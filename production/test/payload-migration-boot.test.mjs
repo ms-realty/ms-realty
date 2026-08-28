@@ -15,6 +15,7 @@ const sourceStatedSearchViewMigration = fromRoot("migrations", "20260826_220000_
 const adminPasswordChangeMigration = fromRoot("migrations", "20260827_120000_admin_password_change_required.ts");
 const durableLeadSideEffectsMigration = fromRoot("migrations", "20260813_120000_durable_lead_side_effects.ts");
 const workspaceSettingsMigration = fromRoot("migrations", "20260828_130000_workspace_settings.ts");
+const durableViewingTripRequestsMigration = fromRoot("migrations", "20260829_120000_durable_viewing_trip_requests.ts");
 
 function tableSql(source, name) {
   const start = [`CREATE TABLE "${name}" (`, `CREATE TABLE IF NOT EXISTS "${name}" (`]
@@ -46,6 +47,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     "20260813_120000_durable_lead_side_effects.ts",
     "20260827_120000_admin_password_change_required.ts",
     "20260828_130000_workspace_settings.ts",
+    "20260829_120000_durable_viewing_trip_requests.ts",
   ]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
@@ -74,6 +76,32 @@ test("Payload migration boot configuration and generated constraints stay runnab
   assert.match(workspaceSettings, /payload_locked_documents_rels_workspace_settings_id_idx/);
   assert.match(workspaceSettings, /payload_locked_documents_rels_workspace_settings_fk/);
   assert.match(workspaceSettings, /export async function down[\s\S]*void db/);
+
+  const viewingTripRequests = fs.readFileSync(durableViewingTripRequestsMigration, "utf8");
+  const viewingTripRequestsTable = tableSql(viewingTripRequests, "viewing_trip_requests");
+  for (const column of [
+    '"workspace_id" varchar NOT NULL',
+    '"request_id" varchar NOT NULL',
+    '"semantic_hash" varchar NOT NULL',
+    '"requested_at" timestamp(3) with time zone NOT NULL',
+    '"arrival_date" timestamp(3) with time zone NOT NULL',
+    '"departure_date" timestamp(3) with time zone NOT NULL',
+    '"requested_locale" varchar NOT NULL',
+    '"locale" varchar NOT NULL',
+    '"status" varchar NOT NULL',
+    '"confirmation" varchar NOT NULL',
+    '"contact_ref" varchar NOT NULL',
+    '"contact_preference" varchar NOT NULL',
+    '"request_row" jsonb NOT NULL',
+  ]) {
+    assert.ok(viewingTripRequestsTable.includes(column), `viewing_trip_requests.${column} must be required`);
+  }
+  assert.match(viewingTripRequests, /CREATE UNIQUE INDEX IF NOT EXISTS "viewing_trip_requests_request_id_idx"/);
+  assert.match(viewingTripRequests, /CREATE UNIQUE INDEX IF NOT EXISTS "viewing_trip_requests_workspace_id_idempotency_key_idx"/);
+  assert.match(viewingTripRequests, /CREATE INDEX IF NOT EXISTS "viewing_trip_requests_semantic_hash_idx"/);
+  assert.match(viewingTripRequests, /payload_locked_documents_rels_viewing_trip_requests_id_idx/);
+  assert.match(viewingTripRequests, /payload_locked_documents_rels_viewing_trip_requests_fk/);
+  assert.match(viewingTripRequests, /export async function down[\s\S]*void db/);
 
   const migration = fs.readFileSync(propertySearchMigration, "utf8");
   const requiredColumns = {

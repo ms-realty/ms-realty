@@ -274,6 +274,7 @@ test("a durable snooze survives the container and still reaches the inbox", asyn
     headers: { authorization: `Bearer ${TOKEN}` },
   });
   assert.equal(served.status, 200);
+  assert.equal(Object.hasOwn(served.body, "leadMatching"), false, "the restarted inbox must not fabricate inventory matching evidence");
   // The snooze reaches the screen through the SLA report, whose clock it defers.
   const slaRow = (served.body.leadSla || served.body.lead_sla).rows.find((row) => row.lead_id === buyerLead.lead_id);
   assert.ok(slaRow, "the lead must still be in the SLA report");

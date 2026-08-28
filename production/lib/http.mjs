@@ -133,7 +133,7 @@ import {
   emptyWorkspaceSettingsDocument,
   leadSlaOptions,
   readWorkspaceSettings,
-  readWorkspaceSettingsStore,
+  readWorkspaceSettingsStore as readWorkspaceSettingsStoreRuntime,
   updateWorkspaceSettingsStore,
   workspaceSettingsStoreConfigured,
   WorkspaceSettingsStoreUnavailableError,
@@ -490,8 +490,14 @@ import { buildViewingWeekView } from "./viewing-week-view.mjs";
 import {
   appendViewingTripRequest,
   createViewingTripRequest,
+  ViewingTripConflictError,
+  isViewingTripDurableStoreEnabled,
+  persistViewingTripDurably,
+  readViewingTripContactsDurably as readViewingTripContactsDurablyStore,
   privacySafeViewingTripRequest,
   readViewingTripRequests,
+  readViewingTripRequestsDurably as readViewingTripRequestsDurablyStore,
+  ViewingTripStoreUnavailableError,
 } from "./viewing-trip-requests.mjs";
 import { publicViewingSlotsPayload } from "./viewing-slots.mjs";
 import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
@@ -1072,6 +1078,7 @@ export function createHttpApp({
   workspaceSettingsPayloadRuntimeConfigured = Boolean(
     String(process.env.PAYLOAD_SECRET || "").trim() && String(process.env.DATABASE_URL || "").trim(),
   ),
+  readWorkspaceSettingsDurably = readWorkspaceSettingsStoreRuntime,
   launchReadinessOutputPath = null,
   listingQualityReviewPath = null,
   searchSyncReportPath = null,
@@ -1136,6 +1143,8 @@ export function createHttpApp({
   viewingDurablePayload = null,
   readViewingsDurably = readViewingsDurablyStore,
   persistViewingDurably = persistViewingDurablyStore,
+  readViewingTripRequestsDurably = readViewingTripRequestsDurablyStore,
+  readViewingTripContactsDurably = readViewingTripContactsDurablyStore,
   recordViewingCalendarSync = recordViewingCalendarSyncStore,
   syncViewingToGoogleCalendar = syncViewingToGoogleCalendarProvider,
   nowSeconds = () => Math.floor(Date.now() / 1000),
@@ -1349,7 +1358,36 @@ export function createHttpApp({
       deliveries: currentSavedSearchAlertDeliveries(),
       now: savedSearchAlertQueuedAt || reviewedAt || receivedAt || new Date().toISOString(),
     });
-  const currentPublicRequestQueue = () => {
+  const currentViewingTripRequests = async (principal = null, payloadSession = null) => {
+    if (!viewingDurableStore?.viewingDurableStoreEnabled) return readViewingTripRequests(viewingTripLedgerPath || undefined);
+    if (!isViewingTripDurableStoreEnabled(viewingDurableStore)) {
+      throw new ViewingTripStoreUnavailableError("Durable viewing trip store is enabled but not fully configured");
+    }
+    const scope = leadReadScopeForPrincipal(principal, viewingDurableStore.workspaceId);
+    const rows = await readViewingTripRequestsDurably({
+      payload: viewingDurablePayload || null,
+      user: payloadUserForLeadRead(principal, payloadSession?.user || null),
+      workspaceIds: scope.workspaceIds,
+    });
+    if (!Array.isArray(rows)) throw new ViewingTripStoreUnavailableError("Durable viewing trip readback returned invalid rows");
+    return rows;
+  };
+  const currentViewingTripContacts = async (principal = null, payloadSession = null) => {
+    if (!viewingDurableStore?.viewingDurableStoreEnabled) {
+      return publicContactVaultPath ? readPublicContacts(publicContactVaultPath, publicContactKey, "viewing_trip") : new Map();
+    }
+    if (!isViewingTripDurableStoreEnabled(viewingDurableStore)) {
+      throw new ViewingTripStoreUnavailableError("Durable viewing trip store is enabled but not fully configured");
+    }
+    const scope = leadReadScopeForPrincipal(principal, viewingDurableStore.workspaceId);
+    return readViewingTripContactsDurably({
+      contactSecret: viewingDurableStore.contactSecret,
+      payload: viewingDurablePayload || null,
+      user: payloadUserForLeadRead(principal, payloadSession?.user || null),
+      workspaceIds: scope.workspaceIds,
+    });
+  };
+  const currentPublicRequestQueue = async (principal = null, payloadSession = null) => {
     let contactMaps = {};
     let contactVaultStatus = "not_configured";
     if (publicContactVaultPath) {
@@ -1357,24 +1395,25 @@ export function createHttpApp({
         contactMaps = {
           saved_search: readPublicContacts(publicContactVaultPath, publicContactKey, "saved_search"),
           language_request: readPublicContacts(publicContactVaultPath, publicContactKey, "language_request"),
-          viewing_trip: readPublicContacts(publicContactVaultPath, publicContactKey, "viewing_trip"),
         };
-        contactVaultStatus = [
-          ...contactMaps.saved_search.values(),
-          ...contactMaps.language_request.values(),
-          ...contactMaps.viewing_trip.values(),
-        ].length
-          ? "available"
-          : "empty";
+        const count = [...contactMaps.saved_search.values(), ...contactMaps.language_request.values()].length;
+        contactVaultStatus = count ? "available" : "empty";
       } catch {
         contactMaps = {};
         contactVaultStatus = "locked";
       }
     }
+    const viewingTrips = await currentViewingTripRequests(principal, payloadSession);
+    const viewingTripContacts = await currentViewingTripContacts(principal, payloadSession);
+    contactMaps.viewing_trip = viewingTripContacts;
+    if (contactVaultStatus !== "locked") {
+      const count = Object.values(contactMaps).reduce((total, map) => total + [...(map?.values?.() || [])].length, 0);
+      contactVaultStatus = count ? "available" : "empty";
+    }
     return buildPublicRequestQueue({
       savedSearches: currentSavedSearches(),
       languageRequests: readLanguageRequests(languageRequestPath || undefined),
-      viewingTrips: readViewingTripRequests(viewingTripLedgerPath || undefined),
+      viewingTrips,
       outcomes: readPublicRequestOutcomes(publicRequestOutcomeLedgerPath || undefined),
       contactMaps,
       contactVaultStatus,
@@ -1531,17 +1570,6 @@ export function createHttpApp({
           languageRequests: [],
           translationTasks: [],
           listingEdits: [],
-          leadMatching: {
-            generated_at: generatedAt,
-            summary: {
-              matchable_leads_with_listing_reference: 0,
-              active_matchable_leads: 0,
-              qualified_leads: 0,
-              leads_with_matches: 0,
-              open_broker_tasks: 0,
-            },
-            rows: [],
-          },
           operatorId,
           leadSourceDurable,
           ...(leadPipelineQueue ? { leadPipelineQueue } : {}),
@@ -1591,7 +1619,7 @@ export function createHttpApp({
       ...currentViewingData(),
       viewingFollowUpWritable: !viewingDurableStore?.viewingDurableStoreEnabled,
       savedSearches: currentSavedSearches(),
-      publicRequestQueue: currentPublicRequestQueue(),
+      publicRequestQueue: await currentPublicRequestQueue(operatorId, payloadSession),
       savedSearchAlertQueue: currentSavedSearchAlertQueue(),
       leadSourceDurable,
       sellerPipeline: journey.sellerPipelines,
@@ -1673,7 +1701,7 @@ export function createHttpApp({
         now: viewingsNow,
       }),
       savedSearches: currentSavedSearches(),
-      publicRequestQueue: currentPublicRequestQueue(),
+      publicRequestQueue: await currentPublicRequestQueue(operatorId, payloadSession),
       savedSearchAlertQueue: currentSavedSearchAlertQueue(),
       sellerPipeline: sellerPipelines,
       sellerPipelineQueue: buildSellerPipelineQueue(sellerPipelines, sellerPipelineOutcomes, {
@@ -2157,7 +2185,7 @@ export function createHttpApp({
     workspaceId: workspaceSettingsWorkspaceId || "",
   };
   const workspaceSettingsStoreReady = workspaceSettingsStoreConfigured(workspaceSettingsStore);
-  const currentDurableWorkspaceSettings = () => readWorkspaceSettingsStore(workspaceSettingsStore);
+  const currentDurableWorkspaceSettings = () => readWorkspaceSettingsDurably(workspaceSettingsStore);
   const withWorkspaceSettings = (page) =>
     page && typeof page === "object" && !page.workspace_settings
       ? { ...page, workspace_settings: workspaceSettingsView(currentWorkspaceSettings()) }
@@ -2324,6 +2352,7 @@ export function createHttpApp({
       url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
     if (!runtimeDataAdminRequest && productionRuntimeDataUnavailable({
       durableLeadOperations: leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
+      durableViewingTrip: viewingDurableStore?.viewingDurableStoreEnabled === true,
       durableOnly: runtimeDataDurableOnly,
       method: request.method,
       pathname: url.pathname,
@@ -2606,6 +2635,7 @@ export function createHttpApp({
       durableLeadOperations,
       durableProviderDelivery,
       durableOnly: runtimeDataDurableOnly,
+      durableViewingTrip: viewingDurableStore?.viewingDurableStoreEnabled === true,
       durableViewing: viewingDurableStore?.viewingDurableStoreEnabled === true,
       method: request.method,
       pathname: url.pathname,
@@ -3749,22 +3779,46 @@ export function createHttpApp({
         }
         try {
           const requestedAt = viewingTripRequestedAt || savedAt || receivedAt || new Date().toISOString();
-          const trip = createViewingTripRequest(activeRegistry, parseBody(request), { requestedAt });
-          if (!publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
-          const contactVault = appendPublicContact(
-            {
-              subjectType: "viewing_trip",
-              subjectId: trip.id,
-              contact: trip.contact,
-              contactPreference: trip.contact_preference,
-              message: trip.note,
-            },
-            { filePath: publicContactVaultPath, secret: publicContactKey, storedAt: requestedAt },
-          );
-          const safeTrip = privacySafeViewingTripRequest(trip);
-          const ledger = viewingTripLedgerPath
-            ? appendViewingTripRequest(safeTrip, { filePath: viewingTripLedgerPath })
-            : null;
+          const parsedBody = parseBody(request);
+          const trip = createViewingTripRequest(activeRegistry, parsedBody, { requestedAt });
+          const durableRequested = viewingDurableStore?.viewingDurableStoreEnabled === true;
+          let safeTrip = privacySafeViewingTripRequest(trip);
+          let ledger = null;
+          let contactVault = null;
+          if (durableRequested) {
+            if (!isViewingTripDurableStoreEnabled(viewingDurableStore)) {
+              throw new ViewingTripStoreUnavailableError("Durable viewing trip store is enabled but not fully configured");
+            }
+            const stored = await persistViewingTripDurably({
+              trip,
+              contactSecret: viewingDurableStore.contactSecret,
+              payload: viewingDurablePayload || null,
+              workspaceId: viewingDurableStore.workspaceId,
+            });
+            safeTrip = stored.request;
+            ledger = { ...stored.request, durable: true };
+            contactVault = {
+              contact_ref: stored.request.contact_ref,
+              stored_at: stored.request.requested_at,
+              encrypted: true,
+              durable: true,
+            };
+          } else {
+            if (!publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
+            contactVault = appendPublicContact(
+              {
+                subjectType: "viewing_trip",
+                subjectId: trip.id,
+                contact: trip.contact,
+                contactPreference: trip.contact_preference,
+                message: trip.note,
+              },
+              { filePath: publicContactVaultPath, secret: publicContactKey, storedAt: requestedAt },
+            );
+            ledger = viewingTripLedgerPath
+              ? appendViewingTripRequest(safeTrip, { filePath: viewingTripLedgerPath })
+              : null;
+          }
           const consent = recordConsent({
             consentType: "viewing_trip_request",
             source: "website_viewing_trip",
@@ -3773,10 +3827,22 @@ export function createHttpApp({
             contact: trip.contact,
             granted: true,
             legalBasis: "contract",
-            marketingOptIn: parseBody(request).marketingOptIn === true,
+            marketingOptIn: parsedBody.marketingOptIn === true,
           });
           return privateJson(201, { ...safeTrip, ledger, contactVault, consent });
         } catch (error) {
+          if (error instanceof ViewingTripConflictError) {
+            return privateJson(409, {
+              kind: error.code,
+              message: error.message,
+            });
+          }
+          if (error instanceof ViewingTripStoreUnavailableError) {
+            return privateJson(503, {
+              kind: "viewing_trip_store_unavailable",
+              message: "Viewing trip requests are temporarily unavailable",
+            });
+          }
           return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
         }
       }
@@ -6543,7 +6609,7 @@ export function createHttpApp({
           {
             savedSearches: currentSavedSearches(),
             languageRequests: readLanguageRequests(languageRequestPath || undefined),
-            viewingTrips: readViewingTripRequests(viewingTripLedgerPath || undefined),
+            viewingTrips: await currentViewingTripRequests(principal, payloadSession),
           },
           bindAuthenticatedOperator(parseBody(request), principal),
           { filePath: publicRequestOutcomeLedgerPath || undefined, recordedAt },

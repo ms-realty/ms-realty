@@ -23,6 +23,7 @@ export const REQUIRED_PAYLOAD_COLLECTIONS = [
   "listing_translations",
   "media_assets",
   "listing_tours",
+  "viewing_trip_requests",
   "workspace_settings",
   ...REALTY_CASE_PAYLOAD_COLLECTION_SLUGS,
 ];

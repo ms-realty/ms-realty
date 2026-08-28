@@ -406,6 +406,13 @@ import {
 import { DEFAULT_VIEWING_DURATION_MINUTES } from "./broker-free-slots.mjs";
 import { buildViewingWeekView } from "./viewing-week-view.mjs";
 import { wholeNumberSlotParam } from "./viewing-slots.mjs";
+import {
+  readViewingTripContactsDurably,
+  readViewingTripRequests,
+  readViewingTripRequestsDurably,
+  isViewingTripDurableStoreEnabled,
+  ViewingTripStoreUnavailableError,
+} from "./viewing-trip-requests.mjs";
 // B3 saved-search alerts: the broker-facing delivery queue.
 import {
   DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
@@ -1200,28 +1207,81 @@ function recordAuditReplica(input, config, recordedAt, alreadyRecorded, bestEffo
   }
 }
 
-function publicRequestContactData(config) {
-  if (!config.publicContactVaultPath) {
-    return { contactMaps: {}, contactVaultStatus: "not_configured" };
+async function publicRequestContactData(config) {
+  let contactMaps = {};
+  let contactVaultStatus = "not_configured";
+  if (config.publicContactVaultPath) {
+    try {
+      contactMaps = {
+        saved_search: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "saved_search"),
+        language_request: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "language_request"),
+      };
+      const count = [...contactMaps.saved_search.values(), ...contactMaps.language_request.values()].length;
+      contactVaultStatus = count ? "available" : "empty";
+    } catch {
+      contactMaps = {};
+      contactVaultStatus = "locked";
+    }
   }
-  try {
-    const contactMaps = {
-      saved_search: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "saved_search"),
-      language_request: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "language_request"),
-    };
-    const count = [...contactMaps.saved_search.values(), ...contactMaps.language_request.values()].length;
-    return { contactMaps, contactVaultStatus: count ? "available" : "empty" };
-  } catch {
-    return { contactMaps: {}, contactVaultStatus: "locked" };
+  if (!config.viewingDurableStore?.viewingDurableStoreEnabled) {
+    if (config.publicContactVaultPath) {
+      try {
+        contactMaps.viewing_trip = readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "viewing_trip");
+        if (contactVaultStatus !== "locked") {
+          const count = Object.values(contactMaps).reduce((total, map) => total + [...(map?.values?.() || [])].length, 0);
+          contactVaultStatus = count ? "available" : "empty";
+        }
+      } catch {
+        if (contactVaultStatus !== "locked") {
+          contactMaps = {};
+          contactVaultStatus = "locked";
+        }
+      }
+    }
+    return { contactMaps, contactVaultStatus };
   }
+  const durableStore = config.viewingDurableStore || {};
+  if (!isViewingTripDurableStoreEnabled(durableStore)) {
+    throw new ViewingTripStoreUnavailableError("Durable viewing trip store is enabled but not fully configured");
+  }
+  const scope = leadReadScopeForPrincipal(config.adminPrincipal, durableStore.workspaceId);
+  contactMaps.viewing_trip = await (config.readViewingTripContactsDurably || readViewingTripContactsDurably)({
+    contactSecret: durableStore.contactSecret,
+    payload: config.viewingDurablePayload || null,
+    user: payloadUserForLeadRead(config.adminPrincipal, config.payloadAdminSession?.user || null),
+    workspaceIds: scope.workspaceIds,
+  });
+  if (contactVaultStatus !== "locked") {
+    const count = Object.values(contactMaps).reduce((total, map) => total + [...(map?.values?.() || [])].length, 0);
+    contactVaultStatus = count ? "available" : "empty";
+  }
+  return { contactMaps, contactVaultStatus };
 }
 
-function currentPublicRequestQueue(config) {
+async function publicRequestViewingTrips(config) {
+  if (!config.viewingDurableStore?.viewingDurableStoreEnabled) {
+    return readViewingTripRequests(config.viewingTripLedgerPath || undefined);
+  }
+  const durableStore = config.viewingDurableStore || {};
+  if (!isViewingTripDurableStoreEnabled(durableStore)) {
+    throw new ViewingTripStoreUnavailableError("Durable viewing trip store is enabled but not fully configured");
+  }
+  const scope = leadReadScopeForPrincipal(config.adminPrincipal, durableStore.workspaceId);
+  return (config.readViewingTripRequestsDurably || readViewingTripRequestsDurably)({
+    payload: config.viewingDurablePayload || null,
+    user: payloadUserForLeadRead(config.adminPrincipal, config.payloadAdminSession?.user || null),
+    workspaceIds: scope.workspaceIds,
+  });
+}
+
+async function currentPublicRequestQueue(config) {
+  const viewingTrips = await publicRequestViewingTrips(config);
   return buildPublicRequestQueue({
     savedSearches: readSavedSearches(config.savedSearchLedgerPath),
     languageRequests: readLanguageRequests(config.languageRequestPath),
+    viewingTrips,
     outcomes: readPublicRequestOutcomes(config.publicRequestOutcomeLedgerPath),
-    ...publicRequestContactData(config),
+    ...(await publicRequestContactData(config)),
     now: config.publicRequestOutcomeAt || config.reviewedAt || new Date().toISOString(),
   });
 }
@@ -1617,7 +1677,7 @@ async function leadInboxPayload(registry, url, config) {
       now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
     }),
     savedSearches: readSavedSearches(config.savedSearchLedgerPath),
-    publicRequestQueue: currentPublicRequestQueue(config),
+    publicRequestQueue: await currentPublicRequestQueue(config),
     sellerPipeline,
     sellerPipelineQueue: buildSellerPipelineQueue(sellerPipeline, sellerPipelineOutcomes, {
       now: config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
@@ -2677,12 +2737,13 @@ async function appendSellerPipelineOutcomeEntry(input, config) {
   });
 }
 
-function appendPublicRequestOutcomeEntry(input, config) {
+async function appendPublicRequestOutcomeEntry(input, config) {
   const recordedAt = config.publicRequestOutcomeAt || config.reviewedAt || new Date().toISOString();
   const result = appendPublicRequestOutcome(
     {
       savedSearches: readSavedSearches(config.savedSearchLedgerPath),
       languageRequests: readLanguageRequests(config.languageRequestPath),
+      viewingTrips: await publicRequestViewingTrips(config),
     },
     bindAuthenticatedOperator(input, config.adminPrincipal),
     { filePath: config.publicRequestOutcomeLedgerPath, recordedAt },
@@ -5010,7 +5071,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/public-requests/outcome") {
-      const result = appendPublicRequestOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendPublicRequestOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
@@ -5038,6 +5099,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (error instanceof ViewingStoreUnavailableError || error?.code === "viewing_store_unavailable") {
       return jsonResponse(503, { kind: "viewing_store_unavailable", message: "Viewing storage is temporarily unavailable" });
+    }
+    if (error instanceof ViewingTripStoreUnavailableError || error?.code === "viewing_trip_store_unavailable") {
+      return jsonResponse(503, { kind: "viewing_trip_store_unavailable", message: "Viewing trip requests are temporarily unavailable" });
     }
     if (error instanceof ViewingConflictError || error?.code === "viewing_conflict") {
       return jsonResponse(409, { kind: "viewing_conflict", message: error.message });
