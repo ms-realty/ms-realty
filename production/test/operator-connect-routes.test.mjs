@@ -237,6 +237,10 @@ test("the assistant configuration route hands back a working config and records 
   assert.equal(body.mcp_url, `${ORIGIN}/mcp`);
   assert.match(body.config, /claude mcp add --transport http ms-realty/);
   assert.match(body.config, /\[mcp_servers\.ms-realty\]/);
+  assert.match(body.config, /MS_REALTY_OPERATOR_TOKEN/);
+  assert.match(body.config, /bearer_token_env_var = "MS_REALTY_OPERATOR_TOKEN"/);
+  assert.equal(body.config.includes("http_headers"), false);
+  assert.equal(body.config.includes("a1."), false);
   assert.ok(body.expires_at > "2026-08-24");
 
   const catalogResponse = await dispatchHttp(app, {

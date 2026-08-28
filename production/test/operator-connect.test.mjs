@@ -5,6 +5,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import {
   CHATGPT_APP_URL,
   DEFAULT_CODEX_MARKETPLACE_PATH,
+  operatorAgentConfigBlock,
   operatorBootstrapPrompt,
   operatorCodexPluginUrl,
   renderOperatorConnectPage,
@@ -37,19 +38,35 @@ async function withNamedOperator(fn) {
   }
 }
 
-test("bootstrap prompt embeds the operator's endpoint, token, and guardrails", () => {
+test("bootstrap prompt references the operator token environment without persisting it", () => {
   const prompt = operatorBootstrapPrompt({
     baseUrl: "https://ms-realty.example.workers.dev/some/path",
     token: OPERATOR_TOKEN,
     operatorId: "connect_operator",
   });
   assert.ok(prompt.includes("https://ms-realty.example.workers.dev/mcp"));
-  assert.ok(prompt.includes(`Bearer ${OPERATOR_TOKEN}`));
+  assert.ok(prompt.includes("MS_REALTY_OPERATOR_TOKEN"));
+  assert.ok(prompt.includes('bearer_token_env_var = "MS_REALTY_OPERATOR_TOKEN"'));
+  assert.equal(prompt.includes(OPERATOR_TOKEN), false);
+  assert.equal(prompt.includes("http_headers"), false);
   assert.ok(prompt.includes("connect_operator"));
   assert.ok(prompt.includes("hermes-mcp-server.mjs"));
   assert.ok(prompt.includes("Never describe Sandanski as a sea destination"));
   assert.ok(prompt.includes("humans approve"));
   assert.throws(() => operatorBootstrapPrompt({ baseUrl: "https://x.test", token: "" }), /operator token/i);
+});
+
+test("assistant config never persists the issued token in headers", () => {
+  const config = operatorAgentConfigBlock({
+    baseUrl: "https://ms-realty.example.workers.dev/some/path",
+    token: OPERATOR_TOKEN,
+    operatorId: "connect_operator",
+  });
+  assert.ok(config.includes("MS_REALTY_OPERATOR_TOKEN"));
+  assert.ok(config.includes('bearer_token_env_var = "MS_REALTY_OPERATOR_TOKEN"'));
+  assert.equal(config.includes(OPERATOR_TOKEN), false);
+  assert.equal(config.includes(`Authorization: Bearer ${OPERATOR_TOKEN}`), false);
+  assert.equal(config.includes("http_headers"), false);
 });
 
 test("connect page renders one-step copy UI with an escaped prompt", () => {
@@ -68,12 +85,13 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
   assert.ok(html.includes('data-codex-plugin-install="ms-realty-operator"'));
   assert.ok(html.includes(operatorCodexPluginUrl()));
   assert.ok(html.includes(`href="${CHATGPT_APP_URL}" target="_blank" rel="noopener noreferrer" data-chatgpt-open="ms-realty-operator"`));
-  assert.ok(html.includes("nothing installs in the background"));
-  assert.ok(html.includes(OPERATOR_TOKEN));
+  assert.ok(html.includes("Open ChatGPT Home"));
+  assert.ok(html.includes("this link does not install or connect anything"));
+  assert.equal(html.includes(OPERATOR_TOKEN), false);
   assert.equal(html.includes("<script>alert"), false);
-  for (const [locale, marker, lang] of [
-    ["bg", "Копирай текста за помощника", "bg"],
-    ["ru", "Скопировать текст для помощника", "ru"],
+  for (const [locale, marker, chatGptLabel, lang] of [
+    ["bg", "Копирай текста за помощника", "Отвори началната страница на ChatGPT", "bg"],
+    ["ru", "Скопировать текст для помощника", "Открыть главную страницу ChatGPT", "ru"],
   ]) {
     const localised = renderOperatorConnectPage({
       baseUrl: "https://ms-realty.example.workers.dev",
@@ -82,6 +100,7 @@ test("connect page renders one-step copy UI with an escaped prompt", () => {
       locale,
     });
     assert.ok(localised.includes(marker), locale);
+    assert.ok(localised.includes(chatGptLabel), locale);
     assert.ok(localised.includes(`<html lang="${lang}">`), locale);
   }
 });
@@ -100,6 +119,8 @@ test("ChatGPT action opens the supported app entry point without credentials", (
   assert.equal(CHATGPT_APP_URL, "https://chatgpt.com/");
   const html = renderOperatorConnectPage({ baseUrl: "https://ms-realty.example.workers.dev", operatorId: "connect_operator" });
   assert.ok(html.includes(`href="${CHATGPT_APP_URL}" target="_blank"`));
+  assert.ok(html.includes("Open ChatGPT Home"));
+  assert.ok(html.includes("Then open this signed-in admin page"));
   assert.equal(html.includes(`${CHATGPT_APP_URL}?token=`), false);
 });
 
@@ -127,7 +148,8 @@ test("standalone HTTP runtime serves /admin/connect behind admin auth", async ()
     assert.equal(page.status, 200);
     assert.match(page.headers["content-type"], /text\/html/);
     assert.ok(page.body.includes("https://ms-realty.ms-realty-bg.workers.dev/mcp"));
-    assert.ok(page.body.includes(OPERATOR_TOKEN));
+    assert.ok(page.body.includes("MS_REALTY_OPERATOR_TOKEN"));
+    assert.equal(page.body.includes(OPERATOR_TOKEN), false);
   });
 });
 
@@ -143,7 +165,8 @@ test("Next admin adapter serves /admin/connect with identical prompt material", 
     assert.match(response.headers.get("content-type"), /text\/html/);
     const body = await response.text();
     assert.ok(body.includes("https://ms-realty.ms-realty-bg.workers.dev/mcp"));
-    assert.ok(body.includes(OPERATOR_TOKEN));
+    assert.ok(body.includes("MS_REALTY_OPERATOR_TOKEN"));
+    assert.equal(body.includes(OPERATOR_TOKEN), false);
     assert.equal(response.headers.get("cache-control"), "no-store");
   });
 });
