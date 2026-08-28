@@ -7,7 +7,7 @@
 // contact vault under the record id, exactly as saved searches do.
 
 import fs from "node:fs";
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import path from "node:path";
 import { assertIsoDate } from "./broker-free-slots.mjs";
 import { resolvePublicLocale } from "./locales.mjs";
@@ -222,21 +222,34 @@ function semanticHashPartsFromTrip(trip) {
   } = safeTrip;
   return {
     public_intent: stableValue(publicIntent),
-    private_payload_sha256: createHash("sha256")
-      .update(
-        JSON.stringify(
-          stableValue({
-            ...durableContactPayload(trip),
-            contact: trip.contact || {},
-          }),
-        ),
-      )
-      .digest("hex"),
+    private_payload_hmac_sha256: stableValue({
+      algorithm: "hmac-sha256",
+      digest_input: stableValue({
+        ...durableContactPayload(trip),
+        contact: trip.contact || {},
+      }),
+    }),
   };
 }
 
-export function viewingTripSemanticHash(trip) {
-  return createHash("sha256").update(JSON.stringify(semanticHashPartsFromTrip(trip))).digest("hex");
+function viewingTripSemanticHash(trip, { contactSecret } = {}) {
+  const secret = requiredText(contactSecret, "MS_REALTY_PUBLIC_CONTACT_KEY", 4096);
+  const parts = semanticHashPartsFromTrip(trip);
+  const privatePayloadHmac = createHmac("sha256", secret)
+      .update(
+        JSON.stringify(
+          parts.private_payload_hmac_sha256.digest_input,
+        ),
+      )
+      .digest("hex");
+  return createHash("sha256")
+    .update(
+      JSON.stringify({
+        public_intent: parts.public_intent,
+        private_payload_hmac_sha256: privatePayloadHmac,
+      }),
+    )
+    .digest("hex");
 }
 
 function durableRequestRow(trip) {
@@ -245,13 +258,13 @@ function durableRequestRow(trip) {
   return safeTrip;
 }
 
-function requestDocumentFor(trip, workspaceId) {
+function requestDocumentFor(trip, workspaceId, { contactSecret } = {}) {
   const safeTrip = durableRequestRow(trip);
   return {
     workspace_id: requiredText(workspaceId, "Durable viewing trip workspace_id"),
     request_id: requiredText(safeTrip.id, "Viewing trip request id"),
     idempotency_key: safeTrip.idempotency_key || null,
-    semantic_hash: viewingTripSemanticHash(trip),
+    semantic_hash: viewingTripSemanticHash(trip, { contactSecret }),
     requested_at: isoTimestamp(safeTrip.requested_at, "requested_at"),
     arrival_date: isoDateStart(safeTrip.arrival_date, "arrival_date"),
     departure_date: isoDateStart(safeTrip.departure_date, "departure_date"),
@@ -516,7 +529,7 @@ export function appendViewingTripRequest(trip, { filePath = DEFAULT_VIEWING_TRIP
 
 export async function persistViewingTripDurably({ trip, contactSecret, payload = null, workspaceId } = {}) {
   if (!trip || typeof trip !== "object") throw new Error("A viewing trip request is required");
-  const request = requestDocumentFor(trip, workspaceId);
+  const request = requestDocumentFor(trip, workspaceId, { contactSecret });
   const envelope = contactEnvelopeForTrip(trip, { contactSecret });
   const runtime = await runtimePayload(payload, { writer: true });
   let transactionId = null;

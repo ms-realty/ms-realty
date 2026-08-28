@@ -43,6 +43,17 @@ function tripInputWith(overrides = {}) {
   };
 }
 
+function tempStoragePaths(prefix) {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+  return {
+    directory,
+    consentLedgerPath: path.join(directory, "consents.jsonl"),
+    publicContactVaultPath: path.join(directory, "public-contact-vault.jsonl"),
+    publicRequestOutcomeLedgerPath: path.join(directory, "public-request-outcomes.jsonl"),
+    viewingTripLedgerPath: path.join(directory, "viewing-trip-requests.jsonl"),
+  };
+}
+
 function payloadRuntime() {
   const collections = new Map();
   const rows = (collection) => {
@@ -109,7 +120,7 @@ async function postNextViewingTrip(config, input = tripInput()) {
 }
 
 test("Next viewing-trip intake uses the durable store without touching file ledgers", async () => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewing-trip-next-"));
+  const storage = tempStoragePaths("ms-realty-viewing-trip-next-");
   const payload = payloadRuntime();
   const config = appApiConfigFromEnv({
     ...approvedPublicSeedFixtureEnv(),
@@ -118,9 +129,9 @@ test("Next viewing-trip intake uses the durable store without touching file ledg
     DATABASE_URL: STORE_CONFIG.databaseUrl,
     MS_REALTY_PUBLIC_CONTACT_KEY: CONTACT_SECRET,
     MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId,
-    MS_REALTY_VIEWING_TRIP_LEDGER_PATH: path.join(directory, "viewing-trip-requests.jsonl"),
-    MS_REALTY_PUBLIC_CONTACT_VAULT_PATH: path.join(directory, "public-contact-vault.jsonl"),
-    MS_REALTY_CONSENT_LEDGER_PATH: path.join(directory, "consents.jsonl"),
+    MS_REALTY_VIEWING_TRIP_LEDGER_PATH: storage.viewingTripLedgerPath,
+    MS_REALTY_PUBLIC_CONTACT_VAULT_PATH: storage.publicContactVaultPath,
+    MS_REALTY_CONSENT_LEDGER_PATH: storage.consentLedgerPath,
     MS_REALTY_VIEWING_TRIP_REQUESTED_AT: "2026-08-29T09:00:00.000Z",
     MS_REALTY_RECEIVED_AT: "2026-08-29T09:00:00.000Z",
   });
@@ -152,8 +163,84 @@ test("Next viewing-trip intake uses the durable store without touching file ledg
   assert.equal(payload.collections.get("lead_contacts").length, 1);
 });
 
+test("durable viewing-trip semantic hash stays stable for the same input and secret", async () => {
+  const payloadA = payloadRuntime();
+  const payloadB = payloadRuntime();
+  const storageA = tempStoragePaths("ms-realty-viewing-trip-stable-a-");
+  const storageB = tempStoragePaths("ms-realty-viewing-trip-stable-b-");
+  const baseEnv = {
+    ...approvedPublicSeedFixtureEnv(),
+    MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: STORE_CONFIG.payloadSecret,
+    DATABASE_URL: STORE_CONFIG.databaseUrl,
+    MS_REALTY_PUBLIC_CONTACT_KEY: CONTACT_SECRET,
+    MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId,
+    MS_REALTY_VIEWING_TRIP_REQUESTED_AT: "2026-08-29T09:00:00.000Z",
+    MS_REALTY_RECEIVED_AT: "2026-08-29T09:00:00.000Z",
+  };
+  const configA = appApiConfigFromEnv({ ...baseEnv, MS_REALTY_CONSENT_LEDGER_PATH: storageA.consentLedgerPath });
+  const configB = appApiConfigFromEnv({ ...baseEnv, MS_REALTY_CONSENT_LEDGER_PATH: storageB.consentLedgerPath });
+  configA.viewingDurablePayload = payloadA;
+  configB.viewingDurablePayload = payloadB;
+
+  const first = await postNextViewingTrip(configA, tripInputWith({ idempotencyKey: "viewing-trip-durable-runtime-stable-a" }));
+  const second = await postNextViewingTrip(configB, tripInputWith({ idempotencyKey: "viewing-trip-durable-runtime-stable-b" }));
+  assert.equal(first.status, 201);
+  assert.equal(second.status, 201);
+
+  const hashA = payloadA.collections.get("viewing_trip_requests")[0].semantic_hash;
+  const hashB = payloadB.collections.get("viewing_trip_requests")[0].semantic_hash;
+  assert.match(hashA, /^[a-f0-9]{64}$/);
+  assert.equal(hashA, hashB);
+});
+
+test("durable viewing-trip semantic hash changes when the secret changes without exposing private values", async () => {
+  const payloadA = payloadRuntime();
+  const payloadB = payloadRuntime();
+  const storageA = tempStoragePaths("ms-realty-viewing-trip-secret-a-");
+  const storageB = tempStoragePaths("ms-realty-viewing-trip-secret-b-");
+  const configA = appApiConfigFromEnv({
+    ...approvedPublicSeedFixtureEnv(),
+    MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: STORE_CONFIG.payloadSecret,
+    DATABASE_URL: STORE_CONFIG.databaseUrl,
+    MS_REALTY_PUBLIC_CONTACT_KEY: CONTACT_SECRET,
+    MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId,
+    MS_REALTY_CONSENT_LEDGER_PATH: storageA.consentLedgerPath,
+    MS_REALTY_VIEWING_TRIP_REQUESTED_AT: "2026-08-29T09:00:00.000Z",
+    MS_REALTY_RECEIVED_AT: "2026-08-29T09:00:00.000Z",
+  });
+  const configB = appApiConfigFromEnv({
+    ...approvedPublicSeedFixtureEnv(),
+    MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true",
+    PAYLOAD_SECRET: STORE_CONFIG.payloadSecret,
+    DATABASE_URL: STORE_CONFIG.databaseUrl,
+    MS_REALTY_PUBLIC_CONTACT_KEY: "alternate-viewing-trip-contact-secret-0001",
+    MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId,
+    MS_REALTY_CONSENT_LEDGER_PATH: storageB.consentLedgerPath,
+    MS_REALTY_VIEWING_TRIP_REQUESTED_AT: "2026-08-29T09:00:00.000Z",
+    MS_REALTY_RECEIVED_AT: "2026-08-29T09:00:00.000Z",
+  });
+  configA.viewingDurablePayload = payloadA;
+  configB.viewingDurablePayload = payloadB;
+
+  const first = await postNextViewingTrip(configA, tripInputWith({ idempotencyKey: "viewing-trip-durable-runtime-secret-a" }));
+  const second = await postNextViewingTrip(configB, tripInputWith({ idempotencyKey: "viewing-trip-durable-runtime-secret-b" }));
+  assert.equal(first.status, 201);
+  assert.equal(second.status, 201);
+
+  const hashA = payloadA.collections.get("viewing_trip_requests")[0].semantic_hash;
+  const hashB = payloadB.collections.get("viewing_trip_requests")[0].semantic_hash;
+  assert.notEqual(hashA, hashB);
+  assert.equal(hashA.includes("+31612345678"), false);
+  assert.equal(hashB.includes("+31612345678"), false);
+  assert.equal(hashA.includes("Trip Visitor"), false);
+  assert.equal(hashB.includes("Trip Visitor"), false);
+});
+
 test("Next durable viewing-trip intake returns 409 when the same idempotency key is reused for different trip content", async () => {
   const payload = payloadRuntime();
+  const storage = tempStoragePaths("ms-realty-viewing-trip-conflict-next-");
   const config = appApiConfigFromEnv({
     ...approvedPublicSeedFixtureEnv(),
     MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true",
@@ -161,6 +248,7 @@ test("Next durable viewing-trip intake returns 409 when the same idempotency key
     DATABASE_URL: STORE_CONFIG.databaseUrl,
     MS_REALTY_PUBLIC_CONTACT_KEY: CONTACT_SECRET,
     MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId,
+    MS_REALTY_CONSENT_LEDGER_PATH: storage.consentLedgerPath,
     MS_REALTY_VIEWING_TRIP_REQUESTED_AT: "2026-08-29T09:00:00.000Z",
     MS_REALTY_RECEIVED_AT: "2026-08-29T09:00:00.000Z",
   });
@@ -189,6 +277,7 @@ test("Next durable viewing-trip intake returns 409 when the same idempotency key
 
 test("requested durable viewing-trip storage fails closed in Next production when config is incomplete", async () => {
   for (const override of [{ DATABASE_URL: "" }, { MS_REALTY_PUBLIC_CONTACT_KEY: "short" }, { MS_REALTY_WORKSPACE_ID: "" }]) {
+    const storage = tempStoragePaths("ms-realty-viewing-trip-incomplete-next-");
     const config = appApiConfigFromEnv({
       ...approvedPublicSeedFixtureEnv(),
       NODE_ENV: "production",
@@ -198,6 +287,7 @@ test("requested durable viewing-trip storage fails closed in Next production whe
       DATABASE_URL: STORE_CONFIG.databaseUrl,
       MS_REALTY_PUBLIC_CONTACT_KEY: CONTACT_SECRET,
       MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId,
+      MS_REALTY_CONSENT_LEDGER_PATH: storage.consentLedgerPath,
       ...override,
     });
 
@@ -211,17 +301,17 @@ test("requested durable viewing-trip storage fails closed in Next production whe
 });
 
 test("standalone viewing-trip intake uses the durable store and the admin queue reads the same request", async () => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewing-trip-http-"));
+  const storage = tempStoragePaths("ms-realty-viewing-trip-http-");
   const payload = payloadRuntime();
   const app = createHttpApp({
     seed: approvedPublicSeedFixture(),
     viewingDurableStore: STORE_CONFIG,
     viewingDurablePayload: payload,
-    viewingTripLedgerPath: path.join(directory, "viewing-trip-requests.jsonl"),
-    publicContactVaultPath: path.join(directory, "public-contact-vault.jsonl"),
+    viewingTripLedgerPath: storage.viewingTripLedgerPath,
+    publicContactVaultPath: storage.publicContactVaultPath,
     publicContactKey: CONTACT_SECRET,
-    consentLedgerPath: path.join(directory, "consents.jsonl"),
-    publicRequestOutcomeLedgerPath: path.join(directory, "public-request-outcomes.jsonl"),
+    consentLedgerPath: storage.consentLedgerPath,
+    publicRequestOutcomeLedgerPath: storage.publicRequestOutcomeLedgerPath,
     viewingTripRequestedAt: "2026-08-29T09:00:00.000Z",
     receivedAt: "2026-08-29T09:00:00.000Z",
   });
@@ -235,8 +325,8 @@ test("standalone viewing-trip intake uses the durable store and the admin queue 
   assert.equal(created.status, 201);
   assert.equal(created.body.ledger.durable, true);
   assert.equal(created.body.contactVault.durable, true);
-  assert.equal(fs.existsSync(path.join(directory, "viewing-trip-requests.jsonl")), false);
-  assert.equal(fs.existsSync(path.join(directory, "public-contact-vault.jsonl")), false);
+  assert.equal(fs.existsSync(storage.viewingTripLedgerPath), false);
+  assert.equal(fs.existsSync(storage.publicContactVaultPath), false);
 
   await withAdminCredentials(async () => {
     const queue = await dispatchHttp(app, {
@@ -264,11 +354,13 @@ test("standalone viewing-trip intake uses the durable store and the admin queue 
 
 test("standalone durable viewing-trip intake returns 409 when the same idempotency key is reused for different trip content", async () => {
   const payload = payloadRuntime();
+  const storage = tempStoragePaths("ms-realty-viewing-trip-conflict-http-");
   const app = createHttpApp({
     seed: approvedPublicSeedFixture(),
     viewingDurableStore: STORE_CONFIG,
     viewingDurablePayload: payload,
     publicContactKey: CONTACT_SECRET,
+    consentLedgerPath: storage.consentLedgerPath,
     viewingTripRequestedAt: "2026-08-29T09:00:00.000Z",
     receivedAt: "2026-08-29T09:00:00.000Z",
   });
