@@ -7047,7 +7047,10 @@ function LeadInboxBody({ page }) {
   const locale = page.workspace?.locale;
   const viewingQueue = page.viewingFollowUpQueue || { rows: [] };
   const sellerQueue = page.sellerPipelineQueue || { rows: [] };
-  const hasSecondaryQueue = Boolean(viewingQueue.rows?.length || sellerQueue.rows?.length);
+  // Once the payload includes either secondary queue, keep both panels in the
+  // workbench even when empty. Their compact empty state is useful evidence
+  // that the queue was checked and avoids making an empty queue disappear.
+  const hasSecondaryQueue = page.secondaryQueuesProvided === true || Boolean(viewingQueue.rows?.length || sellerQueue.rows?.length);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
@@ -7159,8 +7162,8 @@ function LeadInboxBody({ page }) {
         ? h(
             "section",
             { className: "adm-secondary-grid", "data-lead-secondary-queues": "true" },
-            viewingQueue.rows?.length ? h(ViewingFollowUpQueue, { page, copy, ui }) : null,
-            sellerQueue.rows?.length ? h(SellerPipelineQueue, { page, copy, ui }) : null,
+            h(ViewingFollowUpQueue, { page, copy, ui }),
+            h(SellerPipelineQueue, { page, copy, ui }),
           )
         : null,
     ],
@@ -11038,6 +11041,78 @@ function ConnectionRow({ connection, copy }) {
   );
 }
 
+function AssistantAccess({ assistant, copy }) {
+  const credential = String(assistant?.credential || "");
+  const config = String(assistant?.config || "");
+  if (!credential && !config) return null;
+  const operatorId = assistant?.operator_id || "operator";
+  return h(
+    "div",
+    { className: "adm-assistant-connection__access", "data-assistant-access": "true" },
+    credential
+      ? h(
+          "div",
+          { className: "adm-assistant-connection__credential" },
+          h("label", { htmlFor: "agent-credential" }, assistant?.credential_env ? `${copy.agentCredentialLabel} (${assistant.credential_env})` : copy.agentCredentialLabel),
+          h(
+            "div",
+            { className: "adm-assistant-connection__credential-row" },
+            h("input", {
+              className: "adm-assistant-connection__credential-input",
+              id: "agent-credential",
+              type: "password",
+              value: credential,
+              readonly: true,
+              autoComplete: "off",
+              spellCheck: false,
+              "aria-describedby": "agent-credential-hint",
+            }),
+            h(
+              "button",
+              {
+                className: "mk-btn mk-btn--ghost mk-btn--sm",
+                type: "button",
+                "data-copy-block": "agent-credential",
+                "data-copy-done": copy.agentCredentialCopied,
+                "data-copy-failed": copy.agentCopyFailed,
+                hidden: true,
+              },
+              copy.agentCredentialCopy,
+            ),
+            h("span", { className: "adm-assistant-connection__copy-status", role: "status", "aria-live": "polite", "aria-atomic": "true", "data-copy-status": "agent-credential" }),
+          ),
+          h("p", { className: "adm-assistant-connection__hint", id: "agent-credential-hint" }, copy.agentCredentialHint),
+        )
+      : null,
+    config
+      ? h(
+          "div",
+          { className: "adm-assistant-connection__config" },
+          h("p", { className: "adm-assistant-connection__config-label", id: "agent-config-label" }, copy.agentConfigLabel),
+          h("pre", { className: "adm-assistant-connection__config-block", id: "agent-config", tabIndex: 0, "aria-labelledby": "agent-config-label" }, config),
+          h(
+            "div",
+            { className: "adm-assistant-connection__config-actions" },
+            h(
+              "button",
+              {
+                className: "mk-btn mk-btn--ghost mk-btn--sm",
+                type: "button",
+                "data-copy-block": "agent-config",
+                "data-copy-done": copy.agentCopied,
+                "data-copy-failed": copy.agentCopyFailed,
+                hidden: true,
+              },
+              copy.agentCopy,
+            ),
+            h("span", { className: "adm-assistant-connection__copy-status", role: "status", "aria-live": "polite", "aria-atomic": "true", "data-copy-status": "agent-config" }),
+          ),
+          h("p", { className: "adm-assistant-connection__hint" }, `${copy.agentWarning} ${operatorId}.`),
+        )
+      : null,
+  );
+}
+
 function ConnectionsBody({ page }) {
   const copy = page.connection_copy || {};
   const whatsapp = page.whatsapp_client || {};
@@ -11110,7 +11185,13 @@ function ConnectionsBody({ page }) {
             h("span", null, page.assistant?.install_label),
           ),
         },
-        h("div", { className: "adm-assistant-connection__copy" }, h("p", null, page.assistant?.description), h("small", null, page.assistant?.install_hint)),
+        h(
+          "div",
+          { className: "adm-assistant-connection__copy" },
+          h("p", null, page.assistant?.description),
+          h("small", null, page.assistant?.install_hint),
+          h(AssistantAccess, { assistant: page.assistant, copy }),
+        ),
       ),
     ],
   });

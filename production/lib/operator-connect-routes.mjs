@@ -189,7 +189,11 @@ export async function runOperatorConnectionAction({
   } catch {
     return { outcome: "rejected", provider: provider || "unknown", phase: "unsupported_provider", error: new Error("Unsupported provider connection") };
   }
-  if (intent !== "disconnect" && !isOwnerConnectableProvider(provider)) {
+  // Viber remains intentionally absent from the one-click owner catalogue, but
+  // its authenticated token/webhook API is already used by the runtime. Keep
+  // that backend path available without turning it into an owner UI action.
+  const runtimeOnlyProvider = provider === "viber";
+  if (intent !== "disconnect" && !isOwnerConnectableProvider(provider) && !runtimeOnlyProvider) {
     return {
       outcome: "rejected",
       provider,

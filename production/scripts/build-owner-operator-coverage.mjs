@@ -55,7 +55,9 @@ function sourceHermesTools(file = fromRoot("production", "scripts", "hermes-mcp-
 function adminWorkflowReachability(row) {
   return row.execution === "browser_session"
     ? "admin_ui_and_signed_in_webmcp_open"
-    : "delegated_mcp_and_signed_in_webmcp";
+    : row.read_only
+      ? "delegated_mcp_and_signed_in_webmcp_read"
+      : "signed_delegated_mcp_and_human_admin_ui";
 }
 
 function hermesWorkflowReachability() {

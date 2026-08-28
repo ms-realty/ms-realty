@@ -4,6 +4,7 @@ import { renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import {
   DEFAULT_CODEX_MARKETPLACE_PATH,
+  OPERATOR_TOKEN_ENV,
   buildOperatorConnectPayload,
   operatorBootstrapPrompt,
   operatorCodexPluginUrl,
@@ -39,19 +40,19 @@ async function withNamedOperator(fn) {
   }
 }
 
-test("bootstrap prompt embeds the operator's endpoint, token, and guardrails", () => {
+test("bootstrap prompt names the operator endpoint, credential environment and guardrails", () => {
   const prompt = operatorBootstrapPrompt({
     baseUrl: "https://ms-realty.example.workers.dev/some/path",
-    token: OPERATOR_TOKEN,
     operatorId: "connect_operator",
   });
   assert.ok(prompt.includes("https://ms-realty.example.workers.dev/mcp"));
-  assert.ok(prompt.includes(`Bearer ${OPERATOR_TOKEN}`));
+  assert.ok(prompt.includes(OPERATOR_TOKEN_ENV));
   assert.ok(prompt.includes("connect_operator"));
   assert.ok(prompt.includes("hermes-mcp-server.mjs"));
   assert.ok(prompt.includes("Never describe Sandanski as a sea destination"));
   assert.ok(prompt.includes("humans approve"));
-  assert.throws(() => operatorBootstrapPrompt({ baseUrl: "https://x.test", token: "" }), /operator token/i);
+  assert.doesNotMatch(prompt, new RegExp(OPERATOR_TOKEN));
+  assert.doesNotMatch(prompt, /Bearer\s+connect-operator-token/);
 });
 
 test("connections payload renders the persistent owner shell without credential material", () => {

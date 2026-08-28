@@ -746,6 +746,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       replyDeliveryQueue,
       communicationThreads: data.communicationThreads,
     });
+  const secondaryQueuesProvided = Boolean(providedViewingFollowUpQueue || providedSellerPipelineQueue);
   return {
     kind: "admin_lead_inbox",
     status: 200,
@@ -768,6 +769,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     replyDeliveryQueue,
     viewingFollowUpQueue,
     sellerPipelineQueue,
+    secondaryQueuesProvided,
     publicRequestQueue,
     leadBriefs,
     summary: {

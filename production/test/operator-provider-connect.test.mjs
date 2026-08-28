@@ -23,6 +23,7 @@ import {
   providerCopyKey,
 } from "../lib/operator-connect-copy.mjs";
 import {
+  OPERATOR_TOKEN_ENV,
   operatorAgentConfigBlock,
   operatorConnectResult,
   renderOperatorConnectPage,
@@ -506,7 +507,7 @@ test("disconnecting revokes at the provider and then deletes the row", async () 
   );
 });
 
-test("the assistant's configuration helper stays available as an API, but the owner page never renders its token", async () => {
+test("the assistant's configuration helper stays available as an API and the owner page reveals one masked credential", async () => {
   const mint = mintOperatorAgentToken(
     { operatorId: "connect_operator", roles: ["admin"] },
     { secret: SECRET, issuedAt: "2026-08-24T00:00:00.000Z", ttlDays: 90 },
@@ -533,10 +534,11 @@ test("the assistant's configuration helper stays available as an API, but the ow
   const parsed = JSON.parse(claudeSection.slice(claudeSection.indexOf("{"), claudeSection.lastIndexOf("}") + 1));
   assert.equal(parsed.mcpServers["ms-realty"].url, "https://ms-realty.example/mcp");
   assert.equal(parsed.mcpServers["ms-realty"].type, "http");
-  assert.equal(parsed.mcpServers["ms-realty"].headers.Authorization, `Bearer ${mint.token}`);
+  assert.equal(parsed.mcpServers["ms-realty"].headers.Authorization, `Bearer \${${OPERATOR_TOKEN_ENV}}`);
+  assert.equal(block.includes(mint.token), false);
   // ChatGPT, both ways it can be reached.
   assert.match(block, /\[mcp_servers\.ms-realty\]/);
-  assert.match(block, /http_headers = \{ "Authorization" = "Bearer /);
+  assert.match(block, new RegExp(`bearer_token_env_var = "${OPERATOR_TOKEN_ENV}"`));
   assert.match(block, /Settings -> Connectors -> Add custom connector/);
   // The local drafting bridge that already exists.
   assert.match(block, /hermes-mcp-server\.mjs/);
@@ -551,17 +553,17 @@ test("the assistant's configuration helper stays available as an API, but the ow
     agentExpiresAt: mint.expires_at,
     locale: "bg",
   });
-  // A page can offer the Codex install handoff, but it must not embed the
-  // short-lived bearer in a prompt, textarea, pre, script or copy control.
+  // The owner page exposes the short-lived credential once in a masked,
+  // read-only field and keeps the copied configuration token-free.
   assert.match(html, /data-connection-group="assistant"/);
   assert.match(html, /data-codex-plugin-install="ms-realty-operator"/);
-  assert.doesNotMatch(html, /<pre class="agent__config"/);
-  assert.doesNotMatch(html, /id="prompt"/);
-  assert.doesNotMatch(html, /id="agent-reveal"/);
-  assert.doesNotMatch(html, /data-copy-block=/);
-  assert.doesNotMatch(html, /initCopyBlocks/);
-  assert.equal(html.includes(mint.token), false);
-  assert.doesNotMatch(html, /<(?:textarea|pre)[^>]+data-masked="true"/);
+  assert.equal((html.match(/id="agent-credential"/g) || []).length, 1);
+  assert.match(html, /id="agent-credential" type="password"[^>]*readonly/);
+  assert.equal((html.match(/data-copy-block="agent-credential"/g) || []).length, 1);
+  assert.equal((html.match(/data-copy-block="agent-config"/g) || []).length, 1);
+  assert.match(html, new RegExp(OPERATOR_TOKEN_ENV));
+  assert.match(html, new RegExp(`id="agent-credential"[^>]+value="${mint.token}"`));
+  assert.equal((html.match(new RegExp(mint.token, "g")) || []).length, 1);
 
   // The Codex handoff is the supported visible step; no direct MCP credential
   // setup is rendered alongside it.

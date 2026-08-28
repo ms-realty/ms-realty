@@ -6,8 +6,9 @@
 // so and offers a copyable checklist for whoever can register it -- it never
 // renders a button that would fail.
 //
-// Below the cards, the page offers only the authorized Codex handoff. Direct
-// MCP credentials stay behind the authenticated API and never enter this UI.
+// Below the cards, the page offers the authorized Codex handoff and (when the
+// owner-only issuance succeeds) one short-lived delegated credential. The
+// credential itself is never included in the prompt or saved configuration.
 //
 // The page deliberately avoids the React admin shell: its entire job is a
 // column of cards and one safe app handoff that an eighty-year-old can use. Like the
@@ -23,11 +24,14 @@ import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { operatorConnectCopy, providerCopyKey, providerDisplayName } from "./operator-connect-copy.mjs";
 import { operatorProviderCards } from "./operator-provider-catalog.mjs";
 
+export const OPERATOR_TOKEN_ENV = "MS_REALTY_OPERATOR_TOKEN";
+const OPERATOR_TOKEN_PLACEHOLDER = `\${${OPERATOR_TOKEN_ENV}}`;
+
 const PROMPT_TEMPLATE = `You are now the operations copilot for MS Realty, a family real-estate agency in Sandanski, Bulgaria (legacy sites makler-realty.com and makler-realty.ru; the authoritative public platform runs at __BASE_URL__).
 
 Pre-filled configuration for this operator:
 - MCP endpoint: __BASE_URL__/mcp
-- Bearer token: __TOKEN__
+- Credential environment variable: ${OPERATOR_TOKEN_ENV}
 - Operator id: __OPERATOR_ID__
 
 Do the following phases autonomously. Ask the user only when a step genuinely needs their click or choice. Speak to the user in the language they use with you (default to Russian).
@@ -36,13 +40,13 @@ PHASE 1 — CONNECT THE BUSINESS (remote MCP)
 1. Detect your own environment: can you run terminal commands? Is the \`claude\` CLI or \`codex\` CLI available?
 2. Preferred (terminal available):
    - Claude Code / Claude Desktop with Code: run
-     claude mcp add --transport http ms-realty "__BASE_URL__/mcp" --header "Authorization: Bearer __TOKEN__"
+     claude mcp add --transport http ms-realty "__BASE_URL__/mcp" --header "Authorization: Bearer ${OPERATOR_TOKEN_PLACEHOLDER}"
    - Codex / ChatGPT with terminal: add to ~/.codex/config.toml:
      [mcp_servers.ms-realty]
      url = "__BASE_URL__/mcp"
-     http_headers = { "Authorization" = "Bearer __TOKEN__" }
-3. No terminal: walk the user through Settings -> Connectors -> Add custom connector with URL __BASE_URL__/mcp, and put "Authorization: Bearer __TOKEN__" in the Request headers section if your app offers it. If neither headers nor terminal are available in this app, say so plainly and stop after Phase 4's report.
-4. Never print the token back to the user in chat; it is a credential.
+     bearer_token_env_var = "${OPERATOR_TOKEN_ENV}"
+3. No terminal: walk the user through Settings -> Connectors -> Add custom connector with URL __BASE_URL__/mcp, and select ${OPERATOR_TOKEN_ENV} in the connector's secret/environment credential field if the app offers one. If no protected credential field is available, say so plainly and stop after Phase 4's report.
+4. The short-lived token is issued only on the signed-in owner page. Never paste its value into saved headers, URLs, configuration, or chat.
 
 PHASE 2 — VERIFY
 Call these MCP tools and keep the results for the report: get_launch_status, search_public_listings (query "Sandanski", locale "bg"), and get_operator_brief if your role allows it. A 401 means the token was mis-pasted; a 503 on other site APIs is a designed gate, not an outage.
@@ -86,11 +90,9 @@ export function operatorCodexPluginUrl({ marketplacePath = DEFAULT_CODEX_MARKETP
   return `codex://plugins/ms-realty-operator?marketplacePath=${encodeURIComponent(resolved)}`;
 }
 
-export function operatorBootstrapPrompt({ baseUrl, token, operatorId }) {
+export function operatorBootstrapPrompt({ baseUrl, operatorId }) {
   const origin = new URL(String(baseUrl)).origin;
-  if (!token || typeof token !== "string") throw new Error("An operator token is required");
   return PROMPT_TEMPLATE.replaceAll("__BASE_URL__", origin)
-    .replaceAll("__TOKEN__", token)
     .replaceAll("__OPERATOR_ID__", operatorId || "operator");
 }
 
@@ -101,12 +103,16 @@ export function operatorAgentConfigBlock({ baseUrl, token, operatorId, expiresAt
   const origin = new URL(String(baseUrl)).origin;
   if (!token || typeof token !== "string") throw new Error("An operator agent token is required");
   const copy = operatorConnectCopy(locale);
+  // The token is deliberately an authorization gate, not template material:
+  // callers may generate this block only after owner-only issuance succeeds.
+  // The operator stores the one-time credential separately as
+  // MS_REALTY_OPERATOR_TOKEN; it never lands in copied configuration.
   const claudeConfig = {
     mcpServers: {
       "ms-realty": {
         type: "http",
         url: `${origin}/mcp`,
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${OPERATOR_TOKEN_PLACEHOLDER}` },
       },
     },
   };
@@ -120,7 +126,7 @@ export function operatorAgentConfigBlock({ baseUrl, token, operatorId, expiresAt
     `3. ${copy.agentStep3}`,
     "",
     "=== Claude Code ===",
-    `claude mcp add --transport http ms-realty "${origin}/mcp" --header "Authorization: Bearer ${token}"`,
+    `claude mcp add --transport http ms-realty "${origin}/mcp" --header "Authorization: Bearer ${OPERATOR_TOKEN_PLACEHOLDER}"`,
     "",
     "# .mcp.json / claude_desktop_config.json",
     JSON.stringify(claudeConfig, null, 2),
@@ -129,12 +135,13 @@ export function operatorAgentConfigBlock({ baseUrl, token, operatorId, expiresAt
     "# ~/.codex/config.toml",
     "[mcp_servers.ms-realty]",
     `url = "${origin}/mcp"`,
-    `http_headers = { "Authorization" = "Bearer ${token}" }`,
+    `bearer_token_env_var = "${OPERATOR_TOKEN_ENV}"`,
     "",
     "=== ChatGPT (app) ===",
     "Settings -> Connectors -> Add custom connector",
     `URL: ${origin}/mcp`,
-    `Authorization: Bearer ${token}`,
+    `Credential secret/environment field: ${OPERATOR_TOKEN_ENV}`,
+    "Do not paste the token into saved headers, URLs, configuration, or chat.",
     "",
     "=== Hermes drafting bridge (optional, on the machine with the repository) ===",
     "claude mcp add ms-realty-hermes -- node <repo>/production/scripts/hermes-mcp-server.mjs",
@@ -235,6 +242,10 @@ export function buildOperatorConnectPayload({
   connections = [],
   availability = {},
   providerConfig = null,
+  baseUrl = "",
+  assistantPrompt = "",
+  agentToken = "",
+  agentExpiresAt = "",
   codexMarketplacePath = DEFAULT_CODEX_MARKETPLACE_PATH,
   result = "",
   resultTone = "success",
@@ -247,6 +258,16 @@ export function buildOperatorConnectPayload({
     .filter((card) => card.owner_connectable)
     .map((card) => ownerConnectionView(card, copy, canManageConnections));
   const whatsapp = cards.find((card) => card.id === "whatsapp");
+  const operatorId = workspace.operator_id || operator?.id || "operator";
+  const assistantConfig = agentToken
+    ? operatorAgentConfigBlock({
+        baseUrl,
+        token: agentToken,
+        operatorId,
+        expiresAt: agentExpiresAt,
+        locale: workspace.lang,
+      })
+    : String(assistantPrompt || "");
   const systemState = (ready) => ({
     status: ready ? "ready" : "attention",
     status_label: ready ? copy.managedReady : copy.managedAttention,
@@ -294,6 +315,11 @@ export function buildOperatorConnectPayload({
       install_label: copy.agentInstall,
       install_hint: copy.agentInstallHint,
       plugin_url: operatorCodexPluginUrl({ marketplacePath: codexMarketplacePath }),
+      config: assistantConfig,
+      operator_id: operatorId,
+      credential_env: OPERATOR_TOKEN_ENV,
+      credential: String(agentToken || ""),
+      expires_at: String(agentExpiresAt || ""),
     },
     result: result ? { message: result, tone: resultTone === "error" ? "error" : "success" } : null,
     store_error: storeError,
@@ -301,8 +327,7 @@ export function buildOperatorConnectPayload({
 }
 
 // Compatibility entry point for callers that still ask this module for a full
-// document. It uses the same payload and shell as both production runtimes; no
-// alternate connection UI or credential-bearing prompt exists anymore.
+// document. It uses the same payload and shell as both production runtimes.
 export function renderOperatorConnectPage(options = {}) {
   const page = buildOperatorConnectPayload({
     registry: options.registry || loadLocaleRegistry(),
@@ -317,6 +342,10 @@ export function renderOperatorConnectPage(options = {}) {
     connections: options.connections || [],
     availability: options.availability || {},
     providerConfig: options.providerConfig || null,
+    baseUrl: options.baseUrl || "http://localhost",
+    assistantPrompt: options.assistantPrompt || "",
+    agentToken: options.agentToken || "",
+    agentExpiresAt: options.agentExpiresAt || "",
     codexMarketplacePath: options.codexMarketplacePath || DEFAULT_CODEX_MARKETPLACE_PATH,
     result: options.result || "",
     resultTone: options.resultTone || "success",

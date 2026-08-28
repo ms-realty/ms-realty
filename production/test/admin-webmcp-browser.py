@@ -87,13 +87,12 @@ def main():
             CATALOG,
         )
         page.add_script_tag(content=SCRIPT)
-        page.wait_for_function("window.__webmcpTools.length === 4")
+        page.wait_for_function("window.__webmcpTools.length === 3")
 
         names = page.evaluate("window.__webmcpTools.map(tool => tool.name)")
         assert names == [
             "ms_realty_admin_context",
             "ms_realty_admin_read",
-            "ms_realty_admin_write",
             "ms_realty_admin_open",
         ], {"page_errors": errors, "names": names}
 
@@ -101,12 +100,11 @@ def main():
         assert annotations == [
             {"readOnlyHint": True},
             {"readOnlyHint": True, "untrustedContentHint": True},
-            {"readOnlyHint": False, "destructiveHint": True, "untrustedContentHint": True},
             {"readOnlyHint": False, "destructiveHint": False},
         ], annotations
 
         browser_operation = page.evaluate(
-            "window.__webmcpTools[3].inputSchema.properties.operation.enum"
+            "window.__webmcpTools[2].inputSchema.properties.operation.enum"
         )
         assert browser_operation == ["admin_post_security_two_factor_verify"]
 
@@ -118,22 +116,17 @@ def main():
         )
         assert read["http_status"] == 200
 
-        write = page.evaluate(
-            """window.__webmcpTools[2].execute({
-              operation: 'admin_post_listings_status',
-              input: { reference: 'MS-CRAWL-0001', status: 'reviewed' },
-              confirmation: 'owner-confirmed-in-browser'
-            })"""
-        )
-        assert write["http_status"] == 200
+        assert page.evaluate(
+            "window.__webmcpTools.some(tool => tool.name === 'ms_realty_admin_write')"
+        ) is False
 
         calls = page.evaluate("window.__webmcpFetches")
         assert calls[0]["url"].endswith("/api/admin/connections/agent-config?catalog=1")
         assert calls[0]["options"]["credentials"] == "same-origin"
         assert calls[1]["options"]["method"] == "GET"
-        assert calls[-1]["options"]["method"] == "POST"
+        assert len(calls) == 2
+        assert calls[-1]["options"]["method"] == "GET"
         assert calls[-1]["options"]["credentials"] == "same-origin"
-        assert "MS-CRAWL-0001" in calls[-1]["options"]["body"]
         assert errors == []
         browser.close()
 

@@ -214,8 +214,8 @@ function executionBoundary(pathname) {
   // These routes intentionally go through the workspace-security or Payload
   // session implementation, or carry file/secret material. A delegated MCP
   // bearer must not pretend it can satisfy an interactive browser session or
-  // a step-up challenge. The same operation remains available to WebMCP on
-  // the authenticated admin origin.
+  // a step-up challenge. Browser WebMCP is intentionally read/open only;
+  // mutations stay on the signed delegated MCP path or visible forms.
   if (
     /\/security\//.test(pathname) ||
     /\/data-exports/.test(pathname) ||

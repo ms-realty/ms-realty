@@ -108,17 +108,21 @@ test("every authorized workflow has an executable owner entrypoint", () => {
     if (row.execution === "browser_session") {
       assert.equal(workflow.reachability, "admin_ui_and_signed_in_webmcp_open");
       assert.ok(workflow.ui_path?.startsWith("/admin"));
+    } else if (row.read_only) {
+      assert.equal(workflow.reachability, "delegated_mcp_and_signed_in_webmcp_read");
+      assert.equal(workflow.tool, OWNER_OPERATOR_ADMIN_READ_TOOL);
     } else {
-      assert.equal(workflow.reachability, "delegated_mcp_and_signed_in_webmcp");
-      assert.ok([OWNER_OPERATOR_ADMIN_READ_TOOL, OWNER_OPERATOR_ADMIN_WRITE_TOOL].includes(workflow.tool));
+      assert.equal(workflow.reachability, "signed_delegated_mcp_and_human_admin_ui");
+      assert.equal(workflow.tool, OWNER_OPERATOR_ADMIN_WRITE_TOOL);
     }
   }
   assert.equal(coverage.hermes_tools.every((row) => row.reachability === "owner_plugin_mcp"), true);
 
   const client = fs.readFileSync(fromRoot("production", "lib", "ui", "client.mjs"), "utf8");
-  for (const tool of ["ms_realty_admin_context", "ms_realty_admin_read", "ms_realty_admin_write", "ms_realty_admin_open"]) {
+  for (const tool of ["ms_realty_admin_context", "ms_realty_admin_read", "ms_realty_admin_open"]) {
     assert.match(client, new RegExp(`name: ["']${tool}["']`), `${tool} must remain registered with WebMCP`);
   }
+  assert.doesNotMatch(client, /name: ["']ms_realty_admin_write["']/);
 });
 
 test("provider matrix enables only one-click connections with real consumers", () => {

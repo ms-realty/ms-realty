@@ -2336,6 +2336,19 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-managed-system-list > li > .crm-pill { justify-self: end; }
 .adm-assistant-connection__copy { display: grid; gap: var(--space-2); padding: 0 var(--space-5) var(--space-5); }
 .adm-assistant-connection__copy small { color: var(--text-muted); }
+.adm-assistant-connection__access { display: grid; gap: var(--space-4); margin-top: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+.adm-assistant-connection__credential,
+.adm-assistant-connection__config { display: grid; gap: var(--space-2); min-width: 0; }
+.adm-assistant-connection__credential label,
+.adm-assistant-connection__config-label { color: var(--text-strong); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-assistant-connection__credential-row,
+.adm-assistant-connection__config-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.adm-assistant-connection__credential-input { flex: 1 1 320px; width: min(100%, 520px); min-width: 0; font-family: var(--font-mono, ui-monospace, monospace); }
+.adm-assistant-connection__config-block { max-height: 320px; margin: 0; padding: var(--space-3); overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-sunken); color: var(--text-strong); font-family: var(--font-mono, ui-monospace, monospace); font-size: var(--text-xs); line-height: var(--lh-relaxed); white-space: pre-wrap; overflow-wrap: anywhere; }
+.adm-assistant-connection__hint,
+.adm-assistant-connection__copy-status { margin: 0; color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
+.adm-assistant-connection__copy-status[data-state="success"] { color: var(--success-600); font-weight: var(--fw-semibold); }
+.adm-assistant-connection__copy-status[data-state="error"] { color: var(--brick-600); font-weight: var(--fw-semibold); }
 
 @media (max-width: 700px) {
   .adm-connection-row,
@@ -2351,6 +2364,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-assistant-connection .crm-panel__hd { align-items: stretch; flex-direction: column; }
   .adm-assistant-connection .crm-panel__hd .mk-btn { width: 100%; justify-content: center; }
   .adm-assistant-connection__copy { padding-inline: var(--space-4); }
+  .adm-assistant-connection__credential-input { flex-basis: 100%; }
 }
 
 /* ---- Listing photo upload (media manager) ---- */

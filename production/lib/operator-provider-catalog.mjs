@@ -260,7 +260,7 @@ const PROVIDER_COVERAGE = Object.freeze({
   ai: {
     state: "managed",
     ownerSurface: "hermes_status",
-    authorization: "managed_self_hosted_runtime",
+    authorization: "managed_hermes_runtime",
     reason: "hermes_runtime_managed_outside_owner_connections",
     consumers: [
       { workflow: "guarded_hermes_owner_plans", source_file: "production/lib/admin-hermes.mjs", symbol: "buildAdminHermesPayload" },

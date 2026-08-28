@@ -38,7 +38,13 @@ import {
   withAuthenticatedAuditActor,
   adminCredentials,
 } from "./admin-auth.mjs";
-import { buildOperatorConnectPayload, operatorAgentConfigBlock, operatorConnectResult } from "./operator-connect.mjs";
+import {
+  OPERATOR_TOKEN_ENV,
+  buildOperatorConnectPayload,
+  operatorAgentConfigBlock,
+  operatorBootstrapPrompt,
+  operatorConnectResult,
+} from "./operator-connect.mjs";
 import { ownerOperatorCatalog } from "./owner-operator-catalog.mjs";
 import {
   adminSessionClearCookie,
@@ -4342,6 +4348,19 @@ export function createHttpApp({
         error: Boolean(url.searchParams.get("error")),
         storeError,
       });
+      const base =
+        String(providerConnection.publicOrigin || "").trim() ||
+        new URL(request.url, `http://${requestHost(request.headers) || "localhost"}`).origin;
+      const agent = issueOperatorAgentToken({ principal, env: operatorAgentEnv });
+      if (agent) {
+        recordAudit({
+          action: "operator_agent_token_issued",
+          actor: principal?.id,
+          objectType: "operator_agent_token",
+          objectId: agent.operator_id,
+          metadata: { expires_at: agent.expires_at, roles: agent.roles },
+        });
+      }
       return adminResponse(
         200,
         adminHtml(buildOperatorConnectPayload({
@@ -4351,6 +4370,13 @@ export function createHttpApp({
           connections,
           availability,
           providerConfig: providerConnection,
+          baseUrl: base,
+          assistantPrompt:
+            !agent && principal?.source === "credential_registry"
+              ? operatorBootstrapPrompt({ baseUrl: base, operatorId: principal.id })
+              : "",
+          agentToken: agent?.token || "",
+          agentExpiresAt: agent?.expires_at || "",
           codexMarketplacePath: operatorAgentEnv.MS_REALTY_CODEX_MARKETPLACE_PATH,
           result,
           resultTone: resultError ? "error" : "success",
@@ -4428,6 +4454,8 @@ export function createHttpApp({
             operator_id: agent.operator_id,
             expires_at: agent.expires_at,
             mcp_url: `${new URL(origin).origin}/mcp`,
+            credential_env: OPERATOR_TOKEN_ENV,
+            credential: agent.token,
             config: operatorAgentConfigBlock({
               baseUrl: origin,
               token: agent.token,

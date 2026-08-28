@@ -159,9 +159,14 @@ test("both servers render only working one-click connections in the persistent o
       assert.equal((body.match(/<h1\b/g) || []).length, 1, "one page heading");
       assert.equal(body.includes("/api/admin/connections?provider=google&amp;action=start"), false, "bearer view has no OAuth mutation");
       assert.equal(body.includes("data-whatsapp-connect"), false, "bearer view has no embedded-signup mutation");
-      // Both surfaces expose only the authorized Codex handoff; the short-lived
-      // assistant configuration remains behind its authenticated API route.
-      assert.equal(body.includes('data-copy-block="agent-config"'), false, "no assistant config block");
+      // Both surfaces expose the one-time delegated credential in a masked,
+      // read-only field. The copied configuration names its env slot rather
+      // than embedding either the delegated token or the original bearer.
+      assert.equal((body.match(/id="agent-credential"/g) || []).length, 1, "one assistant credential field");
+      assert.match(body, /id="agent-credential" type="password"[^>]*readonly/);
+      assert.equal((body.match(/data-copy-block="agent-credential"/g) || []).length, 1, "one credential copy action");
+      assert.equal((body.match(/data-copy-block="agent-config"/g) || []).length, 1, "one assistant config action");
+      assert.match(body, /MS_REALTY_OPERATOR_TOKEN/);
       assert.equal(body.includes(BEARER), false, "no operator bearer in owner HTML");
       assert.ok(body.includes('data-codex-plugin-install="ms-realty-operator"'), "Codex plugin install link");
       assert.ok(body.includes('<html lang="bg" dir="ltr">'));

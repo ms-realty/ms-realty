@@ -284,6 +284,40 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
     }).operation,
     "hermes_submit_draft",
   );
+  const hermesChallengeWithExplicitNulls = await callTool(
+    config,
+    "ms_realty_admin_context",
+    {
+      challenge_for: {
+        operation: "hermes_submit_draft",
+        input: { ...hermesInput, model: null, target_locale: null },
+      },
+    },
+    auth,
+  );
+  assert.equal(
+    hermesChallengeWithExplicitNulls.challenge.input_hash,
+    hermesChallenge.challenge.input_hash,
+    "optional Hermes fields canonicalize identically when omitted or null",
+  );
+  const hermesCrossSessionReplay = await mcpCall(
+    config,
+    {
+      jsonrpc: "2.0",
+      id: 25,
+      method: "tools/call",
+      params: {
+        name: "ms_realty_hermes",
+        arguments: {
+          operation: "hermes_submit_draft",
+          ...hermesInput,
+          confirmation: hermesChallenge.challenge.token,
+        },
+      },
+    },
+    { authorization: "Bearer mcp-editor-other-token-0123456789abcdef" },
+  );
+  assert.equal(hermesCrossSessionReplay.payload.result.isError, true);
   const status = await callTool(
     config,
     "ms_realty_admin_write",
