@@ -10964,6 +10964,155 @@ function OwnerProfileSection({ page }) {
   );
 }
 
+function connectionTone(status) {
+  if (status === "connected" || status === "ready") return "success";
+  if (status === "attention" || status === "needs_setup") return "brick";
+  return "sand";
+}
+
+function ConnectionAction({ connection }) {
+  if (!connection.can_manage || (!connection.action_href && connection.id !== "whatsapp")) return null;
+  if (connection.id === "whatsapp") {
+    return h(
+      "button",
+      {
+        className: "mk-btn mk-btn--primary mk-btn--sm",
+        type: "button",
+        disabled: true,
+        "data-whatsapp-connect": "true",
+      },
+      h(Icon, { name: "message-circle", size: 15 }),
+      h("span", null, connection.action_label),
+    );
+  }
+  return h(
+    "a",
+    { className: "mk-btn mk-btn--primary mk-btn--sm", href: connection.action_href },
+    h(Icon, { name: "link", size: 15 }),
+    h("span", null, connection.action_label),
+  );
+}
+
+function ConnectionRow({ connection, copy }) {
+  const connected = connection.status === "connected";
+  return h(
+    "li",
+    { className: "adm-connection-row", "data-provider": connection.id, "data-status": connection.status },
+    h(
+      "div",
+      { className: "adm-connection-row__summary" },
+      h("div", { className: "adm-connection-row__icon", "aria-hidden": "true" }, h(Icon, { name: connection.id === "whatsapp" ? "message-circle" : "mail", size: 18 })),
+      h(
+        "div",
+        null,
+        h("h3", null, connection.title),
+        h("p", null, connection.description),
+        connected ? h("p", { className: "adm-connection-row__account" }, h("bdi", null, connection.account_label), h("small", null, connection.verified_label)) : null,
+        connection.unavailable_message
+          ? h("p", { className: "adm-connection-row__recovery" }, connection.unavailable_message, h("small", null, connection.recovery_message))
+          : null,
+      ),
+    ),
+    h(
+      "div",
+      { className: "adm-connection-row__state" },
+      h(StatusPill, { tone: connectionTone(connection.status) }, connection.status_label),
+      h(
+        "div",
+        { className: "adm-connection-row__actions" },
+        h(ConnectionAction, { connection }),
+        connected && connection.can_manage
+          ? h(
+              "form",
+              { method: "post", action: "/api/admin/connections/disconnect" },
+              h("input", { type: "hidden", name: "provider", value: connection.id }),
+              h("button", { className: "mk-btn mk-btn--ghost mk-btn--sm", type: "submit" }, copy.disconnect),
+            )
+          : null,
+      ),
+      connection.id === "whatsapp" ? h("small", { className: "adm-connection-row__live", role: "status", "aria-live": "polite", "aria-atomic": "true", "data-whatsapp-result": "true" }) : null,
+    ),
+  );
+}
+
+function ConnectionsBody({ page }) {
+  const copy = page.connection_copy || {};
+  const whatsapp = page.whatsapp_client || {};
+  const connections = Array.isArray(page.connections) ? page.connections : [];
+  const managed = Array.isArray(page.managed_systems) ? page.managed_systems : [];
+  return adminShell(page, {
+    title: copy.title,
+    titleAsHeading: true,
+    mainAttrs: {
+      "data-kind": "admin_connections",
+      "data-react-admin-ui": "connections",
+      "data-admin-workbench": "connections",
+      "data-admin-locale": page.workspace.locale,
+      "data-whatsapp-embedded-signup": whatsapp.enabled ? "true" : "false",
+      "data-whatsapp-app-id": whatsapp.app_id || "",
+      "data-whatsapp-config-id": whatsapp.config_id || "",
+      "data-whatsapp-version": whatsapp.version || "",
+      "data-meta-checking": copy.metaChecking || "",
+      "data-meta-rejected": copy.metaRejected || "",
+      "data-meta-no-server": copy.metaNoServer || "",
+      "data-meta-ready": copy.metaReady || "",
+      "data-meta-sdk-failed": copy.metaSdkFailed || "",
+      "data-meta-sdk-not-ready": copy.metaSdkNotReady || "",
+      "data-meta-opening": copy.metaOpening || "",
+      "data-meta-cancelled": copy.metaCancelled || "",
+    },
+    children: [
+      h("p", { className: "adm-connections-intro" }, copy.intro),
+      page.result
+        ? h("p", { className: "adm-connections-notice", role: page.result.tone === "error" ? "alert" : "status", "data-state": page.result.tone }, page.result.message)
+        : null,
+      h(
+        Panel,
+        { title: copy.workAccountsTitle, "data-connection-group": "work-accounts" },
+        h("p", { className: "adm-connections-section-copy" }, copy.workAccountsDescription),
+        h("ul", { className: "adm-connection-list" }, ...connections.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+      ),
+      h(
+        Panel,
+        { title: copy.managedTitle, "data-connection-group": "managed-system" },
+        h("p", { className: "adm-connections-section-copy" }, copy.managedDescription),
+        h(
+          "ul",
+          { className: "adm-managed-system-list" },
+          ...managed.map((system) =>
+            h(
+              "li",
+              { key: system.id, "data-managed-system": system.id, "data-status": system.status },
+              h("div", null, h("h3", null, system.title), h("p", null, system.description)),
+              h(StatusPill, { tone: connectionTone(system.status) }, system.status_label),
+            ),
+          ),
+        ),
+      ),
+      h(
+        Panel,
+        {
+          title: page.assistant?.title,
+          className: "adm-assistant-connection",
+          "data-connection-group": "assistant",
+          action: h(
+            "a",
+            {
+              className: "mk-btn mk-btn--primary mk-btn--sm",
+              href: page.assistant?.plugin_url,
+              rel: "noopener",
+              "data-codex-plugin-install": "ms-realty-operator",
+            },
+            h(Icon, { name: "sparkles", size: 15 }),
+            h("span", null, page.assistant?.install_label),
+          ),
+        },
+        h("div", { className: "adm-assistant-connection__copy" }, h("p", null, page.assistant?.description), h("small", null, page.assistant?.install_hint)),
+      ),
+    ],
+  });
+}
+
 function RuntimeUnavailableBody({ page }) {
   const copy = ownerConsoleCopy(page).runtime;
   const requestedPath = page.unavailable?.path || page.path || "/admin";
@@ -11759,6 +11908,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
   if (page.kind === "admin_runtime_unavailable") return renderStaticElement(h(RuntimeUnavailableBody, { page }));
   if (page.kind === "admin_hermes") return renderStaticElement(h(HermesBody, { page }));
+  if (page.kind === "admin_connections") return renderStaticElement(h(ConnectionsBody, { page }));
   if (page.kind === "admin_workspace_settings") return renderStaticElement(h(SettingsBody, { page }));
   if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
   if (page.kind === "admin_consents") return renderStaticElement(h(ConsentsBody, { page }));

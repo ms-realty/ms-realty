@@ -54,6 +54,7 @@ const DEFINITIONS = Object.freeze([
     id: "google",
     kind: "oauth",
     family: "google",
+    ownerConnectable: true,
     scopes: GOOGLE_SCOPES,
     setupEnv: [
       "MS_REALTY_PUBLIC_ORIGIN",
@@ -80,6 +81,7 @@ const DEFINITIONS = Object.freeze([
     id: "whatsapp",
     kind: "embedded_signup",
     family: "meta",
+    ownerConnectable: true,
     setupEnv: [
       "MS_REALTY_PUBLIC_ORIGIN",
       "MS_REALTY_META_APP_ID",
@@ -171,6 +173,9 @@ const DEFINITIONS = Object.freeze([
 ]);
 
 export const OPERATOR_PROVIDERS = Object.freeze(DEFINITIONS.map((definition) => definition.id));
+export const OWNER_CONNECTABLE_PROVIDERS = Object.freeze(
+  DEFINITIONS.filter((definition) => definition.ownerConnectable === true).map((definition) => definition.id),
+);
 // Everything except the runtime card is a row in the connection store.
 export const OPERATOR_STORED_PROVIDERS = Object.freeze(
   DEFINITIONS.filter((definition) => definition.kind !== "runtime").map((definition) => definition.id),
@@ -181,6 +186,14 @@ export function operatorProviderDefinition(id) {
   const definition = BY_ID.get(String(id || "").trim());
   if (!definition) throw new Error("Unknown operator provider");
   return definition;
+}
+
+export function isOwnerConnectableProvider(id) {
+  try {
+    return operatorProviderDefinition(id).ownerConnectable === true;
+  } catch {
+    return false;
+  }
 }
 
 function trimmed(value) {
@@ -313,6 +326,7 @@ export function operatorProviderCards({
               ? "not_connected"
               : "needs_setup",
       supported,
+      owner_connectable: definition.ownerConnectable === true,
       ready,
       scopes: definition.scopes ? [...definition.scopes] : [],
       setup_env: supported

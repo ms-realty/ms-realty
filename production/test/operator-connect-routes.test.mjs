@@ -11,7 +11,7 @@ import { readAuditLog } from "../lib/audit-log.mjs";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { renderMcpResponse, mcpConfigFromEnv } from "../lib/mcp-server.mjs";
-import { OPERATOR_PROVIDERS } from "../lib/operator-provider-catalog.mjs";
+import { OWNER_CONNECTABLE_PROVIDERS, OPERATOR_PROVIDERS } from "../lib/operator-provider-catalog.mjs";
 import { OPERATOR_AGENT_SECRET_ENV, mintOperatorAgentToken } from "../lib/operator-agent-access.mjs";
 import { OWNER_OPERATOR_BROWSER_OPERATIONS } from "../lib/owner-operator-catalog.mjs";
 import { payloadAdminPrincipal } from "../lib/payload-admin-auth.mjs";
@@ -117,7 +117,7 @@ async function withNamedBearer(run) {
 
 const HTML_HEADERS = { authorization: `Bearer ${BEARER}`, host: "ms-realty.example", accept: "text/html" };
 
-test("both servers render every provider card on /admin/connect", async (t) => {
+test("both servers render only working one-click connections in the persistent owner shell", async (t) => {
   await withNamedBearer(async () => {
     const app = createHttpApp({
       reviewedAt: "2026-08-24T12:00:00.000Z",
@@ -147,17 +147,47 @@ test("both servers render every provider card on /admin/connect", async (t) => {
     const adapterBody = await adapter.text();
 
     for (const body of [standalone.body, adapterBody]) {
-      for (const id of OPERATOR_PROVIDERS) {
+      for (const id of OWNER_CONNECTABLE_PROVIDERS) {
         assert.ok(body.includes(`data-provider="${id}"`), id);
       }
+      for (const id of OPERATOR_PROVIDERS.filter((provider) => !OWNER_CONNECTABLE_PROVIDERS.includes(provider))) {
+        assert.equal(body.includes(`data-provider="${id}"`), false, `${id} has no owner connection action`);
+      }
+      assert.ok(body.includes('data-react-admin-ui="connections"'), "persistent admin shell");
+      assert.ok(body.includes('data-managed-system="hermes"'), "Hermes is managed system state");
+      assert.ok(body.includes('data-managed-system="data"'), "database is managed system state");
+      assert.equal((body.match(/<h1\b/g) || []).length, 1, "one page heading");
+      assert.equal(body.includes("/api/admin/connections?provider=google&amp;action=start"), false, "bearer view has no OAuth mutation");
+      assert.equal(body.includes("data-whatsapp-connect"), false, "bearer view has no embedded-signup mutation");
       // Both surfaces expose only the authorized Codex handoff; the short-lived
       // assistant configuration remains behind its authenticated API route.
       assert.equal(body.includes('data-copy-block="agent-config"'), false, "no assistant config block");
       assert.equal(body.includes(BEARER), false, "no operator bearer in owner HTML");
       assert.ok(body.includes('data-codex-plugin-install="ms-realty-operator"'), "Codex plugin install link");
-      assert.ok(body.includes("<html lang=\"bg\">"));
+      assert.ok(body.includes('<html lang="bg" dir="ltr">'));
     }
   });
+});
+
+test("a signed-in Payload owner gets the real Google and WhatsApp one-click actions", async (t) => {
+  const app = createHttpApp({
+    reviewedAt: "2026-08-24T12:00:00.000Z",
+    auditLogPath: auditFile(t),
+    payloadAdminAuth: payloadAdminAuth(),
+    providerConnection: PROVIDER_CONFIG,
+    providerConnectionPayload: providerPayload(),
+  });
+  const response = await dispatchHttp(app, {
+    method: "GET",
+    url: "/admin/connect?locale=en",
+    headers: { cookie: `ms_admin=${SESSION}`, host: "ms-realty.example", accept: "text/html" },
+  });
+  assert.equal(response.status, 200);
+  assert.ok(response.body.includes("/api/admin/connections?provider=google&amp;action=start"));
+  assert.ok(response.body.includes("data-whatsapp-connect=\"true\""));
+  assert.ok(response.body.includes("data-whatsapp-embedded-signup=\"true\""));
+  assert.doesNotMatch(response.body, /<input[^>]+type="password"/);
+  assert.doesNotMatch(response.body, /name="token"/);
 });
 
 test("disconnect revokes, deletes, redirects and writes one audit row", async (t) => {
@@ -246,8 +276,8 @@ test("the assistant configuration route hands back a working config and records 
   });
   assert.equal(catalogResponse.status, 200);
   assert.equal(catalogResponse.body.kind, "owner_operator_catalog");
-  assert.equal(catalogResponse.body.summary.total, 116);
-  assert.equal(catalogResponse.body.operations.length, 116);
+    assert.equal(catalogResponse.body.summary.total, 117);
+    assert.equal(catalogResponse.body.operations.length, 117);
   assert.equal(
     catalogResponse.body.operations.filter((row) => row.execution === "browser_session").length,
     OWNER_OPERATOR_BROWSER_OPERATIONS.length,

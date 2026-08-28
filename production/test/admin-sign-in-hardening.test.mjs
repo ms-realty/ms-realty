@@ -186,6 +186,9 @@ test("the admin surface carries frame, sniffing, referrer and content-security h
     // The workbench's own assets have to keep working under it.
     assert.match(csp, /style-src [^;]*'unsafe-inline'/);
     assert.match(csp, /script-src [^;]*'unsafe-inline'/);
+    assert.match(csp, /script-src [^;]*https:\/\/connect\.facebook\.net/);
+    assert.match(csp, /connect-src [^;]*https:\/\/graph\.facebook\.com/);
+    assert.match(csp, /frame-src [^;]*https:\/\/www\.facebook\.com/);
     assert.match(csp, /font-src [^;]*https:\/\/fonts\.gstatic\.com/);
   }
 });

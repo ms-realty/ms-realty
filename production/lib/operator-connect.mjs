@@ -15,7 +15,11 @@
 // and lays itself out with the same tokens (literal fallbacks keep it readable
 // if the stylesheet is blocked).
 
-import { ADMIN_CSS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_URL } from "./ui/design-assets.mjs";
+import { publicAdminPrincipal } from "./admin-auth.mjs";
+import { renderAdminWorkspace } from "./admin-workflows.mjs";
+import { renderHtmlPage } from "./html.mjs";
+import { loadLocaleRegistry } from "./locales.mjs";
+import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { operatorConnectCopy, providerCopyKey, providerDisplayName } from "./operator-connect-copy.mjs";
 import { operatorProviderCards } from "./operator-provider-catalog.mjs";
 
@@ -161,17 +165,8 @@ export function operatorConnectResult({
   return "";
 }
 
-// ---------------------------------------------------------------------------
-// Cards
-// ---------------------------------------------------------------------------
-
-const PROVIDERS_WITHOUT_REMOTE_REVOKE = new Set(["cloudflare", "neon"]);
-
 const DATE_LOCALES = { bg: "bg-BG", ru: "ru-RU", en: "en-GB" };
 
-// "24 август 2026 г., 09:12" rather than "2026-08-24T09:12:00.000Z". The reader
-// is an estate agent checking whether a connection is still alive, and an ISO
-// timestamp makes them work for an answer they should be able to glance at.
 function verifiedAt(value, copy) {
   const raw = String(value || "").trim();
   if (!raw) return copy.noDate;
@@ -188,322 +183,147 @@ function verifiedAt(value, copy) {
   }
 }
 
-function statusPill(card, copy) {
-  const state =
-    card.status === "connected"
-      ? copy.connected
-      : card.status === "configured"
-        ? copy.runtimeReady
-        : card.status === "needs_setup"
-          ? copy.needsSetup
-          : card.status === "disabled"
-            ? copy.disabled
-            : copy.notConnected;
-  const modifier =
-    card.status === "connected"
-      ? " status--ok"
-      : card.status === "configured"
-        ? " status--ok"
-        : card.status === "needs_setup"
-          ? " status--setup"
-          : card.status === "disabled"
-            ? " status--disabled"
-            : "";
-  return `<strong class="status${modifier}" aria-label="${escapeHtml(`${copy.statusLabel}: ${state}`)}">${escapeHtml(state)}</strong>`;
+function workspaceForOperator(registry, requestedLocale, operator) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const principal = publicAdminPrincipal(operator);
+  if (!principal) return workspace;
+  return {
+    ...workspace,
+    operator_id: principal.id,
+    operator_roles: principal.roles,
+    operator_capabilities: principal.capabilities,
+  };
 }
 
-function unavailableProviderBlock(copy, message = copy.oauthUnavailable, recovery = copy.oauthRecovery) {
-  return `<p class="blocked" data-provider-unavailable="true">${escapeHtml(message)}</p>
-    <p class="hint" data-provider-recovery="true">${escapeHtml(recovery)}</p>`;
-}
-
-function runtimeHealthBlock(card, copy) {
-  if (card.status === "configured") {
-    return `<p class="verified" data-runtime-health="configured">${escapeHtml(copy.aiProviderHealthy)}</p>`;
-  }
-  return unavailableProviderBlock(copy, copy.aiProviderDisabled, copy.aiProviderRecovery);
-}
-
-function disconnectForm(card, copy) {
-  return `<form class="card__disconnect" method="post" action="/api/admin/connections/disconnect">
-      <input type="hidden" name="provider" value="${escapeHtml(card.id)}">
-      <button class="button button--quiet" type="submit">${escapeHtml(copy.disconnect)}</button>
-      <span class="hint">${escapeHtml(PROVIDERS_WITHOUT_REMOTE_REVOKE.has(card.id) ? copy.disconnectManual : copy.disconnectHint)}</span>
-    </form>`;
-}
-
-function disabledProviderBlock(card, copy) {
-  const reason = copy[providerCopyKey(card.id, "Disabled")] || copy.noToken;
-  return `<p class="blocked" data-provider-disabled="true">${escapeHtml(reason)}</p>`;
-}
-
-function cardAction(card, copy, { whatsappReady }) {
-  if (card.supported === false) return disabledProviderBlock(card, copy);
-  if (card.kind === "runtime") return runtimeHealthBlock(card, copy);
-  if (card.status === "needs_setup") return unavailableProviderBlock(copy);
-  if (card.kind === "oauth") {
-    return `<p><a class="button" href="/api/admin/connections?provider=${escapeHtml(card.id)}&amp;action=start">${escapeHtml(copy[providerCopyKey(card.id, "Connect")])}</a></p>`;
-  }
-  if (card.kind === "embedded_signup") {
-    return whatsappReady
-      ? `<button class="button" id="whatsapp-connect" type="button" disabled>${escapeHtml(copy.whatsappConnect)}</button><p id="whatsapp-result" class="verified" role="status" aria-live="polite" aria-atomic="true">${escapeHtml(copy.whatsappLoading)}</p>`
-      : `<p class="blocked">${escapeHtml(copy.whatsappBlocked)}</p>`;
-  }
-  // Token-only providers have no owner-console connection path. Keep this
-  // closed if a future catalogue entry forgets to declare its UI support.
-  return disabledProviderBlock(card, copy);
-}
-
-function runtimeFacts(card, copy) {
-  const rows = [
-    card.endpoint ? `${copy.aiProviderEndpoint}: ${card.endpoint}` : "",
-    card.model ? `${copy.aiProviderModel}: ${card.model}` : "",
-  ].filter(Boolean);
-  return rows.length ? `<p class="verified">${escapeHtml(rows.join(" · "))}</p>` : "";
-}
-
-function connectionCard(card, copy, options) {
-  const title = copy[providerCopyKey(card.id, "Title")];
-  const description = copy[providerCopyKey(card.id, "Description")];
+function ownerConnectionView(card, copy, canManageConnections) {
   const connected = card.status === "connected";
-  const runtime = card.kind === "runtime";
-  return `<section class="card" data-provider="${escapeHtml(card.id)}" data-status="${escapeHtml(card.status)}" aria-labelledby="provider-${escapeHtml(card.id)}-title">
-    <div class="card__head">
-      <div><h2 id="provider-${escapeHtml(card.id)}-title">${escapeHtml(title)}</h2><p>${escapeHtml(description)}</p></div>
-      ${statusPill(card, copy)}
-    </div>
-    ${runtime
-      ? `${card.status === "configured" ? runtimeFacts(card, copy) : ""}${cardAction(card, copy, options)}`
-      : connected
-        ? `<p class="account">${escapeHtml(card.account_label || copy.accountConfirmed)}</p>
-           <p class="verified">${escapeHtml(copy.verifiedAt)}: ${escapeHtml(verifiedAt(card.last_verified_at, copy))}</p>
-           ${disconnectForm(card, copy)}`
-        : cardAction(card, copy, options)
-    }
-  </section>`;
+  const ready = card.status === "not_connected" || connected;
+  return {
+    id: card.id,
+    kind: card.kind,
+    status: card.status,
+    title: copy[providerCopyKey(card.id, "Title")],
+    description: copy[providerCopyKey(card.id, "Description")],
+    status_label: connected
+      ? copy.connected
+      : card.status === "needs_setup"
+        ? copy.needsSetup
+        : copy.notConnected,
+    account_label: connected ? card.account_label || copy.accountConfirmed : "",
+    verified_label: connected ? `${copy.verifiedAt}: ${verifiedAt(card.last_verified_at, copy)}` : "",
+    action_label: connected ? copy.reauthorize : copy[providerCopyKey(card.id, "Connect")],
+    can_manage: canManageConnections,
+    action_href:
+      canManageConnections && card.kind === "oauth" && ready
+        ? `/api/admin/connections?provider=${card.id}&action=start`
+        : "",
+    disconnect_label: copy.disconnect,
+    disconnect_hint: copy.disconnectHint,
+    unavailable_message: !canManageConnections ? copy.sessionRequired : ready ? "" : copy.oauthUnavailable,
+    recovery_message: !canManageConnections ? copy.sessionRequiredRecovery : ready ? "" : copy.oauthRecovery,
+  };
 }
 
-const CONNECT_STYLE = `
-  :root { color-scheme: light; }
-  .connect-page {
-    margin: 0;
-    min-height: 100vh;
-    padding: 24px;
-    box-sizing: border-box;
-    background: var(--ink-50, #F4F4F3);
-    color: var(--text-strong, #241F18);
-    font-family: var(--font-sans, Commissioner, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
-    font-size: 15px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  .connect { width: 100%; max-width: 860px; margin: 0 auto; display: grid; gap: 16px; }
-  .connect__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-  .connect__brand { display: inline-flex; }
-  .connect__brand img { display: block; height: 32px; width: auto; }
-  .connect__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-height: 40px;
-    padding: 0 12px;
-    border: 1px solid var(--ink-200, #C9C9C7);
-    border-radius: 8px;
-    background: #FFFFFF;
-    color: var(--text-strong, #241F18);
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-  .connect__back:hover { border-color: var(--ink-500, #545453); text-decoration: none; }
-  .connect h1 { margin: 0; font-family: inherit; font-size: 22px; font-weight: 600; line-height: 1.25; letter-spacing: -0.015em; color: var(--text-strong, #241F18); }
-  .connect h2 { margin: 0 0 4px; font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1.25; color: var(--text-strong, #241F18); }
-  .intro, .card p { margin: 0; color: var(--text-muted, #948263); font-size: 15px; line-height: 1.5; }
-  .notice { margin: 0; padding: 10px 12px; border: 1px solid var(--sea-100, #D2E3E1); border-radius: 8px; background: var(--sea-50, #ECF3F2); color: var(--sea-800, #122C2B); font-size: 13px; font-weight: 600; line-height: 1.4; }
-  .grid { display: grid; gap: 12px; margin: 0; }
-  .card { padding: 16px 20px; border: 1px solid var(--ink-100, #E6E6E5); border-radius: 8px; background: #FFFFFF; }
-  .card:hover { border-color: var(--ink-200, #C9C9C7); }
-  .card:focus-within { border-color: var(--ink-500, #545453); }
-  .card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-  .status {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    padding: 0 10px;
-    border-radius: 999px;
-    background: var(--stone-100, #F2ECE1);
-    color: var(--text-muted, #948263);
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .status--ok { background: var(--success-50, #E7F3EC); color: var(--success-600, #256345); }
-  .status--setup { background: var(--sun-100, #FBEECF); color: var(--sun-600, #AE7420); }
-  .status--disabled { background: var(--ink-100, #E6E6E5); color: var(--text-muted, #756A5C); }
-  .card .account { margin-top: 12px; color: var(--text-strong, #241F18); font-weight: 600; }
-  .card .verified { margin: 4px 0 0; font-size: 13px; }
-  .card .blocked { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--sun-100, #FBEECF); color: var(--sun-600, #AE7420); font-size: 13px; line-height: 1.4; }
-  .card .blocked + p { margin-top: 8px; }
-  .link { display: inline-flex; align-items: center; min-height: 44px; color: var(--text-link, #3F3F3F); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
-  .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    margin-top: 12px;
-    padding: 0 16px;
-    border: 0;
-    border-radius: 8px;
-    background: var(--brand, #222222);
-    color: #FFFFFF;
-    font: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  .button:hover { background: var(--brand-hover, #181818); text-decoration: none; }
-  .button:active { transform: translateY(1px); }
-  .button:disabled { cursor: wait; opacity: 0.6; }
-  .button:focus-visible, .connect__back:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus, 0 0 0 3px rgba(219, 62, 62, 0.45));
-  }
-  .card__disconnect { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; max-width: none; }
-  .card__disconnect .button { margin-top: 0; }
-  .card__disconnect .hint { margin: 0; flex: 1 1 200px; }
-  .agent { padding-top: 20px; border-top: 1px solid var(--ink-100, #E6E6E5); }
-  .agent p { margin: 0; }
-  .agent .button { margin-top: 16px; }
-  .ai__actions, .agent__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-  .button--quiet { background: var(--surface, #FFFFFF); border: 1px solid var(--ink-200, #C9C9C7); color: var(--text-strong, #241F18); }
-  .button--quiet:hover { background: var(--ink-50, #F4F4F3); }
-  .hint { margin: 12px 0 0; color: var(--text-muted, #948263); font-size: 13px; line-height: 1.4; }
-  @media (max-width: 580px) {
-    .connect-page { padding: 16px; }
-    .connect__back { min-height: 44px; }
-    .card { padding: 16px; }
-    .card__head { display: block; }
-    .status { margin-top: 12px; }
-    .button, form .button { width: 100%; box-sizing: border-box; }
-    .agent__actions { display: grid; }
-    .card__disconnect .button { width: 100%; }
-  }
-`;
-
-const inlineJson = (value) => JSON.stringify(value).replaceAll("<", "\\u003c");
-
-export function renderOperatorConnectPage({
-  baseUrl,
-  token = "",
-  operatorId,
+// The owner page deliberately exposes only connections that both use a
+// provider-authorized handoff and power a real runtime workflow. Infrastructure
+// and unsupported providers remain status/policy facts, never credential forms
+// or decorative "Connect" buttons.
+export function buildOperatorConnectPayload({
+  registry,
+  requestedLocale = "en",
+  operator = null,
   connections = [],
   availability = {},
   providerConfig = null,
-  agentToken = "",
-  agentExpiresAt = "",
   codexMarketplacePath = DEFAULT_CODEX_MARKETPLACE_PATH,
   result = "",
-  locale = "en",
-}) {
-  const copy = operatorConnectCopy(locale);
-  const codexPluginUrl = operatorCodexPluginUrl({ marketplacePath: codexMarketplacePath });
-  const codexInstall = `<p class="agent__actions"><a class="button" href="${escapeHtml(codexPluginUrl)}" rel="noopener" data-codex-plugin-install="ms-realty-operator">${escapeHtml(copy.agentInstall)}</a></p>
-         <p class="hint" id="codex-plugin-install-hint">${escapeHtml(copy.agentInstallHint)}</p>`;
-  const agentCard = `<section class="agent" data-agent-config="unavailable">
-         <h2>${escapeHtml(copy.agentTitle)}</h2>
-         <p>${escapeHtml(copy.agentDescription)}</p>
-         ${codexInstall}
-         <p class="blocked">${escapeHtml(copy.agentNoToken || copy.noToken)}</p>
-       </section>`;
-  const cards = operatorProviderCards({ connections, availability, config: providerConfig });
+  resultTone = "success",
+  storeError = false,
+  canManageConnections = false,
+} = {}) {
+  const workspace = workspaceForOperator(registry, requestedLocale, operator);
+  const copy = operatorConnectCopy(workspace.locale);
+  const cards = operatorProviderCards({ connections, availability, config: providerConfig })
+    .filter((card) => card.owner_connectable)
+    .map((card) => ownerConnectionView(card, copy, canManageConnections));
   const whatsapp = cards.find((card) => card.id === "whatsapp");
-  const whatsappReady = whatsapp?.status === "not_connected";
-  return `<!doctype html>
-<html lang="${copy.lang}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<title>${escapeHtml(copy.documentTitle)}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="${FONTS_URL}">
-<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${ADMIN_CSS_HASH}">
-<style>${CONNECT_STYLE}</style>
-</head>
-<body class="connect-page">
-<main class="connect" aria-labelledby="admin-connect-title">
-  <div class="connect__top">
-    <a class="connect__brand" href="/admin" aria-label="MS Realty"><img src="${LOGO_URL}" alt="MS Realty" height="32" width="${Math.round(32 * LOGO_ASPECT)}"></a>
-    <a class="connect__back" href="/admin">&larr; ${escapeHtml(copy.back)}</a>
-  </div>
-  <h1 id="admin-connect-title">${escapeHtml(copy.title)}</h1>
-  <p class="intro">${escapeHtml(copy.intro)}</p>
-  ${result ? `<p class="notice" role="status">${escapeHtml(result)}</p>` : ""}
-  <div class="grid">
-    ${cards.map((card) => connectionCard(card, copy, { whatsappReady })).join("\n    ")}
-  </div>
-  ${agentCard}
-</main>
-<script>
-  const text = ${inlineJson({
-    metaChecking: copy.metaChecking,
-    metaRejected: copy.metaRejected,
-    metaNoServer: copy.metaNoServer,
-    metaReady: copy.metaReady,
-    metaSdkFailed: copy.metaSdkFailed,
-    metaSdkNotReady: copy.metaSdkNotReady,
-    metaOpening: copy.metaOpening,
-    metaCancelled: copy.metaCancelled,
-  })};
-  const meta = ${inlineJson({
-    enabled: Boolean(whatsappReady),
-    appId: availability.whatsapp?.app_id || null,
-    configId: availability.whatsapp?.config_id || null,
-    version: availability.whatsapp?.graph_version || null,
-  })};
-  if (meta.enabled) {
-    let signup = null, code = null;
-    const result = document.getElementById("whatsapp-result");
-    const button = document.getElementById("whatsapp-connect");
-    const fail = (message) => { result.textContent = message; result.removeAttribute("aria-busy"); button.disabled = false; };
-    const finish = async () => {
-      if (!signup || !code) return;
-      button.disabled = true; result.setAttribute("aria-busy", "true");
-      result.textContent = text.metaChecking;
-      try {
-        const response = await fetch("/api/admin/connections", {
-          method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ provider: "whatsapp", code, waba_id: signup.waba_id, phone_number_id: signup.phone_number_id }),
-        });
-        if (response.ok) location.assign("/admin/connect?connected=whatsapp");
-        else fail(text.metaRejected);
-      } catch { fail(text.metaNoServer); }
-    };
-    addEventListener("message", (event) => {
-      if (!["https://www.facebook.com", "https://web.facebook.com"].includes(event.origin)) return;
-      let data = event.data; try { if (typeof data === "string") data = JSON.parse(data); } catch { return; }
-      if (data?.type === "WA_EMBEDDED_SIGNUP" && data?.event === "FINISH") { signup = data.data; finish(); }
-    });
-    window.fbAsyncInit = () => { FB.init({ appId: meta.appId, autoLogAppEvents: true, xfbml: false, version: meta.version }); button.disabled = false; result.textContent = text.metaReady; };
-    const script = document.createElement("script"); script.async = true; script.src = "https://connect.facebook.net/en_US/sdk.js";
-    script.onerror = () => fail(text.metaSdkFailed); document.head.append(script);
-    button?.addEventListener("click", () => {
-      if (!window.FB) return fail(text.metaSdkNotReady);
-      button.disabled = true; result.textContent = text.metaOpening;
-      FB.login((response) => {
-        code = response?.authResponse?.code || null;
-        if (!code) return fail(text.metaCancelled);
-        finish();
-      }, { config_id: meta.configId, response_type: "code", override_default_response_type: true, extras: { setup: {} } });
-    });
-  }
-</script>
-</body>
-</html>`;
+  const systemState = (ready) => ({
+    status: ready ? "ready" : "attention",
+    status_label: ready ? copy.managedReady : copy.managedAttention,
+  });
+  return {
+    kind: "admin_connections",
+    status: 200,
+    path: "/admin/connect",
+    canonical: "/admin/connect",
+    indexable: false,
+    lang: workspace.lang,
+    locale: workspace.locale,
+    dir: workspace.dir,
+    metadata: {
+      title: copy.documentTitle,
+      description: copy.intro,
+      robots: "noindex,nofollow",
+    },
+    workspace,
+    connection_copy: copy,
+    connections: cards,
+    managed_systems: [
+      {
+        id: "hermes",
+        title: copy.managedHermesTitle,
+        description: copy.managedHermesDescription,
+        ...systemState(availability.ai?.ready === true),
+      },
+      {
+        id: "data",
+        title: copy.managedDataTitle,
+        description: copy.managedDataDescription,
+        ...systemState(availability.store?.ready === true && !storeError),
+      },
+    ],
+    whatsapp_client: {
+      enabled: Boolean(canManageConnections && whatsapp && whatsapp.status !== "needs_setup"),
+      app_id: availability.whatsapp?.app_id || "",
+      config_id: availability.whatsapp?.config_id || "",
+      version: availability.whatsapp?.graph_version || "",
+    },
+    assistant: {
+      title: copy.agentTitle,
+      description: copy.agentDescription,
+      install_label: copy.agentInstall,
+      install_hint: copy.agentInstallHint,
+      plugin_url: operatorCodexPluginUrl({ marketplacePath: codexMarketplacePath }),
+    },
+    result: result ? { message: result, tone: resultTone === "error" ? "error" : "success" } : null,
+    store_error: storeError,
+  };
+}
+
+// Compatibility entry point for callers that still ask this module for a full
+// document. It uses the same payload and shell as both production runtimes; no
+// alternate connection UI or credential-bearing prompt exists anymore.
+export function renderOperatorConnectPage(options = {}) {
+  const page = buildOperatorConnectPayload({
+    registry: options.registry || loadLocaleRegistry(),
+    requestedLocale: options.locale || "en",
+    operator: {
+      id: options.operatorId || "operator",
+      source: "payload_session",
+      can_mutate: true,
+      roles: ["admin"],
+      workspace_ids: [],
+    },
+    connections: options.connections || [],
+    availability: options.availability || {},
+    providerConfig: options.providerConfig || null,
+    codexMarketplacePath: options.codexMarketplacePath || DEFAULT_CODEX_MARKETPLACE_PATH,
+    result: options.result || "",
+    resultTone: options.resultTone || "success",
+    storeError: options.storeError === true,
+    canManageConnections: true,
+  });
+  return renderHtmlPage(page, { bodyHtml: renderReactAdminBody(page) });
 }
 
 export { operatorConnectCopy };

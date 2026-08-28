@@ -306,8 +306,11 @@ test("the connect page never renders an operator bearer token or credential fiel
   assert.doesNotMatch(html, /connect-operator-token-0123456789/);
   assert.doesNotMatch(html, /name="token"/);
   assert.doesNotMatch(html, /<input[^>]+type="password"/);
-  assert.match(html, /data-agent-config="unavailable"/);
-  assert.match(html, /Direct MCP access keys|MCP keys are not shown/);
+  assert.match(html, /data-react-admin-ui="connections"/);
+  assert.match(html, /data-provider="google"/);
+  assert.match(html, /data-provider="whatsapp"/);
+  assert.doesNotMatch(html, /data-provider="(?:github|viber|cloudflare|neon)"/);
+  assert.match(html, /data-codex-plugin-install="ms-realty-operator"/);
   // Each workbench language gets the whole page, script messages included.
   const bulgarian = renderOperatorConnectPage({
     baseUrl: "https://ms-realty.example.workers.dev",
@@ -317,8 +320,9 @@ test("the connect page never renders an operator bearer token or credential fiel
     availability: { google: { ready: false } },
     locale: "bg",
   });
-  assert.match(bulgarian, /<html lang="bg">/);
-  assert.match(bulgarian, /Ключове за директен MCP достъп/);
+  assert.match(bulgarian, /<html lang="bg" dir="ltr">/);
+  assert.match(bulgarian, /Работни акаунти/);
+  assert.match(bulgarian, /Управлявана система/);
   assert.doesNotMatch(bulgarian, /Copying did not work/);
 });
 

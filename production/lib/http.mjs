@@ -38,12 +38,7 @@ import {
   withAuthenticatedAuditActor,
   adminCredentials,
 } from "./admin-auth.mjs";
-import {
-  OPERATOR_TOKEN_ENV,
-  operatorAgentConfigBlock,
-  operatorConnectResult,
-  renderOperatorConnectPage,
-} from "./operator-connect.mjs";
+import { buildOperatorConnectPayload, operatorAgentConfigBlock, operatorConnectResult } from "./operator-connect.mjs";
 import { ownerOperatorCatalog } from "./owner-operator-catalog.mjs";
 import {
   adminSessionClearCookie,
@@ -4335,11 +4330,8 @@ export function createHttpApp({
           Object.entries(availability).map(([key, value]) => [key, { ...value, ready: false }]),
         );
       }
-      const token = principal?.source === "payload_session" ? "" : String(auth).replace(/^Bearer\s+/i, "").trim();
-      const base =
-        String(providerConnection.publicOrigin || "").trim() ||
-        new URL(request.url, `http://${requestHost(request.headers) || "localhost"}`).origin;
       const connectLocale = adminLocaleParam(url);
+      const resultError = Boolean(url.searchParams.get("error")) || storeError;
       const result = operatorConnectResult({
         locale: connectLocale,
         connected: url.searchParams.get("connected") || "",
@@ -4348,34 +4340,23 @@ export function createHttpApp({
         error: Boolean(url.searchParams.get("error")),
         storeError,
       });
-      // A delegated, expiring credential for the operator's own assistant. It is
-      // minted per page view rather than stored, so nothing here can leak a
-      // token the operator never chose to copy.
-      const agent = issueOperatorAgentToken({ principal, env: operatorAgentEnv });
-      if (agent) {
-        recordAudit({
-          action: "operator_agent_token_issued",
-          actor: principal?.id,
-          objectType: "operator_agent_token",
-          objectId: agent.operator_id,
-          metadata: { expires_at: agent.expires_at, roles: agent.roles },
-        });
-      }
       return adminResponse(
         200,
-        renderOperatorConnectPage({
-          baseUrl: base,
-          token,
-          operatorId: principal?.id || "operator",
+        adminHtml(buildOperatorConnectPayload({
+          registry: activeRegistry,
+          requestedLocale: connectLocale,
+          operator: principal,
           connections,
           availability,
           providerConfig: providerConnection,
-          agentToken: agent?.token || "",
-          agentExpiresAt: agent?.expires_at || "",
           codexMarketplacePath: operatorAgentEnv.MS_REALTY_CODEX_MARKETPLACE_PATH,
           result,
-          locale: connectLocale,
-        }),
+          resultTone: resultError ? "error" : "success",
+          storeError,
+          canManageConnections: Boolean(
+            payloadSession && principal?.source === "payload_session" && principal.roles?.includes("admin"),
+          ),
+        })),
         "text/html; charset=utf-8",
         { "x-robots-tag": "noindex, nofollow" },
       );
@@ -4445,8 +4426,6 @@ export function createHttpApp({
             operator_id: agent.operator_id,
             expires_at: agent.expires_at,
             mcp_url: `${new URL(origin).origin}/mcp`,
-            credential_env: OPERATOR_TOKEN_ENV,
-            credential: agent.token,
             config: operatorAgentConfigBlock({
               baseUrl: origin,
               token: agent.token,

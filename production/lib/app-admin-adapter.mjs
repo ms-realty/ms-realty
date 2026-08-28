@@ -14,12 +14,7 @@ import {
   TWO_FACTOR_SELF_SERVICE_PATHS,
   withAuthenticatedAuditActor,
 } from "./admin-auth.mjs";
-import {
-  OPERATOR_TOKEN_ENV,
-  operatorAgentConfigBlock,
-  operatorConnectResult,
-  renderOperatorConnectPage,
-} from "./operator-connect.mjs";
+import { buildOperatorConnectPayload, operatorAgentConfigBlock, operatorConnectResult } from "./operator-connect.mjs";
 import { ownerOperatorCatalog } from "./owner-operator-catalog.mjs";
 import {
   adminSessionClearCookie,
@@ -4085,10 +4080,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           Object.entries(availability).map(([key, value]) => [key, { ...value, ready: false }]),
         );
       }
-      const token = principal.source === "payload_session" ? "" : String(authHeader).replace(/^Bearer\s+/i, "").trim();
-      const base =
-        String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
       const connectLocale = url.searchParams.get("locale") || "en";
+      const resultError = Boolean(url.searchParams.get("error")) || storeError;
       const result = operatorConnectResult({
         locale: connectLocale,
         connected: url.searchParams.get("connected") || "",
@@ -4097,43 +4090,22 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         error: Boolean(url.searchParams.get("error")),
         storeError,
       });
-      // A delegated, expiring credential for the operator's own assistant,
-      // minted per page view rather than stored.
-      const agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
-      if (agent) {
-        recordAudit(
-          {
-            action: "operator_agent_token_issued",
-            actor: principal?.id,
-            objectType: "operator_agent_token",
-            objectId: agent.operator_id,
-            metadata: { expires_at: agent.expires_at, roles: agent.roles },
-          },
-          config,
-        );
-      }
-      return new Response(
-        renderOperatorConnectPage({
-          baseUrl: base,
-          token,
-          operatorId: principal?.id || "operator",
+      return htmlResponse(
+        buildOperatorConnectPayload({
+          registry,
+          requestedLocale: connectLocale,
+          operator: principal,
           connections,
           availability,
           providerConfig,
-          agentToken: agent?.token || "",
-          agentExpiresAt: agent?.expires_at || "",
           codexMarketplacePath: (config.authEnv || process.env).MS_REALTY_CODEX_MARKETPLACE_PATH,
           result,
-          locale: connectLocale,
+          resultTone: resultError ? "error" : "success",
+          storeError,
+          canManageConnections: Boolean(
+            payloadSession && principal.source === "payload_session" && principal.roles?.includes("admin"),
+          ),
         }),
-        {
-          status: 200,
-          headers: {
-            "content-type": "text/html; charset=utf-8",
-            "cache-control": "no-store",
-            "x-robots-tag": "noindex, nofollow",
-          },
-        },
       );
     }
     if (
@@ -4212,8 +4184,6 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           operator_id: agent.operator_id,
           expires_at: agent.expires_at,
           mcp_url: `${new URL(origin).origin}/mcp`,
-          credential_env: OPERATOR_TOKEN_ENV,
-          credential: agent.token,
           config: operatorAgentConfigBlock({
             baseUrl: origin,
             token: agent.token,

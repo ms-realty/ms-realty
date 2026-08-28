@@ -2309,6 +2309,50 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-hermes-guardrails > li { padding-inline: var(--space-4); }
 }
 
+/* ---- Owner connections: working OAuth accounts + managed system state ---- */
+.adm-connections-intro { max-width: 70ch; margin: 0; color: var(--text-muted); font-size: var(--text-base); }
+.adm-connections-notice { margin: 0; padding: var(--space-3) var(--space-4); border: 1px solid var(--success-200, var(--border)); border-radius: var(--radius-md); background: var(--success-50); color: var(--success-700, var(--success-600)); font-weight: var(--fw-semibold); }
+.adm-connections-notice[data-state="error"] { border-color: var(--brick-200, var(--border)); background: var(--brick-50); color: var(--brick-700, var(--brick-600)); }
+.adm-connections-section-copy { margin: 0; padding: 0 var(--space-5) var(--space-4); color: var(--text-muted); }
+.adm-connection-list,
+.adm-managed-system-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.adm-connection-row,
+.adm-managed-system-list > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-5); min-width: 0; padding: var(--space-4) var(--space-5); border-top: 1px solid var(--border); }
+.adm-connection-row__summary { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: start; gap: var(--space-3); min-width: 0; }
+.adm-connection-row__icon { display: grid; width: 36px; height: 36px; place-items: center; border-radius: var(--radius-md); background: var(--surface-sunken); color: var(--text-muted); }
+.adm-connection-row h3,
+.adm-managed-system-list h3 { margin: 0; color: var(--text-strong); font-size: var(--text-base); }
+.adm-connection-row p,
+.adm-managed-system-list p,
+.adm-assistant-connection__copy p { margin: var(--space-1) 0 0; color: var(--text-muted); }
+.adm-connection-row__account { display: flex; flex-wrap: wrap; gap: var(--space-2); color: var(--text-strong) !important; font-weight: var(--fw-semibold); }
+.adm-connection-row__account small { color: var(--text-muted); font-weight: var(--fw-regular); }
+.adm-connection-row__recovery { max-width: 68ch; padding-top: var(--space-2); color: var(--brick-700, var(--brick-600)) !important; }
+.adm-connection-row__recovery small { display: block; margin-top: var(--space-1); color: var(--text-muted); }
+.adm-connection-row__state { display: grid; justify-items: end; gap: var(--space-2); }
+.adm-connection-row__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
+.adm-connection-row__actions form { margin: 0; }
+.adm-connection-row__live { max-width: 34ch; color: var(--text-muted); text-align: end; }
+.adm-managed-system-list > li > .crm-pill { justify-self: end; }
+.adm-assistant-connection__copy { display: grid; gap: var(--space-2); padding: 0 var(--space-5) var(--space-5); }
+.adm-assistant-connection__copy small { color: var(--text-muted); }
+
+@media (max-width: 700px) {
+  .adm-connection-row,
+  .adm-managed-system-list > li { grid-template-columns: minmax(0, 1fr); align-items: stretch; gap: var(--space-3); padding: var(--space-4); }
+  .adm-connections-section-copy { padding-inline: var(--space-4); }
+  .adm-connection-row__state { justify-items: start; padding-inline-start: 48px; }
+  .adm-connection-row__actions { width: 100%; justify-content: stretch; }
+  .adm-connection-row__actions .mk-btn,
+  .adm-connection-row__actions form { width: 100%; }
+  .adm-connection-row__actions .mk-btn { justify-content: center; }
+  .adm-connection-row__live { max-width: none; text-align: start; }
+  .adm-managed-system-list > li > .crm-pill { justify-self: start; }
+  .adm-assistant-connection .crm-panel__hd { align-items: stretch; flex-direction: column; }
+  .adm-assistant-connection .crm-panel__hd .mk-btn { width: 100%; justify-content: center; }
+  .adm-assistant-connection__copy { padding-inline: var(--space-4); }
+}
+
 /* ---- Listing photo upload (media manager) ---- */
 .adm-media-upload { display: grid; gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-4); border: 1px dashed var(--border); border-radius: var(--radius-md); background: var(--surface-sunken); }
 .adm-media-upload__row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-3); }

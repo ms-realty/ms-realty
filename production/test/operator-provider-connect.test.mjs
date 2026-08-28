@@ -6,6 +6,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
+  OWNER_CONNECTABLE_PROVIDERS,
   OPERATOR_PROVIDERS,
   completeOperatorProviderOAuth,
   completeOperatorTokenConnection,
@@ -32,7 +33,7 @@ import {
   mintOperatorAgentToken,
   resolveOperatorAgentPrincipal,
 } from "../lib/operator-agent-access.mjs";
-import { createProviderOAuthState } from "../lib/provider-connections.mjs";
+import { GOOGLE_SCOPES, createProviderOAuthState } from "../lib/provider-connections.mjs";
 import { requiredAdminCapability } from "../lib/admin-auth.mjs";
 import { runOperatorConnectionAction } from "../lib/operator-connect-routes.mjs";
 
@@ -128,6 +129,11 @@ test("every catalogue provider has a card, a title and a sentence in all three l
     [...OPERATOR_PROVIDERS],
   );
   assert.equal(cards.length, 10);
+  assert.deepEqual(
+    cards.filter((card) => card.owner_connectable).map((card) => card.id),
+    [...OWNER_CONNECTABLE_PROVIDERS],
+  );
+  assert.deepEqual([...OWNER_CONNECTABLE_PROVIDERS], ["google", "whatsapp"]);
   for (const locale of OPERATOR_CONNECT_LOCALES) {
     const copy = operatorConnectCopy(locale);
     for (const card of cards) {
@@ -189,17 +195,16 @@ test("a provider without an active authorization path stays unavailable without 
     providerConfig: bare,
     locale: "bg",
   });
-  // No OAuth start link is offered for an application that does not exist.
+  // Only working owner workflows render; unavailable providers have no ghost
+  // card or start URL, while the two real providers explain setup truthfully.
   assert.equal(html.includes('href="/api/admin/connections?provider=github&amp;action=start"'), false);
-  assert.match(html, /data-provider="github" data-status="needs_setup"/);
+  assert.match(html, /data-provider="google" data-status="needs_setup"/);
+  assert.match(html, /data-provider="whatsapp" data-status="needs_setup"/);
   assert.match(html, /Нужна е еднократна настройка/);
   assert.match(html, /Свързването е временно недостъпно/);
   assert.match(html, /Отговорникът за инфраструктурата трябва/);
   assert.doesNotMatch(html, /MS_REALTY_[A-Z0-9_]+/);
-  assert.doesNotMatch(html, /<details class="setup"/);
-  assert.match(html, /data-provider="viber" data-status="disabled"/);
-  assert.match(html, /data-provider="cloudflare" data-status="disabled"/);
-  assert.match(html, /data-provider="neon" data-status="disabled"/);
+  assert.doesNotMatch(html, /data-provider="(?:google_drive|facebook|instagram|github|viber|cloudflare|neon|ai)"/);
   assert.doesNotMatch(html, /<input[^>]+type="password"/);
   assert.doesNotMatch(html, /name="token"/);
 });
@@ -243,7 +248,7 @@ test("a connected card dates itself in words and offers a disclosure with a mark
   assert.equal(broken.includes("Invalid Date"), false);
 });
 
-test("a configured provider offers exactly one primary action per card", () => {
+test("a configured owner page offers exactly the two working one-click handoffs", () => {
   const config = fullConfig();
   const html = renderOperatorConnectPage({
     baseUrl: ORIGIN,
@@ -252,24 +257,13 @@ test("a configured provider offers exactly one primary action per card", () => {
     providerConfig: config,
     locale: "en",
   });
-  for (const id of ["google", "google_drive", "facebook", "instagram", "github"]) {
-    assert.ok(html.includes(`href="/api/admin/connections?provider=${id}&amp;action=start"`), id);
-  }
-  // Providers without a live OAuth/partner handoff are disabled with a source
-  // backed explanation, never a client-secret/token/password field.
-  for (const id of ["viber", "cloudflare", "neon"]) {
-    assert.match(html, new RegExp(`data-provider="${id}" data-status="disabled"`));
-    assert.match(html, /data-provider-disabled="true"/);
-  }
+  assert.ok(html.includes('href="/api/admin/connections?provider=google&amp;action=start"'));
+  assert.equal((html.match(/data-whatsapp-connect="true"/g) || []).length, 1);
+  assert.doesNotMatch(html, /data-provider="(?:google_drive|facebook|instagram|github|viber|cloudflare|neon|ai)"/);
   assert.doesNotMatch(html, /<input[^>]+type="password"/);
   assert.doesNotMatch(html, /name="token"/);
-  // The model provider is health-only: it is configured by the runtime and
-  // never presents an owner verify/setup action.
-  assert.match(html, /data-provider="ai" data-status="configured"/);
-  assert.match(html, /data-runtime-health="configured"/);
-  assert.match(html, /reports health and model status only/);
-  assert.doesNotMatch(html, /<input type="hidden" name="action" value="verify">/);
-  assert.equal(html.includes('id="ai-token"'), false);
+  assert.match(html, /data-managed-system="hermes" data-status="ready"/);
+  assert.match(html, /data-managed-system="data" data-status="ready"/);
 });
 
 test("OAuth start binds the state to this provider and this operator", () => {
@@ -296,49 +290,58 @@ test("OAuth start binds the state to this provider and this operator", () => {
   assert.equal(drive.searchParams.get("scope").includes("auth/drive "), false);
 });
 
-test("a callback is refused unless the state was minted for that provider and operator", async () => {
+test("the owner action router accepts Google and rejects unused OAuth providers", async () => {
   const config = fullConfig();
-  const github = createProviderOAuthState({ provider: "github", operatorId: "connect_operator" }, { stateSecret: SECRET });
+  const google = createProviderOAuthState({ provider: "google", operatorId: "connect_operator" }, { stateSecret: SECRET });
   const { deps, saved } = storeDeps();
   const stub = stubFetch({
-    "https://github.com/login/oauth/access_token": { body: { access_token: "gho_token", scope: "read:user,repo" } },
-    "https://api.github.com/user": { body: { id: 4242, login: "ms-realty-bot" } },
+    "https://oauth2.googleapis.com/token": {
+      body: {
+        access_token: "google-access",
+        refresh_token: "google-refresh",
+        token_type: "Bearer",
+        expires_in: 3600,
+        scope: GOOGLE_SCOPES.join(" "),
+      },
+    },
+    "https://www.googleapis.com/oauth2/v2/userinfo": { body: { id: "google-owner", email: "owner@example.com" } },
   });
 
   // Right state, right operator: connected, and the account was read back.
   const ok = await runOperatorConnectionAction({
     intent: "callback",
-    provider: "github",
+    provider: "google",
     code: "one-time-code",
-    state: github,
+    state: google,
     operatorId: "connect_operator",
     config,
     deps: { ...deps, fetchImpl: stub.fetchImpl },
   });
   assert.equal(ok.outcome, "connected");
-  assert.equal(ok.connection.account_label, "ms-realty-bot");
+  assert.equal(ok.connection.account_label, "owner@example.com");
   assert.equal(saved.length, 1);
-  assert.equal(saved[0].credentials.access_token, "gho_token");
+  assert.equal(saved[0].credentials.access_token, "google-access");
 
-  // Same signed state replayed against a different card.
-  const wrongProvider = await runOperatorConnectionAction({
+  // GitHub has OAuth, but no working owner workflow in this product. The
+  // owner router refuses it before any provider request or storage write.
+  const unusedProvider = await runOperatorConnectionAction({
     intent: "callback",
-    provider: "facebook",
+    provider: "github",
     code: "one-time-code",
-    state: github,
+    state: createProviderOAuthState({ provider: "github", operatorId: "connect_operator" }, { stateSecret: SECRET }),
     operatorId: "connect_operator",
     config,
     deps: { ...deps, fetchImpl: stub.fetchImpl },
   });
-  assert.equal(wrongProvider.outcome, "rejected");
-  assert.equal(wrongProvider.phase, "oauth_callback");
+  assert.equal(unusedProvider.outcome, "rejected");
+  assert.equal(unusedProvider.phase, "unsupported_provider");
 
   // Same state presented by a different operator.
   const wrongOperator = await runOperatorConnectionAction({
     intent: "callback",
-    provider: "github",
+    provider: "google",
     code: "one-time-code",
-    state: github,
+    state: google,
     operatorId: "someone_else",
     config,
     deps: { ...deps, fetchImpl: stub.fetchImpl },
@@ -348,15 +351,15 @@ test("a callback is refused unless the state was minted for that provider and op
   // A tampered signature.
   const tampered = await runOperatorConnectionAction({
     intent: "callback",
-    provider: "github",
+    provider: "google",
     code: "one-time-code",
-    state: `${github.split(".")[0]}.forged`,
+    state: `${google.split(".")[0]}.forged`,
     operatorId: "connect_operator",
     config,
     deps: { ...deps, fetchImpl: stub.fetchImpl },
   });
   assert.equal(tampered.outcome, "rejected");
-  // Nothing beyond the one legitimate connection was ever stored.
+  // Nothing beyond the one legitimate Google connection was ever stored.
   assert.equal(saved.length, 1);
 });
 
@@ -418,8 +421,9 @@ test("a pasted key is stored only after the provider itself confirms it", async 
     deps: { ...deps, fetchImpl: refused.fetchImpl },
   });
   assert.equal(outcome.outcome, "rejected");
-  assert.equal(outcome.phase, "token_verification");
+  assert.equal(outcome.phase, "unsupported_provider");
   assert.equal(saved.length, 0);
+  assert.equal(refused.calls.length, 0);
 
   // An inactive-but-recognised token is refused too.
   const inactive = stubFetch({
@@ -549,7 +553,7 @@ test("the assistant's configuration helper stays available as an API, but the ow
   });
   // A page can offer the Codex install handoff, but it must not embed the
   // short-lived bearer in a prompt, textarea, pre, script or copy control.
-  assert.match(html, /data-agent-config="unavailable"/);
+  assert.match(html, /data-connection-group="assistant"/);
   assert.match(html, /data-codex-plugin-install="ms-realty-operator"/);
   assert.doesNotMatch(html, /<pre class="agent__config"/);
   assert.doesNotMatch(html, /id="prompt"/);
@@ -559,8 +563,8 @@ test("the assistant's configuration helper stays available as an API, but the ow
   assert.equal(html.includes(mint.token), false);
   assert.doesNotMatch(html, /<(?:textarea|pre)[^>]+data-masked="true"/);
 
-  // The owner page explains that direct MCP keys are never rendered; the
-  // Codex handoff is the supported next step instead of a dead token button.
+  // The Codex handoff is the supported visible step; no direct MCP credential
+  // setup is rendered alongside it.
   const blocked = renderOperatorConnectPage({
     baseUrl: ORIGIN,
     operatorId: "connect_operator",
@@ -568,8 +572,8 @@ test("the assistant's configuration helper stays available as an API, but the ow
     providerConfig: fullConfig(),
     locale: "bg",
   });
-  assert.match(blocked, /Ключове за директен MCP достъп/);
-  assert.match(blocked, /добавката за Codex/);
+  assert.match(blocked, /Отвори в Codex/);
+  assert.match(blocked, /добавката/);
   assert.equal(blocked.includes('data-copy-block="agent-config"'), false);
 });
 

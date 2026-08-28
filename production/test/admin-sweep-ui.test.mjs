@@ -127,7 +127,7 @@ test("transaction case forms are localized and report their own status", async (
   }
 });
 
-test("connect page loads the workbench fonts and design-system bundle without em-dashes in its chrome", () => {
+test("connect page uses the persistent workbench shell and responsive connection rows", () => {
   const html = renderOperatorConnectPage({
     baseUrl: "https://ms-realty.example.workers.dev",
     token: "connect-operator-token-0123456789",
@@ -138,11 +138,13 @@ test("connect page loads the workbench fonts and design-system bundle without em
   assert.ok(html.includes(`<link rel="stylesheet" href="${FONTS_URL}">`));
   assert.ok(html.includes(`<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}"`));
   assert.match(html, /<title>Подключения · MS Realty<\/title>/);
-  assert.match(html, /<body class="connect-page">/);
-  assert.match(html, /\.button \{[^}]*min-height: 44px;[^}]*background: var\(--brand, #222222\)/);
-  assert.match(html, /class="status status--ok"/);
+  assert.match(html, /<body>\s*<a class="skip-link" href="#main">/);
+  assert.match(html, /data-react-admin-ui="connections"/);
+  assert.match(html, /data-provider="google" data-status="connected"/);
   assert.match(html, /Проверено: дата не указана/);
-  const chrome = html.slice(html.indexOf("<body"), html.indexOf('<textarea id="prompt"'));
+  assert.match(adminAdapterCss, /\.adm-connection-row,/);
+  assert.match(adminAdapterCss, /@media \(max-width: 700px\)/);
+  const chrome = html.slice(html.indexOf("<body"), html.indexOf("<script defer"));
   assert.doesNotMatch(chrome, /[—–]/);
   assert.doesNotMatch(html, /#1d4ed8/);
 });

@@ -17,8 +17,9 @@ export const CONTENT_SECURITY_POLICY = [
   "img-src 'self' data: https:",
   "font-src 'self' https://fonts.gstatic.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "script-src 'self' 'unsafe-inline'",
-  "connect-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://connect.facebook.net",
+  "connect-src 'self' https://graph.facebook.com",
+  "frame-src 'self' https://www.facebook.com https://web.facebook.com",
   "media-src 'self' https:",
 ].join("; ");
 

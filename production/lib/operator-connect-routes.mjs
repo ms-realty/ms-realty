@@ -18,6 +18,7 @@ import {
 import {
   completeOperatorProviderOAuth,
   completeOperatorTokenConnection,
+  isOwnerConnectableProvider,
   operatorProviderAvailability,
   operatorProviderAuthorizationUrl,
   operatorProviderDefinition,
@@ -52,7 +53,8 @@ function normalizedProvider(value) {
 
 export function isOperatorOAuthProvider(provider) {
   try {
-    return operatorProviderDefinition(normalizedProvider(provider)).kind === "oauth";
+    const id = normalizedProvider(provider);
+    return isOwnerConnectableProvider(id) && operatorProviderDefinition(id).kind === "oauth";
   } catch {
     return false;
   }
@@ -61,7 +63,9 @@ export function isOperatorOAuthProvider(provider) {
 // The authorization redirect. Google keeps the exact URL the already-tested
 // module builds; every other provider goes through the catalogue.
 export function operatorConnectionStart({ provider, config, operatorId, now }) {
-  return operatorProviderAuthorizationUrl({ provider: normalizedProvider(provider), config, operatorId, now });
+  const id = normalizedProvider(provider);
+  if (!isOwnerConnectableProvider(id)) throw new Error("Unsupported provider connection");
+  return operatorProviderAuthorizationUrl({ provider: id, config, operatorId, now });
 }
 
 // Each provider call is overridable so a test can stand in for the provider
@@ -184,6 +188,14 @@ export async function runOperatorConnectionAction({
     definition = operatorProviderDefinition(provider);
   } catch {
     return { outcome: "rejected", provider: provider || "unknown", phase: "unsupported_provider", error: new Error("Unsupported provider connection") };
+  }
+  if (intent !== "disconnect" && !isOwnerConnectableProvider(provider)) {
+    return {
+      outcome: "rejected",
+      provider,
+      phase: "unsupported_provider",
+      error: new Error("Unsupported provider connection"),
+    };
   }
   const phase =
     intent === "callback"
