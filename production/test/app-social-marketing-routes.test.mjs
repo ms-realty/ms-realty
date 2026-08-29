@@ -7,10 +7,12 @@ import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-
 import { requiredAdminCapability } from "../lib/admin-auth.mjs";
 import { readAuditLog } from "../lib/audit-log.mjs";
 import { SocialMarketingPublishError } from "../lib/social-marketing-publishing.mjs";
+import * as socialMarketingRoute from "../../app/api/admin/social-marketing/publish/route.js";
 
 const BEARER = "next-social-token-0123456789";
 
 test("the Next social publish route keeps the admin capability contract and returns typed provider failures", async () => {
+  assert.equal(typeof socialMarketingRoute.POST, "function");
   assert.equal(requiredAdminCapability("POST", "/api/admin/social-marketing/publish"), "content:write");
 
   const response = await renderAppAdminResponse(
