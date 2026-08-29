@@ -16,6 +16,7 @@ const adminPasswordChangeMigration = fromRoot("migrations", "20260827_120000_adm
 const durableLeadSideEffectsMigration = fromRoot("migrations", "20260813_120000_durable_lead_side_effects.ts");
 const workspaceSettingsMigration = fromRoot("migrations", "20260828_130000_workspace_settings.ts");
 const durableViewingTripRequestsMigration = fromRoot("migrations", "20260829_120000_durable_viewing_trip_requests.ts");
+const listingTranslationCopyMigration = fromRoot("migrations", "20260830_120000_listing_translation_copy.ts");
 
 function tableSql(source, name) {
   const start = [`CREATE TABLE "${name}" (`, `CREATE TABLE IF NOT EXISTS "${name}" (`]
@@ -48,6 +49,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     "20260827_120000_admin_password_change_required.ts",
     "20260828_130000_workspace_settings.ts",
     "20260829_120000_durable_viewing_trip_requests.ts",
+    "20260830_120000_listing_translation_copy.ts",
   ]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
@@ -102,6 +104,27 @@ test("Payload migration boot configuration and generated constraints stay runnab
   assert.match(viewingTripRequests, /payload_locked_documents_rels_viewing_trip_requests_id_idx/);
   assert.match(viewingTripRequests, /payload_locked_documents_rels_viewing_trip_requests_fk/);
   assert.match(viewingTripRequests, /export async function down[\s\S]*void db/);
+
+  const listingTranslationCopy = fs.readFileSync(listingTranslationCopyMigration, "utf8");
+  for (const column of [
+    "title",
+    "description",
+    "seo_title",
+    "meta_description",
+    "content_origin",
+    "human_approved",
+    "publication_authorized_by",
+    "publication_authorized_at",
+    "published_at",
+  ]) {
+    assert.match(listingTranslationCopy, new RegExp(`ALTER TABLE "listing_translations" ADD COLUMN IF NOT EXISTS "${column}"`));
+    assert.match(listingTranslationCopy, new RegExp(`ALTER TABLE "_listing_translations_v" ADD COLUMN IF NOT EXISTS "version_${column}"`));
+  }
+  assert.match(listingTranslationCopy, /ensurePostgresSearchView\(args, \{ localizedTranslations: true \}\)/);
+  const localizedPublicSearch = fs.readFileSync(publicSearchMigration, "utf8");
+  assert.match(localizedPublicSearch, /lt\."title"/);
+  assert.match(localizedPublicSearch, /lt\."human_approved" = true/);
+  assert.match(localizedPublicSearch, /target_locale\."code"/);
 
   const migration = fs.readFileSync(propertySearchMigration, "utf8");
   const requiredColumns = {

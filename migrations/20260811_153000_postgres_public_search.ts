@@ -30,10 +30,11 @@ const PUBLIC_LOCATION_SQL = (field: string, value: string, unverifiedValue = 'NU
 
 // The view follows the public projection: source-stated location text is
 // searchable, while exact coordinates still use the broker-only gate below.
-const PUBLIC_SEARCH_TEXT_SQL = (listing = "l.") => `
+const PUBLIC_SEARCH_TEXT_SQL = (listing = "l.", translation: string | null = null) => `
   trim(
-    COALESCE(NULLIF(${listing}"facts_title", ''), NULLIF(${listing}"facts_h1", ''), NULLIF(${listing}"seo_title", ''), ${listing}"id") || ' ' ||
-    COALESCE(NULLIF(${listing}"facts_description", ''), '') || ' ' ||
+    ${translation
+      ? `NULLIF(${translation}"title", '') || ' ' || NULLIF(${translation}"description", '')`
+      : `COALESCE(NULLIF(${listing}"facts_title", ''), NULLIF(${listing}"facts_h1", ''), NULLIF(${listing}"seo_title", ''), ${listing}"id") || ' ' || COALESCE(NULLIF(${listing}"facts_description", ''), '')`} || ' ' ||
     COALESCE(${PUBLIC_LOCATION_SQL('location_label', `NULLIF(${listing}"facts_location", '')`)}, '') || ' ' ||
     COALESCE(${PUBLIC_LOCATION_SQL('municipality', `NULLIF(${listing}"facts_municipality", '')`)}, '') || ' ' ||
     COALESCE(${PUBLIC_LOCATION_SQL('district', `NULLIF(${listing}"facts_district", '')`)}, '') || ' ' ||
@@ -65,7 +66,61 @@ const INDEX_GEOGRAPHY_PATH_SQL = (listing = "l.") =>
 
 const PUBLISHABLE = (field: string) => sql.raw(PUBLISHABLE_FACT_SQL(field))
 
-export async function up({ db }: MigrateUpArgs): Promise<void> {
+type PublicSearchViewOptions = { localizedTranslations?: boolean }
+
+export async function up({ db }: MigrateUpArgs, { localizedTranslations = false }: PublicSearchViewOptions = {}): Promise<void> {
+  const locale = localizedTranslations ? 'target_locale' : 'source_locale'
+  const title = localizedTranslations
+    ? `NULLIF(lt."title", '')`
+    : `COALESCE(NULLIF(l."facts_title", ''), NULLIF(l."facts_h1", ''), NULLIF(l."seo_title", ''), l."id")`
+  const description = localizedTranslations ? `NULLIF(lt."description", '')` : `NULLIF(l."facts_description", '')`
+  const route = localizedTranslations
+    ? `CASE
+        WHEN NULLIF(l."routing_target_locale", '') = target_locale."code" AND NULLIF(l."routing_target_path", '') IS NOT NULL
+          THEN l."routing_target_path"
+        ELSE '/' || target_locale."code" || '/' || CASE target_locale."code"
+          WHEN 'bg' THEN 'imoti'
+          WHEN 'de' THEN 'immobilien'
+          WHEN 'nl' THEN 'vastgoed'
+          WHEN 'el' THEN 'akinita'
+          ELSE 'properties'
+        END || '/' || l."id"
+      END`
+    : `CASE
+        WHEN NULLIF(l."routing_target_locale", '') = source_locale."code" AND NULLIF(l."routing_target_path", '') IS NOT NULL
+          THEN l."routing_target_path"
+        ELSE '/' || source_locale."code" || '/imoti/' || l."id"
+      END`
+  const translationJoin = localizedTranslations
+    ? `JOIN "public"."listing_translations" lt ON lt."listing_id" = l."id"
+      JOIN "public"."locales" target_locale ON target_locale."id" = lt."locale_id"`
+    : ''
+  const translationEligibility = localizedTranslations
+    ? `AND lt."status" = 'published'
+        AND lt."translation_state" = 'published'
+        AND lt."public_indexable" = true
+        AND lt."human_approved" = true
+        AND COALESCE(lt."reviewer", '') <> ''
+        AND lt."approved_at" IS NOT NULL
+        AND COALESCE(lt."content_origin", '') <> ''
+        AND COALESCE(lt."title", '') <> ''
+        AND COALESCE(lt."description", '') <> ''
+        AND COALESCE(lt."seo_title", '') <> ''
+        AND COALESCE(lt."meta_description", '') <> ''
+        AND COALESCE(lt."publication_authorized_by", '') <> ''
+        AND lt."publication_authorized_at" IS NOT NULL
+        AND lt."published_at" IS NOT NULL`
+    : `AND EXISTS (
+          SELECT 1
+          FROM "public"."listing_translations" lt
+          WHERE lt."listing_id" = l."id"
+            AND lt."locale_id" = source_locale."id"
+            AND lt."status" = 'published'
+            AND lt."translation_state" = 'published'
+            AND lt."public_indexable" = true
+            AND COALESCE(lt."reviewer", '') <> ''
+            AND lt."approved_at" IS NOT NULL
+        )`
   await db.execute(sql`
     CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
@@ -79,27 +134,20 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       SELECT ${sql.raw(POSTGRES_SEARCH_FOLD_SQL)};
     $function$;
 
-    -- Translation rows currently carry approval/indexability state; listing copy
-    -- remains the approved source-locale Payload content until localized copy is
-    -- stored in the canonical tables.
     CREATE OR REPLACE VIEW "public"."ms_realty_public_search_documents" AS
       SELECT
-        (l."id" || ':' || source_locale."code") AS "id",
+        (l."id" || ':' || ${sql.raw(locale)}."code") AS "id",
         l."id" AS "source_listing_id",
         l."id" AS "listing_reference",
-        source_locale."code" AS "locale",
-        CASE
-          WHEN NULLIF(l."routing_target_locale", '') = source_locale."code" AND NULLIF(l."routing_target_path", '') IS NOT NULL
-            THEN l."routing_target_path"
-          ELSE '/' || source_locale."code" || '/imoti/' || l."id"
-        END AS "locale_path",
-        COALESCE(NULLIF(l."facts_title", ''), NULLIF(l."facts_h1", ''), NULLIF(l."seo_title", ''), l."id") AS "title",
+        ${sql.raw(locale)}."code" AS "locale",
+        ${sql.raw(route)} AS "locale_path",
+        ${sql.raw(title)} AS "title",
         'published'::varchar AS "publication_state",
         true AS "translation_human_approved",
         true AS "locale_indexable",
         true AS "translation_indexable",
-        NULLIF(l."facts_description", '') AS "description",
-        ${sql.raw(PUBLIC_SEARCH_TEXT_SQL())} AS "search_text",
+        ${sql.raw(description)} AS "description",
+        ${sql.raw(PUBLIC_SEARCH_TEXT_SQL('l.', localizedTranslations ? 'lt.' : null))} AS "search_text",
         (tour."is_public" = true AND tour."review_status" = 'published') AS "has_approved_tour",
         p."property_family"::varchar AS "property_family",
         NULLIF(p."property_subtype", '') AS "property_subtype",
@@ -191,6 +239,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       FROM "public"."listings" l
       JOIN "public"."locales" source_locale
         ON source_locale."id" = l."source_locale_id"
+      ${sql.raw(translationJoin)}
       LEFT JOIN "public"."properties" p
         ON p."id" = l."property_id"
       LEFT JOIN "public"."locations" loc
@@ -199,19 +248,9 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         ON tour."id" = l."tour_id"
       WHERE l."cms_status" = 'published'
         AND COALESCE(l."workflow_publish_approved", false) = true
-        AND source_locale."public_enabled" = true
-        AND source_locale."indexable" = true
-        AND EXISTS (
-          SELECT 1
-          FROM "public"."listing_translations" lt
-          WHERE lt."listing_id" = l."id"
-            AND lt."locale_id" = source_locale."id"
-            AND lt."status" = 'published'
-            AND lt."translation_state" = 'published'
-            AND lt."public_indexable" = true
-            AND COALESCE(lt."reviewer", '') <> ''
-            AND lt."approved_at" IS NOT NULL
-        );
+        AND ${sql.raw(locale)}."public_enabled" = true
+        AND ${sql.raw(locale)}."indexable" = true
+        ${sql.raw(translationEligibility)};
 
     CREATE INDEX IF NOT EXISTS "listings_public_search_status_idx"
       ON "public"."listings" USING btree ("cms_status", "workflow_publish_approved", "source_locale_id", "workflow_publish_approved_at", "id");

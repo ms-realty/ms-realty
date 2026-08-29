@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { publishedListingTranslationCopy } from "./content.mjs";
 import { buildApprovedSearchProjection } from "./search-engine-sync.mjs";
 import { loadPayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
@@ -21,9 +22,7 @@ function publishedTranslation(translation) {
     translation?.status === "published" &&
     translation?.translation_state === "published" &&
     translation?.public_indexable === true &&
-    Boolean(text(translation?.reviewer)) &&
-    Boolean(translation?.approved_at) &&
-    !Number.isNaN(Date.parse(translation.approved_at))
+    Boolean(publishedListingTranslationCopy(translation))
   );
 }
 
@@ -69,6 +68,8 @@ function rowFor(listing, translation, registry) {
 
   const listingFacts = listing.facts || {};
   const propertyFacts = property.facts || {};
+  const copy = publishedListingTranslationCopy(translation);
+  if (!copy) throw new Error(`Published listing ${listingId} has invalid translated copy for ${localeCode}`);
   const localePath =
     listing.routing?.target_locale === localeCode && text(listing.routing?.target_path)
       ? text(listing.routing.target_path)
@@ -77,6 +78,11 @@ function rowFor(listing, translation, registry) {
     listing: {
       ...listingFacts,
       ...propertyFacts,
+      title: copy.title,
+      h1: copy.title,
+      description: copy.description,
+      seo_title: copy.seo_title,
+      meta_description: copy.meta_description,
       id: listingId,
       source_listing_id: listingId,
       listing_reference: listingId,
@@ -125,10 +131,8 @@ export function payloadListingSearchRows(listings = [], { registry = loadLocaleR
       if (typeof onSkipped === "function") onSkipped({ listing_id: id, reason: excluded.get(id) || "not named by the publication approval" });
       continue;
     }
-    const sourceLocale = text(objectRelation(listing.source_locale)?.code);
-    // ponytail: translation rows currently store approval metadata, not localized copy; index only the source locale until copy fields exist.
     for (const translation of Array.isArray(listing.translations) ? listing.translations : []) {
-      if (!publishedTranslation(translation) || text(objectRelation(translation.locale)?.code) !== sourceLocale) continue;
+      if (!publishedTranslation(translation)) continue;
       rows.push(rowFor(listing, translation, registry));
     }
   }

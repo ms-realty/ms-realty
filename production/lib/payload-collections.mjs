@@ -251,6 +251,21 @@ export function assertPayloadCollections(config) {
       throw new Error(`Payload collection contains unadapted manifest fields: ${collection.slug}`);
     }
   }
+  const translations = config.collections.find((collection) => collection.slug === "listing_translations");
+  const translationFields = new Map((translations?.fields || []).map((field) => [field.name, field]));
+  for (const [name, type] of [
+    ["title", "text"],
+    ["description", "textarea"],
+    ["seo_title", "text"],
+    ["meta_description", "textarea"],
+    ["content_origin", "text"],
+    ["human_approved", "checkbox"],
+    ["publication_authorized_by", "text"],
+    ["publication_authorized_at", "date"],
+    ["published_at", "date"],
+  ]) {
+    if (translationFields.get(name)?.type !== type) throw new Error(`Payload listing translations require ${name}:${type}`);
+  }
   return { collections: config.collections.length };
 }
 

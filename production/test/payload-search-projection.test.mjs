@@ -7,6 +7,32 @@ import {
 } from "../lib/payload-search-projection.mjs";
 import { loadListingPublicationApproval } from "../lib/listing-publication-approval.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { contentHash } from "../lib/translations.mjs";
+
+function approvedTranslation(locale, title = `Approved ${locale.code} title`) {
+  const copy = {
+    title,
+    description: `Approved ${locale.code} description`,
+    seo_title: `${title} SEO`,
+    meta_description: `Approved ${locale.code} meta description`,
+  };
+  return {
+    id: `translation-${locale.code}`,
+    locale,
+    status: "published",
+    translation_state: "published",
+    public_indexable: true,
+    human_approved: true,
+    reviewer: `editor-${locale.code}`,
+    approved_at: "2026-08-11T08:00:00.000Z",
+    content_origin: "manual_translation",
+    publication_authorized_by: "owner",
+    publication_authorized_at: "2026-08-11T08:00:00.000Z",
+    published_at: "2026-08-11T08:00:00.000Z",
+    translated_hash: contentHash(copy),
+    ...copy,
+  };
+}
 
 function approvedListing(overrides = {}) {
   const locale = { id: "locale-bg", code: "bg", public_enabled: true, indexable: true };
@@ -43,43 +69,30 @@ function approvedListing(overrides = {}) {
         { field: "total_floors", state: "broker_verified" },
       ],
     },
-    translations: [
-      {
-        id: "translation-bg",
-        locale,
-        status: "published",
-        translation_state: "published",
-        public_indexable: true,
-        reviewer: "editor-bg",
-        approved_at: "2026-08-11T08:00:00.000Z",
-      },
-      {
-        id: "translation-en",
-        locale: { id: "locale-en", code: "en", public_enabled: true, indexable: true },
-        status: "published",
-        translation_state: "published",
-        public_indexable: true,
-        reviewer: "editor-en",
-        approved_at: "2026-08-11T08:00:00.000Z",
-      },
-    ],
+    translations: [approvedTranslation(locale, "Current approved listing")],
     tour: { is_public: true, review_status: "published" },
     ...overrides,
   };
 }
 
-test("Payload projection exposes only approved source-locale copy and verified facts", () => {
+test("Payload projection exposes approved localized copy and verified facts", () => {
+  const current = approvedListing();
+  current.translations.push(
+    approvedTranslation({ id: "locale-en", code: "en", public_enabled: true, indexable: true }, "Current approved listing in English"),
+  );
   const rows = payloadListingSearchRows([
-    approvedListing(),
+    current,
     approvedListing({ id: "MS-BLOCKED-0002", cms_status: "review", workflow: { publish_approved: false } }),
   ]);
-  assert.equal(rows.length, 1);
+  assert.equal(rows.length, 2);
   assert.equal(rows[0].listing.source_listing_id, "MS-CURRENT-0001");
   assert.equal(rows[0].listing.locale, "bg");
   assert.equal(rows[0].listing.locale_path, "/bg/imoti/MS-CURRENT-0001");
   assert.equal(rows[0].listing.price_amount, 120000);
   assert.equal(rows[0].listing.public_latitude, 41.56);
   assert.equal(rows[0].approval.translation_human_approved, true);
+  assert.equal(rows[1].listing.locale, "en");
+  assert.equal(rows[1].listing.title, "Current approved listing in English");
   assert.ok(rows[0].approval.fact_verification.some((item) => item.field === "listing_status" && item.state === "broker_verified"));
 });
 
@@ -214,5 +227,5 @@ test("the default sync path resolves real listing ids from the approval", () => 
   const approval = loadListingPublicationApproval();
   assert.equal(Array.isArray(approval.listing_ids), true);
   assert.ok(approval.listing_ids.length >= 1);
-  assert.equal(approval.listing_ids.includes("MS-CRAWL-0127"), false);
+  assert.equal(approval.listing_ids.includes("MS-CRAWL-0127"), true);
 });

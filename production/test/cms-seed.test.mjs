@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { loadListings } from "../lib/content.mjs";
+import { listingSourceSnapshot, loadListings } from "../lib/content.mjs";
 import {
   assertCmsCollections,
   assertCmsSeed,
@@ -14,6 +14,7 @@ import {
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { assertPayloadCollections, buildPayloadCollections } from "../lib/payload-collections.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { contentHash } from "../lib/translations.mjs";
 
 const registry = loadLocaleRegistry();
 const listings = loadListings();
@@ -29,11 +30,6 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   const polenitsaListing = seed.records.find((record) => record.id === "MS-CRAWL-0033");
   const greekListing = seed.records.find((record) => record.id === "MS-CRAWL-0072");
   const ruListing = seed.records.find((record) => record.source_locale === "ru");
-  const areaOnlyListing = seed.records.find((record) => record.location && record.facts.location_precision === "area_only");
-  const areaOnlyProperty = seed.properties.find((record) => record.id === areaOnlyListing.property);
-  const areaOnlyLocation = seed.locations.find((record) => record.id === areaOnlyListing.location);
-  const unknownLocationListing = seed.records.find((record) => !record.facts.location);
-  const unknownLocationProperty = seed.properties.find((record) => record.id === unknownLocationListing.property);
 
   assert.equal(summary.listings, 165);
   assert.equal(summary.properties, 165);
@@ -45,7 +41,9 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(summary.videoCandidates, 0);
   assert.equal(summary.tourFields, 165);
   assert.equal(summary.publicTours, 0);
-  assert.equal(fixtureListing.translations.some((translation) => translation.locale === "he" && translation.public_indexable), true);
+  assert.deepEqual(fixtureListing.translations.map((translation) => translation.locale), ["bg"]);
+  assert.equal(fixtureListing.translations[0].title, fixtureListing.facts.h1);
+  assert.equal(fixtureListing.translations[0].content_origin, "legacy_source_import");
   assert.equal(fixtureListing.translations.some((translation) => translation.locale === "fr"), false);
   assert.equal(fixtureListing.routing.deployable, false);
   assert.equal(fixtureListing.routing.review_required, true);
@@ -109,11 +107,7 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(property.fact_verification.some((fact) => fact.state === "broker_verified"), false);
   assert.equal(seed.enrichment_tasks.some((task) => task.listing === fixtureListing.id && task.property === property.id), true);
   assert.equal(seed.taxonomy_contract.version, property.taxonomy_mapping_version);
-  assert.equal(areaOnlyListing.facts.location_precision, "area_only");
-  assert.equal(areaOnlyProperty.facts.public_location_precision, "area_only");
-  assert.equal(areaOnlyLocation.public_location_precision, "locality");
-  assert.equal(unknownLocationListing.location, null);
-  assert.equal(unknownLocationProperty.location, null);
+  assert.equal(seed.records.every((record) => Boolean(record.location && record.facts.location)), true);
   assert.equal(seed.locations.some((location) => /unknown|unreviewed/i.test(location.label)), false);
   assert.deepEqual(seed.taxonomy_contract.mappings.find((mapping) => mapping.legacy_property_type === "land"), {
     legacy_property_type: "land",
@@ -121,6 +115,72 @@ test("CMS seed composes listing, migration, route, translation, and media data",
     property_subtype: null,
     review_status: "mapping_review_required",
   });
+});
+
+test("CMS seed persists the catalog projected translation row without weakening publication gates", () => {
+  const sourceListing = listings.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const source = listingSourceSnapshot(sourceListing);
+  const copy = {
+    title: "Approved English listing title",
+    description: "Approved English listing description backed by the source listing.",
+    seo_title: "Approved English listing title",
+    meta_description: "Approved English listing description backed by the source listing.",
+  };
+  const publishedAt = "2026-08-30T08:00:00.000Z";
+  const seed = buildCmsSeed(registry, {
+    listings,
+    migrationRecords,
+    routeMap,
+    mediaRows,
+    translationRecords: [
+      {
+        listing: sourceListing.id,
+        locale: "en",
+        source_locale: sourceListing.locale,
+        status: "published",
+        translation_state: "published",
+        source_hash: contentHash(source),
+        translated_hash: contentHash(copy),
+        ...copy,
+        content_origin: "manual_translation",
+        reviewer: "ms-realty-owner",
+        approved_at: publishedAt,
+        human_approved: true,
+        publication_authorized_by: "ms-realty-owner",
+        published_at: publishedAt,
+        direction: "ltr",
+        public_indexable: true,
+      },
+    ],
+  });
+  const translation = seed.records.find((record) => record.id === sourceListing.id).translations.find((row) => row.locale === "en");
+
+  assert.deepEqual(
+    {
+      title: translation.title,
+      description: translation.description,
+      seo_title: translation.seo_title,
+      meta_description: translation.meta_description,
+      content_origin: translation.content_origin,
+      reviewer: translation.reviewer,
+      human_approved: translation.human_approved,
+      publication_authorized_by: translation.publication_authorized_by,
+      publication_authorized_at: translation.publication_authorized_at,
+      published_at: translation.published_at,
+      public_indexable: translation.public_indexable,
+    },
+    {
+      ...copy,
+      content_origin: "manual_translation",
+      reviewer: "ms-realty-owner",
+      human_approved: true,
+      publication_authorized_by: "ms-realty-owner",
+      publication_authorized_at: publishedAt,
+      published_at: publishedAt,
+      public_indexable: true,
+    },
+  );
+  assert.equal(translation.translated_hash, contentHash(copy));
 });
 
 test("CMS seed rejects Location precision outside the canonical enum", () => {
@@ -219,7 +279,7 @@ test("CMS collection manifest exposes implemented Payload-style contracts only",
   assert.equal(summary.records.listings, 165);
   assert.equal(summary.records.properties, 165);
   assert.ok(summary.records.locations > 0);
-  assert.equal(summary.records.listing_translations, 167);
+  assert.equal(summary.records.listing_translations, 165);
   assert.equal(summary.records.media_assets, 4978);
   assert.equal(summary.records.listing_tours, 165);
   assert.equal(summary.records.listing_enrichment_tasks, 165);
@@ -296,6 +356,7 @@ test("Payload collection configs adapt CMS manifest fields without adding Payloa
   const facts = listingsConfig.fields.find((field) => field.name === "facts");
   const mediaConfig = payload.collections.find((collection) => collection.slug === "media_assets");
   const toursConfig = payload.collections.find((collection) => collection.slug === "listing_tours");
+  const translationsConfig = payload.collections.find((collection) => collection.slug === "listing_translations");
 
   assert.equal(summary.collections, 8);
   assert.equal(listingsConfig.versions.drafts, true);
@@ -308,6 +369,9 @@ test("Payload collection configs adapt CMS manifest fields without adding Payloa
   assert.equal(mediaConfig.fields.find((field) => field.name === "url").type, "text");
   assert.equal(toursConfig.fields.find((field) => field.name === "fallback_gallery").fields[0].name, "url");
   assert.equal(toursConfig.fields.find((field) => field.name === "viewer_url").type, "text");
+  for (const field of ["title", "description", "seo_title", "meta_description", "content_origin", "human_approved", "publication_authorized_by", "published_at"]) {
+    assert.ok(translationsConfig.fields.some((candidate) => candidate.name === field), `missing listing translation field ${field}`);
+  }
   const propertiesConfig = payload.collections.find((collection) => collection.slug === "properties");
   const verification = propertiesConfig.fields.find((field) => field.name === "fact_verification");
   assert.equal(propertiesConfig.versions, false);

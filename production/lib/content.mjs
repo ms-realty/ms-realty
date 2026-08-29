@@ -12,7 +12,41 @@ import { contentHash } from "./translations.mjs";
 
 export const DEFAULT_LISTINGS_PATH = fromRoot("search", "data", "listings.json");
 export const DEFAULT_MIGRATION_RECORDS_PATH = fromRoot("production", "data", "migration-records.json");
-const SEEDED_APPROVED_TRANSLATIONS = new Map([["MS-CRAWL-0001", ["el", "he"]]]);
+
+function translationText(value) {
+  return String(value || "").trim();
+}
+
+export function listingTranslationCopy(translation) {
+  const copy = {
+    title: translationText(translation?.title),
+    description: translationText(translation?.description),
+    seo_title: translationText(translation?.seo_title),
+    meta_description: translationText(translation?.meta_description),
+  };
+  if (Object.values(copy).some((value) => !value)) return null;
+  if (translation?.translated_hash && translation.translated_hash !== contentHash(copy)) return null;
+  return copy;
+}
+
+export function publishedListingTranslationCopy(translation) {
+  const approvedAt = translationText(translation?.approved_at);
+  const authorizedAt = translationText(translation?.publication_authorized_at);
+  const publishedAt = translationText(translation?.published_at);
+  if (
+    translation?.status !== "published" ||
+    (translation?.translation_state && translation.translation_state !== "published") ||
+    translation?.public_indexable !== true ||
+    translation?.human_approved !== true ||
+    !translationText(translation?.reviewer) ||
+    !translationText(translation?.content_origin) ||
+    !translationText(translation?.publication_authorized_by) ||
+    [approvedAt, authorizedAt, publishedAt].some((value) => !value || Number.isNaN(Date.parse(value)))
+  ) {
+    return null;
+  }
+  return listingTranslationCopy(translation);
+}
 
 export function loadListings(path = DEFAULT_LISTINGS_PATH) {
   return JSON.parse(fs.readFileSync(path, "utf8"));
@@ -137,24 +171,36 @@ export function listingSourceSnapshot(listing) {
 export function approvedTranslationRecordsForListing(registry, listing) {
   const source = listingSourceSnapshot(listing);
   const sourceHash = contentHash(source);
-  const locales = new Set();
-  if (listing.locale && listing.translation_status === "published") locales.add(listing.locale);
-  for (const locale of SEEDED_APPROVED_TRANSLATIONS.get(listing.id) || []) locales.add(locale);
-
-  return [...locales].map((localeCode) => {
-    const locale = getLocale(registry, localeCode);
-    const sourceLocaleMatch = listing.locale === locale.code && listing.translation_status === "published";
-    return {
+  if (!listing.locale || listing.translation_status !== "published") return [];
+  const locale = getLocale(registry, listing.locale);
+  const approvedAt = "2026-07-04T00:00:00Z";
+  const copy = {
+    title: source.h1 || source.title,
+    description: source.description || source.h1 || source.title,
+    seo_title: source.title || source.h1,
+    meta_description: source.description || source.h1 || source.title,
+  };
+  return [
+    {
       locale: locale.code,
       source_locale: listing.locale || registry.source_locale,
-      status: sourceLocaleMatch ? "published" : "approved",
+      status: "published",
+      translation_state: "published",
       source_hash: sourceHash,
-      translated_hash: contentHash({ ...source, locale: locale.code }),
+      translated_hash: contentHash(copy),
+      ...copy,
+      translator: null,
+      content_origin: "legacy_source_import",
       reviewer: locale.reviewer_role,
       human_approved: true,
-      approved_at: "2026-07-04T00:00:00Z",
-    };
-  });
+      approved_at: approvedAt,
+      publication_authorized_by: locale.reviewer_role,
+      publication_authorized_at: approvedAt,
+      published_at: approvedAt,
+      public_indexable: true,
+      citations: [listing.url].filter(Boolean),
+    },
+  ];
 }
 
 export function listingToPublicViewModel(listing) {
