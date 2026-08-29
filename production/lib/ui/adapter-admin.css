@@ -2389,6 +2389,8 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-assistant-connection__copy p { margin: var(--space-1) 0 0; color: var(--text-muted); }
 .adm-connection-row__account { display: flex; flex-wrap: wrap; gap: var(--space-2); color: var(--text-strong) !important; font-weight: var(--fw-semibold); }
 .adm-connection-row__account small { color: var(--text-muted); font-weight: var(--fw-regular); }
+.adm-connection-row__helper { margin: var(--space-1) 0 0; color: var(--text-strong) !important; font-size: var(--text-sm); }
+.adm-connection-row__blocked { margin: var(--space-1) 0 0; color: var(--text-muted) !important; font-size: var(--text-sm); }
 .adm-connection-row__recovery { max-width: 68ch; padding-top: var(--space-2); color: var(--brick-700, var(--brick-600)) !important; }
 .adm-connection-row__recovery small { display: block; margin-top: var(--space-1); color: var(--text-muted); }
 .adm-connection-row__state { display: grid; justify-items: end; gap: var(--space-2); }

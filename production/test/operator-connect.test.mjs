@@ -70,12 +70,17 @@ test("connections payload renders the persistent owner shell without credential 
   assert.ok(html.includes('data-kind="admin_connections"'));
   assert.ok(html.includes('data-provider="google"'));
   assert.ok(html.includes('data-provider="whatsapp"'));
-  assert.equal(html.includes('data-provider="viber"'), false);
+  assert.ok(html.includes('data-provider="facebook"'));
+  assert.ok(html.includes('data-provider="instagram"'));
+  assert.ok(html.includes('data-provider="viber"'));
   assert.equal(html.includes('data-provider="github"'), false);
   assert.ok(html.includes('data-managed-system="hermes"'));
   assert.ok(html.includes('data-managed-system="data"'));
+  assert.ok(html.includes('data-managed-system="cloudflare"'));
+  assert.ok(html.includes('data-managed-system="neon"'));
   assert.ok(html.includes('data-codex-plugin-install="ms-realty-operator"'));
   assert.ok(html.includes(operatorCodexPluginUrl()));
+  assert.ok(html.includes("Marketing and additional channels"));
   assert.equal(html.includes(OPERATOR_TOKEN), false);
   assert.doesNotMatch(html, /<input[^>]+type="password"/);
   assert.doesNotMatch(html, /name="token"/);
@@ -126,6 +131,9 @@ test("standalone HTTP runtime serves /admin/connect behind admin auth", async ()
     assert.ok(page.body.includes('data-react-admin-ui="connections"'));
     assert.ok(page.body.includes('data-provider="google"'));
     assert.ok(page.body.includes('data-provider="whatsapp"'));
+    assert.ok(page.body.includes('data-provider="facebook"'));
+    assert.ok(page.body.includes('data-provider="instagram"'));
+    assert.ok(page.body.includes('data-provider="viber"'));
     assert.equal(page.body.includes(OPERATOR_TOKEN), false);
   });
 });
@@ -144,6 +152,9 @@ test("Next admin adapter serves the same credential-free owner connection shell"
     assert.ok(body.includes('data-react-admin-ui="connections"'));
     assert.ok(body.includes('data-provider="google"'));
     assert.ok(body.includes('data-provider="whatsapp"'));
+    assert.ok(body.includes('data-provider="facebook"'));
+    assert.ok(body.includes('data-provider="instagram"'));
+    assert.ok(body.includes('data-provider="viber"'));
     assert.equal(body.includes(OPERATOR_TOKEN), false);
     assert.equal(response.headers.get("cache-control"), "no-store");
   });

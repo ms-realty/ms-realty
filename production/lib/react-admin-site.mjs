@@ -11101,9 +11101,16 @@ function connectionTone(status) {
   return "sand";
 }
 
+function connectionIcon(connection) {
+  if (connection.id === "google") return "mail";
+  if (connection.id === "ai") return "sparkles";
+  if (connection.id === "cloudflare" || connection.id === "neon") return "shield-check";
+  return "message-circle";
+}
+
 function ConnectionAction({ connection }) {
-  if (!connection.can_manage || (!connection.action_href && connection.id !== "whatsapp")) return null;
   if (connection.id === "whatsapp") {
+    if (!connection.can_manage) return null;
     return h(
       "button",
       {
@@ -11116,11 +11123,20 @@ function ConnectionAction({ connection }) {
       h("span", null, connection.action_label),
     );
   }
+  if (connection.can_manage && connection.action_href) {
+    return h(
+      "a",
+      { className: "mk-btn mk-btn--primary mk-btn--sm", href: connection.action_href },
+      h(Icon, { name: "link", size: 15 }),
+      h("span", null, connection.action_label),
+    );
+  }
+  if (!connection.docs_href) return null;
   return h(
     "a",
-    { className: "mk-btn mk-btn--primary mk-btn--sm", href: connection.action_href },
-    h(Icon, { name: "link", size: 15 }),
-    h("span", null, connection.action_label),
+    { className: "mk-btn mk-btn--ghost mk-btn--sm", href: connection.docs_href, target: "_blank", rel: "noreferrer" },
+    h(Icon, { name: "external-link", size: 15 }),
+    h("span", null, connection.docs_label),
   );
 }
 
@@ -11132,13 +11148,23 @@ function ConnectionRow({ connection, copy }) {
     h(
       "div",
       { className: "adm-connection-row__summary" },
-      h("div", { className: "adm-connection-row__icon", "aria-hidden": "true" }, h(Icon, { name: connection.id === "whatsapp" ? "message-circle" : "mail", size: 18 })),
+      h("div", { className: "adm-connection-row__icon", "aria-hidden": "true" }, h(Icon, { name: connectionIcon(connection), size: 18 })),
       h(
         "div",
         null,
         h("h3", null, connection.title),
         h("p", null, connection.description),
+        connection.helper_text ? h("p", { className: "adm-connection-row__helper" }, connection.helper_text) : null,
         connected ? h("p", { className: "adm-connection-row__account" }, h("bdi", null, connection.account_label), h("small", null, connection.verified_label)) : null,
+        connection.model || connection.endpoint
+          ? h(
+              "p",
+              { className: "adm-connection-row__account" },
+              connection.model ? h("span", null, connection.model) : null,
+              connection.endpoint ? h("small", null, connection.endpoint) : null,
+            )
+          : null,
+        connection.blocked_text ? h("p", { className: "adm-connection-row__blocked" }, connection.blocked_text) : null,
         connection.unavailable_message
           ? h("p", { className: "adm-connection-row__recovery" }, connection.unavailable_message, h("small", null, connection.recovery_message))
           : null,
@@ -11242,6 +11268,7 @@ function ConnectionsBody({ page }) {
   const copy = page.connection_copy || {};
   const whatsapp = page.whatsapp_client || {};
   const connections = Array.isArray(page.connections) ? page.connections : [];
+  const supporting = Array.isArray(page.supporting_connections) ? page.supporting_connections : [];
   const managed = Array.isArray(page.managed_systems) ? page.managed_systems : [];
   return adminShell(page, {
     title: copy.title,
@@ -11280,6 +11307,12 @@ function ConnectionsBody({ page }) {
             { title: copy.workAccountsTitle, "data-connection-group": "work-accounts" },
             h("p", { className: "adm-connections-section-copy" }, copy.workAccountsDescription),
             h("ul", { className: "adm-connection-list" }, ...connections.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+          ),
+          h(
+            Panel,
+            { title: copy.additionalChannelsTitle, "data-connection-group": "additional-channels" },
+            h("p", { className: "adm-connections-section-copy" }, copy.additionalChannelsDescription),
+            h("ul", { className: "adm-connection-list" }, ...supporting.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
           ),
           h(
             Panel,

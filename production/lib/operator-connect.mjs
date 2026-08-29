@@ -26,6 +26,8 @@ import { operatorProviderCards } from "./operator-provider-catalog.mjs";
 
 export const OPERATOR_TOKEN_ENV = "MS_REALTY_OPERATOR_TOKEN";
 const OPERATOR_TOKEN_PLACEHOLDER = `\${${OPERATOR_TOKEN_ENV}}`;
+const OPERATIONAL_PROVIDER_IDS = Object.freeze(["google", "whatsapp"]);
+const SUPPORTING_PROVIDER_IDS = Object.freeze(["facebook", "instagram", "viber"]);
 
 const PROMPT_TEMPLATE = `You are now the operations copilot for MS Realty, a family real-estate agency in Sandanski, Bulgaria (legacy sites makler-realty.com and makler-realty.ru; the authoritative public platform runs at __BASE_URL__).
 
@@ -205,9 +207,29 @@ function workspaceForOperator(registry, requestedLocale, operator) {
 function ownerConnectionView(card, copy, canManageConnections) {
   const connected = card.status === "connected";
   const ready = card.status === "not_connected" || connected;
+  const ownerCanAct = card.owner_connectable && canManageConnections;
+  const helperText = {
+    google: copy.googleUsage,
+    whatsapp: copy.whatsappUsage,
+    facebook: copy.facebookUsage,
+    instagram: copy.instagramUsage,
+    viber: copy.viberUsage,
+    cloudflare: copy.cloudflareUsage,
+    neon: copy.neonUsage,
+    ai: copy.aiUsage,
+  }[card.id] || "";
+  const blockedText = {
+    facebook: copy.facebookBlocked,
+    instagram: copy.instagramBlocked,
+    viber: copy.viberDisabled,
+    cloudflare: copy.cloudflareDisabled,
+    neon: copy.neonDisabled,
+    ai: copy.aiProviderHealthy,
+  }[card.id] || "";
   return {
     id: card.id,
     kind: card.kind,
+    family: card.family,
     status: card.status,
     title: copy[providerCopyKey(card.id, "Title")],
     description: copy[providerCopyKey(card.id, "Description")],
@@ -219,15 +241,38 @@ function ownerConnectionView(card, copy, canManageConnections) {
     account_label: connected ? card.account_label || copy.accountConfirmed : "",
     verified_label: connected ? `${copy.verifiedAt}: ${verifiedAt(card.last_verified_at, copy)}` : "",
     action_label: connected ? copy.reauthorize : copy[providerCopyKey(card.id, "Connect")],
-    can_manage: canManageConnections,
+    can_manage: ownerCanAct,
     action_href:
-      canManageConnections && card.kind === "oauth" && ready
+      ownerCanAct && card.kind === "oauth" && ready
         ? `/api/admin/connections?provider=${card.id}&action=start`
         : "",
+    docs_href: card.setup_url || "",
+    docs_label: copy.tokenOpenProvider,
     disconnect_label: copy.disconnect,
     disconnect_hint: copy.disconnectHint,
-    unavailable_message: !canManageConnections ? copy.sessionRequired : ready ? "" : copy.oauthUnavailable,
-    recovery_message: !canManageConnections ? copy.sessionRequiredRecovery : ready ? "" : copy.oauthRecovery,
+    unavailable_message: card.owner_connectable
+      ? !canManageConnections
+        ? copy.sessionRequired
+        : ready
+          ? ""
+          : copy.oauthUnavailable
+      : "",
+    recovery_message: card.owner_connectable
+      ? !canManageConnections
+        ? copy.sessionRequiredRecovery
+        : ready
+          ? ""
+          : copy.oauthRecovery
+      : "",
+    helper_text: helperText,
+    blocked_text:
+      connected || card.status === "not_connected"
+        ? ""
+        : !canManageConnections && card.owner_connectable
+          ? copy.sessionRequired
+          : blockedText,
+    model: card.model || "",
+    endpoint: card.endpoint || "",
   };
 }
 
@@ -254,9 +299,14 @@ export function buildOperatorConnectPayload({
 } = {}) {
   const workspace = workspaceForOperator(registry, requestedLocale, operator);
   const copy = operatorConnectCopy(workspace.locale);
-  const cards = operatorProviderCards({ connections, availability, config: providerConfig })
-    .filter((card) => card.owner_connectable)
+  const visibleCards = operatorProviderCards({ connections, availability, config: providerConfig });
+  const cardById = new Map(visibleCards.map((card) => [card.id, card]));
+  const cards = OPERATIONAL_PROVIDER_IDS.map((id) => cardById.get(id))
+    .filter(Boolean)
     .map((card) => ownerConnectionView(card, copy, canManageConnections));
+  const supportingConnections = SUPPORTING_PROVIDER_IDS.map((id) => cardById.get(id))
+    .filter(Boolean)
+    .map((card) => ownerConnectionView(card, copy, false));
   const whatsapp = cards.find((card) => card.id === "whatsapp");
   const operatorId = workspace.operator_id || operator?.id || "operator";
   const assistantConfig = agentToken
@@ -294,15 +344,36 @@ export function buildOperatorConnectPayload({
         id: "hermes",
         title: copy.managedHermesTitle,
         description: copy.managedHermesDescription,
+        helper_text: copy.aiUsage,
         ...systemState(availability.ai?.ready === true),
+        model: providerConfig?.hermes?.model || "",
+        endpoint: providerConfig?.hermes?.endpoint_redacted || "",
       },
       {
         id: "data",
         title: copy.managedDataTitle,
         description: copy.managedDataDescription,
+        helper_text: copy.managedDataUsage,
         ...systemState(availability.store?.ready === true && !storeError),
       },
+      {
+        id: "cloudflare",
+        title: copy.cloudflareTitle,
+        description: copy.cloudflareDescription,
+        helper_text: copy.cloudflareUsage,
+        status: "managed",
+        status_label: copy.managedElsewhere,
+      },
+      {
+        id: "neon",
+        title: copy.neonTitle,
+        description: copy.neonDescription,
+        helper_text: copy.neonUsage,
+        status: "managed",
+        status_label: copy.managedElsewhere,
+      },
     ],
+    supporting_connections: supportingConnections,
     whatsapp_client: {
       enabled: Boolean(canManageConnections && whatsapp && whatsapp.status !== "needs_setup"),
       app_id: availability.whatsapp?.app_id || "",

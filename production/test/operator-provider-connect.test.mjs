@@ -196,16 +196,25 @@ test("a provider without an active authorization path stays unavailable without 
     providerConfig: bare,
     locale: "bg",
   });
-  // Only working owner workflows render; unavailable providers have no ghost
-  // card or start URL, while the two real providers explain setup truthfully.
+  // Working owner workflows remain the only actionable cards. Supporting
+  // channels stay visible as explicit gaps, without setup forms or start URLs.
   assert.equal(html.includes('href="/api/admin/connections?provider=github&amp;action=start"'), false);
   assert.match(html, /data-provider="google" data-status="needs_setup"/);
   assert.match(html, /data-provider="whatsapp" data-status="needs_setup"/);
+  assert.match(html, /data-provider="facebook" data-status="needs_setup"/);
+  assert.match(html, /data-provider="instagram" data-status="needs_setup"/);
+  assert.match(html, /data-provider="viber" data-status="disabled"/);
+  for (const id of ["facebook", "instagram", "viber"]) {
+    assert.equal(html.includes(`/api/admin/connections?provider=${id}&amp;action=start`), false, id);
+  }
   assert.match(html, /Нужна е еднократна настройка/);
   assert.match(html, /Свързването е временно недостъпно/);
   assert.match(html, /Отговорникът за инфраструктурата трябва/);
+  assert.doesNotMatch(html, /Свързването е достъпно само във влязла сесия/);
   assert.doesNotMatch(html, /MS_REALTY_[A-Z0-9_]+/);
-  assert.doesNotMatch(html, /data-provider="(?:google_drive|facebook|instagram|github|viber|cloudflare|neon|ai)"/);
+  assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon|ai)"/);
+  assert.match(html, /data-managed-system="cloudflare" data-status="managed"/);
+  assert.match(html, /data-managed-system="neon" data-status="managed"/);
   assert.doesNotMatch(html, /<input[^>]+type="password"/);
   assert.doesNotMatch(html, /name="token"/);
 });
@@ -275,11 +284,17 @@ test("a configured owner page offers exactly the two working one-click handoffs"
   });
   assert.ok(html.includes('href="/api/admin/connections?provider=google&amp;action=start"'));
   assert.equal((html.match(/data-whatsapp-connect="true"/g) || []).length, 1);
-  assert.doesNotMatch(html, /data-provider="(?:google_drive|facebook|instagram|github|viber|cloudflare|neon|ai)"/);
+  for (const id of ["facebook", "instagram", "viber"]) {
+    assert.match(html, new RegExp(`data-provider="${id}"`));
+    assert.equal(html.includes(`/api/admin/connections?provider=${id}&amp;action=start`), false, id);
+  }
+  assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon|ai)"/);
   assert.doesNotMatch(html, /<input[^>]+type="password"/);
   assert.doesNotMatch(html, /name="token"/);
   assert.match(html, /data-managed-system="hermes" data-status="ready"/);
   assert.match(html, /data-managed-system="data" data-status="ready"/);
+  assert.match(html, /data-managed-system="cloudflare" data-status="managed"/);
+  assert.match(html, /data-managed-system="neon" data-status="managed"/);
 });
 
 test("OAuth start binds the state to this provider and this operator", () => {
