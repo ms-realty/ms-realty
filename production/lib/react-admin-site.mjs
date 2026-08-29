@@ -3108,20 +3108,26 @@ function navigationLink(item, page, { mobile = false, primary = false, key } = {
 function navigationDestination(destination, page, { mobile = false } = {}) {
   const moreLabel = ownerConsoleCopy(page).navMore.replace("{group}", destination.label);
   const nested = destination.children?.length
-    ? h(
-        "details",
-        {
-          className: mobile ? "adm-mobile-nav__more" : "crm-sb__more",
-          open: destination.children.some((item) => page.kind === item.kind) ? true : undefined,
-          "data-admin-nav-drilldown": destination.id,
-        },
-        h("summary", { className: mobile ? "adm-mobile-nav__more-summary" : "crm-sb__more-summary" }, moreLabel),
-        h(
+    ? mobile
+      ? h(
+          "details",
+          {
+            className: "adm-mobile-nav__more",
+            open: destination.children.some((item) => page.kind === item.kind) ? true : undefined,
+            "data-admin-nav-drilldown": destination.id,
+          },
+          h("summary", { className: "adm-mobile-nav__more-summary" }, moreLabel),
+          h(
+            "div",
+            { className: "adm-mobile-nav__nested" },
+            ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
+          ),
+        )
+      : h(
           "div",
-          { className: mobile ? "adm-mobile-nav__nested" : "crm-sb__nested" },
+          { className: "crm-sb__nested", "data-admin-nav-drilldown": destination.id },
           ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
-        ),
-      )
+        )
     : null;
   return h(
     "div",
@@ -3264,9 +3270,9 @@ function Topbar({ page, title, titleAsHeading = false }) {
     { className: "crm-top" },
     h(
       "div",
-      { style: "min-width:0" },
-      h(titleAsHeading ? "h1" : "div", { className: "crm-top__title" }, title),
-      h("div", { className: "crm-top__sub" }, page.workspace?.title || ""),
+      { className: "crm-top__context" },
+      h("div", { className: "crm-top__eyebrow" }, page.workspace?.title || "MS Realty"),
+      h("div", { className: "crm-top__sub" }, title),
     ),
     h(MobileNavigation, { page }),
     h(
@@ -3771,6 +3777,7 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
 function TodayBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const settingsCopy = workbenchCopy(page).workspaceSettings;
   const queue = leadQueueState(page);
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
@@ -3800,6 +3807,12 @@ function TodayBody({ page }) {
       "data-admin-locale": page.workspace.locale,
     },
     children: [
+      h(
+        PageHeader,
+        { title, subtitle: settingsCopy.todayBriefing.description },
+        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes", page) }, h(Icon, { name: "sparkles", size: 16 }), h("span", null, settingsCopy.hermesEntry.open)),
+      ),
       h(WorkspaceWelcomeBanner, { page }),
       h(
         "div",
@@ -11478,7 +11491,11 @@ function ConnectionsBody({ page }) {
       "data-meta-cancelled": copy.metaCancelled || "",
     },
     children: [
-      h("p", { className: "adm-connections-intro" }, copy.intro),
+      h(
+        PageHeader,
+        { title: copy.title, subtitle: copy.intro },
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/settings", page) }, h(Icon, { name: "settings", size: 16 }), h("span", null, ownerConsoleCopy(page).routes.settings)),
+      ),
       h(SummaryStrip, { cards: summaryCards, "data-summary-kind": "connections" }),
       h(
         "div",
@@ -11675,7 +11692,13 @@ function HermesBody({ page }) {
       "data-hermes-queue": queue.status,
     },
     children: [
-      h("p", { className: "adm-hermes-panel-intro adm-hermes-page-intro" }, copy.description),
+      h(
+        PageHeader,
+        { title: copy.title, subtitle: copy.description },
+        pageCan(page, "settings:manage")
+          ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 16 }), h("span", null, copy.connections))
+          : null,
+      ),
       h(
         "div",
         { className: "adm-owner-flow adm-owner-flow--hermes", "data-hermes-layout": "operating-flow" },
@@ -12181,7 +12204,11 @@ function SettingsBody({ page }) {
       "data-admin-locale": page.workspace.locale,
     },
     children: [
-      h("p", { className: "adm-settings-page-intro" }, settings.description),
+      h(
+        PageHeader,
+        { title, subtitle: settings.description },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 16 }), h("span", null, owner.routes.integrations)),
+      ),
       h(SummaryStrip, { cards: settingsSummaryCards, "data-summary-kind": "settings" }),
       // The store being unconfigured is one fact about the environment, said
       // once - not restated under every section.

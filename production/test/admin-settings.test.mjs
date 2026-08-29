@@ -275,9 +275,9 @@ test("settings screen renders working sections and an in-flow owner overview", a
     assert.equal(page.status, 200);
     assert.match(page.body, /data-react-admin-ui="settings"/);
     assert.match(page.body, /data-settings-layout="sections-flow"/);
-    assert.match(page.body, /<h1 class="crm-top__title">Settings<\/h1>/);
-    assert.doesNotMatch(page.body, /class="crm-ph"/);
-    assert.match(page.body, /class="adm-settings-page-intro"/);
+    assert.match(page.body, /class="crm-ph"/);
+    assert.match(page.body, /<h1>Settings<\/h1>/);
+    assert.match(page.body, /Agency profile, lead reply targets, notifications,/);
     assert.match(page.body, /data-summary-kind="settings"/);
     for (const card of ["agency-profile", "lead-sla", "workspace", "settings-state"]) {
       assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
@@ -345,15 +345,17 @@ test("settings screen speaks Bulgarian and Russian and links from the workspace 
   });
 });
 
-test("Today and Hermes use the shell heading while PageHeader views keep one heading", async () => {
+test("owner screens keep one page heading after moving titles into PageHeader", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
     const hermes = await dispatchHttp(app, { url: "/admin/hermes", headers: HEADERS });
+    const connections = await dispatchHttp(app, { url: "/admin/connect", headers: HEADERS });
     const settings = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
     assert.equal(headingCount(today.body), 1, "Today has exactly one h1");
     assert.equal(headingCount(hermes.body), 1, "Hermes has exactly one h1");
-    assert.equal(headingCount(settings.body), 1, "PageHeader view has exactly one h1");
+    assert.equal(headingCount(connections.body), 1, "Connections has exactly one h1");
+    assert.equal(headingCount(settings.body), 1, "Settings has exactly one h1");
   });
 });
 
@@ -637,7 +639,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
       assert.match(empty.body, new RegExp(`href="/admin/${route}"`), route);
     }
     assert.doesNotMatch(empty.body, /data-today-toolbar="true"/);
-    assert.doesNotMatch(empty.body, /class="crm-ph"/);
+    assert.match(empty.body, /class="crm-ph"/);
     for (const contract of ["data-priority-leads=\"true\"", "data-lead-pipeline-preview=\"true\"", "data-public-request-preview=\"true\""]) {
       assert.doesNotMatch(empty.body, new RegExp(contract), contract);
     }
@@ -683,7 +685,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.match(populated.body, /data-readiness-support="true"/);
     assert.match(populated.body, /data-workspace-welcome="true"/);
     assert.match(populated.body, /data-workspace-onboarding="open"/);
-    assert.doesNotMatch(populated.body, /class="crm-ph"/);
+    assert.match(populated.body, /class="crm-ph"/);
 
     const json = await dispatchHttp(app, { url: "/api/admin/today", headers: HEADERS });
     assert.equal(json.status, 200);
