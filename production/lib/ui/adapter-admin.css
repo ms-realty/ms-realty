@@ -2661,6 +2661,76 @@ html[data-theme="dark"] .crm-top {
   font-size: var(--text-md);
 }
 
+/* One orientation layer above dense owner workflows: factual summaries only,
+   no duplicate actions or synthetic states. */
+.adm-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+.adm-summary-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+.adm-summary-card__eyebrow {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+}
+.adm-summary-card__title {
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+  line-height: var(--lh-snug);
+}
+.adm-summary-card__value {
+  color: var(--text-strong);
+  font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.4rem);
+  font-weight: var(--fw-semibold);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.adm-summary-card__meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--lh-relaxed);
+}
+.adm-summary-card__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.adm-summary-card[data-summary-tone="success"] {
+  border-color: color-mix(in srgb, var(--success-500) 40%, var(--border));
+  background: color-mix(in srgb, var(--success-50) 55%, var(--surface));
+}
+.adm-summary-card[data-summary-tone="sea"] {
+  border-color: color-mix(in srgb, var(--sea-500) 32%, var(--border));
+  background: color-mix(in srgb, var(--sea-50) 50%, var(--surface));
+}
+.adm-summary-card[data-summary-tone="sun"] {
+  border-color: color-mix(in srgb, var(--sun-400) 35%, var(--border));
+  background: color-mix(in srgb, var(--sun-100) 42%, var(--surface));
+}
+.adm-summary-card[data-summary-tone="brick"] {
+  border-color: color-mix(in srgb, var(--brick-500) 35%, var(--border));
+  background: color-mix(in srgb, var(--brick-50) 58%, var(--surface));
+}
+.adm-summary-strip[data-summary-kind="listing-editor"] .adm-summary-card__value {
+  font-size: clamp(1.1rem, 1rem + 0.45vw, 1.45rem);
+}
+.adm-summary-strip[data-summary-kind="settings"] .adm-summary-card__value {
+  font-size: clamp(1rem, 0.95rem + 0.22vw, 1.2rem);
+}
+
 /* The local editor index stays visible while the operator moves through the
    long form. A solid surface avoids the fuzzy, stacked-card effect of the
    previous translucent tab rail. */
@@ -2908,6 +2978,7 @@ html[data-theme="dark"] .crm-top {
     min-height: 44px;
     justify-content: center;
   }
+  .adm-summary-strip { grid-template-columns: minmax(0, 1fr); }
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

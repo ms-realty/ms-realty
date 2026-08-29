@@ -138,6 +138,10 @@ test("the listing editor names the listing, hides the operator field and carries
   // The topbar names the screen; the heading names the listing.
   assert.match(page.body, /<h1>Автор|<h1>[^<]{10,}<\/h1>/);
   assert.match(page.body, /<p>Property editor · makler-realty\.com · bg · MS-CRAWL-0001<\/p>/);
+  assert.match(page.body, /data-summary-kind="listing-editor"/);
+  for (const card of ["cms-status", "publish-approval", "translations", "media"]) {
+    assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
+  }
   // The server attributes the edit, so the editor id travels as a hidden field.
   assert.match(page.body, /<input type="hidden" name="editor" value="[^"]*" data-editor-name="true">/);
   assert.match(page.body, /Editing as /);

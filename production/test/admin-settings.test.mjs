@@ -275,6 +275,10 @@ test("settings screen renders working sections and a concise capability-gap rail
     assert.equal(page.status, 200);
     assert.match(page.body, /data-react-admin-ui="settings"/);
     assert.match(page.body, /data-settings-layout="sections-rail"/);
+    assert.match(page.body, /data-summary-kind="settings"/);
+    for (const card of ["agency-profile", "lead-sla", "workspace", "settings-state"]) {
+      assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
+    }
     for (const section of ["agency", "leads", "notifications", "workspace", "public_site"]) {
       assert.match(page.body, new RegExp(`data-settings-section="${section}"`), `${section} panel`);
       assert.match(page.body, new RegExp(`data-workspace-settings-form="${section}"`), `${section} form`);
