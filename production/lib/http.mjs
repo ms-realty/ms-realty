@@ -1231,23 +1231,17 @@ export function createHttpApp({
           readTranslationLedger(translationLedgerPath || undefined),
         );
   const currentBrokerContacts = () =>
-    runtimeDataDurableOnly
-      ? []
-      : readThroughCached(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH, () =>
-          readBrokerContacts(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH),
-        );
+    readThroughCached(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH, () =>
+      readBrokerContacts(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH),
+    );
   const currentTourApprovals = () =>
-    runtimeDataDurableOnly
-      ? []
-      : readThroughCached(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH, () =>
-          readTourApprovals(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH),
-        );
+    readThroughCached(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH, () =>
+      readTourApprovals(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH),
+    );
   const currentSlugHistory = () =>
-    runtimeDataDurableOnly
-      ? []
-      : readThroughCached(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH, () =>
-          readSlugHistory(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH),
-        );
+    readThroughCached(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH, () =>
+      readSlugHistory(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH),
+    );
   const currentLeads = () =>
     runtimeDataDurableOnly
       ? []
@@ -1310,6 +1304,18 @@ export function createHttpApp({
       tourApprovals: currentTourApprovals(),
       ...options,
     });
+  const authoritativeListingQualityReport = async (options = {}) => {
+    if (!runtimeDataDurableOnly) return currentListingQualityReport(options);
+    return buildListingQualityReport({
+      seed: await projectListingDraftSeed(currentSeed(), {
+        payload: payloadListingRuntime,
+        env: payloadListingEnv,
+        requirePayload: true,
+      }),
+      tourApprovals: currentTourApprovals(),
+      ...options,
+    });
+  };
   const currentListingQualityReviewQueue = (options = {}) => {
     const report = currentListingQualityReport(options);
     const reviewPath = listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
@@ -2141,10 +2147,57 @@ export function createHttpApp({
       productionRecoveryPublicKey: productionRecoverySigningPublicKey,
     });
   };
+  const authoritativeLaunchReadiness = async () => {
+    if (!runtimeDataDurableOnly) return currentLaunchReadiness();
+    const generatedAt = reviewedAt || new Date().toISOString();
+    const redirectArtifact = currentDeployedRedirectArtifact();
+    return buildLaunchReadinessReport({
+      generatedAt,
+      routeMap: {
+        summary: summarizeLegacyRouteMap(routeMap),
+        routes: routeMap,
+      },
+      deployableRedirects: redirectArtifact,
+      listingQuality: await authoritativeListingQualityReport({ generatedAt }),
+      listingQualityReviewPath: listingQualityReviewPath || undefined,
+      seoEvidence: currentSeoEvidence(),
+      liveServices: liveServiceReports({
+        syncReportPath: searchSyncReportPath || undefined,
+        queryReportPath: searchQueryReportPath || undefined,
+        hermesReportPath: hermesWorkerReportPath || undefined,
+      }),
+      liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
+      monitoringRollback: monitoringRollbackState(monitoringRollbackReportPath || undefined),
+      payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
+      r2MediaCoverage: r2MediaCoverageState(r2MediaCoverageReportPath || undefined, {
+        now: generatedAt,
+      }),
+      productionRecovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
+        publicKey: productionRecoverySigningPublicKey,
+        ...(productionRecoveryAt ? { now: productionRecoveryAt } : {}),
+      }),
+      productionRecoveryPublicKey: productionRecoverySigningPublicKey,
+    });
+  };
   const currentLaunchInputChecklist = () =>
     renderLaunchInputChecklist({
       generatedAt: reviewedAt || new Date().toISOString(),
       launchReadiness: currentLaunchReadiness(),
+      seoEvidence: currentSeoEvidence(),
+      redirectWorkbookCsv: renderRedirectApprovalWorkbook(
+        buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routeMap, loadMigrationRecords())),
+      ),
+      deployableRedirects: currentDeployedRedirectArtifact(),
+      routeMap: {
+        summary: summarizeLegacyRouteMap(routeMap),
+        routes: routeMap,
+      },
+      liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
+    });
+  const authoritativeLaunchInputChecklist = async () =>
+    renderLaunchInputChecklist({
+      generatedAt: reviewedAt || new Date().toISOString(),
+      launchReadiness: await authoritativeLaunchReadiness(),
       seoEvidence: currentSeoEvidence(),
       redirectWorkbookCsv: renderRedirectApprovalWorkbook(
         buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routeMap, loadMigrationRecords())),
@@ -2184,6 +2237,43 @@ export function createHttpApp({
         }),
         live_services: buildLiveServicePreflightReport({
           generatedAt: reviewedAt || new Date().toISOString(),
+          syncReportPath: searchSyncReportPath || undefined,
+          queryReportPath: searchQueryReportPath || undefined,
+          hermesReportPath: hermesWorkerReportPath || undefined,
+        }),
+        live_service_provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
+        payload_runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
+        r2_media_coverage: r2MediaCoverageState(r2MediaCoverageReportPath || undefined),
+        production_recovery: productionRecoveryState(productionRecoveryReportPath || undefined, {
+          publicKey: productionRecoverySigningPublicKey,
+          ...(productionRecoveryAt ? { now: productionRecoveryAt } : {}),
+        }),
+      },
+    };
+  };
+  const authoritativePreflightReports = async () => {
+    const generatedAt = reviewedAt || new Date().toISOString();
+    const listingReport = await authoritativeListingQualityReport({
+      generatedAt: listingQualityGeneratedAt || generatedAt,
+    });
+    return {
+      kind: "admin_preflight_reports",
+      generated_at: generatedAt,
+      checklist: {
+        endpoint: "/api/admin/launch-input-checklist",
+        path: "production/data/launch-input-checklist.md",
+        refresh_command: "npm run launch:inputs",
+      },
+      launch_readiness: launchBlockerSummary(await authoritativeLaunchReadiness()),
+      reports: {
+        seo: currentSeoPreflightReport(),
+        listing_quality: buildListingQualityPreflightReport({
+          report: listingReport,
+          reviewPath: listingQualityReviewPath || undefined,
+          generatedAt,
+        }),
+        live_services: buildLiveServicePreflightReport({
+          generatedAt,
           syncReportPath: searchSyncReportPath || undefined,
           queryReportPath: searchQueryReportPath || undefined,
           hermesReportPath: hermesWorkerReportPath || undefined,
@@ -4515,13 +4605,17 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/ready") {
-      const readiness = currentLaunchReadiness();
-      return response(
-        readiness.launch_ready ? 200 : 503,
-        publicLaunchReadinessPayload(readiness),
-        "application/json; charset=utf-8",
-        publicLaunchReadinessHeaders(readiness),
-      );
+      try {
+        const readiness = await authoritativeLaunchReadiness();
+        return response(
+          readiness.launch_ready ? 200 : 503,
+          publicLaunchReadinessPayload(readiness),
+          "application/json; charset=utf-8",
+          publicLaunchReadinessHeaders(readiness),
+        );
+      } catch (error) {
+        return json(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message }, { "cache-control": "no-store" });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/geography") {
@@ -5165,17 +5259,29 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return adminJson(200, currentLaunchReadiness());
+      try {
+        return adminJson(200, await authoritativeLaunchReadiness());
+      } catch (error) {
+        return adminJson(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return adminResponse(200, currentLaunchInputChecklist(), "text/markdown; charset=utf-8");
+      try {
+        return adminResponse(200, await authoritativeLaunchInputChecklist(), "text/markdown; charset=utf-8");
+      } catch (error) {
+        return adminJson(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return adminJson(200, currentPreflightReports());
+      try {
+        return adminJson(200, await authoritativePreflightReports());
+      } catch (error) {
+        return adminJson(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/seo-preflight") {
@@ -5186,14 +5292,18 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const generatedAt = listingQualityGeneratedAt || reviewedAt || new Date().toISOString();
-      return adminJson(200, {
-        kind: "admin_listing_quality",
-        listing_quality: buildListingQualityPreflightReport({
-          report: currentListingQualityReport({ generatedAt }),
-          reviewPath: listingQualityReviewPath || undefined,
-          generatedAt,
-        }),
-      });
+      try {
+        return adminJson(200, {
+          kind: "admin_listing_quality",
+          listing_quality: buildListingQualityPreflightReport({
+            report: await authoritativeListingQualityReport({ generatedAt }),
+            reviewPath: listingQualityReviewPath || undefined,
+            generatedAt,
+          }),
+        });
+      } catch (error) {
+        return adminJson(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/live-services") {
@@ -5234,7 +5344,11 @@ export function createHttpApp({
             status: report.status,
           },
         });
-        return adminJson(report.ready ? 201 : 202, { imported: { outPath, summary: report.summary }, provisioning, report: currentLaunchReadiness() });
+        return adminJson(report.ready ? 201 : 202, {
+          imported: { outPath, summary: report.summary },
+          provisioning,
+          report: await authoritativeLaunchReadiness(),
+        });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -5310,7 +5424,12 @@ export function createHttpApp({
             out_path: imported.outPath,
           },
         });
-        return adminJson(livePreflight.ready ? 201 : 202, { imported, liveImport, livePreflight, report: currentLaunchReadiness() });
+        return adminJson(livePreflight.ready ? 201 : 202, {
+          imported,
+          liveImport,
+          livePreflight,
+          report: await authoritativeLaunchReadiness(),
+        });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -5336,7 +5455,11 @@ export function createHttpApp({
             weak_env: runtime.weakEnv,
           },
         });
-        return adminJson(report.ready ? 201 : 202, { imported: { outPath, summary: report.summary }, report: currentLaunchReadiness(), runtime });
+        return adminJson(report.ready ? 201 : 202, {
+          imported: { outPath, summary: report.summary },
+          report: await authoritativeLaunchReadiness(),
+          runtime,
+        });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -5366,7 +5489,7 @@ export function createHttpApp({
             status: recovery.status,
           },
         });
-        return adminJson(201, { imported: { outPath }, recovery, report: currentLaunchReadiness() });
+        return adminJson(201, { imported: { outPath }, recovery, report: await authoritativeLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -5374,18 +5497,22 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const report = currentLaunchReadiness();
-      const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined, {
-        productionRecoveryPublicKey: productionRecoverySigningPublicKey,
-      });
-      recordAudit({
-        action: "launch_readiness_exported",
-        actor: "operations",
-        objectType: "launch_readiness",
-        objectId: "launch-readiness",
-        metadata: { status: report.status, blockers: report.blockers },
-      });
-      return adminJson(201, { outPath, report });
+      try {
+        const report = await authoritativeLaunchReadiness();
+        const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined, {
+          productionRecoveryPublicKey: productionRecoverySigningPublicKey,
+        });
+        recordAudit({
+          action: "launch_readiness_exported",
+          actor: "operations",
+          objectType: "launch_readiness",
+          objectId: "launch-readiness",
+          metadata: { status: report.status, blockers: report.blockers },
+        });
+        return adminJson(201, { outPath, report });
+      } catch (error) {
+        return adminJson(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
@@ -5409,7 +5536,7 @@ export function createHttpApp({
         });
         return adminJson(result.missingRequiredSources.length ? 202 : 201, {
           ...result,
-          report: currentLaunchReadiness(),
+          report: await authoritativeLaunchReadiness(),
         });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -5460,7 +5587,7 @@ export function createHttpApp({
           approval,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
           terminalDecisionPreview: buildLegacyRouteDecisions(routeMap, approvals),
-          report: currentLaunchReadiness(),
+          report: await authoritativeLaunchReadiness(),
         });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -5492,7 +5619,7 @@ export function createHttpApp({
           approvals: imported,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
           terminalDecisionPreview: buildLegacyRouteDecisions(routeMap, approvals),
-          report: currentLaunchReadiness(),
+          report: await authoritativeLaunchReadiness(),
         });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -5513,7 +5640,11 @@ export function createHttpApp({
           objectId: "deployable-redirects",
           metadata: { exported: rows.length, terminal_decisions: decisions.length, total: written.summary?.total },
         });
-        return adminJson(201, { exported: rows.length, ...written, report: currentLaunchReadiness() });
+        return adminJson(201, {
+          exported: rows.length,
+          ...written,
+          report: await authoritativeLaunchReadiness(),
+        });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -5535,35 +5666,47 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-workbook") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return adminResponse(
-        200,
-        renderListingQualityWorkbook(currentListingQualityReport()),
-        "text/csv; charset=utf-8",
-        { "content-disposition": 'attachment; filename="listing-quality-workbook.csv"' },
-      );
+      try {
+        return adminResponse(
+          200,
+          renderListingQualityWorkbook(await authoritativeListingQualityReport()),
+          "text/csv; charset=utf-8",
+          { "content-disposition": 'attachment; filename="listing-quality-workbook.csv"' },
+        );
+      } catch (error) {
+        return adminJson(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-draft") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return adminResponse(
-        200,
-        renderListingQualityReviewDraft(currentListingQualityReport()),
-        "text/csv; charset=utf-8",
-        { "content-disposition": 'attachment; filename="listing-quality-review-draft.csv"' },
-      );
+      try {
+        return adminResponse(
+          200,
+          renderListingQualityReviewDraft(await authoritativeListingQualityReport()),
+          "text/csv; charset=utf-8",
+          { "content-disposition": 'attachment; filename="listing-quality-review-draft.csv"' },
+        );
+      } catch (error) {
+        return adminJson(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-packet") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const generatedAt = reviewedAt || new Date().toISOString();
-      return adminJson(
-        200,
-        buildListingQualityReviewPacket({
-          generatedAt,
-          report: currentListingQualityReport({ generatedAt }),
-          reviewPath: listingQualityReviewPath || undefined,
-        }),
-      );
+      try {
+        return adminJson(
+          200,
+          buildListingQualityReviewPacket({
+            generatedAt,
+            report: await authoritativeListingQualityReport({ generatedAt }),
+            reviewPath: listingQualityReviewPath || undefined,
+          }),
+        );
+      } catch (error) {
+        return adminJson(error.status || 503, { kind: error.code || "payload_draft_unavailable", message: error.message });
+      }
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
@@ -5571,7 +5714,7 @@ export function createHttpApp({
       try {
         const input = listingQualityReviewInput(request);
         const inputCsv = input.csv;
-        const report = currentListingQualityReport();
+        const report = await authoritativeListingQualityReport();
         const review = validateListingQualityReviewCsv(report, inputCsv, { requireSnapshots: true });
         const reviewOutputPath = listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
         const existingReviewCsv = fs.existsSync(reviewOutputPath) ? fs.readFileSync(reviewOutputPath, "utf8") : "";
@@ -5639,7 +5782,7 @@ export function createHttpApp({
           factsReviewRows: review.summary.facts_review_rows,
           mediaReviewRows: review.summary.media_review_rows,
           missingReviewRows: mergedReview.summary.missing_review_rows,
-          report: currentLaunchReadiness(),
+          report: await authoritativeLaunchReadiness(),
           reviewImport,
           reviewSummary: mergedReview.summary,
           reviewPersisted: Boolean(reviewPath),

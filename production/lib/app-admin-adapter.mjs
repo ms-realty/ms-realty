@@ -1162,6 +1162,19 @@ function currentListingQualityReport(config, options = {}) {
   });
 }
 
+async function authoritativeListingQualityReport(config, options = {}) {
+  if (!config.runtimeDataDurableOnly) return currentListingQualityReport(config, options);
+  return buildListingQualityReport({
+    seed: await projectListingDraftSeed(currentSeed(config), {
+      payload: config.payloadListingRuntime || null,
+      env: config.payloadListingEnv || config.authEnv || process.env,
+      requirePayload: true,
+    }),
+    tourApprovals: readTourApprovals(config.tourApprovalLedgerPath),
+    ...options,
+  });
+}
+
 function currentListingQualityReviewQueue(config, options = {}) {
   const report = currentListingQualityReport(config, options);
   const reviewPath = config.listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
@@ -2271,6 +2284,35 @@ function launchReadiness(config) {
   });
 }
 
+async function authoritativeLaunchReadiness(config) {
+  return buildLaunchReadinessReport({
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+    routeMap: {
+      summary: summarizeLegacyRouteMap(routeMapRows()),
+      routes: routeMapRows(),
+    },
+    deployableRedirects: approvedRouteArtifact(config),
+    listingQuality: await authoritativeListingQualityReport(config, {
+      generatedAt: config.reviewedAt || new Date().toISOString(),
+    }),
+    listingQualityReviewPath: config.listingQualityReviewPath || undefined,
+    seoEvidence: currentSeoEvidence(config),
+    liveServices: liveServiceReports({
+      syncReportPath: config.searchSyncReportPath || undefined,
+      queryReportPath: config.searchQueryReportPath || undefined,
+      hermesReportPath: config.hermesWorkerReportPath || undefined,
+    }),
+    liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
+    monitoringRollback: monitoringRollbackState(config.monitoringRollbackReportPath || undefined),
+    payloadRuntime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
+    r2MediaCoverage: r2MediaCoverageState(config.r2MediaCoverageReportPath || undefined),
+    productionRecovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+      publicKey: config.productionRecoverySigningPublicKey,
+    }),
+    productionRecoveryPublicKey: config.productionRecoverySigningPublicKey,
+  });
+}
+
 function launchInputChecklist(config) {
   const routes = routeMapRows();
   const artifact = approvedRouteArtifact(config);
@@ -2278,6 +2320,23 @@ function launchInputChecklist(config) {
   return renderLaunchInputChecklist({
     generatedAt,
     launchReadiness: launchReadiness(config),
+    seoEvidence: currentSeoEvidence(config),
+    redirectWorkbookCsv: renderRedirectApprovalWorkbook(
+      buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routes, loadMigrationRecords())),
+    ),
+    deployableRedirects: artifact,
+    routeMap: routeMapSummary(routes),
+    liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
+  });
+}
+
+async function authoritativeLaunchInputChecklist(config) {
+  const routes = routeMapRows();
+  const artifact = approvedRouteArtifact(config);
+  const generatedAt = config.reviewedAt || new Date().toISOString();
+  return renderLaunchInputChecklist({
+    generatedAt,
+    launchReadiness: await authoritativeLaunchReadiness(config),
     seoEvidence: currentSeoEvidence(config),
     redirectWorkbookCsv: renderRedirectApprovalWorkbook(
       buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routes, loadMigrationRecords())),
@@ -2305,6 +2364,41 @@ function preflightReports(config) {
       refresh_command: "npm run launch:inputs",
     },
     launch_readiness: launchBlockerSummary(launchReadiness(config)),
+    reports: {
+      seo: seoPreflightReport(config),
+      listing_quality: buildListingQualityPreflightReport({
+        report: listingReport,
+        reviewPath: config.listingQualityReviewPath || undefined,
+        generatedAt,
+      }),
+      live_services: buildLiveServicePreflightReport({
+        generatedAt,
+        syncReportPath: config.searchSyncReportPath || undefined,
+        queryReportPath: config.searchQueryReportPath || undefined,
+        hermesReportPath: config.hermesWorkerReportPath || undefined,
+      }),
+      live_service_provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
+      payload_runtime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
+      r2_media_coverage: r2MediaCoverageState(config.r2MediaCoverageReportPath || undefined),
+      production_recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+        publicKey: config.productionRecoverySigningPublicKey,
+      }),
+    },
+  };
+}
+
+async function authoritativePreflightReports(config) {
+  const generatedAt = config.reviewedAt || new Date().toISOString();
+  const listingReport = await authoritativeListingQualityReport(config, { generatedAt });
+  return {
+    kind: "admin_preflight_reports",
+    generated_at: generatedAt,
+    checklist: {
+      endpoint: "/api/admin/launch-input-checklist",
+      path: "production/data/launch-input-checklist.md",
+      refresh_command: "npm run launch:inputs",
+    },
+    launch_readiness: launchBlockerSummary(await authoritativeLaunchReadiness(config)),
     reports: {
       seo: seoPreflightReport(config),
       listing_quality: buildListingQualityPreflightReport({
@@ -3603,7 +3697,7 @@ function appendListingSlugChange(registry, input, config) {
   return change;
 }
 
-function appendRedirectApprovalRow(input, config) {
+async function appendRedirectApprovalRow(input, config) {
   const principal = { id: config.adminPrincipal?.id || "unassigned" };
   const attributed = bindAuthenticatedOperator(redirectApprovalInput(input), principal, ["reviewer"]);
   const approval = appendRedirectApproval(routeMapRows(), attributed, {
@@ -3625,11 +3719,11 @@ function appendRedirectApprovalRow(input, config) {
     approval,
     deployablePreview: currentDeployableRedirects(config),
     terminalDecisionPreview: currentLegacyRouteDecisions(config),
-    report: launchReadiness(config),
+    report: await authoritativeLaunchReadiness(config),
   };
 }
 
-function importRedirectApprovalRows(csvText, config) {
+async function importRedirectApprovalRows(csvText, config) {
   const principal = { id: config.adminPrincipal?.id || "unassigned" };
   for (const row of parseCsv(csvText)) {
     bindAuthenticatedOperator(row, principal, ["reviewer"]);
@@ -3653,11 +3747,11 @@ function importRedirectApprovalRows(csvText, config) {
     approvals: imported,
     deployablePreview: currentDeployableRedirects(config),
     terminalDecisionPreview: currentLegacyRouteDecisions(config),
-    report: launchReadiness(config),
+    report: await authoritativeLaunchReadiness(config),
   };
 }
 
-function exportDeployableRedirectRows(config) {
+async function exportDeployableRedirectRows(config) {
   const rows = currentDeployableRedirects(config);
   const decisions = currentLegacyRouteDecisions(config);
   const exported = { exported: rows.length, ...writeDeployableRedirects(rows, config.deployableRedirectOutputPath, { decisions }) };
@@ -3671,11 +3765,11 @@ function exportDeployableRedirectRows(config) {
     },
     config,
   );
-  return { ...exported, report: launchReadiness(config) };
+  return { ...exported, report: await authoritativeLaunchReadiness(config) };
 }
 
-function exportLaunchReadiness(config) {
-  const report = launchReadiness(config);
+async function exportLaunchReadiness(config) {
+  const report = await authoritativeLaunchReadiness(config);
   const outPath = writeLaunchReadinessReport(report, config.launchReadinessOutputPath || undefined, {
     productionRecoveryPublicKey: config.productionRecoverySigningPublicKey,
   });
@@ -3692,7 +3786,7 @@ function exportLaunchReadiness(config) {
   return { outPath, report };
 }
 
-function importLiveServiceReport(input, config) {
+async function importLiveServiceReport(input, config) {
   const imported = writeLiveServiceReport(input.source, input.report, {
     syncReportPath: config.searchSyncReportPath || undefined,
     queryReportPath: config.searchQueryReportPath || undefined,
@@ -3719,10 +3813,10 @@ function importLiveServiceReport(input, config) {
     },
     config,
   );
-  return { imported, liveImport, livePreflight, report: launchReadiness(config) };
+  return { imported, liveImport, livePreflight, report: await authoritativeLaunchReadiness(config) };
 }
 
-function importPayloadRuntimeReport(report, config) {
+async function importPayloadRuntimeReport(report, config) {
   const outPath = writePayloadRuntimeReport(report, config.payloadRuntimeReportPath || undefined);
   const runtime = payloadRuntimeImportSummary(report);
   recordAudit(
@@ -3742,10 +3836,10 @@ function importPayloadRuntimeReport(report, config) {
     },
     config,
   );
-  return { imported: { outPath, summary: report.summary }, report: launchReadiness(config), runtime };
+  return { imported: { outPath, summary: report.summary }, report: await authoritativeLaunchReadiness(config), runtime };
 }
 
-function importLiveServiceProvisioningReport(report, config) {
+async function importLiveServiceProvisioningReport(report, config) {
   const outPath = writeLiveServiceProvisioningReport(report, config.liveServiceProvisioningReportPath || undefined);
   const provisioning = liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined);
   recordAudit(
@@ -3762,10 +3856,10 @@ function importLiveServiceProvisioningReport(report, config) {
     },
     config,
   );
-  return { imported: { outPath, summary: report.summary }, provisioning, report: launchReadiness(config) };
+  return { imported: { outPath, summary: report.summary }, provisioning, report: await authoritativeLaunchReadiness(config) };
 }
 
-function importProductionRecoveryReport(report, config) {
+async function importProductionRecoveryReport(report, config) {
   const outPath = writeProductionRecoveryReport(report, config.productionRecoveryReportPath || undefined, {
     publicKey: config.productionRecoverySigningPublicKey,
   });
@@ -3788,10 +3882,10 @@ function importProductionRecoveryReport(report, config) {
     },
     config,
   );
-  return { imported: { outPath }, recovery, report: launchReadiness(config) };
+  return { imported: { outPath }, recovery, report: await authoritativeLaunchReadiness(config) };
 }
 
-function importSeoEvidence(input, config) {
+async function importSeoEvidence(input, config) {
   const result = importAppSeoEvidenceRows(input, config);
   recordAudit(
     {
@@ -3806,7 +3900,7 @@ function importSeoEvidence(input, config) {
     },
     config,
   );
-  return { ...result, report: launchReadiness(config) };
+  return { ...result, report: await authoritativeLaunchReadiness(config) };
 }
 
 function redirectApprovalWorkbook(url, config) {
@@ -3819,25 +3913,25 @@ function redirectApprovalWorkbook(url, config) {
   return renderRedirectApprovalWorkbook(rows);
 }
 
-function listingQualityWorkbook(config) {
-  return renderListingQualityWorkbook(currentListingQualityReport(config));
+async function listingQualityWorkbook(config) {
+  return renderListingQualityWorkbook(await authoritativeListingQualityReport(config));
 }
 
-function listingQualityReviewDraft(config) {
-  return renderListingQualityReviewDraft(currentListingQualityReport(config));
+async function listingQualityReviewDraft(config) {
+  return renderListingQualityReviewDraft(await authoritativeListingQualityReport(config));
 }
 
-function listingQualityReviewPacket(config) {
+async function listingQualityReviewPacket(config) {
   const generatedAt = config.reviewedAt || new Date().toISOString();
   return buildListingQualityReviewPacket({
     generatedAt,
-    report: currentListingQualityReport(config, { generatedAt }),
+    report: await authoritativeListingQualityReport(config, { generatedAt }),
     reviewPath: config.listingQualityReviewPath || undefined,
   });
 }
 
-function importListingQualityRows(inputCsv, config, source = "listing_quality_csv") {
-  const report = currentListingQualityReport(config);
+async function importListingQualityRows(inputCsv, config, source = "listing_quality_csv") {
+  const report = await authoritativeListingQualityReport(config);
   const review = validateListingQualityReviewCsv(report, inputCsv, { requireSnapshots: true });
   const reviewOutputPath = config.listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
   const existingReviewCsv = fs.existsSync(reviewOutputPath) ? fs.readFileSync(reviewOutputPath, "utf8") : "";
@@ -3908,7 +4002,7 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
     factsReviewRows: review.summary.facts_review_rows,
     mediaReviewRows: review.summary.media_review_rows,
     missingReviewRows: mergedReview.summary.missing_review_rows,
-    report: launchReadiness(config),
+    report: await authoritativeLaunchReadiness(config),
     reviewImport,
     reviewSummary: mergedReview.summary,
     reviewPersisted: Boolean(reviewPath),
@@ -4743,13 +4837,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(200, { kind: "admin_payload_collections", ...loadPayloadCollections() });
     }
     if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
-      return jsonResponse(200, launchReadiness(config));
+      return jsonResponse(200, await authoritativeLaunchReadiness(config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
-      return markdownResponse(launchInputChecklist(config));
+      return markdownResponse(await authoritativeLaunchInputChecklist(config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
-      return jsonResponse(200, preflightReports(config));
+      return jsonResponse(200, await authoritativePreflightReports(config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/seo-preflight") {
       return jsonResponse(200, { kind: "admin_seo_preflight", seo: seoPreflightReport(config) });
@@ -4759,7 +4853,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(200, {
         kind: "admin_listing_quality",
         listing_quality: buildListingQualityPreflightReport({
-          report: currentListingQualityReport(config, { generatedAt }),
+          report: await authoritativeListingQualityReport(config, { generatedAt }),
           reviewPath: config.listingQualityReviewPath || undefined,
           generatedAt,
         }),
@@ -4825,13 +4919,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return csvResponse(redirectApprovalWorkbook(url, config), "redirect-approval-workbook.csv");
     }
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-workbook") {
-      return csvResponse(listingQualityWorkbook(config), "listing-quality-workbook.csv");
+      return csvResponse(await listingQualityWorkbook(config), "listing-quality-workbook.csv");
     }
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-draft") {
-      return csvResponse(listingQualityReviewDraft(config), "listing-quality-review-draft.csv");
+      return csvResponse(await listingQualityReviewDraft(config), "listing-quality-review-draft.csv");
     }
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-packet") {
-      return jsonResponse(200, listingQualityReviewPacket(config));
+      return jsonResponse(200, await listingQualityReviewPacket(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
@@ -4846,41 +4940,44 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, appendPublishedTranslation(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
-      return jsonResponse(201, appendRedirectApprovalRow(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+      return jsonResponse(201, await appendRedirectApprovalRow(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals/import") {
-      return jsonResponse(201, importRedirectApprovalRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config));
+      return jsonResponse(201, await importRedirectApprovalRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deployable-redirects/export") {
-      return jsonResponse(201, exportDeployableRedirectRows(config));
+      return jsonResponse(201, await exportDeployableRedirectRows(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
-      return jsonResponse(201, exportLaunchReadiness(config));
+      return jsonResponse(201, await exportLaunchReadiness(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/live-service-reports/import") {
-      const result = importLiveServiceReport(liveServiceReportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await importLiveServiceReport(
+        liveServiceReportInput(request, url, await readRequestBody(request, config.maxBodyBytes)),
+        config,
+      );
       return jsonResponse(result.livePreflight.ready ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/payload-runtime/import") {
       const report = reportJsonInput(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)));
-      return jsonResponse(report.ready ? 201 : 202, importPayloadRuntimeReport(report, config));
+      return jsonResponse(report.ready ? 201 : 202, await importPayloadRuntimeReport(report, config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/production-recovery/import") {
       return jsonResponse(
         201,
-        importProductionRecoveryReport(
+        await importProductionRecoveryReport(
           reportJsonInput(parseJsonBody(await readRequestBody(request, config.maxBodyBytes))),
           config,
         ),
       );
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
-      const result = importSeoEvidence(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await importSeoEvidence(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.missingRequiredSources.length ? 202 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
       const input = listingQualityReviewInput(request, await readRequestBody(request, config.maxBodyBytes));
-      const result = importListingQualityRows(input.csv, config, input.source);
+      const result = await importListingQualityRows(input.csv, config, input.source);
       return jsonResponse(result.reviewImport.ready ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
