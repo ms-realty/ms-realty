@@ -255,6 +255,7 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.doesNotMatch(deployJob, /secrets\.DATABASE_URL|secrets\.PAYLOAD_SECRET|payload:migrate/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
   assert.match(deployJob, /needs: \[check, deploy_origin\]/);
+  assert.match(deployJob, /timeout-minutes: 45/);
   assert.match(ciWorkflow, /previous_release: \$\{\{ steps\.previous_origin\.outputs\.release \}\}/);
   assert.match(ciWorkflow, /Capture active origin release/);
   assert.match(deployJob, /secret list --name ms-realty --format json/);
