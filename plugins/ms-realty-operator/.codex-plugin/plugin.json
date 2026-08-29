@@ -1,6 +1,6 @@
 {
   "name": "ms-realty-operator",
-  "version": "1.0.0",
+  "version": "1.0.0+codex.20260829193542",
   "description": "Operate the authorized MS Realty admin and guarded Hermes drafting workflows from ChatGPT or Codex.",
   "author": {
     "name": "MS Realty",
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "MS Realty Operator",
     "shortDescription": "Run authorized admin and guarded Hermes workflows",
-    "longDescription": "One MS Realty Operator plugin connects Codex to the role-scoped production MCP and signed-in admin WebMCP tools. Its optional bundled local or SSH Hermes bridge adds guarded drafting without becoming a second plugin. Existing workspace scope, 2FA, validation, explicit mutation confirmations, audit attribution, and human review remain authoritative.",
+    "longDescription": "One MS Realty Operator plugin connects Codex to the role-scoped production MCP, guarded Hermes drafting, and signed-in admin WebMCP tools. Existing workspace scope, 2FA, validation, explicit mutation confirmations, audit attribution, and human review remain authoritative.",
     "developerName": "MS Realty",
     "category": "Productivity",
     "capabilities": [

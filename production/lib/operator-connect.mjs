@@ -53,12 +53,10 @@ PHASE 1 — CONNECT THE BUSINESS (remote MCP)
 PHASE 2 — VERIFY
 Call these MCP tools and keep the results for the report: get_launch_status, search_public_listings (query "Sandanski", locale "bg"), and get_operator_brief if your role allows it. A 401 means the token was mis-pasted; a 503 on other site APIs is a designed gate, not an outage.
 
-PHASE 3 — OPTIONAL HERMES BRIDGE INSIDE MS REALTY OPERATOR (only on the owner's machine with the private repo)
-1. Check whether the ms-realty repository exists locally (common path: ~/Code/MS-Realty). If absent, skip this phase silently — the remote MCP already works.
-2. If present: run \`npm ci --no-audit --no-fund\` there once, then register the bundled local drafting bridge. This remains part of MS Realty Operator; it is not a second plugin:
-   claude mcp add ms-realty-hermes -- node <repo>/production/scripts/hermes-mcp-server.mjs
-   (Codex: [mcp_servers.ms-realty-hermes] command = "node", args = ["<repo>/production/scripts/hermes-mcp-server.mjs"])
-3. Verify with hermes_status. It reports how many translation drafts are eligible; sensitive rows are withheld by design.
+PHASE 3 — VERIFY HERMES THROUGH THE SAME MS REALTY MCP
+1. Call ms_realty_hermes with action status.
+2. If authorized, call it with action next_tasks and limit 1. Sensitive rows are withheld by design.
+3. Do not add a second MCP server or plugin; guarded Hermes drafting is already part of MS Realty Operator.
 
 PHASE 4 — REPORT AND HAND OVER
 Tell the user, in short plain sentences:
@@ -145,10 +143,7 @@ export function operatorAgentConfigBlock({ baseUrl, token, operatorId, expiresAt
     `Credential secret/environment field: ${OPERATOR_TOKEN_ENV}`,
     "Do not paste the token into saved headers, URLs, configuration, or chat.",
     "",
-    "=== Optional Hermes bridge inside MS Realty Operator (not a second plugin) ===",
-    "claude mcp add ms-realty-hermes -- node <repo>/production/scripts/hermes-mcp-server.mjs",
-    "",
-    "Ask it: get_launch_status, get_operator_brief, hermes_next_tasks.",
+    "Ask it: get_launch_status, get_operator_brief, and ms_realty_hermes with action next_tasks.",
     "It drafts; a human still approves. Never publish, never send a customer message on your behalf.",
   ]
     .join("\n")

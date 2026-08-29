@@ -131,8 +131,9 @@ export function buildOwnerOperatorCoverage({ adminRoot = fromRoot("app", "api", 
     ...row,
     declared_entrypoint: hermesWorkflowReachability(row),
   }));
-  const authorizedWorkflows = adminRoutes.length + hermesTools.length;
+  const authorizedWorkflows = adminPages.length + adminRoutes.length + hermesTools.length;
   const structurallyCoveredWorkflows = [
+    ...adminPages.map((row) => row.declared_entrypoint),
     ...adminRoutes.map((row) => row.declared_entrypoint),
     ...hermesTools.map((row) => row.declared_entrypoint),
   ].filter(Boolean).length;

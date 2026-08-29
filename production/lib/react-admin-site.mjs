@@ -2556,7 +2556,7 @@ function LeadBulkActionsTool({ page, ui, copy }) {
         h(
           "select",
           { name: "brokerId" },
-          ...(page.brokerProfiles || []).map((profile) => h("option", { key: profile.id, value: profile.id }, profile.label || profile.id)),
+          ...(page.brokerProfiles || []).map((profile) => h("option", { key: profile.id, value: profile.id }, brokerProfileText(page, profile.id))),
         ),
       ),
       h("label", { "data-lead-bulk-field": "snooze" }, ui.snoozeUntil, h("input", { type: "datetime-local", name: "until" })),
@@ -5958,7 +5958,7 @@ function LeadAssignmentControl({ page, lead, copy }) {
               "select",
               { name: "brokerId", defaultValue: brokerId, required: true },
               ...(page.brokerProfiles || []).map((profile) =>
-                h("option", { key: profile.id, value: profile.id, selected: profile.id === brokerId ? true : undefined }, profile.label || profile.id),
+                h("option", { key: profile.id, value: profile.id, selected: profile.id === brokerId ? true : undefined }, brokerProfileText(page, profile.id)),
               ),
             ),
           ),
@@ -6051,7 +6051,7 @@ function CommunicationThread({ page, thread, copy, ui }) {
               ? h("time", { dateTime: event.occurred_at, title: event.occurred_at }, formatAdminDateTime(event.occurred_at, page.workspace?.locale))
               : null,
           ),
-          event.actor ? h("small", null, event.actor) : null,
+          event.actor ? h("small", null, brokerProfileText(page, event.actor)) : null,
           h("p", null, event.body || label(copy, "noMessageBody", "No message body was provided.")),
         ),
       ),
@@ -12084,7 +12084,7 @@ function SettingsBody({ page }) {
         h(
           "option",
           { key: profile.id, value: profile.id, selected: leads.nested("default_brokers", group) === profile.id ? true : undefined },
-          profile.label || profile.id,
+          brokerProfileText(page, profile.id),
         ),
       ),
     );

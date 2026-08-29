@@ -48,7 +48,8 @@ test("bootstrap prompt names the operator endpoint, credential environment and g
   assert.ok(prompt.includes("https://ms-realty.example.workers.dev/mcp"));
   assert.ok(prompt.includes(OPERATOR_TOKEN_ENV));
   assert.ok(prompt.includes("connect_operator"));
-  assert.ok(prompt.includes("hermes-mcp-server.mjs"));
+  assert.ok(prompt.includes("ms_realty_hermes"));
+  assert.doesNotMatch(prompt, /ms-realty-hermes|hermes-mcp-server\.mjs/);
   assert.ok(prompt.includes("Never describe Sandanski as a sea destination"));
   assert.ok(prompt.includes("humans approve"));
   assert.doesNotMatch(prompt, new RegExp(OPERATOR_TOKEN));

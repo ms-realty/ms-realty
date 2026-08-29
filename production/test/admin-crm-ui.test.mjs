@@ -203,6 +203,7 @@ test("unavailable CRM affordances stay out of the owner task flow", async () => 
   const inbox = await dispatchHttp(app(), { url: "/admin/leads?locale=en", headers: auth });
   assert.doesNotMatch(inbox.body, /data-planned-control=/);
   assert.doesNotMatch(inbox.body, /Coming soon/);
+  assert.doesNotMatch(inbox.body, />broker_(?:bg|ru|international)</);
   assert.match(inbox.body, /class="adm-inbox__broker">Not set<\/span>/);
   assert.doesNotMatch(inbox.body, /(Bulgarian|Russian|International) broker/);
 

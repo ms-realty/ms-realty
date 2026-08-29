@@ -851,8 +851,10 @@ test("the assistant's configuration helper stays available as an API and the own
   assert.match(block, /\[mcp_servers\.ms-realty\]/);
   assert.match(block, new RegExp(`bearer_token_env_var = "${OPERATOR_TOKEN_ENV}"`));
   assert.match(block, /Settings -> Connectors -> Add custom connector/);
-  // The local drafting bridge that already exists.
-  assert.match(block, /hermes-mcp-server\.mjs/);
+  // Hermes is part of the same authenticated production MCP, not a second
+  // local server or plugin that the owner has to install and maintain.
+  assert.match(block, /ms_realty_hermes/);
+  assert.doesNotMatch(block, /hermes-mcp-server\.mjs|ms-realty-hermes/);
   assert.match(block, /humans? still approve|human still approve/i);
 
   const html = renderOperatorConnectPage({

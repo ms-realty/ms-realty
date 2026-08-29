@@ -5,20 +5,6 @@
       "url": "https://ms-realty.ms-realty-bg.workers.dev/mcp",
       "bearer_token_env_var": "MS_REALTY_OPERATOR_TOKEN",
       "note": "MS Realty production MCP. Anonymous tools work without a token; owner operations require the short-lived token issued on /admin/connect or configured OAuth."
-    },
-    "ms-realty-hermes": {
-      "command": "./scripts/run-ms-realty-hermes.sh",
-      "cwd": ".",
-      "env_vars": [
-        "MS_REALTY_REPO_ROOT",
-        "MS_REALTY_TRANSLATION_LEDGER_PATH",
-        "MS_REALTY_HERMES_AUDIT_PATH",
-        "MS_REALTY_AUDIT_LOG_PATH",
-        "MS_REALTY_HERMES_WORKER_REPORT_PATH",
-        "MS_REALTY_HERMES_SSH_HOST",
-        "MS_REALTY_HERMES_SSH_IDENTITY",
-        "MS_REALTY_HERMES_CONTAINER"
-      ]
     }
   }
 }

@@ -1,11 +1,10 @@
 # Operator AI — run the whole agency from your own desktop AI
 
-MS Realty's Hermes layer is a **framework, not a hosted model**: dispatch
+MS Realty's Hermes layer is a guarded drafting runtime: dispatch
 queues, fact-preserving validation, draft-only contracts, PII gates, and
-append-only audit. Any agentic desktop AI the operator already pays for
-(Claude Desktop with Claude Code, ChatGPT with Codex) can supply the
-intelligence, while the framework keeps every guardrail. No GPU hosting, no
-per-token API bills, no new accounts.
+append-only audit behind the same production MCP used for owner operations.
+The active runtime may be self-hosted or owner-authorized OpenRouter; the
+connection state reports which one is actually serving drafts.
 
 ## The one-step experience
 
@@ -28,7 +27,7 @@ The prompt source lives in `production/lib/operator-connect.mjs`
 | Surface | Transport | What it provides | Writes? |
 |---|---|---|---|
 | **Business MCP** `<origin>/mcp` | remote MCP (JSON-RPC over HTTPS), delegated operator bearer token | public discovery plus role-scoped reads through `ms_realty_admin_read` | Writes use only `ms_realty_admin_write` and `ms_realty_hermes`. Both require a one-use signed challenge bound to the operator, session, operation and exact input, then pass through the existing admin authorization and audit boundary. |
-| **Hermes drafting bridge** `npm run hermes:mcp` | local stdio MCP (owner's machine with the repo) | `hermes_status`, `hermes_next_tasks` (the exact messages the hosted worker would send its model), `hermes_submit_draft` (validated, ledgered, audited, draft-only) | Yes — local repo ledgers, same append-only path as the hosted worker. Sensitive rows are refused by the provider gate (`sensitiveDataAllowed=false`). |
+| **Hermes drafting** `ms_realty_hermes` | the same remote Business MCP | status, next-task, and validated draft-submission actions | Draft-only. Sensitive rows are refused by the provider gate (`sensitiveDataAllowed=false`). |
 | **Google Workspace** | owner OAuth in `/admin/connect` | approved Gmail delivery and Google Calendar viewing sync | The owner connects once; encrypted refresh credentials stay in the durable provider store and delivery remains an explicit reviewed action. |
 
 Edge wiring: `workers/durable-case-authority.mjs::allowsMcpRequest` admits
@@ -50,8 +49,7 @@ implemented, audited consumer stay hidden instead of appearing as decorative
 - Draft-only: nothing the AI produces publishes, indexes, or reaches a
   customer without a human approving in the admin.
 - `assertProviderMayReceiveDispatch` refuses sensitive dispatch rows
-  (lead replies, raw contacts) to any non-self-hosted provider — the desktop
-  bridge introduces itself as `desktop_subscription`.
+  (lead replies, raw contacts) to any non-self-hosted provider.
 - Fact preservation is validated on submit; drafts that drop price, area, or
   location are rejected with the reason.
 - The MCP operator brief is the privacy-safe view (no raw contacts, no
@@ -72,5 +70,3 @@ implemented, audited consumer stay hidden instead of appearing as decorative
   flow; never store them in the copied configuration or repository.
 - The connect page sends `cache-control: no-store` and `noindex`; it reveals a
   freshly issued credential once in a masked field separate from configuration.
-- The bridge writes to the real repo ledgers — run it on the machine that
-  owns the checkout, commit/import through the normal review flows.
