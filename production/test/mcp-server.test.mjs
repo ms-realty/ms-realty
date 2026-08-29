@@ -60,6 +60,7 @@ function fixture({ durableListingWrites = false } = {}) {
     publicationSchedulePath: jsonl(directory, "publication-schedules"),
     replyOutboxPath: jsonl(directory, "replies"),
     translationLedgerPath: jsonl(directory, "translations"),
+    hermesWorkerReportPath: path.join(directory, "hermes-draft-worker-report.json"),
   };
   const env = {
     NODE_ENV: "production",
@@ -76,6 +77,7 @@ function fixture({ durableListingWrites = false } = {}) {
     MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH: paths.publicationSchedulePath,
     MS_REALTY_REPLY_OUTBOX_PATH: paths.replyOutboxPath,
     MS_REALTY_TRANSLATION_LEDGER_PATH: paths.translationLedgerPath,
+    MS_REALTY_HERMES_WORKER_REPORT_PATH: paths.hermesWorkerReportPath,
     MS_REALTY_REVIEWED_AT: "2026-07-29T10:05:00.000Z",
     MS_REALTY_OPERATOR_CHALLENGE_SECRET: "mcp-operator-challenge-test-secret-longer-than-thirty-two-characters",
     ...(durableListingWrites ? { MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1" } : {}),
@@ -355,6 +357,8 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
     auth,
   );
   assert.equal(hermesDraft.persisted.requires_human_approval, true);
+  assert.equal(hermesDraft.report.path, paths.hermesWorkerReportPath);
+  assert.equal(fs.existsSync(paths.hermesWorkerReportPath), true);
   const hermesReplay = await mcpCall(
     config,
     {

@@ -202,7 +202,6 @@ test("production server entrypoint serves runtime routes with env config", async
       body: JSON.stringify({
         oldUrl: listing.old_url,
         equivalentContent: true,
-        reviewer: "editor_bg",
       }),
     });
     assert.equal(redirectApproval.status, 201);

@@ -203,7 +203,8 @@ test("unavailable CRM affordances stay out of the owner task flow", async () => 
   const inbox = await dispatchHttp(app(), { url: "/admin/leads?locale=en", headers: auth });
   assert.doesNotMatch(inbox.body, /data-planned-control=/);
   assert.doesNotMatch(inbox.body, /Coming soon/);
-  assert.match(inbox.body, /class="adm-inbox__broker">(?:Bulgarian|Russian|International) broker<\/span>/);
+  assert.match(inbox.body, /class="adm-inbox__broker">Not set<\/span>/);
+  assert.doesNotMatch(inbox.body, /(Bulgarian|Russian|International) broker/);
 
   // B5 built broker availability and the free-slot calculation, so the week
   // view is no longer planned: the segmented control is two real links and the

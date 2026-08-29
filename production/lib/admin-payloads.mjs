@@ -832,6 +832,7 @@ export function renderAdminContactsPayload(registry, requestedLocale, data) {
       robots: "noindex,nofollow",
     },
     workspace: workspaceWithOperator(workspace, data.operatorId || null),
+    brokerProfiles: (data.brokerProfiles || []).map((profile) => adminBrokerProfile(profile, workspace.locale)),
     contacts,
     accounts,
     summary: {

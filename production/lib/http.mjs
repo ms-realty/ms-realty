@@ -1080,9 +1080,7 @@ export function createHttpApp({
   workspaceSettingsPath = null,
   workspaceSettingsPayload = null,
   workspaceSettingsWorkspaceId = process.env.MS_REALTY_WORKSPACE_ID,
-  workspaceSettingsPayloadRuntimeConfigured = Boolean(
-    String(process.env.PAYLOAD_SECRET || "").trim() && String(process.env.DATABASE_URL || "").trim(),
-  ),
+  workspaceSettingsPayloadRuntimeConfigured = null,
   readWorkspaceSettingsDurably = readWorkspaceSettingsStoreRuntime,
   launchReadinessOutputPath = null,
   listingQualityReviewPath = null,
@@ -1827,7 +1825,7 @@ export function createHttpApp({
       operatorViews: currentOperatorViews(operatorId),
     });
   };
-  const currentContactPayload = (requestedLocale, operatorId = null, leads = currentLeads()) => {
+  const currentContactPayload = async (requestedLocale, operatorId = null, leads = currentLeads(), payloadSession = null) => {
     const replies = readReplyOutbox(replyOutboxPath || undefined);
     const outcomes = readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined);
     const communicationThreads = buildCommunicationThreads({ leads, replies, outcomes });
@@ -1836,6 +1834,7 @@ export function createHttpApp({
       contacts: buildContactRecords({ leads, communicationThreads, accounts }),
       accounts,
       operatorId,
+      brokerProfiles: await currentBrokerProfiles(payloadSession),
     });
   };
   const currentDocumentChecklistPayload = (requestedLocale, operatorId = null, leads = currentLeads()) =>
@@ -2412,10 +2411,14 @@ export function createHttpApp({
   const workspaceSettingsReadPath = workspaceSettingsPath || DEFAULT_WORKSPACE_SETTINGS_PATH;
   const currentWorkspaceSettings = () =>
     readThroughCached(workspaceSettingsReadPath, () => readWorkspaceSettings(workspaceSettingsReadPath));
+  const workspaceSettingsRuntimeConfigured =
+    workspaceSettingsPayloadRuntimeConfigured === null
+      ? Boolean(String(payloadListingEnv.PAYLOAD_SECRET || "").trim() && String(payloadListingEnv.DATABASE_URL || "").trim())
+      : workspaceSettingsPayloadRuntimeConfigured === true;
   const workspaceSettingsStore = {
     filePath: workspaceSettingsPath,
     payload: workspaceSettingsPayload || payloadListingRuntime || null,
-    payloadRuntimeConfigured: workspaceSettingsPayloadRuntimeConfigured === true,
+    payloadRuntimeConfigured: workspaceSettingsRuntimeConfigured,
     workspaceId: workspaceSettingsWorkspaceId || "",
   };
   const workspaceSettingsStoreReady = workspaceSettingsStoreConfigured(workspaceSettingsStore);
@@ -4984,7 +4987,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentContactPayload(adminLocaleParam(url), principal, requestLeadRows);
+      const payload = await currentContactPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession);
       if (url.pathname === "/admin/contacts" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -6550,7 +6553,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
-        const contacts = currentContactPayload("en", principal).contacts;
+        const contacts = (await currentContactPayload("en", principal, currentLeads(), payloadSession)).contacts;
         const result = appendAccountContactLink(contacts, input, {
           filePath: accountLedgerPath || undefined,
           recordedAt: reviewedAt || receivedAt || new Date().toISOString(),

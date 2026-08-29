@@ -39,7 +39,7 @@ test("RealtyCase Payload collections are registered as workspace-scoped durable 
     "realty_case_outbox",
   ]);
   for (const slug of REALTY_CASE_PAYLOAD_COLLECTION_SLUGS) assert.ok(slugs.includes(slug));
-  assert.equal(REQUIRED_PAYLOAD_COLLECTIONS.length, 14);
+  assert.equal(REQUIRED_PAYLOAD_COLLECTIONS.length, 15);
   for (const slug of REQUIRED_PAYLOAD_COLLECTIONS) assert.ok(slugs.includes(slug));
 
   for (const slug of REALTY_CASE_PAYLOAD_COLLECTION_SLUGS) {

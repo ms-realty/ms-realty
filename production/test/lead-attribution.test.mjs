@@ -192,7 +192,16 @@ test("Hermes availability is derived from configuration, never from a probe requ
   assert.match(missing.reason, /HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
   assert.doesNotMatch(missing.reason, /test-key/);
 
-  assert.equal(hermesReplyAvailability({ env: { ...configured, HERMES_PROVIDER_MODE: "openrouter" } }).reason_key, "provider_mode_unsupported");
+  assert.equal(
+    hermesReplyAvailability({
+      env: {
+        ...configured,
+        HERMES_PROVIDER_MODE: "openrouter",
+        HERMES_CHAT_COMPLETIONS_URL: "https://openrouter.ai/api/v1/chat/completions",
+      },
+    }).reason_key,
+    "provider_mode_unsupported",
+  );
   assert.equal(hermesReplyAvailability({ env: { ...configured, HERMES_PROVIDER_MODE: "wat" } }).reason_key, "provider_mode_invalid");
   assert.equal(hermesReplyAvailability({ env: { ...configured, HERMES_CHAT_COMPLETIONS_URL: "https://hermes.internal/v1/other" } }).reason_key, "endpoint_invalid");
   assert.equal(hermesReplyAvailability({ env: configured, fetchImpl: null }).reason_key, "fetch_unavailable");

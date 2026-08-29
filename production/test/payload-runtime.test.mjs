@@ -88,7 +88,7 @@ test("Payload runtime report blocks missing launch env without leaking defaults"
   assert.deepEqual(report.checks.find((check) => check.id === "payload_config_import"), {
     id: "payload_config_import",
     status: "pass",
-    collections: 14,
+    collections: 15,
     graphql_disabled: true,
     graphql_playground_disabled_in_production: true,
     identity_collection: "admins",

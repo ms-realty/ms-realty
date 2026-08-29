@@ -1870,6 +1870,7 @@ async function contactsPayload(registry, url, config) {
     contacts: data.contacts,
     accounts: data.accounts,
     operatorId: config.adminPrincipal || null,
+    brokerProfiles: config.brokerProfiles || [],
   });
 }
 

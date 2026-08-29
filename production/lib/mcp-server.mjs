@@ -688,6 +688,7 @@ function ownerOperatorToolDefinitions(server, config, principal, sessionId) {
               model,
               filePath: config.adminConfig.translationLedgerPath,
               auditLogPath: config.adminConfig.auditLogPath,
+              reportPath: config.adminConfig.hermesWorkerReportPath || undefined,
             }),
           );
         } catch (error) {

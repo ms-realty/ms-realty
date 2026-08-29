@@ -371,7 +371,7 @@ test("admin activity localizes leftover keys and uses human filter hints", () =>
   assert.doesNotMatch(html, /<dt>object id<\/dt>/);
 });
 
-test("admin contacts hide generated ids behind a human title and localize broker roles", () => {
+test("admin contacts hide generated ids and resolve real owner profiles", () => {
   const html = renderReactAdminBody(
     renderAdminContactsPayload(registry, "bg", {
       contacts: [
@@ -383,18 +383,19 @@ test("admin contacts hide generated ids behind a human title and localize broker
           lead_ids: ["lead-anon"],
           lead_count: 1,
           duplicate_leads: 0,
-          assigned_brokers: ["broker_international"],
+          assigned_brokers: ["owner-ms-realty"],
           languages: ["en"],
           communication_event_count: 0,
           latest_received_at: "2026-07-19T08:00:00.000Z",
         },
       ],
       accounts: [],
+      brokerProfiles: [{ id: "owner-ms-realty", email: "ms.realty.bg@gmail.com", languages: ["bg"] }],
     }),
   );
   assert.match(html, /<h3>buyer@example.test<\/h3>/);
   assert.match(html, /class="crm-mono adm-id-caption">contact-lead-anon</);
-  assert.match(html, /Международен брокер/);
+  assert.match(html, /<dt>Отговорници<\/dt><dd>ms\.realty\.bg@gmail\.com<\/dd>/);
   assert.doesNotMatch(html, /<h3>contact-lead-anon<\/h3>/);
   assert.doesNotMatch(html, />broker_international</);
 });

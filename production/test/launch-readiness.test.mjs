@@ -912,7 +912,14 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
   assert.ok(liveGate.evidence.provisioning.summary.missing_env.includes("DATABASE_URL"));
   assert.match(liveGate.next_actions.join(" "), /npm run live:preflight/);
-  assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
+  assert.deepEqual(
+    report.live_services.map((item) => [item.source, item.status]),
+    [
+      ["postgres_search_sync", "missing_report"],
+      ["postgres_search_query", "missing_report"],
+      ["hermes_draft_worker", "missing_report"],
+    ],
+  );
   assert.match(report.gates.find((gate) => gate.id === "payload_runtime").next_actions.join(" "), /npm run payload:preflight/);
   for (const id of [
     "live_services",
