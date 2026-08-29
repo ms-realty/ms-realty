@@ -83,20 +83,32 @@ test("warning surfaces tint the active theme instead of forcing a light-only pal
   assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-checks ul\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
 });
 
-test("Today, Hermes, and Settings use readable clamped rails instead of fractional sidebars", () => {
-  assert.match(adminAdapterCss, /\.adm-workbench-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)\s+clamp\(300px, 30vw, 336px\)/);
-  assert.match(adminAdapterCss, /\.adm-workbench-rail\s*\{[^}]*inline-size:\s*min\(100%, clamp\(300px, 30vw, 336px\)\)/);
-  assert.match(adminAdapterCss, /main\[data-react-admin-ui="settings"\] \.adm-workbench-shell--settings\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)\s+clamp\(320px, 30vw, 352px\)/);
+test("summary cards tint the active theme instead of forcing light-only ramps", () => {
+  for (const [tone, mix] of [
+    ["success", 55],
+    ["sea", 50],
+    ["sun", 42],
+    ["brick", 58],
+  ]) {
+    assert.match(
+      adminAdapterCss,
+      new RegExp(`\\.adm-summary-card\\[data-summary-tone="${tone}"\\]\\s*\\{[^}]*background:\\s*color-mix\\(in srgb, var\\(--adm-pill-${tone}-bg\\) ${mix}%, var\\(--surface\\)\\)`),
+    );
+  }
 });
 
-test("connections and Hermes keep supporting state in-flow instead of sticky side rails", () => {
-  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-shell,[\s\S]*grid-template-columns:\s*minmax\(0, 1\.12fr\)\s+minmax\(280px, 0\.88fr\)/);
-  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-rail,[\s\S]*position:\s*static/);
-  assert.match(adminAdapterCss, /main\[data-react-admin-ui="hermes"\] \.adm-workbench-rail[\s\S]*inline-size:\s*100%/);
+test("Today, Hermes, and Settings use an in-flow owner grid instead of a split rail shell", () => {
+  assert.match(adminAdapterCss, /\.adm-owner-flow__support\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
+  assert.match(adminAdapterCss, /\.adm-owner-flow--today \[data-readiness-support="true"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(240px, 1fr\)\)/);
+  assert.match(adminAdapterCss, /\.adm-owner-flow--settings \[data-settings-overview="true"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
+});
+
+test("connections and Hermes keep supporting state in-flow without a sticky rail", () => {
+  assert.match(adminAdapterCss, /\.adm-owner-flow--connections \[data-connections-support="true"\],\s*\.adm-owner-flow--hermes \[data-hermes-support="true"\],\s*\.adm-owner-flow--hermes \[data-hermes-disclosures="true"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(300px, 1fr\)\)/);
   assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-connection-list\[data-connection-list="core"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
   assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-connection-row\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
   assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-disclosure > summary\s*\{[^}]*min-height:\s*44px/);
-  assert.match(adminAdapterCss, /@media \(max-width: 700px\)[\s\S]*?main\[data-react-admin-ui="connections"\] \.adm-workbench-shell,[\s\S]*?main\[data-react-admin-ui="hermes"\] \.adm-workbench-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(adminAdapterCss, /@media \(max-width: 700px\)[\s\S]*?\.adm-owner-flow__support\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
   assert.match(adminAdapterCss, /@media \(max-width: 700px\)[\s\S]*?main\[data-react-admin-ui="hermes"\] \.adm-hermes-panel-actions\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
 });
 

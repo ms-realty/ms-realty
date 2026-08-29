@@ -268,13 +268,13 @@ test("workspace onboarding is computed from real workspace state", () => {
   assert.ok(complete.items.every((item) => item.done));
 });
 
-test("settings screen renders working sections and an action-first owner rail", async () => {
+test("settings screen renders working sections and an in-flow owner overview", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const page = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
     assert.equal(page.status, 200);
     assert.match(page.body, /data-react-admin-ui="settings"/);
-    assert.match(page.body, /data-settings-layout="sections-rail"/);
+    assert.match(page.body, /data-settings-layout="sections-flow"/);
     assert.match(page.body, /data-summary-kind="settings"/);
     for (const card of ["agency-profile", "lead-sla", "workspace", "settings-state"]) {
       assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
@@ -294,11 +294,11 @@ test("settings screen renders working sections and an action-first owner rail", 
     // Every form posts to the same endpoint and works without JavaScript.
     assert.equal(page.body.match(/action="\/api\/admin\/settings"/g).length, 5);
     assert.equal(page.body.match(/method="post"/g).length, 5);
-    // The rail stays action-first: current sections, current onboarding
+    // The overview stays action-first: current sections, current onboarding
     // progress, and current links - not a roadmap of unsupported controls.
-    assert.match(page.body, /data-settings-action-rail="true" data-settings-onboarding="0\/5"/);
+    assert.match(page.body, /data-settings-actions="true" data-settings-onboarding="0\/5"/);
     for (const row of ["onboarding", "connections", "history"]) {
-      assert.match(page.body, new RegExp(`data-settings-rail-row="${row}"`), row);
+      assert.match(page.body, new RegExp(`data-settings-action-row="${row}"`), row);
     }
     assert.match(page.body, /data-workspace-onboarding="open" data-workspace-onboarding-progress="0\/5"/);
     assert.doesNotMatch(page.body, /data-planned-control=/);
@@ -636,8 +636,8 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     for (const contract of ["data-priority-leads=\"true\"", "data-lead-pipeline-preview=\"true\"", "data-public-request-preview=\"true\""]) {
       assert.doesNotMatch(empty.body, new RegExp(contract), contract);
     }
-    assert.match(empty.body, /data-today-layout="action-rail"/);
-    assert.match(empty.body, /data-readiness-rail="true"/);
+    assert.match(empty.body, /data-today-layout="operating-flow"/);
+    assert.match(empty.body, /data-readiness-support="true"/);
     assert.match(empty.body, /data-workspace-onboarding="open"/);
     assert.doesNotMatch(empty.body, /data-workspace-welcome="true"/);
 
@@ -675,7 +675,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.doesNotMatch(populated.body, /data-priority-lead=/);
     assert.doesNotMatch(populated.body, /data-lead-pipeline-preview=/);
     assert.doesNotMatch(populated.body, /data-public-request-preview=/);
-    assert.match(populated.body, /data-readiness-rail="true"/);
+    assert.match(populated.body, /data-readiness-support="true"/);
     assert.match(populated.body, /data-workspace-welcome="true"/);
     assert.match(populated.body, /data-workspace-onboarding="open"/);
     assert.doesNotMatch(populated.body, /class="crm-ph"/);

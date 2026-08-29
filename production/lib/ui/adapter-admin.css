@@ -632,6 +632,51 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
 
 /* Segmented lead-queue tabs */
 .adm-lead-tabs { width: max-content; }
+.adm-owner-flow,
+.adm-owner-flow__stack,
+.adm-owner-flow__support {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.adm-owner-flow__support {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: start;
+}
+.adm-owner-flow__support > * { min-width: 0; }
+.adm-owner-stage,
+.adm-owner-stage__primary,
+.adm-owner-stage__aside {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.adm-owner-stage {
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.95fr);
+  align-items: start;
+}
+.adm-owner-flow--today [data-readiness-support="true"] {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.adm-owner-flow--settings [data-settings-overview="true"] {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.adm-owner-stage--connections {
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
+}
+.adm-owner-stage--hermes {
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+}
+.adm-owner-flow--connections [data-connections-support="true"],
+.adm-owner-flow--hermes [data-hermes-support="true"],
+.adm-owner-flow--hermes [data-hermes-disclosures="true"] {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+.adm-owner-flow--connections [data-connections-support="true"] > .crm-panel,
+.adm-owner-flow--hermes [data-hermes-support="true"] > .crm-panel,
+.adm-owner-flow--hermes [data-hermes-disclosures="true"] > details {
+  height: 100%;
+}
 .adm-workbench-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr) clamp(300px, 30vw, 336px);
@@ -2393,16 +2438,15 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr);
   align-items: stretch;
 }
-.crm-app main[data-react-admin-ui="connections"] .adm-workbench-rail,
-.crm-app main[data-react-admin-ui="hermes"] .adm-workbench-rail {
-  position: static;
-  inline-size: 100%;
-  justify-self: stretch;
-}
-.crm-app main[data-react-admin-ui="connections"] .adm-workbench-main,
-.crm-app main[data-react-admin-ui="connections"] .adm-workbench-rail,
-.crm-app main[data-react-admin-ui="hermes"] .adm-workbench-main,
-.crm-app main[data-react-admin-ui="hermes"] .adm-workbench-rail {
+.crm-app main[data-react-admin-ui="connections"] .adm-owner-flow,
+.crm-app main[data-react-admin-ui="hermes"] .adm-owner-flow,
+.crm-app main[data-react-admin-ui="connections"] .adm-owner-stage,
+.crm-app main[data-react-admin-ui="hermes"] .adm-owner-stage,
+.crm-app main[data-react-admin-ui="connections"] .adm-owner-flow__stack,
+.crm-app main[data-react-admin-ui="connections"] [data-connections-support="true"],
+.crm-app main[data-react-admin-ui="hermes"] .adm-owner-flow__stack,
+.crm-app main[data-react-admin-ui="hermes"] [data-hermes-support="true"],
+.crm-app main[data-react-admin-ui="hermes"] [data-hermes-disclosures="true"] {
   gap: var(--space-3);
 }
 .crm-app main[data-react-admin-ui="connections"] .adm-connection-list {
@@ -2485,15 +2529,8 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 }
 
 @media (max-width: 700px) {
-  .crm-app main[data-react-admin-ui="connections"] .adm-workbench-shell,
-  .crm-app main[data-react-admin-ui="hermes"] .adm-workbench-shell {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .crm-app main[data-react-admin-ui="connections"] .adm-workbench-rail,
-  .crm-app main[data-react-admin-ui="hermes"] .adm-workbench-rail {
-    grid-column: 1;
-    min-width: 0;
-  }
+  .adm-owner-flow__support { grid-template-columns: minmax(0, 1fr); }
+  .adm-owner-stage { grid-template-columns: minmax(0, 1fr); }
   .crm-app main[data-react-admin-ui="hermes"] [data-hermes-runtime-card] > .crm-panel__hd {
     align-items: stretch;
     flex-direction: column;
@@ -2797,19 +2834,19 @@ html[data-theme="dark"] .crm-top {
 }
 .adm-summary-card[data-summary-tone="success"] {
   border-color: color-mix(in srgb, var(--success-500) 40%, var(--border));
-  background: color-mix(in srgb, var(--success-50) 55%, var(--surface));
+  background: color-mix(in srgb, var(--adm-pill-success-bg) 55%, var(--surface));
 }
 .adm-summary-card[data-summary-tone="sea"] {
   border-color: color-mix(in srgb, var(--sea-500) 32%, var(--border));
-  background: color-mix(in srgb, var(--sea-50) 50%, var(--surface));
+  background: color-mix(in srgb, var(--adm-pill-sea-bg) 50%, var(--surface));
 }
 .adm-summary-card[data-summary-tone="sun"] {
   border-color: color-mix(in srgb, var(--sun-400) 35%, var(--border));
-  background: color-mix(in srgb, var(--sun-100) 42%, var(--surface));
+  background: color-mix(in srgb, var(--adm-pill-sun-bg) 42%, var(--surface));
 }
 .adm-summary-card[data-summary-tone="brick"] {
   border-color: color-mix(in srgb, var(--brick-500) 35%, var(--border));
-  background: color-mix(in srgb, var(--brick-50) 58%, var(--surface));
+  background: color-mix(in srgb, var(--adm-pill-brick-bg) 58%, var(--surface));
 }
 .adm-summary-strip[data-summary-kind="listing-editor"] .adm-summary-card__value {
   font-size: clamp(1.1rem, 1rem + 0.45vw, 1.45rem);
@@ -2997,12 +3034,9 @@ html[data-theme="dark"] .crm-top {
 .crm-app main[data-react-admin-ui="settings"] .adm-settings-panel[data-settings-disabled="true"] .adm-settings-actions {
   background: var(--surface-sunken);
 }
-.crm-app main[data-react-admin-ui="settings"] .adm-workbench-shell--settings {
-  grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 352px);
-  gap: var(--space-3);
-}
-.crm-app main[data-react-admin-ui="settings"] .adm-workbench-main,
-.crm-app main[data-react-admin-ui="settings"] .adm-workbench-rail {
+.crm-app main[data-react-admin-ui="settings"] .adm-owner-flow--settings,
+.crm-app main[data-react-admin-ui="settings"] .adm-owner-flow--settings .adm-owner-flow__stack,
+.crm-app main[data-react-admin-ui="settings"] .adm-owner-flow--settings [data-settings-overview="true"] {
   gap: var(--space-3);
 }
 .crm-app main[data-react-admin-ui="settings"] .adm-owner-hub {
@@ -3021,9 +3055,6 @@ html[data-theme="dark"] .crm-top {
 .crm-app main[data-react-admin-ui="settings"] .adm-settings-note {
   line-height: var(--lh-normal);
 }
-.crm-app main[data-react-admin-ui="settings"] [data-settings-rail="true"] .crm-panel {
-  box-shadow: none;
-}
 .crm-app main[data-react-admin-ui="settings"] .adm-settings-history {
   gap: var(--space-2);
 }
@@ -3031,6 +3062,12 @@ html[data-theme="dark"] .crm-top {
 /* Translation task filters become a wrapped control on phones so every label
    remains readable without horizontal dragging. */
 @media (max-width: 767px) {
+  .adm-owner-flow,
+  .adm-owner-flow__stack,
+  .adm-owner-flow__support,
+  .adm-owner-stage,
+  .adm-owner-stage__primary,
+  .adm-owner-stage__aside { gap: var(--space-3); }
   .crm-app main[data-react-admin-ui="translation-queue"] .adm-toolbar > .adm-cms-filter[data-cms-filter="translations"] {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3110,9 +3147,6 @@ html[data-theme="dark"] .crm-top {
   .adm-hermes-command__starting-point .mk-btn { width: 100%; justify-content: center; }
   .adm-hermes-recovery { grid-template-columns: auto minmax(0, 1fr); }
   .adm-hermes-recovery .mk-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
-  .crm-app main[data-react-admin-ui="settings"] .adm-workbench-shell--settings {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 @media (max-width: 600px) {

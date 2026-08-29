@@ -3720,8 +3720,8 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
     },
   ];
   return h(
-    "aside",
-    { className: "adm-workbench-rail", "data-readiness-rail": "true" },
+    "div",
+    { className: "adm-owner-flow__support", "data-readiness-support": "true" },
     h(Panel, { title: label(copy, "today", "Today"), "data-today-snapshot": "true" }, h(StatGrid, {
       metrics: [
         [label(copy, "needsReply", "Needs reply"), queue.pending.length, "messages-square", "sea"],
@@ -3796,17 +3796,17 @@ function TodayBody({ page }) {
       "data-react-admin-ui": "today",
       "data-admin-workbench": "crm",
       "data-task-led": "true",
-      "data-today-layout": "action-rail",
+      "data-today-layout": "operating-flow",
       "data-admin-locale": page.workspace.locale,
     },
     children: [
       h(WorkspaceWelcomeBanner, { page }),
       h(
         "div",
-        { className: "adm-workbench-shell adm-workbench-shell--today", "data-today-layout": "action-rail" },
+        { className: "adm-owner-flow adm-owner-flow--today", "data-today-layout": "operating-flow" },
         h(
           "div",
-          { className: "adm-workbench-main" },
+          { className: "adm-owner-flow__stack" },
           h(TodayBriefingPanel, { page, rows: nextActions }),
           showNextActionsPanel ? h(NextActionsPanel, { page, rows: nextActions }) : null,
         ),
@@ -10625,7 +10625,7 @@ function SettingsActionRail({ page }) {
     Panel,
     {
       title: settings.sectionsNav,
-      "data-settings-action-rail": "true",
+      "data-settings-actions": "true",
       "data-settings-onboarding": onboarding ? `${onboarding.done}/${onboarding.total}` : "absent",
       action: pageCan(page, "settings:manage")
         ? h(
@@ -10676,7 +10676,7 @@ function settingsActionRailRows(page, { connectHref }) {
   return rows.map((item) =>
     h(
       "li",
-      { key: item.id, "data-settings-rail-row": item.id },
+      { key: item.id, "data-settings-action-row": item.id },
       h(
         "a",
         { className: "adm-readiness-link", href: item.href },
@@ -11609,17 +11609,23 @@ function ConnectionsBody({ page }) {
       h(SummaryStrip, { cards: summaryCards, "data-summary-kind": "connections" }),
       h(
         "div",
-        { className: "adm-workbench-shell", "data-connections-layout": "workbench" },
+        { className: "adm-owner-flow adm-owner-flow--connections", "data-connections-layout": "operating-flow" },
         h(
           "div",
-          { className: "adm-workbench-main" },
+          { className: "adm-owner-flow__stack" },
           page.result
             ? h("p", { className: "adm-connections-notice", role: page.result.tone === "error" ? "alert" : "status", "data-state": page.result.tone }, page.result.message)
             : null,
           h(
-            Panel,
-            { title: copy.workAccountsTitle, "data-connection-group": "work-accounts" },
-            h("p", { className: "adm-connections-section-copy" }, copy.workAccountsDescription),
+            "section",
+            { className: "adm-owner-stage adm-owner-stage--connections", "data-connections-stage": "true" },
+            h(
+              "div",
+              { className: "adm-owner-stage__primary" },
+              h(
+                Panel,
+                { title: copy.workAccountsTitle, "data-connection-group": "work-accounts" },
+                h("p", { className: "adm-connections-section-copy" }, copy.workAccountsDescription),
             h("ul", { className: "adm-connection-list", "data-connection-list": "core" }, ...primaryConnections.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
             secondaryWorkAccounts.length
               ? h(
@@ -11631,69 +11637,72 @@ function ConnectionsBody({ page }) {
                   h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...secondaryWorkAccounts.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
                 )
               : null,
-          ),
-          h(
-            Panel,
-            {
-              title: page.assistant?.title,
-              className: "adm-assistant-connection",
-              "data-connection-group": "assistant",
-              action: h(
-                "a",
-                {
-                  className: "mk-btn mk-btn--primary mk-btn--sm",
-                  href: page.assistant?.plugin_url,
-                  rel: "noopener",
-                  "data-codex-plugin-install": "ms-realty-operator",
-                },
-                h(Icon, { name: "sparkles", size: 15 }),
-                h("span", null, page.assistant?.install_label),
               ),
-            },
+            ),
             h(
               "div",
-              { className: "adm-assistant-connection__copy" },
-              h("p", null, page.assistant?.description),
-              h("small", null, page.assistant?.install_hint),
-              h(AssistantAccess, { assistant: page.assistant, copy }),
+              { className: "adm-owner-stage__aside" },
+              h(
+                Panel,
+                {
+                  title: page.assistant?.title,
+                  className: "adm-assistant-connection",
+                  "data-connection-group": "assistant",
+                  action: h(
+                    "a",
+                    {
+                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                      href: page.assistant?.plugin_url,
+                      rel: "noopener",
+                      "data-codex-plugin-install": "ms-realty-operator",
+                    },
+                    h(Icon, { name: "sparkles", size: 15 }),
+                    h("span", null, page.assistant?.install_label),
+                  ),
+                },
+                h(
+                  "div",
+                  { className: "adm-assistant-connection__copy" },
+                  h("p", null, page.assistant?.description),
+                  h("small", null, page.assistant?.install_hint),
+                  h(AssistantAccess, { assistant: page.assistant, copy }),
+                ),
+              ),
+              h(
+                Panel,
+                { title: copy.managedTitle, "data-connection-group": "managed-system" },
+                h("p", { className: "adm-connections-section-copy" }, copy.managedDescription),
+                h(
+                  "ul",
+                  { className: "adm-managed-system-list" },
+                  ...managed.map((system) =>
+                    h(
+                      "li",
+                      { key: system.id, "data-managed-system": system.id, "data-status": system.status },
+                      h("div", null, h("h3", null, system.title), h("p", null, system.description)),
+                      h(StatusPill, { tone: connectionTone(system.status) }, system.status_label),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
+        ),
+        h(
+          "div",
+          { className: "adm-owner-flow__support", "data-connections-support": "true" },
           supporting.length
             ? h(
                 Panel,
                 { title: copy.additionalChannelsTitle, "data-connection-group": "additional-channels" },
                 h("p", { className: "adm-connections-section-copy" }, copy.additionalChannelsDescription),
                 h(
-                  WorkbenchDisclosure,
-                  {
-                    summary: connectionGroupSummary(copy.additionalChannelsTitle, supporting),
-                    "data-connection-group": "supporting-disclosure",
-                  },
-                  h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...supporting.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+                  "ul",
+                  { className: "adm-connection-list adm-connection-list--secondary", "data-connection-list": "secondary" },
+                  ...supporting.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy })),
                 ),
               )
             : null,
-        ),
-        h(
-          "aside",
-          { className: "adm-workbench-rail" },
-          h(
-            Panel,
-            { title: copy.managedTitle, "data-connection-group": "managed-system" },
-            h("p", { className: "adm-connections-section-copy" }, copy.managedDescription),
-            h(
-              "ul",
-              { className: "adm-managed-system-list" },
-              ...managed.map((system) =>
-                h(
-                  "li",
-                  { key: system.id, "data-managed-system": system.id, "data-status": system.status },
-                  h("div", null, h("h3", null, system.title), h("p", null, system.description)),
-                  h(StatusPill, { tone: connectionTone(system.status) }, system.status_label),
-                ),
-              ),
-            ),
-          ),
         ),
       ),
     ],
@@ -11769,6 +11778,7 @@ function HermesBody({ page }) {
   const tools = Array.isArray(page.tools) ? page.tools : [];
   const runtimeTone = runtime.ready ? "success" : "brick";
   const commandForm = page.command_form || { enabled: false, idempotency_key: "", max_length: 2000 };
+  const runtimeBlocked = runtime.ready !== true || commandForm.enabled !== true;
   const commandResult = page.command_result?.plan ? page.command_result : null;
   const commandError = page.command_error?.kind ? copy.commandErrors[page.command_error.kind] || copy.commandErrors.hermes_unavailable : null;
   const receipts = Array.isArray(page.receipts) ? page.receipts : [];
@@ -11787,276 +11797,334 @@ function HermesBody({ page }) {
       h("p", { className: "adm-hermes-panel-intro adm-hermes-page-intro" }, copy.description),
       h(
         "div",
-        { className: "adm-workbench-shell", "data-hermes-layout": "workbench" },
+        { className: "adm-owner-flow adm-owner-flow--hermes", "data-hermes-layout": "operating-flow" },
         h(
           "div",
-          { className: "adm-workbench-main" },
+          { className: "adm-owner-flow__stack" },
           h(
-            Panel,
-            {
-              title: copy.command,
-              "data-hermes-command-panel": commandForm.enabled ? "ready" : "blocked",
-            },
+            "section",
+            { className: "adm-owner-stage adm-owner-stage--hermes", "data-hermes-stage": "true" },
             h(
               "div",
-              { className: "adm-hermes-command" },
-              h("p", { className: "adm-hermes-panel-intro" }, copy.commandDescription),
+              { className: "adm-owner-stage__primary" },
               h(
-                "dl",
-                { className: "adm-hermes-command__readiness", "data-hermes-readiness": "true" },
-                h("div", null, h("dt", null, copy.hosted), h("dd", null, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)))),
-                h("div", null, h("dt", null, copy.queue), h("dd", null, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked))),
-                h("div", null, h("dt", null, copy.recentReceipts), h("dd", null, h(StatusPill, { tone: receiptStore.status === "ready" ? "success" : "brick" }, receiptStore.status === "ready" ? copy.ready : copy.blocked))),
-              ),
-              firstTask
-                ? h(
-                    "div",
-                    { className: "adm-hermes-command__starting-point", "data-hermes-next-task": firstTask.id },
-                    h(
-                      "div",
-                      null,
-                      h("span", { className: "adm-hermes-command__starting-kicker" }, copy.queue),
-                      h("strong", null, firstTask.object_id),
-                      h("small", null, [firstTask.source_locale?.toUpperCase(), firstTask.target_locale?.toUpperCase(), valueText(ui, firstTask.task_type)].filter(Boolean).join(" · ")),
-                    ),
-                    h(StatusPill, { tone: "sun" }, copy.draftWrite),
-                    h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref(firstTask.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
-                  )
-                : null,
-              h(
-                "form",
-                { className: "adm-hermes-command__form", method: "post", action: adminHref("/admin/hermes", page) },
-                h("input", { type: "hidden", name: "idempotencyKey", value: commandForm.idempotency_key }),
-                h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
-                h("label", { htmlFor: "hermes-owner-command" }, copy.commandLabel),
-                h("textarea", {
-                  id: "hermes-owner-command",
-                  name: "command",
-                  rows: 4,
-                  maxLength: commandForm.max_length,
-                  required: true,
-                  disabled: commandForm.enabled ? undefined : true,
-                  placeholder: copy.commandPlaceholder,
-                  "aria-describedby": "hermes-owner-command-note",
-                  autoComplete: "off",
-                }),
-                h(
-                  "div",
-                  { className: "adm-hermes-command__actions" },
-                  h("small", { id: "hermes-owner-command-note" }, commandForm.enabled ? copy.notExecuted : copy.commandDisabled),
-                  h(
-                    "button",
-                    { className: `mk-btn mk-btn--${firstTask ? "secondary" : "primary"}`, type: "submit", disabled: commandForm.enabled ? undefined : true },
-                    h(Icon, { name: "sparkles", size: 16 }),
-                    h("span", null, copy.preparePlan),
-                  ),
-                ),
-              ),
-              commandError
-                ? h(
-                    "div",
-                    { className: "adm-hermes-command__error", role: "alert", "data-hermes-command-error": page.command_error.kind },
-                    h(Icon, { name: "triangle-alert", size: 18 }),
-                    h("span", null, commandError),
-                  )
-                : null,
-              commandResult
-                ? h(
-                    "section",
-                    { className: "adm-hermes-plan", "data-hermes-command-result": commandResult.status },
-                    h(
-                      "header",
-                      null,
-                      h("div", null, h("h3", null, copy.planReady), h("p", null, commandResult.plan.summary)),
-                      h(StatusPill, { tone: "sun" }, copy.notExecuted),
-                    ),
-                    h(
-                      "ol",
-                      null,
-                      ...commandResult.plan.steps.map((step, index) =>
-                        h(
-                          "li",
-                          { key: `${commandResult.idempotency_key}-${index}` },
-                          h(
-                            "div",
-                            null,
-                            h("strong", null, step.title),
-                            h("p", null, step.why),
-                            h("small", null, step.evidence.join(" · ")),
-                          ),
-                          h(StatusPill, { tone: step.mode === "draft" ? "sun" : "sea" }, step.mode === "draft" ? copy.draftStep : copy.reviewStep),
-                          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(step.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
-                        ),
-                      ),
-                    ),
-                    commandResult.plan.questions.length
-                      ? h("div", { className: "adm-hermes-plan__questions" }, h("strong", null, copy.questions), h("ul", null, ...commandResult.plan.questions.map((question) => h("li", { key: question }, question))))
-                      : null,
-                    h("small", { className: "adm-hermes-plan__receipt" }, `${copy.receipt}: ${commandResult.idempotency_key}`),
-                  )
-                : null,
-              h(
-                "section",
-                { className: "adm-hermes-receipts", "data-hermes-receipts": receipts.length },
-                h("h3", null, copy.recentReceipts),
-                receipts.length
-                  ? h(
-                      "ul",
-                      null,
-                      ...receipts.map((receipt) =>
-                        h(
-                          "li",
-                          { key: receipt.idempotency_key },
-                          h("span", null, h("strong", null, receipt.plan?.summary || receipt.failure_code || receipt.status), h("small", null, formatAdminDateTime(receipt.completed_at || receipt.started_at, page.workspace.locale))),
-                          h(StatusPill, { tone: receipt.status === "planned" ? "success" : receipt.status === "failed" ? "brick" : "sand" }, hermesStateLabel(copy, receipt.status)),
-                        ),
-                      ),
-                    )
-                  : h("p", { className: "adm-hermes-receipts__empty" }, copy.noReceipts),
-              ),
-            ),
-          ),
-          queue.status !== "ready" || visibleTasks.length || !firstTask
-            ? h(
                 Panel,
                 {
-                  title: copy.queue,
-                  action: h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 15 }), h("span", null, copy.openReview)),
-                  "data-hermes-task-queue": queue.status,
+                  title: copy.command,
+                  "data-hermes-command-panel": runtimeBlocked ? "blocked" : "ready",
                 },
-                h("p", { className: "adm-hermes-panel-intro" }, copy.queueDescription),
-                queue.status !== "ready"
-                  ? h("div", { className: "adm-hermes-empty adm-hermes-empty--blocked", role: "status" }, h(Icon, { name: "triangle-alert", size: 18 }), h("span", null, copy.taskSourceUnavailable))
-                  : visibleTasks.length
-                    ? h(
-                        "ul",
-                        {
-                          className: "adm-hermes-tasks",
-                          "data-hermes-task-count": String(tasks.length),
-                          "data-hermes-task-visible": String(visibleTasks.length),
-                        },
-                        ...visibleTasks.map((task) =>
-                          h(
-                            "li",
-                            { key: task.id, "data-hermes-task": task.id },
-                            h("span", { className: "adm-hermes-task__icon", "aria-hidden": "true" }, h(Icon, { name: "languages", size: 17 })),
+                runtimeBlocked
+                  ? h(
+                      "div",
+                      { className: "adm-hermes-command adm-hermes-command--blocked" },
+                      h("p", { className: "adm-hermes-panel-intro" }, copy.commandDisabled),
+                      h(
+                        "dl",
+                        { className: "adm-hermes-command__readiness", "data-hermes-readiness": "true" },
+                        h("div", null, h("dt", null, copy.hosted), h("dd", null, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)))),
+                        h("div", null, h("dt", null, copy.queue), h("dd", null, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked))),
+                        h("div", null, h("dt", null, copy.recentReceipts), h("dd", null, h(StatusPill, { tone: receiptStore.status === "ready" ? "success" : "brick" }, receiptStore.status === "ready" ? copy.ready : copy.blocked))),
+                      ),
+                      h(
+                        "div",
+                        { className: "adm-hermes-recovery", role: "note", "data-hermes-command-recovery": "true" },
+                        h(Icon, { name: "link", size: 17 }),
+                        h(
+                          "div",
+                          { className: "adm-hermes-recovery__copy" },
+                          h("strong", null, copy.recoveryTitle),
+                          h("p", null, copy.recoveryDescription),
+                        ),
+                        pageCan(page, "settings:manage")
+                          ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, copy.connections)
+                          : null,
+                        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, copy.retry),
+                      ),
+                      firstTask
+                        ? h(
+                            "div",
+                            { className: "adm-hermes-command__starting-point", "data-hermes-next-task": firstTask.id },
                             h(
-                              "span",
-                              { className: "adm-hermes-task__copy" },
-                              h("strong", null, task.object_id),
-                              h("small", null, `${task.source_locale.toUpperCase()} → ${task.target_locale.toUpperCase()} · ${task.task_type}`),
+                              "div",
+                              null,
+                              h("span", { className: "adm-hermes-command__starting-kicker" }, copy.queue),
+                              h("strong", null, firstTask.object_id),
+                              h("small", null, [firstTask.source_locale?.toUpperCase(), firstTask.target_locale?.toUpperCase(), valueText(ui, firstTask.task_type)].filter(Boolean).join(" · ")),
                             ),
                             h(StatusPill, { tone: "sun" }, copy.draftWrite),
-                            h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(task.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                            h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(firstTask.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                          )
+                        : null,
+                    )
+                  : h(
+                      "div",
+                      { className: "adm-hermes-command" },
+                      h("p", { className: "adm-hermes-panel-intro" }, copy.commandDescription),
+                      h(
+                        "dl",
+                        { className: "adm-hermes-command__readiness", "data-hermes-readiness": "true" },
+                        h("div", null, h("dt", null, copy.hosted), h("dd", null, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)))),
+                        h("div", null, h("dt", null, copy.queue), h("dd", null, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked))),
+                        h("div", null, h("dt", null, copy.recentReceipts), h("dd", null, h(StatusPill, { tone: receiptStore.status === "ready" ? "success" : "brick" }, receiptStore.status === "ready" ? copy.ready : copy.blocked))),
+                      ),
+                      firstTask
+                        ? h(
+                            "div",
+                            { className: "adm-hermes-command__starting-point", "data-hermes-next-task": firstTask.id },
+                            h(
+                              "div",
+                              null,
+                              h("span", { className: "adm-hermes-command__starting-kicker" }, copy.queue),
+                              h("strong", null, firstTask.object_id),
+                              h("small", null, [firstTask.source_locale?.toUpperCase(), firstTask.target_locale?.toUpperCase(), valueText(ui, firstTask.task_type)].filter(Boolean).join(" · ")),
+                            ),
+                            h(StatusPill, { tone: "sun" }, copy.draftWrite),
+                            h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref(firstTask.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                          )
+                        : null,
+                      h(
+                        "form",
+                        { className: "adm-hermes-command__form", method: "post", action: adminHref("/admin/hermes", page) },
+                        h("input", { type: "hidden", name: "idempotencyKey", value: commandForm.idempotency_key }),
+                        h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
+                        h("label", { htmlFor: "hermes-owner-command" }, copy.commandLabel),
+                        h("textarea", {
+                          id: "hermes-owner-command",
+                          name: "command",
+                          rows: 4,
+                          maxLength: commandForm.max_length,
+                          required: true,
+                          placeholder: copy.commandPlaceholder,
+                          "aria-describedby": "hermes-owner-command-note",
+                          autoComplete: "off",
+                        }),
+                        h(
+                          "div",
+                          { className: "adm-hermes-command__actions" },
+                          h("small", { id: "hermes-owner-command-note" }, copy.notExecuted),
+                          h(
+                            "button",
+                            { className: `mk-btn mk-btn--${firstTask ? "secondary" : "primary"}`, type: "submit" },
+                            h(Icon, { name: "sparkles", size: 16 }),
+                            h("span", null, copy.preparePlan),
+                          ),
+                        ),
+                      ),
+                    ),
+                commandError
+                  ? h(
+                      "div",
+                      { className: "adm-hermes-command__error", role: "alert", "data-hermes-command-error": page.command_error.kind },
+                      h(Icon, { name: "triangle-alert", size: 18 }),
+                      h("span", null, commandError),
+                    )
+                  : null,
+                commandResult
+                  ? h(
+                      "section",
+                      { className: "adm-hermes-plan", "data-hermes-command-result": commandResult.status },
+                      h(
+                        "header",
+                        null,
+                        h("div", null, h("h3", null, copy.planReady), h("p", null, commandResult.plan.summary)),
+                        h(StatusPill, { tone: "sun" }, copy.notExecuted),
+                      ),
+                      h(
+                        "ol",
+                        null,
+                        ...commandResult.plan.steps.map((step, index) =>
+                          h(
+                            "li",
+                            { key: `${commandResult.idempotency_key}-${index}` },
+                            h(
+                              "div",
+                              null,
+                              h("strong", null, step.title),
+                              h("p", null, step.why),
+                              h("small", null, step.evidence.join(" · ")),
+                            ),
+                            h(StatusPill, { tone: step.mode === "draft" ? "sun" : "sea" }, step.mode === "draft" ? copy.draftStep : copy.reviewStep),
+                            h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(step.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                          ),
+                        ),
+                      ),
+                      commandResult.plan.questions.length
+                        ? h("div", { className: "adm-hermes-plan__questions" }, h("strong", null, copy.questions), h("ul", null, ...commandResult.plan.questions.map((question) => h("li", { key: question }, question))))
+                        : null,
+                      h("small", { className: "adm-hermes-plan__receipt" }, `${copy.receipt}: ${commandResult.idempotency_key}`),
+                    )
+                  : null,
+                h(
+                  "section",
+                  { className: "adm-hermes-receipts", "data-hermes-receipts": receipts.length },
+                  h("h3", null, copy.recentReceipts),
+                  receipts.length
+                    ? h(
+                        "ul",
+                        null,
+                        ...receipts.map((receipt) =>
+                          h(
+                            "li",
+                            { key: receipt.idempotency_key },
+                            h("span", null, h("strong", null, receipt.plan?.summary || receipt.failure_code || receipt.status), h("small", null, formatAdminDateTime(receipt.completed_at || receipt.started_at, page.workspace.locale))),
+                            h(StatusPill, { tone: receipt.status === "planned" ? "success" : receipt.status === "failed" ? "brick" : "sand" }, hermesStateLabel(copy, receipt.status)),
                           ),
                         ),
                       )
-                    : h(
-                        "div",
-                        { className: "adm-hermes-empty", role: "status" },
-                        h(Icon, { name: "check-circle-2", size: 18 }),
-                        h("span", null, h("strong", null, copy.noTasks), h("small", null, copy.noTasksDescription)),
-                      ),
-              )
-            : null,
-        ),
-        h(
-          "aside",
-          { className: "adm-workbench-rail" },
-          h(
-            Panel,
-            {
-              title: copy.hosted,
-              "data-hermes-runtime-card": runtime.status,
-              action: h(
-                "div",
-                { className: "adm-hermes-panel-actions" },
-                h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, h(Icon, { name: "loader-circle", size: 15 }), h("span", null, copy.retry)),
-                pageCan(page, "settings:manage")
-                  ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections))
-                  : null,
-              ),
-            },
-            h(
-              "div",
-              { className: "adm-hermes-card" },
-              h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)), h("p", null, copy.hostedDescription)),
-              h(
-                "details",
-                { className: "adm-hermes-diagnostics", "data-hermes-diagnostics": "collapsed" },
-                h("summary", null, h(Icon, { name: "settings", size: 16 }), h("span", null, copy.runtimeDetails)),
-                h(
-                  "div",
-                  { className: "adm-hermes-diagnostics__body" },
-                  h(
-                    "dl",
-                    { className: "adm-hermes-facts" },
-                    runtime.endpoint ? h("div", null, h("dt", null, copy.endpoint), h("dd", null, h("code", null, runtime.endpoint))) : null,
-                    h("div", null, h("dt", null, copy.model), h("dd", null, runtime.model || "—")),
-                    h("div", null, h("dt", null, copy.generatedAt), h("dd", null, formatAdminDateTime(runtime.generated_at || page.generated_at, page.workspace.locale))),
-                  ),
-                  h(
-                    "div",
-                    { className: "adm-hermes-checks", "aria-label": copy.checks },
-                    h("strong", null, copy.checks),
-                    h(
-                      "ul",
-                      null,
-                      ...(runtime.checks || []).map((check) =>
-                        h(
-                          "li",
-                          { key: check.id, "data-hermes-check": check.id, "data-check-state": check.status },
-                          h("code", null, check.id),
-                          h(StatusPill, { tone: check.status === "pass" ? "success" : check.status === "fail" ? "brick" : "sand" }, hermesStateLabel(copy, check.status)),
-                        ),
-                      ),
-                    ),
-                  ),
-                  runtime.missing?.length
-                    ? h("p", { className: "adm-hermes-missing", "data-hermes-missing": runtime.missing.join(",") }, runtime.missing.join(" · "))
-                    : null,
+                    : h("p", { className: "adm-hermes-receipts__empty" }, copy.noReceipts),
                 ),
               ),
-              !runtime.ready
+              queue.status !== "ready" || visibleTasks.length || !firstTask
                 ? h(
-                    "div",
-                    { className: "adm-hermes-recovery", role: "note", "data-hermes-recovery": "true" },
-                    h(Icon, { name: "link", size: 17 }),
-                    h(
-                      "div",
-                      { className: "adm-hermes-recovery__copy" },
-                      h("strong", null, copy.recoveryTitle),
-                      h("p", null, copy.recoveryDescription),
-                    ),
-                    pageCan(page, "settings:manage")
-                      ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, copy.connections)
-                      : null,
+                    Panel,
+                    {
+                      title: copy.queue,
+                      action: h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 15 }), h("span", null, copy.openReview)),
+                      "data-hermes-task-queue": queue.status,
+                    },
+                    h("p", { className: "adm-hermes-panel-intro" }, copy.queueDescription),
+                    queue.status !== "ready"
+                      ? h("div", { className: "adm-hermes-empty adm-hermes-empty--blocked", role: "status" }, h(Icon, { name: "triangle-alert", size: 18 }), h("span", null, copy.taskSourceUnavailable))
+                      : visibleTasks.length
+                        ? h(
+                            "ul",
+                            {
+                              className: "adm-hermes-tasks",
+                              "data-hermes-task-count": String(tasks.length),
+                              "data-hermes-task-visible": String(visibleTasks.length),
+                            },
+                            ...visibleTasks.map((task) =>
+                              h(
+                                "li",
+                                { key: task.id, "data-hermes-task": task.id },
+                                h("span", { className: "adm-hermes-task__icon", "aria-hidden": "true" }, h(Icon, { name: "languages", size: 17 })),
+                                h(
+                                  "span",
+                                  { className: "adm-hermes-task__copy" },
+                                  h("strong", null, task.object_id),
+                                  h("small", null, `${task.source_locale.toUpperCase()} → ${task.target_locale.toUpperCase()} · ${task.task_type}`),
+                                ),
+                                h(StatusPill, { tone: "sun" }, copy.draftWrite),
+                                h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(task.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                              ),
+                            ),
+                          )
+                        : h(
+                            "div",
+                            { className: "adm-hermes-empty", role: "status" },
+                            h(Icon, { name: "check-circle-2", size: 18 }),
+                            h("span", null, h("strong", null, copy.noTasks), h("small", null, copy.noTasksDescription)),
+                          ),
                   )
                 : null,
             ),
-          ),
-          h(
-            WorkbenchDisclosure,
-            {
-              summary: `${copy.desktop} · ${queue.eligible_for_desktop || 0}`,
-              "data-hermes-desktop-card": bridgeReady ? "ready" : "blocked",
-            },
             h(
-              Panel,
-              { title: copy.desktop },
+              "div",
+              { className: "adm-owner-stage__aside" },
+              h(
+                Panel,
+                {
+                  title: copy.hosted,
+                  "data-hermes-runtime-card": runtime.status,
+                  action: h(
+                    "div",
+                    { className: "adm-hermes-panel-actions" },
+                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, h(Icon, { name: "loader-circle", size: 15 }), h("span", null, copy.retry)),
+                    pageCan(page, "settings:manage")
+                      ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections))
+                      : null,
+                  ),
+                },
+                h(
+                  "div",
+                  { className: "adm-hermes-card" },
+                  h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)), h("p", null, copy.hostedDescription)),
+                  h(
+                    "details",
+                    { className: "adm-hermes-diagnostics", "data-hermes-diagnostics": "collapsed" },
+                    h("summary", null, h(Icon, { name: "settings", size: 16 }), h("span", null, copy.runtimeDetails)),
+                    h(
+                      "div",
+                      { className: "adm-hermes-diagnostics__body" },
+                      h(
+                        "dl",
+                        { className: "adm-hermes-facts" },
+                        runtime.endpoint ? h("div", null, h("dt", null, copy.endpoint), h("dd", null, h("code", null, runtime.endpoint))) : null,
+                        h("div", null, h("dt", null, copy.model), h("dd", null, runtime.model || "—")),
+                        h("div", null, h("dt", null, copy.generatedAt), h("dd", null, formatAdminDateTime(runtime.generated_at || page.generated_at, page.workspace.locale))),
+                      ),
+                      h(
+                        "div",
+                        { className: "adm-hermes-checks", "aria-label": copy.checks },
+                        h("strong", null, copy.checks),
+                        h(
+                          "ul",
+                          null,
+                          ...(runtime.checks || []).map((check) =>
+                            h(
+                              "li",
+                              { key: check.id, "data-hermes-check": check.id, "data-check-state": check.status },
+                              h("code", null, check.id),
+                              h(StatusPill, { tone: check.status === "pass" ? "success" : check.status === "fail" ? "brick" : "sand" }, hermesStateLabel(copy, check.status)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      runtime.missing?.length
+                        ? h("p", { className: "adm-hermes-missing", "data-hermes-missing": runtime.missing.join(",") }, runtime.missing.join(" · "))
+                        : null,
+                    ),
+                  ),
+                  !runtime.ready
+                    ? h(
+                        "div",
+                        { className: "adm-hermes-recovery", role: "note", "data-hermes-recovery": "true" },
+                        h(Icon, { name: "link", size: 17 }),
+                        h(
+                          "div",
+                          { className: "adm-hermes-recovery__copy" },
+                          h("strong", null, copy.recoveryTitle),
+                          h("p", null, copy.recoveryDescription),
+                        ),
+                        pageCan(page, "settings:manage")
+                          ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, copy.connections)
+                          : null,
+                      )
+                    : null,
+                ),
+              ),
               h(
                 "div",
-                { className: "adm-hermes-card" },
-                h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked), h("p", null, copy.desktopDescription)),
-                h(StatGrid, {
-                  metrics: [
-                    [copy.eligible, queue.eligible_for_desktop || 0],
-                    [copy.withheld, queue.withheld_sensitive || 0],
-                  ],
-                }),
+                { className: "adm-owner-flow__support", "data-hermes-support": "true" },
+                h(
+                  WorkbenchDisclosure,
+                  {
+                    summary: `${copy.desktop} · ${queue.eligible_for_desktop || 0}`,
+                    "data-hermes-desktop-card": bridgeReady ? "ready" : "blocked",
+                  },
+                  h(
+                    Panel,
+                    { title: copy.desktop },
+                    h(
+                      "div",
+                      { className: "adm-hermes-card" },
+                      h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked), h("p", null, copy.desktopDescription)),
+                      h(StatGrid, {
+                        metrics: [
+                          [copy.eligible, queue.eligible_for_desktop || 0],
+                          [copy.withheld, queue.withheld_sensitive || 0],
+                        ],
+                      }),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
+        ),
+        h(
+          "div",
+          { className: "adm-owner-flow__support", "data-hermes-disclosures": "true" },
           h(
             "details",
             { className: "adm-hermes-safeguards", "data-hermes-safeguards": "collapsed" },
@@ -12269,10 +12337,43 @@ function SettingsBody({ page }) {
         : null,
       h(
         "div",
-        { className: "adm-workbench-shell adm-workbench-shell--settings", "data-settings-layout": "sections-rail" },
+        { className: "adm-owner-flow adm-owner-flow--settings", "data-settings-layout": "sections-flow" },
         h(
           "div",
-          { className: "adm-workbench-main" },
+          { className: "adm-owner-flow__support", "data-settings-overview": "true" },
+          sectionsNav,
+          h(SettingsActionRail, { page }),
+          page.onboarding ? h(WorkspaceChecklistPanel, { page }) : null,
+          h(
+            Panel,
+            { title: settings.lastUpdated, "data-settings-history": "true" },
+            h(
+              "div",
+              { className: "adm-settings-history" },
+              page.workspace_settings?.updated_at
+                ? h(
+                    "p",
+                    null,
+                    h(
+                      "time",
+                      { dateTime: page.workspace_settings.updated_at, title: page.workspace_settings.updated_at },
+                      formatAdminDateTime(page.workspace_settings.updated_at, page.workspace?.locale),
+                    ),
+                    page.workspace_settings.updated_by ? h("small", null, page.workspace_settings.updated_by) : null,
+                  )
+                : h("p", { className: "adm-empty" }, settings.notConfirmed),
+              h(
+                "a",
+                { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/activity?action=workspace_settings_updated", page) },
+                h(Icon, { name: "list", size: 16 }),
+                h("span", null, label(copy, "viewHistory", "History")),
+              ),
+            ),
+          ),
+        ),
+        h(
+          "div",
+          { className: "adm-owner-flow__stack" },
           h(OwnerProfileSection, { page }),
           h(SettingsSection, {
             page,
@@ -12547,39 +12648,6 @@ function SettingsBody({ page }) {
           }),
           page.workspace_security?.two_factor ? h(SettingsSecuritySection, { page, icon: "shield-check" }) : null,
           page.workspace_security?.exports || page.workspace_security?.audit_retention ? h(SettingsDataSection, { page, icon: "download" }) : null,
-        ),
-        h(
-          "aside",
-          { className: "adm-workbench-rail", "data-settings-rail": "true" },
-          sectionsNav,
-          h(SettingsActionRail, { page }),
-          page.onboarding ? h(WorkspaceChecklistPanel, { page }) : null,
-          h(
-            Panel,
-            { title: settings.lastUpdated, "data-settings-history": "true" },
-            h(
-              "div",
-              { className: "adm-settings-history" },
-              page.workspace_settings?.updated_at
-                ? h(
-                    "p",
-                    null,
-                    h(
-                      "time",
-                      { dateTime: page.workspace_settings.updated_at, title: page.workspace_settings.updated_at },
-                      formatAdminDateTime(page.workspace_settings.updated_at, page.workspace?.locale),
-                    ),
-                    page.workspace_settings.updated_by ? h("small", null, page.workspace_settings.updated_by) : null,
-                  )
-                : h("p", { className: "adm-empty" }, settings.notConfirmed),
-              h(
-                "a",
-                { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/activity?action=workspace_settings_updated", page) },
-                h(Icon, { name: "list", size: 16 }),
-                h("span", null, label(copy, "viewHistory", "History")),
-              ),
-            ),
-          ),
         ),
       ),
     ],

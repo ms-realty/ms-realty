@@ -321,7 +321,7 @@ test("admin Today ranks pipeline and follow-up work in one priority list", () =>
   assert.doesNotMatch(dueAction, /2026-07-06T12:00:00/);
   assert.doesNotMatch(html, /data-pipeline-preview-row=/);
   assert.doesNotMatch(html, /data-viewing-follow-up-table=/);
-  assert.match(html, /data-readiness-rail="true"/);
+  assert.match(html, /data-readiness-support="true"/);
 });
 
 test("admin translation queue localizes reviewer roles and titles results once", () => {
