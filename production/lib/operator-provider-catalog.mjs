@@ -36,8 +36,8 @@ import {
 // explicitly picked. Asking for whole-Drive access would be a restricted scope
 // and a far heavier review for no gain.
 export const GOOGLE_DRIVE_SCOPES = Object.freeze(["openid", "email", "https://www.googleapis.com/auth/drive.file"]);
-export const FACEBOOK_SCOPES = Object.freeze(["pages_show_list", "pages_read_engagement", "pages_manage_metadata"]);
-export const INSTAGRAM_SCOPES = Object.freeze(["pages_show_list", "instagram_basic", "instagram_manage_comments"]);
+export const FACEBOOK_SCOPES = Object.freeze(["pages_show_list", "pages_manage_posts"]);
+export const INSTAGRAM_SCOPES = Object.freeze(["pages_show_list", "instagram_basic", "instagram_content_publish"]);
 // read:user identifies the account; repo is what lets the agent read and open
 // changes in the agency's own repository.
 export const GITHUB_SCOPES = Object.freeze(["read:user", "repo"]);
@@ -106,12 +106,14 @@ const DEFINITIONS = Object.freeze([
     id: "facebook",
     kind: "oauth",
     family: "meta",
+    ownerConnectable: true,
     scopes: FACEBOOK_SCOPES,
     setupEnv: [
       "MS_REALTY_PUBLIC_ORIGIN",
       "MS_REALTY_META_APP_ID",
       "MS_REALTY_META_APP_SECRET",
       "MS_REALTY_META_GRAPH_VERSION",
+      "MS_REALTY_META_FACEBOOK_PUBLISH_READY",
       "MS_REALTY_PROVIDER_OAUTH_STATE_SECRET",
     ],
     setupUrl: "https://developers.facebook.com/apps",
@@ -120,12 +122,14 @@ const DEFINITIONS = Object.freeze([
     id: "instagram",
     kind: "oauth",
     family: "meta",
+    ownerConnectable: true,
     scopes: INSTAGRAM_SCOPES,
     setupEnv: [
       "MS_REALTY_PUBLIC_ORIGIN",
       "MS_REALTY_META_APP_ID",
       "MS_REALTY_META_APP_SECRET",
       "MS_REALTY_META_GRAPH_VERSION",
+      "MS_REALTY_META_INSTAGRAM_PUBLISH_READY",
       "MS_REALTY_PROVIDER_OAUTH_STATE_SECRET",
     ],
     setupUrl: "https://developers.facebook.com/apps",
@@ -223,18 +227,22 @@ const PROVIDER_COVERAGE = Object.freeze({
     ],
   },
   facebook: {
-    state: "disabled",
-    ownerSurface: "hidden",
+    state: "enabled",
+    ownerSurface: "one_click",
     authorization: "oauth_authorization_code",
-    reason: "no_approved_runtime_consumer",
-    consumers: [],
+    ownerAction: { kind: "oauth_redirect", method: "GET", pathname: "/api/admin/connections", action: "start" },
+    consumers: [
+      { workflow: "approved_facebook_page_publish", source_file: "production/lib/social-marketing-publishing.mjs", symbol: "publishApprovedSocialDraft" },
+    ],
   },
   instagram: {
-    state: "disabled",
-    ownerSurface: "hidden",
+    state: "enabled",
+    ownerSurface: "one_click",
     authorization: "oauth_authorization_code",
-    reason: "no_approved_runtime_consumer",
-    consumers: [],
+    ownerAction: { kind: "oauth_redirect", method: "GET", pathname: "/api/admin/connections", action: "start" },
+    consumers: [
+      { workflow: "approved_instagram_publish", source_file: "production/lib/social-marketing-publishing.mjs", symbol: "publishApprovedSocialDraft" },
+    ],
   },
   github: {
     state: "disabled",
@@ -400,8 +408,14 @@ export function operatorProviderAvailability(config = operatorProviderConfigFrom
   return {
     ...base,
     google_drive: entry(google),
-    facebook: entry(meta),
-    instagram: entry(meta),
+    facebook: entry([
+      ...meta,
+      ...(config.metaFacebookPublishReady ? [] : ["MS_REALTY_META_FACEBOOK_PUBLISH_READY"]),
+    ]),
+    instagram: entry([
+      ...meta,
+      ...(config.metaInstagramPublishReady ? [] : ["MS_REALTY_META_INSTAGRAM_PUBLISH_READY"]),
+    ]),
     github: entry(github),
     cloudflare: entry(store),
     neon: entry(store),
@@ -576,7 +590,7 @@ async function exchangeGoogleCode({ definition, code, config, fetchImpl, existin
   };
 }
 
-async function exchangeMetaCode({ definition, code, config, fetchImpl }) {
+async function exchangeMetaCode({ definition, code, config, fetchImpl, now }) {
   const graph = `https://graph.facebook.com/${config.metaGraphVersion}`;
   const exchange = new URL(`${graph}/oauth/access_token`);
   exchange.search = new URLSearchParams({
@@ -585,16 +599,43 @@ async function exchangeMetaCode({ definition, code, config, fetchImpl }) {
     code: String(code),
     redirect_uri: redirectUri(config, definition.id),
   }).toString();
-  const token = await responseJson(await fetchImpl(exchange), "Meta OAuth");
-  const accessToken = trimmed(token.access_token);
-  if (!accessToken) throw new Error("Meta did not return an access token");
+  const shortLived = await responseJson(await fetchImpl(exchange), "Meta OAuth");
+  const shortLivedToken = trimmed(shortLived.access_token);
+  if (!shortLivedToken) throw new Error("Meta did not return an access token");
+  const token = await responseJson(
+    await fetchImpl(
+      `${graph}/oauth/access_token?${new URLSearchParams({
+        grant_type: "fb_exchange_token",
+        client_id: config.metaAppId,
+        client_secret: config.metaAppSecret,
+        fb_exchange_token: shortLivedToken,
+      })}`,
+    ),
+    "Meta long-lived token exchange",
+  );
+  const userAccessToken = trimmed(token.access_token);
+  if (!userAccessToken) throw new Error("Meta did not return a long-lived access token");
+  const permissions = await responseJson(
+    await fetchImpl(`${graph}/me/permissions`, {
+      headers: { authorization: `Bearer ${userAccessToken}` },
+    }),
+    "Meta permission readback",
+  );
+  const granted = new Set(
+    (Array.isArray(permissions.data) ? permissions.data : [])
+      .filter((entry) => entry?.status === "granted" && entry?.permission)
+      .map((entry) => String(entry.permission)),
+  );
+  if (definition.scopes.some((scope) => !granted.has(scope))) {
+    throw new Error("Meta did not grant the scopes this connection needs");
+  }
   const fields =
     definition.id === "instagram"
-      ? "id,name,instagram_business_account{id,username}"
-      : "id,name";
+      ? "id,name,access_token,instagram_business_account{id,username}"
+      : "id,name,access_token";
   const accounts = await responseJson(
     await fetchImpl(`${graph}/me/accounts?fields=${encodeURIComponent(fields)}`, {
-      headers: { authorization: `Bearer ${accessToken}` },
+      headers: { authorization: `Bearer ${userAccessToken}` },
     }),
     "Meta page readback",
   );
@@ -604,8 +645,8 @@ async function exchangeMetaCode({ definition, code, config, fetchImpl }) {
   // card and saying so is more useful than storing a token that cannot post.
   const page =
     definition.id === "instagram"
-      ? pages.find((candidate) => candidate?.instagram_business_account?.id)
-      : pages[0];
+      ? pages.find((candidate) => candidate?.instagram_business_account?.id && trimmed(candidate?.access_token))
+      : pages.find((candidate) => trimmed(candidate?.access_token));
   if (!page?.id) {
     throw new Error(
       definition.id === "instagram"
@@ -613,19 +654,27 @@ async function exchangeMetaCode({ definition, code, config, fetchImpl }) {
         : "No Facebook Page was granted",
     );
   }
+  const pageAccessToken = trimmed(page.access_token);
+  if (!pageAccessToken) throw new Error("Meta did not return a Page access token");
   const instagram = page.instagram_business_account || null;
   return {
     provider: definition.id,
     status: "connected",
     accountLabel: String(instagram?.username ? `@${instagram.username}` : page.name || page.id),
     externalAccountId: String(instagram?.id || page.id),
-    scopes: [...definition.scopes],
+    scopes: [...granted].sort(),
     metadata: {
       page_id: String(page.id),
       page_name: page.name ? String(page.name) : null,
       ...(instagram ? { instagram_account_id: String(instagram.id) } : {}),
     },
-    credentials: { access_token: accessToken, page_id: String(page.id) },
+    credentials: {
+      user_access_token: userAccessToken,
+      user_expires_at: new Date(Number(now) + Number(token.expires_in || 60 * 24 * 60 * 60) * 1000).toISOString(),
+      page_access_token: pageAccessToken,
+      page_id: String(page.id),
+      ...(instagram ? { instagram_account_id: String(instagram.id) } : {}),
+    },
   };
 }
 
@@ -690,7 +739,7 @@ export async function completeOperatorProviderOAuth(
   if (definition.family === "google") {
     return exchangeGoogleCode({ definition, code, config, fetchImpl, existingRefreshToken, now });
   }
-  if (definition.family === "meta") return exchangeMetaCode({ definition, code, config, fetchImpl });
+  if (definition.family === "meta") return exchangeMetaCode({ definition, code, config, fetchImpl, now });
   return exchangeGitHubCode({ definition, code, config, fetchImpl });
 }
 
@@ -812,7 +861,14 @@ export async function revokeOperatorProvider(
   { config = operatorProviderConfigFromEnv(), fetchImpl = fetch } = {},
 ) {
   const definition = operatorProviderDefinition(provider);
-  const token = trimmed(credentials.refresh_token || credentials.access_token || credentials.api_token || credentials.auth_token);
+  const token = trimmed(
+    credentials.refresh_token ||
+      credentials.user_access_token ||
+      credentials.page_access_token ||
+      credentials.access_token ||
+      credentials.api_token ||
+      credentials.auth_token,
+  );
   try {
     if (definition.family === "google" && token) {
       const revoke = new URL("https://oauth2.googleapis.com/revoke");

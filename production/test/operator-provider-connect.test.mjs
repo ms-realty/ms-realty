@@ -58,6 +58,8 @@ function fullConfig(overrides = {}) {
     metaAppSecret: "meta-app-secret-at-least-sixteen-characters",
     metaConfigId: "987654321098765",
     metaGraphVersion: "v22.0",
+    metaFacebookPublishReady: true,
+    metaInstagramPublishReady: true,
     metaWebhookVerifyToken: "meta-webhook-verify-token-at-least-24",
     viberCommercialReady: true,
     webhookMaxBytes: 1024 * 1024,
@@ -134,7 +136,7 @@ test("every catalogue provider has a card, a title and a sentence in all three l
     cards.filter((card) => card.owner_connectable).map((card) => card.id),
     [...OWNER_CONNECTABLE_PROVIDERS],
   );
-  assert.deepEqual([...OWNER_CONNECTABLE_PROVIDERS], ["google", "whatsapp"]);
+  assert.deepEqual([...OWNER_CONNECTABLE_PROVIDERS], ["google", "whatsapp", "facebook", "instagram"]);
   for (const locale of OPERATOR_CONNECT_LOCALES) {
     const copy = operatorConnectCopy(locale);
     for (const card of cards) {
@@ -273,7 +275,7 @@ test("stored provider rows keep truthful intermediate and unavailable status", (
   assert.equal(byId.google.status, "unavailable");
 });
 
-test("a configured owner page offers exactly the two working one-click handoffs", () => {
+test("a configured owner page offers exactly the four working one-click handoffs", () => {
   const config = fullConfig();
   const html = renderOperatorConnectPage({
     baseUrl: ORIGIN,
@@ -283,11 +285,13 @@ test("a configured owner page offers exactly the two working one-click handoffs"
     locale: "en",
   });
   assert.ok(html.includes('href="/api/admin/connections?provider=google&amp;action=start"'));
+  assert.ok(html.includes('href="/api/admin/connections?provider=facebook&amp;action=start"'));
+  assert.ok(html.includes('href="/api/admin/connections?provider=instagram&amp;action=start"'));
   assert.equal((html.match(/data-whatsapp-connect="true"/g) || []).length, 1);
   for (const id of ["facebook", "instagram", "viber"]) {
     assert.match(html, new RegExp(`data-provider="${id}"`));
-    assert.equal(html.includes(`/api/admin/connections?provider=${id}&amp;action=start`), false, id);
   }
+  assert.equal(html.includes("/api/admin/connections?provider=viber&amp;action=start"), false);
   assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon|ai)"/);
   assert.doesNotMatch(html, /<input[^>]+type="password"/);
   assert.doesNotMatch(html, /name="token"/);
@@ -312,7 +316,7 @@ test("OAuth start binds the state to this provider and this operator", () => {
 
   const meta = new URL(operatorProviderAuthorizationUrl({ provider: "instagram", config, operatorId: "connect_operator" }));
   assert.equal(meta.origin + meta.pathname, "https://www.facebook.com/v22.0/dialog/oauth");
-  assert.equal(meta.searchParams.get("scope"), "pages_show_list,instagram_basic,instagram_manage_comments");
+  assert.equal(meta.searchParams.get("scope"), "pages_show_list,instagram_basic,instagram_content_publish");
 
   const drive = new URL(operatorProviderAuthorizationUrl({ provider: "google_drive", config, operatorId: "connect_operator" }));
   assert.equal(drive.searchParams.get("access_type"), "offline");
@@ -321,9 +325,14 @@ test("OAuth start binds the state to this provider and this operator", () => {
   assert.equal(drive.searchParams.get("scope").includes("auth/drive "), false);
 });
 
-test("the owner action router accepts Google and rejects unused OAuth providers", async () => {
+test("the owner action router accepts Google and Instagram and rejects unused OAuth providers", async () => {
   const config = fullConfig();
-  const google = createProviderOAuthState({ provider: "google", operatorId: "connect_operator" }, { stateSecret: SECRET });
+  const oauthNow = Date.parse("2026-08-29T12:00:00.000Z");
+  const google = createProviderOAuthState({ provider: "google", operatorId: "connect_operator" }, { stateSecret: SECRET, now: oauthNow });
+  const instagram = createProviderOAuthState(
+    { provider: "instagram", operatorId: "connect_operator" },
+    { stateSecret: SECRET, now: oauthNow },
+  );
   const { deps, saved } = storeDeps();
   const stub = stubFetch({
     "https://oauth2.googleapis.com/token": {
@@ -336,6 +345,30 @@ test("the owner action router accepts Google and rejects unused OAuth providers"
       },
     },
     "https://www.googleapis.com/oauth2/v2/userinfo": { body: { id: "google-owner", email: "owner@example.com" } },
+    "https://graph.facebook.com/v22.0/oauth/access_token": {
+      body: { access_token: "meta-user-short", expires_in: 3600 },
+    },
+    "https://graph.facebook.com/v22.0/me/permissions": {
+      body: {
+        data: [
+          { permission: "pages_show_list", status: "granted" },
+          { permission: "instagram_basic", status: "granted" },
+          { permission: "instagram_content_publish", status: "granted" },
+        ],
+      },
+    },
+    "https://graph.facebook.com/v22.0/me/accounts": {
+      body: {
+        data: [
+          {
+            id: "100000000001",
+            name: "MS Realty",
+            access_token: "meta-page-token",
+            instagram_business_account: { id: "178414000001", username: "msrealty" },
+          },
+        ],
+      },
+    },
   });
 
   // Right state, right operator: connected, and the account was read back.
@@ -346,12 +379,28 @@ test("the owner action router accepts Google and rejects unused OAuth providers"
     state: google,
     operatorId: "connect_operator",
     config,
-    deps: { ...deps, fetchImpl: stub.fetchImpl },
+    deps: { ...deps, fetchImpl: stub.fetchImpl, now: oauthNow },
   });
   assert.equal(ok.outcome, "connected");
   assert.equal(ok.connection.account_label, "owner@example.com");
   assert.equal(saved.length, 1);
   assert.equal(saved[0].credentials.access_token, "google-access");
+
+  const instagramOk = await runOperatorConnectionAction({
+    intent: "callback",
+    provider: "instagram",
+    code: "meta-code",
+    state: instagram,
+    operatorId: "connect_operator",
+    config,
+    deps: { ...deps, fetchImpl: stub.fetchImpl, now: oauthNow },
+  });
+  assert.equal(instagramOk.outcome, "connected");
+  assert.equal(instagramOk.connection.account_label, "@msrealty");
+  assert.equal(saved.length, 2);
+  assert.equal(saved[1].credentials.user_access_token, "meta-user-short");
+  assert.equal(saved[1].credentials.page_access_token, "meta-page-token");
+  assert.equal(saved[1].credentials.instagram_account_id, "178414000001");
 
   // GitHub has OAuth, but no working owner workflow in this product. The
   // owner router refuses it before any provider request or storage write.
@@ -359,10 +408,10 @@ test("the owner action router accepts Google and rejects unused OAuth providers"
     intent: "callback",
     provider: "github",
     code: "one-time-code",
-    state: createProviderOAuthState({ provider: "github", operatorId: "connect_operator" }, { stateSecret: SECRET }),
+    state: createProviderOAuthState({ provider: "github", operatorId: "connect_operator" }, { stateSecret: SECRET, now: oauthNow }),
     operatorId: "connect_operator",
     config,
-    deps: { ...deps, fetchImpl: stub.fetchImpl },
+    deps: { ...deps, fetchImpl: stub.fetchImpl, now: oauthNow },
   });
   assert.equal(unusedProvider.outcome, "rejected");
   assert.equal(unusedProvider.phase, "unsupported_provider");
@@ -375,7 +424,7 @@ test("the owner action router accepts Google and rejects unused OAuth providers"
     state: google,
     operatorId: "someone_else",
     config,
-    deps: { ...deps, fetchImpl: stub.fetchImpl },
+    deps: { ...deps, fetchImpl: stub.fetchImpl, now: oauthNow },
   });
   assert.equal(wrongOperator.outcome, "rejected");
 
@@ -387,11 +436,76 @@ test("the owner action router accepts Google and rejects unused OAuth providers"
     state: `${google.split(".")[0]}.forged`,
     operatorId: "connect_operator",
     config,
-    deps: { ...deps, fetchImpl: stub.fetchImpl },
+    deps: { ...deps, fetchImpl: stub.fetchImpl, now: oauthNow },
   });
   assert.equal(tampered.outcome, "rejected");
   // Nothing beyond the one legitimate Google connection was ever stored.
-  assert.equal(saved.length, 1);
+  assert.equal(saved.length, 2);
+});
+
+test("Meta OAuth exchanges to a long-lived user token, reads granted scopes, and stores a page token", async () => {
+  const config = fullConfig();
+  const oauthNow = Date.parse("2026-08-29T12:00:00.000Z");
+  const state = createProviderOAuthState({ provider: "facebook", operatorId: "connect_operator" }, { stateSecret: SECRET, now: oauthNow });
+  const stub = stubFetch({
+    "https://graph.facebook.com/v22.0/oauth/access_token": {
+      body: { access_token: "meta-user-access", expires_in: 5_184_000 },
+    },
+    "https://graph.facebook.com/v22.0/me/permissions": {
+      body: {
+        data: [
+          { permission: "pages_show_list", status: "granted" },
+          { permission: "pages_manage_posts", status: "granted" },
+          { permission: "email", status: "declined" },
+        ],
+      },
+    },
+    "https://graph.facebook.com/v22.0/me/accounts": {
+      body: {
+        data: [{ id: "100000000099", name: "MS Realty Bulgaria", access_token: "meta-page-access" }],
+      },
+    },
+  });
+  const connection = await completeOperatorProviderOAuth(
+    { provider: "facebook", code: "meta-code", state, operatorId: "connect_operator" },
+    { config, fetchImpl: stub.fetchImpl, now: oauthNow },
+  );
+  assert.equal(connection.accountLabel, "MS Realty Bulgaria");
+  assert.equal(connection.externalAccountId, "100000000099");
+  assert.deepEqual(connection.scopes, ["pages_manage_posts", "pages_show_list"]);
+  assert.equal(connection.credentials.user_access_token, "meta-user-access");
+  assert.equal(connection.credentials.page_access_token, "meta-page-access");
+  assert.equal(connection.credentials.page_id, "100000000099");
+  assert.equal(connection.credentials.user_expires_at, "2026-10-28T12:00:00.000Z");
+});
+
+test("Meta OAuth refuses a callback whose granted scopes do not cover publishing", async () => {
+  const config = fullConfig();
+  const oauthNow = Date.parse("2026-08-29T12:00:00.000Z");
+  const state = createProviderOAuthState(
+    { provider: "instagram", operatorId: "connect_operator" },
+    { stateSecret: SECRET, now: oauthNow },
+  );
+  const stub = stubFetch({
+    "https://graph.facebook.com/v22.0/oauth/access_token": {
+      body: { access_token: "meta-user-access", expires_in: 5_184_000 },
+    },
+    "https://graph.facebook.com/v22.0/me/permissions": {
+      body: {
+        data: [
+          { permission: "pages_show_list", status: "granted" },
+          { permission: "instagram_basic", status: "granted" },
+        ],
+      },
+    },
+  });
+  await assert.rejects(
+    completeOperatorProviderOAuth(
+      { provider: "instagram", code: "meta-code", state, operatorId: "connect_operator" },
+      { config, fetchImpl: stub.fetchImpl, now: oauthNow },
+    ),
+    /did not grant the scopes/,
+  );
 });
 
 test("a callback that does not grant the scopes the card promised is refused", async () => {
@@ -760,6 +874,21 @@ test("the environment names the catalogue asks for are the ones the modules read
   // Meta was not configured, so its three cards stay honest.
   assert.equal(availability.facebook.ready, false);
   assert.ok(availability.facebook.missing.includes("MS_REALTY_META_APP_ID"));
+  const metaUnavailable = operatorProviderAvailability(
+    operatorProviderConfigFromEnv({
+      MS_REALTY_PUBLIC_ORIGIN: ORIGIN,
+      MS_REALTY_PROVIDER_TOKEN_KEY: SECRET,
+      MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: SECRET,
+      PAYLOAD_SECRET: "payload",
+      DATABASE_URL: "postgres://db/x",
+      MS_REALTY_META_APP_ID: "meta-id",
+      MS_REALTY_META_APP_SECRET: "meta-secret",
+      MS_REALTY_META_GRAPH_VERSION: "v22.0",
+    }),
+  );
+  assert.equal(metaUnavailable.facebook.ready, false);
+  assert.ok(metaUnavailable.facebook.missing.includes("MS_REALTY_META_FACEBOOK_PUBLISH_READY"));
+  assert.ok(metaUnavailable.instagram.missing.includes("MS_REALTY_META_INSTAGRAM_PUBLISH_READY"));
   // A malformed Hermes mode must not take the page down.
   assert.equal(operatorProviderConfigFromEnv({ HERMES_PROVIDER_MODE: "nonsense" }).hermes.has_api_key, false);
 });

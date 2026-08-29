@@ -86,6 +86,7 @@ import {
 } from "./operator-connect-routes.mjs";
 import { issueOperatorAgentToken } from "./operator-agent-access.mjs";
 import { ProviderDeliveryError, deliverApprovedProviderMessage } from "./provider-delivery.mjs";
+import { SocialMarketingPublishError, publishApprovedSocialDraft } from "./social-marketing-publishing.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
@@ -4992,6 +4993,58 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           : appendReplyDeliveryOutcomeEntry(input, config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
+    if (request.method === "POST" && url.pathname === "/api/admin/social-marketing/publish") {
+      if (!principal?.id) throw new Error("Social publishing requires a named authenticated operator");
+      const input = bindAuthenticatedOperator(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), principal, [
+        "approvedBy",
+      ]);
+      const workspaceId = String(input.workspaceId || input.workspace_id || "").trim();
+      if (!workspaceId) throw new Error("workspaceId is required for social publishing");
+      if (!canAdminAccessWorkspace(principal, workspaceId)) return adminForbidden("content:write");
+      const approved = String(input.approved || "").trim().toLowerCase() === "true";
+      if (!approved) throw new Error("Human approval is required before social publishing");
+      const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+      const approvedAt = config.reviewedAt || new Date().toISOString();
+      const publication = await (config.publishApprovedSocialDraft || publishApprovedSocialDraft)(
+        {
+          provider: input.provider,
+          workspaceId,
+          idempotencyKey: String(input.idempotencyKey || input.idempotency_key || "").trim(),
+          message: input.message,
+          link: input.link,
+          imageUrl: input.imageUrl || input.image_url,
+          caption: input.caption,
+          approved: true,
+          approvedBy: input.approvedBy,
+          approvedAt,
+        },
+        {
+          config: providerConfig,
+          payload: config.socialMarketingPayload || config.providerConnectionPayload || null,
+          fetchImpl: config.providerFetch || fetch,
+        },
+      );
+      recordAudit(
+        {
+          action: "social_marketing_published",
+          actor: principal.id,
+          objectType: "social_marketing_publication",
+          objectId: publication.idempotency_key,
+          metadata: {
+            workspace_id: publication.workspace_id,
+            provider: publication.provider,
+            external_post_id: publication.external_post_id,
+            external_account_id: publication.external_account_id,
+          },
+        },
+        config,
+        publication.completed_at || approvedAt,
+      );
+      return jsonResponse(publication.idempotent ? 200 : 201, {
+        kind: "social_marketing_publication",
+        publication,
+      });
+    }
     if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
       const result = await appendLeadPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
@@ -5389,6 +5442,15 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         error.code === "provider_delivery_unavailable" || error.code === "provider_delivery_not_connected"
           ? 503
           : ["provider_delivery_uncertain", "provider_delivery_conflict"].includes(error.code)
+            ? 409
+            : 502;
+      return jsonResponse(status, { kind: error.code, message: error.message, receipt: error.receipt || null });
+    }
+    if (error instanceof SocialMarketingPublishError) {
+      const status =
+        ["social_marketing_unavailable", "social_marketing_not_connected"].includes(error.code)
+          ? 503
+          : ["social_marketing_uncertain", "social_marketing_conflict"].includes(error.code)
             ? 409
             : 502;
       return jsonResponse(status, { kind: error.code, message: error.message, receipt: error.receipt || null });

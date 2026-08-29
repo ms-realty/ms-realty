@@ -88,6 +88,10 @@ import {
   ProviderDeliveryError,
   deliverApprovedProviderMessage as deliverProviderMessage,
 } from "./provider-delivery.mjs";
+import {
+  SocialMarketingPublishError,
+  publishApprovedSocialDraft as publishSocialDraft,
+} from "./social-marketing-publishing.mjs";
 import { renderProviderWebhookResponse } from "./provider-webhooks.mjs";
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import {
@@ -1141,6 +1145,7 @@ export function createHttpApp({
   providerWebhookReceivedAt,
   providerFetch = fetch,
   deliverApprovedProviderMessage = deliverProviderMessage,
+  publishApprovedSocialDraft = publishSocialDraft,
   viewingDurableStore = viewingDurableStoreConfigFromEnv(),
   viewingDurablePayload = null,
   readViewingsDurably = readViewingsDurablyStore,
@@ -6298,6 +6303,81 @@ export function createHttpApp({
               : ["provider_delivery_uncertain", "provider_delivery_conflict"].includes(error.code)
                 ? 409
                 : 400;
+          return adminJson(status, {
+            kind: error.code,
+            message: error.message,
+            ...(error.receipt ? { receipt: error.receipt } : {}),
+          });
+        }
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/social-marketing/publish") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        if (!principal?.id) throw new Error("Social publishing requires a named authenticated operator");
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["approvedBy"]);
+        const workspaceId = String(input.workspaceId || input.workspace_id || "").trim();
+        if (!workspaceId) throw new Error("workspaceId is required for social publishing");
+        if (!canAdminAccessWorkspace(principal, workspaceId)) return adminForbidden("content:write");
+        const approved = String(input.approved || "").trim().toLowerCase() === "true";
+        if (!approved) throw new Error("Human approval is required before social publishing");
+        const approvedAt = reviewedAt || new Date().toISOString();
+        const publication = await publishApprovedSocialDraft(
+          {
+            provider: input.provider,
+            workspaceId,
+            idempotencyKey: String(input.idempotencyKey || input.idempotency_key || "").trim(),
+            message: input.message,
+            link: input.link,
+            imageUrl: input.imageUrl || input.image_url,
+            caption: input.caption,
+            approved: true,
+            approvedBy: input.approvedBy,
+            approvedAt,
+          },
+          {
+            config: providerConnection,
+            payload: providerConnectionPayload,
+            fetchImpl: providerFetch,
+          },
+        );
+        const existingAudit = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) =>
+                row.action === "social_marketing_published" && row.object_id === publication.idempotency_key,
+            )
+          : false;
+        if (!existingAudit) {
+          recordAudit(
+            {
+              action: "social_marketing_published",
+              actor: principal.id,
+              objectType: "social_marketing_publication",
+              objectId: publication.idempotency_key,
+              metadata: {
+                workspace_id: publication.workspace_id,
+                provider: publication.provider,
+                external_post_id: publication.external_post_id,
+                external_account_id: publication.external_account_id,
+              },
+            },
+            publication.completed_at || approvedAt,
+          );
+        }
+        return adminJson(publication.idempotent ? 200 : 201, {
+          kind: "social_marketing_publication",
+          publication,
+        });
+      } catch (error) {
+        if (error instanceof SocialMarketingPublishError) {
+          const status =
+            ["social_marketing_unavailable", "social_marketing_not_connected"].includes(error.code)
+              ? 503
+              : ["social_marketing_uncertain", "social_marketing_conflict"].includes(error.code)
+                ? 409
+                : 502;
           return adminJson(status, {
             kind: error.code,
             message: error.message,

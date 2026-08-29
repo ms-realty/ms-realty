@@ -115,6 +115,7 @@ const ADMIN_ROUTE_METHODS = [
   ["GET", "/api/admin/security/two-factor"],
   ["POST", "/api/admin/security/two-factor/verify"],
   ["POST", "/api/admin/seller-pipeline/outcome"],
+  ["POST", "/api/admin/social-marketing/publish"],
   ["GET", "/api/admin/seo-evidence/export"],
   ["POST", "/api/admin/seo-evidence/import"],
   ["GET", "/api/admin/seo-evidence"],
@@ -181,7 +182,7 @@ function operationFamily(pathname) {
   if (/\/security\/|\/data-exports/.test(pathname)) return "security";
   if (/\/cases(?:\/|$)/.test(pathname)) return "cases";
   if (
-    /\/listings?|\/listing-quality|\/media\/|\/tours\/|\/translations?|\/locales$|\/approved-content|\/cms-collections|\/redirect-/.test(
+    /\/listings?|\/listing-quality|\/media\/|\/social-marketing\/|\/tours\/|\/translations?|\/locales$|\/approved-content|\/cms-collections|\/redirect-/.test(
       pathname,
     )
   ) {

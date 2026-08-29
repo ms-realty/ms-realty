@@ -295,7 +295,7 @@ test("config wires shared access onto admins, content, and case collections", as
     assert.equal(bySlug.lead_contacts.access.read(req(admin)), true);
     assert.deepEqual(bySlug.lead_contacts.access.read(req(broker)), { workspace_id: { in: ["ws-sandanski"] } });
     assert.equal(bySlug.lead_contacts.access.read(req(brokerNoScope)), false);
-    for (const slug of ["provider_connections", "provider_webhook_events", "provider_delivery_receipts", "hermes_owner_receipts", "viewings"]) {
+    for (const slug of ["provider_connections", "provider_webhook_events", "provider_delivery_receipts", "hermes_owner_receipts", "social_marketing_publications", "viewings"]) {
       for (const operation of ["create", "read", "update", "delete"]) {
         assert.equal(bySlug[slug].access[operation](req(admin)), false, `${slug} ${operation} must stay server-only`);
       }

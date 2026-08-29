@@ -23,6 +23,7 @@ import * as migration_20260827_120000_admin_password_change_required from './202
 import * as migration_20260828_120000_hermes_owner_receipts from './20260828_120000_hermes_owner_receipts';
 import * as migration_20260828_130000_workspace_settings from './20260828_130000_workspace_settings';
 import * as migration_20260829_120000_durable_viewing_trip_requests from './20260829_120000_durable_viewing_trip_requests';
+import * as migration_20260829_170000_social_marketing_publications from './20260829_170000_social_marketing_publications';
 
 export const migrations = [
   {
@@ -149,5 +150,10 @@ export const migrations = [
     up: migration_20260829_120000_durable_viewing_trip_requests.up,
     down: migration_20260829_120000_durable_viewing_trip_requests.down,
     name: '20260829_120000_durable_viewing_trip_requests',
+  },
+  {
+    up: migration_20260829_170000_social_marketing_publications.up,
+    down: migration_20260829_170000_social_marketing_publications.down,
+    name: '20260829_170000_social_marketing_publications',
   },
 ];

@@ -28,7 +28,7 @@ const key = (row) => `${row.method} ${row.pathname}`;
 test("owner/operator catalog covers every admin route method exactly once", () => {
   assert.equal(assertOwnerOperatorCatalog(), true);
   const discovered = discoverAdminRoutes();
-  assert.equal(discovered.length, 117);
+  assert.equal(discovered.length, 118);
   assert.equal(new Set(discovered.map((row) => key(row))).size, discovered.length);
   assert.equal(ADMIN_ROUTE_COVERAGE.length, discovered.length);
   assert.deepEqual(
@@ -72,16 +72,16 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   const artifact = JSON.parse(fs.readFileSync(fromRoot("production", "data", "owner-operator-coverage.json"), "utf8"));
   assert.deepEqual(artifact, coverage);
   assert.deepEqual(artifact.summary, {
-    admin_route_files: 103,
-    admin_methods: 117,
+    admin_route_files: 104,
+    admin_methods: 118,
     hermes_tools: 3,
-    authorized_workflows: 120,
-    reachable_workflows: 120,
+    authorized_workflows: 121,
+    reachable_workflows: 121,
     reachability_percent: 100,
     providers: 10,
-    enabled_integrations: 2,
+    enabled_integrations: 4,
     managed_systems: 3,
-    disabled_integrations: 5,
+    disabled_integrations: 3,
   });
   const command = artifact.admin_routes.find((row) => row.method === "POST" && row.pathname === "/api/admin/hermes");
   assert.equal(command.sensitive, true);
@@ -149,7 +149,7 @@ test("provider matrix enables only one-click connections with real consumers", (
 
   assert.deepEqual(
     coverage.provider_matrix.filter((row) => row.state === "disabled").map((row) => row.provider),
-    ["google_drive", "viber", "facebook", "instagram", "github"],
+    ["google_drive", "viber", "github"],
   );
   assert.deepEqual(
     coverage.provider_matrix.filter((row) => row.state === "managed").map((row) => row.provider),

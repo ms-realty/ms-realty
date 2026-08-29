@@ -26,8 +26,8 @@ import { operatorProviderCards } from "./operator-provider-catalog.mjs";
 
 export const OPERATOR_TOKEN_ENV = "MS_REALTY_OPERATOR_TOKEN";
 const OPERATOR_TOKEN_PLACEHOLDER = `\${${OPERATOR_TOKEN_ENV}}`;
-const OPERATIONAL_PROVIDER_IDS = Object.freeze(["google", "whatsapp"]);
-const SUPPORTING_PROVIDER_IDS = Object.freeze(["facebook", "instagram", "viber"]);
+const OPERATIONAL_PROVIDER_IDS = Object.freeze(["google", "whatsapp", "facebook", "instagram"]);
+const SUPPORTING_PROVIDER_IDS = Object.freeze(["viber"]);
 
 const PROMPT_TEMPLATE = `You are now the operations copilot for MS Realty, a family real-estate agency in Sandanski, Bulgaria (legacy sites makler-realty.com and makler-realty.ru; the authoritative public platform runs at __BASE_URL__).
 

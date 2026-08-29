@@ -12,6 +12,7 @@ import { FUNNEL_EVENT_COLLECTION } from "./production/lib/event-durable-store.mj
 import { PROVIDER_CONNECTION_COLLECTION } from "./production/lib/provider-connections.mjs";
 import { PROVIDER_DELIVERY_RECEIPT_COLLECTION } from "./production/lib/provider-delivery.mjs";
 import { HERMES_OWNER_RECEIPT_COLLECTION } from "./production/lib/hermes-owner-command.mjs";
+import { SOCIAL_MARKETING_PUBLICATION_COLLECTION } from "./production/lib/social-marketing-publishing.mjs";
 import { PROVIDER_WEBHOOK_EVENT_COLLECTION } from "./production/lib/provider-webhooks.mjs";
 import { VIEWING_COLLECTION } from "./production/lib/viewing-durable-store.mjs";
 import { VIEWING_TRIP_REQUEST_COLLECTION } from "./production/lib/viewing-trip-requests.mjs";
@@ -331,6 +332,11 @@ const hermesOwnerReceiptCollectionWithAccess = {
   access: { ...serverOwnedCollectionAccess, read: () => false },
 };
 
+const socialMarketingPublicationCollectionWithAccess = {
+  ...SOCIAL_MARKETING_PUBLICATION_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
 const workspaceSettingsCollectionWithAccess = {
   ...WORKSPACE_SETTINGS_COLLECTION,
   access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
@@ -399,6 +405,7 @@ export default buildConfig({
     providerWebhookEventCollectionWithAccess,
     providerDeliveryReceiptCollectionWithAccess,
     hermesOwnerReceiptCollectionWithAccess,
+    socialMarketingPublicationCollectionWithAccess,
     workspaceSettingsCollectionWithAccess,
     VIEWING_COLLECTION,
     viewingTripRequestCollectionWithAccess,

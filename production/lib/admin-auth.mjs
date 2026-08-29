@@ -120,6 +120,7 @@ const CONTENT_WRITE_PATHS = new Set([
   "/api/admin/listings/publication-schedules/run-due",
   "/api/admin/media/reviews",
   "/api/admin/media/uploads",
+  "/api/admin/social-marketing/publish",
   "/api/admin/tours/approve",
 ]);
 

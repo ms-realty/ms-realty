@@ -118,6 +118,8 @@ export function providerConnectionConfigFromEnv(env = process.env) {
     metaAppSecret: String(env.MS_REALTY_META_APP_SECRET || "").trim(),
     metaConfigId: String(env.MS_REALTY_META_EMBEDDED_SIGNUP_CONFIG_ID || "").trim(),
     metaGraphVersion: String(env.MS_REALTY_META_GRAPH_VERSION || "").trim(),
+    metaFacebookPublishReady: String(env.MS_REALTY_META_FACEBOOK_PUBLISH_READY || "").trim() === "true",
+    metaInstagramPublishReady: String(env.MS_REALTY_META_INSTAGRAM_PUBLISH_READY || "").trim() === "true",
     metaWebhookVerifyToken: String(env.MS_REALTY_META_WEBHOOK_VERIFY_TOKEN || "").trim(),
     viberCommercialReady: String(env.MS_REALTY_VIBER_COMMERCIAL_READY || "").trim() === "true",
     webhookMaxBytes: Number(env.MS_REALTY_PROVIDER_WEBHOOK_MAX_BYTES || 1024 * 1024),

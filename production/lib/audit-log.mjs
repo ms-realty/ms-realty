@@ -70,6 +70,7 @@ const ADMIN_ACTIONS = new Set([
   "realty_case_opened",
   "seller_pipeline_outcome_recorded",
   "seo_evidence_imported",
+  "social_marketing_published",
   "tour_approved",
   "translation_drafted",
   "translation_approved",

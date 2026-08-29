@@ -319,7 +319,12 @@ test("the connect page never renders an operator bearer token or credential fiel
   assert.match(html, /data-react-admin-ui="connections"/);
   assert.match(html, /data-provider="google"/);
   assert.match(html, /data-provider="whatsapp"/);
-  assert.doesNotMatch(html, /data-provider="(?:github|viber|cloudflare|neon)"/);
+  assert.match(html, /data-provider="facebook"/);
+  assert.match(html, /data-provider="instagram"/);
+  assert.doesNotMatch(html, /data-provider="github"/);
+  assert.doesNotMatch(html, /data-provider="cloudflare"/);
+  assert.doesNotMatch(html, /data-provider="neon"/);
+  assert.doesNotMatch(html, /href="\/api\/admin\/connections\?provider=(?:github|viber|cloudflare|neon)&amp;action=start"/);
   assert.match(html, /data-codex-plugin-install="ms-realty-operator"/);
   // Each workbench language gets the whole page, script messages included.
   const bulgarian = renderOperatorConnectPage({

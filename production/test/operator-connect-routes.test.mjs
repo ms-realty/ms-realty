@@ -36,6 +36,8 @@ const PROVIDER_CONFIG = {
   metaAppSecret: "meta-app-secret-at-least-sixteen-characters",
   metaConfigId: "987654321098765",
   metaGraphVersion: "v22.0",
+  metaFacebookPublishReady: true,
+  metaInstagramPublishReady: true,
   metaWebhookVerifyToken: "meta-webhook-verify-token-at-least-24",
   viberCommercialReady: true,
   webhookMaxBytes: 1024 * 1024,
@@ -152,7 +154,11 @@ test("both servers render only working one-click connections in the persistent o
         assert.ok(body.includes(`data-provider="${id}"`), id);
       }
       for (const id of OPERATOR_PROVIDERS.filter((provider) => !OWNER_CONNECTABLE_PROVIDERS.includes(provider))) {
-        assert.equal(body.includes(`data-provider="${id}"`), false, `${id} has no owner connection action`);
+        assert.equal(
+          body.includes(`/api/admin/connections?provider=${id}&amp;action=start`),
+          false,
+          `${id} has no owner connection action`,
+        );
       }
       assert.ok(body.includes('data-react-admin-ui="connections"'), "persistent admin shell");
       assert.ok(body.includes('data-managed-system="hermes"'), "Hermes is managed system state");
@@ -176,7 +182,7 @@ test("both servers render only working one-click connections in the persistent o
   });
 });
 
-test("a signed-in Payload owner gets the real Google and WhatsApp one-click actions", async (t) => {
+test("a signed-in Payload owner gets the real Google, WhatsApp, Facebook, and Instagram one-click actions", async (t) => {
   const app = createHttpApp({
     reviewedAt: "2026-08-24T12:00:00.000Z",
     auditLogPath: auditFile(t),
@@ -191,6 +197,8 @@ test("a signed-in Payload owner gets the real Google and WhatsApp one-click acti
   });
   assert.equal(response.status, 200);
   assert.ok(response.body.includes("/api/admin/connections?provider=google&amp;action=start"));
+  assert.ok(response.body.includes("/api/admin/connections?provider=facebook&amp;action=start"));
+  assert.ok(response.body.includes("/api/admin/connections?provider=instagram&amp;action=start"));
   assert.ok(response.body.includes("data-whatsapp-connect=\"true\""));
   assert.ok(response.body.includes("data-whatsapp-embedded-signup=\"true\""));
   assert.doesNotMatch(response.body, /<input[^>]+type="password"/);
@@ -322,8 +330,8 @@ test("the assistant configuration route hands back a working config and records 
   });
   assert.equal(catalogResponse.status, 200);
   assert.equal(catalogResponse.body.kind, "owner_operator_catalog");
-    assert.equal(catalogResponse.body.summary.total, 117);
-    assert.equal(catalogResponse.body.operations.length, 117);
+    assert.equal(catalogResponse.body.summary.total, 118);
+    assert.equal(catalogResponse.body.operations.length, 118);
   assert.equal(
     catalogResponse.body.operations.filter((row) => row.execution === "browser_session").length,
     OWNER_OPERATOR_BROWSER_OPERATIONS.length,

@@ -3,16 +3,16 @@
   "plugin_id": "ms-realty-operator",
   "generated_by": "production/scripts/build-owner-operator-coverage.mjs",
   "summary": {
-    "admin_route_files": 103,
-    "admin_methods": 117,
+    "admin_route_files": 104,
+    "admin_methods": 118,
     "hermes_tools": 3,
-    "authorized_workflows": 120,
-    "reachable_workflows": 120,
+    "authorized_workflows": 121,
+    "reachable_workflows": 121,
     "reachability_percent": 100,
     "providers": 10,
-    "enabled_integrations": 2,
+    "enabled_integrations": 4,
     "managed_systems": 3,
-    "disabled_integrations": 5
+    "disabled_integrations": 3
   },
   "admin_routes": [
     {
@@ -2478,6 +2478,34 @@
       "reachability": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
+      "operation": "admin_post_social_marketing_publish",
+      "method": "POST",
+      "pathname": "/api/admin/social-marketing/publish",
+      "family": "content",
+      "tool": "ms_realty_admin_write",
+      "capability": "content:write",
+      "read_only": false,
+      "sensitive": false,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/social-marketing/publish/route.js",
+      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
       "operation": "admin_post_team",
       "method": "POST",
       "pathname": "/api/admin/team",
@@ -2871,27 +2899,63 @@
     },
     {
       "provider": "facebook",
-      "state": "disabled",
-      "enabled": false,
-      "owner_surface": "hidden",
+      "state": "enabled",
+      "enabled": true,
+      "owner_surface": "one_click",
       "authorization": "oauth_authorization_code",
-      "owner_action": null,
-      "lifecycle": [],
-      "downstream_consumers": [],
-      "reason": "no_approved_runtime_consumer",
+      "owner_action": {
+        "kind": "oauth_redirect",
+        "method": "GET",
+        "pathname": "/api/admin/connections",
+        "action": "start",
+        "provider": "facebook"
+      },
+      "lifecycle": [
+        "authorizing",
+        "connected",
+        "reauthorize",
+        "error",
+        "disconnected"
+      ],
+      "downstream_consumers": [
+        {
+          "workflow": "approved_facebook_page_publish",
+          "source_file": "production/lib/social-marketing-publishing.mjs",
+          "symbol": "publishApprovedSocialDraft"
+        }
+      ],
+      "reason": null,
       "owner_secret_fields": false,
       "source_file": "production/lib/operator-provider-catalog.mjs"
     },
     {
       "provider": "instagram",
-      "state": "disabled",
-      "enabled": false,
-      "owner_surface": "hidden",
+      "state": "enabled",
+      "enabled": true,
+      "owner_surface": "one_click",
       "authorization": "oauth_authorization_code",
-      "owner_action": null,
-      "lifecycle": [],
-      "downstream_consumers": [],
-      "reason": "no_approved_runtime_consumer",
+      "owner_action": {
+        "kind": "oauth_redirect",
+        "method": "GET",
+        "pathname": "/api/admin/connections",
+        "action": "start",
+        "provider": "instagram"
+      },
+      "lifecycle": [
+        "authorizing",
+        "connected",
+        "reauthorize",
+        "error",
+        "disconnected"
+      ],
+      "downstream_consumers": [
+        {
+          "workflow": "approved_instagram_publish",
+          "source_file": "production/lib/social-marketing-publishing.mjs",
+          "symbol": "publishApprovedSocialDraft"
+        }
+      ],
+      "reason": null,
       "owner_secret_fields": false,
       "source_file": "production/lib/operator-provider-catalog.mjs"
     },
