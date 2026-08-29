@@ -13,6 +13,7 @@ const leadDurableStore = {
   payloadSecret: "browser-qa-payload-secret",
   databaseUrl: "postgres://browser-qa.invalid/ms_realty",
   contactSecret: leadContactKey,
+  workspaceId: "sandanski",
 };
 Object.assign(process.env, {
   MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
