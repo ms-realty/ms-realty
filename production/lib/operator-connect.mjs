@@ -218,7 +218,7 @@ function ownerConnectionView(card, copy, canManageConnections) {
     viber: copy.viberUsage,
     cloudflare: copy.cloudflareUsage,
     neon: copy.neonUsage,
-    ai: inactive ? copy.aiInactiveUsage : copy.aiUsage,
+    ai: inactive ? copy.aiInactiveUsage : connected ? copy.aiUsage : copy.aiAvailableUsage,
   }[card.id] || "";
   const blockedText = {
     facebook: copy.facebookBlocked,
@@ -362,7 +362,12 @@ export function buildOperatorConnectPayload({
         id: "hermes",
         title: copy.managedHermesTitle,
         description: copy.managedHermesDescription,
-        helper_text: hermesMode === "self_hosted" ? copy.managedHermesSelfHostedUsage : copy.aiUsage,
+        helper_text:
+          hermesMode === "openrouter"
+            ? copy.aiUsage
+            : hermesMode === "self_hosted"
+              ? copy.managedHermesSelfHostedUsage
+              : copy.managedHermesUnconfiguredUsage,
         ...systemState(hermesReady),
         model: providerConfig?.hermes?.model || "",
         endpoint: providerConfig?.hermes?.endpoint_redacted || "",

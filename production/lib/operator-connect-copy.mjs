@@ -105,8 +105,10 @@ const CONNECT_COPY = {
     cloudflareUsage: "Домейнът и защитата се управляват извън този екран; тук не събираме токени.",
     neonUsage: "Базата е управлявана зависимост. Проверява се отделно от owner връзките.",
     aiUsage: "Hermes използва разрешения от OpenRouter ключ за планове и чернови; публикуването и изпращането остават за човек.",
+    aiAvailableUsage: "Свързването с OpenRouter позволява на Hermes да подготвя планове и чернови; връзката става активна само когато този режим е избран.",
     aiInactiveUsage: "OpenRouter е разрешен и записан, но Hermes още използва самостоятелно хоствания модел. Връзката не се отчита като активна.",
     managedHermesSelfHostedUsage: "Hermes използва настроения самостоятелно хостван модел; OpenRouter връзка не го заменя автоматично.",
+    managedHermesUnconfiguredUsage: "Няма потвърден активен модел за Hermes. Завърши настройката на средата и провери отново.",
     managedDataUsage: "Ако защитеното хранилище липсва, нови връзки и разписки не се приемат.",
     runtimeReady: "Готово",
 
@@ -272,8 +274,10 @@ const CONNECT_COPY = {
     cloudflareUsage: "Домен и защита управляются вне этого экрана; здесь мы не собираем токены.",
     neonUsage: "База данных — управляемая зависимость. Её проверяют отдельно от owner-подключений.",
     aiUsage: "Hermes использует разрешённый OpenRouter ключ для планов и черновиков; публикация и отправка остаются за человеком.",
+    aiAvailableUsage: "Подключение OpenRouter позволяет Hermes готовить планы и черновики; связь становится активной только после выбора этого режима.",
     aiInactiveUsage: "OpenRouter авторизован и сохранён, но Hermes пока использует собственный размещённый сервер модели. Подключение не считается активным.",
     managedHermesSelfHostedUsage: "Hermes использует настроенный собственный сервер модели; подключение OpenRouter не заменяет его автоматически.",
+    managedHermesUnconfiguredUsage: "Для Hermes не подтверждён активный провайдер модели. Заверши настройку среды и проверь снова.",
     managedDataUsage: "Если защищённое хранилище недоступно, новые подключения и квитанции не будут приняты.",
     runtimeReady: "Готово",
 
@@ -439,8 +443,10 @@ const CONNECT_COPY = {
     cloudflareUsage: "Domain and edge security are managed outside this screen; no token is collected here.",
     neonUsage: "The database is a managed dependency. It is checked separately from owner connections.",
     aiUsage: "Hermes uses the OpenRouter-authorized key for plans and drafts; publishing and sending remain human actions.",
+    aiAvailableUsage: "Connecting OpenRouter lets Hermes prepare plans and drafts; the connection becomes active only when that runtime mode is selected.",
     aiInactiveUsage: "OpenRouter is authorized and stored, but Hermes still uses the self-hosted model runtime. This connection is not counted as active.",
     managedHermesSelfHostedUsage: "Hermes uses the configured self-hosted model runtime; an OpenRouter connection does not replace it automatically.",
+    managedHermesUnconfiguredUsage: "No active Hermes model runtime is confirmed. Complete the environment setup and check again.",
     managedDataUsage: "If the protected store is unavailable, new connections and receipts will not be accepted.",
     runtimeReady: "Ready",
 
