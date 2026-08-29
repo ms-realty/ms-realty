@@ -29,6 +29,7 @@ const REQUIRED_FIELDS = [
   "publication_authorized_by",
   "publication_authorized_at",
   "status",
+  "citations",
 ];
 
 function text(value, field, id) {
@@ -66,18 +67,26 @@ function translatedHash(record) {
 }
 
 function assertCitations(citations, listing, id) {
-  if (citations === undefined) return;
   if (!Array.isArray(citations) || !citations.length) throw new Error(`${id} citations must be a non-empty array`);
   const sourceCitation = citations.find(
     (citation) =>
       citation === listing.url ||
-      citation === listing.id ||
       (citation &&
         typeof citation === "object" &&
-        (String(citation.object_id || citation.listing_id || "") === listing.id ||
-          String(citation.source_url || "") === listing.url)),
+        String(citation.source_url || "") === listing.url),
   );
-  if (!sourceCitation) throw new Error(`${id} citations must preserve the listing id or source URL`);
+  if (!sourceCitation) throw new Error(`${id} citations must preserve the exact source URL`);
+}
+
+function factDigits(value) {
+  return [
+    ...String(value || "")
+      .replace(/(?<!\p{L})([mм])\s*[²2](?=\b|\p{P}|\s|$)/giu, "$1²")
+      .matchAll(/\p{Nd}/gu),
+  ]
+    .map((match) => match[0])
+    .sort()
+    .join("");
 }
 
 function normalizeRecord(record, { listing, locale, sourceHash }) {
@@ -110,6 +119,10 @@ function normalizeRecord(record, { listing, locale, sourceHash }) {
   if (normalized.locale === normalized.source_locale) throw new Error(`${id} cannot translate into its source locale`);
   if (normalized.source_hash !== sourceHash) throw new Error(`${id} has stale source_hash`);
   if (!LISTING_TRANSLATION_STATUSES.includes(normalized.status)) throw new Error(`${id} has invalid status ${normalized.status}`);
+  if (normalized.content_origin !== "manual_translation") throw new Error(`${id} must be a manual translation`);
+  if (!normalized.publication_authorized_by || !normalized.publication_authorized_at) {
+    throw new Error(`${id} requires publication authorization`);
+  }
   if (charLength(normalized.seo_title) > 60) throw new Error(`${id} seo_title exceeds 60 characters`);
   const metaLength = charLength(normalized.meta_description);
   const minimumMetaLength = normalized.locale === "he" ? 90 : 120;
@@ -126,6 +139,12 @@ function normalizeRecord(record, { listing, locale, sourceHash }) {
     normalized.description === String(source.description || "").trim()
   ) {
     throw new Error(`${id} translated copy matches the source placeholder`);
+  }
+  if (
+    factDigits(`${source.title || source.h1 || ""}\n${source.description || ""}`) !==
+    factDigits(`${normalized.title}\n${normalized.description}`)
+  ) {
+    throw new Error(`${id} does not preserve every numeric source fact`);
   }
   if (normalized.locale === "he") {
     if (locale.direction !== "rtl") throw new Error("Hebrew locale metadata must be RTL");
@@ -160,14 +179,17 @@ function schemaRow(record, locale) {
     description: record.description,
     seo_title: record.seo_title,
     meta_description: record.meta_description,
+    translator: record.translator,
     content_origin: record.content_origin,
     reviewer: record.reviewed_by,
     approved_at: record.reviewed_at,
     human_approved: published,
     publication_authorized_by: record.publication_authorized_by,
-    published_at: record.publication_authorized_at,
+    publication_authorized_at: record.publication_authorized_at,
+    published_at: published ? record.publication_authorized_at : null,
     direction: locale.direction,
     public_indexable: published,
+    citations: record.citations,
   };
 }
 

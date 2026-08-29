@@ -39,15 +39,16 @@ function fixedLength(value, length = 130) {
 
 function catalogRecord(listing, locale) {
   const hebrew = locale === "he";
+  const fact = String(Number(listing.id.slice(-4)));
   return {
     listing_id: listing.id,
     source_locale: listing.locale,
     locale,
     source_hash: contentHash(listingSourceSnapshot(listing)),
-    title: hebrew ? `נכס למכירה ${listing.id}` : `${locale.toUpperCase()} translated title ${listing.id}`,
+    title: hebrew ? `נכס למכירה עם נתון ${fact}` : `${locale.toUpperCase()} translated property title ${fact}`,
     description: hebrew
-      ? `תיאור מלא ומדויק של הנכס ${listing.id} עם כל הפרטים שנמסרו במקור.`
-      : `${locale.toUpperCase()} translated description for ${listing.id} with every source property detail preserved.`,
+      ? `תיאור מלא ומדויק של הנכס עם כל הפרטים שנמסרו במקור, כולל נתון ${fact}.`
+      : `${locale.toUpperCase()} translated description with every source property detail preserved, including value ${fact}.`,
     seo_title: hebrew ? `נכס ${listing.id}` : `${locale.toUpperCase()} property ${listing.id}`,
     meta_description: fixedLength(
       hebrew
@@ -58,8 +59,8 @@ function catalogRecord(listing, locale) {
     content_origin: "manual_translation",
     reviewed_by: null,
     reviewed_at: null,
-    publication_authorized_by: null,
-    publication_authorized_at: null,
+    publication_authorized_by: "agency_owner",
+    publication_authorized_at: "2026-08-30T00:00:00Z",
     status: "human_review_pending",
     citations: [{ source: "cms_seed", object_id: listing.id, source_url: listing.url }],
   };
@@ -99,6 +100,10 @@ test("complete manual translation batches load deterministically and project pen
   assert.equal(hebrew.human_approved, false);
   assert.equal(hebrew.public_indexable, false);
   assert.equal(hebrew.reviewer, null);
+  assert.equal(hebrew.translator, "catalog-test-translator");
+  assert.equal(hebrew.publication_authorized_at, "2026-08-30T00:00:00Z");
+  assert.equal(hebrew.published_at, null);
+  assert.equal(hebrew.citations[0].source_url, listings[0].url);
   assert.match(hebrew.translated_hash, /^[a-f0-9]{64}$/);
 });
 
@@ -184,7 +189,7 @@ test("catalog validation rejects incomplete, duplicate, stale, placeholder, SEO,
   assert.throws(
     () =>
       validateListingTranslationsCatalog(
-        [{ ...hebrew, title: "English", description: "English description", meta_description: fixedLength("English metadata. ") }],
+        [{ ...hebrew, title: "English 1", description: "English description 1", meta_description: fixedLength("English metadata. ") }],
         { listings, registry, requireComplete: false },
       ),
     /must contain Hebrew copy/,
@@ -196,7 +201,34 @@ test("catalog validation rejects incomplete, duplicate, stale, placeholder, SEO,
         registry,
         requireComplete: false,
       }),
-    /citations must preserve the listing id or source URL/,
+    /citations must preserve the exact source URL/,
+  );
+  assert.throws(
+    () =>
+      validateListingTranslationsCatalog([{ ...records[0], description: `${records[0].description} 9` }], {
+        listings,
+        registry,
+        requireComplete: false,
+      }),
+    /does not preserve every numeric source fact/,
+  );
+  const russianWithWordEndingEm = records.find(
+    (record) => record.listing_id === "MS-CRAWL-0002" && record.locale === "ru",
+  );
+  assert.doesNotThrow(() =>
+    validateListingTranslationsCatalog(
+      [{ ...russianWithWordEndingEm, title: "Объект 2", description: "В нем 2 этажа." }],
+      { listings, registry, requireComplete: false },
+    ),
+  );
+  assert.throws(
+    () =>
+      validateListingTranslationsCatalog([{ ...records[0], publication_authorized_by: null, publication_authorized_at: null }], {
+        listings,
+        registry,
+        requireComplete: false,
+      }),
+    /requires publication authorization/,
   );
 });
 

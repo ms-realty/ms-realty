@@ -29,6 +29,18 @@ export function listingTranslationCopy(translation) {
   return copy;
 }
 
+export function publicationAuthorizedListingTranslationCopy(translation) {
+  const authorizedAt = translationText(translation?.publication_authorized_at);
+  if (
+    !translationText(translation?.publication_authorized_by) ||
+    !authorizedAt ||
+    Number.isNaN(Date.parse(authorizedAt))
+  ) {
+    return null;
+  }
+  return listingTranslationCopy(translation);
+}
+
 export function publishedListingTranslationCopy(translation) {
   const approvedAt = translationText(translation?.approved_at);
   const authorizedAt = translationText(translation?.publication_authorized_at);
@@ -45,7 +57,7 @@ export function publishedListingTranslationCopy(translation) {
   ) {
     return null;
   }
-  return listingTranslationCopy(translation);
+  return publicationAuthorizedListingTranslationCopy(translation);
 }
 
 export function loadListings(path = DEFAULT_LISTINGS_PATH) {

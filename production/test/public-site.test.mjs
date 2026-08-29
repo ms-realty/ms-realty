@@ -162,6 +162,19 @@ test("complete pending-review copy is publicly readable but remains outside inde
   assert.equal(page.fallback.active, false);
   assert.equal(page.translation.status, "human_edited");
   assert.equal(page.translation.human_approved, false);
+
+  const unauthorized = renderListingPage({
+    registry,
+    listing,
+    localeCode: "el",
+    translations: [
+      ...approvedTranslationRecordsForListing(registry, listing),
+      { ...pendingTranslation("el", copy), publication_authorized_by: null, publication_authorized_at: null },
+    ],
+  });
+  assert.equal(unauthorized.fallback.active, true);
+  assert.equal(unauthorized.body.content_locale, "bg");
+  assert.notEqual(unauthorized.body.h1, copy.title);
 });
 
 test("listing language navigation keeps users on the same listing in every public language", () => {

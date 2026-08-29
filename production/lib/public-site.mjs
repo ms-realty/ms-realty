@@ -36,7 +36,7 @@ import {
 import {
   approvedTranslationRecordsForListing,
   listingToPublicViewModel,
-  listingTranslationCopy,
+  publicationAuthorizedListingTranslationCopy,
   publishedListingTranslationCopy,
 } from "./content.mjs";
 import { savedSearchWritesDisabledFromEnv } from "./runtime-data-boundary.mjs";
@@ -3420,7 +3420,7 @@ export function renderListingPage({
   const view = listingToPublicViewModel(listing);
   const allTranslations = translations || listing.translations || approvedTranslationRecordsForListing(registry, listing);
   const translation = translationFor(allTranslations, locale.code);
-  const translated = translation ? listingTranslationCopy(translation) : null;
+  const translated = translation ? publicationAuthorizedListingTranslationCopy(translation) : null;
   const approvedTranslation = translation ? publishedListingTranslationCopy(translation) : null;
   const translationIndexable = Boolean(approvedTranslation && isTranslationIndexable(registry, translation));
   const indexable = resolved.available && translationIndexable;
