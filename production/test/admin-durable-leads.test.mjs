@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { importLeadLedgerJsonl } from "../lib/lead-ledger.mjs";
+import { LEAD_OPERATIONS } from "../lib/lead-ops-durable-store.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
+import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
 const TOKEN = "durable-admin-read-token-0123456789abcdef";
 const CONTACT_SECRET = "durable-admin-contact-key-32-characters-minimum";
@@ -23,6 +26,7 @@ const DURABLE_ENV = {
   MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
 };
 const HEADERS = { authorization: `Bearer ${TOKEN}` };
+const PAYLOAD_DRAFT_RUNTIME = createPayloadDraftRuntime(loadCmsSeed()).payload;
 
 const durableLead = {
   received_at: "2026-08-10T09:00:00.000Z",
@@ -57,6 +61,10 @@ const durableLead = {
   message_original: "Durable private message",
   contact_available: true,
 };
+
+function durableOperationReader(seed = {}) {
+  return async ({ operation }) => seed[operation] || [];
+}
 
 function config(readLeadIntakesDurably, overrides = {}) {
   return {
@@ -104,6 +112,56 @@ test("durable admin leads are read only after authentication and never merged wi
   assert.equal(today.status, 200);
   assert.deepEqual(todayBody.leads.map((lead) => lead.lead_id), [durableLead.lead_id]);
   assert.equal(JSON.stringify(todayBody).includes("lead-draft-62c8e259-c555-4583-a2c4-0a1b5be53731"), false);
+
+  const todayHtml = await adminGet("/admin/today?locale=en", routeConfig);
+  const todayPage = await todayHtml.text();
+  assert.equal(todayHtml.status, 200);
+  assert.doesNotMatch(todayPage, /<code class="crm-mono adm-task-list__reference">durable-admin-lead<\/code>/);
+  assert.match(todayPage, /data-next-actions="true"/);
+});
+
+test("durable admin leads keep durable viewings and writable lead actions when the durable stores are configured", async () => {
+  const viewing = {
+    id: "durable-admin-viewing-1",
+    lead_id: durableLead.lead_id,
+    listing_reference: durableLead.listing_reference,
+    original_language: "bg",
+    admin_locale: "en",
+    broker: "durable_admin",
+    starts_at: "2026-08-11T10:00:00.000Z",
+    booked_at: "2026-08-10T09:10:00.000Z",
+    channel: "property_viewing",
+    status: "booked",
+  };
+  const routeConfig = config(async () => [durableLead], {
+    leadOperationsDurableStore: {
+      leadOperationsDurableStoreEnabled: true,
+      payloadSecret: DURABLE_ENV.PAYLOAD_SECRET,
+      databaseUrl: DURABLE_ENV.DATABASE_URL,
+      workspaceId: DURABLE_ENV.MS_REALTY_WORKSPACE_ID,
+    },
+    readLeadOperationsDurably: async () => [],
+    viewingDurableStore: {
+      viewingDurableStoreEnabled: true,
+      payloadSecret: DURABLE_ENV.PAYLOAD_SECRET,
+      databaseUrl: DURABLE_ENV.DATABASE_URL,
+      contactSecret: CONTACT_SECRET,
+      workspaceId: DURABLE_ENV.MS_REALTY_WORKSPACE_ID,
+    },
+    readViewingsDurably: async () => [viewing],
+    readViewingTripRequestsDurably: async () => [],
+    readViewingTripContactsDurably: async () => new Map(),
+    readSellerPipelineItemsDurably: async () => [],
+  });
+
+  const response = await adminGet("/api/admin/leads", routeConfig);
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.viewings.map((row) => row.id), [viewing.id]);
+  assert.equal(body.viewingFollowUpWritable, false);
+  assert.equal(body.leadOperations.snoozeWritable, true);
+  assert.equal(body.leadOperations.bulkWritable, true);
+  assert.equal(body.leadMatching.summary.leads_with_matches >= 0, true);
 });
 
 test("broker durable reads use only the intersection of assigned and configured workspaces", async () => {
@@ -251,6 +309,137 @@ test("durable admin lead reads return 503 without falling back to JSONL", async 
     assert.equal(response.status, 503, pathname);
     assert.equal((await response.json()).kind, "lead_store_unavailable");
   }
+});
+
+test("durable admin leads project durable assignments, snoozes, deals, and viewings in runtime-data durable mode", async () => {
+  const routeConfig = config(async () => [durableLead], {
+    runtimeDataDurableOnly: true,
+    payloadListingRuntime: PAYLOAD_DRAFT_RUNTIME,
+    leadOperationsDurableStore: {
+      leadOperationsDurableStoreEnabled: true,
+      payloadSecret: "p".repeat(40),
+      databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
+      workspaceId: "workspace-sandanski",
+    },
+    viewingDurableStore: {
+      viewingDurableStoreEnabled: true,
+      payloadSecret: "p".repeat(40),
+      databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
+    },
+    readLeadOperationsDurably: durableOperationReader({
+      [LEAD_OPERATIONS.assignment]: [
+        {
+          id: "assignment-1",
+          lead_id: durableLead.lead_id,
+          broker_id: "broker_ru",
+          actor: "durable_admin",
+          reason: "Russian-speaking buyer",
+          recorded_at: "2026-08-10T09:01:00.000Z",
+        },
+      ],
+      [LEAD_OPERATIONS.snooze]: [
+        {
+          id: "snooze-1",
+          lead_id: durableLead.lead_id,
+          action: "snooze",
+          reason: "Waiting for travel dates",
+          until: "2026-09-20T09:00:00.000Z",
+          actor: "durable_admin",
+          recorded_at: "2026-08-10T09:02:00.000Z",
+        },
+      ],
+      [LEAD_OPERATIONS.leadPipelineOutcome]: [
+        {
+          id: "pipeline-1",
+          lead_id: durableLead.lead_id,
+          actor: "durable_admin",
+          action: "qualify",
+          to_stage: "qualified",
+          recorded_at: "2026-08-10T09:03:00.000Z",
+        },
+      ],
+      [LEAD_OPERATIONS.deal]: [
+        {
+          id: "deal-1",
+          lead_id: durableLead.lead_id,
+          actor: "durable_admin",
+          closed_at: "2026-08-10T09:04:00.000Z",
+          recorded_at: "2026-08-10T09:04:00.000Z",
+        },
+      ],
+    }),
+    readSellerPipelineItemsDurably: async () => [],
+    readViewingsDurably: async () => [
+      {
+        id: "durable-viewing-1",
+        lead_id: durableLead.lead_id,
+        listing_reference: durableLead.listing_reference,
+        broker: "broker_ru",
+        status: "booked",
+        booked_at: "2026-08-10T09:10:00.000Z",
+        starts_at: "2026-08-10T09:30:00.000Z",
+        original_language: "bg",
+        admin_locale: "en",
+      },
+    ],
+  });
+
+  const response = await adminGet("/api/admin/leads", routeConfig);
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.runtime_data_mode, "durable_only");
+  assert.equal(body.leadOperations.snoozeWritable, true);
+  assert.equal(body.leadOperations.bulkWritable, true);
+  assert.equal(body.leadOperations.savedViewsWritable, false);
+  assert.equal(body.leads[0].assigned_broker, "broker_ru");
+  assert.equal(body.leadSla.rows[0].snooze.status, "active");
+  assert.match(JSON.stringify(body.leadPipelineQueue.states), /closed/);
+  assert.equal(body.deals.length, 1);
+  assert.equal(body.deals[0].lead_id, durableLead.lead_id);
+  assert.equal(body.viewings.length, 1);
+  assert.equal(body.viewings[0].id, "durable-viewing-1");
+});
+
+test("durable admin lead reads return 503 when durable lead operations cannot be read", async () => {
+  const routeConfig = config(async () => [durableLead], {
+    runtimeDataDurableOnly: true,
+    payloadListingRuntime: PAYLOAD_DRAFT_RUNTIME,
+    leadOperationsDurableStore: {
+      leadOperationsDurableStoreEnabled: true,
+      payloadSecret: "p".repeat(40),
+      databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
+      workspaceId: "workspace-sandanski",
+    },
+    readLeadOperationsDurably: async () => {
+      throw new Error("database unavailable");
+    },
+    readSellerPipelineItemsDurably: async () => [],
+  });
+
+  const response = await adminGet("/api/admin/leads", routeConfig);
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).kind, "lead_operation_store_unavailable");
+});
+
+test("durable admin lead reads do not collapse provider connection store failures into disconnected state", async () => {
+  const routeConfig = config(async () => [durableLead], {
+    providerConnection: {
+      publicOrigin: "https://ms-realty.example",
+      credentialSecret: "provider-credential-secret-32-characters",
+      stateSecret: "provider-oauth-state-secret-32-characters",
+      payloadSecret: "p".repeat(40),
+      databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
+      googleClientId: "google-client-id",
+      googleClientSecret: "google-client-secret",
+    },
+    readProviderConnections: async () => {
+      throw new Error("provider connection store unavailable");
+    },
+  });
+
+  const response = await adminGet("/api/admin/leads", routeConfig);
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).kind, "provider_connection_unavailable");
 });
 
 test("durable mode rejects admin mutations that only persist to local lead files", async () => {

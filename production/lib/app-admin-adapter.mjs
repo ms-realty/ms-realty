@@ -1121,14 +1121,39 @@ async function leadJourneyContext(config, source = null) {
   const ledgers = leadOperationLedgersFor(config);
   const leadSource = source || (await leadJourneySource(config));
   const filterRows = leadScopedRows(leadSource);
-  const assignments = filterRows(await ledgers.assignments.read());
-  return leadJourneyContextFrom({
-    ledgers,
-    leads: applyLeadAssignments(leadSource.leads, assignments),
-    viewings: filterRows((await adminViewingSource(config)).viewings),
-    viewingFollowUps: filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath)),
-    sellerPipelines: await sellerPipelineItems(config, leadSource),
-  });
+  const viewingSource =
+    config.runtimeDataDurableOnly && !config.viewingDurableStore?.viewingDurableStoreEnabled
+      ? { durable: false, viewings: [] }
+      : await adminViewingSource(config);
+  try {
+    const assignments = filterRows(await ledgers.assignments.read());
+    const context = await leadJourneyContextFrom({
+      ledgers,
+      leads: applyLeadAssignments(leadSource.leads, assignments),
+      viewings: filterRows(viewingSource.viewings),
+      viewingFollowUps:
+        viewingSource.durable || config.runtimeDataDurableOnly
+          ? []
+          : filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath)),
+      sellerPipelines: await sellerPipelineItems(config, leadSource),
+    });
+    return {
+      ...context,
+      outcomes: filterRows(context.outcomes),
+      deals: filterRows(context.deals),
+      sellerPipelineOutcomes: filterRows(context.sellerPipelineOutcomes),
+    };
+  } catch (error) {
+    if (
+      !ledgers.durable ||
+      error instanceof LeadOperationStoreUnavailableError ||
+      error instanceof LeadStoreUnavailableError ||
+      error instanceof ViewingStoreUnavailableError
+    ) {
+      throw error;
+    }
+    throw new LeadOperationStoreUnavailableError("Durable lead operations read failed", error);
+  }
 }
 
 function currentListingQualityReport(config, options = {}) {
@@ -1540,11 +1565,86 @@ function leadScopedRows(source) {
 // control's disabled treatment instead of pretending.
 function leadOperationsFor(config) {
   const principal = config.adminPrincipal;
-  const writable = !config.runtimeDataDurableOnly && canAdminAccess(principal, "operations:write");
+  const writable =
+    canAdminAccess(principal, "operations:write") &&
+    (!config.runtimeDataDurableOnly || leadOperationsDurable(config));
   return {
     snoozeWritable: writable,
     bulkWritable: writable,
-    savedViewsWritable: writable && Boolean(principal?.id),
+    savedViewsWritable: !config.runtimeDataDurableOnly && writable && Boolean(principal?.id),
+  };
+}
+
+async function authoritativeListingCount(config) {
+  const listingSeed = config.runtimeDataDurableOnly
+    ? await projectListingDraftSeed(currentSeed(config), {
+        payload: config.payloadListingRuntime || null,
+        env: config.payloadListingEnv || config.authEnv || process.env,
+        requirePayload: true,
+      })
+    : currentSeed(config);
+  return listingSeed.records.filter((record) => record.collection === "listings").length;
+}
+
+async function hermesBusinessContext(config) {
+  const env = config.authEnv || process.env;
+  const generatedAt = config.reviewedAt || new Date().toISOString();
+  const leadSource = await adminLeadSource(config);
+  const journey = await leadJourneyContext(config, leadSource);
+  const leadPipelineQueue = buildLeadPipelineQueue(journey, {
+    now: config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
+  });
+  const sellerPipelineQueue = buildSellerPipelineQueue(journey.sellerPipelines, journey.sellerPipelineOutcomes, {
+    now: config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
+  });
+  const viewingFollowUpQueue = buildViewingFollowUpQueue(journey.viewings, journey.viewingFollowUps, {
+    now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
+  });
+  const listingTotal = await authoritativeListingCount(config);
+  const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(env);
+  const providers = new Map();
+  if (providerConnectionAvailability(providerConfig).store.ready) {
+    try {
+      const connections = await (config.readProviderConnections || readProviderConnections)({
+        payload: config.providerConnectionPayload || null,
+      });
+      for (const connection of connections) {
+        if (connection?.status !== "connected") continue;
+        providers.set(String(connection.provider), {
+          id: String(connection.provider),
+          status: String(connection.status),
+          scopes: Array.isArray(connection.scopes) ? connection.scopes.map(String) : [],
+            last_verified_at: connection.last_verified_at || null,
+          });
+        }
+    } catch (error) {
+      if (error instanceof ProviderConnectionUnavailableError) throw error;
+      throw new ProviderConnectionUnavailableError("Provider connection storage is unavailable", error);
+    }
+  }
+  if (String(env.HERMES_CHAT_COMPLETIONS_URL || "").trim() && String(env.HERMES_API_KEY || "").trim()) {
+    const mode = String(env.HERMES_PROVIDER_MODE || "self_hosted").trim() || "self_hosted";
+    providers.set(mode === "openrouter" ? "openrouter" : "hermes", {
+      id: mode === "openrouter" ? "openrouter" : "hermes",
+      status: "connected",
+      scopes: ["chat.completions"],
+      last_verified_at: null,
+    });
+  }
+  return {
+    generated_at: generatedAt,
+    authoritative_state: {
+      status: "available",
+      source: config.runtimeDataDurableOnly ? "payload_postgres" : "workspace_runtime",
+      authoritative: true,
+    },
+    counts: {
+      leads: journey.leads.length,
+      pipeline: leadPipelineQueue.summary.open + sellerPipelineQueue.summary.open,
+      tasks: viewingFollowUpQueue.summary.open,
+      listings: listingTotal,
+    },
+    providers: [...providers.values()],
   };
 }
 
@@ -1579,8 +1679,9 @@ async function leadInboxPayload(registry, url, config) {
           },
         ]),
       );
-    } catch {
-      providerConnections = {};
+    } catch (error) {
+      if (error instanceof ProviderConnectionUnavailableError) throw error;
+      throw new ProviderConnectionUnavailableError("Provider connection storage is unavailable", error);
     }
   }
   if (source.durable && config.runtimeDataDurableOnly) {
@@ -1589,15 +1690,23 @@ async function leadInboxPayload(registry, url, config) {
       payload: config.payloadListingRuntime || null,
       requirePayload: true,
     });
-    const viewingSource = await adminViewingSource(config);
-    const viewings = filterRows(viewingSource.viewings);
+    const journey = await leadJourneyContext(config, source);
+    const leadPipelineQueue = buildLeadPipelineQueue(journey, {
+      now: config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
+    });
+    const ledgers = leadOperationLedgersFor(config);
+    const viewings = journey.viewings;
+    const viewingFollowUpQueue = buildViewingFollowUpQueue(viewings, journey.viewingFollowUps, {
+      now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
+    });
     return {
       ...renderAdminLeadsPayload(registry, url.searchParams.get("locale") || "en", {
-        leads: source.leads,
+        leads: journey.leads,
+        leadPipelineQueue,
         replies: [],
         communicationThreads: [],
         communicationTemplates: Object.fromEntries(
-          source.leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
+          journey.leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
         ),
         languageRequests: [],
         translationTasks: [],
@@ -1605,8 +1714,8 @@ async function leadInboxPayload(registry, url, config) {
         leadMatching: buildLeadMatchingReport({
           registry,
           seed,
-          leads: source.leads,
-          leadPipelineStates: [],
+          leads: journey.leads,
+          leadPipelineStates: leadPipelineQueue.states,
           generatedAt: config.reviewedAt || new Date().toISOString(),
         }),
         operatorId: config.adminPrincipal || null,
@@ -1614,14 +1723,16 @@ async function leadInboxPayload(registry, url, config) {
         providerConnections,
         viewings,
         viewingFollowUpWritable: false,
-        viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, [], {
-          now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
-        }),
+        viewingFollowUpQueue,
         savedSearches: [],
-        sellerPipeline: [],
-        deals: [],
+        sellerPipeline: journey.sellerPipelines,
+        sellerPipelineQueue: buildSellerPipelineQueue(journey.sellerPipelines, journey.sellerPipelineOutcomes, {
+          now: config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
+        }),
+        deals: journey.deals,
         brokerContacts: [],
         brokerProfiles: config.brokerProfiles || [],
+        leadSnoozes: filterRows(await ledgers.snoozes.read()),
         hermes: hermesReplyAvailability({ env: config.authEnv || process.env }),
         leadOperations: leadOperationsFor(config),
         operatorViews: [],
@@ -4142,6 +4253,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       }
       if (request.method === "POST") {
         try {
+          const businessContext = await hermesBusinessContext(config);
           const receipt = await runHermesOwnerCommand(
             parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
             {
@@ -4151,6 +4263,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
               env: authEnv,
               fetchImpl: config.hermesCommandFetch || config.hermesAgentFetch || globalThis.fetch,
               provider: config.hermesOwnerCommandProvider || null,
+              providerMetadata: { mode: String(authEnv.HERMES_PROVIDER_MODE || "self_hosted").trim() || "self_hosted" },
+              businessContext,
+              requireBusinessContext: true,
               now: () => config.reviewedAt || new Date().toISOString(),
             },
           );
@@ -4160,19 +4275,25 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           return htmlResponse(await hermesConsolePayload(registry, url, config, { commandResult: receipt }));
         } catch (cause) {
           const error =
-            cause instanceof HermesOwnerCommandError
+            cause instanceof ProviderConnectionUnavailableError
+              ? cause
+              : cause instanceof HermesOwnerCommandError
               ? cause
               : new HermesOwnerCommandError("hermes_unavailable", { status: 503, cause });
           if (url.pathname === "/api/admin/hermes") {
-            return jsonResponse(error.status, {
-              kind: error.code,
+            return jsonResponse(error instanceof ProviderConnectionUnavailableError ? 503 : error.status, {
+              kind: error instanceof ProviderConnectionUnavailableError ? "provider_connection_unavailable" : error.code,
               message: error.message,
-              ...(error.receipt ? { receipt: error.receipt } : {}),
+              ...("receipt" in error && error.receipt ? { receipt: error.receipt } : {}),
             });
           }
           return htmlResponse(
             await hermesConsolePayload(registry, url, config, {
-              commandError: { kind: error.code, message: error.message, receipt: error.receipt || null },
+              commandError: {
+                kind: error instanceof ProviderConnectionUnavailableError ? "provider_connection_unavailable" : error.code,
+                message: error.message,
+                receipt: "receipt" in error ? error.receipt || null : null,
+              },
             }),
           );
         }
@@ -5093,6 +5214,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
   } catch (error) {
     if (error instanceof LeadStoreUnavailableError || error?.code === "lead_store_unavailable") {
       return leadStoreUnavailable();
+    }
+    if (error instanceof LeadOperationStoreUnavailableError || error?.code === "lead_operation_store_unavailable") {
+      return leadStoreUnavailable("lead_operation_store_unavailable");
     }
     if (error instanceof EventStoreUnavailableError || error?.code === "event_store_unavailable") {
       return jsonResponse(503, { kind: "event_store_unavailable", message: "Analytics storage is temporarily unavailable" });

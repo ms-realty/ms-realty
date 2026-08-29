@@ -8,6 +8,7 @@ import { readBuildMarker } from "../lib/build-marker.mjs";
 import {
   allowsAdminSessionMutation,
   allowsDurableCaseAuthorityMutation,
+  allowsDurableLeadAuthorityMutation,
   allowsDurableListingAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
@@ -33,6 +34,7 @@ const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_MCP_DURABLE_LISTING_WRITES",
   "MS_REALTY_LEAD_CONTACT_KEY",
   "MS_REALTY_LEAD_DURABLE_STORE_ENABLED",
+  "MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED",
   "MS_REALTY_PUBLIC_CONTACT_KEY",
   "MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY",
   "MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST",
@@ -192,6 +194,48 @@ test("Cloudflare Container allows only configured durable case-authority writes"
       method: "POST",
       pathname: "/api/admin/cases",
       env: { ...env, MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: "false" },
+    }),
+    false,
+  );
+});
+
+test("Cloudflare Container allows only configured durable lead-authority writes", () => {
+  assert.match(workerSource, /allowsDurableLeadAuthorityMutation\(\{ method: request\.method, pathname: url\.pathname, env \}\)/);
+
+  const env = {
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_CONTACT_KEY: "production-lead-contact-secret-32-characters",
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
+    PAYLOAD_SECRET: "payload-secret",
+    DATABASE_URL: "postgres://payload:secret@db.example.test:5432/ms_realty",
+  };
+  for (const pathname of [
+    "/api/admin/leads/assign",
+    "/api/admin/leads/bulk",
+    "/api/admin/leads/snooze",
+    "/api/admin/leads/unsnooze",
+    "/api/admin/lead-pipeline/outcome",
+    "/api/admin/seller-pipeline/outcome",
+    "/api/admin/deals/close",
+    "/api/admin/consents/withdraw",
+  ]) {
+    assert.equal(allowsDurableLeadAuthorityMutation({ method: "POST", pathname, env }), true, pathname);
+  }
+  assert.equal(allowsDurableLeadAuthorityMutation({ method: "PATCH", pathname: "/api/admin/leads/snooze", env }), false);
+  assert.equal(
+    allowsDurableLeadAuthorityMutation({
+      method: "POST",
+      pathname: "/api/admin/leads/snooze",
+      env: { ...env, MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED: "false" },
+    }),
+    false,
+  );
+  assert.equal(
+    allowsDurableLeadAuthorityMutation({
+      method: "POST",
+      pathname: "/api/admin/leads/snooze",
+      env: { ...env, MS_REALTY_LEAD_CONTACT_KEY: "short" },
     }),
     false,
   );
@@ -440,6 +484,9 @@ test("Cloudflare Container admits only exact Payload-backed listing mutations", 
 
 test("Cloudflare Container route matrix rejects every file-only admin mutation", () => {
   const env = {
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_CONTACT_KEY: "production-lead-contact-secret-32-characters",
     MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: "true",
     MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED: "false",
     MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
@@ -454,6 +501,14 @@ test("Cloudflare Container route matrix rejects every file-only admin mutation",
   );
   const durable = new Set([
     "/api/admin/team",
+    "/api/admin/leads/assign",
+    "/api/admin/leads/bulk",
+    "/api/admin/leads/snooze",
+    "/api/admin/leads/unsnooze",
+    "/api/admin/lead-pipeline/outcome",
+    "/api/admin/seller-pipeline/outcome",
+    "/api/admin/deals/close",
+    "/api/admin/consents/withdraw",
     "/api/admin/listings/edit",
     "/api/admin/listings/status",
     "/api/admin/cases",
@@ -466,6 +521,7 @@ test("Cloudflare Container route matrix rejects every file-only admin mutation",
   for (const pathname of discovered) {
     const admitted =
       allowsAdminSessionMutation({ request, method: "POST", pathname }) ||
+      allowsDurableLeadAuthorityMutation({ method: "POST", pathname, env }) ||
       allowsDurableListingAuthorityMutation({ method: "POST", pathname, env }) ||
       allowsDurableCaseAuthorityMutation({ method: "POST", pathname, env });
     assert.equal(admitted, durable.has(pathname), pathname);

@@ -3,6 +3,7 @@ import {
   LEAD_PROBE_HEADER,
   allowsAdminSessionMutation,
   allowsDurableCaseAuthorityMutation,
+  allowsDurableLeadAuthorityMutation,
   allowsDurableListingAuthorityMutation,
   allowsLeadProbeMutation,
   allowsMcpRequest,
@@ -53,6 +54,7 @@ export class MsRealtyContainer extends Container {
     MS_REALTY_ADMIN_TOKEN: this.env.MS_REALTY_ADMIN_TOKEN ?? "",
     MS_REALTY_LEAD_CONTACT_KEY: this.env.MS_REALTY_LEAD_CONTACT_KEY ?? "",
     MS_REALTY_LEAD_DURABLE_STORE_ENABLED: this.env.MS_REALTY_LEAD_DURABLE_STORE_ENABLED ?? "",
+    MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED: this.env.MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED ?? "",
     MS_REALTY_EVENT_DURABLE_STORE_ENABLED: this.env.MS_REALTY_EVENT_DURABLE_STORE_ENABLED ?? "",
     MS_REALTY_PUBLIC_CONTACT_KEY: this.env.MS_REALTY_PUBLIC_CONTACT_KEY ?? "",
     MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: this.env.MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY ?? "",
@@ -277,6 +279,7 @@ async function serveFromContainer(request, env, url, preview) {
     !publicEvent &&
     !providerWebhook &&
     !allowsMcpRequest({ method: request.method, pathname: url.pathname, env }) &&
+    !allowsDurableLeadAuthorityMutation({ method: request.method, pathname: url.pathname, env }) &&
     !allowsDurableListingAuthorityMutation({ method: request.method, pathname: url.pathname, env }) &&
     !allowsDurableCaseAuthorityMutation({ method: request.method, pathname: url.pathname, env })
   ) {

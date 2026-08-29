@@ -19,6 +19,7 @@ import { DEFAULT_LEAD_SNOOZE_LEDGER_PATH } from "./lib/lead-snoozes.mjs";
 import { DEFAULT_OPERATOR_VIEW_LEDGER_PATH } from "./lib/operator-views.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH } from "./lib/lead-contact-vault.mjs";
 import { leadDurableStoreConfigFromEnv } from "./lib/lead-durable-store.mjs";
+import { leadOperationsDurableStoreConfigFromEnv } from "./lib/lead-ops-durable-store.mjs";
 import { DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/lead-pipeline-outcomes.mjs";
 import { providerConnectionConfigFromEnv } from "./lib/provider-connections.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH } from "./lib/public-contact-vault.mjs";
@@ -172,6 +173,7 @@ export function productionServerConfig(env = process.env) {
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
     leadDurableStore: leadDurableStoreConfigFromEnv(env),
+    leadOperationsDurableStore: leadOperationsDurableStoreConfigFromEnv(env),
     leadDurablePayload: undefined,
     publicContactVaultPath:
       env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
@@ -298,6 +300,13 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     leadContactKey: config.leadContactKey,
     leadDurableStore: config.leadDurableStore,
     leadDurablePayload: config.leadDurablePayload,
+    leadOperationsDurableStore: config.leadOperationsDurableStore,
+    leadOperationsPayload: config.leadOperationsPayload,
+    readLeadOperationsDurably: config.readLeadOperationsDurably,
+    appendLeadOperationDurably: config.appendLeadOperationDurably,
+    readSellerPipelineItemsDurably: config.readSellerPipelineItemsDurably,
+    readConsentEventsDurably: config.readConsentEventsDurably,
+    appendConsentEventDurably: config.appendConsentEventDurably,
     persistLeadIntake: config.persistLeadIntake,
     readLeadIntakes: config.readLeadIntakes,
     publicContactVaultPath: config.publicContactVaultPath,
@@ -316,6 +325,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     viewingLedgerPath: config.viewingLedgerPath,
     viewingDurableStore: config.viewingDurableStore,
     viewingDurablePayload: config.viewingDurablePayload,
+    readViewingsDurably: config.readViewingsDurably,
     readViewingTripRequestsDurably: config.readViewingTripRequestsDurably,
     readViewingTripContactsDurably: config.readViewingTripContactsDurably,
     viewingFollowUpLedgerPath: config.viewingFollowUpLedgerPath,

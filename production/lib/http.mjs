@@ -66,7 +66,7 @@ import {
   deleteProviderConnection,
   providerConnectionAvailability,
   providerConnectionConfigFromEnv,
-  readProviderConnections,
+  readProviderConnections as readProviderConnectionsStore,
   readProviderCredentials,
   saveProviderConnection,
   syncViewingToGoogleCalendar as syncViewingToGoogleCalendarProvider,
@@ -1133,6 +1133,7 @@ export function createHttpApp({
   payloadAdminAuth = getPayloadAdminAuthService,
   brokerProfiles = DEFAULT_BROKER_PROFILES,
   providerConnection = operatorProviderConfigFromEnv(),
+  readProviderConnections = readProviderConnectionsStore,
   operatorAgentEnv = process.env,
   providerConnectionPayload = null,
   providerWebhookPayload = providerConnectionPayload,
@@ -1277,13 +1278,18 @@ export function createHttpApp({
       return [];
     }
   };
-  const currentLeadOperations = (operator) => ({
-    // Every control below is backed by a route in this file; a surface that
-    // cannot reach them keeps its disabled treatment instead.
-    snoozeWritable: !runtimeDataDurableOnly && canAdminAccess(operator, "operations:write"),
-    bulkWritable: !runtimeDataDurableOnly && canAdminAccess(operator, "operations:write"),
-    savedViewsWritable: !runtimeDataDurableOnly && Boolean(operator?.id) && canAdminAccess(operator, "operations:write"),
-  });
+  const currentLeadOperations = (operator) => {
+    const writable =
+      canAdminAccess(operator, "operations:write") &&
+      (!runtimeDataDurableOnly || leadOperationsDurable());
+    return {
+      // Every control below is backed by a route in this file; a surface that
+      // cannot reach them keeps its disabled treatment instead.
+      snoozeWritable: writable,
+      bulkWritable: writable,
+      savedViewsWritable: !runtimeDataDurableOnly && writable && Boolean(operator?.id),
+    };
+  };
   const currentDurableLeads = async (principal, payloadSession = null) => {
     if (!isLeadDurableStoreEnabled(leadDurableStore)) {
       throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
@@ -1515,26 +1521,112 @@ export function createHttpApp({
     return items;
   };
   const currentLeadJourneyContext = async (leads = currentLeads()) => {
-    const filterRows = leadScopedRows({ durable: leadDurableStore?.leadDurableStoreEnabled === true, leads });
+    const leadSource = { durable: leadDurableStore?.leadDurableStoreEnabled === true, leads };
+    const filterRows = leadScopedRows(leadSource);
     const ledgers = currentLeadOperationLedgers();
-    const context = await leadJourneyContextFrom({
-      ledgers,
-      leads: applyLeadAssignments(leads, filterRows(await ledgers.assignments.read())),
-      viewings: filterRows(readViewings(viewingLedgerPath || undefined)),
-      viewingFollowUps: filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined)),
-      sellerPipelines: filterRows(await currentSellerPipelines()),
-    });
-    return {
-      ...context,
-      outcomes: filterRows(context.outcomes),
-      deals: filterRows(context.deals),
-      sellerPipelineOutcomes: filterRows(context.sellerPipelineOutcomes),
-    };
+    const viewingSource =
+      runtimeDataDurableOnly && !viewingDurableStore?.viewingDurableStoreEnabled
+        ? { durable: false, viewings: [] }
+        : await currentDurableViewingSource();
+    try {
+      const context = await leadJourneyContextFrom({
+        ledgers,
+        leads: applyLeadAssignments(leads, filterRows(await ledgers.assignments.read())),
+        viewings: filterRows(viewingSource.viewings),
+        viewingFollowUps:
+          viewingSource.durable || runtimeDataDurableOnly
+            ? []
+            : filterRows(readViewingFollowUps(viewingFollowUpLedgerPath || undefined)),
+        sellerPipelines: filterRows(await currentSellerPipelines()),
+      });
+      return {
+        ...context,
+        outcomes: filterRows(context.outcomes),
+        deals: filterRows(context.deals),
+        sellerPipelineOutcomes: filterRows(context.sellerPipelineOutcomes),
+      };
+    } catch (error) {
+      if (
+        !ledgers.durable ||
+        error instanceof LeadOperationStoreUnavailableError ||
+        error instanceof LeadStoreUnavailableError ||
+        error instanceof ViewingStoreUnavailableError
+      ) {
+        throw error;
+      }
+      throw new LeadOperationStoreUnavailableError("Durable lead operations read failed", error);
+    }
   };
   const currentLeadPipelineQueue = async (leads = currentLeads()) =>
     buildLeadPipelineQueue(await currentLeadJourneyContext(leads), {
       now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
     });
+  const currentAuthoritativeListingTotal = async () => {
+    const listingSeed = runtimeDataDurableOnly
+      ? await projectListingDraftSeed(currentSeed(), {
+          payload: payloadListingRuntime,
+          env: payloadListingEnv,
+          requirePayload: true,
+        })
+      : currentSeed();
+    return listingSeed.records.filter((record) => record.collection === "listings").length;
+  };
+  const currentHermesBusinessContext = async (operator = principal, payloadSession = null, leads = currentLeads()) => {
+    const generatedAt = reviewedAt || receivedAt || new Date().toISOString();
+    const journey = await currentLeadJourneyContext(leads);
+    const leadPipelineQueue = buildLeadPipelineQueue(journey, {
+      now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
+    });
+    const sellerPipelineQueue = buildSellerPipelineQueue(journey.sellerPipelines, journey.sellerPipelineOutcomes, {
+      now: sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
+    });
+    const viewingFollowUpQueue = buildViewingFollowUpQueue(journey.viewings, journey.viewingFollowUps, {
+      now: viewingFollowUpAt || bookedAt || reviewedAt || receivedAt || new Date().toISOString(),
+    });
+    const listingTotal = await currentAuthoritativeListingTotal();
+    const providers = new Map();
+    if (providerConnectionAvailability(providerConnection).store.ready) {
+      try {
+        const connections = await readProviderConnections({ payload: providerConnectionPayload || null });
+        for (const connection of connections) {
+          if (connection?.status !== "connected") continue;
+          providers.set(String(connection.provider), {
+            id: String(connection.provider),
+            status: String(connection.status),
+            scopes: Array.isArray(connection.scopes) ? connection.scopes.map(String) : [],
+            last_verified_at: connection.last_verified_at || null,
+          });
+        }
+      } catch (error) {
+        if (error instanceof ProviderConnectionUnavailableError) throw error;
+        throw new ProviderConnectionUnavailableError("Provider connection storage is unavailable", error);
+      }
+    }
+    if (String(hermesEnv.HERMES_CHAT_COMPLETIONS_URL || "").trim() && String(hermesEnv.HERMES_API_KEY || "").trim()) {
+      const mode = String(hermesEnv.HERMES_PROVIDER_MODE || "self_hosted").trim() || "self_hosted";
+      providers.set(mode === "openrouter" ? "openrouter" : "hermes", {
+        id: mode === "openrouter" ? "openrouter" : "hermes",
+        status: "connected",
+        scopes: ["chat.completions"],
+        last_verified_at: null,
+      });
+    }
+    return {
+      generated_at: generatedAt,
+      authoritative_state: {
+        status: "available",
+        source: runtimeDataDurableOnly ? "payload_postgres" : "workspace_runtime",
+        authoritative: true,
+      },
+      counts: {
+        leads: journey.leads.length,
+        pipeline: leadPipelineQueue.summary.open + sellerPipelineQueue.summary.open,
+        tasks: viewingFollowUpQueue.summary.open,
+        listings: listingTotal,
+      },
+      providers: [...providers.values()],
+    };
+  };
   const currentAdminLeadPayload = async (
     requestedLocale,
     operatorId = null,
@@ -1547,40 +1639,39 @@ export function createHttpApp({
     // the file-era reply forms against durable leads.
     const leadSourceDurable = leadDurableStore?.leadDurableStoreEnabled === true;
     if (runtimeDataDurableOnly) {
-      const generatedAt = reviewedAt || receivedAt || new Date().toISOString();
-      // Lead operations that now have a durable authority are read back here:
-      // a snooze, an assignment, an outcome or a closed deal survives the
-      // container and still reaches the screen. Everything still file-backed
-      // stays empty, because that storage does not survive.
-      const durableOperations = leadOperationsDurable();
-      const journey = durableOperations
-        ? await currentLeadJourneyContext(leads)
-        : { leads, outcomes: [], viewings: [], viewingFollowUps: [], deals: [], sellerPipelines: [], sellerPipelineOutcomes: [] };
-      const leadPipelineQueue = durableOperations
-        ? buildLeadPipelineQueue(journey, {
-            now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
-          })
-        : undefined;
+      const leadSource = { durable: leadSourceDurable, leads };
+      const filterRows = leadScopedRows(leadSource);
+      const journey = await currentLeadJourneyContext(leads);
+      const leadPipelineQueue = buildLeadPipelineQueue(journey, {
+        now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
+      });
+      const viewingFollowUpQueue = buildViewingFollowUpQueue(journey.viewings, journey.viewingFollowUps, {
+        now: viewingFollowUpAt || bookedAt || reviewedAt || receivedAt || new Date().toISOString(),
+      });
       return {
         ...renderAdminLeadsPayload(activeRegistry, requestedLocale, {
-          leads: durableOperations ? journey.leads : leads,
+          leads: journey.leads,
           replies: [],
           communicationThreads: [],
-          communicationTemplates: {},
+          communicationTemplates: Object.fromEntries(
+            journey.leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
+          ),
           languageRequests: [],
           translationTasks: [],
           listingEdits: [],
           operatorId,
           leadSourceDurable,
-          ...(leadPipelineQueue ? { leadPipelineQueue } : {}),
-          viewings: [],
+          leadPipelineQueue,
+          viewings: journey.viewings,
+          viewingFollowUpWritable: false,
+          viewingFollowUpQueue,
           savedSearches: [],
           sellerPipeline: journey.sellerPipelines,
           sellerPipelineQueue: buildSellerPipelineQueue(journey.sellerPipelines, journey.sellerPipelineOutcomes, {
             now: sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
           }),
           deals: journey.deals,
-          leadSnoozes: await currentLeadSnoozes(),
+          leadSnoozes: filterRows(await currentLeadSnoozes()),
           brokerContacts: [],
           brokerProfiles: adminBrokerProfiles,
           hermes: currentHermesAvailability(),
@@ -3920,6 +4011,7 @@ export function createHttpApp({
       }
       if (request.method === "POST") {
         try {
+          const businessContext = await currentHermesBusinessContext(principal, payloadSession);
           const receipt = await runHermesOwnerCommand(parseBody(request), {
             operator: principal,
             payload: hermesReceiptPayload || payloadListingRuntime,
@@ -3927,6 +4019,9 @@ export function createHttpApp({
             env: hermesEnv,
             fetchImpl: hermesCommandFetch || hermesAgentFetch,
             provider: hermesOwnerCommandProvider,
+            providerMetadata: { mode: String(hermesEnv.HERMES_PROVIDER_MODE || "self_hosted").trim() || "self_hosted" },
+            businessContext,
+            requireBusinessContext: true,
             now: () => reviewedAt || new Date().toISOString(),
           });
           if (url.pathname === "/api/admin/hermes") {
@@ -3935,21 +4030,27 @@ export function createHttpApp({
           return adminResponse(200, adminHtml(await currentHermesPayload({ commandResult: receipt })), "text/html; charset=utf-8");
         } catch (cause) {
           const error =
-            cause instanceof HermesOwnerCommandError
+            cause instanceof ProviderConnectionUnavailableError
+              ? cause
+              : cause instanceof HermesOwnerCommandError
               ? cause
               : new HermesOwnerCommandError("hermes_unavailable", { status: 503, cause });
           if (url.pathname === "/api/admin/hermes") {
-            return adminJson(error.status, {
-              kind: error.code,
+            return adminJson(error instanceof ProviderConnectionUnavailableError ? 503 : error.status, {
+              kind: error instanceof ProviderConnectionUnavailableError ? "provider_connection_unavailable" : error.code,
               message: error.message,
-              ...(error.receipt ? { receipt: error.receipt } : {}),
+              ...("receipt" in error && error.receipt ? { receipt: error.receipt } : {}),
             });
           }
           return adminResponse(
             200,
             adminHtml(
               await currentHermesPayload({
-                commandError: { kind: error.code, message: error.message, receipt: error.receipt || null },
+                commandError: {
+                  kind: error instanceof ProviderConnectionUnavailableError ? "provider_connection_unavailable" : error.code,
+                  message: error.message,
+                  receipt: "receipt" in error ? error.receipt || null : null,
+                },
               }),
             ),
             "text/html; charset=utf-8",
@@ -4108,6 +4209,12 @@ export function createHttpApp({
     const viewingStoreErrorResponse = (error) => {
       if (error instanceof LeadStoreUnavailableError || error?.code === "lead_store_unavailable") {
         return adminJson(503, { kind: "lead_store_unavailable", message: "Lead storage is temporarily unavailable" });
+      }
+      if (error instanceof LeadOperationStoreUnavailableError || error?.code === "lead_operation_store_unavailable") {
+        return adminJson(503, {
+          kind: "lead_operation_store_unavailable",
+          message: "Lead operations are temporarily unavailable",
+        });
       }
       if (error instanceof ViewingStoreUnavailableError || error?.code === "viewing_store_unavailable") {
         return adminJson(503, { kind: "viewing_store_unavailable", message: "Viewing storage is temporarily unavailable" });
@@ -4446,7 +4553,14 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = adminLocaleParam(url);
-      const payload = await currentAdminLeadPayload(requestedLocale, principal, requestLeadRows, payloadSession);
+      let payload;
+      try {
+        payload = await currentAdminLeadPayload(requestedLocale, principal, requestLeadRows, payloadSession);
+      } catch (error) {
+        const failure = viewingStoreErrorResponse(error);
+        if (failure) return failure;
+        throw error;
+      }
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
@@ -4703,11 +4817,15 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return adminResponse(
-        200,
-        adminHtml(await currentAdminLeadPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession)),
-        "text/html; charset=utf-8",
-      );
+      let payload;
+      try {
+        payload = await currentAdminLeadPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession);
+      } catch (error) {
+        const failure = viewingStoreErrorResponse(error);
+        if (failure) return failure;
+        throw error;
+      }
+      return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
     }
 
     if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {

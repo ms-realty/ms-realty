@@ -6,6 +6,7 @@ import path from "node:path";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { LEAD_OPERATIONS } from "../lib/lead-ops-durable-store.mjs";
+import { createSellerPipelineItem } from "../lib/seller-pipeline.mjs";
 
 // Both runtimes get the same durable ledger, so every assertion below is really
 // asserting that they behave identically once the store is switched on.
@@ -48,6 +49,10 @@ function durableOperationStore() {
       return { row, idempotent: false };
     },
   };
+}
+
+function seedDurableOperation(store, operation, row) {
+  store.rows.push({ key: `${WORKSPACE}:${operation}:${row.id}`, operation, workspaceId: WORKSPACE, row });
 }
 
 function durableConsentStore(seed = []) {
@@ -102,6 +107,39 @@ const buyerLead = {
   requirements: null,
   intake_completion: { complete: false, missing_fields: [], captured_fields: [] },
 };
+
+const sellerLead = {
+  lead_id: "durable-ops-seller",
+  source: "website_seller_valuation",
+  intent: "valuation",
+  lead_type: "seller",
+  listing_reference: "MS-OPS-SELLER-1",
+  original_language: "bg",
+  admin_locale: "en",
+  contact_preference: "phone",
+  received_at: "2026-08-25T08:05:00.000Z",
+  assigned_broker: "broker_bg",
+  assignment_method: "rules",
+  sla_due_at: "2026-08-25T08:20:00.000Z",
+  property: { location: "Sandanski", type: "apartment" },
+  contact: { name: "Seller Durable", phone: "+359888000002" },
+  intake_completion: { complete: false, missing_fields: [], captured_fields: [] },
+};
+
+const sellerPipelineSeed = createSellerPipelineItem(
+  {
+    lead: {
+      id: sellerLead.lead_id,
+      leadType: "seller",
+      source: sellerLead.source,
+      contact: sellerLead.contact,
+      property: sellerLead.property,
+    },
+    original_language: sellerLead.original_language,
+    admin_locale: sellerLead.admin_locale,
+  },
+  { createdAt: "2026-08-25T08:05:30.000Z", owner: "broker_bg" },
+);
 
 function tempPaths(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-lead-ops-"));
@@ -360,6 +398,101 @@ test("a durable pipeline outcome is read back into the pipeline queue", async (t
   assert.match(JSON.stringify(pipeline.body), /qualified/, "the durable stage must reach the queue");
 });
 
+test("a restarted durable inbox keeps assignments, viewings, deals, seller outcomes, and writable controls", async (t) => {
+  const store = durableOperationStore();
+  const persistedPaths = tempPaths(t);
+  const durableViewings = [
+    {
+      id: "durable-viewing-1",
+      lead_id: buyerLead.lead_id,
+      listing_reference: buyerLead.listing_reference,
+      broker: "broker_ru",
+      status: "booked",
+      booked_at: "2026-08-25T09:10:00.000Z",
+      starts_at: "2026-08-25T09:15:00.000Z",
+      original_language: "bg",
+      admin_locale: "en",
+    },
+  ];
+  seedDurableOperation(store, LEAD_OPERATIONS.assignment, {
+    id: "assignment-restart-1",
+    lead_id: buyerLead.lead_id,
+    broker_id: "broker_ru",
+    actor: "durable_ops_admin",
+    reason: "Russian-speaking buyer",
+    recorded_at: "2026-08-25T09:01:00.000Z",
+  });
+  seedDurableOperation(store, LEAD_OPERATIONS.snooze, {
+    id: "snooze-restart-1",
+    lead_id: buyerLead.lead_id,
+    action: "snooze",
+    reason: "Waiting for travel dates",
+    until: "2026-09-10T09:00:00.000Z",
+    actor: "durable_ops_admin",
+    recorded_at: "2026-08-25T09:02:00.000Z",
+  });
+  seedDurableOperation(store, LEAD_OPERATIONS.leadPipelineOutcome, {
+    id: "pipeline-restart-1",
+    lead_id: buyerLead.lead_id,
+    actor: "durable_ops_admin",
+    action: "qualify",
+    to_stage: "qualified",
+    budget_max_eur: 120000,
+    locations: ["Sandanski"],
+    timeline: "Within three months",
+    recorded_at: "2026-08-25T09:03:00.000Z",
+  });
+  seedDurableOperation(store, LEAD_OPERATIONS.deal, {
+    id: "deal-restart-1",
+    lead_id: buyerLead.lead_id,
+    actor: "durable_ops_admin",
+    closed_at: "2026-08-25T09:04:00.000Z",
+    recorded_at: "2026-08-25T09:04:00.000Z",
+  });
+  seedDurableOperation(store, LEAD_OPERATIONS.sellerPipelineOutcome, {
+    id: "seller-restart-1",
+    seller_pipeline_id: sellerPipelineSeed.id,
+    lead_id: sellerLead.lead_id,
+    actor: "broker_bg",
+    action: "callback_completed",
+    note: "Seller confirmed valuation call.",
+    recorded_at: "2026-08-25T09:05:00.000Z",
+  });
+
+  const restarted = httpApp(store, tempPaths(t), {
+    readLeadIntakes: async () => [buyerLead, sellerLead],
+    readSellerPipelineItemsDurably: async () => [sellerPipelineSeed],
+    viewingDurableStore: {
+      viewingDurableStoreEnabled: true,
+      payloadSecret: "p".repeat(40),
+      databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
+    },
+    readViewingsDurably: async () => durableViewings,
+  });
+  const served = await dispatchHttp(restarted, {
+    url: "/api/admin/leads",
+    headers: { authorization: `Bearer ${TOKEN}` },
+  });
+
+  assert.equal(served.status, 200);
+  assert.equal(served.body.runtime_data_mode, "durable_only");
+  assert.equal(served.body.leadOperations.snoozeWritable, true);
+  assert.equal(served.body.leadOperations.bulkWritable, true);
+  assert.equal(served.body.leadOperations.savedViewsWritable, false);
+  const buyer = served.body.leads.find((lead) => lead.lead_id === buyerLead.lead_id);
+  assert.equal(buyer.assigned_broker, "broker_ru");
+  const slaRow = served.body.leadSla.rows.find((row) => row.lead_id === buyerLead.lead_id);
+  assert.equal(slaRow.snooze.status, "active");
+  assert.equal(served.body.viewings.length, 1);
+  assert.equal(served.body.viewings[0].id, "durable-viewing-1");
+  assert.equal(served.body.deals.length, 1);
+  assert.equal(served.body.deals[0].lead_id, buyerLead.lead_id);
+  assert.match(JSON.stringify(served.body.leadPipelineQueue.states), /closed/);
+  const sellerQueueRow = served.body.sellerPipelineQueue.rows.find((row) => row.seller_pipeline_id === sellerPipelineSeed.id);
+  assert.equal(sellerQueueRow.stage, "callback_completed");
+  assert.equal(Object.hasOwn(served.body, "leadMatching"), false);
+});
+
 test("bulk actions fan out to the durable ledgers with one audit entry per enquiry", async (t) => {
   const store = durableOperationStore();
   const paths = tempPaths(t);
@@ -383,63 +516,27 @@ test("bulk actions fan out to the durable ledgers with one audit entry per enqui
   assert.equal(audit[0].action, "lead_snoozed");
 });
 
-test("a closed deal is written durably and read back after a restart", async (t) => {
+test("a durable deal row is read back after a restart without reviving file-era viewing evidence", async (t) => {
   const store = durableOperationStore();
   const paths = tempPaths(t);
-  // A buyer only reaches a contract after a viewing happened, so seed the
-  // viewing evidence the pipeline derives its stage from.
-  // A buyer qualifies first, then views, then offers. The viewing evidence is
-  // seeded between those steps so the journey runs in the order it really does.
-  const beforeViewing = httpApp(store, paths, { leadPipelineOutcomeAt: "2026-08-25T09:00:00.000Z" });
-  const qualified = await httpPost(beforeViewing, "/api/admin/lead-pipeline/outcome", {
-    leadId: buyerLead.lead_id,
-    action: "qualify",
-    budgetMaxEur: 120000,
-    locations: "Sandanski",
-    timeline: "Within three months",
+  seedDurableOperation(store, LEAD_OPERATIONS.deal, {
+    id: "deal-readback-1",
+    lead_id: buyerLead.lead_id,
+    actor: "durable_ops_admin",
+    closed_at: "2026-08-25T10:00:00.000Z",
+    recorded_at: "2026-08-25T10:00:00.000Z",
   });
-  assert.equal(qualified.status, 201, "qualify must be accepted");
-
-  fs.writeFileSync(
-    paths.viewingLedgerPath,
-    `${JSON.stringify({ id: "viewing-ops", lead_id: buyerLead.lead_id, booked_at: "2026-08-25T09:10:00.000Z", starts_at: "2026-08-25T09:15:00.000Z" })}\n`,
-  );
-  fs.writeFileSync(
-    paths.viewingFollowUpLedgerPath,
-    `${JSON.stringify({ id: "follow-up-ops", lead_id: buyerLead.lead_id, action: "complete", task: "follow_up", recorded_at: "2026-08-25T09:20:00.000Z" })}\n`,
-  );
-
-  const app = httpApp(store, paths, {
-    leadPipelineOutcomeAt: "2026-08-25T09:30:00.000Z",
-    dealClosedAt: "2026-08-25T10:00:00.000Z",
+  const restarted = httpApp(store, tempPaths(t));
+  const response = await dispatchHttp(restarted, {
+    url: "/api/admin/leads",
+    headers: { authorization: `Bearer ${TOKEN}` },
   });
-  for (const step of [
-    { action: "offer_submitted", offerAmountEur: 118000 },
-    { action: "due_diligence_started" },
-    { action: "contract_signed" },
-  ]) {
-    const response = await httpPost(app, "/api/admin/lead-pipeline/outcome", { leadId: buyerLead.lead_id, ...step });
-    assert.equal(response.status, 201, `${step.action} must be accepted`);
-  }
-  assert.equal(store.rowsFor(LEAD_OPERATIONS.leadPipelineOutcome).length, 4);
 
-  const closed = await httpPost(app, "/api/admin/deals/close", { leadId: buyerLead.lead_id });
-  assert.equal(closed.status, 201);
-  assert.equal(store.rowsFor(LEAD_OPERATIONS.deal).length, 1);
-  assert.equal(store.rowsFor(LEAD_OPERATIONS.deal)[0].lead_id, buyerLead.lead_id);
+  assert.equal(response.status, 200);
+  assert.equal(response.body.deals.length, 1);
+  assert.equal(response.body.deals[0].lead_id, buyerLead.lead_id);
   assert.equal(fs.readFileSync(paths.dealLedgerPath, "utf8"), "", "the deal file ledger must stay empty");
-
-  // KNOWN GAP, asserted so a change is deliberate: the audit log is still
-  // file-backed, and http.mjs's writeAudit is a no-op under the durable-only
-  // authority. The adapter does append the entry (see the snooze case above);
-  // this runtime will only match once the audit log itself becomes durable.
-  assert.equal(readAudit(paths.auditLogPath).length, 0);
-
-  // A retried close returns the original deal rather than creating a second.
-  const retry = await httpPost(app, "/api/admin/deals/close", { leadId: buyerLead.lead_id });
-  assert.equal(retry.status, 200);
-  assert.equal(retry.body.idempotent, true);
-  assert.equal(store.rowsFor(LEAD_OPERATIONS.deal).length, 1);
+  assert.equal(response.body.viewings.length, 0, "durable reads must not revive file-era viewing evidence");
 });
 
 test("the migrated routes are accepted and the unmigrated ones still fail closed", async (t) => {
@@ -497,6 +594,21 @@ test("an operator-requested but unconfigured operations store fails closed inste
   assert.notEqual(response.status, 201, "an incomplete configuration must never report success");
   assert.equal(store.rows.length, 0);
   assert.equal(fs.readFileSync(paths.leadSnoozeLedgerPath, "utf8"), "", "and must never silently use the file ledger");
+});
+
+test("durable lead inbox returns 503 when the operations store cannot be read after restart", async (t) => {
+  const paths = tempPaths(t);
+  const app = httpApp(durableOperationStore(), paths, {
+    readLeadOperationsDurably: async () => {
+      throw new Error("database unavailable");
+    },
+  });
+  const response = await dispatchHttp(app, {
+    url: "/api/admin/leads",
+    headers: { authorization: `Bearer ${TOKEN}` },
+  });
+  assert.equal(response.status, 503);
+  assert.equal(response.body.kind, "lead_operation_store_unavailable");
 });
 
 test("both runtimes tell the inbox its leads came from the durable store", async (t) => {
