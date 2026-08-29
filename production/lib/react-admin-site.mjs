@@ -10606,7 +10606,6 @@ function SettingsCheck({ name, labelText, hint, checked, disabled }) {
 }
 
 function SettingsCapabilityGaps({ page }) {
-  const copy = adminCopy(page);
   const settings = settingsCopy(page);
   const rows = [
     ...Object.entries(settings.plannedRows || {}),
@@ -10625,7 +10624,7 @@ function SettingsCapabilityGaps({ page }) {
           "li",
           { key: id, "data-settings-gap": id },
           h(
-            "span",
+            "div",
             { className: "adm-settings-pending__copy" },
             h("strong", null, item.label),
             h("p", { className: "adm-planned-note" }, item.note),

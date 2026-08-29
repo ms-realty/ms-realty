@@ -296,6 +296,8 @@ test("settings screen renders working sections and a concise capability-gap rail
     for (const gap of ["notification_centre", "messaging_credentials", "working_hours", "routing_rules"]) {
       assert.match(page.body, new RegExp(`data-settings-gap="${gap}"`), gap);
     }
+    assert.match(page.body, /<div class="adm-settings-pending__copy">\s*<strong>[^<]+<\/strong>\s*<p class="adm-planned-note">/);
+    assert.doesNotMatch(page.body, /<span class="adm-settings-pending__copy">\s*<strong>[^<]+<\/strong>\s*<p class="adm-planned-note">/);
     assert.doesNotMatch(page.body, /data-planned-control=/);
     assert.doesNotMatch(page.body, /data-export-form=/);
     assert.doesNotMatch(page.body, /Coming soon/);
