@@ -153,7 +153,11 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.match(html, /<details class="adm-hermes-diagnostics" data-hermes-diagnostics="collapsed">/);
   assert.match(html, /<details class="adm-hermes-safeguards" data-hermes-safeguards="collapsed">/);
   assert.match(html, /data-hermes-next-task="/);
-  assert.match(html, /data-hermes-task-count="[0-9]+" data-hermes-task-visible="[0-5]"/);
+  const queueCounts = html.match(/data-hermes-task-count="(\d+)" data-hermes-task-visible="(\d+)"/);
+  assert.ok(queueCounts, "remaining queue contract present");
+  assert.ok(Number(queueCounts[2]) < Number(queueCounts[1]), "starting point is removed from the remaining queue");
+  assert.match(html, /data-hermes-next-task="[^"]+"[\s\S]*?class="mk-btn mk-btn--primary mk-btn--sm"/);
+  assert.match(html, /<button class="mk-btn mk-btn--secondary" type="submit"/);
   assert.match(html, /HERMES_CHAT_COMPLETIONS_URL/);
   assert.match(html, /data-hermes-recovery="true"/);
   assert.match(html, /Recover the connection/);

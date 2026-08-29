@@ -83,6 +83,12 @@ test("warning surfaces tint the active theme instead of forcing a light-only pal
   assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-checks ul\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
 });
 
+test("Today, Hermes, and Settings use readable clamped rails instead of fractional sidebars", () => {
+  assert.match(adminAdapterCss, /\.adm-workbench-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)\s+clamp\(320px, 32vw, 360px\)/);
+  assert.match(adminAdapterCss, /\.adm-workbench-rail\s*\{[^}]*inline-size:\s*min\(100%, clamp\(320px, 32vw, 360px\)\)/);
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="settings"\] \.adm-workbench-shell--settings\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)\s+clamp\(320px, 30vw, 352px\)/);
+});
+
 test("requests and Hermes use disclosure for secondary detail instead of primary clutter", () => {
   assert.match(adminAdapterCss, /\.adm-public-request__details > summary/);
   assert.match(adminAdapterCss, /\.adm-public-request__details-body\s*\{[^}]*background:\s*var\(--surface-sunken\)/);
@@ -99,6 +105,13 @@ test("technical Hermes and assistant setup content is collapsed without JavaScri
   assert.match(adminAdapterCss, /\.adm-hermes-diagnostics > summary/);
   assert.match(adminAdapterCss, /\.adm-hermes-safeguards\[open\] > summary::after/);
   assert.match(adminAdapterCss, /\.adm-assistant-connection__config-label::after/);
+});
+
+test("390px mobile contracts keep one dominant action per owner screen", () => {
+  assert.match(adminSettingsCss, /\.adm-today-briefing__action \.mk-btn\s*\{[^}]*width:\s*100%;[^}]*justify-content:\s*center/);
+  assert.match(adminSettingsCss, /@media \(max-width: 390px\)[\s\S]*?\.adm-today-briefing__action \.mk-btn,[\s\S]*?min-height:\s*44px/);
+  assert.match(adminSettingsCss, /@media \(max-width: 390px\)[\s\S]*?\.adm-next-actions__action \.mk-btn[\s\S]*?width:\s*100%/);
+  assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-command__starting-point \.mk-btn\s*\{[^}]*width:\s*100%;[^}]*justify-content:\s*center/);
 });
 
 test("mobile owner pages retain their title and use a dense media review grid", () => {

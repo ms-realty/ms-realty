@@ -634,16 +634,18 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
 .adm-lead-tabs { width: max-content; }
 .adm-workbench-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.78fr);
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 32vw, 360px);
   gap: var(--space-4);
   align-items: start;
 }
 .adm-workbench-main,
 .adm-workbench-rail { display: grid; gap: var(--space-4); min-width: 0; }
 .adm-workbench-rail {
+  inline-size: min(100%, clamp(320px, 32vw, 360px));
   position: sticky;
   top: calc(var(--adm-shell-top-offset, 64px) + var(--space-4));
   align-self: start;
+  justify-self: end;
 }
 .adm-readiness-list {
   display: grid;
@@ -2837,7 +2839,7 @@ html[data-theme="dark"] .crm-top {
   background: var(--surface-sunken);
 }
 .crm-app main[data-react-admin-ui="settings"] .adm-workbench-shell--settings {
-  grid-template-columns: minmax(0, 1.7fr) minmax(250px, 0.68fr);
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 352px);
   gap: var(--space-3);
 }
 .crm-app main[data-react-admin-ui="settings"] .adm-workbench-main,

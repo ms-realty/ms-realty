@@ -75,5 +75,8 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /setAttribute\("aria-current", "location"\)/);
   assert.match(ADMIN_APP_JS, /window\.addEventListener\("scroll", scheduleSync/);
   assert.match(ADMIN_APP_JS, /data-admin-mobile-nav-close/);
+  assert.match(ADMIN_APP_JS, /summary\.setAttribute\("aria-expanded", mobileNav\.open \? "true" : "false"\)/);
+  assert.match(ADMIN_APP_JS, /document\.documentElement\.classList\.toggle\("admin-mobile-nav-open", mobileNav\.open\)/);
+  assert.match(ADMIN_APP_JS, /var target = close \|\| panel\.querySelector\('\[aria-current="page"\]'\) \|\| focusableItems\(\)\[0\];/);
   assert.match(ADMIN_APP_JS, /var target = returnFocusTarget && returnFocusTarget\.isConnected \? returnFocusTarget : summary/);
 });

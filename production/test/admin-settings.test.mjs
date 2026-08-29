@@ -268,7 +268,7 @@ test("workspace onboarding is computed from real workspace state", () => {
   assert.ok(complete.items.every((item) => item.done));
 });
 
-test("settings screen renders working sections and omits the unconnected backlog", async () => {
+test("settings screen renders working sections and a concise capability-gap rail", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const page = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
@@ -290,11 +290,14 @@ test("settings screen renders working sections and omits the unconnected backlog
     // Every form posts to the same endpoint and works without JavaScript.
     assert.equal(page.body.match(/action="\/api\/admin\/settings"/g).length, 5);
     assert.equal(page.body.match(/method="post"/g).length, 5);
-    // Unconnected settings are absent rather than consuming the owner task
-    // flow with inert controls. The integrations hub remains the recovery path.
-    assert.doesNotMatch(page.body, /data-settings-pending-panel=/);
-    assert.doesNotMatch(page.body, /data-settings-planned=/);
+    // Unconnected settings stay explicit in one concise rail panel, without
+    // dead controls or a fake submit path.
+    assert.match(page.body, /data-settings-capability-gaps="true" data-settings-gap-count="4"/);
+    for (const gap of ["notification_centre", "messaging_credentials", "working_hours", "routing_rules"]) {
+      assert.match(page.body, new RegExp(`data-settings-gap="${gap}"`), gap);
+    }
     assert.doesNotMatch(page.body, /data-planned-control=/);
+    assert.doesNotMatch(page.body, /data-export-form=/);
     assert.doesNotMatch(page.body, /Coming soon/);
     assert.doesNotMatch(page.body, /data-settings-section="(?:security|data)"/);
     assert.match(page.body, /href="\/admin\/connect"/);
@@ -601,8 +604,9 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.equal(empty.status, 200);
     assert.match(empty.body, /data-next-actions="true"/);
     assert.match(empty.body, /data-next-actions-empty="true"/);
+    assert.match(empty.body, /data-next-action-count="0" data-next-action-total="0" data-next-action-visible="0"/);
     assert.match(empty.body, /Nothing is waiting\./);
-    assert.match(empty.body, /data-today-briefing="true" data-today-priority-count="0"/);
+    assert.match(empty.body, /data-today-briefing="true" data-today-primary-action="none" data-today-priority-count="0"/);
     assert.match(empty.body, /data-hermes-entry="today"/);
     assert.match(empty.body, /data-hermes-open="today"/);
     assert.match(empty.body, /href="\/admin\/hermes"/);
@@ -649,10 +653,12 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
 
     const populated = await dispatchHttp(app, { url: "/admin/today?welcome=1", headers: HEADERS });
     // One enquiry produces two next actions: send the first reply, and work the opportunity.
-    assert.match(populated.body, /data-next-action="lead"/);
+    assert.match(populated.body, /data-today-primary-action="lead"/);
+    assert.match(populated.body, /data-today-primary-open="lead"/);
+    assert.doesNotMatch(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);
-    assert.match(populated.body, /data-next-action-count="2"/);
-    assert.match(populated.body, /data-today-briefing="true" data-today-priority-count="2" data-today-priority-total="2"/);
+    assert.match(populated.body, /data-next-action-count="1" data-next-action-total="2" data-next-action-visible="1"/);
+    assert.match(populated.body, /data-today-briefing="true" data-today-primary-action="lead" data-today-priority-count="2" data-today-priority-total="2"/);
     assert.doesNotMatch(populated.body, /data-today-toolbar="true"/);
     assert.doesNotMatch(populated.body, /data-list-filter="next-actions"/);
     assert.doesNotMatch(populated.body, /data-list-item="next-actions"/);

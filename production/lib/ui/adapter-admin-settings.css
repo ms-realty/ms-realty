@@ -22,6 +22,13 @@
 .adm-today-briefing__facts > div { display: grid; gap: 3px; min-width: 0; }
 .adm-today-briefing__facts dt { color: var(--text-muted); font-size: var(--text-xs); }
 .adm-today-briefing__facts dd { margin: 0; color: var(--text-strong); font-size: var(--text-sm); line-height: var(--lh-snug); overflow-wrap: anywhere; }
+.adm-today-briefing__action {
+  padding: 0 var(--space-5) var(--space-4);
+}
+.adm-today-briefing__action .mk-btn {
+  width: 100%;
+  justify-content: center;
+}
 .adm-today-briefing__source { margin: 0; padding: var(--space-3) var(--space-5) var(--space-4); border-top: 1px solid var(--border); color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
 .adm-today-briefing__hermes { display: grid; gap: var(--space-2); margin: 0 var(--space-5) var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border); }
 .adm-today-briefing__hermes h3 { margin: 0; color: var(--text-strong); font-size: var(--text-sm); line-height: var(--lh-snug); }
@@ -269,6 +276,24 @@
 .adm-settings-history p.adm-empty { padding: 0; color: var(--text-muted); }
 .adm-settings-history small { color: var(--text-muted); font-size: var(--text-xs); }
 .adm-settings-history .mk-btn { width: 100%; justify-content: center; }
+.adm-settings-gap-intro {
+  margin: 0;
+  padding: 0 var(--space-5) var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--lh-relaxed);
+}
+.adm-settings-pending__control code {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
 
 /* The Today toolbar carries the next-action filters; they wrap instead of
  * scrolling so no count is hidden on a narrow screen. */
@@ -303,6 +328,7 @@
   .adm-next-actions__action .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
   .adm-next-actions__intro { padding: var(--space-3) var(--space-4) 0; }
   .adm-today-briefing__facts { grid-template-columns: minmax(0, 1fr); padding-inline: var(--space-4); }
+  .adm-today-briefing__action { padding-inline: var(--space-4); }
   .adm-today-briefing__source { padding-inline: var(--space-4); }
   .adm-today-briefing__intro,
   .adm-hermes-entry__description { padding-inline: var(--space-4); }
@@ -322,6 +348,17 @@
   .adm-settings-planned__stack .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
   .adm-settings-pending__control { justify-content: flex-start; }
   .adm-settings-history { padding: var(--space-4); }
+  .adm-settings-gap-intro { padding-inline: var(--space-4); }
+}
+
+@media (max-width: 390px) {
+  .adm-today-briefing__action .mk-btn,
+  .adm-today-briefing__hermes .mk-btn,
+  .adm-next-actions__action .mk-btn {
+    min-height: 44px;
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Second-pass settings polish: the section index and panel boundary do the

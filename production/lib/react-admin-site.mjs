@@ -3495,6 +3495,7 @@ function TodayBriefingPanel({ page, rows }) {
     {
       title: copy.title,
       "data-today-briefing": "true",
+      "data-today-primary-action": first?.kind || "none",
       "data-today-priority-count": String(Math.min(total, 5)),
       "data-today-priority-total": String(total),
     },
@@ -3521,6 +3522,18 @@ function TodayBriefingPanel({ page, rows }) {
         h("dd", null, first ? first.action : copy.clearNext),
       ),
     ),
+    first
+      ? h(
+          "div",
+          { className: "adm-today-briefing__action" },
+          h(
+            "a",
+            { className: "mk-btn mk-btn--primary", href: first.href, "data-today-primary-open": first.kind },
+            h("span", null, first.action),
+            h(Icon, { name: "arrow-right", size: 15 }),
+          ),
+        )
+      : null,
     h("p", { className: "adm-today-briefing__source" }, copy.source),
     h(
       "div",
@@ -3539,13 +3552,16 @@ function TodayBriefingPanel({ page, rows }) {
 
 function NextActionsPanel({ page, rows }) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
-  const visible = rows.slice(0, 5);
+  const remaining = rows.length ? rows.slice(1) : rows;
+  const visible = remaining.slice(0, 5);
   return h(
     Panel,
     {
       title: na.title,
       "data-next-actions": "true",
-      "data-next-action-count": String(rows.length),
+      "data-next-action-count": String(remaining.length),
+      "data-next-action-total": String(rows.length),
+      "data-next-action-visible": String(visible.length),
     },
     h("p", { className: "adm-next-actions__intro" }, na.description),
     visible.length
@@ -3588,7 +3604,7 @@ function NextActionsPanel({ page, rows }) {
                 { className: "adm-next-actions__action" },
                 h(
                   "a",
-                  { className: "mk-btn mk-btn--primary mk-btn--sm", href: row.href },
+                  { className: "mk-btn mk-btn--secondary mk-btn--sm", href: row.href },
                   h("span", null, row.action),
                 ),
               ),
@@ -3784,6 +3800,7 @@ function TodayBody({ page }) {
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
+  const showNextActionsPanel = nextActions.length === 0 || nextActions.length > 1;
   const openLeadPipelineTasks =
     page.leadPipelineQueue?.summary?.open || (page.leadPipelineQueue?.rows || []).filter((row) => !row.status || row.status === "open").length;
   const openSellerTasks =
@@ -3811,12 +3828,12 @@ function TodayBody({ page }) {
       h(WorkspaceWelcomeBanner, { page }),
       h(
         "div",
-        { className: "adm-workbench-shell", "data-today-layout": "action-rail" },
+        { className: "adm-workbench-shell adm-workbench-shell--today", "data-today-layout": "action-rail" },
         h(
           "div",
           { className: "adm-workbench-main" },
           h(TodayBriefingPanel, { page, rows: nextActions }),
-          h(NextActionsPanel, { page, rows: nextActions }),
+          showNextActionsPanel ? h(NextActionsPanel, { page, rows: nextActions }) : null,
         ),
         h(TodayReadinessRail, {
           page,
@@ -10588,6 +10605,42 @@ function SettingsCheck({ name, labelText, hint, checked, disabled }) {
   );
 }
 
+function SettingsCapabilityGaps({ page }) {
+  const copy = adminCopy(page);
+  const settings = settingsCopy(page);
+  const rows = [
+    ...Object.entries(settings.plannedRows || {}),
+    ...Object.entries(settings.pending?.items || {}),
+  ];
+  if (!rows.length) return null;
+  return h(
+    Panel,
+    { title: settings.pending.title, "data-settings-capability-gaps": "true", "data-settings-gap-count": String(rows.length) },
+    h("p", { className: "adm-settings-gap-intro" }, settings.pending.description),
+    h(
+      "ul",
+      { className: "adm-settings-pending" },
+      ...rows.map(([id, item]) =>
+        h(
+          "li",
+          { key: id, "data-settings-gap": id },
+          h(
+            "span",
+            { className: "adm-settings-pending__copy" },
+            h("strong", null, item.label),
+            h("p", { className: "adm-planned-note" }, item.note),
+          ),
+          h(
+            "span",
+            { className: "adm-settings-pending__control" },
+            item.sample ? h("code", null, item.sample) : h(StatusPill, { tone: "ink" }, settings.pending.title),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 function SettingsSection({ page, section, icon, fields }) {
   const copy = settingsCopy(page);
   const sectionCopy = copy.sections[section];
@@ -11489,8 +11542,9 @@ function HermesBody({ page }) {
   const receiptStore = page.receipt_store || { status: "blocked" };
   const bridgeReady = queue.status === "ready";
   const tasks = Array.isArray(queue.rows) ? queue.rows : [];
-  const visibleTasks = tasks.slice(0, 5);
-  const firstTask = visibleTasks[0] || null;
+  const firstTask = tasks[0] || null;
+  const queuedTasks = firstTask ? tasks.slice(1) : tasks;
+  const visibleTasks = queuedTasks.slice(0, 5);
   const tools = Array.isArray(page.tools) ? page.tools : [];
   const runtimeTone = runtime.ready ? "success" : "brick";
   const commandForm = page.command_form || { enabled: false, idempotency_key: "", max_length: 2000 };
@@ -11545,7 +11599,7 @@ function HermesBody({ page }) {
                       h("small", null, [firstTask.source_locale?.toUpperCase(), firstTask.target_locale?.toUpperCase(), valueText(ui, firstTask.task_type)].filter(Boolean).join(" · ")),
                     ),
                     h(StatusPill, { tone: "sun" }, copy.draftWrite),
-                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(firstTask.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                    h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref(firstTask.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
                   )
                 : null,
               h(
@@ -11571,7 +11625,7 @@ function HermesBody({ page }) {
                   h("small", { id: "hermes-owner-command-note" }, commandForm.enabled ? copy.notExecuted : copy.commandDisabled),
                   h(
                     "button",
-                    { className: "mk-btn mk-btn--primary", type: "submit", disabled: commandForm.enabled ? undefined : true },
+                    { className: `mk-btn mk-btn--${firstTask ? "secondary" : "primary"}`, type: "submit", disabled: commandForm.enabled ? undefined : true },
                     h(Icon, { name: "sparkles", size: 16 }),
                     h("span", null, copy.preparePlan),
                   ),
@@ -11641,47 +11695,49 @@ function HermesBody({ page }) {
               ),
             ),
           ),
-          h(
-            Panel,
-            {
-              title: copy.queue,
-              action: h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 15 }), h("span", null, copy.openReview)),
-              "data-hermes-task-queue": queue.status,
-            },
-            h("p", { className: "adm-hermes-panel-intro" }, copy.queueDescription),
-            queue.status !== "ready"
-              ? h("div", { className: "adm-hermes-empty adm-hermes-empty--blocked", role: "status" }, h(Icon, { name: "triangle-alert", size: 18 }), h("span", null, copy.taskSourceUnavailable))
-              : tasks.length
-                ? h(
-                    "ul",
-                    {
-                      className: "adm-hermes-tasks",
-                      "data-hermes-task-count": String(tasks.length),
-                      "data-hermes-task-visible": String(visibleTasks.length),
-                    },
-                    ...visibleTasks.map((task) =>
-                      h(
-                        "li",
-                        { key: task.id, "data-hermes-task": task.id },
-                        h("span", { className: "adm-hermes-task__icon", "aria-hidden": "true" }, h(Icon, { name: "languages", size: 17 })),
-                        h(
-                          "span",
-                          { className: "adm-hermes-task__copy" },
-                          h("strong", null, task.object_id),
-                          h("small", null, `${task.source_locale.toUpperCase()} → ${task.target_locale.toUpperCase()} · ${task.task_type}`),
+          queue.status !== "ready" || visibleTasks.length || !firstTask
+            ? h(
+                Panel,
+                {
+                  title: copy.queue,
+                  action: h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 15 }), h("span", null, copy.openReview)),
+                  "data-hermes-task-queue": queue.status,
+                },
+                h("p", { className: "adm-hermes-panel-intro" }, copy.queueDescription),
+                queue.status !== "ready"
+                  ? h("div", { className: "adm-hermes-empty adm-hermes-empty--blocked", role: "status" }, h(Icon, { name: "triangle-alert", size: 18 }), h("span", null, copy.taskSourceUnavailable))
+                  : visibleTasks.length
+                    ? h(
+                        "ul",
+                        {
+                          className: "adm-hermes-tasks",
+                          "data-hermes-task-count": String(tasks.length),
+                          "data-hermes-task-visible": String(visibleTasks.length),
+                        },
+                        ...visibleTasks.map((task) =>
+                          h(
+                            "li",
+                            { key: task.id, "data-hermes-task": task.id },
+                            h("span", { className: "adm-hermes-task__icon", "aria-hidden": "true" }, h(Icon, { name: "languages", size: 17 })),
+                            h(
+                              "span",
+                              { className: "adm-hermes-task__copy" },
+                              h("strong", null, task.object_id),
+                              h("small", null, `${task.source_locale.toUpperCase()} → ${task.target_locale.toUpperCase()} · ${task.task_type}`),
+                            ),
+                            h(StatusPill, { tone: "sun" }, copy.draftWrite),
+                            h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(task.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                          ),
                         ),
-                        h(StatusPill, { tone: "sun" }, copy.draftWrite),
-                        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(task.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                      )
+                    : h(
+                        "div",
+                        { className: "adm-hermes-empty", role: "status" },
+                        h(Icon, { name: "check-circle-2", size: 18 }),
+                        h("span", null, h("strong", null, copy.noTasks), h("small", null, copy.noTasksDescription)),
                       ),
-                    ),
-                  )
-                : h(
-                    "div",
-                    { className: "adm-hermes-empty", role: "status" },
-                    h(Icon, { name: "check-circle-2", size: 18 }),
-                    h("span", null, h("strong", null, copy.noTasks), h("small", null, copy.noTasksDescription)),
-                  ),
-          ),
+              )
+            : null,
         ),
         h(
           "aside",
@@ -12226,6 +12282,7 @@ function SettingsBody({ page }) {
           "aside",
           { className: "adm-workbench-rail", "data-settings-rail": "true" },
           sectionsNav,
+          h(SettingsCapabilityGaps, { page }),
           h(
             Panel,
             { title: settings.lastUpdated, "data-settings-history": "true" },
